@@ -1,0 +1,43 @@
+# source: https://elderscrolls.fandom.com/pl/wiki/Kalendarz
+
+month1: "Gwiazda Poranna"
+month2: "Wschodzące Słońce"
+month3: "Pierwszy Siew"
+month4: "Deszczowa Dłoń"
+month5: "Drugi Siew"
+month6: "Śródrocze"
+month7: "Pełnia Słońca"
+month8: "Ostatni Siew"
+month9: "Domowe Ognisko"
+month10: "Pierwsze Mrozy"
+month11: "Zachodzące Słońce"
+month12: "Gwiazda Wieczorna"
+
+# The variant of month names in the context "day X of month Y".
+# In English it is the same, but some languages require a different form.
+monthInGenitive1: "Gwiazda Poranna"
+monthInGenitive2: "Wschodzące Słońce"
+monthInGenitive3: "Pierwszy Siew"
+monthInGenitive4: "Deszczowa Dłoń"
+monthInGenitive5: "Drugi Siew"
+monthInGenitive6: "Śródrocze"
+monthInGenitive7: "Pełnia Słońca"
+monthInGenitive8: "Ostatni Siew"
+monthInGenitive9: "Domowe Ognisko"
+monthInGenitive10: "Pierwsze Mrozy"
+monthInGenitive11: "Zachodzące Słońce"
+monthInGenitive12: "Gwiazda Wieczorna"
+
+dateFormat: "day {day} of {monthInGenitive} {year, number, :: group-off}"
+
+weekday1: "Sundas"
+weekday2: "Morndas"
+weekday3: "Tirdas"
+weekday4: "Middas"
+weekday5: "Turdas"
+weekday6: "Fredas"
+weekday7: "Loredas"
+
+am: "a.m."
+pm: "p.m."
+day: "Dzień"

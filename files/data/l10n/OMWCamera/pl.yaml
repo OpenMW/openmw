@@ -1,0 +1,72 @@
+Camera: "Kamera OpenMW"
+settingsPageDescription: "Ustawienia kamery OpenMW."
+
+thirdPersonSettings: "Tryb trzecioosobowy"
+
+viewOverShoulder: "Widok znad ramienia"
+viewOverShoulderDescription: |
+    Steruje trybem widoku trzecioosobowego.
+      Nie: widok jest wycentrowany na głowie postaci. Celownik jest ukryty.
+      Tak: gdy broń jest schowana, kamera jest ustawiona za ramieniem postaci, a celownik zawsze widoczny.
+
+shoulderOffsetX: "Poziome przesunięcie ramienia"
+shoulderOffsetXDescription: >
+    Poziome przesunięcie widoku znad ramienia.
+    Użyj wartości ujemnej, aby przełączyć na lewe ramię.
+
+shoulderOffsetY: "Pionowe przesunięcie ramienia"
+shoulderOffsetYDescription: >
+    Pionowe przesunięcie widoku znad ramienia.
+
+autoSwitchShoulder: "Automatyczne przełączanie ramienia"
+autoSwitchShoulderDescription: >
+    Gdy przeszkody zbliżają kamerę do postaci gracza,
+    kamera automatycznie przełącza się na ramię dalej od przeszkody.
+
+zoomOutWhenMoveCoef: "Oddalanie podczas ruchu"
+zoomOutWhenMoveCoefDescription: >
+    Oddala kamerę (wartość dodatnia) lub przybliża (wartość ujemna) do postaci gracza podczas ruchu.
+    Działa tylko, gdy „widok znad ramienia” jest włączony. Ustaw na zero, aby wyłączyć (domyślnie: 20.0).
+
+previewIfStandStill: "Podgląd przy bezruchu"
+previewIfStandStillDescription: >
+    Zapobiega obracaniu się postaci gracza w kierunku kamery podczas bezczynności,
+    gdy broń jest schowana.
+
+deferredPreviewRotation: "Opóźnione obrócenie po podglądzie"
+deferredPreviewRotationDescription: |
+    Jeśli włączone, postać płynnie obraca się w kierunku kamery po wyjściu z trybu podglądu lub kamery swobodnej.
+    Jeśli wyłączone, obraca się kamera zamiast postaci.
+
+ignoreNC: "Ignoruj flagę „Brak kolizji”"
+ignoreNCDescription: >
+    Zapobiega przenikaniu kamery przez obiekty, które mają w modelu NIF ustawioną flagę NC (Brak kolizji).
+
+move360: "Ruch 360°"
+move360Description: >
+    Powoduje, że kierunek ruchu jest niezależny od kierunku kamery, gdy broń postaci gracza
+    jest schowana. Na przykład postać może biec tyłem patrząc w stronę kamery.
+
+move360TurnSpeed: "Szybkość obrotu 360°"
+move360TurnSpeedDescription: "Mnożnik szybkości obrotu (domyślnie: 5.0)."
+
+slowViewChange: "Płynna zmiana widoku"
+slowViewChangeDescription: "Sprawia, że przejście z widoku pierwszoosobowego do trzecioosobowego nie jest natychmiastowe."
+
+povAutoSwitch: "Automatyczne przełączanie na pierwszą osobę"
+povAutoSwitchDescription: "Automatycznie przełącza na widok pierwszoosobowy, jeśli za plecami gracza znajduje się przeszkoda."
+
+
+headBobbingSettings: "Kołysanie głowy w widoku pierwszoosobowym"
+
+headBobbing_enabled: "Włączone"
+headBobbing_enabledDescription: ""
+
+headBobbing_step: "Długość kroku"
+headBobbing_stepDescription: "Długość pojedynczego kroku (domyślnie: 90.0)."
+
+headBobbing_height: "Wysokość kroku"
+headBobbing_heightDescription: "Amplituda kołysania głowy (domyślnie: 3.0)."
+
+headBobbing_roll: "Maksymalny kąt przechyłu"
+headBobbing_rollDescription: "Maksymalny kąt przechyłu w stopniach (domyślnie: 0.2)."

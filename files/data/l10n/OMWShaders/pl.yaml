@@ -1,0 +1,50 @@
+# HUD post-processingu
+
+Abovewater: "Nad powierzchnią wody"
+ActiveShaders: "Aktywne shadery"
+Author: "Autor"
+Description: "Opis"
+InactiveShaders: "Nieaktywne shadery"
+InExteriors: "Zewnątrz"
+InInteriors: "Wnętrze"
+KeyboardControls: |
+    Sterowanie klawiaturą:
+
+    Shift+Strzałka-w-prawo > Aktywuj shader
+    Shift+Strzałka-w-lewo > Dezaktywuj shader
+    Shift+Strzałka-w-górę > Przesuń shader w górę
+    Shift+Strzałka-w-dół > Przesuń shader w dół
+PostProcessHUD: "HUD Post-processingu"
+ResetShader: "Zresetuj shader do ustawień domyślnych"
+ShaderLocked: "Zablokowany"
+ShaderLockedDescription: "Nie można przełączać ani przesuwać — kontrolowany przez zewnętrzny skrypt Lua"
+ShaderResetUniform: "r"
+Underwater: "Pod wodą"
+Version: "Wersja"
+
+# Wbudowane shadery post-processingu
+
+AdjustmentsDescription: "Dostosowanie kolorów."
+BloomDescription: "Shader Bloom wykonujący obliczenia w (w przybliżeniu) liniowym oświetleniu."
+DebugDescription: "Shader debugowania."
+DebugHeaderDepth: "Bufor głębi"
+DebugHeaderNormals: "Normalne"
+DisplayDepthFactorName: "Współczynnik koloru głębi"
+DisplayDepthFactorDescription: "Określa zależność między wartością głębi piksela a jego kolorem wyjściowym. Wyższe wartości prowadzą do jaśniejszego obrazu."
+DisplayDepthName: "Wizualizacja bufora głębi"
+DisplayNormalsName: "Wizualizacja normalnych w passie"
+NormalsInWorldSpace: "Pokaż normalne w przestrzeni świata"
+ContrastLevelDescription: "Poziom kontrastu."
+ContrastLevelName: "Kontrast"
+GammaLevelDescription: "Poziom gammy."
+GammaLevelName: "Gamma"
+StrengthLevelName: "Siła"
+StrengthLevelDescription: "Siła efektu."
+RadiusLevelName: "Promień"
+RadiusLevelDescription: "Promień działania efektu."
+SkyFactorLevelName: "Współczynnik nieba"
+SkyFactorLevelDescription: "Współczynnik mnożący dla światła pochodzącego bezpośrednio z nieba."
+BloomClampLevelName: "Poziom przycięcia"
+BloomClampLevelDescription: "Przytnij piksele bloom jaśniejsze niż ta wartość przy mieszaniu bloom z obrazem."
+BloomThresholdLevelName: "Próg"
+BloomThresholdLevelDescription: "Ignoruj piksele o jasności poniżej tej wartości podczas obliczania rozmycia. Nie wpływa na niebo."

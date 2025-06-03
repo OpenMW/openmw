@@ -1,0 +1,151 @@
+ControlsPage: "Sterowanie OpenMW"
+ControlsPageDescription: "Dodatkowe ustawienia dotyczące sterowania postacią."
+
+MovementSettings: "Ruch"
+
+alwaysRun: "Zawsze biegnij"
+alwaysRunDescription: |
+    Jeśli ta opcja jest włączona, postać domyślnie będzie biec. W przeciwnym razie będzie chodzić.
+    Klawisz Shift tymczasowo odwraca to ustawienie, a klawisz Caps Lock przełącza je na stałe.
+
+toggleSneak: "Przełącz skradanie"
+toggleSneakDescription: |
+    Ta opcja sprawia, że klawisz skradania (domyślnie Ctrl) działa jako przełącznik, zamiast być przytrzymywanym.
+    Gracze, którzy często się skradają, mogą uznać to ustawienie za wygodniejsze.
+
+smoothControllerMovement: "Płynny ruch kontrolera"
+smoothControllerMovementDescription: |
+   Włącza płynny ruch gałką kontrolera. Przejście między chodzeniem a bieganiem jest mniej gwałtowne.
+
+TogglePOV_name: "Przełącz widok"
+TogglePOV_description: "Przełącza widok między pierwszo- i trzecioosobowym. Przytrzymaj, aby włączyć tryb podglądu."
+
+Zoom3rdPerson_name: "Zbliżenie/Oddalenie"
+Zoom3rdPerson_description: "Przesuwa kamerę bliżej lub dalej w trybie trzecioosobowym."
+
+MoveForward_name: "Idź do przodu"
+MoveForward_description: "Może zostać anulowane przez 'Idź do tyłu'."
+
+MoveBackward_name: "Idź do tyłu"
+MoveBackward_description: "Może zostać anulowane przez 'Idź do przodu'."
+
+MoveLeft_name: "Idź w lewo"
+MoveLeft_description: "Może zostać anulowane przez 'Idź w prawo'."
+
+MoveRight_name: "Idź w prawo"
+MoveRight_description: "Może zostać anulowane przez 'Idź w lewo'."
+
+Use_name: "Użyj"
+Use_description: "Zaatakuj bronią lub rzuć zaklęcie, zależnie od aktualnej pozycji bojowej."
+
+Run_name: "Bieg"
+Run_description: "Przytrzymaj, aby biec lub chodzić w zależności od ustawienia 'Zawsze biegnij'."
+
+AlwaysRun_name: "Zawsze biegnij"
+AlwaysRun_description: "Przełącz ustawienie 'Zawsze biegnij'."
+
+Jump_name: "Skok"
+Jump_description: "Skocz, jeśli jesteś na ziemi."
+
+AutoMove_name: "Automatyczny bieg"
+AutoMove_description: "Przełącza ciągły ruch do przodu."
+
+Sneak_name: "Skradanie się"
+Sneak_description: "Przytrzymaj, aby się skradać (jeśli 'Przełącz skradanie' jest wyłączone)."
+
+ToggleSneak_name: "Przełącz skradanie"
+ToggleSneak_description: "Przełącza skradanie (jeśli opcja 'Przełącz skradanie' jest włączona)."
+
+ToggleWeapon_name: "Gotuj broń"
+ToggleWeapon_description: "Wejdź lub wyjdź z pozycji bojowej."
+
+ToggleSpell_name: "Gotuj magię"
+ToggleSpell_description: "Wejdź lub wyjdź z pozycji rzucania zaklęć."
+
+Inventory_name: "Ekwipunek"
+Inventory_description: "Otwiera ekwipunek."
+
+Journal_name: "Dziennik"
+Journal_description: "Otwiera dziennik."
+
+QuickKeysMenu_name: "Szybkie menu"
+QuickKeysMenu_description: "Otwiera menu szybkich klawiszy."
+
+SmoothMoveForward_name: "Płynny ruch do przodu"
+SmoothMoveForward_description: "Ruch do przodu z płynnym przejściem między chodzeniem a bieganiem."
+
+SmoothMoveBackward_name: "Płynny ruch do tyłu"
+SmoothMoveBackward_description: "Ruch do tyłu z płynnym przejściem między chodzeniem a bieganiem."
+
+SmoothMoveLeft_name: "Płynny ruch w lewo"
+SmoothMoveLeft_description: "Ruch w lewo z płynnym przejściem między chodzeniem a bieganiem."
+
+SmoothMoveRight_name: "Płynny ruch w prawo"
+SmoothMoveRight_description: "Ruch w prawo z płynnym przejściem między chodzeniem a bieganiem."
+
+# Działania niezhardcodowane
+Activate_name: "Aktywuj"
+Activate_description: "Zapasowe przypisanie dla input.ACTIONS.Activate, obecnie nie działa."
+
+Console_name: "Konsola"
+Console_description: "Zapasowe przypisanie dla input.ACTIONS.Console, obecnie nie działa."
+
+CycleSpellLeft_name: "Poprzednie zaklęcie"
+CycleSpellLeft_description: "Zapasowe przypisanie dla input.ACTIONS.CycleSpellLeft, obecnie nie działa."
+
+CycleSpellRight_name: "Następne zaklęcie"
+CycleSpellRight_description: "Zapasowe przypisanie dla input.ACTIONS.CycleSpellRight, obecnie nie działa."
+
+CycleWeaponLeft_name: "Poprzednia broń"
+CycleWeaponLeft_description: "Zapasowe przypisanie dla input.ACTIONS.CycleWeaponLeft, obecnie nie działa."
+
+CycleWeaponRight_name: "Następna broń"
+CycleWeaponRight_description: "Zapasowe przypisanie dla input.ACTIONS.CycleWeaponRight, obecnie nie działa."
+
+GameMenu_name: "Menu gry"
+GameMenu_description: "Zapasowe przypisanie dla input.ACTIONS.GameMenu, obecnie nie działa."
+
+QuickLoad_name: "Szybkie wczytanie"
+QuickLoad_description: "Zapasowe przypisanie dla input.ACTIONS.QuickLoad, obecnie nie działa."
+
+QuickSave_name: "Szybki zapis"
+QuickSave_description: "Zapasowe przypisanie dla input.ACTIONS.QuickSave, obecnie nie działa."
+
+Screenshot_name: "Zrzut ekranu"
+Screenshot_description: "Zapasowe przypisanie dla input.ACTIONS.Screenshot, obecnie nie działa."
+
+ToggleDebug_name: "Przełącz debugowanie"
+ToggleDebug_description: "Zapasowe przypisanie dla input.ACTIONS.ToggleDebug, obecnie nie działa."
+
+ToggleHUD_name: "Przełącz HUD"
+ToggleHUD_description: "Zapasowe przypisanie dla input.ACTIONS.ToggleHUD, obecnie nie działa."
+
+TogglePostProcessorHUD_name: "Przełącz HUD postprocessingu"
+TogglePostProcessorHUD_description: "Zapasowe przypisanie dla input.ACTIONS.TogglePostProcessorHUD, obecnie nie działa."
+
+QuickKey1_name: "Szybki klawisz 1"
+QuickKey1_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey1, obecnie nie działa."
+
+QuickKey2_name: "Szybki klawisz 2"
+QuickKey2_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey2, obecnie nie działa."
+
+QuickKey3_name: "Szybki klawisz 3"
+QuickKey3_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey3, obecnie nie działa."
+
+QuickKey4_name: "Szybki klawisz 4"
+QuickKey4_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey4, obecnie nie działa."
+
+QuickKey5_name: "Szybki klawisz 5"
+QuickKey5_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey5, obecnie nie działa."
+
+QuickKey6_name: "Szybki klawisz 6"
+QuickKey6_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey6, obecnie nie działa."
+
+QuickKey7_name: "Szybki klawisz 7"
+QuickKey7_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey7, obecnie nie działa."
+
+QuickKey8_name: "Szybki klawisz 8"
+QuickKey8_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey8, obecnie nie działa."
+
+QuickKey9_name: "Szybki klawisz 9"
+QuickKey9_description: "Zapasowe przypisanie dla input.ACTIONS.QuickKey9, obecnie nie działa."
