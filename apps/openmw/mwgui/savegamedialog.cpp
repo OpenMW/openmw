@@ -535,6 +535,7 @@ namespace MWGui
                 onOkButtonClicked(mOkButton);
             else
                 onCancelButtonClicked(mCancelButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
@@ -546,6 +547,7 @@ namespace MWGui
             index = wrap(index + 1, mCharacterSelection->getItemCount());
             mCharacterSelection->setIndexSelected(index);
             onCharacterSelected(mCharacterSelection, index);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {

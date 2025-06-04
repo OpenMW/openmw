@@ -557,15 +557,16 @@ namespace MWGui
         if (isFilterListOpen)
         {
             // When the filter list combo box is open, send all inputs to it.
-            if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_Y)
             {
                 // Select the highlighted entry in the combo box and close it.
                 int index = mFilterValue->getIndexSelected();
                 mFilterValue->setIndexSelected(index);
                 onFilterChanged(mFilterValue, index);
                 MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_B || arg.button == SDL_CONTROLLER_BUTTON_Y)
+            else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             {
                 // Close the list without selecting anything
                 mFilterValue->clearIndexSelected();
@@ -610,6 +611,7 @@ namespace MWGui
                     MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mFilterValue);
                     MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
                 }
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
                 onDecreaseButtonTriggered();

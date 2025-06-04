@@ -177,7 +177,10 @@ namespace MWGui
     bool PersuasionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
             onPersuade(mButtons[mControllerFocus]);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancel(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
@@ -960,6 +963,7 @@ namespace MWGui
                 onGoodbyeActivated();
             else
                 onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {

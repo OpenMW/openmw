@@ -158,7 +158,10 @@ namespace MWGui
     {
         if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mToolBox->getVisible())
             || arg.button == SDL_CONTROLLER_BUTTON_Y)
+        {
             onSelectItem(mToolIcon);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancel(mCancelButton);
         else

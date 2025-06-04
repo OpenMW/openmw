@@ -1001,6 +1001,7 @@ namespace MWGui
                 onFilterChanged(mFilterApparel);
             else if (mFilterMisc->getStateSelected())
                 onFilterChanged(mFilterMagic);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
@@ -1014,6 +1015,7 @@ namespace MWGui
                 onFilterChanged(mFilterMisc);
             else if (mFilterMisc->getStateSelected())
                 onFilterChanged(mFilterAll);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else
         {

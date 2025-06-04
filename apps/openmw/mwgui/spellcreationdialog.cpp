@@ -401,11 +401,15 @@ namespace MWGui
                 onOkButtonClicked(mOkButton);
             else if (button == mDeleteButton)
                 onDeleteButtonClicked(mDeleteButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancelButtonClicked(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
             onOkButtonClicked(mOkButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             if (mControllerFocus == 0)
@@ -1036,10 +1040,12 @@ namespace MWGui
             if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
             {
                 onAvailableEffectClicked(mAvailableButtons[mAvailableFocus]);
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
             else if (mRightColumn && mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
             {
                 onEditEffect(mEffectButtons[mEffectFocus].second);
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)

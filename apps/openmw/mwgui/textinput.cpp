@@ -90,6 +90,7 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             onOkClicked(nullptr);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             return true;
         }
 

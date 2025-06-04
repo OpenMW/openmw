@@ -339,11 +339,17 @@ namespace MWGui
     bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
             onWaitButtonClicked(mWaitButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onCancelButtonClicked(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_X && mUntilHealedButton->getVisible())
+        {
             onUntilHealedButtonClicked(mUntilHealedButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
