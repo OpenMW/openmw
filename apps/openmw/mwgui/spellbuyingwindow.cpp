@@ -247,14 +247,17 @@ namespace MWGui
             mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
 
-        // Scroll the list to keep the active item in view
-        int line = mSpellButtons[mControllerFocus].second;
-        if (line <= 5)
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
-        else
+        if (mControllerFocus >= 0 && mControllerFocus < mSpellButtons.size())
         {
-            const int lineHeight = Settings::gui().mFontSize + 2;
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+            // Scroll the list to keep the active item in view
+            int line = mSpellButtons[mControllerFocus].second;
+            if (line <= 5)
+                mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
+            else
+            {
+                const int lineHeight = Settings::gui().mFontSize + 2;
+                mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+            }
         }
 
         return true;

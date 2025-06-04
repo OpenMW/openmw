@@ -408,8 +408,6 @@ namespace MWGui
             if (focused)
             {
                 focused->onMouseSetFocus(nullptr);
-                if (mControllerTooltip)
-                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
 
                 // Scroll the list to keep the active item in view
                 int line = mButtons[newFocus].second;
@@ -420,6 +418,9 @@ namespace MWGui
                     const int lineHeight = focused->getHeight();
                     mScrollView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
                 }
+
+                if (mControllerTooltip)
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
             }
         }
     }

@@ -280,10 +280,10 @@ namespace MWGui
             mLines[newFocus].mIcon->setControllerFocus(true);
 
             // Scroll the list to keep the active item in view
-            if (mControllerFocus <= 3)
+            if (newFocus <= 3)
                 mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
             else
-                mScrollView->setViewOffset(MyGUI::IntPoint(-55 * (mControllerFocus - 3), 0));
+                mScrollView->setViewOffset(MyGUI::IntPoint(-55 * (newFocus - 3), 0));
         }
     }
 }
