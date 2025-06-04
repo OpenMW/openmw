@@ -10,6 +10,7 @@
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/finitenumbers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -56,10 +57,13 @@ namespace MWLua
 
     static void addWorldTimeBindings(sol::table& api, const Context& context)
     {
+        using FiniteDouble = Misc::FiniteDouble;
+        using FiniteFloat = Misc::FiniteFloat;
+
         MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
 
-        api["setGameTimeScale"] = [timeManager](double scale) { timeManager->setGameTimeScale(scale); };
-        api["setSimulationTimeScale"] = [context, timeManager](float scale) {
+        api["setGameTimeScale"] = [timeManager](const FiniteDouble scale) { timeManager->setGameTimeScale(scale); };
+        api["setSimulationTimeScale"] = [context, timeManager](const FiniteFloat scale) {
             context.mLuaManager->addAction([scale, timeManager] { timeManager->setSimulationTimeScale(scale); });
         };
 

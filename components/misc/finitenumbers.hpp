@@ -8,6 +8,18 @@
 
 namespace Misc
 {
+    struct FiniteDouble
+    {
+        double mValue;
+        FiniteDouble(double v)
+        {
+            if (!std::isfinite(v))
+                throw std::invalid_argument("Value must be a finite number");
+            mValue = v;
+        }
+        operator double() const { return mValue; }
+    };
+
     struct FiniteFloat
     {
         float mValue;
@@ -23,7 +35,24 @@ namespace Misc
 
 namespace sol
 {
+    using FiniteDouble = Misc::FiniteDouble;
     using FiniteFloat = Misc::FiniteFloat;
+
+    template <typename Handler>
+    bool sol_lua_check(
+        sol::types<FiniteDouble>, lua_State* L, int index, Handler&& handler, sol::stack::record& tracking)
+    {
+        bool success = sol::stack::check<double>(L, lua_absindex(L, index), handler);
+        tracking.use(1);
+        return success;
+    }
+
+    static FiniteDouble sol_lua_get(sol::types<FiniteDouble>, lua_State* L, int index, sol::stack::record& tracking)
+    {
+        double val = sol::stack::get<double>(L, lua_absindex(L, index));
+        tracking.use(1);
+        return FiniteDouble(val);
+    }
 
     template <typename Handler>
     bool sol_lua_check(
