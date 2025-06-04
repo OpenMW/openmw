@@ -57,12 +57,11 @@ namespace MWLua
 
     static void addWorldTimeBindings(sol::table& api, const Context& context)
     {
-        using FiniteDouble = Misc::FiniteDouble;
         using FiniteFloat = Misc::FiniteFloat;
 
         MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
 
-        api["setGameTimeScale"] = [timeManager](const FiniteDouble scale) { timeManager->setGameTimeScale(scale); };
+        api["setGameTimeScale"] = [timeManager](const FiniteFloat scale) { timeManager->setGameTimeScale(scale); };
         api["setSimulationTimeScale"] = [context, timeManager](const FiniteFloat scale) {
             context.mLuaManager->addAction([scale, timeManager] { timeManager->setSimulationTimeScale(scale); });
         };
