@@ -169,11 +169,22 @@ namespace MWGui
 
         setCoord(400, 0, 400, 300);
 
-        mControllerButtons.a = "#{sBuy}";
-        mControllerButtons.b = "#{sCancel}";
-        mControllerButtons.x = "#{sOffer}";
-        mControllerButtons.r3 = "#{sInfo}";
-        mControllerButtons.l2 = "#{sInventory}";
+        if (Settings::gui().mControllerMenus)
+        {
+            // Show L1 and R1 buttons next to tabs
+            MyGUI::Widget* image;
+            getWidget(image, "BtnL1Image");
+            image->setUserString("Hidden", "false");
+
+            getWidget(image, "BtnR1Image");
+            image->setUserString("Hidden", "false");
+
+            mControllerButtons.a = "#{sBuy}";
+            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.x = "#{sOffer}";
+            mControllerButtons.r3 = "#{sInfo}";
+            mControllerButtons.l2 = "#{sInventory}";
+        }
     }
 
     void TradeWindow::setPtr(const MWWorld::Ptr& actor)
@@ -734,6 +745,14 @@ namespace MWGui
 
     void TradeWindow::setActiveControllerWindow(bool active)
     {
+        // Show L1 and R1 buttons next to tabs
+        MyGUI::Widget* image;
+        getWidget(image, "BtnL1Image");
+        image->setVisible(active);
+
+        getWidget(image, "BtnR1Image");
+        image->setVisible(active);
+
         mItemView->setActiveControllerWindow(active);
         WindowBase::setActiveControllerWindow(active);
     }

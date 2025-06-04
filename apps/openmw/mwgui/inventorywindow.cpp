@@ -132,6 +132,14 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            // Show L1 and R1 buttons next to tabs
+            MyGUI::Widget* image;
+            getWidget(image, "BtnL1Image");
+            image->setUserString("Hidden", "false");
+
+            getWidget(image, "BtnR1Image");
+            image->setUserString("Hidden", "false");
+
             mControllerButtons.r3 = "#{sInfo}";
         }
 
@@ -1035,6 +1043,14 @@ namespace MWGui
             adjustPanes();
             updatePreviewSize();
         }
+
+        // Show L1 and R1 buttons next to tabs
+        MyGUI::Widget* image;
+        getWidget(image, "BtnL1Image");
+        image->setVisible(active);
+
+        getWidget(image, "BtnR1Image");
+        image->setVisible(active);
 
         mItemView->setActiveControllerWindow(active);
         WindowBase::setActiveControllerWindow(active);
