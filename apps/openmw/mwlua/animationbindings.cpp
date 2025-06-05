@@ -100,7 +100,7 @@ namespace MWLua
 
     sol::table initAnimationPackage(const Context& context)
     {
-        using FiniteFloat = Misc::FiniteFloat;
+        using Misc::FiniteFloat;
 
         auto view = context.sol();
         auto mechanics = MWBase::Environment::get().getMechanicsManager();
