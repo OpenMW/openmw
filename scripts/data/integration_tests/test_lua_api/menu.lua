@@ -72,6 +72,7 @@ registerGlobalTest('memory limit')
 registerGlobalTest('vfs')
 registerGlobalTest('commit crime')
 registerGlobalTest('record model property')
+registerGlobalTest('nan', 'world.setGameTimeScale should not accept nan')
 
 registerGlobalTest('player yaw rotation', 'rotating player with controls.yawChange should change rotation')
 registerGlobalTest('player pitch rotation', 'rotating player with controls.pitchChange should change rotation')
