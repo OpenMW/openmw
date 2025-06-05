@@ -5,6 +5,7 @@
 #include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
+#include <components/misc/finitenumbers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/values.hpp>
 
@@ -99,6 +100,8 @@ namespace MWLua
 
     sol::table initAnimationPackage(const Context& context)
     {
+        using FiniteFloat = Misc::FiniteFloat;
+
         auto view = context.sol();
         auto mechanics = MWBase::Environment::get().getMechanicsManager();
         auto world = MWBase::Environment::get().getWorld();
@@ -197,7 +200,7 @@ namespace MWLua
                 return speed;
             return sol::nullopt;
         };
-        api["setSpeed"] = [](const sol::object& object, std::string groupname, float speed) {
+        api["setSpeed"] = [](const sol::object& object, std::string groupname, const FiniteFloat speed) {
             getMutableAnimationOrThrow(ObjectVariant(object))->adjustSpeedMult(groupname, speed);
         };
         api["getActiveGroup"] = [](const sol::object& object, MWRender::BoneGroup boneGroup) -> std::string_view {
