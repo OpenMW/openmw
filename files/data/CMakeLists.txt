@@ -29,6 +29,7 @@ set(BUILTIN_DATA_FILES
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
+    l10n/Calendar/pl.yaml
 
     # Generic UI messages that can be reused by mods
     l10n/Interface/de.yaml
@@ -36,6 +37,7 @@ set(BUILTIN_DATA_FILES
     l10n/Interface/ru.yaml
     l10n/Interface/sv.yaml
     l10n/Interface/fr.yaml
+    l10n/Interface/pl.yaml
 
     # L10n for scripts/omw
     l10n/OMWCamera/de.yaml
@@ -43,11 +45,13 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/ru.yaml
     l10n/OMWCamera/sv.yaml
     l10n/OMWCamera/fr.yaml
+    l10n/OMWCamera/pl.yaml
     l10n/OMWControls/de.yaml
     l10n/OMWControls/en.yaml
     l10n/OMWControls/fr.yaml
     l10n/OMWControls/ru.yaml
     l10n/OMWControls/sv.yaml
+    l10n/OMWControls/pl.yaml
 
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/de.yaml
@@ -55,6 +59,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWEngine/ru.yaml
     l10n/OMWEngine/sv.yaml
     l10n/OMWEngine/fr.yaml
+    l10n/OMWEngine/pl.yaml
 
     # L10n for music system
     l10n/OMWMusic/de.yaml
@@ -62,6 +67,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWMusic/ru.yaml
     l10n/OMWMusic/sv.yaml
     l10n/OMWMusic/fr.yaml
+    l10n/OMWMusic/pl.yaml
 
     # L10n for post-processing HUD and built-in shaders
     l10n/OMWShaders/de.yaml
@@ -69,6 +75,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWShaders/ru.yaml
     l10n/OMWShaders/sv.yaml
     l10n/OMWShaders/fr.yaml
+    l10n/OMWShaders/pl.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua

@@ -304,6 +304,7 @@ Public Relations and Translations
     sir_herrbatka - Polish News Writer
     spyboot - German Translator
     Tom Koenderink (Okulo) - English News Writer
+    Igor Wiśniewski (Igilq) - Polish Translation
 
 Website
 -------
