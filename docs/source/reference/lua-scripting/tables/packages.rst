@@ -4,7 +4,8 @@
 |:ref:`openmw.ambient <Package openmw.ambient>`              | by player and menu | | Controls background sounds for given player.                |
 |                                                            | scripts            |                                                               |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.animation <Package openmw.animation>`          | everywhere         | | Animation controls                                          |
+|:ref:`openmw.animation <Package openmw.animation>`          | by local and       | | Animation controls                                          |
+|                                                            | player scripts     |                                                               |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.async <Package openmw.async>`                  | everywhere         | | Timers and callbacks.                                       |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+

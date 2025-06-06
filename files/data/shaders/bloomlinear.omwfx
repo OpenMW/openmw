@@ -80,8 +80,9 @@ shared {
         radius = max(radius, 0.1);
         // hack: make the radius wider on the screen edges
         // (makes things in the corner of the screen look less "wrong" with not-extremely-low FOVs)
-        radius *= pow(texcoord.x*2.0-1.0, 2.0)+1.0;
-        radius *= pow(texcoord.y*2.0-1.0, 2.0)+1.0;
+        texcoord = texcoord * 2.0 - vec2(1.0);
+        radius *= texcoord.x * texcoord.x + 1.0;
+        radius *= texcoord.y * texcoord.y + 1.0;
         return radius;
     }
     vec3 powv(vec3 a, float x)

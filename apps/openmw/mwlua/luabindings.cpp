@@ -32,7 +32,6 @@ namespace MWLua
         sol::state_view lua = context.mLua->unsafeState();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
-            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },
@@ -59,6 +58,7 @@ namespace MWLua
         initCellBindingsForLocalScripts(context);
         LocalScripts::initializeSelfPackage(context);
         return {
+            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.core", initCorePackage(context) },
             { "openmw.types", initTypesPackage(context) },
             { "openmw.nearby", initNearbyPackage(context) },
