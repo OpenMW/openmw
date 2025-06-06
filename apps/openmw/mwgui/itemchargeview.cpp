@@ -283,7 +283,7 @@ namespace MWGui
             if (newFocus <= 3)
                 mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
             else
-                mScrollView->setViewOffset(MyGUI::IntPoint(-55 * (newFocus - 3), 0));
+                mScrollView->setViewOffset(MyGUI::IntPoint(0, -55 * (newFocus - 3)));
         }
     }
 }
