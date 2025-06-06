@@ -344,6 +344,13 @@ testing.registerGlobalTest('load while teleporting - teleport', function()
     landracer:teleport(player.cell, player.position)
 end)
 
+testing.registerGlobalTest('nan', function()
+    local nan = 0.0 / 0.0
+    local ok, err = pcall(function() world.setGameTimeScale(nan) end)
+    testing.expectEqual(ok, false)
+    testing.expectEqual(err, 'Value must be a finite number')
+end)
+
 return {
     engineHandlers = {
         onUpdate = testing.updateGlobal,

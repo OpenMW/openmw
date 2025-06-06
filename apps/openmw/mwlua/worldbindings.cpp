@@ -57,7 +57,7 @@ namespace MWLua
 
     static void addWorldTimeBindings(sol::table& api, const Context& context)
     {
-        using FiniteFloat = Misc::FiniteFloat;
+        using Misc::FiniteFloat;
 
         MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
 
