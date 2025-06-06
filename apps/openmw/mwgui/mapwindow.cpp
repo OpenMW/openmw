@@ -839,7 +839,7 @@ namespace MWGui
             mControllerButtons.b = "#{sBack}";
             mControllerButtons.x = global ? "#{sLocal}" : "#{sWorld}";
             mControllerButtons.y = "#{sCenter}";
-            mControllerButtons.rStick = "#{sMove}";
+            mControllerButtons.rStick = Settings::map().mAllowZooming ? "" : "#{sMove}";
         }
     }
 
@@ -1420,11 +1420,15 @@ namespace MWGui
 
     bool MapWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
     {
-        int dx = arg.axis == SDL_CONTROLLER_AXIS_RIGHTX ? -30.0f * arg.value / 32767 : 0;
-        int dy = arg.axis == SDL_CONTROLLER_AXIS_RIGHTY ? -30.0f * arg.value / 32767 : 0;
-        shiftMap(dx, dy);
+        if (!Settings::map().mAllowZooming)
+        {
+            int dx = arg.axis == SDL_CONTROLLER_AXIS_RIGHTX ? -30.0f * arg.value / 32767 : 0;
+            int dy = arg.axis == SDL_CONTROLLER_AXIS_RIGHTY ? -30.0f * arg.value / 32767 : 0;
+            shiftMap(dx, dy);
 
-        return true;
+            return true;
+        }
+        return false;
     }
 
     void MapWindow::shiftMap(int dx, int dy)
