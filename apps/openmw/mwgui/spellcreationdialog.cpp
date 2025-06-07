@@ -14,6 +14,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
@@ -102,6 +103,7 @@ namespace MWGui
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.b = "#{sCancel}";
             mControllerButtons.x = "#{sOk}";
+            mControllerButtons.r3 = "#{sInfo}";
         }
     }
 
@@ -615,6 +617,13 @@ namespace MWGui
         mPtr = actor;
         mNameEdit->setCaption({});
 
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (Settings::gui().mControllerMenus && winMgr->getControllerTooltip())
+        {
+            winMgr->setCursorActive(false);
+            winMgr->setControllerTooltip(false);
+        }
+
         startEditing();
     }
 
@@ -1048,6 +1057,12 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
         }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        {
+            // Toggle info tooltip
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             if (mRightColumn && mEffectButtons.size() > 0)
@@ -1106,6 +1121,13 @@ namespace MWGui
         {
             const int lineHeight = Settings::gui().mFontSize + 3;
             mAvailableEffectsList->setViewOffset(-lineHeight * (mAvailableFocus - 5));
+        }
+
+        if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+        {
+            // Warp the mouse to the selected spell to show the tooltip
+            if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mAvailableButtons[mAvailableFocus]);
         }
 
         return true;

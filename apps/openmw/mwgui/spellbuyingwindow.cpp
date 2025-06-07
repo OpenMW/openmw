@@ -9,6 +9,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -37,6 +38,7 @@ namespace MWGui
             mDisableGamepadCursor = true;
             mControllerButtons.a = "#{sBuy}";
             mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.r3 = "#{sInfo}";
         }
     }
 
@@ -144,6 +146,13 @@ namespace MWGui
             mControllerFocus = 0;
             if (mSpellButtons.size() > 0)
                 mSpellButtons[0].first->setStateSelected(true);
+
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            if (winMgr->getControllerTooltip())
+            {
+                winMgr->setCursorActive(false);
+                winMgr->setControllerTooltip(false);
+            }
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -228,6 +237,12 @@ namespace MWGui
         {
             onCancelButtonClicked(mCancelButton);
         }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        {
+            // Toggle info tooltip
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+        }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             if (mSpellButtons.size() <= 1)
@@ -258,6 +273,10 @@ namespace MWGui
                 const int lineHeight = Settings::gui().mFontSize + 2;
                 mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
             }
+
+            // Warp the mouse to the selected spell to show the tooltip
+            if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[mControllerFocus].first);
         }
 
         return true;
