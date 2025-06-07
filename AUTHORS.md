@@ -291,6 +291,7 @@ Public Relations and Translations
     Artem Kotsynyak (greye) - Russian News Writer
     Dawid Lakomy (Vedyimyn) - Polish News Writer
     ElderTroll - Release Manager
+    Igor Wiśniewski (Igilq) - Polish Translation
     Jim Clauwaert (Zedd) - Public Outreach
     juanmnzsk8 - Spanish News Writer
     Julien Voisin (jvoisin/ap0) - French News Writer
@@ -304,7 +305,6 @@ Public Relations and Translations
     sir_herrbatka - Polish News Writer
     spyboot - German Translator
     Tom Koenderink (Okulo) - English News Writer
-    Igor Wiśniewski (Igilq) - Polish Translation
 
 Website
 -------
