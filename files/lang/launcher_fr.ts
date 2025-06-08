@@ -1450,5 +1450,13 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Run Script After Startup:</source>
         <translation>Script à lancer après démarrage :</translation>
     </message>
+    <message>
+        <source>Enable Controller Menus</source>
+        <translation>Activer les menus du contrôleur</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make it easier to use game menus with a controller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Faciliter l&apos;utilisation des menus de jeu avec une manette.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
 </context>
 </TS>
