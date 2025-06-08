@@ -941,15 +941,19 @@ namespace MWGui
             else if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
             {
                 // Drag and drop the item on the companion's window.
-                MWGui::CompanionWindow* companionWindow =
-                    (MWGui::CompanionWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                MWGui::CompanionWindow* companionWindow = (MWGui::CompanionWindow*)MWBase::Environment::get()
+                                                              .getWindowManager()
+                                                              ->getGuiModeWindows(mGuiMode)
+                                                              .at(0);
                 mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
             }
             else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
             {
                 // Drag and drop the item on the container window.
-                MWGui::ContainerWindow* containerWindow =
-                    (MWGui::ContainerWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
+                                                              .getWindowManager()
+                                                              ->getGuiModeWindows(mGuiMode)
+                                                              .at(0);
                 mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
             }
             // GM_Barter is handled by onControllerButtonEvent. No other steps are necessary.
@@ -967,16 +971,20 @@ namespace MWGui
             {
                 // Take all. Pass the button press to the container window and let it do the
                 // logic of taking all.
-                MWGui::ContainerWindow* containerWindow =
-                    (MWGui::ContainerWindow *)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0);
+                MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
+                                                              .getWindowManager()
+                                                              ->getGuiModeWindows(mGuiMode)
+                                                              .at(0);
                 containerWindow->onControllerButtonEvent(arg);
             }
             else if (mGuiMode == MWGui::GM_Barter)
             {
                 // Offer. Pass the button press to the barter window and let it do the logic
                 // of making an offer.
-                MWGui::TradeWindow* tradeWindow =
-                    (MWGui::TradeWindow*)MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(1);
+                MWGui::TradeWindow* tradeWindow = (MWGui::TradeWindow*)MWBase::Environment::get()
+                                                      .getWindowManager()
+                                                      ->getGuiModeWindows(mGuiMode)
+                                                      .at(1);
                 tradeWindow->onControllerButtonEvent(arg);
             }
         }

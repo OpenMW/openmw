@@ -603,10 +603,10 @@ namespace MWGui
 
     void DialogueWindow::updateTopicsPane()
     {
-        const std::string focusedTopic =
-            Settings::gui().mControllerMenus && mControllerFocus < mTopicsList->getItemCount()
-                ? mTopicsList->getItemNameAt(mControllerFocus)
-                : "";
+        const std::string focusedTopic
+            = Settings::gui().mControllerMenus && mControllerFocus < mTopicsList->getItemCount()
+            ? mTopicsList->getItemNameAt(mControllerFocus)
+            : "";
 
         mTopicsList->clear();
         for (auto& linkPair : mTopicLinks)
@@ -931,7 +931,8 @@ namespace MWGui
         {
             mGoodbyeButton->setStateSelected(focused);
         }
-        else {
+        else
+        {
             std::string keyword = mTopicsList->getItemNameAt(mControllerFocus);
             if (keyword.length() == 0)
                 return;

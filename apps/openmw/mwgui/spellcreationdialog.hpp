@@ -1,8 +1,8 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include <memory>
 #include <SDL.h>
+#include <memory>
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>

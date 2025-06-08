@@ -95,7 +95,7 @@ namespace MWGui
         void adjustSpellWidget(const Spell& spell, SpellModel::ModelIndex index, MyGUI::Widget* widget);
 
         /// Keep a list of buttons for controller navigation and their index in the full list.
-        std::vector<std::pair<Gui::SharedStateButton *, int>> mButtons;
+        std::vector<std::pair<Gui::SharedStateButton*, int>> mButtons;
         /// Keep a list of group offsets for controller navigation
         std::vector<int> mGroupIndices;
 

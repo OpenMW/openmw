@@ -542,7 +542,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            switch(mControllerFocus)
+            switch (mControllerFocus)
             {
                 case 0:
                     onNameClicked(mButtons[0]);
@@ -573,15 +573,13 @@ namespace MWGui
         {
             onOkClicked(mButtons[5]);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
             setControllerFocus(mButtons, mControllerFocus, true);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
             mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());

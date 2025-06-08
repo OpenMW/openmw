@@ -156,8 +156,7 @@ namespace MWGui
 
     bool Repair::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mToolBox->getVisible())
-            || arg.button == SDL_CONTROLLER_BUTTON_Y)
+        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mToolBox->getVisible()) || arg.button == SDL_CONTROLLER_BUTTON_Y)
         {
             onSelectItem(mToolIcon);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));

@@ -75,7 +75,8 @@ namespace MWGui
         setVisible(buttonCount > 0);
     }
 
-    int ControllerButtonsOverlay::updateButton(MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr)
+    int ControllerButtonsOverlay::updateButton(
+        MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr)
     {
         if (buttonStr.length() > 0)
         {

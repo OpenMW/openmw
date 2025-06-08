@@ -496,7 +496,8 @@ namespace
                 MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
                 if (listItem)
                 {
-                    listItem->setTextColour(mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
+                    listItem->setTextColour(
+                        mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }
@@ -737,8 +738,10 @@ namespace
                     // Choose an index. Cyrillic capital A is a 0xd090 in UTF-8.
                     // Words can not be started with characters 26 or 28.
                     int russianOffset = 0xd090;
-                    if (mSelectedIndex >= 26) russianOffset++;
-                    if (mSelectedIndex >= 27) russianOffset++; // 27, not 28, because of skipping char 26
+                    if (mSelectedIndex >= 26)
+                        russianOffset++;
+                    if (mSelectedIndex >= 27)
+                        russianOffset++; // 27, not 28, because of skipping char 26
                     notifyIndexLinkClicked(isRussian ? mSelectedIndex + russianOffset : mSelectedIndex + 'A');
                 }
                 return true;
@@ -776,7 +779,8 @@ namespace
                     notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
                     mQuestMode = false;
                 }
-                else {
+                else
+                {
                     // Show the quest overlay if viewing a journal entry or the topics
                     if (!mOptionsMode)
                         notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
@@ -793,7 +797,8 @@ namespace
                     notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
                     mQuestMode = false;
                 }
-                else {
+                else
+                {
                     // Show the topics overlay if viewing a journal entry or the quest list
                     if (!mOptionsMode)
                         notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));

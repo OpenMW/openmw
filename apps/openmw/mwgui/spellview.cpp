@@ -393,7 +393,7 @@ namespace MWGui
     void SpellView::updateControllerFocus(int prevFocus, int newFocus)
     {
         if (mButtons.empty())
-           return;
+            return;
 
         if (prevFocus >= 0 && prevFocus < mButtons.size())
         {

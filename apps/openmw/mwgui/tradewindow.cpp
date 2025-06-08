@@ -733,11 +733,9 @@ namespace MWGui
                 onFilterChanged(mFilterAll);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             mItemView->onControllerButton(arg.button);
         }

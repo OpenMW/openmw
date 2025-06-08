@@ -163,10 +163,11 @@ namespace MWGui
                 hour = 12;
 
             ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
-            std::string daysPassed = Misc::StringUtils::format("#{Calendar:day} %i", timeManager.getTimeStamp().getDay());
+            std::string daysPassed
+                = Misc::StringUtils::format("#{Calendar:day} %i", timeManager.getTimeStamp().getDay());
             std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
-            std::string autoFilename
-                = Misc::StringUtils::format("%s - %i %s %i %s", daysPassed, currentDate.mDay, month, hour, formattedHour);
+            std::string autoFilename = Misc::StringUtils::format(
+                "%s - %i %s %i %s", daysPassed, currentDate.mDay, month, hour, formattedHour);
 
             mSaveNameEdit->setCaptionWithReplacing(autoFilename);
         }
@@ -561,8 +562,8 @@ namespace MWGui
             winMgr->setKeyFocusWidget(mSaveList);
             winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         }
-        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus) ||
-            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus)
+            || (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
         {
             mOkButtonFocus = !mOkButtonFocus;
             mOkButton->setStateSelected(mOkButtonFocus);

@@ -142,8 +142,7 @@ namespace MWGui
 
     bool Recharge::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
-        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mGemBox->getVisible())
-            || arg.button == SDL_CONTROLLER_BUTTON_Y)
+        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mGemBox->getVisible()) || arg.button == SDL_CONTROLLER_BUTTON_Y)
         {
             onSelectItem(mGemIcon);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));

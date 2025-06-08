@@ -268,14 +268,14 @@ namespace MWGui
 
         if (prevFocus >= 0 && prevFocus < mItemCount)
         {
-            ItemWidget* prev = (ItemWidget *)dragArea->getChildAt(prevFocus);
+            ItemWidget* prev = (ItemWidget*)dragArea->getChildAt(prevFocus);
             if (prev)
                 prev->setControllerFocus(false);
         }
 
         if (mControllerActiveWindow && newFocus >= 0 && newFocus < mItemCount)
         {
-            ItemWidget* focused = (ItemWidget *)dragArea->getChildAt(newFocus);
+            ItemWidget* focused = (ItemWidget*)dragArea->getChildAt(newFocus);
             if (focused)
             {
                 focused->setControllerFocus(true);

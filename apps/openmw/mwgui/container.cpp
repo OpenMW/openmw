@@ -127,8 +127,7 @@ namespace MWGui
         if (!onTakeItem(item, count))
             return;
 
-        MWGui::InventoryWindow* inventoryWindow
-            = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
+        MWGui::InventoryWindow* inventoryWindow = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
         ItemModel* playerModel = inventoryWindow->getModel();
 
         mModel->moveItem(item, count, playerModel);
@@ -385,11 +384,9 @@ namespace MWGui
             if (mDisposeCorpseButton->getVisible())
                 onDisposeCorpseButtonClicked(mDisposeCorpseButton);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ||
-            arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             mItemView->onControllerButton(arg.button);
         }

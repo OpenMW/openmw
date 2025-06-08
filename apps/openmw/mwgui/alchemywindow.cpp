@@ -552,7 +552,8 @@ namespace MWGui
     bool AlchemyWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        bool isFilterListOpen = focus != nullptr && focus->getParent() != nullptr && focus->getParent()->getParent() == mFilterValue;
+        bool isFilterListOpen
+            = focus != nullptr && focus->getParent() != nullptr && focus->getParent()->getParent() == mFilterValue;
 
         if (isFilterListOpen)
         {

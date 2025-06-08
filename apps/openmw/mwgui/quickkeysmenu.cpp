@@ -469,8 +469,7 @@ namespace MWGui
             onQuickKeyButtonClicked(mKey[mControllerFocus].button);
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
             onOkButtonClicked(mOkButton);
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP ||
-                arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
             mControllerFocus = (mControllerFocus + 5) % 10;
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
         {

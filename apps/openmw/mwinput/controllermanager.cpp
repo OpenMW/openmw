@@ -255,9 +255,7 @@ namespace MWInput
             {
                 // When the inventory tooltip is visible, we don't actually want the A button to
                 // act like a mouse button; it should act normally.
-                if (treatAsMouse
-                        && arg.button == SDL_CONTROLLER_BUTTON_A
-                        && winMgr->getControllerTooltip())
+                if (treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A && winMgr->getControllerTooltip())
                     treatAsMouse = false;
 
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();

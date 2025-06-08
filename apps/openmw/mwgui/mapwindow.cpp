@@ -1440,14 +1440,12 @@ namespace MWGui
         {
             mNeedDoorMarkersUpdate = true;
             mLocalMap->setViewOffset(
-                MyGUI::IntPoint(
-                    mLocalMap->getViewOffset().left + dx, mLocalMap->getViewOffset().top + dy));
+                MyGUI::IntPoint(mLocalMap->getViewOffset().left + dx, mLocalMap->getViewOffset().top + dy));
         }
         else
         {
             mGlobalMap->setViewOffset(
-                MyGUI::IntPoint(
-                    mGlobalMap->getViewOffset().left + dx, mGlobalMap->getViewOffset().top + dy));
+                MyGUI::IntPoint(mGlobalMap->getViewOffset().left + dx, mGlobalMap->getViewOffset().top + dy));
         }
     }
 

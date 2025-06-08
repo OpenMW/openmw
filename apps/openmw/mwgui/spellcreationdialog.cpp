@@ -13,8 +13,8 @@
 #include <components/esm3/loadgmst.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
@@ -550,10 +550,8 @@ namespace MWGui
         if (prevFocus >= 0 && prevFocus < mButtons.size())
         {
             MyGUI::TextBox* button = mButtons[prevFocus];
-            if (button == mMagnitudeMinValue ||
-                button == mMagnitudeMaxValue ||
-                button == mDurationValue ||
-                button == mAreaValue)
+            if (button == mMagnitudeMinValue || button == mMagnitudeMaxValue || button == mDurationValue
+                || button == mAreaValue)
             {
                 button->setTextColour(textColours.normal);
             }
@@ -566,10 +564,8 @@ namespace MWGui
         if (newFocus >= 0 && newFocus < mButtons.size())
         {
             MyGUI::TextBox* button = mButtons[newFocus];
-            if (button == mMagnitudeMinValue ||
-                button == mMagnitudeMaxValue ||
-                button == mDurationValue ||
-                button == mAreaValue)
+            if (button == mMagnitudeMinValue || button == mMagnitudeMaxValue || button == mDurationValue
+                || button == mAreaValue)
             {
                 button->setTextColour(textColours.link);
             }
@@ -744,7 +740,6 @@ namespace MWGui
         mSuccessChance->setCaption(MyGUI::utility::toString(intChance));
     }
 
-
     bool SpellCreationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -760,7 +755,6 @@ namespace MWGui
         else
             return EffectEditorBase::onControllerButtonEvent(arg);
     }
-
 
     // ------------------------------------------------------------------------------------------------
 
@@ -856,7 +850,7 @@ namespace MWGui
             mEffectFocus = 0;
             mRightColumn = false;
             if (mAvailableButtons.size() > 0)
-               mAvailableButtons[0]->setStateSelected(true);
+                mAvailableButtons[0]->setStateSelected(true);
         }
     }
 

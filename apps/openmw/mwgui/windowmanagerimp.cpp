@@ -898,7 +898,8 @@ namespace MWGui
 
             int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
 
-            Log(Debug::Debug) << "Getting active controller window: mode=" << mode << ", " << state.mWindows.size() << " window(s), activeIndex=" << activeIndex;
+            Log(Debug::Debug) << "Getting active controller window: mode=" << mode << ", " << state.mWindows.size()
+                              << " window(s), activeIndex=" << activeIndex;
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -1903,7 +1904,8 @@ namespace MWGui
     {
         // If using controller menus, don't persist changes to size of the stats or magic
         // windows.
-        if (Settings::gui().mControllerMenus && (window == (MyGUI::Window*)mStatsWindow || window == (MyGUI::Window*)mSpellWindow))
+        if (Settings::gui().mControllerMenus
+            && (window == (MyGUI::Window*)mStatsWindow || window == (MyGUI::Window*)mSpellWindow))
             return;
 
         const auto it = mTrackedWindows.find(window);
@@ -2616,7 +2618,8 @@ namespace MWGui
 
         // setButtons will handle setting visibility based on if any buttons are defined.
         mControllerButtonsOverlay->setButtons(topWin->getControllerButtons());
-        if (getMode() == GM_Inventory) {
+        if (getMode() == GM_Inventory)
+        {
             mInventoryTabsOverlay->setVisible(true);
             mInventoryTabsOverlay->setTab(mActiveControllerWindows[GM_Inventory]);
         }

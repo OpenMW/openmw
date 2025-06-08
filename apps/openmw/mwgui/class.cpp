@@ -91,8 +91,8 @@ namespace MWGui
         {
             onBackClicked(mBackButton);
         }
-        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus) ||
-            (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus)
+            || (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
         {
             mOkButtonFocus = !mOkButtonFocus;
             mOkButton->setStateSelected(mOkButtonFocus);
