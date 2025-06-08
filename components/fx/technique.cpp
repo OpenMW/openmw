@@ -85,7 +85,7 @@ namespace fx
         mDescription = {};
         mVersion = {};
         mGLSLExtensions.clear();
-        mGLSLVersion = (mUBO || Stereo::getMultiview()) ? 330 : 120;
+        mGLSLVersion = 120;//(mUBO || Stereo::getMultiview()) ? 330 : 120;
         mGLSLProfile.clear();
         mDynamic = false;
     }
@@ -245,7 +245,7 @@ namespace fx
             else if (key == "author")
                 mAuthor = parseString();
             else if (key == "glsl_version")
-                mGLSLVersion = std::max(mGLSLVersion, parseInteger());
+                mGLSLVersion = 120;//std::max(mGLSLVersion, parseInteger());
             else if (key == "flags")
                 mFlags = parseFlags();
             else if (key == "hdr")
