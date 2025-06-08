@@ -162,7 +162,7 @@ namespace MWGui
             if (mBribe1000Button->getEnabled())
                 mButtons.push_back(mBribe1000Button);
 
-            for (int i = 0; i < mButtons.size(); i++)
+            for (size_t i = 0; i < mButtons.size(); i++)
                 mButtons[i]->setStateSelected(i == 0);
         }
 
@@ -604,7 +604,7 @@ namespace MWGui
     void DialogueWindow::updateTopicsPane()
     {
         const std::string focusedTopic
-            = Settings::gui().mControllerMenus && mControllerFocus < mTopicsList->getItemCount()
+            = Settings::gui().mControllerMenus && mControllerFocus < static_cast<int>(mTopicsList->getItemCount())
             ? mTopicsList->getItemNameAt(mControllerFocus)
             : "";
 
@@ -924,10 +924,10 @@ namespace MWGui
     void DialogueWindow::setControllerFocus(int index, bool focused)
     {
         // List is mTopicsList + "Goodbye" button below the list.
-        if (index < 0 || index > mTopicsList->getItemCount())
+        if (index < 0 || index > static_cast<int>(mTopicsList->getItemCount()))
             return;
 
-        if (index == mTopicsList->getItemCount())
+        if (index == static_cast<int>(mTopicsList->getItemCount()))
         {
             mGoodbyeButton->setStateSelected(focused);
         }
@@ -957,10 +957,10 @@ namespace MWGui
         {
             if (mChoices.size() > 0)
             {
-                if (mControllerChoice >= 0 && mControllerChoice < mChoices.size())
+                if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
                     onChoiceActivated(mControllerChoice + 1); // +1 because choices are indexed starting at 1
             }
-            else if (mControllerFocus == mTopicsList->getItemCount())
+            else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()))
                 onGoodbyeActivated();
             else
                 onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
@@ -975,7 +975,7 @@ namespace MWGui
             if (mChoices.size() > 0)
             {
                 // In-dialogue choice (red text)
-                mControllerChoice = std::clamp(mControllerChoice - 1, 0, (int)mChoices.size() - 1);
+                mControllerChoice = std::clamp(mControllerChoice - 1, 0, static_cast<int>(mChoices.size()) - 1);
                 mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
             }
             else
@@ -996,16 +996,16 @@ namespace MWGui
             if (mChoices.size() > 0)
             {
                 // In-dialogue choice (red text)
-                mControllerChoice = std::clamp(mControllerChoice + 1, 0, (int)mChoices.size() - 1);
+                mControllerChoice = std::clamp(mControllerChoice + 1, 0, static_cast<int>(mChoices.size()) - 1);
                 mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
             }
             else
             {
                 // Number of items is mTopicsList.length+1 because of "Goodbye" button.
                 setControllerFocus(mControllerFocus, false);
-                if (mControllerFocus >= mTopicsList->getItemCount())
+                if (mControllerFocus >= static_cast<int>(mTopicsList->getItemCount()))
                     mControllerFocus = 0;
-                else if (mControllerFocus == mTopicsList->getItemCount() - 1)
+                else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()) - 1)
                     mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
                 else if (mTopicsList->getItemNameAt(mControllerFocus + 1).length() == 0)
                     mControllerFocus += 2; // Skip separator

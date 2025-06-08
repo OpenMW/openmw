@@ -467,7 +467,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
                 onButtonClicked(mButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -490,7 +490,7 @@ namespace MWGui
         {
             if (mButtons.size() <= 1)
                 return true;
-            if (mButtons.size() == 2 && mControllerFocus == mButtons.size() - 1)
+            if (mButtons.size() == 2 && mControllerFocus == static_cast<int>(mButtons.size()) - 1)
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
@@ -992,7 +992,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < mAttributeButtons.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mAttributeButtons.size()))
                 onAttributeClicked(mAttributeButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -1094,7 +1094,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < mSkillButtons.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSkillButtons.size()))
                 onSkillClicked(mSkillButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)

@@ -32,7 +32,7 @@ namespace MWGui
         if (!MWBase::Environment::get().getWindowManager()->getJournalAllowed())
             return;
 
-        for (int i = 0; i < mTabs.size(); i++)
+        for (int i = 0; i < static_cast<int>(mTabs.size()); i++)
         {
             if (mTabs[i] == sender)
             {
@@ -45,7 +45,7 @@ namespace MWGui
 
     void InventoryTabsOverlay::setTab(int index)
     {
-        for (int i = 0; i < mTabs.size(); i++)
+        for (int i = 0; i < static_cast<int>(mTabs.size()); i++)
             mTabs[i]->setStateSelected(i == index);
     }
 }

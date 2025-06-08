@@ -396,7 +396,7 @@ namespace MWGui
         WindowBase* getActiveControllerWindow() override;
         void cycleActiveControllerWindow(bool next) override;
         void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
-        const bool getControllerTooltip() const override { return mControllerTooltip; }
+        bool getControllerTooltip() const override { return mControllerTooltip; }
         void setControllerTooltip(bool enabled) override;
         void updateControllerButtonsOverlay() override;
 

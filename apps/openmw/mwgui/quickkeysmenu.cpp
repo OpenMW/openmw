@@ -119,7 +119,7 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mControllerFocus = 0;
-            for (int i = 0; i < mKey.size(); i++)
+            for (int i = 0; i < static_cast<int>(mKey.size()); i++)
                 mKey[i].button->setControllerFocus(i == mControllerFocus);
         }
     }
@@ -490,7 +490,7 @@ namespace MWGui
                 mControllerFocus++;
         }
 
-        for (int i = 0; i < mKey.size(); i++)
+        for (int i = 0; i < static_cast<int>(mKey.size()); i++)
             mKey[i].button->setControllerFocus(i == mControllerFocus);
 
         return true;

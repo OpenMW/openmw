@@ -249,7 +249,7 @@ namespace MWGui
         if (button == SDL_CONTROLLER_BUTTON_A)
         {
             // Select the focused item, if any.
-            if (mControllerFocus >= 0 && mControllerFocus < mLines.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mLines.size()))
                 onIconClicked(mLines[mControllerFocus].mIcon);
         }
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
@@ -268,13 +268,13 @@ namespace MWGui
 
         const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
 
-        if (prevFocus >= 0 && prevFocus < mLines.size())
+        if (prevFocus >= 0 && prevFocus < static_cast<int>(mLines.size()))
         {
             mLines[prevFocus].mText->setTextColour(textColours.normal);
             mLines[prevFocus].mIcon->setControllerFocus(false);
         }
 
-        if (newFocus >= 0 && newFocus < mLines.size())
+        if (newFocus >= 0 && newFocus < static_cast<int>(mLines.size()))
         {
             mLines[newFocus].mText->setTextColour(textColours.link);
             mLines[newFocus].mIcon->setControllerFocus(true);

@@ -491,13 +491,13 @@ namespace
         void addControllerButtons(Gui::MWList* _list, int _selectedIndex)
         {
             mButtons.clear();
-            for (int i = 0; i < _list->getItemCount(); i++)
+            for (size_t i = 0; i < _list->getItemCount(); i++)
             {
                 MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
                 if (listItem)
                 {
                     listItem->setTextColour(
-                        mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
+                        static_cast<int>(mButtons.size()) == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }

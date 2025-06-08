@@ -107,11 +107,11 @@ namespace MWGui
 
         void setColour(int section, int line, int run, MyGUI::Colour colour) const override
         {
-            if (section < 0 || section >= mSections.size())
+            if (section < 0 || section >= static_cast<int>(mSections.size()))
                 return;
-            if (line < 0 || line >= mSections[section].mLines.size())
+            if (line < 0 || line >= static_cast<int>(mSections[section].mLines.size()))
                 return;
-            if (run < 0 || run >= mSections[section].mLines[line].mRuns.size())
+            if (run < 0 || run >= static_cast<int>(mSections[section].mLines[line].mRuns.size()))
                 return;
 
             mSections[section].mLines[line].mRuns[run].mStyle->mNormalColour = colour;

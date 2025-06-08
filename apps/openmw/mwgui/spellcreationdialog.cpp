@@ -390,7 +390,7 @@ namespace MWGui
     bool EditEffectDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         int prevFocus = mControllerFocus;
-        mControllerFocus = std::clamp(mControllerFocus, 0, (int)mButtons.size() - 1);
+        mControllerFocus = std::clamp(mControllerFocus, 0, static_cast<int>(mButtons.size()) - 1);
         MyGUI::TextBox* button = mButtons[mControllerFocus];
 
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -415,7 +415,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             if (mControllerFocus == 0)
-                mControllerFocus = (int)mButtons.size() - 2;
+                mControllerFocus = static_cast<int>(mButtons.size()) - 2;
             else if (button == mCancelButton && mDeleteButton->getVisible())
                 mControllerFocus -= 3;
             else if (button == mCancelButton || (button == mOkButton && mDeleteButton->getVisible()))
@@ -547,7 +547,7 @@ namespace MWGui
     {
         const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
 
-        if (prevFocus >= 0 && prevFocus < mButtons.size())
+        if (prevFocus >= 0 && prevFocus < static_cast<int>(mButtons.size()))
         {
             MyGUI::TextBox* button = mButtons[prevFocus];
             if (button == mMagnitudeMinValue || button == mMagnitudeMaxValue || button == mDurationValue
@@ -561,7 +561,7 @@ namespace MWGui
             }
         }
 
-        if (newFocus >= 0 && newFocus < mButtons.size())
+        if (newFocus >= 0 && newFocus < static_cast<int>(mButtons.size()))
         {
             MyGUI::TextBox* button = mButtons[newFocus];
             if (button == mMagnitudeMinValue || button == mMagnitudeMaxValue || button == mDurationValue
@@ -1040,12 +1040,12 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+            if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
             {
                 onAvailableEffectClicked(mAvailableButtons[mAvailableFocus]);
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
-            else if (mRightColumn && mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
+            else if (mRightColumn && mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
             {
                 onEditEffect(mEffectButtons[mEffectFocus].second);
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
@@ -1061,14 +1061,14 @@ namespace MWGui
         {
             if (mRightColumn && mEffectButtons.size() > 0)
             {
-                if (mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
+                if (mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
                     mEffectButtons[mEffectFocus].first->setStateSelected(false);
                 mEffectFocus = wrap(mEffectFocus - 1, mEffectButtons.size());
                 mEffectButtons[mEffectFocus].first->setStateSelected(true);
             }
             else if (!mRightColumn && mAvailableButtons.size() > 0)
             {
-                if (mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+                if (mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
                     mAvailableButtons[mAvailableFocus]->setStateSelected(false);
                 mAvailableFocus = wrap(mAvailableFocus - 1, mAvailableButtons.size());
                 mAvailableButtons[mAvailableFocus]->setStateSelected(true);
@@ -1078,14 +1078,14 @@ namespace MWGui
         {
             if (mRightColumn && mEffectButtons.size() > 0)
             {
-                if (mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
+                if (mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
                     mEffectButtons[mEffectFocus].first->setStateSelected(false);
                 mEffectFocus = wrap(mEffectFocus + 1, mEffectButtons.size());
                 mEffectButtons[mEffectFocus].first->setStateSelected(true);
             }
             else if (!mRightColumn && mAvailableButtons.size() > 0)
             {
-                if (mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+                if (mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
                     mAvailableButtons[mAvailableFocus]->setStateSelected(false);
                 mAvailableFocus = wrap(mAvailableFocus + 1, mAvailableButtons.size());
                 mAvailableButtons[mAvailableFocus]->setStateSelected(true);
@@ -1094,17 +1094,17 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mRightColumn)
         {
             mRightColumn = false;
-            if (mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
+            if (mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
                 mEffectButtons[mEffectFocus].first->setStateSelected(false);
-            if (mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+            if (mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
                 mAvailableButtons[mAvailableFocus]->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mRightColumn && mEffectButtons.size() > 0)
         {
             mRightColumn = true;
-            if (mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+            if (mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
                 mAvailableButtons[mAvailableFocus]->setStateSelected(false);
-            if (mEffectFocus >= 0 && mEffectFocus < mEffectButtons.size())
+            if (mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
                 mEffectButtons[mEffectFocus].first->setStateSelected(true);
         }
 
@@ -1117,7 +1117,7 @@ namespace MWGui
             mAvailableEffectsList->setViewOffset(-lineHeight * (mAvailableFocus - 5));
         }
 
-        if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < mAvailableButtons.size())
+        if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
         {
             // Warp the mouse to the selected spell to show the tooltip
             if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())

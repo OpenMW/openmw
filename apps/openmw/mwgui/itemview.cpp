@@ -61,7 +61,7 @@ namespace MWGui
             mRows = std::max(maxHeight / 42, 1);
         }
 
-        for (unsigned int i = 0; i < mItemCount; ++i)
+        for (int i = 0; i < mItemCount; ++i)
         {
             MyGUI::Widget* w = dragArea->getChildAt(i);
 

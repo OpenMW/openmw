@@ -231,7 +231,7 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mControllerFocus = 0;
-            for (int i = 0; i < mAttributeButtons.size(); i++)
+            for (size_t i = 0; i < mAttributeButtons.size(); i++)
                 setControllerFocus(mAttributeButtons, i, i == 0);
         }
 
@@ -386,7 +386,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < mAttributeButtons.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mAttributeButtons.size()))
                 onAttributeClicked(mAttributeButtons[mControllerFocus]);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
         }

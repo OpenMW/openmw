@@ -337,7 +337,7 @@ namespace MWGui
         if (button == SDL_CONTROLLER_BUTTON_A)
         {
             // Select the focused item, if any.
-            if (mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
             {
                 onSpellSelected(mButtons[mControllerFocus].first);
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
@@ -347,7 +347,7 @@ namespace MWGui
         {
             // Toggle info tooltip
             mControllerTooltip = !mControllerTooltip;
-            if (mControllerTooltip && mControllerFocus >= 0 && mControllerFocus < mButtons.size())
+            if (mControllerTooltip && mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
                 MWBase::Environment::get().getInputManager()->warpMouseToWidget(mButtons[mControllerFocus].first);
         }
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
@@ -357,7 +357,7 @@ namespace MWGui
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             mControllerFocus = std::max(0, mControllerFocus - 10);
         else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-            mControllerFocus = std::min(mControllerFocus + 10, (int)mButtons.size() - 1);
+            mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
         else if (button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
             // Jump to first item in previous group
@@ -395,14 +395,14 @@ namespace MWGui
         if (mButtons.empty())
             return;
 
-        if (prevFocus >= 0 && prevFocus < mButtons.size())
+        if (prevFocus >= 0 && prevFocus < static_cast<int>(mButtons.size()))
         {
             Gui::SharedStateButton* prev = mButtons[prevFocus].first;
             if (prev)
                 prev->onMouseLostFocus(nullptr);
         }
 
-        if (newFocus >= 0 && newFocus < mButtons.size())
+        if (newFocus >= 0 && newFocus < static_cast<int>(mButtons.size()))
         {
             Gui::SharedStateButton* focused = mButtons[newFocus].first;
             if (focused)
