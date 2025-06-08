@@ -47,7 +47,10 @@ namespace Misc
         for (size_t i = 0; i < rgb.size(); i++)
         {
             int b = static_cast<int>(rgb[i] * 255.0f);
-            auto [_, ec] = std::to_chars(result.data() + i * 2, result.data() + (i + 1) * 2, b, 16);
+            char* start = result.data() + i * 2;
+            if (b < 16)
+                start++;
+            auto [_, ec] = std::to_chars(start, result.data() + (i + 1) * 2, b, 16);
             if (ec != std::errc())
                 throw std::logic_error("Error when converting number to base 16");
         }

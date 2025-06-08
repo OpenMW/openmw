@@ -235,6 +235,7 @@
     Bug #8462: Crashes when resizing the window on macOS
     Bug #8465: Blue screen w/ antialiasing and post-processing on macOS
     Bug #8503: Camera does not handle NaN gracefully
+    Bug #8541: Lua: util.color:asHex produces wrong output for some colors
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking

@@ -16,7 +16,7 @@ namespace MWLua
 
     sol::table initCameraPackage(sol::state_view lua)
     {
-        using FiniteFloat = Misc::FiniteFloat;
+        using Misc::FiniteFloat;
 
         MWRender::Camera* camera = MWBase::Environment::get().getWorld()->getCamera();
         MWRender::RenderingManager* renderingManager = MWBase::Environment::get().getWorld()->getRenderingManager();

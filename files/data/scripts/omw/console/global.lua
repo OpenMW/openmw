@@ -29,7 +29,6 @@ local env = {
     aux_util = require('openmw_aux.util'),
     calendar = require('openmw_aux.calendar'),
     time = require('openmw_aux.time'),
-    anim = require('openmw.animation'),
     view = require('openmw_aux.util').deepToString,
     print = printToConsole,
     exit = function() player:sendEvent('OMWConsoleExit') end,
