@@ -390,7 +390,7 @@ namespace MWBase
         /// Cycle to the next window to receive controller events
         virtual void cycleActiveControllerWindow(bool next) = 0;
         virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;
-        virtual const bool getControllerTooltip() const = 0;
+        virtual bool getControllerTooltip() const = 0;
         virtual void setControllerTooltip(bool enabled) = 0;
         virtual void updateControllerButtonsOverlay() = 0;
 
