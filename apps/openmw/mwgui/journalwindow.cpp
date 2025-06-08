@@ -496,8 +496,9 @@ namespace
                 MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
                 if (listItem)
                 {
-                    listItem->setTextColour(
-                        static_cast<int>(mButtons.size()) == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
+                    listItem->setTextColour(static_cast<int>(mButtons.size()) == _selectedIndex
+                            ? MWGui::journalHeaderColour
+                            : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }
