@@ -5,45 +5,45 @@
     <name>ComponentSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Select Components</source>
-        <translation>Wybierz komponenty</translation>
+        <translation type="unfinished">Wybierz komponenty</translation>
     </message>
     <message>
         <source>Which components should be installed?</source>
-        <translation>Które komponenty powinny zostać zainstalowane?</translation>
+        <translation type="unfinished">Które komponenty powinny zostać zainstalowane?</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select which official Morrowind expansions should be installed. For best results, it is recommended to have both expansions installed.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to install expansions later by re-running this Wizard.&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wybierz, które oficjalne dodatki do Morrowinda mają zostać zainstalowane. Dla najlepszych rezultatów zaleca się instalację obu dodatków.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to install expansions later by re-running this Wizard.&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wybierz, które oficjalne dodatki do Morrowinda mają zostać zainstalowane. Dla najlepszych rezultatów zaleca się instalację obu dodatków.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to install expansions later by re-running this Wizard.&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Selected components:</source>
-        <translation>Wybrane komponenty:</translation>
+        <translation type="unfinished">Wybrane komponenty:</translation>
     </message>
 </context>
 <context>
     <name>ConclusionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Completing the OpenMW Wizard</source>
-        <translation>Zakończenie kreatora OpenMW</translation>
+        <translation type="unfinished">Zakończenie kreatora OpenMW</translation>
     </message>
     <message>
         <source>Placeholder</source>
-        <translation>Tekst zastępczy</translation>
+        <translation type="unfinished">Tekst zastępczy</translation>
     </message>
 </context>
 <context>
     <name>ExistingInstallationPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Select Existing Installation</source>
@@ -66,7 +66,7 @@
     <name>ImportPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Import Settings</source>
@@ -78,7 +78,7 @@
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW needs to import settings from the Morrowind configuration file in order to function properly.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to import settings later by re-running this Wizard.&lt;/p&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW needs to import settings from the Morrowind configuration file in order to function properly.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to import settings later by re-running this Wizard.&lt;/p&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW needs to import settings from the Morrowind configuration file in order to function properly.&lt;/p&gt;&lt;p&gt;&lt;span style=" font-weight:bold;"&gt;Note:&lt;/span&gt; It is possible to import settings later by re-running this Wizard.&lt;/p&gt;&lt;p/&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Import Settings From Morrowind.ini</source>
@@ -103,7 +103,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>InstallationPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Installing</source>
@@ -118,7 +118,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>InstallationTargetPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Select Installation Destination</source>
@@ -141,7 +141,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>IntroPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Welcome to the OpenMW Wizard</source>
@@ -156,7 +156,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>LanguageSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Select Morrowind Language</source>
@@ -175,7 +175,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>MethodSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona kreatora</translation>
+        <translation type="unfinished">Strona kreatora</translation>
     </message>
     <message>
         <source>Select Installation Method</source>
@@ -183,7 +183,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Retail CD/DVD</source>
@@ -285,7 +285,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;You are about to install Tribunal&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Bloodmoon is already installed on your computer.&lt;/p&gt;&lt;p&gt;However, it is recommended that you install Tribunal before Bloodmoon.&lt;/p&gt;&lt;p&gt;Would you like to re-install Bloodmoon?&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;You are about to install Tribunal&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Bloodmoon is already installed on your computer.&lt;/p&gt;&lt;p&gt;However, it is recommended that you install Tribunal before Bloodmoon.&lt;/p&gt;&lt;p&gt;Would you like to re-install Bloodmoon?&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;You are about to install Tribunal&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Bloodmoon is already installed on your computer.&lt;/p&gt;&lt;p&gt;However, it is recommended that you install Tribunal before Bloodmoon.&lt;/p&gt;&lt;p&gt;Would you like to re-install Bloodmoon?&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Re-install &amp;Bloodmoon</source>
@@ -296,15 +296,15 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>Wizard::ConclusionPage</name>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully installed Morrowind on your computer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully installed Morrowind on your computer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully installed Morrowind on your computer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully modified your existing Morrowind installation.&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully modified your existing Morrowind installation.&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard successfully modified your existing Morrowind installation.&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard failed to install Morrowind on your computer.&lt;/p&gt;&lt;p&gt;Please report any bugs you might have encountered to our &lt;a href="https://gitlab.com/OpenMW/openmw/issues"&gt;bug tracker&lt;/a&gt;.&lt;br/&gt;Make sure to include the installation log.&lt;/p&gt;&lt;br/&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard failed to install Morrowind on your computer.&lt;/p&gt;&lt;p&gt;Please report any bugs you might have encountered to our &lt;a href="https://gitlab.com/OpenMW/openmw/issues"&gt;bug tracker&lt;/a&gt;.&lt;br/&gt;Make sure to include the installation log.&lt;/p&gt;&lt;br/&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The OpenMW Wizard failed to install Morrowind on your computer.&lt;/p&gt;&lt;p&gt;Please report any bugs you might have encountered to our &lt;a href="https://gitlab.com/OpenMW/openmw/issues"&gt;bug tracker&lt;/a&gt;.&lt;br/&gt;Make sure to include the installation log.&lt;/p&gt;&lt;br/&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -394,7 +394,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The Wizard has encountered an error&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The error reported was:&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;Press &amp;quot;Show Details...&amp;quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The Wizard has encountered an error&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The error reported was:&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;Press &amp;quot;Show Details...&amp;quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The Wizard has encountered an error&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The error reported was:&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;Press &amp;quot;Show Details...&amp;quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 <context>
@@ -405,7 +405,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Insufficient permissions</source>
@@ -413,7 +413,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not write to the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not write to the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not write to the destination directory&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again, or specify a different location.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Destination not empty</source>
@@ -421,7 +421,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The destination directory is not empty&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An existing Morrowind installation is present in the specified location.&lt;/p&gt;&lt;p&gt;Please specify a different location, or go back and select the location as an existing installation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The destination directory is not empty&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An existing Morrowind installation is present in the specified location.&lt;/p&gt;&lt;p&gt;Please specify a different location, or go back and select the location as an existing installation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;The destination directory is not empty&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An existing Morrowind installation is present in the specified location.&lt;/p&gt;&lt;p&gt;Please specify a different location, or go back and select the location as an existing installation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Select where to install Morrowind</source>
@@ -467,7 +467,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Error opening Wizard log file</source>
@@ -475,7 +475,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Error opening OpenMW configuration file</source>
@@ -495,7 +495,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Error writing OpenMW configuration file</source>

@@ -5,7 +5,7 @@
     <name>DataFilesPage</name>
     <message>
         <source>Content Files</source>
-        <translation>Pliki zawartości</translation>
+        <translation type="unfinished">Pliki zawartości</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: content files that are not part of current Content List are &lt;span style=" font-style:italic;font-weight: bold"&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -13,47 +13,47 @@
     </message>
     <message>
         <source>Data Directories</source>
-        <translation>Katalogi danych</translation>
+        <translation type="unfinished">Katalogi danych</translation>
     </message>
     <message>
         <source>Scan directories for likely data directories and append them at the end of the list.</source>
-        <translation>Skanuj katalogi w poszukiwaniu prawdopodobnych katalogów danych i dołącz je na końcu listy.</translation>
+        <translation type="unfinished">Skanuj katalogi w poszukiwaniu prawdopodobnych katalogów danych i dołącz je na końcu listy.</translation>
     </message>
     <message>
         <source>Append</source>
-        <translation>Dołącz</translation>
+        <translation type="unfinished">Dołącz</translation>
     </message>
     <message>
         <source>Scan directories for likely data directories and insert them above the selected position</source>
-        <translation>Skanuj katalogi w poszukiwaniu prawdopodobnych katalogów danych i wstaw je powyżej wybranej pozycji</translation>
+        <translation type="unfinished">Skanuj katalogi w poszukiwaniu prawdopodobnych katalogów danych i wstaw je powyżej wybranej pozycji</translation>
     </message>
     <message>
         <source>Insert Above</source>
-        <translation>Wstaw powyżej</translation>
+        <translation type="unfinished">Wstaw powyżej</translation>
     </message>
     <message>
         <source>Move selected directory one position up</source>
-        <translation>Przenieś wybrany katalog o jedną pozycję w górę</translation>
+        <translation type="unfinished">Przenieś wybrany katalog o jedną pozycję w górę</translation>
     </message>
     <message>
         <source>Move Up</source>
-        <translation>Przenieś w górę</translation>
+        <translation type="unfinished">Przenieś w górę</translation>
     </message>
     <message>
         <source>Move selected directory one position down</source>
-        <translation>Przenieś wybrany katalog o jedną pozycję w dół</translation>
+        <translation type="unfinished">Przenieś wybrany katalog o jedną pozycję w dół</translation>
     </message>
     <message>
         <source>Move Down</source>
-        <translation>Przenieś w dół</translation>
+        <translation type="unfinished">Przenieś w dół</translation>
     </message>
     <message>
         <source>Remove selected directory</source>
-        <translation>Usuń wybrany katalog</translation>
+        <translation type="unfinished">Usuń wybrany katalog</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation>Usuń</translation>
+        <translation type="unfinished">Usuń</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Note: directories that are not part of current Content List are &lt;span style=" font-style:italic;font-weight: bold"&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1417,31 +1417,31 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Grab Cursor</source>
-        <translation>Przechwyć kursor</translation>
+        <translation type="unfinished">Przechwyć kursor</translation>
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation>Pomiń menu i wygeneruj domyślną postać</translation>
+        <translation type="unfinished">Pomiń menu i wygeneruj domyślną postać</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation>Uruchom domyślną postać w</translation>
+        <translation type="unfinished">Uruchom domyślną postać w</translation>
     </message>
     <message>
         <source>Default Cell</source>
-        <translation>Domyślna komórka</translation>
+        <translation type="unfinished">Domyślna komórka</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
-        <translation>Uruchom skrypt po uruchomieniu:</translation>
+        <translation type="unfinished">Uruchom skrypt po uruchomieniu:</translation>
     </message>
     <message>
         <source>Browse…</source>
-        <translation>Przeglądaj…</translation>
+        <translation type="unfinished">Przeglądaj…</translation>
     </message>
     <message>
         <source>Smooth Animation Transitions</source>
-        <translation>Płynne przejścia animacji</translation>
+        <translation type="unfinished">Płynne przejścia animacji</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
