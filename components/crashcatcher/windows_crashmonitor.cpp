@@ -312,12 +312,10 @@ namespace Crash
                 failedDumping(ss.str());
                 return;
             }
-            else
-            {
-                shmLock();
-                mShm->mMonitorStatus = CrashSHM::Status::DumpedSuccessfully;
-                shmUnlock();
-            }
+
+            shmLock();
+            mShm->mMonitorStatus = CrashSHM::Status::DumpedSuccessfully;
+            shmUnlock();
         }
         catch (const std::exception& e)
         {

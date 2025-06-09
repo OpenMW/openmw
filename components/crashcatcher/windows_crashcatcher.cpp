@@ -149,8 +149,13 @@ namespace Crash
 
     void CrashCatcher::waitMonitor()
     {
-        if (WaitForSingleObject(mSignalAppEvent, CrashCatcherTimeout) != WAIT_OBJECT_0)
+        if (!waitMonitorNoThrow())
             throw std::runtime_error("Waiting for monitor failed");
+    }
+
+    bool CrashCatcher::waitMonitorNoThrow()
+    {
+        return WaitForSingleObject(mSignalAppEvent, CrashCatcherTimeout) == WAIT_OBJECT_0;
     }
 
     void CrashCatcher::signalMonitor()
@@ -236,16 +241,9 @@ namespace Crash
 
         signalMonitor();
 
-        try
-        {
-            // give monitor a chance to start dumping
-            // do this in try/catch as dumping might take longer than the timeout and an exception will be thrown when
-            // we're resumed
-            waitMonitor();
-        }
-        catch (std::exception)
-        {
-        }
+        // give monitor a chance to start dumping
+        // as we're suspended, this might time out even if it's successful, so mMonitorStatus is the source of truth
+        waitMonitorNoThrow();
 
         shmLock();
         CrashSHM::Status monitorStatus = mShm->mMonitorStatus;
@@ -253,7 +251,6 @@ namespace Crash
 
         if (monitorStatus == CrashSHM::Status::DumpedSuccessfully)
         {
-
             std::string message = "OpenMW has encountered a fatal error.\nCrash dump saved to '"
                 + Misc::StringUtils::u8StringToString(getCrashDumpPath(*mShm).u8string())
                 + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
