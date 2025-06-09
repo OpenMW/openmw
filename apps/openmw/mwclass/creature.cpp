@@ -530,10 +530,11 @@ namespace MWClass
 
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         float moveSpeed;
 
-        if (getEncumbrance(ptr) > getCapacity(ptr))
+        if (normalizedEncumbrance > 1.0f)
             moveSpeed = 0.0f;
         else if (canFly(ptr)
             || (mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled()))
@@ -543,7 +544,6 @@ namespace MWClass
                     + mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->mValue.getFloat()
                 + flySpeed * (gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
-            const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;

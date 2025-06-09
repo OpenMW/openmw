@@ -990,15 +990,10 @@ namespace MWClass
         const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
-
-        bool swimming = world->isSwimming(ptr);
-        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
-        bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
-        running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
+        const bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr);
 
         float moveSpeed;
-        if (getEncumbrance(ptr) > getCapacity(ptr))
+        if (normalizedEncumbrance > 1.0f)
             moveSpeed = 0.0f;
         else if (mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled())
         {
@@ -1011,9 +1006,9 @@ namespace MWClass
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
-        else if (swimming)
+        else if (world->isSwimming(ptr))
             moveSpeed = getSwimSpeed(ptr);
-        else if (running && !sneaking)
+        else if (running && !MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr))
             moveSpeed = getRunSpeed(ptr);
         else
             moveSpeed = getWalkSpeed(ptr);
@@ -1509,14 +1504,8 @@ namespace MWClass
 
     float Npc::getSwimSpeed(const MWWorld::Ptr& ptr) const
     {
-        const MWBase::World* world = MWBase::Environment::get().getWorld();
-        const MWMechanics::NpcStats& stats = getNpcStats(ptr);
-        const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
-        const bool swimming = world->isSwimming(ptr);
-        const bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
-        const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run)
-            && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
-
-        return getSwimSpeedImpl(ptr, getGmst(), mageffects, running ? getRunSpeed(ptr) : getWalkSpeed(ptr));
+        const MWMechanics::MagicEffects& effects = getNpcStats(ptr).getMagicEffects();
+        const bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr);
+        return getSwimSpeedImpl(ptr, getGmst(), effects, running ? getRunSpeed(ptr) : getWalkSpeed(ptr));
     }
 }
