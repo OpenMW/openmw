@@ -288,7 +288,13 @@ namespace MWGui
 
             // If we have more than one button, we need to set the focus to the first one.
             if (mButtons.size() > 1)
-                mButtons[0]->setStateSelected(true);
+            {
+                mControllerFocus = 0;
+                if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+                    mControllerFocus = mDefaultFocus;
+                for (int i = 0; i < static_cast<int>(mButtons.size()); ++i)
+                    mButtons[i]->setStateSelected(i == mControllerFocus);
+            }
         }
 
         MyGUI::IntSize mainWidgetSize;
