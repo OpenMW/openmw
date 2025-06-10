@@ -331,7 +331,10 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
-            if (mTrading)
+            if (Settings::gui().mControllerMenus
+                && (mGuiMode == MWGui::GM_Companion || mGuiMode == MWGui::GM_Container))
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::giveItem);
+            else if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
@@ -409,6 +412,32 @@ namespace MWGui
 
         mItemView->update();
         notifyContentChanged();
+    }
+
+    void InventoryWindow::giveItem(MyGUI::Widget* sender, int count)
+    {
+        ensureSelectedItemUnequipped(count);
+        mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
+        notifyContentChanged();
+
+        if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
+        {
+            // Drag and drop the item on the companion's window.
+            MWGui::CompanionWindow* companionWindow = (MWGui::CompanionWindow*)MWBase::Environment::get()
+                                                          .getWindowManager()
+                                                          ->getGuiModeWindows(mGuiMode)
+                                                          .at(1);
+            mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
+        }
+        else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
+        {
+            // Drag and drop the item on the container window.
+            MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
+                                                          .getWindowManager()
+                                                          ->getGuiModeWindows(mGuiMode)
+                                                          .at(0);
+            mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
+        }
     }
 
     void InventoryWindow::updateItemView()
@@ -944,7 +973,7 @@ namespace MWGui
                 MWGui::CompanionWindow* companionWindow = (MWGui::CompanionWindow*)MWBase::Environment::get()
                                                               .getWindowManager()
                                                               ->getGuiModeWindows(mGuiMode)
-                                                              .at(0);
+                                                              .at(1);
                 mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
             }
             else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
