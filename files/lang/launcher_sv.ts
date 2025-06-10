@@ -1472,7 +1472,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Enable Controller Menus</source>
-        <translation>Aktivera kontrollmenyer</translation>
+        <translation>Aktivera handkontrollmenyer</translation>
     </message>
 </context>
 </TS>
