@@ -189,19 +189,16 @@ bool Config::GameSettings::readFile(
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
 
-            QList<SettingValue> values = cache.values(key);
-            values.append(settings.values(key));
-
-            bool exists = false;
-            for (const auto& existingValue : values)
-            {
-                if (existingValue.value == value.value)
+            auto containsValue = [&](const QMultiMap<QString, SettingValue>& map) {
+                for (auto [itr, end] = map.equal_range(key); itr != end; ++itr)
                 {
-                    exists = true;
-                    break;
+                    if (itr->value == value.value)
+                        return true;
                 }
-            }
-            if (!exists)
+                return false;
+            };
+
+            if (!containsValue(cache) && !containsValue(settings))
             {
                 cache.insert(key, value);
             }
