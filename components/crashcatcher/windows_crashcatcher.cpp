@@ -129,6 +129,8 @@ namespace Crash
         if (mShm == nullptr)
             throw std::runtime_error("Failed to map crash catcher shared memory");
 
+        mShm->mMonitorStatus = CrashSHM::Status::Uninitialised;
+
         mShmMutex = CreateMutexW(&attributes, FALSE, NULL);
         if (mShmMutex == nullptr)
             throw std::runtime_error("Failed to create crash catcher shared memory mutex");
@@ -147,8 +149,13 @@ namespace Crash
 
     void CrashCatcher::waitMonitor()
     {
-        if (WaitForSingleObject(mSignalAppEvent, CrashCatcherTimeout) != WAIT_OBJECT_0)
+        if (!waitMonitorNoThrow())
             throw std::runtime_error("Waiting for monitor failed");
+    }
+
+    bool CrashCatcher::waitMonitorNoThrow()
+    {
+        return WaitForSingleObject(mSignalAppEvent, CrashCatcherTimeout) == WAIT_OBJECT_0;
     }
 
     void CrashCatcher::signalMonitor()
@@ -234,13 +241,23 @@ namespace Crash
 
         signalMonitor();
 
-        // must remain until monitor has finished
-        waitMonitor();
+        // give monitor a chance to start dumping
+        // as we're suspended, this might time out even if it's successful, so mMonitorStatus is the source of truth
+        waitMonitorNoThrow();
 
-        std::string message = "OpenMW has encountered a fatal error.\nCrash dump saved to '"
-            + Misc::StringUtils::u8StringToString(getCrashDumpPath(*mShm).u8string())
-            + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
-        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
+        shmLock();
+        CrashSHM::Status monitorStatus = mShm->mMonitorStatus;
+        shmUnlock();
+
+        if (monitorStatus == CrashSHM::Status::DumpedSuccessfully)
+        {
+            std::string message = "OpenMW has encountered a fatal error.\nCrash dump saved to '"
+                + Misc::StringUtils::u8StringToString(getCrashDumpPath(*mShm).u8string())
+                + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
+            SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
+        }
+        else if (monitorStatus == CrashSHM::Status::Dumping)
+            SDL_ShowSimpleMessageBox(0, "Fatal Error", "Timed out while creating crash dump", nullptr);
     }
 
 } // namespace Crash
