@@ -119,8 +119,6 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
-        if (Settings::gui().mControllerMenus && mNameEdit->getCaption().length() == 0)
-            mNameEdit->setCaption("Unknown potion");
         mAlchemy->setPotionName(mNameEdit->getCaption());
         int count = mAlchemy->countPotionsToBrew();
         count = std::min(count, mBrewCountEdit->getValue());
