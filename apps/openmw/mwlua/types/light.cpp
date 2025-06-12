@@ -5,6 +5,7 @@
 #include <components/esm3/loadligh.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/color.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -62,7 +63,13 @@ namespace
         if (rec["radius"] != sol::nil)
             light.mData.mRadius = rec["radius"];
         if (rec["color"] != sol::nil)
-            light.mData.mColor = rec["color"];
+        {
+            sol::object color = rec["color"];
+            if (color.is<Misc::Color>())
+                light.mData.mColor = color.as<Misc::Color>().toRGBA();
+            else
+                light.mData.mColor = color.as<uint32_t>();
+        }
         setRecordFlag(rec, "isCarriable", ESM::Light::Carry, light);
         setRecordFlag(rec, "isDynamic", ESM::Light::Dynamic, light);
         setRecordFlag(rec, "isFire", ESM::Light::Fire, light);
@@ -104,7 +111,8 @@ namespace MWLua
         record["value"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mValue; });
         record["duration"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mTime; });
         record["radius"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mRadius; });
-        record["color"] = sol::readonly_property([](const ESM::Light& rec) -> int { return rec.mData.mColor; });
+        record["color"] = sol::readonly_property(
+            [](const ESM::Light& rec) -> Misc::Color { return Misc::Color::fromRGB(rec.mData.mColor); });
         record["isCarriable"] = sol::readonly_property(
             [](const ESM::Light& rec) -> bool { return rec.mData.mFlags & ESM::Light::Carry; });
         record["isDynamic"] = sol::readonly_property(

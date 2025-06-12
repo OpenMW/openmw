@@ -1673,7 +1673,7 @@
 -- @field #number value
 -- @field #number duration
 -- @field #number radius
--- @field #number color
+-- @field openmw.util#Color color
 -- @field #boolean isCarriable True if the light can be carried by actors and appears up in their inventory.
 -- @field #boolean isDynamic If true, the light will apply to actors and other moving objects
 -- @field #boolean isFire True if the light acts like a fire.
