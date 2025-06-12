@@ -113,7 +113,9 @@ namespace MWGui
                 curType = spell.mType;
             }
 
-            const std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            if (Settings::gui().mControllerMenus)
+                skin = spell.mActive ? "SpellTextEquippedController" : "SpellTextUnequippedController";
             const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
 
             Gui::SharedStateButton* t = mScrollView->createWidget<Gui::SharedStateButton>(
