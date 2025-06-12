@@ -252,7 +252,7 @@ namespace ESSImport
                 for (size_t i = 0; i < invState.mItems.size(); ++i)
                 {
                     // FIXME: in case of conflict (multiple items with this refID) use the already equipped one?
-                    if (invState.mItems[i].mRef.mRefID == ESM::RefId::stringRefId(refr.mActorData.mSelectedEnchantItem))
+                    if (invState.mItems[i].mRef.mRefID == refr.mActorData.mSelectedEnchantItem)
                         invState.mSelectedEnchantItem = i;
                 }
             }
@@ -260,12 +260,12 @@ namespace ESSImport
         void write(ESM::ESMWriter& esm) override
         {
             esm.startRecord(ESM::REC_ASPL);
-            esm.writeHNString("ID__", mSelectedSpell);
+            esm.writeHNRefId("ID__", mSelectedSpell);
             esm.endRecord(ESM::REC_ASPL);
         }
 
     private:
-        std::string mSelectedSpell;
+        ESM::RefId mSelectedSpell;
     };
 
     class ConvertPCDT : public Converter
@@ -374,16 +374,16 @@ namespace ESSImport
         void write(ESM::ESMWriter& esm) override
         {
             esm.startRecord(ESM::REC_DCOU);
-            for (auto it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
+            for (const auto& [id, count] : mKillCounter)
             {
-                esm.writeHNString("ID__", it->first);
-                esm.writeHNT("COUN", it->second);
+                esm.writeHNRefId("ID__", id);
+                esm.writeHNT("COUN", count);
             }
             esm.endRecord(ESM::REC_DCOU);
         }
 
     private:
-        std::map<std::string, int> mKillCounter;
+        std::map<ESM::RefId, int> mKillCounter;
     };
 
     class ConvertFACT : public Converter

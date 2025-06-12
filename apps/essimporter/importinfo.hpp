@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <components/esm/refid.hpp>
+
 namespace ESM
 {
     class ESMReader;
@@ -13,7 +15,7 @@ namespace ESSImport
 
     struct INFO
     {
-        std::string mInfo;
+        ESM::RefId mInfo;
         std::string mActorRefId;
 
         void load(ESM::ESMReader& esm);
