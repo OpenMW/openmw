@@ -237,6 +237,7 @@ namespace LuaUtil
         colorType["asRgba"] = [](const Misc::Color& c) { return Vec4(c.r(), c.g(), c.b(), c.a()); };
         colorType["asRgb"] = [](const Misc::Color& c) { return Vec3(c.r(), c.g(), c.b()); };
         colorType["asHex"] = [](const Misc::Color& c) { return c.toHex(); };
+        colorType[sol::meta_function::equal_to] = [](const Misc::Color& a, const Misc::Color& b) { return a == b; };
 
         sol::table color(lua, sol::create);
         color["rgba"] = [](float r, float g, float b, float a) { return Misc::Color(r, g, b, a); };
