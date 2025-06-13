@@ -163,6 +163,7 @@ namespace Crash
 
     void CrashMonitor::run()
     {
+        mShm->mMonitorStatus = CrashSHM::Status::Monitoring;
         try
         {
             // app waits for monitor start up, let it continue
@@ -231,6 +232,18 @@ namespace Crash
 
     void CrashMonitor::handleCrash(bool isFreeze)
     {
+        shmLock();
+        mShm->mMonitorStatus = CrashSHM::Status::Dumping;
+        shmUnlock();
+
+        auto failedDumping = [this](const std::string& message) {
+            Log(Debug::Error) << "CrashMonitor: " << message;
+            shmLock();
+            mShm->mMonitorStatus = CrashSHM::Status::FailedDumping;
+            shmUnlock();
+            SDL_ShowSimpleMessageBox(0, "Failed to create crash dump", message.c_str(), nullptr);
+        };
+
         DWORD processId = GetProcessId(mAppProcessHandle);
         const char* env = getenv("OPENMW_FULL_MEMDUMP");
 
@@ -238,7 +251,10 @@ namespace Crash
         {
             HMODULE dbghelp = LoadLibraryA("dbghelp.dll");
             if (dbghelp == NULL)
+            {
+                failedDumping("Could not load dbghelp.dll");
                 return;
+            }
 
             using MiniDumpWirteDumpFn = BOOL(WINAPI*)(HANDLE hProcess, DWORD ProcessId, HANDLE hFile,
                 MINIDUMP_TYPE DumpType, PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
@@ -246,11 +262,17 @@ namespace Crash
 
             MiniDumpWirteDumpFn miniDumpWriteDump = (MiniDumpWirteDumpFn)GetProcAddress(dbghelp, "MiniDumpWriteDump");
             if (miniDumpWriteDump == NULL)
+            {
+                failedDumping("Could not get MiniDumpWriteDump address");
                 return;
+            }
 
             std::wstring utf16Path = (isFreeze ? getFreezeDumpPath(*mShm) : getCrashDumpPath(*mShm)).native();
             if (utf16Path.empty())
+            {
+                failedDumping("Empty dump path");
                 return;
+            }
 
             if (utf16Path.length() > MAX_PATH)
                 utf16Path = LR"(\\?\)" + utf16Path;
@@ -258,9 +280,17 @@ namespace Crash
             HANDLE hCrashLog = CreateFileW(utf16Path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
                 FILE_ATTRIBUTE_NORMAL, nullptr);
             if (hCrashLog == NULL || hCrashLog == INVALID_HANDLE_VALUE)
+            {
+                failedDumping("Bad dump file handle");
                 return;
+            }
             if (auto err = GetLastError(); err != ERROR_ALREADY_EXISTS && err != 0)
+            {
+                std::stringstream ss;
+                ss << "Error opening dump file: " << std::hex << err;
+                failedDumping(ss.str());
                 return;
+            }
 
             EXCEPTION_POINTERS exp;
             exp.ContextRecord = &mShm->mCrashed.mContext;
@@ -274,15 +304,26 @@ namespace Crash
             if (env)
                 type = static_cast<MINIDUMP_TYPE>(type | MiniDumpWithFullMemory);
 
-            miniDumpWriteDump(mAppProcessHandle, processId, hCrashLog, type, &infos, 0, 0);
+            if (!miniDumpWriteDump(mAppProcessHandle, processId, hCrashLog, type, &infos, 0, 0))
+            {
+                auto err = GetLastError();
+                std::stringstream ss;
+                ss << "Error while writing dump: " << std::hex << err;
+                failedDumping(ss.str());
+                return;
+            }
+
+            shmLock();
+            mShm->mMonitorStatus = CrashSHM::Status::DumpedSuccessfully;
+            shmUnlock();
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Error) << "CrashMonitor: " << e.what();
+            failedDumping(e.what());
         }
         catch (...)
         {
-            Log(Debug::Error) << "CrashMonitor: unknown exception";
+            failedDumping("Unknown exception");
         }
     }
 

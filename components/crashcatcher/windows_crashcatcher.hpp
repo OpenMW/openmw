@@ -66,6 +66,7 @@ namespace Crash
             const std::filesystem::path& freezeDumpName);
 
         void waitMonitor();
+        bool waitMonitorNoThrow();
 
         void signalMonitor();
 
