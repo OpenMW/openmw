@@ -245,7 +245,7 @@ namespace MWGui
 
         mCharacterSelection->setIndexSelected(selectedIndex);
         if (selectedIndex == MyGUI::ITEM_NONE)
-            mCharacterSelection->setCaptionWithReplacing("#{OMWEngine:SelectCharacter}");
+            mCharacterSelection->setCaptionWithReplacing("#{OMWEngine:SelectCharacter}...");
 
         fillSaveList();
     }
@@ -524,7 +524,7 @@ namespace MWGui
 
     ControllerButtonStr* SaveGameDialog::getControllerButtons()
     {
-        mControllerButtons.y = mSaving ? "" : "Select Character";
+        mControllerButtons.y = mSaving ? "" : "#{OMWEngine:SelectCharacter}";
         return &mControllerButtons;
     }
 

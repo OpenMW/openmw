@@ -923,7 +923,7 @@ namespace MWGui
         {
             case MWGui::GM_Companion:
             case MWGui::GM_Container:
-                mControllerButtons.a = "Put";
+                mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{sClose}";
                 mControllerButtons.x = "#{sTakeAll}";
                 mControllerButtons.y = "";

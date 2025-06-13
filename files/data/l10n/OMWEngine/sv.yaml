@@ -59,7 +59,7 @@ MissingContentFilesListCopy: |-
     other{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
   } 
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
-SelectCharacter: "Välj spelfigur..."
+SelectCharacter: "Välj spelfigur"
 
 
 # Settings menu
@@ -213,3 +213,13 @@ WindowModeHint: "Notera: Helskärm i fönsterläge\nanvänder alltid skärmens n
 WindowModeWindowed: "Fönster"
 WindowModeWindowedFullscreen: "Helskärm i fönsterläge"
 WobblyShores: "Vaggande stränder"
+
+
+# Controller button names
+
+EnchantType: "Typ"
+InventorySelect: "Sätta"
+JournalQuests: "Uppdrag"
+JournalShowAll: "Visa Alla"
+RechargeSelect: "Ladda"
+RepairTool: "Verktyg"

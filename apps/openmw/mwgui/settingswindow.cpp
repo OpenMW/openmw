@@ -462,8 +462,7 @@ namespace MWGui
 
         mControllerButtons.a = "#{sSelect}";
         mControllerButtons.b = "#{sOk}";
-        mControllerButtons.l1 = "#{sPrev} Tab";
-        mControllerButtons.r1 = "#{sNext} Tab";
+        mControllerButtons.lStick = "#{sMouse}";
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)

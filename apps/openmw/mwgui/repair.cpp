@@ -42,7 +42,7 @@ namespace MWGui
 
         mControllerButtons.a = "#{sRepair}";
         mControllerButtons.b = "#{sCancel}";
-        mControllerButtons.y = "Tool";
+        mControllerButtons.y = "#{OMWEngine:RepairTool}";
     }
 
     void Repair::onOpen()

@@ -219,7 +219,7 @@ namespace
             }
 
             mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.x = "Quests";
+            mControllerButtons.x = "#{OMWEngine:JournalQuests}";
             mControllerButtons.y = "#{sTopics}";
 
             mQuestMode = false;
@@ -692,7 +692,7 @@ namespace
             mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{sClose}";
             mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
             mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
-            mControllerButtons.r3 = mOptionsMode && mQuestMode ? "Show All" : "";
+            mControllerButtons.r3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
             return &mControllerButtons;
         }
 

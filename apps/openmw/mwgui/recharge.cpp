@@ -40,7 +40,7 @@ namespace MWGui
 
         mGemIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onSelectItem);
 
-        mControllerButtons.a = "Recharge";
+        mControllerButtons.a = "#{OMWEngine:RechargeSelect}";
         mControllerButtons.b = "#{sCancel}";
         mControllerButtons.y = "#{sSoulGem}";
     }
