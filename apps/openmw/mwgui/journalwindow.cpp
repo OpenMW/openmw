@@ -826,6 +826,18 @@ namespace
                     mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
                     mSelectedQuest = MWGui::wrap(mSelectedQuest - 1, mButtons.size());
                     mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
+
+                    // Scroll the list to keep the active item in view
+                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
+                    if (mSelectedQuest <= 3)
+                        list->setViewOffset(0);
+                    else
+                    {
+                        int offset = 0;
+                        for (int i = 0; i < mSelectedQuest - 3; i++)
+                            offset += mButtons[i]->getHeight() + 3;
+                        list->setViewOffset(-offset);
+                    }
                 }
                 else if (mOptionsMode)
                 {
@@ -868,6 +880,18 @@ namespace
                     mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
                     mSelectedQuest = MWGui::wrap(mSelectedQuest + 1, mButtons.size());
                     mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
+
+                    // Scroll the list to keep the active item in view
+                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
+                    if (mSelectedQuest <= 3)
+                        list->setViewOffset(0);
+                    else
+                    {
+                        int offset = 0;
+                        for (int i = 0; i < mSelectedQuest - 3; i++)
+                            offset += mButtons[i]->getHeight() + 3;
+                        list->setViewOffset(-offset);
+                    }
                 }
                 else if (mOptionsMode)
                 {
