@@ -218,7 +218,7 @@ WobblyShores: "Vaggande stränder"
 # Controller button names
 
 EnchantType: "Typ"
-InventorySelect: "Sätta"
+InventorySelect: "Placera"
 JournalQuests: "Uppdrag"
 JournalShowAll: "Visa Alla"
 RechargeSelect: "Ladda"
