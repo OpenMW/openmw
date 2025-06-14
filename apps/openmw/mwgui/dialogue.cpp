@@ -944,10 +944,21 @@ namespace MWGui
         if (focused)
         {
             // Scroll the side bar to keep the active item in view
-            if (index <= 5)
+            if (index <= 8)
                 mTopicsList->setViewOffset(0);
             else
-                mTopicsList->setViewOffset(-20 * (index - 5));
+            {
+                int offset = 0;
+                for (int i = 0; i < index - 8; i++)
+                {
+                    std::string keyword = mTopicsList->getItemNameAt(i);
+                    if (keyword.length() == 0)
+                        offset += 21;
+                    else
+                        offset += mTopicsList->getItemWidget(keyword)->getHeight() + 3;
+                }
+                mTopicsList->setViewOffset(-offset);
+            }
         }
     }
 
@@ -966,7 +977,7 @@ namespace MWGui
                 onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.size() < 2)
         {
             onGoodbyeActivated();
         }
