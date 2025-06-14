@@ -11,8 +11,8 @@ brew install curl xquartz gd fontconfig freetype harfbuzz brotli s3cmd
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
-command -v qmake >/dev/null 2>&1 || brew install qt@5
-export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+command -v qmake >/dev/null 2>&1 || brew install qt@6
+export PATH="/opt/homebrew/opt/qt@6/bin:$PATH"
 
 # Install deps
 brew install openal-soft icu4c yaml-cpp sqlite
