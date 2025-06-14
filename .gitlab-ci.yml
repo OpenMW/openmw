@@ -534,6 +534,17 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
       - build/OpenMW-*.dmg
 
+macOS14_Xcode15_x86-64:
+  extends: .MacOS
+  image: macos-14-xcode-15
+  tags:
+    - saas-macos-medium-m1
+  cache:
+    key: macOS14_Xcode15_x86-64.v1
+  variables:
+    CCACHE_SIZE: 3G
+    MACOS_X86_64: true
+
 macOS14_Xcode15_arm64:
   extends: .MacOS
   image: macos-14-xcode-15
