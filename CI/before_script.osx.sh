@@ -29,6 +29,12 @@ declare -a CMAKE_CONF_OPTS=(
 -D OPENMW_OSX_DEPLOYMENT=TRUE
 )
 
+if [[ "${MACOS_X86_64}" ]]; then
+    CMAKE_CONF_OPTS+=(
+        -D CMAKE_OSX_ARCHITECTURES="x86_64"
+    )
+fi
+
 if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     CMAKE_CONF_OPTS+=(
         -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}

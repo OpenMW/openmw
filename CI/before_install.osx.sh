@@ -20,7 +20,7 @@ ccache --version
 cmake --version
 qmake --version
 
-if [[ "${MACOS_AMD64}" ]]; then
+if [[ "${MACOS_X86_64}" ]]; then
     curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20240802.zip -o ~/openmw-deps.zip
     unzip -o ~/openmw-deps.zip -d /tmp > /dev/null
 else
