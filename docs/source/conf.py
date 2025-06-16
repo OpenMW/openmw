@@ -98,7 +98,7 @@ rst_prolog = f"""
 .. |ppApiRevision| replace:: {ppApiRevision}
 .. |bdg-ctx-menu| replace:: :bdg-warning:`menu`
 .. |bdg-ctx-global| replace:: :bdg-danger:`global`
-.. |bdg-ctx-player| replace:: :bdg-secondary:`local:player`
+.. |bdg-ctx-player| replace:: :bdg-secondary:`player`
 .. |bdg-ctx-local| replace:: :bdg-info:`local`
 .. |bdg-ctx-all| replace:: :bdg-danger:`global` :bdg-warning:`menu` :bdg-info:`local`
 """
