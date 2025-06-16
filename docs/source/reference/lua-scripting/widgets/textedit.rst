@@ -1,6 +1,8 @@
 TextEdit Widget
 ===============
 
+Accepts text input from the user.
+
 Properties
 ----------
 

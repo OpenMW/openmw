@@ -1,7 +1,8 @@
 ---
--- `openmw.animation` defines functions that allow control of character animations.
+-- Defines functions that allow control of character animations.
 -- Note that for some methods, such as @{openmw.animation#playBlended} you should use the associated methods on the 
 -- [AnimationController](interface_animation.html) interface rather than invoking this API directly.
+-- @context local
 -- @module animation
 -- @usage local anim = require('openmw.animation')
 

@@ -1,5 +1,5 @@
-OpenMW Modding Reference
-########################
+Modding Reference
+#################
 
 The following document is the complete reference guide to modifying, or
 modding, your OpenMW setup. It does not cover content creation itself,

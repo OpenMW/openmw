@@ -1,5 +1,5 @@
-Built-in events
-===============
+Events
+======
 
 .. include:: version.rst
 

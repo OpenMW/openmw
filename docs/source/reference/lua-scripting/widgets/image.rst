@@ -1,6 +1,8 @@
 Image Widget
 ============
 
+Renders a texture.
+
 Properties
 ----------
 

@@ -1,6 +1,6 @@
 ---
--- `openmw.postprocessing` is an interface to postprocessing shaders.
--- Can be used only by local scripts, that are attached to a player.
+-- Provides an interface to postprocessing shaders.
+-- @context player
 -- @module postprocessing
 -- @usage local postprocessing = require('openmw.postprocessing')
 

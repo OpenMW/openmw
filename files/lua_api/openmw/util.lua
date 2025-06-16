@@ -1,5 +1,6 @@
 ---
--- `openmw.util` defines utility functions and classes like 3D vectors, that don't depend on the game world.
+-- Defines utility functions and classes like 3D vectors, that don't depend on the game world.
+-- @context global|menu|local|player
 -- @module util
 -- @usage local util = require('openmw.util')
 

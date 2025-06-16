@@ -1,6 +1,6 @@
-######################
-OpenMW Post Processing
-######################
+###############
+Post Processing
+###############
 
 .. toctree::
     :caption: Table of Contents

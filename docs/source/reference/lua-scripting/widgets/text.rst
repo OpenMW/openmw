@@ -1,6 +1,8 @@
 Text Widget
 ===========
 
+Displays text.
+
 Properties
 ----------
 

@@ -1,6 +1,6 @@
-######################
-OpenMW Texture Modding
-######################
+###############
+Texture Modding
+###############
 
 Although texture modding requires external tools not supported by the OpenMW team,
 adding and modifying textures is an important part of content creation.

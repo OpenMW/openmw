@@ -1,6 +1,6 @@
-####################
-OpenMW Lua scripting
-####################
+#############
+Lua scripting
+#############
 
 .. note::
     OpenMW Lua is not compatible with MWSE.
