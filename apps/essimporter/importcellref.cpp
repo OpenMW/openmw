@@ -107,12 +107,12 @@ namespace ESSImport
 
         if (esm.isNextSub("WNAM"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId spellRefId = esm.getRefId();
 
             if (esm.isNextSub("XNAM"))
-                mActorData.mSelectedEnchantItem = esm.getHString();
+                mActorData.mSelectedEnchantItem = esm.getRefId();
             else
-                mActorData.mSelectedSpell = std::move(id);
+                mActorData.mSelectedSpell = std::move(spellRefId);
 
             if (esm.isNextSub("YNAM"))
                 esm.skipHSub(); // 4 byte, 0

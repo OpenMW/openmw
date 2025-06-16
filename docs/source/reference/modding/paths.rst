@@ -75,6 +75,7 @@ Configuration sources
 
 Configuration for OpenMW is composed from several sources.
 From lowest to highest priority, these are:
+
 * The local or global ``openmw.cfg``.
 * Any ``openmw.cfg`` files in any other directories specified with the ``config`` option.
 * Options specified on the command line.

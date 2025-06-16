@@ -3,7 +3,8 @@
 
 #include <cstdint>
 #include <map>
-#include <string>
+
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -18,8 +19,7 @@ namespace ESSImport
     {
         void load(ESM::ESMReader& esm);
 
-        /// RefId, kill count
-        std::map<std::string, int32_t> mKillCounter;
+        std::map<ESM::RefId, int32_t> mKillCounter;
 
         int32_t mWerewolfKills;
     };

@@ -75,8 +75,8 @@ namespace ESSImport
         // to change them ingame
         int mCombatStats[3][2];
 
-        std::string mSelectedSpell;
-        std::string mSelectedEnchantItem;
+        ESM::RefId mSelectedSpell;
+        ESM::RefId mSelectedEnchantItem;
 
         SCRI mSCRI;
 

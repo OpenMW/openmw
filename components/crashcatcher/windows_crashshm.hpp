@@ -22,6 +22,17 @@ namespace Crash
 
         Event mEvent;
 
+        enum class Status
+        {
+            Uninitialised,
+            Monitoring,
+            Dumping,
+            DumpedSuccessfully,
+            FailedDumping
+        };
+
+        Status mMonitorStatus;
+
         struct Startup
         {
             HANDLE mAppProcessHandle;

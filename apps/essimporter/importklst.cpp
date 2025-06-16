@@ -9,7 +9,7 @@ namespace ESSImport
     {
         while (esm.isNextSub("KNAM"))
         {
-            std::string refId = esm.getHString();
+            ESM::RefId refId = esm.getRefId();
             int32_t count;
             esm.getHNT(count, "CNAM");
             mKillCounter[refId] = count;
