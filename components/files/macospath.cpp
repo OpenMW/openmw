@@ -64,11 +64,6 @@ namespace Files
     MacOsPath::MacOsPath(const std::string& application_name)
         : mName(application_name)
     {
-        std::filesystem::path binary_path = getBinaryPath();
-        std::error_code ec;
-        std::filesystem::current_path(binary_path.parent_path(), ec);
-        if (ec.value() != 0)
-            Log(Debug::Warning) << "Error " << ec.message() << " when changing current directory";
     }
 
     std::filesystem::path MacOsPath::getUserConfigPath() const

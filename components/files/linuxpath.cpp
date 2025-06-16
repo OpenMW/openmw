@@ -51,14 +51,6 @@ namespace Files
     LinuxPath::LinuxPath(const std::string& application_name)
         : mName(application_name)
     {
-        std::error_code ec;
-        current_path(getLocalPath(), ec);
-        const auto err = ec.value();
-        if (err != 0)
-        {
-            Log(Debug::Warning) << "Error " << err << " " << std::generic_category().message(errno)
-                                << " when changing current directory";
-        }
     }
 
     std::filesystem::path LinuxPath::getUserConfigPath() const
