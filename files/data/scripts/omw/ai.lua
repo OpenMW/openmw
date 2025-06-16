@@ -58,6 +58,7 @@ return {
     interfaceName = 'AI',
     --- Basic AI interface
     -- @module AI
+    -- @context local
     -- @usage require('openmw.interfaces').AI
     interface = {
         --- Interface version

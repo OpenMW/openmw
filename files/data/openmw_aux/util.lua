@@ -2,6 +2,7 @@
 -- `openmw_aux.util` defines utility functions that are implemented in Lua rather than in C++.
 -- Implementation can be found in `resources/vfs/openmw_aux/util.lua`.
 -- @module util
+-- @context global|menu|local
 -- @usage local aux_util = require('openmw_aux.util')
 
 local aux_util = {}

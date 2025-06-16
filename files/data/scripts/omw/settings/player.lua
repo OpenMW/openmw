@@ -40,6 +40,7 @@ return {
     interfaceName = 'Settings',
     ---
     -- @module Settings
+    -- @context global|menu|player
     -- @usage
     -- -- In a player script
     -- local storage = require('openmw.storage')
