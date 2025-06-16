@@ -17,15 +17,19 @@
     padding: 0px;
 }
 
-
-/* EXAMPLE: this should serve as a template on how to conditonally apply styles for dark themes
-body[data-theme="dark"] #luadoc pre.example {
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) #luadoc pre.example,
+  body:not([data-theme="light"]) #luadoc pre.example code {
+    background-color: #2a3a49;
+    color: #ffffff;
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-    body:not([data-theme="light"]) #luadoc pre.example {
-    }
-} */
+body[data-theme="dark"] #luadoc pre.example,
+body[data-theme="dark"] #luadoc pre.example code {
+  background-color: #2a3a49;
+  color: #ffffff;
+}
 
 #luadoc a:not(:link) {
     font-weight: bold;
