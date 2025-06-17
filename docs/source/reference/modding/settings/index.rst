@@ -50,28 +50,28 @@ The ranges included with each setting are the physically possible ranges, not re
 	:hidden:
 	:maxdepth: 2
 
-	camera
-	cells
-	fog
-	groundcover
-	map
-	GUI
-	HUD
-	game
-	general
-	lua
-	shaders
-	shadows
-	input
-	saves
-	sound
-	terrain
-	video
-	water
-	windows
-	navigator
-	physics
-	models
-	postprocessing
-	stereo
-	stereoview
+	Camera <camera>
+	Cells <cells>
+	Fog <fog>
+	Groundcover <groundcover>
+	Map <map>
+	GUI <GUI>
+	HUD <HUD>
+	Game <game>
+	General <general>
+	Lua <lua>
+	Shaders <shaders>
+	Shadows <shadows>
+	Input <input>
+	Saves <saves>
+	Sound <sound>
+	Terrain <terrain>
+	Video <video>
+	Water <water>
+	Windows <windows>
+	Navigator <navigator>
+	Physics <physics>
+	Models <models>
+	Postprocessing <postprocessing>
+	Stereo <stereo>
+	Stereoview <stereoview>

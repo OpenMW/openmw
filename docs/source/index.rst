@@ -1,18 +1,20 @@
 Welcome to OpenMW's Documentation!
 ==================================
 
+This documentation covers all aspects of OpenMW development, scripting, and content creation.
+Use the categorized sections below to quickly access technical references, modding tools, and installation guides.
+
 .. toctree::
 	:caption: Reference
-	:hidden:
+   	:titlesonly:
 	:maxdepth: 4
 
 	reference/modding/index
 	reference/postprocessing/index
-	reference/documentationHowTo
 
 .. toctree::
 	:caption: Lua
-	:hidden:
+	:titlesonly:
 	:maxdepth: 4
 
 	reference/lua-scripting/overview
@@ -21,7 +23,7 @@ Welcome to OpenMW's Documentation!
 
 .. toctree::
 	:caption: Help
-	:hidden:
+	:titlesonly:
 	:maxdepth: 4
 
 	manuals/installation/index

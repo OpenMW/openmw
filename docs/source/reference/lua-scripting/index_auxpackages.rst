@@ -7,10 +7,10 @@ Auxiliary Packages
 .. toctree::
     :hidden:
 
-    aux_calendar <openmw_aux_calendar>
-    aux_time <openmw_aux_time>
-    aux_ui <openmw_aux_ui>
-    aux_util <openmw_aux_util>
+    calendar <openmw_aux_calendar>
+    time <openmw_aux_time>
+    ui <openmw_aux_ui>
+    util <openmw_aux_util>
 
 
 **Auxiliary packages**

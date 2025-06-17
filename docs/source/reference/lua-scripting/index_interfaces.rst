@@ -16,7 +16,7 @@ Interfaces
     ItemUsage <interface_item_usage>
     MWUI <interface_mwui>
     Settings <interface_settings>
-    Skill_progression <interface_skill_progression>
+    SkillProgression <interface_skill_progression>
     UI <interface_ui>
     Crimes <interface_crimes>
 

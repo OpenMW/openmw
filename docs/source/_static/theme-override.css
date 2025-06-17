@@ -1,11 +1,9 @@
-#content a.sd-badge:not(.toc-backref)  {
+#content a.sd-badge:not(.toc-backref), #content table a:not(.toc-backref)  {
     text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-    .dark\:invert {
-        --tw-invert: none;
-    }
+.dark\:invert {
+    --tw-invert: none !important;
 }
 
 code {
@@ -18,4 +16,8 @@ code {
 
 .md-content {
     margin-left: 500px; /* match the new sidebar width */
+}
+
+#searchbox kbd {
+    display: none !important;
 }

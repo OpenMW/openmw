@@ -16,6 +16,7 @@ Below is a quick overview of supported formats, followed by separate articles wi
 
 .. toctree::
 	:caption: Table of Contents
+	:hidden:
 	:maxdepth: 1
 
 	pipeline-blender-collada-static-models

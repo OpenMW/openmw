@@ -17,14 +17,11 @@
     padding: 0px;
 }
 
-@media (prefers-color-scheme: dark) {
-  #luadoc pre.example,
-  #luadoc pre.example code {
-    background-color: hsl(var(--muted));
-    color: #ffffff;
-  }
+html.dark #luadoc pre.example,
+html.dark #luadoc pre.example code {
+  background-color: hsl(var(--muted));
+  color: #ffffff;
 }
-
 #luadoc > p:nth-child(1) {
   margin: 12px 0 12px 0;
 }

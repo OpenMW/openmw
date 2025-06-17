@@ -1,5 +1,3 @@
-autosectionlabel_prefix_document = True
-
 ######################
 Texture Modding Basics
 ######################
