@@ -1,23 +1,24 @@
+/* Hide text underline in tables since the underlines clash with table lines */
 #content a.sd-badge:not(.toc-backref), #content table a:not(.toc-backref)  {
     text-decoration: none;
 }
 
+/* Disables the saturation filter on project icon in dark mode */
 .dark\:invert {
     --tw-invert: none !important;
 }
 
+/* Disable no-wrap set on some code blocks, causing x-overflow issues in right bar */
 code {
     white-space: normal;
 }
 
-.md-sidebar--primary {
-    width: 500px; /* default is 240px */
-}
-
-.md-content {
-    margin-left: 500px; /* match the new sidebar width */
-}
-
+/* Hide the keybind shortcut for search, we haven't linked this to sphinx search addon yet */
 #searchbox kbd {
     display: none !important;
+}
+
+/* Table headers are bolded in dark mode, do it in light mode too */
+table th {
+    font-weight: 600 !important;
 }
