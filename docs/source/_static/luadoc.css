@@ -33,6 +33,11 @@ html.dark #luadoc pre.example code {
     cursor: inherit;
 }
 
+#luadoc em {
+  font-size: 13px;
+  font-style: normal;
+}
+
 #luadoc p em { font-family: 'monospace';}
 
 #luadoc a:link { font-weight: bold; color: var(--color-link);; text-decoration: none; }
