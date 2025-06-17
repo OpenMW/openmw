@@ -22,3 +22,15 @@ code {
 table th {
     font-weight: 600 !important;
 }
+
+/* Highlight non-header rows on hover */
+tbody tr:hover {
+    background-color: hsl(var(--muted));
+}
+
+/* Increase maximum width for docs, default is quite narrow at 1400px max */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 2000px !important;
+    }
+}
