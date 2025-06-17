@@ -18,17 +18,15 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  body:not([data-theme="light"]) #luadoc pre.example,
-  body:not([data-theme="light"]) #luadoc pre.example code {
-    background-color: #2a3a49;
+  #luadoc pre.example,
+  #luadoc pre.example code {
+    background-color: hsl(var(--muted));
     color: #ffffff;
   }
 }
 
-body[data-theme="dark"] #luadoc pre.example,
-body[data-theme="dark"] #luadoc pre.example code {
-  background-color: #2a3a49;
-  color: #ffffff;
+#luadoc > p:nth-child(1) {
+  margin: 12px 0 12px 0;
 }
 
 #luadoc a:not(:link) {
@@ -46,8 +44,14 @@ body[data-theme="dark"] #luadoc pre.example code {
 
 .context-wrapper {
     display: flex;
+    margin-top: 14px;
     gap: 4px;
 }
+
+#luadoc ul { list-style-type: disc; }
+
+#luadoc ul { list-style-type: disc; }
+#luadoc li {list-style: bullet;}
 
 table.docutils {
     width: 100%;

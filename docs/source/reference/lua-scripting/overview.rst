@@ -1,5 +1,5 @@
-Overview of Lua scripting
-#########################
+Overview
+########
 
 .. include:: version.rst
 
@@ -641,7 +641,7 @@ Using IDE for Lua scripting
 Find the directory ``resources/lua_api`` in your installation of OpenMW.
 It describes OpenMW LuaAPI in
 `LDT Documentation Language <https://wiki.eclipse.org/LDT/User_Area/Documentation_Language>`__.
-It is the source from which the :ref:`API reference <Lua API reference>` is generated.
+It is the source from which the :ref:`API reference <API Reference>` is generated.
 
 If you write scripts using `Lua Development Tools <https://www.eclipse.org/ldt/>`__ (eclipse-based IDE),
 you can import these files to get code autocompletion and integrated OpenMW API reference. Here are the steps:

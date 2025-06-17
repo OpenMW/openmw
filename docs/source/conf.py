@@ -136,7 +136,7 @@ exclude_patterns = []
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'github-dark'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -158,7 +158,8 @@ html_theme = 'sphinxawesome_theme'
 html_theme_options = asdict(ThemeOptions(
    show_breadcrumbs=False,
    main_nav_links= {
-        "Lua API": "reference/lua-scripting/index",
+        "Modding": "reference/modding/index",
+        "Lua API": "reference/lua-scripting/overview",
         "Postprocessing": "reference/postprocessing/index",
    }
 ))

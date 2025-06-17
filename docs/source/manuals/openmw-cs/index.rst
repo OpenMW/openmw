@@ -15,6 +15,7 @@ few chapters to familiarise yourself with the new interface.
 
 .. toctree::
     :caption: Table of Contents
+    :hidden:
     :maxdepth: 2
 
     foreword

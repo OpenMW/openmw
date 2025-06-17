@@ -47,6 +47,7 @@ The ranges included with each setting are the physically possible ranges, not re
 
 .. toctree::
 	:caption: Table of Contents
+	:hidden:
 	:maxdepth: 2
 
 	camera

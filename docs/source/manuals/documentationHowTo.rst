@@ -1,6 +1,6 @@
-#######################################
-So you want to help with documentation?
-#######################################
+###############
+Help with docs?
+###############
 
 Or a beginner's guide to writing docs without having to deal with more techie stuff than you have to.
 #####################################################################################################

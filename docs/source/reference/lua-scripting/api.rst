@@ -1,6 +1,6 @@
-#################
-Lua API reference
-#################
+#############
+API Reference
+#############
 
 .. include:: version.rst
 

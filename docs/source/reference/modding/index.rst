@@ -1,5 +1,5 @@
-Modding Reference
-#################
+Modding
+#######
 
 The following document is the complete reference guide to modifying, or
 modding, your OpenMW setup. It does not cover content creation itself,
@@ -14,7 +14,7 @@ about creating new content for OpenMW, please refer to
 	not errors in the manual.
 
 .. toctree::
-	:caption: Table of Contents
+	:hidden:
 	:maxdepth: 2
 
 	foreword

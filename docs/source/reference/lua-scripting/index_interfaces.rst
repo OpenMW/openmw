@@ -7,18 +7,18 @@ Interfaces
 .. toctree::
     :hidden:
 
-    activation <interface_activation>
-    ai <interface_ai>
-    animation <interface_animation>
-    camera <interface_camera>
-    controls <interface_controls>
-    gamepadcontrols <interface_gamepadcontrols>
-    item_usage <interface_item_usage>
-    mwui <interface_mwui>
-    settings <interface_settings>
-    skill_progression <interface_skill_progression>
-    ui <interface_ui>
-    crimes <interface_crimes>
+    Activation <interface_activation>
+    AI <interface_ai>
+    Animation <interface_animation>
+    Camera <interface_camera>
+    Controls <interface_controls>
+    GamepadControls <interface_gamepadcontrols>
+    ItemUsage <interface_item_usage>
+    MWUI <interface_mwui>
+    Settings <interface_settings>
+    Skill_progression <interface_skill_progression>
+    UI <interface_ui>
+    Crimes <interface_crimes>
 
 **Interfaces of built-in scripts**
 

@@ -8,6 +8,10 @@
     }
 }
 
+code {
+    white-space: normal;
+}
+
 .md-sidebar--primary {
     width: 500px; /* default is 240px */
 }
