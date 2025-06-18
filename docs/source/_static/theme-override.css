@@ -79,3 +79,8 @@ tbody tr:hover {
         grid-template-columns: 310px minmax(0, 1fr);
     }
 }
+
+/* Always enable scrollbar in left TOC to prevent layout shifts when expanding */
+#left-sidebar {
+    overflow-y: scroll;
+}
