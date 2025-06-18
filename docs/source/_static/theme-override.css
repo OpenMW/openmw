@@ -79,3 +79,15 @@ tbody tr:hover {
         grid-template-columns: 310px minmax(0, 1fr);
     }
 }
+
+#left-sidebar a.expandable {
+    padding: 0 0 0 12px;
+}
+
+#left-sidebar a>button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
