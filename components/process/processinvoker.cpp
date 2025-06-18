@@ -6,7 +6,6 @@
 #include <QString>
 #include <QStringList>
 
-
 Process::ProcessInvoker::ProcessInvoker(QObject* parent)
     : QObject(parent)
 {
