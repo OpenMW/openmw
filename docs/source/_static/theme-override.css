@@ -73,3 +73,9 @@ tbody tr:hover {
 #left-sidebar::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted));;
 }
+
+@media (min-width: 1024px) {
+    .container:has(#left-sidebar) {
+        grid-template-columns: 310px minmax(0, 1fr);
+    }
+}
