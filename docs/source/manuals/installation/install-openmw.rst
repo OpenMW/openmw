@@ -31,8 +31,8 @@ Add it and install OpenMW::
 	$ sudo apt update
 	$ sudo apt install openmw
 
-The Arch Linux Way
-==================
+Arch Linux
+==========
 
 The binary package is available in the official [community] Repositories.
 To install, simply run the following as root (or in sudo)::

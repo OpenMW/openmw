@@ -163,7 +163,10 @@ Debian/Ubuntu - using "Steam Proton" & "OpenMW launcher".
 #. Launch "OpenMW launcher" and follow the setup wizard, when asked, point it at the location you installed Morrowind to, we will be looking for the directory that contains the Morrowing.esm file, for example '/steam library/steamapps/common/Morrowind/Data Files/'.
 #. Everything should now be in place, click that big "PLAY" button and fire up OpenMW.
 
-Note, Bloodmoon.esm needs to be below Tribunal.esm in your datafiles list, if you don't have the right order a red "!" will apear next to the filename in the datafiles section of the OpenMW launcher, just drag bloodmoon below tribunal to fix it.
+.. note::
+	`Bloodmoon.esm` needs to be below `Tribunal.esm` in your data files list.
+	If you don't have the right order a red `!` will apear next to the filename in the data files section of the OpenMW launcher.
+	To fix, drag `Bloodmoon.esm` below `Tribunal.esm`.
 
 Wine
 ~~~~

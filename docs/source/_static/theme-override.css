@@ -1,6 +1,30 @@
+:root {
+    --link: #4a90e2;
+    --link-hover: #1c6cd9;
+}
+
+/* Less aggressive dark background */
+.dark {
+    --background: 220 20% 7% !important;
+}
+
 /* Hide text underline in tables since the underlines clash with table lines */
 #content a.sd-badge:not(.toc-backref), #content table a:not(.toc-backref)  {
     text-decoration: none;
+}
+
+/* Override link colors, default is foreground */
+#content a:not(.toc-backref) {
+    color: var(--link);
+}
+
+#content a:not(.toc-backref):hover, #content a:not(.toc-backref):focus {
+    color: var(--link-hover);
+}
+
+#content .highlight {
+    background-color: hsl(var(--accent)) !important;
+    border-radius: 0.25rem;
 }
 
 /* Disables the saturation filter on project icon in dark mode */
