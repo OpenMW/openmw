@@ -1,5 +1,5 @@
 #luadoc code, #luadoc tt, #luadoc p em {
-    font-family: monospace;
+    font-family: 'JetBrains Mono', monospace;
 }
 
 #luadoc pre.example {
