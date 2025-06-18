@@ -10,10 +10,10 @@ Simply download the latest version for your operating system from
 `github.com/OpenMW/openmw/releases <https://github.com/OpenMW/openmw/releases>`_
 and run the install package once downloaded. It's now installed!
 
-	.. note::
-		There is no need to uninstall previous versions
-		as OpenMW automatically installs into a separate directory for each new version.
-		Your saves and configuration are compatible and accessible between versions.
+.. note::
+	There is no need to uninstall previous versions
+	as OpenMW automatically installs into a separate directory for each new version.
+	Your saves and configuration are compatible and accessible between versions.
 
 From Source
 ===========
@@ -25,7 +25,9 @@ Ubuntu
 ======
 
 A `Launchpad PPA <https://launchpad.net/~openmw/+archive/openmw>`_ is available.
-Add it and install OpenMW::
+Add it and install OpenMW.
+
+.. code-block:: console
 
 	$ sudo add-apt-repository ppa:openmw/openmw
 	$ sudo apt update
@@ -35,17 +37,21 @@ Arch Linux
 ==========
 
 The binary package is available in the official [community] Repositories.
-To install, simply run the following as root (or in sudo)::
+To install, simply run the following as root (or in sudo).
 
-	# pacman -S openmw
+.. code-block:: console
+
+	$ pacman -S openmw
 
 Void Linux
 ==========
 
 The binary package is available in the official Repository
-To install simply run the following as root (or in sudo)::
+To install simply run the following as root (or in sudo).
 
-	# xbps-install openmw
+.. code-block:: console
+
+	$ xbps-install openmw
 
 Debian
 ======
@@ -60,6 +66,7 @@ Flatpak
 =======
 
 OpenMW is available as a flatpak. With flatpak installed, run the command below. It should show up on your desktop.
-::
 
-	# flatpak install openmw
+.. code-block:: console
+
+	$ flatpak install openmw
