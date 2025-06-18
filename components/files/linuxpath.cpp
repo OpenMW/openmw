@@ -7,7 +7,6 @@
 #include <pwd.h>
 #include <unistd.h>
 
-#include <components/debug/debuglog.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace
