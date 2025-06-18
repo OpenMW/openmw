@@ -162,7 +162,8 @@ html_theme_options = asdict(ThemeOptions(
         "Modding": "reference/modding/index",
         "Lua API": "reference/lua-scripting/overview",
         "Postprocessing": "reference/postprocessing/index",
-   }
+   },
+   show_scrolltop=True,
 ))
 
 html_permalinks_icon = Icons.permalinks_icon
