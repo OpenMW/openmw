@@ -354,6 +354,16 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
             MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            mHourSlider->setScrollPosition(0);
+            onHourSliderChangedPosition(mHourSlider, mHourSlider->getScrollPosition());
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            mHourSlider->setScrollPosition(mHourSlider->getScrollRange() - 1);
+            onHourSliderChangedPosition(mHourSlider, mHourSlider->getScrollPosition());
+        }
 
         return true;
     }
