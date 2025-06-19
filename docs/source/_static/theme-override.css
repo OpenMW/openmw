@@ -1,6 +1,29 @@
 :root {
     --link: #4a90e2;
     --link-hover: #1c6cd9;
+
+    --readthedocs-search-color: hsl(var(--foreground));
+    --readthedocs-search-link-color: var(--link);
+    --readthedocs-search-content-background-color: hsl(var(--background));
+    --readthedocs-search-content-border-color: hsl(var(--border));
+    --readthedocs-search-footer-background-color: hsl(var(--background));
+    --readthedocs-search-footer-color: hsl(var(--foreground));
+    --readthedocs-search-footer-code-background-color: hsl(var(--background));
+    --readthedocs-search-footer-code-border-color: hsl(var(--background));
+    --readthedocs-search-input-background-color: hsl(var(--accent));
+    --readthedocs-search-result-color: hsl(var(--foreground));
+    --readthedocs-search-result-icon-color: hsl(var(--foreground));
+    --readthedocs-search-result-heading-color: hsl(var(--foreground));
+    --readthedocs-search-result-subheading-color: hsl(var(--foreground));
+    --readthedocs-search-result-active-background-color: hsl(var(--accent));
+    --readthedocs-search-result-border-color: hsl(var(--border));
+
+    --readthedocs-flyout-background-color: hsl(var(--background));
+    --readthedocs-flyout-color: hsl(var(--foreground));
+    --readthedocs-flyout-current-version-color: hsl(var(--foreground));
+    --readthedocs-flyout-item-link-color: var(--link);
+    --readthedocs-flyout-link-color: var(--link);
+    --readthedocs-flyout-section-heading-color: hsl(var(--foreground));
 }
 
 /* Less aggressive dark background */

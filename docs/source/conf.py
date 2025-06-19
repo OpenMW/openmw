@@ -163,7 +163,7 @@ html_theme_options = asdict(ThemeOptions(
         "Lua API": "reference/lua-scripting/overview",
         "Postprocessing": "reference/postprocessing/index",
    },
-   show_scrolltop=True,
+   show_scrolltop=False, # Useful, but hard to position with the Flyout addon since the best place for that is bottom right
 ))
 
 html_permalinks_icon = Icons.permalinks_icon
