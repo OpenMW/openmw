@@ -4,8 +4,10 @@
 }
 
 /* Less aggressive dark background */
-.dark {
-    --background: 220 20% 7% !important;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: 220 20% 7% !important;
+    }
 }
 
 /* Hide text underline in tables since the underlines clash with table lines */

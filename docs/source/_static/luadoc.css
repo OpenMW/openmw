@@ -17,14 +17,26 @@
     padding: 0px;
 }
 
-html.dark #luadoc pre.example,
-html.dark #luadoc pre.example code {
-  background-color: hsl(var(--muted));
-  color: #ffffff;
+@media (prefers-color-scheme: dark) {
+  #luadoc pre.example,
+  #luadoc pre.example code {
+    background-color: hsl(var(--muted));
+    color: #ffffff;
+  }
 }
 
 #luadoc code {
   background-color: unset;
+}
+
+#luadoc pre {
+    background-color: inherit;
+    color: inherit;
+    border: none;
+}
+
+#luadoc pre code {
+    white-space: normal;
 }
 
 #content #luadoc code a:not(.toc-backref) {
