@@ -44,6 +44,10 @@ code {
     display: none !important;
 }
 
+#search-input {
+    padding-right: 12px !important;
+}
+
 /* Table headers are bolded in dark mode, do it in light mode too */
 table th {
     font-weight: 600 !important;
