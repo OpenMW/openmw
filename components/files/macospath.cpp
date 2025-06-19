@@ -97,7 +97,7 @@ namespace Files
 
     std::filesystem::path MacOsPath::getLocalPath() const
     {
-        return getBinaryPath() / "../Resources";
+        return getBinaryPath().parent_path().parent_path() / "Resources";
     }
 
     std::filesystem::path MacOsPath::getGlobalDataPath() const
