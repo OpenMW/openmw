@@ -1252,9 +1252,15 @@ namespace MWRender
     }
 
     void RenderingManager::spawnEffect(VFS::Path::NormalizedView model, std::string_view texture,
-        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX, bool useAmbientLight)
+        const osg::Vec3f& worldPosition, float scale, bool isMagicVFX, bool useAmbientLight, std::string_view effectId,
+        bool loop)
     {
-        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX, useAmbientLight);
+        mEffectManager->addEffect(model, texture, worldPosition, scale, isMagicVFX, useAmbientLight, effectId, loop);
+    }
+
+    void RenderingManager::removeEffect(std::string_view effectId)
+    {
+        mEffectManager->removeEffect(effectId);
     }
 
     void RenderingManager::notifyWorldSpaceChanged()
