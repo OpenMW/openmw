@@ -2,34 +2,15 @@
     font-family: 'JetBrains Mono', monospace;
 }
 
-#luadoc pre.example {
-    background-color: hsl(var(--accent)) !important;
-    padding: 10px;
-    margin: 10px 0 10px 0;
-    overflow-x: auto;
-}
-
 #luadoc pre.example code {
-    color: black;
-    background-color: hsl(var(--accent)) !important;
-    border: none;
     white-space: pre;
-    padding: 0px;
 }
 
-@media (prefers-color-scheme: dark) {
-  #luadoc pre.example,
-  #luadoc pre.example code {
-    background-color: hsl(var(--muted));
-    color: #ffffff;
-  }
-}
-
-#luadoc code {
+#luadoc code:not([class*="language-"]) {
   background-color: unset;
 }
 
-#luadoc pre {
+#luadoc pre:not([class*="language-"]) {
     background-color: inherit;
     color: inherit;
     border: none;

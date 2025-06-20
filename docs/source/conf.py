@@ -168,10 +168,16 @@ html_theme_options = asdict(ThemeOptions(
 
 html_permalinks_icon = Icons.permalinks_icon
 
+html_js_files = [
+    'prism.js'
+]
+
 html_css_files = [
     "theme-override.css",
     "luadoc.css",
-    "figures.css"
+    "figures.css",
+    "prism.css",
+    "prism-dark.css",
 ]
 
 # Add any paths that contain custom themes here, relative to this directory.
