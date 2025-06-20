@@ -48,7 +48,6 @@
 }
 
 #luadoc a:not([href]) {
-    font-weight: bold;
     text-decoration: none;
     cursor: inherit;
     color: inherit;
@@ -76,6 +75,27 @@
 
 #luadoc ul { list-style-type: disc; }
 #luadoc li {list-style: bullet;}
+
+#content #luadoc dl.function dt:not(.sig):first-child {
+  border-bottom: 2px solid hsl(163.24deg 81.3% 74.1% / 30%);
+  background-color: hsl(155.69deg 27.84% 54.99% / 12%);
+  padding: 6px;
+}
+
+#content #luadoc dl.function dt:not(.sig):first-child a {
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  #content #luadoc dl.function dt:not(.sig):first-child {
+      border-bottom: 2px solid hsl(163.24deg 81.3% 74.1% / 20%);
+      background-color: hsl(155.69deg 27.84% 54.99% / 8%);
+  }
+}
+
+#luadoc .table-wrapper.container {
+  padding: 0;
+}
 
 table.docutils {
     width: 100%;
