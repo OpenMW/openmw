@@ -50,6 +50,7 @@
 #content .highlight {
     background-color: hsl(var(--accent)) !important;
     border-radius: 0.25rem;
+    font-variant-ligatures: none;
 }
 
 /* Disables the saturation filter on project icon in dark mode */
