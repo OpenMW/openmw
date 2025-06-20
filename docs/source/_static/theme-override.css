@@ -33,6 +33,11 @@
     }
 }
 
+/* Enable hover-to-highlight in TOC */
+.contents ul li a.reference:hover, .toctree-wrapper ul li a.reference:hover {
+    color: hsl(var(--foreground)) !important;
+}
+
 /* Hide text underline in tables since the underlines clash with table lines */
 #content a.sd-badge:not(.toc-backref), #content table a:not(.toc-backref)  {
     text-decoration: none;
