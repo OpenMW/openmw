@@ -461,7 +461,10 @@
 -- @return #number
 
 ---
--- Get the terrain texture at a given location.
+-- Get the terrain texture at a given location. As textures are blended and
+-- multiple textures can be at one specific position the texture whose center is
+-- closest to the position will be returned.
+--
 -- @function [parent=#Land] getTextureAt
 -- @param openmw.util#Vector3 position
 -- @param #any cellOrName cell or cell name in their exterior world space to query
