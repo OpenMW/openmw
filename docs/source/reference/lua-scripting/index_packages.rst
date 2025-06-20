@@ -14,7 +14,6 @@ Packages
     core <openmw_core>
     debug <openmw_debug>
     input <openmw_input>
-    interfaces <openmw_interfaces>
     markup <openmw_markup>
     menu <openmw_menu>
     nearby <openmw_nearby>

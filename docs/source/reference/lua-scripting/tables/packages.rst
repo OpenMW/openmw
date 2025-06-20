@@ -26,6 +26,9 @@
    * - :doc:`input </reference/lua-scripting/openmw_input>`
      - |bdg-ctx-menu| |bdg-ctx-player|
      - User input.
+   * - :ref:`interfaces <Script interfaces>`
+     - |bdg-ctx-all|
+     - Public interfaces of other scripts.
    * - :doc:`markup </reference/lua-scripting/openmw_markup>`
      - |bdg-ctx-all|
      - API to work with markup languages.
@@ -59,6 +62,3 @@
    * - :doc:`world </reference/lua-scripting/openmw_world>`
      - |bdg-ctx-global|
      - Read-write access to the game world.
-   * - :ref:`interfaces <Script interfaces>`
-     - |bdg-ctx-all|
-     - Public interfaces of other scripts.
