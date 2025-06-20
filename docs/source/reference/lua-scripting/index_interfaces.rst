@@ -9,7 +9,7 @@ Interfaces
 
     Activation <interface_activation>
     AI <interface_ai>
-    Animation <interface_animation>
+    AnimationController <interface_animation>
     Camera <interface_camera>
     Controls <interface_controls>
     Crimes <interface_crimes>

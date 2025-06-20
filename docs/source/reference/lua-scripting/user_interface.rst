@@ -78,11 +78,11 @@ Events
    :hidden:
 
    Widget <widgets/widget>
+   Container <widgets/container>
+   Flex <widgets/flex>
+   Image <widgets/image>
    Text <widgets/text>
    TextEdit <widgets/textedit>
-   Image <widgets/image>
-   Flex <widgets/flex>
-   Container <widgets/container>
 
 Example
 -------
