@@ -1,4 +1,4 @@
-Post Processing Settings
+Post-Processing Settings
 ########################
 
 .. _Post Processing:

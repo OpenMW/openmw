@@ -46,7 +46,6 @@ The ranges included with each setting are the physically possible ranges, not re
 	this guide should be plenty clear enough that you can find the setting you want to change and safely edit it.
 
 .. toctree::
-	:caption: Table of Contents
 	:hidden:
 	:maxdepth: 2
 
@@ -72,6 +71,6 @@ The ranges included with each setting are the physically possible ranges, not re
 	Navigator <navigator>
 	Physics <physics>
 	Models <models>
-	Postprocessing <postprocessing>
+	Post-Processing <postprocessing>
 	Stereo <stereo>
-	Stereoview <stereoview>
+	Stereo View <stereoview>

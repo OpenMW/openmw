@@ -1,5 +1,5 @@
 ###############
-Post Processing
+Post-Processing
 ###############
 
 OpenMW supports a moddable post process framework for creating and

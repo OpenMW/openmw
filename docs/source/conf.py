@@ -161,7 +161,7 @@ html_theme_options = asdict(ThemeOptions(
    main_nav_links= {
         "Modding": "reference/modding/index",
         "Lua API": "reference/lua-scripting/overview",
-        "Postprocessing": "reference/postprocessing/index",
+        "Post-Processing": "reference/postprocessing/index",
    },
    show_scrolltop=False, # Useful, but hard to position with the Flyout addon since the best place for that is bottom right
 ))
