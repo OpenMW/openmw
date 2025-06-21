@@ -7,9 +7,12 @@ adding and modifying textures is an important part of content creation.
 Therefore, we've included the following in hopes of helping modders transition
 to texture modding in OpenMW.
 
-.. toctree::
-	:caption: Table of Contents
-	:maxdepth: 2
+.. dropdown:: Table of Contents
+	:icon: book
 
-	texture-basics
-	convert-bump-mapped-mods
+	.. toctree::
+		:caption: Table of Contents
+		:maxdepth: 2
+
+		texture-basics
+		convert-bump-mapped-mods
