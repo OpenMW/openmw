@@ -1,8 +1,3 @@
-0.50.0
-------
-
-    Feature #8112: Expose landscape record data to Lua
-
 0.49.0
 ------
 
