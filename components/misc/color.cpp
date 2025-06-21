@@ -6,13 +6,12 @@
 #include <sstream>
 #include <system_error>
 
+#include <components/sceneutil/util.hpp>
+
 namespace Misc
 {
     Color::Color(float r, float g, float b, float a)
-        : mR(std::clamp(r, 0.f, 1.f))
-        , mG(std::clamp(g, 0.f, 1.f))
-        , mB(std::clamp(b, 0.f, 1.f))
-        , mA(std::clamp(a, 0.f, 1.f))
+        : mValue(std::clamp(r, 0.f, 1.f), std::clamp(g, 0.f, 1.f), std::clamp(b, 0.f, 1.f), std::clamp(a, 0.f, 1.f))
     {
     }
 
@@ -27,26 +26,31 @@ namespace Misc
     {
         if (hex.size() != 6)
             throw std::logic_error(std::string("Invalid hex color: ") += hex);
-        std::array<float, 3> rgb;
-        for (size_t i = 0; i < rgb.size(); i++)
+        Color col;
+        col.mValue.a() = 1;
+        for (size_t i = 0; i < 3; i++)
         {
             auto sub = hex.substr(i * 2, 2);
             int v = 0;
             auto [_, ec] = std::from_chars(sub.data(), sub.data() + sub.size(), v, 16);
             if (ec != std::errc())
                 throw std::logic_error(std::string("Invalid hex color: ") += hex);
-            rgb[i] = v / 255.0f;
+            col.mValue[i] = v / 255.0f;
         }
-        return Color(rgb[0], rgb[1], rgb[2], 1);
+        return col;
+    }
+
+    Color Color::fromRGB(unsigned int value)
+    {
+        return Color(SceneUtil::colourFromRGB(value));
     }
 
     std::string Color::toHex() const
     {
         std::string result(6, '0');
-        std::array<float, 3> rgb = { mR, mG, mB };
-        for (size_t i = 0; i < rgb.size(); i++)
+        for (size_t i = 0; i < 3; i++)
         {
-            int b = static_cast<int>(rgb[i] * 255.0f);
+            int b = static_cast<int>(mValue[i] * 255.0f);
             char* start = result.data() + i * 2;
             if (b < 16)
                 start++;
@@ -59,6 +63,6 @@ namespace Misc
 
     bool operator==(const Color& l, const Color& r)
     {
-        return l.mR == r.mR && l.mG == r.mG && l.mB == r.mB && l.mA == r.mA;
+        return l.mValue == r.mValue;
     }
 }

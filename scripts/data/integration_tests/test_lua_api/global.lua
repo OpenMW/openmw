@@ -157,7 +157,7 @@ testing.registerGlobalTest('record creation', function()
         value = 10,
         duration = 12,
         radius = 30,
-        color = 5,
+        color = util.color.hex('123456'),
         name = "TestLight",
         model = "meshes/marker_door.dae"
     }
