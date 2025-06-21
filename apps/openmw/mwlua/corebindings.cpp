@@ -21,7 +21,6 @@
 
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
-#include "landbindings.hpp"
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
@@ -97,8 +96,6 @@ namespace MWLua
 
         api["stats"]
             = context.cachePackage("openmw_core_stats", [context]() { return initCoreStatsBindings(context); });
-
-        api["land"] = context.cachePackage("openmw_core_land", [context]() { return initCoreLandBindings(context); });
 
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
