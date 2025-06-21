@@ -10,10 +10,10 @@ cd build
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
 if [[ "${MACOS_X86_64}" ]]; then
-    QT_PATH=$(arch -x86_64 brew --prefix qt@6)
-    ICU_PATH=$(arch -x86_64 brew --prefix icu4c)
-    OPENAL_PATH=$(arch -x86_64 brew --prefix openal-soft)
-    CCACHE_EXECUTABLE=$(arch -x86_64 brew --prefix ccache)/bin/ccache
+    QT_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix qt@6)
+    ICU_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix icu4c)
+    OPENAL_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix openal-soft)
+    CCACHE_EXECUTABLE=$(arch -x86_64 /usr/local/bin/brew --prefix ccache)/bin/ccache
 else
     QT_PATH=$(brew --prefix qt@6)
     ICU_PATH=$(brew --prefix icu4c)
