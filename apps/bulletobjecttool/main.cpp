@@ -125,6 +125,7 @@ namespace
         }
 
         Files::ConfigurationManager config;
+        config.processPaths(variables, std::filesystem::current_path());
         config.readConfiguration(variables, desc);
 
         Debug::setupLogging(config.getLogPath(), applicationName);

@@ -236,6 +236,7 @@
     Bug #8465: Blue screen w/ antialiasing and post-processing on macOS
     Bug #8503: Camera does not handle NaN gracefully
     Bug #8541: Lua: util.color:asHex produces wrong output for some colors
+    Bug #8567: Token replacement does not work via CLI and relative paths passed via the command line are not relative to the CWD
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
