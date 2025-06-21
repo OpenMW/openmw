@@ -969,7 +969,7 @@ namespace MWGui
             if (mChoices.size() > 0)
             {
                 if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
-                    onChoiceActivated(mControllerChoice + 1); // +1 because choices are indexed starting at 1
+                    onChoiceActivated(mChoices[mControllerChoice].second);
             }
             else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()))
                 onGoodbyeActivated();
