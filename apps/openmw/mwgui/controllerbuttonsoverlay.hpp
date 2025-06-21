@@ -24,6 +24,9 @@ namespace MWGui
         MyGUI::ImageBox* mImageB;
         MyGUI::TextBox* mTextB;
 
+        MyGUI::ImageBox* mImageDpad;
+        MyGUI::TextBox* mTextDpad;
+
         MyGUI::ImageBox* mImageL1;
         MyGUI::TextBox* mTextL1;
 

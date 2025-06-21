@@ -33,7 +33,6 @@ namespace MWGui
         void setTakeButtonShow(bool show);
         void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
 
     private:
         Gui::ImageButton* mCloseButton;

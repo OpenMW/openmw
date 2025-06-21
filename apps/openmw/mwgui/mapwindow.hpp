@@ -272,7 +272,6 @@ namespace MWGui
 
     protected:
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
         void setActiveControllerWindow(bool active) override;
 
     private:

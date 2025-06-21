@@ -21,6 +21,7 @@ namespace MWGui
     {
         std::string a;
         std::string b;
+        std::string dpad;
         std::string l1;
         std::string l2;
         std::string l3;

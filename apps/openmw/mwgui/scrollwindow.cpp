@@ -41,7 +41,7 @@ namespace MWGui
 
         mControllerScrollWidget = mTextView;
         mControllerButtons.b = "#{sClose}";
-        mControllerButtons.rStick = "#{sScrolldown}";
+        mControllerButtons.dpad = "#{sScrolldown}";
 
         center();
     }
@@ -147,18 +147,5 @@ namespace MWGui
             return false; // Fall through to keyboard
 
         return true;
-    }
-
-    bool ScrollWindow::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
-    {
-        if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY)
-        {
-            MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(false);
-
-            int scroll = -30.0f * arg.value / 32767;
-            mTextView->setViewOffset(mTextView->getViewOffset() + MyGUI::IntPoint(0, scroll));
-            return true;
-        }
-        return false;
     }
 }

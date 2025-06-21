@@ -14,6 +14,9 @@ namespace MWGui
         getWidget(mImageB, "BtnBImage");
         getWidget(mTextB, "BtnBText");
 
+        getWidget(mImageDpad, "BtnDpadImage");
+        getWidget(mTextDpad, "BtnDpadText");
+
         getWidget(mImageL1, "BtnL1Image");
         getWidget(mTextL1, "BtnL1Text");
 
@@ -58,6 +61,7 @@ namespace MWGui
         int buttonCount = 0;
         buttonCount += updateButton(mTextA, mImageA, buttons->a);
         buttonCount += updateButton(mTextB, mImageB, buttons->b);
+        buttonCount += updateButton(mTextDpad, mImageDpad, buttons->dpad);
         buttonCount += updateButton(mTextL1, mImageL1, buttons->l1);
         buttonCount += updateButton(mTextL2, mImageL2, buttons->l2);
         buttonCount += updateButton(mTextL3, mImageL3, buttons->l3);
