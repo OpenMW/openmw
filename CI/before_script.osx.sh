@@ -9,7 +9,7 @@ cd build
 
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
-QT_PATH=$(brew --prefix qt@5)
+QT_PATH=$(brew --prefix qt@6)
 ICU_PATH=$(brew --prefix icu4c)
 OPENAL_PATH=$(brew --prefix openal-soft)
 CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache

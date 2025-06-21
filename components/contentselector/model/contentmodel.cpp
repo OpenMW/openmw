@@ -129,7 +129,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
     {
         if (depFile->isGameFile() && file->gameFiles().contains(depFile->fileName(), Qt::CaseInsensitive))
         {
-            if (!depFile->builtIn() && !depFile->fromAnotherConfigFile() && !mCheckedFiles.contains(depFile))
+            if (!isChecked(depFile))
                 break;
 
             return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled;
@@ -215,8 +215,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             if (file == mGameFile)
                 return QVariant();
 
-            return (file->builtIn() || file->fromAnotherConfigFile() || mCheckedFiles.contains(file)) ? Qt::Checked
-                                                                                                      : Qt::Unchecked;
+            return isChecked(file) ? Qt::Checked : Qt::Unchecked;
         }
 
         case Qt::UserRole:
@@ -230,7 +229,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
         }
 
         case Qt::UserRole + 1:
-            return mCheckedFiles.contains(file);
+            return isChecked(file);
     }
     return QVariant();
 }
@@ -264,9 +263,9 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex& index, const
         {
             int checkValue = value.toInt();
             if (checkValue == Qt::Checked)
-                return mCheckedFiles.contains(file) || setCheckState(file, true);
+                return isChecked(file) || setCheckState(file, true);
             if (checkValue == Qt::Unchecked)
-                return !mCheckedFiles.contains(file) || setCheckState(file, false);
+                return !isChecked(file) || setCheckState(file, false);
         }
     }
 
@@ -606,6 +605,14 @@ void ContentSelectorModel::ContentModel::sortFiles()
     emit layoutChanged();
 }
 
+bool ContentSelectorModel::ContentModel::isChecked(const EsmFile* file) const
+{
+    if (file == nullptr)
+        return false;
+
+    return file->builtIn() || file->fromAnotherConfigFile() || mCheckedFiles.contains(file);
+}
+
 bool ContentSelectorModel::ContentModel::isEnabled(const QModelIndex& index) const
 {
     return (flags(index) & Qt::ItemIsEnabled);
@@ -691,7 +698,7 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
         }
         else
         {
-            if (!mCheckedFiles.contains(dependentFile))
+            if (!isChecked(dependentFile))
             {
                 errors.append(LoadOrderError(LoadOrderError::ErrorCode_InactiveDependency, dependentfileName));
             }
@@ -706,7 +713,7 @@ QList<ContentSelectorModel::LoadOrderError> ContentSelectorModel::ContentModel::
     {
         // Warn the user if Bloodmoon is loaded before Tribunal (Tribunal is not a hard dependency)
         const EsmFile* tribunalFile = item("Tribunal.esm");
-        if (tribunalFile != nullptr && mCheckedFiles.contains(tribunalFile) && row < indexFromItem(tribunalFile).row())
+        if (isChecked(tribunalFile) && row < indexFromItem(tribunalFile).row())
             errors.append(LoadOrderError(LoadOrderError::ErrorCode_LoadOrder, "Tribunal.esm"));
     }
 
@@ -770,8 +777,9 @@ bool ContentSelectorModel::ContentModel::setCheckState(const EsmFile* file, bool
         for (const QString& upstreamName : file->gameFiles())
         {
             const EsmFile* upstreamFile = item(upstreamName);
-            if (upstreamFile == nullptr || !mCheckedFiles.insert(upstreamFile).second)
+            if (upstreamFile == nullptr || isChecked(upstreamFile))
                 continue;
+            mCheckedFiles.insert(upstreamFile);
             QModelIndex upstreamIndex = indexFromItem(upstreamFile);
             emit dataChanged(upstreamIndex, upstreamIndex);
         }
