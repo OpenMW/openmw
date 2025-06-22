@@ -360,7 +360,7 @@ namespace MWInput
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
-                    if (winMgr->getControllerTooltip())
+                    if (winMgr->getControllerTooltip() && std::abs(arg.value) > 2000)
                     {
                         winMgr->setControllerTooltip(false);
                         winMgr->setCursorVisible(true);

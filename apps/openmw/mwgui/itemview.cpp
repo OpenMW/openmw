@@ -81,7 +81,6 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            MWBase::Environment::get().getWindowManager()->setControllerTooltip(false);
             mControllerFocus = std::clamp(mControllerFocus, 0, mItemCount - 1);
             updateControllerFocus(-1, mControllerFocus);
         }
@@ -215,6 +214,7 @@ namespace MWGui
             // Select the focused item, if any.
             if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
             {
+                MWBase::Environment::get().getWindowManager()->setControllerTooltip(false);
                 MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
                 onSelectedItem(dragArea->getChildAt(mControllerFocus));
             }
