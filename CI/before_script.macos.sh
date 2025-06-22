@@ -41,14 +41,14 @@ declare -a BUILD_OPTS=(
 -D BUILD_OPENCS=TRUE
 -D BUILD_ESMTOOL=TRUE
 -D BUILD_BSATOOL=TRUE
--D BUILD_ESSIMPORTER=TRU
+-D BUILD_ESSIMPORTER=TRUE
 -D BUILD_NIFTEST=TRUE
 -D BUILD_NAVMESHTOOL=TRUE
 -D BUILD_BULLETOBJECTTOOL=TRUE
 -G"Unix Makefiles"
 )
 
-if [[ "${MACOS_X86_64}" ]]; then
+if [[ "${MACOS_AMD64}" ]]; then
     CMAKE_CONF_OPTS+=(
         -D CMAKE_OSX_ARCHITECTURES="x86_64"
     )
@@ -64,7 +64,7 @@ else
     )
 fi
 
-if [[ "${MACOS_X86_64}" ]]; then
+if [[ "${MACOS_AMD64}" ]]; then
     arch -x86_64 cmake \
         "${CMAKE_CONF_OPTS[@]}" \
         "${BUILD_OPTS[@]}" \
