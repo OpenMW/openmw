@@ -62,8 +62,8 @@
 }
 
 #content #luadoc dl.function dt:not(.sig):first-child {
-  border-bottom: 2px solid hsl(163.24deg 81.3% 74.1% / 30%);
-  background-color: hsl(155.69deg 27.84% 54.99% / 12%);
+  border-bottom: 2px solid hsl(var(--muted)  / 50%);
+  background-color: hsl(var(--muted));
   padding: 6px;
 }
 
@@ -73,8 +73,8 @@
 
 @media (prefers-color-scheme: dark) {
   #content #luadoc dl.function dt:not(.sig):first-child {
-      border-bottom: 2px solid hsl(163.24deg 81.3% 74.1% / 20%);
-      background-color: hsl(155.69deg 27.84% 54.99% / 8%);
+      border-bottom: 2px solid hsl(var(--accent)  / 50%);
+      background-color: hsl(var(--accent));
   }
 }
 

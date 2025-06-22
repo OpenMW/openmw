@@ -29,7 +29,13 @@
 /* Less aggressive dark background */
 @media (prefers-color-scheme: dark) {
     :root {
-        --background: 220 20% 7% !important;
+        /* These were not overriding without important when deploying to RTD */
+        --background: 220 14% 9% !important;
+        --border: 216 14% 17% !important;
+        --accent: 216 14% 17% !important;
+        --input: 216 14% 17% !important;
+        --muted: 223 27% 14% !important;
+
         --link: #ffffff;
         --link-hover: #ffffff;
     }
