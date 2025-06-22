@@ -138,6 +138,12 @@ if(BUILD_OPENMW)
     endif()
 
     target_link_libraries(openmw openmw-lib)
+
+    # Workaround necessary to ensure osgAnimation::MatrixLinearSampler dynamic casts work under Clang
+    # NOTE: it's unclear whether the broken behavior is spec-compliant
+    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+        set_target_properties(openmw PROPERTIES ENABLE_EXPORTS ON)
+    endif()
 endif()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
