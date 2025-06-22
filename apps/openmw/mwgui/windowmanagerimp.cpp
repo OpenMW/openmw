@@ -1407,6 +1407,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
+            if (mode == GM_Container)
+                mActiveControllerWindows[mode] = 0; // Ensure controller focus is on container
             // Activate first visible window. This needs to be called after updateVisible.
             mActiveControllerWindows[mode] = std::max(mActiveControllerWindows[mode] - 1, -1);
             cycleActiveControllerWindow(true);

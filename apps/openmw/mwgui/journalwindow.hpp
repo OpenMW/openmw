@@ -36,6 +36,7 @@ namespace MWGui
         int mSelectedQuest = 0;
         int mSelectedIndex = 0;
         void setIndexControllerFocus(int index, bool focused);
+        void setControllerFocusedQuest(int index);
     };
 }
 

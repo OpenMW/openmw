@@ -252,7 +252,8 @@ namespace
             }
             updateShowingPages();
 
-            mSelectedQuest = 0;
+            if (Settings::gui().mControllerMenus)
+                setControllerFocusedQuest(0);
 
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
         }
@@ -524,7 +525,7 @@ namespace
 
             if (Settings::gui().mControllerMenus)
             {
-                mSelectedQuest = 0;
+                setControllerFocusedQuest(0);
                 addControllerButtons(list, mSelectedQuest);
             }
 
@@ -823,21 +824,7 @@ namespace
                         return true;
 
                     // Scroll through the list of quests or topics
-                    mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
-                    mSelectedQuest = MWGui::wrap(mSelectedQuest - 1, mButtons.size());
-                    mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
-
-                    // Scroll the list to keep the active item in view
-                    Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
-                    if (mSelectedQuest <= 3)
-                        list->setViewOffset(0);
-                    else
-                    {
-                        int offset = 0;
-                        for (int i = 0; i < mSelectedQuest - 3; i++)
-                            offset += mButtons[i]->getHeight() + 3;
-                        list->setViewOffset(-offset);
-                    }
+                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest - 1, mButtons.size()));
                 }
                 else if (mOptionsMode)
                 {
@@ -877,21 +864,7 @@ namespace
                         return true;
 
                     // Scroll through the list of quests or topics
-                    mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
-                    mSelectedQuest = MWGui::wrap(mSelectedQuest + 1, mButtons.size());
-                    mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
-
-                    // Scroll the list to keep the active item in view
-                    Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
-                    if (mSelectedQuest <= 3)
-                        list->setViewOffset(0);
-                    else
-                    {
-                        int offset = 0;
-                        for (int i = 0; i < mSelectedQuest - 3; i++)
-                            offset += mButtons[i]->getHeight() + 3;
-                        list->setViewOffset(-offset);
-                    }
+                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest + 1, mButtons.size()));
                 }
                 else if (mOptionsMode)
                 {
@@ -981,6 +954,31 @@ namespace
             }
 
             return false;
+        }
+
+        void setControllerFocusedQuest(int index)
+        {
+            int listSize = static_cast<int>(mButtons.size());
+            if (mSelectedQuest >= 0 && mSelectedQuest < listSize)
+                mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
+
+            mSelectedQuest = index;
+            if (mSelectedQuest >= 0 && mSelectedQuest < listSize)
+            {
+                mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
+
+                // Scroll the list to keep the active item in view
+                Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
+                if (mSelectedQuest <= 3)
+                    list->setViewOffset(0);
+                else
+                {
+                    int offset = 0;
+                    for (int i = 0; i < mSelectedQuest - 3; i++)
+                        offset += mButtons[i]->getHeight() + 3;
+                    list->setViewOffset(-offset);
+                }
+            }
         }
     };
 }
