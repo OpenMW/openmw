@@ -29,21 +29,25 @@
 /* Less aggressive dark background */
 @media (prefers-color-scheme: dark) {
     :root {
-        /* These were not overriding without important when deploying to RTD */
         --background: 220 14% 9% !important;
-        --border: 216 14% 17% !important;
-        --accent: 216 14% 17% !important;
-        --input: 216 14% 17% !important;
-        --muted: 223 27% 14% !important;
+        --border: 216 14% 17%;
+        --accent: 216 14% 17%;
+        --input: 216 14% 17%;
+        --muted: 223 27% 14%;
+        --card: 220 14% 9%;
 
         --link: #ffffff;
         --link-hover: #ffffff;
+    }
+
+    .contents ul li a.reference:hover, .sd-dropdown .toctree-wrapper ul li a.reference, details.sd-dropdown .sd-summary-title {
+        --muted-foreground: 215.4 16.3% 86.9%;
     }
 }
 
 /* Enable hover-to-highlight in TOC */
 .contents ul li a.reference:hover, .toctree-wrapper ul li a.reference:hover {
-    color: hsl(var(--foreground)) !important;
+    text-decoration: underline !important;
 }
 
 /* Hide text underline in tables since the underlines clash with table lines */
