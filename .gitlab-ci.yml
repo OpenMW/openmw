@@ -508,9 +508,13 @@ Ubuntu_GCC_integration_tests_asan:
     - ccache/
   script:
     - CI/before_install.macos.sh
+    - export CCACHE_BASEDIR="$(pwd)"
+    - export CCACHE_DIR="$(pwd)/ccache"
+    - mkdir -pv "${CCACHE_DIR}"
     - CI/macos/ccache_prep.sh
     - CI/before_script.macos.sh
     - CI/macos/build.sh
+    - cd build
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
@@ -526,7 +530,7 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ccache -s
+    - CI/macos/ccache_save.sh
   artifacts:
     paths:
       - build/OpenMW-*.dmg
@@ -537,7 +541,7 @@ macOS14_Xcode15_amd64:
   tags:
     - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_amd64.v1
+    key: macOS14_Xcode15_amd64.v2
   variables:
     CCACHE_SIZE: 3G
     DMG_IDENTIFIER: amd64
