@@ -30,6 +30,8 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --background: 220 20% 7% !important;
+        --link: #ffffff;
+        --link-hover: #ffffff;
     }
 }
 
@@ -46,6 +48,7 @@
 /* Override link colors, default is foreground */
 #content a:not(.toc-backref) {
     color: var(--link);
+    font-weight: 600;
 }
 
 #content a:not(.toc-backref):hover, #content a:not(.toc-backref):focus {

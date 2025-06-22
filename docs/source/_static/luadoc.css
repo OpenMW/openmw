@@ -57,6 +57,10 @@
 #luadoc ul { list-style-type: disc; }
 #luadoc li {list-style: bullet;}
 
+#luadoc .function a:not(.toc-backref) {
+  font-weight: 500;
+}
+
 #content #luadoc dl.function dt:not(.sig):first-child {
   border-bottom: 2px solid hsl(163.24deg 81.3% 74.1% / 30%);
   background-color: hsl(155.69deg 27.84% 54.99% / 12%);
