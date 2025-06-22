@@ -828,7 +828,7 @@ namespace
                     mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
 
                     // Scroll the list to keep the active item in view
-                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
+                    Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
                     if (mSelectedQuest <= 3)
                         list->setViewOffset(0);
                     else
@@ -882,7 +882,7 @@ namespace
                     mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
 
                     // Scroll the list to keep the active item in view
-                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
+                    Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
                     if (mSelectedQuest <= 3)
                         list->setViewOffset(0);
                     else
