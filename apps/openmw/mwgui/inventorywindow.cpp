@@ -922,6 +922,12 @@ namespace MWGui
         switch (mGuiMode)
         {
             case MWGui::GM_Companion:
+                mControllerButtons.a = "#{OMWEngine:InventorySelect}";
+                mControllerButtons.b = "#{sClose}";
+                mControllerButtons.x = "";
+                mControllerButtons.y = "";
+                mControllerButtons.r2 = "#{sCompanionShare}";
+                break;
             case MWGui::GM_Container:
                 mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{sClose}";
