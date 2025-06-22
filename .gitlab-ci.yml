@@ -507,14 +507,11 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
     - ccache/
   script:
-    - CI/before_install.osx.sh
-    - export CCACHE_BASEDIR="$(pwd)"
-    - export CCACHE_DIR="$(pwd)/ccache"
-    - mkdir -pv "${CCACHE_DIR}"
-    - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.osx.sh
-    - cd build; make -j $(sysctl -n hw.logicalcpu) package
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
+    - CI/before_install.macos.sh
+    - CI/macos/ccache_prep.sh
+    - CI/before_script.macos.sh
+    - CI/macos/build.sh
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}_${DMG_IDENTIFIER}.dmg"; done
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
         echo "[default]" > ~/.s3cfg
@@ -529,10 +526,22 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ccache -s
+    - CI/macos/ccache_save.sh
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+
+macOS14_Xcode15_amd64:
+  extends: .MacOS
+  image: macos-14-xcode-15
+  tags:
+    - saas-macos-medium-m1
+  cache:
+    key: macOS14_Xcode15_amd64.v1
+  variables:
+    CCACHE_SIZE: 3G
+    DMG_IDENTIFIER: amd64
+    MACOS_AMD64: true
 
 macOS14_Xcode15_arm64:
   extends: .MacOS
@@ -542,6 +551,7 @@ macOS14_Xcode15_arm64:
   cache:
     key: macOS14_Xcode15_arm64.v1
   variables:
+    DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
 
 .Compress_And_Upload_Symbols_Base:
@@ -968,7 +978,7 @@ Windows_MSBuild_CacheInit:
       - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
     cache:
       key: flatpak
-      paths: 
+      paths:
         - ".flatpak-builder"
     artifacts:
       untracked: false
