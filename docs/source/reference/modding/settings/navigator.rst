@@ -1,433 +1,298 @@
 Navigator Settings
 ##################
 
-Main settings
-*************
+.. omw-setting::
+   :title: enable
+   :type: boolean
+   :range: true, false
+   :default: true
+
+   Enables the navigator system, building a navmesh for pathfinding.
+   Disabling uses only path grid, which affects NPC AI and pathfinding.
+   May impact performance, especially on single-core CPUs.
+
+.. omw-setting::
+   :title: max tiles number
+   :type: int
+   :range: ≥ 0
+   :default: 512
+
+   Sets the number of tiles in the navmesh area around the player.
+   Increasing can decrease performance.
+   Must satisfy: max tiles number * max polygons per tile ≤ 4194304.
+
+.. omw-setting::
+   :title: wait until min distance to player
+   :type: int
+   :range: ≥ 0
+   :default: 5
+
+   Distance in tiles around player to delay loading screen until navmesh is generated.
+   Zero disables waiting.
+
+.. omw-setting::
+   :title: enable nav mesh disk cache
+   :type: boolean
+   :range: true, false
+   :default: true
+
+   Enables using disk cache for navmesh tiles in addition to memory cache.
+
+.. omw-setting::
+   :title: write to navmeshdb
+   :type: boolean
+   :range: true, false
+   :default: true
+
+   Enables writing generated navmesh tiles to disk cache during runtime.
+
+.. omw-setting::
+   :title: max navmeshdb file size
+   :type: uint
+   :range: > 0
+   :default: 2147483648
+
+   Maximum size in bytes of navmesh disk cache file.
+
+.. omw-setting::
+   :title: async nav mesh updater threads
+   :type: uint
+   :range: ≥ 1
+   :default: 1
+
+   Number of background threads updating navmesh.
+   Increasing threads may affect latency and performance.
+
+.. omw-setting::
+   :title: max nav mesh tiles cache size
+   :type: uint
+   :range: ≥ 0
+   :default: 268435456
+
+   Maximum memory size for cached navmesh tiles.
+   Larger cache reduces update latency but uses more memory.
+
+.. omw-setting::
+   :title: min update interval ms
+   :type: int
+   :range: ≥ 0
+   :default: 250
+
+   Minimum milliseconds between navmesh updates per tile when objects move.
+   Smaller values increase CPU usage.
+
+.. omw-setting::
+   :title: enable write recast mesh to file
+   :type: boolean
+   :range: true, false
+   :default: false
+
+   Write recast mesh to .obj file on each update for debugging.
+
+.. omw-setting::
+   :title: enable write nav mesh to file
+   :type: boolean
+   :range: true, false
+   :default: false
+
+   Write navmesh to file readable by RecastDemo app.
+
+.. omw-setting::
+   :title: enable recast mesh file name revision
+   :type: boolean
+   :range: true, false
+   :default: false
 
-This section is for players.
+   Append revision number to recast mesh file names to keep history.
 
-enable
-------
+.. omw-setting::
+   :title: enable nav mesh file name revision
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   Append revision number to navmesh file names to keep history.
 
-Enable navigator to make all settings in this category take effect.
-When enabled, a navigation mesh (navmesh) is built in the background for world geometry to be used for pathfinding.
-When disabled only the path grid is used to build paths.
-Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world.
-May slightly affect performance on multi-core CPU systems.
-Multi-core CPU systems may have different latency for navigation mesh update depending on other settings and system performance.
-Moving across external world, entering/exiting location produce navigation mesh update.
-NPC and creatures may not be able to find path before navigation mesh is built around them.
-Try to disable this if you want to have old fashioned AI which doesn't know where to go when you stand behind that stone and cast a firebolt.
+.. omw-setting::
+   :title: recast mesh path prefix
+   :type: string
+   :default: ""
 
-max tiles number
-----------------
+   File path prefix for recast mesh files.
 
-:Type:		integer
-:Range:		>= 0
-:Default:	512
+.. omw-setting::
+   :title: nav mesh path prefix
+   :type: string
+   :default: ""
 
-Number of tiles at navigation mesh.
-Nav mesh covers circle area around player.
-This option allows to set an explicit limit for navigation mesh size, how many tiles should fit into circle.
-If actor is inside this area it able to find path over navigation mesh.
-Increasing this value may decrease performance.
+   File path prefix for navmesh files.
 
-.. note::
-    Don't expect infinite navigation mesh size increasing.
-    This condition is always true: ``max tiles number * max polygons per tile <= 4194304``.
-    It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
+.. omw-setting::
+   :title: enable nav mesh render
+   :type: boolean
+   :range: true, false
+   :default: false
 
-wait until min distance to player
----------------------------------
+   Render the navmesh in-game for debugging.
 
-:Type:		integer
-:Range:		>= 0
-:Default:	5
+.. omw-setting::
+   :title: nav mesh render mode
+   :type: string
+   :range: "area type", "update frequency"
+   :default: "area type"
 
-Distance in navigation mesh tiles around the player to keep loading screen until navigation mesh is generated.
-Allows to complete cell loading only when minimal navigation mesh area is generated to correctly find path for actors
-nearby the player. Increasing this value will keep loading screen longer but will slightly increase navigation mesh generation
-speed on systems bound by CPU. Zero means no waiting.
+   Mode to render navmesh: color by area type or show update frequency heatmap.
 
-enable nav mesh disk cache
---------------------------
+.. omw-setting::
+   :title: enable agents paths render
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   Render NPC/creature planned paths, even if navigator disabled.
 
-If true navigation mesh cache stored on disk will be used in addition to memory cache.
-If navigation mesh tile is not present in memory cache, it will be looked up in the disk cache.
-If it's not found there it will be generated.
+.. omw-setting::
+   :title: enable recast mesh render
+   :type: boolean
+   :range: true, false
+   :default: false
 
-write to navmeshdb
-------------------
+   Render recast mesh (culled tiles from physical mesh) for debugging.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+.. omw-setting::
+   :title: wait for all jobs on exit
+   :type: boolean
+   :range: true, false
+   :default: false
 
-If true generated navigation mesh tiles will be stored into disk cache while game is running.
+   Wait for all async navmesh jobs to complete before engine exit.
 
-max navmeshdb file size
------------------------
+.. omw-setting::
+   :title: recast scale factor
+   :type: float32
+   :range: > 0.0
+   :default: 0.029411764705882353
 
-:Type:		unsigned 64-bit integer
-:Range:		> 0
-:Default:	2147483648
+   Scale factor between navigation mesh voxels and world units.
+   Changing affects mesh generation and navigation accuracy.
 
-Approximate maximum file size of navigation mesh cache stored on disk in bytes (value > 0).
+.. omw-setting::
+   :title: max polygon path size
+   :type: uint
+   :range: > 0
+   :default: 1024
 
-Advanced settings
-*****************
+   Maximum path length over polygons.
 
-This section is for advanced PC uses who understands concepts of OS thread and memory.
+.. omw-setting::
+   :title: max smooth path size
+   :type: uint
+   :range: > 0
+   :default: 1024
 
-async nav mesh updater threads
-------------------------------
+   Maximum length of smoothed path.
 
-:Type:		platform dependant unsigned integer
-:Range:		>= 1
-:Default:	1
+.. omw-setting::
+   :title: cell height
+   :type: float32
+   :range: > 0.0
+   :default: 0.2
 
-Number of background threads to update navigation mesh.
-Increasing this value may decrease performance, but also may decrease or increase navigation mesh update latency depending on number of CPU cores.
-On systems with not less than 4 CPU cores latency dependens approximately like 1/log(n) from number of threads.
-Don't expect twice better latency by doubling this value.
+   Height (Z axis) size of each voxel cell in navigation mesh.
 
-max nav mesh tiles cache size
------------------------------
+.. omw-setting::
+   :title: cell size
+   :type: float32
+   :range: > 0.0
+   :default: 0.2
 
-:Type:		platform dependant unsigned integer
-:Range:		>= 0
-:Default:	268435456
+   XY plane size of each voxel cell in navigation mesh.
 
-Maximum total cached size of all navigation mesh tiles in bytes.
-Setting greater than zero value will reduce navigation mesh update latency for previously visited locations.
-Increasing this value may increase total memory consumption, but potentially will reduce latency for recently visited locations.
-Limit this value by total available physical memory minus base game memory consumption and other applications.
-Game will not eat all memory at once.
-Memory will be consumed in approximately linear dependency from number of navigation mesh updates.
-But only for new locations or already dropped from cache.
+.. omw-setting::
+   :title: detail sample dist
+   :type: float32
+   :range: 0.0 or ≥ 0.9
+   :default: 6.0
 
-min update interval ms
-----------------------
+   Sampling distance when generating detail mesh.
 
-:Type:		integer
-:Range:		>= 0
-:Default:	250
+.. omw-setting::
+   :title: detail sample max error
+   :type: float32
+   :range: ≥ 0.0
+   :default: 1.0
 
-Minimum time duration required to pass before next navigation mesh update for the same tile in milliseconds.
-Only tiles affected where objects are transformed.
-Next update for tile with added or removed object will not be delayed.
-Visible ingame effect is navigation mesh update around opening or closing door.
-Primary usage is for rotating signs like in Seyda Neen at Arrille's Tradehouse entrance.
-Decreasing this value may increase CPU usage by background threads.
+   Maximum deviation distance of detail mesh surface from heightfield.
 
-Developer's settings
-********************
+.. omw-setting::
+   :title: max simplification error
+   :type: float32
+   :range: ≥ 0.0
+   :default: 1.3
 
-This section is for developers or anyone who wants to learn how navigation mesh system works in OpenMW.
+   Max deviation for simplified contours from raw contour.
 
-enable write recast mesh to file
---------------------------------
+.. omw-setting::
+   :title: tile size
+   :type: int
+   :range: > 0
+   :default: 128
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Width and height of each navmesh tile in voxels.
 
-Write recast mesh to file in .obj format for each use to update navigation mesh.
-Option is used to find out what world geometry is used to build navigation mesh.
-Potentially decreases performance.
+.. omw-setting::
+   :title: border size
+   :type: int
+   :range: ≥ 0
+   :default: 16
 
-enable write nav mesh to file
------------------------------
+   Size of non-navigable border around heightfield.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: max edge len
+   :type: int
+   :range: ≥ 0
+   :default: 12
 
-Write navigation mesh to file to be able to open by RecastDemo application.
-Usually it is more useful to have both enable write recast mesh to file and this options enabled.
-RecastDemo supports .obj files.
-Potentially decreases performance.
+   Max length for contour edges on mesh border.
 
-enable recast mesh file name revision
--------------------------------------
+.. omw-setting::
+   :title: max nav mesh query nodes
+   :type: int
+   :range: [1, 65535]
+   :default: 2048
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Maximum number of search nodes for pathfinding queries.
 
-Write each recast mesh file with revision in name.
-Otherwise will rewrite same file.
-If it is unclear when geometry is changed use this option to dump multiple files for each state.
+.. omw-setting::
+   :title: max polygons per tile
+   :type: int
+   :range: powers of two [0, 22]
+   :default: 4096
 
-enable nav mesh file name revision
-----------------------------------
+   Max polygons per navmesh tile.
+   Must satisfy: max tiles number * max polygons per tile ≤ 4194304.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: max verts per poly
+   :type: int
+   :range: ≥ 3
+   :default: 6
 
-Write each navigation mesh file with revision in name.
-Otherwise will rewrite same file.
-If it is unclear when navigation mesh is changed use this option to dump multiple files for each state.
+   Max vertices per polygon in mesh.
 
-recast mesh path prefix
------------------------
+.. omw-setting::
+   :title: region merge area
+   :type: int
+   :range: ≥ 0
+   :default: 400
 
-:Type:		string
-:Range:		file system path
-:Default:	""
+   Regions smaller than this may be merged with larger ones.
 
-Write recast mesh file at path with this prefix.
+.. omw-setting::
+   :title: region min area
+   :type: int
+   :range: ≥ 0
+   :default: 64
 
-nav mesh path prefix
---------------------
-
-:Type:		string
-:Range:		file system path
-:Default:	""
-
-Write navigation mesh file at path with this prefix.
-
-enable nav mesh render
-----------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Render navigation mesh.
-Allows to do in-game debug.
-Every navigation mesh is visible and every update is noticeable.
-Potentially decreases performance.
-
-nav mesh render mode
---------------------
-
-:Type:		string
-:Range:		"area type", "update frequency"
-:Default:	"area type"
-
-Render navigation mesh in specific mode.
-"area type" - show area types using different colours.
-"update frequency" - show tiles update frequency as a heatmap.
-
-enable agents paths render
---------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Render agents paths.
-Make visible all NPC's and creaure's plans where they are going.
-Works even if Navigator is disabled.
-Potentially decreases performance.
-
-enable recast mesh render
--------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Render recast mesh that is built as set of culled tiles from physical mesh.
-Should show similar mesh to physical one.
-Little difference can be a result of floating point error.
-Absent pieces usually mean a bug in recast mesh tiles building.
-Allows to do in-game debug.
-Potentially decreases performance.
-
-wait for all jobs on exit
--------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Wait until all queued async navmesh jobs are processed before exiting the engine.
-Useful when a benchmark generates jobs to write into navmeshdb faster than they are processed.
-
-Expert settings
-***************
-
-This section is for developers who wants to go deeper into Detournavigator component logic.
-
-recast scale factor
--------------------
-
-:Type:		floating point
-:Range:		> 0.0
-:Default:	0.029411764705882353
-
-Scale of navigation mesh coordinates to world coordinates. Recastnavigation builds voxels for world geometry.
-Basically voxel size is 1 / "cell size". To reduce amount of voxels we apply scale factor, to make voxel size
-"recast scale factor" / "cell size". Default value calculates by this equation:
-sStepSizeUp * "recast scale factor" / "cell size" = 5 (max climb height should be equal to 4 voxels).
-Changing this value will change generated navigation mesh. Some locations may become unavailable for NPC and creatures.
-Pay attention to slopes and roofs when change it. Increasing this value will reduce navigation mesh update latency.
-
-max polygon path size
----------------------
-
-:Type:		platform dependant unsigned integer
-:Range:		> 0
-:Default:	1024
-
-Maximum size of path over polygons.
-
-max smooth path size
---------------------
-
-:Type:		platform dependant unsigned integer
-:Range:		> 0
-:Default:	1024
-
-Maximum size of smoothed path.
-
-Expert Recastnavigation related settings
-****************************************
-
-This section is for OpenMW developers who knows about `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library and understands how it works.
-
-cell height
------------
-
-:Type:		floating point
-:Range:		> 0.0
-:Default:	0.2
-
-The z-axis cell size to use for fields.
-Defines voxel/grid/cell size. So their values have significant
-side effects on all parameters defined in voxel units.
-The minimum value for this parameter depends on the platform's floating point
-accuracy, with the practical minimum usually around 0.05.
-Same default value is used in RecastDemo.
-
-cell size
----------
-
-:Type:		floating point
-:Range:		> 0.0
-:Default:	0.2
-
-The xy-plane cell size to use for fields.
-Defines voxel/grid/cell size. So their values have significant
-side effects on all parameters defined in voxel units.
-The minimum value for this parameter depends on the platform's floating point
-accuracy, with the practical minimum usually around 0.05.
-Same default value is used in RecastDemo.
-
-detail sample dist
-------------------
-
-:Type:		floating point
-:Range:		= 0.0 or >= 0.9
-:Default:	6.0
-
-Sets the sampling distance to use when generating the detail mesh.
-
-detail sample max error
------------------------
-
-:Type:		floating point
-:Range:		>= 0.0
-:Default:	1.0
-
-The maximum distance the detail mesh surface should deviate from heightfield data.
-
-max simplification error
-------------------------
-
-:Type:		floating point
-:Range:		>= 0.0
-:Default:	1.3
-
-The maximum distance a simplfied contour's border edges should deviate the original raw contour.
-
-tile size
----------
-
-:Type:		integer
-:Range:		> 0
-:Default:	128
-
-The width and height of each tile.
-
-border size
------------
-
-:Type:		integer
-:Range:		>= 0
-:Default:	16
-
-The size of the non-navigable border around the heightfield.
-
-max edge len
-------------
-
-:Type:		integer
-:Range:		>= 0
-:Default:	12
-
-The maximum allowed length for contour edges along the border of the mesh.
-
-max nav mesh query nodes
-------------------------
-
-:Type:		integer
-:Range:		0 < value <= 65535
-:Default:	2048
-
-Maximum number of search nodes.
-
-max polygons per tile
----------------------
-
-:Type:		integer
-:Range:		2^n, 0 < n < 22
-:Default:	4096
-
-Maximum number of polygons per navigation mesh tile. Maximum number of navigation mesh tiles depends on
-this value. 22 bits is a limit to store both tile identifier and polygon identifier (tiles = 2^(22 - log2(polygons))).
-See `recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ for more details.
-
-.. Warning::
-    Lower value may lead to ignored world geometry on navigation mesh.
-    Greater value will reduce number of navigation mesh tiles.
-    This condition is always true: ``max tiles number * max polygons per tile <= 4194304``.
-    It's a limitation of `Recastnavigation <https://github.com/recastnavigation/recastnavigation>`_ library.
-
-max verts per poly
-------------------
-
-:Type:		integer
-:Range:		>= 3
-:Default:	6
-
-The maximum number of vertices allowed for polygons generated during the contour to polygon conversion process.
-
-region merge area
------------------
-
-:Type:		integer
-:Range:		>= 0
-:Default:	400
-
-Any regions with a span count smaller than this value will, if possible, be merged with larger regions.
-
-region min area
----------------
-
-:Type:		integer
-:Range:		>= 0
-:Default:	64
-
-The minimum number of cells allowed to form isolated island areas.
+   Minimum cell count to form isolated regions.

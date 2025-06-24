@@ -1,130 +1,104 @@
-General Settings
-################
+General
+#######
 
-anisotropy
-----------
+.. omw-setting::
+   :title: anisotropy
+   :type: int
+   :range: 0 to 16
+   :default: 4
+   :location: :bdg-info:`In Game > Options > Video > Detail Level`
 
-:Type:		integer
-:Range:		0 to 16
-:Default:	4
+   Set the maximum anisotropic filtering on textures.
+   Anisotropic filtering enhances the image quality of textures on surfaces at oblique viewing angles.
+   Valid values range from 0 to 16.
+   Modern video cards can often perform 8 or 16 anisotropic filtering with minimal performance impact.
 
-Set the maximum anisotropic filtering on textures.
-Anisotropic filtering is a method of enhancing the image quality of textures
-on surfaces that are at oblique viewing angles with respect to the camera. Valid values range from 0 to 16.
-Modern video cards can often perform 8 or 16 anisotropic filtering with a minimal performance impact.
-This effect of this setting can be seen in the Video panel of the Options menu by finding a location with straight lines
-(striped rugs and Balmora cobblestones work well) radiating into the distance, and adjusting the anisotropy slider.
+   This setting's effect can be seen by finding locations with straight lines
+   (striped rugs or Balmora cobblestones) radiating into the distance,
+   and adjusting the anisotropy slider.
 
-This setting can be changed in game
-using the Anisotropy slider in the Detail tab of the Video panel of the Options menu.
+.. omw-setting::
+   :title: screenshot format
+   :type: string
+   :range: jpg, png, tga
+   :default: png
+   :location: :bdg-success:`Launcher > Settings > Miscellaneous`
 
-screenshot format
------------------
+   Specify the format for screenshots taken using the screenshot key (F12 by default).
+   This should be the file extension commonly associated with the format.
+   Supported formats depend on compilation, but typically include "jpg", "png", and "tga".
 
-:Type:		string
-:Range:		jpg, png, tga
-:Default:	png
+.. omw-setting::
+   :title: texture mag filter
+   :type: string
+   :range: nearest, linear
+   :default: linear
 
-Specify the format for screen shots taken by pressing the screen shot key (bound to F12 by default).
-This setting should be the file extension commonly associated with the desired format.
-The formats supported will be determined at compilation, but "jpg", "png", and "tga" should be allowed.
+   Set the texture magnification filter type.
 
-This setting can be controlled in the Settings tab of the launcher.
+.. omw-setting::
+   :title: texture min filter
+   :type: string
+   :range: nearest, linear
+   :default: linear
 
-texture mag filter
-------------------
+   Set the texture minification filter type.
 
-:Type:		string
-:Range:		nearest, linear
-:Default:	linear
+.. omw-setting::
+   :title: texture mipmap
+   :type: string
+   :range: none, nearest, linear
+   :default: nearest
 
-Set the texture magnification filter type.
+   Set the texture mipmap type to control the method mipmaps are created.
+   Mipmapping reduces processing power needed during minification by pre-generating a series of smaller textures.
 
-texture min filter
-------------------
+.. omw-setting::
+   :title: notify on saved screenshot
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Miscellaneous`
 
-:Type:		string
-:Range:		nearest, linear
-:Default:	linear
+   Show a message box when a screenshot is saved to a file.
 
-Set the texture minification filter type.
+.. omw-setting::
+   :title: preferred locales
+   :type: string
+   :default: en
+   :location: :bdg-info:`In Game > Options > Language`
 
-texture mipmap
---------------
+   Comma-separated list of preferred locales (e.g. "de,en").
+   Each locale must consist of a two-letter language code and can optionally include a two-letter country code (e.g. "en_US").
+   Country codes improve accuracy, but partial matches are allowed.
 
-:Type:		string
-:Range:		none, nearest, linear
-:Default:	nearest
+.. omw-setting::
+   :title: gmst overrides l10n
+   :type: boolean
+   :range: true, false
+   :default: true
+   :location: :bdg-info:`In Game > Options > Language`
 
-Set the texture mipmap type to control the method mipmaps are created.
-Mipmapping is a way of reducing the processing power needed during minification
-by pregenerating a series of smaller textures.
+   If true, localization GMSTs in content take priority over l10n files.
+   Set to false if your preferred locale does not match the content language.
 
-notify on saved screenshot
---------------------------
+.. omw-setting::
+   :title: log buffer size
+   :type: int
+   :range: ≥ 0
+   :default: 65536
+   
+   Buffer size for the in-game log viewer (F10).
+   If the log exceeds the buffer size, only the end will be visible.
+   Setting this to zero disables the log viewer.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: console history buffer size
+   :type: int
+   :range: ≥ 0
+   :default: 4096
 
-Show message box when screenshot is saved to a file.
 
-This setting can be controlled in the Settings tab of the launcher.
-
-preferred locales
------------------
-
-:Type:		string
-:Default:	en
-
-List of the preferred locales separated by comma.
-For example "de,en" means German as the first priority and English as a fallback.
-
-Each locale must consist of a two-letter language code (e.g. "de" or "en") and
-can also optionally include a two-letter country code (e.g. "en_US", "fr_CA").
-Locales with country codes can match locales without one (e.g. specifying "en_US"
-will match "en"), so is recommended that you include the country codes where possible,
-since if the country code isn't specified the generic language-code only locale might
-refer to any of the country-specific variants.
-
-Two highest priority locales may be assigned via the Localization tab of the in-game options.
-
-gmst overrides l10n
--------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-If true, localization GMSTs in content have priority over l10n files.
-Setting to false can be useful if selected preferred locale doesn't
-match the language of content files.
-
-Can be changed via the Localization tab of the in-game options.
-
-log buffer size
----------------
-
-:Type:		platform dependant unsigned integer
-:Range:		>= 0
-:Default:	65536
-
-Buffer size for the in-game log viewer (press F10 to toggle the log viewer).
-When the log doesn't fit into the buffer, only the end of the log is visible in the log viewer.
-Zero disables the log viewer.
-
-This setting can only be configured by editing the settings configuration file.
-
-console history buffer size 
----------------------------
-
-:Type:		platform dependant unsigned integer
-:Range:		>= 0
-:Default:	4096
-
-Number of console history objects to retrieve from previous session. If the number of history 
-objects in the file exceeds this value, history objects will be erased starting from the oldest. 
-This operation runs on every new session. See :doc:`../paths` for location of the history file.
-
-This setting can only be configured by editing the settings configuration file.
-
+   Number of console history entries retrieved from the previous session.
+   Older entries are discarded when the file exceeds this value.
+   See :doc:`../paths` for the location of the history file.

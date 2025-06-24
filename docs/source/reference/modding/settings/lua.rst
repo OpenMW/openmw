@@ -1,100 +1,74 @@
 Lua Settings
 ############
 
-lua debug
----------
+.. omw-setting::
+   :title: lua debug
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Enables debug tracebacks for Lua actions.
+   Causes significant performance overhead.
 
-Enables debug tracebacks for Lua actions.
-It adds significant performance overhead, don't enable if you don't need it.
+.. omw-setting::
+   :title: lua num threads
+   :type: int
+   :range: 0, 1
+   :default: 1
 
-This setting can only be configured by editing the settings configuration file.
+   Maximum number of threads used for Lua scripts.
+   0 = main thread only, 1 = separate thread.
+   Values >1 not supported.
 
-lua num threads
----------------
+.. omw-setting::
+   :title: lua profiler
+   :type: boolean
+   :range: true, false
+   :default: true
 
-:Type:		integer
-:Range:		0, 1
-:Default:	1
+   Enables Lua profiler.
 
-The maximum number of threads used for Lua scripts.
-If zero, Lua scripts are processed in the main thread.
-If one, a separate thread is used.
-Values >1 are not yet supported.
+.. omw-setting::
+   :title: small alloc max size
+   :type: int
+   :range: ≥ 0
+   :default: 1024
 
-This setting can only be configured by editing the settings configuration file.
+   Max size in bytes for allocations without ownership tracking.
+   Used only if lua profiler is true.
+   Lower values increase memory tracking detail at cost of overhead.
 
-lua profiler
-------------
+.. omw-setting::
+   :title: memory limit
+   :type: int
+   :range: > 0
+   :default: 2147483648
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   Memory limit for Lua runtime (if lua profiler is true).
+   If exceeded, only small allocations are allowed.
 
-Enables Lua profiler.
+.. omw-setting::
+   :title: log memory usage
+   :type: boolean
+   :range: true, false
+   :default: false
 
-This setting can only be configured by editing the settings configuration file.
+   Prints debug info about memory usage (if lua profiler is true).
 
-small alloc max size
---------------------
+.. omw-setting::
+   :title: instruction limit per call
+   :type: int
+   :range: > 1000
+   :default: 100000000
 
-:Type:		unsigned 64-bit integer
-:Range:		>= 0
-:Default:	1024
+   Max number of Lua instructions per function call (if lua profiler is true).
+   Functions exceeding this limit will be terminated.
 
-No ownership tracking for memory allocations below or equal this size (in bytes).
-This setting is used only if ``lua profiler = true``.
-With the default value (1024) the lua profiler will show almost no memory usage because allocation more than 1KB are rare.
-Decrease the value of this setting (e.g. set it to 64) to have better memory tracking by the cost of higher overhead.
+.. omw-setting::
+   :title: gc steps per frame
+   :type: int
+   :range: ≥ 0
+   :default: 100
 
-This setting can only be configured by editing the settings configuration file.
-
-memory limit
-------------
-
-:Type:		unsigned 64-bit integer
-:Range:		> 0
-:Default:	2147483648 (2GB)
-
-Memory limit for Lua runtime (only if ``lua profiler = true``). If exceeded then only small allocations are allowed.
-Small allocations are always allowed, so e.g. Lua console can function.
-
-This setting can only be configured by editing the settings configuration file.
-
-log memory usage
-----------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Print debug info about memory usage (only if ``lua profiler = true``).
-
-This setting can only be configured by editing the settings configuration file.
-
-instruction limit per call
---------------------------
-
-:Type:		unsigned 64-bit integer
-:Range:		> 1000
-:Default:	100000000
-
-The maximal number of Lua instructions per function call (only if ``lua profiler = true``).
-If exceeded (e.g. because of an infinite loop) the function will be terminated.
-
-This setting can only be configured by editing the settings configuration file.
-
-gc steps per frame
-------------------
-
-:Type:		integer
-:Range:		>= 0
-:Default:	100
-
-Lua garbage collector steps per frame. The higher the value the more time Lua runtime can spend on freeing unused memory.
-
-This setting can only be configured by editing the settings configuration file.
-
+   Lua garbage collector steps per frame.
+   Higher values allow more memory to be freed per frame.

@@ -1,0 +1,21 @@
+.omw-setting td:nth-child(1) { width: 20%; }
+.omw-setting td:nth-child(2) { width: 20%; }
+.omw-setting td:nth-child(3) { width: 20%; }
+.omw-setting td:nth-child(4) { width: 20%; }
+
+.omw-setting .type-color-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    padding: 0;
+    gap: 12px;
+}
+
+.color-chip {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 0.2em;
+    border: 1px solid #333;
+}

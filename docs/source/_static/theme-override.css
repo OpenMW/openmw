@@ -113,18 +113,18 @@ tbody tr:hover {
     }
 }
 
-/* Less intrusive scrollbar in left section TOC */
-#left-sidebar::-webkit-scrollbar {
+/* Less intrusive scrollbar in the TOC */
+#left-sidebar::-webkit-scrollbar, #right-sidebar .sticky::-webkit-scrollbar {
     width: 6px;
     border-radius: 0;
 }
 
-#left-sidebar::-webkit-scrollbar-thumb {
+#left-sidebar::-webkit-scrollbar-thumb, #right-sidebar .sticky::-webkit-scrollbar-thumb {
     background-color: hsl(var(--border));;
     border-radius: 0;
 }
 
-#left-sidebar::-webkit-scrollbar-thumb:hover {
+#left-sidebar::-webkit-scrollbar-thumb:hover, #right-sidebar .sticky::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted));;
 }
 

@@ -25,6 +25,7 @@ from sphinxawesome_theme.postprocess import Icons
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 project_root = os.path.abspath('../../')
 sys.path.insert(0, project_root)
+sys.path.append(os.path.abspath("_ext"))
 
 # -- General configuration ------------------------------------------------
 
@@ -42,6 +43,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
     'sphinx_design',
+    'omw-directives'
 ]
 
 #autosectionlabel_prefix_document = True

@@ -54,25 +54,25 @@ The ranges included with each setting are the physically possible ranges, not re
         Camera <camera>
         Cells <cells>
         Fog <fog>
-        Groundcover <groundcover>
-        Map <map>
-        GUI <GUI>
-        HUD <HUD>
         Game <game>
         General <general>
+        Groundcover <groundcover>
+        GUI <GUI>
+        HUD <HUD>
+        Input <input>
         Lua <lua>
+        Map <map>
+        Models <models>
+        Navigator <navigator>
+        Physics <physics>
+        Post-Processing <postprocessing>
         Shaders <shaders>
         Shadows <shadows>
-        Input <input>
         Saves <saves>
         Sound <sound>
+        Stereo <stereo>
+        Stereo View <stereoview>
         Terrain <terrain>
         Video <video>
         Water <water>
         Windows <windows>
-        Navigator <navigator>
-        Physics <physics>
-        Models <models>
-        Post-Processing <postprocessing>
-        Stereo <stereo>
-        Stereo View <stereoview>
