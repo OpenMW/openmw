@@ -1,15 +1,15 @@
 #include "landbindings.hpp"
 
-#include <apps/openmw/mwlua/object.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
-#include <apps/openmw/mwworld/worldmodel.hpp>
-
+#include <components/esm/refid.hpp>
 #include <components/esm/util.hpp>
 #include <components/esmterrain/storage.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/worldmodel.hpp"
+#include "object.hpp"
 
 namespace
 {
@@ -37,15 +37,18 @@ namespace
         return { tex, plugin };
     }
 
-    const ESM::RefId worldspaceAt(sol::object cellOrName)
+    const ESM::RefId worldspaceAt(sol::object cellOrId)
     {
         const MWWorld::Cell* cell = nullptr;
-        if (cellOrName.is<MWLua::GCell>())
-            cell = cellOrName.as<MWLua::GCell>().mStore->getCell();
-        else if (cellOrName.is<MWLua::LCell>())
-            cell = cellOrName.as<MWLua::LCell>().mStore->getCell();
-        else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
-            cell = MWBase::Environment::get().getWorldModel()->getCell(cellOrName.as<std::string_view>()).getCell();
+        if (cellOrId.is<MWLua::GCell>())
+            cell = cellOrId.as<MWLua::GCell>().mStore->getCell();
+        else if (cellOrId.is<MWLua::LCell>())
+            cell = cellOrId.as<MWLua::LCell>().mStore->getCell();
+        else if (cellOrId.is<std::string_view>() && !cellOrId.as<std::string_view>().empty())
+            cell = MWBase::Environment::get()
+                       .getWorldModel()
+                       ->getCell(ESM::RefId::deserializeText(cellOrId.as<std::string_view>()))
+                       .getCell();
         if (cell == nullptr)
             throw std::runtime_error("Invalid cell");
         else if (!cell->isExterior())
@@ -62,16 +65,16 @@ namespace MWLua
         sol::state_view lua = context.sol();
         sol::table landApi(lua, sol::create);
 
-        landApi["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrName) {
-            ESM::RefId worldspace = worldspaceAt(cellOrName);
+        landApi["getHeightAt"] = [](const osg::Vec3f& pos, sol::object cellOrId) {
+            ESM::RefId worldspace = worldspaceAt(cellOrId);
             return MWBase::Environment::get().getWorld()->getTerrainHeightAt(pos, worldspace);
         };
 
-        landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrName) {
+        landApi["getTextureAt"] = [lua = lua](const osg::Vec3f& pos, sol::object cellOrId) {
             sol::variadic_results values;
             const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const MWWorld::Store<ESM::Land>& landStore = store.get<ESM::Land>();
-            ESM::RefId worldspace = worldspaceAt(cellOrName);
+            ESM::RefId worldspace = worldspaceAt(cellOrId);
 
             if (worldspace != ESM::Cell::sDefaultWorldspaceId)
                 return values;
