@@ -40,8 +40,8 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       // sunlight extinction
 
 const float SUN_SPEC_FADING_THRESHOLD = 0.15;       // visibility at which sun specularity starts to fade
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
-const float SPEC_BUMPINESS = 5.0;				   // surface bumpiness boost for specular
-const float SPEC_BRIGHTNESS = 1.5;				   // boosts the brightness of the specular highlights
+const float SPEC_BUMPINESS = 5.0;                  // surface bumpiness boost for specular
+const float SPEC_BRIGHTNESS = 1.5;                 // boosts the brightness of the specular highlights
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
 const float REFR_FOG_DISTORT_DISTANCE = 3000.0;    // at what distance refraction fog will be calculated using real water depth instead of distorted depth (prevents splotchy shores)
