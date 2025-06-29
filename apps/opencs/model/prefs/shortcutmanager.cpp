@@ -78,7 +78,7 @@ namespace CSMPrefs
         }
     }
 
-    bool ShortcutManager::getModifier(const std::string& name, int& modifier) const
+    bool ShortcutManager::getModifier(std::string_view name, int& modifier) const
     {
         ModifierMap::const_iterator item = mModifiers.find(name);
         if (item != mModifiers.end())
@@ -175,14 +175,14 @@ namespace CSMPrefs
         return concat;
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, QKeySequence& sequence) const
+    void ShortcutManager::convertFromString(std::string_view data, QKeySequence& sequence) const
     {
         const int MaxKeys = 4; // A limitation of QKeySequence
 
         size_t end = data.find(';');
         size_t size = std::min(end, data.size());
 
-        std::string value = data.substr(0, size);
+        std::string_view value = data.substr(0, size);
         size_t start = 0;
 
         int keyPos = 0;
@@ -195,7 +195,7 @@ namespace CSMPrefs
             end = data.find('+', start);
             end = std::min(end, value.size());
 
-            std::string name = value.substr(start, end - start);
+            std::string_view name = value.substr(start, end - start);
 
             if (name == "Ctrl")
             {
@@ -242,12 +242,12 @@ namespace CSMPrefs
         sequence = QKeySequence(keys[0], keys[1], keys[2], keys[3]);
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, int& modifier) const
+    void ShortcutManager::convertFromString(std::string_view data, int& modifier) const
     {
         size_t start = data.find(';') + 1;
         start = std::min(start, data.size());
 
-        std::string name = data.substr(start);
+        std::string_view name = data.substr(start);
         KeyMap::const_iterator searchResult = mKeys.find(name);
         if (searchResult != mKeys.end())
         {
@@ -259,7 +259,7 @@ namespace CSMPrefs
         }
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, QKeySequence& sequence, int& modifier) const
+    void ShortcutManager::convertFromString(std::string_view data, QKeySequence& sequence, int& modifier) const
     {
         convertFromString(data, sequence);
         convertFromString(data, modifier);
