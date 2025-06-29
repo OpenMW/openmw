@@ -21,6 +21,24 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
 
+namespace
+{
+    void prependToEachLine(QTextCursor begin, const QString& text)
+    {
+        QTextCursor end = begin;
+        begin.setPosition(begin.selectionStart());
+        begin.movePosition(QTextCursor::StartOfLine);
+        end.setPosition(end.selectionEnd());
+        end.movePosition(QTextCursor::EndOfLine);
+        begin.beginEditBlock();
+        for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
+        {
+            begin.insertText(text);
+        }
+        begin.endEditBlock();
+    }
+}
+
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock(ScriptEdit& edit)
     : mEdit(edit)
 {
@@ -44,6 +62,55 @@ bool CSVWorld::ScriptEdit::event(QEvent* event)
     }
 
     return QPlainTextEdit::event(event);
+}
+
+void CSVWorld::ScriptEdit::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Backtab)
+    {
+        QTextCursor cursor = textCursor();
+        QTextCursor end = cursor;
+        cursor.setPosition(cursor.selectionStart());
+        cursor.movePosition(QTextCursor::StartOfLine);
+        end.setPosition(end.selectionEnd());
+        end.movePosition(QTextCursor::EndOfLine);
+        cursor.beginEditBlock();
+        for (; cursor < end; cursor.movePosition(QTextCursor::EndOfLine), cursor.movePosition(QTextCursor::Right))
+        {
+            cursor.select(QTextCursor::LineUnderCursor);
+            QString line = cursor.selectedText();
+
+            if (line.isEmpty())
+                continue;
+            qsizetype index = 0;
+            if (line[0] == '\t')
+                index = 1;
+            else
+            {
+                // Remove up to a tab worth of spaces instead
+                while (line[index].isSpace() && index < mTabCharCount && line[index] != '\t')
+                    index++;
+            }
+
+            if (index != 0)
+            {
+                line.remove(0, index);
+                cursor.insertText(line);
+            }
+        }
+        cursor.endEditBlock();
+        return;
+    }
+    else if (event->key() == Qt::Key_Tab)
+    {
+        QTextCursor cursor = textCursor();
+        if (cursor.hasSelection())
+        {
+            prependToEachLine(cursor, "\t");
+            return;
+        }
+    }
+    QPlainTextEdit::keyPressEvent(event);
 }
 
 CSVWorld::ScriptEdit::ScriptEdit(const CSMDoc::Document& document, ScriptHighlighter::Mode mode, QWidget* parent)
@@ -316,22 +383,7 @@ void CSVWorld::ScriptEdit::markOccurrences()
 
 void CSVWorld::ScriptEdit::commentSelection()
 {
-    QTextCursor begin = textCursor();
-    QTextCursor end = begin;
-    begin.setPosition(begin.selectionStart());
-    begin.movePosition(QTextCursor::StartOfLine);
-
-    end.setPosition(end.selectionEnd());
-    end.movePosition(QTextCursor::EndOfLine);
-
-    begin.beginEditBlock();
-
-    for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
-    {
-        begin.insertText(";");
-    }
-
-    begin.endEditBlock();
+    prependToEachLine(textCursor(), ";");
 }
 
 void CSVWorld::ScriptEdit::uncommentSelection()
@@ -345,17 +397,16 @@ void CSVWorld::ScriptEdit::uncommentSelection()
     end.movePosition(QTextCursor::EndOfLine);
 
     begin.beginEditBlock();
-
     for (; begin < end; begin.movePosition(QTextCursor::EndOfLine), begin.movePosition(QTextCursor::Right))
     {
         begin.select(QTextCursor::LineUnderCursor);
         QString line = begin.selectedText();
 
-        if (line.size() == 0)
+        if (line.isEmpty())
             continue;
 
         // get first nonspace character in line
-        int index;
+        qsizetype index;
         for (index = 0; index != line.size(); ++index)
         {
             if (!line[index].isSpace())
