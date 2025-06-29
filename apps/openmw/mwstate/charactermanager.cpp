@@ -18,10 +18,8 @@ MWState::CharacterManager::CharacterManager(std::filesystem::path saves, const s
     }
     else
     {
-        for (std::filesystem::directory_iterator iter(mPath); iter != std::filesystem::directory_iterator(); ++iter)
+        for (const std::filesystem::path& characterDir : std::filesystem::directory_iterator(mPath))
         {
-            std::filesystem::path characterDir = *iter;
-
             if (std::filesystem::is_directory(characterDir))
             {
                 Character character(characterDir, mGame);
@@ -30,6 +28,7 @@ MWState::CharacterManager::CharacterManager(std::filesystem::path saves, const s
                     mCharacters.push_back(character);
             }
         }
+        mCharacters.sort();
     }
 }
 

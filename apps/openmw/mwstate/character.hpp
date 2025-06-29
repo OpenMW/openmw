@@ -2,6 +2,7 @@
 #define GAME_STATE_CHARACTER_H
 
 #include <filesystem>
+#include <string_view>
 
 #include <components/esm3/savedgame.hpp>
 
@@ -16,7 +17,7 @@ namespace MWState
 
     bool operator<(const Slot& left, const Slot& right);
 
-    std::string getFirstGameFile(const std::vector<std::string>& contentFiles);
+    std::string_view getFirstGameFile(const std::vector<std::string>& contentFiles);
 
     class Character
     {
@@ -63,6 +64,8 @@ namespace MWState
         ///< Return signature information for this character.
         ///
         /// \attention This function must not be called if there are no slots.
+
+        friend bool operator<(const Character& left, const Character& right);
     };
 }
 
