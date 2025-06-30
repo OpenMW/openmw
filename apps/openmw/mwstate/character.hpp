@@ -15,8 +15,6 @@ namespace MWState
         std::filesystem::file_time_type mTimeStamp;
     };
 
-    bool operator<(const Slot& left, const Slot& right);
-
     std::string_view getFirstGameFile(const std::vector<std::string>& contentFiles);
 
     class Character
@@ -67,6 +65,9 @@ namespace MWState
 
         friend bool operator<(const Character& left, const Character& right);
     };
+
+    bool operator<(const Slot& left, const Slot& right);
+    bool operator<(const Character& left, const Character& right);
 }
 
 #endif
