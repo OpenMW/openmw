@@ -375,7 +375,6 @@ namespace MWWorld
                 if (object->getShapeInstance()->mVisualCollisionType == Resource::VisualCollisionType::None)
                     mNavigator.removeObject(DetourNavigator::ObjectId(object), navigatorUpdateGuard);
                 mPhysics->remove(ptr);
-                ptr.mRef->mData.mPhysicsPostponed = false;
             }
             else if (mPhysics->getActor(ptr))
             {
@@ -383,6 +382,8 @@ namespace MWWorld
                 mRendering.removeActorPath(ptr);
                 mPhysics->remove(ptr);
             }
+            else
+                ptr.mRef->mData.mPhysicsPostponed = false;
             MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         }
 
