@@ -122,6 +122,8 @@ namespace MWMechanics
 
         static std::string_view getIdleGroupName(size_t index) { return sIdleSelectToGroupName[index]; }
 
+        void resetInitialPosition() override;
+
     private:
         void stopWalking(const MWWorld::Ptr& actor);
 

@@ -7,7 +7,7 @@
 
 #include <components/bsa/ba2dx10file.hpp>
 #include <components/bsa/ba2gnrlfile.hpp>
-#include <components/bsa/bsa_file.hpp>
+#include <components/bsa/bsafile.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 
 #include <algorithm>

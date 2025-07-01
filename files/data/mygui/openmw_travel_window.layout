@@ -4,18 +4,17 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 500 250" align="Center" name="_Main">
         <Property key="Visible" value="false"/>
 
-        <Widget type="TextBox" skin="SandText" position="8 22 24 24" name="Select" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
-            <Property key="Caption" value="#{sTravelServiceTitle}"/>
-        </Widget>
-        <Widget type="TextBox" skin="NormalText" position="0 4 484 24" name="Travel" align="Center Top">
+        <Widget type="TextBox" skin="NormalText" position="0 3 490 24" name="Travel" align="Center Top">
             <Property key="TextAlign" value="Center"/>
             <Property key="Caption" value="#{sServiceTravelTitle}"/>
         </Widget>
-
+        <Widget type="TextBox" skin="SandText" position="6 22 490 24" name="Select" align="Right Top">
+            <Property key="TextAlign" value="Left"/>
+            <Property key="Caption" value="#{sTravelServiceTitle}"/>
+        </Widget>
 
         <Widget type="Widget" skin="MW_Box" position="6 42 480 165" align="Left Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 472 160" align="Left Top Stretch" name="DestinationsView">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 3 472 160" align="Left Top Stretch" name="DestinationsView">
                 <Property key="CanvasAlign" value="Left"/>
             </Widget>
         </Widget>

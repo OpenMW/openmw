@@ -6,7 +6,7 @@
 
 #include <apps/opencs/model/world/universalid.hpp>
 
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include <QObject>
 

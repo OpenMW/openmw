@@ -185,18 +185,18 @@ namespace MWMechanics
      *
      *  Formula on UESPWiki is not entirely correct.
      */
-    float Enchanting::getEnchantPoints(bool precise) const
+    std::vector<float> Enchanting::getEffectCosts() const
     {
+        std::vector<float> costs;
         if (mEffectList.mList.empty())
-            // No effects added, cost = 0
-            return 0;
+            return costs;
 
+        costs.reserve(mEffectList.mList.size());
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
         const float fEnchantmentConstantDurationMult
             = store.get<ESM::GameSetting>().find("fEnchantmentConstantDurationMult")->mValue.getFloat();
 
-        float enchantmentCost = 0.f;
         float cost = 0.f;
         for (const ESM::IndexedENAMstruct& effect : mEffectList.mList)
         {
@@ -215,8 +215,17 @@ namespace MWMechanics
             if (effect.mData.mRange == ESM::RT_Target)
                 cost *= 1.5f;
 
-            enchantmentCost += precise ? cost : std::floor(cost);
+            costs.push_back(cost);
         }
+
+        return costs;
+    }
+
+    float Enchanting::getEnchantPoints(bool precise) const
+    {
+        float enchantmentCost = 0.f;
+        for (float cost : getEffectCosts())
+            enchantmentCost += precise ? cost : std::floor(cost);
 
         return enchantmentCost;
     }
@@ -278,13 +287,19 @@ namespace MWMechanics
         if (mEnchanter.isEmpty())
             return 0;
 
+        // Use the final effect's accumulated cost
+        float finalEffectCost = 0.f;
+        std::vector<float> effectCosts = getEffectCosts();
+        if (!effectCosts.empty())
+            finalEffectCost = effectCosts.back();
+
         float priceMultipler = MWBase::Environment::get()
                                    .getESMStore()
                                    ->get<ESM::GameSetting>()
                                    .find("fEnchantmentValueMult")
                                    ->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(
-            mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
+            mEnchanter, static_cast<int>(finalEffectCost * priceMultipler), true);
         price *= count * getTypeMultiplier();
         return std::max(1, price);
     }

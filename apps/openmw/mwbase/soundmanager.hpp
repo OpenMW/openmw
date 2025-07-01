@@ -39,8 +39,8 @@ namespace MWSound
 
     class Sound;
     class Stream;
-    struct Sound_Decoder;
-    typedef std::shared_ptr<Sound_Decoder> DecoderPtr;
+    struct SoundDecoder;
+    typedef std::shared_ptr<SoundDecoder> DecoderPtr;
 
     /* These must all fit together */
     enum class PlayMode

@@ -33,15 +33,9 @@ namespace MWGui
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
-        getWidget(mSelect, "Select");
-        getWidget(mDestinations, "Travel");
         getWidget(mDestinationsView, "DestinationsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onCancelButtonClicked);
-
-        mDestinations->setCoord(450 / 2 - mDestinations->getTextSize().width / 2, mDestinations->getTop(),
-            mDestinations->getTextSize().width, mDestinations->getHeight());
-        mSelect->setCoord(8, mSelect->getTop(), mSelect->getTextSize().width, mSelect->getHeight());
 
         if (Settings::gui().mControllerMenus)
         {
@@ -100,8 +94,7 @@ namespace MWGui
 
         const std::string& nameString = name.getRefIdString();
         toAdd->setUserString("price", std::to_string(price));
-        toAdd->setCaptionWithReplacing(
-            "#{sCell=" + nameString + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing("#{sCell=" + nameString + "}  - " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mDestinationsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", nameString);

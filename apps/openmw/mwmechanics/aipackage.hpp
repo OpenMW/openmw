@@ -119,6 +119,7 @@ namespace MWMechanics
 
         /// Reset pathfinding state
         void reset();
+        virtual void resetInitialPosition() {}
 
         /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise
         /// actor should rotate while standing.

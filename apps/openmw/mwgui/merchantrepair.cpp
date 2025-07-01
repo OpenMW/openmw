@@ -83,7 +83,7 @@ namespace MWGui
                 int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
                 std::string name{ iter->getClass().getName(*iter) };
-                name += " - " + MyGUI::utility::toString(price)
+                name += "  - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("sgp")->mValue.getString();
 
                 items.emplace_back(name, price, *iter);

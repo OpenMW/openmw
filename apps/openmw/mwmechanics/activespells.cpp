@@ -267,7 +267,7 @@ namespace MWMechanics
             if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
                 && !isSpellActive(spell->mId))
             {
-                mSpells.emplace_back(ActiveSpellParams{ spell, ptr });
+                mSpells.emplace_back(ActiveSpellParams{ spell, ptr, true });
                 mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
             }
         }
@@ -506,9 +506,9 @@ namespace MWMechanics
         mQueue.emplace_back(params);
     }
 
-    void ActiveSpells::addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor)
+    void ActiveSpells::addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances)
     {
-        mQueue.emplace_back(ActiveSpellParams{ spell, actor, true });
+        mQueue.emplace_back(ActiveSpellParams{ spell, actor, ignoreResistances });
     }
 
     void ActiveSpells::purge(ParamsPredicate predicate, const MWWorld::Ptr& ptr)

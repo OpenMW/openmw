@@ -251,6 +251,9 @@ namespace MWWorld
     {
     public:
         MoonModel(const std::string& name);
+        MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish, float axisOffset,
+            float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle,
+            float moonShadowEarlyFadeAngle);
 
         MWRender::MoonState calculateState(const TimeStamp& gameTime) const;
 
@@ -266,10 +269,12 @@ namespace MWWorld
         float mFadeEndAngle;
         float mMoonShadowEarlyFadeAngle;
 
-        float angle(const TimeStamp& gameTime) const;
-        float moonRiseHour(unsigned int daysPassed) const;
+        float angle(int gameDay, float gameHour) const;
+        float moonPhaseHour(int gameDay) const;
+        float moonRiseHour(int gameDay) const;
         float rotation(float hours) const;
         MWRender::MoonState::Phase phase(const TimeStamp& gameTime) const;
+        bool isVisible(int gameDay, float gameHour) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;

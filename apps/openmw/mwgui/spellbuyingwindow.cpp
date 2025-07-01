@@ -20,6 +20,7 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spells.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 namespace MWGui
 {
@@ -52,8 +53,8 @@ namespace MWGui
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         int price = std::max(1,
-            static_cast<int>(
-                spell.mData.mCost * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
+            static_cast<int>(MWMechanics::calcSpellCost(spell)
+                * store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat()));
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -71,7 +72,7 @@ namespace MWGui
         mCurrentY += lineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell.mName + "   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing(spell.mName + "  - " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mSpellsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");

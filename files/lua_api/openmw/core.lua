@@ -635,7 +635,7 @@
 -- @usage local spell = core.magic.spells.records[1]  -- get by index
 -- @usage -- Print all powers
 -- for _, spell in pairs(core.magic.spells.records) do
---     if spell.types == core.magic.SPELL_TYPE.Power then
+--     if spell.type == core.magic.SPELL_TYPE.Power then
 --         print(spell.name)
 --     end
 -- end

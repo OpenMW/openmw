@@ -20,7 +20,7 @@
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/settings/settings.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
@@ -125,6 +125,7 @@ namespace
         }
 
         Files::ConfigurationManager config;
+        config.processPaths(variables, std::filesystem::current_path());
         config.readConfiguration(variables, desc);
 
         Debug::setupLogging(config.getLogPath(), applicationName);

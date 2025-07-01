@@ -34,7 +34,7 @@
 #include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/settings/settings.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "view/doc/viewmanager.hpp"
 

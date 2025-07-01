@@ -4,29 +4,28 @@ include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 file(GLOB UNITTEST_SRC_FILES
     main.cpp
 
-    esm/test_fixed_string.cpp
-    esm/variant.cpp
+    esm/testfixedstring.cpp
     esm/testrefid.cpp
+    esm/variant.cpp
 
-    lua/test_lua.cpp
-    lua/test_scriptscontainer.cpp
-    lua/test_utilpackage.cpp
-    lua/test_serialization.cpp
-    lua/test_configuration.cpp
-    lua/test_l10n.cpp
-    lua/test_storage.cpp
-    lua/test_async.cpp
-    lua/test_inputactions.cpp
-    lua/test_yaml.cpp
-
-    lua/test_ui_content.cpp
+    lua/testasync.cpp
+    lua/testconfiguration.cpp
+    lua/testinputactions.cpp
+    lua/testl10n.cpp
+    lua/testlua.cpp
+    lua/testscriptscontainer.cpp
+    lua/testserialization.cpp
+    lua/teststorage.cpp
+    lua/testuicontent.cpp
+    lua/testutilpackage.cpp
+    lua/testyaml.cpp
 
     misc/compression.cpp
     misc/progressreporter.cpp
-    misc/test_endianness.cpp
-    misc/test_resourcehelpers.cpp
-    misc/test_stringops.cpp
+    misc/testendianness.cpp
     misc/testmathutil.cpp
+    misc/testresourcehelpers.cpp
+    misc/teststringops.cpp
 
     nifloader/testbulletnifloader.cpp
 
@@ -64,8 +63,8 @@ file(GLOB UNITTEST_SRC_FILES
     esmloader/esmdata.cpp
     esmloader/record.cpp
 
+    files/conversiontests.cpp
     files/hash.cpp
-    files/conversion_tests.cpp
 
     toutf8/toutf8.cpp
 

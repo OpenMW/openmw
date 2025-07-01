@@ -40,6 +40,7 @@ Allowed options)");
         bpo::notify(variables);
 
         Files::ConfigurationManager cfgManager(true);
+        cfgManager.processPaths(variables, std::filesystem::current_path());
         cfgManager.readConfiguration(variables, desc);
 
         const auto& essFile = variables["mwsave"].as<Files::MaybeQuotedPath>();

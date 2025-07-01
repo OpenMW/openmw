@@ -7,17 +7,17 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "sound_decoder.hpp"
+#include "sounddecoder.hpp"
 
 namespace MWSound
 {
 
     class MovieAudioDecoder;
-    class MWSoundDecoderBridge final : public Sound_Decoder
+    class MWSoundDecoderBridge final : public SoundDecoder
     {
     public:
         MWSoundDecoderBridge(MWSound::MovieAudioDecoder* decoder)
-            : Sound_Decoder(nullptr)
+            : SoundDecoder(nullptr)
             , mDecoder(decoder)
         {
         }

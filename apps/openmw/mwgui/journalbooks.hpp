@@ -4,7 +4,7 @@
 #include "bookpage.hpp"
 #include "journalviewmodel.hpp"
 
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 namespace MWGui
 {

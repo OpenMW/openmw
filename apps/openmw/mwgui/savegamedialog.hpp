@@ -59,6 +59,7 @@ namespace MWGui
         bool mSaving;
 
         MyGUI::ComboBox* mCharacterSelection;
+        MyGUI::EditBox* mCellName;
         MyGUI::EditBox* mInfoText;
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;

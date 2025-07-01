@@ -24,8 +24,7 @@ namespace MWGui
     protected:
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
-        MyGUI::TextBox* mDestinations;
-        MyGUI::TextBox* mSelect;
+
         std::vector<MyGUI::Button*> mDestinationButtons;
 
         MyGUI::ScrollView* mDestinationsView;

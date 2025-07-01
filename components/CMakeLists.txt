@@ -111,7 +111,7 @@ add_component_dir (bgsm
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
+    bsafile compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
 add_component_dir (bullethelpers
@@ -155,9 +155,9 @@ add_component_dir (nifbullet
     bulletnifloader
     )
 
-add_component_dir (to_utf8
-    tables_gen
-    to_utf8
+add_component_dir (toutf8
+    tablesgen
+    toutf8
     )
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
@@ -173,7 +173,7 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     exteriorcelllocation
     )
 
-add_component_dir(fx pass technique lexer lexer_types parse_constants widgets stateupdater)
+add_component_dir(fx pass technique lexer lexertypes parseconstants widgets stateupdater)
 
 add_component_dir(std140 ubo)
 
@@ -362,7 +362,7 @@ add_component_dir (fontloader
 
 add_component_dir (sdlutil
     events
-    gl4es_init
+    gl4esinit
     imagetosurface
     sdlcursormanager
     sdlgraphicswindow
@@ -390,10 +390,10 @@ copy_resource_file("lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lu
 
 if(WIN32)
     add_component_dir (crashcatcher
-        windows_crashcatcher
-        windows_crashmonitor
-        windows_crashshm
+        windowscrashcatcher
         windowscrashdumppathhelpers
+        windowscrashmonitor
+        windowscrashshm
     )
 elseif(NOT ANDROID)
     add_component_dir (crashcatcher
@@ -500,15 +500,15 @@ add_component_dir(platform
 
 if (WIN32)
     add_component_dir(platform
-        file.win32
+        filewin32
         )
 elseif (UNIX)
     add_component_dir(platform
-        file.posix
+        fileposix
         )
 else ()
     add_component_dir(platform
-        file.stdio
+        filestdio
         )
 endif()
 
