@@ -43,6 +43,7 @@ namespace MWGui
     {
         getWidget(mScreenshot, "Screenshot");
         getWidget(mCharacterSelection, "SelectCharacter");
+        getWidget(mCellName, "CellName");
         getWidget(mInfoText, "InfoText");
         getWidget(mOkButton, "OkButton");
         getWidget(mCancelButton, "CancelButton");
@@ -196,7 +197,8 @@ namespace MWGui
                 title << " (#{OMWEngine:Level} " << signature.mPlayerLevel << " "
                       << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
-                mCharacterSelection->addItem(MyGUI::LanguageManager::getInstance().replaceTags(title.str()));
+                const MyGUI::UString playerDesc = MyGUI::LanguageManager::getInstance().replaceTags(title.str());
+                mCharacterSelection->addItem(playerDesc, signature.mPlayerName);
 
                 if (mCurrentCharacter == &*it
                     || (!mCurrentCharacter && !mSaving
@@ -390,6 +392,7 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = nullptr;
+            mCellName->setCaption({});
             mInfoText->setCaption({});
             mScreenshot->setImageTexture({});
             return;
@@ -411,14 +414,20 @@ namespace MWGui
 
         std::stringstream text;
 
-        text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
+        const size_t profileIndex = mCharacterSelection->getIndexSelected();
+        const std::string& slotPlayerName = mCurrentSlot->mProfile.mPlayerName;
+        const std::string& profilePlayerName = *mCharacterSelection->getItemDataAt<std::string>(profileIndex);
+        if (slotPlayerName != profilePlayerName)
+            text << slotPlayerName << "\n";
+
+        text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+
+        if (mCurrentSlot->mProfile.mCurrentDay > 0)
+            text << "#{Calendar:day} " << mCurrentSlot->mProfile.mCurrentDay << "\n";
 
         if (mCurrentSlot->mProfile.mMaximumHealth > 0)
             text << "#{OMWEngine:Health} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
                  << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
-
-        text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
-        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
@@ -427,20 +436,19 @@ namespace MWGui
         if (hour == 0)
             hour = 12;
 
-        if (mCurrentSlot->mProfile.mCurrentDay > 0)
-            text << "#{Calendar:day} " << mCurrentSlot->mProfile.mCurrentDay << "\n";
-
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
              << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(
                     mCurrentSlot->mProfile.mInGameTime.mMonth)
-             << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
+             << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}") << "\n";
 
         if (mCurrentSlot->mProfile.mTimePlayed > 0)
         {
-            text << "\n"
-                 << "#{OMWEngine:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+            text << "#{OMWEngine:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed) << "\n";
         }
 
+        text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
+
+        mCellName->setCaptionWithReplacing("#{sCell=" + mCurrentSlot->mProfile.mPlayerCellName + "}");
         mInfoText->setCaptionWithReplacing(text.str());
 
         // Reset the image for the case we're unable to recover a screenshot
