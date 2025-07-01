@@ -115,6 +115,11 @@ namespace MWScript
                 std::string_view cell = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
+                // In Morrowind, using an empty string either errors out (e.g. console) or kills the game
+                // so it should be reasonable to interrupt the script
+                if (cell.empty())
+                    throw std::runtime_error("ShowMap substring must not be empty");
+
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's
                 // House as well." http://www.uesp.net/wiki/Tes3Mod:ShowMap
 
