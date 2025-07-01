@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_ENCHANTING_H
 
 #include <string>
+#include <vector>
 
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadench.hpp>
@@ -32,6 +33,7 @@ namespace MWMechanics
         float getTypeMultiplier() const;
         void payForEnchantment(int count) const;
         int getEnchantPrice(int count) const;
+        std::vector<float> getEffectCosts() const;
 
     public:
         Enchanting();
