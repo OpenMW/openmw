@@ -62,7 +62,7 @@ namespace MWGui
         mCurrentY += lineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell.mName + "   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing(spell.mName + "  - " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mSpellsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
