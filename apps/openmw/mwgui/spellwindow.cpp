@@ -242,21 +242,50 @@ namespace MWGui
             return;
 
         mSpellView->setModel(new SpellModel(MWMechanics::getPlayer()));
-
-        SpellModel::ModelIndex selected = mSpellView->getModel()->getSelectedIndex();
-        if (selected < 0)
-            selected = 0;
-
-        selected += next ? 1 : -1;
-        int itemcount = mSpellView->getModel()->getItemCount();
-        if (itemcount == 0)
+        int itemCount = mSpellView->getModel()->getItemCount();
+        if (itemCount == 0)
             return;
-        selected = (selected + itemcount) % itemcount;
 
-        const Spell& spell = mSpellView->getModel()->getItem(selected);
-        if (spell.mType == Spell::Type_EnchantedItem)
-            onEnchantedItemSelected(spell.mItem, spell.mActive);
+        SpellModel::ModelIndex nextIndex;
+        SpellModel::ModelIndex currentIndex = mSpellView->getModel()->getSelectedIndex();
+
+        // If we have a selected index, search for a valid selection in the target direction
+        if (currentIndex >= 0)
+        {
+            MWWorld::ContainerStore store;
+            const Spell& currentSpell = mSpellView->getModel()->getItem(currentIndex);
+
+            nextIndex = currentIndex;
+            for (int i = 0; i < itemCount; i++)
+            {
+                nextIndex += next ? 1 : -1;
+                nextIndex = (nextIndex + itemCount) % itemCount;
+
+                // We can keep this selection if:
+                //   * we're not switching off of an enchanted item
+                //   * we're not switching to an enchanted item
+                //   * the next item wouldn't stack with the current item
+                if (currentSpell.mType != Spell::Type_EnchantedItem)
+                    break;
+
+                const Spell& nextSpell = mSpellView->getModel()->getItem(nextIndex);
+                if (nextSpell.mType != Spell::Type_EnchantedItem || !store.stacks(currentSpell.mItem, nextSpell.mItem))
+                    break;
+            }
+        }
+        // Otherwise, the first selection is always index 0
         else
-            onSpellSelected(spell.mId);
+            nextIndex = 0;
+
+        // Only trigger the selection event if the selection is actually changing.
+        // The itemCount check earlier ensures we have at least one spell to select.
+        if (nextIndex != currentIndex)
+        {
+            const Spell& selectedSpell = mSpellView->getModel()->getItem(nextIndex);
+            if (selectedSpell.mType == Spell::Type_EnchantedItem)
+                onEnchantedItemSelected(selectedSpell.mItem, selectedSpell.mActive);
+            else
+                onSpellSelected(selectedSpell.mId);
+        }
     }
 }
