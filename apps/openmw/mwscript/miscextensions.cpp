@@ -884,8 +884,8 @@ namespace MWScript
                     return;
                 }
 
-                const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                runtime.push(stats.getActiveSpells().isSpellActive(id));
+                const auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
+                runtime.push(activeSpells.isSpellActive(id) || activeSpells.isEnchantmentActive(id));
             }
         };
 
