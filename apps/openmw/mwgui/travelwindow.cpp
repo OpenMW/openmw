@@ -93,8 +93,7 @@ namespace MWGui
 
         const std::string& nameString = name.getRefIdString();
         toAdd->setUserString("price", std::to_string(price));
-        toAdd->setCaptionWithReplacing(
-            "#{sCell=" + nameString + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing("#{sCell=" + nameString + "}  - " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mDestinationsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", nameString);
