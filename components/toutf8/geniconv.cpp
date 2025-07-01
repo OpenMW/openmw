@@ -1,4 +1,4 @@
-// This program generates the file tables_gen.hpp
+// This program generates the file tablesgen.hpp
 
 #include <iostream>
 
@@ -88,7 +88,7 @@ int write_table(const std::string& charset, const std::string& tableName)
 int main()
 {
     // Write header guard
-    std::cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
+    std::cout << "#ifndef OPENMW_COMPONENTS_TOUTF8_TABLESGEN_HPP\n#define OPENMW_COMPONENTS_TOUTF8_TABLESGEN_HPP\n\n";
 
     // Write namespace
     std::cout << "namespace ToUTF8\n{\n\n";

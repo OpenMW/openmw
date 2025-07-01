@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: https://openmw.org/
 
-  This file (bsa_file.h) is part of the OpenMW package.
+  This file (bsafile.hpp) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,8 +21,8 @@
 
  */
 
-#ifndef BSA_BSA_FILE_H
-#define BSA_BSA_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_BSAFILE_HPP
+#define OPENMW_COMPONENTS_BSA_BSAFILE_HPP
 
 #include <cstdint>
 #include <filesystem>

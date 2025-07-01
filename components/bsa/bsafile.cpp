@@ -4,7 +4,7 @@
   Email: < korslund@gmail.com >
   WWW: https://openmw.org/
 
-  This file (bsa_file.cpp) is part of the OpenMW package.
+  This file (bsafile.cpp) is part of the OpenMW package.
 
   OpenMW is distributed as free software: you can redistribute it
   and/or modify it under the terms of the GNU General Public License
@@ -21,16 +21,16 @@
 
  */
 
-#include "bsa_file.hpp"
-
-#include <components/esm/fourcc.hpp>
-#include <components/files/constrainedfilestream.hpp>
+#include "bsafile.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+
+#include <components/esm/fourcc.hpp>
+#include <components/files/constrainedfilestream.hpp>
 
 using namespace Bsa;
 

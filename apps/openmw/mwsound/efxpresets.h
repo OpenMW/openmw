@@ -1,7 +1,7 @@
 /* Reverb presets for EFX */
 
-#ifndef EFX_PRESETS_H
-#define EFX_PRESETS_H
+#ifndef GAME_SOUND_EFXPRESETS_H
+#define GAME_SOUND_EFXPRESETS_H
 
 #ifndef EFXEAXREVERBPROPERTIES_DEFINED
 #define EFXEAXREVERBPROPERTIES_DEFINED
@@ -852,4 +852,4 @@ typedef struct
             0.1900f, 0.9920f, 5000.0000f, 250.0000f, 0.0000f, 0x0                                                      \
     }
 
-#endif /* EFX_PRESETS_H */
+#endif

@@ -17,13 +17,12 @@
 #include <components/misc/thread.hpp>
 #include <components/vfs/manager.hpp>
 
+#include "efxpresets.h"
 #include "loudness.hpp"
-#include "openal_output.hpp"
+#include "openaloutput.hpp"
 #include "sound.hpp"
-#include "sound_decoder.hpp"
+#include "sounddecoder.hpp"
 #include "soundmanagerimp.hpp"
-
-#include "efx-presets.h"
 
 #ifndef ALC_ALL_DEVICES_SPECIFIER
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
@@ -301,7 +300,7 @@ namespace MWSound
         OpenAL_SoundStream(const OpenAL_SoundStream& rhs);
         OpenAL_SoundStream& operator=(const OpenAL_SoundStream& rhs);
 
-        friend class OpenAL_Output;
+        friend class OpenALOutput;
 
     public:
         OpenAL_SoundStream(ALuint src, DecoderPtr decoder);
@@ -323,7 +322,7 @@ namespace MWSound
     //
     // A background streaming thread (keeps active streams processed)
     //
-    struct OpenAL_Output::StreamThread
+    struct OpenALOutput::StreamThread
     {
         std::vector<OpenAL_SoundStream*> mStreams;
 
@@ -393,13 +392,13 @@ namespace MWSound
         StreamThread& operator=(const StreamThread& rhs) = delete;
     };
 
-    class OpenAL_Output::DefaultDeviceThread
+    class OpenALOutput::DefaultDeviceThread
     {
     public:
         std::basic_string<ALCchar> mCurrentName;
 
     private:
-        OpenAL_Output& mOutput;
+        OpenALOutput& mOutput;
 
         std::atomic<bool> mQuitNow;
         std::mutex mMutex;
@@ -433,7 +432,7 @@ namespace MWSound
         }
 
     public:
-        DefaultDeviceThread(OpenAL_Output& output, std::basic_string_view<ALCchar> name = {})
+        DefaultDeviceThread(OpenALOutput& output, std::basic_string_view<ALCchar> name = {})
             : mCurrentName(name)
             , mOutput(output)
             , mQuitNow(false)
@@ -655,7 +654,7 @@ namespace MWSound
     //
     // An OpenAL output device
     //
-    std::vector<std::string> OpenAL_Output::enumerate()
+    std::vector<std::string> OpenALOutput::enumerate()
     {
         std::vector<std::string> devlist;
         const ALCchar* devnames;
@@ -672,14 +671,14 @@ namespace MWSound
         return devlist;
     }
 
-    void OpenAL_Output::eventCallback(
+    void OpenALOutput::eventCallback(
         ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar* message, void* userParam)
     {
         if (eventType == AL_EVENT_TYPE_DISCONNECTED_SOFT)
-            static_cast<OpenAL_Output*>(userParam)->onDisconnect();
+            static_cast<OpenALOutput*>(userParam)->onDisconnect();
     }
 
-    void OpenAL_Output::onDisconnect()
+    void OpenALOutput::onDisconnect()
     {
         if (!mInitialized || !alcReopenDeviceSOFT)
             return;
@@ -702,7 +701,7 @@ namespace MWSound
         }
     }
 
-    bool OpenAL_Output::init(const std::string& devname, const std::string& hrtfname, HrtfMode hrtfmode)
+    bool OpenALOutput::init(const std::string& devname, const std::string& hrtfname, HrtfMode hrtfmode)
     {
         deinit();
         std::lock_guard<std::mutex> lock(mReopenMutex);
@@ -802,7 +801,7 @@ namespace MWSound
         {
             static const std::array<ALenum, 1> events{ { AL_EVENT_TYPE_DISCONNECTED_SOFT } };
             alEventControlSOFT(events.size(), events.data(), AL_TRUE);
-            alEventCallbackSOFT(&OpenAL_Output::eventCallback, this);
+            alEventCallbackSOFT(&OpenALOutput::eventCallback, this);
         }
         else
             Log(Debug::Warning) << "Cannot detect audio device changes";
@@ -970,7 +969,7 @@ namespace MWSound
         return true;
     }
 
-    void OpenAL_Output::deinit()
+    void OpenALOutput::deinit()
     {
         mStreamThread->removeAll();
         mDefaultDeviceThread.reset();
@@ -1006,7 +1005,7 @@ namespace MWSound
         mInitialized = false;
     }
 
-    std::vector<std::string> OpenAL_Output::enumerateHrtf()
+    std::vector<std::string> OpenALOutput::enumerateHrtf()
     {
         std::vector<std::string> ret;
 
@@ -1028,7 +1027,7 @@ namespace MWSound
         return ret;
     }
 
-    std::pair<Sound_Handle, size_t> OpenAL_Output::loadSound(VFS::Path::NormalizedView fname)
+    std::pair<Sound_Handle, size_t> OpenALOutput::loadSound(VFS::Path::NormalizedView fname)
     {
         getALError();
 
@@ -1076,7 +1075,7 @@ namespace MWSound
         return std::make_pair(MAKE_PTRID(buf), size);
     }
 
-    size_t OpenAL_Output::unloadSound(Sound_Handle data)
+    size_t OpenALOutput::unloadSound(Sound_Handle data)
     {
         ALuint buffer = GET_PTRID(data);
         if (!buffer)
@@ -1105,7 +1104,7 @@ namespace MWSound
         return size;
     }
 
-    void OpenAL_Output::initCommon2D(
+    void OpenALOutput::initCommon2D(
         ALuint source, const osg::Vec3f& pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv)
     {
         alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
@@ -1143,7 +1142,7 @@ namespace MWSound
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
-    void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f& pos, ALfloat mindist, ALfloat maxdist,
+    void OpenALOutput::initCommon3D(ALuint source, const osg::Vec3f& pos, ALfloat mindist, ALfloat maxdist,
         ALfloat gain, ALfloat pitch, bool loop, bool useenv)
     {
         alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
@@ -1183,7 +1182,7 @@ namespace MWSound
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
-    void OpenAL_Output::updateCommon(
+    void OpenALOutput::updateCommon(
         ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv)
     {
         if (useenv && mListenerEnv == Env_Underwater && !mWaterFilter)
@@ -1199,7 +1198,7 @@ namespace MWSound
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
-    bool OpenAL_Output::playSound(Sound* sound, Sound_Handle data, float offset)
+    bool OpenALOutput::playSound(Sound* sound, Sound_Handle data, float offset)
     {
         ALuint source;
 
@@ -1238,7 +1237,7 @@ namespace MWSound
         return true;
     }
 
-    bool OpenAL_Output::playSound3D(Sound* sound, Sound_Handle data, float offset)
+    bool OpenALOutput::playSound3D(Sound* sound, Sound_Handle data, float offset)
     {
         ALuint source;
 
@@ -1277,7 +1276,7 @@ namespace MWSound
         return true;
     }
 
-    void OpenAL_Output::finishSound(Sound* sound)
+    void OpenALOutput::finishSound(Sound* sound)
     {
         if (!sound->mHandle)
             return;
@@ -1294,7 +1293,7 @@ namespace MWSound
         mActiveSounds.erase(std::find(mActiveSounds.begin(), mActiveSounds.end(), sound));
     }
 
-    bool OpenAL_Output::isSoundPlaying(Sound* sound)
+    bool OpenALOutput::isSoundPlaying(Sound* sound)
     {
         if (!sound->mHandle)
             return false;
@@ -1307,7 +1306,7 @@ namespace MWSound
         return state == AL_PLAYING || state == AL_PAUSED;
     }
 
-    void OpenAL_Output::updateSound(Sound* sound)
+    void OpenALOutput::updateSound(Sound* sound)
     {
         if (!sound->mHandle)
             return;
@@ -1318,7 +1317,7 @@ namespace MWSound
         getALError();
     }
 
-    bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream* sound, bool getLoudnessData)
+    bool OpenALOutput::streamSound(DecoderPtr decoder, Stream* sound, bool getLoudnessData)
     {
         if (mFreeSources.empty())
         {
@@ -1349,7 +1348,7 @@ namespace MWSound
         return true;
     }
 
-    bool OpenAL_Output::streamSound3D(DecoderPtr decoder, Stream* sound, bool getLoudnessData)
+    bool OpenALOutput::streamSound3D(DecoderPtr decoder, Stream* sound, bool getLoudnessData)
     {
         if (mFreeSources.empty())
         {
@@ -1380,7 +1379,7 @@ namespace MWSound
         return true;
     }
 
-    void OpenAL_Output::finishStream(Stream* sound)
+    void OpenALOutput::finishStream(Stream* sound)
     {
         if (!sound->mHandle)
             return;
@@ -1402,7 +1401,7 @@ namespace MWSound
         delete stream;
     }
 
-    double OpenAL_Output::getStreamDelay(Stream* sound)
+    double OpenALOutput::getStreamDelay(Stream* sound)
     {
         if (!sound->mHandle)
             return 0.0;
@@ -1410,7 +1409,7 @@ namespace MWSound
         return stream->getStreamDelay();
     }
 
-    double OpenAL_Output::getStreamOffset(Stream* sound)
+    double OpenALOutput::getStreamOffset(Stream* sound)
     {
         if (!sound->mHandle)
             return 0.0;
@@ -1419,7 +1418,7 @@ namespace MWSound
         return stream->getStreamOffset();
     }
 
-    float OpenAL_Output::getStreamLoudness(Stream* sound)
+    float OpenALOutput::getStreamLoudness(Stream* sound)
     {
         if (!sound->mHandle)
             return 0.0;
@@ -1428,7 +1427,7 @@ namespace MWSound
         return stream->getCurrentLoudness();
     }
 
-    bool OpenAL_Output::isStreamPlaying(Stream* sound)
+    bool OpenALOutput::isStreamPlaying(Stream* sound)
     {
         if (!sound->mHandle)
             return false;
@@ -1437,7 +1436,7 @@ namespace MWSound
         return stream->isPlaying();
     }
 
-    void OpenAL_Output::updateStream(Stream* sound)
+    void OpenALOutput::updateStream(Stream* sound)
     {
         if (!sound->mHandle)
             return;
@@ -1449,17 +1448,17 @@ namespace MWSound
         getALError();
     }
 
-    void OpenAL_Output::startUpdate()
+    void OpenALOutput::startUpdate()
     {
         alcSuspendContext(alcGetCurrentContext());
     }
 
-    void OpenAL_Output::finishUpdate()
+    void OpenALOutput::finishUpdate()
     {
         alcProcessContext(alcGetCurrentContext());
     }
 
-    void OpenAL_Output::updateListener(
+    void OpenALOutput::updateListener(
         const osg::Vec3f& pos, const osg::Vec3f& atdir, const osg::Vec3f& updir, Environment env)
     {
         if (mContext)
@@ -1501,7 +1500,7 @@ namespace MWSound
         mListenerEnv = env;
     }
 
-    void OpenAL_Output::pauseSounds(int types)
+    void OpenALOutput::pauseSounds(int types)
     {
         std::vector<ALuint> sources;
         for (Sound* sound : mActiveSounds)
@@ -1524,7 +1523,7 @@ namespace MWSound
         }
     }
 
-    void OpenAL_Output::pauseActiveDevice()
+    void OpenALOutput::pauseActiveDevice()
     {
         if (mDevice == nullptr)
             return;
@@ -1540,7 +1539,7 @@ namespace MWSound
         alListenerf(AL_GAIN, 0.0f);
     }
 
-    void OpenAL_Output::resumeActiveDevice()
+    void OpenALOutput::resumeActiveDevice()
     {
         if (mDevice == nullptr)
             return;
@@ -1556,7 +1555,7 @@ namespace MWSound
         alListenerf(AL_GAIN, 1.0f);
     }
 
-    void OpenAL_Output::resumeSounds(int types)
+    void OpenALOutput::resumeSounds(int types)
     {
         std::vector<ALuint> sources;
         for (Sound* sound : mActiveSounds)
@@ -1579,8 +1578,8 @@ namespace MWSound
         }
     }
 
-    OpenAL_Output::OpenAL_Output(SoundManager& mgr)
-        : Sound_Output(mgr)
+    OpenALOutput::OpenALOutput(SoundManager& mgr)
+        : SoundOutput(mgr)
         , mDevice(nullptr)
         , mContext(nullptr)
         , mListenerPos(0.0f, 0.0f, 0.0f)
@@ -1593,12 +1592,12 @@ namespace MWSound
     {
     }
 
-    OpenAL_Output::~OpenAL_Output()
+    OpenALOutput::~OpenALOutput()
     {
-        OpenAL_Output::deinit();
+        OpenALOutput::deinit();
     }
 
-    float OpenAL_Output::getTimeScaledPitch(SoundBase* sound)
+    float OpenALOutput::getTimeScaledPitch(SoundBase* sound)
     {
         const bool shouldScale = !(sound->mParams.mFlags & PlayMode::NoScaling);
         return shouldScale ? sound->getPitch() * mManager.getSimulationTimeScale() : sound->getPitch();

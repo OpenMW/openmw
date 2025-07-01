@@ -15,7 +15,7 @@
 #include <components/esm4/readerutils.hpp>
 #include <components/esm4/records.hpp>
 #include <components/esm4/typetraits.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 namespace EsmTool
 {

@@ -3,7 +3,7 @@
 #include <SDL_video.h>
 
 #ifdef OPENMW_GL4ES_MANUAL_INIT
-#include "gl4es_init.h"
+#include "gl4esinit.h"
 #endif
 
 namespace SDLUtil

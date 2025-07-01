@@ -1,4 +1,4 @@
-#include "sound_buffer.hpp"
+#include "soundbuffer.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -35,7 +35,7 @@ namespace MWSound
         }
     }
 
-    SoundBufferPool::SoundBufferPool(Sound_Output& output)
+    SoundBufferPool::SoundBufferPool(SoundOutput& output)
         : mOutput(&output)
         , mBufferCacheMax(Settings::sound().mBufferCacheMax * 1024 * 1024)
         , mBufferCacheMin(
@@ -48,31 +48,31 @@ namespace MWSound
         clear();
     }
 
-    Sound_Buffer* SoundBufferPool::lookup(const ESM::RefId& soundId) const
+    SoundBuffer* SoundBufferPool::lookup(const ESM::RefId& soundId) const
     {
         const auto it = mBufferNameMap.find(soundId);
         if (it != mBufferNameMap.end())
         {
-            Sound_Buffer* sfx = it->second;
+            SoundBuffer* sfx = it->second;
             if (sfx->getHandle() != nullptr)
                 return sfx;
         }
         return nullptr;
     }
 
-    Sound_Buffer* SoundBufferPool::lookup(std::string_view fileName) const
+    SoundBuffer* SoundBufferPool::lookup(std::string_view fileName) const
     {
         const auto it = mBufferFileNameMap.find(std::string(fileName));
         if (it != mBufferFileNameMap.end())
         {
-            Sound_Buffer* sfx = it->second;
+            SoundBuffer* sfx = it->second;
             if (sfx->getHandle() != nullptr)
                 return sfx;
         }
         return nullptr;
     }
 
-    Sound_Buffer* SoundBufferPool::loadSfx(Sound_Buffer* sfx)
+    SoundBuffer* SoundBufferPool::loadSfx(SoundBuffer* sfx)
     {
         if (sfx->getHandle() != nullptr)
             return sfx;
@@ -95,7 +95,7 @@ namespace MWSound
         return sfx;
     }
 
-    Sound_Buffer* SoundBufferPool::load(const ESM::RefId& soundId)
+    SoundBuffer* SoundBufferPool::load(const ESM::RefId& soundId)
     {
         if (mBufferNameMap.empty())
         {
@@ -103,7 +103,7 @@ namespace MWSound
                 insertSound(sound.mId, sound);
         }
 
-        Sound_Buffer* sfx;
+        SoundBuffer* sfx;
         const auto it = mBufferNameMap.find(soundId);
         if (it != mBufferNameMap.end())
             sfx = it->second;
@@ -118,9 +118,9 @@ namespace MWSound
         return loadSfx(sfx);
     }
 
-    Sound_Buffer* SoundBufferPool::load(std::string_view fileName)
+    SoundBuffer* SoundBufferPool::load(std::string_view fileName)
     {
-        Sound_Buffer* sfx;
+        SoundBuffer* sfx;
         const auto it = mBufferFileNameMap.find(std::string(fileName));
         if (it != mBufferFileNameMap.end())
             sfx = it->second;
@@ -146,7 +146,7 @@ namespace MWSound
         mUnusedBuffers.clear();
     }
 
-    Sound_Buffer* SoundBufferPool::insertSound(std::string_view fileName)
+    SoundBuffer* SoundBufferPool::insertSound(std::string_view fileName)
     {
         static const AudioParams audioParams
             = makeAudioParams(MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>());
@@ -158,13 +158,13 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer& sfx = mSoundBuffers.emplace_back(fileName, volume, min, max);
+        SoundBuffer& sfx = mSoundBuffers.emplace_back(fileName, volume, min, max);
 
         mBufferFileNameMap.emplace(fileName, &sfx);
         return &sfx;
     }
 
-    Sound_Buffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM::Sound& sound)
+    SoundBuffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM::Sound& sound)
     {
         static const AudioParams audioParams
             = makeAudioParams(MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>());
@@ -183,7 +183,7 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer& sfx = mSoundBuffers.emplace_back(
+        SoundBuffer& sfx = mSoundBuffers.emplace_back(
             Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(sound.mSound)), volume, min, max);
 
         mBufferNameMap.emplace(soundId, &sfx);
@@ -194,7 +194,7 @@ namespace MWSound
     {
         while (!mUnusedBuffers.empty() && mBufferCacheSize > mBufferCacheMin)
         {
-            Sound_Buffer* const unused = mUnusedBuffers.back();
+            SoundBuffer* const unused = mUnusedBuffers.back();
 
             mBufferCacheSize -= mOutput->unloadSound(unused->getHandle());
             unused->mHandle = nullptr;

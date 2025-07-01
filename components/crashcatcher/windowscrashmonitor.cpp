@@ -1,4 +1,4 @@
-#include "windows_crashmonitor.hpp"
+#include "windowscrashmonitor.hpp"
 
 #include <Psapi.h>
 #include <components/misc/windows.hpp>
@@ -10,11 +10,12 @@
 
 #include <SDL_messagebox.h>
 
-#include "windows_crashcatcher.hpp"
-#include "windows_crashshm.hpp"
-#include "windowscrashdumppathhelpers.hpp"
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/conversion.hpp>
+
+#include "windowscrashcatcher.hpp"
+#include "windowscrashdumppathhelpers.hpp"
+#include "windowscrashshm.hpp"
 
 namespace Crash
 {

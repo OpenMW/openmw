@@ -1,16 +1,17 @@
-#include "windows_crashcatcher.hpp"
+#include "windowscrashcatcher.hpp"
 
 #include <cassert>
 #include <cwchar>
 #include <sstream>
 #include <thread>
 
-#include "windows_crashmonitor.hpp"
-#include "windows_crashshm.hpp"
-#include "windowscrashdumppathhelpers.hpp"
 #include <SDL_messagebox.h>
 
 #include <components/misc/strings/conversion.hpp>
+
+#include "windowscrashdumppathhelpers.hpp"
+#include "windowscrashmonitor.hpp"
+#include "windowscrashshm.hpp"
 
 namespace Crash
 {

@@ -1,4 +1,4 @@
-#include "to_utf8.hpp"
+#include "toutf8.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -41,7 +41,7 @@
  */
 
 // Generated tables
-#include "tables_gen.hpp"
+#include "tablesgen.hpp"
 
 using namespace ToUTF8;
 

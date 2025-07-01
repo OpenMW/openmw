@@ -7,7 +7,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/misc/notnullptr.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "formatversion.hpp"
 

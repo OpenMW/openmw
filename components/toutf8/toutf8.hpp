@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_TOUTF8_H
-#define COMPONENTS_TOUTF8_H
+#ifndef OPENMW_COMPONENTS_TOUTF8_TOUTF8_HPP
+#define OPENMW_COMPONENTS_TOUTF8_TOUTF8_HPP
 
 #include <cstring>
 #include <span>
