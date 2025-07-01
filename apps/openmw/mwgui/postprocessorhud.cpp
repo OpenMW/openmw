@@ -301,7 +301,7 @@ namespace MWGui
 
         auto technique = processor->loadTechnique(name);
 
-        if (!technique || technique->getStatus() == fx::Technique::Status::File_Not_exists)
+        if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
             return;
 
         while (mConfigArea->getChildCount() > 0)
@@ -431,9 +431,6 @@ namespace MWGui
         for (const std::string& name : techniques)
         {
             auto technique = processor->loadTechnique(name);
-
-            if (!technique)
-                continue;
 
             if (!technique->getHidden() && !processor->isTechniqueEnabled(technique))
             {
