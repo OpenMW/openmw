@@ -400,7 +400,7 @@ namespace MWMechanics
         const auto newTypeId = package.getTypeId();
         if (currentTypeId <= MWMechanics::AiPackageTypeId::Wander
             && !hasPackage(MWMechanics::AiPackageTypeId::InternalTravel)
-            && (newTypeId <= MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
+            && (newTypeId == MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
                 || newTypeId == MWMechanics::AiPackageTypeId::Cast))
         {
             osg::Vec3f dest;
@@ -444,8 +444,15 @@ namespace MWMechanics
 
             if ((*it)->getPriority() <= package.getPriority())
             {
+                if (cancelOther && isActualAiPackage((*it)->getTypeId()))
+                    mAiState.reset();
                 onPackageAdded(package);
-                mPackages.insert(it, package.clone());
+                it = mPackages.insert(it, package.clone());
+                if (newTypeId == MWMechanics::AiPackageTypeId::Follow)
+                {
+                    for (++it; it != mPackages.end(); ++it)
+                        (*it)->resetInitialPosition();
+                }
                 return;
             }
         }
@@ -455,11 +462,7 @@ namespace MWMechanics
 
         // Make sure that temporary storage is empty
         if (cancelOther)
-        {
-            mAiState.moveIn(std::make_unique<AiCombatStorage>());
-            mAiState.moveIn(std::make_unique<AiFollowStorage>());
-            mAiState.moveIn(std::make_unique<AiWanderStorage>());
-        }
+            mAiState.reset();
     }
 
     bool MWMechanics::AiSequence::isEmpty() const
