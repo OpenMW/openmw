@@ -421,6 +421,9 @@ namespace MWGui
                 }
 
                 store.setSelectedEnchantItem(it);
+                // to reset WindowManager::mSelectedSpell immediately
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(*it);
+
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Spell);
             }
         }
@@ -448,6 +451,9 @@ namespace MWGui
             store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
         }
+
+        // Updates the state of equipped/not equipped (skin) in spellwindow
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
     // ---------------------------------------------------------------------------------------------------------
