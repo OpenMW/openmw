@@ -404,8 +404,8 @@ OMW::Engine::~Engine()
     mMechanicsManager = nullptr;
     mDialogueManager = nullptr;
     mJournal = nullptr;
-    mScriptManager = nullptr;
     mWindowManager = nullptr;
+    mScriptManager = nullptr;
     mWorld = nullptr;
     mStereoManager = nullptr;
     mSoundManager = nullptr;
