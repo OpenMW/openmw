@@ -164,7 +164,7 @@ void main(void)
 
     // specular
     vec3 R = reflect(viewDir, normalize(vec3(normal.x * SPEC_BUMPINESS, normal.y * SPEC_BUMPINESS, normal.z)));
-	float specular = clamp(pow(atan(max(dot(R, sunWorldDir), 0.0) * 1.55), SPEC_HARDNESS) * SPEC_BRIGHTNESS, 0.0, 1.0) * shadow * sunSpec.a;
+    float specular = clamp(pow(atan(max(dot(R, sunWorldDir), 0.0) * 1.55), SPEC_HARDNESS) * SPEC_BRIGHTNESS, 0.0, 1.0) * shadow * sunSpec.a;
 
     // artificial specularity to make rain ripples more noticeable
     vec3 skyColorEstimate = vec3(max(0.0, mix(-0.3, 1.0, sunFade)));
