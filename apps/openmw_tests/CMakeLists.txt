@@ -10,6 +10,7 @@ file(GLOB UNITTEST_SRC_FILES
     mwworld/testduration.cpp
     mwworld/testtimestamp.cpp
     mwworld/testptr.cpp
+    mwworld/testweather.cpp
 
     mwdialogue/testkeywordsearch.cpp
 
