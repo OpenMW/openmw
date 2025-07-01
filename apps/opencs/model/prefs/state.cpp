@@ -498,7 +498,7 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
     // Setup with actual data
     QKeySequence sequence;
 
-    getShortcutManager().convertFromString(value, sequence);
+    getShortcutManager().convertFromString(value.get(), sequence);
     getShortcutManager().setSequence(value.mName, sequence);
 
     CSMPrefs::ShortcutSetting* setting
