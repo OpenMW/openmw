@@ -389,7 +389,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
         std::string key(line.substr(0, pos));
         std::string value(line.substr(pos + 1));
         key = trim_ws(key);
-        value = trim_ws(key);
+        value = trim_ws(value);
 
         if (map.find(key) == map.end())
         {
