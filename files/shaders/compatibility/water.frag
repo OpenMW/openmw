@@ -163,8 +163,13 @@ void main(void)
     sunSpec.a = min(1.0, sunSpec.a / SUN_SPEC_FADING_THRESHOLD);
 
     // specular
-    vec3 R = reflect(viewDir, normalize(vec3(normal.x * SPEC_BUMPINESS, normal.y * SPEC_BUMPINESS, normal.z)));
-    float specular = clamp(pow(atan(max(dot(R, sunWorldDir), 0.0) * 1.55), SPEC_HARDNESS) * SPEC_BRIGHTNESS, 0.0, 1.0) * shadow * sunSpec.a;
+    const float SPEC_MAGIC = 1.55; // from the original blender shader, changing it makes the spec vanish or become too bright
+
+    vec3 specNormal = normalize(vec3(normal.x * SPEC_BUMPINESS, normal.y * SPEC_BUMPINESS, normal.z));
+    vec3 viewReflectDir = reflect(viewDir, specNormal);
+    float phongTerm = max(dot(viewReflectDir, sunWorldDir), 0.0);
+    float specular = pow(atan(phongTerm * SPEC_MAGIC), SPEC_HARDNESS) * SPEC_BRIGHTNESS;
+    specular = clamp(specular, 0.0, 1.0) * shadow * sunSpec.a;
 
     // artificial specularity to make rain ripples more noticeable
     vec3 skyColorEstimate = vec3(max(0.0, mix(-0.3, 1.0, sunFade)));
