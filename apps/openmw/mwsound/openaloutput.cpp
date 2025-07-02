@@ -1144,8 +1144,8 @@ namespace MWSound
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     }
 
-    void OpenALOutput::initCommon3D(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat mindist, ALfloat maxdist,
-        ALfloat gain, ALfloat pitch, bool loop, bool useenv)
+    void OpenALOutput::initCommon3D(ALuint source, const osg::Vec3f& pos, const osg::Vec3f& vel, ALfloat mindist,
+        ALfloat maxdist, ALfloat gain, ALfloat pitch, bool loop, bool useenv)
     {
         alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
         alSourcef(source, AL_MAX_DISTANCE, maxdist);
@@ -1250,8 +1250,9 @@ namespace MWSound
         }
         source = mFreeSources.front();
 
-        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(), sound->getMaxDistance(),
-            sound->getRealVolume(), getTimeScaledPitch(sound), sound->getIsLooping(), sound->getUseEnv());
+        initCommon3D(source, sound->getPosition(), sound->getVelocity(), sound->getMinDistance(),
+            sound->getMaxDistance(), sound->getRealVolume(), getTimeScaledPitch(sound), sound->getIsLooping(),
+            sound->getUseEnv());
         alSourcei(source, AL_BUFFER, GET_PTRID(data));
         alSourcef(source, AL_SEC_OFFSET, offset);
         if (getALError() != AL_NO_ERROR)
