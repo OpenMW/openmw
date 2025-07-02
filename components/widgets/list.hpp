@@ -36,7 +36,7 @@ namespace Gui
         void adjustSize();
 
         void sort();
-        void addItem(std::string_view name);
+        void addItem(std::string_view name, int verticalPadding = 0);
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);
         size_t getItemCount();
@@ -64,7 +64,18 @@ namespace Gui
         MyGUI::Widget* mClient;
         std::string mListItemSkin;
 
-        std::vector<std::string> mItems;
+        struct ListItemData
+        {
+            std::string mName;
+            int mVPadding;
+
+            ListItemData(std::string_view name, int verticalPadding)
+                : mName(name)
+                , mVPadding(verticalPadding)
+            {
+            }
+        };
+        std::vector<ListItemData> mItems;
 
         int mItemHeight; // height of all items
     };
