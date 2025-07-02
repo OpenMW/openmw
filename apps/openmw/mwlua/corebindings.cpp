@@ -22,6 +22,7 @@
 #include "coremwscriptbindings.hpp"
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
+#include "landbindings.hpp"
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
@@ -100,6 +101,8 @@ namespace MWLua
 
         api["mwscripts"]
             = context.cachePackage("openmw_core_mwscripts", [context]() { return initCoreMwScriptBindings(context); });
+
+        api["land"] = context.cachePackage("openmw_core_land", [context]() { return initCoreLandBindings(context); });
 
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
