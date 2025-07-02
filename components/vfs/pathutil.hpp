@@ -127,6 +127,15 @@ namespace VFS::Path
             return stream << value.mValue;
         }
 
+        NormalizedView parent() const
+        {
+            NormalizedView p;
+            const std::size_t pos = mValue.find_last_of(separator);
+            if (pos != std::string_view::npos)
+                p.mValue = mValue.substr(0, pos);
+            return p;
+        }
+
     private:
         std::string_view mValue;
     };
@@ -257,6 +266,11 @@ namespace VFS::Path
         friend std::ostream& operator<<(std::ostream& stream, const Normalized& value)
         {
             return stream << value.mValue;
+        }
+
+        NormalizedView parent() const
+        {
+            return NormalizedView(*this).parent();
         }
 
     private:

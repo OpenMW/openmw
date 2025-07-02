@@ -84,14 +84,14 @@ namespace Bsa
     protected:
         bool mHasChanged = false;
 
+        /// True when an archive has been loaded
+        bool mIsLoaded = false;
+
         /// Table of files in this archive
         FileList mFiles;
 
         /// Filename string buffer
         std::vector<char> mStringBuf;
-
-        /// True when an archive has been loaded
-        bool mIsLoaded;
 
         /// Used for error messages
         std::filesystem::path mFilepath;
@@ -108,11 +108,6 @@ namespace Bsa
          * BSA management methods
          * -----------------------------------
          */
-
-        BSAFile()
-            : mIsLoaded(false)
-        {
-        }
 
         virtual ~BSAFile()
         {
@@ -146,6 +141,11 @@ namespace Bsa
         std::string getFilename() const
         {
             return Files::pathToUnicodeString(mFilepath);
+        }
+
+        const std::filesystem::path& getPath() const
+        {
+            return mFilepath;
         }
 
         // checks version of BSA from file header

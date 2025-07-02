@@ -12,6 +12,7 @@
 #include <osg/Texture3D>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -250,14 +251,12 @@ namespace MWRender
 
     void PostProcessor::populateTechniqueFiles()
     {
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
         {
-            std::filesystem::path path = Files::pathFromUnicodeString(name);
-            std::string fileExt = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(path.extension()));
-            if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
+            std::string_view fileExt = Misc::getFileExtension(path);
+            if (path.parent().parent().empty() && fileExt == fx::Technique::sExt)
             {
-                const auto absolutePath = mVFS->getAbsoluteFileName(path);
-                mTechniqueFileMap[Files::pathToUnicodeString(absolutePath.stem())] = absolutePath;
+                mTechniqueFiles.emplace(path);
             }
         }
     }
@@ -351,7 +350,7 @@ namespace MWRender
             if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
                 continue;
 
-            const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
+            const auto lastWriteTime = mVFS->getLastModified(technique->getFileName());
             const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
             if (!isDirty)
@@ -363,7 +362,7 @@ namespace MWRender
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
-                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()];
+                Log(Debug::Info) << "Reloaded technique : " << technique->getFileName();
 
             mReload = technique->isValid();
         }
@@ -751,26 +750,30 @@ namespace MWRender
 
     std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
     {
+        VFS::Path::Normalized path = fx::Technique::makeFileName(name);
+        return loadTechnique(VFS::Path::NormalizedView(path), loadNextFrame);
+    }
+
+    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame)
+    {
         for (const auto& technique : mTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
         for (const auto& technique : mQueuedTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
-        std::string realName = name;
-        auto fileIter = mTechniqueFileMap.find(name);
-        if (fileIter != mTechniqueFileMap.end())
-            realName = fileIter->first;
+        if (!mTechniqueFiles.contains(path))
+            return {};
 
         auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
-            std::move(realName), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+            path, mVFS->getStem(path), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
         if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(std::filesystem::last_write_time(fileIter->second));
+            technique->setLastModificationTime(mVFS->getLastModified(path));
 
         if (loadNextFrame)
         {
@@ -802,7 +805,10 @@ namespace MWRender
             if (techniqueName.empty())
                 continue;
 
-            mTechniques.push_back(loadTechnique(techniqueName));
+            auto technique = loadTechnique(techniqueName);
+            if (!technique)
+                continue;
+            mTechniques.push_back(std::move(technique));
         }
 
         dirtyTechniques();

@@ -81,4 +81,14 @@ namespace VFS
         return Files::openConstrainedFileStream(mPath);
     }
 
+    std::filesystem::file_time_type FileSystemArchiveFile::getLastModified() const
+    {
+        return std::filesystem::last_write_time(mPath);
+    }
+
+    std::string FileSystemArchiveFile::getStem() const
+    {
+        return Files::pathToUnicodeString(mPath.stem());
+    }
+
 }
