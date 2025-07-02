@@ -19,6 +19,7 @@
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "coremwscriptbindings.hpp"
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"
 #include "luaevents.hpp"
@@ -96,6 +97,9 @@ namespace MWLua
 
         api["stats"]
             = context.cachePackage("openmw_core_stats", [context]() { return initCoreStatsBindings(context); });
+
+        api["mwscripts"]
+            = context.cachePackage("openmw_core_mwscripts", [context]() { return initCoreMwScriptBindings(context); });
 
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
