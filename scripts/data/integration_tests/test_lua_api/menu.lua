@@ -19,6 +19,7 @@ testing.registerMenuTest('save and load', function()
             'template.omwgame',
             'landracer.omwaddon',
             'the_hub.omwaddon',
+            'mwscript.omwaddon',
             'test_lua_api.omwscripts',
         },
         creationTime = matchers.isAny(),
