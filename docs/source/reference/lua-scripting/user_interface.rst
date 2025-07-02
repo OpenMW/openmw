@@ -104,15 +104,15 @@ Example
             layer = 'HUD',
             type = ui.TYPE.Text,
             props = {
-            -- position in the top right corner
-            relativePosition = util.vector2(1, 0),
-            -- position is for the top left corner of the widget by default
-            -- change it to align exactly to the top right corner of the screen
-            anchor = util.vector2(1, 0),
-            text = calendar.formatGameTime('%H:%M'),
-            textSize = 24,
-            -- default black text color isn't always visible
-            textColor = util.color.rgb(0, 1, 0),
+               -- position in the top right corner
+               relativePosition = util.vector2(1, 0),
+               -- position is for the top left corner of the widget by default
+               -- change it to align exactly to the top right corner of the screen
+               anchor = util.vector2(1, 0),
+               text = calendar.formatGameTime('%H:%M'),
+               textSize = 24,
+               -- default black text color isn't always visible
+               textColor = util.color.rgb(0, 1, 0),
             },
          }
 
