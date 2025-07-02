@@ -104,7 +104,6 @@ namespace MWLua
 
         api["land"] = context.cachePackage("openmw_core_land", [context]() { return initCoreLandBindings(context); });
 
-
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
         api["dialogue"]
