@@ -198,12 +198,11 @@ namespace MWGui
                       << MyGUI::TextIterator::toTagsString(MyGUI::UString(className)) << ")";
 
                 const MyGUI::UString playerDesc = MyGUI::LanguageManager::getInstance().replaceTags(title.str());
-                mCharacterSelection->addItem(playerDesc, signature.mPlayerName);
+                mCharacterSelection->addItem(playerDesc, &*it);
 
                 if (mCurrentCharacter == &*it
                     || (!mCurrentCharacter && !mSaving
-                        && Misc::StringUtils::ciEqual(
-                            directory, Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
+                        && Misc::StringUtils::ciEqual(directory, Files::pathToUnicodeString(it->getPath().filename()))))
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount() - 1;
@@ -211,6 +210,11 @@ namespace MWGui
             }
         }
 
+        if (selectedIndex == MyGUI::ITEM_NONE && !mSaving && mCharacterSelection->getItemCount() != 0)
+        {
+            selectedIndex = 0;
+            mCurrentCharacter = *mCharacterSelection->getItemDataAt<const MWState::Character*>(0);
+        }
         mCharacterSelection->setIndexSelected(selectedIndex);
         if (selectedIndex == MyGUI::ITEM_NONE)
             mCharacterSelection->setCaptionWithReplacing("#{OMWEngine:SelectCharacter}");
@@ -324,14 +328,7 @@ namespace MWGui
     {
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
 
-        unsigned int i = 0;
-        const MWState::Character* character = nullptr;
-        for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it, ++i)
-        {
-            if (i == pos)
-                character = &*it;
-        }
-        assert(character && "Can't find selected character");
+        const MWState::Character* character = *mCharacterSelection->getItemDataAt<const MWState::Character*>(pos);
 
         mCurrentCharacter = character;
         mCurrentSlot = nullptr;
@@ -402,7 +399,7 @@ namespace MWGui
             mSaveNameEdit->setCaption(sender->getItemNameAt(pos));
 
         mCurrentSlot = nullptr;
-        unsigned int i = 0;
+        size_t i = 0;
         for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end();
              ++it, ++i)
         {
@@ -416,8 +413,9 @@ namespace MWGui
 
         const size_t profileIndex = mCharacterSelection->getIndexSelected();
         const std::string& slotPlayerName = mCurrentSlot->mProfile.mPlayerName;
-        const std::string& profilePlayerName = *mCharacterSelection->getItemDataAt<std::string>(profileIndex);
-        if (slotPlayerName != profilePlayerName)
+        const ESM::SavedGame& profileSavedGame
+            = (*mCharacterSelection->getItemDataAt<const MWState::Character*>(profileIndex))->getSignature();
+        if (slotPlayerName != profileSavedGame.mPlayerName)
             text << slotPlayerName << "\n";
 
         text << "#{OMWEngine:Level} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
