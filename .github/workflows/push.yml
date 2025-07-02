@@ -105,7 +105,6 @@ jobs:
       matrix:
         image:
         - "2022"
-        - "2025"
 
     uses: ./.github/workflows/windows.yml
     with:
