@@ -3047,28 +3047,31 @@ namespace MWWorld
         // TODO: as a better solutuon we should handle projectiles during physics update, not during world update.
         const osg::Vec3f sourcePos = worldPos + orient * osg::Vec3f(0, -1, 0) * 64.f;
 
-        // Early out if the launch position is underwater
-        bool underwater = isUnderwater(MWMechanics::getPlayer().getCell(), worldPos);
-        if (underwater)
-        {
-            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
-            mRendering->emitWaterRipple(worldPos);
-            return;
-        }
-
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
         // result.
         std::vector<MWWorld::Ptr> targetActors;
         if (!actor.isEmpty() && actor.getClass().isActor() && actor != MWMechanics::getPlayer())
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
-        // Check for impact, if yes, handle hit, if not, launch projectile
+        // Check for impact, if yes, handle hit
         MWPhysics::RayCastingResult result = mPhysics->castRay(
             sourcePos, worldPos, { actor }, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+
         if (result.mHit)
+        {
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
-        else
-            mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
+            return;
+        }
+
+        // Bail out if the launch position is underwater
+        if (isUnderwater(MWMechanics::getPlayer().getCell(), worldPos))
+        {
+            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
+            mRendering->emitWaterRipple(worldPos);
+            return;
+        }
+
+        mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
     void World::launchMagicBolt(
