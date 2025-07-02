@@ -2,53 +2,59 @@
 Install OpenMW
 ==============
 
-The (easier) Binary Way
-=======================
+Direct Download
+===============
 
 If you're not sure what any of the different methods mean, you should probably stick to this one.
 Simply download the latest version for your operating system from
 `github.com/OpenMW/openmw/releases <https://github.com/OpenMW/openmw/releases>`_
 and run the install package once downloaded. It's now installed!
 
-	.. note::
-		There is no need to uninstall previous versions
-		as OpenMW automatically installs into a separate directory for each new version.
-		Your saves and configuration are compatible and accessible between versions.
+.. note::
+	There is no need to uninstall previous versions
+	as OpenMW automatically installs into a separate directory for each new version.
+	Your saves and configuration are compatible and accessible between versions.
 
-The (bleeding edge) Source Way
-==============================
+From Source
+===========
 
 Visit the `Development Environment Setup <https://wiki.openmw.org/index.php?title=Development_Environment_Setup>`_
 section of the Wiki for detailed instructions on how to build the engine.
 
-The Ubuntu Way
-==============
+Ubuntu
+======
 
 A `Launchpad PPA <https://launchpad.net/~openmw/+archive/openmw>`_ is available.
-Add it and install OpenMW::
+Add it and install OpenMW.
+
+.. code-block:: console
 
 	$ sudo add-apt-repository ppa:openmw/openmw
 	$ sudo apt update
 	$ sudo apt install openmw
 
-The Arch Linux Way
-==================
+Arch Linux
+==========
 
 The binary package is available in the official [community] Repositories.
-To install, simply run the following as root (or in sudo)::
+To install, simply run the following as root (or in sudo).
 
-	# pacman -S openmw
+.. code-block:: console
 
-The Void Linux Way
-==================
+	$ pacman -S openmw
+
+Void Linux
+==========
 
 The binary package is available in the official Repository
-To install simply run the following as root (or in sudo)::
+To install simply run the following as root (or in sudo).
 
-	# xbps-install openmw
+.. code-block:: console
 
-The Debian Way
-==============
+	$ xbps-install openmw
+
+Debian
+======
 
 OpenMW is available from the unstable (sid) repository of Debian contrib
 and can be easily installed if you are using testing or unstable.
@@ -56,10 +62,11 @@ However, it depends on several packages which are not in stable,
 so it is not possible to install OpenMW in Wheezy without creating a FrankenDebian.
 This is not recommended or supported.
 
-The Flatpak Way
-===============
+Flatpak
+=======
 
 OpenMW is available as a flatpak. With flatpak installed, run the command below. It should show up on your desktop.
-::
 
-	# flatpak install openmw
+.. code-block:: console
+
+	$ flatpak install openmw

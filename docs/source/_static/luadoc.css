@@ -1,113 +1,87 @@
-#luadoc tt { font-family: monospace; }
-
-#luadoc p,
-#luadoc td,
-#luadoc th { font-size: .95em; line-height: 1.2em;}
-
-#luadoc p,
-#luadoc ul
-{ margin: 10px 0 0 10px;}
-
-#luadoc strong { font-weight: bold;}
-
-#luadoc em { font-style: italic;}
-
-#luadoc h1 {
-    font-size: 1.5em;
-    margin: 25px 0 20px 0;
-}
-#luadoc h2,
-#luadoc h3,
-#luadoc h4 { margin: 15px 0 10px 0; }
-#luadoc h2 { font-size: 1.25em; }
-#luadoc h3 { font-size: 1.15em; }
-#luadoc h4 { font-size: 1.06em; }
-
-#luadoc hr {
-    color:#cccccc;
-    background: #00007f;
-    height: 1px;
-}
-
-#luadoc blockquote { margin-left: 3em; }
-
-#luadoc ul { list-style-type: disc; }
-
-#luadoc p.name {
-    font-family: "Andale Mono", monospace;
-    padding-top: 1em;
-}
-
-#luadoc p:first-child {
-    margin-top: 0px;
-}
-
-#luadoc table.function_list {
-    border-width: 1px;
-    border-style: solid;
-    border-color: #cccccc;
-    border-collapse: collapse;
-}
-#luadoc table.function_list td {
-    border-width: 1px;
-    padding: 3px;
-    border-style: solid;
-    border-color: #cccccc;
-}
-
-#luadoc table.function_list td.name { background-color: #f0f0f0; }
-#luadoc table.function_list td.summary { width: 100%; }
-
-#luadoc dl.table dt,
-#luadoc dl.function dt {border-top: 1px solid #ccc; padding-top: 1em;}
-#luadoc dl.table dd,
-#luadoc dl.function dd {padding-bottom: 1em; margin: 10px 0 0 20px;}
-#luadoc dl.table h3,
-#luadoc dl.function h3 {font-size: .95em;}
-
-
-
-#luadoc pre.example {
-    background-color: #eeffcc;
-    border: 1px solid #e1e4e5;
-    padding: 10px;
-    margin: 10px 0 10px 0;
-    overflow-x: auto;
-}
-
-#luadoc code {
-    background-color: inherit;
-    color: inherit;
-    border: none;
-    font-family: monospace;
+#luadoc code, #luadoc tt, #luadoc p em {
+    font-family: 'JetBrains Mono', monospace;
 }
 
 #luadoc pre.example code {
-    color: #404040;
-    background-color: #eeffcc;
-    border: none;
     white-space: pre;
-    padding: 0px;
 }
 
-#luadoc dt {
-    background: inherit;
+#luadoc code:not([class*="language-"]) {
+  background-color: unset;
+}
+
+#luadoc pre:not([class*="language-"]) {
+    background-color: inherit;
     color: inherit;
-    width: 100%;
-    padding: 0px;
+    border: none;
 }
 
-#luadoc a:not(:link) {
-    font-weight: bold;
-    color: #000;
+#luadoc pre code {
+    white-space: normal;
+}
+
+#content #luadoc code a:not(.toc-backref) {
+  font-weight: 600;
+}
+
+#luadoc > p:nth-child(1) {
+  margin: 12px 0 12px 0;
+}
+
+#luadoc a:not([href]) {
     text-decoration: none;
     cursor: inherit;
+    color: inherit;
 }
-#luadoc a:link { font-weight: bold; color: #004080; text-decoration: none; }
-#luadoc a:visited { font-weight: bold; color: #006699; text-decoration: none; }
-#luadoc a:link:hover { text-decoration: underline; }
 
-#luadoc dl,
-#luadoc dd {margin: 0px; line-height: 1.2em;}
+#luadoc a:not([href]):hover {
+    color: inherit;
+}
+
+#luadoc code a em {
+  color: inherit;
+  font-weight: inherit;
+}
+
+#luadoc em {
+  font-size: 13px;
+  font-style: normal;
+}
+
+.context-wrapper {
+    display: flex;
+    margin-top: 14px;
+    gap: 4px;
+}
+
+#luadoc ul { list-style-type: disc; }
 #luadoc li {list-style: bullet;}
 
+#luadoc .function a:not(.toc-backref) {
+  font-weight: 500;
+}
+
+#content #luadoc dl.function dt:not(.sig):first-child {
+  border-bottom: 2px solid hsl(var(--muted)  / 50%);
+  background-color: hsl(var(--muted));
+  padding: 6px;
+}
+
+#content #luadoc dl.function dt:not(.sig):first-child a {
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  #content #luadoc dl.function dt:not(.sig):first-child {
+      border-bottom: 2px solid hsl(var(--accent)  / 50%);
+      background-color: hsl(var(--accent));
+  }
+}
+
+#luadoc .table-wrapper.container {
+  padding: 0;
+}
+
+table.docutils {
+    width: 100%;
+}

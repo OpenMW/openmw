@@ -1,12 +1,19 @@
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-| Built-in library                                        | Can be used        | Description                                                   |
-+=========================================================+====================+===============================================================+
-|:ref:`openmw_aux.calendar <Package openmw_aux.calendar>` | everywhere         | | Game time calendar                                          |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw_aux.util <Package openmw_aux.util>`         | everywhere         | | Miscellaneous utils                                         |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw_aux.time <Package openmw_aux.time>`         | everywhere         | | Timers and game time utils                                  |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw_aux.ui <Package openmw_aux.ui>`             | by player and menu | | User interface utils                                        |
-|                                                         | scripts            |                                                               |
-+---------------------------------------------------------+--------------------+---------------------------------------------------------------+
+.. list-table::
+   :widths: 30 40 60
+   :header-rows: 1
+
+   * - Module
+     - Context
+     - Description
+   * - :doc:`calendar </reference/lua-scripting/openmw_aux_calendar>`
+     - |bdg-ctx-all|
+     - Game time calendar
+   * - :doc:`time </reference/lua-scripting/openmw_aux_time>`
+     - |bdg-ctx-all|
+     - Timers and game time utils
+   * - :doc:`ui </reference/lua-scripting/openmw_aux_ui>`
+     - |bdg-ctx-menu| |bdg-ctx-player|
+     - User interface utils
+   * - :doc:`util </reference/lua-scripting/openmw_aux_util>`
+     - |bdg-ctx-all|
+     - Miscellaneous utils

@@ -1,6 +1,6 @@
 ---
--- `openmw.camera` controls camera.
--- Can be used only by player scripts.
+-- Controls camera.
+-- @context player
 -- @module camera
 -- @usage local camera = require('openmw.camera')
 

@@ -1,6 +1,7 @@
 ---
--- `openmw.self` provides full access to the object the script is attached to.
--- Can be used only from local scripts. All fields and function of `GameObject` are also available for `openmw.self`.
+-- Provides full access to the object the script is attached to.
+-- All fields and function of `GameObject` are also available for `openmw.self`.
+-- @context local
 -- @module Self
 -- @extends openmw.core#GameObject
 -- @usage local self = require('openmw.self')

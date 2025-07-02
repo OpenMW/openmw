@@ -1,6 +1,6 @@
 ---
--- `openmw.debug` is an interface to the engine debug utils.
--- Can be used only by local scripts, that are attached to a player.
+-- Provides an interface to the engine debug utils.
+-- @context player
 -- @module Debug
 -- @usage local debug = require('openmw.debug')
 

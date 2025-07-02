@@ -250,6 +250,7 @@ return {
     interfaceName = 'Controls',
     ---
     -- @module Controls
+    -- @context player
     -- @usage require('openmw.interfaces').Controls
     interface = {
         --- Interface version

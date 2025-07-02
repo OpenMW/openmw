@@ -153,6 +153,7 @@ return {
     ---
     -- Allows to extend or override built-in skill progression mechanics.
     -- @module SkillProgression
+    -- @context local
     -- @usage local I = require('openmw.interfaces')
     --
     -- -- Forbid increasing destruction skill past 50

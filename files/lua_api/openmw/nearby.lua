@@ -1,6 +1,6 @@
 ---
--- `openmw.nearby` provides read-only access to the nearest area of the game world.
--- Can be used only from local scripts.
+-- Provides read-only access to the nearest area of the game world.
+-- @context local
 -- @module nearby
 -- @usage local nearby = require('openmw.nearby')
 
