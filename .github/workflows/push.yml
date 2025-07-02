@@ -104,7 +104,6 @@ jobs:
       fail-fast: true
       matrix:
         image:
-        - "2019"
         - "2022"
 
     uses: ./.github/workflows/windows.yml
