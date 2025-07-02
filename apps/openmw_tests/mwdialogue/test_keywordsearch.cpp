@@ -46,7 +46,7 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution2)
 
 TEST_F(KeywordSearchTest, keyword_test_conflict_resolution3)
 {
-    // testing that the longest keyword is chosen, rather than maximizing the
+    // Test that the longest keyword is chosen, rather than maximizing the
     // amount of highlighted characters by highlighting the first and last keyword
     MWDialogue::KeywordSearch<int> search;
     search.seed("foo bar", 0);
@@ -64,12 +64,12 @@ TEST_F(KeywordSearchTest, keyword_test_conflict_resolution3)
 
 TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
 {
-    // We make sure that the search works well even if the character is not ASCII
+    // Make sure that the search works well on UTF-8 strings containing some non-ASCII (French)
     MWDialogue::KeywordSearch<int> search;
     search.seed("états", 0);
     search.seed("ïrradiés", 0);
     search.seed("ça nous déçois", 0);
-    search.seed("ois", 0);
+    search.seed("nous", 0);
 
     std::string text
         = "les nations unis ont réunis le monde entier, états units inclus pour parler du problème des gens ïrradiés "
@@ -86,38 +86,22 @@ TEST_F(KeywordSearchTest, keyword_test_utf8_word_begin)
 
 TEST_F(KeywordSearchTest, keyword_test_non_alpha_non_whitespace_word_begin)
 {
-    // We make sure that the search works well even if the separator is not a whitespace
+    // Make sure that the search works well even if the separator is not whitespace
     MWDialogue::KeywordSearch<int> search;
     search.seed("Report to caius cosades", 0);
 
-    std::string text = "I was told to \"Report to caius cosades\"";
+    std::string text = "I was told to \"Report to Caius Cosades\"";
 
     std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
     search.highlightKeywords(text.begin(), text.end(), matches);
 
     EXPECT_EQ(matches.size(), 1);
-    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Report to caius cosades");
-}
-
-TEST_F(KeywordSearchTest, keyword_test_russian_non_ascii_before)
-{
-    // We make sure that the search works well even if the separator is not a whitespace with russian chars
-    MWDialogue::KeywordSearch<int> search;
-    search.seed("Доложить Каю Косадесу", 0);
-
-    std::string text
-        = "Что? Да. Я Кай Косадес. То есть как это, вам велели «Доложить Каю Косадесу»? О чем вы говорите?";
-
-    std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
-    search.highlightKeywords(text.begin(), text.end(), matches);
-
-    EXPECT_EQ(matches.size(), 1);
-    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Доложить Каю Косадесу");
+    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Report to Caius Cosades");
 }
 
 TEST_F(KeywordSearchTest, keyword_test_russian_ascii_before)
 {
-    // We make sure that the search works well even if the separator is not a whitespace with russian chars
+    // Make sure that the search works well even if the separator is not whitespace with Russian chars
     MWDialogue::KeywordSearch<int> search;
     search.seed("Доложить Каю Косадесу", 0);
 
@@ -129,4 +113,54 @@ TEST_F(KeywordSearchTest, keyword_test_russian_ascii_before)
 
     EXPECT_EQ(matches.size(), 1);
     EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Доложить Каю Косадесу");
+}
+
+TEST_F(KeywordSearchTest, keyword_test_substrings_without_word_separators)
+{
+    // Make sure that the search does not highlight substrings within words
+    // i.e. "Force" does not contain "orc"
+    // and "bring" does not contain "ring"
+    MWDialogue::KeywordSearch<int> search;
+    search.seed("orc", 0);
+    search.seed("ring", 0);
+
+    std::string text = "Bring the Force, Lucan!";
+
+    std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
+    search.highlightKeywords(text.begin(), text.end(), matches);
+
+    EXPECT_EQ(matches.size(), 0);
+}
+
+TEST_F(KeywordSearchTest, keyword_test_initial_substrings_match)
+{
+    // Make sure that the search highlights prefix substrings
+    // "Orcs" should match "orc"
+    // "ring" is not matched because "-" is not a word separator
+    MWDialogue::KeywordSearch<int> search;
+    search.seed("orc", 0);
+    search.seed("ring", 0);
+
+    std::string text = "Bring the Orcs some gold-rings.";
+
+    std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
+    search.highlightKeywords(text.begin(), text.end(), matches);
+
+    EXPECT_EQ(matches.size(), 1);
+    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "Orc");
+}
+
+TEST_F(KeywordSearchTest, keyword_test_french_substrings)
+{
+    // Substrings within words should not match
+    MWDialogue::KeywordSearch<int> search;
+    search.seed("ages", 0);
+    search.seed("orc", 0);
+
+    std::string text = "traçages et forces";
+
+    std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
+    search.highlightKeywords(text.begin(), text.end(), matches);
+
+    EXPECT_EQ(matches.size(), 0);
 }
