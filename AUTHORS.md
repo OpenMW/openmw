@@ -53,6 +53,7 @@ Programmers
     Carl Maxwell
     cc9cii
     Cédric Mocquillon
+    Charles Horn
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)
     Chris Vigil
