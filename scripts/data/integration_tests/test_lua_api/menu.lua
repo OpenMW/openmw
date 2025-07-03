@@ -87,6 +87,7 @@ registerGlobalTest('castNavigationRay')
 registerGlobalTest('findNearestNavMeshPosition')
 registerGlobalTest('player memory limit')
 registerGlobalTest('player weapon attack', 'player with equipped weapon on attack should damage health of other actors')
+registerGlobalTest('mwscript magic interactions')
 
 return {
     engineHandlers = {
