@@ -968,7 +968,9 @@ namespace MWGui
         {
             if (mChoices.size() > 0)
             {
-                if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
+                if (mChoices.size() == 1)
+                    onChoiceActivated(mChoices[0].second);
+                else if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
                     onChoiceActivated(mChoices[mControllerChoice].second);
             }
             else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()))
@@ -1024,6 +1026,18 @@ namespace MWGui
                     mControllerFocus++;
                 setControllerFocus(mControllerFocus, true);
             }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER && mChoices.size() == 0)
+        {
+            setControllerFocus(mControllerFocus, false);
+            mControllerFocus = std::max(mControllerFocus - 5, 0);
+            setControllerFocus(mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER && mChoices.size() == 0)
+        {
+            setControllerFocus(mControllerFocus, false);
+            mControllerFocus = std::min(mControllerFocus + 5, static_cast<int>(mTopicsList->getItemCount()));
+            setControllerFocus(mControllerFocus, true);
         }
 
         return true;
