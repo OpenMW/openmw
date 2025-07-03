@@ -748,7 +748,7 @@ namespace MWRender
         return technique->isValid();
     }
 
-    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
+    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(std::string_view name, bool loadNextFrame)
     {
         VFS::Path::Normalized path = fx::Technique::makeFileName(name);
         return loadTechnique(VFS::Path::NormalizedView(path), loadNextFrame);
@@ -764,11 +764,14 @@ namespace MWRender
             if (technique->getFileName() == path)
                 return technique;
 
-        if (!mTechniqueFiles.contains(path))
-            return {};
+        std::string name;
+        if (mTechniqueFiles.contains(path))
+            name = mVFS->getStem(path);
+        else
+            name = path.stem();
 
         auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
-            path, mVFS->getStem(path), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+            path, std::move(name), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
@@ -805,10 +808,7 @@ namespace MWRender
             if (techniqueName.empty())
                 continue;
 
-            auto technique = loadTechnique(techniqueName);
-            if (!technique)
-                continue;
-            mTechniques.push_back(std::move(technique));
+            mTechniques.push_back(loadTechnique(techniqueName));
         }
 
         dirtyTechniques();
@@ -831,7 +831,11 @@ namespace MWRender
     void PostProcessor::toggleMode()
     {
         for (auto& technique : mTemplates)
+        {
+            if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
+                continue;
             technique->compile();
+        }
 
         dirtyTechniques(true);
     }

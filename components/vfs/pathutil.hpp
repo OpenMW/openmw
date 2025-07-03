@@ -136,6 +136,18 @@ namespace VFS::Path
             return p;
         }
 
+        std::string_view stem() const
+        {
+            std::string_view stem = mValue;
+            std::size_t pos = stem.find_last_of(separator);
+            if (pos != std::string_view::npos)
+                stem = stem.substr(pos + 1);
+            pos = stem.find_first_of(extensionSeparator);
+            if (pos != std::string_view::npos)
+                stem = stem.substr(0, pos);
+            return stem;
+        }
+
     private:
         std::string_view mValue;
     };
@@ -271,6 +283,11 @@ namespace VFS::Path
         NormalizedView parent() const
         {
             return NormalizedView(*this).parent();
+        }
+
+        std::string_view stem() const
+        {
+            return NormalizedView(*this).stem();
         }
 
     private:

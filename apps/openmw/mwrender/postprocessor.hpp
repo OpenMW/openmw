@@ -177,7 +177,7 @@ namespace MWRender
         void toggleMode();
 
         std::shared_ptr<fx::Technique> loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame = false);
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame = false);
+        std::shared_ptr<fx::Technique> loadTechnique(std::string_view name, bool loadNextFrame = false);
 
         TechniqueList getChain();
 
