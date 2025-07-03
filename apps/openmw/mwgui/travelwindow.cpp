@@ -132,10 +132,15 @@ namespace MWGui
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }
-            else if (worldModel.findCell(cellname, false) == nullptr)
+            else
             {
-                Log(Debug::Error) << "Failed to add travel destination: unknown cell (" << cellname << ")";
-                continue;
+                const MWWorld::CellStore* destCell = worldModel.findCell(cellname, false);
+                if (destCell == nullptr)
+                {
+                    Log(Debug::Error) << "Failed to add travel destination: unknown cell (" << cellname << ")";
+                    continue;
+                }
+                interior = !destCell->getCell()->isExterior();
             }
             addDestination(ESM::RefId::stringRefId(cellname), dest.mPos, interior);
         }
