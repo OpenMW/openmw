@@ -11,6 +11,7 @@
                 <Property key="ImageTexture" value="textures\omw_steam_button_l1.dds"/>
                 <Property key="Colour" value="#ccb589"/>
                 <Property key="Alpha" value="0.7"/>
+                <Property key="Visible" value="false"/>
                 <UserString key="Hidden" value="true"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="AllButton">
@@ -37,6 +38,7 @@
                 <Property key="ImageTexture" value="textures\omw_steam_button_r1.dds"/>
                 <Property key="Colour" value="#ccb589"/>
                 <Property key="Alpha" value="0.7"/>
+                <Property key="Visible" value="false"/>
                 <UserString key="Hidden" value="true"/>
             </Widget>
             <!-- Search box-->

@@ -174,9 +174,11 @@ namespace MWGui
             // Show L1 and R1 buttons next to tabs
             MyGUI::Widget* image;
             getWidget(image, "BtnL1Image");
+            image->setVisible(true);
             image->setUserString("Hidden", "false");
 
             getWidget(image, "BtnR1Image");
+            image->setVisible(true);
             image->setUserString("Hidden", "false");
 
             mControllerButtons.a = "#{sBuy}";
