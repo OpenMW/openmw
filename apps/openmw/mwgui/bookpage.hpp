@@ -32,7 +32,7 @@ namespace MWGui
         virtual std::pair<unsigned int, unsigned int> getSize() const = 0;
 
         /// Used to highlight journal indices
-        virtual void setColour(int section, int line, int run, MyGUI::Colour colour) const = 0;
+        virtual void setColour(size_t section, size_t line, size_t run, const MyGUI::Colour& colour) const = 0;
 
         virtual ~TypesetBook() = default;
     };

@@ -477,7 +477,7 @@ namespace
             }
 
             if (Settings::gui().mControllerMenus)
-                setIndexControllerFocus(mSelectedIndex, true);
+                setIndexControllerFocus(true);
         }
 
         void notifyJournal(MyGUI::Widget* _sender)
@@ -489,7 +489,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void addControllerButtons(Gui::MWList* _list, int _selectedIndex)
+        void addControllerButtons(Gui::MWList* _list, size_t _selectedIndex)
         {
             mButtons.clear();
             for (size_t i = 0; i < _list->getItemCount(); i++)
@@ -497,9 +497,8 @@ namespace
                 MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
                 if (listItem)
                 {
-                    listItem->setTextColour(static_cast<int>(mButtons.size()) == _selectedIndex
-                            ? MWGui::journalHeaderColour
-                            : MyGUI::Colour::Black);
+                    listItem->setTextColour(
+                        mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }
@@ -700,21 +699,21 @@ namespace
             return &mControllerButtons;
         }
 
-        void setIndexControllerFocus(int index, bool focused)
+        void setIndexControllerFocus(bool focused)
         {
             int col, row;
             bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
             if (isRussian)
             {
                 // Cyrillic = 30 (10 + 10 + 10)
-                col = index / 10;
-                row = index % 10;
+                col = mSelectedIndex / 10;
+                row = mSelectedIndex % 10;
             }
             else
             {
                 // Latin = 26 (13 + 13)
-                col = index / 13;
-                row = index % 13;
+                col = mSelectedIndex / 13;
+                row = mSelectedIndex % 13;
             }
 
             mTopicIndexBook->setColour(col, row, 0, focused ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
@@ -831,7 +830,7 @@ namespace
                 }
                 else if (mOptionsMode)
                 {
-                    setIndexControllerFocus(mSelectedIndex, false);
+                    setIndexControllerFocus(false);
                     if (isRussian)
                     {
                         // Cyrillic = 30 (10 + 10 + 10)
@@ -854,7 +853,7 @@ namespace
                         else
                             mSelectedIndex--;
                     }
-                    setIndexControllerFocus(mSelectedIndex, true);
+                    setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
@@ -871,7 +870,7 @@ namespace
                 }
                 else if (mOptionsMode)
                 {
-                    setIndexControllerFocus(mSelectedIndex, false);
+                    setIndexControllerFocus(false);
                     if (isRussian)
                     {
                         // Cyrillic = 30 (10 + 10 + 10)
@@ -894,7 +893,7 @@ namespace
                         else
                             mSelectedIndex++;
                     }
-                    setIndexControllerFocus(mSelectedIndex, true);
+                    setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
@@ -905,7 +904,7 @@ namespace
                     notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
                 else if (mOptionsMode && !mQuestMode && !mTopicsMode)
                 {
-                    setIndexControllerFocus(mSelectedIndex, false);
+                    setIndexControllerFocus(false);
                     if (isRussian)
                     {
                         // Cyrillic = 30 (10 + 10 + 10)
@@ -916,7 +915,7 @@ namespace
                         // Latin = 26 (13 + 13)
                         mSelectedIndex = (mSelectedIndex + 13) % 26;
                     }
-                    setIndexControllerFocus(mSelectedIndex, true);
+                    setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
@@ -927,7 +926,7 @@ namespace
                     notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
                 else if (mOptionsMode && !mQuestMode && !mTopicsMode)
                 {
-                    setIndexControllerFocus(mSelectedIndex, false);
+                    setIndexControllerFocus(false);
                     if (isRussian)
                     {
                         // Cyrillic = 30 (10 + 10 + 10)
@@ -938,7 +937,7 @@ namespace
                         // Latin = 26 (13 + 13)
                         mSelectedIndex = (mSelectedIndex + 13) % 26;
                     }
-                    setIndexControllerFocus(mSelectedIndex, true);
+                    setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
                 return true;
@@ -959,14 +958,14 @@ namespace
             return false;
         }
 
-        void setControllerFocusedQuest(int index)
+        void setControllerFocusedQuest(size_t index)
         {
-            int listSize = static_cast<int>(mButtons.size());
-            if (mSelectedQuest >= 0 && mSelectedQuest < listSize)
+            size_t listSize = mButtons.size();
+            if (mSelectedQuest < listSize)
                 mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
 
             mSelectedQuest = index;
-            if (mSelectedQuest >= 0 && mSelectedQuest < listSize)
+            if (mSelectedQuest < listSize)
             {
                 mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
 
@@ -977,7 +976,7 @@ namespace
                 else
                 {
                     int offset = 0;
-                    for (int i = 0; i < mSelectedQuest - 3; i++)
+                    for (int i = 0; i < static_cast<int>(mSelectedQuest) - 3; i++)
                         offset += mButtons[i]->getHeight() + 3;
                     list->setViewOffset(-offset);
                 }

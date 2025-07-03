@@ -105,13 +105,13 @@ namespace MWGui
         Styles mStyles;
         MyGUI::IntRect mRect;
 
-        void setColour(int section, int line, int run, MyGUI::Colour colour) const override
+        void setColour(size_t section, size_t line, size_t run, const MyGUI::Colour& colour) const override
         {
-            if (section < 0 || section >= static_cast<int>(mSections.size()))
+            if (section >= mSections.size())
                 return;
-            if (line < 0 || line >= static_cast<int>(mSections[section].mLines.size()))
+            if (line >= mSections[section].mLines.size())
                 return;
-            if (run < 0 || run >= static_cast<int>(mSections[section].mLines[line].mRuns.size()))
+            if (run >= mSections[section].mLines[line].mRuns.size())
                 return;
 
             mSections[section].mLines[line].mRuns[run].mStyle->mNormalColour = colour;
