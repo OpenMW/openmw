@@ -927,7 +927,7 @@ namespace MWGui
     void DialogueWindow::setControllerFocus(size_t index, bool focused)
     {
         // List is mTopicsList + "Goodbye" button below the list.
-        if (index < 0 || index > mTopicsList->getItemCount())
+        if (index > mTopicsList->getItemCount())
             return;
 
         if (index == mTopicsList->getItemCount())
@@ -952,7 +952,7 @@ namespace MWGui
             else
             {
                 int offset = 0;
-                for (size_t i = 0; i < index - 8; i++)
+                for (int i = 0; i < static_cast<int>(index) - 8; i++)
                 {
                     const std::string& keyword = mTopicsList->getItemNameAt(i);
                     if (keyword.empty())
