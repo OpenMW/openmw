@@ -1192,6 +1192,10 @@ namespace MWScript
 
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 std::vector<std::string> names = runtime.getContext().getGlobals();
+
+                // sort for user convenience
+                std::sort(names.begin(), names.end());
+
                 for (size_t i = 0; i < names.size(); ++i)
                 {
                     char type = world->getGlobalVariableType(names[i]);
@@ -1223,6 +1227,50 @@ namespace MWScript
                 runtime.getContext().report(str.str());
             }
 
+            void printGlobalScriptsVars(Interpreter::Runtime& runtime)
+            {
+                std::stringstream str;
+                str << std::endl << "Global Scripts:";
+
+                const auto& scripts = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getScripts();
+
+                // sort for user convenience
+                std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> globalScripts(scripts.begin(), scripts.end());
+
+                auto printVariables
+                    = [&str](const ESM::RefId& scptName, const auto& names, const auto& values, std::string_view type) {
+                          size_t size = std::min(names.size(), values.size());
+                          for (size_t i = 0; i < size; ++i)
+                          {
+                              str << std::endl
+                                  << " " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                          }
+                      };
+
+                for (const auto& [refId, script] : globalScripts)
+                {
+                    // Skip dormant global scripts
+                    if (!script->mRunning)
+                        continue;
+
+                    const Compiler::Locals& complocals
+                        = MWBase::Environment::get().getScriptManager()->getLocals(refId);
+                    const Locals& locals
+                        = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(refId);
+
+                    if (locals.isEmpty())
+                        str << std::endl << " No variables in script " << refId;
+                    else
+                    {
+                        printVariables(refId, complocals.get('s'), locals.mShorts, "short");
+                        printVariables(refId, complocals.get('l'), locals.mLongs, "long");
+                        printVariables(refId, complocals.get('f'), locals.mFloats, "float");
+                    }
+                }
+
+                runtime.getContext().report(str.str());
+            }
+
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
@@ -1233,6 +1281,7 @@ namespace MWScript
                 {
                     // No reference, no problem.
                     printGlobalVars(runtime);
+                    printGlobalScriptsVars(runtime);
                 }
             }
         };
