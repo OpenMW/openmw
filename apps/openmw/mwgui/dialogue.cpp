@@ -921,20 +921,20 @@ namespace MWGui
             && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
-    void DialogueWindow::setControllerFocus(int index, bool focused)
+    void DialogueWindow::setControllerFocus(size_t index, bool focused)
     {
         // List is mTopicsList + "Goodbye" button below the list.
-        if (index < 0 || index > static_cast<int>(mTopicsList->getItemCount()))
+        if (index < 0 || index > mTopicsList->getItemCount())
             return;
 
-        if (index == static_cast<int>(mTopicsList->getItemCount()))
+        if (index == mTopicsList->getItemCount())
         {
             mGoodbyeButton->setStateSelected(focused);
         }
         else
         {
-            std::string keyword = mTopicsList->getItemNameAt(mControllerFocus);
-            if (keyword.length() == 0)
+            const std::string& keyword = mTopicsList->getItemNameAt(mControllerFocus);
+            if (keyword.empty())
                 return;
 
             MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
@@ -949,10 +949,10 @@ namespace MWGui
             else
             {
                 int offset = 0;
-                for (int i = 0; i < index - 8; i++)
+                for (size_t i = 0; i < index - 8; i++)
                 {
-                    std::string keyword = mTopicsList->getItemNameAt(i);
-                    if (keyword.length() == 0)
+                    const std::string& keyword = mTopicsList->getItemNameAt(i);
+                    if (keyword.empty())
                         offset += 21;
                     else
                         offset += mTopicsList->getItemWidget(keyword)->getHeight() + 3;
@@ -997,7 +997,7 @@ namespace MWGui
                 setControllerFocus(mControllerFocus, false);
                 if (mControllerFocus <= 0)
                     mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
-                else if (mTopicsList->getItemNameAt(mControllerFocus - 1).length() == 0)
+                else if (mTopicsList->getItemNameAt(mControllerFocus - 1).empty())
                     mControllerFocus -= 2; // Skip separator
                 else
                     mControllerFocus--;
@@ -1020,7 +1020,7 @@ namespace MWGui
                     mControllerFocus = 0;
                 else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()) - 1)
                     mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
-                else if (mTopicsList->getItemNameAt(mControllerFocus + 1).length() == 0)
+                else if (mTopicsList->getItemNameAt(mControllerFocus + 1).empty())
                     mControllerFocus += 2; // Skip separator
                 else
                     mControllerFocus++;

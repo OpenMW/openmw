@@ -229,7 +229,7 @@ namespace MWGui
         std::unique_ptr<ResponseCallback> mCallback;
         std::unique_ptr<ResponseCallback> mGreetingCallback;
 
-        void setControllerFocus(int index, bool focused);
+        void setControllerFocus(size_t index, bool focused);
         int mControllerFocus = 0;
         int mControllerChoice = -1;
 
