@@ -599,7 +599,10 @@ namespace
             list->adjustSize();
 
             if (Settings::gui().mControllerMenus)
+            {
                 addControllerButtons(list, mSelectedQuest);
+                setControllerFocusedQuest(MWGui::wrap(mSelectedQuest, mButtons.size()));
+            }
 
             if (mAllQuests)
             {
