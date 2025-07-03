@@ -326,8 +326,6 @@ namespace MWGui
 
     void SaveGameDialog::onCharacterSelected(MyGUI::ComboBox* sender, size_t pos)
     {
-        MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
-
         const MWState::Character* character = *mCharacterSelection->getItemDataAt<const MWState::Character*>(pos);
 
         mCurrentCharacter = character;
