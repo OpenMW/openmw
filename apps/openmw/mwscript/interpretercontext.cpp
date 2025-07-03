@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/locals.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/esm/records.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -300,7 +301,15 @@ namespace MWScript
 
     std::string_view InterpreterContext::getNPCFaction() const
     {
-        const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
+        if (factionId.empty())
+        {
+            Log(Debug::Warning) << "getNPCFaction(): NPC is not in a faction";
+            return "%";
+        }
+
+        const ESM::NPC* npc = ptr.get<ESM::NPC>()->mBase;
         const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc->mFaction);
         return faction->mName;
     }
@@ -310,7 +319,10 @@ namespace MWScript
         const MWWorld::Ptr& ptr = getReferenceImp();
         const ESM::RefId& faction = ptr.getClass().getPrimaryFaction(ptr);
         if (faction.empty())
-            throw std::runtime_error("getNPCRank(): NPC is not in a faction");
+        {
+            Log(Debug::Warning) << "getNPCRank(): NPC is not in a faction";
+            return "%";
+        }
 
         int rank = ptr.getClass().getPrimaryFactionRank(ptr);
         if (rank < 0 || rank > 9)
@@ -349,7 +361,10 @@ namespace MWScript
 
         const ESM::RefId& factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
         if (factionId.empty())
-            throw std::runtime_error("getPCRank(): NPC is not in a faction");
+        {
+            Log(Debug::Warning) << "getPCRank(): NPC is not in a faction";
+            return "%";
+        }
 
         const auto& ranks = player.getClass().getNpcStats(player).getFactionRanks();
         auto it = ranks.find(factionId);
@@ -378,7 +393,10 @@ namespace MWScript
 
         const ESM::RefId& factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
         if (factionId.empty())
-            throw std::runtime_error("getPCNextRank(): NPC is not in a faction");
+        {
+            Log(Debug::Warning) << "getPCNextRank(): NPC is not in a faction";
+            return "%";
+        }
 
         const auto& ranks = player.getClass().getNpcStats(player).getFactionRanks();
         auto it = ranks.find(factionId);
