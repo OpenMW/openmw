@@ -60,6 +60,7 @@ return {
     interfaceName = 'Activation',
     ---
     -- @module Activation
+    -- @context global
     -- @usage require('openmw.interfaces').Activation
     interface = {
         --- Interface version

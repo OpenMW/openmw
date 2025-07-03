@@ -1,4 +1,5 @@
 ---
+-- @context global|menu|local|player
 -- @module interfaces
 -- @usage local I = require('openmw.interfaces')
 

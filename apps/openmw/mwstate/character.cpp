@@ -18,14 +18,25 @@ bool MWState::operator<(const Slot& left, const Slot& right)
     return left.mTimeStamp < right.mTimeStamp;
 }
 
-std::string MWState::getFirstGameFile(const std::vector<std::string>& contentFiles)
+bool MWState::operator<(const Character& left, const Character& right)
+{
+    if (left.mSlots.empty() && right.mSlots.empty())
+        return left.mPath < right.mPath;
+    else if (left.mSlots.empty())
+        return false;
+    else if (right.mSlots.empty())
+        return true;
+    return right.mSlots.back() < left.mSlots.back();
+}
+
+std::string_view MWState::getFirstGameFile(const std::vector<std::string>& contentFiles)
 {
     for (const std::string& c : contentFiles)
     {
         if (Misc::StringUtils::ciEndsWith(c, ".esm") || Misc::StringUtils::ciEndsWith(c, ".omwgame"))
             return c;
     }
-    return "";
+    return {};
 }
 
 void MWState::Character::addSlot(const std::filesystem::path& path, const std::string& game)

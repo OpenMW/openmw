@@ -64,6 +64,8 @@ namespace MWScript
 
         void removeScript(const ESM::RefId& name);
 
+        const std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>& getScripts() const { return mScripts; }
+
         bool isRunning(const ESM::RefId& name) const;
 
         void run();

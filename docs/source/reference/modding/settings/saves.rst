@@ -1,35 +1,30 @@
 Saves Settings
 ##############
 
-character
----------
+.. omw-setting::
+   :title: character
+   :type: string
+   :default: ""
 
-:Type:		string
-:Range:
-:Default:	""
+   The default character shown in the Load Game menu.
+   Automatically updated when a different character is selected.
 
-This contains the default character for the Load Game menu and is automatically updated when a different character is selected.
+.. omw-setting::
+   :title: autosave
+   :type: boolean
+   :range: true, false
+   :default: true
+   :location: :bdg-info:`In Game > Options > Prefs`
 
-autosave
---------
+   Determines whether the game auto-saves when the character rests.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+.. omw-setting::
+   :title: max quicksaves
+   :type: int
+   :range: >0
+   :default: 1
+   :location: :bdg-success:`Launcher > Settings > Miscellaneous`
 
-This setting determines whether the game will be automatically saved when the character rests.
-
-This setting can be toggled in game with the Auto-Save when Rest button in the Prefs panel of the Options menu.
-
-max quicksaves
---------------
-
-:Type:		integer
-:Range:		>0
-:Default:	1
-
-This setting determines how many quicksave and autosave slots you can have at a time.  If greater than 1, 
-quicksaves will be sequentially created each time you quicksave.  Once the maximum number of quicksaves has been reached, 
-the oldest quicksave will be recycled the next time you perform a quicksave.
-
-This setting can only be configured by editing the settings configuration file.
+   Number of quicksave and autosave slots available.
+   If greater than 1, quicksaves are created sequentially.
+   When the max is reached, the oldest quicksave is overwritten on the next quicksave.

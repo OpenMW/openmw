@@ -159,6 +159,7 @@ return {
     interfaceName = 'UI',
     ---
     -- @module UI
+    -- @context player
     -- @usage require('openmw.interfaces').UI
     interface = {
         --- Interface version

@@ -36,6 +36,7 @@ return {
     -- * can't intercept actions performed by the AI (i.e. drinking a potion in combat);
     -- * can't intercept actions performed via quick keys menu.
     -- @module ItemUsage
+    -- @context global
     -- @usage local I = require('openmw.interfaces')
     --
     -- -- Override Use action (global script).

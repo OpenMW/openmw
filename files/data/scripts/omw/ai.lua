@@ -58,6 +58,7 @@ return {
     interfaceName = 'AI',
     --- Basic AI interface
     -- @module AI
+    -- @context local
     -- @usage require('openmw.interfaces').AI
     interface = {
         --- Interface version
@@ -87,7 +88,7 @@ return {
 
         --- Start new AI package.
         -- @function [parent=#AI] startPackage
-        -- @param #table options See the "Built-in AI packages" page.
+        -- @param #table options See the "AI packages" page.
         startPackage = startPackage,
 
         --- Iterate over all packages starting from the active one and remove those where `filterCallback` returns false.

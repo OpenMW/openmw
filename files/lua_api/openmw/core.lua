@@ -1,6 +1,6 @@
 ---
--- `openmw.core` defines functions and types that are available in local,
--- global and menu scripts.
+-- Defines functions and types that are available in local, global and menu scripts.
+-- @context global|menu|local|player
 -- @module core
 -- @usage local core = require('openmw.core')
 
@@ -448,6 +448,28 @@
 -- @param #string recordId
 -- @return #ObjectList
 -- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
+
+
+--- @{#Land}: Functions for interacting with land data
+-- @field [parent=#core] #Land land
+
+---
+-- Get the terrain height at a given location.
+-- @function [parent=#Land] getHeightAt
+-- @param openmw.util#Vector3 position
+-- @param #any cellOrId cell or cell id in their exterior world space to query
+-- @return #number
+
+---
+-- Get the terrain texture at a given location. As textures are blended and
+-- multiple textures can be at one specific position the texture whose center is
+-- closest to the position will be returned.
+--
+-- @function [parent=#Land] getTextureAt
+-- @param openmw.util#Vector3 position
+-- @param #any cellOrId cell or cell id in their exterior world space to query
+-- @return #nil, #string Texture path or nil if one isn't defined
+-- @return #nil, #string Plugin name or nil if failed to retrieve the texture
 
 
 --- @{#Magic}: spells and spell effects
@@ -1142,5 +1164,20 @@
 -- @field #number primarySkillValue Primary skill value required to get this rank.
 -- @field #number favouredSkillValue Secondary skill value required to get this rank.
 -- @field #number factionReaction Reaction of faction members if player is in this faction.
+
+--- @{#MWScripts}: MWScripts
+-- @field [parent=#core] #MWScript mwscripts
+
+---
+-- A read-only list of all @{#MWScriptRecord}s in the world database.
+-- @field [parent=#MWScripts] #list<#MWScriptRecord> records
+-- @usage local record = core.mwscripts.records['example_recordid']
+-- @usage local record = core.mwscripts.records[1]
+
+---
+-- MWScript data record
+-- @type MWScriptRecord
+-- @field #string id MWScript id
+-- @field #string text MWScript content
 
 return nil

@@ -1,6 +1,8 @@
 Widget
 ======
 
+Base widget type, all the other widgets inherit its properties and events. 
+
 Properties
 ----------
 

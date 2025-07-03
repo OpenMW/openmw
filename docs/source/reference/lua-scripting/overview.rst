@@ -1,5 +1,5 @@
-Overview of Lua scripting
-#########################
+Overview
+########
 
 .. include:: version.rst
 
@@ -384,8 +384,8 @@ Player scripts are local scripts that are attached to a player.
 
 .. include:: tables/packages.rst
 
-openmw_aux
-----------
+Auxiliary packages
+------------------
 
 ``openmw_aux.*`` are built-in libraries that are themselves implemented in Lua. They can not do anything that is not possible with the basic API, they only make it more convenient.
 Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can override them, but it is not recommended.
@@ -544,7 +544,7 @@ The protection mod attaches an additional local script to every actor. The scrip
 
 In order to be able to intercept the event, the protection script should be placed in the load order below the original script.
 
-See :ref:`the list of events <Built-in events>` that are used by built-in scripts.
+See :ref:`the list of events <Events>` that are used by built-in scripts.
 
 
 Timers
@@ -618,7 +618,7 @@ An example:
         }
     }
 
-Also in `openmw_aux`_ is the helper function ``runRepeatedly``, it is implemented on top of unsavable timers:
+Also in `Auxiliary packages`_ is the helper function ``runRepeatedly``, it is implemented on top of unsavable timers:
 
 .. code-block:: Lua
 
@@ -641,7 +641,7 @@ Using IDE for Lua scripting
 Find the directory ``resources/lua_api`` in your installation of OpenMW.
 It describes OpenMW LuaAPI in
 `LDT Documentation Language <https://wiki.eclipse.org/LDT/User_Area/Documentation_Language>`__.
-It is the source from which the :ref:`API reference <Lua API reference>` is generated.
+It is the source from which the :ref:`API reference <API Reference>` is generated.
 
 If you write scripts using `Lua Development Tools <https://www.eclipse.org/ldt/>`__ (eclipse-based IDE),
 you can import these files to get code autocompletion and integrated OpenMW API reference. Here are the steps:

@@ -1,6 +1,7 @@
 0.50.0
 ------
 
+    Feature #8285: Expose list of active shaders in postprocessing API
 
 0.49.0
 ------

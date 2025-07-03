@@ -1,5 +1,6 @@
 ---
--- `openmw.menu` can be used only in menu scripts.
+-- Provides interfaces to interact with menu elements.
+-- @context menu
 -- @module menu
 -- @usage local menu = require('openmw.menu')
 

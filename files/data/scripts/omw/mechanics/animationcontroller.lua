@@ -60,6 +60,7 @@ return {
     --- 
     -- Animation controller interface
     -- @module AnimationController
+    -- @context local
     -- @usage local anim = require('openmw.animation')
     -- local I = require('openmw.interfaces')
     --

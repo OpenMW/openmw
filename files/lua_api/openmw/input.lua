@@ -1,9 +1,9 @@
 ---
--- `openmw.input` can be used only in menu scripts and scripts attached to a player.
 -- Most mods should prefer to use the actions/triggers API over the direct input device methods.
 -- Actions have one value on each frame (resolved just before the `onFrame` engine handler),
 --  while Triggers don't have a value, but can occur multiple times on each frame.
 -- Prefer to use built-in methods of binding actions, such as the [inputBinding setting renderer](setting_renderers.html#inputbinding)
+-- @context menu|player
 -- @module input
 -- @usage local input = require('openmw.input')
 -- -- Example of Action usage

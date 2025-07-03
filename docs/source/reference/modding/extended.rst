@@ -338,7 +338,7 @@ Also groundcover detection should be enabled via settings.cfg:
 Lua scripting
 -------------
 
-OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <OpenMW Lua scripting>`.
+OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <Lua scripting>`.
 It is not compatible with MWSE. A mod with Lua scripts will work only if it was developed specifically for OpenMW.
 
 Installation of a Lua mod is the same as of any other mod: add ``data=`` and ``content=`` entries to ``openmw.cfg``.

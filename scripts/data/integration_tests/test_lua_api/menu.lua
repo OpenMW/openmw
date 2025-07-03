@@ -19,6 +19,7 @@ testing.registerMenuTest('save and load', function()
             'template.omwgame',
             'landracer.omwaddon',
             'the_hub.omwaddon',
+            'mwscript.omwaddon',
             'test_lua_api.omwscripts',
         },
         creationTime = matchers.isAny(),
@@ -86,6 +87,7 @@ registerGlobalTest('castNavigationRay')
 registerGlobalTest('findNearestNavMeshPosition')
 registerGlobalTest('player memory limit')
 registerGlobalTest('player weapon attack', 'player with equipped weapon on attack should damage health of other actors')
+registerGlobalTest('mwscript magic interactions')
 
 return {
     engineHandlers = {

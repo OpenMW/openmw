@@ -1,6 +1,6 @@
 ---
--- `openmw.ui` controls user interface.
--- Can be used only by menu scripts and local scripts, that are attached to a player.
+-- Controls user interface.
+-- @context menu|player
 -- @module ui
 -- @usage
 -- local ui = require('openmw.ui')
