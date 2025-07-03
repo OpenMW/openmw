@@ -982,7 +982,7 @@ namespace MWGui
                 onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.size() < 2)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.empty())
         {
             onGoodbyeActivated();
         }
