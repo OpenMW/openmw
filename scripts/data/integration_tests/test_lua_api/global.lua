@@ -82,7 +82,7 @@ testing.registerGlobalTest('getGMST', function()
 end)
 
 testing.registerGlobalTest('MWScript', function()
-    local variableStoreCount = 18
+    local variableStoreCount = 19
     local variableStore = world.mwscript.getGlobalVariables(player)
     testing.expectEqual(variableStoreCount, #variableStore)
 
@@ -349,6 +349,20 @@ testing.registerGlobalTest('nan', function()
     local ok, err = pcall(function() world.setGameTimeScale(nan) end)
     testing.expectEqual(ok, false)
     testing.expectEqual(err, 'Value must be a finite number')
+end)
+
+testing.registerGlobalTest('mwscript magic interactions', function()
+    local player = world.players[1]
+    local script = world.mwscript.getGlobalScript('OpenMW_Tests', player)
+    testing.expectEqual(script == nil, false, 'Expected mwscript OpenMW_Tests to be active')
+    script.variables.state = 1
+    local globals = world.mwscript.getGlobalVariables(player);
+    globals.OpenMW_Tests_Failed = 0
+    while script.variables.state ~= 0 and globals.OpenMW_Tests_Failed == 0 and script.isRunning do
+        coroutine.yield()
+    end
+    testing.expectEqual(script.isRunning, true, 'OpenMW_Tests should not crash')
+    testing.expectEqual(globals.OpenMW_Tests_Failed, 0, 'OpenMW_Tests should run without issue')
 end)
 
 return {

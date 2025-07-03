@@ -29,6 +29,7 @@ content_paths = (
     example_suite_dir / "game_template" / "data" / "template.omwgame",
     example_suite_dir / "example_animated_creature" / "data" / "landracer.omwaddon",
     example_suite_dir / "the_hub" / "data" / "the_hub.omwaddon",
+    example_suite_dir / "integration_tests" / "data" / "mwscript.omwaddon",
 )
 for path in content_paths:
     if not path.is_file():
@@ -60,6 +61,7 @@ def run_test(test_name):
         omw_cfg.writelines(
             (
                 f'data="{testing_util_dir}"\n',
+                f'data="{example_suite_dir / "example_static_props" / "data"}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
             )
