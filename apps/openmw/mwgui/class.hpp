@@ -42,6 +42,7 @@ namespace MWGui
 
     protected:
         void onButtonClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void fitToText(MyGUI::TextBox* widget);
@@ -50,6 +51,7 @@ namespace MWGui
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;
         std::vector<MyGUI::Button*> mButtons;
+        int mControllerFocus = 0;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -92,10 +94,14 @@ namespace MWGui
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool mOkButtonFocus = true;
 
     private:
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mClassName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentClassId;
     };
@@ -140,11 +146,15 @@ namespace MWGui
         MyGUI::ImageBox* mClassImage;
         MyGUI::ListBox* mClassList;
         MyGUI::TextBox* mSpecializationName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
         Widgets::MWAttributePtr mFavoriteAttribute[2];
         Widgets::MWSkillPtr mMajorSkill[5];
         Widgets::MWSkillPtr mMinorSkill[5];
 
         ESM::RefId mCurrentClassId;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
     class SelectSpecializationDialog : public WindowModal
@@ -173,6 +183,7 @@ namespace MWGui
     protected:
         void onSpecializationClicked(MyGUI::Widget* _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::TextBox *mSpecialization0, *mSpecialization1, *mSpecialization2;
@@ -206,6 +217,9 @@ namespace MWGui
     protected:
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
+        std::vector<Widgets::MWAttribute*> mAttributeButtons;
 
     private:
         ESM::RefId mAttributeId;
@@ -237,6 +251,9 @@ namespace MWGui
     protected:
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
+        std::vector<Widgets::MWSkill*> mSkillButtons;
 
     private:
         ESM::RefId mSkillId;
@@ -258,6 +275,7 @@ namespace MWGui
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::EditBox* mTextEdit;
@@ -314,6 +332,7 @@ namespace MWGui
     private:
         MyGUI::EditBox* mEditName;
         MyGUI::TextBox* mSpecializationName;
+        std::vector<MyGUI::Button*> mButtons;
         Widgets::MWAttributePtr mFavoriteAttribute0, mFavoriteAttribute1;
         std::array<Widgets::MWSkillPtr, 5> mMajorSkill;
         std::array<Widgets::MWSkillPtr, 5> mMinorSkill;
@@ -329,6 +348,9 @@ namespace MWGui
 
         Widgets::MWAttributePtr mAffectedAttribute;
         Widgets::MWSkillPtr mAffectedSkill;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus = 2;
     };
 }
 #endif

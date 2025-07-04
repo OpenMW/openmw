@@ -31,6 +31,12 @@ namespace MWGui
         void setVisible(bool newValue) override = 0;
 
         std::string_view getWindowIdForLua() const override { return "Journal"; }
+
+        std::vector<MyGUI::Button*> mButtons;
+        size_t mSelectedQuest = 0;
+        size_t mSelectedIndex = 0;
+        void setIndexControllerFocus(bool focused);
+        void setControllerFocusedQuest(size_t index);
     };
 }
 

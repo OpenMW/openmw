@@ -10,6 +10,8 @@ namespace MWGui
 {
     MWGui::BookTypesetter::Utf8Span to_utf8_span(std::string_view text);
 
+    const MyGUI::Colour journalHeaderColour = MyGUI::Colour(0.60f, 0.00f, 0.00f);
+
     struct JournalBooks
     {
         typedef TypesetBook::Ptr Book;

@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nPress Copy to place their names to the clipboard.}
   }
 OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
-SelectCharacter: "Select Character..."
+SelectCharacter: "Select Character"
 TimePlayed: "Time Played"
 
 
@@ -212,3 +212,13 @@ WindowModeHint: "Hint: Windowed Fullscreen mode\nalways uses the native display 
 WindowModeWindowed: "Windowed"
 WindowModeWindowedFullscreen: "Windowed Fullscreen"
 WobblyShores: "Wobbly Shores"
+
+
+# Controller button names
+
+EnchantType: "Cast Type"
+InventorySelect: "Put"
+JournalQuests: "Quests"
+JournalShowAll: "Show All"
+RechargeSelect: "Recharge"
+RepairTool: "Tool"

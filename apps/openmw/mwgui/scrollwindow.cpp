@@ -7,6 +7,7 @@
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -37,6 +38,10 @@ namespace MWGui
 
         mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
+
+        mControllerScrollWidget = mTextView;
+        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.dpad = "#{sScrolldown}";
 
         center();
     }
@@ -114,5 +119,33 @@ namespace MWGui
         take.execute(MWMechanics::getPlayer());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+    }
+
+    void ScrollWindow::onClose()
+    {
+        if (Settings::gui().mControllerMenus)
+            MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(true);
+        BookWindowBase::onClose();
+    }
+
+    ControllerButtonStr* ScrollWindow::getControllerButtons()
+    {
+        mControllerButtons.a = mTakeButton->getVisible() ? "#{sTake}" : "";
+        return &mControllerButtons;
+    }
+
+    bool ScrollWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mTakeButton->getVisible())
+                onTakeButtonClicked(mTakeButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCloseButtonClicked(mCloseButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            return false; // Fall through to keyboard
+
+        return true;
     }
 }

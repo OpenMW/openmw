@@ -3,6 +3,8 @@
 
 #include "windowbase.hpp"
 
+#include <components/widgets/scrollbar.hpp>
+
 namespace Gui
 {
     class NumericEditBox;
@@ -15,6 +17,7 @@ namespace MWGui
     public:
         CountDialog();
         void openCountDialog(const std::string& item, const std::string& message, const int maxCount);
+        void setCount(int count);
 
         typedef MyGUI::delegates::MultiDelegate<MyGUI::Widget*, int> EventHandle_WidgetInt;
 
@@ -24,7 +27,7 @@ namespace MWGui
         EventHandle_WidgetInt eventOkClicked;
 
     private:
-        MyGUI::ScrollBar* mSlider;
+        Gui::ScrollBar* mSlider;
         Gui::NumericEditBox* mItemEdit;
         MyGUI::TextBox* mItemText;
         MyGUI::TextBox* mLabelText;
@@ -36,6 +39,7 @@ namespace MWGui
         void onEditValueChanged(int value);
         void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
         void onEnterKeyPressed(MyGUI::EditBox* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
 }

@@ -39,6 +39,8 @@ namespace MWGui
         MyGUI::ScrollView* mSpellsView;
 
         std::map<MyGUI::Widget*, ESM::RefId> mSpellsWidgetMap;
+        /// List of enabled/purchasable spells and their index in the full list.
+        std::vector<std::pair<MyGUI::Button*, int>> mSpellButtons;
 
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onSpellButtonClick(MyGUI::Widget* _sender);
@@ -55,6 +57,8 @@ namespace MWGui
 
     private:
         static bool sortSpells(const ESM::Spell* left, const ESM::Spell* right);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        int mControllerFocus;
     };
 }
 

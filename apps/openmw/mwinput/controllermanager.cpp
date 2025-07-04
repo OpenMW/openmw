@@ -16,6 +16,7 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwgui/inventorywindow.hpp"
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
@@ -31,6 +32,7 @@ namespace MWInput
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
+        , mGamepadMousePressed(false)
     {
         if (!controllerBindingsFile.empty())
         {
@@ -141,6 +143,7 @@ namespace MWInput
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonPress(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = true;
                     if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
                         MyGUI::Button* b
@@ -185,12 +188,13 @@ namespace MWInput
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            if (mGamepadGuiCursorEnabled)
+            if (mGamepadGuiCursorEnabled && (!Settings::gui().mControllerMenus || mGamepadMousePressed))
             {
                 // Temporary mouse binding until keyboard controls are available:
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonRelease(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = false;
                     if (mBindingsManager->isDetectingBindingState()) // If the player just triggered binding, don't let
                                                                      // button release bind.
                         return;
@@ -241,6 +245,33 @@ namespace MWInput
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent& arg)
     {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Update cursor state.
+            bool treatAsMouse = winMgr->getCursorVisible();
+            winMgr->setCursorActive(false);
+
+            MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
+            if (topWin)
+            {
+                // When the inventory tooltip is visible, we don't actually want the A button to
+                // act like a mouse button; it should act normally.
+                if (treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A && winMgr->getControllerTooltip())
+                    treatAsMouse = false;
+
+                mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
+
+                // Fall through to mouse click
+                if (mGamepadGuiCursorEnabled && treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A)
+                    return false;
+
+                if (topWin->onControllerButtonEvent(arg))
+                    return true;
+            }
+        }
+
         // Presumption of GUI mode will be removed in the future.
         // MyGUI KeyCodes *may* change.
         MyGUI::KeyCode key = MyGUI::KeyCode::None;
@@ -266,9 +297,9 @@ namespace MWInput
                 break;
             case SDL_CONTROLLER_BUTTON_B:
                 if (MyGUI::InputManager::getInstance().isModalAny())
-                    MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+                    winMgr->exitCurrentModal();
                 else
-                    MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+                    winMgr->exitCurrentGuiMode();
                 return true;
             case SDL_CONTROLLER_BUTTON_X:
                 key = MyGUI::KeyCode::Semicolon;
@@ -278,7 +309,7 @@ namespace MWInput
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
                 MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
+                winMgr->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
                 MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
                 return true;
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
@@ -286,7 +317,7 @@ namespace MWInput
                 return true;
             case SDL_CONTROLLER_BUTTON_LEFTSTICK:
                 mGamepadGuiCursorEnabled = !mGamepadGuiCursorEnabled;
-                MWBase::Environment::get().getWindowManager()->setCursorActive(mGamepadGuiCursorEnabled);
+                winMgr->setCursorActive(mGamepadGuiCursorEnabled);
                 return true;
             default:
                 return false;
@@ -296,21 +327,71 @@ namespace MWInput
         if (SDL_IsTextInputActive())
             return false;
 
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+        winMgr->injectKeyPress(key, 0, false);
         return true;
     }
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerAxisEvent& arg)
     {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Left and right triggers toggle through open GUI windows.
+            if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    winMgr->cycleActiveControllerWindow(true);
+                return true;
+            }
+            else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    winMgr->cycleActiveControllerWindow(false);
+                return true;
+            }
+
+            MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
+            if (topWin)
+            {
+                // Update cursor state
+                mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
+                if (!mGamepadGuiCursorEnabled)
+                    winMgr->setCursorActive(false);
+
+                if (mGamepadGuiCursorEnabled
+                    && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
+                {
+                    // Treat the left stick like a cursor, which is the default behavior.
+                    if (winMgr->getControllerTooltip() && std::abs(arg.value) > 2000)
+                    {
+                        winMgr->setControllerTooltip(false);
+                        winMgr->setCursorVisible(true);
+                    }
+                    return false;
+                }
+
+                // On some windows, treat right stick like a scroll wheel.
+                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && topWin->getControllerScrollWidget() != nullptr)
+                    mMouseManager->warpMouseToWidget(topWin->getControllerScrollWidget());
+
+                if (topWin->onControllerThumbstickEvent(arg))
+                {
+                    // Window handled the event.
+                    return true;
+                }
+            }
+        }
+
         switch (arg.axis)
         {
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
                 if (arg.value == 32767) // Treat like a button.
-                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Minus, 0, false);
+                    winMgr->injectKeyPress(MyGUI::KeyCode::Minus, 0, false);
                 break;
             case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
                 if (arg.value == 32767) // Treat like a button.
-                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Equals, 0, false);
+                    winMgr->injectKeyPress(MyGUI::KeyCode::Equals, 0, false);
                 break;
             case SDL_CONTROLLER_AXIS_LEFTX:
             case SDL_CONTROLLER_AXIS_LEFTY:

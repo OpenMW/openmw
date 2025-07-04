@@ -21,13 +21,14 @@ namespace Gui
     public:
         SharedStateButton();
 
+        void onMouseSetFocus(MyGUI::Widget* _old) override;
+        void onMouseLostFocus(MyGUI::Widget* _new) override;
+
     protected:
         void updateButtonState();
 
         void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) override;
         void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) override;
-        void onMouseSetFocus(MyGUI::Widget* _old) override;
-        void onMouseLostFocus(MyGUI::Widget* _new) override;
         void baseUpdateEnable() override;
 
         void shutdownOverride() override;

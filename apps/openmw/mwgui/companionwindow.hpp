@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
+#include "companionitemmodel.hpp"
+#include "itemmodel.hpp"
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
@@ -32,6 +34,12 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Companion"; }
 
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
+
+        MWGui::ItemView* getItemView() { return mItemView; }
+        ItemModel* getModel() { return mModel; }
+
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
@@ -50,6 +58,7 @@ namespace MWGui
         void onNameFilterChanged(MyGUI::EditBox* _sender);
         void onBackgroundSelected();
         void dragItem(MyGUI::Widget* sender, int count);
+        void takeItem(MyGUI::Widget* sender, int count);
 
         void onMessageBoxButtonClicked(int button);
 

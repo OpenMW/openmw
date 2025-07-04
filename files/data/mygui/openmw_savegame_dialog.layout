@@ -6,7 +6,7 @@
         <Property key="Spacing" value="8"/>
 
         <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 0 24" name="SelectCharacter">
-            <Property key="Caption" value="#{OMWEngine:SelectCharacter}"/>
+            <Property key="Caption" value="#{OMWEngine:SelectCharacter}..."/>
             <UserString key="HStretch" value="true"/>
         </Widget>
 

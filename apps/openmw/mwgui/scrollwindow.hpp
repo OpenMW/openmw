@@ -20,15 +20,19 @@ namespace MWGui
         void setPtr(const MWWorld::Ptr& scroll) override;
         void setInventoryAllowed(bool allowed);
 
+        void onClose() override;
         void onResChange(int, int) override { center(); }
 
         std::string_view getWindowIdForLua() const override { return "Scroll"; }
+
+        ControllerButtonStr* getControllerButtons() override;
 
     protected:
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeButtonClicked(MyGUI::Widget* _sender);
         void setTakeButtonShow(bool show);
         void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         Gui::ImageButton* mCloseButton;

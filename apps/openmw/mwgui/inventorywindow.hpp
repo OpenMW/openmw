@@ -67,8 +67,12 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Inventory"; }
 
+        ControllerButtonStr* getControllerButtons() override;
+
     protected:
         void onTitleDoubleClicked() override;
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
 
     private:
         DragAndDrop* mDragAndDrop;
@@ -118,6 +122,7 @@ namespace MWGui
 
         void sellItem(MyGUI::Widget* sender, int count);
         void dragItem(MyGUI::Widget* sender, int count);
+        void giveItem(MyGUI::Widget* sender, int count);
 
         void onWindowResize(MyGUI::Window* _sender);
         void onFilterChanged(MyGUI::Widget* _sender);

@@ -9,6 +9,10 @@
 #include <components/widgets/box.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "tooltips.hpp"
 
 namespace MWGui
@@ -28,6 +32,8 @@ namespace MWGui
         : mScrollView(nullptr)
         , mShowCostColumn(true)
         , mHighlightSelected(true)
+        , mControllerActiveWindow(false)
+        , mControllerFocus(0)
     {
     }
 
@@ -88,6 +94,8 @@ namespace MWGui
         const int spellHeight = Settings::gui().mFontSize + 2;
 
         mLines.clear();
+        mButtons.clear();
+        mGroupIndices.clear();
 
         while (mScrollView->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mScrollView->getChildAt(0));
@@ -106,7 +114,9 @@ namespace MWGui
                 curType = spell.mType;
             }
 
-            const std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            std::string skin = spell.mActive ? "SandTextButton" : "SpellTextUnequipped";
+            if (Settings::gui().mControllerMenus)
+                skin = spell.mActive ? "SpellTextEquippedController" : "SpellTextUnequippedController";
             const std::string captionSuffix = MWGui::ToolTips::getCountString(spell.mCount);
 
             Gui::SharedStateButton* t = mScrollView->createWidget<Gui::SharedStateButton>(
@@ -115,6 +125,7 @@ namespace MWGui
             t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
+            mButtons.emplace_back(std::make_pair(t, i));
 
             if (!spell.mCostColumn.empty() && mShowCostColumn)
             {
@@ -221,6 +232,12 @@ namespace MWGui
             height += lineHeight;
         }
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = wrap(mControllerFocus, mButtons.size());
+            updateControllerFocus(-1, mControllerFocus);
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
         mScrollView->setVisibleVScroll(false);
@@ -256,6 +273,8 @@ namespace MWGui
         }
         else
             mLines.emplace_back(groupWidget, (MyGUI::Widget*)nullptr, NoSpellIndex);
+
+        mGroupIndices.push_back(mButtons.size());
     }
 
     void SpellView::setSize(const MyGUI::IntSize& _value)
@@ -315,5 +334,111 @@ namespace MWGui
     void SpellView::resetScrollbars()
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
+
+    void SpellView::setActiveControllerWindow(bool active)
+    {
+        mControllerActiveWindow = active;
+        if (active)
+            update();
+    }
+
+    void SpellView::onControllerButton(const unsigned char button)
+    {
+        if (mButtons.empty())
+            return;
+
+        int prevFocus = mControllerFocus;
+
+        if (button == SDL_CONTROLLER_BUTTON_A)
+        {
+            // Select the focused item, if any.
+            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
+            {
+                onSpellSelected(mButtons[mControllerFocus].first);
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            }
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+        {
+            // Toggle info tooltip
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            mControllerFocus--;
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            mControllerFocus++;
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            mControllerFocus = std::max(0, mControllerFocus - 10);
+        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
+        else if (button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            // Jump to first item in previous group
+            int prevGroupIndex = 0;
+            for (int groupIndex : mGroupIndices)
+            {
+                if (groupIndex >= mControllerFocus)
+                    break;
+                else
+                    prevGroupIndex = groupIndex;
+            }
+            mControllerFocus = prevGroupIndex;
+        }
+        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            // Jump to first item in next group
+            for (int groupIndex : mGroupIndices)
+            {
+                if (groupIndex > mControllerFocus)
+                {
+                    mControllerFocus = groupIndex;
+                    break;
+                }
+            }
+        }
+
+        mControllerFocus = wrap(mControllerFocus, mButtons.size());
+
+        if (prevFocus != mControllerFocus)
+            updateControllerFocus(prevFocus, mControllerFocus);
+        else
+            updateControllerFocus(-1, mControllerFocus);
+    }
+
+    void SpellView::updateControllerFocus(int prevFocus, int newFocus)
+    {
+        if (mButtons.empty())
+            return;
+
+        if (prevFocus >= 0 && prevFocus < static_cast<int>(mButtons.size()))
+        {
+            Gui::SharedStateButton* prev = mButtons[prevFocus].first;
+            if (prev)
+                prev->onMouseLostFocus(nullptr);
+        }
+
+        if (mControllerActiveWindow && newFocus >= 0 && newFocus < static_cast<int>(mButtons.size()))
+        {
+            Gui::SharedStateButton* focused = mButtons[newFocus].first;
+            if (focused)
+            {
+                focused->onMouseSetFocus(nullptr);
+
+                // Scroll the list to keep the active item in view
+                int line = mButtons[newFocus].second;
+                if (line <= 5)
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+                else
+                {
+                    const int lineHeight = focused->getHeight();
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+                }
+
+                if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+            }
+        }
     }
 }

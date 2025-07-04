@@ -7,6 +7,13 @@
 
         <!-- Categories -->
         <Widget type="HBox" position="8 8 566 24" align="Left Top HStretch" name="Categories">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 24 24" name="BtnL1Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_l1.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+                <Property key="Visible" value="false"/>
+                <UserString key="Hidden" value="true"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="AllButton">
                 <Property key="Caption" value="#{sAllTab}"/>
                 <Property key="NeedKey" value="false"/>
@@ -26,6 +33,13 @@
             <Widget type="AutoSizedButton" skin="MW_Button" name="MiscButton">
                 <Property key="Caption" value="#{sMiscTab}"/>
                 <Property key="NeedKey" value="false"/>
+            </Widget>
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 24 24" name="BtnR1Image">
+                <Property key="ImageTexture" value="textures\omw_steam_button_r1.dds"/>
+                <Property key="Colour" value="#ccb589"/>
+                <Property key="Alpha" value="0.7"/>
+                <Property key="Visible" value="false"/>
+                <UserString key="Hidden" value="true"/>
             </Widget>
             <!-- Search box-->
             <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="0 0 0 23" name="FilterEdit">

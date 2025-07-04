@@ -58,6 +58,12 @@ namespace MWGui
 
             unassign(&mKey[i]);
         }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sOK}";
+        }
     }
 
     void QuickKeysMenu::clear()
@@ -108,6 +114,13 @@ namespace MWGui
         for (int index = 0; index < 10; ++index)
         {
             validate(index);
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            for (int i = 0; i < static_cast<int>(mKey.size()); i++)
+                mKey[i].button->setControllerFocus(i == mControllerFocus);
         }
     }
 
@@ -456,6 +469,39 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
+    bool QuickKeysMenu::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+            onQuickKeyButtonClicked(mKey[mControllerFocus].button);
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onOkButtonClicked(mOkButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            mControllerFocus = (mControllerFocus + 5) % 10;
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            if (mControllerFocus == 0)
+                mControllerFocus = 4;
+            else if (mControllerFocus == 5)
+                mControllerFocus = 9;
+            else
+                mControllerFocus--;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            if (mControllerFocus == 4)
+                mControllerFocus = 0;
+            else if (mControllerFocus == 9)
+                mControllerFocus = 5;
+            else
+                mControllerFocus++;
+        }
+
+        for (int i = 0; i < static_cast<int>(mKey.size()); i++)
+            mKey[i].button->setControllerFocus(i == mControllerFocus);
+
+        return true;
+    }
+
     // ---------------------------------------------------------------------------------------------------------
 
     QuickKeysMenuAssign::QuickKeysMenuAssign(QuickKeysMenu* parent)
@@ -491,7 +537,43 @@ namespace MWGui
         mCancelButton->setCoord((maxWidth - mCancelButton->getTextSize().width - 24) / 2 + 8, mCancelButton->getTop(),
             mCancelButton->getTextSize().width + 24, mCancelButton->getHeight());
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mItemButton->setStateSelected(true);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sCancel}";
+        }
+
         center();
+    }
+
+    bool QuickKeysMenuAssign::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus == 0)
+                mParent->onItemButtonClicked(mItemButton);
+            else if (mControllerFocus == 1)
+                mParent->onMagicButtonClicked(mMagicButton);
+            else if (mControllerFocus == 2)
+                mParent->onUnassignButtonClicked(mUnassignButton);
+            else if (mControllerFocus == 3)
+                mParent->onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            mParent->onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+            mControllerFocus = wrap(mControllerFocus - 1, 4);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            mControllerFocus = wrap(mControllerFocus + 1, 4);
+
+        mItemButton->setStateSelected(mControllerFocus == 0);
+        mMagicButton->setStateSelected(mControllerFocus == 1);
+        mUnassignButton->setStateSelected(mControllerFocus == 2);
+        mCancelButton->setStateSelected(mControllerFocus == 3);
+
+        return true;
     }
 
     void QuickKeysMenu::write(ESM::ESMWriter& writer)
@@ -603,6 +685,12 @@ namespace MWGui
         mMagicList->setHighlightSelected(false);
         mMagicList->eventSpellClicked += MyGUI::newDelegate(this, &MagicSelectionDialog::onModelIndexSelected);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sCancel}";
+        }
+
         center();
     }
 
@@ -634,4 +722,13 @@ namespace MWGui
             mParent->onAssignMagic(spell.mId);
     }
 
+    bool MagicSelectionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+        else
+            mMagicList->onControllerButton(arg.button);
+
+        return true;
+    }
 }

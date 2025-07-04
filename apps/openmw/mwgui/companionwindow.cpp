@@ -6,6 +6,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -14,6 +16,7 @@
 #include "companionitemmodel.hpp"
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
+#include "inventorywindow.hpp"
 #include "itemview.hpp"
 #include "messagebox.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -58,6 +61,11 @@ namespace MWGui
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
         setCoord(200, 0, 600, 300);
+
+        mControllerButtons.a = "#{sTake}";
+        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.r3 = "#{sInfo}";
+        mControllerButtons.l2 = "#{sInventory}";
     }
 
     void CompanionWindow::onItemSelected(int index)
@@ -93,8 +101,13 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
+            if (Settings::gui().mControllerMenus)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::takeItem);
+            else
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
         }
+        else if (Settings::gui().mControllerMenus)
+            takeItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
@@ -108,6 +121,29 @@ namespace MWGui
     void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
     {
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
+    }
+
+    void CompanionWindow::takeItem(MyGUI::Widget* sender, int count)
+    {
+        if (!mModel)
+            return;
+
+        const ItemStack& item = mModel->getItem(mSelectedItem);
+        if (!mModel->onTakeItem(item.mBase, count))
+            return;
+
+        MWGui::InventoryWindow* inventoryWindow = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
+        ItemModel* playerModel = inventoryWindow->getModel();
+
+        mModel->moveItem(item, count, playerModel);
+
+        inventoryWindow->updateItemView();
+        mItemView->update();
+
+        // play the item's sound
+        MWWorld::Ptr itemBase = item.mBase;
+        const ESM::RefId& sound = itemBase.getClass().getUpSoundId(itemBase);
+        MWBase::Environment::get().getWindowManager()->playSound(sound);
     }
 
     void CompanionWindow::onBackgroundSelected()
@@ -202,4 +238,31 @@ namespace MWGui
         mSortModel = nullptr;
     }
 
+    bool CompanionWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            int index = mItemView->getControllerFocus();
+            if (index >= 0 && index < mItemView->getItemCount())
+                onItemSelected(index);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCloseButtonClicked(mCloseButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mItemView->onControllerButton(arg.button);
+        }
+
+        return true;
+    }
+
+    void CompanionWindow::setActiveControllerWindow(bool active)
+    {
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
+    }
 }

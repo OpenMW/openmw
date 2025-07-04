@@ -2,6 +2,8 @@
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Window.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -55,6 +57,14 @@ namespace MWGui
         // Adjust the spell filtering widget size because of MyGUI limitations.
         int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
         mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            setPinButtonVisible(false);
+            mControllerButtons.a = "#{sSelect}";
+            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.r3 = "#{sInfo}";
+        }
     }
 
     void SpellWindow::onPinToggled()
@@ -287,5 +297,39 @@ namespace MWGui
             else
                 onSpellSelected(selectedSpell.mId);
         }
+    }
+
+    bool SpellWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        else
+            mSpellView->onControllerButton(arg.button);
+
+        return true;
+    }
+
+    void SpellWindow::setActiveControllerWindow(bool active)
+    {
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // match the size of the stats window.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, 600);
+            int height = std::min(viewSize.height - 48 - 48, 750);
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
+
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                active && Settings::gui().mControllerTooltips);
+        }
+
+        mSpellView->setActiveControllerWindow(active);
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

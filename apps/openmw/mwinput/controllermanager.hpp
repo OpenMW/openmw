@@ -62,6 +62,7 @@ namespace MWInput
         bool mGamepadGuiCursorEnabled;
         bool mGuiCursorEnabled;
         bool mJoystickLastUsed;
+        bool mGamepadMousePressed;
     };
 }
 #endif

@@ -72,6 +72,7 @@ namespace MWGui
         void onBirthSignClicked(MyGUI::Widget* _sender);
 
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
@@ -100,6 +101,10 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
 
         bool mUpdateSkillArea;
+
+        // 0 = Name, 1 = Race, 2 = Class, 3 = BirthSign, 4 = Back, 5 = OK
+        std::vector<MyGUI::Button*> mButtons;
+        int mControllerFocus = 5;
     };
 }
 #endif

@@ -5,6 +5,9 @@
 #include <tuple>
 
 #include <MyGUI_Widget.h>
+#include <SDL.h>
+
+#include <components/widgets/sharedstatebutton.hpp>
 
 #include "spellmodel.hpp"
 
@@ -54,6 +57,9 @@ namespace MWGui
 
         void resetScrollbars();
 
+        void setActiveControllerWindow(bool active);
+        void onControllerButton(const unsigned char button);
+
     private:
         MyGUI::ScrollView* mScrollView;
 
@@ -88,6 +94,15 @@ namespace MWGui
         void layoutWidgets();
         void addGroup(const std::string& label1, const std::string& label2);
         void adjustSpellWidget(const Spell& spell, SpellModel::ModelIndex index, MyGUI::Widget* widget);
+
+        /// Keep a list of buttons for controller navigation and their index in the full list.
+        std::vector<std::pair<Gui::SharedStateButton*, int>> mButtons;
+        /// Keep a list of group offsets for controller navigation
+        std::vector<int> mGroupIndices;
+
+        bool mControllerActiveWindow;
+        int mControllerFocus;
+        void updateControllerFocus(int prevFocus, int newFocus);
 
         void onSpellSelected(MyGUI::Widget* _sender);
         void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);

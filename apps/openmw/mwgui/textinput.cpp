@@ -25,6 +25,8 @@ namespace MWGui
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+
+        mControllerButtons.a = "#{sOk}";
     }
 
     void TextInputDialog::setNextButtonShow(bool shown)
@@ -83,4 +85,15 @@ namespace MWGui
         mTextEdit->setCaption(text);
     }
 
+    bool TextInputDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onOkClicked(nullptr);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            return true;
+        }
+
+        return false;
+    }
 }

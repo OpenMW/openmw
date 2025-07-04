@@ -169,7 +169,7 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* header = typesetter->createStyle({}, journalHeaderColour);
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         typesetter->write(header, to_utf8_span("You have no journal entries!"));
@@ -184,7 +184,7 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* header = typesetter->createStyle({}, journalHeaderColour);
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         mModel->visitJournalEntries({}, AddJournalEntry(typesetter, body, header, true));
@@ -196,7 +196,7 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* header = typesetter->createStyle({}, journalHeaderColour);
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
@@ -212,7 +212,7 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* header = typesetter->createStyle({}, journalHeaderColour);
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         AddQuestName addName(typesetter, header);
