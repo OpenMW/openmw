@@ -43,7 +43,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
     'sphinx_design',
-    'omw-directives'
+    'omw-directives',
+    'omw-lexers',
 ]
 
 #autosectionlabel_prefix_document = True

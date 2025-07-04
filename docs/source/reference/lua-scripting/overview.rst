@@ -126,10 +126,12 @@ The options are:
 
 Enable it in ``openmw.cfg`` the same way as any other mod:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     data=path/to/my_lua_mod
-    content=my_lua_mod.omwscripts  # or content=my_lua_mod.omwaddon
+    # or content=my_lua_mod.omwaddon
+    content=my_lua_mod.omwscripts
 
 Now every time the player presses "X" on a keyboard, a message is shown.
 
