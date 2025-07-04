@@ -7,6 +7,7 @@
 #include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/sdlutil/events.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -69,9 +70,8 @@ namespace MWLua
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
             touchpadEvent["finger"]
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
-            touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f {
-                return { e.mX, e.mY };
-            });
+            touchpadEvent["position"]
+                = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f { return { e.mX, e.mY }; });
             touchpadEvent["pressure"]
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
             return sol::table(lua, sol::create);
@@ -239,6 +239,7 @@ namespace MWLua
         api["isMouseButtonPressed"]
             = [](int button) -> bool { return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(button); };
         api["_isGamepadCursorActive"] = [input]() -> bool { return input->isGamepadGuiCursorEnabled(); };
+        api["_isControllerMenusEnabled"] = [input]() -> bool { return Settings::gui().mControllerMenus; };
         api["_setGamepadCursorActive"] = [input](bool v) {
             input->setGamepadGuiCursorEnabled(v);
             MWBase::Environment::get().getWindowManager()->setCursorActive(v);
