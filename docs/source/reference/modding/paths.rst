@@ -133,7 +133,7 @@ This can't change until computers are able to read minds.
 
 Lines with options have an option name, then an equals sign (``=``), then an option value.
 Option names and values have leading and trailing whitespace trimmed, but whitespace within an option value is preserved - it's only removed if it's at the ends.
-This means that these are all equivalent
+This means that these are all equivalent:
 
 .. code-block:: openmwcfg
 
@@ -227,7 +227,7 @@ Navigate to the OpenMW installation directory, and open the ``openmw.cfg`` file 
 By default, this contains a warning at the top telling you that this is the local ``openmw.cfg`` and not to modify it.
 However, for this kind of install, it's okay to do so, so you can remove this warning.
 
-Change the start of the file from
+Change the start of the file from:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -247,7 +247,7 @@ Change the start of the file from
     fallback=LightAttenuation_ConstantValue,0.0
     fallback=LightAttenuation_UseLinear,1
 
-to
+to:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -281,7 +281,7 @@ Navigate to the OpenMW installation directory, and open the ``openmw.cfg`` file 
 By default, this contains a warning at the top telling you that this is the local ``openmw.cfg`` and not to modify it.
 However, you'll need to make a small change to create this kind of install.
 
-Change the start of the file from
+Change the start of the file from:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -301,7 +301,7 @@ Change the start of the file from
     fallback=LightAttenuation_ConstantValue,0.0
     fallback=LightAttenuation_UseLinear,1
 
-to
+to:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -356,7 +356,7 @@ This will put the basic setup required to play *Morrowind* into a new ``Morrowin
 
 Next, come up with a name for the subprofile you'll create for your mod list.
 If you're following a modding guide, they've probably already given it a name, e.g. *Total Overhaul*, so that's the example we'll use.
-Add a line to the ``Morrowind/openmw.cfg`` with the profile name, e.g.
+Add a line to the ``Morrowind/openmw.cfg`` with the profile name like this:
 
 .. code-block:: openmwcfg
     :caption: Morrowind/openmw.cfg
@@ -375,7 +375,7 @@ The ones in the ``Morrowind`` directory are used for all profiles for *Morrowind
 The ones in the ``Morrowind/Total Overhaul`` directory are only used for the *Total Overhaul* profile, so you can set up that mod list and any settings it requires here, and they won't affect any other profiles you set up later.
 Making changes within the launcher will affect these files and leave all the others alone.
 
-If you want the *Total Overhaul* profile to keep its saved games etc. in a dedicated location instead of mixing them in with ones from another profile, you can add a ``user-data=…`` line to your ``Morrowind/Total Overhaul/openmw.cfg``, e.g.
+If you want the *Total Overhaul* profile to keep its saved games etc. in a dedicated location instead of mixing them in with ones from another profile, you can add a ``user-data=…`` line to your ``Morrowind/Total Overhaul/openmw.cfg``, like this:
 
 .. code-block:: openmwcfg
     :caption: Morrowind/Total Overhaul/openmw.cfg
@@ -399,7 +399,7 @@ You'll now have an empty directory e.g. at ``Documents\My Games\OpenMW\Original`
 Next, move all the files that were already in the default configuration directory to the profile directory you just made.
 Afterwards, the default configuration directory should only contain the profile directory you made.
 
-Create a new ``openmw.cfg`` file in the default configuration directory containing
+Create a new ``openmw.cfg`` file in the default configuration directory containing:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -407,7 +407,7 @@ Create a new ``openmw.cfg`` file in the default configuration directory containi
     # select the profile
     config=Original
 
-In the ``openmw.cfg`` in the profile directory, add these lines
+In the ``openmw.cfg`` in the profile directory, add these lines:
 
 .. code-block:: openmwcfg
     :caption: openmw.cfg
@@ -430,7 +430,7 @@ Passing arguments on the command line lets you avoid this.
 
 The basic idea is that you need to pass ``--replace config`` to ignore the configuration directories that the engine would have loaded because they were specified in ``openmw.cfg`` files, and pass each one you want to use instead with ``--config <directory path here>``.
 
-E.g. if you've got a profile called *Morrowind* in your default configuration directory, and it's got a *Total Overhaul* subprofile, you could load it by running
+E.g. if you've got a profile called *Morrowind* in your default configuration directory, and it's got a *Total Overhaul* subprofile, you could load it by running:
 
 .. code-block:: console
 
@@ -452,7 +452,7 @@ On Windows, you can create a desktop shortcut to run this command with these ste
 * At the end of that field, add the arguments for the profile you want, e.g. ``--replace config --config ?userconfig?/Morrowind --config "?userconfig?/Morrowind/Total Overhaul"``.
 * Press *Apply* or *OK* to save the changes, and test the shortcut by double-clicking it.
 
-On most Linux distros, you can create a ``.desktop`` file like this
+On most Linux distros, you can create a ``.desktop`` file like this:
 
 .. code-block:: desktop
 

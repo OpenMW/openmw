@@ -50,7 +50,7 @@ TrueType fonts are configured via ``openmw.cfg`` too:
 In this example, OpenMW will scan ``Fonts`` folder in data directories for ``.omwfont`` files.
 These files are XML files with schema provided by MyGUI. OpenMW uses ``.omwfont`` files which name (without extension) matches ``openmw.cfg`` entries.
 
-It is also possible to adjust the font size via ``settings.cfg`` file
+It is also possible to adjust the font size via ``settings.cfg`` file:
 
 .. code-block:: ini
   :caption: settings.cfg

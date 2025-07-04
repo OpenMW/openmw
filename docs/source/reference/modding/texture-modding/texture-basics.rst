@@ -55,7 +55,7 @@ Simply create the textures with appropriate naming convention
 the normal map would have to be called foo_n.dds).
 To enable this automatic use based on filename pattern,
 you will have to add the following to your
-`settings.cfg </source/reference/modding/paths>`_ file
+`settings.cfg </source/reference/modding/paths>`_ file:
 
 .. code-block:: ini
   :caption: settings.cfg
