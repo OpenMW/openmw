@@ -23,6 +23,8 @@ PLAYER: scripts/omw/input/actionbindings.lua
 PLAYER: scripts/omw/input/smoothmovement.lua
 PLAYER: scripts/omw/input/gamepadcontrols.lua
 NPC,CREATURE: scripts/omw/ai.lua
+GLOBAL: scripts/omw/mechanics/globalcontroller.lua
+CREATURE, NPC, PLAYER: scripts/omw/mechanics/actorcontroller.lua
 
 # User interface
 PLAYER: scripts/omw/ui.lua
