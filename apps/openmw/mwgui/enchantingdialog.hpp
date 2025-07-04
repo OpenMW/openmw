@@ -70,7 +70,6 @@ namespace MWGui
         MyGUI::TextBox* mSuccessChance;
         MyGUI::TextBox* mPrice;
         MyGUI::TextBox* mPriceText;
-        MyGUI::TextBox* mPlayerGold;
 
         MWMechanics::Enchanting mEnchanting;
         ESM::EffectList mEffectList;
