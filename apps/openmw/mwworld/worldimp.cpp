@@ -2333,34 +2333,35 @@ namespace MWWorld
             Log(Debug::Warning) << "Player agent bounds are not supported by navigator: " << agentBounds;
     }
 
-    World::RestPermitted World::canRest() const
+    int World::canRest() const
     {
+        int result = 0;
+
         CellStore* currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
-        RefData& refdata = player.getRefData();
-        osg::Vec3f playerPos(refdata.getPosition().asVec3());
 
         const MWPhysics::Actor* actor = mPhysics->getActor(player);
         if (!actor)
             throw std::runtime_error("can't find player");
 
-        if (mPlayer->enemiesNearby())
-            return Rest_EnemiesAreNearby;
-
+        const osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
         if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
-            return Rest_PlayerIsUnderwater;
+            result |= Rest_PlayerIsUnderwater;
 
         float fallHeight = player.getClass().getCreatureStats(player).getFallHeight();
         float epsilon = 1e-4;
         if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon))
             || isFlying(player))
-            return Rest_PlayerIsInAir;
+            result |= Rest_PlayerIsInAir;
 
-        if (currentCell->getCell()->noSleep() || player.getClass().getNpcStats(player).isWerewolf())
-            return Rest_OnlyWaiting;
+        if (mPlayer->enemiesNearby())
+            result |= Rest_EnemiesAreNearby;
 
-        return Rest_Allowed;
+        if (!currentCell->getCell()->noSleep() && !player.getClass().getNpcStats(player).isWerewolf())
+            result |= Rest_CanSleep;
+
+        return result;
     }
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr& ptr)

@@ -656,20 +656,18 @@ namespace MWPhysics
             auto ptr = physicActor->getPtr();
             if (!ptr.getClass().isMobile(ptr))
                 continue;
-            float waterlevel = -std::numeric_limits<float>::max();
-            const MWWorld::CellStore* cell = ptr.getCell();
-            if (cell->getCell()->hasWater())
-                waterlevel = cell->getWaterLevel();
 
+            const MWWorld::CellStore& cell = *ptr.getCell();
             const auto& stats = ptr.getClass().getCreatureStats(ptr);
             const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
+            float waterlevel = -std::numeric_limits<float>::max();
             bool waterCollision = false;
-            if (cell->getCell()->hasWater() && effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude())
+            if (cell.getCell()->hasWater())
             {
-                if (physicActor->getCollisionMode()
-                    || !world->isUnderwater(ptr.getCell(), ptr.getRefData().getPosition().asVec3()))
-                    waterCollision = true;
+                waterlevel = cell.getWaterLevel();
+                if (physicActor->getCollisionMode())
+                    waterCollision = effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude();
             }
 
             physicActor->setCanWaterWalk(waterCollision);

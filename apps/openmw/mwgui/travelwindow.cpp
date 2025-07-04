@@ -4,6 +4,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -71,15 +72,15 @@ namespace MWGui
                 price = static_cast<int>(d);
         }
 
-        price = std::max(1, price);
-        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
-
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
         MWWorld::ActionTeleport::getFollowers(player, followers, !interior);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
+
+        price = std::max(1, price);
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
@@ -134,11 +135,22 @@ namespace MWGui
             bool interior = true;
             const ESM::ExteriorCellLocation cellIndex
                 = ESM::positionToExteriorCellLocation(dest.mPos.pos[0], dest.mPos.pos[1]);
+            const MWWorld::WorldModel& worldModel = *MWBase::Environment::get().getWorldModel();
             if (cellname.empty())
             {
-                MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
+                MWWorld::CellStore& cell = worldModel.getExterior(cellIndex);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
+            }
+            else
+            {
+                const MWWorld::CellStore* destCell = worldModel.findCell(cellname, false);
+                if (destCell == nullptr)
+                {
+                    Log(Debug::Error) << "Failed to add travel destination: unknown cell (" << cellname << ")";
+                    continue;
+                }
+                interior = !destCell->getCell()->isExterior();
             }
             addDestination(ESM::RefId::stringRefId(cellname), dest.mPos, interior);
         }
