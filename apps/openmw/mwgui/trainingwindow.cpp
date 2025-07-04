@@ -37,13 +37,6 @@ namespace MWGui
 
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &TrainingWindow::onTrainingProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &TrainingWindow::onTrainingFinished);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sBuy}";
-            mControllerButtons.b = "#{sCancel}";
-        }
     }
 
     void TrainingWindow::onOpen()
@@ -112,7 +105,6 @@ namespace MWGui
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
-        mTrainingButtons.clear();
         for (size_t i = 0; i < skills.size(); ++i)
         {
             const ESM::Skill* skill = skills[i].first;
@@ -136,16 +128,6 @@ namespace MWGui
             button->setSize(button->getTextSize().width + 12, button->getSize().height);
 
             ToolTips::createSkillToolTip(button, skill->mId);
-
-            if (price <= playerGold)
-                mTrainingButtons.emplace_back(button);
-        }
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mControllerFocus = 0;
-            if (mTrainingButtons.size() > 0)
-                mTrainingButtons[0]->setStateSelected(true);
         }
 
         center();
@@ -247,36 +229,4 @@ namespace MWGui
         return !mTimeAdvancer.isRunning();
     }
 
-    bool TrainingWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mTrainingButtons.size()))
-                onTrainingSelected(mTrainingButtons[mControllerFocus]);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onCancelButtonClicked(mCancelButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            if (mTrainingButtons.size() <= 1)
-                return true;
-
-            setControllerFocus(mTrainingButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mTrainingButtons.size());
-            setControllerFocus(mTrainingButtons, mControllerFocus, true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            if (mTrainingButtons.size() <= 1)
-                return true;
-
-            setControllerFocus(mTrainingButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mTrainingButtons.size());
-            setControllerFocus(mTrainingButtons, mControllerFocus, true);
-        }
-
-        return true;
-    }
 }

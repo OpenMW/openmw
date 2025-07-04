@@ -103,8 +103,6 @@ namespace MWGui
 
         bool mMarkedToDelete;
 
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-
     private:
         void buttonActivated(MyGUI::Widget* _widget);
 
@@ -116,7 +114,6 @@ namespace MWGui
         int mButtonPressed;
         int mDefaultFocus;
         bool mImmediate;
-        int mControllerFocus = 0;
     };
 
 }

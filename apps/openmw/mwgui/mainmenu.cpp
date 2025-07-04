@@ -1,7 +1,6 @@
 #include "mainmenu.hpp"
 
 #include <MyGUI_Gui.h>
-#include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_TextBox.h>
 
@@ -106,7 +105,6 @@ namespace MWGui
         constexpr VFS::Path::NormalizedView menuBackgroundVideo("video/menu_background.bik");
 
         mHasAnimatedMenu = mVFS->exists(menuBackgroundVideo);
-        mDisableGamepadCursor = Settings::gui().mControllerMenus;
 
         updateMenu();
     }
@@ -165,7 +163,9 @@ namespace MWGui
         const std::string& name = *sender->getUserData<std::string>();
         winMgr->playSound(ESM::RefId::stringRefId("Menu Click"));
         if (name == "return")
+        {
             winMgr->removeGuiMode(GM_MainMenu);
+        }
         else if (name == "credits")
             winMgr->playVideo("mw_credits.bik", true);
         else if (name == "exitgame")
@@ -206,32 +206,6 @@ namespace MWGui
         {
             winMgr->toggleSettingsWindow();
         }
-    }
-
-    bool MainMenu::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Space, 0, false);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B || arg.button == SDL_CONTROLLER_BUTTON_START)
-        {
-            if (mButtons["return"]->getVisible())
-                onButtonClicked(mButtons["return"]);
-            else
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Escape, 0, false);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
-            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
-            MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
-        }
-        return true;
     }
 
     void MainMenu::showBackground(bool show)

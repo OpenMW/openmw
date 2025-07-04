@@ -14,8 +14,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
-#include "textcolours.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -66,12 +64,6 @@ namespace MWGui::Widgets
             else
                 mSkillValueWidget->_setWidgetState("normal");
         }
-    }
-
-    void MWSkill::setStateSelected(bool selected)
-    {
-        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
-        mSkillNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
     }
 
     void MWSkill::onClicked(MyGUI::Widget* _sender)
@@ -158,12 +150,6 @@ namespace MWGui::Widgets
         }
     }
 
-    void MWAttribute::setStateSelected(bool selected)
-    {
-        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
-        mAttributeNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
-    }
-
     void MWAttribute::initialiseOverride()
     {
         Base::initialiseOverride();
@@ -243,12 +229,6 @@ namespace MWGui::Widgets
             else
                 mSpellNameWidget->setCaption({});
         }
-    }
-
-    void MWSpell::setStateSelected(bool selected)
-    {
-        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
-        mSpellNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
     }
 
     void MWSpell::initialiseOverride()
@@ -480,12 +460,6 @@ namespace MWGui::Widgets
     }
 
     MWSpellEffect::~MWSpellEffect() {}
-
-    void MWSpellEffect::setStateSelected(bool selected)
-    {
-        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
-        mTextWidget->setTextColour(selected ? textColours.link : textColours.normal);
-    }
 
     void MWSpellEffect::initialiseOverride()
     {

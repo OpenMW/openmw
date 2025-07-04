@@ -17,7 +17,6 @@
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/l10n/manager.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
@@ -29,7 +28,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/timestamp.hpp"
 
 #include "../mwstate/character.hpp"
 
@@ -66,9 +64,6 @@ namespace MWGui
 
         // To avoid accidental deletions
         mDeleteButton->setNeedKeyFocus(false);
-
-        mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox* sender, size_t pos)
@@ -150,28 +145,6 @@ namespace MWGui
         WindowModal::onOpen();
 
         mSaveNameEdit->setCaption({});
-        if (Settings::gui().mControllerMenus && mSaving)
-        {
-            // For controller mode, set a default save file name. The format is
-            // "Day 24 - Last Steed 7 p.m."
-            const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
-            std::string_view month = timeManager.getMonthName();
-            int hour = static_cast<int>(timeManager.getTimeStamp().getHour());
-            bool pm = hour >= 12;
-            if (hour >= 13)
-                hour -= 12;
-            if (hour == 0)
-                hour = 12;
-
-            ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
-            std::string daysPassed
-                = Misc::StringUtils::format("#{Calendar:day} %i", timeManager.getTimeStamp().getDay());
-            std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
-            std::string autoFilename = Misc::StringUtils::format(
-                "%s - %i %s %i %s", daysPassed, currentDate.mDay, month, hour, formattedHour);
-
-            mSaveNameEdit->setCaptionWithReplacing(autoFilename);
-        }
         if (mSaving)
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
         else
@@ -185,13 +158,6 @@ namespace MWGui
         mCurrentSlot = nullptr;
         mSaveList->removeAllItems();
         onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mOkButtonFocus = true;
-            mOkButton->setStateSelected(true);
-            mCancelButton->setStateSelected(false);
-        }
 
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
         if (mgr->characterBegin() == mgr->characterEnd())
@@ -251,7 +217,7 @@ namespace MWGui
         }
         mCharacterSelection->setIndexSelected(selectedIndex);
         if (selectedIndex == MyGUI::ITEM_NONE)
-            mCharacterSelection->setCaptionWithReplacing("#{OMWEngine:SelectCharacter}...");
+            mCharacterSelection->setCaptionWithReplacing("#{OMWEngine:SelectCharacter}");
 
         fillSaveList();
     }
@@ -524,56 +490,5 @@ namespace MWGui
 
         mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
-    }
-
-    ControllerButtonStr* SaveGameDialog::getControllerButtons()
-    {
-        mControllerButtons.y = mSaving ? "" : "#{OMWEngine:SelectCharacter}";
-        return &mControllerButtons;
-    }
-
-    bool SaveGameDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mOkButtonFocus)
-                onOkButtonClicked(mOkButton);
-            else
-                onCancelButtonClicked(mCancelButton);
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onCancelButtonClicked(mCancelButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
-        {
-            uint32_t index = mCharacterSelection->getIndexSelected();
-            index = wrap(index + 1, mCharacterSelection->getItemCount());
-            mCharacterSelection->setIndexSelected(index);
-            onCharacterSelected(mCharacterSelection, index);
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mSaveList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mSaveList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-        }
-        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mOkButtonFocus)
-            || (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && mOkButtonFocus))
-        {
-            mOkButtonFocus = !mOkButtonFocus;
-            mOkButton->setStateSelected(mOkButtonFocus);
-            mCancelButton->setStateSelected(!mOkButtonFocus);
-        }
-
-        return true;
     }
 }

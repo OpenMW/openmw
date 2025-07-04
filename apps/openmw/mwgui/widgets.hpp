@@ -110,8 +110,6 @@ namespace MWGui
             */
             EventHandle_SkillVoid eventClicked;
 
-            void setStateSelected(bool selected);
-
         protected:
             virtual ~MWSkill();
 
@@ -150,8 +148,6 @@ namespace MWGui
                 signature : void method(MWAttribute* _sender)\n
             */
             EventHandle_AttributeVoid eventClicked;
-
-            void setStateSelected(bool selected);
 
         protected:
             ~MWAttribute() override = default;
@@ -194,8 +190,6 @@ namespace MWGui
                 std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator, MyGUI::IntCoord& coord, int flags);
 
             const ESM::RefId& getSpellId() const { return mId; }
-
-            void setStateSelected(bool selected);
 
         protected:
             virtual ~MWSpell();
@@ -261,8 +255,6 @@ namespace MWGui
             void setSpellEffect(const SpellEffectParams& params);
 
             int getRequestedWidth() const { return mRequestedWidth; }
-
-            void setStateSelected(bool selected);
 
         protected:
             virtual ~MWSpellEffect();

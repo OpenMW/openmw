@@ -49,7 +49,6 @@ namespace MWGui
         MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription);
 
         void onResChange(int w, int h) override;
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         void setVisible(bool visible) override;
 

@@ -23,6 +23,16 @@
 
 namespace
 {
+    int wrap(int index, int max)
+    {
+        if (index < 0)
+            return max - 1;
+        else if (index >= max)
+            return 0;
+        else
+            return index;
+    }
+
     bool sortRaces(const std::pair<ESM::RefId, std::string>& left, const std::pair<ESM::RefId, std::string>& right)
     {
         return left.second.compare(right.second) < 0;
@@ -98,23 +108,15 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu7", "Specials"));
         getWidget(mSpellPowerList, "SpellPowerList");
 
-        getWidget(mBackButton, "BackButton");
-        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
+        MyGUI::Button* backButton;
+        getWidget(backButton, "BackButton");
+        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
-        getWidget(mOkButton, "OKButton");
-        mOkButton->setCaption(
+        MyGUI::Button* okButton;
+        getWidget(okButton, "OKButton");
+        okButton->setCaption(
             MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
-        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mControllerButtons.lStick = "#{sMouse}";
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
-            mControllerButtons.y = "#{sSex}";
-            mControllerButtons.l1 = "#{sHair}";
-            mControllerButtons.r1 = "#{sFace}";
-        }
+        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
         updateRaces();
         updateSkills();
@@ -127,17 +129,8 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
-        {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.x = "#{sNext}";
-        }
-        else if (Settings::gui().mControllerMenus)
-        {
-            okButton->setCaption(
-                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.x = "#{sDone}";
-        }
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
@@ -467,56 +460,6 @@ namespace MWGui
             coord.top += lineHeight;
             ++i;
         }
-    }
-
-    bool RaceDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onBackClicked(mBackButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-        {
-            onOkClicked(mOkButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
-        {
-            onSelectNextGender(nullptr);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-        {
-            onSelectNextHair(nullptr);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-        {
-            onSelectNextFace(nullptr);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mRaceList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mRaceList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-        }
-
-        return true;
-    }
-
-    bool RaceDialog::onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg)
-    {
-        if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX)
-        {
-            if (arg.value < -1000 || arg.value > 1000)
-                onPreviewScroll(nullptr, arg.value < 0 ? 1 : -1);
-            return true;
-        }
-
-        return false;
     }
 
     const ESM::NPC& RaceDialog::getResult() const

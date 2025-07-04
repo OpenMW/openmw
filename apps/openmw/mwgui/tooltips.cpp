@@ -94,7 +94,7 @@ namespace MWGui
 
         if (guiMode)
         {
-            if (!winMgr->getCursorVisible() && !winMgr->getControllerTooltip())
+            if (!winMgr->getCursorVisible())
                 return;
             const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 

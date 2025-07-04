@@ -14,7 +14,6 @@
     <Layer name="MainMenuBackground" overlapped="true" pick="true"/>
     <Layer name="MainMenu" overlapped="true" pick="true"/>
     <Layer name="Settings" overlapped="true" pick="true"/>
-    <Layer name="ControllerButtons" overlapped="true" pick="false"/>
     <Layer name="LoadingScreenBackground" overlapped="false" pick="true"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="Debug" overlapped="true" pick="true"/>

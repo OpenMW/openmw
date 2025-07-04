@@ -50,8 +50,6 @@ namespace MWGui
 
         void onRepairItem(MyGUI::Widget* sender, const MWWorld::Ptr& ptr);
         void onCancel(MyGUI::Widget* sender);
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
 }

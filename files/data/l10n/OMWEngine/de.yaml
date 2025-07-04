@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
    other{\n\nDrücken Sie „Kopieren“, um alle Namen in die Zwischenablage zu kopieren.}
  }
 OverwriteGameConfirmation: "Sind Sie sicher, dass Sie den Spielstand überschreiben wollen?"
-SelectCharacter: "Charakter auswählen"
+SelectCharacter: "Charakter auswählen..."
 TimePlayed: "Spielzeit"
 
 
@@ -213,13 +213,3 @@ WindowModeWindowed: "Fenster"
 WindowModeWindowedFullscreen: "Fenster in Vollbildgröße"
 # More fitting translations of "wobbly" are welcome
 WobblyShores: "Wabbelige Uferlinien"
-
-
-# Controller button names
-
-EnchantType: "Zaubertyp"
-InventorySelect: "Geben"
-JournalQuests: "Quests"
-JournalShowAll: "Alle Anzeigen"
-RechargeSelect: "Aufladen"
-RepairTool: "Werkzeug"

@@ -120,38 +120,6 @@ color_misc=0,205,205 # ????
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="SpellTextEquippedController" size="16 16">
-        <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Left Bottom"/>
-        <Property key="NeedKey" value="true"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
-            <State name="normal" colour="#{fontcolour=normal}" shift="0"/>
-            <State name="highlighted" colour="#{fontcolour=active}" shift="0"/>
-            <State name="pushed" colour="#{fontcolour=normal_pressed}" shift="0"/>
-            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
-            <State name="normal_checked" colour="#{fontcolour=active_over}" shift="0"/>
-            <State name="highlighted_checked" colour="#{fontcolour=active}" shift="0"/>
-            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
-        </BasisSkin>
-    </Resource>
-
-    <Resource type="ResourceSkin" name="SpellTextUnequippedController" size="16 16">
-        <Property key="FontName" value="Default"/>
-        <Property key="NeedKey" value="true"/>
-        <Property key="TextAlign" value="Left Bottom"/>
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch">
-            <State name="disabled" colour="#{fontcolour=disabled}" shift="0"/>
-            <State name="normal" colour="#{fontcolour=disabled}" shift="0"/>
-            <State name="highlighted" colour="#{fontcolour=active}" shift="0"/>
-            <State name="pushed" colour="#{fontcolour=disabled_pressed}" shift="0"/>
-            <State name="disabled_checked" colour="#{fontcolour=disabled}" shift="0"/>
-            <State name="normal_checked" colour="#{fontcolour=active_over}" shift="0"/>
-            <State name="highlighted_checked" colour="#{fontcolour=active}" shift="0"/>
-            <State name="pushed_checked" colour="#{fontcolour=active_pressed}" shift="0"/>
-        </BasisSkin>
-    </Resource>
-
     <Resource type="ResourceSkin" name="MW_StatNameButtonC" size="200 18">
         <Child type="Button" skin="SandTextButtonC" offset="0 0 200 18" align="Left HStretch" name="StatNameButton"/>
     </Resource>

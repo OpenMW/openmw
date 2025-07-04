@@ -9,7 +9,6 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -33,14 +32,6 @@ namespace MWGui
         getWidget(mSpellsView, "SpellsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sBuy}";
-            mControllerButtons.b = "#{sCancel}";
-            mControllerButtons.r3 = "#{sInfo}";
-        }
     }
 
     bool SpellBuyingWindow::sortSpells(const ESM::Spell* left, const ESM::Spell* right)
@@ -80,8 +71,6 @@ namespace MWGui
         toAdd->setUserString("SpellCost", std::to_string(spell.mData.mCost));
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
         mSpellsWidgetMap.insert(std::make_pair(toAdd, spell.mId));
-        if (price <= playerGold)
-            mSpellButtons.emplace_back(std::make_pair(toAdd, mSpellsWidgetMap.size()));
     }
 
     void SpellBuyingWindow::clearSpells()
@@ -91,7 +80,6 @@ namespace MWGui
         while (mSpellsView->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mSpellsView->getChildAt(0));
         mSpellsWidgetMap.clear();
-        mSpellButtons.clear();
     }
 
     void SpellBuyingWindow::setPtr(const MWWorld::Ptr& actor)
@@ -141,18 +129,6 @@ namespace MWGui
         spellsToSort.clear();
 
         updateLabels();
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mControllerFocus = 0;
-            if (mSpellButtons.size() > 0)
-                mSpellButtons[0].first->setStateSelected(true);
-
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setControllerTooltip(Settings::gui().mControllerTooltips);
-            if (winMgr->getControllerTooltip())
-                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[0].first);
-        }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
@@ -223,61 +199,5 @@ namespace MWGui
         else
             mSpellsView->setViewOffset(
                 MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + _rel * 0.3f)));
-    }
-
-    bool SpellBuyingWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSpellButtons.size()))
-                onSpellButtonClick(mSpellButtons[mControllerFocus].first);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onCancelButtonClicked(mCancelButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
-        {
-            // Toggle info tooltip
-            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            if (mSpellButtons.size() <= 1)
-                return true;
-
-            mSpellButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus - 1, mSpellButtons.size());
-            mSpellButtons[mControllerFocus].first->setStateSelected(true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            if (mSpellButtons.size() <= 1)
-                return true;
-
-            mSpellButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus + 1, mSpellButtons.size());
-            mSpellButtons[mControllerFocus].first->setStateSelected(true);
-        }
-
-        if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSpellButtons.size()))
-        {
-            // Scroll the list to keep the active item in view
-            int line = mSpellButtons[mControllerFocus].second;
-            if (line <= 5)
-                mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
-            else
-            {
-                const int lineHeight = Settings::gui().mFontSize + 2;
-                mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
-            }
-
-            // Warp the mouse to the selected spell to show the tooltip
-            if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
-                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[mControllerFocus].first);
-        }
-
-        return true;
     }
 }

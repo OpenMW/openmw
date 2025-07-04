@@ -8,7 +8,6 @@
 #include <MyGUI_UString.h>
 
 #include <components/fallback/fallback.hpp>
-#include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -73,7 +72,6 @@ namespace MWGui
                 widgets.mButton->setCaption(attribute.mName);
                 widgets.mValue = hbox->createWidget<Gui::AutoSizedTextBox>("SandText", {}, MyGUI::Align::Default);
                 mAttributeWidgets.emplace(attribute.mId, widgets);
-                mAttributeButtons.emplace_back(widgets.mButton);
                 ++i;
             }
 
@@ -90,15 +88,6 @@ namespace MWGui
                 "ImageBox", MyGUI::IntCoord(0, 0, 16, 16), MyGUI::Align::Default);
             image->setImageTexture("icons\\tx_goldicon.dds");
             mCoins.push_back(image);
-        }
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.x = "#{sDone}";
-            mOkButton->setCaption(
-                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
         }
 
         center();
@@ -227,13 +216,6 @@ namespace MWGui
         setAttributeValues();
 
         center();
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mControllerFocus = 0;
-            for (size_t i = 0; i < mAttributeButtons.size(); i++)
-                setControllerFocus(mAttributeButtons, i, i == 0);
-        }
 
         // Play LevelUp Music
         MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Normal);
@@ -380,49 +362,5 @@ namespace MWGui
         }
 
         return ret;
-    }
-
-    bool LevelupDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mAttributeButtons.size()))
-                onAttributeClicked(mAttributeButtons[mControllerFocus]);
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-        {
-            onOkButtonClicked(mOkButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            if (mControllerFocus == 0)
-                mControllerFocus = 3;
-            else if (mControllerFocus == 4)
-                mControllerFocus = 7;
-            else
-                mControllerFocus--;
-            setControllerFocus(mAttributeButtons, mControllerFocus, true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            if (mControllerFocus == 3)
-                mControllerFocus = 0;
-            else if (mControllerFocus == 7)
-                mControllerFocus = 4;
-            else
-                mControllerFocus++;
-            setControllerFocus(mAttributeButtons, mControllerFocus, true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            mControllerFocus = (mControllerFocus + 4) % mAttributeButtons.size();
-            setControllerFocus(mAttributeButtons, mControllerFocus, true);
-        }
-
-        return true;
     }
 }

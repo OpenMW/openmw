@@ -1,8 +1,6 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
-#include <SDL.h>
-
 #include "layout.hpp"
 
 namespace MWWorld
@@ -13,28 +11,6 @@ namespace MWWorld
 namespace MWGui
 {
     class DragAndDrop;
-
-    int wrap(int index, int max);
-    void setControllerFocus(std::vector<MyGUI::Button*> buttons, int index, bool selected);
-
-    struct ControllerButtonStr
-    {
-        std::string a;
-        std::string b;
-        std::string dpad;
-        std::string l1;
-        std::string l2;
-        std::string l3;
-        std::string lStick;
-        std::string menu;
-        std::string r1;
-        std::string r2;
-        std::string r3;
-        std::string rStick;
-        std::string view;
-        std::string x;
-        std::string y;
-    };
 
     class WindowBase : public Layout
     {
@@ -78,20 +54,8 @@ namespace MWGui
 
         static void clampWindowCoordinates(MyGUI::Window* window);
 
-        virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
-        MyGUI::Widget* getControllerScrollWidget() { return mControllerScrollWidget; }
-        bool isGamepadCursorAllowed() { return !mDisableGamepadCursor; }
-        virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; }
-        virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) { return true; }
-        virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
-
     protected:
         virtual void onTitleDoubleClicked();
-
-        ControllerButtonStr mControllerButtons;
-        bool mActiveControllerWindow = false;
-        bool mDisableGamepadCursor = false;
-        MyGUI::Widget* mControllerScrollWidget = nullptr;
 
     private:
         void onDoubleClick(MyGUI::Widget* _sender);

@@ -11,9 +11,7 @@
 
 #include <MyGUI_KeyCode.h>
 
-#include "../mwgui/hud.hpp"
 #include "../mwgui/mode.hpp"
-#include "../mwgui/windowbase.hpp"
 
 #include <components/sdlutil/events.hpp>
 
@@ -159,9 +157,7 @@ namespace MWBase
         virtual MWGui::CountDialog* getCountDialog() = 0;
         virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
         virtual MWGui::TradeWindow* getTradeWindow() = 0;
-        virtual MWGui::HUD* getHud() = 0;
         virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
-        virtual std::vector<MWGui::WindowBase*> getGuiModeWindows(MWGui::GuiMode mode) = 0;
 
         /// Make the player use an item, while updating GUI state accordingly
         virtual void useItem(const MWWorld::Ptr& item, bool force = false) = 0;
@@ -384,15 +380,6 @@ namespace MWBase
 
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
-
-        /// Return the window that should receive controller events
-        virtual MWGui::WindowBase* getActiveControllerWindow() = 0;
-        /// Cycle to the next window to receive controller events
-        virtual void cycleActiveControllerWindow(bool next) = 0;
-        virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;
-        virtual bool getControllerTooltip() const = 0;
-        virtual void setControllerTooltip(bool enabled) = 0;
-        virtual void updateControllerButtonsOverlay() = 0;
 
         // Used in Lua bindings
         virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;

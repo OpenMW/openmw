@@ -25,8 +25,6 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
 
-        std::vector<MyGUI::Button*> mDestinationButtons;
-
         MyGUI::ScrollView* mDestinationsView;
 
         void onCancelButtonClicked(MyGUI::Widget* _sender);
@@ -39,10 +37,6 @@ namespace MWGui
         void updateLabels();
 
         void onReferenceUnavailable() override;
-
-    private:
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
     };
 }
 

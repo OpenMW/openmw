@@ -53,12 +53,8 @@ namespace MWGui
         MyGUI::ScrollView* mSpellArea;
         MyGUI::ImageBox* mBirthImage;
         std::vector<MyGUI::Widget*> mSpellItems;
-        MyGUI::Button* mBackButton;
-        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentBirthId;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 }
 #endif
