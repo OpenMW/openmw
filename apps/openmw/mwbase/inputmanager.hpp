@@ -79,6 +79,8 @@ namespace MWBase
         /// @return true if joystick, false otherwise
         virtual bool joystickLastUsed() = 0;
         virtual void setJoystickLastUsed(bool enabled) = 0;
+        virtual std::string getControllerButtonIcon(int button) = 0;
+        virtual std::string getControllerAxisIcon(int axis) = 0;
 
         virtual int countSavedGameRecords() const = 0;
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;

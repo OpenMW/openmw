@@ -92,6 +92,8 @@ namespace MWInput
 
         void setJoystickLastUsed(bool enabled) override;
         bool joystickLastUsed() override;
+        std::string getControllerButtonIcon(int button) override;
+        std::string getControllerAxisIcon(int axis) override;
 
         int countSavedGameRecords() const override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;

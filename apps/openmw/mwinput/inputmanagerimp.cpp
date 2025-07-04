@@ -249,6 +249,16 @@ namespace MWInput
         return mControllerManager->joystickLastUsed();
     }
 
+    std::string InputManager::getControllerButtonIcon(int button)
+    {
+        return mControllerManager->getControllerButtonIcon(button);
+    }
+
+    std::string InputManager::getControllerAxisIcon(int axis)
+    {
+        return mControllerManager->getControllerAxisIcon(axis);
+    }
+
     void InputManager::executeAction(int action)
     {
         mActionManager->executeAction(action);

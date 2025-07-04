@@ -48,12 +48,17 @@ namespace MWInput
         bool isGyroAvailable() const;
         std::array<float, 3> getGyroValues() const;
 
+        std::string getControllerButtonIcon(int button);
+        std::string getControllerAxisIcon(int axis);
+
     private:
         // Return true if GUI consumes input.
         bool gamepadToGuiControl(const SDL_ControllerButtonEvent& arg);
         bool gamepadToGuiControl(const SDL_ControllerAxisEvent& arg);
 
         void enableGyroSensor();
+
+        int getControllerType();
 
         BindingsManager* mBindingsManager;
         MouseManager* mMouseManager;

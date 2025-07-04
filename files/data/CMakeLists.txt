@@ -10,6 +10,11 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_center_h.dds
     textures/omw_menu_scroll_center_v.dds
     textures/omw_menu_icon_active.dds
+    textures/omw_psx_button_circle.dds
+    textures/omw_psx_button_dpad.dds
+    textures/omw_psx_button_square.dds
+    textures/omw_psx_button_triangle.dds
+    textures/omw_psx_button_x.dds
     textures/omw_steam_button_a.dds
     textures/omw_steam_button_b.dds
     textures/omw_steam_button_dpad.dds
@@ -25,6 +30,14 @@ set(BUILTIN_DATA_FILES
     textures/omw_steam_button_view.dds
     textures/omw_steam_button_x.dds
     textures/omw_steam_button_y.dds
+    textures/omw_switch_button_l.dds
+    textures/omw_switch_button_r.dds
+    textures/omw_switch_button_zl.dds
+    textures/omw_switch_button_zr.dds
+    textures/omw_xbox_button_lb.dds
+    textures/omw_xbox_button_lt.dds
+    textures/omw_xbox_button_rb.dds
+    textures/omw_xbox_button_rt.dds
     textures/omw/water_nm.png
 
     fonts/DejaVuFontLicense.txt

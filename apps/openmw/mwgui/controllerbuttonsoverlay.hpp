@@ -65,6 +65,7 @@ namespace MWGui
 
         Gui::HBox* mHBox;
 
+        void setIcon(MyGUI::ImageBox* image, const std::string& imagePath);
         int updateButton(MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr);
     };
 }

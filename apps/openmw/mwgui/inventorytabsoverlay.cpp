@@ -1,6 +1,9 @@
 #include "inventorytabsoverlay.hpp"
 
+#include <MyGUI_ImageBox.h>
+
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
@@ -25,6 +28,15 @@ namespace MWGui
         getWidget(tab, "TabStats");
         tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
         mTabs.push_back(tab);
+
+        MyGUI::ImageBox* image;
+        getWidget(image, "BtnL2Image");
+        image->setImageTexture(
+            MWBase::Environment::get().getInputManager()->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERLEFT));
+
+        getWidget(image, "BtnR2Image");
+        image->setImageTexture(
+            MWBase::Environment::get().getInputManager()->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERRIGHT));
     }
 
     void InventoryTabsOverlay::onTabClicked(MyGUI::Widget* sender)

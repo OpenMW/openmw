@@ -19,6 +19,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -133,14 +134,18 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             // Show L1 and R1 buttons next to tabs
-            MyGUI::Widget* image;
+            MyGUI::ImageBox* image;
             getWidget(image, "BtnL1Image");
             image->setVisible(true);
             image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_LEFTSHOULDER));
 
             getWidget(image, "BtnR1Image");
             image->setVisible(true);
             image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
             mControllerButtons.r3 = "#{sInfo}";
         }
