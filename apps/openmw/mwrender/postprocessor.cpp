@@ -655,6 +655,14 @@ namespace MWRender
                     const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
 
+                    if (subPass.mMipMap)
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+                    }
+                    else
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(0);
+                    }
                     subPass.mRenderTexture->setTextureSize(w, h);
                     subPass.mRenderTexture->dirtyTextureObject();
 
