@@ -1408,6 +1408,19 @@
            </property>
           </widget>
          </item>
+         <item row="8" column="1">
+          <widget class="QCheckBox" name="controllerMenuTooltipsCheckBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When using controller menus, make tooltips visible by default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Show Controller Tooltips By Default</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="showOwnedLabel">
            <property name="text">

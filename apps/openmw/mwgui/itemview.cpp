@@ -21,6 +21,7 @@ namespace MWGui
 
     ItemView::ItemView()
         : mScrollView(nullptr)
+        , mControllerActiveWindow(false)
     {
     }
 
@@ -189,12 +190,8 @@ namespace MWGui
     {
         mControllerActiveWindow = active;
 
-        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-        if (winMgr->getControllerTooltip())
-        {
-            winMgr->setCursorActive(false);
-            winMgr->setControllerTooltip(false);
-        }
+        MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+            active && Settings::gui().mControllerTooltips);
 
         if (active)
             updateControllerFocus(-1, mControllerFocus);
@@ -214,7 +211,6 @@ namespace MWGui
             // Select the focused item, if any.
             if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
             {
-                MWBase::Environment::get().getWindowManager()->setControllerTooltip(false);
                 MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
                 onSelectedItem(dragArea->getChildAt(mControllerFocus));
             }

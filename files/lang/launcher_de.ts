@@ -1455,5 +1455,13 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Enable Controller Menus</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When using controller menus, make tooltips visible by default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Controller Tooltips By Default</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

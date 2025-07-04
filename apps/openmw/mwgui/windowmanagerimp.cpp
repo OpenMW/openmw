@@ -949,10 +949,16 @@ namespace MWGui
         if (winCount == 0)
             return;
 
-        mActiveControllerWindows[mode] = std::clamp(activeIndex, 0, winCount - 1);
+        activeIndex = std::clamp(activeIndex, 0, winCount - 1);
+        mActiveControllerWindows[mode] = activeIndex;
 
+        // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
         for (int i = 0; i < winCount; i++)
-            mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == activeIndex);
+        {
+            if (i != activeIndex)
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
+        }
+        mGuiModeStates[mode].mWindows[activeIndex]->setActiveControllerWindow(true);
 
         MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
             mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
@@ -1468,13 +1474,23 @@ namespace MWGui
         if (mConsole && mConsole->isVisible())
             mConsole->onOpen();
 
-        if (Settings::gui().mControllerMenus && !mGuiModes.empty())
+        if (Settings::gui().mControllerMenus)
         {
-            // Re-apply any controller-specific window changes.
-            const GuiMode mode = mGuiModes.back();
-            int winCount = mGuiModeStates[mode].mWindows.size();
-            for (int i = 0; i < winCount; i++)
-                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(i == mActiveControllerWindows[mode]);
+            if (mGuiModes.empty())
+                setControllerTooltip(false);
+            else
+            {
+                // Re-apply any controller-specific window changes.
+                const GuiMode mode = mGuiModes.back();
+                int winCount = mGuiModeStates[mode].mWindows.size();
+
+                for (int i = 0; i < winCount; i++)
+                {
+                    if (i != mActiveControllerWindows[mode])
+                        mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
+                }
+                mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
+            }
         }
     }
 

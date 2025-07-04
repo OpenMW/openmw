@@ -57,6 +57,7 @@ namespace MWGui
 
         void resetScrollbars();
 
+        void setActiveControllerWindow(bool active);
         void onControllerButton(const unsigned char button);
 
     private:
@@ -99,8 +100,8 @@ namespace MWGui
         /// Keep a list of group offsets for controller navigation
         std::vector<int> mGroupIndices;
 
+        bool mControllerActiveWindow;
         int mControllerFocus;
-        bool mControllerTooltip;
         void updateControllerFocus(int prevFocus, int newFocus);
 
         void onSpellSelected(MyGUI::Widget* _sender);

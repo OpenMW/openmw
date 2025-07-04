@@ -32,6 +32,7 @@ namespace MWInput
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
+        , mGamepadMousePressed(false)
     {
         if (!controllerBindingsFile.empty())
         {
@@ -142,6 +143,7 @@ namespace MWInput
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonPress(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = true;
                     if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
                         MyGUI::Button* b
@@ -186,12 +188,13 @@ namespace MWInput
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            if (mGamepadGuiCursorEnabled)
+            if (mGamepadGuiCursorEnabled && (!Settings::gui().mControllerMenus || mGamepadMousePressed))
             {
                 // Temporary mouse binding until keyboard controls are available:
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonRelease(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = false;
                     if (mBindingsManager->isDetectingBindingState()) // If the player just triggered binding, don't let
                                                                      // button release bind.
                         return;
