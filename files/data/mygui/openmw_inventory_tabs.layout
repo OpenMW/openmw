@@ -10,7 +10,7 @@
 
             <Widget type="Spacer"/>
 
-            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24">
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnL2Image">
                 <Property key="ImageTexture" value="textures\omw_steam_button_l2.dds"/>
                 <Property key="Colour" value="#ccb589"/>
                 <Property key="Alpha" value="0.7"/>
@@ -39,7 +39,7 @@
                 <Property key="TextShadow" value="true"/>
                 <Property key="TextShadowColour" value="0 0 0"/>
             </Widget>
-            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24">
+            <Widget type="ImageBox" skin="ImageBox" align="Stretch" position="0 0 24 24" name="BtnR2Image">
                 <Property key="ImageTexture" value="textures\omw_steam_button_r2.dds"/>
                 <Property key="Colour" value="#ccb589"/>
                 <Property key="Alpha" value="0.7"/>

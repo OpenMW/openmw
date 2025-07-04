@@ -465,6 +465,120 @@ namespace MWInput
         return std::array<float, 3>({ gyro[0], gyro[1], gyro[2] });
     }
 
+    int ControllerManager::getControllerType()
+    {
+        int type = 0;
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (cntrl)
+            type = SDL_GameControllerGetType(cntrl);
+#endif
+        return type;
+    }
+
+    std::string ControllerManager::getControllerButtonIcon(int button)
+    {
+        int controllerType = ControllerManager::getControllerType();
+
+        bool isXbox = false;
+        bool isPsx = false;
+        bool isSwitch = false;
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+        isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        isPsx = controllerType == SDL_CONTROLLER_TYPE_PS3 || controllerType == SDL_CONTROLLER_TYPE_PS4
+            || controllerType == SDL_CONTROLLER_TYPE_PS5;
+        isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
+#endif
+
+        switch (button)
+        {
+            case SDL_CONTROLLER_BUTTON_A:
+                if (isPsx)
+                    return "textures/omw_psx_button_x.dds";
+                return "textures/omw_steam_button_a.dds";
+            case SDL_CONTROLLER_BUTTON_B:
+                if (isPsx)
+                    return "textures/omw_psx_button_circle.dds";
+                return "textures/omw_steam_button_b.dds";
+            case SDL_CONTROLLER_BUTTON_BACK:
+                return "textures/omw_steam_button_view.dds";
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                if (isPsx)
+                    return "textures/omw_psx_button_dpad.dds";
+                return "textures/omw_steam_button_dpad.dds";
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                if (isXbox)
+                    return "textures/omw_xbox_button_lb.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_l.dds";
+                return "textures/omw_steam_button_l1.dds";
+            case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+                return "textures/omw_steam_button_l3.dds";
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                if (isXbox)
+                    return "textures/omw_xbox_button_rb.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_r.dds";
+                return "textures/omw_steam_button_r1.dds";
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                return "textures/omw_steam_button_r3.dds";
+            case SDL_CONTROLLER_BUTTON_START:
+                return "textures/omw_steam_button_menu.dds";
+            case SDL_CONTROLLER_BUTTON_X:
+                if (isPsx)
+                    return "textures/omw_psx_button_square.dds";
+                return "textures/omw_steam_button_x.dds";
+            case SDL_CONTROLLER_BUTTON_Y:
+                if (isPsx)
+                    return "textures/omw_psx_button_triangle.dds";
+                return "textures/omw_steam_button_y.dds";
+            case SDL_CONTROLLER_BUTTON_GUIDE:
+            default:
+                return "";
+        }
+    }
+
+    std::string ControllerManager::getControllerAxisIcon(int axis)
+    {
+        int controllerType = ControllerManager::getControllerType();
+
+        bool isXbox = false;
+        bool isSwitch = false;
+
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+        isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
+#endif
+
+        switch (axis)
+        {
+            case SDL_CONTROLLER_AXIS_LEFTX:
+            case SDL_CONTROLLER_AXIS_LEFTY:
+                return "textures/omw_steam_button_lstick.dds";
+            case SDL_CONTROLLER_AXIS_RIGHTX:
+            case SDL_CONTROLLER_AXIS_RIGHTY:
+                return "textures/omw_steam_button_rstick.dds";
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+                if (isXbox)
+                    return "textures/omw_xbox_button_lt.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_zl.dds";
+                return "textures/omw_steam_button_l2.dds";
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+                if (isXbox)
+                    return "textures/omw_xbox_button_rt.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_zr.dds";
+                return "textures/omw_steam_button_r2.dds";
+            default:
+                return "";
+        }
+    }
+
     void ControllerManager::touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg)
     {
         MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchMoved, arg });

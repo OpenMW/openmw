@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
+#include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 
 #include <components/misc/rng.hpp>
@@ -11,6 +12,7 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -172,14 +174,18 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             // Show L1 and R1 buttons next to tabs
-            MyGUI::Widget* image;
+            MyGUI::ImageBox* image;
             getWidget(image, "BtnL1Image");
             image->setVisible(true);
             image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_LEFTSHOULDER));
 
             getWidget(image, "BtnR1Image");
             image->setVisible(true);
             image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
             mControllerButtons.a = "#{sBuy}";
             mControllerButtons.b = "#{sCancel}";
