@@ -70,8 +70,9 @@ namespace MWLua
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mDevice; });
             touchpadEvent["finger"]
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> int { return e.mFinger; });
-            touchpadEvent["position"]
-                = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f { return { e.mX, e.mY }; });
+            touchpadEvent["position"] = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> osg::Vec2f {
+                return { e.mX, e.mY };
+            });
             touchpadEvent["pressure"]
                 = sol::readonly_property([](const SDLUtil::TouchEvent& e) -> float { return e.mPressure; });
             return sol::table(lua, sol::create);
