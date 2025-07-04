@@ -72,9 +72,8 @@
                 <Property key="Caption" value="#{sGold}"/>
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
-                <UserString key="Caption_Text" value="#{sYourGold}"/>
             </Widget>
-            <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold">
+                <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold">
 	        </Widget>
             
             <Widget type="Spacer"/>
@@ -87,6 +86,7 @@
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
             </Widget>
+
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">
                 <Property key="Caption" value="#{sBuy}"/>
