@@ -20,13 +20,6 @@ return {
             return input._isGamepadCursorActive()
         end,
 
-        --- Checks if the controller menu option is enabled. If true, UI is replaced with a more controller appropriate interface.
-        -- @function [parent=#GamepadControls] isControllerMenusEnabled
-        -- @return #boolean
-        isControllerMenusEnabled = function()
-            return input._isControllerMenusEnabled()
-        end,
-
         --- Sets if the gamepad cursor is active. If it is active, the left stick can move the cursor, and A will be interpreted as a mouse click.
         -- @function [parent=#GamepadControls] setGamepadCursorActive
         -- @param #boolean value

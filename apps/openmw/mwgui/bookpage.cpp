@@ -105,18 +105,6 @@ namespace MWGui
         Styles mStyles;
         MyGUI::IntRect mRect;
 
-        void setColour(size_t section, size_t line, size_t run, const MyGUI::Colour& colour) const override
-        {
-            if (section >= mSections.size())
-                return;
-            if (line >= mSections[section].mLines.size())
-                return;
-            if (run >= mSections[section].mLines[line].mRuns.size())
-                return;
-
-            mSections[section].mLines[line].mRuns[run].mStyle->mNormalColour = colour;
-        }
-
         virtual ~TypesetBookImpl() {}
 
         Range addContent(const BookTypesetter::Utf8Span& text)
@@ -1299,12 +1287,6 @@ namespace MWGui
         }
 
         void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = std::function<void(InteractiveId)>(); }
-
-        void setFocusItem(BookTypesetter::Style* itemStyle) override
-        {
-            mPageDisplay->mFocusItem = (TypesetBookImpl::StyleImpl*)itemStyle;
-            mPageDisplay->dirtyFocusItem();
-        }
 
     protected:
         void initialiseOverride() override

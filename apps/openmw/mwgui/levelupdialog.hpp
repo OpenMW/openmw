@@ -49,10 +49,6 @@ namespace MWGui
 
         std::string_view getLevelupClassImage(
             const int combatIncreases, const int magicIncreases, const int stealthIncreases);
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        std::vector<MyGUI::Button*> mAttributeButtons;
-        int mControllerFocus;
     };
 
 }

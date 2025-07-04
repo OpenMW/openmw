@@ -50,20 +50,15 @@ namespace MWGui
         mBirthList->eventListSelectAccept += MyGUI::newDelegate(this, &BirthDialog::onAccept);
         mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
-        getWidget(mBackButton, "BackButton");
-        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
+        MyGUI::Button* backButton;
+        getWidget(backButton, "BackButton");
+        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
-        getWidget(mOkButton, "OKButton");
-        mOkButton->setCaption(
+        MyGUI::Button* okButton;
+        getWidget(okButton, "OKButton");
+        okButton->setCaption(
             MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
-        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            mControllerButtons.lStick = "#{sMouse}";
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
-        }
+        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
         updateBirths();
         updateSpells();
@@ -75,17 +70,8 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
-        {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.x = "#{sNext}";
-        }
-        else if (Settings::gui().mControllerMenus)
-        {
-            okButton->setCaption(
-                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.x = "#{sDone}";
-        }
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
@@ -284,31 +270,5 @@ namespace MWGui
         mSpellArea->setCanvasSize(MyGUI::IntSize(mSpellArea->getWidth(), std::max(mSpellArea->getHeight(), coord.top)));
         mSpellArea->setVisibleVScroll(true);
         mSpellArea->setViewOffset(MyGUI::IntPoint(0, 0));
-    }
-
-    bool BirthDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onBackClicked(mBackButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-        {
-            onOkClicked(mOkButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mBirthList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setKeyFocusWidget(mBirthList);
-            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
-        }
-
-        return true;
     }
 }

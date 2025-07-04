@@ -72,9 +72,6 @@ namespace MWGui
         // Check if quick key is still valid
         inline void validate(int index);
         void unassign(keyData* key);
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
     };
 
     class QuickKeysMenuAssign : public WindowModal
@@ -90,9 +87,6 @@ namespace MWGui
         MyGUI::Button* mCancelButton;
 
         QuickKeysMenu* mParent;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
     };
 
     class MagicSelectionDialog : public WindowModal
@@ -111,9 +105,6 @@ namespace MWGui
 
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onModelIndexSelected(SpellModel::ModelIndex index);
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
     };
 }
 

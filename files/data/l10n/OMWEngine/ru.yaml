@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nНажмите Скопировать, чтобы поместить их названия в буфер обмена.}
   }
 OverwriteGameConfirmation: "Вы уверены, что хотите перезаписать это сохранение?"
-SelectCharacter: "Выберите персонажа"
+SelectCharacter: "Выберите персонажа..."
 TimePlayed: "Время в игре"
 
 
@@ -212,13 +212,3 @@ WindowModeHint: "Подсказка: режим Оконный без полей
 WindowModeWindowed: "Оконный"
 WindowModeWindowedFullscreen: "Оконный без полей"
 WobblyShores: "Колеблющиеся берега"
-
-
-# Controller button names
-
-EnchantType: "Тип заклинания"
-InventorySelect: "Поместить"
-JournalQuests: "Квесты"
-JournalShowAll: "Показать все"
-RechargeSelect: "Перезарядить"
-RepairTool: "Инструмент"

@@ -7,29 +7,12 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include <components/settings/values.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
 #include "exposedwindow.hpp"
 
 using namespace MWGui;
-
-int MWGui::wrap(int index, int max)
-{
-    if (index < 0)
-        return max - 1;
-    else if (index >= max)
-        return 0;
-    else
-        return index;
-}
-
-void MWGui::setControllerFocus(std::vector<MyGUI::Button*> buttons, int index, bool focused)
-{
-    if (index >= 0 && index < static_cast<int>(buttons.size()))
-        buttons[index]->setStateSelected(focused);
-}
 
 WindowBase::WindowBase(std::string_view parLayout)
     : Layout(parLayout)
@@ -139,7 +122,6 @@ void WindowModal::onOpen()
 void WindowModal::onClose()
 {
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
-    MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
 
     MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }

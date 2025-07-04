@@ -3,8 +3,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 
-#include <components/settings/values.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
@@ -56,12 +54,6 @@ namespace MWGui
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
         setCoord(200, 0, 600, 300);
-
-        mControllerButtons.a = "#{sTake}";
-        mControllerButtons.b = "#{sClose}";
-        mControllerButtons.x = "#{sTakeAll}";
-        mControllerButtons.r3 = "#{sInfo}";
-        mControllerButtons.l2 = "#{sInventory}";
     }
 
     void ContainerWindow::onItemSelected(int index)
@@ -96,13 +88,8 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            if (Settings::gui().mControllerMenus)
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::takeItem);
-            else
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
-        else if (Settings::gui().mControllerMenus)
-            takeItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
@@ -116,29 +103,6 @@ namespace MWGui
             return;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
-    }
-
-    void ContainerWindow::takeItem(MyGUI::Widget* sender, int count)
-    {
-        if (!mModel)
-            return;
-
-        const ItemStack& item = mModel->getItem(mSelectedItem);
-        if (!onTakeItem(item, count))
-            return;
-
-        MWGui::InventoryWindow* inventoryWindow = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
-        ItemModel* playerModel = inventoryWindow->getModel();
-
-        mModel->moveItem(item, count, playerModel);
-
-        inventoryWindow->updateItemView();
-        mItemView->update();
-
-        // play the item's sound
-        MWWorld::Ptr itemBase = item.mBase;
-        const ESM::RefId& sound = itemBase.getClass().getUpSoundId(itemBase);
-        MWBase::Environment::get().getWindowManager()->playSound(sound);
     }
 
     void ContainerWindow::dropItem()
@@ -355,48 +319,5 @@ namespace MWGui
     {
         if (mModel && mModel->usesContainer(ptr))
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
-    }
-
-    ControllerButtonStr* ContainerWindow::getControllerButtons()
-    {
-        mControllerButtons.r1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
-        return &mControllerButtons;
-    }
-
-    bool ContainerWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            int index = mItemView->getControllerFocus();
-            if (index >= 0 && index < mItemView->getItemCount())
-                onItemSelected(index);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onCloseButtonClicked(mCloseButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-        {
-            onTakeAllButtonClicked(mTakeButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-        {
-            if (mDisposeCorpseButton->getVisible())
-                onDisposeCorpseButtonClicked(mDisposeCorpseButton);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
-            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
-            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            mItemView->onControllerButton(arg.button);
-        }
-
-        return true;
-    }
-
-    void ContainerWindow::setActiveControllerWindow(bool active)
-    {
-        mItemView->setActiveControllerWindow(active);
-        WindowBase::setActiveControllerWindow(active);
     }
 }

@@ -176,9 +176,4 @@ namespace Gui
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
     }
-
-    void MWList::setViewOffset(int offset)
-    {
-        mScrollView->setViewOffset(MyGUI::IntPoint(0, offset));
-    }
 }

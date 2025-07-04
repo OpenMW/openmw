@@ -24,8 +24,6 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
-        ControllerButtonStr* getControllerButtons() override;
-
     private:
         void confirmDeleteSave();
 
@@ -69,9 +67,6 @@ namespace MWGui
 
         const MWState::Character* mCurrentCharacter;
         const MWState::Slot* mCurrentSlot;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool mOkButtonFocus = true;
     };
 
 }

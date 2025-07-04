@@ -47,10 +47,6 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Stats"; }
 
-    protected:
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        void setActiveControllerWindow(bool active) override;
-
     private:
         void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
             const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);

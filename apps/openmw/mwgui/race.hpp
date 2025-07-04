@@ -3,7 +3,6 @@
 
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
-#include <components/widgets/scrollbar.hpp>
 #include <memory>
 
 namespace MWRender
@@ -101,9 +100,7 @@ namespace MWGui
 
         MyGUI::ImageBox* mPreviewImage;
         MyGUI::ListBox* mRaceList;
-        Gui::ScrollBar* mHeadRotate;
-        MyGUI::Button* mBackButton;
-        MyGUI::Button* mOkButton;
+        MyGUI::ScrollBar* mHeadRotate;
 
         MyGUI::Widget* mSkillList;
         std::vector<MyGUI::Widget*> mSkillItems;
@@ -121,9 +118,6 @@ namespace MWGui
         std::unique_ptr<MyGUI::ITexture> mPreviewTexture;
 
         bool mPreviewDirty;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) override;
     };
 }
 #endif

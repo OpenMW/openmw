@@ -144,10 +144,6 @@
                     <Property key="Alpha" value="0.5"/>
                 </Widget>
             </Widget>
-            <Widget type="ImageBox" skin="ImageBox" position="0 0 42 42" align="Stretch" name="ControllerBorder">
-                <Property key="ImageTexture" value="textures\omw_menu_icon_active.dds"/>
-                <Property key="Visible" value="false"/>
-            </Widget>
         </Widget>
     </Resource>
 
@@ -172,10 +168,6 @@
                     <Property key="Alpha" value="0.5"/>
                 </Widget>
             </Widget>
-            <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Stretch" name="ControllerBorder">
-                <Property key="ImageTexture" value="textures\omw_menu_icon_active.dds"/>
-                <Property key="Visible" value="false"/>
-            </Widget>
         </Widget>
     </Resource>
 
@@ -192,10 +184,7 @@
                     <Property key="Alpha" value="0.5"/>
                 </Widget>
             </Widget>
-            <Widget type="ImageBox" skin="ImageBox" position="4 4 42 42" align="Stretch" name="ControllerBorder">
-                <Property key="ImageTexture" value="textures\omw_menu_icon_active.dds"/>
-                <Property key="Visible" value="false"/>
-            </Widget>
+
             <Widget type="Widget" skin="MW_Box_Overlay" position="0 0 50 50" align="Stretch"/>
         </Widget>
     </Resource>

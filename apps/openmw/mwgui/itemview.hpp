@@ -2,7 +2,6 @@
 #define MWGUI_ITEMVIEW_H
 
 #include <MyGUI_Widget.h>
-#include <SDL.h>
 
 #include "itemmodel.hpp"
 
@@ -32,11 +31,6 @@ namespace MWGui
 
         void resetScrollBars();
 
-        void setActiveControllerWindow(bool active);
-        int getControllerFocus() { return mControllerFocus; }
-        int getItemCount() { return mItemCount; }
-        void onControllerButton(const unsigned char button);
-
     private:
         void initialiseOverride() override;
 
@@ -51,12 +45,6 @@ namespace MWGui
 
         std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;
-
-        int mItemCount = 0;
-        int mRows;
-        int mControllerFocus = 0;
-        bool mControllerActiveWindow;
-        void updateControllerFocus(int prevFocus, int newFocus);
     };
 
 }

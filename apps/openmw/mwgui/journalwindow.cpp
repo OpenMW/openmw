@@ -218,10 +218,6 @@ namespace
                 }
             }
 
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.x = "#{OMWEngine:JournalQuests}";
-            mControllerButtons.y = "#{sTopics}";
-
             mQuestMode = false;
             mAllQuests = false;
             mOptionsMode = false;
@@ -252,9 +248,6 @@ namespace
             }
             updateShowingPages();
 
-            if (Settings::gui().mControllerMenus)
-                setControllerFocusedQuest(0);
-
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
         }
 
@@ -282,8 +275,6 @@ namespace
 
             updateShowingPages();
             updateCloseJournalButton();
-
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void setOptionsMode()
@@ -316,8 +307,6 @@ namespace
                 notifyQuests(getWidget<MyGUI::Widget>(QuestsList));
             else
                 notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
-
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void pushBook(Book& book, unsigned int page)
@@ -349,7 +338,6 @@ namespace
         {
             setVisible(CloseBTN, mStates.size() < 2);
             setVisible(JournalBTN, mStates.size() >= 2);
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void updateShowingPages()
@@ -392,8 +380,6 @@ namespace
 
             setText(PageOneNum, page + 1);
             setText(PageTwoNum, page + 2);
-
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyKeyPress(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
@@ -421,7 +407,6 @@ namespace
             mTopicsMode = false;
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyTopicSelected(const std::string& topicIdString, int id)
@@ -454,7 +439,6 @@ namespace
             mOptionsMode = false;
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -475,9 +459,6 @@ namespace
                 getPage(LeftTopicIndex)->showPage(mTopicIndexBook, 0);
                 getPage(RightTopicIndex)->showPage(mTopicIndexBook, 1);
             }
-
-            if (Settings::gui().mControllerMenus)
-                setIndexControllerFocus(true);
         }
 
         void notifyJournal(MyGUI::Widget* _sender)
@@ -486,22 +467,6 @@ namespace
             popBook();
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
-        }
-
-        void addControllerButtons(Gui::MWList* _list, size_t _selectedIndex)
-        {
-            mButtons.clear();
-            for (size_t i = 0; i < _list->getItemCount(); i++)
-            {
-                MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
-                if (listItem)
-                {
-                    listItem->setTextColour(
-                        mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
-                    mButtons.push_back(listItem);
-                }
-            }
         }
 
         void notifyIndexLinkClicked(MWGui::TypesetBook::InteractiveId index)
@@ -522,14 +487,7 @@ namespace
 
             list->adjustSize();
 
-            if (Settings::gui().mControllerMenus)
-            {
-                setControllerFocusedQuest(0);
-                addControllerButtons(list, mSelectedQuest);
-            }
-
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -545,7 +503,6 @@ namespace
             setVisible(ShowActiveBTN, false);
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         struct AddNamesToList
@@ -597,12 +554,6 @@ namespace
             list->sort();
             list->adjustSize();
 
-            if (Settings::gui().mControllerMenus)
-            {
-                addControllerButtons(list, mSelectedQuest);
-                setControllerFocusedQuest(MWGui::wrap(mSelectedQuest, mButtons.size()));
-            }
-
             if (mAllQuests)
             {
                 SetNamesInactive setInactive(list);
@@ -610,7 +561,6 @@ namespace
             }
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-            MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -686,299 +636,6 @@ namespace
 
                     page -= 2;
                     updateShowingPages();
-                }
-            }
-        }
-
-        MWGui::ControllerButtonStr* getControllerButtons() override
-        {
-            mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{sClose}";
-            mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
-            mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
-            mControllerButtons.r3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
-            return &mControllerButtons;
-        }
-
-        void setIndexControllerFocus(bool focused)
-        {
-            int col, row;
-            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
-            if (isRussian)
-            {
-                // Cyrillic = 30 (10 + 10 + 10)
-                col = mSelectedIndex / 10;
-                row = mSelectedIndex % 10;
-            }
-            else
-            {
-                // Latin = 26 (13 + 13)
-                col = mSelectedIndex / 13;
-                row = mSelectedIndex % 13;
-            }
-
-            mTopicIndexBook->setColour(col, row, 0, focused ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
-        }
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override
-        {
-            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
-
-            if (arg.button == SDL_CONTROLLER_BUTTON_A) // A: Mouse click or Select
-            {
-                if (mOptionsMode && mQuestMode)
-                {
-                    // Choose a quest
-                    Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
-                    notifyQuestClicked(list->getItemNameAt(mSelectedQuest), 0);
-                }
-                else if (mOptionsMode && mTopicsMode)
-                {
-                    // Choose a topic
-                    Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
-                    notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
-                }
-                else if (mOptionsMode)
-                {
-                    // Choose an index. Cyrillic capital A is a 0xd090 in UTF-8.
-                    // Words can not be started with characters 26 or 28.
-                    int russianOffset = 0xd090;
-                    if (mSelectedIndex >= 26)
-                        russianOffset++;
-                    if (mSelectedIndex >= 27)
-                        russianOffset++; // 27, not 28, because of skipping char 26
-                    notifyIndexLinkClicked(isRussian ? mSelectedIndex + russianOffset : mSelectedIndex + 'A');
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_B) // B: Back
-            {
-                if (mOptionsMode)
-                {
-                    // Hide the options overlay
-                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
-                    mQuestMode = false;
-                }
-                else if (mStates.size() > 1)
-                {
-                    // Pop the current book. If in quest mode, reopen the quest list.
-                    notifyJournal(getWidget<MyGUI::Widget>(JournalBTN));
-                    if (mQuestMode)
-                    {
-                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
-                        notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
-                    }
-                }
-                else
-                {
-                    // Close the journal window
-                    notifyClose(getWidget<MyGUI::Widget>(CloseBTN));
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_X) // X: Quests
-            {
-                if (mOptionsMode && mQuestMode)
-                {
-                    // Hide the quest overlay if visible
-                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
-                    mQuestMode = false;
-                }
-                else
-                {
-                    // Show the quest overlay if viewing a journal entry or the topics
-                    if (!mOptionsMode)
-                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
-                    if (!mQuestMode)
-                        notifyQuests(getWidget<MyGUI::Widget>(QuestsBTN));
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_Y) // Y: Topics
-            {
-                if (mOptionsMode && !mQuestMode)
-                {
-                    // Hide the topics overlay if visible
-                    notifyCancel(getWidget<MyGUI::Widget>(CancelBTN));
-                    mQuestMode = false;
-                }
-                else
-                {
-                    // Show the topics overlay if viewing a journal entry or the quest list
-                    if (!mOptionsMode)
-                        notifyOptions(getWidget<MyGUI::Widget>(OptionsBTN));
-                    if (mQuestMode)
-                        notifyTopics(getWidget<MyGUI::Widget>(TopicsBTN));
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK) // R3: Show All/Some
-            {
-                if (mAllQuests)
-                    notifyShowActive(getWidget<MyGUI::Widget>(ShowActiveBTN));
-                else
-                    notifyShowAll(getWidget<MyGUI::Widget>(ShowAllBTN));
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-            {
-                if (mOptionsMode && (mQuestMode || mTopicsMode))
-                {
-                    if (mButtons.size() <= 1)
-                        return true;
-
-                    // Scroll through the list of quests or topics
-                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest - 1, mButtons.size()));
-                }
-                else if (mOptionsMode)
-                {
-                    setIndexControllerFocus(false);
-                    if (isRussian)
-                    {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        if (mSelectedIndex == 0)
-                            mSelectedIndex = 9;
-                        else if (mSelectedIndex == 10)
-                            mSelectedIndex = 19;
-                        else if (mSelectedIndex == 20)
-                            mSelectedIndex = 29;
-                        else
-                            mSelectedIndex--;
-                    }
-                    else
-                    {
-                        // Latin = 26 (13 + 13)
-                        if (mSelectedIndex == 0)
-                            mSelectedIndex = 12;
-                        else if (mSelectedIndex == 13)
-                            mSelectedIndex = 25;
-                        else
-                            mSelectedIndex--;
-                    }
-                    setIndexControllerFocus(true);
-                    setText(PageOneNum, 1); // Redraw the list
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-            {
-                if (mOptionsMode && (mQuestMode || mTopicsMode))
-                {
-                    if (mButtons.size() <= 1)
-                        return true;
-
-                    // Scroll through the list of quests or topics
-                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest + 1, mButtons.size()));
-                }
-                else if (mOptionsMode)
-                {
-                    setIndexControllerFocus(false);
-                    if (isRussian)
-                    {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        if (mSelectedIndex == 9)
-                            mSelectedIndex = 0;
-                        else if (mSelectedIndex == 19)
-                            mSelectedIndex = 10;
-                        else if (mSelectedIndex == 29)
-                            mSelectedIndex = 20;
-                        else
-                            mSelectedIndex++;
-                    }
-                    else
-                    {
-                        // Latin = 26 (13 + 13)
-                        if (mSelectedIndex == 12)
-                            mSelectedIndex = 0;
-                        else if (mSelectedIndex == 25)
-                            mSelectedIndex = 13;
-                        else
-                            mSelectedIndex++;
-                    }
-                    setIndexControllerFocus(true);
-                    setText(PageOneNum, 1); // Redraw the list
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
-            {
-                if (!mOptionsMode)
-                    notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
-                else if (mOptionsMode && !mQuestMode && !mTopicsMode)
-                {
-                    setIndexControllerFocus(false);
-                    if (isRussian)
-                    {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        mSelectedIndex = (mSelectedIndex + 20) % 30;
-                    }
-                    else
-                    {
-                        // Latin = 26 (13 + 13)
-                        mSelectedIndex = (mSelectedIndex + 13) % 26;
-                    }
-                    setIndexControllerFocus(true);
-                    setText(PageOneNum, 1); // Redraw the list
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-            {
-                if (!mOptionsMode)
-                    notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
-                else if (mOptionsMode && !mQuestMode && !mTopicsMode)
-                {
-                    setIndexControllerFocus(false);
-                    if (isRussian)
-                    {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        mSelectedIndex = (mSelectedIndex + 10) % 30;
-                    }
-                    else
-                    {
-                        // Latin = 26 (13 + 13)
-                        mSelectedIndex = (mSelectedIndex + 13) % 26;
-                    }
-                    setIndexControllerFocus(true);
-                    setText(PageOneNum, 1); // Redraw the list
-                }
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // LB: Previous Page
-            {
-                if (!mOptionsMode)
-                    notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
-                return true;
-            }
-            else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) // RB: Next Page
-            {
-                if (!mOptionsMode)
-                    notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
-                return true;
-            }
-
-            return false;
-        }
-
-        void setControllerFocusedQuest(size_t index)
-        {
-            size_t listSize = mButtons.size();
-            if (mSelectedQuest < listSize)
-                mButtons[mSelectedQuest]->setTextColour(MyGUI::Colour::Black);
-
-            mSelectedQuest = index;
-            if (mSelectedQuest < listSize)
-            {
-                mButtons[mSelectedQuest]->setTextColour(MWGui::journalHeaderColour);
-
-                // Scroll the list to keep the active item in view
-                Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
-                if (mSelectedQuest <= 3)
-                    list->setViewOffset(0);
-                else
-                {
-                    int offset = 0;
-                    for (int i = 0; i < static_cast<int>(mSelectedQuest) - 3; i++)
-                        offset += mButtons[i]->getHeight() + 3;
-                    list->setViewOffset(-offset);
                 }
             }
         }

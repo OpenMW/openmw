@@ -8,7 +8,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -281,22 +280,6 @@ namespace MWGui
             }
         }
 
-        if (Settings::gui().mControllerMenus)
-        {
-            mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sOk}";
-
-            // If we have more than one button, we need to set the focus to the first one.
-            if (mButtons.size() > 1)
-            {
-                mControllerFocus = 0;
-                if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
-                    mControllerFocus = mDefaultFocus;
-                for (int i = 0; i < static_cast<int>(mButtons.size()); ++i)
-                    mButtons[i]->setStateSelected(i == mControllerFocus);
-            }
-        }
-
         MyGUI::IntSize mainWidgetSize;
         if (buttonsWidth < textSize.width)
         {
@@ -448,41 +431,4 @@ namespace MWGui
         return mButtonPressed;
     }
 
-    bool InteractiveMessageBox::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            mControllerFocus = std::clamp(mControllerFocus, 0, static_cast<int>(mButtons.size()) - 1);
-            buttonActivated(mButtons[mControllerFocus]);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            if (mButtons.size() == 1)
-                buttonActivated(mButtons[0]);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
-        {
-            if (mButtons.size() <= 1)
-                return true;
-            if (mButtons.size() == 2 && mControllerFocus == 0)
-                return true;
-
-            setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
-            setControllerFocus(mButtons, mControllerFocus, true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            if (mButtons.size() <= 1)
-                return true;
-            if (mButtons.size() == 2 && mControllerFocus == static_cast<int>(mButtons.size()) - 1)
-                return true;
-
-            setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
-            setControllerFocus(mButtons, mControllerFocus, true);
-        }
-
-        return true;
-    }
 }

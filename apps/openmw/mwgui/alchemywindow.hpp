@@ -99,8 +99,6 @@ namespace MWGui
 
         std::vector<ItemWidget*> mApparatus;
         std::vector<ItemWidget*> mIngredients;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 }
 

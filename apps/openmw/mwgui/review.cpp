@@ -46,25 +46,21 @@ namespace MWGui
         getWidget(button, "NameButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onNameClicked);
-        mButtons.push_back(button);
 
         getWidget(mRaceWidget, "RaceText");
         getWidget(button, "RaceButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onRaceClicked);
-        mButtons.push_back(button);
 
         getWidget(mClassWidget, "ClassText");
         getWidget(button, "ClassButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onClassClicked);
-        mButtons.push_back(button);
 
         getWidget(mBirthSignWidget, "SignText");
         getWidget(button, "SignButton");
         adjustButtonSize(button);
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBirthSignClicked);
-        mButtons.push_back(button);
 
         // Setup dynamic stats
         getWidget(mHealth, "Health");
@@ -112,22 +108,10 @@ namespace MWGui
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
-        mButtons.push_back(backButton);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
-        mButtons.push_back(okButton);
-
-        if (Settings::gui().mControllerMenus)
-        {
-            setControllerFocus(mButtons, mControllerFocus, true);
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
-            mControllerButtons.x = "#{sDone}";
-            okButton->setCaption(
-                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-        }
     }
 
     void ReviewDialog::onOpen()
@@ -538,54 +522,4 @@ namespace MWGui
                 MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
     }
 
-    bool ReviewDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if (arg.button == SDL_CONTROLLER_BUTTON_A)
-        {
-            switch (mControllerFocus)
-            {
-                case 0:
-                    onNameClicked(mButtons[0]);
-                    break;
-                case 1:
-                    onRaceClicked(mButtons[1]);
-                    break;
-                case 2:
-                    onClassClicked(mButtons[2]);
-                    break;
-                case 3:
-                    onBirthSignClicked(mButtons[3]);
-                    break;
-                case 4:
-                    onBackClicked(mButtons[4]);
-                    break;
-                case 5:
-                    onOkClicked(mButtons[5]);
-                    break;
-            }
-            return true;
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-        {
-            onBackClicked(mButtons[4]);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
-        {
-            onOkClicked(mButtons[5]);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
-        {
-            setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
-            setControllerFocus(mButtons, mControllerFocus, true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
-            setControllerFocus(mButtons, mControllerFocus, true);
-        }
-
-        return true;
-    }
 }

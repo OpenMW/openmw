@@ -6,7 +6,6 @@
 #include "imagebutton.hpp"
 #include "list.hpp"
 #include "numericeditbox.hpp"
-#include "scrollbar.hpp"
 #include "sharedstatebutton.hpp"
 #include "windowcaption.hpp"
 
@@ -27,7 +26,6 @@ namespace Gui
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::Button>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::NumericEditBox>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::SharedStateButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::WindowCaption>("Widget");
     }

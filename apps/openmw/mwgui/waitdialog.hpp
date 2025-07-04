@@ -4,7 +4,6 @@
 #include "timeadvancer.hpp"
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
-#include <components/widgets/scrollbar.hpp>
 
 namespace MWGui
 {
@@ -37,7 +36,6 @@ namespace MWGui
         void clear() override;
 
         void onFrame(float dt) override;
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();
@@ -47,8 +45,6 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "WaitDialog"; }
 
-        ControllerButtonStr* getControllerButtons() override;
-
     protected:
         MyGUI::TextBox* mDateTimeText;
         MyGUI::TextBox* mRestText;
@@ -56,7 +52,7 @@ namespace MWGui
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
-        Gui::ScrollBar* mHourSlider;
+        MyGUI::ScrollBar* mHourSlider;
 
         TimeAdvancer mTimeAdvancer;
         bool mSleeping;

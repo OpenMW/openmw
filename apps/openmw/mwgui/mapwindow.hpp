@@ -212,8 +212,6 @@ namespace MWGui
         EventHandle_Void eventDeleteClicked;
         EventHandle_Void eventOkClicked;
 
-        ControllerButtonStr* getControllerButtons() override;
-
     private:
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
@@ -223,9 +221,6 @@ namespace MWGui
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;
         MyGUI::Button* mDeleteButton;
-
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
     };
 
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
@@ -270,10 +265,6 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Map"; }
 
-    protected:
-        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        void setActiveControllerWindow(bool active) override;
-
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -292,7 +283,6 @@ namespace MWGui
         void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
         float getMarkerSize(size_t agregatedWeight) const;
         void resizeGlobalMap();
-        void shiftMap(int dx, int dy);
         void worldPosToGlobalMapImageSpace(float x, float z, float& imageX, float& imageY) const;
         MyGUI::IntCoord createMarkerCoords(float x, float y, float agregatedWeight) const;
         MyGUI::Widget* createMarker(const std::string& name, float x, float y, float agregatedWeight);

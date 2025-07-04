@@ -39,10 +39,6 @@ namespace MWGui
         mRepairBox->setDisplayMode(ItemChargeView::DisplayMode_Health);
 
         mToolIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onSelectItem);
-
-        mControllerButtons.a = "#{sRepair}";
-        mControllerButtons.b = "#{sCancel}";
-        mControllerButtons.y = "#{OMWEngine:RepairTool}";
     }
 
     void Repair::onOpen()
@@ -154,18 +150,4 @@ namespace MWGui
         updateRepairView();
     }
 
-    bool Repair::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
-    {
-        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mToolBox->getVisible()) || arg.button == SDL_CONTROLLER_BUTTON_Y)
-        {
-            onSelectItem(mToolIcon);
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
-            onCancel(mCancelButton);
-        else
-            mRepairBox->onControllerButton(arg.button);
-
-        return true;
-    }
 }

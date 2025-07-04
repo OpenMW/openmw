@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
   }
 OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
-SelectCharacter: "Sélection du personnage"
+SelectCharacter: "Sélection du personnage..."
 TimePlayed: "Temps de jeu"
 
 
@@ -212,13 +212,3 @@ WindowModeHint: "Info : Le mode \"Fenêtré plein écran\" utilise toujours la r
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
 WobblyShores: "Rivages vacillants"
-
-
-# Controller button names
-
-EnchantType: "Type de lancement"
-InventorySelect: "Placer"
-JournalQuests: "Quêtes"
-JournalShowAll: "Tout Afficher"
-RechargeSelect: "Recharge"
-RepairTool: "Outil"
