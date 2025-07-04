@@ -240,7 +240,7 @@ namespace MWLua
         api["isMouseButtonPressed"]
             = [](int button) -> bool { return SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(button); };
         api["_isGamepadCursorActive"] = [input]() -> bool { return input->isGamepadGuiCursorEnabled(); };
-        api["_isControllerMenusEnabled"] = [input]() -> bool { return Settings::gui().mControllerMenus; };
+        api["_isControllerMenusEnabled"] = []() -> bool { return Settings::gui().mControllerMenus; };
         api["_setGamepadCursorActive"] = [input](bool v) {
             input->setGamepadGuiCursorEnabled(v);
             MWBase::Environment::get().getWindowManager()->setCursorActive(v);
