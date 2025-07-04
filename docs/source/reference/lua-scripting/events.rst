@@ -147,7 +147,7 @@ Calls the corresponding function in openw.core. Note that PlaySound3d will call 
 
 **ConsumeItem**
 
-Reduces stack size of an item by a given amount, removing the item complete if removing all items in the stack are removed.
+Reduces stack size of an item by a given amount, removing the item completely if stack size is reduced to 0 or less.
 
 .. code-block:: Lua
 
@@ -161,3 +161,19 @@ Modify a specified amount of enchantment charge of an item
 
     -- Reduce charge by 10
     core.sendGlobalEvent('ModifyItemCharge', {item = foobar, amount = -10})
+
+**Lock**
+
+Lock a container or door
+
+.. code-block:: Lua
+
+    core.sendGlobalEvent('Lock', {taret = selected, magnitude = 50})
+
+**Unlock**
+
+Unlock a container or door
+
+.. code-block:: Lua
+
+    core.sendGlobalEvent('Unlock', {taret = selected})
