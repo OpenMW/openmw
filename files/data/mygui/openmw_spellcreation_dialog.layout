@@ -41,7 +41,7 @@
             <Property key="TextAlign" value="Right HCenter"/>
             <Property key="NeedMouse" value="false"/>
         </Widget>
-	
+
         <!-- Available effects -->
         <Widget type="TextBox" skin="NormalText" position="12 48 300 24">
             <Property key="Caption" value="#{sMagicEffects}"/>
