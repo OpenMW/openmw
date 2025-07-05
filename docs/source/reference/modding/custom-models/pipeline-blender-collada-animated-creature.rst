@@ -177,7 +177,6 @@ definitions and events. At a minimum it needs to include at least animation
     runforward: stop 4.433333
     attack1: start 4.466667
     attack1: stop 5.433333
-    ...
 
 The textkeys file is placed in the same folder as the model and matches the model's name.
 

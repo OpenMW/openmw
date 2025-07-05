@@ -138,3 +138,17 @@ tbody tr:hover {
 #left-sidebar {
     overflow-y: scroll;
 }
+
+#content div[class^=highlight], #content pre.literal-block, p, h4, h5, h6 {
+    margin-bottom: 1.5rem;
+}
+
+h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+h6 {
+    font-size: 1.08rem;
+    font-weight: 600;
+}
