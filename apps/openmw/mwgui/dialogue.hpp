@@ -226,6 +226,9 @@ namespace MWGui
 
         MyGUI::IntSize mCurrentWindowSize;
 
+        // Morrowind uses 3 px invisible borders for padding topics
+        static const int sVerticalPadding = 3;
+
         std::unique_ptr<ResponseCallback> mCallback;
         std::unique_ptr<ResponseCallback> mGreetingCallback;
 

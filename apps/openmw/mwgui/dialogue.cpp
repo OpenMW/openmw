@@ -653,13 +653,10 @@ namespace MWGui
         if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
-        // Morrowind uses 3 px invisible borders for padding topics
-        constexpr int verticalPadding = 3;
-
         for (const auto& keyword : mKeywords)
         {
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
-            mTopicsList->addItem(keyword, verticalPadding);
+            mTopicsList->addItem(keyword, sVerticalPadding);
 
             auto t = std::make_unique<Topic>(keyword);
             mKeywordSearch.seed(topicId, intptr_t(t.get()));
@@ -947,18 +944,18 @@ namespace MWGui
         if (focused)
         {
             // Scroll the side bar to keep the active item in view
-            if (index <= 8)
+            if (index <= 6)
                 mTopicsList->setViewOffset(0);
             else
             {
                 int offset = 0;
-                for (int i = 0; i < static_cast<int>(index) - 8; i++)
+                for (int i = 0; i < static_cast<int>(index) - 6; i++)
                 {
                     const std::string& keyword = mTopicsList->getItemNameAt(i);
                     if (keyword.empty())
-                        offset += 21;
+                        offset += 18 + sVerticalPadding * 2;
                     else
-                        offset += mTopicsList->getItemWidget(keyword)->getHeight() + 3;
+                        offset += mTopicsList->getItemWidget(keyword)->getHeight() + sVerticalPadding * 2;
                 }
                 mTopicsList->setViewOffset(-offset);
             }
