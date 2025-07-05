@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nPress Copy to place their names to the clipboard.}
   }
 OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
-SelectCharacter: "Select Character"
+SelectCharacter: "Select Character..."
 TimePlayed: "Time Played"
 
 
@@ -220,5 +220,6 @@ EnchantType: "Cast Type"
 InventorySelect: "Put"
 JournalQuests: "Quests"
 JournalShowAll: "Show All"
+LoadingSelectCharacter: "Change Character"
 RechargeSelect: "Recharge"
 RepairTool: "Tool"

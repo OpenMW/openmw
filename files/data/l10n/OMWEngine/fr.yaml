@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nCliquez sur Copier pour placer ces noms dans le presse-papier.}
   }
 OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
-SelectCharacter: "Sélection du personnage"
+SelectCharacter: "Sélection du personnage..."
 TimePlayed: "Temps de jeu"
 
 
@@ -220,5 +220,6 @@ EnchantType: "Type de lancement"
 InventorySelect: "Placer"
 JournalQuests: "Quêtes"
 JournalShowAll: "Tout Afficher"
+LoadingSelectCharacter: "Sélection du personnage"
 RechargeSelect: "Recharge"
 RepairTool: "Outil"

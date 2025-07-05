@@ -59,7 +59,7 @@ MissingContentFilesListCopy: |-
     other{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
   } 
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
-SelectCharacter: "Välj spelfigur"
+SelectCharacter: "Välj spelfigur..."
 
 
 # Settings menu
@@ -221,5 +221,6 @@ EnchantType: "Typ"
 InventorySelect: "Placera"
 JournalQuests: "Uppdrag"
 JournalShowAll: "Visa Alla"
+LoadingSelectCharacter: "Välj spelfigur"
 RechargeSelect: "Ladda"
 RepairTool: "Verktyg"

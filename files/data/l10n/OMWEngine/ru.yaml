@@ -58,7 +58,7 @@ MissingContentFilesListCopy: |-
     other{\n\nНажмите Скопировать, чтобы поместить их названия в буфер обмена.}
   }
 OverwriteGameConfirmation: "Вы уверены, что хотите перезаписать это сохранение?"
-SelectCharacter: "Выберите персонажа"
+SelectCharacter: "Выберите персонажа..."
 TimePlayed: "Время в игре"
 
 
@@ -220,5 +220,6 @@ EnchantType: "Тип заклинания"
 InventorySelect: "Поместить"
 JournalQuests: "Квесты"
 JournalShowAll: "Показать все"
+LoadingSelectCharacter: "Выбрать персонажа"
 RechargeSelect: "Перезарядить"
 RepairTool: "Инструмент"
