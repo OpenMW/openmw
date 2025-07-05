@@ -26,8 +26,8 @@
 #include "landbindings.hpp"
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
-#include "soundbindings.hpp"
 #include "regionbindings.hpp"
+#include "soundbindings.hpp"
 #include "stats.hpp"
 #include "weatherbindings.hpp"
 
