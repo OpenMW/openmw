@@ -13,6 +13,25 @@
     @endforeach
 #endif // SHADOWS
 
+float calcShadowing(sampler2DShadow shadowTexture, vec4 LightSpacePos)
+{
+    float Offset = 1.0/@shadowMapSize.0;
+    float shadowing = 1.0;
+
+    float numPixels = @PCFSamples.0 + 1.0;
+    float mult = (numPixels -1.0) / 2.0;
+    shadowing = 0.0;
+    for (float y = -1.0 * mult; y <= mult; y+=1.0) {
+        for (float x = -1.0 * mult; x <= mult; x+=1.0) {
+            vec4 Offsets = vec4(float(x) * Offset, float(y) * Offset, -0.001, 0.0);
+                shadowing += min(shadow2DProj(shadowTexture, LightSpacePos + (Offsets * vec4(LightSpacePos.w, LightSpacePos.w, 1.0, 1.0))), 1.0);
+        }
+    }
+    shadowing = shadowing / (numPixels * numPixels);
+
+    return  shadowing;
+}
+
 float unshadowedLightRatio(float distance)
 {
     float shadowing = 1.0;
@@ -32,7 +51,7 @@ float unshadowedLightRatio(float distance)
 #endif
             if (all(lessThan(shadowXYZ.xy, vec2(1.0, 1.0))) && all(greaterThan(shadowXYZ.xy, vec2(0.0, 0.0))))
             {
-                shadowing = min(shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r, shadowing);
+                shadowing = calcShadowing(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index);
 
                 doneShadows = all(lessThan(shadowXYZ, vec3(0.95, 0.95, 1.0))) && all(greaterThan(shadowXYZ, vec3(0.05, 0.05, 0.0)));
 #if @perspectiveShadowMaps

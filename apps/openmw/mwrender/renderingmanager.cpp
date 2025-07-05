@@ -213,6 +213,7 @@ namespace MWRender
             : mFogStart(0.f)
             , mFogEnd(0.f)
             , mWireframe(false)
+            , mWriteNormals(false)
         {
         }
 
@@ -231,6 +232,12 @@ namespace MWRender
             }
             else
                 stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
+
+            stateset->setDefine("FORCE_PPL", (Settings::shaders().mForcePerPixelLighting == true) ? "1" : "0", osg::StateAttribute::ON);
+            stateset->setDefine("CLASSIC_FALLOFF", (Settings::shaders().mClassicFalloff == true) ? "1" : "0", osg::StateAttribute::ON);
+            stateset->setDefine("MAX_LIGHTS", std::to_string(Settings::shaders().mMaxLights), osg::StateAttribute::ON);
+
+            stateset->setDefine("WRITE_NORMALS", (mWriteNormals) ? "1" : "0", osg::StateAttribute::ON);
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
@@ -242,6 +249,8 @@ namespace MWRender
             fog->setColor(mFogColor);
             fog->setStart(mFogStart);
             fog->setEnd(mFogEnd);
+
+            stateset->setDefine("WRITE_NORMALS", (mWriteNormals) ? "1" : "0", osg::StateAttribute::ON);
         }
 
         void setAmbientColor(const osg::Vec4f& col) { mAmbientColor = col; }
@@ -263,12 +272,15 @@ namespace MWRender
 
         bool getWireframe() const { return mWireframe; }
 
+        void setWriteNormals(float enabled) {mWriteNormals = enabled; }
+
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
         float mFogStart;
         float mFogEnd;
         bool mWireframe;
+        bool mWriteNormals;
     };
 
     class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
@@ -460,6 +472,10 @@ namespace MWRender
 
         globalDefines["reverseZ"] = reverseZ ? "1" : "0";
 
+
+        globalDefines["shadowMapSize"] = std::to_string(Settings::shadows().mShadowMapResolution);
+        globalDefines["PCFSamples"] = std::to_string(Settings::shadows().mPercentageCloserFiltering);
+
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
@@ -510,8 +526,8 @@ namespace MWRender
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
-            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
-            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
+            mPostProcessor->getTexture(PostProcessor::Tex_Depth/*Tex_OpaqueDepth*/, 0),
+            mPostProcessor->getTexture(PostProcessor::Tex_Depth/*Tex_OpaqueDepth*/, 1));
         resourceSystem->getSceneManager()->setSoftParticles(Settings::shaders().mSoftParticles);
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
@@ -1541,17 +1557,21 @@ namespace MWRender
             else if (it->first == "Shaders"
                 && (it->second == "force per pixel lighting" || it->second == "classic falloff"))
             {
+/*
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
                 defines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+*/
 
                 if (MWMechanics::getPlayer().isInCell() && it->second == "classic falloff")
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
-                mViewer->startThreading();
+                mStateUpdater->reset();
+
+//                mViewer->startThreading();
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"
@@ -1567,12 +1587,12 @@ namespace MWRender
                     mViewer->stopThreading();
 
                     lightManager->updateMaxLights(Settings::shaders().mMaxLights);
-
+/*
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                     for (const auto& [name, key] : lightManager->getLightDefines())
                         defines[name] = key;
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
-
+*/
                     mStateUpdater->reset();
 
                     mViewer->startThreading();
@@ -1823,5 +1843,10 @@ namespace MWRender
     void RenderingManager::setNavMeshMode(Settings::NavMeshRenderMode value)
     {
         mNavMesh->setMode(value);
+    }
+
+    void RenderingManager::setWriteNormals(bool enabled)
+    {
+        mStateUpdater->setWriteNormals(enabled);
     }
 }

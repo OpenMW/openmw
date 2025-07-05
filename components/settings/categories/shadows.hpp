@@ -42,6 +42,7 @@ namespace Settings
         SettingValue<bool> mTerrainShadows{ mIndex, "Shadows", "terrain shadows" };
         SettingValue<bool> mObjectShadows{ mIndex, "Shadows", "object shadows" };
         SettingValue<bool> mEnableIndoorShadows{ mIndex, "Shadows", "enable indoor shadows" };
+        SettingValue<int> mPercentageCloserFiltering{ mIndex, "Shadows", "percentage closer filtering" };
     };
 }
 

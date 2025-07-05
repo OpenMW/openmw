@@ -195,10 +195,6 @@ namespace MWRender
         if (!ext->glDisablei && ext->glDisableIndexedEXT)
             ext->glDisablei = ext->glDisableIndexedEXT;
 
-#ifdef ANDROID
-        ext->glDisablei = nullptr;
-#endif
-
         if (ext->glDisablei)
             mNormalsSupported = true;
         else
@@ -301,7 +297,7 @@ namespace MWRender
         mCanvases[frameId]->setCalculateAvgLum(mHDR);
 
         mCanvases[frameId]->setTextureScene(getTexture(Tex_Scene, frameId));
-        mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
+        mCanvases[frameId]->setTextureDepth(getTexture(Tex_Depth/*Tex_OpaqueDepth*/, frameId));
         mCanvases[frameId]->setTextureDistortion(getTexture(Tex_Distortion, frameId));
 
         mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
@@ -413,11 +409,15 @@ namespace MWRender
 
             if (mNormalsSupported)
             {
+// Crashing with gl4es, use OSG define instead
+/*
                 auto& shaderManager
                     = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
                 auto defines = shaderManager.getGlobalDefines();
                 defines["disableNormals"] = mNormals ? "0" : "1";
                 shaderManager.setGlobalDefines(defines);
+*/
+                mRendering.setWriteNormals(mNormals);
             }
 
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);

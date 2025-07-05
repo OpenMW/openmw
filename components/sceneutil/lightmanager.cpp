@@ -717,6 +717,7 @@ namespace SceneUtil
 
         if (!mInitLayout)
         {
+/*
             mDummyProgram->apply(state);
             auto handle = mDummyProgram->getPCP(state)->getHandle();
             auto* ext = state.get<osg::GLExtensions>();
@@ -726,8 +727,10 @@ namespace SceneUtil
 
             // wait until the UBO binding is created
             if (activeUniformBlocks > 0)
+*/
             {
-                initSharedLayout(ext, handle, frame);
+                //initSharedLayout(ext, handle, frame);
+                mTemplate->configureLayout(0, 16, 32, 16384, 0);
                 mInitLayout = true;
             }
         }

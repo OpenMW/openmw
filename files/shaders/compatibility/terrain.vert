@@ -1,19 +1,16 @@
 #version 120
-
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
-#if @useGPUShader4
-    #extension GL_EXT_gpu_shader4: require
-#endif
+#pragma import_defines(FORCE_PPL, CLASSIC_FALLOFF, MAX_LIGHTS)
 
 #include "lib/core/vertex.h.glsl"
 varying vec2 uv;
 varying float euclideanDepth;
 varying float linearDepth;
 
+#if defined(FORCE_PPL)
+#define PER_PIXEL_LIGHTING (@normalMap || @specularMap || FORCE_PPL)
+#else
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
+#endif
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;

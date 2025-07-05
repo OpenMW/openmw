@@ -43,6 +43,11 @@ namespace MWRender
 
         for (unsigned int unit = 1; unit < 8; ++unit)
             mStateSet->setTextureMode(unit, GL_TEXTURE_2D, modeOff);
+
+        mDepth = new SceneUtil::AutoDepth;
+        mDepth->setWriteMask(false);
+
+     //   setPostPass(mPostPass);
     }
 
     void TransparentDepthBinCallback::drawImplementation(
@@ -92,20 +97,27 @@ namespace MWRender
         else
         {
             opaqueFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-            ext->glBlitFramebuffer(0, 0, tex->getTextureWidth(), tex->getTextureHeight(), 0, 0, tex->getTextureWidth(),
-                tex->getTextureHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            //ext->glBlitFramebuffer(0, 0, tex->getTextureWidth(), tex->getTextureHeight(), 0, 0, tex->getTextureWidth(),
+             //   tex->getTextureHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
 
         msaaFbo ? msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER)
                 : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
+        if (mPostPass)
+            bin->getStateSet()->setAttributeAndModes(mDepth, osg::StateAttribute::ON);
+
         // draws scene into primary attachments
         bin->drawImplementation(renderInfo, previous);
+
+        if (mPostPass)
+            bin->getStateSet()->setAttributeAndModes(mDepth, osg::StateAttribute::OFF);
 
         if (!mPostPass)
             return;
 
-        opaqueFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+        //opaqueFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
         // draw transparent post-pass to populate a postprocess friendly depth texture with alpha-clipped geometry
 
@@ -139,5 +151,12 @@ namespace MWRender
         msaaFbo ? msaaFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER)
                 : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
         state.checkGLErrors("after TransparentDepthBinCallback::drawImplementation");
+    }
+
+    void TransparentDepthBinCallback::setPostPass(bool enable)
+    {
+        mPostPass = enable;
+
+  //      osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->getStateSet()->setAttributeAndModes(mDepth, (mPostPass) ? osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE : osg::StateAttribute::OFF);
     }
 }

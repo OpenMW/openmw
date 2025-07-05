@@ -89,8 +89,19 @@ static const char fragmentShaderSource_withBaseTexture_twoShadowMaps[] =
         "} \n";
 #endif
 
-std::string debugVertexShaderSource = "void main(void){gl_Position = gl_Vertex; gl_TexCoord[0]=gl_MultiTexCoord0;}";
+//std::string debugVertexShaderSource = "void main(void){gl_Position = gl_Vertex; gl_TexCoord[0]=gl_MultiTexCoord0;}";
+std::string debugVertexShaderSource =
+        "#version 120                                                            \n"
+        "                                                                        \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+        "    gl_Position = gl_Vertex;                                            \n"
+        "    gl_TexCoord[0]=gl_MultiTexCoord0;                                   \n"
+        "}                                                                       \n";
+
 std::string debugFragmentShaderSource =
+        "#version 120                                                            \n"
+        "                                                                        \n"
         "uniform sampler2D texture;                                              \n"
         "                                                                        \n"
         "void main(void)                                                         \n"
@@ -127,8 +138,21 @@ std::string debugFragmentShaderSource =
 #endif
         "}                                                                       \n";
 
-std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z / gl_Position.w;}";
+//std::string debugFrustumVertexShaderSource = "varying float depth; uniform mat4 transform; void main(void){gl_Position = transform * gl_Vertex; depth = gl_Position.z / gl_Position.w;}";
+std::string debugFrustumVertexShaderSource =
+        "#version 120                                                            \n"
+        "                                                                        \n"
+        "varying float depth;                                                    \n"
+        "uniform mat4 transform;                                                 \n"
+        "void main(void)                                                         \n"
+        "{                                                                       \n"
+        "    gl_Position = transform * gl_Vertex;                                \n"
+        "    depth = gl_Position.z / gl_Position.w;                              \n"
+        "}                                                                       \n";
+
 std::string debugFrustumFragmentShaderSource =
+        "#version 120                                                            \n"
+        "                                                                        \n"
         "varying float depth;                                                    \n"
         "                                                                        \n"
         "void main(void)                                                         \n"
@@ -552,7 +576,7 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     {
         _texture->setInternalFormat(GL_DEPTH_COMPONENT);
         _texture->setShadowComparison(true);
-        _texture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
+ //       _texture->setShadowTextureMode(osg::Texture2D::LUMINANCE);
     }
 
     _texture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::LINEAR);

@@ -24,6 +24,7 @@ namespace NavMeshTool
     Status generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
         const DetourNavigator::Settings& settings, std::size_t threadsNumber, bool removeUnusedTiles,
         bool writeBinaryLog, WorldspaceData& cellsData, DetourNavigator::NavMeshDb&& db);
+        int runNavMeshTool(int argc, char *argv[]);
 }
 
 #endif
