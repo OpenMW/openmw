@@ -384,6 +384,7 @@ namespace MWBase
         // Used in Lua bindings
         virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;
         virtual void setDisabledByLua(std::string_view windowId, bool disabled) = 0;
+        virtual bool isWindowVisible(std::string_view windowId) const = 0;
         virtual std::vector<std::string_view> getAllWindowIds() const = 0;
         virtual std::vector<std::string_view> getAllowedWindowIds(MWGui::GuiMode mode) const = 0;
     };
