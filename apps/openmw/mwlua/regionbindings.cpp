@@ -2,6 +2,7 @@
 #include "recordstore.hpp"
 
 #include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadsoun.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 
@@ -27,6 +28,10 @@ namespace sol
     {
     };
     template <>
+    struct is_automagical<ESM::Region::SoundRef> : std::false_type
+    {
+    };
+    template <>
     struct is_automagical<MWWorld::Store<RegionSoundRef>> : std::false_type
     {
     };
@@ -39,6 +44,18 @@ namespace MWLua
         sol::state_view lua = context.sol();
         sol::table regions(lua, sol::create);
         addRecordFunctionBinding<ESM::Region>(regions, context);
+        auto soundRefT = lua.new_usertype<ESM::Region::SoundRef>("ESM3_RegionSoundRef");
+
+        soundRefT[sol::meta_function::to_string] = [](const ESM::Region::SoundRef& ref) -> std::string {
+            return "ESM3_RegionSoundRef[" + ref.mSound.toDebugString() + "]";
+        };
+        soundRefT["soundId"]
+            = sol::readonly_property([](const ESM::Region::SoundRef& ref) { return ref.mSound.serializeText(); });
+
+        soundRefT["chance"] = sol::readonly_property([](const ESM::Region::SoundRef& ref) { return ref.mChance; });
+        soundRefT["sound"] = sol::readonly_property([](const ESM::Region::SoundRef& ref) -> const ESM::Sound* {
+            return MWBase::Environment::get().getESMStore()->get<ESM::Sound>().find(ref.mSound);
+        });
 
         // Region record
         auto regionT = lua.new_usertype<ESM::Region>("ESM3_Region");
@@ -63,22 +80,12 @@ namespace MWLua
             }
             return res;
         });
-
         regionT["sounds"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
             for (const auto& soundRef : rec.mSoundList)
-                res.add(RegionSoundRef(soundRef));
+                res.add(soundRef);
             return res;
         });
-
-        auto soundRefT = lua.new_usertype<RegionSoundRef>("ESM3_RegionSoundRef");
-        soundRefT[sol::meta_function::to_string] = [](const RegionSoundRef& ref) -> std::string {
-            return "ESM3_RegionSoundRef[" + ref.mSoundId.toDebugString() + "]";
-        };
-        soundRefT["soundId"]
-            = sol::readonly_property([](const RegionSoundRef& ref) { return ref.mSoundId.serializeText(); });
-        soundRefT["chance"] = sol::readonly_property([](const RegionSoundRef& ref) { return ref.mChance; });
-
         return LuaUtil::makeReadOnly(regions);
     }
 }
