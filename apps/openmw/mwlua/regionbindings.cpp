@@ -44,12 +44,12 @@ namespace MWLua
         auto regionT = lua.new_usertype<ESM::Region>("ESM3_Region");
         regionT[sol::meta_function::to_string]
             = [](const ESM::Region& rec) -> std::string { return "ESM3_Region[" + rec.mId.toDebugString() + "]"; };
-        regionT["id"] = sol::readonly_property([](const ESM::Region& rec) { return rec.mId.serializeText(); });
+        regionT["id"] = sol::readonly_property([](const ESM::Region& rec) { return LuaUtil::serializeRefId(rec.mId); });
         regionT["name"] = sol::readonly_property([](const ESM::Region& rec) -> std::string_view { return rec.mName; });
         regionT["mapColor"] = sol::readonly_property(
             [](const ESM::Region& rec) -> Misc::Color { return Misc::Color::fromRGB(rec.mMapColor); });
         regionT["sleepList"]
-            = sol::readonly_property([](const ESM::Region& rec) { return rec.mSleepList.serializeText(); });
+            = sol::readonly_property([](const ESM::Region& rec) { return LuaUtil::serializeRefId(rec.mSleepList); });
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             static const std::array<const char*, 10> WeatherNames
