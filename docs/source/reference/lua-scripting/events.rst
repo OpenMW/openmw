@@ -153,15 +153,6 @@ Reduces stack size of an item by a given amount, removing the item completely if
 
     core.sendGlobalEvent('ConsumeItem', {item = foobar, amount = 1})
 
-**ModifyItemCharge**
-
-Modify a specified amount of enchantment charge of an item
-
-.. code-block:: Lua
-
-    -- Reduce charge by 10
-    core.sendGlobalEvent('ModifyItemCharge', {item = foobar, amount = -10})
-
 **Lock**
 
 Lock a container or door
