@@ -638,6 +638,7 @@ else ()
 endif ()
 
 if (OPENMW_CXX_FLAGS)
+    separate_arguments(OPENMW_CXX_FLAGS NATIVE_COMMAND "${OPENMW_CXX_FLAGS}")
     add_compile_options(${OPENMW_CXX_FLAGS})
 endif()
 
