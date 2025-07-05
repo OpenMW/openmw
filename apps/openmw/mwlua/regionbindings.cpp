@@ -3,10 +3,7 @@
 
 #include <components/esm3/loadregn.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
-
-#include "idcollectionbindings.hpp"
 
 namespace
 {
