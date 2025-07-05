@@ -136,7 +136,7 @@ void CSVWorld::ScriptEdit::dragEnterEvent(QDragEnterEvent* event)
         QPlainTextEdit::dragEnterEvent(event);
     else
     {
-        setTextCursor(cursorForPosition(event->pos()));
+        setTextCursor(cursorForPosition(event->position().toPoint()));
         event->acceptProposedAction();
     }
 }
@@ -148,7 +148,7 @@ void CSVWorld::ScriptEdit::dragMoveEvent(QDragMoveEvent* event)
         QPlainTextEdit::dragMoveEvent(event);
     else
     {
-        setTextCursor(cursorForPosition(event->pos()));
+        setTextCursor(cursorForPosition(event->position().toPoint()));
         event->accept();
     }
 }
@@ -162,7 +162,7 @@ void CSVWorld::ScriptEdit::dropEvent(QDropEvent* event)
         return;
     }
 
-    setTextCursor(cursorForPosition(event->pos()));
+    setTextCursor(cursorForPosition(event->position().toPoint()));
 
     if (mime->fromDocument(mDocument))
     {

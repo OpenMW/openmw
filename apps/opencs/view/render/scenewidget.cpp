@@ -161,8 +161,6 @@ namespace CSVRender
         , mLighting(nullptr)
         , mHasDefaultAmbient(false)
         , mIsExterior(true)
-        , mPrevMouseX(0)
-        , mPrevMouseY(0)
         , mCamPositionSet(false)
     {
         mFreeCamControl = new FreeCameraController(this);
@@ -423,10 +421,10 @@ namespace CSVRender
 
     void SceneWidget::mouseMoveEvent(QMouseEvent* event)
     {
-        mCurrentCamControl->handleMouseMoveEvent(event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+        QPointF pos = event->position();
+        mCurrentCamControl->handleMouseMoveEvent(pos.x() - mPrevMouse.x(), pos.y() - mPrevMouse.y());
 
-        mPrevMouseX = event->x();
-        mPrevMouseY = event->y();
+        mPrevMouse = pos;
     }
 
     void SceneWidget::wheelEvent(QWheelEvent* event)

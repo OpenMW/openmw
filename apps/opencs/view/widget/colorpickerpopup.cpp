@@ -52,7 +52,7 @@ void CSVWidget::ColorPickerPopup::mousePressEvent(QMouseEvent* event)
 
         // If the mouse is pressed above the pop-up parent,
         // the pop-up will be hidden and the pressed signal won't be repeated for the parent
-        if (buttonRect.contains(event->globalPos()) || buttonRect.contains(event->pos()))
+        if (buttonRect.contains(event->globalPosition().toPoint()) || buttonRect.contains(event->position().toPoint()))
         {
             setAttribute(Qt::WA_NoMouseReplay);
         }

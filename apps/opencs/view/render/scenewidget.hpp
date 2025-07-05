@@ -137,7 +137,7 @@ namespace CSVRender
         LightingNight mLightingNight;
         LightingBright mLightingBright;
 
-        int mPrevMouseX, mPrevMouseY;
+        QPointF mPrevMouse;
 
         /// Tells update that camera isn't set
         bool mCamPositionSet;

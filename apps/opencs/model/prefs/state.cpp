@@ -59,13 +59,6 @@ void CSMPrefs::State::declare()
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
     declareEnum(mValues->mWindows.mMainwindowScrollbar, "Main Window Horizontal Scrollbar Mode");
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    declareBool(mValues->mWindows.mGrowLimit, "Grow Limit Screen")
-        .setTooltip(
-            "When \"Grow then Scroll\" option is selected, the window size grows to"
-            " the width of the virtual desktop. \nIf this option is selected the the window growth"
-            "is limited to the current screen.");
-#endif
 
     declareCategory("Records");
     declareEnum(mValues->mRecords.mStatusFormat, "Modification Status Display Format");

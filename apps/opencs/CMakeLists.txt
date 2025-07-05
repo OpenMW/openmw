@@ -240,11 +240,7 @@ target_link_libraries(openmw-cs-lib
     components_qt
 )
 
-if (QT_VERSION_MAJOR VERSION_EQUAL 6)
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets Qt::Svg)
-else()
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::Svg)
-endif()
+target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets Qt::Svg)
 
 if (WIN32)
     target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)

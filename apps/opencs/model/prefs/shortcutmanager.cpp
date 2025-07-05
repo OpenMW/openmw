@@ -115,15 +115,12 @@ namespace CSMPrefs
 
     std::string ShortcutManager::convertToString(const QKeySequence& sequence) const
     {
-        const int MouseKeyMask = 0x01FFFFFF;
-        const int ModMask = 0x7E000000;
-
         std::string result;
 
-        for (int i = 0; i < (int)sequence.count(); ++i)
+        for (int i = 0; i < sequence.count(); ++i)
         {
-            int mods = sequence[i] & ModMask;
-            int key = sequence[i] & MouseKeyMask;
+            int mods = sequence[i].keyboardModifiers();
+            int key = sequence[i].key();
 
             if (key)
             {
