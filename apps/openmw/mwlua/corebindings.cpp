@@ -27,6 +27,7 @@
 #include "luaevents.hpp"
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
+#include "regionbindings.hpp"
 #include "stats.hpp"
 #include "weatherbindings.hpp"
 
@@ -111,6 +112,8 @@ namespace MWLua
 
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
+        api["regions"]
+            = context.cachePackage("openmw_core_regions", [context]() { return initCoreRegionBindings(context); });
         api["dialogue"]
             = context.cachePackage("openmw_core_dialogue", [context]() { return initCoreDialogueBindings(context); });
         api["l10n"] = context.cachePackage("openmw_core_l10n",
