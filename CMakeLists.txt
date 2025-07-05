@@ -786,7 +786,7 @@ if (WIN32)
         endif()
 
         if (BUILD_BULLETOBJECTTOOL)
-            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
+            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS})
         endif()
 
         if (BUILD_OPENCS_TESTS)
