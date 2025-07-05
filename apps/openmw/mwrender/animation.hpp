@@ -483,6 +483,7 @@ namespace MWRender
 
         virtual void setAccurateAiming(bool enabled) {}
         virtual bool canBeHarvested() const { return false; }
+        virtual void harvest(const MWWorld::Ptr& ptr) {}
 
         virtual void removeFromScene();
 
@@ -498,6 +499,7 @@ namespace MWRender
             bool animated, bool allowLight);
 
         bool canBeHarvested() const override;
+        void harvest(const MWWorld::Ptr& ptr) override;
     };
 
     class UpdateVfxCallback : public SceneUtil::NodeCallback<UpdateVfxCallback>
