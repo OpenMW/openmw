@@ -135,10 +135,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     MWWorld::MovementDirectionFlags supportedMovementDirections, float destTolerance, float endTolerance,
     PathType pathType)
 {
-    // No pathing for totally static creatures
-    if (!actor.getClass().isMobile(actor))
-        return false;
-
     const Misc::TimerStatus timerStatus = mReaction.update(duration);
 
     const osg::Vec3f position = actor.getRefData().getPosition().asVec3(); // position of the actor

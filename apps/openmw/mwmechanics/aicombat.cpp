@@ -124,6 +124,13 @@ namespace MWMechanics
         if (actor == target) // This should never happen.
             return true;
 
+        // No actions for totally static creatures
+        if (!actor.getClass().isMobile(actor))
+        {
+            storage.mFleeState = AiCombatStorage::FleeState_Idle;
+            return false;
+        }
+
         if (!storage.isFleeing())
         {
             if (storage.mCurrentAction.get()) // need to wait to init action with its attack range
@@ -230,10 +237,6 @@ namespace MWMechanics
             else
                 storage.stopFleeing();
         }
-
-        // No attack actions for totally static creatures
-        if (!actor.getClass().isMobile(actor))
-            return false;
 
         bool isRangedCombat = false;
         float& rangeAttack = storage.mAttackRange;
