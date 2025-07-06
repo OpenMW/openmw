@@ -243,7 +243,7 @@ namespace fx
             else if (key == "author")
                 mAuthor = parseString();
             else if (key == "glsl_version")
-                mGLSLVersion = std::max(mGLSLVersion, parseInteger());
+                mGLSLVersion = std::min(mGLSLVersion, parseInteger());
             else if (key == "flags")
                 mFlags = parseFlags();
             else if (key == "hdr")
