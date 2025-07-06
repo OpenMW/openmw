@@ -33,6 +33,14 @@
 
 namespace MWGui
 {
+    namespace
+    {
+        std::shared_ptr<fx::Technique>& getTechnique(const MyGUI::ListBox& list, size_t selected)
+        {
+            return *list.getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+        }
+    }
+
     void PostProcessorHud::ListWrapper::onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char ch)
     {
         if (MyGUI::InputManager::getInstance().isShiftPressed()
@@ -117,7 +125,7 @@ namespace MWGui
         if (index >= sender->getItemCount())
             return;
 
-        updateConfigView(sender->getItemNameAt(index));
+        updateConfigView(getTechnique(*sender, index)->getFileName());
     }
 
     void PostProcessorHud::toggleTechnique(bool enabled)
@@ -131,7 +139,7 @@ namespace MWGui
             auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
             mOverrideHint = list->getItemNameAt(selected);
 
-            auto technique = *list->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            auto technique = getTechnique(*list, selected);
             if (technique->getDynamic())
                 return;
 
@@ -167,7 +175,7 @@ namespace MWGui
 
         if (static_cast<size_t>(index) != selected)
         {
-            auto technique = *mActiveList->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            auto technique = getTechnique(*mActiveList, selected);
             if (technique->getDynamic() || technique->getInternal())
                 return;
 
@@ -290,16 +298,16 @@ namespace MWGui
             return;
 
         if (mInactiveList->getIndexSelected() != MyGUI::ITEM_NONE)
-            updateConfigView(mInactiveList->getItemNameAt(mInactiveList->getIndexSelected()));
+            updateConfigView(getTechnique(*mInactiveList, mInactiveList->getIndexSelected())->getFileName());
         else if (mActiveList->getIndexSelected() != MyGUI::ITEM_NONE)
-            updateConfigView(mActiveList->getItemNameAt(mActiveList->getIndexSelected()));
+            updateConfigView(getTechnique(*mActiveList, mActiveList->getIndexSelected())->getFileName());
     }
 
-    void PostProcessorHud::updateConfigView(const std::string& name)
+    void PostProcessorHud::updateConfigView(VFS::Path::NormalizedView path)
     {
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
-        auto technique = processor->loadTechnique(name);
+        auto technique = processor->loadTechnique(path);
 
         if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
             return;
@@ -423,22 +431,22 @@ namespace MWGui
 
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
-        std::vector<std::string> techniques;
-        for (const auto& [name, _] : processor->getTechniqueMap())
-            techniques.push_back(name);
-        std::sort(techniques.begin(), techniques.end(), Misc::StringUtils::ciLess);
+        std::vector<VFS::Path::NormalizedView> techniques;
+        for (const auto& vfsPath : processor->getTechniqueFiles())
+            techniques.emplace_back(vfsPath);
+        std::sort(techniques.begin(), techniques.end());
 
-        for (const std::string& name : techniques)
+        for (VFS::Path::NormalizedView path : techniques)
         {
-            auto technique = processor->loadTechnique(name);
+            auto technique = processor->loadTechnique(path);
 
             if (!technique->getHidden() && !processor->isTechniqueEnabled(technique))
             {
-                std::string lowerName = Utf8Stream::lowerCaseUtf8(name);
+                std::string lowerName = Utf8Stream::lowerCaseUtf8(technique->getName());
                 std::string lowerCaption = mFilter->getCaption();
                 lowerCaption = Utf8Stream::lowerCaseUtf8(lowerCaption);
                 if (lowerName.find(lowerCaption) != std::string::npos)
-                    mInactiveList->addItem(name, technique);
+                    mInactiveList->addItem(technique->getName(), technique);
             }
         }
 

@@ -6,6 +6,7 @@
 #include <MyGUI_ListBox.h>
 
 #include <components/settings/shadermanager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace MyGUI
 {
@@ -48,7 +49,7 @@ namespace MWGui
 
         void notifyFilterChanged(MyGUI::EditBox* sender);
 
-        void updateConfigView(const std::string& name);
+        void updateConfigView(VFS::Path::NormalizedView path);
 
         void notifyResetButtonClicked(MyGUI::Widget* sender);
 

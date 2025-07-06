@@ -56,7 +56,9 @@ namespace TestingOpenMW
 
         Files::IStreamPtr open() override { return std::make_unique<std::stringstream>(mContent, std::ios_base::in); }
 
-        std::filesystem::path getPath() override { return "TestFile"; }
+        std::filesystem::file_time_type getLastModified() const override { return {}; }
+
+        std::string getStem() const override { return "TestFile"; }
 
     private:
         const std::string mContent;
