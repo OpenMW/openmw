@@ -338,6 +338,8 @@ namespace MWWorld
 
         Ptr getMovedActor(int actorId) const;
 
+        CellStore* getOriginCell(const Ptr& object) const;
+
         Ptr getPtr(ESM::RefId id);
 
     private:
