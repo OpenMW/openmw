@@ -6,6 +6,8 @@
 
 #include "itemmodel.hpp"
 
+#include "../mwworld/containerstore.hpp"
+
 namespace MyGUI
 {
     class Gui;
@@ -21,7 +23,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class ContainerWindow : public WindowBase, public ReferenceInterface
+    class ContainerWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
     {
     public:
         ContainerWindow(DragAndDrop* dragAndDrop);
@@ -30,13 +32,16 @@ namespace MWGui
         void onClose() override;
         void clear() override { resetReference(); }
 
-        void onFrame(float dt) override { checkReferenceAvailable(); }
+        void onFrame(float dt) override;
 
         void resetReference() override;
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
         void treatNextOpenAsLoot() { mTreatNextOpenAsLoot = true; }
+
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         std::string_view getWindowIdForLua() const override { return "Container"; }
 
@@ -47,6 +52,7 @@ namespace MWGui
         SortFilterItemModel* mSortModel;
         ItemModel* mModel;
         int mSelectedItem;
+        bool mUpdateNextFrame;
         bool mTreatNextOpenAsLoot;
         MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;

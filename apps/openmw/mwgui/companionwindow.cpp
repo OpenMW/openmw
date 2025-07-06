@@ -43,6 +43,7 @@ namespace MWGui
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
+        , mUpdateNextFrame(false)
         , mDragAndDrop(dragAndDrop)
         , mMessageBoxManager(manager)
     {
@@ -134,12 +135,20 @@ namespace MWGui
         mItemView->resetScrollBars();
 
         setTitle(actor.getClass().getName(actor));
+
+        mPtr.getClass().getContainerStore(mPtr).setContListener(this);
     }
 
     void CompanionWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
-        updateEncumbranceBar();
+
+        if (mUpdateNextFrame)
+        {
+            updateEncumbranceBar();
+            mItemView->update();
+            mUpdateNextFrame = false;
+        }
     }
 
     void CompanionWindow::updateEncumbranceBar()
@@ -202,4 +211,13 @@ namespace MWGui
         mSortModel = nullptr;
     }
 
+    void CompanionWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
+    void CompanionWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
 }
