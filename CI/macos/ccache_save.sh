@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
 if [[ "${MACOS_AMD64}" ]]; then
-    arch -x86_64 ccache -s
+    arch -x86_64 ccache -sv
 else
-    ccache -s
+    ccache -sv
 fi
