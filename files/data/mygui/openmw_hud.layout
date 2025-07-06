@@ -110,8 +110,7 @@
         </Widget>
 
         <!-- Crosshair -->
-        <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 32 32" align="Center Center" name="Crosshair">
-        </Widget>
+        <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 27 27" align="Center Center" name="Crosshair"/>
 
     </Widget>
 
