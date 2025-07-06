@@ -38,3 +38,8 @@ testing.registerGlobalTest('[issues] Should keep reference to an object moved in
     end
     testing.expectThat(types.Container.inventory(barrel):find('ring_keley'), isFargothRing)
 end)
+
+testing.registerGlobalTest('[regression] Player quest status should update and its journal entries should be accessible', function()
+    coroutine.yield()
+    testing.runLocalTest(world.players[1], 'Player quest status should update and its journal entries should be accessible')
+end)
