@@ -519,8 +519,31 @@ namespace MWMechanics
             case ESM::MagicEffect::ExtraSpell:
                 if (target.getClass().hasInventoryStore(target))
                 {
-                    auto& store = target.getClass().getInventoryStore(target);
-                    store.unequipAll();
+                    if (target != getPlayer())
+                    {
+                        auto& store = target.getClass().getInventoryStore(target);
+                        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                        {
+                            // Unequip everything except weapons, torches, and pants
+                            switch (slot)
+                            {
+                                case MWWorld::InventoryStore::Slot_Ammunition:
+                                case MWWorld::InventoryStore::Slot_CarriedRight:
+                                case MWWorld::InventoryStore::Slot_Pants:
+                                    continue;
+                                case MWWorld::InventoryStore::Slot_CarriedLeft:
+                                {
+                                    auto carried = store.getSlot(slot);
+                                    if (carried == store.end()
+                                        || carried.getType() != MWWorld::ContainerStore::Type_Armor)
+                                        continue;
+                                    [[fallthrough]];
+                                }
+                                default:
+                                    store.unequipSlot(slot);
+                            }
+                        }
+                    }
                 }
                 else
                     invalid = true;
@@ -1083,7 +1106,7 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::ExtraSpell:
-                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f)
+                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f && target != getPlayer())
                     target.getClass().getInventoryStore(target).autoEquip();
                 break;
             case ESM::MagicEffect::TurnUndead:
