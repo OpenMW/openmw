@@ -894,7 +894,8 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
         widget->setUserString(
             "ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture, vfs));
-        std::string text = sign->mName + "\n#{fontcolourhtml=normal}" + sign->mDescription;
+        widget->setUserString("Caption_BirthSignName", sign->mName);
+        widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
         std::vector<const ESM::Spell*> abilities, powers, spells;
 
@@ -915,26 +916,22 @@ namespace MWGui
                 spells.push_back(spell);
         }
 
-        using Category = std::pair<const std::vector<const ESM::Spell*>&, std::string_view>;
-        for (const auto& [category, label] : std::initializer_list<Category>{
-                 { abilities, "sBirthsignmenu1" }, { powers, "sPowers" }, { spells, "sBirthsignmenu2" } })
+        using Category = std::tuple<const std::vector<const ESM::Spell*>&, std::string_view, std::string_view>;
+        std::initializer_list<Category> categories{ { abilities, "#{sBirthsignmenu1}", "Abilities" },
+            { powers, "#{sPowers}", "Powers" }, { spells, "#{sBirthsignmenu2}", "Spells" } };
+
+        for (const auto& [category, label, widgetName] : categories)
         {
-            bool addHeader = true;
-            for (const ESM::Spell* spell : category)
+            std::string text;
+            if (!category.empty())
             {
-                if (addHeader)
-                {
-                    text += "\n\n#{fontcolourhtml=header}#{";
-                    text += label;
-                    text += '}';
-                    addHeader = false;
-                }
-
-                text += "\n#{fontcolourhtml=normal}" + spell->mName;
+                text = std::string(label) + "\n#{fontcolourhtml=normal}";
+                for (const ESM::Spell* spell : category)
+                    text += spell->mName + ' ';
+                text.pop_back();
             }
+            widget->setUserString("Caption_BirthSign" + std::string(widgetName), text);
         }
-
-        widget->setUserString("Caption_BirthSignText", text);
     }
 
     void ToolTips::createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace)

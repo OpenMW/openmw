@@ -272,16 +272,34 @@
         </Widget>
 
         <!-- Birthsign tooltip -->
-        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 300 300" align="Stretch" name="BirthSignToolTip">
+        <Widget type="VBox" skin="HUD_Box_NoTransp" position="0 0 0 0" align="Stretch" name="BirthSignToolTip">
             <Property key="AutoResize" value="true"/>
-            <Property key="Padding" value="8"/>
+            <Property key="Padding" value="10"/>
 
             <!-- Birthsign image -->
             <Widget type="Widget" skin="MW_Box" position="18 13 263 137" align="Top HCenter">
-                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="Left Top"/>
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="Top"/>
             </Widget>
 
-            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 154 284 138" align="Top" name="BirthSignText">
+            <Widget type="AutoSizedTextBox" skin="NormalText" align="Top" name="BirthSignName">
+                <Property key="TextAlign" value="Top HCenter"/>
+            </Widget>
+
+            <Widget type="AutoSizedEditBox" skin="SandText" position="0 0 400 100" align="Top" name="BirthSignDescription">
+                <Property key="MultiLine" value="true"/>
+                <Property key="WordWrap" value="true"/>
+                <Property key="TextAlign" value="Left Top"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" align="Top" name="BirthSignAbilities">
+                <Property key="TextAlign" value="Top HCenter"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" align="Top" name="BirthSignPowers">
+                <Property key="TextAlign" value="Top HCenter"/>
+            </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="NormalText" align="Top" name="BirthSignSpells">
                 <Property key="TextAlign" value="Top HCenter"/>
             </Widget>
         </Widget>
