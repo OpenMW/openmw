@@ -53,6 +53,9 @@ namespace NavMeshTool
             Log(Debug::Info) << provided << "/" << expected << " ("
                              << (static_cast<double>(provided) / static_cast<double>(expected) * 100)
                              << "%) navmesh tiles are generated";
+
+            std::string message = std::to_string((static_cast<double>(provided) / static_cast<double>(expected) * 100));
+            setenv("NAVMESHTOOL_MESSAGE", message.c_str(), true);
         }
 
         template <class T>

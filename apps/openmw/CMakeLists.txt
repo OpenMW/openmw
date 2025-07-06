@@ -116,6 +116,10 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager luamanager
     )
 
+add_openmw_dir (.
+    ../navmeshtool/main ../navmeshtool/navmesh ../navmeshtool/worldspacedata
+    )
+
 # Main executable
 
 add_library(openmw-lib STATIC
