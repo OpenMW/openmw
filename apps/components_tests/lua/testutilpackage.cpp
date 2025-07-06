@@ -9,6 +9,17 @@ namespace
 {
     using namespace testing;
 
+    struct LuaUtilPackageTest : Test
+    {
+        LuaUtil::LuaState mLuaState{ nullptr, nullptr };
+
+        LuaUtilPackageTest()
+        {
+            mLuaState.addInternalLibSearchPath(
+                std::filesystem::path{ OPENMW_PROJECT_SOURCE_DIR } / "components" / "lua");
+        }
+    };
+
     template <typename T>
     T get(sol::state& lua, const std::string& luaCode)
     {
@@ -203,6 +214,10 @@ namespace
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(0.1, 0, 1.5)"), 0.1f);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(-0.1, 0, 1.5)"), 0);
         EXPECT_FLOAT_EQ(get<float>(lua, "util.clamp(2.1, 0, 1.5)"), 1.5f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.round(2.1)"), 2.0f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.round(-2.1)"), -2.0f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.remap(5, 0, 10, 0, 100)"), 50.0f);
+        EXPECT_FLOAT_EQ(get<float>(lua, "util.remap(-5, 0, 10, 0, 100)"), -50.0f);
         lua.safe_script("t = util.makeReadOnly({x = 1})");
         EXPECT_FLOAT_EQ(get<float>(lua, "t.x"), 1);
         EXPECT_ERROR(lua.safe_script("t.y = 2"), "userdata value");
