@@ -18,7 +18,11 @@ namespace
         {
             // Argument values
             if (value.is<std::string>())
-                args.push_back(icu::Formattable(LuaUtil::cast<std::string>(value).c_str()));
+            {
+                const auto& str = LuaUtil::cast<std::string>(value);
+                args.push_back(icu::Formattable(icu::UnicodeString::fromUTF8(str.c_str())));
+            }
+
             // Note: While we pass all numbers as doubles, they still seem to be handled appropriately.
             // Numbers can be forced to be integers using the argType number and argStyle integer
             //     E.g. {var, number, integer}
