@@ -69,7 +69,6 @@ namespace MWWorld
 
         void autoEquipWeapon(TSlots& slots_);
         void autoEquipArmor(TSlots& slots_);
-        void autoEquipShield(TSlots& slots_);
 
         // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
         ContainerStoreIterator mSelectedEnchantItem;
