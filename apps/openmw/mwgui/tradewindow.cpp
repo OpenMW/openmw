@@ -694,7 +694,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
-<<<<<<< HEAD
     bool TradeWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)

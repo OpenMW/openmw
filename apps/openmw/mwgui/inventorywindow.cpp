@@ -90,9 +90,8 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(std::make_unique<MWRender::InventoryPreview>(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
-        , mUpdateTimer(0.f)
-        , mPendingControllerAction(ControllerAction::None)
         , mUpdateNextFrame(false)
+        , mPendingControllerAction(ControllerAction::None)
     {
         mPreviewTexture
             = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
