@@ -49,7 +49,7 @@ namespace Files
 
     // /data/data/com.libopenmw.openmw/files/config
     // (note the addition of "files")
-    std::filesystem::path AndroidPath::getGlobalConfigPath() const
+    std::optional<std::filesystem::path> AndroidPath::getGlobalConfigPath() const
     {
         return std::filesystem::path(g_path_global) / "files" / "config";
     }
@@ -61,7 +61,7 @@ namespace Files
 
     // /sdcard/Android/data/com.libopenmw.openmw
     // (so that the data is at /sdcard/Android/data/com.libopenmw.openmw/data)
-    std::filesystem::path AndroidPath::getGlobalDataPath() const
+    std::optional<std::filesystem::path> AndroidPath::getGlobalDataPath() const
     {
         return std::filesystem::path(g_path_user);
     }

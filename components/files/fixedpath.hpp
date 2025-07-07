@@ -80,7 +80,7 @@ namespace Files
         /**
          * \brief Return path pointing to the global (system) configuration directory.
          */
-        const std::filesystem::path& getGlobalConfigPath() const { return mGlobalConfigPath; }
+        const std::optional<std::filesystem::path>& getGlobalConfigPath() const { return mGlobalConfigPath; }
 
         /**
          * \brief Return path pointing to the directory where application was started.
@@ -89,7 +89,7 @@ namespace Files
 
         const std::filesystem::path& getInstallPath() const { return mInstallPath; }
 
-        const std::filesystem::path& getGlobalDataPath() const { return mGlobalDataPath; }
+        const std::optional<std::filesystem::path>& getGlobalDataPath() const { return mGlobalDataPath; }
 
         const std::filesystem::path& getCachePath() const { return mCachePath; }
 
@@ -98,10 +98,10 @@ namespace Files
 
         std::filesystem::path mUserConfigPath; /**< User path  */
         std::filesystem::path mUserDataPath;
-        std::filesystem::path mGlobalConfigPath; /**< Global path */
+        std::optional<std::filesystem::path> mGlobalConfigPath; /**< Global path */
         std::filesystem::path mLocalPath; /**< It is the same directory where application was run */
 
-        std::filesystem::path mGlobalDataPath; /**< Global application data path */
+        std::optional<std::filesystem::path> mGlobalDataPath; /**< Global application data path */
 
         std::filesystem::path mCachePath;
 

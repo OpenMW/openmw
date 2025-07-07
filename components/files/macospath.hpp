@@ -4,6 +4,7 @@
 #if defined(macintosh) || defined(Macintosh) || defined(__APPLE__) || defined(__MACH__)
 
 #include <filesystem>
+#include <optional>
 
 /**
  * \namespace Files
@@ -32,7 +33,7 @@ namespace Files
          *
          * \return std::filesystem::path
          */
-        std::filesystem::path getGlobalConfigPath() const;
+        std::optional<std::filesystem::path> getGlobalConfigPath() const;
 
         /**
          * \brief Return path to the runtime directory which is the
@@ -54,7 +55,7 @@ namespace Files
          *
          * \return std::filesystem::path
          */
-        std::filesystem::path getGlobalDataPath() const;
+        std::optional<std::filesystem::path> getGlobalDataPath() const;
 
         std::filesystem::path getInstallPath() const;
 

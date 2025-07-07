@@ -44,7 +44,7 @@ namespace Files
             boost::program_options::variables_map& variables, const std::filesystem::path& basePath) const;
 
         /**< Fixed paths */
-        const std::filesystem::path& getGlobalPath() const;
+        const std::optional<std::filesystem::path>& getGlobalPath() const;
         const std::filesystem::path& getLocalPath() const;
 
         const std::filesystem::path& getUserConfigPath() const;
@@ -62,16 +62,11 @@ namespace Files
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef const std::filesystem::path& (FixedPathType::*path_type_f)() const;
-        typedef std::map<std::u8string, path_type_f> TokensMappingContainer;
-
         std::optional<boost::program_options::variables_map> loadConfig(
             const std::filesystem::path& path, const boost::program_options::options_description& description) const;
 
         void addExtraConfigDirs(
             std::stack<std::filesystem::path>& dirs, const boost::program_options::variables_map& variables) const;
-
-        void setupTokensMapping();
 
         std::vector<std::filesystem::path> mActiveConfigPaths;
 
@@ -79,8 +74,6 @@ namespace Files
 
         std::filesystem::path mUserDataPath;
         std::filesystem::path mScreenshotPath;
-
-        TokensMappingContainer mTokensMapping;
 
         bool mSilent;
     };

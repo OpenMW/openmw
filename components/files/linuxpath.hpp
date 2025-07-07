@@ -4,6 +4,7 @@
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 
 #include <filesystem>
+#include <optional>
 
 /**
  * \namespace Files
@@ -28,7 +29,7 @@ namespace Files
         /**
          * \brief Return path to the global (system) directory where config files can be placed.
          */
-        std::filesystem::path getGlobalConfigPath() const;
+        std::optional<std::filesystem::path> getGlobalConfigPath() const;
 
         /**
          * \brief Return path to the runtime configuration directory which is the
@@ -39,7 +40,7 @@ namespace Files
         /**
          * \brief Return path to the global (system) directory where game files can be placed.
          */
-        std::filesystem::path getGlobalDataPath() const;
+        std::optional<std::filesystem::path> getGlobalDataPath() const;
 
         /**
          * \brief
