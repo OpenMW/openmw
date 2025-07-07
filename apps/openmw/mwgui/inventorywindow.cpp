@@ -550,7 +550,7 @@ namespace MWGui
         }
 
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
-        action->execute(player);
+        action->execute(player, !canEquip);
 
         // Handles partial equipping (final part)
         if (mEquippedStackableCount.has_value())
@@ -581,11 +581,11 @@ namespace MWGui
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
 
-            auto canEquip = ptr.getClass().canBeEquipped(ptr, mPtr);
-            if (canEquip.first == 0) // cannot equip
+            auto [canEquipRes, canEquipMsg] = ptr.getClass().canBeEquipped(ptr, mPtr);
+            if (canEquipRes == 0) // cannot equip
             {
                 mDragAndDrop->drop(mTradeModel, mItemView); // also plays down sound
-                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                MWBase::Environment::get().getWindowManager()->messageBox(canEquipMsg);
                 return;
             }
 

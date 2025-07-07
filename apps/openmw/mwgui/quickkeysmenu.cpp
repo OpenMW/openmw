@@ -388,26 +388,9 @@ namespace MWGui
                 return;
             }
 
-            // check the quickkey item is not broken
-            if (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0)
-            {
-                const std::vector<int>& equipmentSlots = item.getClass().getEquipmentSlots(item).first;
-                if (!equipmentSlots.empty())
-                {
-                    const auto& itSlot = store.getSlot(equipmentSlots.front());
-                    // Morrowind.exe behavior:
-                    // Only display the "item is broken" message if:
-                    // - There is no item in the target equipment slot, or
-                    // - The quickkey item is broken and the currently equipped item has a different ID
-                    if (itSlot == store.end() || (item.getCellRef().getRefId() != itSlot->getCellRef().getRefId()))
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
-                }
-                return;
-            }
-
             if (key->type == ESM::QuickKeys::Type::Item)
             {
-                if (!store.isEquipped(item))
+                if (!store.isEquipped(item.getCellRef().getRefId()))
                     MWBase::Environment::get().getWindowManager()->useItem(item);
                 MWWorld::ConstContainerStoreIterator rightHand
                     = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
