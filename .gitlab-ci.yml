@@ -77,7 +77,7 @@ Ubuntu_GCC_preprocess:
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
-    - ccache -sv
+    - ccache -svv
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
     - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
@@ -124,7 +124,7 @@ Coverity:
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     # Remove the specific targets and build everything once we can do it under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
-    - ccache -sv
+    - ccache -svv
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
@@ -396,7 +396,7 @@ Ubuntu_Clang:
     - cd build
     - find . -name *.o -exec touch {} \;
     - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
-    - ccache -sv
+    - ccache -svv
   artifacts:
     paths:
       - build/
@@ -940,7 +940,7 @@ Windows_MSBuild_CacheInit:
     - cd build
     - cmake --build . -- -j $(nproc)
     # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
-    - ccache -sv
+    - ccache -svv
     - df -h
     - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
     - cd ..
