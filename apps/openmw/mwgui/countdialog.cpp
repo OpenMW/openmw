@@ -71,17 +71,16 @@ namespace MWGui
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        eventOkClicked(nullptr, mSlider->getScrollPosition() + 1);
-
+        // The order here matters. Hide the dialog first so the OK event tooltips reappear.
         setVisible(false);
+        eventOkClicked(nullptr, mSlider->getScrollPosition() + 1);
     }
 
     // essentially duplicating what the OK button does if user presses
     // Enter key
     void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
     {
-        eventOkClicked(nullptr, mSlider->getScrollPosition() + 1);
-        setVisible(false);
+        onOkButtonClicked(_sender);
 
         // To do not spam onEnterKeyPressed() again and again
         MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
