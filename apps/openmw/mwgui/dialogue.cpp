@@ -944,21 +944,16 @@ namespace MWGui
         if (focused)
         {
             // Scroll the side bar to keep the active item in view
-            if (index <= 6)
-                mTopicsList->setViewOffset(0);
-            else
+            int offset = 0;
+            for (int i = 6; i < static_cast<int>(index); i++)
             {
-                int offset = 0;
-                for (int i = 0; i < static_cast<int>(index) - 6; i++)
-                {
-                    const std::string& keyword = mTopicsList->getItemNameAt(i);
-                    if (keyword.empty())
-                        offset += 18 + sVerticalPadding * 2;
-                    else
-                        offset += mTopicsList->getItemWidget(keyword)->getHeight() + sVerticalPadding * 2;
-                }
-                mTopicsList->setViewOffset(-offset);
+                const std::string& keyword = mTopicsList->getItemNameAt(i);
+                if (keyword.empty())
+                    offset += 18 + sVerticalPadding * 2;
+                else
+                    offset += mTopicsList->getItemWidget(keyword)->getHeight() + sVerticalPadding * 2;
             }
+            mTopicsList->setViewOffset(-offset);
         }
     }
 
