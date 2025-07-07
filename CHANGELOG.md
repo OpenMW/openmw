@@ -1,7 +1,52 @@
 0.50.0
 ------
 
+    Bug #2967: Inventory windows don't update when changing items by script
+    Bug #5331: Pathfinding works incorrectly when actor is moved from one interior cell to another
+    Bug #6039: Next Spell keybind fails while selected enchanted item has multiple copies
+    Bug #6573: Editor: Selection behaves incorrectly on high-DPI displays
+    Bug #6792: Birth sign info box has no line breaks
+    Bug #7622: Player's marksman weapons don't work on close actors underwater
+    Bug #7740: Magic items in the HUD aren't composited correctly
+    Bug #7799: Picking up ingredients while object paging active grid is on may cause a hiccup
+    Bug #8245: The console command ShowVars does not list global mwscripts
+    Bug #8265: Topics are linked incorrectly
+    Bug #8303: On target spells cast by non-actors should fire underwater
+    Bug #8318: Missing global variables are not handled gracefully in dialogue conditions
+    Bug #8340: Multi-effect enchantments are too expensive
+    Bug #8341: Repeat shader visitor passes discard parallax
+    Bug #8349: Travel to non-existent cell causes persistent black screen
+    Bug #8371: Silence affects powers
+    Bug #8375: Moon phase cycle doesn't match Morrowind
+    Bug #8383: Casting bound helm or boots on beast races doesn't cleanup properly
+    Bug #8385: Russian encoding broken with locale parameters and calendar
+    Bug #8408: OpenMW doesn't report all the potential resting hindrances
+    Bug #8414: Waterwalking works when collision is disabled
+    Bug #8431: Behaviour of removed items from a container is buggy
+    Bug #8432: Changing to and from an interior cell doesn't update collision
+    Bug #8436: Spell selection in a pinned spellbook window doesn't update
+    Bug #8437: Pinned inventory window's pin button doesn't look pressed
+    Bug #8446: Travel prices are strangely inconsistent
+    Bug #8459: Changing magic effect base cost doesn't change spell price
+    Bug #8466: Showmap "" reveals nameless cells
+    Bug #8485: Witchwither disease and probably other common diseases don't work correctly
+    Bug #8490: Normals on Water disappear when Water Shader is Enabled but Refraction is Disabled
+    Bug #8500: OpenMW Alarm behaviour doesn't match morrowind.exe
+    Bug #8519: Multiple bounty is sometimes assigned to player when detected during a pickpocketing action
+    Bug #8585: Dialogue topic list doesn't have enough padding
+    Bug #8587: Minor INI importer problems
+    Bug #8593: Render targets do not generate mipmaps
+    Bug #8598: Post processing shaders don't interact with the vfs correctly
+    Bug #8599: Non-ASCII paths in BSA files don't work
+    Feature #3769: Allow GetSpellEffects on enchantments
+    Feature #8112: Expose landscape record data to Lua
+    Feature #8113: Support extended selection in autodetected subdirectory dialog
     Feature #8285: Expose list of active shaders in postprocessing API
+    Feature #8313: Show the character name in the savegame details
+    Feature #8320: Add access mwscript source text to lua api
+    Feature #8355: Lua: Window visibility checking in interfaces.UI
+    Feature #8580: Sort characters in the save loading menu
+    Feature #8597: Lua: Add more built-in event handlers
 
 0.49.0
 ------
