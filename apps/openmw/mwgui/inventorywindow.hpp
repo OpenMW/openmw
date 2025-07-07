@@ -120,9 +120,20 @@ namespace MWGui
 
         void onBackgroundSelected();
 
+        enum ControllerAction
+        {
+            None = 0,
+            Use,
+            Give,
+            Sell,
+            Drop,
+        };
+        ControllerAction mPendingControllerAction;
+
         void sellItem(MyGUI::Widget* sender, int count);
         void dragItem(MyGUI::Widget* sender, int count);
         void giveItem(MyGUI::Widget* sender, int count);
+        void dropItem(MyGUI::Widget* sender, int count);
 
         void onWindowResize(MyGUI::Window* _sender);
         void onFilterChanged(MyGUI::Widget* _sender);

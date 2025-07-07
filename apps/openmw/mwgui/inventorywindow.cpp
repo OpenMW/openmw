@@ -91,6 +91,7 @@ namespace MWGui
         , mPreview(std::make_unique<MWRender::InventoryPreview>(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
         , mUpdateTimer(0.f)
+        , mPendingControllerAction(ControllerAction::None)
     {
         mPreviewTexture
             = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
@@ -331,18 +332,23 @@ namespace MWGui
 
         // Show a dialog to select a count of items, but not when using an item from the inventory
         // in controller mode. In that case, we skip the dialog and just use one item immediately.
-        if (count > 1 && !shift && !(Settings::gui().mControllerMenus && mGuiMode == MWGui::GM_Inventory))
+        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
+            std::string message = "#{sTake}";
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
+                message = "#{sQuanityMenuMessage01}";
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                message = "#{sDrop}";
             std::string name{ object.getClass().getName(object) };
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
-            if (Settings::gui().mControllerMenus
-                && (mGuiMode == MWGui::GM_Companion || mGuiMode == MWGui::GM_Container))
+            if (mPendingControllerAction == ControllerAction::Give)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::giveItem);
-            else if (mTrading)
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dropItem);
+            else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
@@ -351,11 +357,27 @@ namespace MWGui
         else
         {
             mSelectedItem = index;
-            if (mTrading)
+
+            if (mPendingControllerAction == ControllerAction::Use)
+            {
+                // Drag and drop the item on the avatar to activate it.
+                dragItem(nullptr, count);
+                onAvatarClicked(nullptr); // Equip or use
+                // Drop any remaining items back in inventory. This is needed when clicking on a
+                // stack of items; we only want to use the first item.
+                onBackgroundSelected();
+            }
+            else if (mPendingControllerAction == ControllerAction::Give)
+                giveItem(nullptr, count);
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                dropItem(nullptr, count);
+            else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 sellItem(nullptr, count);
             else
                 dragItem(nullptr, count);
         }
+
+        mPendingControllerAction = ControllerAction::None;
     }
 
     void InventoryWindow::ensureSelectedItemUnequipped(int count)
@@ -424,9 +446,8 @@ namespace MWGui
 
     void InventoryWindow::giveItem(MyGUI::Widget* sender, int count)
     {
-        ensureSelectedItemUnequipped(count);
-        mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
-        notifyContentChanged();
+        if (!mDragAndDrop->mIsOnDragAndDrop)
+            dragItem(sender, count);
 
         if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -446,6 +467,19 @@ namespace MWGui
                                                           .at(0);
             mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
         }
+    }
+
+    void InventoryWindow::dropItem(MyGUI::Widget* sender, int count)
+    {
+        if (mGuiMode != MWGui::GM_Inventory)
+            return;
+
+        if (!mDragAndDrop->mIsOnDragAndDrop)
+            dragItem(sender, count);
+
+        // Drop the item into the gameworld
+        if (mDragAndDrop->mIsOnDragAndDrop)
+            MWBase::Environment::get().getWindowManager()->getHud()->dropDraggedItem(0.5f, 0.5f);
     }
 
     void InventoryWindow::updateItemView()
@@ -964,51 +998,29 @@ namespace MWGui
 
     bool InventoryWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
+        mPendingControllerAction = ControllerAction::None; // Clear any pending controller actions
+
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
+            if (mGuiMode == MWGui::GM_Inventory)
+                mPendingControllerAction = ControllerAction::Use;
+            else if (mGuiMode == MWGui::GM_Companion || mGuiMode == MWGui::GM_Container)
+                mPendingControllerAction = ControllerAction::Give;
+            else if (mGuiMode == MWGui::GM_Barter)
+                mPendingControllerAction = ControllerAction::Sell;
+
             mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
-            // The following actions are done here, not in onItemSelectedFromSourceModel, because we
-            // want the mouse to work even in controller mode.
-            if (mGuiMode == MWGui::GM_Inventory && mDragAndDrop->mIsOnDragAndDrop)
-            {
-                // Drag and drop the item on the avatar to activate it.
-                onAvatarClicked(nullptr); // Equip or use
-                // Drop any remaining items back in inventory. This is needed when clicking on a
-                // stack of items; we only want to use the first item.
-                onBackgroundSelected();
-            }
-            else if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
-            {
-                // Drag and drop the item on the companion's window.
-                MWGui::CompanionWindow* companionWindow = (MWGui::CompanionWindow*)MWBase::Environment::get()
-                                                              .getWindowManager()
-                                                              ->getGuiModeWindows(mGuiMode)
-                                                              .at(1);
-                mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
-            }
-            else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
-            {
-                // Drag and drop the item on the container window.
-                MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
-                                                              .getWindowManager()
-                                                              ->getGuiModeWindows(mGuiMode)
-                                                              .at(0);
-                mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
-            }
-            // GM_Barter is handled by onControllerButtonEvent. No other steps are necessary.
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_X)
         {
             if (mGuiMode == MWGui::GM_Inventory)
             {
-                // Drop the item into the gameworld
+                mPendingControllerAction = ControllerAction::Drop;
                 mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
-                if (mDragAndDrop->mIsOnDragAndDrop)
-                    MWBase::Environment::get().getWindowManager()->getHud()->dropDraggedItem(0.5f, 0.5f);
             }
             else if (mGuiMode == MWGui::GM_Container)
             {
