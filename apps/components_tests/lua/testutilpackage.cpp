@@ -12,11 +12,17 @@ namespace
     struct LuaUtilPackageTest : Test
     {
         LuaUtil::LuaState mLuaState{ nullptr, nullptr };
+        sol::state& lua;
 
         LuaUtilPackageTest()
+            : lua(mLuaState.unsafeState())
         {
             mLuaState.addInternalLibSearchPath(
                 std::filesystem::path{ OPENMW_PROJECT_SOURCE_DIR } / "components" / "lua");
+
+            lua["loadInternalLib"] = [this](const std::string& name) { return mLuaState.loadInternalLib(name); };
+            lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
+            lua["util"] = LuaUtil::initUtilPackage(lua);
         }
     };
 
@@ -31,11 +37,8 @@ namespace
         return LuaUtil::toString(lua.safe_script("return " + luaCode));
     }
 
-    TEST(LuaUtilPackageTest, Vector2)
+    TEST_F(LuaUtilPackageTest, Vector2)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("v = util.vector2(3, 4)");
         EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), 3);
         EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 4);
@@ -66,11 +69,8 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "swizzle['01'] == util.vector2(0, 1) and swizzle['0y'] == util.vector2(0, 2)"));
     }
 
-    TEST(LuaUtilPackageTest, Vector3)
+    TEST_F(LuaUtilPackageTest, Vector3)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("v = util.vector3(5, 12, 13)");
         EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), 5);
         EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 12);
@@ -105,11 +105,8 @@ namespace
             get<bool>(lua, "swizzle['001'] == util.vector3(0, 0, 1) and swizzle['0yx'] == util.vector3(0, 2, 1)"));
     }
 
-    TEST(LuaUtilPackageTest, Vector4)
+    TEST_F(LuaUtilPackageTest, Vector4)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("v = util.vector4(5, 12, 13, 15)");
         EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), 5);
         EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 12);
@@ -147,11 +144,8 @@ namespace
             lua, "swizzle['0001'] == util.vector4(0, 0, 0, 1) and swizzle['0yx1'] == util.vector4(0, 2, 1, 1)"));
     }
 
-    TEST(LuaUtilPackageTest, Color)
+    TEST_F(LuaUtilPackageTest, Color)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("brown = util.color.rgba(0.75, 0.25, 0, 1)");
         EXPECT_EQ(get<std::string>(lua, "tostring(brown)"), "(0.75, 0.25, 0, 1)");
         lua.safe_script("blue = util.color.rgb(0, 1, 0, 1)");
@@ -166,11 +160,8 @@ namespace
         EXPECT_TRUE(get<bool>(lua, "red:asRgb() == util.vector3(1, 0, 0)"));
     }
 
-    TEST(LuaUtilPackageTest, Transform)
+    TEST_F(LuaUtilPackageTest, Transform)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua["T"] = lua["util"]["transform"];
         lua["v"] = lua["util"]["vector3"];
         EXPECT_ERROR(lua.safe_script("T.identity = nil"), "attempt to index");
@@ -202,11 +193,8 @@ namespace
         EXPECT_LT(get<float>(lua, "(rz_move_rx:inverse() * v(0, 1, 2) - v(1, 2, 3)):length()"), 1e-6);
     }
 
-    TEST(LuaUtilPackageTest, UtilityFunctions)
+    TEST_F(LuaUtilPackageTest, UtilityFunctions)
     {
-        sol::state lua;
-        lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
-        lua["util"] = LuaUtil::initUtilPackage(lua);
         lua.safe_script("v = util.vector2(1, 0):rotate(math.rad(120))");
         EXPECT_FLOAT_EQ(get<float>(lua, "v.x"), -0.5f);
         EXPECT_FLOAT_EQ(get<float>(lua, "v.y"), 0.86602539f);
