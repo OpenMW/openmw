@@ -945,7 +945,7 @@ namespace
                 // Scroll the list to keep the active item in view
                 Gui::MWList* list = getWidget<Gui::MWList>(mQuestMode ? QuestsList : TopicsList);
                 int offset = 0;
-                for (int i = 3; i < static_cast<int>(mSelectedQuest); i++)
+                for (int i = 4; i < static_cast<int>(mSelectedQuest); i++)
                     offset += mButtons[i]->getHeight();
                 list->setViewOffset(-offset);
             }

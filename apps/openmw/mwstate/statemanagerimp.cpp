@@ -332,14 +332,15 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         writer.close();
 
         if (stream.fail())
-            throw std::runtime_error("Write operation failed (memory stream)");
+            throw std::runtime_error(
+                "Write operation failed (memory stream): " + std::generic_category().message(errno));
 
         // All good, write to file
         std::ofstream filestream(slot->mPath, std::ios::binary);
         filestream << stream.rdbuf();
 
         if (filestream.fail())
-            throw std::runtime_error("Write operation failed (file stream)");
+            throw std::runtime_error("Write operation failed (file stream): " + std::generic_category().message(errno));
 
         Settings::saves().mCharacter.set(Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
         mLastSavegame = slot->mPath;

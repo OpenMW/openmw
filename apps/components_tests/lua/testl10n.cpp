@@ -24,6 +24,8 @@ namespace
     constexpr VFS::Path::NormalizedView test2EnPath("l10n/test2/en.yaml");
     constexpr VFS::Path::NormalizedView test3EnPath("l10n/test3/en.yaml");
     constexpr VFS::Path::NormalizedView test3DePath("l10n/test3/de.yaml");
+    constexpr VFS::Path::NormalizedView test4RuPath("l10n/test4/ru.yaml");
+    constexpr VFS::Path::NormalizedView test4EnPath("l10n/test4/en.yaml");
 
     VFSTestFile invalidScript("not a script");
     VFSTestFile incorrectScript(
@@ -71,6 +73,16 @@ good_morning: "Morning!"
 you_have_arrows: "Arrows count: {count}"
 )X");
 
+    VFSTestFile test4Ru(R"X(
+skill_increase: "Ваш навык {навык} увеличился до {value}"
+acrobatics: "Акробатика"
+)X");
+
+    VFSTestFile test4En(R"X(
+stat_increase: "Your {stat} has increased to {value}"
+speed: "Speed"
+)X");
+
     struct LuaL10nTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
@@ -80,6 +92,8 @@ you_have_arrows: "Arrows count: {count}"
             { test2EnPath, &test2En },
             { test3EnPath, &test1En },
             { test3DePath, &test1De },
+            { test4RuPath, &test4Ru },
+            { test4EnPath, &test4En },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -169,6 +183,18 @@ you_have_arrows: "Arrows count: {count}"
             l.safe_script("t3 = l10n('Test3', 'de')");
             l10nManager.setPreferredLocales({ "en" });
             EXPECT_EQ(get<std::string>(l, "t3('Hello {name}!', {name='World'})"), "Hallo World!");
+
+            // Test that formatting arguments use a correct encoding
+            l.safe_script("t4 = l10n('Test4', 'ru')");
+            l10nManager.setPreferredLocales({ "ru", "en" });
+            EXPECT_EQ(get<std::string>(l, "t4('skill_increase', {навык='Акробатика', value=100})"),
+                "Ваш навык Акробатика увеличился до 100");
+            EXPECT_EQ(get<std::string>(l, "t4('skill_increase', {навык=t4('acrobatics'), value=100})"),
+                "Ваш навык Акробатика увеличился до 100");
+            EXPECT_EQ(get<std::string>(l, "t4('stat_increase', {stat='Speed', value=100})"),
+                "Your Speed has increased to 100");
+            EXPECT_EQ(get<std::string>(l, "t4('stat_increase', {stat=t4('speed'), value=100})"),
+                "Your Speed has increased to 100");
         });
     }
 }
