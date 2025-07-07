@@ -26,40 +26,40 @@ namespace
 
     std::vector<std::string> globals;
     const std::initializer_list<std::tuple<std::string_view, std::string_view>> sActionBindings{
-        { "ActionSlideRight", "#{sRight}" },
-        { "ActionReadyMagic", "#{sReady_Magic}" },
-        { "ActionPrevWeapon", "#{sPrevWeapon}" },
-        { "ActionNextWeapon", "#{sNextWeapon}" },
-        { "ActionToggleRun", "#{sAuto_Run}" },
-        { "ActionSlideLeft", "#{sLeft}" },
-        { "ActionReadyItem", "#{sReady_Weapon}" },
-        { "ActionPrevSpell", "#{sPrevSpell}" },
-        { "ActionNextSpell", "#{sNextSpell}" },
-        { "ActionRestMenu", "#{sRestKey}" },
-        { "ActionMenuMode", "#{sInventory}" },
-        { "ActionActivate", "#{sActivate}" },
-        { "ActionJournal", "#{sJournal}" },
-        { "ActionForward", "#{sForward}" },
-        { "ActionCrouch", "#{sCrouch_Sneak}" },
-        { "ActionJump", "#{sJump}" },
-        { "ActionBack", "#{sBack}" },
-        { "ActionUse", "#{sUse}" },
-        { "ActionRun", "#{sRun}" },
+        { "actionslideright", "#{sRight}" },
+        { "actionreadymagic", "#{sReady_Magic}" },
+        { "actionprevweapon", "#{sPrevWeapon}" },
+        { "actionnextweapon", "#{sNextWeapon}" },
+        { "actiontogglerun", "#{sAuto_Run}" },
+        { "actionslideleft", "#{sLeft}" },
+        { "actionreadyitem", "#{sReady_Weapon}" },
+        { "actionprevspell", "#{sPrevSpell}" },
+        { "actionnextspell", "#{sNextSpell}" },
+        { "actionrestmenu", "#{sRestKey}" },
+        { "actionmenumode", "#{sInventory}" },
+        { "actionactivate", "#{sActivate}" },
+        { "actionjournal", "#{sJournal}" },
+        { "actionforward", "#{sForward}" },
+        { "actioncrouch", "#{sCrouch_Sneak}" },
+        { "actionjump", "#{sJump}" },
+        { "actionback", "#{sBack}" },
+        { "actionuse", "#{sUse}" },
+        { "actionrun", "#{sRun}" },
     };
     using ContextMethod = std::string_view (Interpreter::Context::*)() const;
     const std::initializer_list<std::tuple<std::string_view, std::pair<ContextMethod, ContextMethod>>> sContextMethods{
-        { "NextPCRank", { &Interpreter::Context::getPCNextRank, nullptr } },
-        { "PCNextRank", { &Interpreter::Context::getPCNextRank, nullptr } },
-        { "Faction", { &Interpreter::Context::getNPCFaction, nullptr } },
-        { "PCClass", { &Interpreter::Context::getPCClass, &Interpreter::Context::getPCClass } },
-        { "PCName", { &Interpreter::Context::getPCName, &Interpreter::Context::getPCName } },
-        { "PCRace", { &Interpreter::Context::getPCRace, &Interpreter::Context::getPCRace } },
-        { "PCRank", { &Interpreter::Context::getPCRank, nullptr } },
-        { "Class", { &Interpreter::Context::getNPCClass, &Interpreter::Context::getPCClass } },
-        { "Cell", { &Interpreter::Context::getCurrentCellName, &Interpreter::Context::getCurrentCellName } },
-        { "Race", { &Interpreter::Context::getNPCRace, &Interpreter::Context::getPCRace } },
-        { "Rank", { &Interpreter::Context::getNPCRank, nullptr } },
-        { "Name", { &Interpreter::Context::getActorName, &Interpreter::Context::getPCName } },
+        { "nextpcrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "pcnextrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "faction", { &Interpreter::Context::getNPCFaction, nullptr } },
+        { "pcclass", { &Interpreter::Context::getPCClass, &Interpreter::Context::getPCClass } },
+        { "pcname", { &Interpreter::Context::getPCName, &Interpreter::Context::getPCName } },
+        { "pcrace", { &Interpreter::Context::getPCRace, &Interpreter::Context::getPCRace } },
+        { "pcrank", { &Interpreter::Context::getPCRank, nullptr } },
+        { "class", { &Interpreter::Context::getNPCClass, &Interpreter::Context::getPCClass } },
+        { "cell", { &Interpreter::Context::getCurrentCellName, &Interpreter::Context::getCurrentCellName } },
+        { "race", { &Interpreter::Context::getNPCRace, &Interpreter::Context::getPCRace } },
+        { "rank", { &Interpreter::Context::getNPCRank, nullptr } },
+        { "name", { &Interpreter::Context::getActorName, &Interpreter::Context::getPCName } },
     };
 
     bool longerStr(std::string_view a, std::string_view b)
@@ -78,7 +78,7 @@ namespace
                 return true;
             }
         }
-        if (check(temp, "PCCrimeLevel", i, start))
+        if (check(temp, "pccrimelevel", i, start))
         {
             retval << context.getPCBounty();
             return true;
@@ -89,13 +89,7 @@ namespace
             if (check(temp, name, i, start))
             {
                 if (method) // Not all variables are available outside of dialogue
-                {
                     retval << (context.*method)();
-
-                    // Re-add the token if replacement failed without an error
-                    if ((context.*method)() == "%")
-                        retval << name;
-                }
                 return true;
             }
         }
