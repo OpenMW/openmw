@@ -32,6 +32,8 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Journal"; }
 
+        size_t mIndexRowCount;
+
         std::vector<MyGUI::Button*> mButtons;
         size_t mSelectedQuest = 0;
         size_t mSelectedIndex = 0;

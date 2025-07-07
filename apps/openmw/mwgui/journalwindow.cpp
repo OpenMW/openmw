@@ -218,6 +218,18 @@ namespace
                 }
             }
 
+            // Latin = 26 (13 + 13)
+            mIndexRowCount = 13;
+            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
+            if (isRussian)
+            {
+                // This should match the logic in createCyrillicJournalIndex
+                if (Settings::gui().mFontSize < 18)
+                    mIndexRowCount = 15; // Cyrillic = 30 (15 + 15)
+                else
+                    mIndexRowCount = 10; // Cyrillic = 30 (10 + 10 + 10)
+            }
+
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.x = "#{OMWEngine:JournalQuests}";
             mControllerButtons.y = "#{sTopics}";
@@ -701,21 +713,8 @@ namespace
 
         void setIndexControllerFocus(bool focused)
         {
-            int col, row;
-            bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
-            if (isRussian)
-            {
-                // Cyrillic = 30 (10 + 10 + 10)
-                col = mSelectedIndex / 10;
-                row = mSelectedIndex % 10;
-            }
-            else
-            {
-                // Latin = 26 (13 + 13)
-                col = mSelectedIndex / 13;
-                row = mSelectedIndex % 13;
-            }
-
+            int col = mSelectedIndex / mIndexRowCount;
+            int row = mSelectedIndex % mIndexRowCount;
             mTopicIndexBook->setColour(col, row, 0, focused ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
         }
 
@@ -831,28 +830,13 @@ namespace
                 else if (mOptionsMode)
                 {
                     setIndexControllerFocus(false);
-                    if (isRussian)
+                    if (mSelectedIndex % mIndexRowCount == 0)
                     {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        if (mSelectedIndex == 0)
-                            mSelectedIndex = 9;
-                        else if (mSelectedIndex == 10)
-                            mSelectedIndex = 19;
-                        else if (mSelectedIndex == 20)
-                            mSelectedIndex = 29;
-                        else
-                            mSelectedIndex--;
+                        int col = mSelectedIndex / mIndexRowCount;
+                        mSelectedIndex = (col * mIndexRowCount) + mIndexRowCount - 1;
                     }
                     else
-                    {
-                        // Latin = 26 (13 + 13)
-                        if (mSelectedIndex == 0)
-                            mSelectedIndex = 12;
-                        else if (mSelectedIndex == 13)
-                            mSelectedIndex = 25;
-                        else
-                            mSelectedIndex--;
-                    }
+                        mSelectedIndex--;
                     setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
@@ -871,28 +855,13 @@ namespace
                 else if (mOptionsMode)
                 {
                     setIndexControllerFocus(false);
-                    if (isRussian)
+                    if (mSelectedIndex % mIndexRowCount == mIndexRowCount - 1)
                     {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        if (mSelectedIndex == 9)
-                            mSelectedIndex = 0;
-                        else if (mSelectedIndex == 19)
-                            mSelectedIndex = 10;
-                        else if (mSelectedIndex == 29)
-                            mSelectedIndex = 20;
-                        else
-                            mSelectedIndex++;
+                        int col = mSelectedIndex / mIndexRowCount;
+                        mSelectedIndex = col * mIndexRowCount;
                     }
                     else
-                    {
-                        // Latin = 26 (13 + 13)
-                        if (mSelectedIndex == 12)
-                            mSelectedIndex = 0;
-                        else if (mSelectedIndex == 25)
-                            mSelectedIndex = 13;
-                        else
-                            mSelectedIndex++;
-                    }
+                        mSelectedIndex++;
                     setIndexControllerFocus(true);
                     setText(PageOneNum, 1); // Redraw the list
                 }
@@ -908,7 +877,11 @@ namespace
                     if (isRussian)
                     {
                         // Cyrillic = 30 (10 + 10 + 10)
-                        mSelectedIndex = (mSelectedIndex + 20) % 30;
+                        if (mIndexRowCount == 10)
+                            mSelectedIndex = (mSelectedIndex + 20) % 30;
+                        // or Cyrillic = 30 (15 + 15)
+                        else
+                            mSelectedIndex = (mSelectedIndex + 15) % 30;
                     }
                     else
                     {
@@ -929,8 +902,8 @@ namespace
                     setIndexControllerFocus(false);
                     if (isRussian)
                     {
-                        // Cyrillic = 30 (10 + 10 + 10)
-                        mSelectedIndex = (mSelectedIndex + 10) % 30;
+                        // Cyrillic = 30 (10 + 10 + 10) or (15 + 15)
+                        mSelectedIndex = (mSelectedIndex + mIndexRowCount) % 30;
                     }
                     else
                     {
