@@ -3,8 +3,11 @@ Fonts
 
 Default UI font and font used in magic scrolls are defined in ``openmw.cfg``:
 
-			fallback=Fonts_Font_0,MysticCards
-			fallback=Fonts_Font_2,DemonicLetters
+.. code-block:: openmwcfg
+  :caption: openmw.cfg
+
+  fallback=Fonts_Font_0,MysticCards
+  fallback=Fonts_Font_2,DemonicLetters
 
 When there are no ``Fonts_Font_*`` lines in user's ``openmw.cfg``, built-in TrueType fonts are used.
 Font used by console and another debug windows is not configurable (so ``Fonts_Font_1`` is unused).
@@ -20,8 +23,11 @@ You can use --export-fonts command line option to write the converted font
 
 They can be used instead of TrueType fonts if needed by specifying their ``.fnt`` files names in the ``openmw.cfg``. For example:
 
-			fallback=Fonts_Font_0,magic_cards_regular
-			fallback=Fonts_Font_2,daedric_font
+.. code-block:: openmwcfg
+  :caption: openmw.cfg
+
+  fallback=Fonts_Font_0,magic_cards_regular
+  fallback=Fonts_Font_2,daedric_font
 
 In this example OpenMW will search for ``magic_cards_regular.fnt`` and ``daedric_font.fnt`` in the ``Fonts`` folder in data directories.
 If they are not found, built-in TrueType fonts will be used as a fallback.
@@ -35,16 +41,22 @@ Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts. Th
 OpenMW has build-in TrueType fonts: MysticCards, DemonicLetters and DejaVuLGCSansMono, which are used by default.
 TrueType fonts are configured via ``openmw.cfg`` too:
 
-			fallback=Fonts_Font_0,MysticCards
-			fallback=Fonts_Font_2,DemonicLetters
+.. code-block:: openmwcfg
+  :caption: openmw.cfg
+
+  fallback=Fonts_Font_0,MysticCards
+  fallback=Fonts_Font_2,DemonicLetters
 
 In this example, OpenMW will scan ``Fonts`` folder in data directories for ``.omwfont`` files.
 These files are XML files with schema provided by MyGUI. OpenMW uses ``.omwfont`` files which name (without extension) matches ``openmw.cfg`` entries.
 
-It is also possible to adjust the font size via ``settings.cfg`` file::
+It is also possible to adjust the font size via ``settings.cfg`` file:
 
-			[GUI]
-			font size = 16
+.. code-block:: ini
+  :caption: settings.cfg
+
+  [GUI]
+  font size = 16
 
 The ``font size`` setting accepts clamped values in range from 12 to 18.
 

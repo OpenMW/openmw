@@ -40,6 +40,7 @@ namespace MWGui
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
+        , mUpdateNextFrame(false)
         , mTreatNextOpenAsLoot(false)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
@@ -196,6 +197,8 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         setTitle(container.getClass().getName(container));
+
+        mPtr.getClass().getContainerStore(mPtr).setContListener(this);
     }
 
     void ContainerWindow::resetReference()
@@ -398,5 +401,26 @@ namespace MWGui
     {
         mItemView->setActiveControllerWindow(active);
         WindowBase::setActiveControllerWindow(active);
+    }
+
+    void ContainerWindow::onFrame(float dt)
+    {
+        checkReferenceAvailable();
+
+        if (mUpdateNextFrame)
+        {
+            mItemView->update();
+            mUpdateNextFrame = false;
+        }
+    }
+
+    void ContainerWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
+    void ContainerWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
     }
 }

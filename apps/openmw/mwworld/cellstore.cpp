@@ -1354,6 +1354,15 @@ namespace MWWorld
         return {};
     }
 
+    CellStore* MWWorld::CellStore::getOriginCell(const Ptr& object) const
+    {
+        MovedRefTracker::const_iterator found = mMovedHere.find(object.getBase());
+        if (found != mMovedHere.end())
+            return found->second;
+
+        return object.getCell();
+    }
+
     Ptr CellStore::getPtr(ESM::RefId id)
     {
         if (mState == CellStore::State_Unloaded)

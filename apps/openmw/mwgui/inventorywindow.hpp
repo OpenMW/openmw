@@ -5,6 +5,7 @@
 #include "windowpinnablebase.hpp"
 
 #include "../mwrender/characterpreview.hpp"
+#include "../mwworld/containerstore.hpp"
 #include "../mwworld/ptr.hpp"
 
 namespace osg
@@ -30,7 +31,7 @@ namespace MWGui
     class DragAndDrop;
     class ItemModel;
 
-    class InventoryWindow : public WindowPinnableBase
+    class InventoryWindow : public WindowPinnableBase, public MWWorld::ContainerStoreListener
     {
     public:
         InventoryWindow(DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem);
@@ -61,6 +62,9 @@ namespace MWGui
         void useItem(const MWWorld::Ptr& ptr, bool force = false);
 
         void setGuiMode(GuiMode mode);
+
+        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
+        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
 
         /// Cycle to previous/next weapon
         void cycle(bool next);
@@ -111,7 +115,7 @@ namespace MWGui
         std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
         bool mTrading;
-        float mUpdateTimer;
+        bool mUpdateNextFrame;
 
         void toggleMaximized();
 

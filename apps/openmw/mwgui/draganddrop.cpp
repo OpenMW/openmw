@@ -11,7 +11,6 @@
 #include "controllers.hpp"
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
-#include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 
 namespace MWGui
@@ -72,25 +71,25 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        ItemWidget* baseWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
+        mDraggedWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
             "MW_ItemIcon", 0, 0, 42, 42, MyGUI::Align::Default, "DragAndDrop");
 
         Controllers::ControllerFollowMouse* controller
             = MyGUI::ControllerManager::getInstance()
                   .createItem(Controllers::ControllerFollowMouse::getClassTypeName())
                   ->castType<Controllers::ControllerFollowMouse>();
-        MyGUI::ControllerManager::getInstance().addItem(baseWidget, controller);
+        MyGUI::ControllerManager::getInstance().addItem(mDraggedWidget, controller);
 
-        mDraggedWidget = baseWidget;
-        baseWidget->setItem(mItem.mBase);
-        baseWidget->setNeedMouseFocus(false);
-        baseWidget->setCount(count);
-
-        sourceView->update();
+        mDraggedWidget->setItem(mItem.mBase);
+        mDraggedWidget->setNeedMouseFocus(false);
+        mDraggedWidget->setCount(count);
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 
         mIsOnDragAndDrop = true;
+
+        // Update item view after completing drag-and-drop setup
+        mSourceView->update();
     }
 
     void DragAndDrop::drop(ItemModel* targetModel, ItemView* targetView)
@@ -124,6 +123,22 @@ namespace MWGui
         mSourceView->update();
     }
 
+    void DragAndDrop::update()
+    {
+        if (mIsOnDragAndDrop)
+        {
+            int count = mItem.mBase.getCellRef().getCount();
+            if (count < mDraggedCount)
+            {
+                mItem.mCount = count;
+                mDraggedCount = count;
+                mDraggedWidget->setCount(mDraggedCount);
+                mSourceSortModel->clearDragItems();
+                mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
+            }
+        }
+    }
+
     void DragAndDrop::onFrame()
     {
         if (mIsOnDragAndDrop && mItem.mBase.getCellRef().getCount() == 0)
@@ -137,8 +152,12 @@ namespace MWGui
         // since mSourceView doesn't get updated in drag()
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
 
-        MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
-        mDraggedWidget = nullptr;
+        if (mDraggedWidget)
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
+            mDraggedWidget = nullptr;
+        }
+
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 

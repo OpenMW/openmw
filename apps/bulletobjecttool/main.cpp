@@ -155,7 +155,7 @@ namespace
 
         VFS::Manager vfs;
 
-        VFS::registerArchives(&vfs, fileCollections, archives, true);
+        VFS::registerArchives(&vfs, fileCollections, archives, true, &encoder.getStatelessEncoder());
 
         Settings::Manager::load(config);
 

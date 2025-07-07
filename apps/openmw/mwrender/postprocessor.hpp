@@ -128,7 +128,7 @@ namespace MWRender
 
         const TechniqueList& getTemplates() const { return mTemplates; }
 
-        const auto& getTechniqueMap() const { return mTechniqueFileMap; }
+        const auto& getTechniqueFiles() const { return mTechniqueFiles; }
 
         void resize();
 
@@ -176,7 +176,8 @@ namespace MWRender
 
         void toggleMode();
 
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame = false);
+        std::shared_ptr<fx::Technique> loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame = false);
+        std::shared_ptr<fx::Technique> loadTechnique(std::string_view name, bool loadNextFrame = false);
 
         TechniqueList getChain();
 
@@ -232,8 +233,7 @@ namespace MWRender
         TechniqueList mQueuedTemplates;
         TechniqueList mInternalTechniques;
 
-        std::unordered_map<std::string, std::filesystem::path, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
-            mTechniqueFileMap;
+        std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash, std::equal_to<>> mTechniqueFiles;
 
         RenderingManager& mRendering;
         osgViewer::Viewer* mViewer;

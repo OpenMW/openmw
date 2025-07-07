@@ -23,7 +23,8 @@ dungeons.
 To use this feature the :ref:`soft particles` setting must be enabled.
 This setting can either be activated in the OpenMW launcher or changed in `settings.cfg`:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Shaders]
     soft particles = true
@@ -64,7 +65,8 @@ Blue and alpha channels are ignored.
 To use this feature the :ref:`post processing <Post Processing>` setting must be enabled.
 This setting can either be activated in the OpenMW launcher, in-game, or changed in `settings.cfg`:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Post Processing]
     enabled = true

@@ -82,8 +82,8 @@ message(STATUS "Configuring OpenMW...")
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 50)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 78)
-set(OPENMW_POSTPROCESSING_API_REVISION 2)
+set(OPENMW_LUA_API_REVISION 80)
+set(OPENMW_POSTPROCESSING_API_REVISION 3)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -590,30 +590,10 @@ if(OPENMW_LTO_BUILD)
     endif()
 endif()
 
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105438
-        set(OPENMW_CXX_FLAGS "-Wno-array-bounds ${OPENMW_CXX_FLAGS}")
-    endif()
-
-    if (APPLE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-    endif()
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
-        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
-            set(OPENMW_CXX_FLAGS "${OPENMW_CXX_FLAGS} -Wno-potentially-evaluated-expression")
-        endif ()
-    endif()
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-        set(OPENMW_CXX_FLAGS "${OPENMW_CXX_FLAGS} -Wno-unused-but-set-parameter -Wduplicated-branches -Wduplicated-cond -Wlogical-op")
-    endif()
-endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+endif()
 
 # Extern
 
@@ -624,8 +604,42 @@ if (BUILD_OPENCS OR BUILD_OPENCS_TESTS)
     add_subdirectory (extern/osgQt)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    add_compile_options("/W4")
+
+    set(WARNINGS_DISABLE
+        4100 # Unreferenced formal parameter (-Wunused-parameter)
+        4127 # Conditional expression is constant
+        4996 # Function was declared deprecated
+        5054 # Deprecated operations between enumerations of different types caused by Qt headers
+        )
+
+    foreach(d ${WARNINGS_DISABLE})
+        add_compile_options("/wd${d}")
+    endforeach(d)
+
+    if(OPENMW_MSVC_WERROR)
+        add_compile_options("/WX")
+    endif()
+else ()
+    add_compile_options("-Wall" "-Wextra" "-Wundef" "-Wextra-semi" "-Wno-unused-parameter" "-pedantic" "-Wno-long-long" "-Wnon-virtual-dtor" "-Wunused")
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
+            add_compile_options("-Wno-potentially-evaluated-expression")
+        endif ()
+    endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+        add_compile_options("-Wno-unused-but-set-parameter" "-Wduplicated-branches" "-Wduplicated-cond" "-Wlogical-op")
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105438
+        add_compile_options("-Wno-array-bounds")
+    endif()
+endif ()
+
 if (OPENMW_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMW_CXX_FLAGS}")
+    separate_arguments(OPENMW_CXX_FLAGS NATIVE_COMMAND "${OPENMW_CXX_FLAGS}")
+    add_compile_options(${OPENMW_CXX_FLAGS})
 endif()
 
 # Components
@@ -715,86 +729,8 @@ if (WIN32)
             set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
         endif()
 
-        # Play a bit with the warning levels
-
-        set(WARNINGS "/W4")
-
-        set(WARNINGS_DISABLE
-            4100 # Unreferenced formal parameter (-Wunused-parameter)
-            4127 # Conditional expression is constant
-            4996 # Function was declared deprecated
-            5054 # Deprecated operations between enumerations of different types caused by Qt headers
-            )
-
-        foreach(d ${WARNINGS_DISABLE})
-            list(APPEND WARNINGS "/wd${d}")
-        endforeach(d)
-
-        if(OPENMW_MSVC_WERROR)
-            list(APPEND WARNINGS "/WX")
-        endif()
-
-        target_compile_options(components PRIVATE ${WARNINGS})
-        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
-
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
-        endif()
-
-        if (BUILD_BSATOOL)
-            target_compile_options(bsatool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_ESMTOOL)
-            target_compile_options(esmtool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_ESSIMPORTER)
-            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_LAUNCHER)
-            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_MWINIIMPORTER)
-            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_OPENCS)
-            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_OPENMW)
-            target_compile_options(openmw PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_WIZARD)
-            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_COMPONENTS_TESTS)
-            target_compile_options(components-tests PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_BENCHMARKS)
-            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_NAVMESHTOOL)
-            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_BULLETOBJECTTOOL)
-            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
-        endif()
-
-        if (BUILD_OPENCS_TESTS)
-            target_compile_options(openmw-cs-tests PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_OPENMW_TESTS)
-            target_compile_options(openmw-tests PRIVATE ${WARNINGS})
         endif()
     endif(MSVC)
 

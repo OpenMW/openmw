@@ -125,6 +125,7 @@ namespace MWGui
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
+        , mUpdateNextFrame(false)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -230,11 +231,24 @@ namespace MWGui
         // Cycle to the buy window if it's not active.
         if (Settings::gui().mControllerMenus && !mActiveControllerWindow)
             MWBase::Environment::get().getWindowManager()->cycleActiveControllerWindow(true);
+
+        for (const auto& source : itemSources)
+            source.getClass().getContainerStore(source).setContListener(this);
     }
 
     void TradeWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+
+        if (isVisible() && mUpdateNextFrame)
+        {
+            mTradeModel->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            mItemView->update();
+            updateOffer();
+            mUpdateNextFrame = false;
+        }
     }
 
     void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
@@ -680,6 +694,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
+<<<<<<< HEAD
     bool TradeWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
@@ -763,5 +778,20 @@ namespace MWGui
 
         mItemView->setActiveControllerWindow(active);
         WindowBase::setActiveControllerWindow(active);
+    }
+
+    void TradeWindow::updateItemView()
+    {
+        mItemView->update();
+    }
+
+    void TradeWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
+    void TradeWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
     }
 }

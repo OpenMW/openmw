@@ -37,22 +37,20 @@ namespace
 
 namespace fx
 {
-    namespace
+    VFS::Path::Normalized Technique::makeFileName(std::string_view name)
     {
-        VFS::Path::Normalized makeFilePath(std::string_view name)
-        {
-            std::string fileName(name);
-            fileName += Technique::sExt;
-            VFS::Path::Normalized result(Technique::sSubdir);
-            result /= fileName;
-            return result;
-        }
+        std::string fileName(name);
+        fileName += '.';
+        fileName += Technique::sExt;
+        VFS::Path::Normalized result(Technique::sSubdir);
+        result /= fileName;
+        return result;
     }
 
-    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
-        int height, bool ubo, bool supportsNormals)
+    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager,
+        VFS::Path::NormalizedView fileName, std::string name, int width, int height, bool ubo, bool supportsNormals)
         : mName(std::move(name))
-        , mFilePath(makeFilePath(mName))
+        , mFilePath(fileName)
         , mLastModificationTime(std::filesystem::file_time_type::clock::now())
         , mWidth(width)
         , mHeight(height)

@@ -565,6 +565,8 @@ namespace MWRender
         else
             createSimpleWaterStateSet(mWaterGeom, Fallback::Map::getFloat("Water_World_Alpha"));
 
+        mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(mWaterGeom->getOrCreateStateSet(), true);
+
         updateVisible();
     }
 

@@ -2096,12 +2096,17 @@ namespace MWRender
         if (Settings::game().mGraphicHerbalism && ptr.getRefData().getCustomData() != nullptr
             && ObjectAnimation::canBeHarvested())
         {
-            const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-            if (!store.hasVisibleItems())
-            {
-                HarvestVisitor visitor;
-                mObjectRoot->accept(visitor);
-            }
+            harvest(ptr);
+        }
+    }
+
+    void ObjectAnimation::harvest(const MWWorld::Ptr& ptr)
+    {
+        const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+        if (!store.hasVisibleItems())
+        {
+            HarvestVisitor visitor;
+            mObjectRoot->accept(visitor);
         }
     }
 

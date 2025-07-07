@@ -41,8 +41,52 @@ Example:
 
     core.sendGlobalEvent('UseItem', {object = potion, actor = player, force = true})
 
+**ModifyStat**
+
+Modify the corresponding stat.
+
+.. code-block:: Lua
+
+    -- Consume 10 magicka
+    actor:sendEvent('ModifyStat', {name = 'magicka', amount = -10})
+
+**AddVfx**
+
+Calls the corresponding method in openmw.animation
+
+.. code-block:: Lua
+
+    local eventParams = {
+        model = 'vfx_default',
+        options = {
+            textureOverride = effect.particle,
+        },
+    }
+    actor:sendEvent('AddVfx', eventParams)
+
+**PlaySound3d**
+
+Calls the corresponding function in openw.core on the target. Will use core.sound.playSoundFile3d instead of core.sound.playSound3d if you put `file` instead of `sound` in the event data.
+
+.. code-block:: Lua
+    actor:sendEvent('PlaySound3d', {sound = 'Open Lock'})
+
+
+**BreakInvisibility**
+
+Forces the actor to lose all active invisibility effects.
+
+
 UI events
 ---------
+
+**ShowMessage**
+
+If sent to a player, shows a message as if a call to ui.showMessage was made.
+
+.. code-block:: Lua
+
+    player:sendEvent('ShowMessage', {message = 'Lorem ipsum'})
 
 **UiModeChanged**
 
@@ -91,3 +135,36 @@ Global events that just call the corresponding function in `openmw.world`.
 
     -- world.setSimulationTimeScale(scale)
     core.sendGlobalEvent('SetSimulationTimeScale', scale)
+
+
+**SpawnVfx, PlaySound3d**
+
+Calls the corresponding function in openw.core. Note that PlaySound3d will call core.sound.playSoundFile3d instead of core.sound.playSound3d if you put `file` instead of `sound` in the event data.
+
+.. code-block:: Lua
+    core.sendGlobalEvent('SpawnVfx', {position = hitPos, model = 'vfx_destructarea', options = {scale = 10}})
+    core.sendGlobalEvent('PlaySound3d', {sound = 'Open Lock', position = container.position})
+
+**ConsumeItem**
+
+Reduces stack size of an item by a given amount, removing the item completely if stack size is reduced to 0 or less.
+
+.. code-block:: Lua
+
+    core.sendGlobalEvent('ConsumeItem', {item = foobar, amount = 1})
+
+**Lock**
+
+Lock a container or door
+
+.. code-block:: Lua
+
+    core.sendGlobalEvent('Lock', {taret = selected, magnitude = 50})
+
+**Unlock**
+
+Unlock a container or door
+
+.. code-block:: Lua
+
+    core.sendGlobalEvent('Unlock', {taret = selected})

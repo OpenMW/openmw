@@ -38,6 +38,7 @@ namespace Bsa
     public:
         using BSAFile::getFilename;
         using BSAFile::getList;
+        using BSAFile::getPath;
         using BSAFile::open;
 
         BA2GNRLFile();

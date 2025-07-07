@@ -81,15 +81,15 @@ For Distributions Using `apt` (e.g., Ubuntu, Debian)
 
 .. code:: console
 
-    sudo apt update
-    sudo apt install innoextract
+    $ sudo apt update
+    $ sudo apt install innoextract
 
 For macOS using Homebrew
 ++++++++++++++++++++++++
 
 .. code:: console
 
-    brew install innoextract
+    $ brew install innoextract
 
 Once innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
 
