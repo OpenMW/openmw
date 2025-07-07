@@ -205,20 +205,18 @@ namespace MWLua
         };
         topicEntriesBindingsClass[sol::meta_function::index]
             = [journal](const MWLua::TopicEntries& topicEntries, size_t index) -> const MWDialogue::Entry* {
-            if (index == 0)
+            const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
+
+            const size_t numberOfTopicEntries = std::distance(topic.begin(), topic.end());
+            if (index == 0 || index > numberOfTopicEntries)
             {
                 return nullptr;
             }
             index = LuaUtil::fromLuaIndex(index);
-            const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
 
             MWDialogue::Topic::TEntryIter iter{ topic.begin() };
-            while (index > 0 && iter != topic.end())
-            {
-                ++iter;
-                --index;
-            }
-            return (iter != topic.end()) ? &(*iter) : nullptr;
+            std::advance(iter, index);
+            return &(*iter);
         };
         topicEntriesBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         topicEntriesBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -249,19 +247,16 @@ namespace MWLua
             = [journal](const MWLua::JournalEntries&) { return std::distance(journal->begin(), journal->end()); };
         journalEntriesBindingsClass[sol::meta_function::index]
             = [journal](const MWLua::JournalEntries&, size_t index) -> const MWDialogue::StampedJournalEntry* {
-            if (index == 0)
+            const size_t numberOfEntries = std::distance(journal->begin(), journal->end());
+            if (index == 0 || index > numberOfEntries)
             {
                 return nullptr;
             }
             index = LuaUtil::fromLuaIndex(index);
 
             MWBase::Journal::TEntryIter iter{ journal->begin() };
-            while (index > 0 && iter != journal->end())
-            {
-                ++iter;
-                --index;
-            }
-            return (iter != journal->end()) ? &(*iter) : nullptr;
+            std::advance(iter, index);
+            return &(*iter);
         };
         journalEntriesBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         journalEntriesBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -363,12 +358,6 @@ namespace MWLua
         quest["id"] = sol::readonly_property([](const Quest& q) -> std::string { return q.mQuestId.serializeText(); });
         quest["started"] = sol::readonly_property(
             [journal](const Quest& q) { return journal->getQuestOrNull(q.mQuestId) != nullptr; });
-        quest["name"] = sol::readonly_property([journal](const Quest& q) -> std::string_view {
-            const MWDialogue::Quest* quest = journal->getQuestOrNull(q.mQuestId);
-            if (quest == nullptr)
-                return "";
-            return quest->getName();
-        });
         quest["finished"] = sol::property(
             [journal](const Quest& q) -> bool {
                 const MWDialogue::Quest* quest = journal->getQuestOrNull(q.mQuestId);
