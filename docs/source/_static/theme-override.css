@@ -143,6 +143,10 @@ tbody tr:hover {
     margin-bottom: 1.5rem;
 }
 
+#content table p {
+    margin-bottom: 0;
+}
+
 h5 {
     font-size: 1.15rem;
     font-weight: 600;

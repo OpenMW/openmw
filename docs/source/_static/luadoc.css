@@ -20,6 +20,10 @@
     white-space: normal;
 }
 
+html:has(#luadoc) {
+    scroll-padding-top: 4.0rem;
+}
+
 #content #luadoc code a:not(.toc-backref) {
   font-weight: 600;
 }
