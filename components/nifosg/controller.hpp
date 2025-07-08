@@ -54,7 +54,8 @@ namespace NifOsg
                     return mLastHighKey;
             }
 
-            return mKeys->mKeys.lower_bound(time);
+            return std::lower_bound(mKeys->mKeys.begin(), mKeys->mKeys.end(), time,
+                [](const typename MapT::MapType::value_type& key, float t) { return key.first < t; });
         }
 
     public:
@@ -99,8 +100,8 @@ namespace NifOsg
 
             const typename MapT::MapType& keys = mKeys->mKeys;
 
-            if (time <= keys.begin()->first)
-                return keys.begin()->second.mValue;
+            if (time <= keys.front().first)
+                return keys.front().second.mValue;
 
             typename MapT::MapType::const_iterator it = retrieveKey(time);
 
@@ -116,7 +117,7 @@ namespace NifOsg
                 return interpolate(mLastLowKey->second, mLastHighKey->second, a, mKeys->mInterpolationType);
             }
 
-            return keys.rbegin()->second.mValue;
+            return keys.back().second.mValue;
         }
 
         bool empty() const { return !mKeys || mKeys->mKeys.empty(); }
@@ -283,7 +284,7 @@ namespace NifOsg
     class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller
     {
     private:
-        std::shared_ptr<std::map<float, bool>> mData;
+        std::shared_ptr<std::vector<std::pair<float, bool>>> mData;
         BoolInterpolator mInterpolator;
         unsigned int mMask{ 0u };
 
