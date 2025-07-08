@@ -280,15 +280,6 @@ namespace MWRender
                 {
                     pass.mRenderTarget->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
 
-                    if (pass.mRenderTexture->getNumMipmapLevels() > 0)
-                    {
-                        state.setActiveTextureUnit(0);
-                        state.applyTextureAttribute(0,
-                            pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
-                                .getTexture());
-                        ext->glGenerateMipmap(GL_TEXTURE_2D);
-                    }
-
                     lastApplied = pass.mRenderTarget->getHandle(state.getContextID());
                 }
                 else if (pass.mResolve && index == filtered.back())
@@ -324,6 +315,15 @@ namespace MWRender
                     mFallbackProgram->apply(state);
 
                 drawGeometry(renderInfo);
+
+                if (pass.mRenderTexture && pass.mRenderTexture->getNumMipmapLevels() > 0)
+                {
+                    state.setActiveTextureUnit(0);
+                    state.applyTextureAttribute(0,
+                        pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
+                            .getTexture());
+                    ext->glGenerateMipmap(GL_TEXTURE_2D);
+                }
 
                 state.popStateSet();
                 state.apply();
