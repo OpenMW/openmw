@@ -26,6 +26,15 @@ namespace
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({});
         constexpr VFS::Path::NormalizedView path("sound/foo.wav");
         EXPECT_EQ(correctSoundPath(path, *mVFS), "sound/foo.mp3");
+
+        auto correctESM4SoundPath = [](auto path, auto* vfs) {
+            return Misc::ResourceHelpers::correctResourcePath({ { "sound" } }, path, vfs, ".mp3");
+        };
+
+        EXPECT_EQ(correctESM4SoundPath("foo.WAV", mVFS.get()), "sound\\foo.mp3");
+        EXPECT_EQ(correctESM4SoundPath("SOUND/foo.WAV", mVFS.get()), "sound\\foo.mp3");
+        EXPECT_EQ(correctESM4SoundPath("DATA\\SOUND\\foo.WAV", mVFS.get()), "sound\\foo.mp3");
+        EXPECT_EQ(correctESM4SoundPath("\\Data/Sound\\foo.WAV", mVFS.get()), "sound\\foo.mp3");
     }
 
     namespace

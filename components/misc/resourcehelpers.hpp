@@ -1,11 +1,11 @@
 #ifndef MISC_RESOURCEHELPERS_H
 #define MISC_RESOURCEHELPERS_H
 
-#include <components/vfs/pathutil.hpp>
-
 #include <span>
 #include <string>
 #include <string_view>
+
+#include <components/vfs/pathutil.hpp>
 
 namespace VFS
 {
@@ -25,8 +25,8 @@ namespace Misc
     namespace ResourceHelpers
     {
         bool changeExtensionToDds(std::string& path);
-        std::string correctResourcePath(
-            std::span<const std::string_view> topLevelDirectories, std::string_view resPath, const VFS::Manager* vfs);
+        std::string correctResourcePath(std::span<const std::string_view> topLevelDirectories, std::string_view resPath,
+            const VFS::Manager* vfs, std::string_view ext = {});
         std::string correctTexturePath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctIconPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, const VFS::Manager* vfs);
