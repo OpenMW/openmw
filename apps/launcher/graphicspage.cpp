@@ -240,13 +240,26 @@ void Launcher::GraphicsPage::slotFullScreenChanged(int mode)
 
 void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
 {
-    if (mode == Settings::WindowMode::Fullscreen || mode == Settings::WindowMode::WindowedFullscreen)
+    if (mode == Settings::WindowMode::Fullscreen)
     {
         standardRadioButton->toggle();
         customRadioButton->setEnabled(false);
         customWidthSpinBox->setEnabled(false);
         customHeightSpinBox->setEnabled(false);
         windowBorderCheckBox->setEnabled(false);
+        resolutionComboBox->setEnabled(true);
+    }
+    else if (mode == Settings::WindowMode::WindowedFullscreen)
+    {
+        standardRadioButton->toggle();
+        customRadioButton->setEnabled(false);
+        customWidthSpinBox->setEnabled(false);
+        customHeightSpinBox->setEnabled(false);
+        windowBorderCheckBox->setEnabled(false);
+        resolutionComboBox->setEnabled(false);
+
+        // Assume that a first item is a native screen resolution
+        resolutionComboBox->setCurrentIndex(0);
     }
     else
     {
@@ -254,6 +267,7 @@ void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
         windowBorderCheckBox->setEnabled(true);
+        resolutionComboBox->setEnabled(true);
     }
 }
 
