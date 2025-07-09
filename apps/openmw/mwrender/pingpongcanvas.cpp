@@ -316,7 +316,7 @@ namespace MWRender
 
                 drawGeometry(renderInfo);
 
-                if (pass.mRenderTexture && pass.mRenderTexture->getNumMipmapLevels() > 0)
+                if (pass.mRenderTarget && pass.mRenderTexture->getNumMipmapLevels() > 0)
                 {
                     state.setActiveTextureUnit(0);
                     state.applyTextureAttribute(0,
