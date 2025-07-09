@@ -425,6 +425,18 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</source>
         <translation></translation>
     </message>
+    <message>
+        <source>Custom window size is available only in Windowed mode.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Window border is available only in Windowed mode.</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Windowed Fullscreen mode always uses the native display resolution.</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>Launcher::ImportPage</name>
