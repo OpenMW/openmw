@@ -433,6 +433,8 @@ OMW::Engine::~Engine()
     }
 
     SDL_Quit();
+
+    Log(Debug::Info) << "Quitting peacefully.";
 }
 
 // Set data dir
@@ -1069,8 +1071,6 @@ void OMW::Engine::go()
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
     Settings::ShaderManager::get().save();
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
-
-    Log(Debug::Info) << "Quitting peacefully.";
 }
 
 void OMW::Engine::setCompileAll(bool all)
