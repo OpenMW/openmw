@@ -559,7 +559,7 @@ namespace MWGui
             if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_Y)
             {
                 // Select the highlighted entry in the combo box and close it.
-                int index = mFilterValue->getIndexSelected();
+                size_t index = mFilterValue->getIndexSelected();
                 mFilterValue->setIndexSelected(index);
                 onFilterChanged(mFilterValue, index);
                 MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list

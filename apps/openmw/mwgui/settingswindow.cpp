@@ -1142,7 +1142,7 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
         {
-            uint32_t index = mSettingsTab->getIndexSelected();
+            size_t index = mSettingsTab->getIndexSelected();
             index = wrap(index - 1, mSettingsTab->getItemCount());
             mSettingsTab->setIndexSelected(index);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
@@ -1150,7 +1150,7 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
-            uint32_t index = mSettingsTab->getIndexSelected();
+            size_t index = mSettingsTab->getIndexSelected();
             index = wrap(index + 1, mSettingsTab->getItemCount());
             mSettingsTab->setIndexSelected(index);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
