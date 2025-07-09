@@ -61,6 +61,7 @@ add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
     shapes/box inputactions yamlloader scripttracker luastateptr
     )
+copy_resource_file("lua/util.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/util.lua")
 
 add_component_dir (l10n
     messagebundles manager
