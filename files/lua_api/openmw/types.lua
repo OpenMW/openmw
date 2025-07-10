@@ -1237,10 +1237,10 @@
 
 ---
 -- A read-only list of player's accumulated journal (quest etc.) entries (@{#PlayerJournalTextEntry} elements), ordered from oldest entry to newest.
--- Implements [iterables#list-iterable](iterables.html#list-iterable) of #PlayerJournalTextEntry.
+-- Implements [iterables#list-iterable](iterables.html#list-iterable) of @{#PlayerJournalTextEntry}.
 -- @field [parent=#PlayerJournal] #list<#PlayerJournalTextEntry> journalTextEntries
--- @usage -- The `firstQuestName` variable below is likely to be "Report to Caius Cosades" in vanilla MW
--- local firstQuestName = types.Player.journal(player).journalTextEntries[1].quest
+-- @usage -- The `firstQuestName` variable below is likely to be "a1_1_findspymaster" in vanilla MW
+-- local firstQuestName = types.Player.journal(player).journalTextEntries[1].questId
 -- @usage -- The number of journal entries accumulated in the player journal
 -- local num = #types.Player.journal(player).journalTextEntries
 -- @usage -- Print all journal entries accumulated in the player journal
@@ -1250,7 +1250,7 @@
 
 ---
 -- A read-only table of player's accumulated @{#PlayerJournalTopic}s, indexed by the topic name.
--- Implements [iterables#Map](iterables.html#map-iterable) of #PlayerJournalTopic.
+-- Implements [iterables#Map](iterables.html#map-iterable) of @{#PlayerJournalTopic}.
 -- Topic name index doesn't have to be lowercase.
 -- @field [parent=#PlayerJournal] #map<#string, #PlayerJournalTopic> topics
 -- @usage local record = types.Player.journal(player).topics["my trade"]
@@ -1265,7 +1265,8 @@
 -- A read-only list of player's accumulated conversation lines (@{#PlayerJournalTopicEntry}) for this topic.
 -- Implements [iterables#list-iterable](iterables.html#list-iterable) of #PlayerJournalTopicEntry.
 -- @field [parent=#PlayerJournalTopic] #list<#PlayerJournalTopicEntry> entries
--- @usage -- local firstBackgroundLine = types.Player.journal(player).topics["Background"].entries[1]
+-- @usage -- First NPC topic line entry in the "Background" topic
+-- local firstBackgroundLine = types.Player.journal(player).topics["Background"].entries[1]
 -- @usage -- The number of topic entries accumulated in the player journal for "Vivec"
 -- local num = #types.Player.journal(player).topics["vivec"].entries
 -- @usage -- Print all conversation lines accumulated in the player journal for "Balmora"
@@ -1286,7 +1287,7 @@
 ---
 -- @type PlayerJournalTextEntry
 -- @field #string text Text of this journal entry.
--- @field #string quest Quest id this journal entry is associated with. Can be nil if there is no quest associated with this entry or if journal quest sorting functionality is not available in game.
+-- @field #string questId Quest id this journal entry is associated with. Can be nil if there is no quest associated with this entry or if journal quest sorting functionality is not available in game.
 -- @field #number day Number of the day this journal entry was written at.
 -- @field #number month Number of the month this journal entry was written at.
 -- @field #number dayOfMonth Number of the day in the month this journal entry was written at.
