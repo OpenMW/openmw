@@ -156,6 +156,13 @@ namespace MWGui
         return MWGui::BookTypesetter::Utf8Span(begin, begin + text.length());
     }
 
+    int getCyrillicIndexPageCount()
+    {
+        // For small font size split alphabet to two columns (2x15 characers), for big font size split it to three
+        // colums (3x10 characters).
+        return Settings::gui().mFontSize < 18 ? 2 : 3;
+    }
+
     typedef TypesetBook::Ptr book;
 
     JournalBooks::JournalBooks(JournalViewModel::Ptr model, ToUTF8::FromType encoding)
@@ -277,13 +284,8 @@ namespace MWGui
 
         // for small font size split alphabet to two columns (2x15 characers), for big font size split it to three
         // colums (3x10 characters).
-        int sectionBreak = 10;
-        mIndexPagesCount = 3;
-        if (Settings::gui().mFontSize < 18)
-        {
-            sectionBreak = 15;
-            mIndexPagesCount = 2;
-        }
+        mIndexPagesCount = getCyrillicIndexPageCount();
+        int sectionBreak = 30 / mIndexPagesCount;
 
         unsigned char ch[3] = { 0xd0, 0x90, 0x00 }; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 

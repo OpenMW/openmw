@@ -221,14 +221,8 @@ namespace
             // Latin = 26 (13 + 13)
             mIndexRowCount = 13;
             bool isRussian = (mEncoding == ToUTF8::WINDOWS_1251);
-            if (isRussian)
-            {
-                // This should match the logic in createCyrillicJournalIndex
-                if (Settings::gui().mFontSize < 18)
-                    mIndexRowCount = 15; // Cyrillic = 30 (15 + 15)
-                else
-                    mIndexRowCount = 10; // Cyrillic = 30 (10 + 10 + 10)
-            }
+            if (isRussian) // Cyrillic is either (10 + 10 + 10) or (15 + 15)
+                mIndexRowCount = MWGui::getCyrillicIndexPageCount();
 
             mControllerButtons.a = "#{sSelect}";
             mControllerButtons.x = "#{OMWEngine:JournalQuests}";
