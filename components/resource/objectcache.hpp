@@ -56,9 +56,13 @@ namespace Resource
         /*
          * @brief Updates usage timestamps and removes expired items
          *
-         * Updates the lastUsage timestamp of cached items that have external references.
+         * Updates the lastUsage timestamp of cached non-nullptr items that have external references.
          * Initializes lastUsage timestamp for new items.
          * Removes items that haven't been referenced for longer than expiryDelay.
+         *
+         * \note
+         * Last usage might be updated from other places so nullptr items
+         * that are not referenced elsewhere are not always removed.
          *
          * @param referenceTime the timestamp indicating when the item was most recently used
          * @param expiryDelay the delay after which the cache entry for an item expires
@@ -66,10 +70,8 @@ namespace Resource
         void update(double referenceTime, double expiryDelay)
         {
             std::vector<osg::ref_ptr<osg::Object>> objectsToRemove;
-
             {
                 const double expiryTime = referenceTime - expiryDelay;
-
                 std::lock_guard<std::mutex> lock(mMutex);
 
                 std::erase_if(mItems, [&](auto& v) {
@@ -93,7 +95,6 @@ namespace Resource
                     return true;
                 });
             }
-
             // remove expired items from cache
             objectsToRemove.clear();
         }
