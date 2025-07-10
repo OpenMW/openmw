@@ -898,9 +898,6 @@ namespace MWGui
 
             int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
 
-            Log(Debug::Debug) << "Getting active controller window: mode=" << mode << ", " << state.mWindows.size()
-                              << " window(s), activeIndex=" << activeIndex;
-
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
                 cycleActiveControllerWindow(true);
@@ -2634,7 +2631,7 @@ namespace MWGui
         if (!Settings::gui().mControllerMenus || !mControllerButtonsOverlay)
             return;
 
-        WindowBase* topWin = this->getActiveControllerWindow();
+        WindowBase* topWin = getActiveControllerWindow();
         if (!topWin || !topWin->isVisible())
         {
             mControllerButtonsOverlay->setVisible(false);

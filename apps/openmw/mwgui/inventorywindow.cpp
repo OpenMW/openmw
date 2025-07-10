@@ -977,22 +977,22 @@ namespace MWGui
             case MWGui::GM_Companion:
                 mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{sClose}";
-                mControllerButtons.x = "";
-                mControllerButtons.y = "";
+                mControllerButtons.x.clear();
+                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sCompanionShare}";
                 break;
             case MWGui::GM_Container:
                 mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{sClose}";
                 mControllerButtons.x = "#{sTakeAll}";
-                mControllerButtons.y = "";
+                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sContainer}";
                 break;
             case MWGui::GM_Barter:
                 mControllerButtons.a = "#{sSell}";
                 mControllerButtons.b = "#{sCancel}";
                 mControllerButtons.x = "#{sOffer}";
-                mControllerButtons.y = "";
+                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sBarter}";
                 break;
             case MWGui::GM_Inventory:
@@ -1001,7 +1001,7 @@ namespace MWGui
                 mControllerButtons.b = "#{sBack}";
                 mControllerButtons.x = "#{sDrop}";
                 mControllerButtons.y = "#{sUnequip}";
-                mControllerButtons.r2 = "";
+                mControllerButtons.r2.clear();
                 break;
         }
         return &mControllerButtons;

@@ -99,14 +99,23 @@ namespace MWGui
 
     void ControllerButtonsOverlay::setIcon(MyGUI::ImageBox* image, const std::string& imagePath)
     {
-        if (imagePath.length() > 0)
+        if (!imagePath.empty())
             image->setImageTexture(imagePath);
     }
 
     int ControllerButtonsOverlay::updateButton(
         MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr)
     {
-        if (buttonStr.length() > 0)
+        if (buttonStr.empty())
+        {
+            image->setVisible(false);
+            image->setUserString("Hidden", "true");
+
+            text->setVisible(false);
+            text->setUserString("Hidden", "true");
+            return 0;
+        }
+        else
         {
             image->setVisible(true);
             image->setUserString("Hidden", "false");
@@ -116,15 +125,6 @@ namespace MWGui
             text->setUserString("Hidden", "false");
             text->setSize(text->getTextSize().width + 16, 48);
             return 1;
-        }
-        else
-        {
-            image->setVisible(false);
-            image->setUserString("Hidden", "true");
-
-            text->setVisible(false);
-            text->setUserString("Hidden", "true");
-            return 0;
         }
     }
 }

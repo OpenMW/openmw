@@ -347,6 +347,10 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
+
+    // Morrowind uses 3 px invisible borders for padding topics
+    static constexpr int sVerticalPadding = 3;
+
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
         , mIsCompanion(false)
@@ -603,10 +607,9 @@ namespace MWGui
 
     void DialogueWindow::updateTopicsPane()
     {
-        const std::string focusedTopic
-            = Settings::gui().mControllerMenus && mControllerFocus < static_cast<int>(mTopicsList->getItemCount())
-            ? mTopicsList->getItemNameAt(mControllerFocus)
-            : "";
+        std::string focusedTopic;
+        if (Settings::gui().mControllerMenus && mControllerFocus < static_cast<int>(mTopicsList->getItemCount()))
+            focusedTopic = mTopicsList->getItemNameAt(mControllerFocus);
 
         mTopicsList->clear();
         for (auto& linkPair : mTopicLinks)

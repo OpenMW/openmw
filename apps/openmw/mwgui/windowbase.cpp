@@ -25,7 +25,7 @@ int MWGui::wrap(int index, int max)
         return index;
 }
 
-void MWGui::setControllerFocus(std::vector<MyGUI::Button*> buttons, int index, bool focused)
+void MWGui::setControllerFocus(const std::vector<MyGUI::Button*>& buttons, int index, bool focused)
 {
     if (index >= 0 && index < static_cast<int>(buttons.size()))
         buttons[index]->setStateSelected(focused);

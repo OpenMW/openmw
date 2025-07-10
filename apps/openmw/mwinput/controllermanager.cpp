@@ -538,7 +538,7 @@ namespace MWInput
                 return "textures/omw_steam_button_y.dds";
             case SDL_CONTROLLER_BUTTON_GUIDE:
             default:
-                return "";
+                return {};
         }
     }
 
