@@ -347,7 +347,6 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-
     // Morrowind uses 3 px invisible borders for padding topics
     static constexpr int sVerticalPadding = 3;
 
