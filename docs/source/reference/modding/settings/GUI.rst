@@ -63,6 +63,27 @@ GUI Settings
    If false, assets are centered with black bars filling remainder.
 
 .. omw-setting::
+   :title: controller menus
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
+
+   Make menus easier to navigate with a controller.
+   If false, the controller works as a GUI mouse.
+
+.. omw-setting::
+   :title: controller tooltips
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
+
+   When true, you do not need to press R3 to show tooltips when using
+   controller menus.
+   If false, controller menu tooltips are hidden until R3 is pressed.
+
+.. omw-setting::
    :title: subtitles
    :type: boolean
    :range: true, false
