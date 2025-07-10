@@ -428,6 +428,18 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode misslyckades:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Custom window size is available only in Windowed mode.</source>
+        <translation>Anpassad fönsterstorlek finns endast tillgänglig i fönsterläge.</translation>
+    </message>
+    <message>
+        <source>Window border is available only in Windowed mode.</source>
+        <translation>Fönsterram finns endast tillgänglig i fönsterläge</translation>
+    </message>
+    <message>
+        <source>Windowed Fullscreen mode always uses the native display resolution.</source>
+        <translation>Helskärm i fönsterläge använder alltid skärmens nativa upplösning.</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::ImportPage</name>
