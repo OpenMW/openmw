@@ -1,13 +1,12 @@
 #include "types.hpp"
 
-#include <apps/openmw/mwbase/dialoguemanager.hpp>
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadfact.hpp>
-#include <components/misc/strings/format.hpp>
 
 #include "../birthsignbindings.hpp"
 #include "../luamanagerimp.hpp"
 
+#include "apps/openmw/mwbase/dialoguemanager.hpp"
 #include "apps/openmw/mwbase/inputmanager.hpp"
 #include "apps/openmw/mwbase/journal.hpp"
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
@@ -205,11 +204,10 @@ namespace MWLua
                 = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic);
 
             if (!dialogueRecord)
-                throw std::runtime_error(
-                    Misc::StringUtils::format("Failed to add topic ", topicId, ": topic record not found"));
-            else if (dialogueRecord->mType != ESM::Dialogue::Topic)
-                throw std::runtime_error(
-                    Misc::StringUtils::format("Failed to add topic ", topicId, ": record is not a topic"));
+                throw std::runtime_error("Failed to add topic " + std::string(topicId) + ": topic record not found");
+
+            if (dialogueRecord->mType != ESM::Dialogue::Topic)
+                throw std::runtime_error("Failed to add topic " + std::string(topicId) + ": record is not a topic");
 
             MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
