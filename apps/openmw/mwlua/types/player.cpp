@@ -192,7 +192,8 @@ namespace MWLua
 
     void addJournalClassTopicEntriesListBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto topicEntriesBindingsClass = lua.new_usertype<MWLua::TopicEntries>("MWDialogue_Journal_Topic_WrittenEntries");
+        auto topicEntriesBindingsClass
+            = lua.new_usertype<MWLua::TopicEntries>("MWDialogue_Journal_Topic_WrittenEntries");
         topicEntriesBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::TopicEntries& topicEntries) {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
             const size_t numberOfTopics = std::distance(topic.begin(), topic.end());
