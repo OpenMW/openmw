@@ -204,10 +204,11 @@ namespace MWLua
                 = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic);
 
             if (!dialogueRecord)
-                throw std::runtime_error("Failed to add topic " + std::string(topicId) + ": topic record not found");
+                throw std::runtime_error(
+                    "Failed to add topic \"" + std::string(topicId) + "\": topic record not found");
 
             if (dialogueRecord->mType != ESM::Dialogue::Topic)
-                throw std::runtime_error("Failed to add topic " + std::string(topicId) + ": record is not a topic");
+                throw std::runtime_error("Failed to add topic \"" + std::string(topicId) + "\": record is not a topic");
 
             MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
