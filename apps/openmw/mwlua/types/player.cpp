@@ -146,10 +146,10 @@ namespace MWLua
 
     void addJournalClassTopicsListBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto topicsBindingsClass = lua.new_usertype<MWLua::Topics>("MWLua::Topics");
+        auto topicsBindingsClass = lua.new_usertype<MWLua::Topics>("MWDialogue_Journal_Topics");
         topicsBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::Topics& topicEntriesStore) {
             const size_t numberOfTopics = std::distance(journal->topicBegin(), journal->topicEnd());
-            return "{MWDialogue_Journal: " + std::to_string(numberOfTopics) + " topics}";
+            return "{MWDialogue_Journal_Topics: " + std::to_string(numberOfTopics) + " topics}";
         };
         topicsBindingsClass[sol::meta_function::index]
             = [journal](
@@ -178,9 +178,9 @@ namespace MWLua
 
     void addJournalClassTopicBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto topicBindingsClass = lua.new_usertype<MWDialogue::Topic>("MWDialogue_Topic");
+        auto topicBindingsClass = lua.new_usertype<MWDialogue::Topic>("MWDialogue_Journal_Topic");
         topicBindingsClass[sol::meta_function::to_string] = [](const MWDialogue::Topic& topic) {
-            return "MWDialogue_Topic: \"" + std::string{ topic.getName() } + "\"";
+            return "MWDialogue_Journal_Topic: \"" + std::string{ topic.getName() } + "\"";
         };
         topicBindingsClass["id"]
             = sol::readonly_property([](const MWDialogue::Topic& topic) { return topic.getTopic().serializeText(); });
@@ -192,12 +192,12 @@ namespace MWLua
 
     void addJournalClassTopicEntriesListBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto topicEntriesBindingsClass = lua.new_usertype<MWLua::TopicEntries>("MWDialogue_Topic_TextEntries");
+        auto topicEntriesBindingsClass = lua.new_usertype<MWLua::TopicEntries>("MWDialogue_Journal_Topic_WrittenEntries");
         topicEntriesBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::TopicEntries& topicEntries) {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
             const size_t numberOfTopics = std::distance(topic.begin(), topic.end());
-            return "MWDialogue_Topic \"" + std::string{ topic.getName() }
-            + "\" entries: " + std::to_string(numberOfTopics) + " elements";
+            return "MWDialogue_Journal_Topic_WrittenEntries for \"" + std::string{ topic.getName() }
+            + "\": " + std::to_string(numberOfTopics) + " elements";
         };
         topicEntriesBindingsClass[sol::meta_function::length] = [journal](const MWLua::TopicEntries& topicEntries) {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
@@ -224,9 +224,9 @@ namespace MWLua
 
     void addJournalClassTopicEntryBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto topicEntryBindingsClass = lua.new_usertype<MWDialogue::Entry>("MWDialogue_Topic_Entry");
+        auto topicEntryBindingsClass = lua.new_usertype<MWDialogue::Entry>("MWDialogue_Journal_Topic_WrittenEntry");
         topicEntryBindingsClass[sol::meta_function::to_string] = [](const MWDialogue::Entry& topicEntry) {
-            return "MWDialogue_Topic_Entry: " + topicEntry.mInfoId.toDebugString();
+            return "MWDialogue_Journal_Topic_WrittenEntry: " + topicEntry.mInfoId.toDebugString();
         };
         topicEntryBindingsClass["id"] = sol::readonly_property(
             [](const MWDialogue::Entry& topicEntry) { return topicEntry.mInfoId.serializeText(); });
@@ -238,10 +238,10 @@ namespace MWLua
 
     void addJournalClassJournalEntriesListBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
-        auto journalEntriesBindingsClass = lua.new_usertype<MWLua::JournalEntries>("MWDialogue_Topic_TextEntries");
+        auto journalEntriesBindingsClass = lua.new_usertype<MWLua::JournalEntries>("MWDialogue_Journal_WrittenEntries");
         journalEntriesBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::JournalEntries&) {
             const size_t numberOfEntries = std::distance(journal->begin(), journal->end());
-            return "{MWDialogue_Journal: " + std::to_string(numberOfEntries) + " journal text entries}";
+            return "{MWDialogue_Journal_WrittenEntries: " + std::to_string(numberOfEntries) + " journal text entries}";
         };
         journalEntriesBindingsClass[sol::meta_function::length]
             = [journal](const MWLua::JournalEntries&) { return std::distance(journal->begin(), journal->end()); };
@@ -265,10 +265,10 @@ namespace MWLua
     void addJournalClassJournalEntryBindings(sol::state_view& lua, const MWBase::Journal* journal)
     {
         auto journalEntryBindingsClass
-            = lua.new_usertype<MWDialogue::StampedJournalEntry>("MWDialogue_Topic_TextEntry");
+            = lua.new_usertype<MWDialogue::StampedJournalEntry>("MWDialogue_Journal_WrittenEntry");
         journalEntryBindingsClass[sol::meta_function::to_string]
             = [](const MWDialogue::StampedJournalEntry& journalEntry) {
-                  return "MWDialogue_Journal_TextEntry: " + journalEntry.mTopic.toDebugString();
+                  return "MWDialogue_Journal_WrittenEntry: " + journalEntry.mTopic.toDebugString();
               };
         journalEntryBindingsClass["id"] = sol::readonly_property(
             [](const MWDialogue::StampedJournalEntry& journalEntry) { return journalEntry.mInfoId.serializeText(); });
