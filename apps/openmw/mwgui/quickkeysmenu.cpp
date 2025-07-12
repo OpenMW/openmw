@@ -84,9 +84,8 @@ namespace MWGui
             case ESM::QuickKeys::Type::MagicItem:
             {
                 MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
-                // Make sure the item is available and is not broken
-                if (item.isEmpty() || item.getCellRef().getCount() < 1
-                    || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
+                // Make sure the item is available
+                if (item.isEmpty() || item.getCellRef().getCount() < 1)
                 {
                     // Try searching for a compatible replacement
                     item = store.findReplacement(mKey[index].id);
@@ -384,23 +383,16 @@ namespace MWGui
             if (it == store.end())
                 item = nullptr;
 
-            // check the item is available and not broken
-            if (item.isEmpty() || item.getCellRef().getCount() < 1
-                || (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
+            // check the quickkey item is available
+            if (item.isEmpty() || item.getCellRef().getCount() < 1)
             {
-                item = store.findReplacement(key->id);
-
-                if (item.isEmpty() || item.getCellRef().getCount() < 1)
-                {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
-
-                    return;
-                }
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
+                return;
             }
 
             if (key->type == ESM::QuickKeys::Type::Item)
             {
-                if (!store.isEquipped(item))
+                if (!store.isEquipped(item.getCellRef().getRefId()))
                     MWBase::Environment::get().getWindowManager()->useItem(item);
                 MWWorld::ConstContainerStoreIterator rightHand
                     = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);

@@ -732,6 +732,16 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::ConstPtr& item)
     return false;
 }
 
+bool MWWorld::InventoryStore::isEquipped(const ESM::RefId& id)
+{
+    for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
+        if (getSlot(i) != end() && getSlot(i)->getCellRef().getRefId() == id)
+            return true;
+    }
+    return false;
+}
+
 bool MWWorld::InventoryStore::isFirstEquip()
 {
     bool first = mFirstAutoEquip;

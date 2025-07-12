@@ -21,12 +21,11 @@ namespace MWWorld
         MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
 
-        if (object.getClass().hasItemHealth(object) && object.getCellRef().getCharge() == 0)
+        if (actor != MWMechanics::getPlayer())
         {
-            if (actor == MWMechanics::getPlayer())
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
-
-            return;
+            // player logic is handled in InventoryWindow::useItem
+            if (object.getClass().hasItemHealth(object) && object.getCellRef().getCharge() == 0)
+                return;
         }
 
         if (!mForce)
