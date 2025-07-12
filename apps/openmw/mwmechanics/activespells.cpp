@@ -273,13 +273,14 @@ namespace MWMechanics
         }
 
         bool updateSpellWindow = false;
+        bool playNonLooping = false;
         if (ptr.getClass().hasInventoryStore(ptr)
             && !(creatureStats.isDead() && !creatureStats.isDeathAnimationFinished()))
         {
             auto& store = ptr.getClass().getInventoryStore(ptr);
             if (store.getInvListener() != nullptr)
             {
-                bool playNonLooping = !store.isFirstEquip();
+                playNonLooping = !store.isFirstEquip();
                 const auto world = MWBase::Environment::get().getWorld();
                 for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
                 {
@@ -307,9 +308,6 @@ namespace MWMechanics
                     applyPurges(ptr);
                     ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
                     params.setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
-                    for (const auto& effect : params.mEffects)
-                        MWMechanics::playEffects(
-                            ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
                     updateSpellWindow = true;
                 }
             }
@@ -327,7 +325,7 @@ namespace MWMechanics
             std::optional<ActiveSpellParams> reflected;
             for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
             {
-                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration);
+                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, playNonLooping);
                 if (result.mType == MagicApplicationResult::Type::REFLECTED)
                 {
                     if (!reflected)

@@ -914,7 +914,7 @@ namespace MWMechanics
     }
 
     MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt)
+        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt, bool playNonLooping)
     {
         const auto world = MWBase::Environment::get().getWorld();
         bool invalid = false;
@@ -1032,9 +1032,12 @@ namespace MWMechanics
                 oldMagnitude = effect.mMagnitude;
             else
             {
-                if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Equipment)
-                    && !spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
-                    playEffects(target, *magicEffect, spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary));
+                bool isTemporary = spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary);
+                bool isEquipment = spellParams.hasFlag(ESM::ActiveSpells::Flag_Equipment);
+
+                if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
+                    playEffects(target, *magicEffect, (isTemporary || (isEquipment && playNonLooping)));
+
                 if (effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc()
                     && target.getType() == ESM::Creature::sRecordId
                     && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())

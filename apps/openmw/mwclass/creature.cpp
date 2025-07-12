@@ -360,16 +360,12 @@ namespace MWClass
         {
             stats.setAttacked(true);
 
-            // No retaliation for totally static creatures (they have no movement or attacks anyway)
-            if (isMobile(ptr))
-            {
-                bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
-                bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
-                if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
-                    setOnPcHitMe = false;
-                else
-                    setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
-            }
+            bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+            bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+            if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
+                setOnPcHitMe = false;
+            else
+                setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet

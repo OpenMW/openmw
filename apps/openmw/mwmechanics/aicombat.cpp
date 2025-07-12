@@ -104,10 +104,10 @@ namespace MWMechanics
     bool AiCombat::execute(
         const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        // get or create temporary storage
+        // Get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
 
-        // General description
+        // No combat for dead creatures
         if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
@@ -123,6 +123,13 @@ namespace MWMechanics
 
         if (actor == target) // This should never happen.
             return true;
+
+        // No actions for totally static creatures
+        if (!actor.getClass().isMobile(actor))
+        {
+            storage.mFleeState = AiCombatStorage::FleeState_Idle;
+            return false;
+        }
 
         if (!storage.isFleeing())
         {
