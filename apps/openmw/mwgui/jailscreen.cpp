@@ -23,7 +23,6 @@ namespace MWGui
         : WindowBase("openmw_jail_screen.layout")
         , mDays(1)
         , mFadeTimeRemaining(0)
-        , mTimeAdvancer()
     {
         getWidget(mProgressBar, "ProgressBar");
 

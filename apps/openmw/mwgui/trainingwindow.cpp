@@ -27,7 +27,6 @@ namespace MWGui
 
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
-        , mTimeAdvancer()
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");
