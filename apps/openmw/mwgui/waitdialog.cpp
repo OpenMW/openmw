@@ -52,7 +52,7 @@ namespace MWGui
 
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
-        , mTimeAdvancer(0.05f)
+        , mTimeAdvancer()
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)

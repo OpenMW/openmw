@@ -2,13 +2,12 @@
 
 namespace MWGui
 {
-    TimeAdvancer::TimeAdvancer(float delay)
+    TimeAdvancer::TimeAdvancer()
         : mRunning(false)
         , mCurHour(0)
         , mHours(1)
         , mInterruptAt(-1)
-        , mDelay(delay)
-        , mRemainingTime(delay)
+        , mRemainingTime(mDelay)
     {
     }
 
