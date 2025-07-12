@@ -32,7 +32,6 @@ namespace MWGui
         int mHours;
         int mInterruptAt;
 
-        static constexpr float mDelay = 1.0f / 60.0f;
         float mRemainingTime;
     };
 }
