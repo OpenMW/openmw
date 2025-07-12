@@ -911,13 +911,21 @@ namespace
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // LB: Previous Page
             {
-                if (!mOptionsMode)
+                // Scroll through the list of quests or topics
+                if (mOptionsMode && (mQuestMode || mTopicsMode))
+                    setControllerFocusedQuest(std::max(int(mSelectedQuest) - 5, 0));
+                // Page through the journal
+                else if (!mOptionsMode)
                     notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
                 return true;
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) // RB: Next Page
             {
-                if (!mOptionsMode)
+                // Scroll through the list of quests or topics
+                if (mOptionsMode && (mQuestMode || mTopicsMode))
+                    setControllerFocusedQuest(std::min(mSelectedQuest + 5, mButtons.size() - 1));
+                // Page through the journal
+                else if (!mOptionsMode)
                     notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
                 return true;
             }

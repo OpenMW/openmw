@@ -389,14 +389,19 @@ namespace MWGui
         else if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
         {
             // Jump to first item in next group
+            int newFocus = mControllerFocus;
             for (int groupIndex : mGroupIndices)
             {
                 if (groupIndex > mControllerFocus)
                 {
-                    mControllerFocus = groupIndex;
+                    newFocus = groupIndex;
                     break;
                 }
             }
+            // If on last group, jump to bottom of whole list
+            if (newFocus == mControllerFocus)
+                newFocus = mButtons.size() - 1;
+            mControllerFocus = newFocus;
         }
 
         mControllerFocus = wrap(mControllerFocus, mButtons.size());
