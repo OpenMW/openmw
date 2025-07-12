@@ -605,10 +605,6 @@ namespace MWMechanics
     void Actors::engageCombat(
         const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, SidingCache& cachedAllies, bool againstPlayer) const
     {
-        // No combat for totally static creatures
-        if (!actor1.getClass().isMobile(actor1))
-            return;
-
         CreatureStats& creatureStats1 = actor1.getClass().getCreatureStats(actor1);
         if (creatureStats1.isDead() || creatureStats1.getAiSequence().isInCombat(actor2))
             return;
