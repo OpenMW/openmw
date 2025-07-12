@@ -8,7 +8,7 @@ namespace MWGui
     class TimeAdvancer
     {
     public:
-        TimeAdvancer(float delay);
+        TimeAdvancer();
 
         void run(int hours, int interruptAt = -1);
         void stop();
@@ -32,7 +32,6 @@ namespace MWGui
         int mHours;
         int mInterruptAt;
 
-        float mDelay;
         float mRemainingTime;
     };
 }
