@@ -74,7 +74,7 @@ namespace MWGui
         void unassign(keyData* key);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        size_t mControllerFocus;
     };
 
     class QuickKeysMenuAssign : public WindowModal

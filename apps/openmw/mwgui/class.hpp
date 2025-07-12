@@ -51,7 +51,7 @@ namespace MWGui
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;
         std::vector<MyGUI::Button*> mButtons;
-        int mControllerFocus = 0;
+        size_t mControllerFocus;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -218,7 +218,7 @@ namespace MWGui
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        size_t mControllerFocus;
         std::vector<Widgets::MWAttribute*> mAttributeButtons;
 
     private:
@@ -252,7 +252,7 @@ namespace MWGui
         void onSkillClicked(Widgets::MWSkillPtr _sender);
         void onCancelClicked(MyGUI::Widget* _sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        size_t mControllerFocus;
         std::vector<Widgets::MWSkill*> mSkillButtons;
 
     private:
@@ -350,7 +350,7 @@ namespace MWGui
         Widgets::MWSkillPtr mAffectedSkill;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus = 2;
+        size_t mControllerFocus;
     };
 }
 #endif

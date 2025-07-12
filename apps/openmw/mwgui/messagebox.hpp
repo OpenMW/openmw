@@ -93,7 +93,7 @@ namespace MWGui
     {
     public:
         InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-            const std::vector<std::string>& buttons, bool immediate, int defaultFocus);
+            const std::vector<std::string>& buttons, bool immediate, size_t defaultFocus);
         void mousePressed(MyGUI::Widget* _widget);
         int readPressedButton();
 
@@ -114,9 +114,9 @@ namespace MWGui
         std::vector<MyGUI::Button*> mButtons;
 
         int mButtonPressed;
-        int mDefaultFocus;
+        size_t mDefaultFocus;
         bool mImmediate;
-        int mControllerFocus = 0;
+        size_t mControllerFocus;
     };
 
 }

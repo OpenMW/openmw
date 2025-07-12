@@ -27,6 +27,7 @@ namespace MWGui
     SpellBuyingWindow::SpellBuyingWindow()
         : WindowBase("openmw_spell_buying_window.layout")
         , mCurrentY(0)
+        , mControllerFocus(0)
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
@@ -229,7 +230,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSpellButtons.size()))
+            if (mControllerFocus < mSpellButtons.size())
                 onSpellButtonClick(mSpellButtons[mControllerFocus].first);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -261,7 +262,7 @@ namespace MWGui
             mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
 
-        if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSpellButtons.size()))
+        if (mControllerFocus < mSpellButtons.size())
         {
             // Scroll the list to keep the active item in view
             int line = mSpellButtons[mControllerFocus].second;

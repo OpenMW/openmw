@@ -386,7 +386,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mAttributeButtons.size()))
+            if (mControllerFocus < mAttributeButtons.size())
                 onAttributeClicked(mAttributeButtons[mControllerFocus]);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
         }

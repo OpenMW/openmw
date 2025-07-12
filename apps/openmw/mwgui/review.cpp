@@ -36,6 +36,7 @@ namespace MWGui
     ReviewDialog::ReviewDialog()
         : WindowModal("openmw_chargen_review.layout")
         , mUpdateSkillArea(false)
+        , mControllerFocus(5)
     {
         // Centre dialog
         center();

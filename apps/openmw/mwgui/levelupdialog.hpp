@@ -52,7 +52,7 @@ namespace MWGui
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         std::vector<MyGUI::Button*> mAttributeButtons;
-        int mControllerFocus;
+        size_t mControllerFocus;
     };
 
 }

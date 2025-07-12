@@ -27,7 +27,7 @@ namespace MWGui
 
         MWWorld::Ptr mActor;
 
-        int mControllerFocus;
+        size_t mControllerFocus;
 
     protected:
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);

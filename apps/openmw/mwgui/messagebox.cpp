@@ -218,7 +218,7 @@ namespace MWGui
     }
 
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-        const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
+        const std::vector<std::string>& buttons, bool immediate, size_t defaultFocus)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
                 ? "openmw_interactive_messagebox_notransp.layout"
                 : "openmw_interactive_messagebox.layout")
@@ -226,6 +226,7 @@ namespace MWGui
         , mButtonPressed(-1)
         , mDefaultFocus(defaultFocus)
         , mImmediate(immediate)
+        , mControllerFocus(0)
     {
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
@@ -290,9 +291,9 @@ namespace MWGui
             if (mButtons.size() > 1)
             {
                 mControllerFocus = 0;
-                if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+                if (mDefaultFocus < mButtons.size())
                     mControllerFocus = mDefaultFocus;
-                for (int i = 0; i < static_cast<int>(mButtons.size()); ++i)
+                for (size_t i = 0; i < mButtons.size(); ++i)
                     mButtons[i]->setStateSelected(i == mControllerFocus);
             }
         }
@@ -397,7 +398,7 @@ namespace MWGui
 
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
-        if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+        if (mDefaultFocus < mButtons.size())
             return mButtons[mDefaultFocus];
         auto& languageManager = MyGUI::LanguageManager::getInstance();
         std::vector<MyGUI::UString> keywords{ languageManager.replaceTags("#{sOk}"),
@@ -452,8 +453,12 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            mControllerFocus = std::clamp(mControllerFocus, 0, static_cast<int>(mButtons.size()) - 1);
-            buttonActivated(mButtons[mControllerFocus]);
+            if (!mButtons.empty())
+            {
+                if (mControllerFocus >= mButtons.size())
+                    mControllerFocus = mButtons.size() - 1;
+                buttonActivated(mButtons[mControllerFocus]);
+            }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
@@ -475,7 +480,7 @@ namespace MWGui
         {
             if (mButtons.size() <= 1)
                 return true;
-            if (mButtons.size() == 2 && mControllerFocus == static_cast<int>(mButtons.size()) - 1)
+            if (mButtons.size() == 2 && mControllerFocus == 1)
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);

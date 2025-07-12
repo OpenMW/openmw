@@ -39,7 +39,7 @@ namespace MWGui
         , mKey(std::vector<keyData>(10))
         , mSelected(nullptr)
         , mActivated(nullptr)
-
+        , mControllerFocus(0)
     {
         getWidget(mOkButton, "OKButton");
         getWidget(mInstructionLabel, "InstructionLabel");
@@ -118,7 +118,7 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mControllerFocus = 0;
-            for (int i = 0; i < static_cast<int>(mKey.size()); i++)
+            for (size_t i = 0; i < mKey.size(); i++)
                 mKey[i].button->setControllerFocus(i == mControllerFocus);
         }
     }
@@ -490,7 +490,7 @@ namespace MWGui
                 mControllerFocus++;
         }
 
-        for (int i = 0; i < static_cast<int>(mKey.size()); i++)
+        for (size_t i = 0; i < mKey.size(); i++)
             mKey[i].button->setControllerFocus(i == mControllerFocus);
 
         return true;
@@ -501,6 +501,7 @@ namespace MWGui
     QuickKeysMenuAssign::QuickKeysMenuAssign(QuickKeysMenu* parent)
         : WindowModal("openmw_quickkeys_menu_assign.layout")
         , mParent(parent)
+        , mControllerFocus(0)
     {
         getWidget(mLabel, "Label");
         getWidget(mItemButton, "ItemButton");

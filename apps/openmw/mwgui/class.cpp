@@ -383,6 +383,7 @@ namespace MWGui
 
     InfoBoxDialog::InfoBoxDialog()
         : WindowModal("openmw_infobox.layout")
+        , mControllerFocus(0)
     {
         getWidget(mTextBox, "TextBox");
         getWidget(mText, "Text");
@@ -467,7 +468,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
+            if (mControllerFocus < mButtons.size())
                 onButtonClicked(mButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -490,7 +491,7 @@ namespace MWGui
         {
             if (mButtons.size() <= 1)
                 return true;
-            if (mButtons.size() == 2 && mControllerFocus == static_cast<int>(mButtons.size()) - 1)
+            if (mButtons.size() == 2 && mControllerFocus == 1)
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
@@ -524,6 +525,7 @@ namespace MWGui
         : WindowModal("openmw_chargen_create_class.layout")
         , mAffectedAttribute(nullptr)
         , mAffectedSkill(nullptr)
+        , mControllerFocus(2)
     {
         // Centre dialog
         center();
@@ -992,7 +994,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mAttributeButtons.size()))
+            if (mControllerFocus < mAttributeButtons.size())
                 onAttributeClicked(mAttributeButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -1094,7 +1096,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mSkillButtons.size()))
+            if (mControllerFocus < mSkillButtons.size())
                 onSkillClicked(mSkillButtons[mControllerFocus]);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)

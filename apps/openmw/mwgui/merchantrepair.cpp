@@ -178,7 +178,7 @@ namespace MWGui
     {
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
+            if (mControllerFocus < mButtons.size())
                 onRepairButtonClick(mButtons[mControllerFocus].first);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
@@ -205,7 +205,7 @@ namespace MWGui
         }
 
         // Scroll the list to keep the active item in view
-        if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
+        if (mControllerFocus < mButtons.size())
         {
             int line = mButtons[mControllerFocus].second;
             if (line <= 5)
