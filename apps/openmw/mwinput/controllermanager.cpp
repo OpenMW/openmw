@@ -467,29 +467,20 @@ namespace MWInput
 
     int ControllerManager::getControllerType()
     {
-        int type = 0;
-#if SDL_VERSION_ATLEAST(2, 0, 12)
         SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
         if (cntrl)
-            type = SDL_GameControllerGetType(cntrl);
-#endif
-        return type;
+            return SDL_GameControllerGetType(cntrl);
+        return 0;
     }
 
     std::string ControllerManager::getControllerButtonIcon(int button)
     {
         int controllerType = ControllerManager::getControllerType();
 
-        bool isXbox = false;
-        bool isPsx = false;
-        bool isSwitch = false;
-
-#if SDL_VERSION_ATLEAST(2, 0, 12)
-        isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
-        isPsx = controllerType == SDL_CONTROLLER_TYPE_PS3 || controllerType == SDL_CONTROLLER_TYPE_PS4
-            || controllerType == SDL_CONTROLLER_TYPE_PS5;
-        isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
-#endif
+        bool isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        bool isPsx = controllerType == SDL_CONTROLLER_TYPE_PS3 || controllerType == SDL_CONTROLLER_TYPE_PS4
+            || controllerType == SDL_CONTROLLER_TYPE_PS5;;
+        bool isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
 
         switch (button)
         {
@@ -546,13 +537,8 @@ namespace MWInput
     {
         int controllerType = ControllerManager::getControllerType();
 
-        bool isXbox = false;
-        bool isSwitch = false;
-
-#if SDL_VERSION_ATLEAST(2, 0, 12)
-        isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
-        isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
-#endif
+        bool isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        bool isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
 
         switch (axis)
         {
