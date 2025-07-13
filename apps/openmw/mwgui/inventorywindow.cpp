@@ -349,10 +349,10 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
-            if (mPendingControllerAction == ControllerAction::Drop)
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dropItem);
-            else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dropItem);
             else if (MyGUI::InputManager::getInstance().isAltPressed()
                 || mPendingControllerAction == ControllerAction::Transfer)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::transferItem);
@@ -365,7 +365,9 @@ namespace MWGui
         {
             mSelectedItem = index;
 
-            if (mPendingControllerAction == ControllerAction::Use)
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
+                sellItem(nullptr, count);
+            else if (mPendingControllerAction == ControllerAction::Use)
             {
                 // Drag and drop the item on the avatar to activate it.
                 dragItem(nullptr, count);
@@ -382,8 +384,6 @@ namespace MWGui
             }
             else if (mPendingControllerAction == ControllerAction::Drop)
                 dropItem(nullptr, count);
-            else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
-                sellItem(nullptr, count);
             else if (MyGUI::InputManager::getInstance().isAltPressed()
                 || mPendingControllerAction == ControllerAction::Transfer)
                 transferItem(nullptr, count);
