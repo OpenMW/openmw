@@ -79,6 +79,7 @@ namespace MWMechanics
         bool mUpdatedHitOverlay = false;
         bool mUpdateSpellWindow = false;
         bool mPlayNonLooping = false;
+        bool mEraseRemoved = false;
         bool mUpdate;
 
         UpdateContext(bool update)
@@ -327,6 +328,7 @@ namespace MWMechanics
 
         const MWWorld::Ptr player = MWMechanics::getPlayer();
         // Update effects
+        context.mEraseRemoved = true;
         for (auto spellIt = mSpells.begin(); spellIt != mSpells.end();)
         {
             updateActiveSpell(ptr, duration, spellIt, context);
@@ -411,45 +413,48 @@ namespace MWMechanics
         if (removedSpell)
             return true;
 
-        bool remove = false;
-        if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
+        if (context.mEraseRemoved)
         {
-            try
+            bool remove = false;
+            if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
             {
-                auto& spells = ptr.getClass().getCreatureStats(ptr).getSpells();
-                remove = !spells.hasSpell(spellIt->mSourceSpellId);
-            }
-            catch (const std::runtime_error& e)
-            {
-                remove = true;
-                Log(Debug::Error) << "Removing active effect: " << e.what();
-            }
-        }
-        else if (spellIt->hasFlag(ESM::ActiveSpells::Flag_Equipment))
-        {
-            // Remove effects tied to equipment that has been unequipped
-            const auto& store = ptr.getClass().getInventoryStore(ptr);
-            remove = true;
-            for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
-            {
-                auto slot = store.getSlot(slotIndex);
-                if (slot != store.end() && slot->getCellRef().getRefNum().isSet()
-                    && slot->getCellRef().getRefNum() == spellIt->mItem)
+                try
                 {
-                    remove = false;
-                    break;
+                    auto& spells = ptr.getClass().getCreatureStats(ptr).getSpells();
+                    remove = !spells.hasSpell(spellIt->mSourceSpellId);
+                }
+                catch (const std::runtime_error& e)
+                {
+                    remove = true;
+                    Log(Debug::Error) << "Removing active effect: " << e.what();
                 }
             }
-        }
-        if (remove)
-        {
-            auto params = *spellIt;
-            spellIt = mSpells.erase(spellIt);
-            for (const auto& effect : params.mEffects)
-                onMagicEffectRemoved(ptr, params, effect);
-            applyPurges(ptr, &spellIt);
-            context.mUpdateSpellWindow = true;
-            return true;
+            else if (spellIt->hasFlag(ESM::ActiveSpells::Flag_Equipment))
+            {
+                // Remove effects tied to equipment that has been unequipped
+                const auto& store = ptr.getClass().getInventoryStore(ptr);
+                remove = true;
+                for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
+                {
+                    auto slot = store.getSlot(slotIndex);
+                    if (slot != store.end() && slot->getCellRef().getRefNum().isSet()
+                        && slot->getCellRef().getRefNum() == spellIt->mItem)
+                    {
+                        remove = false;
+                        break;
+                    }
+                }
+            }
+            if (remove)
+            {
+                auto params = *spellIt;
+                spellIt = mSpells.erase(spellIt);
+                for (const auto& effect : params.mEffects)
+                    onMagicEffectRemoved(ptr, params, effect);
+                applyPurges(ptr, &spellIt);
+                context.mUpdateSpellWindow = true;
+                return true;
+            }
         }
         ++spellIt;
         return false;
