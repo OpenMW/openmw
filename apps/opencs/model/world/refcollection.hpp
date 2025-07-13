@@ -1,6 +1,7 @@
 #ifndef CSM_WOLRD_REFCOLLECTION_H
 #define CSM_WOLRD_REFCOLLECTION_H
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
@@ -40,8 +41,11 @@ namespace CSMWorld
         std::map<unsigned int, int> mRefIndex; // CellRef index keyed by CSMWorld::CellRef::mIdNum
 
         int mNextId;
+        uint32_t mHighestUsedRefNum = 0;
 
         unsigned int extractIdNum(std::string_view id) const;
+
+        uint32_t getNextRefNum();
 
         int getIntIndex(unsigned int id) const;
 
