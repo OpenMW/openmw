@@ -6,6 +6,7 @@
 #include "../birthsignbindings.hpp"
 #include "../luamanagerimp.hpp"
 
+#include "apps/openmw/mwbase/dialoguemanager.hpp"
 #include "apps/openmw/mwbase/inputmanager.hpp"
 #include "apps/openmw/mwbase/journal.hpp"
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
@@ -194,6 +195,22 @@ namespace MWLua
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
             MWBase::Environment::get().getWorld()->enableTeleporting(state);
+        };
+        player["addTopic"] = [](const Object& player, std::string_view topicId) {
+            verifyPlayer(player);
+
+            ESM::RefId topic = ESM::RefId::deserializeText(topicId);
+            const ESM::Dialogue* dialogueRecord
+                = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topic);
+
+            if (!dialogueRecord)
+                throw std::runtime_error(
+                    "Failed to add topic \"" + std::string(topicId) + "\": topic record not found");
+
+            if (dialogueRecord->mType != ESM::Dialogue::Topic)
+                throw std::runtime_error("Failed to add topic \"" + std::string(topicId) + "\": record is not a topic");
+
+            MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
         player["sendMenuEvent"] = [context](const Object& player, std::string eventName, const sol::object& eventData) {
             verifyPlayer(player);
