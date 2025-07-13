@@ -336,7 +336,8 @@ namespace MWGui
 
         // Show a dialog to select a count of items, but not when using an item from the inventory
         // in controller mode. In that case, we skip the dialog and just use one item immediately.
-        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use)
+        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use
+            && mPendingControllerAction != ControllerAction::Unequip)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sTake}";
@@ -371,6 +372,12 @@ namespace MWGui
                 onAvatarClicked(nullptr); // Equip or use
                 // Drop any remaining items back in inventory. This is needed when clicking on a
                 // stack of items; we only want to use the first item.
+                onBackgroundSelected();
+            }
+            else if (mPendingControllerAction == ControllerAction::Unequip)
+            {
+                // Drop on inventory background to unequip
+                dragItem(nullptr, count);
                 onBackgroundSelected();
             }
             else if (mPendingControllerAction == ControllerAction::Drop)
@@ -1059,8 +1066,8 @@ namespace MWGui
             if (mGuiMode == MWGui::GM_Inventory)
             {
                 // Unequip an item.
+                mPendingControllerAction = ControllerAction::Unequip;
                 mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
-                onBackgroundSelected(); // Drop on inventory background to unequip
             }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
