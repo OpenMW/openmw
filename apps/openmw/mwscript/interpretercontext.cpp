@@ -309,8 +309,9 @@ namespace MWScript
             return "%";
         }
 
-        const ESM::NPC* npc = ptr.get<ESM::NPC>()->mBase;
-        const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc->mFaction);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::ESMStore& store = world->getStore();
+        const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
         return faction->mName;
     }
 
