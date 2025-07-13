@@ -334,7 +334,7 @@ namespace MWScript
         if (rank < 0 || rank > 9)
         {
             Log(Debug::Warning) << "getNPCRank(): NPC " << ptr.mRef->mRef.getRefId() << " has invalid rank " << rank
-                                << " in faction " << faction->mName;
+                                << " in faction " << factionId;
             return "%";
         }
         return faction->mRanks[rank];
