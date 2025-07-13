@@ -306,7 +306,7 @@ namespace MWScript
         const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
         if (factionId.empty())
         {
-            Log(Debug::Warning) << "getNPCFaction(): NPC " << ptrClass.getName(ptr) << " has no primary faction";
+            Log(Debug::Warning) << "getNPCFaction(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
             return "%";
         }
 
@@ -322,7 +322,7 @@ namespace MWScript
         const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
         if (factionId.empty())
         {
-            Log(Debug::Warning) << "getNPCRank(): NPC " << ptrClass.getName(ptr) << " has no primary faction";
+            Log(Debug::Warning) << "getNPCRank(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
             return "%";
         }
 
@@ -333,7 +333,7 @@ namespace MWScript
         int rank = ptrClass.getPrimaryFactionRank(ptr);
         if (rank < 0 || rank > 9)
         {
-            Log(Debug::Warning) << "getNPCRank(): NPC " << ptrClass.getName(ptr) << " has invalid rank " << rank
+            Log(Debug::Warning) << "getNPCRank(): NPC " << ptr.mRef->mRef.getRefId() << " has invalid rank " << rank
                                 << " in faction " << faction->mName;
             return "%";
         }
@@ -367,7 +367,7 @@ namespace MWScript
         const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
         if (factionId.empty())
         {
-            Log(Debug::Warning) << "getPCRank(): NPC " << ptrClass.getName(ptr) << " has no primary faction";
+            Log(Debug::Warning) << "getPCRank(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
             return "%";
         }
 
@@ -400,7 +400,7 @@ namespace MWScript
         const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
         if (factionId.empty())
         {
-            Log(Debug::Warning) << "getPCNextRank(): NPC " << ptrClass.getName(ptr) << " has no primary faction";
+            Log(Debug::Warning) << "getPCNextRank(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
             return "%";
         }
 
