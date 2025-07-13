@@ -316,13 +316,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
             }
 
             ESM::RefId streamId = ESM::RefId::stringRefId(stream.str());
-            if (refRecord.mNew || refRecord.mRefNum.mIndex == 0
-                || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly && refRecord.mCell != streamId))
-            {
-                refRecord.mRefNum.mIndex = newRefNum++;
-            }
-            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != streamId
-                && !interior)
+            if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != streamId && !interior)
             {
                 // An empty mOriginalCell is meant to indicate that it is the same as
                 // the current cell.  It is possible that a moved ref is moved again.
