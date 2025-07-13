@@ -131,7 +131,6 @@ namespace NifOsg
                 case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
                 case Nif::InterpolationType_Quadratic:
-                case Nif::InterpolationType_TCB:
                 {
                     // Using a cubic Hermite spline.
                     // b1(t) = 2t^3  - 3t^2 + 1
@@ -148,6 +147,7 @@ namespace NifOsg
                     const float b4 = t3 - t2;
                     return a.mValue * b1 + b.mValue * b2 + a.mOutTan * b3 + b.mInTan * b4;
                 }
+                // TODO: Implement TBC interpolation
                 default:
                     return a.mValue + ((b.mValue - a.mValue) * fraction);
             }
