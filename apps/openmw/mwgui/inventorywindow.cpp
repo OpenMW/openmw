@@ -38,6 +38,7 @@
 #include "draganddrop.hpp"
 #include "hud.hpp"
 #include "inventoryitemmodel.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "settings.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -78,10 +79,11 @@ namespace MWGui
         }
     }
 
-    InventoryWindow::InventoryWindow(
-        DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+    InventoryWindow::InventoryWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, osg::Group* parent,
+        Resource::ResourceSystem* resourceSystem)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mSelectedItem(-1)
         , mSortModel(nullptr)
         , mTradeModel(nullptr)
@@ -346,14 +348,16 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
-            if (mPendingControllerAction == ControllerAction::Give)
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::giveItem);
-            else if (mPendingControllerAction == ControllerAction::Drop)
+            if (mPendingControllerAction == ControllerAction::Drop)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dropItem);
             else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
+            else if (MyGUI::InputManager::getInstance().isAltPressed()
+                || mPendingControllerAction == ControllerAction::Transfer)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
+
             mSelectedItem = index;
         }
         else
@@ -369,12 +373,13 @@ namespace MWGui
                 // stack of items; we only want to use the first item.
                 onBackgroundSelected();
             }
-            else if (mPendingControllerAction == ControllerAction::Give)
-                giveItem(nullptr, count);
             else if (mPendingControllerAction == ControllerAction::Drop)
                 dropItem(nullptr, count);
             else if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 sellItem(nullptr, count);
+            else if (MyGUI::InputManager::getInstance().isAltPressed()
+                || mPendingControllerAction == ControllerAction::Transfer)
+                transferItem(nullptr, count);
             else
                 dragItem(nullptr, count);
         }
@@ -415,14 +420,21 @@ namespace MWGui
         }
     }
 
-    void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
         notifyContentChanged();
     }
 
-    void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
+    {
+        ensureSelectedItemUnequipped(count);
+        mItemTransfer->apply(mTradeModel->getItem(mSelectedItem), count, *mItemView);
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
@@ -446,32 +458,7 @@ namespace MWGui
         notifyContentChanged();
     }
 
-    void InventoryWindow::giveItem(MyGUI::Widget* sender, int count)
-    {
-        if (!mDragAndDrop->mIsOnDragAndDrop)
-            dragItem(sender, count);
-
-        if (mGuiMode == MWGui::GM_Companion && mDragAndDrop->mIsOnDragAndDrop)
-        {
-            // Drag and drop the item on the companion's window.
-            MWGui::CompanionWindow* companionWindow = (MWGui::CompanionWindow*)MWBase::Environment::get()
-                                                          .getWindowManager()
-                                                          ->getGuiModeWindows(mGuiMode)
-                                                          .at(1);
-            mDragAndDrop->drop(companionWindow->getModel(), companionWindow->getItemView());
-        }
-        else if (mGuiMode == MWGui::GM_Container && mDragAndDrop->mIsOnDragAndDrop)
-        {
-            // Drag and drop the item on the container window.
-            MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
-                                                          .getWindowManager()
-                                                          ->getGuiModeWindows(mGuiMode)
-                                                          .at(0);
-            mDragAndDrop->drop(containerWindow->getModel(), containerWindow->getItemView());
-        }
-    }
-
-    void InventoryWindow::dropItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::dropItem(MyGUI::Widget* sender, size_t count)
     {
         if (mGuiMode != MWGui::GM_Inventory)
             return;
@@ -507,6 +494,13 @@ namespace MWGui
             notifyContentChanged();
         }
         adjustPanes();
+
+        mItemTransfer->addTarget(*mItemView);
+    }
+
+    void InventoryWindow::onClose()
+    {
+        mItemTransfer->removeTarget(*mItemView);
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -868,7 +862,16 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
             mDragAndDrop->finish();
 
-        mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+        if (MyGUI::InputManager::getInstance().isAltPressed())
+        {
+            const MWWorld::Ptr item = mTradeModel->getItem(i).mBase;
+            MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+            mItemView->update();
+        }
+        else
+        {
+            mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+        }
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
@@ -1017,7 +1020,7 @@ namespace MWGui
             if (mGuiMode == MWGui::GM_Inventory)
                 mPendingControllerAction = ControllerAction::Use;
             else if (mGuiMode == MWGui::GM_Companion || mGuiMode == MWGui::GM_Container)
-                mPendingControllerAction = ControllerAction::Give;
+                mPendingControllerAction = ControllerAction::Transfer;
             else if (mGuiMode == MWGui::GM_Barter)
                 mPendingControllerAction = ControllerAction::Sell;
 

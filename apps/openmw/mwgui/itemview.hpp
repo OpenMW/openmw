@@ -18,6 +18,8 @@ namespace MWGui
         /// Register needed components with MyGUI's factory manager
         static void registerComponents();
 
+        ItemModel* getModel() { return mModel.get(); }
+
         /// Takes ownership of \a model
         void setModel(std::unique_ptr<ItemModel> model);
 

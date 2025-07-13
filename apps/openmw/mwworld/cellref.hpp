@@ -244,6 +244,18 @@ namespace MWWorld
                 return std::abs(count);
             return count;
         }
+
+        unsigned getAbsCount() const
+        {
+            struct Visitor
+            {
+                int operator()(const ESM::CellRef& ref) { return ref.mCount; }
+                int operator()(const ESM4::Reference& ref) { return ref.mCount; }
+                int operator()(const ESM4::ActorCharacter& ref) { return ref.mCount; }
+            };
+            return static_cast<unsigned>(std::abs(std::visit(Visitor(), mCellRef.mVariant)));
+        }
+
         void setCount(int value);
 
         // Write the content of this CellRef into the given ObjectState

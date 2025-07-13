@@ -16,7 +16,7 @@
 #include "companionitemmodel.hpp"
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
-#include "inventorywindow.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "messagebox.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -41,13 +41,14 @@ namespace
 namespace MWGui
 {
 
-    CompanionWindow::CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager)
+    CompanionWindow::CompanionWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, MessageBoxManager* manager)
         : WindowBase("openmw_companion_window.layout")
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
         , mUpdateNextFrame(false)
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mMessageBoxManager(manager)
     {
         getWidget(mCloseButton, "CloseButton");
@@ -102,13 +103,13 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            if (Settings::gui().mControllerMenus)
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::takeItem);
+            if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
         }
-        else if (Settings::gui().mControllerMenus)
-            takeItem(nullptr, count);
+        else if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+            transferItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
@@ -119,32 +120,14 @@ namespace MWGui
         mItemView->update();
     }
 
-    void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
+    void CompanionWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
 
-    void CompanionWindow::takeItem(MyGUI::Widget* sender, int count)
+    void CompanionWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        if (!mModel)
-            return;
-
-        const ItemStack& item = mModel->getItem(mSelectedItem);
-        if (!mModel->onTakeItem(item.mBase, count))
-            return;
-
-        MWGui::InventoryWindow* inventoryWindow = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
-        ItemModel* playerModel = inventoryWindow->getModel();
-
-        mModel->moveItem(item, count, playerModel);
-
-        inventoryWindow->updateItemView();
-        mItemView->update();
-
-        // play the item's sound
-        MWWorld::Ptr itemBase = item.mBase;
-        const ESM::RefId& sound = itemBase.getClass().getUpSoundId(itemBase);
-        MWBase::Environment::get().getWindowManager()->playSound(sound);
+        mItemTransfer->apply(mModel->getItem(mSelectedItem), count, *mItemView);
     }
 
     void CompanionWindow::onBackgroundSelected()
@@ -255,6 +238,16 @@ namespace MWGui
     void CompanionWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
     {
         mUpdateNextFrame = true;
+    }
+
+    void CompanionWindow::onOpen()
+    {
+        mItemTransfer->addTarget(*mItemView);
+    }
+
+    void CompanionWindow::onClose()
+    {
+        mItemTransfer->removeTarget(*mItemView);
     }
 
     bool CompanionWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

@@ -25,67 +25,12 @@
 
 #include "draganddrop.hpp"
 #include "inventorywindow.hpp"
-#include "itemmodel.hpp"
-#include "spellicons.hpp"
-
 #include "itemwidget.hpp"
+#include "spellicons.hpp"
+#include "worlditemmodel.hpp"
 
 namespace MWGui
 {
-
-    /**
-     * Makes it possible to use ItemModel::moveItem to move an item from an inventory to the world.
-     */
-    class WorldItemModel : public ItemModel
-    {
-    public:
-        WorldItemModel(float left, float top)
-            : mLeft(left)
-            , mTop(top)
-        {
-        }
-        virtual ~WorldItemModel() override {}
-
-        MWWorld::Ptr dropItemImpl(const ItemStack& item, size_t count, bool copy)
-        {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-
-            MWWorld::Ptr dropped;
-            if (world->canPlaceObject(mLeft, mTop))
-                dropped = world->placeObject(item.mBase, mLeft, mTop, count, copy);
-            else
-                dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count, copy);
-            dropped.getCellRef().setOwner(ESM::RefId());
-
-            return dropped;
-        }
-
-        MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
-        {
-            return dropItemImpl(item, count, false);
-        }
-
-        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
-        {
-            return dropItemImpl(item, count, true);
-        }
-
-        void removeItem(const ItemStack& item, size_t count) override
-        {
-            throw std::runtime_error("removeItem not implemented");
-        }
-        ModelIndex getIndex(const ItemStack& item) override { throw std::runtime_error("getIndex not implemented"); }
-        void update() override {}
-        size_t getItemCount() override { return 0; }
-        ItemStack getItem(ModelIndex index) override { throw std::runtime_error("getItem not implemented"); }
-        bool usesContainer(const MWWorld::Ptr&) override { return false; }
-
-    private:
-        // Where to drop the item
-        float mLeft;
-        float mTop;
-    };
-
     HUD::HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : WindowBase("openmw_hud.layout")
         , LocalMapBase(customMarkers, localMapRender, Settings::map().mLocalMapHudFogOfWar)
@@ -262,13 +207,14 @@ namespace MWGui
         MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
-            // drop item into the gameworld
-            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-            MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
-            float mouseX = cursorPosition.left / float(viewSize.width);
-            float mouseY = cursorPosition.top / float(viewSize.height);
+            const MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            const MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+            const float cursorX = cursorPosition.left / static_cast<float>(viewSize.width);
+            const float cursorY = cursorPosition.top / static_cast<float>(viewSize.height);
 
-            dropDraggedItem(mouseX, mouseY);
+            // drop item into the gameworld
+            WorldItemModel worldItemModel(cursorX, cursorY);
+            mDragAndDrop->drop(&worldItemModel, nullptr);
 
             winMgr->changePointer("arrow");
         }

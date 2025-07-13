@@ -19,12 +19,10 @@ namespace MWGui
         void openCountDialog(const std::string& item, const std::string& message, const int maxCount);
         void setCount(int count);
 
-        typedef MyGUI::delegates::MultiDelegate<MyGUI::Widget*, int> EventHandle_WidgetInt;
-
         /** Event : Ok button was clicked.\n
-            signature : void method(MyGUI::Widget* _sender, int _count)\n
+            signature : void method(MyGUI::Widget* sender, std::size_t count)\n
         */
-        EventHandle_WidgetInt eventOkClicked;
+        MyGUI::delegates::MultiDelegate<MyGUI::Widget*, std::size_t> eventOkClicked;
 
     private:
         Gui::ScrollBar* mSlider;

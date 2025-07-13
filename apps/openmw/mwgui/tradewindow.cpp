@@ -321,7 +321,7 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
+    void TradeWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
         const ESM::RefId& sound = item.mBase.getClass().getUpSoundId(item.mBase);
@@ -382,9 +382,9 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::onOfferSubmitted(MyGUI::Widget* _sender, int offerAmount)
+    void TradeWindow::onOfferSubmitted(MyGUI::Widget* _sender, size_t offerAmount)
     {
-        mCurrentBalance = mCurrentBalance < 0 ? -offerAmount : offerAmount;
+        mCurrentBalance = offerAmount * (mCurrentBalance < 0 ? -1 : 1);
         updateLabels();
         onOfferButtonClicked(mOfferButton);
     }

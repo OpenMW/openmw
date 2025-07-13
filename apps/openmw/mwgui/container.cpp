@@ -20,12 +20,12 @@
 
 #include "../mwscript/interpretercontext.hpp"
 
-#include "countdialog.hpp"
-#include "inventorywindow.hpp"
-
 #include "containeritemmodel.hpp"
+#include "countdialog.hpp"
 #include "draganddrop.hpp"
 #include "inventoryitemmodel.hpp"
+#include "inventorywindow.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "pickpocketitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -34,9 +34,10 @@
 namespace MWGui
 {
 
-    ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
+    ContainerWindow::ContainerWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer)
         : WindowBase("openmw_container_window.layout")
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
@@ -97,54 +98,46 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-            if (Settings::gui().mControllerMenus)
-                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::takeItem);
+            if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
-        else if (Settings::gui().mControllerMenus)
-            takeItem(nullptr, count);
+        else if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+            transferItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
 
-    void ContainerWindow::dragItem(MyGUI::Widget* sender, int count)
+    void ContainerWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        if (!mModel)
+        if (mModel == nullptr)
             return;
 
-        if (!onTakeItem(mModel->getItem(mSelectedItem), count))
+        const ItemStack item = mModel->getItem(mSelectedItem);
+
+        if (!mModel->onTakeItem(item.mBase, count))
             return;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
     }
 
-    void ContainerWindow::takeItem(MyGUI::Widget* sender, int count)
+    void ContainerWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        if (!mModel)
+        if (mModel == nullptr)
             return;
 
-        const ItemStack& item = mModel->getItem(mSelectedItem);
-        if (!onTakeItem(item, count))
+        const ItemStack item = mModel->getItem(mSelectedItem);
+
+        if (!mModel->onTakeItem(item.mBase, count))
             return;
 
-        MWGui::InventoryWindow* inventoryWindow = MWBase::Environment::get().getWindowManager()->getInventoryWindow();
-        ItemModel* playerModel = inventoryWindow->getModel();
-
-        mModel->moveItem(item, count, playerModel);
-
-        inventoryWindow->updateItemView();
-        mItemView->update();
-
-        // play the item's sound
-        MWWorld::Ptr itemBase = item.mBase;
-        const ESM::RefId& sound = itemBase.getClass().getUpSoundId(itemBase);
-        MWBase::Environment::get().getWindowManager()->playSound(sound);
+        mItemTransfer->apply(item, count, *mItemView);
     }
 
     void ContainerWindow::dropItem()
     {
-        if (!mModel)
+        if (mModel == nullptr)
             return;
 
         bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
@@ -209,10 +202,13 @@ namespace MWGui
         mSortModel = nullptr;
     }
 
+    void ContainerWindow::onOpen()
+    {
+        mItemTransfer->addTarget(*mItemView);
+    }
+
     void ContainerWindow::onClose()
     {
-        WindowBase::onClose();
-
         // Make sure the window was actually closed and not temporarily hidden.
         if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container))
             return;
@@ -223,6 +219,8 @@ namespace MWGui
         if (!mPtr.isEmpty())
             MWBase::Environment::get().getMechanicsManager()->onClose(mPtr);
         resetReference();
+
+        mItemTransfer->removeTarget(*mItemView);
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
@@ -270,9 +268,9 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 
-            const ItemStack& item = mModel->getItem(i);
+            const ItemStack item = mModel->getItem(i);
 
-            if (!onTakeItem(item, item.mCount))
+            if (!mModel->onTakeItem(item.mBase, item.mCount))
                 break;
 
             mModel->moveItem(item, item.mCount, playerModel);
@@ -347,11 +345,6 @@ namespace MWGui
     void ContainerWindow::onReferenceUnavailable()
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
-    }
-
-    bool ContainerWindow::onTakeItem(const ItemStack& item, int count)
-    {
-        return mModel->onTakeItem(item.mBase, count);
     }
 
     void ContainerWindow::onDeleteCustomData(const MWWorld::Ptr& ptr)

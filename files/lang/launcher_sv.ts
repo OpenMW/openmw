@@ -767,10 +767,10 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
                   the specular map texture would have to be named foo_spec.dds).
                   If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
                   (.osg file, not supported in .nif files). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om den här funktionen är aktiverad kommer spekularitetskartor (specular maps) att hittas och användas 
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om den här funktionen är aktiverad kommer spekularitetskartor (specular maps) att hittas och användas
                   (see &apos;specular map pattern&apos;, t.ex. för en bastextur foo.dds,
                   ska spekularitetskartan heta foo_spec.dds).
-                  Om funktionen är inaktiverad kommer normalkartor bara användas om texturerna är explicit listade i 3D-modell-filen 
+                  Om funktionen är inaktiverad kommer normalkartor bara användas om texturerna är explicit listade i 3D-modell-filen
                   (.nif eller .osg fil). Påverkar objekt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
