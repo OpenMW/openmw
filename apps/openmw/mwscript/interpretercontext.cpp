@@ -302,8 +302,7 @@ namespace MWScript
     std::string_view InterpreterContext::getNPCFaction() const
     {
         const MWWorld::Ptr& ptr = getReferenceImp();
-        const MWWorld::Class& ptrClass = ptr.getClass();
-        const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
         if (factionId.empty())
         {
             Log(Debug::Warning) << "getNPCFaction(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
@@ -363,8 +362,7 @@ namespace MWScript
     std::string_view InterpreterContext::getPCRank() const
     {
         const MWWorld::Ptr& ptr = getReferenceImp();
-        const MWWorld::Class& ptrClass = ptr.getClass();
-        const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
         if (factionId.empty())
         {
             Log(Debug::Warning) << "getPCRank(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
@@ -396,8 +394,7 @@ namespace MWScript
     std::string_view InterpreterContext::getPCNextRank() const
     {
         const MWWorld::Ptr& ptr = getReferenceImp();
-        const MWWorld::Class& ptrClass = ptr.getClass();
-        const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
         if (factionId.empty())
         {
             Log(Debug::Warning) << "getPCNextRank(): NPC " << ptr.mRef->mRef.getRefId() << " has no primary faction";
