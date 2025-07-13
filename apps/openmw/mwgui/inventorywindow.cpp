@@ -34,6 +34,7 @@
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
 #include "inventoryitemmodel.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "settings.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -74,10 +75,11 @@ namespace MWGui
         }
     }
 
-    InventoryWindow::InventoryWindow(
-        DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+    InventoryWindow::InventoryWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, osg::Group* parent,
+        Resource::ResourceSystem* resourceSystem)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mSelectedItem(-1)
         , mSortModel(nullptr)
         , mTradeModel(nullptr)
@@ -312,17 +314,24 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
+
             if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
+            else if (MyGUI::InputManager::getInstance().isAltPressed())
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
+
             mSelectedItem = index;
         }
         else
         {
             mSelectedItem = index;
+
             if (mTrading)
                 sellItem(nullptr, count);
+            else if (MyGUI::InputManager::getInstance().isAltPressed())
+                transferItem(nullptr, count);
             else
                 dragItem(nullptr, count);
         }
@@ -361,14 +370,21 @@ namespace MWGui
         }
     }
 
-    void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
         notifyContentChanged();
     }
 
-    void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
+    {
+        ensureSelectedItemUnequipped(count);
+        mItemTransfer->apply(mTradeModel->getItem(mSelectedItem), count, *mItemView);
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
@@ -415,6 +431,13 @@ namespace MWGui
             notifyContentChanged();
         }
         adjustPanes();
+
+        mItemTransfer->addTarget(*mItemView);
+    }
+
+    void InventoryWindow::onClose()
+    {
+        mItemTransfer->removeTarget(*mItemView);
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -776,7 +799,16 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
             mDragAndDrop->finish();
 
-        mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+        if (MyGUI::InputManager::getInstance().isAltPressed())
+        {
+            const MWWorld::Ptr item = mTradeModel->getItem(i).mBase;
+            MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+            mItemView->update();
+        }
+        else
+        {
+            mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+        }
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }

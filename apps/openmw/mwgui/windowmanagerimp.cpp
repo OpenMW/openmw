@@ -93,6 +93,7 @@
 #include "hud.hpp"
 #include "inventorywindow.hpp"
 #include "itemchargeview.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "jailscreen.hpp"
@@ -312,6 +313,7 @@ namespace MWGui
         mTextColours.loadColours();
 
         mDragAndDrop = std::make_unique<DragAndDrop>();
+        mItemTransfer = std::make_unique<ItemTransfer>(*this);
 
         auto recharge = std::make_unique<Recharge>();
         mGuiModeStates[GM_Recharge] = GuiModeState(recharge.get());
@@ -334,7 +336,7 @@ namespace MWGui
         trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
         auto inventoryWindow = std::make_unique<InventoryWindow>(
-            mDragAndDrop.get(), mViewer->getSceneData()->asGroup(), mResourceSystem);
+            *mDragAndDrop, *mItemTransfer, mViewer->getSceneData()->asGroup(), mResourceSystem);
         mInventoryWindow = inventoryWindow.get();
         mWindows.push_back(std::move(inventoryWindow));
 
@@ -381,7 +383,7 @@ namespace MWGui
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        auto containerWindow = std::make_unique<ContainerWindow>(mDragAndDrop.get());
+        auto containerWindow = std::make_unique<ContainerWindow>(*mDragAndDrop, *mItemTransfer);
         mContainerWindow = containerWindow.get();
         mWindows.push_back(std::move(containerWindow));
         trackWindow(mContainerWindow, makeContainerWindowSettingValues());
@@ -457,7 +459,8 @@ namespace MWGui
 
         mSoulgemDialog = std::make_unique<SoulgemDialog>(mMessageBoxManager.get());
 
-        auto companionWindow = std::make_unique<CompanionWindow>(mDragAndDrop.get(), mMessageBoxManager.get());
+        auto companionWindow
+            = std::make_unique<CompanionWindow>(*mDragAndDrop, *mItemTransfer, mMessageBoxManager.get());
         trackWindow(companionWindow.get(), makeCompanionWindowSettingValues());
         mGuiModeStates[GM_Companion] = GuiModeState({ mInventoryWindow, companionWindow.get() });
         mWindows.push_back(std::move(companionWindow));

@@ -6,6 +6,8 @@
 
 #include "../mwworld/containerstore.hpp"
 
+#include <components/misc/notnullptr.hpp>
+
 namespace MWGui
 {
     namespace Widgets
@@ -18,11 +20,12 @@ namespace MWGui
     class DragAndDrop;
     class SortFilterItemModel;
     class CompanionItemModel;
+    class ItemTransfer;
 
     class CompanionWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
     {
     public:
-        CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
+        explicit CompanionWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, MessageBoxManager* manager);
 
         bool exit() override;
 
@@ -44,7 +47,8 @@ namespace MWGui
         int mSelectedItem;
         bool mUpdateNextFrame;
 
-        DragAndDrop* mDragAndDrop;
+        Misc::NotNullPtr<DragAndDrop> mDragAndDrop;
+        Misc::NotNullPtr<ItemTransfer> mItemTransfer;
 
         MyGUI::Button* mCloseButton;
         MyGUI::EditBox* mFilterEdit;
@@ -55,7 +59,8 @@ namespace MWGui
         void onItemSelected(int index);
         void onNameFilterChanged(MyGUI::EditBox* _sender);
         void onBackgroundSelected();
-        void dragItem(MyGUI::Widget* sender, int count);
+        void dragItem(MyGUI::Widget* sender, std::size_t count);
+        void transferItem(MyGUI::Widget* sender, std::size_t count);
 
         void onMessageBoxButtonClicked(int button);
 
@@ -64,6 +69,10 @@ namespace MWGui
         void onCloseButtonClicked(MyGUI::Widget* _sender);
 
         void onReferenceUnavailable() override;
+
+        void onOpen() override;
+
+        void onClose() override;
     };
 
 }

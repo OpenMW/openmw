@@ -1,10 +1,11 @@
 #ifndef MGUI_CONTAINER_H
 #define MGUI_CONTAINER_H
 
+#include "itemmodel.hpp"
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
-#include "itemmodel.hpp"
+#include <components/misc/notnullptr.hpp>
 
 #include "../mwworld/containerstore.hpp"
 
@@ -19,17 +20,19 @@ namespace MWGui
     class ContainerWindow;
     class ItemView;
     class SortFilterItemModel;
-}
+    class ItemTransfer;
 
-namespace MWGui
-{
     class ContainerWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
     {
     public:
-        ContainerWindow(DragAndDrop* dragAndDrop);
+        explicit ContainerWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer);
 
         void setPtr(const MWWorld::Ptr& container) override;
+
+        void onOpen() override;
+
         void onClose() override;
+
         void clear() override { resetReference(); }
 
         void onFrame(float dt) override;
@@ -46,7 +49,8 @@ namespace MWGui
         std::string_view getWindowIdForLua() const override { return "Container"; }
 
     private:
-        DragAndDrop* mDragAndDrop;
+        Misc::NotNullPtr<DragAndDrop> mDragAndDrop;
+        Misc::NotNullPtr<ItemTransfer> mItemTransfer;
 
         MWGui::ItemView* mItemView;
         SortFilterItemModel* mSortModel;
@@ -60,14 +64,12 @@ namespace MWGui
 
         void onItemSelected(int index);
         void onBackgroundSelected();
-        void dragItem(MyGUI::Widget* sender, int count);
+        void dragItem(MyGUI::Widget* sender, std::size_t count);
+        void transferItem(MyGUI::Widget* sender, std::size_t count);
         void dropItem();
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
-
-        /// @return is taking the item allowed?
-        bool onTakeItem(const ItemStack& item, int count);
 
         void onReferenceUnavailable() override;
     };

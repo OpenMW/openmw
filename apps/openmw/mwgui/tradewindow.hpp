@@ -95,7 +95,7 @@ namespace MWGui
         void updateOffer();
 
         void onItemSelected(int index);
-        void sellItem(MyGUI::Widget* sender, int count);
+        void sellItem(MyGUI::Widget* sender, std::size_t count);
 
         void borrowItem(int index, size_t count);
         void returnItem(int index, size_t count);

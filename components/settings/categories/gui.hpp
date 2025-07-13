@@ -10,8 +10,6 @@
 
 #include <MyGUI_Colour.h>
 
-#include <cstdint>
-#include <string>
 #include <string_view>
 
 namespace Settings
