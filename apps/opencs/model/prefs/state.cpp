@@ -180,7 +180,10 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic Projection Size Parameter")
         .setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.")
         .setRange(10, 10000);
-    declareDouble(mValues->mRendering.mObjectMarkerAlpha, "Object Marker Transparency").setPrecision(2).setRange(0, 1);
+    declareDouble(mValues->mRendering.mObjectMarkerScale, "Object Marker Scale Factor")
+        .setPrecision(2)
+        .setRange(.01f, 100.f)
+        .setTooltip("Multiplier for the size of object selection markers.");
     declareBool(mValues->mRendering.mSceneUseGradient, "Use Gradient Background");
     declareColour(mValues->mRendering.mSceneDayBackgroundColour, "Day Background Colour");
     declareColour(mValues->mRendering.mSceneDayGradientColour, "Day Gradient  Colour")
@@ -376,6 +379,7 @@ void CSMPrefs::State::declare()
     declareShortcut(mValues->mKeyBindings.mSceneScaleSubmode, "Scale Object Submode");
     declareShortcut(mValues->mKeyBindings.mSceneRotateSubmode, "Rotate Object Submode");
     declareShortcut(mValues->mKeyBindings.mSceneCameraCycle, "Cycle Camera Mode");
+    declareShortcut(mValues->mKeyBindings.mSceneToggleMarker, "Toggle Selection Marker");
 
     declareSubcategory("1st/Free Camera");
     declareShortcut(mValues->mKeyBindings.mFreeForward, "Forward");
