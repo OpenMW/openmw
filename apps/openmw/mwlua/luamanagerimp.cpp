@@ -540,7 +540,10 @@ namespace MWLua
             localScripts = createLocalScripts(ptr);
             localScripts->addAutoStartedScripts();
             if (ptr.isInCell() && MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell()))
+            {
+                localScripts->setActive(true, false);
                 mActiveLocalScripts.insert(localScripts);
+            }
         }
         localScripts->addCustomScript(scriptId, initData);
     }
