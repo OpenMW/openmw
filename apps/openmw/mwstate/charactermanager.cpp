@@ -81,8 +81,7 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
         path = mPath / test.str();
     }
 
-    mCharacters.emplace_back(path, mGame);
-    return &mCharacters.back();
+    return &mCharacters.emplace_front(path, mGame);
 }
 
 std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)
