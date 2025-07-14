@@ -174,6 +174,8 @@ namespace CSVRender
         /// Erase all overrides and restore the visual representation to its true state.
         void reset(unsigned int elementMask) override;
 
+        CSVRender::Object* getObjectByReferenceId(const std::string& referenceId) override;
+
     protected:
         void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool) override;
 

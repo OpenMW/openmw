@@ -975,6 +975,14 @@ namespace Resource
         return loadNonNif(errorMarker, file, mImageManager);
     }
 
+    void SceneManager::loadSelectionMarker(
+        osg::ref_ptr<osg::Group> parentNode, const char* markerData, long long markerSize) const
+    {
+        Files::IMemStream file(markerData, markerSize);
+        constexpr VFS::Path::NormalizedView selectionMarker("selectionmarker.osgt");
+        parentNode->addChild(loadNonNif(selectionMarker, file, mImageManager));
+    }
+
     osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()
     {
         if (!mErrorMarker)

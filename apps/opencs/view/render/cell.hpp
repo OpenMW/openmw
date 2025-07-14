@@ -9,9 +9,9 @@
 #include <osg/Vec3d>
 #include <osg/ref_ptr>
 
-#include "../../model/doc/document.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
+#include "worldspacewidget.hpp"
 #include <components/esm/refid.hpp>
 #include <components/misc/algorithm.hpp>
 
@@ -44,8 +44,11 @@ namespace CSVRender
     class CellBorder;
     class CellMarker;
 
+    class ObjectMarker;
+
     class Cell
     {
+        ObjectMarker* const mSelectionMarker;
         CSMWorld::Data& mData;
         ESM::RefId mId;
         osg::ref_ptr<osg::Group> mCellNode;
@@ -90,8 +93,8 @@ namespace CSVRender
     public:
         /// \note Deleted covers both cells that are deleted and cells that don't exist in
         /// the first place.
-        Cell(CSMDoc::Document& document, osg::Group* rootNode, const std::string& id, bool deleted = false,
-            bool isExterior = false);
+        Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker, osg::Group* rootNode, const std::string& id,
+            bool deleted = false, bool isExterior = false);
 
         ~Cell();
 
@@ -181,6 +184,8 @@ namespace CSVRender
         /// Erase all overrides and restore the visual representation of the cell to its
         /// true state.
         void reset(unsigned int elementMask);
+
+        CSVRender::Object* getObjectByReferenceId(const std::string& referenceId);
 
         friend class CellNodeCallback;
     };

@@ -79,7 +79,7 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget(
 
     update();
 
-    mCell = std::make_unique<Cell>(document, mRootNode, mCellId);
+    mCell = std::make_unique<Cell>(document, mSelectionMarker.get(), mRootNode, mCellId);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -127,7 +127,7 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop(
 
     mCellId = universalIdData.begin()->getId();
 
-    mCell = std::make_unique<Cell>(getDocument(), mRootNode, mCellId);
+    mCell = std::make_unique<Cell>(getDocument(), mSelectionMarker.get(), mRootNode, mCellId);
     mCamPositionSet = false;
     mOrbitCamControl->reset();
 
@@ -141,6 +141,7 @@ void CSVRender::UnpagedWorldspaceWidget::clearSelection(int elementMask)
 {
     mCell->setSelection(elementMask, Cell::Selection_Clear);
     flagAsModified();
+    mSelectionMarker->detachMarker();
 }
 
 void CSVRender::UnpagedWorldspaceWidget::invertSelection(int elementMask)
@@ -218,6 +219,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase>> CSVRender::UnpagedWorldspaceWidget
 void CSVRender::UnpagedWorldspaceWidget::setSubMode(int subMode, unsigned int elementMask)
 {
     mCell->setSubMode(subMode, elementMask);
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::UnpagedWorldspaceWidget::reset(unsigned int elementMask)
@@ -382,4 +384,9 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::UnpagedWorldspaceWidget:
         default:
             return ignored;
     }
+}
+
+CSVRender::Object* CSVRender::UnpagedWorldspaceWidget::getObjectByReferenceId(const std::string& referenceId)
+{
+    return mCell->getObjectByReferenceId(referenceId);
 }
