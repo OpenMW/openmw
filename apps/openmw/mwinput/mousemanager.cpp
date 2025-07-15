@@ -57,7 +57,8 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            float uiScale = winMgr->getScalingFactor();
             mGuiCursorX = static_cast<float>(arg.x) / uiScale;
             mGuiCursorY = static_cast<float>(arg.y) / uiScale;
 
@@ -70,7 +71,13 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectMouseMove(
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
-            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
+            winMgr->setCursorActive(true);
+            if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible())
+            {
+                // Unhide the cursor if it was hidden to show a controller tooltip.
+                winMgr->setControllerTooltip(false);
+                winMgr->setCursorVisible(true);
+            }
         }
 
         if (mMouseLookEnabled && !input->controlsDisabled())
