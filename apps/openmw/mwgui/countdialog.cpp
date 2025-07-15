@@ -28,8 +28,8 @@ namespace MWGui
         // make sure we read the enter key being pressed to accept multiple items
         mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
 
-        mControllerButtons.a = "#{sOk}";
-        mControllerButtons.b = "#{sCancel}";
+        mControllerButtons.a = "#{Interface:OK}";
+        mControllerButtons.b = "#{Interface:Cancel}";
     }
 
     void CountDialog::openCountDialog(const std::string& item, const std::string& message, const int maxCount)

@@ -42,7 +42,7 @@ namespace MWGui
         {
             mDisableGamepadCursor = true;
             mControllerButtons.a = "#{sTravel}";
-            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.b = "#{Interface:Cancel}";
         }
     }
 

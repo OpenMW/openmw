@@ -80,7 +80,7 @@ namespace MWGui
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
 
-        mControllerButtons.b = "#{sCancel}";
+        mControllerButtons.b = "#{Interface:Cancel}";
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
     }
 

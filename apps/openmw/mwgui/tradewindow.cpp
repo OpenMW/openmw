@@ -189,7 +189,7 @@ namespace MWGui
                 SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
             mControllerButtons.a = "#{sBuy}";
-            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.b = "#{Interface:Cancel}";
             mControllerButtons.x = "#{sOffer}";
             mControllerButtons.r3 = "#{sInfo}";
             mControllerButtons.l2 = "#{sInventory}";

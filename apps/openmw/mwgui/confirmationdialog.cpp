@@ -23,8 +23,8 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sOk}";
-            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.a = "#{Interface:OK}";
+            mControllerButtons.b = "#{Interface:Cancel}";
         }
     }
 

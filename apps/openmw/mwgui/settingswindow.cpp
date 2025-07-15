@@ -461,7 +461,7 @@ namespace MWGui
         }
 
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sOk}";
+        mControllerButtons.b = "#{Interface:OK}";
         mControllerButtons.lStick = "#{sMouse}";
     }
 

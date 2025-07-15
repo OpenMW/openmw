@@ -40,7 +40,7 @@ namespace MWGui
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
 
         mControllerScrollWidget = mTextView;
-        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.b = "#{Interface:Close}";
         mControllerButtons.dpad = "#{sScrolldown}";
 
         center();

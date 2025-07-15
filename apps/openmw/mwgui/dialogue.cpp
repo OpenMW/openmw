@@ -91,7 +91,7 @@ namespace MWGui
 
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
+        mControllerButtons.b = "#{Interface:Cancel}";
     }
 
     void PersuasionDialog::adjustAction(MyGUI::Widget* action, int& totalHeight)

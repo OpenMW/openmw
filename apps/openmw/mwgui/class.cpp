@@ -885,7 +885,7 @@ namespace MWGui
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
 
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
+        mControllerButtons.b = "#{Interface:Cancel}";
     }
 
     SelectSpecializationDialog::~SelectSpecializationDialog() {}
@@ -967,7 +967,7 @@ namespace MWGui
                 mAttributeButtons[0]->setStateSelected(true);
 
             mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.b = "#{Interface:Cancel}";
         }
     }
 
@@ -1067,7 +1067,7 @@ namespace MWGui
                 mSkillButtons[0]->setStateSelected(true);
 
             mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sCancel}";
+            mControllerButtons.b = "#{Interface:Cancel}";
         }
     }
 
@@ -1156,7 +1156,7 @@ namespace MWGui
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
 
-        mControllerButtons.a = "#{sOk}";
+        mControllerButtons.a = "#{Interface:OK}";
     }
 
     DescriptionDialog::~DescriptionDialog() {}

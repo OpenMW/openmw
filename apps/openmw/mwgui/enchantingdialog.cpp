@@ -61,7 +61,7 @@ namespace MWGui
         mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
 
         mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{sCancel}";
+        mControllerButtons.b = "#{Interface:Cancel}";
         mControllerButtons.y = "#{OMWEngine:EnchantType}";
         mControllerButtons.l1 = "#{sItem}";
         mControllerButtons.r1 = "#{sSoulGem}";

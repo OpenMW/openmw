@@ -68,7 +68,7 @@ namespace MWGui
 
         mControllerButtons.l1 = "#{sPrev}";
         mControllerButtons.r1 = "#{sNext}";
-        mControllerButtons.b = "#{sClose}";
+        mControllerButtons.b = "#{Interface:Close}";
 
         center();
     }

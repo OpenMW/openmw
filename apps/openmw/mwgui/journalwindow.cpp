@@ -698,7 +698,7 @@ namespace
 
         MWGui::ControllerButtonStr* getControllerButtons() override
         {
-            mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{sClose}";
+            mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{Interface:Close}";
             mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
             mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
             mControllerButtons.r3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
