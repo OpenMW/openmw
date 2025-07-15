@@ -913,7 +913,7 @@ namespace
             {
                 // Scroll through the list of quests or topics
                 if (mOptionsMode && (mQuestMode || mTopicsMode))
-                    setControllerFocusedQuest(std::max(int(mSelectedQuest) - 5, 0));
+                    setControllerFocusedQuest(std::max(static_cast<int>(mSelectedQuest) - 5, 0));
                 // Page through the journal
                 else if (!mOptionsMode)
                     notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
