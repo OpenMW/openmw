@@ -26,7 +26,7 @@ variables:
 
 .Ubuntu_Image:
   tags:
-    - saas-linux-medium-amd64
+    - saas-linux-2xlarge-amd64
   image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -93,7 +93,7 @@ Ubuntu_GCC_preprocess:
 
 Coverity:
   tags:
-    - saas-linux-medium-amd64
+    - saas-linux-2xlarge-amd64
   image: ubuntu:22.04
   stage: build
   rules:
@@ -501,6 +501,9 @@ Ubuntu_GCC_integration_tests_asan:
 
 .MacOS:
   stage: build
+  image: macos-14-xcode-15
+  tags:
+    - saas-macos-large-m2pro
   rules:
     - if: $CI_PROJECT_ID == "7107382"
   cache:
@@ -537,9 +540,6 @@ Ubuntu_GCC_integration_tests_asan:
 
 macOS14_Xcode15_amd64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
     key: macOS14_Xcode15_amd64.v2
   variables:
@@ -549,9 +549,6 @@ macOS14_Xcode15_amd64:
 
 macOS14_Xcode15_arm64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
     key: macOS14_Xcode15_arm64.v1
   variables:
@@ -915,7 +912,7 @@ Windows_MSBuild_CacheInit:
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
-    - saas-linux-medium-amd64
+    - saas-linux-2xlarge-amd64
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
