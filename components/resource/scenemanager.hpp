@@ -136,6 +136,9 @@ namespace Resource
 
         osg::ref_ptr<osg::Texture> getOpaqueDepthTex(size_t frame);
 
+        void loadSelectionMarker(
+            osg::ref_ptr<osg::Group> parentNode, const char* markerData, long long markerSize) const;
+
         enum class UBOBinding
         {
             // If we add more UBO's, we should probably assign their bindings dynamically according to the current count
