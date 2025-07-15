@@ -934,8 +934,6 @@ namespace MWGui
             }
         }
 
-        Log(Debug::Debug) << "Cycling active controller window: mode=" << mode << ", activeIndex=" << activeIndex;
-
         if (mActiveControllerWindows[mode] != activeIndex)
             setActiveControllerWindow(mode, activeIndex);
     }
