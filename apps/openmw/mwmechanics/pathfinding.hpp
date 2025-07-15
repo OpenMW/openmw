@@ -178,16 +178,16 @@ namespace MWMechanics
         //
         // NOTE: pos is expected to be in local coordinates, as is grid->mPoints
         //
-        static int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
+        static size_t getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
         {
             assert(grid && !grid->mPoints.empty());
 
             float distanceBetween = distanceSquared(grid->mPoints[0], pos);
-            int closestIndex = 0;
+            size_t closestIndex = 0;
 
             // TODO: if this full scan causes performance problems mapping pathgrid
             //       points to a quadtree may help
-            for (unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+            for (size_t counter = 1; counter < grid->mPoints.size(); counter++)
             {
                 float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
                 if (potentialDistBetween < distanceBetween)

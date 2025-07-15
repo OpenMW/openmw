@@ -393,13 +393,13 @@ namespace MWMechanics
                         osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                         coords.toLocal(localPos);
 
-                        int closestPointIndex = PathFinder::getClosestPoint(pathgrid, localPos);
-                        for (int i = 0; i < static_cast<int>(pathgrid->mPoints.size()); i++)
+                        size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, localPos);
+                        for (size_t i = 0; i < pathgrid->mPoints.size(); i++)
                         {
                             if (i != closestPointIndex
                                 && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, i))
                             {
-                                points.push_back(pathgrid->mPoints[static_cast<size_t>(i)]);
+                                points.push_back(pathgrid->mPoints[i]);
                             }
                         }
 
