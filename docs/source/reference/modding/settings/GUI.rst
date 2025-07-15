@@ -69,7 +69,16 @@ GUI Settings
    :default: false
    :location: :bdg-success:`Launcher > Settings > Interface`
 
-   Make menus easier to navigate with a controller.
+   Menus are now fully navigable with a controller using the DPad, triggers, and
+   face buttons. Most button mappings follow the Xbox version, with modern
+   additions like R3 to toggle item info. All menus can be opened and closed
+   with the controller, though some elements—such as editing settings or viewing
+   certain tooltips—still use the controller’s mouse cursor.
+   A button hint bar appears at the bottom of each menu, with icons that match
+   the connected controller type (Xbox, PlayStation, Switch, or Steam). In the
+   inventory menu, L2/R2 switch between sub-menus (Map, Inventory, Magic, Stats),
+   while L1/R1 adjust filters in inventory and barter screens. R3 toggles
+   tooltips, similar to Oblivion Remastered. Mouse input remains fully supported.
    If false, the controller works as a GUI mouse.
 
 .. omw-setting::
