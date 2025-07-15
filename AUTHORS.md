@@ -10,7 +10,8 @@ If you feel your name is missing from this list, please add it to `AUTHORS.md`.
 Programmers
 -----------
 
-    Bret Curtis (psi29a) - Project leader 2019-present
+    Alexey Dobrokhotov (Capo) - Project leader 2025-present
+    Bret Curtis (psi29a) - Project leader 2019-2025
     Marc Zinnschlag (Zini) - Project leader 2010-2018
     Nicolay Korslund - Project leader 2008-2010
     scrawl - Top contributor
@@ -49,7 +50,6 @@ Programmers
     Berulacks
     Bo Svensson
     Britt Mathis (galdor557)
-    Capostrophic
     Carl Maxwell
     cc9cii
     Cédric Mocquillon
