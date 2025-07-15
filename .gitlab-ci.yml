@@ -414,7 +414,7 @@ Ubuntu_Clang_Tidy_openmw:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: openmw
+    BUILD_TARGETS: openmw openmw-tests
   timeout: 3h
 
 Ubuntu_Clang_Tidy_openmw-cs:
@@ -430,7 +430,7 @@ Ubuntu_Clang_Tidy_other:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest components-tests openmw-tests openmw-cs-tests openmw-navmeshtool openmw-bulletobjecttool
+    BUILD_TARGETS: components-tests bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
