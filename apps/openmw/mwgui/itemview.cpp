@@ -55,7 +55,7 @@ namespace MWGui
 
         mRows = std::max(maxHeight / 42, 1);
         mItemCount = dragArea->getChildCount();
-        bool showScrollbar = int(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
+        bool showScrollbar = static_cast<int>(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
         if (showScrollbar)
         {
             maxHeight -= 18;
@@ -264,14 +264,14 @@ namespace MWGui
 
         if (prevFocus >= 0 && prevFocus < mItemCount)
         {
-            ItemWidget* prev = (ItemWidget*)dragArea->getChildAt(prevFocus);
+            ItemWidget* prev = static_cast<ItemWidget*>(dragArea->getChildAt(prevFocus));
             if (prev)
                 prev->setControllerFocus(false);
         }
 
         if (mControllerActiveWindow && newFocus >= 0 && newFocus < mItemCount)
         {
-            ItemWidget* focused = (ItemWidget*)dragArea->getChildAt(newFocus);
+            ItemWidget* focused = static_cast<ItemWidget*>(dragArea->getChildAt(newFocus));
             if (focused)
             {
                 focused->setControllerFocus(true);

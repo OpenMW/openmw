@@ -899,7 +899,8 @@ namespace MWGui
             if (state.mWindows.size() == 0)
                 return nullptr;
 
-            int activeIndex = std::clamp(mActiveControllerWindows[mode], 0, (int)state.mWindows.size() - 1);
+            int activeIndex
+                = std::clamp(mActiveControllerWindows[mode], 0, static_cast<int>(state.mWindows.size()) - 1);
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())

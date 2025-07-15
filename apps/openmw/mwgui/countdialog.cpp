@@ -59,7 +59,7 @@ namespace MWGui
 
     void CountDialog::setCount(int count)
     {
-        count = std::clamp(count, 1, (int)mSlider->getScrollRange());
+        count = std::clamp(count, 1, static_cast<int>(mSlider->getScrollRange()));
         mSlider->setScrollPosition(count - 1);
         mItemEdit->setValue(count);
     }
@@ -105,7 +105,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
             setCount(1);
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-            setCount((int)mSlider->getScrollRange());
+            setCount(static_cast<int>(mSlider->getScrollRange()));
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
             MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
