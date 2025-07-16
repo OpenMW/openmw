@@ -546,6 +546,9 @@ macOS14_Xcode15_amd64:
     CCACHE_SIZE: 3G
     DMG_IDENTIFIER: amd64
     MACOS_AMD64: true
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
 
 macOS14_Xcode15_arm64:
   extends: .MacOS
@@ -557,6 +560,9 @@ macOS14_Xcode15_arm64:
   variables:
     DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
 
 .Compress_And_Upload_Symbols_Base:
   extends: .Ubuntu_Image
