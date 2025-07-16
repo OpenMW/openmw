@@ -72,7 +72,8 @@ namespace MWInput
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
             winMgr->setCursorActive(true);
-            if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible())
+            if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible()
+                && (std::abs(arg.xrel) > 1 || std::abs(arg.yrel) > 1))
             {
                 // Unhide the cursor if it was hidden to show a controller tooltip.
                 winMgr->setControllerTooltip(false);
