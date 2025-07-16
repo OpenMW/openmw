@@ -228,7 +228,7 @@ namespace MWGui
         mAssignDialog->setVisible(false);
     }
 
-    void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)
+    void QuickKeysMenu::assignItem(MWWorld::Ptr item)
     {
         assert(mSelected);
 
@@ -245,7 +245,11 @@ namespace MWGui
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
+    }
 
+    void QuickKeysMenu::onAssignItem(MWWorld::Ptr item)
+    {
+        assignItem(item);
         MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
     }
 
@@ -566,7 +570,7 @@ namespace MWGui
                     else
                     {
                         if (quickKey.mType == ESM::QuickKeys::Type::Item)
-                            onAssignItem(item);
+                            assignItem(item);
                         else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
                             onAssignMagicItem(item);
                     }
