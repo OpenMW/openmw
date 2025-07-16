@@ -542,7 +542,7 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
       - build/OpenMW-*.dmg
 
-macOS14_Xcode15_amd64:
+macOS15_Xcode16_amd64:
   extends: .MacOS
   cache:
     key: macOS15_Xcode16_amd64.v1
@@ -551,7 +551,7 @@ macOS14_Xcode15_amd64:
     DMG_IDENTIFIER: amd64
     MACOS_AMD64: true
 
-macOS14_Xcode15_arm64:
+macOS15_Xcode16_arm64:
   extends: .MacOS
   cache:
     key: macOS15_Xcode16_arm64.v1
