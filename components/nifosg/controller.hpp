@@ -112,7 +112,12 @@ namespace NifOsg
                 mLastHighKey = it;
                 mLastLowKey = --it;
 
-                float a = (time - mLastLowKey->first) / (mLastHighKey->first - mLastLowKey->first);
+                const float highTime = mLastHighKey->first;
+                const float lowTime = mLastLowKey->first;
+                if (highTime == lowTime)
+                    return mLastLowKey->second.mValue;
+
+                const float a = (time - lowTime) / (highTime - lowTime);
 
                 return interpolate(mLastLowKey->second, mLastHighKey->second, a, mKeys->mInterpolationType);
             }
