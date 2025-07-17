@@ -4,6 +4,7 @@
 #define OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 
 #include <map>
+#include <vector>
 
 #include "exception.hpp"
 #include "niffile.hpp"
@@ -17,7 +18,7 @@ namespace Nif
         InterpolationType_Unknown = 0,
         InterpolationType_Linear = 1,
         InterpolationType_Quadratic = 2,
-        InterpolationType_TBC = 3,
+        InterpolationType_TCB = 3,
         InterpolationType_XYZ = 4,
         InterpolationType_Constant = 5
     };
@@ -28,18 +29,19 @@ namespace Nif
         T mValue;
         T mInTan; // Only for Quadratic interpolation, and never for QuaternionKeyList
         T mOutTan; // Only for Quadratic interpolation, and never for QuaternionKeyList
-
-        // FIXME: Implement TBC interpolation
-        /*
-        float mTension;    // Only for TBC interpolation
-        float mBias;       // Only for TBC interpolation
-        float mContinuity; // Only for TBC interpolation
-        */
     };
-    using FloatKey = KeyT<float>;
-    using Vector3Key = KeyT<osg::Vec3f>;
-    using Vector4Key = KeyT<osg::Vec4f>;
-    using QuaternionKey = KeyT<osg::Quat>;
+
+    template <typename T>
+    struct TCBKey
+    {
+        float mTime;
+        T mValue{};
+        T mInTan{};
+        T mOutTan{};
+        float mTension;
+        float mContinuity;
+        float mBias;
+    };
 
     template <typename T, T (NIFStream::*getValue)()>
     struct KeyMapT
@@ -101,15 +103,20 @@ namespace Nif
                     mKeys[time] = key;
                 }
             }
-            else if (mInterpolationType == InterpolationType_TBC)
+            else if (mInterpolationType == InterpolationType_TCB)
             {
-                for (size_t i = 0; i < count; i++)
+                std::vector<TCBKey<T>> tcbKeys(count);
+                for (TCBKey<T>& tcbKey : tcbKeys)
                 {
-                    float time;
-                    nif->read(time);
-                    readTBC(*nif, key);
-                    mKeys[time] = key;
+                    nif->read(tcbKey.mTime);
+                    tcbKey.mValue = ((*nif).*getValue)();
+                    nif->read(tcbKey.mTension);
+                    nif->read(tcbKey.mContinuity);
+                    nif->read(tcbKey.mBias);
                 }
+                generateTCBTangents(tcbKeys);
+                for (TCBKey<T>& key : tcbKeys)
+                    mKeys[key.mTime] = KeyType{ std::move(key.mValue), std::move(key.mInTan), std::move(key.mOutTan) };
             }
             else if (mInterpolationType == InterpolationType_XYZ)
             {
@@ -140,14 +147,43 @@ namespace Nif
 
         static void readQuadratic(NIFStream& nif, KeyT<osg::Quat>& key) { readValue(nif, key); }
 
-        static void readTBC(NIFStream& nif, KeyT<T>& key)
+        template <typename U>
+        static void generateTCBTangents(std::vector<TCBKey<U>>& keys)
         {
-            readValue(nif, key);
-            /*key.mTension = */ nif.get<float>();
-            /*key.mBias = */ nif.get<float>();
-            /*key.mContinuity = */ nif.get<float>();
+            if (keys.size() <= 1)
+                return;
+
+            for (std::size_t i = 0; i < keys.size(); ++i)
+            {
+                TCBKey<U>& curr = keys[i];
+                const TCBKey<U>* prev = (i == 0) ? nullptr : &keys[i - 1];
+                const TCBKey<U>* next = (i == keys.size() - 1) ? nullptr : &keys[i + 1];
+                const float prevLen = prev != nullptr && next != nullptr ? curr.mTime - prev->mTime : 1.f;
+                const float nextLen = prev != nullptr && next != nullptr ? next->mTime - curr.mTime : 1.f;
+                if (prevLen + nextLen == 0.f)
+                    continue;
+                const float x = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f + curr.mBias);
+                const float y = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f - curr.mBias);
+                const float z = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f + curr.mBias);
+                const float w = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f - curr.mBias);
+                const U prevDelta = prev != nullptr ? curr.mValue - prev->mValue : next->mValue - curr.mValue;
+                const U nextDelta = next != nullptr ? next->mValue - curr.mValue : curr.mValue - prev->mValue;
+                curr.mInTan = (prevDelta * x + nextDelta * y) * prevLen / (prevLen + nextLen);
+                curr.mOutTan = (prevDelta * z + nextDelta * w) * nextLen / (prevLen + nextLen);
+            }
+        }
+
+        static void generateTCBTangents(std::vector<TCBKey<bool>>& keys)
+        {
+            // TODO: is this even legal?
+        }
+
+        static void generateTCBTangents(std::vector<TCBKey<osg::Quat>>& keys)
+        {
+            // TODO: implement TCB interpolation for quaternions
         }
     };
+
     using FloatKeyMap = KeyMapT<float, &NIFStream::get<float>>;
     using Vector3KeyMap = KeyMapT<osg::Vec3f, &NIFStream::get<osg::Vec3f>>;
     using Vector4KeyMap = KeyMapT<osg::Vec4f, &NIFStream::get<osg::Vec4f>>;
