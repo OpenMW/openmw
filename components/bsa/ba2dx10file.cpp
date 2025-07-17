@@ -1,29 +1,12 @@
 #include "ba2dx10file.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 
-#include <lz4frame.h>
-
-#if defined(_MSC_VER)
-// why is this necessary? These are included with /external:I
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#pragma warning(disable : 4702)
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#pragma warning(pop)
-#else
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#endif
-
-#include <boost/iostreams/device/array.hpp>
+#include <zlib.h>
 
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -644,11 +627,16 @@ namespace Bsa
         size_t headerSize = (header.ddspf.fourCC == ESM::fourCC("DX10") ? sizeof(DDSHeaderDX10) : sizeof(DDSHeader));
 
         size_t textureSize = sizeof(uint32_t) + headerSize; //"DDS " + header
+        uint32_t maxPackedChunkSize = 0;
         for (const auto& textureChunk : fileRecord.texturesChunks)
+        {
             textureSize += textureChunk.size;
+            maxPackedChunkSize = std::max(textureChunk.packedSize, maxPackedChunkSize);
+        }
 
         auto memoryStreamPtr = std::make_unique<MemoryInputStream>(textureSize);
         char* buff = memoryStreamPtr->getRawData();
+        std::vector<char> inputBuffer(maxPackedChunkSize);
 
         uint32_t dds = ESM::fourCC("DDS ");
         buff = (char*)std::memcpy(buff, &dds, sizeof(uint32_t)) + sizeof(uint32_t);
@@ -658,25 +646,22 @@ namespace Bsa
         // append chunks
         for (const auto& c : fileRecord.texturesChunks)
         {
+            const uint32_t inputSize = c.packedSize != 0 ? c.packedSize : c.size;
+            Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, inputSize);
             if (c.packedSize != 0)
             {
-                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
-                std::istream* fileStream = streamPtr.get();
+                streamPtr->read(inputBuffer.data(), c.packedSize);
+                uLongf destSize = static_cast<uLongf>(c.size);
+                int ec = ::uncompress(reinterpret_cast<Bytef*>(memoryStreamPtr->getRawData() + offset), &destSize,
+                    reinterpret_cast<Bytef*>(inputBuffer.data()), static_cast<uLong>(c.packedSize));
 
-                boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-                inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-                inputStreamBuf.push(*fileStream);
-
-                boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData() + offset, c.size);
-                boost::iostreams::copy(inputStreamBuf, sr);
+                if (ec != Z_OK)
+                    fail("zlib uncompress failed: " + std::string(::zError(ec)));
             }
             // uncompressed chunk
             else
             {
-                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.size);
-                std::istream* fileStream = streamPtr.get();
-
-                fileStream->read(memoryStreamPtr->getRawData() + offset, c.size);
+                streamPtr->read(memoryStreamPtr->getRawData() + offset, c.size);
             }
             offset += c.size;
         }
