@@ -517,13 +517,6 @@ namespace MWWorld
 
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
-                if (getPlayerPtr().isInCell())
-                {
-                    if (getPlayerPtr().getCell()->isExterior())
-                        mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3(),
-                            getPlayerPtr().getCell()->getCell()->getWorldSpace());
-                    mWorldScene->preloadCellWithSurroundings(*getPlayerPtr().getCell());
-                }
                 break;
             case ESM::REC_CSTA:
                 // We need to rebuild the ESMStore index in order to be able to lookup dynamic records while loading the
