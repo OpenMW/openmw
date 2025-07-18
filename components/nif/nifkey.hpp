@@ -3,7 +3,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 #define OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 
-#include <map>
+#include <utility>
 #include <vector>
 
 #include "exception.hpp"
@@ -46,7 +46,8 @@ namespace Nif
     template <typename T, T (NIFStream::*getValue)()>
     struct KeyMapT
     {
-        using MapType = std::map<float, KeyT<T>>;
+        // This is theoretically a "flat map" sorted by time
+        using MapType = std::vector<std::pair<float, KeyT<T>>>;
 
         using ValueType = T;
         using KeyType = KeyT<T>;
@@ -78,8 +79,12 @@ namespace Nif
             uint32_t count;
             nif->read(count);
 
-            if (count != 0 || morph)
-                nif->read(mInterpolationType);
+            if (count == 0 && !morph)
+                return;
+
+            nif->read(mInterpolationType);
+
+            mKeys.reserve(count);
 
             KeyType key = {};
 
@@ -90,7 +95,7 @@ namespace Nif
                     float time;
                     nif->read(time);
                     readValue(*nif, key);
-                    mKeys[time] = key;
+                    mKeys.emplace_back(time, key);
                 }
             }
             else if (mInterpolationType == InterpolationType_Quadratic)
@@ -100,7 +105,7 @@ namespace Nif
                     float time;
                     nif->read(time);
                     readQuadratic(*nif, key);
-                    mKeys[time] = key;
+                    mKeys.emplace_back(time, key);
                 }
             }
             else if (mInterpolationType == InterpolationType_TCB)
@@ -115,8 +120,9 @@ namespace Nif
                     nif->read(tcbKey.mBias);
                 }
                 generateTCBTangents(tcbKeys);
-                for (TCBKey<T>& key : tcbKeys)
-                    mKeys[key.mTime] = KeyType{ std::move(key.mValue), std::move(key.mInTan), std::move(key.mOutTan) };
+                for (TCBKey<T>& tcbKey : tcbKeys)
+                    mKeys.emplace_back(std::move(tcbKey.mTime),
+                        KeyType{ std::move(tcbKey.mValue), std::move(tcbKey.mInTan), std::move(tcbKey.mOutTan) });
             }
             else if (mInterpolationType == InterpolationType_XYZ)
             {
@@ -132,6 +138,8 @@ namespace Nif
                 throw Nif::Exception("Unhandled interpolation type: " + std::to_string(mInterpolationType),
                     nif->getFile().getFilename());
             }
+
+            // Note: NetImmerse does NOT sort keys or remove duplicates
         }
 
     private:
