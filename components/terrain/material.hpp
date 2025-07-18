@@ -20,14 +20,13 @@ namespace Terrain
     {
         osg::ref_ptr<osg::Texture2D> mDiffuseMap;
         osg::ref_ptr<osg::Texture2D> mNormalMap; // optional
-        bool mParallax;
-        bool mSpecular;
+        bool mParallax = false;
+        bool mSpecular = false;
     };
 
     std::vector<osg::ref_ptr<osg::StateSet>> createPasses(bool useShaders, Resource::SceneManager* sceneManager,
         const std::vector<TextureLayer>& layers, const std::vector<osg::ref_ptr<osg::Texture2D>>& blendmaps,
-        int blendmapScale, float layerTileSize);
-
+        int blendmapScale, float layerTileSize, bool esm4terrain = false);
 }
 
 #endif

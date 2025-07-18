@@ -1,6 +1,8 @@
 #include "terrainstorage.hpp"
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm4/loadltex.hpp>
+#include <components/esm4/loadtxst.hpp>
 #include <components/esm4/loadwrld.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -111,4 +113,15 @@ namespace MWRender
         return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }
 
+    const ESM4::LandTexture* TerrainStorage::getEsm4LandTexture(ESM::RefId ltexId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::LandTexture>().search(ltexId);
+    }
+
+    const ESM4::TextureSet* TerrainStorage::getEsm4TextureSet(ESM::RefId txstId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::TextureSet>().search(txstId);
+    }
 }

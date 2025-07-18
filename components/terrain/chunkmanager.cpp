@@ -5,6 +5,7 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <components/esm/util.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -205,10 +206,10 @@ namespace Terrain
             blendmapTextures.push_back(texture);
         }
 
-        float blendmapScale = mStorage->getBlendmapScale(chunkSize);
+        float tileCount = mStorage->getTextureTileCount(chunkSize, mWorldspace);
 
         return ::Terrain::createPasses(
-            useShaders, mSceneManager, layers, blendmapTextures, blendmapScale, blendmapScale);
+            useShaders, mSceneManager, layers, blendmapTextures, tileCount, tileCount, ESM::isEsm4Ext(mWorldspace));
     }
 
     osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f& chunkCenter, unsigned char lod,

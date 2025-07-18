@@ -4,6 +4,7 @@
 #include <cassert>
 #include <mutex>
 
+#include <components/terrain/defs.hpp>
 #include <components/terrain/storage.hpp>
 
 #include <components/esm/esmterrain.hpp>
@@ -13,6 +14,8 @@
 namespace ESM4
 {
     struct Land;
+    struct LandTexture;
+    struct TextureSet;
 }
 
 namespace ESM
@@ -51,8 +54,12 @@ namespace ESMTerrain
 
         int getPlugin() const { return mData.getPlugin(); }
 
+        const Terrain::LayerInfo& getEsm4DefaultLayerInfo() const { return mEsm4DefaultLayerInfo; }
+
     private:
         ESM::LandData mData;
+
+        Terrain::LayerInfo mEsm4DefaultLayerInfo;
 
         LandObject(const LandObject& copy, const osg::CopyOp& copyOp);
     };
@@ -74,6 +81,11 @@ namespace ESMTerrain
         // Not implemented in this class, because we need different Store implementations for game and editor
         virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
         virtual const std::string* getLandTexture(std::uint16_t index, int plugin) = 0;
+
+        // Not implemented in this class because requires ESMStore
+        virtual const ESM4::LandTexture* getEsm4LandTexture(ESM::RefId ltexId) const { return nullptr; }
+        virtual const ESM4::TextureSet* getEsm4TextureSet(ESM::RefId txstId) const { return nullptr; }
+
         /// Get bounds of the whole terrain in cell units
         void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override = 0;
 
@@ -120,7 +132,7 @@ namespace ESMTerrain
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         int getCellVertices(ESM::RefId worldspace) override;
 
-        int getBlendmapScale(float chunkSize) override;
+        int getTextureTileCount(float chunkSize, ESM::RefId worldspace) override;
 
         float getVertexHeight(const ESM::LandData* data, int x, int y)
         {
@@ -159,6 +171,11 @@ namespace ESMTerrain
         bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
+        Terrain::LayerInfo getTextureSetLayerInfo(const ESM4::TextureSet& txst);
+        Terrain::LayerInfo getLandTextureLayerInfo(ESM::FormId id);
+
+        void getEsm4Blendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+            std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace);
     };
 
 }
