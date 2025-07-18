@@ -1922,7 +1922,8 @@ namespace MWGui
         // If using controller menus, don't persist changes to size of the stats or magic
         // windows.
         if (Settings::gui().mControllerMenus
-            && (window == (MyGUI::Window*)mStatsWindow || window == (MyGUI::Window*)mSpellWindow))
+            && (window == mStatsWindow->mMainWidget->castType<MyGUI::Window>()
+                || window == mSpellWindow->mMainWidget->castType<MyGUI::Window>()))
             return;
 
         const auto it = mTrackedWindows.find(window);

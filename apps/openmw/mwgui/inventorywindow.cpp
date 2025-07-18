@@ -1046,20 +1046,16 @@ namespace MWGui
             {
                 // Take all. Pass the button press to the container window and let it do the
                 // logic of taking all.
-                MWGui::ContainerWindow* containerWindow = (MWGui::ContainerWindow*)MWBase::Environment::get()
-                                                              .getWindowManager()
-                                                              ->getGuiModeWindows(mGuiMode)
-                                                              .at(0);
+                MWGui::ContainerWindow* containerWindow = static_cast<MWGui::ContainerWindow*>(
+                    MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0));
                 containerWindow->onControllerButtonEvent(arg);
             }
             else if (mGuiMode == MWGui::GM_Barter)
             {
                 // Offer. Pass the button press to the barter window and let it do the logic
                 // of making an offer.
-                MWGui::TradeWindow* tradeWindow = (MWGui::TradeWindow*)MWBase::Environment::get()
-                                                      .getWindowManager()
-                                                      ->getGuiModeWindows(mGuiMode)
-                                                      .at(1);
+                MWGui::TradeWindow* tradeWindow = static_cast<MWGui::TradeWindow*>(
+                    MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(1));
                 tradeWindow->onControllerButtonEvent(arg);
             }
         }

@@ -1302,7 +1302,7 @@ namespace MWGui
 
         void setFocusItem(BookTypesetter::Style* itemStyle) override
         {
-            mPageDisplay->mFocusItem = (TypesetBookImpl::StyleImpl*)itemStyle;
+            mPageDisplay->mFocusItem = static_cast<TypesetBookImpl::StyleImpl*>(itemStyle);
             mPageDisplay->dirtyFocusItem();
         }
 

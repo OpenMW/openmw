@@ -556,7 +556,7 @@ namespace MWGui
             }
             else
             {
-                ((MyGUI::Button*)button)->setStateSelected(false);
+                static_cast<MyGUI::Button*>(button)->setStateSelected(false);
             }
         }
 
@@ -570,7 +570,7 @@ namespace MWGui
             }
             else
             {
-                ((MyGUI::Button*)button)->setStateSelected(true);
+                static_cast<MyGUI::Button*>(button)->setStateSelected(true);
             }
         }
     }
