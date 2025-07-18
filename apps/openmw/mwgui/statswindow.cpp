@@ -723,7 +723,9 @@ namespace MWGui
 
     void StatsWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
             MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
             MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();

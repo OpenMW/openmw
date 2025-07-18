@@ -594,7 +594,9 @@ namespace MWGui
 
     void InventoryWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus && mGuiMode == GM_Inventory)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
             toggleMaximized();
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);

@@ -1243,7 +1243,9 @@ namespace MWGui
 
     void MapWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
             MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Map);
