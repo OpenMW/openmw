@@ -147,12 +147,14 @@ namespace MWGui
         {
             mControllerFocus = 0;
             if (mSpellButtons.size() > 0)
+            {
                 mSpellButtons[0].first->setStateSelected(true);
 
-            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->setControllerTooltip(Settings::gui().mControllerTooltips);
-            if (winMgr->getControllerTooltip())
-                MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[0].first);
+                MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+                winMgr->setControllerTooltip(Settings::gui().mControllerTooltips);
+                if (winMgr->getControllerTooltip())
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[0].first);
+            }
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
