@@ -11,65 +11,28 @@ namespace MWGui
     {
         MWBase::InputManager* inputMgr = MWBase::Environment::get().getInputManager();
 
-        getWidget(mImageA, "BtnAImage");
-        getWidget(mTextA, "BtnAText");
-        setIcon(mImageA, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_A));
+        mButtons[Button::Button_A] = { "A", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_A) };
+        mButtons[Button::Button_B] = { "B", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_B) };
+        mButtons[Button::Button_Dpad] = { "Dpad", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_DPAD_UP) };
+        mButtons[Button::Button_L1] = { "L1", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_LEFTSHOULDER) };
+        mButtons[Button::Button_L2] = { "L2", inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERLEFT) };
+        mButtons[Button::Button_L3] = { "L3", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_LEFTSTICK) };
+        mButtons[Button::Button_LStick] = { "LStick", inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_LEFTY) };
+        mButtons[Button::Button_Menu] = { "Menu", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_BACK) };
+        mButtons[Button::Button_R1] = { "R1", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) };
+        mButtons[Button::Button_R2] = { "R2", inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERRIGHT) };
+        mButtons[Button::Button_R3] = { "R3", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_RIGHTSTICK) };
+        mButtons[Button::Button_RStick] = { "RStick", inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_RIGHTY) };
+        mButtons[Button::Button_View] = { "View", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_START) };
+        mButtons[Button::Button_X] = { "X", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_X) };
+        mButtons[Button::Button_Y] = { "Y", inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_Y) };
 
-        getWidget(mImageB, "BtnBImage");
-        getWidget(mTextB, "BtnBText");
-        setIcon(mImageB, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_B));
-
-        getWidget(mImageDpad, "BtnDpadImage");
-        getWidget(mTextDpad, "BtnDpadText");
-        setIcon(mImageDpad, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_DPAD_UP));
-
-        getWidget(mImageL1, "BtnL1Image");
-        getWidget(mTextL1, "BtnL1Text");
-        setIcon(mImageL1, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_LEFTSHOULDER));
-
-        getWidget(mImageL2, "BtnL2Image");
-        getWidget(mTextL2, "BtnL2Text");
-        setIcon(mImageL2, inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERLEFT));
-
-        getWidget(mImageL3, "BtnL3Image");
-        getWidget(mTextL3, "BtnL3Text");
-        setIcon(mImageL3, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_LEFTSTICK));
-
-        getWidget(mImageLStick, "BtnLStickImage");
-        getWidget(mTextLStick, "BtnLStickText");
-        setIcon(mImageLStick, inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_LEFTY));
-
-        getWidget(mImageMenu, "BtnMenuImage");
-        getWidget(mTextMenu, "BtnMenuText");
-        setIcon(mImageMenu, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_BACK));
-
-        getWidget(mImageR1, "BtnR1Image");
-        getWidget(mTextR1, "BtnR1Text");
-        setIcon(mImageR1, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
-
-        getWidget(mImageR2, "BtnR2Image");
-        getWidget(mTextR2, "BtnR2Text");
-        setIcon(mImageR2, inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERRIGHT));
-
-        getWidget(mImageR3, "BtnR3Image");
-        getWidget(mTextR3, "BtnR3Text");
-        setIcon(mImageR3, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_RIGHTSTICK));
-
-        getWidget(mImageRStick, "BtnRStickImage");
-        getWidget(mTextRStick, "BtnRStickText");
-        setIcon(mImageRStick, inputMgr->getControllerAxisIcon(SDL_CONTROLLER_AXIS_RIGHTY));
-
-        getWidget(mImageView, "BtnViewImage");
-        getWidget(mTextView, "BtnViewText");
-        setIcon(mImageView, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_START));
-
-        getWidget(mImageX, "BtnXImage");
-        getWidget(mTextX, "BtnXText");
-        setIcon(mImageX, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_X));
-
-        getWidget(mImageY, "BtnYImage");
-        getWidget(mTextY, "BtnYText");
-        setIcon(mImageY, inputMgr->getControllerButtonIcon(SDL_CONTROLLER_BUTTON_Y));
+        for (size_t i = 0; i < mButtons.size(); i++)
+        {
+            getWidget(mButtons[i].mImage, "Btn" + mButtons[i].mName + "Image");
+            getWidget(mButtons[i].mText, "Btn" + mButtons[i].mName + "Text");
+            setIcon(mButtons[i].mImage, mButtons[i].mImagePath);
+        }
 
         getWidget(mHBox, "ButtonBox");
     }
@@ -77,21 +40,22 @@ namespace MWGui
     void ControllerButtonsOverlay::setButtons(ControllerButtonStr* buttons)
     {
         int buttonCount = 0;
-        buttonCount += updateButton(mTextA, mImageA, buttons->a);
-        buttonCount += updateButton(mTextB, mImageB, buttons->b);
-        buttonCount += updateButton(mTextDpad, mImageDpad, buttons->dpad);
-        buttonCount += updateButton(mTextL1, mImageL1, buttons->l1);
-        buttonCount += updateButton(mTextL2, mImageL2, buttons->l2);
-        buttonCount += updateButton(mTextL3, mImageL3, buttons->l3);
-        buttonCount += updateButton(mTextLStick, mImageLStick, buttons->lStick);
-        buttonCount += updateButton(mTextMenu, mImageMenu, buttons->menu);
-        buttonCount += updateButton(mTextR1, mImageR1, buttons->r1);
-        buttonCount += updateButton(mTextR2, mImageR2, buttons->r2);
-        buttonCount += updateButton(mTextR3, mImageR3, buttons->r3);
-        buttonCount += updateButton(mTextRStick, mImageRStick, buttons->rStick);
-        buttonCount += updateButton(mTextView, mImageView, buttons->view);
-        buttonCount += updateButton(mTextX, mImageX, buttons->x);
-        buttonCount += updateButton(mTextY, mImageY, buttons->y);
+        buttonCount += updateButton(Button::Button_A, buttons->a);
+        buttonCount += updateButton(Button::Button_B, buttons->b);
+        buttonCount += updateButton(Button::Button_Dpad, buttons->dpad);
+        buttonCount += updateButton(Button::Button_L1, buttons->l1);
+        buttonCount += updateButton(Button::Button_L2, buttons->l2);
+        buttonCount += updateButton(Button::Button_L3, buttons->l3);
+        buttonCount += updateButton(Button::Button_LStick, buttons->lStick);
+        buttonCount += updateButton(Button::Button_Menu, buttons->menu);
+        buttonCount += updateButton(Button::Button_R1, buttons->r1);
+        buttonCount += updateButton(Button::Button_R2, buttons->r2);
+        buttonCount += updateButton(Button::Button_R3, buttons->r3);
+        buttonCount += updateButton(Button::Button_RStick, buttons->rStick);
+        buttonCount += updateButton(Button::Button_View, buttons->view);
+        buttonCount += updateButton(Button::Button_X, buttons->x);
+        buttonCount += updateButton(Button::Button_Y, buttons->y);
+
         mHBox->notifyChildrenSizeChanged();
 
         setVisible(buttonCount > 0);
@@ -103,9 +67,11 @@ namespace MWGui
             image->setImageTexture(imagePath);
     }
 
-    int ControllerButtonsOverlay::updateButton(
-        MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr)
+    int ControllerButtonsOverlay::updateButton(ControllerButtonsOverlay::Button button, const std::string& buttonStr)
     {
+        MyGUI::TextBox* text = mButtons[button].mText;
+        MyGUI::ImageBox* image = mButtons[button].mImage;
+
         if (buttonStr.empty())
         {
             image->setVisible(false);

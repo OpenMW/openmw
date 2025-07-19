@@ -18,55 +18,40 @@ namespace MWGui
         void setButtons(ControllerButtonStr* buttons);
 
     private:
-        MyGUI::ImageBox* mImageA;
-        MyGUI::TextBox* mTextA;
+        enum Button
+        {
+            Button_A = 0,
+            Button_B,
+            Button_Dpad,
+            Button_L1,
+            Button_L2,
+            Button_L3,
+            Button_LStick,
+            Button_Menu,
+            Button_R1,
+            Button_R2,
+            Button_R3,
+            Button_RStick,
+            Button_View,
+            Button_X,
+            Button_Y,
+            Button_Max,
+        };
 
-        MyGUI::ImageBox* mImageB;
-        MyGUI::TextBox* mTextB;
+        struct ButtonDetails
+        {
+            std::string mName;
+            std::string mImagePath;
+            MyGUI::ImageBox* mImage = nullptr;
+            MyGUI::TextBox* mText = nullptr;
+        };
 
-        MyGUI::ImageBox* mImageDpad;
-        MyGUI::TextBox* mTextDpad;
-
-        MyGUI::ImageBox* mImageL1;
-        MyGUI::TextBox* mTextL1;
-
-        MyGUI::ImageBox* mImageL2;
-        MyGUI::TextBox* mTextL2;
-
-        MyGUI::ImageBox* mImageL3;
-        MyGUI::TextBox* mTextL3;
-
-        MyGUI::ImageBox* mImageLStick;
-        MyGUI::TextBox* mTextLStick;
-
-        MyGUI::ImageBox* mImageMenu;
-        MyGUI::TextBox* mTextMenu;
-
-        MyGUI::ImageBox* mImageR1;
-        MyGUI::TextBox* mTextR1;
-
-        MyGUI::ImageBox* mImageR2;
-        MyGUI::TextBox* mTextR2;
-
-        MyGUI::ImageBox* mImageR3;
-        MyGUI::TextBox* mTextR3;
-
-        MyGUI::ImageBox* mImageRStick;
-        MyGUI::TextBox* mTextRStick;
-
-        MyGUI::ImageBox* mImageView;
-        MyGUI::TextBox* mTextView;
-
-        MyGUI::ImageBox* mImageX;
-        MyGUI::TextBox* mTextX;
-
-        MyGUI::ImageBox* mImageY;
-        MyGUI::TextBox* mTextY;
+        std::array<ButtonDetails, Button::Button_Max> mButtons;
 
         Gui::HBox* mHBox;
 
         void setIcon(MyGUI::ImageBox* image, const std::string& imagePath);
-        int updateButton(MyGUI::TextBox* text, MyGUI::ImageBox* image, const std::string& buttonStr);
+        int updateButton(Button button, const std::string& buttonStr);
     };
 }
 
