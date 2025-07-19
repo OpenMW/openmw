@@ -80,7 +80,6 @@
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #4822: Non-weapon equipment and body parts can't inherit time from parent animation
-    Bug #4885: Disable in dialogue result script causes a crash
     Bug #4898: Odd/Incorrect lighting on meshes
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5062: Root bone rotations for NPC animation don't work the same as for creature animation

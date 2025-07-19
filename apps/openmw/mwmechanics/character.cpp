@@ -883,13 +883,12 @@ namespace MWMechanics
         }
 
         mDeathState = hitStateToDeathState(mHitState);
-        if (mDeathState == CharState_None)
-        {
-            if (MWBase::Environment::get().getWorld()->isSwimming(mPtr))
-                mDeathState = CharState_SwimDeath;
-            else if (mAnimation && !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState)))
-                mDeathState = chooseRandomDeathState();
-        }
+        if (mDeathState == CharState_None && MWBase::Environment::get().getWorld()->isSwimming(mPtr))
+            mDeathState = CharState_SwimDeath;
+
+        if (mDeathState == CharState_None
+            || (mAnimation && !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState))))
+            mDeathState = chooseRandomDeathState();
 
         // Do not interrupt scripted animation by death
         if (!mAnimation || isScriptedAnimPlaying())
@@ -1160,7 +1159,7 @@ namespace MWMechanics
         else if (action == "shoot release")
         {
             // See notes for melee release above
-            if (mAttackStrength != -1.f  && mAnimation)
+            if (mAttackStrength != -1.f && mAnimation)
             {
                 mAnimation->releaseArrow(mAttackStrength);
                 mReadyToHit = false;
