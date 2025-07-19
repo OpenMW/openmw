@@ -23,7 +23,7 @@ float coveragePreservingAlphaScale(sampler2D diffuseMap, vec2 uv)
     #if @adjustCoverage
         vec2 textureSize;
         #if @useGPUShader4
-            textureSize = vec2(256.0);
+            textureSize = vec2(textureSize2D(diffuseMap, 0));
         #else
             textureSize = vec2(256.0);
         #endif
