@@ -11,7 +11,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#GamepadControls] #number version
-        version = 0,
+        version = 1,
 
         --- Checks if the gamepad cursor is active. If it is active, the left stick can move the cursor, and A will be interpreted as a mouse click.
         -- @function [parent=#GamepadControls] isGamepadCursorActive
