@@ -55,6 +55,16 @@ namespace MWClass
             }
             return res;
         }
+
+        // TODO: Figure out a better way to find markers and LOD meshes
+        inline bool isMarkerModel(std::string_view model)
+        {
+            return Misc::StringUtils::ciStartsWith(model, "marker");
+        }
+        inline bool isLodModel(std::string_view model)
+        {
+            return Misc::StringUtils::ciEndsWith(model, "lod.nif");
+        }
     }
 
     // Base for many ESM4 Classes
@@ -100,11 +110,8 @@ namespace MWClass
         {
             std::string_view model = getClassModel<Record>(ptr);
 
-            // Hide meshes meshes/marker/* and *LOD.nif in ESM4 cells. It is a temporarty hack.
-            // Needed because otherwise LOD meshes are rendered on top of normal meshes.
-            // TODO: Figure out a better way find markers and LOD meshes; show LOD only outside of active grid.
-            if (model.empty() || Misc::StringUtils::ciStartsWith(model, "marker")
-                || Misc::StringUtils::ciEndsWith(model, "lod.nif"))
+            // TODO: There should be a better way to hide markers
+            if (ESM4Impl::isMarkerModel(model) || ESM4Impl::isLodModel(model))
                 return {};
 
             return model;

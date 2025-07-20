@@ -181,6 +181,7 @@ namespace MWRender
         AnimSourceList mAnimSources;
 
         std::unordered_set<std::string_view> mSupportedAnimations;
+        mutable std::vector<std::pair<std::string, MWWorld::MovementDirectionFlags>> mSupportedDirections;
 
         osg::ref_ptr<osg::Group> mInsert;
 

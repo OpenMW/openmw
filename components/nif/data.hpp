@@ -193,8 +193,8 @@ namespace Nif
 
     struct NiVisData : public Record
     {
-        // TODO: investigate possible use of BoolKeyMap
-        std::shared_ptr<std::map<float, bool>> mKeys;
+        // This is theoretically a "flat map" sorted by time
+        std::shared_ptr<std::vector<std::pair<float, bool>>> mKeys;
 
         void read(NIFStream* nif) override;
     };
