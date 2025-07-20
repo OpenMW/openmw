@@ -3,14 +3,14 @@
 
 #include <sol/sol.hpp>
 
-namespace l10n
+namespace L10n
 {
     class Manager;
 }
 
 namespace LuaUtil
 {
-    sol::function initL10nLoader(lua_State*, l10n::Manager* manager);
+    sol::function initL10nLoader(lua_State*, L10n::Manager* manager);
 }
 
 #endif // COMPONENTS_LUA_L10N_H

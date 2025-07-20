@@ -6,7 +6,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
 
-namespace l10n
+namespace L10n
 {
 
     void Manager::setPreferredLocales(const std::vector<std::string>& langs, bool gmstHasPriority)

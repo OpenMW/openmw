@@ -91,7 +91,7 @@ namespace
 )" };
 
     using namespace testing;
-    using namespace fx;
+    using namespace Fx;
 
     struct TechniqueTest : Test
     {

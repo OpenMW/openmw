@@ -12,7 +12,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
 
-namespace fx
+namespace Fx
 {
     namespace Types
     {

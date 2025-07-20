@@ -402,7 +402,7 @@ namespace MWGui
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-        std::unique_ptr<osgMyGUI::Platform> mGuiPlatform;
+        std::unique_ptr<MyGUIPlatform::Platform> mGuiPlatform;
         osgViewer::Viewer* mViewer;
 
         std::unique_ptr<Gui::FontLoader> mFontLoader;

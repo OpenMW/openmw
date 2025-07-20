@@ -13,11 +13,11 @@
 
 #include "technique.hpp"
 
-namespace fx
+namespace Fx
 {
-    namespace constants
+    namespace Constants
     {
-        constexpr std::array<std::pair<std::string_view, fx::FlagsType>, 6> TechniqueFlag = { {
+        constexpr std::array<std::pair<std::string_view, Fx::FlagsType>, 6> TechniqueFlag = { {
             { "disable_interiors", Technique::Flag_Disable_Interiors },
             { "disable_exteriors", Technique::Flag_Disable_Exteriors },
             { "disable_underwater", Technique::Flag_Disable_Underwater },

@@ -8,7 +8,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     OSGTexture::OSGTexture(const std::string& name, Resource::ImageManager* imageManager)

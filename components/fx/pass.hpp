@@ -18,7 +18,7 @@ namespace osg
     class StateSet;
 }
 
-namespace fx
+namespace Fx
 {
     class Technique;
 

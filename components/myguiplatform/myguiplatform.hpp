@@ -26,7 +26,7 @@ namespace VFS
     class Manager;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class RenderManager;
