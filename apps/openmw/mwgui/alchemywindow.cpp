@@ -558,19 +558,21 @@ namespace MWGui
             // When the filter list combo box is open, send all inputs to it.
             if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_Y)
             {
-                // Select the highlighted entry in the combo box and close it.
+                // Select the highlighted entry in the combo box and close it. List is closed by focusing on another
+                // widget.
                 size_t index = mFilterValue->getIndexSelected();
                 mFilterValue->setIndexSelected(index);
                 onFilterChanged(mFilterValue, index);
-                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
+
                 MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             {
-                // Close the list without selecting anything
+                // Close the list without selecting anything. List is closed by focusing on another widget.
                 mFilterValue->clearIndexSelected();
                 onFilterEdited(mFilterValue);
-                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit); // Close list
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
                 MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
