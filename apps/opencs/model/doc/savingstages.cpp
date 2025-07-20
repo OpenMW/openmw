@@ -304,7 +304,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
         {
             CSMWorld::CellRef refRecord = ref.get();
 
-            const bool isLocal = refRecord.mRefNum.mContentFile == 0;
+            const bool isLocal = refRecord.mRefNum.mContentFile == -1;
 
             // -1 is the current file, saved indices are 1-based
             refRecord.mRefNum.mContentFile++;
