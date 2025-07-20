@@ -12,6 +12,7 @@ namespace MWGui
     public:
         InventoryTabsOverlay();
 
+        int getHeight();
         void setTab(int index);
 
     private:

@@ -2621,6 +2621,16 @@ namespace MWGui
         return res;
     }
 
+    int WindowManager::getControllerMenuHeight()
+    {
+        int height = MyGUI::RenderManager::getInstance().getViewSize().height;
+        if (mControllerButtonsOverlay != nullptr && mControllerButtonsOverlay->isVisible())
+            height -= mControllerButtonsOverlay->getHeight();
+        if (mInventoryTabsOverlay != nullptr && mInventoryTabsOverlay->isVisible())
+            height -= mInventoryTabsOverlay->getHeight();
+        return height;
+    }
+
     void WindowManager::setControllerTooltip(bool enabled)
     {
         if (!Settings::gui().mControllerMenus)

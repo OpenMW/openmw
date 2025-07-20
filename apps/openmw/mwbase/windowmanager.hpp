@@ -387,6 +387,8 @@ namespace MWBase
 
         /// Return the window that should receive controller events
         virtual MWGui::WindowBase* getActiveControllerWindow() = 0;
+        /// Return the available height for menus accounting for visible controller overlays
+        virtual int getControllerMenuHeight() = 0;
         /// Cycle to the next window to receive controller events
         virtual void cycleActiveControllerWindow(bool next) = 0;
         virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;

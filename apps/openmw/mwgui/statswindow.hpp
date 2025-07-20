@@ -13,6 +13,10 @@ namespace MWGui
     public:
         typedef std::map<ESM::RefId, int> FactionList;
 
+        /// It would be nice to measure these, but for now they're hardcoded.
+        static int getIdealHeight() { return 750; }
+        static int getIdealWidth() { return 600; }
+
         StatsWindow(DragAndDrop* drag);
 
         /// automatically updates all the data in the stats window, but only if it has changed.

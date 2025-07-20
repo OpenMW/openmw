@@ -394,6 +394,7 @@ namespace MWGui
         void asyncPrepareSaveMap() override;
 
         WindowBase* getActiveControllerWindow() override;
+        int getControllerMenuHeight() override;
         void cycleActiveControllerWindow(bool next) override;
         void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
         bool getControllerTooltip() const override { return mControllerTooltip; }

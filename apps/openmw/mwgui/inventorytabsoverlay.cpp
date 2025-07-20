@@ -1,6 +1,7 @@
 #include "inventorytabsoverlay.hpp"
 
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_Window.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -37,6 +38,12 @@ namespace MWGui
         getWidget(image, "BtnR2Image");
         image->setImageTexture(
             MWBase::Environment::get().getInputManager()->getControllerAxisIcon(SDL_CONTROLLER_AXIS_TRIGGERRIGHT));
+    }
+
+    int InventoryTabsOverlay::getHeight()
+    {
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        return window->getHeight();
     }
 
     void InventoryTabsOverlay::onTabClicked(MyGUI::Widget* sender)

@@ -15,6 +15,7 @@ namespace MWGui
     public:
         ControllerButtonsOverlay();
 
+        int getHeight();
         void setButtons(ControllerButtonStr* buttons);
 
     private:

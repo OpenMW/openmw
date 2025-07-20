@@ -745,13 +745,14 @@ namespace MWGui
 
     void StatsWindow::setActiveControllerWindow(bool active)
     {
-        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
         {
             // Fill the screen, or limit to a certain size on large screens. Size chosen to
             // show all stats.
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-            int width = std::min(viewSize.width, 600);
-            int height = std::min(viewSize.height - 48 - 48, 750);
+            int width = std::min(viewSize.width, getIdealWidth());
+            int height = std::min(winMgr->getControllerMenuHeight(), getIdealHeight());
             int x = (viewSize.width - width) / 2;
             int y = (viewSize.height - height) / 2;
 

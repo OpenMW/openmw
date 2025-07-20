@@ -1,5 +1,7 @@
 #include "controllerbuttonsoverlay.hpp"
 
+#include <MyGUI_Window.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -35,6 +37,12 @@ namespace MWGui
         }
 
         getWidget(mHBox, "ButtonBox");
+    }
+
+    int ControllerButtonsOverlay::getHeight()
+    {
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        return window->getHeight();
     }
 
     void ControllerButtonsOverlay::setButtons(ControllerButtonStr* buttons)

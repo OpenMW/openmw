@@ -42,6 +42,7 @@
 #include "itemview.hpp"
 #include "settings.hpp"
 #include "sortfilteritemmodel.hpp"
+#include "statswindow.hpp"
 #include "tooltips.hpp"
 #include "tradeitemmodel.hpp"
 #include "tradewindow.hpp"
@@ -1109,13 +1110,14 @@ namespace MWGui
         if (!Settings::gui().mControllerMenus)
             return;
 
-        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Inventory)
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
         {
             // Fill the screen, or limit to a certain size on large screens. Size chosen to
             // match the size of the stats window.
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             int width = std::min(viewSize.width, 1600);
-            int height = std::min(viewSize.height - 48 - 48, 750);
+            int height = std::min(winMgr->getControllerMenuHeight(), StatsWindow::getIdealHeight());
             int x = (viewSize.width - width) / 2;
             int y = (viewSize.height - height) / 2;
 
