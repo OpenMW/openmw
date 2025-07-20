@@ -46,6 +46,9 @@ Ubuntu_GCC_preprocess:
     - pip3 install --user click termtables
   script:
     - CI/ubuntu_gcc_preprocess.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -268,6 +271,9 @@ Ubuntu_GCC_tests_asan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -285,6 +291,9 @@ Ubuntu_GCC_tests_ubsan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -322,6 +331,9 @@ Ubuntu_GCC_tests_coverage:
         coverage_format: cobertura
         path: coverage.xml
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -402,6 +414,9 @@ Ubuntu_Clang:
       - build/
     expire_in: 12h
   timeout: 3h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_Clang_Tidy_components:
   extends: .Ubuntu_Clang_Tidy_Base

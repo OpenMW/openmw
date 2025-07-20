@@ -20,6 +20,12 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm4/loadacti.hpp>
+#include <components/esm4/loadcont.hpp>
+#include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadfurn.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadtree.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
@@ -36,12 +42,14 @@
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwclass/esm4base.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
 
 namespace MWRender
 {
+
     namespace
     {
         bool typeFilter(int type, bool far)
@@ -51,8 +59,14 @@ namespace MWRender
                 case ESM::REC_STAT:
                 case ESM::REC_ACTI:
                 case ESM::REC_DOOR:
+                case ESM::REC_STAT4:
+                case ESM::REC_DOOR4:
+                case ESM::REC_TREE4:
                     return true;
                 case ESM::REC_CONT:
+                case ESM::REC_ACTI4:
+                case ESM::REC_CONT4:
+                case ESM::REC_FURN4:
                     return !far;
 
                 default:
@@ -60,7 +74,16 @@ namespace MWRender
             }
         }
 
-        std::string getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
+        template <typename Record>
+        std::string_view getEsm4Model(const Record& record)
+        {
+            if (MWClass::ESM4Impl::isMarkerModel(record->mModel))
+                return {};
+            else
+                return record->mModel;
+        }
+
+        std::string_view getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
         {
             switch (type)
             {
@@ -72,6 +95,18 @@ namespace MWRender
                     return store.get<ESM::Door>().searchStatic(id)->mModel;
                 case ESM::REC_CONT:
                     return store.get<ESM::Container>().searchStatic(id)->mModel;
+                case ESM::REC_STAT4:
+                    return getEsm4Model(store.get<ESM4::Static>().searchStatic(id));
+                case ESM::REC_DOOR4:
+                    return getEsm4Model(store.get<ESM4::Door>().searchStatic(id));
+                case ESM::REC_TREE4:
+                    return getEsm4Model(store.get<ESM4::Tree>().searchStatic(id));
+                case ESM::REC_ACTI4:
+                    return getEsm4Model(store.get<ESM4::Activator>().searchStatic(id));
+                case ESM::REC_CONT4:
+                    return getEsm4Model(store.get<ESM4::Container>().searchStatic(id));
+                case ESM::REC_FURN4:
+                    return getEsm4Model(store.get<ESM4::Furniture>().searchStatic(id));
                 default:
                     return {};
             }
@@ -494,6 +529,17 @@ namespace MWRender
             };
         }
 
+        PagedCellRef makePagedCellRef(const ESM4::Reference& value)
+        {
+            return PagedCellRef{
+                .mRefId = value.mBaseObj,
+                .mRefNum = value.mId,
+                .mPosition = value.mPos.asVec3(),
+                .mRotation = value.mPos.asRotationVec3(),
+                .mScale = value.mScale,
+            };
+        }
+
         std::map<ESM::RefNum, PagedCellRef> collectESM3References(
             float size, const osg::Vec2i& startCell, const MWWorld::ESMStore& store)
         {
@@ -561,6 +607,45 @@ namespace MWRender
             }
             return refs;
         }
+
+        std::map<ESM::RefNum, PagedCellRef> collectESM4References(
+            float size, const osg::Vec2i& startCell, ESM::RefId worldspace)
+        {
+            std::map<ESM::RefNum, PagedCellRef> refs;
+            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
+            {
+                for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
+                {
+                    const ESM4::Cell* cell
+                        = store.get<ESM4::Cell>().searchExterior(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
+                    if (!cell)
+                        continue;
+                    for (const ESM4::Reference* ref4 : store.get<ESM4::Reference>().getByCell(cell->mId))
+                    {
+                        if (ref4->mFlags & ESM4::Rec_Disabled)
+                            continue;
+                        int type = store.findStatic(ref4->mBaseObj);
+                        if (!typeFilter(type, size >= 2))
+                            continue;
+                        if (!ref4->mEsp.parent.isZeroOrUnset())
+                        {
+                            const ESM4::Reference* parentRef
+                                = store.get<ESM4::Reference>().searchStatic(ref4->mEsp.parent);
+                            if (parentRef)
+                            {
+                                bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
+                                bool inversed = ref4->mEsp.flags & ESM4::EnableParent::Flag_Inversed;
+                                if (parentDisabled != inversed)
+                                    continue;
+                            }
+                        }
+                        refs.insert_or_assign(ref4->mId, makePagedCellRef(*ref4));
+                    }
+                }
+            }
+            return refs;
+        }
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
@@ -578,7 +663,7 @@ namespace MWRender
         }
         else
         {
-            // TODO
+            refs = collectESM4References(size, startCell, mWorldspace);
         }
 
         if (activeGrid && !refs.empty())
@@ -648,12 +733,12 @@ namespace MWRender
                 continue;
 
             const int type = store.findStatic(ref.mRefId);
-            VFS::Path::Normalized model = getModel(type, ref.mRefId, store);
+            VFS::Path::Normalized model(getModel(type, ref.mRefId, store));
             if (model.empty())
                 continue;
             model = Misc::ResourceHelpers::correctMeshPath(model);
 
-            if (activeGrid && type != ESM::REC_STAT)
+            if (activeGrid && type != ESM::REC_STAT && type != ESM::REC_STAT4)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
                 if (Misc::getFileExtension(model) == "nif")

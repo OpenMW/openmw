@@ -676,12 +676,16 @@ namespace Nif
 
     void NiPSysEmitterCtlrData::read(NIFStream* nif)
     {
+        // TODO: this is not used in the official files and needs verification
         mFloatKeyList = std::make_shared<FloatKeyMap>();
+        mFloatKeyList->read(nif);
         mVisKeyList = std::make_shared<BoolKeyMap>();
-        uint32_t numVisKeys;
-        nif->read(numVisKeys);
-        for (size_t i = 0; i < numVisKeys; i++)
-            mVisKeyList->mKeys[nif->get<float>()].mValue = nif->get<uint8_t>() != 0;
+        mVisKeyList->mKeys.resize(nif->get<uint32_t>());
+        for (auto& [time, key] : mVisKeyList->mKeys)
+        {
+            nif->read(time);
+            key.mValue = nif->get<uint8_t>() != 0;
+        }
     }
 
     void NiPSysCollider::read(NIFStream* nif)

@@ -1263,26 +1263,48 @@ namespace MWWorld
                 }
             }
 
-            for (CellRefList<ESM::Creature>::List::iterator it(get<ESM::Creature>().mList.begin());
-                 it != get<ESM::Creature>().mList.end(); ++it)
+            // Actors need to respawn here even if they've been moved to another cell
+            for (LiveCellRefBase& base : get<ESM::Creature>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
+                Ptr ptr = getCurrentPtr(&base);
                 clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
-            for (CellRefList<ESM::NPC>::List::iterator it(get<ESM::NPC>().mList.begin());
-                 it != get<ESM::NPC>().mList.end(); ++it)
+            for (LiveCellRefBase& base : get<ESM::NPC>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
+                Ptr ptr = getCurrentPtr(&base);
                 clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
-            forEachType<ESM::CreatureLevList>([](Ptr ptr) {
-                // no need to clearCorpse, handled as part of get<ESM::Creature>()
+            for (LiveCellRefBase& base : get<ESM::CreatureLevList>().mList)
+            {
+                Ptr ptr = getCurrentPtr(&base);
                 if (!ptr.mRef->isDeleted())
                     ptr.getClass().respawn(ptr);
-                return true;
-            });
+            }
+            for (const auto& [base, _] : mMovedHere)
+            {
+                switch (base->getType())
+                {
+                    case ESM::Creature::sRecordId:
+                    case ESM::NPC::sRecordId:
+                    case ESM::CreatureLevList::sRecordId:
+                    {
+                        MWWorld::Ptr ptr(base, this);
+                        if (ptr.mRef->isDeleted())
+                            continue;
+                        // Remove actors that have been dead a while, but don't belong here and didn't get hit by the
+                        // logic above
+                        if (ptr.getClass().isActor())
+                            clearCorpse(ptr, mStore);
+                        else // Respawn lists in their new position
+                            ptr.getClass().respawn(ptr);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
     }
 

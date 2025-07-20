@@ -1062,9 +1062,12 @@ namespace MWMechanics
             {
                 if (heldIter != inventoryStore.end() && heldIter->getType() == ESM::Light::sRecordId)
                 {
-                    // At day, unequip lights and auto equip shields or other suitable items
-                    // (Note: autoEquip will ignore lights)
-                    inventoryStore.autoEquip();
+                    // At day, unequip lights and auto equip shields
+                    auto shield = inventoryStore.getPreferredShield();
+                    if (shield != inventoryStore.end())
+                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, shield);
+                    else
+                        inventoryStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
                 }
             }
         }

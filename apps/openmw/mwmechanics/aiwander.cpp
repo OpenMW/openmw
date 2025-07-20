@@ -827,7 +827,7 @@ namespace MWMechanics
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
 
-        int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
+        size_t index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
         getPathGridGraph(pathgrid).getNeighbouringPoints(index, points);
     }
@@ -860,7 +860,7 @@ namespace MWMechanics
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point
-            int closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
+            size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point

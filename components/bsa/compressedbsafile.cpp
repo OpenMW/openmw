@@ -24,27 +24,13 @@
  */
 #include "compressedbsafile.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include <fstream>
 
 #include <lz4frame.h>
-
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#pragma warning(disable : 4702)
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#pragma warning(pop)
-#else
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#endif
-
-#include <boost/iostreams/device/array.hpp>
+#include <zlib.h>
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
@@ -292,19 +278,26 @@ namespace Bsa
 
         if (compressed)
         {
+            std::vector<char> buffer(size);
+            streamPtr->read(buffer.data(), size);
+
             if (mHeader.mVersion != Version_SSE)
             {
-                boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-                inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-                inputStreamBuf.push(*streamPtr);
+                uLongf destSize = static_cast<uLongf>(resultSize);
+                int ec = ::uncompress(reinterpret_cast<Bytef*>(memoryStreamPtr->getRawData()), &destSize,
+                    reinterpret_cast<Bytef*>(buffer.data()), static_cast<uLong>(buffer.size()));
 
-                boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), resultSize);
-                boost::iostreams::copy(inputStreamBuf, sr);
+                if (ec != Z_OK)
+                {
+                    std::string message = "zlib uncompress failed for file ";
+                    message.append(fileRecord.mName.begin(), fileRecord.mName.end());
+                    message += ": ";
+                    message += ::zError(ec);
+                    fail(message);
+                }
             }
             else
             {
-                auto buffer = std::vector<char>(size);
-                streamPtr->read(buffer.data(), size);
                 LZ4F_decompressionContext_t context = nullptr;
                 LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
                 LZ4F_decompressOptions_t options = {};
