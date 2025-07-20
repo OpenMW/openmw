@@ -41,10 +41,11 @@ namespace MWGui
 
         struct ButtonDetails
         {
-            std::string mName;
+            std::string mLayoutName;
             std::string mImagePath;
             MyGUI::ImageBox* mImage = nullptr;
             MyGUI::TextBox* mText = nullptr;
+            Gui::HBox* mHBox = nullptr;
         };
 
         std::array<ButtonDetails, Button::Button_Max> mButtons;

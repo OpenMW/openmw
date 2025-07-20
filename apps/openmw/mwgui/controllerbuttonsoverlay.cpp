@@ -31,8 +31,9 @@ namespace MWGui
 
         for (size_t i = 0; i < mButtons.size(); i++)
         {
-            getWidget(mButtons[i].mImage, "Btn" + mButtons[i].mName + "Image");
-            getWidget(mButtons[i].mText, "Btn" + mButtons[i].mName + "Text");
+            getWidget(mButtons[i].mImage, "Btn" + mButtons[i].mLayoutName + "Image");
+            getWidget(mButtons[i].mText, "Btn" + mButtons[i].mLayoutName + "Text");
+            getWidget(mButtons[i].mHBox, "Btn" + mButtons[i].mLayoutName);
             setIcon(mButtons[i].mImage, mButtons[i].mImagePath);
         }
 
@@ -77,27 +78,17 @@ namespace MWGui
 
     int ControllerButtonsOverlay::updateButton(ControllerButtonsOverlay::Button button, const std::string& buttonStr)
     {
-        MyGUI::TextBox* text = mButtons[button].mText;
-        MyGUI::ImageBox* image = mButtons[button].mImage;
-
         if (buttonStr.empty())
         {
-            image->setVisible(false);
-            image->setUserString("Hidden", "true");
-
-            text->setVisible(false);
-            text->setUserString("Hidden", "true");
+            mButtons[button].mHBox->setVisible(false);
+            mButtons[button].mHBox->setUserString("Hidden", "true");
             return 0;
         }
         else
         {
-            image->setVisible(true);
-            image->setUserString("Hidden", "false");
-
-            text->setCaptionWithReplacing(buttonStr);
-            text->setVisible(true);
-            text->setUserString("Hidden", "false");
-            text->setSize(text->getTextSize().width + 16, 48);
+            mButtons[button].mHBox->setVisible(true);
+            mButtons[button].mHBox->setUserString("Hidden", "false");
+            mButtons[button].mText->setCaptionWithReplacing(buttonStr);
             return 1;
         }
     }
