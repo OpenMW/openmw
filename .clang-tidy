@@ -1,6 +1,7 @@
 Checks: >
   -*,
   portability-*,
+  -portability-template-virtual-member-function,
   clang-analyzer-*,
   -clang-analyzer-optin.*,
   -clang-analyzer-cplusplus.NewDeleteLeaks,
