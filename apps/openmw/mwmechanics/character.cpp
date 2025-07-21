@@ -1159,7 +1159,7 @@ namespace MWMechanics
         else if (action == "shoot release")
         {
             // See notes for melee release above
-            if (mAttackStrength != -1.f && mAnimation)
+            if (mReadyToHit)
             {
                 mAnimation->releaseArrow(mAttackStrength);
                 mReadyToHit = false;
