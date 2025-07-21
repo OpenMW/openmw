@@ -9,7 +9,7 @@
 
 #include "lexertypes.hpp"
 
-namespace fx
+namespace Fx
 {
     namespace Lexer
     {

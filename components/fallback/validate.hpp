@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 
+// NOLINTBEGIN(readability-identifier-naming)
 namespace boost
 {
     class any;
 }
+// NOLINTEND(readability-identifier-naming)
 
 namespace Fallback
 {

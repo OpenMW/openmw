@@ -3,7 +3,7 @@
 #include <MyGUI_RenderManager.h>
 #include <algorithm>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     /// @brief the ProxyRenderTarget allows to adjust the pixel scale and offset for a "source" render target.

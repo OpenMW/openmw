@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
         resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
     }
 
-    l10n::installQtTranslations(app, "wizard", resourcesPath);
+    L10n::installQtTranslations(app, "wizard", resourcesPath);
 
     Wizard::MainWizard wizard(std::move(configurationManager));
 

@@ -91,7 +91,7 @@ namespace MWGui
         , mUpdateNextFrame(false)
     {
         mPreviewTexture
-            = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
+            = std::make_unique<MyGUIPlatform::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
         mPreview->rebuild();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord

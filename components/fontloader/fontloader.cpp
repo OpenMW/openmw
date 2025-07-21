@@ -276,8 +276,8 @@ namespace Gui
     {
         Log(Debug::Info) << "Loading font file " << fileName;
 
-        osgMyGUI::DataManager* dataManager
-            = dynamic_cast<osgMyGUI::DataManager*>(&osgMyGUI::DataManager::getInstance());
+        MyGUIPlatform::DataManager* dataManager
+            = dynamic_cast<MyGUIPlatform::DataManager*>(&MyGUIPlatform::DataManager::getInstance());
         if (!dataManager)
         {
             Log(Debug::Error) << "Can not load TrueType font " << fontId << ": osgMyGUI::DataManager is not available.";
@@ -287,7 +287,7 @@ namespace Gui
         // TODO: it may be worth to take in account resolution change, but it is not safe to replace used assets
         std::unique_ptr<MyGUI::IDataStream> layersStream(dataManager->getData("openmw_layers.xml"));
         MyGUI::IntSize bookSize = getBookSize(layersStream.get());
-        float bookScale = osgMyGUI::ScalingLayer::getScaleFactor(bookSize);
+        float bookScale = MyGUIPlatform::ScalingLayer::getScaleFactor(bookSize);
 
         const auto oldDataPath = dataManager->getDataPath({});
         dataManager->setResourcePath("fonts");

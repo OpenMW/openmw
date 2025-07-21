@@ -9,11 +9,13 @@
 #include <components/files/collections.hpp>
 #include <components/files/fixedpath.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
 namespace boost::program_options
 {
     class options_description;
     class variables_map;
 }
+// NOLINTEND(readability-identifier-naming)
 
 /**
  * \namespace Files

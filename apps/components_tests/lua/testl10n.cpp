@@ -105,7 +105,7 @@ speed: "Speed"
         lua.protectedCall([&](LuaUtil::LuaView& view) {
             sol::state_view& l = view.sol();
             internal::CaptureStdout();
-            l10n::Manager l10nManager(mVFS.get());
+            L10n::Manager l10nManager(mVFS.get());
             l10nManager.setPreferredLocales({ "de", "en" });
             EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: gmst de en\n");
 

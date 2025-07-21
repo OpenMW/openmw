@@ -10,7 +10,7 @@ namespace osg
     class StateSet;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     /// @brief A Layer rendering with additive blend mode.

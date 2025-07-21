@@ -4,7 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
     void CustomLogListener::open()
     {

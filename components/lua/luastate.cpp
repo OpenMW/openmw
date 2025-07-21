@@ -453,7 +453,7 @@ namespace LuaUtil
             return call(sol::state_view(obj.lua_state())["tostring"], obj);
     }
 
-    std::string internal::formatCastingError(const sol::object& obj, const std::type_info& t)
+    std::string Internal::formatCastingError(const sol::object& obj, const std::type_info& t)
     {
         const char* typeName = t.name();
         if (t == typeid(int))
