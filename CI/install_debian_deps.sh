@@ -57,7 +57,7 @@ declare -rA GROUPED_DEPS=(
     libsdl2-dev libboost-system-dev libboost-filesystem-dev libgl-dev
   "
 
-  [openmw-coverage]="gcovr"
+  [openmw-coverage]="pipx"
 
   [openmw-integration-tests]="
     ca-certificates

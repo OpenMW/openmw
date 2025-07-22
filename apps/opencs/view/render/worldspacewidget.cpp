@@ -735,7 +735,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
             }
         }
 
-        const QPointF& pos = event->localPos();
+        QPoint pos = event->position().toPoint();
         handleMarkerHighlight(pos.x(), pos.y());
         SceneWidget::mouseMoveEvent(event);
     }
