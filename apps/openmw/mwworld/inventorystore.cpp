@@ -54,7 +54,8 @@ void MWWorld::InventoryStore::storeEquipmentState(
             inventory.mEquipmentSlots[static_cast<uint32_t>(index)] = i;
     }
 
-    // I'm not sure if the narrowing cast below is safe, but I think it'd break the save format if I widen the destination type
+    // I'm not sure if the narrowing cast below is safe, but I think it'd break the save format if I widen the
+    // destination type
     if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
         inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
