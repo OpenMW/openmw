@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -37,7 +37,7 @@
 #include <array>
 #include <iterator>
 #include <iosfwd>
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 #include <variant>
 #endif // variant is weird on XCode, thanks XCode
 
@@ -479,7 +479,7 @@ namespace sol { namespace meta {
 		template <typename T, typename U>
 		class supports_op_less_test<T, U, void_t<decltype(std::declval<T&>() < std::declval<U&>())>>
 		: public std::integral_constant<bool,
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 			  !is_specialization_of_v<unqualified_t<T>, std::variant> && !is_specialization_of_v<unqualified_t<U>, std::variant>
 #else
 			  true
@@ -492,7 +492,7 @@ namespace sol { namespace meta {
 		template <typename T, typename U>
 		class supports_op_equal_test<T, U, void_t<decltype(std::declval<T&>() == std::declval<U&>())>>
 		: public std::integral_constant<bool,
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 			  !is_specialization_of_v<unqualified_t<T>, std::variant> && !is_specialization_of_v<unqualified_t<U>, std::variant>
 #else
 			  true
@@ -505,7 +505,7 @@ namespace sol { namespace meta {
 		template <typename T, typename U>
 		class supports_op_less_equal_test<T, U, void_t<decltype(std::declval<T&>() <= std::declval<U&>())>>
 		: public std::integral_constant<bool,
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 			  !is_specialization_of_v<unqualified_t<T>, std::variant> && !is_specialization_of_v<unqualified_t<U>, std::variant>
 #else
 			  true
@@ -530,7 +530,19 @@ namespace sol { namespace meta {
 
 		template <typename T>
 		using non_void_t = meta::conditional_t<std::is_void_v<T>, ::sol::detail::unchecked_t, T>;
+
+		template <typename T>
+		using detect_sentinel = typename T::sentinel;
 	} // namespace meta_detail
+
+	template <typename T, typename Fallback>
+	class sentinel_or {
+	public:
+		using type = detected_or_t<Fallback, meta_detail::detect_sentinel, T>;
+	};
+
+	template <typename T, typename Fallback>
+	using sentinel_or_t = typename sentinel_or<T, Fallback>::type;
 
 	template <typename T, typename U = T>
 	class supports_op_less : public meta_detail::supports_op_less_test<T, U> { };
@@ -626,11 +638,12 @@ namespace sol { namespace meta {
 	constexpr inline bool is_string_literal_array_of_v = is_string_literal_array_of<T, CharT>::value;
 
 	template <typename T>
-	using is_string_literal_array = boolean<std::is_array_v<T> && any_same_v<std::remove_all_extents_t<T>, char,
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
-	char8_t,
+	using is_string_literal_array = boolean<std::is_array_v<T>
+		&& any_same_v<std::remove_all_extents_t<T>, char,
+#if SOL_IS_ON(SOL_CHAR8_T)
+		     char8_t,
 #endif
-	char16_t, char32_t, wchar_t>>;
+		     char16_t, char32_t, wchar_t>>;
 
 	template <typename T>
 	constexpr inline bool is_string_literal_array_v = is_string_literal_array<T>::value;
@@ -661,9 +674,8 @@ namespace sol { namespace meta {
 	constexpr inline bool is_string_like_v = is_string_like<T>::value;
 
 	template <typename T, typename CharT = char>
-	using is_string_constructible = meta::boolean<
-		is_string_literal_array_of_v<T,
-		     CharT> || std::is_same_v<T, const CharT*> || std::is_same_v<T, CharT> || is_string_of_v<T, CharT> || std::is_same_v<T, std::initializer_list<CharT>> || is_string_view_of_v<T, CharT> || std::is_null_pointer_v<T>>;
+	using is_string_constructible = meta::boolean<is_string_literal_array_of_v<T, CharT> || std::is_same_v<T, const CharT*> || std::is_same_v<T, CharT>
+		|| is_string_of_v<T, CharT> || std::is_same_v<T, std::initializer_list<CharT>> || is_string_view_of_v<T, CharT> || std::is_null_pointer_v<T>>;
 
 	template <typename T, typename CharT = char>
 	constexpr inline bool is_string_constructible_v = is_string_constructible<T, CharT>::value;
@@ -733,7 +745,6 @@ namespace sol { namespace meta {
 	struct iterator_tag<T, conditional_t<false, typename std::iterator_traits<T>::iterator_category, void>> {
 		using type = typename std::iterator_traits<T>::iterator_category;
 	};
-
-}} // namespace sol::meta
+}}     // namespace sol::meta
 
 #endif // SOL_TRAITS_HPP

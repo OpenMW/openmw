@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -1375,7 +1375,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR T& value() & {
 			if (has_value())
 				return this->m_value;
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();
@@ -1386,7 +1386,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR const T& value() const& {
 			if (has_value())
 				return this->m_value;
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();
@@ -1396,7 +1396,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR T&& value() && {
 			if (has_value())
 				return std::move(this->m_value);
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();
@@ -1408,7 +1408,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR const T&& value() const&& {
 			if (has_value())
 				return std::move(this->m_value);
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();
@@ -2186,12 +2186,9 @@ namespace sol {
 		/// one.
 		///
 		/// \group emplace
-		template <class... Args>
-		T& emplace(Args&&... args) noexcept {
-			static_assert(std::is_constructible<T, Args&&...>::value, "T must be constructible with Args");
-
+		T& emplace(T& arg) noexcept {
 			*this = nullopt;
-			new (static_cast<void*>(this)) optional(std::in_place, std::forward<Args>(args)...);
+			m_value = &arg;
 			return **this;
 		}
 
@@ -2251,7 +2248,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR T& value() {
 			if (has_value())
 				return *m_value;
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();
@@ -2262,7 +2259,7 @@ namespace sol {
 		SOL_TL_OPTIONAL_11_CONSTEXPR const T& value() const {
 			if (has_value())
 				return *m_value;
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 			std::abort();
 #else
 			throw bad_optional_access();

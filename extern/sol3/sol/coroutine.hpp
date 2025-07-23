@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -94,7 +94,7 @@ namespace sol {
 		          meta::neg<std::is_same<lua_nil_t, meta::unqualified_t<T>>>, is_lua_reference<meta::unqualified_t<T>>> = meta::enabler>
 		basic_coroutine(T&& r) noexcept
 		: base_t(std::forward<T>(r)), m_error_handler(detail::get_default_handler<reference, is_main_threaded<base_t>::value>(r.lua_state())) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			if (!is_function<meta::unqualified_t<T>>::value) {
 				auto pp = stack::push_pop(*this);
 				constructor_handler handler {};
@@ -157,7 +157,7 @@ namespace sol {
 		}
 		template <typename T, meta::enable<is_lua_reference<meta::unqualified_t<T>>> = meta::enabler>
 		basic_coroutine(lua_State* L, T&& r, handler_t eh) : base_t(L, std::forward<T>(r)), m_error_handler(std::move(eh)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			auto pp = stack::push_pop(*this);
 			constructor_handler handler {};
 			stack::check<basic_coroutine>(lua_state(), -1, handler);
@@ -180,7 +180,7 @@ namespace sol {
 		: basic_coroutine(L, index, detail::get_default_handler<reference, is_main_threaded<base_t>::value>(L)) {
 		}
 		basic_coroutine(lua_State* L, absolute_index index, handler_t eh) : base_t(L, index), m_error_handler(std::move(eh)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			constructor_handler handler {};
 			stack::check<basic_coroutine>(L, index, handler);
 #endif // Safety
@@ -189,7 +189,7 @@ namespace sol {
 		: basic_coroutine(L, index, detail::get_default_handler<reference, is_main_threaded<base_t>::value>(L)) {
 		}
 		basic_coroutine(lua_State* L, raw_index index, handler_t eh) : base_t(L, index), m_error_handler(std::move(eh)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			constructor_handler handler {};
 			stack::check<basic_coroutine>(L, index, handler);
 #endif // Safety
@@ -198,7 +198,7 @@ namespace sol {
 		: basic_coroutine(L, index, detail::get_default_handler<reference, is_main_threaded<base_t>::value>(L)) {
 		}
 		basic_coroutine(lua_State* L, ref_index index, handler_t eh) : base_t(L, index), m_error_handler(std::move(eh)) {
-#if SOL_IS_ON(SOL_SAFE_REFERENCES_I_)
+#if SOL_IS_ON(SOL_SAFE_REFERENCES)
 			auto pp = stack::push_pop(*this);
 			constructor_handler handler {};
 			stack::check<basic_coroutine>(lua_state(), -1, handler);

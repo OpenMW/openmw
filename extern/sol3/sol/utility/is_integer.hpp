@@ -11,7 +11,7 @@
 // the Software, and to permit persons to whom the Software is furnished to do so,
 // subject to the following conditions:
 
-// The above copyright notice and this permission notice shall be included in all
+// The above copyright notice and this Spermission notice shall be included in all
 // copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -21,29 +21,23 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_OVERLOAD_HPP
-#define SOL_OVERLOAD_HPP
+#ifndef SOL_IS_INTEGER_HPP
+#define SOL_IS_INTEGER_HPP
 
-#include <sol/traits.hpp>
-#include <utility>
+#include <sol/object.hpp>
 
-namespace sol {
-	template <typename... Functions>
-	struct overload_set {
-		std::tuple<Functions...> functions;
-		template <typename Arg, typename... Args, meta::disable<std::is_same<overload_set, meta::unqualified_t<Arg>>> = meta::enabler>
-		overload_set(Arg&& arg, Args&&... args) : functions(std::forward<Arg>(arg), std::forward<Args>(args)...) {
-		}
-		overload_set(const overload_set&) = default;
-		overload_set(overload_set&&) = default;
-		overload_set& operator=(const overload_set&) = default;
-		overload_set& operator=(overload_set&&) = default;
-	};
+namespace sol::utility {
 
-	template <typename... Args>
-	decltype(auto) overload(Args&&... args) {
-		return overload_set<std::decay_t<Args>...>(std::forward<Args>(args)...);
+	// Returns true if the object is represented by an integer,
+	// not a floating point number or any other type.
+	inline bool is_integer(const sol::object& object) {
+		auto pp = stack::push_pop(object);
+		return lua_isinteger(object.lua_state(), -1);
 	}
-} // namespace sol
+	inline bool is_integer(const sol::stack_object& object) {
+		return lua_isinteger(object.lua_state(), object.stack_index());
+	}
 
-#endif // SOL_OVERLOAD_HPP
+} // namespace sol::utility
+
+#endif // SOL_IS_INTEGER_HPP
