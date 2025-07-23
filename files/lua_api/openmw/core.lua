@@ -1236,6 +1236,11 @@
 -- @param #WeatherData The weather to change to
 
 ---
+-- Get the current direction of the light of the sun.
+-- @function [parent=#Weather] getCurrentSunLightDirection
+-- @return openmw.util#Vector4
+
+---
 -- Get the current sun visibility taking weather transition into account.
 -- @function [parent=#Weather] getCurrentSunVisibility
 -- @return #number

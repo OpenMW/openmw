@@ -487,6 +487,7 @@ namespace MWBase
         // Allow NPCs to use torches?
         virtual bool useTorches() const = 0;
 
+        virtual const osg::Vec4f& getSunLightPosition() const = 0;
         virtual float getSunVisibility() const = 0;
         virtual float getSunPercentage() const = 0;
 

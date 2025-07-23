@@ -1,7 +1,6 @@
 #include "worldimp.hpp"
 
 #include <charconv>
-#include <functional>
 #include <vector>
 
 #include <osg/ComputeBoundsVisitor>
@@ -3152,6 +3151,11 @@ namespace MWWorld
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
             return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
+    }
+
+    const osg::Vec4f& World::getSunLightPosition() const
+    {
+        return mRendering->getSunLightPosition();
     }
 
     float World::getSunVisibility() const

@@ -579,6 +579,7 @@ namespace MWWorld
         // Allow NPCs to use torches?
         bool useTorches() const override;
 
+        const osg::Vec4f& getSunLightPosition() const override;
         float getSunVisibility() const override;
         float getSunPercentage() const override;
 

@@ -117,12 +117,8 @@ namespace MWLua
         weatherT["recordId"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mId.serializeText(); });
 
         api["getCurrent"] = []() { return MWBase::Environment::get().getWorld()->getCurrentWeather(); };
-        api["getNext"] = []() -> sol::optional<const MWWorld::Weather&> {
-            auto next = MWBase::Environment::get().getWorld()->getNextWeather();
-            if (next != nullptr)
-                return *next;
-            return sol::nullopt;
-        };
+        api["getNext"]
+            = []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); };
         api["getTransition"] = []() { return MWBase::Environment::get().getWorld()->getWeatherTransition(); };
 
         api["changeWeather"] = [](std::string_view regionId, const MWWorld::Weather& weather) {
@@ -151,6 +147,12 @@ namespace MWLua
         // Provide access to the store.
         api["records"] = WeatherStore{};
 
+        api["getCurrentSunLightDirection"] = []() {
+            osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
+            sunPos.normalize();
+
+            return sunPos;
+        };
         api["getCurrentSunVisibility"] = []() { return MWBase::Environment::get().getWorld()->getSunVisibility(); };
         api["getCurrentSunPercentage"] = []() { return MWBase::Environment::get().getWorld()->getSunPercentage(); };
         api["getCurrentWindSpeed"] = []() { return MWBase::Environment::get().getWorld()->getWindSpeed(); };
