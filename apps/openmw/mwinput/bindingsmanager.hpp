@@ -65,6 +65,8 @@ namespace MWInput
 
         void actionValueChanged(int action, float currentValue, float previousValue);
 
+        void saveBindings();
+
     private:
         void setupSDLKeyMappings();
 

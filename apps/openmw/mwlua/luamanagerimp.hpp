@@ -43,7 +43,7 @@ namespace MWLua
         void init();
 
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
-        void savePermanentStorage(const std::filesystem::path& userConfigPath);
+        void savePermanentStorage(const std::filesystem::path& userConfigPath) override;
 
         // \brief Executes lua handlers. Defaults to running in parallel with OSG Cull.
         //

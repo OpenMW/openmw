@@ -5,6 +5,7 @@
 
 #include <MyGUI_ListBox.h>
 
+#include <components/files/configurationmanager.hpp>
 #include <components/settings/shadermanager.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -32,7 +33,7 @@ namespace MWGui
         };
 
     public:
-        PostProcessorHud();
+        PostProcessorHud(Files::ConfigurationManager& cfgMgr);
 
         void onOpen() override;
 
@@ -99,6 +100,8 @@ namespace MWGui
         std::string mOverrideHint;
 
         int mOffset = 0;
+
+        Files::ConfigurationManager& mCfgMgr;
     };
 }
 
