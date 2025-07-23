@@ -197,7 +197,7 @@ Programmers
     Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
-    Randy Davin (Kindi)
+    Randy Davin (Kuyondo)
     rdimesio
     rexelion
     riothamus

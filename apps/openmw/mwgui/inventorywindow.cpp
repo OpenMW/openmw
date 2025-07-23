@@ -573,24 +573,37 @@ namespace MWGui
         }
 
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
+
+        MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+        auto [eqSlots, canStack] = ptr.getClass().getEquipmentSlots(ptr);
+        bool isFromDragAndDrop = mDragAndDrop->mItem.mBase == ptr;
+        int useCount = isFromDragAndDrop ? mDragAndDrop->mDraggedCount : ptr.getCellRef().getCount();
+
+        if (!eqSlots.empty())
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(eqSlots.front());
+            if (it != invStore.end() && it->getCellRef().getRefId() == ptr.getCellRef().getRefId())
+                useCount += it->getCellRef().getCount();
+        }
+
         action->execute(player, !canEquip);
 
-        // Handles partial equipping (final part)
-        if (mEquippedStackableCount.has_value())
-        {
-            // the count to unequip
-            int count = ptr.getCellRef().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
-            if (count > 0)
-            {
-                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-                invStore.unequipItemQuantity(ptr, count);
-                updateItemView();
-            }
-            mEquippedStackableCount.reset();
-        }
+        // Partial equipping
+        int excess = ptr.getCellRef().getCount() - useCount;
+        if (excess > 0 && canStack)
+            invStore.unequipItemQuantity(ptr, excess);
 
         if (isVisible())
         {
+            if (isFromDragAndDrop)
+            {
+                // Feature: Don't stop draganddrop if potion or ingredient was used
+                if (ptr.getType() != ESM::Potion::sRecordId && ptr.getType() != ESM::Ingredient::sRecordId)
+                    mDragAndDrop->finish();
+                else
+                    mDragAndDrop->update();
+            }
+
             mItemView->update();
 
             notifyContentChanged();
@@ -612,8 +625,6 @@ namespace MWGui
                 return;
             }
 
-            mDragAndDrop->finish();
-
             if (mDragAndDrop->mSourceModel != mTradeModel)
             {
                 // Move item to the player's inventory
@@ -621,33 +632,7 @@ namespace MWGui
                     mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
 
-            // Handles partial equipping
-            mEquippedStackableCount.reset();
-            const auto slots = ptr.getClass().getEquipmentSlots(ptr);
-            if (!slots.first.empty() && slots.second)
-            {
-                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-                MWWorld::ConstContainerStoreIterator slotIt = invStore.getSlot(slots.first.front());
-
-                // Save the currently equipped count before useItem()
-                if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
-                    mEquippedStackableCount = slotIt->getCellRef().getCount();
-                else
-                    mEquippedStackableCount = 0;
-            }
-
             MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
-
-            // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
-            // item
-            if ((ptr.getType() == ESM::Potion::sRecordId || ptr.getType() == ESM::Ingredient::sRecordId)
-                && mDragAndDrop->mDraggedCount > 1)
-            {
-                // Item can be provided from other window for example container.
-                // But after DragAndDrop::startDrag item automaticly always gets to player inventory.
-                mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
-                dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
-            }
         }
         else
         {
