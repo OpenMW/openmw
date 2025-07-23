@@ -625,8 +625,6 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsAlwaysTrue(
         default:
             throw std::logic_error("InfoCondition: operator can not be used to compare");
     }
-
-    return false;
 }
 
 template <typename T1, typename T2>
@@ -651,8 +649,6 @@ bool CSMWorld::ConstInfoSelectWrapper::conditionIsNeverTrue(
         default:
             throw std::logic_error("InfoCondition: operator can not be used to compare");
     }
-
-    return false;
 }
 
 QVariant CSMWorld::ConstInfoSelectWrapper::getValue() const

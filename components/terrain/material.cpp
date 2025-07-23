@@ -43,7 +43,7 @@ namespace
                 // blendmap, apparently.
                 matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, 1.0f / blendmapScale / 4.0f, 0.f));
 
-                texMat = mTexMatMap.insert(std::make_pair(blendmapScale, new osg::TexMat(matrix))).first;
+                texMat = mTexMatMap.insert(std::make_pair(static_cast<float>(blendmapScale), new osg::TexMat(matrix))).first;
             }
             return texMat->second;
         }

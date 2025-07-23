@@ -34,7 +34,7 @@
 namespace
 {
 
-    const int sLoudnessFPS = 20; // loudness values per second of audio
+    const float sLoudnessFPS = 20.0f; // loudness values per second of audio
 
     ALCenum checkALCError(ALCdevice* device, const char* func, int line)
     {

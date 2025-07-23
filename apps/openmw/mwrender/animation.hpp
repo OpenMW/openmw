@@ -154,7 +154,7 @@ namespace MWRender
             float mLoopStopTime = 0;
             float mStopTime = 0;
 
-            std::shared_ptr<float> mTime = std::make_shared<float>(0);
+            std::shared_ptr<float> mTime = std::make_shared<float>(0.0f);
             float mSpeedMult = 1;
 
             bool mPlaying = false;

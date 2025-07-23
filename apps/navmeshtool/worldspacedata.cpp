@@ -201,8 +201,8 @@ namespace NavMeshTool
         {
             if (!land.has_value() || osg::Vec2i(land->mX, land->mY) != cellPosition
                 || (land->mDataTypes & ESM::Land::DATA_VHGT) == 0)
-                return { HeightfieldPlane{ ESM::Land::DEFAULT_HEIGHT }, ESM::Land::DEFAULT_HEIGHT,
-                    ESM::Land::DEFAULT_HEIGHT };
+                return { HeightfieldPlane{ static_cast<float>(ESM::Land::DEFAULT_HEIGHT) },
+                    static_cast<float>(ESM::Land::DEFAULT_HEIGHT), static_cast<float>(ESM::Land::DEFAULT_HEIGHT) };
 
             ESM::Land::LandData& landData = *landDatas.emplace_back(std::make_unique<ESM::Land::LandData>());
             land->loadData(ESM::Land::DATA_VHGT, landData);
