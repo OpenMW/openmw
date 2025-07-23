@@ -409,7 +409,7 @@ namespace MWGui
         mCountDialog = countDialog.get();
         mWindows.push_back(std::move(countDialog));
 
-        auto settingsWindow = std::make_unique<SettingsWindow>();
+        auto settingsWindow = std::make_unique<SettingsWindow>(mCfgMgr);
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
@@ -503,7 +503,7 @@ namespace MWGui
         mWindows.push_back(std::move(debugWindow));
         trackWindow(mDebugWindow, makeDebugWindowSettingValues());
 
-        auto postProcessorHud = std::make_unique<PostProcessorHud>();
+        auto postProcessorHud = std::make_unique<PostProcessorHud>(mCfgMgr);
         mPostProcessorHud = postProcessorHud.get();
         mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
