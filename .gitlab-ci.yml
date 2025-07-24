@@ -517,7 +517,14 @@ Ubuntu_GCC_integration_tests_asan:
 .MacOS:
   stage: build
   rules:
-    - if: $CI_PROJECT_ID == "7107382"
+    - if: $CI_PROJECT_ID != "7107382"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
+  image: macos-15-xcode-16
+  tags:
+    - saas-macos-medium-m1
   cache:
     paths:
     - ccache/
@@ -550,13 +557,10 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
       - build/OpenMW-*.dmg
 
-macOS14_Xcode15_amd64:
+macOS15_Xcode16_amd64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_amd64.v2
+    key: macOS15_Xcode16_amd64.v1
   variables:
     CCACHE_SIZE: 3G
     DMG_IDENTIFIER: amd64
@@ -565,13 +569,10 @@ macOS14_Xcode15_amd64:
     HOMEBREW_NO_EMOJI: true
     HOMEBREW_NO_INSTALL_CLEANUP: true
 
-macOS14_Xcode15_arm64:
+macOS15_Xcode16_arm64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_arm64.v1
+    key: macOS15_Xcode16_arm64.v1
   variables:
     DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
