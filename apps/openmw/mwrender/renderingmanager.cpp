@@ -60,7 +60,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
 #include "../mwworld/scene.hpp"
-#include "../mwworld/weather.hpp"
 
 #include "../mwgui/postprocessorhud.hpp"
 
@@ -944,8 +943,8 @@ namespace MWRender
         stateUpdater->setIsUnderwater(isUnderwater);
         stateUpdater->setFogColor(fogColor);
         stateUpdater->setGameHour(world->getTimeStamp().getHour());
-        stateUpdater->setWeatherId(world->getCurrentWeather().mScriptId);
-        stateUpdater->setNextWeatherId(world->getNextWeather() != nullptr ? world->getNextWeather()->mScriptId : -1);
+        stateUpdater->setWeatherId(world->getCurrentWeatherScriptId());
+        stateUpdater->setNextWeatherId(world->getNextWeatherScriptId());
         stateUpdater->setWeatherTransition(world->getWeatherTransition());
         stateUpdater->setWindSpeed(world->getWindSpeed());
         stateUpdater->setSkyColor(mSky->getSkyColor());

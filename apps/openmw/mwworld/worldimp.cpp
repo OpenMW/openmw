@@ -1873,6 +1873,11 @@ namespace MWWorld
         return mWeatherManager->getAllWeather();
     }
 
+    int World::getCurrentWeatherScriptId() const
+    {
+        return mWeatherManager->getWeather().mScriptId;
+    }
+
     const MWWorld::Weather& World::getCurrentWeather() const
     {
         return mWeatherManager->getWeather();
@@ -1886,6 +1891,15 @@ namespace MWWorld
     const MWWorld::Weather* World::getWeather(const ESM::RefId& id) const
     {
         return mWeatherManager->getWeather(id);
+    }
+
+    int World::getNextWeatherScriptId() const
+    {
+        auto next = mWeatherManager->getNextWeather();
+        if (next == nullptr)
+            return -1;
+
+        return next->mScriptId;
     }
 
     const MWWorld::Weather* World::getNextWeather() const

@@ -14,7 +14,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/weather.hpp"
 
 namespace MWScript
 {
@@ -72,7 +71,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                runtime.push(MWBase::Environment::get().getWorld()->getCurrentWeather().mScriptId);
+                runtime.push(MWBase::Environment::get().getWorld()->getCurrentWeatherScriptId());
             }
         };
 

@@ -222,11 +222,15 @@ namespace MWBase
 
         virtual const std::vector<MWWorld::Weather>& getAllWeather() const = 0;
 
+        virtual int getCurrentWeatherScriptId() const = 0;
+
         virtual const MWWorld::Weather& getCurrentWeather() const = 0;
 
         virtual const MWWorld::Weather* getWeather(size_t index) const = 0;
 
         virtual const MWWorld::Weather* getWeather(const ESM::RefId& id) const = 0;
+
+        virtual int getNextWeatherScriptId() const = 0;
 
         virtual const MWWorld::Weather* getNextWeather() const = 0;
 

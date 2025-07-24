@@ -18,7 +18,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/weather.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -502,7 +501,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
         case ESM::DialogueCondition::Function_Weather:
 
-            return MWBase::Environment::get().getWorld()->getCurrentWeather().mScriptId;
+            return MWBase::Environment::get().getWorld()->getCurrentWeatherScriptId();
 
         case ESM::DialogueCondition::Function_Reputation:
             if (!mActor.getClass().isNpc())

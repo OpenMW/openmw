@@ -321,10 +321,11 @@ namespace MWWorld
 
         const std::vector<MWWorld::Weather>& getAllWeather() const override;
 
+        int getCurrentWeatherScriptId() const override;
         const MWWorld::Weather& getCurrentWeather() const override;
         const MWWorld::Weather* getWeather(size_t index) const override;
         const MWWorld::Weather* getWeather(const ESM::RefId& id) const override;
-
+        int getNextWeatherScriptId() const override;
         const MWWorld::Weather* getNextWeather() const override;
 
         float getWeatherTransition() const override;
