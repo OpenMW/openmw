@@ -60,6 +60,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/groundcoverstore.hpp"
 #include "../mwworld/scene.hpp"
+#include "../mwworld/weather.hpp"
 
 #include "../mwgui/postprocessorhud.hpp"
 

@@ -16,13 +16,13 @@
 #include "../mwworld/globalvariablename.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/spellcaststate.hpp"
-#include "../mwworld/weather.hpp"
 
 #include "../mwrender/rendermode.hpp"
 
 namespace osg
 {
     class Vec3f;
+    class Vec4f;
     class Matrixf;
     class Quat;
     class Image;
@@ -94,6 +94,7 @@ namespace MWWorld
     class RefData;
     class Cell;
     class DateTimeManager;
+    class Weather;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }

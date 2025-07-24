@@ -3,10 +3,9 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
+    struct Context;
 
     sol::table initCoreWeatherBindings(const Context&);
 

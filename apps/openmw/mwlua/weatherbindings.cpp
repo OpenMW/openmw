@@ -8,6 +8,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/weather.hpp"
 
+#include "context.hpp"
+
 namespace
 {
     class WeatherStore
@@ -123,11 +125,8 @@ namespace MWLua
 
         api["changeWeather"] = [](std::string_view regionId, const MWWorld::Weather& weather) {
             ESM::RefId region = ESM::RefId::deserializeText(regionId);
-            const ESM::Region* reg = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(region);
-            if (reg)
-                MWBase::Environment::get().getWorld()->changeWeather(region, weather.mId);
-            else
-                throw std::runtime_error("Region not found");
+            MWBase::Environment::get().getESMStore()->get<ESM::Region>().find(region);
+            MWBase::Environment::get().getWorld()->changeWeather(region, weather.mId);
         };
 
         sol::usertype<WeatherStore> storeT = lua.new_usertype<WeatherStore>("WeatherWorldStore");

@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/weather.hpp"
 
 namespace MWScript
 {
