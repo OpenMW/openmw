@@ -1732,6 +1732,8 @@ namespace NifOsg
                 }
                 rig->setBoneInfo(std::move(boneInfo));
                 rig->setInfluences(influences);
+                if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                    rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
             }
