@@ -157,9 +157,11 @@ namespace MWLua
 
         api["getCurrentSunLightDirection"] = []() {
             osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
+            // normalize to get the direction towards the sun
             sunPos.normalize();
 
-            return sunPos;
+            // and invert it to get the direction of the sun light
+            return -sunPos;
         };
         api["getCurrentSunVisibility"] = []() { return MWBase::Environment::get().getWorld()->getSunVisibility(); };
         api["getCurrentSunPercentage"] = []() { return MWBase::Environment::get().getWorld()->getSunPercentage(); };
