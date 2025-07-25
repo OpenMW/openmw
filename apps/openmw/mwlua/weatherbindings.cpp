@@ -5,6 +5,8 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -42,13 +44,16 @@ namespace MWLua
         sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
+        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         auto weatherT = lua.new_usertype<MWWorld::Weather>("Weather");
         weatherT[sol::meta_function::to_string]
             = [](const MWWorld::Weather& w) -> std::string { return "Weather[" + w.mName + "]"; };
         weatherT["name"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mName; });
         weatherT["windSpeed"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mWindSpeed; });
         weatherT["cloudSpeed"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mCloudSpeed; });
-        weatherT["cloudTexture"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mCloudTexture; });
+        weatherT["cloudTexture"] = sol::readonly_property([vfs](const MWWorld::Weather& w) {
+            return Misc::ResourceHelpers::correctTexturePath(w.mCloudTexture, vfs);
+        });
         weatherT["cloudsMaximumPercent"]
             = sol::readonly_property([](const MWWorld::Weather& w) { return w.mCloudsMaximumPercent; });
         weatherT["isStorm"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mIsStorm; });
@@ -58,7 +63,11 @@ namespace MWLua
         weatherT["rainSpeed"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mRainSpeed; });
         weatherT["rainEntranceSpeed"]
             = sol::readonly_property([](const MWWorld::Weather& w) { return w.mRainEntranceSpeed; });
-        weatherT["rainEffect"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mRainEffect; });
+        weatherT["rainEffect"] = sol::readonly_property([](const MWWorld::Weather& w) -> sol::optional<std::string> {
+            if (w.mRainEffect.empty())
+                return sol::nullopt;
+            return w.mRainEffect;
+        });
         weatherT["rainMaxRaindrops"]
             = sol::readonly_property([](const MWWorld::Weather& w) { return w.mRainMaxRaindrops; });
         weatherT["rainDiameter"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mRainDiameter; });
@@ -118,7 +127,11 @@ namespace MWLua
             return result;
         });
         weatherT["particleEffect"]
-            = sol::readonly_property([](const MWWorld::Weather& w) { return w.mParticleEffect; });
+            = sol::readonly_property([](const MWWorld::Weather& w) -> sol::optional<std::string> {
+                  if (w.mParticleEffect.empty())
+                      return sol::nullopt;
+                  return w.mParticleEffect;
+              });
         weatherT["distantLandFogFactor"]
             = sol::readonly_property([](const MWWorld::Weather& w) { return w.mDL.FogFactor; });
         weatherT["distantLandFogOffset"]
@@ -136,8 +149,7 @@ namespace MWLua
             MWBase::Environment::get().getESMStore()->get<ESM::Region>().find(region);
             MWBase::Environment::get().getWorld()->changeWeather(region, weather.mId);
         };
-        {
-        }
+
         sol::usertype<WeatherStore> storeT = lua.new_usertype<WeatherStore>("WeatherWorldStore");
         storeT[sol::meta_function::to_string]
             = [](const WeatherStore& store) { return "{" + std::to_string(store.size()) + " Weather records}"; };

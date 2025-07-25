@@ -1276,7 +1276,7 @@
 -- @field #number glareView
 -- @field #number rainSpeed
 -- @field #number rainEntranceSpeed
--- @field #string rainEffect
+-- @field #string rainEffect Will return nil if weather has no rainEffect
 -- @field #number rainMaxRaindrops
 -- @field #number rainDiameter
 -- @field #number rainMaxHeight
@@ -1284,14 +1284,14 @@
 -- @field #string rainLoopSoundID
 -- @field #table  thunderSoundID An array containing the recordIds of the thunder sounds
 -- @field #string ambientLoopSoundID
--- @field #number particleEffect
+-- @field #string particleEffect Will return nil if weather has no particleEffect
 -- @field #number distantLandFogFactor
 -- @field #number distantLandFogOffset
 -- @field openmw.util#Color sunDiscSunsetColor
 -- @field #table landFogDepth A table with the keys "sunrise", "day", "sunset" and "night"
--- @field #table skyColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
--- @field #table ambientColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
--- @field #table fogColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
--- @field #table sunColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
+-- @field #table skyColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a #{openmw.util#Color}.
+-- @field #table ambientColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a #{openmw.util#Color}.
+-- @field #table fogColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a @{openmw.util#Color}.
+-- @field #table sunColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a @{openmw.util#Color}.
 
 return nil
