@@ -1287,7 +1287,7 @@
 -- @field #number particleEffect
 -- @field #number distantLandFogFactor
 -- @field #number distantLandFogOffset
--- @field openmw.util#Vector4 sunDiscSunsetColor
+-- @field openmw.util#Color sunDiscSunsetColor
 -- @field #table landFogDepth A table with the keys "sunrise", "day", "sunset" and "night"
 -- @field #table skyColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
 -- @field #table ambientColor A table with the keys "sunrise", "day", "sunset" and "night". Each is a openmw.util#Color.
