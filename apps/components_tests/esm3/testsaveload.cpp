@@ -723,7 +723,7 @@ namespace ESM
         TEST_P(Esm3SaveLoadRecordTest, landShouldNotChange)
         {
             LandRecordData data;
-            std::iota(data.mHeights.begin(), data.mHeights.end(), 1);
+            std::iota(data.mHeights.begin(), data.mHeights.end(), 1.0f);
             std::for_each(data.mHeights.begin(), data.mHeights.end(), [](float& v) { v *= Land::sHeightScale; });
             data.mMinHeight = *std::min_element(data.mHeights.begin(), data.mHeights.end());
             data.mMaxHeight = *std::max_element(data.mHeights.begin(), data.mHeights.end());

@@ -362,7 +362,7 @@ namespace SceneUtil
 
         std::map<BoneWeights, VertexList> influencesToVertices;
         for (size_t i = 0; i < influences.size(); i++)
-            influencesToVertices[influences[i]].emplace_back(i);
+            influencesToVertices[influences[i]].emplace_back(static_cast<VertexList::value_type>(i));
 
         mData->mInfluences.reserve(influencesToVertices.size());
         mData->mInfluences.assign(influencesToVertices.begin(), influencesToVertices.end());
