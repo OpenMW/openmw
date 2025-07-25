@@ -1205,8 +1205,8 @@
 --- List of all @{#WeatherRecord}s.
 -- @field [parent=#Weather] #list<#WeatherRecord> records A read-only list of all @{#WeatherRecord}s in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) of #WeatherRecord.
--- @usage local weather = core.weather.records.records['Cloudy']  -- get by id
--- @usage local weather = core.weather.records.records[1]  -- get by index
+-- @usage local weather = core.weather.records['Cloudy']  -- get by id
+-- @usage local weather = core.weather.records[1]  -- get by index
 -- @usage -- Print all storms
 -- for _, weather in pairs(core.weather.records) do
 --     if weather.isStorm then
