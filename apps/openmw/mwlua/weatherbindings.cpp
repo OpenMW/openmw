@@ -1,7 +1,10 @@
 #include "weatherbindings.hpp"
 
+#include <osg/Vec4f>
+
 #include <components/esm3/loadregn.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/color.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -25,6 +28,11 @@ namespace
         }
         size_t size() const { return MWBase::Environment::get().getWorld()->getAllWeather().size(); }
     };
+
+    Misc::Color color(const osg::Vec4f& color)
+    {
+        return Misc::Color(color.r(), color.g(), color.b(), color.a());
+    }
 }
 
 namespace MWLua
@@ -66,39 +74,39 @@ namespace MWLua
             return result;
         });
         weatherT["sunDiscSunsetColor"]
-            = sol::readonly_property([](const MWWorld::Weather& w) { return w.mSunDiscSunsetColor; });
+            = sol::readonly_property([](const MWWorld::Weather& w) { return color(w.mSunDiscSunsetColor); });
         weatherT["ambientLoopSoundID"]
             = sol::readonly_property([](const MWWorld::Weather& w) { return w.mAmbientLoopSoundID.serializeText(); });
         weatherT["ambientColor"] = sol::readonly_property([lua](const MWWorld::Weather& w) {
             sol::table result(lua, sol::create);
-            result["sunrise"] = w.mAmbientColor.getSunriseValue();
-            result["day"] = w.mAmbientColor.getDayValue();
-            result["sunset"] = w.mAmbientColor.getSunsetValue();
-            result["night"] = w.mAmbientColor.getNightValue();
+            result["sunrise"] = color(w.mAmbientColor.getSunriseValue());
+            result["day"] = color(w.mAmbientColor.getDayValue());
+            result["sunset"] = color(w.mAmbientColor.getSunsetValue());
+            result["night"] = color(w.mAmbientColor.getNightValue());
             return result;
         });
         weatherT["fogColor"] = sol::readonly_property([lua](const MWWorld::Weather& w) {
             sol::table result(lua, sol::create);
-            result["sunrise"] = w.mFogColor.getSunriseValue();
-            result["day"] = w.mFogColor.getDayValue();
-            result["sunset"] = w.mFogColor.getSunsetValue();
-            result["night"] = w.mFogColor.getNightValue();
+            result["sunrise"] = color(w.mFogColor.getSunriseValue());
+            result["day"] = color(w.mFogColor.getDayValue());
+            result["sunset"] = color(w.mFogColor.getSunsetValue());
+            result["night"] = color(w.mFogColor.getNightValue());
             return result;
         });
         weatherT["skyColor"] = sol::readonly_property([lua](const MWWorld::Weather& w) {
             sol::table result(lua, sol::create);
-            result["sunrise"] = w.mSkyColor.getSunriseValue();
-            result["day"] = w.mSkyColor.getDayValue();
-            result["sunset"] = w.mSkyColor.getSunsetValue();
-            result["night"] = w.mSkyColor.getNightValue();
+            result["sunrise"] = color(w.mSkyColor.getSunriseValue());
+            result["day"] = color(w.mSkyColor.getDayValue());
+            result["sunset"] = color(w.mSkyColor.getSunsetValue());
+            result["night"] = color(w.mSkyColor.getNightValue());
             return result;
         });
         weatherT["sunColor"] = sol::readonly_property([lua](const MWWorld::Weather& w) {
             sol::table result(lua, sol::create);
-            result["sunrise"] = w.mSunColor.getSunriseValue();
-            result["day"] = w.mSunColor.getDayValue();
-            result["sunset"] = w.mSunColor.getSunsetValue();
-            result["night"] = w.mSunColor.getNightValue();
+            result["sunrise"] = color(w.mSunColor.getSunriseValue());
+            result["day"] = color(w.mSunColor.getDayValue());
+            result["sunset"] = color(w.mSunColor.getSunsetValue());
+            result["night"] = color(w.mSunColor.getNightValue());
             return result;
         });
         weatherT["landFogDepth"] = sol::readonly_property([lua](const MWWorld::Weather& w) {
@@ -128,7 +136,8 @@ namespace MWLua
             MWBase::Environment::get().getESMStore()->get<ESM::Region>().find(region);
             MWBase::Environment::get().getWorld()->changeWeather(region, weather.mId);
         };
-
+        {
+        }
         sol::usertype<WeatherStore> storeT = lua.new_usertype<WeatherStore>("WeatherWorldStore");
         storeT[sol::meta_function::to_string]
             = [](const WeatherStore& store) { return "{" + std::to_string(store.size()) + " Weather records}"; };
