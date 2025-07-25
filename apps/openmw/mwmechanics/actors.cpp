@@ -683,7 +683,7 @@ namespace MWMechanics
             }
         }
 
-        if (creatureStats2.getMagicEffects().getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+        if (isTargetMagicallyHidden(actor2))
             return;
 
         // Stop here if target is unreachable
