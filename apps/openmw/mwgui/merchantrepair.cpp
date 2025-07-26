@@ -207,7 +207,7 @@ namespace MWGui
         // Scroll the list to keep the active item in view
         if (mControllerFocus < mButtons.size())
         {
-            int line = mButtons[mControllerFocus].second;
+            size_t line = mButtons[mControllerFocus].second;
             if (line <= 5)
                 mList->setViewOffset(MyGUI::IntPoint(0, 0));
             else

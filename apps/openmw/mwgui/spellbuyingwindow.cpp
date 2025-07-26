@@ -267,7 +267,7 @@ namespace MWGui
         if (mControllerFocus < mSpellButtons.size())
         {
             // Scroll the list to keep the active item in view
-            int line = mSpellButtons[mControllerFocus].second;
+            size_t line = mSpellButtons[mControllerFocus].second;
             if (line <= 5)
                 mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
             else

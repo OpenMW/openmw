@@ -23,7 +23,7 @@ namespace MWGui
         MyGUI::Button* mOkButton;
         MyGUI::TextBox* mGoldLabel;
         /// List of enabled/repairable items and their index in the full list.
-        std::vector<std::pair<MyGUI::Button*, int>> mButtons;
+        std::vector<std::pair<MyGUI::Button*, size_t>> mButtons;
 
         MWWorld::Ptr mActor;
 
