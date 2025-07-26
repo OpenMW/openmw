@@ -2,15 +2,15 @@ DurationDay: "{days} d "
 DurationHour: "{hours} h "
 DurationMinute: "{minutes} min "
 DurationMonth: |-
-  {months, plural,
-    one{{months} mo }
-    other{{months} mos }
+  {miesięcy, plural,
+    one{{months} miesiąc }
+    other{{months} miesięcy }
   }
 DurationSecond: "{seconds} s "
 DurationYear: |-
-  {years, plural,
-    one{{years} yr }
-    other{{years} yrs }
+  {lat, plural,
+    one{{years} rok }
+    other{{years} lat }
   }
 No: "Nie"
 NotAvailableShort: "N/A"
