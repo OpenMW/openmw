@@ -939,6 +939,24 @@ namespace MWGui
             setActiveControllerWindow(mode, activeIndex);
     }
 
+    void WindowManager::reapplyActiveControllerWindow()
+    {
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
+            return;
+
+        const GuiMode mode = mGuiModes.back();
+        int winCount = mGuiModeStates[mode].mWindows.size();
+
+        for (int i = 0; i < winCount; i++)
+        {
+            // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
+            if (i != mActiveControllerWindows[mode])
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
+        }
+        if (winCount > 0)
+            mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
+    }
+
     void WindowManager::setActiveControllerWindow(GuiMode mode, int activeIndex)
     {
         if (!Settings::gui().mControllerMenus)
@@ -951,13 +969,7 @@ namespace MWGui
         activeIndex = std::clamp(activeIndex, 0, winCount - 1);
         mActiveControllerWindows[mode] = activeIndex;
 
-        // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
-        for (int i = 0; i < winCount; i++)
-        {
-            if (i != activeIndex)
-                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
-        }
-        mGuiModeStates[mode].mWindows[activeIndex]->setActiveControllerWindow(true);
+        reapplyActiveControllerWindow();
 
         MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
             mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
@@ -1331,6 +1343,9 @@ namespace MWGui
         for (const auto& window : mWindows)
             window->onResChange(x, y);
 
+        // Re-apply any controller-specific window changes.
+        reapplyActiveControllerWindow();
+
         // TODO: check if any windows are now off-screen and move them back if so
     }
 
@@ -1478,18 +1493,7 @@ namespace MWGui
             if (mGuiModes.empty())
                 setControllerTooltip(false);
             else
-            {
-                // Re-apply any controller-specific window changes.
-                const GuiMode mode = mGuiModes.back();
-                int winCount = mGuiModeStates[mode].mWindows.size();
-
-                for (int i = 0; i < winCount; i++)
-                {
-                    if (i != mActiveControllerWindows[mode])
-                        mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
-                }
-                mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
-            }
+                reapplyActiveControllerWindow();
         }
     }
 

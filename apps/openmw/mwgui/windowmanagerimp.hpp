@@ -515,6 +515,8 @@ namespace MWGui
         std::map<GuiMode, int> mActiveControllerWindows;
         bool mControllerTooltip;
 
+        void reapplyActiveControllerWindow();
+
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 
         std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
