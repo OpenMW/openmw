@@ -129,6 +129,9 @@ namespace MWWorld
         void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
         void preloadFastTravelDestinations(
             const osg::Vec3f& playerPos, std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadCellWithSurroundings(MWWorld::CellStore& cell);
+        void preloadCell(MWWorld::CellStore& cell);
+        void preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync = false);
 
         osg::Vec4i gridCenterToBounds(const osg::Vec2i& centerCell) const;
         osg::Vec2i getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter = nullptr) const;
@@ -143,9 +146,6 @@ namespace MWWorld
 
         ~Scene();
 
-        void preloadCellWithSurroundings(MWWorld::CellStore& cell);
-        void preloadCell(MWWorld::CellStore& cell);
-        void preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync = false);
         void reloadTerrain();
 
         void playerMoved(const osg::Vec3f& pos);

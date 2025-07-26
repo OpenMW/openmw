@@ -155,15 +155,23 @@ local function onUiModeChangedEvent(data)
     end
 end
 
+local function isWindowVisible(windowName)
+    if replacedWindows[windowName] then
+        return replacedWindows[windowName].visible
+    end
+    return ui._isWindowVisible(windowName)
+end
+
 return {
     interfaceName = 'UI',
     ---
     -- @module UI
+    -- @context player
     -- @usage require('openmw.interfaces').UI
     interface = {
         --- Interface version
         -- @field [parent=#UI] #number version
-        version = 1,
+        version = 2,
 
         --- All available UI modes.
         -- Use `view(I.UI.MODE)` in `luap` console mode to see the list.
@@ -238,6 +246,13 @@ return {
         -- @function [parent=#UI] isHudVisible
         -- @return #boolean
         isHudVisible = function() return ui._isHudVisible() end,
+
+        ---
+        -- Returns if the given window is visible or not
+        -- @function [parent=#UI] isWindowVisible
+        -- @param #string windowName
+        -- @return #boolean
+        isWindowVisible = isWindowVisible,
 
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,

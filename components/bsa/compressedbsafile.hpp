@@ -23,14 +23,14 @@
 
  */
 
-#ifndef BSA_COMPRESSED_BSA_FILE_H
-#define BSA_COMPRESSED_BSA_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_COMPRESSEDBSAFILE_HPP
+#define OPENMW_COMPONENTS_BSA_COMPRESSEDBSAFILE_HPP
 
+#include <filesystem>
 #include <limits>
 #include <map>
 
-#include <components/bsa/bsa_file.hpp>
-#include <filesystem>
+#include "bsafile.hpp"
 
 namespace Bsa
 {
@@ -117,6 +117,7 @@ namespace Bsa
     public:
         using BSAFile::getFilename;
         using BSAFile::getList;
+        using BSAFile::getPath;
         using BSAFile::open;
 
         CompressedBSAFile() = default;

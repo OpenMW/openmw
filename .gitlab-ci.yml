@@ -46,6 +46,9 @@ Ubuntu_GCC_preprocess:
     - pip3 install --user click termtables
   script:
     - CI/ubuntu_gcc_preprocess.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -77,7 +80,7 @@ Ubuntu_GCC_preprocess:
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
-    - ccache -s
+    - ccache -svv
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
     - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
@@ -124,7 +127,7 @@ Coverity:
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     # Remove the specific targets and build everything once we can do it under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
-    - ccache -s
+    - ccache -svv
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
@@ -268,6 +271,9 @@ Ubuntu_GCC_tests_asan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -285,6 +291,9 @@ Ubuntu_GCC_tests_ubsan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -322,6 +331,9 @@ Ubuntu_GCC_tests_coverage:
         coverage_format: cobertura
         path: coverage.xml
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -396,12 +408,15 @@ Ubuntu_Clang:
     - cd build
     - find . -name *.o -exec touch {} \;
     - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
-    - ccache -s
+    - ccache -svv
   artifacts:
     paths:
       - build/
     expire_in: 12h
   timeout: 3h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_Clang_Tidy_components:
   extends: .Ubuntu_Clang_Tidy_Base
@@ -414,7 +429,7 @@ Ubuntu_Clang_Tidy_openmw:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: openmw
+    BUILD_TARGETS: openmw openmw-tests
   timeout: 3h
 
 Ubuntu_Clang_Tidy_openmw-cs:
@@ -430,7 +445,7 @@ Ubuntu_Clang_Tidy_other:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest components-tests openmw-tests openmw-cs-tests openmw-navmeshtool openmw-bulletobjecttool
+    BUILD_TARGETS: components-tests bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
@@ -467,7 +482,7 @@ Ubuntu_Clang_tests_Debug:
   stage: test
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    EXAMPLE_SUITE_REVISION: f51b832e033429a7cdc520e0e48d7dfdb9141caa
+    EXAMPLE_SUITE_REVISION: 599987b52bd2d064e26299d3317b11049499f32b
   cache:
     paths:
       - .cache/pip
@@ -502,19 +517,27 @@ Ubuntu_GCC_integration_tests_asan:
 .MacOS:
   stage: build
   rules:
-    - if: $CI_PROJECT_ID == "7107382"
+    - if: $CI_PROJECT_ID != "7107382"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
+  image: macos-15-xcode-16
+  tags:
+    - saas-macos-medium-m1
   cache:
     paths:
     - ccache/
   script:
-    - CI/before_install.osx.sh
+    - CI/before_install.macos.sh
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
-    - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.osx.sh
-    - cd build; make -j $(sysctl -n hw.logicalcpu) package
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
+    - CI/macos/ccache_prep.sh
+    - CI/before_script.macos.sh
+    - CI/macos/build.sh
+    - cd build
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
         echo "[default]" > ~/.s3cfg
@@ -529,20 +552,33 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ccache -s
+    - ../CI/macos/ccache_save.sh
   artifacts:
     paths:
       - build/OpenMW-*.dmg
 
-macOS14_Xcode15_arm64:
+macOS15_Xcode16_amd64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_arm64.v1
+    key: macOS15_Xcode16_amd64.v1
   variables:
     CCACHE_SIZE: 3G
+    DMG_IDENTIFIER: amd64
+    MACOS_AMD64: true
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
+
+macOS15_Xcode16_arm64:
+  extends: .MacOS
+  cache:
+    key: macOS15_Xcode16_arm64.v1
+  variables:
+    DMG_IDENTIFIER: arm64
+    CCACHE_SIZE: 3G
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
 
 .Compress_And_Upload_Symbols_Base:
   extends: .Ubuntu_Image
@@ -667,7 +703,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v12
+    key: ninja-2022-v13
     paths:
     - ccache
     - deps
@@ -825,7 +861,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-2022-v12
+    key: msbuild-2022-v13
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -926,7 +962,7 @@ Windows_MSBuild_CacheInit:
     - cd build
     - cmake --build . -- -j $(nproc)
     # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
-    - ccache -s
+    - ccache -svv
     - df -h
     - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
     - cd ..
@@ -968,7 +1004,7 @@ Windows_MSBuild_CacheInit:
       - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
     cache:
       key: flatpak
-      paths: 
+      paths:
         - ".flatpak-builder"
     artifacts:
       untracked: false

@@ -82,6 +82,39 @@ namespace MWScript
             }
         };
 
+        class OpFillJournal : public Interpreter::Opcode0
+        {
+        public:
+            void execute(Interpreter::Runtime& runtime) override
+            {
+                const MWWorld::Store<ESM::Dialogue>& dialogues
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
+                MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+                MWBase::DialogueManager* dialogueManager = MWBase::Environment::get().getDialogueManager();
+
+                for (const auto& dialogue : dialogues)
+                {
+                    if (dialogue.mType == ESM::Dialogue::Type::Journal)
+                    {
+                        for (const auto& journalInfo : dialogue.mInfoOrder.getOrderedInfo())
+                        {
+                            if (journalInfo.mQuestStatus != ESM::DialInfo::QS_Name)
+                                journal->addEntry(dialogue.mId, journalInfo.mData.mJournalIndex, playerPtr);
+                        }
+                    }
+                    else if (dialogue.mType == ESM::Dialogue::Type::Topic)
+                    {
+                        for (const auto& topicInfo : dialogue.mInfoOrder.getOrderedInfo())
+                        {
+                            journal->addTopic(dialogue.mId, topicInfo.mId, playerPtr);
+                        }
+                        dialogueManager->addTopic(dialogue.mId);
+                    }
+                }
+            }
+        };
+
         class OpAddTopic : public Interpreter::Opcode0
         {
         public:
@@ -288,6 +321,7 @@ namespace MWScript
             interpreter.installSegment5<OpJournal<ExplicitRef>>(Compiler::Dialogue::opcodeJournalExplicit);
             interpreter.installSegment5<OpSetJournalIndex>(Compiler::Dialogue::opcodeSetJournalIndex);
             interpreter.installSegment5<OpGetJournalIndex>(Compiler::Dialogue::opcodeGetJournalIndex);
+            interpreter.installSegment5<OpFillJournal>(Compiler::Dialogue::opcodeFillJournal);
             interpreter.installSegment5<OpAddTopic>(Compiler::Dialogue::opcodeAddTopic);
             interpreter.installSegment3<OpChoice>(Compiler::Dialogue::opcodeChoice);
             interpreter.installSegment5<OpForceGreeting<ImplicitRef>>(Compiler::Dialogue::opcodeForceGreeting);

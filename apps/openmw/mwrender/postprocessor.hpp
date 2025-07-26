@@ -58,7 +58,7 @@ namespace MWRender
     public:
         using FBOArray = std::array<osg::ref_ptr<osg::FrameBufferObject>, 6>;
         using TextureArray = std::array<osg::ref_ptr<osg::Texture>, 6>;
-        using TechniqueList = std::vector<std::shared_ptr<fx::Technique>>;
+        using TechniqueList = std::vector<std::shared_ptr<Fx::Technique>>;
 
         enum TextureIndex
         {
@@ -122,24 +122,24 @@ namespace MWRender
 
         osg::ref_ptr<osg::Camera> getHUDCamera() { return mHUDCamera; }
 
-        osg::ref_ptr<fx::StateUpdater> getStateUpdater() { return mStateUpdater; }
+        osg::ref_ptr<Fx::StateUpdater> getStateUpdater() { return mStateUpdater; }
 
         const TechniqueList& getTechniques() { return mTechniques; }
 
         const TechniqueList& getTemplates() const { return mTemplates; }
 
-        const auto& getTechniqueMap() const { return mTechniqueFileMap; }
+        const auto& getTechniqueFiles() const { return mTechniqueFiles; }
 
         void resize();
 
-        Status enableTechnique(std::shared_ptr<fx::Technique> technique, std::optional<int> location = std::nullopt);
+        Status enableTechnique(std::shared_ptr<Fx::Technique> technique, std::optional<int> location = std::nullopt);
 
-        Status disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty = true);
+        Status disableTechnique(std::shared_ptr<Fx::Technique> technique, bool dirty = true);
 
         bool getSupportsNormalsRT() const { return mNormalsSupported; }
 
         template <class T>
-        void setUniform(std::shared_ptr<fx::Technique> technique, const std::string& name, const T& value)
+        void setUniform(std::shared_ptr<Fx::Technique> technique, const std::string& name, const T& value)
         {
             if (!isEnabled())
                 return;
@@ -158,7 +158,7 @@ namespace MWRender
             (*it)->setValue(value);
         }
 
-        std::optional<size_t> getUniformSize(std::shared_ptr<fx::Technique> technique, const std::string& name)
+        std::optional<size_t> getUniformSize(std::shared_ptr<Fx::Technique> technique, const std::string& name)
         {
             auto it = technique->findUniform(name);
 
@@ -168,7 +168,7 @@ namespace MWRender
             return (*it)->getNumElements();
         }
 
-        bool isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const;
+        bool isTechniqueEnabled(const std::shared_ptr<Fx::Technique>& technique) const;
 
         void setExteriorFlag(bool exterior) { mExteriorFlag = exterior; }
 
@@ -176,7 +176,10 @@ namespace MWRender
 
         void toggleMode();
 
-        std::shared_ptr<fx::Technique> loadTechnique(const std::string& name, bool loadNextFrame = false);
+        std::shared_ptr<Fx::Technique> loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame = false);
+        std::shared_ptr<Fx::Technique> loadTechnique(std::string_view name, bool loadNextFrame = false);
+
+        TechniqueList getChain();
 
         bool isEnabled() const { return mUsePostProcessing; }
 
@@ -230,8 +233,7 @@ namespace MWRender
         TechniqueList mQueuedTemplates;
         TechniqueList mInternalTechniques;
 
-        std::unordered_map<std::string, std::filesystem::path, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
-            mTechniqueFileMap;
+        std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash, std::equal_to<>> mTechniqueFiles;
 
         RenderingManager& mRendering;
         osgViewer::Viewer* mViewer;
@@ -261,13 +263,13 @@ namespace MWRender
         int mHeight;
         int mSamples;
 
-        osg::ref_ptr<fx::StateUpdater> mStateUpdater;
+        osg::ref_ptr<Fx::StateUpdater> mStateUpdater;
         osg::ref_ptr<PingPongCull> mPingPongCull;
         std::array<osg::ref_ptr<PingPongCanvas>, 2> mCanvases;
         osg::ref_ptr<TransparentDepthBinCallback> mTransparentDepthPostPass;
         osg::ref_ptr<DistortionCallback> mDistortionCallback;
 
-        fx::DispatchArray mTemplateData;
+        Fx::DispatchArray mTemplateData;
     };
 }
 

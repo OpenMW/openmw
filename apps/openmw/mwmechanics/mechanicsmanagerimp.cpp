@@ -368,17 +368,28 @@ namespace MWMechanics
 
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
     {
-        return mActors.isRunning(ptr);
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (!stats.getStance(MWMechanics::CreatureStats::Stance_Run))
+            return false;
+
+        if (mActors.isRunning(ptr))
+            return true;
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        return !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
     }
 
     bool MechanicsManager::isSneaking(const MWWorld::Ptr& ptr)
     {
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (!stats.getStance(MWMechanics::CreatureStats::Stance_Sneak))
+            return false;
+
+        if (mActors.isSneaking(ptr))
+            return true;
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        bool animActive = mActors.isSneaking(ptr);
-        bool stanceOn = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool inair = !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
-        return stanceOn && (animActive || inair);
+        return !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
     }
 
     void MechanicsManager::rest(double hours, bool sleep)
@@ -1232,33 +1243,39 @@ namespace MWMechanics
             victim.getClass().getCreatureStats(victim).notifyMurder();
 
         // Bounty and disposition penalty for each type of crime
-        float disp = 0.f, dispVictim = 0.f;
+        int bounty;
+        float disp, dispVictim;
         if (type == OT_Trespassing || type == OT_SleepingInOwnedBed)
         {
-            arg = store.find("iCrimeTresspass")->mValue.getInteger();
+            bounty = store.find("iCrimeTresspass")->mValue.getInteger();
             disp = dispVictim = store.find("iDispTresspass")->mValue.getFloat();
         }
         else if (type == OT_Pickpocket)
         {
-            arg = store.find("iCrimePickPocket")->mValue.getInteger();
+            bounty = store.find("iCrimePickPocket")->mValue.getInteger();
             disp = dispVictim = store.find("fDispPickPocketMod")->mValue.getFloat();
         }
         else if (type == OT_Assault)
         {
-            arg = store.find("iCrimeAttack")->mValue.getInteger();
+            bounty = store.find("iCrimeAttack")->mValue.getInteger();
             disp = store.find("iDispAttackMod")->mValue.getFloat();
             dispVictim = store.find("fDispAttacking")->mValue.getFloat();
         }
         else if (type == OT_Murder)
         {
-            arg = store.find("iCrimeKilling")->mValue.getInteger();
+            bounty = store.find("iCrimeKilling")->mValue.getInteger();
             disp = dispVictim = store.find("iDispKilling")->mValue.getFloat();
         }
         else if (type == OT_Theft)
         {
+            bounty = static_cast<int>(arg * store.find("fCrimeStealing")->mValue.getFloat());
+            bounty = std::max(1, bounty); // Minimum bounty of 1, in case items with zero value are stolen
             disp = dispVictim = store.find("fDispStealing")->mValue.getFloat() * arg;
-            arg = static_cast<int>(arg * store.find("fCrimeStealing")->mValue.getFloat());
-            arg = std::max(1, arg); // Minimum bounty of 1, in case items with zero value are stolen
+        }
+        else
+        {
+            bounty = arg;
+            disp = dispVictim = 0.f;
         }
 
         // Make surrounding actors within alarm distance respond to the crime
@@ -1296,7 +1313,7 @@ namespace MWMechanics
         else if (type == OT_Murder)
             fight = fightVictim = esmStore.get<ESM::GameSetting>().find("iFightKilling")->mValue.getInteger();
         else if (type == OT_Theft)
-            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->mValue.getInteger();
+            fight = fightVictim = esmStore.get<ESM::GameSetting>().find("fFightStealing")->mValue.getInteger() * arg;
 
         bool reported = false;
 
@@ -1457,7 +1474,7 @@ namespace MWMechanics
         if (reported)
         {
             player.getClass().getNpcStats(player).setBounty(
-                std::max(0, player.getClass().getNpcStats(player).getBounty() + arg));
+                std::max(0, player.getClass().getNpcStats(player).getBounty() + bounty));
 
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
@@ -1719,6 +1736,8 @@ namespace MWMechanics
                         .getActorId()); // Stops guard from ending combat if player is unreachable
                 for (const Actor& actor : mActors)
                 {
+                    if (actor.isInvalid())
+                        continue;
                     if (actor.getPtr().getClass().isClass(actor.getPtr(), "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq

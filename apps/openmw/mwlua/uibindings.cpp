@@ -296,6 +296,8 @@ namespace MWLua
                   luaManager->addAction(
                       [=, window = std::move(window)]() { windowManager->setDisabledByLua(window, disabled); });
               };
+        api["_isWindowVisible"]
+            = [windowManager](std::string_view window) { return windowManager->isWindowVisible(window); };
 
         // TODO
         // api["_showMouseCursor"] = [](bool) {};

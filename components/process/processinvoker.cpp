@@ -1,13 +1,10 @@
 #include "processinvoker.hpp"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>
-
-#if defined(Q_OS_MAC)
-#include <QCoreApplication>
-#endif
 
 Process::ProcessInvoker::ProcessInvoker(QObject* parent)
     : QObject(parent)
@@ -60,12 +57,9 @@ bool Process::ProcessInvoker::startProcess(const QString& name, const QStringLis
     QString path(name);
 #ifdef Q_OS_WIN
     path.append(QLatin1String(".exe"));
-#elif defined(Q_OS_MAC)
-    QDir dir(QCoreApplication::applicationDirPath());
-    path = dir.absoluteFilePath(name);
-#else
-    path.prepend(QLatin1String("./"));
 #endif
+    QDir dir(QCoreApplication::applicationDirPath());
+    path = dir.absoluteFilePath(path);
 
     QFileInfo info(path);
 

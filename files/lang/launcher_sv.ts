@@ -428,6 +428,18 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode misslyckades:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Custom window size is available only in Windowed mode.</source>
+        <translation>Anpassad fönsterstorlek finns endast tillgänglig i fönsterläge.</translation>
+    </message>
+    <message>
+        <source>Window border is available only in Windowed mode.</source>
+        <translation>Fönsterram finns endast tillgänglig i fönsterläge</translation>
+    </message>
+    <message>
+        <source>Windowed Fullscreen mode always uses the native display resolution.</source>
+        <translation>Helskärm i fönsterläge använder alltid skärmens nativa upplösning.</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::ImportPage</name>
@@ -755,10 +767,10 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
                   the specular map texture would have to be named foo_spec.dds).
                   If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
                   (.osg file, not supported in .nif files). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om den här funktionen är aktiverad kommer spekularitetskartor (specular maps) att hittas och användas 
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om den här funktionen är aktiverad kommer spekularitetskartor (specular maps) att hittas och användas
                   (see &apos;specular map pattern&apos;, t.ex. för en bastextur foo.dds,
                   ska spekularitetskartan heta foo_spec.dds).
-                  Om funktionen är inaktiverad kommer normalkartor bara användas om texturerna är explicit listade i 3D-modell-filen 
+                  Om funktionen är inaktiverad kommer normalkartor bara användas om texturerna är explicit listade i 3D-modell-filen
                   (.nif eller .osg fil). Påverkar objekt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>

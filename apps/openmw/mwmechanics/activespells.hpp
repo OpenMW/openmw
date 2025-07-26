@@ -137,8 +137,8 @@ namespace MWMechanics
         ///
         void addSpell(const ActiveSpellParams& params);
 
-        /// Bypasses resistances
-        void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor);
+        /// Force resistances
+        void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances = true);
 
         /// Removes the active effects from this spell/potion/.. with \a id
         void removeEffectsBySourceSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id);

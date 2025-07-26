@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <osg/AlphaFunc>
+#include <osg/Capability>
 #include <osg/ColorMaski>
 #include <osg/Group>
 #include <osg/Node>
@@ -607,6 +608,9 @@ namespace Resource
         if (!getSupportsNormalsRT())
             return;
         stateset->setAttributeAndModes(new osg::ColorMaski(1, enabled, enabled, enabled, enabled));
+
+        if (enabled)
+            stateset->setAttributeAndModes(new osg::Disablei(GL_BLEND, 1));
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -969,6 +973,14 @@ namespace Resource
         Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
         constexpr VFS::Path::NormalizedView errorMarker("error_marker.osgt");
         return loadNonNif(errorMarker, file, mImageManager);
+    }
+
+    void SceneManager::loadSelectionMarker(
+        osg::ref_ptr<osg::Group> parentNode, const char* markerData, long long markerSize) const
+    {
+        Files::IMemStream file(markerData, markerSize);
+        constexpr VFS::Path::NormalizedView selectionMarker("selectionmarker.osgt");
+        parentNode->addChild(loadNonNif(selectionMarker, file, mImageManager));
     }
 
     osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()

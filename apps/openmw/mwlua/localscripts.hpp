@@ -67,7 +67,7 @@ namespace MWLua
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
         const MWWorld::Ptr& getPtrOrEmpty() const { return mData.ptrOrEmpty(); }
 
-        void setActive(bool active);
+        void setActive(bool active, bool callHandlers = true);
         bool isActive() const override { return mData.mIsActive; }
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }

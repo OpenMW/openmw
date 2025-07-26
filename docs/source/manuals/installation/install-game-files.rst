@@ -81,15 +81,15 @@ For Distributions Using `apt` (e.g., Ubuntu, Debian)
 
 .. code:: console
 
-    sudo apt update
-    sudo apt install innoextract
+    $ sudo apt update
+    $ sudo apt install innoextract
 
 For macOS using Homebrew
 ++++++++++++++++++++++++
 
 .. code:: console
 
-    brew install innoextract
+    $ brew install innoextract
 
 Once innoextract is installed, download the game from GOG. The downloaded file should be called ``setup_tes_morrowind_goty_2.0.0.7.exe`` or something similar. When ``innoextract`` is run on it, it will extract the files directly into the folder the ``setup.exe`` file is located. If you have a specific folder where you want it to be extracted to, for example in ``~/Documents/Games/Morrowind`` You can specify it with the ``-d`` flag.
 
@@ -163,7 +163,10 @@ Debian/Ubuntu - using "Steam Proton" & "OpenMW launcher".
 #. Launch "OpenMW launcher" and follow the setup wizard, when asked, point it at the location you installed Morrowind to, we will be looking for the directory that contains the Morrowing.esm file, for example '/steam library/steamapps/common/Morrowind/Data Files/'.
 #. Everything should now be in place, click that big "PLAY" button and fire up OpenMW.
 
-Note, Bloodmoon.esm needs to be below Tribunal.esm in your datafiles list, if you don't have the right order a red "!" will apear next to the filename in the datafiles section of the OpenMW launcher, just drag bloodmoon below tribunal to fix it.
+.. note::
+	`Bloodmoon.esm` needs to be below `Tribunal.esm` in your data files list.
+	If you don't have the right order a red `!` will apear next to the filename in the data files section of the OpenMW launcher.
+	To fix, drag `Bloodmoon.esm` below `Tribunal.esm`.
 
 Wine
 ~~~~

@@ -2,6 +2,7 @@
 -- `openmw_aux.time` defines utility functions for timers.
 -- Implementation can be found in `resources/vfs/openmw_aux/time.lua`.
 -- @module time
+-- @context global|menu|local
 -- @usage local time = require('openmw_aux.time')
 
 local time = {

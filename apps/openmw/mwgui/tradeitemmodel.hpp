@@ -31,6 +31,9 @@ namespace MWGui
 
         void returnItemBorrowedFromUs(ModelIndex itemIndex, ItemModel* source, size_t count);
 
+        /// Update borrowed items in this model
+        void updateBorrowed();
+
         /// Permanently transfers items that were borrowed to us from another model to this model
         void transferItems();
         /// Aborts trade

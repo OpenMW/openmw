@@ -1,6 +1,6 @@
 ---
--- `openmw.world` is an interface to the game world for global scripts.
--- Can not be used from local scripts.
+-- Provides an interface to the game world for global scripts.
+-- @context global
 -- @module world
 -- @usage local world = require('openmw.world')
 

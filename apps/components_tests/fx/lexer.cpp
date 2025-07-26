@@ -5,7 +5,7 @@
 namespace
 {
     using namespace testing;
-    using namespace fx::Lexer;
+    using namespace Fx::Lexer;
 
     struct LexerTest : Test
     {

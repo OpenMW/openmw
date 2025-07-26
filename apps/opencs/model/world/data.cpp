@@ -143,7 +143,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     , mArchives(archives)
     , mVFS(std::make_unique<VFS::Manager>())
 {
-    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true);
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true, &mEncoder.getStatelessEncoder());
 
     mResourcesManager.setVFS(mVFS.get());
 
@@ -1465,7 +1465,7 @@ std::vector<ESM::RefId> CSMWorld::Data::getIds(bool listDeleted) const
 void CSMWorld::Data::assetsChanged()
 {
     mVFS.get()->reset();
-    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true);
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true, &mEncoder.getStatelessEncoder());
 
     const UniversalId assetTableIds[] = { UniversalId::Type_Meshes, UniversalId::Type_Icons, UniversalId::Type_Musics,
         UniversalId::Type_SoundsRes, UniversalId::Type_Textures, UniversalId::Type_Videos };

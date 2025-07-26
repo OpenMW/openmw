@@ -517,13 +517,6 @@ namespace MWWorld
 
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
-                if (getPlayerPtr().isInCell())
-                {
-                    if (getPlayerPtr().getCell()->isExterior())
-                        mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3(),
-                            getPlayerPtr().getCell()->getCell()->getWorldSpace());
-                    mWorldScene->preloadCellWithSurroundings(*getPlayerPtr().getCell());
-                }
                 break;
             case ESM::REC_CSTA:
                 // We need to rebuild the ESMStore index in order to be able to lookup dynamic records while loading the
@@ -2333,34 +2326,35 @@ namespace MWWorld
             Log(Debug::Warning) << "Player agent bounds are not supported by navigator: " << agentBounds;
     }
 
-    World::RestPermitted World::canRest() const
+    int World::canRest() const
     {
+        int result = 0;
+
         CellStore* currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
-        RefData& refdata = player.getRefData();
-        osg::Vec3f playerPos(refdata.getPosition().asVec3());
 
         const MWPhysics::Actor* actor = mPhysics->getActor(player);
         if (!actor)
             throw std::runtime_error("can't find player");
 
-        if (mPlayer->enemiesNearby())
-            return Rest_EnemiesAreNearby;
-
+        const osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
         if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
-            return Rest_PlayerIsUnderwater;
+            result |= Rest_PlayerIsUnderwater;
 
         float fallHeight = player.getClass().getCreatureStats(player).getFallHeight();
         float epsilon = 1e-4;
         if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon))
             || isFlying(player))
-            return Rest_PlayerIsInAir;
+            result |= Rest_PlayerIsInAir;
 
-        if (currentCell->getCell()->noSleep() || player.getClass().getNpcStats(player).isWerewolf())
-            return Rest_OnlyWaiting;
+        if (mPlayer->enemiesNearby())
+            result |= Rest_EnemiesAreNearby;
 
-        return Rest_Allowed;
+        if (!currentCell->getCell()->noSleep() && !player.getClass().getNpcStats(player).isWerewolf())
+            result |= Rest_CanSleep;
+
+        return result;
     }
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr& ptr)
@@ -3047,28 +3041,31 @@ namespace MWWorld
         // TODO: as a better solutuon we should handle projectiles during physics update, not during world update.
         const osg::Vec3f sourcePos = worldPos + orient * osg::Vec3f(0, -1, 0) * 64.f;
 
-        // Early out if the launch position is underwater
-        bool underwater = isUnderwater(MWMechanics::getPlayer().getCell(), worldPos);
-        if (underwater)
-        {
-            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
-            mRendering->emitWaterRipple(worldPos);
-            return;
-        }
-
         // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
         // result.
         std::vector<MWWorld::Ptr> targetActors;
         if (!actor.isEmpty() && actor.getClass().isActor() && actor != MWMechanics::getPlayer())
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
-        // Check for impact, if yes, handle hit, if not, launch projectile
+        // Check for impact, if yes, handle hit
         MWPhysics::RayCastingResult result = mPhysics->castRay(
             sourcePos, worldPos, { actor }, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+
         if (result.mHit)
+        {
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
-        else
-            mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
+            return;
+        }
+
+        // Bail out if the launch position is underwater
+        if (isUnderwater(MWMechanics::getPlayer().getCell(), worldPos))
+        {
+            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
+            mRendering->emitWaterRipple(worldPos);
+            return;
+        }
+
+        mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
     void World::launchMagicBolt(

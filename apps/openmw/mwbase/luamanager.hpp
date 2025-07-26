@@ -1,6 +1,7 @@
 #ifndef GAME_MWBASE_LUAMANAGER_H
 #define GAME_MWBASE_LUAMANAGER_H
 
+#include <filesystem>
 #include <map>
 #include <string>
 #include <variant>
@@ -75,6 +76,7 @@ namespace MWBase
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
+        virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,

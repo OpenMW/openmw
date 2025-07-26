@@ -91,7 +91,8 @@ The behavior of such a model:
 
 The actual state toggling time depends on the sunrise/sunset time settings in `openmw.cfg`:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     fallback=Weather_Sunrise_Time,6
     fallback=Weather_Sunset_Time,18
@@ -102,7 +103,8 @@ These settings lead to the "night" starting at 20:00 and ending at 6:00.
 
 The engine checks if the weather is bright enough to support the "interior day" mode using the Glare_View setting. If it is >= 0.5, the engine considers the weather bright.
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     fallback=Weather_Clear_Glare_View,1
     fallback=Weather_Foggy_Glare_View,0.25
@@ -138,7 +140,8 @@ If you want to override walking animations, you should override ``xbase_anim_fem
 
 To enable this feature, you should have this line in your settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     use additional anim sources = true
@@ -157,7 +160,8 @@ This feature conflicts with old mods which use scripted scabbards, arrows with p
 
 The minimum you need is the ``xbase_anim_sh.nif`` file from the `Weapon Sheathing`_ mod and this line in your settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     weapon sheathing = true
@@ -205,7 +209,8 @@ Skeleton extensions
 
 It is possible to inject custom bones into actor skeletons:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     use additional anim sources = true
@@ -323,14 +328,16 @@ General advices to create assets for this feature:
 
 Groundcover mods can be registered in the openmw.cfg via "groundcover" entries instead of "content" ones:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     groundcover=my_grass_mod.esp
 
 Every static from such mod is treated as a groundcover object.
 Also groundcover detection should be enabled via settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Groundcover]
     enabled = true
@@ -338,7 +345,7 @@ Also groundcover detection should be enabled via settings.cfg:
 Lua scripting
 -------------
 
-OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <OpenMW Lua scripting>`.
+OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <Lua scripting>`.
 It is not compatible with MWSE. A mod with Lua scripts will work only if it was developed specifically for OpenMW.
 
 Installation of a Lua mod is the same as of any other mod: add ``data=`` and ``content=`` entries to ``openmw.cfg``.

@@ -61,6 +61,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         return false;
     }
 
+    cfgMgr.processPaths(variables, std::filesystem::current_path());
+
     cfgMgr.readConfiguration(variables, desc);
 
     Debug::setupLogging(cfgMgr.getLogPath(), "OpenMW");

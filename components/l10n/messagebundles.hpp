@@ -10,7 +10,7 @@
 #include <unicode/locid.h>
 #include <unicode/msgfmt.h>
 
-namespace l10n
+namespace L10n
 {
     /**
      * @brief A collection of Message Bundles

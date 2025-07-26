@@ -49,7 +49,7 @@ void main()
     vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
 
 #if @parallax
-    adjustedUV += getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), texture2D(normalMap, adjustedUV).a, 1.f);
+    adjustedUV += getParallaxOffset(transpose(normalToViewMatrix) * normalize(-passViewPos), texture2D(normalMap, adjustedUV).a, -1.0f);
 #endif
     vec4 diffuseTex = texture2D(diffuseMap, adjustedUV);
     gl_FragData[0] = vec4(diffuseTex.xyz, 1.0);

@@ -154,7 +154,7 @@ namespace MWRender
             float mLoopStopTime = 0;
             float mStopTime = 0;
 
-            std::shared_ptr<float> mTime = std::make_shared<float>(0);
+            std::shared_ptr<float> mTime = std::make_shared<float>(0.0f);
             float mSpeedMult = 1;
 
             bool mPlaying = false;
@@ -181,6 +181,7 @@ namespace MWRender
         AnimSourceList mAnimSources;
 
         std::unordered_set<std::string_view> mSupportedAnimations;
+        mutable std::vector<std::pair<std::string, MWWorld::MovementDirectionFlags>> mSupportedDirections;
 
         osg::ref_ptr<osg::Group> mInsert;
 
@@ -483,6 +484,7 @@ namespace MWRender
 
         virtual void setAccurateAiming(bool enabled) {}
         virtual bool canBeHarvested() const { return false; }
+        virtual void harvest(const MWWorld::Ptr& ptr) {}
 
         virtual void removeFromScene();
 
@@ -498,6 +500,7 @@ namespace MWRender
             bool animated, bool allowLight);
 
         bool canBeHarvested() const override;
+        void harvest(const MWWorld::Ptr& ptr) override;
     };
 
     class UpdateVfxCallback : public SceneUtil::NodeCallback<UpdateVfxCallback>

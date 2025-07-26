@@ -3,6 +3,7 @@
 
 #include <algorithm> // std::reverse
 #include <cctype>
+#include <cstring>
 #include <map>
 #include <stdexcept>
 #include <vector>
@@ -66,6 +67,8 @@ namespace MWDialogue
             return false;
         }
 
+        static bool isWordSeparator(char c) { return std::strchr("\n\r \t'\"", c) != nullptr; }
+
         static bool sortMatches(const Match& left, const Match& right) { return left.mBeg < right.mBeg; }
 
         void highlightKeywords(Point beg, Point end, std::vector<Match>& out) const
@@ -73,6 +76,14 @@ namespace MWDialogue
             std::vector<Match> matches;
             for (Point i = beg; i != end; ++i)
             {
+                if (i != beg)
+                {
+                    Point prev = i;
+                    --prev;
+                    if (!isWordSeparator(*prev))
+                        continue;
+                }
+
                 // check first character
                 typename Entry::childen_t::const_iterator candidate
                     = mRoot.mChildren.find(Misc::StringUtils::toLower(*i));
@@ -86,7 +97,6 @@ namespace MWDialogue
 
                 // some keywords might be longer variations of other keywords, so we definitely need a list of
                 // candidates the first element in the pair is length of the match, i.e. depth from the first character
-                // on
                 std::vector<typename std::pair<std::ptrdiff_t, typename Entry::childen_t::const_iterator>> candidates;
 
                 while ((j + 1) != end)

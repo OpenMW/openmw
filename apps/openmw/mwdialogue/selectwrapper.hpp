@@ -28,9 +28,6 @@ namespace MWDialogue
 
         Type getType() const;
 
-        bool isNpcOnly() const;
-        ///< \attention Do not call any of the select functions for this select struct!
-
         bool selectCompare(int value) const;
 
         bool selectCompare(float value) const;

@@ -1,4 +1,5 @@
 local async = require('openmw.async')
+local core = require('openmw.core')
 local types = require('openmw.types')
 local world = require('openmw.world')
 
@@ -6,8 +7,9 @@ local EnableObject = async:registerTimerCallback('EnableObject', function(obj) o
 
 local function ESM4DoorActivation(door, actor)
     -- TODO: Implement lockpicking minigame
-    -- TODO: Play door opening animation and sound
+    -- TODO: Play door opening animation
     local Door4 = types.ESM4Door
+    core.sound.playSound3d(Door4.record(door).openSound, actor)
     if Door4.isTeleport(door) then
         actor:teleport(Door4.destCell(door), Door4.destPosition(door), Door4.destRotation(door))
     else
@@ -60,6 +62,7 @@ return {
     interfaceName = 'Activation',
     ---
     -- @module Activation
+    -- @context global
     -- @usage require('openmw.interfaces').Activation
     interface = {
         --- Interface version

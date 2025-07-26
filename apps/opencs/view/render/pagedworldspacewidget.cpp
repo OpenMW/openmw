@@ -86,8 +86,8 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
                 {
                     modified = true;
 
-                    auto cell
-                        = std::make_unique<Cell>(mDocument, mRootNode, iter->first.getId(mWorldspace), deleted, true);
+                    auto cell = std::make_unique<Cell>(getDocument(), mSelectionMarker.get(), mRootNode,
+                        iter->first.getId(mWorldspace), deleted, true);
 
                     delete iter->second;
                     iter->second = cell.release();
@@ -465,7 +465,8 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene(const CSMWorld::CellCoordi
 
     bool deleted = index == -1 || cells.getRecord(index).mState == CSMWorld::RecordBase::State_Deleted;
 
-    auto cell = std::make_unique<Cell>(mDocument, mRootNode, coordinates.getId(mWorldspace), deleted, true);
+    auto cell = std::make_unique<Cell>(
+        getDocument(), mSelectionMarker.get(), mRootNode, coordinates.getId(mWorldspace), deleted, true);
     EditMode* editMode = getEditMode();
     cell->setSubMode(editMode->getSubMode(), editMode->getInteractionMask());
 
@@ -750,6 +751,7 @@ void CSVRender::PagedWorldspaceWidget::clearSelection(int elementMask)
         iter->second->setSelection(elementMask, Cell::Selection_Clear);
 
     flagAsModified();
+    mSelectionMarker->detachMarker();
 }
 
 void CSVRender::PagedWorldspaceWidget::invertSelection(int elementMask)
@@ -907,6 +909,7 @@ void CSVRender::PagedWorldspaceWidget::setSubMode(int subMode, unsigned int elem
 {
     for (std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator iter = mCells.begin(); iter != mCells.end(); ++iter)
         iter->second->setSubMode(subMode, elementMask);
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::PagedWorldspaceWidget::reset(unsigned int elementMask)
@@ -985,4 +988,13 @@ void CSVRender::PagedWorldspaceWidget::loadWestCell()
 void CSVRender::PagedWorldspaceWidget::loadSouthCell()
 {
     addCellToSceneFromCamera(0, -1);
+}
+
+CSVRender::Object* CSVRender::PagedWorldspaceWidget::getObjectByReferenceId(const std::string& referenceId)
+{
+    for (const auto& [_, cell] : mCells)
+        if (const auto& object = cell->getObjectByReferenceId(referenceId))
+            return object;
+
+    return nullptr;
 }

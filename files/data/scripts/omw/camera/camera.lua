@@ -239,6 +239,7 @@ return {
     interfaceName = 'Camera',
     ---
     -- @module Camera
+    -- @context player
     -- @usage require('openmw.interfaces').Camera
     interface = {
         --- Interface version is 1

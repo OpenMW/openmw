@@ -235,13 +235,16 @@ namespace MWLua
             &mOnSkillLevelUp });
     }
 
-    void LocalScripts::setActive(bool active)
+    void LocalScripts::setActive(bool active, bool callHandlers)
     {
         mData.mIsActive = active;
-        if (active)
-            callEngineHandlers(mOnActiveHandlers);
-        else
-            callEngineHandlers(mOnInactiveHandlers);
+        if (callHandlers)
+        {
+            if (active)
+                callEngineHandlers(mOnActiveHandlers);
+            else
+                callEngineHandlers(mOnInactiveHandlers);
+        }
     }
 
     void LocalScripts::applyStatsCache()

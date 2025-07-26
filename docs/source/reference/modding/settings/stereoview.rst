@@ -1,218 +1,194 @@
 Stereo View Settings
 ####################
 
-eye resolution x
-----------------
+.. omw-setting::
+   :title: eye resolution x
+   :type: int
+   :range: > 0
+   :default: 3128
+
+   The default values are based on an HP Reverb G2 HMD.
+
+.. omw-setting::
+   :title: eye resolution y
+   :type: int
+   :range: > 0
+   :default: 3060
+
+   The default values are based on an HP Reverb G2 HMD.
+
+.. omw-setting::
+   :title: left eye offset x
+   :type: float64
+   :range: any
+   :default: -2.35
+
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
+
+.. omw-setting::
+   :title: left eye offset y
+   :type: float64
+   :range: any
+   :default: 0.0
+
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
+
+.. omw-setting::
+   :title: left eye offset z
+   :type: float64
+   :range: any
+   :default: 0.0
+
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
+
+.. omw-setting::
+   :title: left eye orientation x
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
+
+   Left eye orientation, expressed as a quaternion.
+
+.. omw-setting::
+   :title: left eye orientation y
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
+
+   Left eye orientation, expressed as a quaternion.
+
+.. omw-setting::
+   :title: left eye orientation z
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
+
+   Left eye orientation, expressed as a quaternion.
+
+.. omw-setting::
+   :title: left eye orientation w
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 1.0
+
+   Left eye orientation, expressed as a quaternion.
+
+.. omw-setting::
+   :title: left eye fov left
+   :type: float64
+   :range: -π to π
+   :default: -0.86
+
+   Left eye field of view, expressed in radians.
+
+.. omw-setting::
+   :title: left eye fov right
+   :type: float64
+   :range: -π to π
+   :default: 0.78
+
+   Left eye field of view, expressed in radians.
+
+.. omw-setting::
+   :title: left eye fov up
+   :type: float64
+   :range: -π to π
+   :default: 0.8
+
+   Left eye field of view, expressed in radians.
+
+.. omw-setting::
+   :title: left eye fov down
+   :type: float64
+   :range: -π to π
+   :default: -0.8
 
-:Type:		integer
-:Range:		> 0
-:Default:	3128
+   Left eye field of view, expressed in radians.
 
-The default values are based on an HP Reverb G2 HMD.
+.. omw-setting::
+   :title: right eye offset x
+   :type: float64
+   :range: any
+   :default: 2.35
 
-eye resolution y
-----------------
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
 
-:Type:		integer
-:Range:		> 0
-:Default:	3060
+.. omw-setting::
+   :title: right eye offset y
+   :type: float64
+   :range: any
+   :default: 0.0
 
-The default values are based on an HP Reverb G2 HMD.
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
 
-left eye offset x
------------------
+.. omw-setting::
+   :title: right eye offset z
+   :type: float64
+   :range: any
+   :default: 0.0
 
-:Type:		double precision floating point
-:Range:		any
-:Default:	-2.35
+   Left eye offset from center, expressed in MW units (1 meter = ~70).
 
-Left eye offset from center, expressed in MW units (1 meter = ~70).
+.. omw-setting::
+   :title: right eye orientation x
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
 
-left eye offset y
------------------
+   Left eye orientation, expressed as a quaternion.
 
-:Type:		double precision floating point
-:Range:		any
-:Default:	0.0
+.. omw-setting::
+   :title: right eye orientation y
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
 
-Left eye offset from center, expressed in MW units (1 meter = ~70).
+   Left eye orientation, expressed as a quaternion.
 
-left eye offset z
------------------
+.. omw-setting::
+   :title: right eye orientation z
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 0.0
 
-:Type:		double precision floating point
-:Range:		any
-:Default:	0.0
+   Left eye orientation, expressed as a quaternion.
 
-Left eye offset from center, expressed in MW units (1 meter = ~70).
+.. omw-setting::
+   :title: right eye orientation w
+   :type: float64
+   :range: -1.0 to 1.0
+   :default: 1.0
 
-left eye orientation x
-----------------------
+   Left eye orientation, expressed as a quaternion.
 
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
+.. omw-setting::
+   :title: right eye fov left
+   :type: float64
+   :range: -π to π
+   :default: -0.78
 
-Left eye orientation, expressed as a quaternion.
+   Left eye field of view.
 
-left eye orientation y
-----------------------
+.. omw-setting::
+   :title: right eye fov right
+   :type: float64
+   :range: -π to π
+   :default: 0.86
 
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
+   Left eye field of view.
 
-Left eye orientation, expressed as a quaternion.
+.. omw-setting::
+   :title: right eye fov up
+   :type: float64
+   :range: -π to π
+   :default: 0.8
 
-left eye orientation z
-----------------------
+   Left eye field of view.
 
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
+.. omw-setting::
+   :title: right eye fov down
+   :type: float64
+   :range: -π to π
+   :default: -0.8
 
-Left eye orientation, expressed as a quaternion.
-
-left eye orientation w
-----------------------
-
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	1.0
-
-Left eye orientation, expressed as a quaternion.
-
-left eye fov left
------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	-0.86
-
-Left eye field of view, expressed in radians.
-
-left eye fov right
-------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	0.78
-
-Left eye field of view, expressed in radians.
-
-left eye fov up
----------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	0.8
-
-Left eye field of view, expressed in radians.
-
-left eye fov down
------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	-0.8
-
-Left eye field of view, expressed in radians.
-
-right eye offset x
-------------------
-
-:Type:		double precision floating point
-:Range:		any
-:Default:	2.35
-
-Left eye offset from center, expressed in MW units (1 meter = ~70).
-
-right eye offset y
-------------------
-
-:Type:		double precision floating point
-:Range:		any
-:Default:	0.0
-
-Left eye offset from center, expressed in MW units (1 meter = ~70).
-
-right eye offset z
-------------------
-
-:Type:		double precision floating point
-:Range:		any
-:Default:	0.0
-
-Left eye offset from center, expressed in MW units (1 meter = ~70).
-
-right eye orientation x
------------------------
-
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
-
-Left eye orientation, expressed as a quaternion.
-
-right eye orientation y
------------------------
-
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
-
-Left eye orientation, expressed as a quaternion.
-
-right eye orientation z
------------------------
-
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	0.0
-
-Left eye orientation, expressed as a quaternion.
-
-right eye orientation w
------------------------
-
-:Type:		double precision floating point
-:Range:		-1.0 to 1.0
-:Default:	1.0
-
-Left eye orientation, expressed as a quaternion.
-
-right eye fov left
-------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	-0.78
-
-Left eye field of view.
-
-right eye fov right
--------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	0.86
-
-Left eye field of view.
-
-right eye fov up
-----------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	0.8
-
-Left eye field of view.
-
-right eye fov down
-------------------
-
-:Type:		double precision floating point
-:Range:		-π to π
-:Default:	-0.8
-
-Left eye field of view.
+   Left eye field of view.

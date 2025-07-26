@@ -1,33 +1,19 @@
 #include "ba2gnrlfile.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include <fstream>
 
-#include <lz4frame.h>
+#include <zlib.h>
 
-#if defined(_MSC_VER)
-// why is this necessary? These are included with /external:I
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#pragma warning(disable : 4702)
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#pragma warning(pop)
-#else
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#endif
-
-#include <boost/iostreams/device/array.hpp>
-#include <components/bsa/ba2file.hpp>
-#include <components/bsa/memorystream.hpp>
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
+
+#include "ba2file.hpp"
+#include "memorystream.hpp"
 
 namespace Bsa
 {
@@ -221,12 +207,14 @@ namespace Bsa
         auto memoryStreamPtr = std::make_unique<MemoryInputStream>(fileRecord.size);
         if (fileRecord.packedSize)
         {
-            boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-            inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-            inputStreamBuf.push(*streamPtr);
+            std::vector<char> buffer(inputSize);
+            streamPtr->read(buffer.data(), inputSize);
+            uLongf destSize = static_cast<uLongf>(fileRecord.size);
+            int ec = ::uncompress(reinterpret_cast<Bytef*>(memoryStreamPtr->getRawData()), &destSize,
+                reinterpret_cast<Bytef*>(buffer.data()), static_cast<uLong>(buffer.size()));
 
-            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), fileRecord.size);
-            boost::iostreams::copy(inputStreamBuf, sr);
+            if (ec != Z_OK)
+                fail("zlib uncompress failed: " + std::string(::zError(ec)));
         }
         else
         {

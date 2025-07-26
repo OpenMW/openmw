@@ -66,7 +66,9 @@ namespace MWMechanics
             if (Misc::Rng::rollDice(10000, prng) < x)
             {
                 // Contracted disease!
-                actor.getClass().getCreatureStats(actor).getSpells().add(spell);
+                MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
+                creatureStats.getSpells().add(spell);
+                creatureStats.getActiveSpells().addSpell(spell, actor, false);
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = MWBase::Environment::get()

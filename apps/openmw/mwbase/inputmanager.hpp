@@ -88,6 +88,8 @@ namespace MWBase
         virtual void executeAction(int action) = 0;
 
         virtual bool controlsDisabled() = 0;
+
+        virtual void saveBindings() = 0;
     };
 }
 

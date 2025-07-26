@@ -20,6 +20,7 @@ return {
     ---
     -- Allows to utilize built-in crime mechanics.
     -- @module Crimes
+    -- @context global
     -- @usage require('openmw.interfaces').Crimes
     interface = {
         --- Interface version

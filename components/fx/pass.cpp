@@ -49,7 +49,7 @@ void main()
 
 }
 
-namespace fx
+namespace Fx
 {
     Pass::Pass(Pass::Type type, Pass::Order order, bool ubo)
         : mCompiled(false)

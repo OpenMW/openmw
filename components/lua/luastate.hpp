@@ -325,7 +325,7 @@ namespace LuaUtil
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
 
-    namespace internal
+    namespace Internal
     {
         std::string formatCastingError(const sol::object& obj, const std::type_info&);
     }
@@ -334,7 +334,7 @@ namespace LuaUtil
     decltype(auto) cast(const sol::object& obj)
     {
         if (!obj.is<T>())
-            throw std::runtime_error(internal::formatCastingError(obj, typeid(T)));
+            throw std::runtime_error(Internal::formatCastingError(obj, typeid(T)));
         return obj.as<T>();
     }
 

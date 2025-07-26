@@ -7,6 +7,8 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Can be defined by any script**
 
+|bdg-ctx-all|
+
 .. list-table::
   :widths: 20 80
 
@@ -15,6 +17,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | (``base``) of another script.
 
 **Can be defined by any non-menu script**
+
+|bdg-ctx-global| |bdg-ctx-local|
 
 .. list-table::
   :widths: 20 80
@@ -39,6 +43,8 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Only for global scripts**
 
+|bdg-ctx-global|
+
 .. list-table::
   :widths: 20 80
 
@@ -60,6 +66,8 @@ Engine handler is a function defined by a script, that can be called by the engi
     - A new exterior cell not defined by a content file has been generated.
 
 **Only for local scripts**
+
+|bdg-ctx-local|
 
 .. list-table::
   :widths: 20 80
@@ -85,6 +93,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | from the actor's inventory, and the count was set to zero.
 
 **Only menu scripts and local scripts attached to a player**
+
+|bdg-ctx-menu| |bdg-ctx-player|
 
 .. list-table::
   :widths: 20 80
@@ -140,6 +150,8 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Only for local scripts attached to a player**
 
+|bdg-ctx-player|
+
 .. list-table::
   :widths: 20 80
 
@@ -151,6 +163,8 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | Called when a quest is updated.
 
 **Only for menu scripts**
+
+|bdg-ctx-menu|
 
 .. list-table::
   :widths: 20 80

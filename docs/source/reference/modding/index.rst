@@ -1,5 +1,5 @@
-OpenMW Modding Reference
-########################
+Modding
+#######
 
 The following document is the complete reference guide to modifying, or
 modding, your OpenMW setup. It does not cover content creation itself,
@@ -13,24 +13,26 @@ about creating new content for OpenMW, please refer to
 	intended. Please report any software problems as bugs in the software,
 	not errors in the manual.
 
-.. toctree::
-	:caption: Table of Contents
-	:maxdepth: 2
+.. dropdown:: Table of Contents
+    :icon: book
 
-	foreword
-	differences
-	mod-install
-	openmw-game-template
-	settings/index
-	texture-modding/index
-	custom-models/index
-	font
-	sound-effects
-	music
-	sky-system
-	doors-and-teleports
-	custom-shader-effects
-	extended
-	animation-blending
-	paths
-	localisation
+    .. toctree::
+        :maxdepth: 2
+
+        foreword
+        differences
+        mod-install
+        openmw-game-template
+        settings/index
+        texture-modding/index
+        custom-models/index
+        font
+        sound-effects
+        music
+        sky-system
+        doors-and-teleports
+        custom-shader-effects
+        extended
+        animation-blending
+        paths
+        localisation

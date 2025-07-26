@@ -332,14 +332,15 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         writer.close();
 
         if (stream.fail())
-            throw std::runtime_error("Write operation failed (memory stream)");
+            throw std::runtime_error(
+                "Write operation failed (memory stream): " + std::generic_category().message(errno));
 
         // All good, write to file
         std::ofstream filestream(slot->mPath, std::ios::binary);
         filestream << stream.rdbuf();
 
         if (filestream.fail())
-            throw std::runtime_error("Write operation failed (file stream)");
+            throw std::runtime_error("Write operation failed (file stream): " + std::generic_category().message(errno));
 
         Settings::saves().mCharacter.set(Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
         mLastSavegame = slot->mPath;
@@ -660,11 +661,13 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         // Report the last version still capable of reading this save
         if (e.getFormatVersion() <= ESM::OpenMW0_48SaveGameFormatVersion)
             release = "OpenMW 0.48.0";
+        else if (e.getFormatVersion() <= ESM::OpenMW0_49SaveGameFormatVersion)
+            release = "OpenMW 0.49.0";
         else
         {
             // Insert additional else if statements above to cover future releases
-            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49SaveGameFormatVersion);
-            release = "OpenMW 0.49.0";
+            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_50SaveGameFormatVersion);
+            release = "OpenMW 0.50.0";
         }
         auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
         std::string error = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });

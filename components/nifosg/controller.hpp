@@ -54,7 +54,8 @@ namespace NifOsg
                     return mLastHighKey;
             }
 
-            return mKeys->mKeys.lower_bound(time);
+            return std::lower_bound(mKeys->mKeys.begin(), mKeys->mKeys.end(), time,
+                [](const typename MapT::MapType::value_type& key, float t) { return key.first < t; });
         }
 
     public:
@@ -99,8 +100,8 @@ namespace NifOsg
 
             const typename MapT::MapType& keys = mKeys->mKeys;
 
-            if (time <= keys.begin()->first)
-                return keys.begin()->second.mValue;
+            if (time <= keys.front().first)
+                return keys.front().second.mValue;
 
             typename MapT::MapType::const_iterator it = retrieveKey(time);
 
@@ -111,12 +112,17 @@ namespace NifOsg
                 mLastHighKey = it;
                 mLastLowKey = --it;
 
-                float a = (time - mLastLowKey->first) / (mLastHighKey->first - mLastLowKey->first);
+                const float highTime = mLastHighKey->first;
+                const float lowTime = mLastLowKey->first;
+                if (highTime == lowTime)
+                    return mLastLowKey->second.mValue;
+
+                const float a = (time - lowTime) / (highTime - lowTime);
 
                 return interpolate(mLastLowKey->second, mLastHighKey->second, a, mKeys->mInterpolationType);
             }
 
-            return keys.rbegin()->second.mValue;
+            return keys.back().second.mValue;
         }
 
         bool empty() const { return !mKeys || mKeys->mKeys.empty(); }
@@ -131,6 +137,7 @@ namespace NifOsg
                 case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
                 case Nif::InterpolationType_Quadratic:
+                case Nif::InterpolationType_TCB:
                 {
                     // Using a cubic Hermite spline.
                     // b1(t) = 2t^3  - 3t^2 + 1
@@ -147,7 +154,6 @@ namespace NifOsg
                     const float b4 = t3 - t2;
                     return a.mValue * b1 + b.mValue * b2 + a.mOutTan * b3 + b.mInTan * b4;
                 }
-                // TODO: Implement TBC interpolation
                 default:
                     return a.mValue + ((b.mValue - a.mValue) * fraction);
             }
@@ -283,7 +289,7 @@ namespace NifOsg
     class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller
     {
     private:
-        std::shared_ptr<std::map<float, bool>> mData;
+        std::shared_ptr<std::vector<std::pair<float, bool>>> mData;
         BoolInterpolator mInterpolator;
         unsigned int mMask{ 0u };
 

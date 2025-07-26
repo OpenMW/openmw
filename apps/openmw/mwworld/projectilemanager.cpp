@@ -274,8 +274,8 @@ namespace MWWorld
             pos.z() += mPhysics->getRenderingHalfExtents(caster).z() * 2 * Constants::TorsoHeight;
         }
 
-        if (MWBase::Environment::get().getWorld()->isUnderwater(
-                caster.getCell(), pos)) // Underwater casting not possible
+        // Actors can't cast target spells underwater
+        if (caster.getClass().isActor() && MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos))
             return;
 
         osg::Quat orient;
@@ -564,15 +564,19 @@ namespace MWWorld
             for (const auto& sound : magicBoltState.mSounds)
                 sound->setPosition(pos);
 
-            if (projectile->isActive())
+            const Ptr caster = magicBoltState.getCaster();
+
+            const MWBase::World& world = *MWBase::Environment::get().getWorld();
+            const bool active = projectile->isActive();
+            if (active && !world.isUnderwater(caster.getCell(), pos))
                 continue;
 
-            const auto target = projectile->getTarget();
-            const auto caster = magicBoltState.getCaster();
+            const Ptr target = !active ? projectile->getTarget() : Ptr();
+
             assert(target != caster);
 
             MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = Misc::Convert::toOsg(projectile->getHitPosition());
+            cast.mHitPosition = !active ? Misc::Convert::toOsg(projectile->getHitPosition()) : pos;
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mItem = magicBoltState.mItem;

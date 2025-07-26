@@ -73,7 +73,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install Building Dependencies
-      run: CI/before_install.osx.sh
+      run: CI/before_install.macos.sh
 
     - name: Prime ccache
       uses: hendrikmuhs/ccache-action@v1
@@ -82,11 +82,9 @@ jobs:
         max-size: 1000M
 
     - name: Configure
-      run: CI/before_script.osx.sh
+      run: CI/before_script.macos.sh
     - name: Build
-      run: |
-        cd build
-        make -j $(sysctl -n hw.logicalcpu) package
+      run: CI/macos/build.sh
 
   Output-Envs:
     name: Read .env file and expose it as output
@@ -106,7 +104,6 @@ jobs:
       fail-fast: true
       matrix:
         image:
-        - "2019"
         - "2022"
 
     uses: ./.github/workflows/windows.yml

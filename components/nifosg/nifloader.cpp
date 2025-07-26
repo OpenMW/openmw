@@ -1568,6 +1568,9 @@ namespace NifOsg
                 }
                 rig->setBoneInfo(std::move(boneInfo));
                 rig->setInfluences(influences);
+                rig->setTransform(data->mTransform.toMatrix());
+                if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                    rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
             }
@@ -1683,7 +1686,7 @@ namespace NifOsg
                 if (hasColors)
                     colors.emplace_back(elem.mVertColor[0], elem.mVertColor[1], elem.mVertColor[2], elem.mVertColor[3]);
                 if (hasUV)
-                    uvlist.emplace_back(halfToFloat(elem.mUV[0]), 1.0 - halfToFloat(elem.mUV[1]));
+                    uvlist.emplace_back(halfToFloat(elem.mUV[0]), 1.0f - halfToFloat(elem.mUV[1]));
             }
 
             if (!vertices.empty())
@@ -1729,6 +1732,8 @@ namespace NifOsg
                 }
                 rig->setBoneInfo(std::move(boneInfo));
                 rig->setInfluences(influences);
+                if (const Nif::NiAVObject* rootBone = skin->mRoot.getPtr())
+                    rig->setRootBone(rootBone->mName);
 
                 drawable = rig;
             }

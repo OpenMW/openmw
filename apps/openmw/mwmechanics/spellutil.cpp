@@ -274,14 +274,14 @@ namespace MWMechanics
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Silence).getMagnitude() && !godmode)
-            return 0;
-
         if (spell->mData.mType == ESM::Spell::ST_Power)
             return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
         if (godmode)
             return 100;
+
+        if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Silence).getMagnitude())
+            return 0;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;

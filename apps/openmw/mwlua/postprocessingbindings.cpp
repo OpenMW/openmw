@@ -1,5 +1,7 @@
 #include "postprocessingbindings.hpp"
 
+#include "MyGUI_LanguageManager.h"
+
 #include <components/lua/util.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -7,6 +9,14 @@
 #include "../mwrender/postprocessor.hpp"
 
 #include "luamanagerimp.hpp"
+
+namespace
+{
+    std::string getLocalizedMyGUIString(std::string_view unlocalized)
+    {
+        return MyGUI::LanguageManager::getInstance().replaceTags(std::string(unlocalized)).asUTF8();
+    }
+}
 
 namespace MWLua
 {
@@ -25,9 +35,9 @@ namespace MWLua
 {
     struct Shader
     {
-        std::shared_ptr<fx::Technique> mShader;
+        std::shared_ptr<Fx::Technique> mShader;
 
-        Shader(std::shared_ptr<fx::Technique> shader)
+        Shader(std::shared_ptr<Fx::Technique> shader)
             : mShader(std::move(shader))
         {
         }
@@ -37,7 +47,7 @@ namespace MWLua
             if (!mShader)
                 return "Shader(nil)";
 
-            return Misc::StringUtils::format("Shader(%s, %s)", mShader->getName(), mShader->getFileName());
+            return Misc::StringUtils::format("Shader(%s, %s)", mShader->getName(), mShader->getFileName().value());
         }
 
         enum
@@ -139,6 +149,15 @@ namespace MWLua
             return MWBase::Environment::get().getWorld()->getPostProcessor()->isTechniqueEnabled(shader.mShader);
         };
 
+        shader["name"] = sol::readonly_property(
+            [](const Shader& shader) { return getLocalizedMyGUIString(shader.mShader->getName()); });
+        shader["author"] = sol::readonly_property(
+            [](const Shader& shader) { return getLocalizedMyGUIString(shader.mShader->getAuthor()); });
+        shader["description"] = sol::readonly_property(
+            [](const Shader& shader) { return getLocalizedMyGUIString(shader.mShader->getDescription()); });
+        shader["version"] = sol::readonly_property(
+            [](const Shader& shader) { return getLocalizedMyGUIString(shader.mShader->getVersion()); });
+
         shader["setBool"] = getSetter<bool>(context);
         shader["setFloat"] = getSetter<float>(context);
         shader["setInt"] = getSetter<int>(context);
@@ -158,10 +177,21 @@ namespace MWLua
             if (!shader.mShader || !shader.mShader->isValid())
                 throw std::runtime_error(Misc::StringUtils::format("Failed loading shader '%s'", name));
 
-            if (!shader.mShader->getDynamic())
-                throw std::runtime_error(Misc::StringUtils::format("Shader '%s' is not marked as dynamic", name));
-
             return shader;
+        };
+
+        api["getChain"] = [context]() {
+            sol::table chain(context.sol(), sol::create);
+
+            for (const auto& shader : MWBase::Environment::get().getWorld()->getPostProcessor()->getChain())
+            {
+                // Don't expose internal shaders to the API, they should be invisible to the user
+                if (shader->getInternal())
+                    continue;
+                chain.add(Shader(shader));
+            }
+
+            return chain;
         };
 
         return LuaUtil::makeReadOnly(api);

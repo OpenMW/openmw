@@ -406,17 +406,16 @@ namespace MWBase
 
         virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
-        enum RestPermitted
+        enum RestFlags
         {
-            Rest_Allowed = 0,
-            Rest_OnlyWaiting = 1,
+            Rest_PlayerIsUnderwater = 1,
             Rest_PlayerIsInAir = 2,
-            Rest_PlayerIsUnderwater = 3,
-            Rest_EnemiesAreNearby = 4
+            Rest_EnemiesAreNearby = 4,
+            Rest_CanSleep = 8,
         };
 
         /// check if the player is allowed to rest
-        virtual RestPermitted canRest() const = 0;
+        virtual int canRest() const = 0;
 
         /// \todo Probably shouldn't be here
         virtual MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr) = 0;

@@ -93,6 +93,7 @@
 #include "hud.hpp"
 #include "inventorywindow.hpp"
 #include "itemchargeview.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "jailscreen.hpp"
@@ -204,7 +205,7 @@ namespace MWGui
         SDL_GL_GetDrawableSize(window, &dw, &dh);
 
         mScalingFactor = Settings::gui().mScalingFactor * (dw / w);
-        mGuiPlatform = std::make_unique<osgMyGUI::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
+        mGuiPlatform = std::make_unique<MyGUIPlatform::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
             resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
 
         mGui = std::make_unique<MyGUI::Gui>();
@@ -228,8 +229,8 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Window>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
-        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<MyGUIPlatform::AdditiveLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<MyGUIPlatform::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents();
         PostProcessorHud::registerMyGUIComponents();
         ItemView::registerComponents();
@@ -312,6 +313,7 @@ namespace MWGui
         mTextColours.loadColours();
 
         mDragAndDrop = std::make_unique<DragAndDrop>();
+        mItemTransfer = std::make_unique<ItemTransfer>(*this);
 
         auto recharge = std::make_unique<Recharge>();
         mGuiModeStates[GM_Recharge] = GuiModeState(recharge.get());
@@ -334,7 +336,7 @@ namespace MWGui
         trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
         auto inventoryWindow = std::make_unique<InventoryWindow>(
-            mDragAndDrop.get(), mViewer->getSceneData()->asGroup(), mResourceSystem);
+            *mDragAndDrop, *mItemTransfer, mViewer->getSceneData()->asGroup(), mResourceSystem);
         mInventoryWindow = inventoryWindow.get();
         mWindows.push_back(std::move(inventoryWindow));
 
@@ -381,7 +383,7 @@ namespace MWGui
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        auto containerWindow = std::make_unique<ContainerWindow>(mDragAndDrop.get());
+        auto containerWindow = std::make_unique<ContainerWindow>(*mDragAndDrop, *mItemTransfer);
         mContainerWindow = containerWindow.get();
         mWindows.push_back(std::move(containerWindow));
         trackWindow(mContainerWindow, makeContainerWindowSettingValues());
@@ -407,7 +409,7 @@ namespace MWGui
         mCountDialog = countDialog.get();
         mWindows.push_back(std::move(countDialog));
 
-        auto settingsWindow = std::make_unique<SettingsWindow>();
+        auto settingsWindow = std::make_unique<SettingsWindow>(mCfgMgr);
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
@@ -457,7 +459,8 @@ namespace MWGui
 
         mSoulgemDialog = std::make_unique<SoulgemDialog>(mMessageBoxManager.get());
 
-        auto companionWindow = std::make_unique<CompanionWindow>(mDragAndDrop.get(), mMessageBoxManager.get());
+        auto companionWindow
+            = std::make_unique<CompanionWindow>(*mDragAndDrop, *mItemTransfer, mMessageBoxManager.get());
         trackWindow(companionWindow.get(), makeCompanionWindowSettingValues());
         mGuiModeStates[GM_Companion] = GuiModeState({ mInventoryWindow, companionWindow.get() });
         mWindows.push_back(std::move(companionWindow));
@@ -500,7 +503,7 @@ namespace MWGui
         mWindows.push_back(std::move(debugWindow));
         trackWindow(mDebugWindow, makeDebugWindowSettingValues());
 
-        auto postProcessorHud = std::make_unique<PostProcessorHud>();
+        auto postProcessorHud = std::make_unique<PostProcessorHud>(mCfgMgr);
         mPostProcessorHud = postProcessorHud.get();
         mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
@@ -1124,7 +1127,7 @@ namespace MWGui
             std::vector<std::string> split;
             Misc::StringUtils::split(tag, split, ":");
 
-            l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
+            L10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
             // If a key has a "Context:KeyName" format, use YAML to translate data
             if (split.size() == 2)
@@ -2404,6 +2407,14 @@ namespace MWGui
     {
         mLuaIdToWindow.at(windowId)->setDisabledByLua(disabled);
         updateVisible();
+    }
+
+    bool WindowManager::isWindowVisible(std::string_view windowId) const
+    {
+        auto it = mLuaIdToWindow.find(windowId);
+        if (it == mLuaIdToWindow.end())
+            throw std::logic_error("Invalid window name: " + std::string(windowId));
+        return it->second->isVisible();
     }
 
     std::vector<std::string_view> WindowManager::getAllWindowIds() const

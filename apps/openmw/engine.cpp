@@ -404,8 +404,8 @@ OMW::Engine::~Engine()
     mMechanicsManager = nullptr;
     mDialogueManager = nullptr;
     mJournal = nullptr;
-    mScriptManager = nullptr;
     mWindowManager = nullptr;
+    mScriptManager = nullptr;
     mWorld = nullptr;
     mStereoManager = nullptr;
     mSoundManager = nullptr;
@@ -433,6 +433,8 @@ OMW::Engine::~Engine()
     }
 
     SDL_Quit();
+
+    Log(Debug::Info) << "Quitting peacefully.";
 }
 
 // Set data dir
@@ -729,7 +731,7 @@ void OMW::Engine::prepareEngine()
 
     mVFS = std::make_unique<VFS::Manager>();
 
-    VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
+    VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true, &mEncoder.get()->getStatelessEncoder());
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(
         mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
@@ -753,7 +755,7 @@ void OMW::Engine::prepareEngine()
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    mL10nManager = std::make_unique<l10n::Manager>(mVFS.get());
+    mL10nManager = std::make_unique<L10n::Manager>(mVFS.get());
     mL10nManager->setPreferredLocales(Settings::general().mPreferredLocales, Settings::general().mGmstOverridesL10n);
     mEnvironment.setL10nManager(*mL10nManager);
 
@@ -1069,8 +1071,6 @@ void OMW::Engine::go()
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
     Settings::ShaderManager::get().save();
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
-
-    Log(Debug::Info) << "Quitting peacefully.";
 }
 
 void OMW::Engine::setCompileAll(bool all)

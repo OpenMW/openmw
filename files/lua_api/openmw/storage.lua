@@ -1,5 +1,6 @@
 ---
--- `openmw.storage` contains functions to work with permanent Lua storage.
+-- Contains functions to work with permanent Lua storage.
+-- @context global|menu|local|player
 -- @module storage
 -- @usage
 -- local storage = require('openmw.storage')

@@ -69,7 +69,6 @@ namespace MWWorld
 
         void autoEquipWeapon(TSlots& slots_);
         void autoEquipArmor(TSlots& slots_);
-        void autoEquipShield(TSlots& slots_);
 
         // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
         ContainerStoreIterator mSelectedEnchantItem;
@@ -118,6 +117,7 @@ namespace MWWorld
         ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
         bool isEquipped(const MWWorld::ConstPtr& item);
+        bool isEquipped(const ESM::RefId& id);
         ///< Utility function, returns true if the given item is equipped in any slot
 
         void setSelectedEnchantItem(const ContainerStoreIterator& iterator);

@@ -26,10 +26,6 @@ namespace Files
     WindowsPath::WindowsPath(const std::string& application_name)
         : mName(application_name)
     {
-        std::error_code ec;
-        current_path(getLocalPath(), ec);
-        if (ec.value() != 0)
-            Log(Debug::Warning) << "Error " << ec.value() << " when changing current directory";
     }
 
     std::filesystem::path WindowsPath::getUserConfigPath() const

@@ -15,7 +15,7 @@ Below is a quick overview of supported formats, followed by separate articles wi
 * **NIF** is the proprietary format used in the original Morrowind game. It supports static and animated models and everything else the format included in the original game.
 
 .. toctree::
-	:caption: Table of Contents
+	:hidden:
 	:maxdepth: 1
 
 	pipeline-blender-collada-static-models

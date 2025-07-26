@@ -5,7 +5,9 @@
 
 #include <MyGUI_ListBox.h>
 
+#include <components/files/configurationmanager.hpp>
 #include <components/settings/shadermanager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace MyGUI
 {
@@ -31,7 +33,7 @@ namespace MWGui
         };
 
     public:
-        PostProcessorHud();
+        PostProcessorHud(Files::ConfigurationManager& cfgMgr);
 
         void onOpen() override;
 
@@ -48,7 +50,7 @@ namespace MWGui
 
         void notifyFilterChanged(MyGUI::EditBox* sender);
 
-        void updateConfigView(const std::string& name);
+        void updateConfigView(VFS::Path::NormalizedView path);
 
         void notifyResetButtonClicked(MyGUI::Widget* sender);
 
@@ -98,6 +100,8 @@ namespace MWGui
         std::string mOverrideHint;
 
         int mOffset = 0;
+
+        Files::ConfigurationManager& mCfgMgr;
     };
 }
 

@@ -72,6 +72,7 @@ namespace MWGui
         // Check if quick key is still valid
         inline void validate(int index);
         void unassign(keyData* key);
+        void assignItem(MWWorld::Ptr item);
     };
 
     class QuickKeysMenuAssign : public WindowModal

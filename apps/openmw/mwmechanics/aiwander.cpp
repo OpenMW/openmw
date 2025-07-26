@@ -676,6 +676,13 @@ namespace MWMechanics
         stopMovement(actor);
     }
 
+    void AiWander::resetInitialPosition()
+    {
+        mStoredInitialActorPosition = false;
+        mPathFinder.clearPath();
+        mHasDestination = false;
+    }
+
     bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
@@ -804,7 +811,7 @@ namespace MWMechanics
 
         converter.toWorld(dest);
 
-        state.moveIn(std::make_unique<AiWanderStorage>());
+        state.reset();
 
         osg::Vec3f pos(static_cast<float>(dest.mX), static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         MWBase::Environment::get().getWorld()->moveObject(actor, pos);
@@ -820,7 +827,7 @@ namespace MWMechanics
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
 
-        int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
+        size_t index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
         getPathGridGraph(pathgrid).getNeighbouringPoints(index, points);
     }
@@ -853,7 +860,7 @@ namespace MWMechanics
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point
-            int closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
+            size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point

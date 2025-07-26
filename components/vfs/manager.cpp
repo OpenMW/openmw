@@ -81,15 +81,20 @@ namespace VFS
         return {};
     }
 
-    std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path& name) const
+    std::filesystem::file_time_type Manager::getLastModified(VFS::Path::NormalizedView name) const
     {
-        std::string normalized = Files::pathToUnicodeString(name);
-        Path::normalizeFilenameInPlace(normalized);
-
-        const auto found = mIndex.find(normalized);
+        const auto found = mIndex.find(name);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + normalized + "' is not found");
-        return found->second->getPath();
+            throw std::runtime_error("Resource '" + std::string(name.value()) + "' not found");
+        return found->second->getLastModified();
+    }
+
+    std::string Manager::getStem(VFS::Path::NormalizedView name) const
+    {
+        const auto found = mIndex.find(name);
+        if (found == mIndex.end())
+            throw std::runtime_error("Resource '" + std::string(name.value()) + "' not found");
+        return found->second->getStem();
     }
 
     RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const

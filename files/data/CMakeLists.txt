@@ -98,7 +98,9 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
     scripts/omw/console/menu.lua
+    scripts/omw/mechanics/actorcontroller.lua
     scripts/omw/mechanics/animationcontroller.lua
+    scripts/omw/mechanics/globalcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/settings/menu.lua
     scripts/omw/music/actor.lua

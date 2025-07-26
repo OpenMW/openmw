@@ -2,9 +2,9 @@
 
 #include <span>
 
-#include "niffile.hpp"
+#include <components/toutf8/toutf8.hpp>
 
-#include "../to_utf8/to_utf8.hpp"
+#include "niffile.hpp"
 
 namespace
 {

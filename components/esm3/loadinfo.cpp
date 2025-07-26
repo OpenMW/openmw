@@ -76,15 +76,15 @@ namespace ESM
                     break;
                 case fourCC("QSTN"):
                     mQuestStatus = QS_Name;
-                    esm.skipRecord();
+                    esm.skipHSub();
                     break;
                 case fourCC("QSTF"):
                     mQuestStatus = QS_Finished;
-                    esm.skipRecord();
+                    esm.skipHSub();
                     break;
                 case fourCC("QSTR"):
                     mQuestStatus = QS_Restart;
-                    esm.skipRecord();
+                    esm.skipHSub();
                     break;
                 case SREC_DELE:
                     esm.skipHSub();

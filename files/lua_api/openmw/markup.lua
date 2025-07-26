@@ -1,5 +1,6 @@
 ---
--- `openmw.markup` allows to work with markup languages.
+-- Allows to work with markup languages.
+-- @context global|menu|local|player
 -- @module markup
 -- @usage local markup = require('openmw.markup')
 

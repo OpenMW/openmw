@@ -1,0 +1,158 @@
+:root {
+    --link: #4a90e2;
+    --link-hover: #1c6cd9;
+
+    --readthedocs-search-color: hsl(var(--foreground));
+    --readthedocs-search-link-color: var(--link);
+    --readthedocs-search-content-background-color: hsl(var(--background));
+    --readthedocs-search-content-border-color: hsl(var(--border));
+    --readthedocs-search-footer-background-color: hsl(var(--background));
+    --readthedocs-search-footer-color: hsl(var(--foreground));
+    --readthedocs-search-footer-code-background-color: hsl(var(--background));
+    --readthedocs-search-footer-code-border-color: hsl(var(--background));
+    --readthedocs-search-input-background-color: hsl(var(--accent));
+    --readthedocs-search-result-color: hsl(var(--foreground));
+    --readthedocs-search-result-icon-color: hsl(var(--foreground));
+    --readthedocs-search-result-heading-color: hsl(var(--foreground));
+    --readthedocs-search-result-subheading-color: hsl(var(--foreground));
+    --readthedocs-search-result-active-background-color: hsl(var(--accent));
+    --readthedocs-search-result-border-color: hsl(var(--border));
+
+    --readthedocs-flyout-background-color: hsl(var(--background));
+    --readthedocs-flyout-color: hsl(var(--foreground));
+    --readthedocs-flyout-current-version-color: hsl(var(--foreground));
+    --readthedocs-flyout-item-link-color: var(--link);
+    --readthedocs-flyout-link-color: var(--link);
+    --readthedocs-flyout-section-heading-color: hsl(var(--foreground));
+}
+
+/* Less aggressive dark background */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: 220 14% 9% !important;
+        --border: 216 14% 17%;
+        --accent: 216 14% 17%;
+        --input: 216 14% 17%;
+        --muted: 223 27% 14%;
+        --card: 220 14% 9%;
+
+        --link: #95b1dd;
+        --link-hover: #dde2eb;
+    }
+
+    .contents ul li a.reference:hover, .sd-dropdown .toctree-wrapper ul li a.reference, details.sd-dropdown .sd-summary-title {
+        --muted-foreground: 215.4 16.3% 86.9%;
+    }
+}
+
+/* Enable hover-to-highlight in TOC */
+.contents ul li a.reference:hover, .toctree-wrapper ul li a.reference:hover {
+    text-decoration: underline !important;
+}
+
+/* Hide text underline in tables since the underlines clash with table lines */
+#content a.sd-badge:not(.toc-backref), #content table a:not(.toc-backref)  {
+    text-decoration: none;
+}
+
+/* Override link colors, default is foreground */
+#content a:not(.toc-backref) {
+    color: var(--link);
+    font-weight: 600;
+}
+
+#content a:not(.toc-backref):hover, #content a:not(.toc-backref):focus {
+    color: var(--link-hover);
+}
+
+#content .highlight {
+    background-color: #f6f8fa !important;
+    border-radius: 0.25rem;
+    font-variant-ligatures: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    #content .highlight {
+        background-color: #161b22 !important;
+    }
+}
+
+/* Disables the saturation filter on project icon in dark mode */
+.dark\:invert {
+    --tw-invert: none !important;
+}
+
+/* Disable no-wrap set on some code blocks, causing x-overflow issues in right bar */
+code {
+    white-space: normal;
+}
+
+/* Hide the keybind shortcut for search, we haven't linked this to sphinx search addon yet */
+#searchbox kbd {
+    display: none !important;
+}
+
+#search-input {
+    padding-right: 12px !important;
+}
+
+/* Table headers are bolded in dark mode, do it in light mode too */
+table th {
+    font-weight: 600 !important;
+}
+
+/* Highlight non-header rows on hover */
+tbody tr:hover {
+    background-color: hsl(var(--muted));
+}
+
+/* Increase maximum width for docs, default is quite narrow at 1400px max */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 2000px !important;
+    }
+}
+
+/* Less intrusive scrollbar in the TOC */
+#left-sidebar::-webkit-scrollbar, #right-sidebar .sticky::-webkit-scrollbar {
+    width: 6px;
+    border-radius: 0;
+}
+
+#left-sidebar::-webkit-scrollbar-thumb, #right-sidebar .sticky::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));;
+    border-radius: 0;
+}
+
+#left-sidebar::-webkit-scrollbar-thumb:hover, #right-sidebar .sticky::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted));;
+}
+
+@media (min-width: 1024px) {
+    .container:has(#left-sidebar) {
+        grid-template-columns: 310px minmax(0, 1fr);
+    }
+}
+
+/* Always enable scrollbar in left TOC to prevent layout shifts when expanding */
+#left-sidebar {
+    overflow-y: scroll;
+}
+
+#content div[class^=highlight], #content pre.literal-block, p, h4, h5, h6 {
+    margin-bottom: 1.5rem;
+}
+
+#content table p {
+    margin-bottom: 0;
+}
+
+h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+h6 {
+    font-size: 1.08rem;
+    font-weight: 600;
+}

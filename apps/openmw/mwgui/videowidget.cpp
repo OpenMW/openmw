@@ -50,7 +50,7 @@ namespace MWGui
         if (!texture)
             return;
 
-        mTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
+        mTexture = std::make_unique<MyGUIPlatform::OSGTexture>(texture);
 
         setRenderItemTexture(mTexture.get());
         getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));

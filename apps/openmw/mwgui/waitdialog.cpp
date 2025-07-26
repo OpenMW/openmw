@@ -52,7 +52,6 @@ namespace MWGui
 
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
-        , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)
@@ -84,14 +83,28 @@ namespace MWGui
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)
     {
-        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld()->canRest() == MWBase::World::Rest_Allowed);
+        const int restFlags = MWBase::Environment::get().getWorld()->canRest();
 
-        if (ptr.isEmpty() && MWBase::Environment::get().getWorld()->canRest() == MWBase::World::Rest_PlayerIsInAir)
+        const bool underwater = (restFlags & MWBase::World::Rest_PlayerIsUnderwater) != 0;
+        // Resting in air is allowed if you're using a bed
+        const bool inAir = ptr.isEmpty() && (restFlags & MWBase::World::Rest_PlayerIsInAir) != 0;
+        const bool enemiesNearby = (restFlags & MWBase::World::Rest_EnemiesAreNearby) != 0;
+        const bool solidGround = !underwater && !inAir;
+
+        if (!solidGround || enemiesNearby)
         {
-            // Resting in air is not allowed unless you're using a bed
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
+            if (!solidGround)
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
+
+            if (enemiesNearby)
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
+
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            return;
         }
+
+        const bool canSleep = !ptr.isEmpty() || (restFlags & MWBase::World::Rest_CanSleep) != 0;
+        setCanRest(canSleep);
 
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
@@ -135,20 +148,6 @@ namespace MWGui
 
         if (!MWBase::Environment::get().getWindowManager()->getRestEnabled())
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-
-        MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld()->canRest();
-
-        if (canRest == MWBase::World::Rest_EnemiesAreNearby)
-        {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-        else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
-        {
-            // resting underwater not allowed
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
 

@@ -8,7 +8,6 @@
 **/
 
 #include <memory>
-#include <stack>
 #include <vector>
 
 #include <osg/ref_ptr>
@@ -22,7 +21,7 @@
 #include <components/sdlutil/sdlcursormanager.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 #include <components/settings/settings.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "charactercreation.hpp"
 #include "draganddrop.hpp"
@@ -118,6 +117,7 @@ namespace MWGui
     class PostProcessorHud;
     class JailScreen;
     class KeyboardNavigation;
+    class ItemTransfer;
 
     class WindowManager : public MWBase::WindowManager
     {
@@ -390,6 +390,7 @@ namespace MWGui
         // Used in Lua bindings
         const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
         void setDisabledByLua(std::string_view windowId, bool disabled) override;
+        bool isWindowVisible(std::string_view windowId) const override;
         std::vector<std::string_view> getAllWindowIds() const override;
         std::vector<std::string_view> getAllowedWindowIds(GuiMode mode) const override;
 
@@ -401,7 +402,7 @@ namespace MWGui
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-        std::unique_ptr<osgMyGUI::Platform> mGuiPlatform;
+        std::unique_ptr<MyGUIPlatform::Platform> mGuiPlatform;
         osgViewer::Viewer* mViewer;
 
         std::unique_ptr<Gui::FontLoader> mFontLoader;
@@ -432,6 +433,7 @@ namespace MWGui
         Console* mConsole;
         DialogueWindow* mDialogueWindow;
         std::unique_ptr<DragAndDrop> mDragAndDrop;
+        std::unique_ptr<ItemTransfer> mItemTransfer;
         InventoryWindow* mInventoryWindow;
         ScrollWindow* mScrollWindow;
         BookWindow* mBookWindow;

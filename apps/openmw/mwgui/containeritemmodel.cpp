@@ -224,7 +224,7 @@ namespace MWGui
         if (target.getType() != ESM::Container::sRecordId)
             return true;
 
-        // check container organic flag
+        // Check container organic flag
         MWWorld::LiveCellRef<ESM::Container>* ref = target.get<ESM::Container>();
         if (ref->mBase->mFlags & ESM::Container::Organic)
         {
@@ -232,9 +232,18 @@ namespace MWGui
             return false;
         }
 
-        // check that we don't exceed container capacity
-        float weight = item.getClass().getWeight(item) * count;
-        if (target.getClass().getCapacity(target) < target.getClass().getEncumbrance(target) + weight)
+        // Check for container without capacity
+        float capacity = target.getClass().getCapacity(target);
+        if (capacity <= 0.0f)
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
+            return false;
+        }
+
+        // Check the container capacity plus one increment so the expected total weight can
+        // fit in the container with floating-point imprecision
+        float newEncumbrance = target.getClass().getEncumbrance(target) + (item.getClass().getWeight(item) * count);
+        if (std::nextafterf(capacity, std::numeric_limits<float>::max()) < newEncumbrance)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sContentsMessage3}");
             return false;

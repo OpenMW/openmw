@@ -247,16 +247,11 @@ namespace Nif
 
     void NiVisData::read(NIFStream* nif)
     {
-        mKeys = std::make_shared<std::map<float, bool>>();
-        uint32_t numKeys;
-        nif->read(numKeys);
-        for (size_t i = 0; i < numKeys; i++)
+        mKeys = std::make_shared<std::vector<std::pair<float, bool>>>(nif->get<uint32_t>());
+        for (auto& [time, value] : *mKeys)
         {
-            float time;
-            char value;
             nif->read(time);
-            nif->read(value);
-            (*mKeys)[time] = (value != 0);
+            value = nif->get<uint8_t>() != 0;
         }
     }
 

@@ -45,32 +45,34 @@ The ranges included with each setting are the physically possible ranges, not re
 	you may want to steer clear of altering these files. That being said,
 	this guide should be plenty clear enough that you can find the setting you want to change and safely edit it.
 
-.. toctree::
-	:caption: Table of Contents
-	:maxdepth: 2
+.. dropdown:: Table of Contents
+    :icon: book
 
-	camera
-	cells
-	fog
-	groundcover
-	map
-	GUI
-	HUD
-	game
-	general
-	lua
-	shaders
-	shadows
-	input
-	saves
-	sound
-	terrain
-	video
-	water
-	windows
-	navigator
-	physics
-	models
-	postprocessing
-	stereo
-	stereoview
+    .. toctree::
+        :maxdepth: 2
+
+        Camera <camera>
+        Cells <cells>
+        Fog <fog>
+        Game <game>
+        General <general>
+        Groundcover <groundcover>
+        GUI <GUI>
+        HUD <HUD>
+        Input <input>
+        Lua <lua>
+        Map <map>
+        Models <models>
+        Navigator <navigator>
+        Physics <physics>
+        Post-Processing <postprocessing>
+        Shaders <shaders>
+        Shadows <shadows>
+        Saves <saves>
+        Sound <sound>
+        Stereo <stereo>
+        Stereo View <stereoview>
+        Terrain <terrain>
+        Video <video>
+        Water <water>
+        Windows <windows>

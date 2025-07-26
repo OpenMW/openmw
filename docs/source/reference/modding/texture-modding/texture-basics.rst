@@ -1,5 +1,3 @@
-autosectionlabel_prefix_document = True
-
 ######################
 Texture Modding Basics
 ######################
@@ -57,17 +55,20 @@ Simply create the textures with appropriate naming convention
 the normal map would have to be called foo_n.dds).
 To enable this automatic use based on filename pattern,
 you will have to add the following to your
-`settings.cfg </source/reference/modding/paths>`_ file::
+`settings.cfg </source/reference/modding/paths>`_ file:
 
-	[Shaders]
-	auto use object normal maps = true
+.. code-block:: ini
+  :caption: settings.cfg
 
-	auto use object specular maps = true
+  [Shaders]
+  auto use object normal maps = true
 
-	normal map pattern = _n
-	normal height map pattern = _nh
+  auto use object specular maps = true
 
-	specular map pattern = _spec
+  normal map pattern = _n
+  normal height map pattern = _nh
+
+  specular map pattern = _spec
 
 Additionally, a normal map with the `_nh` pattern enables
 the use of the normal map's alpha channel as height information.
@@ -94,18 +95,21 @@ For example, if you wanted to add specular mapping to a terrain layer called roc
 you would copy this texture to a new file called rock_diffusespec.dds,
 and then edit its alpha channel to set the specular intensity.
 
-The relevant settings are::
+The relevant settings are
 
-	[Shaders]
-	auto use terrain normal maps = true
+.. code-block:: ini
+  :caption: settings.cfg
 
-	auto use terrain specular maps = true
+  [Shaders]
+  auto use terrain normal maps = true
 
-	terrain specular map pattern = _diffusespec
+  auto use terrain specular maps = true
 
-	# Also used for terrain normal maps
-	normal map pattern = _n
-	normal height map pattern = _nh
+  terrain specular map pattern = _diffusespec
+
+  # Also used for terrain normal maps
+  normal map pattern = _n
+  normal height map pattern = _nh
 
 OSG native files
 ################

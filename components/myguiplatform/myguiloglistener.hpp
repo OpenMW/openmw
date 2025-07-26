@@ -10,7 +10,7 @@
 #include <MyGUI_LevelLogFilter.h>
 #include <MyGUI_LogSource.h>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     /// \brief  Custom MyGUI::ILogListener interface implementation

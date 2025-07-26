@@ -267,19 +267,20 @@ namespace MWMechanics
             if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
                 && !isSpellActive(spell->mId))
             {
-                mSpells.emplace_back(ActiveSpellParams{ spell, ptr });
+                mSpells.emplace_back(ActiveSpellParams{ spell, ptr, true });
                 mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
             }
         }
 
         bool updateSpellWindow = false;
+        bool playNonLooping = false;
         if (ptr.getClass().hasInventoryStore(ptr)
             && !(creatureStats.isDead() && !creatureStats.isDeathAnimationFinished()))
         {
             auto& store = ptr.getClass().getInventoryStore(ptr);
             if (store.getInvListener() != nullptr)
             {
-                bool playNonLooping = !store.isFirstEquip();
+                playNonLooping = !store.isFirstEquip();
                 const auto world = MWBase::Environment::get().getWorld();
                 for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
                 {
@@ -307,9 +308,6 @@ namespace MWMechanics
                     applyPurges(ptr);
                     ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
                     params.setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
-                    for (const auto& effect : params.mEffects)
-                        MWMechanics::playEffects(
-                            ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
                     updateSpellWindow = true;
                 }
             }
@@ -327,7 +325,7 @@ namespace MWMechanics
             std::optional<ActiveSpellParams> reflected;
             for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
             {
-                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration);
+                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, playNonLooping);
                 if (result.mType == MagicApplicationResult::Type::REFLECTED)
                 {
                     if (!reflected)
@@ -506,9 +504,9 @@ namespace MWMechanics
         mQueue.emplace_back(params);
     }
 
-    void ActiveSpells::addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor)
+    void ActiveSpells::addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances)
     {
-        mQueue.emplace_back(ActiveSpellParams{ spell, actor, true });
+        mQueue.emplace_back(ActiveSpellParams{ spell, actor, ignoreResistances });
     }
 
     void ActiveSpells::purge(ParamsPredicate predicate, const MWWorld::Ptr& ptr)

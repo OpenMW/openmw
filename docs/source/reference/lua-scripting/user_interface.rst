@@ -1,5 +1,5 @@
-User interface reference
-========================
+UI reference
+============
 
 .. include:: version.rst
 
@@ -73,63 +73,65 @@ Events
    an event-specific value, and that widget's layout table.
 | See the Widget type pages for information on what events exist, and which first argument they pass. 
 
-Widget types
-------------
-
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
-   Widget: Base widget type, all the other widgets inherit its properties and events. <widgets/widget>
-   Text: Displays text. <widgets/text>
-   TextEdit: Accepts text input from the user. <widgets/textedit>
-   Image: Renders a texture. <widgets/image>
-   Flex: Aligns children in a column/row <widgets/flex>
-   Container: Wraps around its children <widgets/container>
+   Widget <widgets/widget>
+   Container <widgets/container>
+   Flex <widgets/flex>
+   Image <widgets/image>
+   Text <widgets/text>
+   TextEdit <widgets/textedit>
 
 Example
 -------
 
-*scripts/clock.lua*
+.. tab-set::
 
-.. code-block:: Lua
+   .. tab-item:: scripts/clock.lua
 
-  local ui = require('openmw.ui')
-  local util = require('openmw.util')
-  local calendar = require('openmw_aux.calendar')
-  local time = require('openmw_aux.time')
+      .. code-block:: lua
 
-  local element = ui.create {
-    -- important not to forget the layer
-    -- by default widgets are not attached to any layer and are not visible
-    layer = 'HUD',
-    type = ui.TYPE.Text,
-    props = {
-      -- position in the top right corner
-      relativePosition = util.vector2(1, 0),
-      -- position is for the top left corner of the widget by default
-      -- change it to align exactly to the top right corner of the screen
-      anchor = util.vector2(1, 0),
-      text = calendar.formatGameTime('%H:%M'),
-      textSize = 24,
-      -- default black text color isn't always visible
-      textColor = util.color.rgb(0, 1, 0),
-    },
-  }
+         local ui = require('openmw.ui')
+         local util = require('openmw.util')
+         local calendar = require('openmw_aux.calendar')
+         local time = require('openmw_aux.time')
 
-  local function updateTime()
-    -- formatGameTime uses current time by default
-    -- otherwise we could get it by calling `core.getGameTime()`
-    element.layout.props.text = calendar.formatGameTime('%H:%M')
-    -- the layout changes won't affect the widget unless we request an update
-    element:update()
-  end
+         local element = ui.create {
+            -- important not to forget the layer
+            -- by default widgets are not attached to any layer and are not visible
+            layer = 'HUD',
+            type = ui.TYPE.Text,
+            props = {
+               -- position in the top right corner
+               relativePosition = util.vector2(1, 0),
+               -- position is for the top left corner of the widget by default
+               -- change it to align exactly to the top right corner of the screen
+               anchor = util.vector2(1, 0),
+               text = calendar.formatGameTime('%H:%M'),
+               textSize = 24,
+               -- default black text color isn't always visible
+               textColor = util.color.rgb(0, 1, 0),
+            },
+         }
 
-  -- we are showing game time in hours and minutes
-  -- so no need to update more often than once a game minute
-  time.runRepeatedly(updateTime, 1 * time.minute, { type = time.GameTime })
+         local function updateTime()
+            -- formatGameTime uses current time by default
+            -- otherwise we could get it by calling `core.getGameTime()`
+            element.layout.props.text = calendar.formatGameTime('%H:%M')
+            -- the layout changes won't affect the widget unless we request an update
+            element:update()
+         end
 
-*clock.omwscripts*
+         -- we are showing game time in hours and minutes
+         -- so no need to update more often than once a game minute
+         time.runRepeatedly(updateTime, 1 * time.minute, { type = time.GameTime })
 
-::
 
-  PLAYER: scripts/clock.lua
+   .. tab-item:: clock.omwscripts
+
+      .. code-block::
+
+         PLAYER: scripts/clock.lua
+

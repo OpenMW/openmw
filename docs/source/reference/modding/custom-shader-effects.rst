@@ -23,7 +23,8 @@ dungeons.
 To use this feature the :ref:`soft particles` setting must be enabled.
 This setting can either be activated in the OpenMW launcher or changed in `settings.cfg`:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Shaders]
     soft particles = true
@@ -32,7 +33,7 @@ Variables.
 
 +--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
 | Name         | Description                                                                                            | Type    | Default |
-+--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
++==============+========================================================================================================+=========+=========+
 | size         | Scaling ratio. Larger values will make a softer fade effect. Larger geometry requires higher values.   | integer | 45      |
 +--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
 | falloff      | Fades away geometry as camera gets closer. Geometry full fades when parallel to camera.                | boolean | false   |
@@ -64,7 +65,8 @@ Blue and alpha channels are ignored.
 To use this feature the :ref:`post processing <Post Processing>` setting must be enabled.
 This setting can either be activated in the OpenMW launcher, in-game, or changed in `settings.cfg`:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Post Processing]
     enabled = true
@@ -73,7 +75,7 @@ Variables.
 
 +---------+--------------------------------------------------------------------------------------------------------+---------+---------+
 | Name    | Description                                                                                            | Type    | Default |
-+---------+--------------------------------------------------------------------------------------------------------+---------+---------+
++=========+========================================================================================================+=========+=========+
 | strength| The strength of the distortion effect. Scales linearly.                                                | float   | 0.1     |
 +---------+--------------------------------------------------------------------------------------------------------+---------+---------+
 

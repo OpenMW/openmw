@@ -123,6 +123,7 @@ namespace MWGui
         , mItemToSell(-1)
         , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
+        , mUpdateNextFrame(false)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
@@ -201,11 +202,24 @@ namespace MWGui
 
         onFilterChanged(mFilterAll);
         mFilterEdit->setCaption({});
+
+        for (const auto& source : itemSources)
+            source.getClass().getContainerStore(source).setContListener(this);
     }
 
     void TradeWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+
+        if (isVisible() && mUpdateNextFrame)
+        {
+            mTradeModel->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->updateBorrowed();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+            mItemView->update();
+            updateOffer();
+            mUpdateNextFrame = false;
+        }
     }
 
     void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
@@ -278,7 +292,7 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
+    void TradeWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
         const ESM::RefId& sound = item.mBase.getClass().getUpSoundId(item.mBase);
@@ -642,5 +656,20 @@ namespace MWGui
     {
         if (mTradeModel && mTradeModel->usesContainer(ptr))
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+    }
+
+    void TradeWindow::updateItemView()
+    {
+        mItemView->update();
+    }
+
+    void TradeWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
+    }
+
+    void TradeWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
+    {
+        mUpdateNextFrame = true;
     }
 }

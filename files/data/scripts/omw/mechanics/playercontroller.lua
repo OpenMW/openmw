@@ -111,4 +111,10 @@ return {
     engineHandlers = {
         onUpdate = onUpdate,
     },
+
+    eventHandlers = {
+        ShowMessage = function(data)
+            if data.message then ui.showMessage(data.message) end
+        end
+    },
 }

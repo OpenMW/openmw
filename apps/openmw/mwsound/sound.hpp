@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include "sound_output.hpp"
+#include "soundoutput.hpp"
 
 namespace MWSound
 {
@@ -53,7 +53,7 @@ namespace MWSound
     protected:
         Sound_Instance mHandle = nullptr;
 
-        friend class OpenAL_Output;
+        friend class OpenALOutput;
 
     public:
         void setPosition(const osg::Vec3f& pos) { mParams.mPos = pos; }

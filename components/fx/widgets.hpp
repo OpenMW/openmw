@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_WIDGETS_H
-#define OPENMW_COMPONENTS_FX_WIDGETS_H
+#ifndef OPENMW_COMPONENTS_FX_WIDGETS_HPP
+#define OPENMW_COMPONENTS_FX_WIDGETS_HPP
 
 #include <MyGUI_Button.h>
 #include <MyGUI_Delegate.h>
@@ -28,7 +28,7 @@ namespace Gui
     class AutoSizedButton;
 }
 
-namespace fx
+namespace Fx
 {
     namespace Widgets
     {
@@ -46,7 +46,7 @@ namespace fx
         public:
             virtual ~EditBase() = default;
 
-            void setData(const std::shared_ptr<fx::Types::UniformBase>& uniform, Index index = None)
+            void setData(const std::shared_ptr<Fx::Types::UniformBase>& uniform, Index index = None)
             {
                 mUniform = uniform;
                 mIndex = index;
@@ -57,7 +57,7 @@ namespace fx
             virtual void toDefault() = 0;
 
         protected:
-            std::shared_ptr<fx::Types::UniformBase> mUniform;
+            std::shared_ptr<Fx::Types::UniformBase> mUniform;
             Index mIndex;
         };
 
@@ -268,7 +268,7 @@ namespace fx
             MYGUI_RTTI_DERIVED(UniformBase)
 
         public:
-            void init(const std::shared_ptr<fx::Types::UniformBase>& uniform);
+            void init(const std::shared_ptr<Fx::Types::UniformBase>& uniform);
 
             void toDefault();
 

@@ -15,7 +15,7 @@ set(OPENMW_HEADERS
     profile.hpp
 )
 
-source_group(apps/openmw FILES main.cpp android_main.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
+source_group(apps/openmw FILES main.cpp androidmain.cpp ${OPENMW_SOURCES} ${OPENMW_HEADERS} ${OPENMW_RESOURCES})
 
 add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky skyutil npcanimation esm4npcanimation vismask
@@ -44,7 +44,7 @@ add_openmw_dir (mwgui
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
     draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours statswatcher
-    postprocessorhud settings
+    postprocessorhud settings worlditemmodel itemtransfer
     )
 
 add_openmw_dir (mwdialogue
@@ -60,9 +60,9 @@ add_openmw_dir (mwscript
 
 add_openmw_dir (mwlua
     luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant
-    context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings
+    context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings coremwscriptbindings
     mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings dialoguebindings
-    postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker magicbindings factionbindings
+    postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker landbindings magicbindings factionbindings
     classbindings itemdata inputprocessor animationbindings birthsignbindings racebindings markupbindings
     types/types types/door types/item types/actor types/container types/lockable types/weapon types/npc
     types/creature types/player types/activator types/book types/lockpick types/probe types/apparatus
@@ -71,8 +71,8 @@ add_openmw_dir (mwlua
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
-    loudness movieaudiofactory alext efx efx-presets regionsoundselector watersoundupdater
+    soundmanagerimp openaloutput ffmpegdecoder sound soundbuffer sounddecoder soundoutput
+    loudness movieaudiofactory alext efx efxpresets regionsoundselector watersoundupdater
     )
 
 add_openmw_dir (mwworld
@@ -127,7 +127,7 @@ if(BUILD_OPENMW)
     if (ANDROID)
         add_library(openmw SHARED
             main.cpp
-            android_main.cpp
+            androidmain.cpp
         )
     else()
         openmw_add_executable(openmw
@@ -138,6 +138,12 @@ if(BUILD_OPENMW)
     endif()
 
     target_link_libraries(openmw openmw-lib)
+
+    # Workaround necessary to ensure osgAnimation::MatrixLinearSampler dynamic casts work under Clang
+    # NOTE: it's unclear whether the broken behavior is spec-compliant
+    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+        set_target_properties(openmw PROPERTIES ENABLE_EXPORTS ON)
+    endif()
 endif()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING

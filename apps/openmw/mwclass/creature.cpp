@@ -360,16 +360,12 @@ namespace MWClass
         {
             stats.setAttacked(true);
 
-            // No retaliation for totally static creatures (they have no movement or attacks anyway)
-            if (isMobile(ptr))
-            {
-                bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
-                bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
-                if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
-                    setOnPcHitMe = false;
-                else
-                    setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
-            }
+            bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+            bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+            if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
+                setOnPcHitMe = false;
+            else
+                setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
@@ -534,10 +530,11 @@ namespace MWClass
 
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         float moveSpeed;
 
-        if (getEncumbrance(ptr) > getCapacity(ptr))
+        if (normalizedEncumbrance > 1.0f)
             moveSpeed = 0.0f;
         else if (canFly(ptr)
             || (mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled()))
@@ -547,7 +544,6 @@ namespace MWClass
                     + mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->mValue.getFloat()
                 + flySpeed * (gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
-            const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
@@ -871,7 +867,8 @@ namespace MWClass
                 ptr.getRefData().setCustomData(nullptr);
 
                 // Reset to original position
-                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().asVec3());
+                MWBase::Environment::get().getWorld()->moveObject(
+                    ptr, ptr.getCell()->getOriginCell(ptr), ptr.getCellRef().getPosition().asVec3());
                 MWBase::Environment::get().getWorld()->rotateObject(
                     ptr, ptr.getCellRef().getPosition().asRotationVec3(), MWBase::RotationFlag_none);
             }

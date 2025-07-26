@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_TYPES_H
-#define OPENMW_COMPONENTS_FX_TYPES_H
+#ifndef OPENMW_COMPONENTS_FX_TYPES_HPP
+#define OPENMW_COMPONENTS_FX_TYPES_HPP
 
 #include <optional>
 #include <variant>
@@ -12,7 +12,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
 
-namespace fx
+namespace Fx
 {
     namespace Types
     {

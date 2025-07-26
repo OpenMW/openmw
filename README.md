@@ -5,7 +5,7 @@ OpenMW is an open-source open-world RPG game engine that supports playing Morrow
 
 OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
-* Version: 0.49.0
+* Version: 0.50.0
 * License: GPLv3 (see [LICENSE](https://gitlab.com/OpenMW/openmw/-/raw/master/LICENSE) for more information)
 * Website: https://www.openmw.org
 * IRC: #openmw on irc.libera.chat

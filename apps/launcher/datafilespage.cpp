@@ -39,8 +39,6 @@
 #include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"
 
-#include "ui_directorypicker.h"
-
 const char* Launcher::DataFilesPage::mDefaultContentListName = "Default";
 
 namespace
@@ -155,6 +153,7 @@ namespace Launcher
 Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
     Config::LauncherSettings& launcherSettings, MainDialog* parent)
     : QWidget(parent)
+    , mDirectoryPickerDialog(new QDialog(this))
     , mMainDialog(parent)
     , mCfgMgr(cfg)
     , mGameSettings(gameSettings)
@@ -163,6 +162,7 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     , mReloadCellsThread(&DataFilesPage::reloadCells, this)
 {
     ui.setupUi(this);
+    mDirectoryPicker.setupUi(mDirectoryPickerDialog);
     setObjectName("DataFilesPage");
     mSelector = new ContentSelectorView::ContentSelector(ui.contentSelectorWidget, /*showOMWScripts=*/true);
     const QString encoding = mGameSettings.value("encoding", { "win1252" }).value;
@@ -266,6 +266,7 @@ void Launcher::DataFilesPage::buildView()
 
     buildArchiveContextMenu();
     buildDataFilesContextMenu();
+    buildDirectoryPickerContextMenu();
 }
 
 void Launcher::DataFilesPage::slotCopySelectedItemsPaths()
@@ -298,8 +299,10 @@ void Launcher::DataFilesPage::buildArchiveContextMenu()
         &DataFilesPage::slotShowArchiveContextMenu);
 
     mArchiveContextMenu = new QMenu(ui.archiveListWidget);
-    mArchiveContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
-    mArchiveContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
+    mArchiveContextMenu->addAction(tr("&Check Selected"), this,
+        [this]() { setCheckStateForMultiSelectedItems(ui.archiveListWidget, Qt::Checked); });
+    mArchiveContextMenu->addAction(tr("&Uncheck Selected"), this,
+        [this]() { setCheckStateForMultiSelectedItems(ui.archiveListWidget, Qt::Unchecked); });
 }
 
 void Launcher::DataFilesPage::buildDataFilesContextMenu()
@@ -312,6 +315,18 @@ void Launcher::DataFilesPage::buildDataFilesContextMenu()
         tr("&Copy Path(s) to Clipboard"), this, &Launcher::DataFilesPage::slotCopySelectedItemsPaths);
     mDataFilesContextMenu->addAction(
         tr("&Open Path in File Explorer"), this, &Launcher::DataFilesPage::slotOpenSelectedItemsPaths);
+}
+
+void Launcher::DataFilesPage::buildDirectoryPickerContextMenu()
+{
+    connect(mDirectoryPicker.dirListWidget, &QListWidget::customContextMenuRequested, this,
+        &DataFilesPage::slotShowDirectoryPickerContextMenu);
+
+    mDirectoryPickerMenu = new QMenu(mDirectoryPicker.dirListWidget);
+    mDirectoryPickerMenu->addAction(tr("&Check Selected"), this,
+        [this]() { setCheckStateForMultiSelectedItems(mDirectoryPicker.dirListWidget, Qt::Checked); });
+    mDirectoryPickerMenu->addAction(tr("&Uncheck Selected"), this,
+        [this]() { setCheckStateForMultiSelectedItems(mDirectoryPicker.dirListWidget, Qt::Unchecked); });
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -821,28 +836,22 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
         return;
     }
 
-    QDialog dialog;
-    Ui::SelectSubdirs select;
-
-    select.setupUi(&dialog);
+    mDirectoryPicker.dirListWidget->clear();
 
     for (const auto& dir : subdirs)
     {
         if (!ui.directoryListWidget->findItems(dir, Qt::MatchFixedString).isEmpty())
             continue;
-        const auto lastRow = select.dirListWidget->count();
-        select.dirListWidget->addItem(dir);
-        select.dirListWidget->item(lastRow)->setCheckState(Qt::Unchecked);
+        QListWidgetItem* newDir = new QListWidgetItem(dir, mDirectoryPicker.dirListWidget);
+        newDir->setCheckState(Qt::Unchecked);
     }
 
-    dialog.show();
-
-    if (dialog.exec() == QDialog::Rejected)
+    if (mDirectoryPickerDialog->exec() == QDialog::Rejected)
         return;
 
-    for (int i = 0; i < select.dirListWidget->count(); ++i)
+    for (int i = 0; i < mDirectoryPicker.dirListWidget->count(); ++i)
     {
-        const auto* dir = select.dirListWidget->item(i);
+        const auto* dir = mDirectoryPicker.dirListWidget->item(i);
         if (dir->checkState() == Qt::Checked)
         {
             ui.directoryListWidget->insertItem(selectedRow, dir->text());
@@ -893,36 +902,33 @@ void Launcher::DataFilesPage::removeDirectory()
     refreshDataFilesView();
 }
 
+void Launcher::DataFilesPage::showContextMenu(QMenu* menu, QListWidget* list, const QPoint& pos)
+{
+    QPoint globalPos = list->viewport()->mapToGlobal(pos);
+    menu->exec(globalPos);
+}
+
 void Launcher::DataFilesPage::slotShowArchiveContextMenu(const QPoint& pos)
 {
-    QPoint globalPos = ui.archiveListWidget->viewport()->mapToGlobal(pos);
-    mArchiveContextMenu->exec(globalPos);
+    showContextMenu(mArchiveContextMenu, ui.archiveListWidget, pos);
 }
 
 void Launcher::DataFilesPage::slotShowDataFilesContextMenu(const QPoint& pos)
 {
-    QPoint globalPos = ui.directoryListWidget->viewport()->mapToGlobal(pos);
-    mDataFilesContextMenu->exec(globalPos);
+    showContextMenu(mDataFilesContextMenu, ui.directoryListWidget, pos);
 }
 
-void Launcher::DataFilesPage::setCheckStateForMultiSelectedItems(bool checked)
+void Launcher::DataFilesPage::slotShowDirectoryPickerContextMenu(const QPoint& pos)
 {
-    Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
+    showContextMenu(mDirectoryPickerMenu, mDirectoryPicker.dirListWidget, pos);
+}
 
-    for (QListWidgetItem* selectedItem : ui.archiveListWidget->selectedItems())
+void Launcher::DataFilesPage::setCheckStateForMultiSelectedItems(QListWidget* list, Qt::CheckState checkState)
+{
+    for (QListWidgetItem* selectedItem : list->selectedItems())
     {
         selectedItem->setCheckState(checkState);
     }
-}
-
-void Launcher::DataFilesPage::slotUncheckMultiSelectedItems()
-{
-    setCheckStateForMultiSelectedItems(false);
-}
-
-void Launcher::DataFilesPage::slotCheckMultiSelectedItems()
-{
-    setCheckStateForMultiSelectedItems(true);
 }
 
 void Launcher::DataFilesPage::moveSources(QListWidget* sourceList, int step)
