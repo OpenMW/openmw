@@ -137,7 +137,6 @@ namespace MWGui
             Transfer,
             Sell,
             Drop,
-            Unequip,
         };
         ControllerAction mPendingControllerAction;
 

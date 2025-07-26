@@ -337,8 +337,7 @@ namespace MWGui
 
         // Show a dialog to select a count of items, but not when using an item from the inventory
         // in controller mode. In that case, we skip the dialog and just use one item immediately.
-        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use
-            && mPendingControllerAction != ControllerAction::Unequip)
+        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sTake}";
@@ -370,18 +369,20 @@ namespace MWGui
                 sellItem(nullptr, count);
             else if (mPendingControllerAction == ControllerAction::Use)
             {
-                // Drag and drop the item on the avatar to activate it.
                 dragItem(nullptr, count);
-                onAvatarClicked(nullptr); // Equip or use
-                // Drop any remaining items back in inventory. This is needed when clicking on a
-                // stack of items; we only want to use the first item.
-                onBackgroundSelected();
-            }
-            else if (mPendingControllerAction == ControllerAction::Unequip)
-            {
-                // Drop on inventory background to unequip
-                dragItem(nullptr, count);
-                onBackgroundSelected();
+                if (item.mType == ItemStack::Type_Equipped)
+                {
+                    // Drop the item on the inventory background to unequip it.
+                    onBackgroundSelected();
+                }
+                else
+                {
+                    // Drop the item on the avatar to activate or equip it.
+                    onAvatarClicked(nullptr);
+                    // Drop any remaining items back in inventory. This is needed when clicking on a
+                    // stack of items; we only want to use the first item.
+                    onBackgroundSelected();
+                }
             }
             else if (mPendingControllerAction == ControllerAction::Drop)
                 dropItem(nullptr, count);
@@ -973,21 +974,18 @@ namespace MWGui
                 mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{Interface:Close}";
                 mControllerButtons.x.clear();
-                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sCompanionShare}";
                 break;
             case MWGui::GM_Container:
                 mControllerButtons.a = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.b = "#{Interface:Close}";
                 mControllerButtons.x = "#{sTakeAll}";
-                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sContainer}";
                 break;
             case MWGui::GM_Barter:
                 mControllerButtons.a = "#{sSell}";
                 mControllerButtons.b = "#{Interface:Cancel}";
                 mControllerButtons.x = "#{sOffer}";
-                mControllerButtons.y.clear();
                 mControllerButtons.r2 = "#{sBarter}";
                 break;
             case MWGui::GM_Inventory:
@@ -995,7 +993,6 @@ namespace MWGui
                 mControllerButtons.a = "#{sEquip}";
                 mControllerButtons.b = "#{sBack}";
                 mControllerButtons.x = "#{sDrop}";
-                mControllerButtons.y = "#{sUnequip}";
                 mControllerButtons.r2.clear();
                 break;
         }
@@ -1043,15 +1040,6 @@ namespace MWGui
                 MWGui::TradeWindow* tradeWindow = static_cast<MWGui::TradeWindow*>(
                     MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(1));
                 tradeWindow->onControllerButtonEvent(arg);
-            }
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
-        {
-            if (mGuiMode == MWGui::GM_Inventory)
-            {
-                // Unequip an item.
-                mPendingControllerAction = ControllerAction::Unequip;
-                mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
             }
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
