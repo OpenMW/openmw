@@ -501,7 +501,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
         case ESM::DialogueCondition::Function_Weather:
 
-            return MWBase::Environment::get().getWorld()->getCurrentWeather();
+            return MWBase::Environment::get().getWorld()->getCurrentWeatherScriptId();
 
         case ESM::DialogueCondition::Function_Reputation:
             if (!mActor.getClass().isNpc())
