@@ -4,7 +4,6 @@
 #if defined(__ANDROID__)
 
 #include <filesystem>
-#include <optional>
 /**
  * \namespace Files
  */
@@ -26,7 +25,7 @@ namespace Files
         /**
          * \brief Return path to the global (system) directory where config files can be placed.
          */
-        std::optional<std::filesystem::path> getGlobalConfigPath() const;
+        std::filesystem::path getGlobalConfigPath() const;
 
         /**
          * \brief Return path to the runtime configuration directory which is the
@@ -37,7 +36,7 @@ namespace Files
         /**
          * \brief Return path to the global (system) directory where game files can be placed.
          */
-        std::optional<std::filesystem::path> getGlobalDataPath() const;
+        std::filesystem::path getGlobalDataPath() const;
 
         /**
          * \brief

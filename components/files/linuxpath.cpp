@@ -67,7 +67,7 @@ namespace Files
         return getEnv("XDG_CACHE_HOME", getUserHome() / ".cache") / mName;
     }
 
-    std::optional<std::filesystem::path> LinuxPath::getGlobalConfigPath() const
+    std::filesystem::path LinuxPath::getGlobalConfigPath() const
     {
         std::filesystem::path globalPath(GLOBAL_CONFIG_PATH);
         return globalPath / mName;
@@ -94,7 +94,7 @@ namespace Files
         return localPath;
     }
 
-    std::optional<std::filesystem::path> LinuxPath::getGlobalDataPath() const
+    std::filesystem::path LinuxPath::getGlobalDataPath() const
     {
         std::filesystem::path globalDataPath(GLOBAL_DATA_PATH);
         return globalDataPath / mName;

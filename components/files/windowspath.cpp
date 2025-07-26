@@ -50,7 +50,7 @@ namespace Files
         return getUserConfigPath();
     }
 
-    std::optional<std::filesystem::path> WindowsPath::getGlobalConfigPath() const
+    std::filesystem::path WindowsPath::getGlobalConfigPath() const
     {
         // The concept of a global config path is absurd on Windows.
         // Always use local config instead.
@@ -72,7 +72,7 @@ namespace Files
         return localPath;
     }
 
-    std::optional<std::filesystem::path> WindowsPath::getGlobalDataPath() const
+    std::filesystem::path WindowsPath::getGlobalDataPath() const
     {
         return getGlobalConfigPath();
     }

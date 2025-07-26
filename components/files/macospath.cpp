@@ -82,7 +82,7 @@ namespace Files
         return userPath / mName;
     }
 
-    std::optional<std::filesystem::path> MacOsPath::getGlobalConfigPath() const
+    std::filesystem::path MacOsPath::getGlobalConfigPath() const
     {
         std::filesystem::path globalPath("/Library/Preferences/");
         return globalPath / mName;
@@ -100,7 +100,7 @@ namespace Files
         return getBinaryPath().parent_path().parent_path() / "Resources";
     }
 
-    std::optional<std::filesystem::path> MacOsPath::getGlobalDataPath() const
+    std::filesystem::path MacOsPath::getGlobalDataPath() const
     {
         std::filesystem::path globalDataPath("/Library/Application Support/");
         return globalDataPath / mName;

@@ -44,7 +44,7 @@ namespace Files
             boost::program_options::variables_map& variables, const std::filesystem::path& basePath) const;
 
         /**< Fixed paths */
-        const std::optional<std::filesystem::path>& getGlobalPath() const;
+        const std::filesystem::path& getGlobalPath() const;
         const std::filesystem::path& getLocalPath() const;
 
         const std::filesystem::path& getUserConfigPath() const;

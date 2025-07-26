@@ -4,7 +4,6 @@
 #if defined(_WIN32) || defined(__WINDOWS__)
 
 #include <filesystem>
-#include <optional>
 
 /**
  * \namespace Files
@@ -35,11 +34,11 @@ namespace Files
         std::filesystem::path getUserDataPath() const;
 
         /**
-         * \brief Returns nothing
+         * \brief Returns an empty path
          *
          * \return std::filesystem::path
          */
-        std::optional<std::filesystem::path> getGlobalConfigPath() const;
+        std::filesystem::path getGlobalConfigPath() const;
 
         /**
          * \brief Return local path which is a location where
@@ -61,7 +60,7 @@ namespace Files
          *
          * \return std::filesystem::path
          */
-        std::optional<std::filesystem::path> getGlobalDataPath() const;
+        std::filesystem::path getGlobalDataPath() const;
 
         /**
          * \brief Gets the path of the installed Morrowind version if there is one.

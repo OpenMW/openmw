@@ -789,9 +789,9 @@ void OMW::Engine::prepareEngine()
     std::filesystem::path gameControllerdb;
     if (std::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
-    else if (mCfgMgr.getGlobalPath())
+    else if (!mCfgMgr.getGlobalPath().empty())
     {
-        const auto globaldefault = *mCfgMgr.getGlobalPath() / "gamecontrollerdb.txt";
+        const auto globaldefault = mCfgMgr.getGlobalPath() / "gamecontrollerdb.txt";
         if (std::filesystem::exists(globaldefault))
             gameControllerdb = globaldefault;
     }

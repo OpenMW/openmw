@@ -26,23 +26,13 @@ namespace Files
         constexpr auto applicationName = "openmw";
 #endif
 
-        constexpr std::u8string_view localToken = u8"?local?";
-        constexpr std::u8string_view userConfigToken = u8"?userconfig?";
-        constexpr std::u8string_view userDataToken = u8"?userdata?";
-        constexpr std::u8string_view globalToken = u8"?global?";
-
-        const std::filesystem::path* getTokenPath(std::u8string_view token, const Files::FixedPath<>& fixedPath)
-        {
-            if (token == localToken)
-                return &fixedPath.getLocalPath();
-            else if (token == userConfigToken)
-                return &fixedPath.getUserConfigPath();
-            else if (token == userDataToken)
-                return &fixedPath.getUserDataPath();
-            else if (token == globalToken && fixedPath.getGlobalDataPath())
-                return &*fixedPath.getGlobalDataPath();
-            return nullptr;
-        }
+        using GetPath = const std::filesystem::path& (Files::FixedPath<>::*)() const;
+        constexpr std::array<std::pair<std::u8string_view, GetPath>, 4> sTokenMappings = {
+            std::make_pair(u8"?local?", &FixedPath<>::getLocalPath),
+            std::make_pair(u8"?userconfig?", &FixedPath<>::getUserConfigPath),
+            std::make_pair(u8"?userdata?", &FixedPath<>::getUserDataPath),
+            std::make_pair(u8"?global?", &FixedPath<>::getGlobalDataPath),
+        };
     }
 
     ConfigurationManager::ConfigurationManager(bool silent)
@@ -80,10 +70,10 @@ namespace Files
         std::optional<bpo::variables_map> config = loadConfig(mFixedPath.getLocalPath(), description);
         if (config)
             mActiveConfigPaths.push_back(mFixedPath.getLocalPath());
-        else if (mFixedPath.getGlobalConfigPath())
+        else if (!mFixedPath.getGlobalConfigPath().empty())
         {
-            mActiveConfigPaths.push_back(*mFixedPath.getGlobalConfigPath());
-            config = loadConfig(*mFixedPath.getGlobalConfigPath(), description);
+            mActiveConfigPaths.push_back(mFixedPath.getGlobalConfigPath());
+            config = loadConfig(mFixedPath.getGlobalConfigPath(), description);
         }
         if (!config)
         {
@@ -313,10 +303,12 @@ namespace Files
         {
             std::u8string_view view(str);
             auto token = view.substr(0, pos + 1);
-            if (const std::filesystem::path* tokenPath = getTokenPath(token, mFixedPath))
+            auto found = std::find_if(
+                sTokenMappings.begin(), sTokenMappings.end(), [&](const auto& item) { return item.first == token; });
+            if (found != sTokenMappings.end())
             {
-                auto tempPath(*tokenPath);
-                if (pos < view.length() - 1)
+                auto tempPath(((mFixedPath).*(found->second))());
+                if (!tempPath.empty() && pos < view.length() - 1)
                 {
                     // There is something after the token, so we should
                     // append it to the path
@@ -398,7 +390,7 @@ namespace Files
         return std::nullopt;
     }
 
-    const std::optional<std::filesystem::path>& ConfigurationManager::getGlobalPath() const
+    const std::filesystem::path& ConfigurationManager::getGlobalPath() const
     {
         return mFixedPath.getGlobalConfigPath();
     }
