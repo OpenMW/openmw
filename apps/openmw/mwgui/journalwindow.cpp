@@ -901,7 +901,8 @@ namespace
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
                 notifyPrevPage(getWidget<MyGUI::Widget>(PrevPageBTN));
-            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT || arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+            else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT
+                || arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
                 notifyNextPage(getWidget<MyGUI::Widget>(NextPageBTN));
 
             return true;

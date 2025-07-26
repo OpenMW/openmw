@@ -589,7 +589,7 @@ namespace MWGui
         if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             // Remove active ingredients or close the window, starting with right-most slot.
-            for (size_t i = mIngredients.size() - 1; i >= 0; --i)
+            for (int i = mIngredients.size() - 1; i >= 0; --i)
             {
                 if (mIngredients[i]->isUserString("ToolTipType"))
                 {
