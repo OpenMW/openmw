@@ -37,8 +37,10 @@ namespace MWGui
         std::vector<MyGUI::Button*> mButtons;
         size_t mSelectedQuest = 0;
         size_t mSelectedIndex = 0;
+        void moveSelectedIndex(int offset);
         void setIndexControllerFocus(bool focused);
         void setControllerFocusedQuest(size_t index);
+        bool optionsModeButtonHandler(const SDL_ControllerButtonEvent& arg);
     };
 }
 
