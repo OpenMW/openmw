@@ -102,7 +102,7 @@ namespace MWBase
         ///< Return the number of deaths for actors with the given ID.
 
         /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
-        virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
+        virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer, bool useCache = true) = 0;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
         virtual void startCombat(

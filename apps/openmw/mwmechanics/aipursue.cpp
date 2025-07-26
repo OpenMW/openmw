@@ -42,7 +42,7 @@ namespace MWMechanics
             return true;
 
         if (isTargetMagicallyHidden(target)
-            && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
+            && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor, false))
             return false;
 
         if (target.getClass().getCreatureStats(target).isDead())
