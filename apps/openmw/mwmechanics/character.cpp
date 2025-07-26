@@ -535,7 +535,7 @@ namespace MWMechanics
 
     bool CharacterController::onOpen() const
     {
-        if (mPtr.getType() == ESM::Container::sRecordId)
+        if (mPtr.getType() == ESM::Container::sRecordId && mAnimation)
         {
             if (!mAnimation->hasAnimation("containeropen"))
                 return true;
@@ -559,7 +559,7 @@ namespace MWMechanics
     {
         if (mPtr.getType() == ESM::Container::sRecordId)
         {
-            if (!mAnimation->hasAnimation("containerclose"))
+            if (!mAnimation || !mAnimation->hasAnimation("containerclose"))
                 return;
 
             float complete, startPoint = 0.f;
@@ -886,11 +886,12 @@ namespace MWMechanics
         if (mDeathState == CharState_None && MWBase::Environment::get().getWorld()->isSwimming(mPtr))
             mDeathState = CharState_SwimDeath;
 
-        if (mDeathState == CharState_None || !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState)))
+        if (mDeathState == CharState_None
+            || (mAnimation && !mAnimation->hasAnimation(deathStateToAnimGroup(mDeathState))))
             mDeathState = chooseRandomDeathState();
 
         // Do not interrupt scripted animation by death
-        if (isScriptedAnimPlaying())
+        if (!mAnimation || isScriptedAnimPlaying())
             return;
 
         playDeath(startpoint, mDeathState);
@@ -910,13 +911,10 @@ namespace MWMechanics
         return result;
     }
 
-    CharacterController::CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim)
+    CharacterController::CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation& anim)
         : mPtr(ptr)
-        , mAnimation(anim)
+        , mAnimation(&anim)
     {
-        if (!mAnimation)
-            return;
-
         mAnimation->setTextKeyListener(this);
 
         const MWWorld::Class& cls = mPtr.getClass();
@@ -993,16 +991,24 @@ namespace MWMechanics
 
     CharacterController::~CharacterController()
     {
+        detachAnimation();
+    }
+
+    void CharacterController::detachAnimation()
+    {
         if (mAnimation)
         {
             persistAnimationState();
             mAnimation->setTextKeyListener(nullptr);
+            mAnimation = nullptr;
         }
     }
 
     void CharacterController::handleTextKey(
         std::string_view groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
     {
+        if (!mAnimation)
+            return;
         std::string_view evt = key->second;
 
         MWBase::Environment::get().getLuaManager()->animationTextKey(mPtr, key->second);
@@ -1232,7 +1238,8 @@ namespace MWMechanics
 
     float CharacterController::calculateWindUp() const
     {
-        if (mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))
+        if (!mAnimation || mCurrentWeapon.empty() || mWeaponType == ESM::Weapon::PickProbe
+            || isRandomAttackAnimation(mCurrentWeapon))
             return -1.f;
 
         float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + mAttackType + " min attack");
@@ -1950,6 +1957,8 @@ namespace MWMechanics
 
     void CharacterController::update(float duration)
     {
+        if (!mAnimation)
+            return;
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         const MWWorld::Class& cls = mPtr.getClass();
@@ -2528,7 +2537,7 @@ namespace MWMechanics
             ESM::AnimationState::ScriptedAnimation anim;
             anim.mGroup = iter->mGroup;
 
-            if (iter == mAnimQueue.begin())
+            if (iter == mAnimQueue.begin() && mAnimation)
             {
                 float complete;
                 size_t loopcount;
@@ -2741,23 +2750,18 @@ namespace MWMechanics
     void CharacterController::clearAnimQueue(bool clearScriptedAnims)
     {
         // Do not interrupt scripted animations, if we want to keep them
-        if ((!isScriptedAnimPlaying() || clearScriptedAnims) && !mAnimQueue.empty())
+        if (mAnimation && (!isScriptedAnimPlaying() || clearScriptedAnims) && !mAnimQueue.empty())
             mAnimation->disable(mAnimQueue.front().mGroup);
 
         if (clearScriptedAnims)
         {
-            mAnimation->setPlayScriptedOnly(false);
+            if (mAnimation)
+                mAnimation->setPlayScriptedOnly(false);
             mAnimQueue.clear();
             return;
         }
 
-        for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
-        {
-            if (!it->mScripted)
-                it = mAnimQueue.erase(it);
-            else
-                ++it;
-        }
+        std::erase_if(mAnimQueue, [](const AnimationQueueEntry& entry) { return !entry.mScripted; });
     }
 
     void CharacterController::forceStateUpdate()
@@ -2866,6 +2870,8 @@ namespace MWMechanics
 
     void CharacterController::setVisibility(float visibility) const
     {
+        if (!mAnimation)
+            return;
         // We should take actor's invisibility in account
         if (mPtr.getClass().isActor())
         {
@@ -2926,7 +2932,7 @@ namespace MWMechanics
 
     bool CharacterController::isReadyToBlock() const
     {
-        return updateCarriedLeftVisible(mWeaponType);
+        return mAnimation && updateCarriedLeftVisible(mWeaponType);
     }
 
     bool CharacterController::isKnockedDown() const
@@ -3030,7 +3036,8 @@ namespace MWMechanics
 
     void CharacterController::setActive(int active) const
     {
-        mAnimation->setActive(active);
+        if (mAnimation)
+            mAnimation->setActive(active);
     }
 
     void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr& target)
@@ -3061,6 +3068,8 @@ namespace MWMechanics
 
     float CharacterController::getAnimationMovementDirection() const
     {
+        if (!mAnimation)
+            return 0.f;
         switch (mMovementState)
         {
             case CharState_RunLeft:
@@ -3155,6 +3164,8 @@ namespace MWMechanics
 
     MWWorld::MovementDirectionFlags CharacterController::getSupportedMovementDirections() const
     {
+        if (!mAnimation)
+            return 0;
         using namespace std::string_view_literals;
         // There are fallbacks in the CharacterController::refreshMovementAnims for certain animations. Arrays below
         // represent them.

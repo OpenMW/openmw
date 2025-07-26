@@ -40,12 +40,12 @@
         }                                                                                                              \
     } while (0)
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class Drawable : public osg::Drawable
     {
-        osgMyGUI::RenderManager* mParent;
+        MyGUIPlatform::RenderManager* mParent;
         osg::ref_ptr<osg::StateSet> mStateSet;
 
     public:
@@ -58,12 +58,12 @@ namespace osgMyGUI
             {
             }
 
-            void setRenderManager(osgMyGUI::RenderManager* renderManager) { mRenderManager = renderManager; }
+            void setRenderManager(MyGUIPlatform::RenderManager* renderManager) { mRenderManager = renderManager; }
 
             void operator()(osg::Node*, osg::NodeVisitor*) { mRenderManager->update(); }
 
         private:
-            osgMyGUI::RenderManager* mRenderManager;
+            MyGUIPlatform::RenderManager* mRenderManager;
         };
 
         // Stage 1: collect draw calls. Run during the Cull traversal.
@@ -75,12 +75,12 @@ namespace osgMyGUI
             {
             }
 
-            void setRenderManager(osgMyGUI::RenderManager* renderManager) { mRenderManager = renderManager; }
+            void setRenderManager(MyGUIPlatform::RenderManager* renderManager) { mRenderManager = renderManager; }
 
             void operator()(osg::Node*, osg::NodeVisitor*) { mRenderManager->collectDrawCalls(); }
 
         private:
-            osgMyGUI::RenderManager* mRenderManager;
+            MyGUIPlatform::RenderManager* mRenderManager;
         };
 
         // Stage 2: execute the draw calls. Run during the Draw traversal. May run in parallel with the update traversal
@@ -162,7 +162,7 @@ namespace osgMyGUI
         }
 
     public:
-        Drawable(osgMyGUI::RenderManager* parent = nullptr)
+        Drawable(MyGUIPlatform::RenderManager* parent = nullptr)
             : mParent(parent)
             , mWriteTo(0)
             , mReadFrom(0)

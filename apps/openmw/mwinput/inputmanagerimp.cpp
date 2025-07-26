@@ -263,4 +263,9 @@ namespace MWInput
     {
         mActionManager->executeAction(action);
     }
+
+    void InputManager::saveBindings()
+    {
+        mBindingsManager->saveBindings();
+    }
 }

@@ -10,7 +10,7 @@ namespace VFS
     class Manager;
 }
 
-namespace l10n
+namespace L10n
 {
 
     class Manager

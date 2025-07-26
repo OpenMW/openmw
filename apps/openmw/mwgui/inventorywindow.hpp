@@ -89,7 +89,6 @@ namespace MWGui
         Misc::NotNullPtr<ItemTransfer> mItemTransfer;
 
         int mSelectedItem;
-        std::optional<int> mEquippedStackableCount;
 
         MWWorld::Ptr mPtr;
 

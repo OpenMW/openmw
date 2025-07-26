@@ -164,14 +164,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-
-                bool stanceOn = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
-                bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr);
-                bool inair = !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
-
-                runtime.push(stanceOn && (running || inair));
+                runtime.push(MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
             }
         };
 

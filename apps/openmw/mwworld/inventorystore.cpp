@@ -55,7 +55,7 @@ void MWWorld::InventoryStore::storeEquipmentState(
     }
 
     if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
-        inventory.mSelectedEnchantItem = index;
+        inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
 
 void MWWorld::InventoryStore::readEquipmentState(

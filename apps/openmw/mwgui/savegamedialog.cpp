@@ -522,7 +522,7 @@ namespace MWGui
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setUnRefImageDataAfterApply(true);
 
-        mScreenshotTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
+        mScreenshotTexture = std::make_unique<MyGUIPlatform::OSGTexture>(texture);
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
     }
 

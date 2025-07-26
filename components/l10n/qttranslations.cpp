@@ -3,7 +3,7 @@
 #include <QLibraryInfo>
 #include <QLocale>
 
-namespace l10n
+namespace L10n
 {
     QTranslator AppTranslator{};
     QTranslator ComponentsTranslator{};

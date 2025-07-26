@@ -46,6 +46,9 @@ Ubuntu_GCC_preprocess:
     - pip3 install --user click termtables
   script:
     - CI/ubuntu_gcc_preprocess.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -268,6 +271,9 @@ Ubuntu_GCC_tests_asan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -285,6 +291,9 @@ Ubuntu_GCC_tests_ubsan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -322,6 +331,9 @@ Ubuntu_GCC_tests_coverage:
         coverage_format: cobertura
         path: coverage.xml
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -402,6 +414,9 @@ Ubuntu_Clang:
       - build/
     expire_in: 12h
   timeout: 3h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_Clang_Tidy_components:
   extends: .Ubuntu_Clang_Tidy_Base
@@ -502,7 +517,14 @@ Ubuntu_GCC_integration_tests_asan:
 .MacOS:
   stage: build
   rules:
-    - if: $CI_PROJECT_ID == "7107382"
+    - if: $CI_PROJECT_ID != "7107382"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
+  image: macos-15-xcode-16
+  tags:
+    - saas-macos-medium-m1
   cache:
     paths:
     - ccache/
@@ -535,13 +557,10 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
       - build/OpenMW-*.dmg
 
-macOS14_Xcode15_amd64:
+macOS15_Xcode16_amd64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_amd64.v2
+    key: macOS15_Xcode16_amd64.v1
   variables:
     CCACHE_SIZE: 3G
     DMG_IDENTIFIER: amd64
@@ -550,13 +569,10 @@ macOS14_Xcode15_amd64:
     HOMEBREW_NO_EMOJI: true
     HOMEBREW_NO_INSTALL_CLEANUP: true
 
-macOS14_Xcode15_arm64:
+macOS15_Xcode16_arm64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_arm64.v1
+    key: macOS15_Xcode16_arm64.v1
   variables:
     DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
@@ -687,7 +703,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v12
+    key: ninja-2022-v13
     paths:
     - ccache
     - deps
@@ -845,7 +861,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-2022-v12
+    key: msbuild-2022-v13
     paths:
     - deps
     - MSVC2022_64/deps/Qt

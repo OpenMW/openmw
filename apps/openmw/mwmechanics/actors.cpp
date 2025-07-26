@@ -122,6 +122,8 @@ namespace
     {
         for (const MWMechanics::Actor& actor : actors)
         {
+            if (actor.isInvalid())
+                continue;
             const MWWorld::Ptr& iteratedActor = actor.getPtr();
             if (iteratedActor == player || iteratedActor == actorPtr)
                 continue;
@@ -345,7 +347,7 @@ namespace MWMechanics
                     // Find something nearby.
                     for (const Actor& otherActor : actors)
                     {
-                        if (otherActor.getPtr() == ptr)
+                        if (otherActor.isInvalid() || otherActor.getPtr() == ptr)
                             continue;
 
                         updateHeadTracking(
@@ -681,7 +683,7 @@ namespace MWMechanics
             }
         }
 
-        if (creatureStats2.getMagicEffects().getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+        if (isTargetMagicallyHidden(actor2))
             return;
 
         // Stop here if target is unreachable
@@ -1195,7 +1197,7 @@ namespace MWMechanics
         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (!anim)
             return;
-        const auto it = mActors.emplace(mActors.end(), ptr, anim);
+        const auto it = mActors.emplace(mActors.end(), ptr, *anim);
         mIndex.emplace(ptr.mRef, it);
 
         if (updateImmediately)
@@ -1247,7 +1249,7 @@ namespace MWMechanics
         {
             if (!keepActive)
                 removeTemporaryEffects(iter->second->getPtr());
-            mActors.erase(iter->second);
+            iter->second->invalidate();
             mIndex.erase(iter);
         }
     }
@@ -1299,16 +1301,15 @@ namespace MWMechanics
 
     void Actors::dropActors(const MWWorld::CellStore* cellStore, const MWWorld::Ptr& ignore)
     {
-        for (auto iter = mActors.begin(); iter != mActors.end();)
+        for (Actor& actor : mActors)
         {
-            if ((iter->getPtr().isInCell() && iter->getPtr().getCell() == cellStore) && iter->getPtr() != ignore)
+            if (!actor.isInvalid() && actor.getPtr().isInCell() && actor.getPtr().getCell() == cellStore
+                && actor.getPtr() != ignore)
             {
-                removeTemporaryEffects(iter->getPtr());
-                mIndex.erase(iter->getPtr().mRef);
-                iter = mActors.erase(iter);
+                removeTemporaryEffects(actor.getPtr());
+                mIndex.erase(actor.getPtr().mRef);
+                actor.invalidate();
             }
-            else
-                ++iter;
         }
     }
 
@@ -1327,6 +1328,8 @@ namespace MWMechanics
         const MWBase::World* const world = MWBase::Environment::get().getWorld();
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             const MWWorld::Ptr& ptr = actor.getPtr();
             if (ptr == player)
                 continue; // Don't interfere with player controls.
@@ -1391,6 +1394,8 @@ namespace MWMechanics
             // Iterate through all other actors and predict collisions.
             for (const Actor& otherActor : mActors)
             {
+                if (otherActor.isInvalid())
+                    continue;
                 const MWWorld::Ptr& otherPtr = otherActor.getPtr();
                 if (otherPtr == ptr || otherPtr == currentTarget)
                     continue;
@@ -1509,6 +1514,8 @@ namespace MWMechanics
             // AI and magic effects update
             for (Actor& actor : mActors)
             {
+                if (actor.isInvalid())
+                    continue;
                 const bool isPlayer = actor.getPtr() == player;
                 CharacterController& ctrl = actor.getCharacterController();
                 MWBase::LuaManager::ActorControls* luaControls
@@ -1570,6 +1577,8 @@ namespace MWMechanics
 
                             for (const Actor& otherActor : mActors)
                             {
+                                if (otherActor.isInvalid())
+                                    continue;
                                 if (otherActor.getPtr() == actor.getPtr() || isPlayer) // player is not AI-controlled
                                     continue;
                                 engageCombat(
@@ -1627,6 +1636,8 @@ namespace MWMechanics
             CharacterController* playerCharacter = nullptr;
             for (Actor& actor : mActors)
             {
+                if (actor.isInvalid())
+                    continue;
                 const float dist = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length();
                 const bool isPlayer = actor.getPtr() == player;
                 CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
@@ -1692,8 +1703,15 @@ namespace MWMechanics
                     luaControls->mJump = false;
             }
 
-            for (const Actor& actor : mActors)
+            for (auto it = mActors.begin(); it != mActors.end();)
             {
+                if (it->isInvalid())
+                {
+                    it = mActors.erase(it);
+                    continue;
+                }
+                const Actor& actor = *it;
+                it++;
                 const MWWorld::Class& cls = actor.getPtr().getClass();
                 CreatureStats& stats = cls.getCreatureStats(actor.getPtr());
 
@@ -1743,6 +1761,8 @@ namespace MWMechanics
     {
         for (Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             const MWWorld::Class& cls = actor.getPtr().getClass();
             CreatureStats& stats = cls.getCreatureStats(actor.getPtr());
 
@@ -1830,6 +1850,8 @@ namespace MWMechanics
     {
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             MWMechanics::ActiveSpells& spells
                 = actor.getPtr().getClass().getCreatureStats(actor.getPtr()).getActiveSpells();
             spells.purge(actor.getPtr(), casterActorId);
@@ -1849,6 +1871,8 @@ namespace MWMechanics
 
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             if (actor.getPtr().getClass().getCreatureStats(actor.getPtr()).isDead())
             {
                 adjustMagicEffects(actor.getPtr(), duration);
@@ -2046,7 +2070,10 @@ namespace MWMechanics
     void Actors::persistAnimationStates() const
     {
         for (const Actor& actor : mActors)
-            actor.getCharacterController().persistAnimationState();
+        {
+            if (!actor.isInvalid())
+                actor.getCharacterController().persistAnimationState();
+        }
     }
 
     void Actors::clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted)
@@ -2060,6 +2087,8 @@ namespace MWMechanics
     {
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             if ((actor.getPtr().getRefData().getPosition().asVec3() - position).length2() <= radius * radius)
                 out.push_back(actor.getPtr());
         }
@@ -2069,6 +2098,8 @@ namespace MWMechanics
     {
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             if ((actor.getPtr().getRefData().getPosition().asVec3() - position).length2() <= radius * radius)
                 return true;
         }
@@ -2082,6 +2113,8 @@ namespace MWMechanics
         list.push_back(actorPtr);
         for (const Actor& actor : mActors)
         {
+            if (actor.isInvalid())
+                continue;
             const MWWorld::Ptr& iteratedActor = actor.getPtr();
             if (iteratedActor == getPlayer())
                 continue;
@@ -2352,10 +2385,11 @@ namespace MWMechanics
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
             return;
 
-        for (auto it = mActors.begin(); it != mActors.end();)
+        for (const Actor& actor : mActors)
         {
-            const MWWorld::Ptr ptr = it->getPtr();
-            ++it;
+            if (actor.isInvalid())
+                continue;
+            const MWWorld::Ptr ptr = actor.getPtr();
             if (ptr == getPlayer() || !isConscious(ptr) || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;
             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();

@@ -196,23 +196,7 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
-        const std::string newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
-        try
-        {
-            if (mInputBinder->save(newFileName))
-            {
-                std::filesystem::rename(Files::pathFromUnicodeString(newFileName), mUserFile);
-                Log(Debug::Info) << "Saved input bindings: " << mUserFile;
-            }
-            else
-            {
-                Log(Debug::Error) << "Failed to save input bindings to " << newFileName;
-            }
-        }
-        catch (const std::exception& e)
-        {
-            Log(Debug::Error) << "Failed to save input bindings to " << newFileName << ": " << e.what();
-        }
+        saveBindings();
     }
 
     void BindingsManager::update(float dt)
@@ -714,5 +698,26 @@ namespace MWInput
 
         if (previousValue <= 0.6 && currentValue > 0.6)
             manager->executeAction(action);
+    }
+
+    void BindingsManager::saveBindings()
+    {
+        const std::string newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
+        try
+        {
+            if (mInputBinder->save(newFileName))
+            {
+                std::filesystem::rename(Files::pathFromUnicodeString(newFileName), mUserFile);
+                Log(Debug::Info) << "Saved input bindings: " << mUserFile;
+            }
+            else
+            {
+                Log(Debug::Error) << "Failed to save input bindings to " << newFileName;
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Failed to save input bindings to " << newFileName << ": " << e.what();
+        }
     }
 }

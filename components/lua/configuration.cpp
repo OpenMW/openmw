@@ -55,7 +55,7 @@ namespace LuaUtil
         // Find duplicates; only the last occurrence will be used (unless `sMerge` flag is used).
         // Search for duplicates is case insensitive.
         std::vector<bool> skip(cfg.mScripts.size(), false);
-        for (size_t i = 0; i < cfg.mScripts.size(); ++i)
+        for (int i = 0; i < static_cast<int>(cfg.mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
             bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;

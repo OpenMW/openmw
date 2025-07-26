@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-namespace l10n
+namespace L10n
 {
     MessageBundles::MessageBundles(const std::vector<icu::Locale>& preferredLocales, icu::Locale& fallbackLocale)
         : mFallbackLocale(fallbackLocale)

@@ -18,6 +18,7 @@
 #include <SDL_video.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/l10n/manager.hpp>
 #include <components/lua_ui/scriptsettings.hpp>
 #include <components/misc/constants.hpp>
@@ -39,6 +40,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwlua/luamanagerimp.hpp"
 
 #include "confirmationdialog.hpp"
 
@@ -247,10 +249,11 @@ namespace MWGui
         }
     }
 
-    SettingsWindow::SettingsWindow()
+    SettingsWindow::SettingsWindow(Files::ConfigurationManager& cfgMgr)
         : WindowBase("openmw_settings_window.layout")
         , mKeyboardMode(true)
         , mCurrentPage(-1)
+        , mCfgMgr(cfgMgr)
     {
         const bool terrain = Settings::terrain().mDistantTerrain;
         const std::string_view widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
@@ -1094,6 +1097,14 @@ namespace MWGui
         resetScrollbars();
         renderScriptSettings();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
+    }
+
+    void SettingsWindow::onClose()
+    {
+        // Save user settings
+        Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
+        MWBase::Environment::get().getLuaManager()->savePermanentStorage(mCfgMgr.getUserConfigPath());
+        MWBase::Environment::get().getInputManager()->saveBindings();
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window* _sender)

@@ -85,6 +85,8 @@ namespace Terrain
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
         void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
 
+        void updateTextureFiltering();
+
         void setNodeMask(unsigned int mask) { mNodeMask = mask; }
         unsigned int getNodeMask() override { return mNodeMask; }
 

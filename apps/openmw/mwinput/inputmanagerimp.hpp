@@ -109,6 +109,8 @@ namespace MWInput
     private:
         bool mControlsDisabled;
 
+        void saveBindings() override;
+
         std::unique_ptr<SDLUtil::InputWrapper> mInputWrapper;
         std::unique_ptr<BindingsManager> mBindingsManager;
         std::unique_ptr<ControlSwitch> mControlSwitch;

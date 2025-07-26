@@ -6,7 +6,7 @@
 
 #include "components/files/conversion.hpp"
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     Platform::Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager,

@@ -24,7 +24,7 @@ namespace
     };
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     void DataManager::setResourcePath(const std::filesystem::path& path)

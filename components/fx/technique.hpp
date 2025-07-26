@@ -29,7 +29,7 @@ namespace VFS
     class Manager;
 }
 
-namespace fx
+namespace Fx
 {
     using FlagsType = size_t;
 
@@ -85,7 +85,7 @@ namespace fx
         }
 
         // not safe to read/write in draw thread
-        std::shared_ptr<fx::Technique> mHandle = nullptr;
+        std::shared_ptr<Fx::Technique> mHandle = nullptr;
 
         FlagsType mFlags = 0;
 

@@ -755,7 +755,7 @@ void OMW::Engine::prepareEngine()
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
-    mL10nManager = std::make_unique<l10n::Manager>(mVFS.get());
+    mL10nManager = std::make_unique<L10n::Manager>(mVFS.get());
     mL10nManager->setPreferredLocales(Settings::general().mPreferredLocales, Settings::general().mGmstOverridesL10n);
     mEnvironment.setL10nManager(*mL10nManager);
 

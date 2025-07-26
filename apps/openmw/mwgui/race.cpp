@@ -161,7 +161,7 @@ namespace MWGui
         mPreview->setAngle(mCurrentAngle);
 
         mPreviewTexture
-            = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
+            = std::make_unique<MyGUIPlatform::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
         mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
         mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
