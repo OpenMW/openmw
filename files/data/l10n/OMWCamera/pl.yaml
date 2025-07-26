@@ -26,7 +26,7 @@ autoSwitchShoulderDescription: >
 zoomOutWhenMoveCoef: "Oddalanie podczas ruchu"
 zoomOutWhenMoveCoefDescription: >
     Oddala kamerę (wartość dodatnia) lub przybliża (wartość ujemna) do postaci gracza podczas ruchu.
-    Działa tylko, gdy „widok znad ramienia” jest włączony. Ustaw na zero, aby wyłączyć (domyślnie: 20.0).
+    Działa tylko, gdy "widok znad ramienia" jest włączony. Ustaw na zero, aby wyłączyć (domyślnie: 20.0).
 
 previewIfStandStill: "Podgląd przy bezruchu"
 previewIfStandStillDescription: >
@@ -38,7 +38,7 @@ deferredPreviewRotationDescription: |
     Jeśli włączone, postać płynnie obraca się w kierunku kamery po wyjściu z trybu podglądu lub kamery swobodnej.
     Jeśli wyłączone, obraca się kamera zamiast postaci.
 
-ignoreNC: "Ignoruj flagę „Brak kolizji”"
+ignoreNC: "Ignoruj flagę "Brak kolizji""
 ignoreNCDescription: >
     Zapobiega przenikaniu kamery przez obiekty, które mają w modelu NIF ustawioną flagę NC (Brak kolizji).
 
