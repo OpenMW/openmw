@@ -130,9 +130,9 @@ namespace MWGui
 
         void onBackgroundSelected();
 
-        enum ControllerAction
+        enum class ControllerAction
         {
-            None = 0,
+            None,
             Use,
             Transfer,
             Sell,
