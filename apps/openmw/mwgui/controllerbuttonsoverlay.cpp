@@ -49,23 +49,26 @@ namespace MWGui
     void ControllerButtonsOverlay::setButtons(ControllerButtons* buttons)
     {
         int buttonCount = 0;
-        buttonCount += updateButton(Button::Button_A, buttons->mA);
-        buttonCount += updateButton(Button::Button_B, buttons->mB);
-        buttonCount += updateButton(Button::Button_Dpad, buttons->mDpad);
-        buttonCount += updateButton(Button::Button_L1, buttons->mL1);
-        buttonCount += updateButton(Button::Button_L2, buttons->mL2);
-        buttonCount += updateButton(Button::Button_L3, buttons->mL3);
-        buttonCount += updateButton(Button::Button_LStick, buttons->mLStick);
-        buttonCount += updateButton(Button::Button_Menu, buttons->mMenu);
-        buttonCount += updateButton(Button::Button_R1, buttons->mR1);
-        buttonCount += updateButton(Button::Button_R2, buttons->mR2);
-        buttonCount += updateButton(Button::Button_R3, buttons->mR3);
-        buttonCount += updateButton(Button::Button_RStick, buttons->mRStick);
-        buttonCount += updateButton(Button::Button_View, buttons->mView);
-        buttonCount += updateButton(Button::Button_X, buttons->mX);
-        buttonCount += updateButton(Button::Button_Y, buttons->mY);
+        if (buttons != nullptr)
+        {
+            buttonCount += updateButton(Button::Button_A, buttons->mA);
+            buttonCount += updateButton(Button::Button_B, buttons->mB);
+            buttonCount += updateButton(Button::Button_Dpad, buttons->mDpad);
+            buttonCount += updateButton(Button::Button_L1, buttons->mL1);
+            buttonCount += updateButton(Button::Button_L2, buttons->mL2);
+            buttonCount += updateButton(Button::Button_L3, buttons->mL3);
+            buttonCount += updateButton(Button::Button_LStick, buttons->mLStick);
+            buttonCount += updateButton(Button::Button_Menu, buttons->mMenu);
+            buttonCount += updateButton(Button::Button_R1, buttons->mR1);
+            buttonCount += updateButton(Button::Button_R2, buttons->mR2);
+            buttonCount += updateButton(Button::Button_R3, buttons->mR3);
+            buttonCount += updateButton(Button::Button_RStick, buttons->mRStick);
+            buttonCount += updateButton(Button::Button_View, buttons->mView);
+            buttonCount += updateButton(Button::Button_X, buttons->mX);
+            buttonCount += updateButton(Button::Button_Y, buttons->mY);
 
-        mHBox->notifyChildrenSizeChanged();
+            mHBox->notifyChildrenSizeChanged();
+        }
 
         setVisible(buttonCount > 0);
     }
