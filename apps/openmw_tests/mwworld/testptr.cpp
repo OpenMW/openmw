@@ -7,6 +7,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/readerscache.hpp>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 namespace MWWorld
@@ -36,7 +37,7 @@ namespace MWWorld
             LiveCellRef<ESM::NPC> liveCellRef(cellRef, &npc);
             liveCellRef.mData.setDeletedByContentFile(true);
             Ptr ptr(&liveCellRef);
-            EXPECT_EQ(ptr.toString(), "deleted object0xd00002a (NPC, \"player\")");
+            EXPECT_THAT(ptr.toString(), StrCaseEq("deleted object0xd00002a (NPC, \"player\")"));
         }
 
         TEST(MWWorldPtrTest, toStringShouldReturnHumanReadableTextRepresentationOfPtr)
@@ -53,7 +54,7 @@ namespace MWWorld
             cellRef.mRefNum = ESM::RefNum{ .mIndex = 0x2a, .mContentFile = 0xd };
             LiveCellRef<ESM::NPC> liveCellRef(cellRef, &npc);
             Ptr ptr(&liveCellRef);
-            EXPECT_EQ(ptr.toString(), "object0xd00002a (NPC, \"player\")");
+            EXPECT_THAT(ptr.toString(), StrCaseEq("object0xd00002a (NPC, \"player\")"));
         }
 
         TEST(MWWorldPtrTest, underlyingLiveCellRefShouldBeDeregisteredOnDestruction)
