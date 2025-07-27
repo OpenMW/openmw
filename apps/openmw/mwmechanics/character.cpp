@@ -2310,17 +2310,13 @@ namespace MWMechanics
                 }
                 else
                 {
-                    // Do not play turning animation for player if rotation speed is very slow.
-                    // Actual threshold should take framerate in account.
-                    float rotationThreshold = (isPlayer ? 0.015f : 0.001f) * 60 * duration;
-
                     // It seems only bipedal actors use turning animations.
                     // Also do not use turning animations in the first-person view and when sneaking.
                     if (!sneak && !isFirstPersonPlayer && isBiped)
                     {
-                        if (effectiveRotation > rotationThreshold)
+                        if (effectiveRotation > 0.f)
                             movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
-                        else if (effectiveRotation < -rotationThreshold)
+                        else if (effectiveRotation < 0.f)
                             movestate = inwater ? CharState_SwimTurnLeft : CharState_TurnLeft;
                     }
                 }
@@ -2346,34 +2342,19 @@ namespace MWMechanics
                 vec.y() *= std::sqrt(1.0f - swimUpwardCoef * swimUpwardCoef);
             }
 
-            // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
-            if (isPlayer)
+            if (isBiped)
             {
-                float threshold = mCurrentMovement.find("swim") == std::string::npos ? 0.4f : 0.8f;
-                float complete;
-                bool animPlaying = mAnimation->getInfo(mCurrentMovement, &complete);
-                if (movestate == CharState_None && jumpstate == JumpState_None && isTurning())
-                {
-                    if (animPlaying && complete < threshold)
-                        movestate = mMovementState;
-                }
-            }
-            else
-            {
-                if (isBiped)
-                {
-                    if (mTurnAnimationThreshold > 0)
-                        mTurnAnimationThreshold -= duration;
+                if (mTurnAnimationThreshold > 0)
+                    mTurnAnimationThreshold -= duration;
 
-                    if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft
-                        || movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
-                    {
-                        mTurnAnimationThreshold = 0.05f;
-                    }
-                    else if (movestate == CharState_None && isTurning() && mTurnAnimationThreshold > 0)
-                    {
-                        movestate = mMovementState;
-                    }
+                if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft
+                    || movestate == CharState_SwimTurnRight || movestate == CharState_SwimTurnLeft)
+                {
+                    mTurnAnimationThreshold = 0.05f;
+                }
+                else if (movestate == CharState_None && isTurning() && mTurnAnimationThreshold > 0)
+                {
+                    movestate = mMovementState;
                 }
             }
 
@@ -2402,11 +2383,10 @@ namespace MWMechanics
 
             if (isTurning())
             {
-                // Adjust animation speed from 1.0 to 1.5 multiplier
                 if (duration > 0)
                 {
                     float turnSpeed = std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI));
-                    mAnimation->adjustSpeedMult(mCurrentMovement, std::max(turnSpeed, 1.0f));
+                    mAnimation->adjustSpeedMult(mCurrentMovement, turnSpeed);
                 }
             }
             else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
