@@ -45,8 +45,6 @@ namespace MyGUI
     class Window;
     class UString;
     class ImageBox;
-    class ControllerButtonsOverlay;
-    class InventoryTabsOverlay;
 }
 
 namespace MWWorld
