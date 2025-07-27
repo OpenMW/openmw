@@ -1,19 +1,15 @@
 #include "itemchargeview.hpp"
 
-#include <SDL.h>
+#include <SDL_gamecontroller.h>
 #include <set>
 
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
-#include <MyGUI_TextBox.h>
-#include <MyGUI_UString.h>
 
-#include <components/esm3/loadench.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/spellutil.hpp"
