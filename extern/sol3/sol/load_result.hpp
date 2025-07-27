@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -39,7 +39,7 @@ namespace sol {
 		load_status err;
 
 	public:
-		load_result() noexcept = default;
+		load_result() noexcept : load_result(nullptr) {}
 		load_result(lua_State* Ls, int stackindex = -1, int retnum = 0, int popnum = 0, load_status lerr = load_status::ok) noexcept
 		: L(Ls), index(stackindex), returncount(retnum), popcount(popnum), err(lerr) {
 		}
@@ -95,7 +95,7 @@ namespace sol {
 					if (valid()) {
 						return UT(nullopt);
 					}
-					return error(detail::direct_error, stack::get<std::string>(L, index));
+					return stack::stack_detail::get_error(L, index);
 				}
 				else {
 					if (!valid()) {
@@ -106,15 +106,15 @@ namespace sol {
 			}
 			else {
 				if constexpr (std::is_same_v<T, error>) {
-#if SOL_IS_ON(SOL_SAFE_PROXIES_I_)
+#if SOL_IS_ON(SOL_SAFE_PROXIES)
 					if (valid()) {
 						type_panic_c_str(L, index, type_of(L, index), type::none, "expecting an error type (a string, from Lua)");
 					}
 #endif // Check proxy type's safety
-					return error(detail::direct_error, stack::get<std::string>(L, index));
+					return stack::stack_detail::get_error(L, index);
 				}
 				else {
-#if SOL_IS_ON(SOL_SAFE_PROXIES_I_)
+#if SOL_IS_ON(SOL_SAFE_PROXIES)
 					if (!valid()) {
 						type_panic_c_str(L, index, type_of(L, index), type::none);
 					}
@@ -142,7 +142,9 @@ namespace sol {
 		};
 
 		~load_result() {
-			stack::remove(L, index, popcount);
+			if (L != nullptr) {
+				stack::remove(L, index, popcount);
+			}
 		}
 	};
 } // namespace sol

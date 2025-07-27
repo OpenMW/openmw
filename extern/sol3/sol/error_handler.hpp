@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,7 @@
 #ifndef SOL_ERROR_HANDLER_HPP
 #define SOL_ERROR_HANDLER_HPP
 
+#include <sol/config.hpp>
 #include <sol/types.hpp>
 #include <sol/demangle.hpp>
 
@@ -62,7 +63,7 @@ namespace sol {
 		case type::poly:
 			return "anything";
 		case type::userdata: {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L, 2, "not enough space to push get the type name");
 #endif // make sure stack doesn't overflow
 			if (lua_getmetatable(L, index) == 0) {
@@ -84,7 +85,7 @@ namespace sol {
 
 	inline int push_type_panic_string(lua_State* L, int index, type expected, type actual, string_view message, string_view aux_message) noexcept {
 		const char* err = message.size() == 0
-		     ? (aux_message.size() == 0 ? "stack index %d, expected %s, received %s" : "stack index %d, expected %s, received %s: %s")
+		     ? (aux_message.size() == 0 ? "stack index %d, expected %s, received %s" : "stack index %d, expected %s, received %s: %s%s")
 		     : "stack index %d, expected %s, received %s: %s %s";
 		const char* type_name = expected == type::poly ? "anything" : lua_typename(L, static_cast<int>(expected));
 		{
@@ -96,12 +97,16 @@ namespace sol {
 
 	inline int type_panic_string(lua_State* L, int index, type expected, type actual, string_view message = "") noexcept(false) {
 		push_type_panic_string(L, index, expected, actual, message, "");
-		return lua_error(L);
+		size_t str_size = 0;
+		const char* str = lua_tolstring(L, -1, &str_size);
+		return luaL_error(L, str);
 	}
 
 	inline int type_panic_c_str(lua_State* L, int index, type expected, type actual, const char* message = nullptr) noexcept(false) {
 		push_type_panic_string(L, index, expected, actual, message == nullptr ? "" : message, "");
-		return lua_error(L);
+		size_t str_size = 0;
+		const char* str = lua_tolstring(L, -1, &str_size);
+		return luaL_error(L, str);
 	}
 
 	struct type_panic_t {
@@ -118,7 +123,9 @@ namespace sol {
 	struct constructor_handler {
 		int operator()(lua_State* L, int index, type expected, type actual, string_view message) const noexcept(false) {
 			push_type_panic_string(L, index, expected, actual, message, "(type check failed in constructor)");
-			return lua_error(L);
+			size_t str_size = 0;
+			const char* str = lua_tolstring(L, -1, &str_size);
+			return luaL_error(L, str);
 		}
 	};
 
@@ -126,7 +133,9 @@ namespace sol {
 	struct argument_handler {
 		int operator()(lua_State* L, int index, type expected, type actual, string_view message) const noexcept(false) {
 			push_type_panic_string(L, index, expected, actual, message, "(bad argument to variable or function call)");
-			return lua_error(L);
+			size_t str_size = 0;
+			const char* str = lua_tolstring(L, -1, &str_size);
+			return luaL_error(L, str);
 		}
 	};
 
@@ -142,7 +151,9 @@ namespace sol {
 				aux_message += ")')";
 				push_type_panic_string(L, index, expected, actual, message, aux_message);
 			}
-			return lua_error(L);
+			size_t str_size = 0;
+			const char* str = lua_tolstring(L, -1, &str_size);
+			return luaL_error(L, str);
 		}
 	};
 

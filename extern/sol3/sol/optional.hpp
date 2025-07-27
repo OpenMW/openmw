@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
 #include <sol/forward.hpp>
 #include <sol/in_place.hpp>
 #include <sol/traits.hpp>
-#if SOL_IS_ON(SOL_USE_BOOST_I_)
+#if SOL_IS_ON(SOL_USE_BOOST)
 #include <boost/optional.hpp>
 #else
 #include <sol/optional_implementation.hpp>
@@ -38,7 +38,7 @@
 
 namespace sol {
 
-#if SOL_IS_ON(SOL_USE_BOOST_I_)
+#if SOL_IS_ON(SOL_USE_BOOST)
 	template <typename T>
 	using optional = boost::optional<T>;
 	using nullopt_t = boost::none_t;
@@ -59,14 +59,14 @@ namespace sol {
 			inline static constexpr std::nullopt_t value = std::nullopt;
 		};
 
-#if SOL_IS_ON(SOL_USE_BOOST_I_)
+#if SOL_IS_ON(SOL_USE_BOOST)
 		template <typename T>
 		struct associated_nullopt<boost::optional<T>> {
 			inline static SOL_BOOST_NONE_CONSTEXPR_I_ boost::none_t value = boost::none;
 		};
 #endif // Boost nullopt
 
-#if SOL_IS_ON(SOL_USE_BOOST_I_)
+#if SOL_IS_ON(SOL_USE_BOOST)
 		template <typename T>
 		inline SOL_BOOST_NONE_CONSTEXPR_I_ auto associated_nullopt_v = associated_nullopt<T>::value;
 #else
@@ -76,7 +76,7 @@ namespace sol {
 	} // namespace detail
 } // namespace sol
 
-#if SOL_IS_ON(SOL_USE_BOOST_I_)
+#if SOL_IS_ON(SOL_USE_BOOST)
 #undef SOL_BOOST_NONE_CONSTEXPR_I_
 #endif
 

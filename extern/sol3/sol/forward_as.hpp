@@ -21,29 +21,24 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_OVERLOAD_HPP
-#define SOL_OVERLOAD_HPP
+#ifndef SOL_FORWARD_AS_HPP
+#define SOL_FORWARD_AS_HPP
 
-#include <sol/traits.hpp>
+#include <sol/version.hpp>
+
 #include <utility>
+#include <type_traits>
 
 namespace sol {
-	template <typename... Functions>
-	struct overload_set {
-		std::tuple<Functions...> functions;
-		template <typename Arg, typename... Args, meta::disable<std::is_same<overload_set, meta::unqualified_t<Arg>>> = meta::enabler>
-		overload_set(Arg&& arg, Args&&... args) : functions(std::forward<Arg>(arg), std::forward<Args>(args)...) {
+	template <typename T, typename U>
+	constexpr decltype(auto) forward_as(U&& value) noexcept {
+		if constexpr (::std::is_lvalue_reference_v<T>) {
+			return value;
 		}
-		overload_set(const overload_set&) = default;
-		overload_set(overload_set&&) = default;
-		overload_set& operator=(const overload_set&) = default;
-		overload_set& operator=(overload_set&&) = default;
-	};
-
-	template <typename... Args>
-	decltype(auto) overload(Args&&... args) {
-		return overload_set<std::decay_t<Args>...>(std::forward<Args>(args)...);
+		else {
+			return ::std::move(value);
+		}
 	}
-} // namespace sol
+}
 
-#endif // SOL_OVERLOAD_HPP
+#endif // SOL_FORWARD_AS_HPP

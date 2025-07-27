@@ -21,29 +21,27 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_OVERLOAD_HPP
-#define SOL_OVERLOAD_HPP
+#ifndef SOL_ABORT_HPP
+#define SOL_ABORT_HPP
 
-#include <sol/traits.hpp>
-#include <utility>
+#include <sol/version.hpp>
 
-namespace sol {
-	template <typename... Functions>
-	struct overload_set {
-		std::tuple<Functions...> functions;
-		template <typename Arg, typename... Args, meta::disable<std::is_same<overload_set, meta::unqualified_t<Arg>>> = meta::enabler>
-		overload_set(Arg&& arg, Args&&... args) : functions(std::forward<Arg>(arg), std::forward<Args>(args)...) {
-		}
-		overload_set(const overload_set&) = default;
-		overload_set(overload_set&&) = default;
-		overload_set& operator=(const overload_set&) = default;
-		overload_set& operator=(overload_set&&) = default;
-	};
+#include <sol/base_traits.hpp>
 
-	template <typename... Args>
-	decltype(auto) overload(Args&&... args) {
-		return overload_set<std::decay_t<Args>...>(std::forward<Args>(args)...);
-	}
-} // namespace sol
+#include <cstdlib>
 
-#endif // SOL_OVERLOAD_HPP
+// clang-format off
+#if SOL_IS_ON(SOL_DEBUG_BUILD)
+	#if SOL_IS_ON(SOL_COMPILER_VCXX)
+		#define SOL_DEBUG_ABORT() \
+			if (true) { ::std::abort(); } \
+			static_assert(true, "")
+	#else
+		#define SOL_DEBUG_ABORT() ::std::abort()
+	#endif
+#else
+	#define SOL_DEBUG_ABORT() static_assert(true, "")
+#endif
+// clang-format on
+
+#endif // SOL_ABORT_HPP

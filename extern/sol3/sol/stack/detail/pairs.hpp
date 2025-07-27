@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -84,7 +84,7 @@ namespace sol { namespace stack { namespace stack_detail {
 			pushed += 1;
 		}
 		int metatable_exists = lua_getmetatable(L_, 1);
-		sol_c_assert(metatable_exists == 1);
+		SOL_ASSERT(metatable_exists == 1);
 		const auto& index_key = to_string(sol::meta_function::index);
 		lua_getfield(L_, lua_gettop(L_), index_key.c_str());
 		lua_remove(L_, -2);
