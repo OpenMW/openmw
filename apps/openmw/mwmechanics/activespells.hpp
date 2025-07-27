@@ -116,16 +116,22 @@ namespace MWMechanics
             IterationGuard(ActiveSpells& spells);
             ~IterationGuard();
         };
+        struct UpdateContext;
 
         std::list<ActiveSpellParams> mSpells;
         std::vector<ActiveSpellParams> mQueue;
         std::queue<Predicate> mPurges;
         bool mIterating;
 
-        void addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell);
+        void addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell, UpdateContext& context);
 
         bool applyPurges(const MWWorld::Ptr& ptr, std::list<ActiveSpellParams>::iterator* currentSpell = nullptr,
             std::vector<ActiveEffect>::iterator* currentEffect = nullptr);
+
+        bool updateActiveSpell(
+            const MWWorld::Ptr& ptr, float duration, Collection::iterator& spellIt, UpdateContext& context);
+
+        ActiveSpellParams* initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context);
 
     public:
         ActiveSpells();
