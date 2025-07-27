@@ -557,7 +557,7 @@ namespace MWInput
                     return "textures/omw_switch_button_zr.dds";
                 return "textures/omw_steam_button_r2.dds";
             default:
-                return "";
+                return {};
         }
     }
 
