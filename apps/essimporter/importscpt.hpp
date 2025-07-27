@@ -7,6 +7,7 @@
 
 #include <components/esm/esmcommon.hpp>
 #include <components/esm3/loadscpt.hpp>
+#include <components/esm3/refnum.hpp>
 
 namespace ESM
 {
@@ -35,7 +36,7 @@ namespace ESSImport
         SCRI mSCRI;
 
         bool mRunning;
-        int32_t mRefNum; // Targeted reference, -1: no reference
+        ESM::RefNum mRefNum; // Targeted reference
 
         void load(ESM::ESMReader& esm);
     };

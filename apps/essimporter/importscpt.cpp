@@ -12,11 +12,13 @@ namespace ESSImport
 
         mSCRI.load(esm);
 
-        mRefNum = -1;
         if (esm.isNextSub("RNAM"))
         {
             mRunning = true;
-            esm.getHT(mRefNum);
+            ESM::FormId32 refNum;
+            esm.getHT(refNum);
+            mRefNum = ESM::RefNum::fromUint32(refNum);
+            mRefNum.mContentFile--;
         }
         else
             mRunning = false;

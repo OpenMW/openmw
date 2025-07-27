@@ -60,10 +60,10 @@ namespace
 
         MWWorld::Ptr operator()(const std::pair<ESM::RefNum, ESM::RefId>& pair) const
         {
-            if (pair.second.empty())
-                return MWWorld::Ptr();
-            else if (pair.first.hasContentFile())
+            if (pair.first.hasContentFile())
                 return MWBase::Environment::get().getWorldModel()->getPtr(pair.first);
+            else if (pair.second.empty())
+                return MWWorld::Ptr();
             return MWBase::Environment::get().getWorld()->searchPtr(pair.second, false);
         }
     };
@@ -256,7 +256,7 @@ namespace MWScript
                     try
                     {
                         auto desc = std::make_shared<GlobalScriptDesc>();
-                        if (!script.mTargetId.empty())
+                        if (!script.mTargetId.empty() || script.mTargetRef.isSet())
                         {
                             desc->mTarget = std::make_pair(script.mTargetRef, script.mTargetId);
                         }
