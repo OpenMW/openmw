@@ -16,7 +16,7 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwgui/inventorywindow.hpp"
+#include "../mwgui/windowbase.hpp"
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
