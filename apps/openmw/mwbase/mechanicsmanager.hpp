@@ -8,9 +8,6 @@
 #include <string_view>
 #include <vector>
 
-#include "../mwmechanics/greetingstate.hpp"
-#include "../mwrender/animationpriority.hpp"
-
 #include "../mwworld/ptr.hpp"
 
 namespace osg
@@ -25,6 +22,11 @@ namespace ESM
     class RefId;
     class ESMReader;
     class ESMWriter;
+}
+
+namespace MWMechanics
+{
+    enum class GreetingState;
 }
 
 namespace MWWorld
