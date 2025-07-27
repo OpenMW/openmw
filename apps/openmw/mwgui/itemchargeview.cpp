@@ -7,6 +7,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/esm3/loadench.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
