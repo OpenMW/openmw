@@ -1273,13 +1273,12 @@ namespace MWWorld
         const std::size_t leftCapacity = mPreloader->getMaxCacheSize() - mPreloader->getCacheSize();
         if (cells.size() > leftCapacity)
         {
-            static bool logged = [&] {
+            [[maybe_unused]] static const bool logged = [&] {
                 Log(Debug::Warning) << "Not enough cell preloader cache capacity to preload exterior cells, consider "
                                        "increasing \"preload cell cache max\" up to "
                                     << (mPreloader->getCacheSize() + cells.size());
                 return true;
             }();
-            (void)logged;
             cells.resize(leftCapacity);
         }
 
