@@ -62,8 +62,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:OK}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:OK}";
         }
     }
 
@@ -541,8 +541,8 @@ namespace MWGui
         {
             mDisableGamepadCursor = true;
             mItemButton->setStateSelected(true);
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
         }
 
         center();
@@ -687,8 +687,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
         }
 
         center();

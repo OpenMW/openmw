@@ -16,7 +16,7 @@ namespace MWGui
         ControllerButtonsOverlay();
 
         int getHeight();
-        void setButtons(ControllerButtonStr* buttons);
+        void setButtons(ControllerButtons* buttons);
 
     private:
         enum Button

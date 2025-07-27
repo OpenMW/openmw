@@ -151,7 +151,7 @@ namespace MWGui
             image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
                 SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
-            mControllerButtons.r3 = "#{sInfo}";
+            mControllerButtons.mR3 = "#{sInfo}";
         }
 
         adjustPanes();
@@ -966,34 +966,34 @@ namespace MWGui
         return osg::Vec2f(normalisedX * float(viewport.width - 1), (1.0 - normalisedY) * float(viewport.height - 1));
     }
 
-    ControllerButtonStr* InventoryWindow::getControllerButtons()
+    ControllerButtons* InventoryWindow::getControllerButtons()
     {
         switch (mGuiMode)
         {
             case MWGui::GM_Companion:
-                mControllerButtons.a = "#{OMWEngine:InventorySelect}";
-                mControllerButtons.b = "#{Interface:Close}";
-                mControllerButtons.x.clear();
-                mControllerButtons.r2 = "#{sCompanionShare}";
+                mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
+                mControllerButtons.mB = "#{Interface:Close}";
+                mControllerButtons.mX.clear();
+                mControllerButtons.mR2 = "#{sCompanionShare}";
                 break;
             case MWGui::GM_Container:
-                mControllerButtons.a = "#{OMWEngine:InventorySelect}";
-                mControllerButtons.b = "#{Interface:Close}";
-                mControllerButtons.x = "#{sTakeAll}";
-                mControllerButtons.r2 = "#{sContainer}";
+                mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
+                mControllerButtons.mB = "#{Interface:Close}";
+                mControllerButtons.mX = "#{sTakeAll}";
+                mControllerButtons.mR2 = "#{sContainer}";
                 break;
             case MWGui::GM_Barter:
-                mControllerButtons.a = "#{sSell}";
-                mControllerButtons.b = "#{Interface:Cancel}";
-                mControllerButtons.x = "#{sOffer}";
-                mControllerButtons.r2 = "#{sBarter}";
+                mControllerButtons.mA = "#{sSell}";
+                mControllerButtons.mB = "#{Interface:Cancel}";
+                mControllerButtons.mX = "#{sOffer}";
+                mControllerButtons.mR2 = "#{sBarter}";
                 break;
             case MWGui::GM_Inventory:
             default:
-                mControllerButtons.a = "#{sEquip}";
-                mControllerButtons.b = "#{sBack}";
-                mControllerButtons.x = "#{sDrop}";
-                mControllerButtons.r2.clear();
+                mControllerButtons.mA = "#{sEquip}";
+                mControllerButtons.mB = "#{sBack}";
+                mControllerButtons.mX = "#{sDrop}";
+                mControllerButtons.mR2.clear();
                 break;
         }
         return &mControllerButtons;

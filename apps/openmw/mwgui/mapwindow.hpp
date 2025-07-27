@@ -212,7 +212,7 @@ namespace MWGui
         EventHandle_Void eventDeleteClicked;
         EventHandle_Void eventOkClicked;
 
-        ControllerButtonStr* getControllerButtons() override;
+        ControllerButtons* getControllerButtons() override;
 
     private:
         void onCancelButtonClicked(MyGUI::Widget* sender);

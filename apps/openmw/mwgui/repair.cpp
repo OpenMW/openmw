@@ -40,9 +40,9 @@ namespace MWGui
 
         mToolIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onSelectItem);
 
-        mControllerButtons.a = "#{sRepair}";
-        mControllerButtons.b = "#{Interface:Cancel}";
-        mControllerButtons.y = "#{OMWEngine:RepairTool}";
+        mControllerButtons.mA = "#{sRepair}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
+        mControllerButtons.mY = "#{OMWEngine:RepairTool}";
     }
 
     void Repair::onOpen()

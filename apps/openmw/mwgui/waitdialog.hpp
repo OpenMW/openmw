@@ -46,7 +46,7 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "WaitDialog"; }
 
-        ControllerButtonStr* getControllerButtons() override;
+        ControllerButtons* getControllerButtons() override;
 
     protected:
         MyGUI::TextBox* mDateTimeText;

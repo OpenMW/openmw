@@ -59,8 +59,8 @@ namespace MWGui
         {
             mOkButton->setStateSelected(true);
             mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
         }
 
         center();
@@ -149,9 +149,9 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.lStick = "#{sMouse}";
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
         }
 
         updateClasses();
@@ -167,13 +167,13 @@ namespace MWGui
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.x = "#{sNext}";
+            mControllerButtons.mX = "#{sNext}";
         }
         else if (Settings::gui().mControllerMenus)
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.x = "#{sDone}";
+            mControllerButtons.mX = "#{sDone}";
         }
         else
             okButton->setCaption(
@@ -393,7 +393,7 @@ namespace MWGui
         center();
 
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
-        mControllerButtons.a = "#{sSelect}";
+        mControllerButtons.mA = "#{sSelect}";
     }
 
     void InfoBoxDialog::setText(const std::string& str)
@@ -586,9 +586,9 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             okButton->setStateSelected(true);
-            mControllerButtons.lStick = "#{sMouse}";
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
+            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
         }
 
         // Set default skills, attributes
@@ -680,13 +680,13 @@ namespace MWGui
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.x = "#{sNext}";
+            mControllerButtons.mX = "#{sNext}";
         }
         else if (Settings::gui().mControllerMenus)
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.x = "#{sDone}";
+            mControllerButtons.mX = "#{sDone}";
         }
         else
             okButton->setCaption(
@@ -884,8 +884,8 @@ namespace MWGui
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
 
-        mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{Interface:Cancel}";
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
     SelectSpecializationDialog::~SelectSpecializationDialog() {}
@@ -966,8 +966,8 @@ namespace MWGui
             if (mAttributeButtons.size() > 0)
                 mAttributeButtons[0]->setStateSelected(true);
 
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
         }
     }
 
@@ -1066,8 +1066,8 @@ namespace MWGui
             if (mSkillButtons.size() > 0)
                 mSkillButtons[0]->setStateSelected(true);
 
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
         }
     }
 
@@ -1156,7 +1156,7 @@ namespace MWGui
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
 
-        mControllerButtons.a = "#{Interface:OK}";
+        mControllerButtons.mA = "#{Interface:OK}";
     }
 
     DescriptionDialog::~DescriptionDialog() {}

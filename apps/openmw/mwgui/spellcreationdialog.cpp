@@ -100,9 +100,9 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
-            mControllerButtons.x = "#{Interface:OK}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+            mControllerButtons.mX = "#{Interface:OK}";
         }
     }
 
@@ -598,10 +598,10 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{Interface:Cancel}";
-            mControllerButtons.x = "#{sBuy}";
-            mControllerButtons.r3 = "#{sInfo}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+            mControllerButtons.mX = "#{sBuy}";
+            mControllerButtons.mR3 = "#{sInfo}";
         }
     }
 

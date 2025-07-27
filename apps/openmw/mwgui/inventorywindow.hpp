@@ -77,7 +77,7 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Inventory"; }
 
-        ControllerButtonStr* getControllerButtons() override;
+        ControllerButtons* getControllerButtons() override;
 
     protected:
         void onTitleDoubleClicked() override;

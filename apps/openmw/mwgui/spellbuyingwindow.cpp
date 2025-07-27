@@ -38,9 +38,9 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sBuy}";
-            mControllerButtons.b = "#{Interface:Cancel}";
-            mControllerButtons.r3 = "#{sInfo}";
+            mControllerButtons.mA = "#{sBuy}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+            mControllerButtons.mR3 = "#{sInfo}";
         }
     }
 

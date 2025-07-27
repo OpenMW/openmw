@@ -24,7 +24,7 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
-        ControllerButtonStr* getControllerButtons() override;
+        ControllerButtons* getControllerButtons() override;
 
     private:
         void confirmDeleteSave();

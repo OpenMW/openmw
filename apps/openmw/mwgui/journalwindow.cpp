@@ -224,9 +224,9 @@ namespace
             if (isRussian) // Cyrillic is either (10 + 10 + 10) or (15 + 15)
                 mIndexRowCount = MWGui::getCyrillicIndexPageCount();
 
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.x = "#{OMWEngine:JournalQuests}";
-            mControllerButtons.y = "#{sTopics}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mX = "#{OMWEngine:JournalQuests}";
+            mControllerButtons.mY = "#{sTopics}";
 
             mQuestMode = false;
             mAllQuests = false;
@@ -696,12 +696,12 @@ namespace
             }
         }
 
-        MWGui::ControllerButtonStr* getControllerButtons() override
+        MWGui::ControllerButtons* getControllerButtons() override
         {
-            mControllerButtons.b = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{Interface:Close}";
-            mControllerButtons.l1 = mOptionsMode ? "" : "#{sPrev}";
-            mControllerButtons.r1 = mOptionsMode ? "" : "#{sNext}";
-            mControllerButtons.r3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
+            mControllerButtons.mB = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{Interface:Close}";
+            mControllerButtons.mL1 = mOptionsMode ? "" : "#{sPrev}";
+            mControllerButtons.mR1 = mOptionsMode ? "" : "#{sNext}";
+            mControllerButtons.mR3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
             return &mControllerButtons;
         }
 

@@ -17,23 +17,23 @@ namespace MWGui
     int wrap(int index, int max);
     void setControllerFocus(const std::vector<MyGUI::Button*>& buttons, int index, bool selected);
 
-    struct ControllerButtonStr
+    struct ControllerButtons
     {
-        std::string a;
-        std::string b;
-        std::string dpad;
-        std::string l1;
-        std::string l2;
-        std::string l3;
-        std::string lStick;
-        std::string menu;
-        std::string r1;
-        std::string r2;
-        std::string r3;
-        std::string rStick;
-        std::string view;
-        std::string x;
-        std::string y;
+        std::string mA;
+        std::string mB;
+        std::string mDpad;
+        std::string mL1;
+        std::string mL2;
+        std::string mL3;
+        std::string mLStick;
+        std::string mMenu;
+        std::string mR1;
+        std::string mR2;
+        std::string mR3;
+        std::string mRStick;
+        std::string mView;
+        std::string mX;
+        std::string mY;
     };
 
     class WindowBase : public Layout
@@ -78,7 +78,7 @@ namespace MWGui
 
         static void clampWindowCoordinates(MyGUI::Window* window);
 
-        virtual ControllerButtonStr* getControllerButtons() { return &mControllerButtons; }
+        virtual ControllerButtons* getControllerButtons() { return &mControllerButtons; }
         MyGUI::Widget* getControllerScrollWidget() { return mControllerScrollWidget; }
         bool isGamepadCursorAllowed() { return !mDisableGamepadCursor; }
         virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; }
@@ -88,7 +88,7 @@ namespace MWGui
     protected:
         virtual void onTitleDoubleClicked();
 
-        ControllerButtonStr mControllerButtons;
+        ControllerButtons mControllerButtons;
         bool mActiveControllerWindow = false;
         bool mDisableGamepadCursor = false;
         MyGUI::Widget* mControllerScrollWidget = nullptr;

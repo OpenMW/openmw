@@ -95,8 +95,8 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             mDisableGamepadCursor = true;
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.x = "#{sDone}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mX = "#{sDone}";
             mOkButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
         }

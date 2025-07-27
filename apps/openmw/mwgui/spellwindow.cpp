@@ -62,9 +62,9 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             setPinButtonVisible(false);
-            mControllerButtons.a = "#{sSelect}";
-            mControllerButtons.b = "#{sBack}";
-            mControllerButtons.r3 = "#{sInfo}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mR3 = "#{sInfo}";
         }
     }
 

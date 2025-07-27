@@ -80,7 +80,7 @@ namespace MWGui
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
 
-        mControllerButtons.b = "#{Interface:Cancel}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
     }
 
@@ -328,10 +328,10 @@ namespace MWGui
         }
     }
 
-    ControllerButtonStr* WaitDialog::getControllerButtons()
+    ControllerButtons* WaitDialog::getControllerButtons()
     {
-        mControllerButtons.a = mSleeping ? "#{sRest}" : "#{sWait}";
-        mControllerButtons.x = mSleeping && mUntilHealedButton->getVisible() ? "#{sUntilHealed}" : "";
+        mControllerButtons.mA = mSleeping ? "#{sRest}" : "#{sWait}";
+        mControllerButtons.mX = mSleeping && mUntilHealedButton->getVisible() ? "#{sUntilHealed}" : "";
         return &mControllerButtons;
     }
 

@@ -67,8 +67,8 @@ namespace MWGui
         // To avoid accidental deletions
         mDeleteButton->setNeedKeyFocus(false);
 
-        mControllerButtons.a = "#{sSelect}";
-        mControllerButtons.b = "#{Interface:Cancel}";
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
     void SaveGameDialog::onSlotActivated(MyGUI::ListBox* sender, size_t pos)
@@ -526,9 +526,9 @@ namespace MWGui
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
     }
 
-    ControllerButtonStr* SaveGameDialog::getControllerButtons()
+    ControllerButtons* SaveGameDialog::getControllerButtons()
     {
-        mControllerButtons.y = mSaving ? "" : "#{OMWEngine:LoadingSelectCharacter}";
+        mControllerButtons.mY = mSaving ? "" : "#{OMWEngine:LoadingSelectCharacter}";
         return &mControllerButtons;
     }
 

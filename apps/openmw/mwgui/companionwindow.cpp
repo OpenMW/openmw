@@ -64,10 +64,10 @@ namespace MWGui
 
         setCoord(200, 0, 600, 300);
 
-        mControllerButtons.a = "#{sTake}";
-        mControllerButtons.b = "#{Interface:Close}";
-        mControllerButtons.r3 = "#{sInfo}";
-        mControllerButtons.l2 = "#{sInventory}";
+        mControllerButtons.mA = "#{sTake}";
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mR3 = "#{sInfo}";
+        mControllerButtons.mL2 = "#{sInventory}";
     }
 
     void CompanionWindow::onItemSelected(int index)

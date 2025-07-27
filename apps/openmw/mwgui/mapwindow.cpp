@@ -836,10 +836,10 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.b = "#{sBack}";
-            mControllerButtons.x = global ? "#{sLocal}" : "#{sWorld}";
-            mControllerButtons.y = "#{sCenter}";
-            mControllerButtons.dpad = Settings::map().mAllowZooming ? "" : "#{sMove}";
+            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mX = global ? "#{sLocal}" : "#{sWorld}";
+            mControllerButtons.mY = "#{sCenter}";
+            mControllerButtons.mDpad = Settings::map().mAllowZooming ? "" : "#{sMove}";
         }
     }
 
@@ -1230,7 +1230,7 @@ namespace MWGui
         mLocalMap->setVisible(!global);
 
         mButton->setCaptionWithReplacing(global ? "#{sLocal}" : "#{sWorld}");
-        mControllerButtons.x = global ? "#{sLocal}" : "#{sWorld}";
+        mControllerButtons.mX = global ? "#{sLocal}" : "#{sWorld}";
         MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
     }
 
@@ -1475,8 +1475,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.a = "#{Interface:OK}";
-            mControllerButtons.b = "#{Interface:Cancel}";
+            mControllerButtons.mA = "#{Interface:OK}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
         }
     }
 
@@ -1529,9 +1529,9 @@ namespace MWGui
         eventDeleteClicked();
     }
 
-    ControllerButtonStr* EditNoteDialog::getControllerButtons()
+    ControllerButtons* EditNoteDialog::getControllerButtons()
     {
-        mControllerButtons.x = getDeleteButtonShown() ? "#{sDelete}" : "";
+        mControllerButtons.mX = getDeleteButtonShown() ? "#{sDelete}" : "";
         return &mControllerButtons;
     }
 

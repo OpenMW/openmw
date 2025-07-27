@@ -40,8 +40,8 @@ namespace MWGui
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
 
         mControllerScrollWidget = mTextView;
-        mControllerButtons.b = "#{Interface:Close}";
-        mControllerButtons.dpad = "#{sScrolldown}";
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mDpad = "#{sScrolldown}";
 
         center();
     }
@@ -128,9 +128,9 @@ namespace MWGui
         BookWindowBase::onClose();
     }
 
-    ControllerButtonStr* ScrollWindow::getControllerButtons()
+    ControllerButtons* ScrollWindow::getControllerButtons()
     {
-        mControllerButtons.a = mTakeButton->getVisible() ? "#{sTake}" : "";
+        mControllerButtons.mA = mTakeButton->getVisible() ? "#{sTake}" : "";
         return &mControllerButtons;
     }
 

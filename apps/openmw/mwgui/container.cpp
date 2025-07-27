@@ -59,11 +59,11 @@ namespace MWGui
 
         setCoord(200, 0, 600, 300);
 
-        mControllerButtons.a = "#{sTake}";
-        mControllerButtons.b = "#{Interface:Close}";
-        mControllerButtons.x = "#{sTakeAll}";
-        mControllerButtons.r3 = "#{sInfo}";
-        mControllerButtons.l2 = "#{sInventory}";
+        mControllerButtons.mA = "#{sTake}";
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mX = "#{sTakeAll}";
+        mControllerButtons.mR3 = "#{sInfo}";
+        mControllerButtons.mL2 = "#{sInventory}";
     }
 
     void ContainerWindow::onItemSelected(int index)
@@ -353,9 +353,9 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
-    ControllerButtonStr* ContainerWindow::getControllerButtons()
+    ControllerButtons* ContainerWindow::getControllerButtons()
     {
-        mControllerButtons.r1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
+        mControllerButtons.mR1 = mDisposeCorpseButton->getVisible() ? "#{sDisposeofCorpse}" : "";
         return &mControllerButtons;
     }
 
