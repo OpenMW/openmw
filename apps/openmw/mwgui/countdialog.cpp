@@ -5,6 +5,7 @@
 #include <MyGUI_ScrollBar.h>
 
 #include <components/widgets/numericeditbox.hpp>
+#include <components/widgets/scrollbar.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

@@ -10,6 +10,7 @@
 #include <components/misc/strings/format.hpp>
 #include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
+#include <components/widgets/scrollbar.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"

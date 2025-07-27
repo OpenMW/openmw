@@ -11,6 +11,7 @@
 #include <components/esm3/quickkeys.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"

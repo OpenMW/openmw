@@ -14,6 +14,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "tooltips.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {

@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <MyGUI_Widget.h>
 #include <SDL_gamecontroller.h>
 #include <cstdint>
 
@@ -18,6 +17,11 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+}
+
+namespace MyGUI
+{
+    class Widget;
 }
 
 namespace MWBase

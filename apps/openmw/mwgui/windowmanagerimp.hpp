@@ -24,9 +24,7 @@
 #include <components/toutf8/toutf8.hpp>
 
 #include "charactercreation.hpp"
-#include "controllerbuttonsoverlay.hpp"
 #include "draganddrop.hpp"
-#include "inventorytabsoverlay.hpp"
 #include "mapwindow.hpp"
 #include "messagebox.hpp"
 #include "settings.hpp"
@@ -47,6 +45,8 @@ namespace MyGUI
     class Window;
     class UString;
     class ImageBox;
+    class ControllerButtonsOverlay;
+    class InventoryTabsOverlay;
 }
 
 namespace MWWorld

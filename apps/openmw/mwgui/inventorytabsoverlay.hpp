@@ -1,9 +1,12 @@
 #ifndef MWGUI_INVENTORYTABSSOVERLAY_H
 #define MWGUI_INVENTORYTABSSOVERLAY_H
 
-#include <MyGUI_Button.h>
-
 #include "windowbase.hpp"
+
+namespace MyGUI
+{
+    class Button;
+}
 
 namespace MWGui
 {

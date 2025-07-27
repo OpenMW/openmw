@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWGUI_COMPANIONWINDOW_H
 #define OPENMW_MWGUI_COMPANIONWINDOW_H
 
-#include "companionitemmodel.hpp"
-#include "itemmodel.hpp"
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
 
@@ -46,7 +44,7 @@ namespace MWGui
         void setActiveControllerWindow(bool active) override;
 
         MWGui::ItemView* getItemView() { return mItemView; }
-        ItemModel* getModel() { return mModel; }
+        CompanionItemModel* getModel() { return mModel; }
 
     private:
         ItemView* mItemView;
