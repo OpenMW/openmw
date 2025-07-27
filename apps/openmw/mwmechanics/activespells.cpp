@@ -73,6 +73,21 @@ namespace
 
 namespace MWMechanics
 {
+    struct ActiveSpells::UpdateContext
+    {
+        bool mUpdatedEnemy = false;
+        bool mUpdatedHitOverlay = false;
+        bool mUpdateSpellWindow = false;
+        bool mPlayNonLooping = false;
+        bool mEraseRemoved = false;
+        bool mUpdate;
+
+        UpdateContext(bool update)
+            : mUpdate(update)
+        {
+        }
+    };
+
     ActiveSpells::IterationGuard::IterationGuard(ActiveSpells& spells)
         : mActiveSpells(spells)
     {
@@ -256,8 +271,9 @@ namespace MWMechanics
                 ++spellIt;
         }
 
+        UpdateContext context(duration > 0.f);
         for (const auto& spell : mQueue)
-            addToSpells(ptr, spell);
+            addToSpells(ptr, spell, context);
         mQueue.clear();
 
         // Vanilla only does this on cell change I think
@@ -267,20 +283,17 @@ namespace MWMechanics
             if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
                 && !isSpellActive(spell->mId))
             {
-                mSpells.emplace_back(ActiveSpellParams{ spell, ptr, true });
-                mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+                initParams(ptr, ActiveSpellParams{ spell, ptr, true }, context);
             }
         }
 
-        bool updateSpellWindow = false;
-        bool playNonLooping = false;
         if (ptr.getClass().hasInventoryStore(ptr)
             && !(creatureStats.isDead() && !creatureStats.isDeathAnimationFinished()))
         {
             auto& store = ptr.getClass().getInventoryStore(ptr);
             if (store.getInvListener() != nullptr)
             {
-                playNonLooping = !store.isFirstEquip();
+                context.mPlayNonLooping = !store.isFirstEquip();
                 const auto world = MWBase::Environment::get().getWorld();
                 for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
                 {
@@ -306,82 +319,108 @@ namespace MWMechanics
                     // invisibility manually
                     purgeEffect(ptr, ESM::MagicEffect::Invisibility);
                     applyPurges(ptr);
-                    ActiveSpellParams& params = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
-                    params.setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
-                    updateSpellWindow = true;
+                    ActiveSpellParams* params = initParams(ptr, ActiveSpellParams{ *slot, enchantment, ptr }, context);
+                    if (params)
+                        context.mUpdateSpellWindow = true;
                 }
             }
         }
 
         const MWWorld::Ptr player = MWMechanics::getPlayer();
-        bool updatedHitOverlay = false;
-        bool updatedEnemy = false;
         // Update effects
+        context.mEraseRemoved = true;
         for (auto spellIt = mSpells.begin(); spellIt != mSpells.end();)
         {
-            const auto caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(
-                spellIt->mCasterActorId); // Maybe make this search outside active grid?
-            bool removedSpell = false;
-            std::optional<ActiveSpellParams> reflected;
-            for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
-            {
-                auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, playNonLooping);
-                if (result.mType == MagicApplicationResult::Type::REFLECTED)
-                {
-                    if (!reflected)
-                    {
-                        if (Settings::game().mClassicReflectedAbsorbSpellsBehavior)
-                            reflected = { *spellIt, caster };
-                        else
-                            reflected = { *spellIt, ptr };
-                    }
-                    auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
-                    reflectedEffect.mFlags
-                        = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
-                    it = spellIt->mEffects.erase(it);
-                }
-                else if (result.mType == MagicApplicationResult::Type::REMOVED)
-                    it = spellIt->mEffects.erase(it);
-                else
-                {
-                    ++it;
-                    if (!updatedEnemy && result.mShowHealth && caster == player && ptr != player)
-                    {
-                        MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
-                        updatedEnemy = true;
-                    }
-                    if (!updatedHitOverlay && result.mShowHit && ptr == player)
-                    {
-                        MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
-                        updatedHitOverlay = true;
-                    }
-                }
-                removedSpell = applyPurges(ptr, &spellIt, &it);
-                if (removedSpell)
-                    break;
-            }
-            if (reflected)
-            {
-                const ESM::Static* reflectStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
-                    ESM::RefId::stringRefId("VFX_Reflect"));
-                MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-                if (animation && !reflectStatic->mModel.empty())
-                {
-                    const VFS::Path::Normalized reflectStaticModel
-                        = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(reflectStatic->mModel));
-                    animation->addEffect(
-                        reflectStaticModel, ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
-                }
-                caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
-            }
-            if (removedSpell)
-                continue;
+            updateActiveSpell(ptr, duration, spellIt, context);
+        }
 
+        if (Settings::game().mClassicCalmSpellsBehavior)
+        {
+            ESM::MagicEffect::Effects effect
+                = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
+            if (creatureStats.getMagicEffects().getOrDefault(effect).getMagnitude() > 0.f)
+                creatureStats.getAiSequence().stopCombat();
+        }
+
+        if (ptr == player && context.mUpdateSpellWindow)
+        {
+            // Something happened with the spell list -- possibly while the game is paused,
+            // so we want to make the spell window get the memo.
+            // We don't normally want to do this, so this targets constant enchantments.
+            MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+        }
+    }
+
+    bool ActiveSpells::updateActiveSpell(
+        const MWWorld::Ptr& ptr, float duration, Collection::iterator& spellIt, UpdateContext& context)
+    {
+        const auto caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(
+            spellIt->mCasterActorId); // Maybe make this search outside active grid?
+        bool removedSpell = false;
+        std::optional<ActiveSpellParams> reflected;
+        for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
+        {
+            auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, context.mPlayNonLooping);
+            if (result.mType == MagicApplicationResult::Type::REFLECTED)
+            {
+                if (!reflected)
+                {
+                    if (Settings::game().mClassicReflectedAbsorbSpellsBehavior)
+                        reflected = { *spellIt, caster };
+                    else
+                        reflected = { *spellIt, ptr };
+                }
+                auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
+                reflectedEffect.mFlags
+                    = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
+                it = spellIt->mEffects.erase(it);
+            }
+            else if (result.mType == MagicApplicationResult::Type::REMOVED)
+                it = spellIt->mEffects.erase(it);
+            else
+            {
+                const MWWorld::Ptr player = MWMechanics::getPlayer();
+                ++it;
+                if (!context.mUpdatedEnemy && result.mShowHealth && caster == player && ptr != player)
+                {
+                    MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+                    context.mUpdatedEnemy = true;
+                }
+                if (!context.mUpdatedHitOverlay && result.mShowHit && ptr == player)
+                {
+                    MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
+                    context.mUpdatedHitOverlay = true;
+                }
+            }
+            removedSpell = applyPurges(ptr, &spellIt, &it);
+            if (removedSpell)
+                break;
+        }
+        if (reflected)
+        {
+            const ESM::Static* reflectStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
+                ESM::RefId::stringRefId("VFX_Reflect"));
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+            if (animation && !reflectStatic->mModel.empty())
+            {
+                const VFS::Path::Normalized reflectStaticModel
+                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(reflectStatic->mModel));
+                animation->addEffect(
+                    reflectStaticModel, ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
+            }
+            caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
+        }
+        if (removedSpell)
+            return true;
+
+        if (context.mEraseRemoved)
+        {
             bool remove = false;
             if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
             {
                 try
                 {
+                    auto& spells = ptr.getClass().getCreatureStats(ptr).getSpells();
                     remove = !spells.hasSpell(spellIt->mSourceSpellId);
                 }
                 catch (const std::runtime_error& e)
@@ -413,30 +452,27 @@ namespace MWMechanics
                 for (const auto& effect : params.mEffects)
                     onMagicEffectRemoved(ptr, params, effect);
                 applyPurges(ptr, &spellIt);
-                updateSpellWindow = true;
-                continue;
+                context.mUpdateSpellWindow = true;
+                return true;
             }
-            ++spellIt;
         }
-
-        if (Settings::game().mClassicCalmSpellsBehavior)
-        {
-            ESM::MagicEffect::Effects effect
-                = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
-            if (creatureStats.getMagicEffects().getOrDefault(effect).getMagnitude() > 0.f)
-                creatureStats.getAiSequence().stopCombat();
-        }
-
-        if (ptr == player && updateSpellWindow)
-        {
-            // Something happened with the spell list -- possibly while the game is paused,
-            // so we want to make the spell window get the memo.
-            // We don't normally want to do this, so this targets constant enchantments.
-            MWBase::Environment::get().getWindowManager()->updateSpellWindow();
-        }
+        ++spellIt;
+        return false;
     }
 
-    void ActiveSpells::addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell)
+    ActiveSpells::ActiveSpellParams* ActiveSpells::initParams(
+        const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context)
+    {
+        mSpells.emplace_back(params).setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+        auto it = mSpells.end();
+        --it;
+        // We instantly apply the effect with a duration of 0 so continuous effects can be purged before truly applying
+        if (context.mUpdate && updateActiveSpell(ptr, 0.f, it, context))
+            return nullptr;
+        return &*it;
+    }
+
+    void ActiveSpells::addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell, UpdateContext& context)
     {
         if (!spell.hasFlag(ESM::ActiveSpells::Flag_Stackable))
         {
@@ -454,8 +490,7 @@ namespace MWMechanics
                     onMagicEffectRemoved(ptr, params, effect);
             }
         }
-        mSpells.emplace_back(spell);
-        mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+        initParams(ptr, spell, context);
     }
 
     ActiveSpells::ActiveSpells()
@@ -608,6 +643,8 @@ namespace MWMechanics
     {
         purge(
             [=](const ActiveSpellParams&, const ESM::ActiveEffect& effect) {
+                if (!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
+                    return false;
                 if (effectArg.empty())
                     return effect.mEffectId == effectId;
                 return effect.mEffectId == effectId && effect.getSkillOrAttribute() == effectArg;

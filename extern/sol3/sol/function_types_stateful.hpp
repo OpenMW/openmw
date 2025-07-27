@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -74,7 +74,7 @@ namespace sol { namespace function_detail {
 		}
 
 		static int call(lua_State* L, member_function& self)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)
@@ -90,7 +90,7 @@ namespace sol { namespace function_detail {
 		}
 
 		int operator()(lua_State* L)
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX)
 		// MSVC is broken, what a surprise...
 #else
 			noexcept(traits_type::is_noexcept)

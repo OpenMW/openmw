@@ -34,7 +34,7 @@ namespace Files
         std::filesystem::path getUserDataPath() const;
 
         /**
-         * \brief Returns "X:\Program Files\"
+         * \brief Returns an empty path
          *
          * \return std::filesystem::path
          */

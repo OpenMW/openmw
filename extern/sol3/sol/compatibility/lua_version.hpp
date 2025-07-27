@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -21,24 +21,40 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef SOL_COMPATIBILITY_VERSION_HPP
-#define SOL_COMPATIBILITY_VERSION_HPP
+#ifndef SOL_COMPATIBILITY_LUA_VERSION_HPP
+#define SOL_COMPATIBILITY_LUA_VERSION_HPP
 
 #include <sol/version.hpp>
 
 // clang-format off
 
-#if SOL_IS_ON(SOL_USE_CXX_LUA_I_)
-	#include <lua.h>
-	#include <lualib.h>
-	#include <lauxlib.h>
-#elif SOL_IS_ON(SOL_USE_LUA_HPP_I_)
-	#include <lua.hpp>
-#else
-	extern "C" {
+#if SOL_IS_ON(SOL_USING_CXX_LUA)
+	#if __has_include(<lua/lua.h>)
+		#include <lua/lua.h>
+		#include <lua/lauxlib.h>
+		#include <lua/lualib.h>
+	#else
 		#include <lua.h>
 		#include <lauxlib.h>
 		#include <lualib.h>
+	#endif
+#elif SOL_IS_ON(SOL_USE_LUA_HPP)
+	#if __has_include(<lua/lua.hpp>)
+		#include <lua/lua.hpp>
+	#else
+		#include <lua.hpp>
+	#endif
+#else
+	extern "C" {
+		#if __has_include(<lua/lua.h>)
+			#include <lua/lua.h>
+			#include <lua/lauxlib.h>
+			#include <lua/lualib.h>
+		#else
+			#include <lua.h>
+			#include <lauxlib.h>
+			#include <lualib.h>
+		#endif
 	}
 #endif // C++ Mangling for Lua vs. Not
 
@@ -50,13 +66,15 @@
 	#endif
 #elif defined(LUAJIT_VERSION)
 	#define SOL_USE_LUAJIT_I_ SOL_ON
+#elif SOL_IS_ON(SOL_USING_CXX_LUAJIT)
+	#define SOL_USE_LUAJIT_I_ SOL_ON
 #else
 	#define SOL_USE_LUAJIT_I_ SOL_DEFAULT_OFF
 #endif // luajit
 
-#if SOL_IS_ON(SOL_USE_CXX_LUAJIT_I_)
+#if SOL_IS_ON(SOL_USING_CXX_LUAJIT)
 	#include <luajit.h>
-#elif SOL_IS_ON(SOL_USE_LUAJIT_I_)
+#elif SOL_IS_ON(SOL_USE_LUAJIT)
 	extern "C" {
 		#include <luajit.h>
 	}
@@ -64,7 +82,7 @@
 
 #if defined(SOL_LUAJIT_VERSION)
 	#define SOL_LUAJIT_VERSION_I_ SOL_LUAJIT_VERSION
-#elif SOL_IS_ON(SOL_USE_LUAJIT_I_)
+#elif SOL_IS_ON(SOL_USE_LUAJIT)
 	#define SOL_LUAJIT_VERSION_I_ LUAJIT_VERSION_NUM
 #else
 	#define SOL_LUAJIT_VERSION_I_ 0
@@ -118,21 +136,25 @@
 	#else
 		#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_OFF
 	#endif
-#elif SOL_LUAJIT_VERSION_I_ >= 20100
-	// LuaJIT 2.1.0-beta3 and better have exception support locked in for all platforms (mostly)
-	#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_ON
-#elif SOL_LUAJIT_VERSION_I_ >= 20000
-	// LuaJIT 2.0.x have exception support only on x64 builds
-	#if SOL_IS_ON(SOL_PLATFORM_X64_I_)
-		#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_ON
-	#else
-		#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_OFF
-	#endif
 #else
-	// otherwise, there is no exception safety for
-	// shoving exceptions through Lua and errors should
-	// always be serialized
-	#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_OFF
+	#if SOL_IS_ON(SOL_USE_LUAJIT)
+		#if SOL_USE(SOL_LUAJIT_VERSION) >= 20100
+			// LuaJIT 2.1.0-beta3 and better have exception support locked in for all platforms (mostly)
+			#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_ON
+		#elif SOL_USE(SOL_LUAJIT_VERSION) >= 20000
+			// LuaJIT 2.0.x have exception support only on x64 builds
+			#if SOL_IS_ON(SOL_PLATFORM_X64)
+				#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_ON
+			#else
+				#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_OFF
+			#endif
+		#endif
+	#else
+		// otherwise, there is no exception safety for
+		// shoving exceptions through Lua and errors should
+		// always be serialized
+		#define SOL_PROPAGATE_EXCEPTIONS_I_ SOL_DEFAULT_OFF
+	#endif
 #endif
 
 // Some configurations work with exceptions,
@@ -144,13 +166,14 @@
 		#define SOL_EXCEPTIONS_CATCH_ALL_I_ SOL_OFF
 	#endif
 #else
-	#if SOL_IS_ON(SOL_USE_LUAJIT_I_)
+	#if SOL_IS_ON(SOL_USE_LUAJIT) || SOL_IS_ON(SOL_USING_CXX_LUAJIT)
 		#define SOL_EXCEPTIONS_CATCH_ALL_I_ SOL_DEFAULT_OFF
-	#elif SOL_IS_ON(SOL_USE_CXX_LUAJIT_I_)
-		#define SOL_EXCEPTIONS_CATCH_ALL_I_ SOL_DEFAULT_OFF
-	#elif SOL_IS_ON(SOL_USE_CXX_LUA_I_)
+	#elif SOL_IS_ON(SOL_USING_CXX_LUA)
+		// C++ builds of Lua will throw an exception to implement its `yield` behavior;
+		// it is irresponsible to "catch all" on this setting.
 		#define SOL_EXCEPTIONS_CATCH_ALL_I_ SOL_DEFAULT_OFF
 	#else
+		// Otherwise, by default, everyhting should be caught.
 		#define SOL_EXCEPTIONS_CATCH_ALL_I_ SOL_DEFAULT_ON
 	#endif
 #endif
@@ -162,7 +185,7 @@
 		#define SOL_USE_LUAJIT_EXCEPTION_TRAMPOLINE_I_ SOL_OFF
 	#endif
 #else
-	#if SOL_IS_OFF(SOL_PROPAGATE_EXCEPTIONS_I_) && SOL_IS_ON(SOL_USE_LUAJIT_I_)
+	#if SOL_IS_OFF(SOL_PROPAGATE_EXCEPTIONS) && SOL_IS_ON(SOL_USE_LUAJIT)
 		#define SOL_USE_LUAJIT_EXCEPTION_TRAMPOLINE_I_ SOL_ON
 	#else
 		#define SOL_USE_LUAJIT_EXCEPTION_TRAMPOLINE_I_ SOL_DEFAULT_OFF
@@ -176,7 +199,7 @@
 		#define SOL_LUAL_STREAM_USE_CLOSE_FUNCTION_I_ SOL_OFF
 	#endif
 #else
-	#if SOL_IS_OFF(SOL_USE_LUAJIT_I_) && (SOL_LUA_VERSION > 501)
+	#if SOL_IS_OFF(SOL_USE_LUAJIT) && (SOL_LUA_VERSION > 501)
 		#define SOL_LUAL_STREAM_USE_CLOSE_FUNCTION_I_ SOL_ON
 	#else
 		#define SOL_LUAL_STREAM_USE_CLOSE_FUNCTION_I_ SOL_DEFAULT_OFF
@@ -192,7 +215,11 @@
 #else
 	// Lua 5.2 only (deprecated in 5.3 (503)) (Can be turned on with Compat flags)
 	// Lua 5.2, or other versions of Lua with the compat flag, or Lua that is not 5.2 with the specific define (5.4.1 either removed it entirely or broke it)
-	#if (SOL_LUA_VERSION_I_ == 502) || (defined(LUA_COMPAT_BITLIB) && (LUA_COMPAT_BITLIB != 0)) || (SOL_LUA_VERSION_I_ < 504 && (defined(LUA_COMPAT_5_2) && (LUA_COMPAT_5_2 != 0)))
+	#if (SOL_LUA_VERSION_I_ == 502)
+		#define SOL_LUA_BIT32_LIB_I_ SOL_ON
+	#elif defined(LUA_COMPAT_BITLIB)
+		#define SOL_LUA_BIT32_LIB_I_ SOL_ON
+	#elif (SOL_LUA_VERSION_I_ < 504 && defined(LUA_COMPAT_5_2))
 		#define SOL_LUA_BIT32_LIB_I_ SOL_ON
 	#else
 		#define SOL_LUA_BIT32_LIB_I_ SOL_DEFAULT_OFF
@@ -215,4 +242,4 @@
 
 // clang-format on
 
-#endif // SOL_COMPATIBILITY_VERSION_HPP
+#endif // SOL_COMPATIBILITY_LUA_VERSION_HPP
