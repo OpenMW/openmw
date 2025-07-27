@@ -10,6 +10,7 @@
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/misc/math.hpp>
+#include <components/misc/pathgridutils.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -38,7 +39,7 @@ namespace
         //       points to a quadtree may help
         for (size_t counter = 0; counter < grid->mPoints.size(); counter++)
         {
-            float potentialDistBetween = MWMechanics::PathFinder::distanceSquared(grid->mPoints[counter], pos);
+            float potentialDistBetween = Misc::distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
             {
                 // found a closer one
@@ -197,7 +198,7 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
-        size_t startNode = getClosestPoint(pathgrid, startPointInLocalCoords);
+        const size_t startNode = Misc::getClosestPoint(*pathgrid, startPointInLocalCoords);
 
         osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
         std::pair<size_t, bool> endNode
@@ -206,8 +207,8 @@ namespace MWMechanics
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
         float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
-        float endTolastNodeLength2 = distanceSquared(pathgrid->mPoints[endNode.first], endPointInLocalCoords);
-        float startTo1stNodeLength2 = distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
+        float endTolastNodeLength2 = Misc::distanceSquared(pathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = Misc::distanceSquared(pathgrid->mPoints[startNode], startPointInLocalCoords);
         if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
         {
             *out++ = endPoint;
@@ -223,7 +224,7 @@ namespace MWMechanics
         {
             ESM::Pathgrid::Point temp(pathgrid->mPoints[startNode]);
             converter.toWorld(temp);
-            *out++ = makeOsgVec3(temp);
+            *out++ = Misc::Convert::makeOsgVec3f(temp);
         }
         else
         {
@@ -234,8 +235,8 @@ namespace MWMechanics
             if (path.size() > 1)
             {
                 ESM::Pathgrid::Point secondNode = *(++path.begin());
-                osg::Vec3f firstNodeVec3f = makeOsgVec3(pathgrid->mPoints[startNode]);
-                osg::Vec3f secondNodeVec3f = makeOsgVec3(secondNode);
+                osg::Vec3f firstNodeVec3f = Misc::Convert::makeOsgVec3f(pathgrid->mPoints[startNode]);
+                osg::Vec3f secondNodeVec3f = Misc::Convert::makeOsgVec3f(secondNode);
                 osg::Vec3f toSecondNodeVec3f = secondNodeVec3f - firstNodeVec3f;
                 osg::Vec3f toStartPointVec3f = startPointInLocalCoords - firstNodeVec3f;
                 if (toSecondNodeVec3f * toStartPointVec3f > 0)
@@ -259,7 +260,7 @@ namespace MWMechanics
             // convert supplied path to world coordinates
             std::transform(path.begin(), path.end(), out, [&](ESM::Pathgrid::Point& point) {
                 converter.toWorld(point);
-                return makeOsgVec3(point);
+                return Misc::Convert::makeOsgVec3f(point);
             });
         }
 
@@ -359,26 +360,16 @@ namespace MWMechanics
         mConstructed = true;
     }
 
-    void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
-    {
-        mPath.clear();
-        mCell = cell;
-
-        buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
-
-        mConstructed = !mPath.empty();
-    }
-
     void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType,
+        std::span<const osg::Vec3f> checkpoints)
     {
         mPath.clear();
 
         // If it's not possible to build path over navmesh due to disabled navmesh generation fallback to straight path
         DetourNavigator::Status status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds, flags,
-            areaCosts, endTolerance, pathType, std::back_inserter(mPath));
+            areaCosts, endTolerance, pathType, checkpoints, std::back_inserter(mPath));
 
         if (status != DetourNavigator::Status::Success)
             mPath.clear();
@@ -390,19 +381,19 @@ namespace MWMechanics
     }
 
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
-        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-        const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType, std::span<const osg::Vec3f> checkpoints)
     {
         mPath.clear();
-        mCell = cell;
+        mCell = actor.getCell();
 
         DetourNavigator::Status status = DetourNavigator::Status::NavMeshNotFound;
 
         if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds, flags, areaCosts, endTolerance,
-                pathType, std::back_inserter(mPath));
+                pathType, checkpoints, std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
         }
@@ -411,7 +402,7 @@ namespace MWMechanics
             && (flags & DetourNavigator::Flag_usePathgrid) == 0)
         {
             status = buildPathByNavigatorImpl(actor, startPoint, endPoint, agentBounds,
-                flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType,
+                flags | DetourNavigator::Flag_usePathgrid, areaCosts, endTolerance, pathType, checkpoints,
                 std::back_inserter(mPath));
             if (status != DetourNavigator::Status::Success)
                 mPath.clear();
@@ -429,12 +420,13 @@ namespace MWMechanics
     DetourNavigator::Status PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor,
         const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const DetourNavigator::AgentBounds& agentBounds,
         const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
-        PathType pathType, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
+        PathType pathType, std::span<const osg::Vec3f> checkpoints,
+        std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
-        const auto world = MWBase::Environment::get().getWorld();
-        const auto navigator = world->getNavigator();
-        const auto status = DetourNavigator::findPath(
-            *navigator, agentBounds, startPoint, endPoint, flags, areaCosts, endTolerance, out);
+        const MWBase::World& world = *MWBase::Environment::get().getWorld();
+        const DetourNavigator::Navigator& navigator = *world.getNavigator();
+        const DetourNavigator::Status status = DetourNavigator::findPath(
+            navigator, agentBounds, startPoint, endPoint, flags, areaCosts, endTolerance, checkpoints, out);
 
         if (pathType == PathType::Partial && status == DetourNavigator::Status::PartialPath)
             return DetourNavigator::Status::Success;
@@ -451,9 +443,9 @@ namespace MWMechanics
     }
 
     void PathFinder::buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
-        const osg::Vec3f& endPoint, const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
-        const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType)
+        const osg::Vec3f& endPoint, const PathgridGraph& pathgridGraph, const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts, float endTolerance,
+        PathType pathType)
     {
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto maxDistance
@@ -461,9 +453,9 @@ namespace MWMechanics
         const auto startToEnd = endPoint - startPoint;
         const auto distance = startToEnd.length();
         if (distance <= maxDistance)
-            return buildPath(actor, startPoint, endPoint, cell, pathgridGraph, agentBounds, flags, areaCosts,
-                endTolerance, pathType);
+            return buildPath(
+                actor, startPoint, endPoint, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
         const auto end = startPoint + startToEnd * maxDistance / distance;
-        buildPath(actor, startPoint, end, cell, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
+        buildPath(actor, startPoint, end, pathgridGraph, agentBounds, flags, areaCosts, endTolerance, pathType);
     }
 }

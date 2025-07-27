@@ -179,6 +179,39 @@ testing.registerLocalTest('findPath',
         testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success, 'Status')
         testing.expectLessOrEqual((path[#path] - dst):length(), 1,
             'Last path point '  .. testing.formatActualExpected(path[#path], dst))
+        testing.expectThat(path, matchers.equalTo({
+            matchers.closeToVector(util.vector3(4096, 4096, 1746.27099609375), 1e-1),
+            matchers.closeToVector(util.vector3(4500, 4500, 1745.95263671875), 1e-1),
+        }))
+    end)
+
+testing.registerLocalTest('findPath with checkpoints',
+    function()
+        local src = util.vector3(4096, 4096, 1745)
+        local dst = util.vector3(4500, 4500, 1745.95263671875)
+        local options = {
+            agentBounds = types.Actor.getPathfindingAgentBounds(self),
+            includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
+            areaCosts = {
+                water = 1,
+                door = 2,
+                ground = 1,
+                pathgrid = 1,
+            },
+            destinationTolerance = 1,
+            checkpoints = {
+                util.vector3(4200, 4100, 1750),
+            },
+        }
+        local status, path = nearby.findPath(src, dst, options)
+        testing.expectEqual(status, nearby.FIND_PATH_STATUS.Success, 'Status')
+        testing.expectLessOrEqual((path[#path] - dst):length(), 1,
+            'Last path point '  .. testing.formatActualExpected(path[#path], dst))
+        testing.expectThat(path, matchers.equalTo({
+            matchers.closeToVector(util.vector3(4096, 4096, 1746.27099609375), 1e-1),
+            matchers.closeToVector(util.vector3(4200, 4100, 1749.5076904296875), 1e-1),
+            matchers.closeToVector(util.vector3(4500, 4500, 1745.95263671875), 1e-1),
+        }))
     end)
 
 testing.registerLocalTest('findRandomPointAroundCircle',

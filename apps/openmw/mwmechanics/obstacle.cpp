@@ -106,21 +106,6 @@ namespace MWMechanics
         return visitor.mResult;
     }
 
-    bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& destination, bool ignorePlayer,
-        std::vector<MWWorld::Ptr>* occupyingActors)
-    {
-        const auto world = MWBase::Environment::get().getWorld();
-        const osg::Vec3f halfExtents = world->getPathfindingAgentBounds(actor).mHalfExtents;
-        const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
-        if (ignorePlayer)
-        {
-            const std::array ignore{ actor, world->getPlayerConstPtr() };
-            return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, ignore, occupyingActors);
-        }
-        const std::array ignore{ actor };
-        return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, ignore, occupyingActors);
-    }
-
     ObstacleCheck::ObstacleCheck()
         : mEvadeDirectionIndex(std::size(evadeDirections) - 1)
     {
