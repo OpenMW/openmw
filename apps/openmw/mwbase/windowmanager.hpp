@@ -13,7 +13,6 @@
 
 #include "../mwgui/mode.hpp"
 
-#include <components/esm/refid.hpp>
 #include <components/sdlutil/events.hpp>
 
 namespace ESM
