@@ -2,7 +2,6 @@
 #define MWGUI_ITEMVIEW_H
 
 #include <MyGUI_Widget.h>
-#include <SDL.h>
 
 #include "itemmodel.hpp"
 

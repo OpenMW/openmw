@@ -3,11 +3,10 @@
 
 #include "windowbase.hpp"
 
-#include <components/widgets/scrollbar.hpp>
-
 namespace Gui
 {
     class NumericEditBox;
+    class ScrollBar;
 }
 
 namespace MWGui

@@ -7,6 +7,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_UString.h>
 
+#include <components/esm/refid.hpp>
+
 namespace MWGui
 {
 

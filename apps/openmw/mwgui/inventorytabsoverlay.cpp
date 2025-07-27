@@ -1,5 +1,6 @@
 #include "inventorytabsoverlay.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Window.h>
 

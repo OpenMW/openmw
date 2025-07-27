@@ -4,7 +4,11 @@
 #include "timeadvancer.hpp"
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
-#include <components/widgets/scrollbar.hpp>
+
+namespace Gui
+{
+    class ScrollBar;
+}
 
 namespace MWGui
 {

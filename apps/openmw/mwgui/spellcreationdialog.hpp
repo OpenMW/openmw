@@ -1,12 +1,10 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include <SDL.h>
 #include <memory>
 
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
-#include <components/widgets/scrollbar.hpp>
 
 #include "referenceinterface.hpp"
 #include "widgets.hpp"
@@ -15,6 +13,7 @@
 namespace Gui
 {
     class MWList;
+    class ScrollBar;
 }
 
 namespace MWGui

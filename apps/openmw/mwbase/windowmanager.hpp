@@ -11,9 +11,7 @@
 
 #include <MyGUI_KeyCode.h>
 
-#include "../mwgui/hud.hpp"
 #include "../mwgui/mode.hpp"
-#include "../mwgui/windowbase.hpp"
 
 #include <components/sdlutil/events.hpp>
 
@@ -80,6 +78,8 @@ namespace MWGui
     class MessageBox;
     class PostProcessorHud;
     class SettingsWindow;
+    class HUD;
+    class WindowBase;
 
     enum ShowInDialogueMode
     {

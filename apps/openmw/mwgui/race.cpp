@@ -13,6 +13,7 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/values.hpp>
+#include <components/widgets/scrollbar.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

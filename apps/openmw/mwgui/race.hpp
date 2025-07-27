@@ -3,7 +3,6 @@
 
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
-#include <components/widgets/scrollbar.hpp>
 #include <memory>
 
 namespace MWRender
@@ -24,6 +23,11 @@ namespace osg
 namespace Resource
 {
     class ResourceSystem;
+}
+
+namespace Gui
+{
+    class ScrollBar;
 }
 
 namespace MWGui

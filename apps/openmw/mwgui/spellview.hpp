@@ -5,15 +5,17 @@
 #include <tuple>
 
 #include <MyGUI_Widget.h>
-#include <SDL.h>
-
-#include <components/widgets/sharedstatebutton.hpp>
 
 #include "spellmodel.hpp"
 
 namespace MyGUI
 {
     class ScrollView;
+}
+
+namespace Gui
+{
+    class SharedStateButton;
 }
 
 namespace MWGui

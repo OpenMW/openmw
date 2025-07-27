@@ -24,6 +24,7 @@
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 #include "textcolours.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
