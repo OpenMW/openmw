@@ -1868,14 +1868,43 @@ namespace MWWorld
         return ESM::Cell::sDefaultWorldspaceId;
     }
 
-    int World::getCurrentWeather() const
+    const std::vector<MWWorld::Weather>& World::getAllWeather() const
     {
-        return mWeatherManager->getWeatherID();
+        return mWeatherManager->getAllWeather();
     }
 
-    int World::getNextWeather() const
+    int World::getCurrentWeatherScriptId() const
     {
-        return mWeatherManager->getNextWeatherID();
+        return mWeatherManager->getWeather().mScriptId;
+    }
+
+    const MWWorld::Weather& World::getCurrentWeather() const
+    {
+        return mWeatherManager->getWeather();
+    }
+
+    const MWWorld::Weather* World::getWeather(size_t index) const
+    {
+        return mWeatherManager->getWeather(index);
+    }
+
+    const MWWorld::Weather* World::getWeather(const ESM::RefId& id) const
+    {
+        return mWeatherManager->getWeather(id);
+    }
+
+    int World::getNextWeatherScriptId() const
+    {
+        auto next = mWeatherManager->getNextWeather();
+        if (next == nullptr)
+            return -1;
+
+        return next->mScriptId;
+    }
+
+    const MWWorld::Weather* World::getNextWeather() const
+    {
+        return mWeatherManager->getNextWeather();
     }
 
     float World::getWeatherTransition() const
@@ -1889,6 +1918,11 @@ namespace MWWorld
     }
 
     void World::changeWeather(const ESM::RefId& region, const unsigned int id)
+    {
+        mWeatherManager->changeWeather(region, id);
+    }
+
+    void World::changeWeather(const ESM::RefId& region, const ESM::RefId& id)
     {
         mWeatherManager->changeWeather(region, id);
     }
@@ -3131,6 +3165,11 @@ namespace MWWorld
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
             return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
+    }
+
+    const osg::Vec4f& World::getSunLightPosition() const
+    {
+        return mRendering->getSunLightPosition();
     }
 
     float World::getSunVisibility() const

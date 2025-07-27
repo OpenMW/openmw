@@ -18,37 +18,33 @@ namespace Files
 
     namespace bpo = boost::program_options;
 
+    namespace
+    {
 #if defined(_WIN32) || defined(__WINDOWS__)
-    static const char* const applicationName = "OpenMW";
+        constexpr auto applicationName = "OpenMW";
 #else
-    static const char* const applicationName = "openmw";
+        constexpr auto applicationName = "openmw";
 #endif
 
-    static constexpr auto localToken = u8"?local?";
-    static constexpr auto userConfigToken = u8"?userconfig?";
-    static constexpr auto userDataToken = u8"?userdata?";
-    static constexpr auto globalToken = u8"?global?";
+        using GetPath = const std::filesystem::path& (Files::FixedPath<>::*)() const;
+        constexpr std::array<std::pair<std::u8string_view, GetPath>, 4> sTokenMappings = {
+            std::make_pair(u8"?local?", &FixedPath<>::getLocalPath),
+            std::make_pair(u8"?userconfig?", &FixedPath<>::getUserConfigPath),
+            std::make_pair(u8"?userdata?", &FixedPath<>::getUserDataPath),
+            std::make_pair(u8"?global?", &FixedPath<>::getGlobalDataPath),
+        };
+    }
 
     ConfigurationManager::ConfigurationManager(bool silent)
         : mFixedPath(applicationName)
         , mSilent(silent)
     {
-        setupTokensMapping();
-
         // Initialize with fixed paths, will be overridden in `readConfiguration`.
         mUserDataPath = mFixedPath.getUserDataPath();
         mScreenshotPath = mFixedPath.getUserDataPath() / "screenshots";
     }
 
-    ConfigurationManager::~ConfigurationManager() {}
-
-    void ConfigurationManager::setupTokensMapping()
-    {
-        mTokensMapping.insert(std::make_pair(localToken, &FixedPath<>::getLocalPath));
-        mTokensMapping.insert(std::make_pair(userConfigToken, &FixedPath<>::getUserConfigPath));
-        mTokensMapping.insert(std::make_pair(userDataToken, &FixedPath<>::getUserDataPath));
-        mTokensMapping.insert(std::make_pair(globalToken, &FixedPath<>::getGlobalDataPath));
-    }
+    ConfigurationManager::~ConfigurationManager() = default;
 
     static bool hasReplaceConfig(const bpo::variables_map& variables)
     {
@@ -74,7 +70,7 @@ namespace Files
         std::optional<bpo::variables_map> config = loadConfig(mFixedPath.getLocalPath(), description);
         if (config)
             mActiveConfigPaths.push_back(mFixedPath.getLocalPath());
-        else
+        else if (!mFixedPath.getGlobalConfigPath().empty())
         {
             mActiveConfigPaths.push_back(mFixedPath.getGlobalConfigPath());
             config = loadConfig(mFixedPath.getGlobalConfigPath(), description);
@@ -305,15 +301,18 @@ namespace Files
         const auto pos = str.find('?', 1);
         if (pos != std::u8string::npos && pos != 0)
         {
-            auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
-            if (tokenIt != mTokensMapping.end())
+            std::u8string_view view(str);
+            auto token = view.substr(0, pos + 1);
+            auto found = std::find_if(
+                sTokenMappings.begin(), sTokenMappings.end(), [&](const auto& item) { return item.first == token; });
+            if (found != sTokenMappings.end())
             {
-                auto tempPath(((mFixedPath).*(tokenIt->second))());
-                if (pos < str.length() - 1)
+                auto tempPath(((mFixedPath).*(found->second))());
+                if (!tempPath.empty() && pos < view.length() - 1)
                 {
                     // There is something after the token, so we should
                     // append it to the path
-                    tempPath /= str.substr(pos + 1, str.length() - pos);
+                    tempPath /= view.substr(pos + 1, view.length() - pos);
                 }
 
                 path = std::move(tempPath);

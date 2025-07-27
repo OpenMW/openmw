@@ -27,6 +27,7 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
+#include "weatherbindings.hpp"
 
 namespace MWLua
 {
@@ -103,6 +104,9 @@ namespace MWLua
             = context.cachePackage("openmw_core_mwscripts", [context]() { return initCoreMwScriptBindings(context); });
 
         api["land"] = context.cachePackage("openmw_core_land", [context]() { return initCoreLandBindings(context); });
+
+        api["weather"]
+            = context.cachePackage("openmw_core_weather", [context]() { return initCoreWeatherBindings(context); });
 
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
