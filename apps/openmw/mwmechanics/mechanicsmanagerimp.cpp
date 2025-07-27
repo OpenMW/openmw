@@ -1453,6 +1453,7 @@ namespace MWMechanics
                     }
 
                     startCombat(actor, player, &playerFollowers);
+                    observerStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId());
 
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
