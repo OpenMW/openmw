@@ -13,7 +13,6 @@
 namespace Gui
 {
     class MWList;
-    class ScrollBar;
 }
 
 namespace MWGui
@@ -59,10 +58,10 @@ namespace MWGui
         MyGUI::TextBox* mDurationValue;
         MyGUI::TextBox* mAreaValue;
 
-        Gui::ScrollBar* mMagnitudeMinSlider;
-        Gui::ScrollBar* mMagnitudeMaxSlider;
-        Gui::ScrollBar* mDurationSlider;
-        Gui::ScrollBar* mAreaSlider;
+        MyGUI::ScrollBar* mMagnitudeMinSlider;
+        MyGUI::ScrollBar* mMagnitudeMaxSlider;
+        MyGUI::ScrollBar* mDurationSlider;
+        MyGUI::ScrollBar* mAreaSlider;
 
         MyGUI::TextBox* mAreaText;
 

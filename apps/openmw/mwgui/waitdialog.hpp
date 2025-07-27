@@ -5,11 +5,6 @@
 #include "windowbase.hpp"
 #include <components/esm/refid.hpp>
 
-namespace Gui
-{
-    class ScrollBar;
-}
-
 namespace MWGui
 {
 
@@ -60,7 +55,7 @@ namespace MWGui
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
-        Gui::ScrollBar* mHourSlider;
+        MyGUI::ScrollBar* mHourSlider;
 
         TimeAdvancer mTimeAdvancer;
         bool mSleeping;

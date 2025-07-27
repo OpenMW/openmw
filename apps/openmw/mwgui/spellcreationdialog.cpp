@@ -9,7 +9,6 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/values.hpp>
 #include <components/widgets/list.hpp>
-#include <components/widgets/scrollbar.hpp>
 
 #include <components/esm3/loadgmst.hpp>
 

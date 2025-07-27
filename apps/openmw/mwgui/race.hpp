@@ -25,11 +25,6 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace Gui
-{
-    class ScrollBar;
-}
-
 namespace MWGui
 {
     class RaceDialog : public WindowModal
@@ -105,7 +100,7 @@ namespace MWGui
 
         MyGUI::ImageBox* mPreviewImage;
         MyGUI::ListBox* mRaceList;
-        Gui::ScrollBar* mHeadRotate;
+        MyGUI::ScrollBar* mHeadRotate;
         MyGUI::Button* mBackButton;
         MyGUI::Button* mOkButton;
 

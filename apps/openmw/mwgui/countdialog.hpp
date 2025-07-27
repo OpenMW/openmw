@@ -6,7 +6,6 @@
 namespace Gui
 {
     class NumericEditBox;
-    class ScrollBar;
 }
 
 namespace MWGui
@@ -24,7 +23,7 @@ namespace MWGui
         MyGUI::delegates::MultiDelegate<MyGUI::Widget*, std::size_t> eventOkClicked;
 
     private:
-        Gui::ScrollBar* mSlider;
+        MyGUI::ScrollBar* mSlider;
         Gui::NumericEditBox* mItemEdit;
         MyGUI::TextBox* mItemText;
         MyGUI::TextBox* mLabelText;
