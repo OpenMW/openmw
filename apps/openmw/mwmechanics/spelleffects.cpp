@@ -377,8 +377,11 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
-            effect.mMinMagnitude *= magnitudeMult;
-            effect.mMaxMagnitude *= magnitudeMult;
+            else if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            {
+                effect.mMinMagnitude *= magnitudeMult;
+                effect.mMaxMagnitude *= magnitudeMult;
+            }
         }
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
@@ -1011,11 +1014,13 @@ namespace MWMechanics
         else
         {
             // Morrowind.exe doesn't apply magic effects while the menu is open, we do because we like to see stats
-            // updated instantly. We don't want to teleport instantly though
+            // updated instantly. We don't want to teleport instantly though. Nor do we want to force players to drink
+            // invisibility potions in the "right" order
             if (!dt
                 && (effect.mEffectId == ESM::MagicEffect::Recall
                     || effect.mEffectId == ESM::MagicEffect::DivineIntervention
-                    || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention))
+                    || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention
+                    || effect.mEffectId == ESM::MagicEffect::Invisibility))
                 return { MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth };
             auto& stats = target.getClass().getCreatureStats(target);
             auto& magnitudes = stats.getMagicEffects();

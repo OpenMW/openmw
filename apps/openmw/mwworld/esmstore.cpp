@@ -566,10 +566,10 @@ namespace MWWorld
         std::vector<Ref> refs;
         std::set<ESM::RefId> keyIDs;
         std::vector<ESM::RefId> refIDs;
-        Store<ESM::Cell> Cells = get<ESM::Cell>();
-        for (auto it = Cells.intBegin(); it != Cells.intEnd(); ++it)
+        const Store<ESM::Cell>& cells = get<ESM::Cell>();
+        for (auto it = cells.intBegin(); it != cells.intEnd(); ++it)
             readRefs(*it, refs, refIDs, keyIDs, readers);
-        for (auto it = Cells.extBegin(); it != Cells.extEnd(); ++it)
+        for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
             readRefs(*it, refs, refIDs, keyIDs, readers);
         const auto lessByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
         std::stable_sort(refs.begin(), refs.end(), lessByRefNum);

@@ -10,7 +10,6 @@
 #include <components/files/conversion.hpp>
 
 namespace bpo = boost::program_options;
-namespace sfs = std::filesystem;
 
 #ifndef _WIN32
 int main(int argc, char* argv[])

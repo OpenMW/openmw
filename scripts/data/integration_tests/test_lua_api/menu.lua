@@ -82,6 +82,7 @@ registerGlobalTest('player rotation', 'rotating player should not lead to nan ro
 registerGlobalTest('player forward running')
 registerGlobalTest('player diagonal walking')
 registerGlobalTest('findPath')
+registerGlobalTest('findPath with checkpoints')
 registerGlobalTest('findRandomPointAroundCircle')
 registerGlobalTest('castNavigationRay')
 registerGlobalTest('findNearestNavMeshPosition')

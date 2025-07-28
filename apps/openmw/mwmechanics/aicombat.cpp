@@ -1,13 +1,11 @@
 #include "aicombat.hpp"
 
-#include <components/misc/coordinateconverter.hpp>
-#include <components/misc/rng.hpp>
-
-#include <components/esm3/aisequence.hpp>
-
-#include <components/misc/mathutil.hpp>
-
 #include <components/detournavigator/navigatorutils.hpp>
+#include <components/esm3/aisequence.hpp>
+#include <components/misc/coordinateconverter.hpp>
+#include <components/misc/mathutil.hpp>
+#include <components/misc/pathgridutils.hpp>
+#include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwphysics/raycasting.hpp"
@@ -178,11 +176,16 @@ namespace MWMechanics
             currentCell = actor.getCell();
         }
 
+        const MWWorld::Class& actorClass = actor.getClass();
+        MWMechanics::CreatureStats& stats = actorClass.getCreatureStats(actor);
+        if (stats.isParalyzed() || stats.getKnockedDown())
+            return false;
+
         bool forceFlee = false;
         if (!canFight(actor, target))
         {
             storage.stopAttack();
-            actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+            stats.setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
             // Continue combat if target is player or player follower/escorter and an attack has been attempted
             const auto& playerFollowersAndEscorters
@@ -191,18 +194,14 @@ namespace MWMechanics
                 = (std::find(playerFollowersAndEscorters.begin(), playerFollowersAndEscorters.end(), target)
                     != playerFollowersAndEscorters.end());
             if ((target == MWMechanics::getPlayer() || targetSidesWithPlayer)
-                && ((actor.getClass().getCreatureStats(actor).getHitAttemptActorId()
-                        == target.getClass().getCreatureStats(target).getActorId())
-                    || (target.getClass().getCreatureStats(target).getHitAttemptActorId()
-                        == actor.getClass().getCreatureStats(actor).getActorId())))
+                && ((stats.getHitAttemptActorId() == target.getClass().getCreatureStats(target).getActorId())
+                    || (target.getClass().getCreatureStats(target).getHitAttemptActorId() == stats.getActorId())))
                 forceFlee = true;
             else // Otherwise end combat
                 return true;
         }
 
-        const MWWorld::Class& actorClass = actor.getClass();
-        actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
-
+        stats.setMovementFlag(CreatureStats::Flag_Run, true);
         float& actionCooldown = storage.mActionCooldown;
         std::unique_ptr<Action>& currentAction = storage.mCurrentAction;
 
@@ -302,8 +301,8 @@ namespace MWMechanics
             const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
             const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             const auto& pathGridGraph = getPathGridGraph(pathgrid);
-            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
-                navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
+            mPathFinder.buildPath(actor, vActorPos, vTargetPos, pathGridGraph, agentBounds, navigatorFlags, areaCosts,
+                storage.mAttackRange, PathType::Full);
 
             if (!mPathFinder.isPathConstructed())
             {
@@ -316,8 +315,8 @@ namespace MWMechanics
                 if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
                 {
                     // If the point is close enough, try to find a path to that point.
-                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, agentBounds,
-                        navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
+                    mPathFinder.buildPath(actor, vActorPos, *hit, pathGridGraph, agentBounds, navigatorFlags, areaCosts,
+                        storage.mAttackRange, PathType::Full);
                     if (mPathFinder.isPathConstructed())
                     {
                         // If path to that point is found use it as custom destination.
@@ -330,7 +329,7 @@ namespace MWMechanics
                 {
                     storage.mUseCustomDestination = false;
                     storage.stopAttack();
-                    actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
+                    stats.setAttackingOrSpell(false);
                     currentAction = std::make_unique<ActionFlee>();
                     actionCooldown = currentAction->getActionCooldown();
                     storage.startFleeing();
@@ -393,8 +392,8 @@ namespace MWMechanics
                         osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                         coords.toLocal(localPos);
 
-                        size_t closestPointIndex = PathFinder::getClosestPoint(pathgrid, localPos);
-                        for (size_t i = 0; i < pathgrid->mPoints.size(); i++)
+                        const std::size_t closestPointIndex = Misc::getClosestPoint(*pathgrid, localPos);
+                        for (std::size_t i = 0; i < pathgrid->mPoints.size(); i++)
                         {
                             if (i != closestPointIndex
                                 && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, i))
@@ -455,7 +454,8 @@ namespace MWMechanics
                 float dist
                     = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                 if ((dist > fFleeDistance && !storage.mLOS)
-                    || pathTo(actor, PathFinder::makeOsgVec3(storage.mFleeDest), duration, supportedMovementDirections))
+                    || pathTo(
+                        actor, Misc::Convert::makeOsgVec3f(storage.mFleeDest), duration, supportedMovementDirections))
                 {
                     state = AiCombatStorage::FleeState_Idle;
                 }

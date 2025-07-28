@@ -1,6 +1,7 @@
 Checks: >
   -*,
   portability-*,
+  -portability-template-virtual-member-function,
   clang-analyzer-*,
   -clang-analyzer-optin.*,
   -clang-analyzer-cplusplus.NewDeleteLeaks,
@@ -16,4 +17,4 @@ CheckOptions:
 - key: readability-identifier-naming.NamespaceCase
   value: CamelCase
 - key: readability-identifier-naming.NamespaceIgnoredRegexp
-  value: 'osg(DB|FX|Particle|Shadow|Viewer|Util)?'
+  value: 'bpo|osg(DB|FX|Particle|Shadow|Viewer|Util)?'
