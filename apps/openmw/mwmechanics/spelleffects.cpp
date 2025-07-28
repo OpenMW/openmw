@@ -377,8 +377,11 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
-            effect.mMinMagnitude *= magnitudeMult;
-            effect.mMaxMagnitude *= magnitudeMult;
+            else if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            {
+                effect.mMinMagnitude *= magnitudeMult;
+                effect.mMaxMagnitude *= magnitudeMult;
+            }
         }
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
