@@ -293,7 +293,11 @@ namespace MWLua
 
         api["remove"] = [context](std::string vfxId) {
             context.mLuaManager->addAction(
-                [vfxId = vfxId] { MWBase::Environment::get().getWorld()->removeEffect(vfxId); }, "openmw.vfx.remove");
+                [vfxId = vfxId] {
+                    if (!vfxId.empty())
+                        MWBase::Environment::get().getWorld()->removeEffect(vfxId);
+                },
+                "openmw.vfx.remove");
         };
 
         api["spawn"]
