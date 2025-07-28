@@ -2,6 +2,8 @@
 ------
 
     Bug #2967: Inventory windows don't update when changing items by script
+    Bug #4437: Transformations for NiSkinInstance are ignored
+    Bug #4885: Disable in dialogue result script causes a crash
     Bug #5331: Pathfinding works incorrectly when actor is moved from one interior cell to another
     Bug #6039: Next Spell keybind fails while selected enchanted item has multiple copies
     Bug #6573: Editor: Selection behaves incorrectly on high-DPI displays
@@ -9,9 +11,11 @@
     Bug #7371: Equipping item from inventory does not play a Down sound when equipping fails
     Bug #7622: Player's marksman weapons don't work on close actors underwater
     Bug #7649: The sound and vfx of resisted enchanted items' magic still play
+    Bug #7693: I.ItemUsage should return an item to the selected stack if equipping/consumption is denied
     Bug #7740: Magic items in the HUD aren't composited correctly
     Bug #7799: Picking up ingredients while object paging active grid is on may cause a hiccup
     Bug #7871: Kwama Queen doesn't start combat with player
+    Bug #7979: Paralyzed NPCs battlecry
     Bug #8245: The console command ShowVars does not list global mwscripts
     Bug #8265: Topics are linked incorrectly
     Bug #8303: On target spells cast by non-actors should fire underwater
@@ -25,30 +29,40 @@
     Bug #8375: Moon phase cycle doesn't match Morrowind
     Bug #8383: Casting bound helm or boots on beast races doesn't cleanup properly
     Bug #8385: Russian encoding broken with locale parameters and calendar
+    Bug #8404: Prevent merchant equipping breaks on lights
     Bug #8408: OpenMW doesn't report all the potential resting hindrances
     Bug #8414: Waterwalking works when collision is disabled
     Bug #8431: Behaviour of removed items from a container is buggy
     Bug #8432: Changing to and from an interior cell doesn't update collision
+    Bug #8433: Wandering NPCs are not capable of avoiding easy obstacles
     Bug #8436: Spell selection in a pinned spellbook window doesn't update
     Bug #8437: Pinned inventory window's pin button doesn't look pressed
     Bug #8446: Travel prices are strangely inconsistent
+    Bug #8447: Werewolf swimming animation breaks in third person perspective
     Bug #8459: Changing magic effect base cost doesn't change spell price
     Bug #8466: Showmap "" reveals nameless cells
     Bug #8485: Witchwither disease and probably other common diseases don't work correctly
     Bug #8490: Normals on Water disappear when Water Shader is Enabled but Refraction is Disabled
     Bug #8500: OpenMW Alarm behaviour doesn't match morrowind.exe
     Bug #8519: Multiple bounty is sometimes assigned to player when detected during a pickpocketing action
+    Bug #8540: Magic resistance is applied to effects without a magnitude
+    Bug #8557: Charm's disposition changes capped on 100, uncapped below 0
+    Bug #8582: addScript-attached local scripts start out inactive
     Bug #8585: Dialogue topic list doesn't have enough padding
     Bug #8587: Minor INI importer problems
     Bug #8593: Render targets do not generate mipmaps
     Bug #8598: Post processing shaders don't interact with the vfs correctly
     Bug #8599: Non-ASCII paths in BSA files don't work
+    Bug #8606: Floating point imprecision can mess with container capacity
     Bug #8609: The crosshair is too large
     Bug #8610: Terrain normal maps using NormalGL format instead of NormalDX
     Bug #8612: Using aiactivate on an ingredient when graphical herbalism is enabled triggers non-stop pickup sounds
+    Bug #8614: Lua garbage collection fails to remove unused data
     Bug #8615: Rest/wait time progress speed is different from vanilla
     Feature #2522: Support quick item transfer
     Feature #3769: Allow GetSpellEffects on enchantments
+    Feature #6976: [Lua] Weather API
+    Feature #8077: Save settings changes when clicking "ok"/closing the window
     Feature #8112: Expose landscape record data to Lua
     Feature #8113: Support extended selection in autodetected subdirectory dialog
     Feature #8139: Editor: Redesign the selection markers
@@ -57,8 +71,10 @@
     Feature #8320: Add access mwscript source text to lua api
     Feature #8334: Lua: AddTopic equivalent
     Feature #8355: Lua: Window visibility checking in interfaces.UI
+    Feature #8509: FillJournal script instruction
     Feature #8580: Sort characters in the save loading menu
     Feature #8597: Lua: Add more built-in event handlers
+    Feature #8629: Expose path grid data to Lua
 
 0.49.0
 ------
