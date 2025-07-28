@@ -331,6 +331,7 @@
 ---
 -- Adds a new spell to the list of active spells (only in global scripts or on self).
 -- Note that this does not play any related VFX or sounds.
+-- Note that this should not be used to add spells without durations (i.e. abilities, curses, and diseases) as they will expire instantly. Use @{#ActorSpells.add} instead.
 -- @function [parent=#ActorActiveSpells] add
 -- @param self
 -- @param #table options A table of parameters. Must contain the following required parameters:
