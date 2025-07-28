@@ -22,6 +22,7 @@
 #include "../mwmechanics/aitravel.hpp"
 #include "../mwmechanics/aiwander.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/greetingstate.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -487,7 +488,7 @@ namespace MWScript
                     else if (testedTargetId == "Player") // Currently the player ID is hardcoded
                     {
                         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
-                        bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
+                        bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::GreetingState::InProgress;
                         bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
                         targetsAreEqual = (greeting && sayActive) || mechMgr->isTurningToPlayer(actor);
                     }
