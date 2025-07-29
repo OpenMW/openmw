@@ -62,6 +62,19 @@ However, it depends on several packages which are not in stable,
 so it is not possible to install OpenMW in Wheezy without creating a FrankenDebian.
 This is not recommended or supported.
 
+Fedora
+======
+
+OpenMW is available in the official repository of Fedora for versions 41 and up.
+To install simply run the following as root (or in sudo), depending on what packages
+you want.
+
+.. code-block:: console
+
+	$ dnf install openmw
+	$ dnf install openmw-cs
+	$ dnf install openmw-tools
+
 Flatpak
 =======
 
