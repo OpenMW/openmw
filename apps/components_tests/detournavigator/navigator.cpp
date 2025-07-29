@@ -985,7 +985,7 @@ namespace
             0, 0, 0, 0, 0, // row 0
             0, 0, 0, 0, 0, // row 1
             0, 0, 1000, 0, 0, // row 2
-            0, 0, 0, 0, 0, // row 3
+            0, 0, 1000, 0, 0, // row 3
             0, 0, 0, 0, 0, // row 4
         } };
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
@@ -1017,7 +1017,7 @@ namespace
             0, 0, 0, 0, 0, // row 0
             0, 0, 0, 0, 0, // row 1
             0, 0, -1000, 0, 0, // row 2
-            0, 0, 0, 0, 0, // row 3
+            0, 0, -1000, 0, 0, // row 3
             0, 0, 0, 0, 0, // row 4
         } };
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
@@ -1049,7 +1049,7 @@ namespace
             0, 0, 0, 0, 0, // row 0
             0, 0, 0, 0, 0, // row 1
             0, 0, 1000, 0, 0, // row 2
-            0, 0, 0, 0, 0, // row 3
+            0, 0, 1000, 0, 0, // row 3
             0, 0, 0, 0, 0, // row 4
         } };
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
@@ -1086,7 +1086,7 @@ namespace
             0, 0, 0, 0, 0, // row 0
             0, 0, 0, 0, 0, // row 1
             0, 0, 1000, 0, 0, // row 2
-            0, 0, 0, 0, 0, // row 3
+            0, 0, 1000, 0, 0, // row 3
             0, 0, 0, 0, 0, // row 4
         } };
         const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
