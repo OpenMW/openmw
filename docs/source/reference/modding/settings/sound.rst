@@ -129,5 +129,5 @@ Sound Settings
    :default: 0.25
    :location: :bdg-success:`Launcher > Settings > Audio`
 
-   This setting controls the strength of the doppler effect. Doppler effect increases or decreases the pitch of sounds
-   relative to the velocity of the source and the listener.
+   This setting controls the strength of the Doppler effect. The Doppler effect increases or decreases the pitch of sounds
+   relative to the velocity of the sound source and the listener.

@@ -1451,7 +1451,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Script à lancer après démarrage :</translation>
     </message>
     <message>
-        <source>Controls the strength of the doppler effect. Zero means it is completely disabled.</source>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
