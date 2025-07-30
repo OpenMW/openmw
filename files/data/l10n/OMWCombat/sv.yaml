@@ -1,0 +1,16 @@
+Combat: "OpenMW Strid"
+combatSettingsPageDescription: "OpenMW Stridsinställningar"
+
+combatSettings: "Strid"
+
+unarmedCreatureAttacksDamageArmor: "Obeväpnad attack från varelser skadar rustning"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Obeväpnade varelser skadar nu även rustning.
+
+redistributeShieldHitsWhenNotWearingShield: "Omfördela sköldträffar när sköld inte är buren"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Motsvarar ”Shield hit location fix” från Morrowind Code Patch. Omfördelar träffar på sköldens rustningsplats till vänster axelstycke (pauldron) eller kyrass (cuirass) när du inte bär en sköld.
+
+spawnBloodEffectsOnPlayer: "Skapa blodeffekter på spelarfiguren"
+spawnBloodEffectsOnPlayerDescription: |
+    Om blodeffekter är aktiverade visas de på spelarfiguren när denne träffas i strid, precis som på alla andra rollfigurer.

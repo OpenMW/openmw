@@ -5,8 +5,6 @@
 #include <MyGUI_InputManager.h>
 #include <osg/Stats>
 
-#include "sol/state_view.hpp"
-
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/luascripts.hpp>
@@ -150,6 +148,17 @@ namespace MWLua
                 mGlobalStorage.save(view.sol(), userConfigPath / "global_storage.bin");
             mPlayerStorage.save(view.sol(), userConfigPath / "player_storage.bin");
         });
+    }
+
+    void LuaManager::sendLocalEvent(
+        const MWWorld::Ptr& target, const std::string& name, const std::optional<sol::table>& data)
+    {
+        LuaUtil::BinaryData binary = {};
+        if (data)
+        {
+            binary = LuaUtil::serialize(*data, mLocalSerializer.get());
+        }
+        mLuaEvents.addLocalEvent({ getId(target), name, binary });
     }
 
     void LuaManager::update()
@@ -480,6 +489,49 @@ namespace MWLua
     {
         mEngineEvents.addToQueue(
             EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
+    }
+
+    void LuaManager::onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
+        const MWWorld::Ptr& ammo, int attackType, float attackStrength, float damage, bool isHealth,
+        const osg::Vec3f& hitPos, bool successful, MWMechanics::DamageSourceType sourceType)
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table damageTable = view.newTable();
+            if (isHealth)
+                damageTable["health"] = damage;
+            else
+                damageTable["fatigue"] = damage;
+
+            sol::table data = view.newTable();
+            if (!attacker.isEmpty())
+                data["attacker"] = LObject(attacker);
+            if (!weapon.isEmpty())
+                data["weapon"] = LObject(weapon);
+            if (!ammo.isEmpty())
+                data["ammo"] = LObject(weapon);
+            data["type"] = attackType;
+            data["strength"] = attackStrength;
+            data["damage"] = damageTable;
+            data["hitPos"] = hitPos;
+            data["successful"] = successful;
+            switch (sourceType)
+            {
+                case MWMechanics::DamageSourceType::Unspecified:
+                    data["sourceType"] = "unspecified";
+                    break;
+                case MWMechanics::DamageSourceType::Melee:
+                    data["sourceType"] = "melee";
+                    break;
+                case MWMechanics::DamageSourceType::Ranged:
+                    data["sourceType"] = "ranged";
+                    break;
+                case MWMechanics::DamageSourceType::Magical:
+                    data["sourceType"] = "magic";
+                    break;
+            }
+
+            sendLocalEvent(victim, "Hit", data);
+        });
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)

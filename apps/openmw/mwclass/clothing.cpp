@@ -98,7 +98,7 @@ namespace MWClass
         return std::make_pair(slots_, false);
     }
 
-    ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 

@@ -25,10 +25,13 @@
 #include "../mwmechanics/setbaseaisetting.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwlua/localscripts.hpp"
 
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -283,8 +286,8 @@ namespace MWClass
 
         if (!success)
         {
-            victim.getClass().onHit(
-                victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
+            MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
+                0.0f, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -342,12 +345,12 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(
-            victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
+        MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
+            damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
-    void Creature::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+    void Creature::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages,
+        const MWWorld::Ptr& object, const MWWorld::Ptr& attacker, bool successful,
         const MWMechanics::DamageSourceType sourceType) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
@@ -397,19 +400,44 @@ namespace MWClass
         if (!successful)
         {
             // Missed
-            if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                MWBase::Environment::get().getSoundManager()->playSound3D(
-                    ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
             return;
         }
 
         if (!object.isEmpty())
             stats.setLastHitObject(object.getCellRef().getRefId());
 
-        if (damage < 0.001f)
-            damage = 0;
+        bool hasDamage = false;
+        bool hasHealthDamage = false;
+        float healthDamage = 0.f;
+        for (auto& [stat, damage] : damages)
+        {
+            if (damage < 0.001f)
+                continue;
+            hasDamage = true;
 
-        if (damage > 0.f)
+            if (stat == "health")
+            {
+                hasHealthDamage = true;
+                healthDamage = damage;
+                MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+                health.setCurrent(health.getCurrent() - damage);
+                stats.setHealth(health);
+            }
+            else if (stat == "fatigue")
+            {
+                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                fatigue.setCurrent(fatigue.getCurrent() - damage, true);
+                stats.setFatigue(fatigue);
+            }
+            else if (stat == "magicka")
+            {
+                MWMechanics::DynamicStat<float> magicka(getCreatureStats(ptr).getMagicka());
+                magicka.setCurrent(magicka.getCurrent() - damage);
+                stats.setMagicka(magicka);
+            }
+        }
+
+        if (hasDamage)
         {
             if (!attacker.isEmpty())
             {
@@ -420,34 +448,10 @@ namespace MWClass
                         * getGmst().iKnockDownOddsMult->mValue.getInteger() * 0.01f
                     + getGmst().iKnockDownOddsBase->mValue.getInteger();
                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99(prng))
+                if (hasHealthDamage && agilityTerm <= healthDamage && knockdownTerm <= Misc::Rng::roll0to99(prng))
                     stats.setKnockedDown(true);
                 else
                     stats.setHitRecovery(true); // Is this supposed to always occur?
-            }
-
-            if (ishealth)
-            {
-                damage *= damage / (damage + getArmorRating(ptr));
-                damage = std::max(1.f, damage);
-                if (!attacker.isEmpty())
-                {
-                    damage = scaleDamage(damage, attacker, ptr);
-                    MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
-                }
-
-                MWBase::Environment::get().getSoundManager()->playSound3D(
-                    ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
-
-                MWMechanics::DynamicStat<float> health(stats.getHealth());
-                health.setCurrent(health.getCurrent() - damage);
-                stats.setHealth(health);
-            }
-            else
-            {
-                MWMechanics::DynamicStat<float> fatigue(stats.getFatigue());
-                fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-                stats.setFatigue(fatigue);
             }
         }
     }
@@ -591,7 +595,7 @@ namespace MWClass
         return info;
     }
 
-    float Creature::getArmorRating(const MWWorld::Ptr& ptr) const
+    float Creature::getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         // Equipment armor rating is deliberately ignored.
         return getCreatureStats(ptr).getMagicEffects().getOrDefault(ESM::MagicEffect::Shield).getMagnitude();
@@ -762,11 +766,6 @@ namespace MWClass
             default:
                 throw std::runtime_error("invalid specialisation");
         }
-    }
-
-    int Creature::getBloodTexture(const MWWorld::ConstPtr& ptr) const
-    {
-        return ptr.get<ESM::Creature>()->mBase->mBloodType;
     }
 
     void Creature::readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const

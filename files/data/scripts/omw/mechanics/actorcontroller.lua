@@ -19,5 +19,18 @@ return {
         BreakInvisibility = function(data)
             Actor.activeEffects(self):remove(core.magic.EFFECT_TYPE.Invisibility)
         end,
+        Unequip = function(data)
+            local equipment = Actor.getEquipment(self)
+            if data.item then
+                for slot, item in pairs(equipment) do
+                    if item == data.item then
+                        equipment[slot] = nil
+                    end
+                end
+            elseif data.slot then
+                equipment[slot] = nil
+            end
+            Actor.setEquipment(self, equipment)
+        end,
     },
 }

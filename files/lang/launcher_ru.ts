@@ -737,14 +737,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет любым персонажам плыть возле поверхности воды, чтобы следовать за другим персонажем, вне зависимости от того, могут они плыть, или нет. Работает только с навигационной сеткой.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет атакам существ без оружия повреждать броню цели, по аналогии с атаками оружием.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation>Атаки существ повреждают броню</translation>
-    </message>
-    <message>
         <source>Off</source>
         <translation>Отключено</translation>
     </message>

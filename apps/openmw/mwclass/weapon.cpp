@@ -105,7 +105,7 @@ namespace MWClass
         return std::make_pair(slots_, stack);
     }
 
-    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;

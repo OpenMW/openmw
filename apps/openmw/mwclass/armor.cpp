@@ -12,6 +12,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwlua/localscripts.hpp"
+
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -109,8 +111,23 @@ namespace MWClass
         return std::make_pair(slots_, false);
     }
 
-    ESM::RefId Armor::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
+        // We don't actually need an actor as such. We just need an object that has
+        // lua scripts and the Combat interface.
+        if (useLuaInterfaceIfAvailable)
+        {
+            // In this interface call, both objects are effectively const, so stripping Const from the ConstPtr is fine.
+            MWWorld::Ptr mutablePtr(
+                const_cast<MWWorld::LiveCellRefBase*>(ptr.mRef), const_cast<MWWorld::CellStore*>(ptr.mCell));
+            auto res = MWLua::LocalScripts::callPlayerInterface<std::string>(
+                "Combat", "getArmorSkill", MWLua::LObject(mutablePtr));
+            if (res)
+                return ESM::RefId::deserializeText(res.value());
+        }
+
+        // Fallback to the old engine implementation when actors don't have their scripts attached yet.
+
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
         std::string_view typeGmst;
@@ -175,7 +192,7 @@ namespace MWClass
 
     const ESM::RefId& Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        const ESM::RefId es = getEquipmentSkill(ptr);
+        const ESM::RefId es = getEquipmentSkill(ptr, false);
         static const ESM::RefId lightUp = ESM::RefId::stringRefId("Item Armor Light Up");
         static const ESM::RefId mediumUp = ESM::RefId::stringRefId("Item Armor Medium Up");
         static const ESM::RefId heavyUp = ESM::RefId::stringRefId("Item Armor Heavy Up");
@@ -190,7 +207,7 @@ namespace MWClass
 
     const ESM::RefId& Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        const ESM::RefId es = getEquipmentSkill(ptr);
+        const ESM::RefId es = getEquipmentSkill(ptr, false);
         static const ESM::RefId lightDown = ESM::RefId::stringRefId("Item Armor Light Down");
         static const ESM::RefId mediumDown = ESM::RefId::stringRefId("Item Armor Medium Down");
         static const ESM::RefId heavyDown = ESM::RefId::stringRefId("Item Armor Heavy Down");
@@ -221,24 +238,29 @@ namespace MWClass
         std::string text;
 
         // get armor type string (light/medium/heavy)
-        std::string_view typeText;
+        std::string typeText;
         if (ref->mBase->mData.mWeight == 0)
         {
             // no type
         }
         else
         {
-            const ESM::RefId armorType = getEquipmentSkill(ptr);
+            const ESM::RefId armorType = getEquipmentSkill(ptr, true);
             if (armorType == ESM::Skill::LightArmor)
                 typeText = "#{sLight}";
             else if (armorType == ESM::Skill::MediumArmor)
                 typeText = "#{sMedium}";
-            else
+            else if (armorType == ESM::Skill::HeavyArmor)
                 typeText = "#{sHeavy}";
+            // For other skills, just subtitute the skill name
+            // Normally you would never see this case, but modding allows getEquipmentSkill() to return any skill.
+            else
+                typeText = "#{sSkill" + armorType.toString() + "}";
         }
 
         text += "\n#{sArmorRating}: "
-            + MWGui::ToolTips::toString(static_cast<int>(getEffectiveArmorRating(ptr, MWMechanics::getPlayer())));
+            + MWGui::ToolTips::toString(
+                static_cast<int>(getSkillAdjustedArmorRating(ptr, MWMechanics::getPlayer(), true)));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -289,11 +311,25 @@ namespace MWClass
         return record->mId;
     }
 
-    float Armor::getEffectiveArmorRating(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& actor) const
+    float Armor::getSkillAdjustedArmorRating(
+        const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& actor, bool useLuaInterfaceIfAvailable) const
     {
+        if (useLuaInterfaceIfAvailable && actor == MWMechanics::getPlayer())
+        {
+            // In this interface call, both objects are effectively const, so stripping Const from the ConstPtr is fine.
+            MWWorld::Ptr mutablePtr(
+                const_cast<MWWorld::LiveCellRefBase*>(ptr.mRef), const_cast<MWWorld::CellStore*>(ptr.mCell));
+            auto res = MWLua::LocalScripts::callPlayerInterface<float>(
+                "Combat", "getSkillAdjustedArmorRating", MWLua::LObject(mutablePtr), MWLua::LObject(actor));
+            if (res)
+                return res.value();
+        }
+
+        // Fallback to the old engine implementation when actors don't have their scripts attached yet.
+
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
-        const ESM::RefId armorSkillType = getEquipmentSkill(ptr);
+        const ESM::RefId armorSkillType = getEquipmentSkill(ptr, useLuaInterfaceIfAvailable);
         float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
         int iBaseArmorSkill = MWBase::Environment::get()

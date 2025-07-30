@@ -443,17 +443,6 @@ Game Settings
    Some mods add models which change visuals based on time of day. When this setting is enabled, supporting models will automatically make use of Day/night state.
 
 .. omw-setting::
-   :title: unarmed creature attacks damage armor
-   :type: boolean
-   :range: true, false
-   :default: false
-   :location: :bdg-success:`Launcher > Settings > Gameplay`
-
-   If disabled unarmed creature attacks do not reduce armor condition, just as with vanilla engine.
-
-   If enabled unarmed creature attacks reduce armor condition, the same as attacks from NPCs and armed creatures.
-
-.. omw-setting::
    :title: actor collision shape type
    :type: int
    :range: 0, 1, 2
