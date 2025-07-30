@@ -73,7 +73,7 @@ you want.
 
 ``openmw-cs`` includes the construction set.
 
-``openmw-tools`` includes `bsatool`, `esmtool` and `niftest`.
+``openmw-tools`` includes ``bsatool``, ``esmtool`` and ``niftest``.
 
 .. code-block:: console
 
