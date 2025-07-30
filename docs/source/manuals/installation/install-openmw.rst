@@ -69,6 +69,12 @@ OpenMW is available in the official repository of Fedora for versions 41 and up.
 To install simply run the following as root (or in sudo), depending on what packages
 you want.
 
+``openmw`` includes the launcher, install wizard, iniimporter and the game itself.
+
+``openmw-cs`` includes the construction set.
+
+``openmw-tools`` includes `bsatool`, `esmtool` and `niftest`.
+
 .. code-block:: console
 
 	$ dnf install openmw
