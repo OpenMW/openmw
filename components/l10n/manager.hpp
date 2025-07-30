@@ -40,7 +40,7 @@ namespace L10n
 
         const VFS::Manager* mVFS;
         std::vector<icu::Locale> mPreferredLocales;
-        std::map<std::pair<std::string, std::string>, std::shared_ptr<MessageBundles>, std::less<>> mCache;
+        std::map<std::tuple<std::string, std::string>, std::shared_ptr<MessageBundles>, std::less<>> mCache;
         std::function<std::string(std::string_view)> mGmstLoader;
     };
 

@@ -31,7 +31,7 @@ namespace L10n
                 msg << " " << l.getName();
         }
         for (auto& [key, context] : mCache)
-            updateContext(key.first, *context);
+            updateContext(std::get<0>(key), *context);
     }
 
     void Manager::readLangData(std::string_view name, MessageBundles& ctx, const icu::Locale& lang)
@@ -91,7 +91,7 @@ namespace L10n
     std::shared_ptr<const MessageBundles> Manager::getContext(
         std::string_view contextName, const std::string& fallbackLocaleName)
     {
-        std::pair<std::string_view, std::string_view> key(contextName, fallbackLocaleName);
+        std::tuple<std::string_view, std::string_view> key(contextName, fallbackLocaleName);
         auto it = mCache.find(key);
         if (it != mCache.end())
             return it->second;
