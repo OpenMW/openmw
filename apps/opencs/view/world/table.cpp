@@ -592,7 +592,7 @@ void CSVWorld::Table::moveRecords(QDropEvent* event)
     if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
         return;
 
-    QModelIndex targedIndex = indexAt(event->pos());
+    QModelIndex targedIndex = indexAt(event->position().toPoint());
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     int targetRowRaw = targedIndex.row();
@@ -872,7 +872,7 @@ void CSVWorld::Table::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
-        startDragFromTable(*this, indexAt(event->pos()));
+        startDragFromTable(*this, indexAt(event->position().toPoint()));
     }
 }
 

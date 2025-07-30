@@ -55,7 +55,7 @@ void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent* event)
 
 void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
+    QModelIndex index = indexAt(event->position().toPoint());
     if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index))
         || CSVWorld::DragDropUtils::isInfo(*event, getIndexDisplayType(index))
         || CSVWorld::DragDropUtils::isTopicOrJournal(*event, getIndexDisplayType(index)))
@@ -71,7 +71,7 @@ void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent* event)
 
 void CSVWorld::DragRecordTable::dropEvent(QDropEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
+    QModelIndex index = indexAt(event->position().toPoint());
     CSMWorld::ColumnBase::Display display = getIndexDisplayType(index);
     if (CSVWorld::DragDropUtils::canAcceptData(*event, display))
     {

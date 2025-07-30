@@ -659,11 +659,7 @@ void CSVDoc::View::addSubView(const CSMWorld::UniversalId& id, const std::string
     //
     mScrollbarOnly = windows["mainwindow-scrollbar"].toString() == "Scrollbar Only";
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    updateWidth(windows["grow-limit"].isTrue(), minWidth);
-#else
     updateWidth(true, minWidth);
-#endif
 
     mSubViewWindow.addDockWidget(Qt::TopDockWidgetArea, view);
 

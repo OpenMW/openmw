@@ -171,7 +171,7 @@ QWidget* CSVWorld::CommandDelegate::createEditor(
     // TODO: Find a better solution?
     if (display == CSMWorld::ColumnBase::Display_Boolean)
     {
-        return QItemEditorFactory::defaultFactory()->createEditor(QVariant::Bool, parent);
+        return QItemEditorFactory::defaultFactory()->createEditor(QMetaType::Bool, parent);
     }
     // For tables the pop-up of the color editor should appear immediately after the editor creation
     // (the third parameter of ColorEditor's constructor)
@@ -362,11 +362,7 @@ void CSVWorld::CommandDelegate::setEditorData(QWidget* editor, const QModelIndex
     if (!n.isEmpty())
     {
         if (!variant.isValid())
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             variant = QVariant(editor->property(n).metaType(), (const void*)nullptr);
-#else
-            variant = QVariant(editor->property(n).userType(), (const void*)nullptr);
-#endif
         editor->setProperty(n, variant);
     }
 }

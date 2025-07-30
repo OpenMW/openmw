@@ -1132,7 +1132,7 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
             return;
 
         WorldspaceHitResult hit
-            = getWorldspaceWidget().mousePick(event->pos(), getWorldspaceWidget().getInteractionMask());
+            = getWorldspaceWidget().mousePick(event->position().toPoint(), getWorldspaceWidget().getInteractionMask());
 
         std::string cellId = getWorldspaceWidget().getCellId(hit.worldPos);
 

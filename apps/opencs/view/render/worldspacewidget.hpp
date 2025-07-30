@@ -260,8 +260,6 @@ namespace CSVRender
 
         void settingChanged(const CSMPrefs::Setting* setting) override;
 
-        bool getSpeedMode();
-
         void cycleNavigationMode();
 
     private:
