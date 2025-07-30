@@ -23,6 +23,9 @@
   * - :doc:`Crimes </reference/lua-scripting/interface_crimes>`
     - |bdg-ctx-global|
     - Commit crimes.
+  * - :doc:`Combat </reference/lua-scripting/interface_combat>`
+    - |bdg-ctx-local|
+    - Control combat of NPCs and creatures
   * - :doc:`GamepadControls </reference/lua-scripting/interface_gamepadcontrols>`
     - |bdg-ctx-player|
     - Allows to alter behavior of the built-in script that handles player gamepad controls.

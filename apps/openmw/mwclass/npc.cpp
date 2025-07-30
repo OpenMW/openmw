@@ -29,6 +29,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwlua/localscripts.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aisetting.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
@@ -620,8 +622,8 @@ namespace MWClass
         float damage = 0.0f;
         if (!success)
         {
-            othercls.onHit(
-                victim, damage, false, weapon, ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
+            MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
+                damage, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(damage, false, weapon, ptr);
             MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
             return;
@@ -694,14 +696,13 @@ namespace MWClass
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        othercls.onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
+        MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
+            damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
-    void Npc::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
-        const MWMechanics::DamageSourceType sourceType) const
+    void Npc::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, const MWWorld::Ptr& object,
+        const MWWorld::Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
-        MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         bool wasDead = stats.isDead();
 
@@ -748,23 +749,47 @@ namespace MWClass
         if (!successful)
         {
             // Missed
-            if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
             return;
         }
 
         if (!object.isEmpty())
             stats.setLastHitObject(object.getCellRef().getRefId());
 
-        if (damage < 0.001f)
-            damage = 0;
+        if (ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
+            return;
 
-        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+        bool hasDamage = false;
+        bool hasHealthDamage = false;
+        float healthDamage = 0.f;
+        for (auto& [stat, damage] : damages)
+        {
+            if (damage < 0.001f)
+                continue;
+            hasDamage = true;
 
-        if (godmode)
-            damage = 0;
+            if (stat == "health")
+            {
+                hasHealthDamage = true;
+                healthDamage = damage;
+                MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+                health.setCurrent(health.getCurrent() - damage);
+                stats.setHealth(health);
+            }
+            else if (stat == "fatigue")
+            {
+                MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+                fatigue.setCurrent(fatigue.getCurrent() - damage, true);
+                stats.setFatigue(fatigue);
+            }
+            else if (stat == "magicka")
+            {
+                MWMechanics::DynamicStat<float> magicka(getCreatureStats(ptr).getMagicka());
+                magicka.setCurrent(magicka.getCurrent() - damage);
+                stats.setMagicka(magicka);
+            }
+        }
 
-        if (damage > 0.0f && !attacker.isEmpty())
+        if (hasDamage && !attacker.isEmpty())
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
@@ -783,109 +808,16 @@ namespace MWClass
             float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->mValue.getInteger() * 0.01f
                 + gmst.iKnockDownOddsBase->mValue.getInteger();
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99(prng))
+            if (hasHealthDamage && agilityTerm <= healthDamage && knockdownTerm <= Misc::Rng::roll0to99(prng))
                 stats.setKnockedDown(true);
             else
                 stats.setHitRecovery(true); // Is this supposed to always occur?
-
-            if (damage > 0 && ishealth)
-            {
-                // Hit percentages:
-                // cuirass = 30%
-                // shield, helmet, greaves, boots, pauldrons = 10% each
-                // guantlets = 5% each
-                static const int hitslots[20]
-                    = { MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
-                          MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
-                          MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
-                          MWWorld::InventoryStore::Slot_CarriedLeft, MWWorld::InventoryStore::Slot_CarriedLeft,
-                          MWWorld::InventoryStore::Slot_Helmet, MWWorld::InventoryStore::Slot_Helmet,
-                          MWWorld::InventoryStore::Slot_Greaves, MWWorld::InventoryStore::Slot_Greaves,
-                          MWWorld::InventoryStore::Slot_Boots, MWWorld::InventoryStore::Slot_Boots,
-                          MWWorld::InventoryStore::Slot_LeftPauldron, MWWorld::InventoryStore::Slot_LeftPauldron,
-                          MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
-                          MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet };
-                int hitslot = hitslots[Misc::Rng::rollDice(20, prng)];
-
-                float unmitigatedDamage = damage;
-                float x = damage / (damage + getArmorRating(ptr));
-                damage *= std::max(gmst.fCombatArmorMinMult->mValue.getFloat(), x);
-                int damageDiff = static_cast<int>(unmitigatedDamage - damage);
-                damage = std::max(1.f, damage);
-                damageDiff = std::max(1, damageDiff);
-
-                MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-                MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
-                MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
-                bool hasArmor = !armor.isEmpty() && armor.getType() == ESM::Armor::sRecordId;
-                // If there's no item in the carried left slot or if it is not a shield redistribute the hit.
-                if (!hasArmor && hitslot == MWWorld::InventoryStore::Slot_CarriedLeft)
-                {
-                    if (Misc::Rng::rollDice(2, prng) == 0)
-                        hitslot = MWWorld::InventoryStore::Slot_Cuirass;
-                    else
-                        hitslot = MWWorld::InventoryStore::Slot_LeftPauldron;
-                    armorslot = inv.getSlot(hitslot);
-                    if (armorslot != inv.end())
-                    {
-                        armor = *armorslot;
-                        hasArmor = !armor.isEmpty() && armor.getType() == ESM::Armor::sRecordId;
-                    }
-                }
-                if (hasArmor)
-                {
-                    // Unarmed creature attacks don't affect armor condition unless it was
-                    // explicitly requested.
-                    if (!object.isEmpty() || attacker.isEmpty() || attacker.getClass().isNpc()
-                        || Settings::game().mUnarmedCreatureAttacksDamageArmor)
-                    {
-                        int armorhealth = armor.getClass().getItemHealth(armor);
-                        armorhealth -= std::min(damageDiff, armorhealth);
-                        armor.getCellRef().setCharge(armorhealth);
-
-                        // Armor broken? unequip it
-                        if (armorhealth == 0)
-                            armor = *inv.unequipItem(armor);
-                    }
-
-                    ESM::RefId skill = armor.getClass().getEquipmentSkill(armor);
-                    if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(ptr, skill, ESM::Skill::Armor_HitByOpponent);
-
-                    if (skill == ESM::Skill::LightArmor)
-                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
-                    else if (skill == ESM::Skill::MediumArmor)
-                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
-                    else if (skill == ESM::Skill::HeavyArmor)
-                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
-                }
-                else if (ptr == MWMechanics::getPlayer())
-                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, ESM::Skill::Armor_HitByOpponent);
-            }
         }
 
-        if (ishealth)
+        if (hasHealthDamage && healthDamage > 0.0f)
         {
-            if (!attacker.isEmpty() && !godmode)
-                damage = scaleDamage(damage, attacker, ptr);
-
-            if (damage > 0.0f)
-            {
-                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
-                if (ptr == MWMechanics::getPlayer())
-                    MWBase::Environment::get().getWindowManager()->activateHitOverlay();
-                if (!attacker.isEmpty())
-                    MWBase::Environment::get().getWorld()->spawnBloodEffect(ptr, hitPosition);
-            }
-            MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
-            health.setCurrent(health.getCurrent() - damage);
-            stats.setHealth(health);
-        }
-        else
-        {
-            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
-            fatigue.setCurrent(fatigue.getCurrent() - damage, true);
-            stats.setFatigue(fatigue);
+            if (ptr == MWMechanics::getPlayer())
+                MWBase::Environment::get().getWindowManager()->activateHitOverlay();
         }
 
         if (!wasDead && getCreatureStats(ptr).isDead())
@@ -1136,8 +1068,17 @@ namespace MWClass
         MWBase::Environment::get().getLuaManager()->skillUse(ptr, skill, usageType, extraFactor);
     }
 
-    float Npc::getArmorRating(const MWWorld::Ptr& ptr) const
+    float Npc::getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable) const
     {
+        if (useLuaInterfaceIfAvailable && ptr == MWMechanics::getPlayer())
+        {
+            auto res = MWLua::LocalScripts::callPlayerInterface<float>("Combat", "getArmorRating");
+            if (res)
+                return res.value();
+        }
+
+        // Fallback to the old engine implementation when actors don't have their scripts attached yet.
+
         const MWWorld::Store<ESM::GameSetting>& store
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
@@ -1159,7 +1100,7 @@ namespace MWClass
             }
             else
             {
-                ratings[i] = it->getClass().getEffectiveArmorRating(*it, ptr);
+                ratings[i] = it->getClass().getSkillAdjustedArmorRating(*it, ptr);
 
                 // Take in account armor condition
                 const bool hasHealth = it->getClass().hasItemHealth(*it);
@@ -1306,11 +1247,6 @@ namespace MWClass
     float Npc::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const
     {
         return getNpcStats(ptr).getSkill(id).getModified();
-    }
-
-    int Npc::getBloodTexture(const MWWorld::ConstPtr& ptr) const
-    {
-        return ptr.get<ESM::NPC>()->mBase->mBloodType;
     }
 
     void Npc::readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const

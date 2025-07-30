@@ -420,6 +420,42 @@ namespace MWLua
             return ptr.getClass().getCapacity(ptr);
         };
 
+        actor["_onHit"] = [context](const SelfObject& self, const sol::table& options) {
+            sol::optional<sol::table> damageLua = options.get<sol::optional<sol::table>>("damage");
+            std::map<std::string, float> damageCpp;
+            if (damageLua)
+            {
+                for (auto& [key, value] : damageLua.value())
+                {
+                    damageCpp[key.as<std::string>()] = value.as<float>();
+                }
+            }
+            std::string sourceTypeStr = options.get_or<std::string>("sourceType", "unspecified");
+            MWMechanics::DamageSourceType sourceType = MWMechanics::DamageSourceType::Unspecified;
+            if (sourceTypeStr == "melee")
+                sourceType = MWMechanics::DamageSourceType::Melee;
+            else if (sourceTypeStr == "ranged")
+                sourceType = MWMechanics::DamageSourceType::Ranged;
+            else if (sourceTypeStr == "magic")
+                sourceType = MWMechanics::DamageSourceType::Magical;
+            sol::optional<Object> weapon = options.get<sol::optional<Object>>("weapon");
+            sol::optional<Object> ammo = options.get<sol::optional<Object>>("ammo");
+
+            context.mLuaManager->addAction(
+                [self = self, damages = std::move(damageCpp), attacker = options.get<sol::optional<Object>>("attacker"),
+                    weapon = ammo ? ammo : weapon, successful = options.get<bool>("successful"),
+                    sourceType = sourceType] {
+                    MWWorld::Ptr attackerPtr;
+                    MWWorld::Ptr weaponPtr;
+                    if (attacker)
+                        attackerPtr = attacker->ptr();
+                    if (weapon)
+                        weaponPtr = weapon->ptr();
+                    self.ptr().getClass().onHit(self.ptr(), damages, weaponPtr, attackerPtr, successful, sourceType);
+                },
+                "HitAction");
+        };
+
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }

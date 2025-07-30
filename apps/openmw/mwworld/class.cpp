@@ -119,8 +119,8 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker,
-        const osg::Vec3f& hitPosition, bool successful, const MWMechanics::DamageSourceType sourceType) const
+    void Class::onHit(const Ptr& ptr, const std::map<std::string, float>& damages, const Ptr& object,
+        const Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         throw std::runtime_error("class cannot be hit");
     }
@@ -205,7 +205,7 @@ namespace MWWorld
         return std::make_pair(std::vector<int>(), false);
     }
 
-    ESM::RefId Class::getEquipmentSkill(const ConstPtr& ptr) const
+    ESM::RefId Class::getEquipmentSkill(const ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         return {};
     }
@@ -235,7 +235,7 @@ namespace MWWorld
         return false;
     }
 
-    float Class::getArmorRating(const MWWorld::Ptr& ptr) const
+    float Class::getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         throw std::runtime_error("Class does not support armor rating");
     }
@@ -452,11 +452,6 @@ namespace MWWorld
         throw std::runtime_error("class does not support skills");
     }
 
-    int Class::getBloodTexture(const MWWorld::ConstPtr& ptr) const
-    {
-        throw std::runtime_error("class does not support gore");
-    }
-
     void Class::readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
 
     void Class::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const {}
@@ -514,7 +509,8 @@ namespace MWWorld
         return -1;
     }
 
-    float Class::getEffectiveArmorRating(const ConstPtr& armor, const Ptr& actor) const
+    float Class::getSkillAdjustedArmorRating(
+        const ConstPtr& armor, const Ptr& actor, bool useLuaInterfaceIfAvailable) const
     {
         throw std::runtime_error("class does not support armor ratings");
     }

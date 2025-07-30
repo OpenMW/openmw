@@ -408,7 +408,7 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
         {
             if (actorIsNpc)
             {
-                if (testCls.getEffectiveArmorRating(test, actor) <= unarmoredRating)
+                if (testCls.getSkillAdjustedArmorRating(test, actor) <= unarmoredRating)
                     continue;
             }
             else
@@ -463,8 +463,8 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
                         // For NPCs, compare armor rating; for creatures, compare condition
                         if (actorIsNpc)
                         {
-                            const float rating = testCls.getEffectiveArmorRating(test, actor);
-                            const float oldRating = oldCls.getEffectiveArmorRating(old, actor);
+                            const float rating = testCls.getSkillAdjustedArmorRating(test, actor);
+                            const float oldRating = oldCls.getSkillAdjustedArmorRating(old, actor);
                             if (rating <= oldRating)
                                 continue;
                         }

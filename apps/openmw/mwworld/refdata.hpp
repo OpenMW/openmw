@@ -105,7 +105,7 @@ namespace MWWorld
 
         void setLocals(const ESM::Script& script);
 
-        MWLua::LocalScripts* getLuaScripts() { return mLuaScripts.get(); }
+        MWLua::LocalScripts* getLuaScripts() const { return mLuaScripts.get(); }
         void setLuaScripts(std::shared_ptr<MWLua::LocalScripts>&&);
 
         /// This flag is only used for content stack loading and will not be stored in the savegame.

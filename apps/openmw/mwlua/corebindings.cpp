@@ -11,6 +11,7 @@
 #include <components/lua/util.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/settings/values.hpp>
 #include <components/version/version.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -158,6 +159,8 @@ namespace MWLua
                     { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
         }
+
+        api["getGameDifficulty"] = []() { return Settings::game().mDifficulty.get(); };
 
         sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
         return context.setTypePackage(readOnlyApi, "openmw_core");
