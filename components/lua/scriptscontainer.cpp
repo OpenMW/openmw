@@ -215,12 +215,13 @@ namespace LuaUtil
                                 return true;
                         }
                     }
+                    return false;
                 }
-                else if constexpr (std::is_same_v<T, LoadedData>)
+                else
                 {
+                    static_assert(std::is_same_v<T, LoadedData>, "Non-exhaustive visitor");
                     return variant.mScripts.count(scriptId) != 0;
                 }
-                return false;
             },
             mData);
     }

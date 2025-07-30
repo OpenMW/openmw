@@ -528,8 +528,6 @@ namespace Fx
         {
             return parseBool();
         }
-
-        error(Misc::StringUtils::format("failed setting uniform type"));
     }
 
     template <class SrcT, class T>
@@ -557,10 +555,12 @@ namespace Fx
             {
                 if constexpr (std::is_same_v<bool, SrcT>)
                     error("bool arrays currently unsupported");
-
-                int size = parseInteger();
-                if (size > 1)
-                    data.mArray = std::vector<SrcT>(size);
+                else
+                {
+                    int size = parseInteger();
+                    if (size > 1)
+                        data.mArray = std::vector<SrcT>(size);
+                }
             }
             else if (key == "min")
             {
