@@ -263,6 +263,8 @@ namespace MWGui
             mControllerFocus = wrap(mControllerFocus + 1, mSpellButtons.size());
             mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
+        else
+            return true;
 
         if (mControllerFocus < mSpellButtons.size())
         {

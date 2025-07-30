@@ -1109,6 +1109,8 @@ namespace MWGui
 
             winMgr->setControllerTooltip(false);
         }
+        else
+            return true;
 
         // Scroll the list to keep the active item in view
         if (mAvailableFocus <= 5)

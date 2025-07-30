@@ -206,44 +206,46 @@ namespace MWGui
 
         int prevFocus = mControllerFocus;
 
-        if (button == SDL_CONTROLLER_BUTTON_A)
+        switch (button)
         {
-            // Select the focused item, if any.
-            if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
-            {
-                MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
-                onSelectedItem(dragArea->getChildAt(mControllerFocus));
-            }
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
-        {
-            // Toggle info tooltip
-            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
-            updateControllerFocus(-1, mControllerFocus);
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-        {
-            if (mControllerFocus % mRows == 0)
-                mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
-            else
-                mControllerFocus--;
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-        {
-            if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
-                mControllerFocus -= mControllerFocus % mRows;
-            else
-                mControllerFocus++;
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mControllerFocus >= mRows)
-            mControllerFocus -= mRows;
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            if (mControllerFocus + mRows < mItemCount)
-                mControllerFocus += mRows;
-            else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
-                mControllerFocus = mItemCount - 1;
+            case SDL_CONTROLLER_BUTTON_A:
+                // Select the focused item, if any.
+                if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
+                {
+                    MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+                    onSelectedItem(dragArea->getChildAt(mControllerFocus));
+                }
+                break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                // Toggle info tooltip
+                MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                    !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+                updateControllerFocus(-1, mControllerFocus);
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                if (mControllerFocus % mRows == 0)
+                    mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
+                else
+                    mControllerFocus--;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
+                    mControllerFocus -= mControllerFocus % mRows;
+                else
+                    mControllerFocus++;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                if (mControllerFocus >= mRows)
+                    mControllerFocus -= mRows;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                if (mControllerFocus + mRows < mItemCount)
+                    mControllerFocus += mRows;
+                else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
+                    mControllerFocus = mItemCount - 1;
+                break;
+            default:
+                return;
         }
 
         if (prevFocus != mControllerFocus)

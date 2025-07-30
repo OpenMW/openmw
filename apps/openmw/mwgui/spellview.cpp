@@ -351,58 +351,67 @@ namespace MWGui
 
         int prevFocus = mControllerFocus;
 
-        if (button == SDL_CONTROLLER_BUTTON_A)
+        switch (button)
         {
-            // Select the focused item, if any.
-            if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
-            {
-                onSpellSelected(mButtons[mControllerFocus].first);
-                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
-            }
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
-        {
-            // Toggle info tooltip
-            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-            mControllerFocus--;
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-            mControllerFocus++;
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
-            mControllerFocus = std::max(0, mControllerFocus - 10);
-        else if (button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-            mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
-        else if (button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-        {
-            // Jump to first item in previous group
-            int prevGroupIndex = 0;
-            for (int groupIndex : mGroupIndices)
-            {
-                if (groupIndex >= mControllerFocus)
-                    break;
-                else
-                    prevGroupIndex = groupIndex;
-            }
-            mControllerFocus = prevGroupIndex;
-        }
-        else if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-        {
-            // Jump to first item in next group
-            int newFocus = mControllerFocus;
-            for (int groupIndex : mGroupIndices)
-            {
-                if (groupIndex > mControllerFocus)
+            case SDL_CONTROLLER_BUTTON_A:
+                // Select the focused item, if any.
+                if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
                 {
-                    newFocus = groupIndex;
-                    break;
+                    onSpellSelected(mButtons[mControllerFocus].first);
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
                 }
+                break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                // Toggle info tooltip
+                MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                    !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                mControllerFocus--;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                mControllerFocus++;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                mControllerFocus = std::max(0, mControllerFocus - 10);
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
+                break;
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+            {
+                // Jump to first item in previous group
+                int prevGroupIndex = 0;
+                for (int groupIndex : mGroupIndices)
+                {
+                    if (groupIndex >= mControllerFocus)
+                        break;
+                    else
+                        prevGroupIndex = groupIndex;
+                }
+                mControllerFocus = prevGroupIndex;
             }
-            // If on last group, jump to bottom of whole list
-            if (newFocus == mControllerFocus)
-                newFocus = mButtons.size() - 1;
-            mControllerFocus = newFocus;
+            break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+            {
+                // Jump to first item in next group
+                int newFocus = mControllerFocus;
+                for (int groupIndex : mGroupIndices)
+                {
+                    if (groupIndex > mControllerFocus)
+                    {
+                        newFocus = groupIndex;
+                        break;
+                    }
+                }
+                // If on last group, jump to bottom of whole list
+                if (newFocus == mControllerFocus)
+                    newFocus = mButtons.size() - 1;
+                mControllerFocus = newFocus;
+            }
+            break;
+            default:
+                return;
         }
 
         mControllerFocus = wrap(mControllerFocus, mButtons.size());
