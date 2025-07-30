@@ -724,7 +724,7 @@ void CSVRender::TerrainTextureMode::dragMoveEvent(QDragMoveEvent* event) {}
 
 void CSVRender::TerrainTextureMode::mouseMoveEvent(QMouseEvent* event)
 {
-    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->pos(), getInteractionMask());
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->position().toPoint(), getInteractionMask());
     if (hit.hit && mBrushDraw)
         mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
     if (!hit.hit && mBrushDraw)

@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <osg/Quat>
 #include <osg/Vec4f>
 
 #include "doorstate.hpp"
@@ -16,8 +15,12 @@
 #include "../mwmechanics/damagesourcetype.hpp"
 
 #include <components/esm/refid.hpp>
-#include <components/esm3/loadskil.hpp>
 #include <components/vfs/pathutil.hpp>
+
+namespace osg
+{
+    class Quat;
+}
 
 namespace ESM
 {

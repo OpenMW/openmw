@@ -708,17 +708,12 @@ printf "Qt ${QT_VER}... "
 			DLLSUFFIX=""
 		fi
 
-		if [ "${QT_MAJOR_VER}" -eq 6 ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
+		add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
 
-			# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
-			if [ "${QT_MINOR_VER}" -ge 7 ]; then
-				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
-			else
-				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
-			fi
+		# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
+		if [ "${QT_MINOR_VER}" -ge 7 ]; then
+			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
 			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		fi
 

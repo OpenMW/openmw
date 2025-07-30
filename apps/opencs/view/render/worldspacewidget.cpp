@@ -687,11 +687,12 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
 
     if (mDragging)
     {
-        int diffX = event->x() - mDragX;
-        int diffY = (height() - event->y()) - mDragY;
+        QPoint pos = event->position().toPoint();
+        int diffX = pos.x() - mDragX;
+        int diffY = (height() - pos.y()) - mDragY;
 
-        mDragX = event->x();
-        mDragY = height() - event->y();
+        mDragX = pos.x();
+        mDragY = height() - pos.y();
 
         double factor = mDragFactor;
 
@@ -700,32 +701,32 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&>(*mEditMode->getCurrent());
 
-        editMode.drag(event->pos(), diffX, diffY, factor);
+        editMode.drag(event->position().toPoint(), diffX, diffY, factor);
     }
     else if (mDragMode != InteractionType_None)
     {
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&>(*mEditMode->getCurrent());
 
         if (mDragMode == InteractionType_PrimaryEdit)
-            mDragging = editMode.primaryEditStartDrag(event->pos());
+            mDragging = editMode.primaryEditStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_SecondaryEdit)
-            mDragging = editMode.secondaryEditStartDrag(event->pos());
+            mDragging = editMode.secondaryEditStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_PrimarySelect)
-            mDragging = editMode.primarySelectStartDrag(event->pos());
+            mDragging = editMode.primarySelectStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_SecondarySelect)
-            mDragging = editMode.secondarySelectStartDrag(event->pos());
+            mDragging = editMode.secondarySelectStartDrag(event->position().toPoint());
 
         if (mDragging)
         {
-            mDragX = event->localPos().x();
-            mDragY = height() - event->localPos().y();
+            mDragX = event->position().x();
+            mDragY = height() - event->position().y();
         }
     }
     else
     {
-        if (event->globalPos() != mToolTipPos)
+        if (event->globalPosition().toPoint() != mToolTipPos)
         {
-            mToolTipPos = event->globalPos();
+            mToolTipPos = event->globalPosition().toPoint();
 
             if (mShowToolTips)
             {
@@ -734,7 +735,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
             }
         }
 
-        const QPointF& pos = event->localPos();
+        QPoint pos = event->position().toPoint();
         handleMarkerHighlight(pos.x(), pos.y());
         SceneWidget::mouseMoveEvent(event);
     }
