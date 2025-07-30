@@ -221,7 +221,8 @@ namespace MWInput
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            gamepadToGuiControl(arg);
+            if (gamepadToGuiControl(arg))
+                return;
         }
         else if (mBindingsManager->actionIsActive(A_TogglePOV)
             && (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
@@ -354,6 +355,7 @@ namespace MWInput
             MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
             if (topWin)
             {
+                bool isPastDeadzone = std::abs(arg.value) > 2000;
                 // Update cursor state
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
                 if (!mGamepadGuiCursorEnabled)
@@ -363,22 +365,35 @@ namespace MWInput
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
-                    if (winMgr->getControllerTooltip() && std::abs(arg.value) > 2000)
+                    if (isPastDeadzone && winMgr->getControllerTooltip())
                     {
                         winMgr->setControllerTooltip(false);
+                        winMgr->setCursorVisible(true);
+                    }
+                    else if (isPastDeadzone && mGamepadGuiCursorEnabled)
+                    {
                         winMgr->setCursorVisible(true);
                     }
                     return false;
                 }
 
-                // On some windows, treat right stick like a scroll wheel.
-                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && topWin->getControllerScrollWidget() != nullptr)
+                // Some windows have a specific widget to scroll with the right stick. Move the mouse there.
+                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && isPastDeadzone
+                    && topWin->getControllerScrollWidget() != nullptr)
+                {
                     mMouseManager->warpMouseToWidget(topWin->getControllerScrollWidget());
+                    winMgr->setCursorVisible(false);
+                }
 
                 if (topWin->onControllerThumbstickEvent(arg))
                 {
                     // Window handled the event.
                     return true;
+                }
+                else if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX || arg.axis == SDL_CONTROLLER_AXIS_RIGHTY)
+                {
+                    // Only right-stick scroll if mouse is visible or there's a widget to scroll.
+                    return !winMgr->getCursorVisible() && topWin->getControllerScrollWidget() == nullptr;
                 }
             }
         }
