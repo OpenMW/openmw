@@ -287,6 +287,8 @@ namespace MWPhysics
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         void reportCollision(const btVector3& position, const btVector3& normal);
 
+        float mPhysicsDt;
+
     private:
         void updateWater();
 
@@ -329,8 +331,6 @@ namespace MWPhysics
         std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
 
         osg::ref_ptr<osg::Group> mParentNode;
-
-        float mPhysicsDt;
 
         std::size_t mSimulationsCounter = 0;
         std::array<std::vector<Simulation>, 2> mSimulations;

@@ -3152,6 +3152,11 @@ namespace MWWorld
         return mWeatherManager->getSunPercentage(getTimeStamp().getHour());
     }
 
+    float World::getPhysicsFrameRateDT() const
+    {
+        return mPhysics->mPhysicsDt;
+    }
+
     bool World::findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result)
     {
         if (cell->isExterior())

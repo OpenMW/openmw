@@ -1587,8 +1587,6 @@ namespace MWSound
         : SoundOutput(mgr)
         , mDevice(nullptr)
         , mContext(nullptr)
-        , mListenerPos(0.0f, 0.0f, 0.0f)
-        , mListenerVel(0.0f, 0.0f, 0.0f)
         , mListenerEnv(Env_Normal)
         , mWaterFilter(0)
         , mWaterEffect(0)

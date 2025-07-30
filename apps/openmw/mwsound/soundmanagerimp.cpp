@@ -10,7 +10,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
-#include <components/misc/strings/conversion.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -42,8 +41,6 @@ namespace MWSound
         constexpr float sSfxFadeInDuration = 1.0f;
         constexpr float sSfxFadeOutDuration = 1.0f;
         constexpr float sSoundCullDistance = 2000.f;
-
-        float physicsFramerate = 60.f;
 
         WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
         {
@@ -140,13 +137,6 @@ namespace MWSound
         {
             Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
-        }
-
-        if (const char* env = getenv("OPENMW_PHYSICS_FPS"))
-        {
-            if (const auto physFramerate = Misc::StringUtils::toNumeric<float>(env);
-                physFramerate.has_value() && *physFramerate > 0)
-                physicsFramerate = *physFramerate;
         }
 
         std::vector<std::string> names = mOutput->enumerate();
@@ -991,7 +981,9 @@ namespace MWSound
                     {
                         sound->setLastPosition(sound->getPosition());
                         sound->setPosition(ptr.getRefData().getPosition().asVec3());
-                        sound->setVelocity((sound->getPosition() - sound->getLastPosition()) * physicsFramerate);
+                        MWBase::World* world = MWBase::Environment::get().getWorld();
+                        sound->setVelocity(
+                            (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDT());
                     }
 
                     cull3DSound(sound);
@@ -1031,7 +1023,8 @@ namespace MWSound
                     sound->setLastPosition(sound->getPosition());
                     MWBase::World* world = MWBase::Environment::get().getWorld();
                     sound->setPosition(world->getActorHeadTransform(ptr).getTrans());
-                    sound->setVelocity((sound->getPosition() - sound->getLastPosition()) * physicsFramerate);
+                    sound->setVelocity(
+                        (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDT());
                 }
 
                 cull3DSound(sound);
