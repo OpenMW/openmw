@@ -1,0 +1,16 @@
+Combat: "Боевая система OpenMW"
+combatSettingsPageDescription: "Настройки боевой системы OpenMW"
+
+combatSettings: "Бой"
+
+unarmedCreatureAttacksDamageArmor: "Атаки существ повреждают броню"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Атаки невооруженных существ тоже будут наносить броне урон.
+
+redistributeShieldHitsWhenNotWearingShield: "Перераспространять удары по щитам"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Эквивалентно настройке "Shield hit location fix" из Morrowind Code Patch. Когда персонаж не носит щит, удары по его слоту будут проходить по слоту левого наплечника или кирасы.
+
+spawnBloodEffectsOnPlayer: "Использовать эффекты крови для игрока"
+spawnBloodEffectsOnPlayerDescription: |
+    Если настройка включена, эффекты крови будут играть при получении ударов в бою персонажем игрока, как для всех остальных персонажей.

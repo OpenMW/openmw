@@ -165,6 +165,29 @@ namespace LuaUtil
         virtual bool isActive() const { return false; }
 
     protected:
+        // Call a function on an interface.
+        template <typename T, typename... Args>
+        std::optional<T> callInterface(std::string_view interfaceName, std::string_view identifier, const Args&... args)
+        {
+            std::optional<T> res = std::nullopt;
+            mLua.protectedCall([&](LuaUtil::LuaView& view) {
+                LoadedData& data = ensureLoaded();
+                auto I = data.mPublicInterfaces.get<sol::optional<sol::table>>(interfaceName);
+                if (I)
+                {
+                    auto o = I->get_or<sol::object>(identifier, sol::nil);
+                    if (o.is<sol::function>())
+                    {
+                        sol::object luaRes = o.as<sol::function>().call(args...);
+                        if (luaRes.is<T>())
+                            res = luaRes.as<T>();
+                    }
+                }
+            });
+
+            return res;
+        }
+
         struct Handler
         {
             int mScriptId;

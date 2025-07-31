@@ -25,6 +25,7 @@
 #include "actorutil.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
+#include "greetingstate.hpp"
 #include "movement.hpp"
 #include "pathgrid.hpp"
 
@@ -257,7 +258,7 @@ namespace MWMechanics
             && !cStats.getMovementFlag(CreatureStats::Flag_ForceSneak))
         {
             GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
-            if (greetingState == Greet_InProgress)
+            if (greetingState == GreetingState::InProgress)
             {
                 if (storage.mState == AiWanderStorage::Wander_Walking)
                 {
@@ -526,7 +527,7 @@ namespace MWMechanics
 
         // Check if idle animation finished
         GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
-        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
+        if (!checkIdle(actor, storage.mIdleAnimation) && greetingState != GreetingState::InProgress)
         {
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);

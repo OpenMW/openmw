@@ -66,8 +66,8 @@ namespace MWClass
         void hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim,
             const osg::Vec3f& hitPosition, bool success) const override;
 
-        void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        void onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, const MWWorld::Ptr& object,
+            const MWWorld::Ptr& attacker, bool successful,
             const MWMechanics::DamageSourceType sourceType) const override;
 
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
@@ -88,7 +88,7 @@ namespace MWClass
         ///< Return total weight that fits into the object. Throws an exception, if the object can't
         /// hold other objects.
 
-        float getArmorRating(const MWWorld::Ptr& ptr) const override;
+        float getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable) const override;
         ///< @return combined armor rating of this actor
 
         bool isEssential(const MWWorld::ConstPtr& ptr) const override;
@@ -117,9 +117,6 @@ namespace MWClass
         bool canWalk(const MWWorld::ConstPtr& ptr) const override;
 
         float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const override;
-
-        /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
-        int getBloodTexture(const MWWorld::ConstPtr& ptr) const override;
 
         void readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
         ///< Read additional state from \a state into \a ptr.

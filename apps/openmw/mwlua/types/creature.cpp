@@ -74,6 +74,7 @@ namespace MWLua
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Essential; });
         record["isRespawning"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Respawn; });
+        record["bloodType"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mBloodType; });
 
         addActorServicesBindings<ESM::Creature>(record, context);
     }

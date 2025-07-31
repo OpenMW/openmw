@@ -63,6 +63,11 @@
 -- @return #any
 
 ---
+-- The game's difficulty setting.
+-- @function [parent=#core] getGameDifficulty
+-- @return #number
+
+---
 -- Return l10n formatting function for the given context.
 -- Localisation files (containing the message names and translations) should be stored in
 -- VFS as files of the form `l10n/<ContextName>/<Locale>.yaml`.
