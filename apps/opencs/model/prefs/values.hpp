@@ -507,8 +507,10 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mOrbitRollRight{ mIndex, sName, "orbit-roll-right", "E" };
         Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitCenterSelection{ mIndex, sName, "orbit-center-selection", "C" };
-        Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment", "" };
-        Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment", "" };
+        Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment",
+            "Ctrl+Slash" };
+        Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment",
+            "Ctrl+Shift+Question" };
     };
 
     struct ModelsCategory : Settings::WithIndex
