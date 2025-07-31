@@ -1,0 +1,16 @@
+Combat: "Walka OpenMW"
+combatSettingsPageDescription: "Ustawienia walki OpenMW"
+
+combatSettings: "Walka"
+
+unarmedCreatureAttacksDamageArmor: "Ataki stworzeń bez broni uszkadzają pancerz"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Nieuzbrojone stworzenia teraz również uszkadzają pancerz.
+
+redistributeShieldHitsWhenNotWearingShield: "Rozdziel trafienia w tarczę, gdy tarcza nie jest założona"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Odpowiednik „Poprawki trafień w tarczę” z Morrowind Code Patch. Rozdziela trafienia w slot pancerza tarczy na lewy naramiennik lub napierśnik, gdy tarcza nie jest założona.
+    
+spawnBloodEffectsOnPlayer: "Efekty krwi na postaci gracza"
+spawnBloodEffectsOnPlayerDescription: |
+        Jeśli włączone, efekty krwi pojawiają się na graczu po trafieniu w walce — tak samo jak u innych postaci.

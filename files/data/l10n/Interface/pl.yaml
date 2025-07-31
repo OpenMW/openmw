@@ -1,19 +1,53 @@
-DurationDay: "{days} d "
-DurationHour: "{hours} h "
-DurationMinute: "{minutes} min "
+DurationDay: |-
+  {days, plural,
+    one{{days} dzień}
+    other{{days} dni}
+    # few{{days} dni}       2, 3, 4 days
+    # many{{days} dni}        5+ or 0 days
+  }
+
+DurationHour: |-
+  {hours, plural,
+    one{{hours} godzina}
+    other{{hours} godzin}
+    # few{{hours} godziny}        2, 3, 4 hours
+    # many{{hours} godzin}        5+ or 0 hours
+  }
+
+DurationMinute: |-
+  {minutes, plural,
+    one{{minutes} minuta}
+    other{{minutes} minut}
+    # few{{minutes} minuty}       2, 3, 4 minutes
+    # many{{minutes} minut}       5+ or 0 minutes
+  }
+
+DurationSecond: |-
+  {seconds, plural,
+    one{{seconds} sekunda}
+    other{{seconds} sekund}
+    # few{{seconds} sekundy}        2, 3, 4 seconds
+    # many{{seconds} sekund}        5+ or 0 seconds
+  }
+
 DurationMonth: |-
-  {miesięcy, plural,
-    one{{months} miesiąc }
-    other{{months} miesięcy }
+  {months, plural,
+    one{{months} miesiąc}
+    other{{months} miesięcy}
+    # few{{months} miesiące}        2, 3, 4 months
+    # many{{months} miesięcy}       5+ or 0 months
   }
-DurationSecond: "{seconds} s "
+
 DurationYear: |-
-  {lat, plural,
-    one{{years} rok }
-    other{{years} lat }
+  {years, plural,
+    one{{years} rok}
+    other{{years} lat}
+    # few{{years} lata}       2, 3, 4 years
+    # many{{years} lat}       5+ or 0 years
   }
+
 No: "Nie"
-NotAvailableShort: "N/A"
+NotAvailableShort: "N/D"
 Reset: "Przywróć"
 Yes: "Tak"
 On: "Włączone"

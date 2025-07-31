@@ -46,6 +46,10 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/sv.yaml
     l10n/OMWCamera/fr.yaml
     l10n/OMWCamera/pl.yaml
+    l10n/OMWCombat/en.yaml
+    l10n/OMWCombat/ru.yaml
+    l10n/OMWCombat/sv.yaml
+    l10n/OMWCombat/pl.yaml
     l10n/OMWControls/de.yaml
     l10n/OMWControls/en.yaml
     l10n/OMWControls/fr.yaml
@@ -94,6 +98,10 @@ set(BUILTIN_DATA_FILES
     scripts/omw/camera/settings.lua
     scripts/omw/camera/move360.lua
     scripts/omw/camera/first_person_auto_switch.lua
+    scripts/omw/combat/common.lua
+    scripts/omw/combat/global.lua
+    scripts/omw/combat/local.lua
+    scripts/omw/combat/menu.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
