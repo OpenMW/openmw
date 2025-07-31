@@ -93,9 +93,10 @@ namespace
 namespace MWPhysics
 {
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(
-            std::make_unique<Resource::BulletShapeManager>(resourceSystem->getVFS(), resourceSystem->getSceneManager(),
-                resourceSystem->getNifFileManager(), Settings::cells().mCacheExpiryDelay))
+        : mPhysicsDt(1.f / 60.f)
+        , mShapeManager(std::make_unique<Resource::BulletShapeManager>(resourceSystem->getVFS(),
+              resourceSystem->getSceneManager(), resourceSystem->getNifFileManager(),
+              Settings::cells().mCacheExpiryDelay))
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
@@ -103,7 +104,6 @@ namespace MWPhysics
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(std::move(parentNode))
-        , mPhysicsDt(1.f / 60.f)
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 

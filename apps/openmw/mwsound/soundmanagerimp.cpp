@@ -983,7 +983,7 @@ namespace MWSound
                         sound->setPosition(ptr.getRefData().getPosition().asVec3());
                         MWBase::World* world = MWBase::Environment::get().getWorld();
                         sound->setVelocity(
-                            (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDT());
+                            (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDt());
                     }
 
                     cull3DSound(sound);
@@ -1024,7 +1024,7 @@ namespace MWSound
                     MWBase::World* world = MWBase::Environment::get().getWorld();
                     sound->setPosition(world->getActorHeadTransform(ptr).getTrans());
                     sound->setVelocity(
-                        (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDT());
+                        (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDt());
                 }
 
                 cull3DSound(sound);

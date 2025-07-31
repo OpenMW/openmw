@@ -576,7 +576,7 @@ namespace MWWorld
         float getSunVisibility() const override;
         float getSunPercentage() const override;
 
-        float getPhysicsFrameRateDT() const override;
+        float getPhysicsFrameRateDt() const override;
 
         bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 

@@ -3152,7 +3152,7 @@ namespace MWWorld
         return mWeatherManager->getSunPercentage(getTimeStamp().getHour());
     }
 
-    float World::getPhysicsFrameRateDT() const
+    float World::getPhysicsFrameRateDt() const
     {
         return mPhysics->mPhysicsDt;
     }
