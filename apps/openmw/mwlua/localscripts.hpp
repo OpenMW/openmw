@@ -10,6 +10,7 @@
 #include <components/lua/scriptscontainer.hpp>
 
 #include "../mwbase/luamanager.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "object.hpp"
 
@@ -90,6 +91,19 @@ namespace MWLua
         }
 
         void applyStatsCache();
+
+        // Calls a lua interface on the player's scripts. This call is only meant for use in updating UI elements.
+        template <typename T, typename... Args>
+        static std::optional<T> callPlayerInterface(
+            std::string_view interfaceName, std::string_view identifier, const Args&... args)
+        {
+            auto player = MWMechanics::getPlayer();
+            auto scripts = player.getRefData().getLuaScripts();
+            if (scripts)
+                return scripts->callInterface<T>(interfaceName, identifier, args...);
+
+            return std::nullopt;
+        }
 
     protected:
         SelfObject mData;

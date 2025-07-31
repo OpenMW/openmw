@@ -608,9 +608,6 @@ namespace MWWorld
         /// Spawn a random creature from a levelled list next to the player
         void spawnRandomCreature(const ESM::RefId& creatureList) override;
 
-        /// Spawn a blood effect for \a ptr at \a worldPosition
-        void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
-
         void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true,
             bool useAmbientLight = true) override;

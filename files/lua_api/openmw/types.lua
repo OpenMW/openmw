@@ -863,6 +863,7 @@
 -- @field #boolean isBiped whether the creature is a biped
 -- @field #boolean isEssential whether the creature is essential
 -- @field #boolean isRespawning whether the creature respawns after death
+-- @field #number bloodType integer representing the blood type of the Creature. Used to generate the correct blood vfx.
 
 
 --- @{#NPC} functions
@@ -1137,6 +1138,7 @@
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 -- @field #boolean isEssential whether the NPC is essential
 -- @field #boolean isRespawning whether the NPC respawns after death
+-- @field #number bloodType integer representing the blood type of the NPC. Used to generate the correct blood vfx.
 
 ---
 -- @type TravelDestination

@@ -147,11 +147,11 @@ namespace MWWorld
         ///               enums. ignored for creature attacks.
         /// (default implementation: throw an exception)
 
-        virtual void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        virtual void onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages,
+            const MWWorld::Ptr& object, const MWWorld::Ptr& attacker, bool successful,
             const MWMechanics::DamageSourceType sourceType) const;
-        ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
-        /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
+        ///< Alerts \a ptr that it's being hit for \a damages by \a object (sword, arrow, etc). \a attacker specifies
+        ///< the
         /// actor responsible for the attack. \a successful specifies if the hit is
         /// successful or not. \a sourceType classifies the damage source.
 
@@ -212,7 +212,7 @@ namespace MWWorld
         ///
         /// Default implementation: return (empty vector, false).
 
-        virtual ESM::RefId getEquipmentSkill(const ConstPtr& ptr) const;
+        virtual ESM::RefId getEquipmentSkill(const ConstPtr& ptr, bool useLuaInterfaceIfAvailable = false) const;
         /// Return the index of the skill this item corresponds to when equipped.
         /// (default implementation: return empty ref id)
 
@@ -258,7 +258,7 @@ namespace MWWorld
         virtual ESM::RefId getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
         ///< Returns the sound ID for \a ptr of the given soundgen \a type.
 
-        virtual float getArmorRating(const MWWorld::Ptr& ptr) const;
+        virtual float getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable = false) const;
         ///< @return combined armor rating of this actor
 
         virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
@@ -312,9 +312,6 @@ namespace MWWorld
 
         virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const { return true; }
         ///< Return whether this class of object can be activated with telekinesis
-
-        /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
-        virtual int getBloodTexture(const MWWorld::ConstPtr& ptr) const;
 
         virtual Ptr copyToCell(const ConstPtr& ptr, CellStore& cell, int count) const;
 
@@ -378,7 +375,8 @@ namespace MWWorld
         virtual int getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const;
 
         /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-        virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
+        virtual float getSkillAdjustedArmorRating(
+            const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor, bool useLuaInterfaceIfAvailable = false) const;
 
         virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 

@@ -3706,24 +3706,6 @@ namespace MWWorld
         }
     }
 
-    void World::spawnBloodEffect(const Ptr& ptr, const osg::Vec3f& worldPosition)
-    {
-        if (ptr == getPlayerPtr() && Settings::gui().mHitFader)
-            return;
-
-        std::string_view texture
-            = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
-        if (texture.empty())
-            texture = Fallback::Map::getString("Blood_Texture_0");
-
-        // [0, 2]
-        const int number = Misc::Rng::rollDice(3);
-        const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
-            VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
-
-        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false, false);
-    }
-
     void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
         const osg::Vec3f& worldPos, float scale, bool isMagicVFX, bool useAmbientLight)
     {
