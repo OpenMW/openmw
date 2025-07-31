@@ -806,11 +806,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że ataki nieuzbrojonych stworzeń mogą zmniejszać wytrzymałość pancerza, tak jak ataki NPC i uzbrojonych stworzeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że ataki nieuzbrojonych stworzeń mogą zmniejszać wytrzymałość pancerza, tak jak ataki NPC i uzbrojonych stworzeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation>Ataki nieuzbrojonych stworzeń uszkadzają pancerz</translation>
+        <translation type="vanished">Ataki nieuzbrojonych stworzeń uszkadzają pancerz</translation>
     </message>
     <message>
         <source>Factor Strength into Hand-to-Hand Combat</source>
