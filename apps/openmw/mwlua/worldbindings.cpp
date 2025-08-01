@@ -9,6 +9,7 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/finitenumbers.hpp>
 
@@ -155,6 +156,11 @@ namespace MWLua
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, cell, count.value_or(1));
             return GObject(newPtr);
         };
+        api["advanceTime"] = [context](double hours, bool incremental) {
+            context.mLuaManager->addAction([ hours, incremental] {
+                MWBase::Environment::get().getWorld()->advanceTime(hours, incremental);
+            });
+        };
         api["getObjectByFormId"] = [](std::string_view formIdStr) -> GObject {
             ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
             if (!refId.is<ESM::FormId>())
@@ -187,6 +193,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Potion& potion) -> const ESM::Potion* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(potion);
+            },
+            [lua = context.mLua](const ESM::NPC& npc) -> const ESM::NPC* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(npc);
             },
             [lua = context.mLua](const ESM::Weapon& weapon) -> const ESM::Weapon* {
                 checkGameInitialized(lua);
