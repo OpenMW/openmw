@@ -14,7 +14,7 @@ namespace MWGui
         : WindowBase("openmw_inventory_tabs.layout")
     {
         MyGUI::Button* tab;
-        constexpr char* kTabIds[] = { "TabMap", "TabInventory", "TabSpells", "TabStats" };
+        static const char* kTabIds[] = { "TabMap", "TabInventory", "TabSpells", "TabStats" };
 
         for (const char* id : kTabIds)
         {
