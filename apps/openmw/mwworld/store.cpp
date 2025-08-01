@@ -269,13 +269,15 @@ namespace MWWorld
             list.push_back((*it)->mId);
         }
     }
-    template <typename T, typename Id>
-    T* TypedDynamicStore<T, Id>::insert(const T& item, bool /*overrideOnly*/)
+    template <class T, class Id>
+    T* TypedDynamicStore<T, Id>::insert(const T& item, bool overrideOnly)
     {
-        // Check if the ID already exists in static or dynamic stores
-        auto itStatic = mStatic.find(item.mId);
-        auto itDynamic = mDynamic.find(item.mId);
-
+        if (overrideOnly)
+        {
+            auto it = mStatic.find(item.mId);
+            if (it == mStatic.end())
+                return nullptr;
+        }
         std::pair<typename Dynamic::iterator, bool> result = mDynamic.insert_or_assign(item.mId, item);
         T* ptr = &result.first->second;
         if (result.second)

@@ -738,9 +738,9 @@ namespace MWWorld
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
             case ESM::REC_LIGH:
+            case ESM::REC_NPC_:
                 mStoreImp->mRecNameToStore[type]->read(reader);
                 return true;
-            case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
                 mStoreImp->mRecNameToStore[type]->read(reader, true);
