@@ -1117,8 +1117,8 @@ namespace MWRender
 
             return keyframeController->getAsCallback();
         }
-
-        return asCallback;
+        else
+            return asCallback;
     }
 
     void Animation::resetActiveGroups()
