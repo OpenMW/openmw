@@ -43,7 +43,7 @@ namespace MWGui
             Button mButton;
             std::string mName;
             std::variant<SDL_GameControllerButton, SDL_GameControllerAxis> mId;
-            std::string MWGui::ControllerButtons::* mField;
+            std::string MWGui::ControllerButtons::*mField;
         };
 
     private:
