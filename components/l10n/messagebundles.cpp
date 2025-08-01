@@ -9,6 +9,50 @@
 
 namespace L10n
 {
+    namespace
+    {
+        std::string getErrorText(const UParseError& parseError)
+        {
+            icu::UnicodeString preContext(parseError.preContext), postContext(parseError.postContext);
+            std::string parseErrorString;
+            preContext.toUTF8String(parseErrorString);
+            postContext.toUTF8String(parseErrorString);
+            return parseErrorString;
+        }
+
+        template <class... Args>
+        bool checkSuccess(const icu::ErrorCode& status, const UParseError& parseError, Args const&... message)
+        {
+            if (status.isFailure())
+            {
+                std::string errorText = getErrorText(parseError);
+                if (!errorText.empty())
+                {
+                    (Log(Debug::Error) << ... << message)
+                        << ": " << status.errorName() << " in \"" << errorText << "\"";
+                }
+                else
+                {
+                    (Log(Debug::Error) << ... << message) << ": " << status.errorName();
+                }
+            }
+            return status.isSuccess();
+        }
+
+        std::string loadGmst(
+            const std::function<std::string(std::string_view)>& gmstLoader, const icu::MessageFormat* message)
+        {
+            icu::UnicodeString gmstNameUnicode;
+            std::string gmstName;
+            icu::ErrorCode success;
+            message->format(nullptr, nullptr, 0, gmstNameUnicode, success);
+            gmstNameUnicode.toUTF8String(gmstName);
+            if (gmstLoader)
+                return gmstLoader(gmstName);
+            return "GMST:" + gmstName;
+        }
+    }
+
     MessageBundles::MessageBundles(const std::vector<icu::Locale>& preferredLocales, icu::Locale& fallbackLocale)
         : mFallbackLocale(fallbackLocale)
     {
@@ -39,33 +83,6 @@ namespace L10n
         }
     }
 
-    std::string getErrorText(const UParseError& parseError)
-    {
-        icu::UnicodeString preContext(parseError.preContext), postContext(parseError.postContext);
-        std::string parseErrorString;
-        preContext.toUTF8String(parseErrorString);
-        postContext.toUTF8String(parseErrorString);
-        return parseErrorString;
-    }
-
-    static bool checkSuccess(
-        const icu::ErrorCode& status, const std::string& message, const UParseError parseError = UParseError())
-    {
-        if (status.isFailure())
-        {
-            std::string errorText = getErrorText(parseError);
-            if (!errorText.empty())
-            {
-                Log(Debug::Error) << message << ": " << status.errorName() << " in \"" << errorText << "\"";
-            }
-            else
-            {
-                Log(Debug::Error) << message << ": " << status.errorName();
-            }
-        }
-        return status.isSuccess();
-    }
-
     void MessageBundles::load(std::istream& input, const icu::Locale& lang)
     {
         YAML::Node data = YAML::Load(input);
@@ -80,20 +97,19 @@ namespace L10n
             icu::ErrorCode status;
             UParseError parseError;
             icu::MessageFormat message(pattern, langOrEn, parseError, status);
-            if (checkSuccess(status, std::string("Failed to create message ") + key + " for locale " + lang.getName(),
-                    parseError))
+            if (checkSuccess(status, parseError, "Failed to create message ", key, " for locale ", lang.getName()))
             {
-                mBundles[localeName].insert(std::make_pair(key, message));
+                mBundles[localeName].emplace(key, message);
             }
         }
     }
 
-    const icu::MessageFormat* MessageBundles::findMessage(std::string_view key, const std::string& localeName) const
+    const icu::MessageFormat* MessageBundles::findMessage(std::string_view key, std::string_view localeName) const
     {
         auto iter = mBundles.find(localeName);
         if (iter != mBundles.end())
         {
-            auto message = iter->second.find(key.data());
+            auto message = iter->second.find(key);
             if (message != iter->second.end())
             {
                 return &(message->second);
@@ -114,20 +130,6 @@ namespace L10n
             argValues.push_back(v);
         }
         return formatMessage(key, argNames, argValues);
-    }
-
-    static std::string loadGmst(
-        const std::function<std::string(std::string_view)> gmstLoader, const icu::MessageFormat* message)
-    {
-        icu::UnicodeString gmstNameUnicode;
-        std::string gmstName;
-        icu::ErrorCode success;
-        message->format(nullptr, nullptr, 0, gmstNameUnicode, success);
-        gmstNameUnicode.toUTF8String(gmstName);
-        if (gmstLoader)
-            return gmstLoader(gmstName);
-        else
-            return "GMST:" + gmstName;
     }
 
     std::string MessageBundles::formatMessage(std::string_view key, const std::vector<icu::UnicodeString>& argNames,
@@ -158,7 +160,7 @@ namespace L10n
                 message->format(argNames.data(), args.data(), static_cast<std::int32_t>(args.size()), result, success);
             else
                 message->format(nullptr, nullptr, static_cast<std::int32_t>(args.size()), result, success);
-            checkSuccess(success, std::string("Failed to format message ") + key.data());
+            checkSuccess(success, {}, "Failed to format message ", key);
             result.toUTF8String(resultString);
             return resultString;
         }
@@ -171,7 +173,7 @@ namespace L10n
         icu::MessageFormat defaultMessage(
             icu::UnicodeString::fromUTF8(icu::StringPiece(key.data(), static_cast<std::int32_t>(key.size()))),
             defaultLocale, parseError, success);
-        if (!checkSuccess(success, std::string("Failed to create message ") + key.data(), parseError))
+        if (!checkSuccess(success, parseError, "Failed to create message ", key))
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);
 
@@ -180,7 +182,7 @@ namespace L10n
                 argNames.data(), args.data(), static_cast<std::int32_t>(args.size()), result, success);
         else
             defaultMessage.format(nullptr, nullptr, static_cast<std::int32_t>(args.size()), result, success);
-        checkSuccess(success, std::string("Failed to format message ") + key.data());
+        checkSuccess(success, {}, "Failed to format message ", key);
         result.toUTF8String(resultString);
         return resultString;
     }
