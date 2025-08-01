@@ -5,11 +5,11 @@
     <name>ComponentSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Select Components</source>
-        <translation>Wybierz Komponenty</translation>
+        <translation>Wybierz komponenty</translation>
     </message>
     <message>
         <source>Which components should be installed?</source>
@@ -28,11 +28,11 @@
     <name>ConclusionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Completing the OpenMW Wizard</source>
-        <translation>Kończenie pracy Kreatora OpenMW</translation>
+        <translation>Kończenie pracy kreatora OpenMW</translation>
     </message>
     <message>
         <source>Placeholder</source>
@@ -43,7 +43,7 @@
     <name>ExistingInstallationPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Select Existing Installation</source>
@@ -66,11 +66,11 @@
     <name>ImportPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Import Settings</source>
-        <translation>Importuj Ustawienia</translation>
+        <translation>Importuj ustawienia</translation>
     </message>
     <message>
         <source>Import settings from the Morrowind installation.</source>
@@ -82,15 +82,15 @@
     </message>
     <message>
         <source>Import Settings From Morrowind.ini</source>
-        <translation>Importuj Ustawienia Z Morrowind.ini</translation>
+        <translation>Importuj ustawienia z Morrowind.ini</translation>
     </message>
     <message>
         <source>Import Add-on and Plugin Selection</source>
-        <translation>Importowanie Dodatków i Wtyczek</translation>
+        <translation>Importowanie dodatków i wtyczek</translation>
     </message>
     <message>
         <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
-        <translation>Importuj Ustawienia Czionek Bitmapowych Z Pliku Morrowind.ini</translation>
+        <translation>Importuj ustawienia czionek bitmapowych z pliku Morrowind.ini</translation>
     </message>
     <message>
         <source>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,
@@ -105,7 +105,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <name>InstallationPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Installing</source>
@@ -120,11 +120,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <name>InstallationTargetPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Select Installation Destination</source>
-        <translation>Wybierz Miejsce Instalacji</translation>
+        <translation>Wybierz miejsce instalacji</translation>
     </message>
     <message>
         <source>Where should Morrowind be installed?</source>
@@ -132,7 +132,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Morrowind will be installed to the following location. </source>
-        <translation>Morrowind zostanie zainstalowane do następującej lokalizaji. </translation>
+        <translation>Morrowind zostanie zainstalowane do następującej lokalizacji. </translation>
     </message>
     <message>
         <source>Browse...</source>
@@ -143,26 +143,26 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <name>IntroPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Welcome to the OpenMW Wizard</source>
-        <translation>Witaj w Kreatorze OpenMW</translation>
+        <translation>Witaj w kreatorze OpenMW</translation>
     </message>
     <message>
         <source>This Wizard will help you install Morrowind and its add-ons for OpenMW to use.</source>
-        <translation>Ten Kreator pomoże Ci zainstalować Morrowind i jego dodatki do OpenMW.</translation>
+        <translation>Ten kreator pomoże Ci zainstalować Morrowind i jego dodatki do OpenMW.</translation>
     </message>
 </context>
 <context>
     <name>LanguageSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Select Morrowind Language</source>
-        <translation>Wybierz Język Morrowind</translation>
+        <translation>Wybierz język Morrowind</translation>
     </message>
     <message>
         <source>What is the language of the Morrowind installation?</source>
@@ -177,11 +177,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <name>MethodSelectionPage</name>
     <message>
         <source>WizardPage</source>
-        <translation>Strona Kreatora</translation>
+        <translation>Strona kreatora</translation>
     </message>
     <message>
         <source>Select Installation Method</source>
-        <translation>Wybierz Metodę Instalacji</translation>
+        <translation>Wybierz metodę instalacji</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select how you would like to install &lt;i&gt;The Elder Scrolls III: Morrowind&lt;/i&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -197,7 +197,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Existing Installation</source>
-        <translation>Istniejąca Instalacja</translation>
+        <translation>Istniejąca instalacja</translation>
     </message>
     <message>
         <source>Select an existing installation.</source>
@@ -232,7 +232,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Most recent Morrowind not detected</source>
-        <translation>Most recent Morrowind not detected</translation>
+        <translation>Nie wykryto najnowszej wersji Morrowind</translation>
     </message>
     <message>
         <source>&lt;br&gt;&lt;b&gt;There may be a more recent version of Morrowind available.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Do you wish to continue anyway?&lt;br&gt;</source>
@@ -475,7 +475,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Error opening Wizard log file</source>
-        <translation>Błąd podczas otwierania pliku dziennika Kreatora</translation>
+        <translation>Błąd podczas otwierania pliku dziennika kreatora</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -487,11 +487,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Quit Wizard</source>
-        <translation>Opuść Kreator</translation>
+        <translation>Opuść kreator</translation>
     </message>
     <message>
         <source>Are you sure you want to exit the Wizard?</source>
-        <translation>Czy jesteś pewny że chcesz opuścić Kreator?</translation>
+        <translation>Czy jesteś pewny że chcesz opuścić kreator?</translation>
     </message>
     <message>
         <source>Error creating OpenMW configuration directory</source>
@@ -550,7 +550,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Installing %1</source>
-        <translation>Installing %1</translation>
+        <translation>Instalowanie %1</translation>
     </message>
     <message>
         <source>Installation media path not set!</source>

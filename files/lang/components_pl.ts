@@ -27,15 +27,15 @@
     <name>ContentSelectorModel::EsmFile</name>
     <message>
         <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is part of OpenMW.&lt;/b&gt;&lt;br/&gt;</source>
-        <translation>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is part of OpenMW.&lt;/b&gt;&lt;br/&gt;</translation>
+        <translation>&lt;br/&gt;&lt;b&gt;Ten plik zawartości nie może zostać wyłączony, ponieważ jest częścią OpenMW&lt;/b&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is enabled in a config file other than the user one.&lt;/b&gt;&lt;br/&gt;</source>
-        <translation>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is enabled in a config file other than the user one.&lt;/b&gt;&lt;br/&gt;</translation>
+        <translation>&lt;br/&gt;&lt;b&gt;Ten plik zawartości nie może zostać wyłączony, ponieważ jest włączony w pliku konfiguracyjnym innym niż użytkownika.&lt;/b&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Author:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Format version:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Modified:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Path:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Description:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Dependencies: &lt;/b&gt;%6&lt;br/&gt;</source>
-        <translation>&lt;b&gt;Author:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Format version:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Modified:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Path:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Description:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Dependencies: &lt;/b&gt;%6&lt;br/&gt;</translation>
+        <translation>&lt;b&gt;Autor:&lt;/b&gt; %1&lt;br/&gt;&lt;b&gt;Wersja formatu:&lt;/b&gt; %2&lt;br/&gt;&lt;b&gt;Zmodyfikowano:&lt;/b&gt; %3&lt;br/&gt;&lt;b&gt;Ścieżka:&lt;/b&gt;&lt;br/&gt;%4&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Opis:&lt;/b&gt;&lt;br/&gt;%5&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Zależności:&lt;/b&gt; %6&lt;br/&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>

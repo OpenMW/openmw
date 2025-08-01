@@ -117,11 +117,11 @@
     </message>
     <message>
         <source>New Content List</source>
-        <translation>Lista nowych treści</translation>
+        <translation>Nowa lista treści</translation>
     </message>
     <message>
         <source>&amp;New Content List</source>
-        <translation>&amp;Lista nowych treści</translation>
+        <translation>&amp;Nowa lista treści</translation>
     </message>
     <message>
         <source>Clone Content List</source>
@@ -332,7 +332,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>New Content List</source>
-        <translation>Lista nowych treści</translation>
+        <translation>Nowa lista treści</translation>
     </message>
     <message>
         <source>Content List name:</source>
