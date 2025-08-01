@@ -110,7 +110,6 @@ GUI Settings
 
 
    Enables or disables the red flash overlay when the character takes damage.
-   Disabling causes the player to "bleed" like NPCs.
 
 .. omw-setting::
    :title: werewolf overlay

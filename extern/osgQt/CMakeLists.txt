@@ -17,11 +17,7 @@ set(OSGQT_SOURCE_FILES
 
 add_library(${OSGQT_LIBRARY} STATIC ${OSGQT_SOURCE_FILES})
 
-if (QT_VERSION_MAJOR VERSION_EQUAL 6)
-    target_link_libraries(${OSGQT_LIBRARY} Qt::Core Qt::OpenGL Qt::OpenGLWidgets)
-else()
-    target_link_libraries(${OSGQT_LIBRARY} Qt::Core Qt::OpenGL)
-endif()
+target_link_libraries(${OSGQT_LIBRARY} Qt::Core Qt::OpenGL Qt::OpenGLWidgets)
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 

@@ -359,8 +359,7 @@ namespace
         // Notify the target actor they've been hit
         bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
         if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
-            target.getClass().onHit(
-                target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true, MWMechanics::DamageSourceType::Magical);
+            target.getClass().onHit(target, {}, MWWorld::Ptr(), caster, true, MWMechanics::DamageSourceType::Magical);
         // Apply resistances
         if (!(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Resistances))
         {
@@ -377,8 +376,11 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
-            effect.mMinMagnitude *= magnitudeMult;
-            effect.mMaxMagnitude *= magnitudeMult;
+            else if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            {
+                effect.mMinMagnitude *= magnitudeMult;
+                effect.mMaxMagnitude *= magnitudeMult;
+            }
         }
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }

@@ -233,6 +233,7 @@ namespace MWLua
                   DetourNavigator::Flags includeFlags = defaultIncludeFlags;
                   DetourNavigator::AreaCosts areaCosts{};
                   float destinationTolerance = 1;
+                  std::vector<osg::Vec3f> checkpoints;
 
                   if (options.has_value())
                   {
@@ -258,13 +259,24 @@ namespace MWLua
                       }
                       if (const auto& v = options->get<sol::optional<float>>("destinationTolerance"))
                           destinationTolerance = *v;
+                      if (const auto& t = options->get<sol::optional<sol::table>>("checkpoints"))
+                      {
+                          for (const auto& [k, v] : *t)
+                          {
+                              const int index = k.as<int>();
+                              const osg::Vec3f position = v.as<osg::Vec3f>();
+                              if (index != static_cast<int>(checkpoints.size() + 1))
+                                  throw std::runtime_error("checkpoints is not an array");
+                              checkpoints.push_back(position);
+                          }
+                      }
                   }
 
                   std::vector<osg::Vec3f> path;
 
-                  const DetourNavigator::Status status
-                      = DetourNavigator::findPath(*MWBase::Environment::get().getWorld()->getNavigator(), agentBounds,
-                          source, destination, includeFlags, areaCosts, destinationTolerance, std::back_inserter(path));
+                  const DetourNavigator::Status status = DetourNavigator::findPath(
+                      *MWBase::Environment::get().getWorld()->getNavigator(), agentBounds, source, destination,
+                      includeFlags, areaCosts, destinationTolerance, checkpoints, std::back_inserter(path));
 
                   sol::table result(lua, sol::create);
                   LuaUtil::copyVectorToTable(path, result);

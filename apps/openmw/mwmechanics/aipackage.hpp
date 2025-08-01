@@ -16,6 +16,8 @@
 namespace ESM
 {
     struct Cell;
+    struct Pathgrid;
+
     namespace AiSequence
     {
         struct AiSequence;

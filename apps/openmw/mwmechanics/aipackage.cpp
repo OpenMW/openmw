@@ -180,8 +180,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
                     = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
                 const DetourNavigator::Flags navigatorFlags = getNavigatorFlags(actor);
                 const DetourNavigator::AreaCosts areaCosts = getAreaCosts(actor, navigatorFlags);
-                mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(pathgrid),
-                    agentBounds, navigatorFlags, areaCosts, endTolerance, pathType);
+                mPathFinder.buildLimitedPath(actor, position, dest, getPathGridGraph(pathgrid), agentBounds,
+                    navigatorFlags, areaCosts, endTolerance, pathType);
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -501,7 +501,11 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor) && actor.getClass().getWalkSpeed(actor) > 0)
-        result |= DetourNavigator::Flag_walk | DetourNavigator::Flag_usePathgrid;
+    {
+        result |= DetourNavigator::Flag_walk;
+        if (getTypeId() != AiPackageTypeId::Wander)
+            result |= DetourNavigator::Flag_usePathgrid;
+    }
 
     if (canOpenDoors(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;

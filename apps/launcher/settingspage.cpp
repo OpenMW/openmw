@@ -163,8 +163,6 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingInt(Settings::physics().mAsyncNumThreads, *physicsThreadsSpinBox);
         loadSettingBool(
             Settings::game().mAllowActorsToFollowOverWaterSurface, *allowNPCToFollowOverWaterSurfaceCheckBox);
-        loadSettingBool(
-            Settings::game().mUnarmedCreatureAttacksDamageArmor, *unarmedCreatureAttacksDamageArmorCheckBox);
         loadSettingInt(Settings::game().mActorCollisionShapeType, *actorCollisonShapeTypeComboBox);
     }
 
@@ -376,8 +374,6 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingInt(*physicsThreadsSpinBox, Settings::physics().mAsyncNumThreads);
         saveSettingBool(
             *allowNPCToFollowOverWaterSurfaceCheckBox, Settings::game().mAllowActorsToFollowOverWaterSurface);
-        saveSettingBool(
-            *unarmedCreatureAttacksDamageArmorCheckBox, Settings::game().mUnarmedCreatureAttacksDamageArmor);
         saveSettingInt(*actorCollisonShapeTypeComboBox, Settings::game().mActorCollisionShapeType);
     }
 

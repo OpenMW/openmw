@@ -3706,24 +3706,6 @@ namespace MWWorld
         }
     }
 
-    void World::spawnBloodEffect(const Ptr& ptr, const osg::Vec3f& worldPosition)
-    {
-        if (ptr == getPlayerPtr() && Settings::gui().mHitFader)
-            return;
-
-        std::string_view texture
-            = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
-        if (texture.empty())
-            texture = Fallback::Map::getString("Blood_Texture_0");
-
-        // [0, 2]
-        const int number = Misc::Rng::rollDice(3);
-        const VFS::Path::Normalized model = Misc::ResourceHelpers::correctMeshPath(
-            VFS::Path::Normalized(Fallback::Map::getString("Blood_Model_" + std::to_string(number))));
-
-        mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false, false);
-    }
-
     void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
         const osg::Vec3f& worldPos, float scale, bool isMagicVFX, bool useAmbientLight)
     {
@@ -3871,10 +3853,11 @@ namespace MWWorld
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
     }
 
-    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-        std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const
+    bool World::isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const
     {
-        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore, occupyingActors);
+        const osg::Vec3f halfExtents = getPathfindingAgentBounds(actor).mHalfExtents;
+        const float maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+        return mPhysics->isAreaOccupiedByOtherActor(actor.mRef, position, 2 * maxHalfExtent);
     }
 
     void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const

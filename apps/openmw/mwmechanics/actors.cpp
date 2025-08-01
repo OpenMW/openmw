@@ -50,6 +50,7 @@
 #include "attacktype.hpp"
 #include "character.hpp"
 #include "creaturestats.hpp"
+#include "greetingstate.hpp"
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "steering.hpp"
@@ -487,7 +488,7 @@ namespace MWMechanics
         {
             actorState.setTurningToPlayer(false);
             actorState.setGreetingTimer(0);
-            actorState.setGreetingState(Greet_None);
+            actorState.setGreetingState(GreetingState::None);
             return;
         }
 
@@ -525,7 +526,7 @@ namespace MWMechanics
 
         int greetingTimer = actorState.getGreetingTimer();
         GreetingState greetingState = actorState.getGreetingState();
-        if (greetingState == Greet_None)
+        if (greetingState == GreetingState::None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance * helloDistance && !playerStats.isDead()
                 && !actorStats.isParalyzed() && !isTargetMagicallyHidden(player)
@@ -535,14 +536,14 @@ namespace MWMechanics
 
             if (greetingTimer >= GREETING_SHOULD_START)
             {
-                greetingState = Greet_InProgress;
+                greetingState = GreetingState::InProgress;
                 if (!MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("hello")))
-                    greetingState = Greet_Done;
+                    greetingState = GreetingState::Done;
                 greetingTimer = 0;
             }
         }
 
-        if (greetingState == Greet_InProgress)
+        if (greetingState == GreetingState::InProgress)
         {
             greetingTimer++;
 
@@ -554,16 +555,16 @@ namespace MWMechanics
 
             if (greetingTimer >= GREETING_COOLDOWN)
             {
-                greetingState = Greet_Done;
+                greetingState = GreetingState::Done;
                 greetingTimer = 0;
             }
         }
 
-        if (greetingState == Greet_Done)
+        if (greetingState == GreetingState::Done)
         {
             float resetDist = 2 * helloDistance;
             if ((playerPos - actorPos).length2() >= resetDist * resetDist)
-                greetingState = Greet_None;
+                greetingState = GreetingState::None;
         }
 
         actorState.setGreetingTimer(greetingTimer);
@@ -2381,7 +2382,7 @@ namespace MWMechanics
     {
         const auto it = mIndex.find(ptr.mRef);
         if (it == mIndex.end())
-            return Greet_None;
+            return GreetingState::None;
 
         return it->second->getGreetingState();
     }

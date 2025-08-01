@@ -694,10 +694,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är aktiv tillåts spelaren plundra figurer (exempelvis tillkallade varelser) under deras dödsanimation, om de inte är i strid.&lt;/p&gt;&lt;p&gt;Om inställningen är inaktiv måste spelaren vänta tills dödsanimationen är slut. Detta gör det mycket svårare att exploatera tillkallade varelser (exempelvis plundra Draemoror eller Golden Saints för att få dyrbara vapen). Inställningen är i konflikt med skyltdocks-moddar som använder SkipAnim för att förhindra avslutning av dödsanimationer.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör att obeväpnade varelseattacker kan reducera rustningars skick, precis som attacker från icke-spelbara figurer och beväpnade varelser.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>Off</source>
         <translation>Av</translation>
     </message>
@@ -1162,10 +1158,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>Classic Reflected Absorb Spells Behavior</source>
         <translation>Klassiskt beteende för reflekterade &quot;Absorb&quot;-besvärjelser</translation>
-    </message>
-    <message>
-        <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation>Obeväpnad attack från varelser skadar rustning</translation>
     </message>
     <message>
         <source>Affect Werewolves</source>

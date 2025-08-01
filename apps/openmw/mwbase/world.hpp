@@ -526,9 +526,6 @@ namespace MWBase
         /// Spawn a random creature from a levelled list next to the player
         virtual void spawnRandomCreature(const ESM::RefId& creatureList) = 0;
 
-        /// Spawn a blood effect for \a ptr at \a worldPosition
-        virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
-
         virtual void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true)
             = 0;
@@ -589,8 +586,7 @@ namespace MWBase
         virtual bool hasCollisionWithDoor(
             const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
 
-        virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
+        virtual bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const = 0;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 

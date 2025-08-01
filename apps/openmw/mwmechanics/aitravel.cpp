@@ -12,6 +12,7 @@
 
 #include "character.hpp"
 #include "creaturestats.hpp"
+#include "greetingstate.hpp"
 #include "movement.hpp"
 
 namespace
@@ -77,7 +78,7 @@ namespace MWMechanics
 
         if (!stats.getMovementFlag(CreatureStats::Flag_ForceJump)
             && !stats.getMovementFlag(CreatureStats::Flag_ForceSneak)
-            && (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress))
+            && (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == GreetingState::InProgress))
             return false;
 
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
