@@ -1468,11 +1468,11 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kontrollerar styrkan på dopplereffekten. Noll innebär helt inaktiverat.&lt;/p&gt;&lt;p&gt;Dopplereffekten höjer eller sänker tonhöjden på ljud i förhållande till ljudkällans hastighet och lyssnaren.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Doppler Factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Dopplerfaktor</translation>
     </message>
 </context>
 </TS>
