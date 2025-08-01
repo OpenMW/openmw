@@ -255,6 +255,7 @@ namespace MWLua
             auto& stats = cls.getNpcStats(o.ptr());
             stats.setBaseDisposition(stats.getBaseDisposition() + value);
         };
+        
         npc["createRecordDraft"] = tableToNPC;
         npc["getFactionRank"] = [](const Object& actor, std::string_view faction) -> size_t {
             const MWWorld::Ptr ptr = actor.ptr();
