@@ -156,11 +156,6 @@ namespace MWLua
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, cell, count.value_or(1));
             return GObject(newPtr);
         };
-        api["advanceTime"] = [context](double hours, bool incremental) {
-            context.mLuaManager->addAction([ hours, incremental] {
-                MWBase::Environment::get().getWorld()->advanceTime(hours, incremental);
-            });
-        };
         api["getObjectByFormId"] = [](std::string_view formIdStr) -> GObject {
             ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
             if (!refId.is<ESM::FormId>())
