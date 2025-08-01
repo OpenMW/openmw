@@ -14,22 +14,14 @@ namespace MWGui
         : WindowBase("openmw_inventory_tabs.layout")
     {
         MyGUI::Button* tab;
+        constexpr char* kTabIds[] = { "TabMap", "TabInventory", "TabSpells", "TabStats" };
 
-        getWidget(tab, "TabMap");
-        tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
-        mTabs.push_back(tab);
-
-        getWidget(tab, "TabInventory");
-        tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
-        mTabs.push_back(tab);
-
-        getWidget(tab, "TabSpells");
-        tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
-        mTabs.push_back(tab);
-
-        getWidget(tab, "TabStats");
-        tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
-        mTabs.push_back(tab);
+        for (const char* id : kTabIds)
+        {
+            getWidget(tab, id);
+            tab->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryTabsOverlay::onTabClicked);
+            mTabs.push_back(tab);
+        }
 
         MyGUI::ImageBox* image;
         getWidget(image, "BtnL2Image");
