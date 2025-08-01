@@ -38,24 +38,35 @@ namespace MWGui
             Button_Max,
         };
 
+        enum InputType
+        {
+            InputType_Button,
+            InputType_Axis
+        };
+
         struct ButtonDefinition
         {
             Button mButton;
             std::string mName;
-            std::variant<SDL_GameControllerButton, SDL_GameControllerAxis> mId;
+            InputType mInputType;
+            union {
+                SDL_GameControllerButton mButton;
+                SDL_GameControllerAxis mAxis;
+            } mId;
             std::string MWGui::ControllerButtons::*mField;
         };
 
     private:
         struct ButtonWidgets
         {
-            MyGUI::ImageBox* mImage = nullptr;
-            MyGUI::TextBox* mText = nullptr;
-            Gui::HBox* mHBox = nullptr;
+            MyGUI::ImageBox* mImage;
+            MyGUI::TextBox* mText;
+            Gui::HBox* mHBox;
+
+            ButtonWidgets() : mImage(nullptr), mText(nullptr), mHBox(nullptr) {}
         };
 
         std::array<ButtonWidgets, Button::Button_Max> mButtons;
-
         Gui::HBox* mHBox;
 
         void setIcon(MyGUI::ImageBox* image, const std::string& imagePath);
