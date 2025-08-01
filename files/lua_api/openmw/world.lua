@@ -119,7 +119,7 @@
 -- @param #number ratio
 
 ---
--- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- Whether the world is paused.
 -- @function [parent=#world] isWorldPaused
 -- @return #boolean
 

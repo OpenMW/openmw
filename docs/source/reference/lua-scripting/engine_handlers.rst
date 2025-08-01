@@ -28,7 +28,7 @@ Engine handler is a function defined by a script, that can be called by the engi
       | `assigned to a script in openmw-cs (not yet implemented).`
       | ``onInterfaceOverride`` can be called before ``onInit``.
   * - onUpdate(dt)
-    - | Called every frame if the game is not paused. `dt` is
+    - | Called every frame in the Lua thread (even if the game is paused). `dt` is
       | the simulation time from the last update in seconds.
   * - onSave() -> savedData
     - | Called when the game is saving. May be called in inactive state,
