@@ -1447,8 +1447,11 @@ namespace MWGui
             // Fill the screen, or limit to a certain size on large screens. Size chosen to
             // show the entire local map without scrolling.
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-            int width = std::min(viewSize.width, 1552);
-            int height = std::min(winMgr->getControllerMenuHeight(), 1572);
+            MyGUI::IntSize canvasSize = mLocalMap->getCanvasSize();
+            MyGUI::IntSize borderSize = mMainWidget->getSize() - mMainWidget->getClientWidget()->getSize();
+
+            int width = std::min(viewSize.width, canvasSize.width + borderSize.width);
+            int height = std::min(winMgr->getControllerMenuHeight(), canvasSize.height + borderSize.height);
             int x = (viewSize.width - width) / 2;
             int y = (viewSize.height - height) / 2;
 
