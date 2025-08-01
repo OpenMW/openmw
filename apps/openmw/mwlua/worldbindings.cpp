@@ -7,9 +7,9 @@
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
-#include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/finitenumbers.hpp>
 
