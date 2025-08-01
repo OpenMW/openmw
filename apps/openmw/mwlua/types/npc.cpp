@@ -31,131 +31,103 @@ namespace sol
 
 namespace
 {
-ESM::NPC tableToNPC(const sol::table& rec)
-{
-    ESM::NPC npc;
-
-    // Start from template if provided
-    if (rec["template"] != sol::nil)
-        npc = LuaUtil::cast<ESM::NPC>(rec["template"]);
-    else
-        npc.blank();
-
-    // Force dummy ID
-    npc.mId = ESM::RefId::deserializeText("blank");
-
-    // Basic fields
-    if (rec["name"] != sol::nil)
-        npc.mName = rec["name"];
-    if (rec["model"] != sol::nil)
-        npc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-    if (rec["mwscript"] != sol::nil)
-        npc.mScript = ESM::RefId::deserializeText(rec["mwscript"].get<std::string_view>());
-    if (rec["race"] != sol::nil)
-        npc.mRace = ESM::RefId::deserializeText(rec["race"].get<std::string_view>());
-    if (rec["class"] != sol::nil)
-        npc.mClass = ESM::RefId::deserializeText(rec["class"].get<std::string_view>());
-    if (rec["head"] != sol::nil)
-        npc.mHead = ESM::RefId::deserializeText(rec["head"].get<std::string_view>());
-    if (rec["hair"] != sol::nil)
-        npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
-
-    if (rec["isMale"] != sol::nil)
+    ESM::NPC tableToNPC(const sol::table& rec)
     {
-        bool male = rec["isMale"];
-        if (male)
-            npc.mFlags &= ~ESM::NPC::Female;
+        ESM::NPC npc;
+
+        // Start from template if provided
+        if (rec["template"] != sol::nil)
+            npc = LuaUtil::cast<ESM::NPC>(rec["template"]);
         else
-            npc.mFlags |= ESM::NPC::Female;
-    }
+            npc.blank();
 
-    if (rec["isEssential"] != sol::nil)
-    {
-        bool essential = rec["isEssential"];
-        if (essential)
-            npc.mFlags |= ESM::NPC::Essential;
-        else
-            npc.mFlags &= ~ESM::NPC::Essential;
-    }
+        // Force dummy ID
+        npc.mId = ESM::RefId::deserializeText("blank");
 
-    if (rec["isRespawning"] != sol::nil)
-    {
-        bool respawn = rec["isRespawning"];
-        if (respawn)
-            npc.mFlags |= ESM::NPC::Respawn;
-        else
-            npc.mFlags &= ~ESM::NPC::Respawn;
-    }
+        // Basic fields
+        if (rec["name"] != sol::nil)
+            npc.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            npc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["mwscript"] != sol::nil)
+            npc.mScript = ESM::RefId::deserializeText(rec["mwscript"].get<std::string_view>());
+        if (rec["race"] != sol::nil)
+            npc.mRace = ESM::RefId::deserializeText(rec["race"].get<std::string_view>());
+        if (rec["class"] != sol::nil)
+            npc.mClass = ESM::RefId::deserializeText(rec["class"].get<std::string_view>());
+        if (rec["head"] != sol::nil)
+            npc.mHead = ESM::RefId::deserializeText(rec["head"].get<std::string_view>());
+        if (rec["hair"] != sol::nil)
+            npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
 
-    if (rec["baseDisposition"] != sol::nil)
-        npc.mNpdt.mDisposition = static_cast<int>(rec["baseDisposition"]);
-
-    if (rec["baseGold"] != sol::nil)
-        npc.mNpdt.mGold = static_cast<int>(rec["baseGold"]);
-
-    if (rec["bloodType"] != sol::nil)
-        npc.mBloodType = static_cast<int>(rec["bloodType"]);
-
-    // Services offered
-    if (rec["servicesOffered"] != sol::nil)
-    {
-        const sol::table services = rec["servicesOffered"];
-        int flags = 0;
-        auto setFlag = [&](const char* key, int mask) {
-            if (services[key] != sol::nil && services[key])
-                flags |= mask;
-        };
-
-        setFlag("Spells", ESM::NPC::Spells);
-        setFlag("Spellmaking", ESM::NPC::Spellmaking);
-        setFlag("Enchanting", ESM::NPC::Enchanting);
-        setFlag("Training", ESM::NPC::Training);
-        setFlag("Repair", ESM::NPC::Repair);
-        setFlag("Barter", ESM::NPC::AllItems);
-        setFlag("Weapon", ESM::NPC::Weapon);
-        setFlag("Armor", ESM::NPC::Armor);
-        setFlag("Clothing", ESM::NPC::Clothing);
-        setFlag("Books", ESM::NPC::Books);
-        setFlag("Ingredients", ESM::NPC::Ingredients);
-        setFlag("Picks", ESM::NPC::Picks);
-        setFlag("Probes", ESM::NPC::Probes);
-        setFlag("Lights", ESM::NPC::Lights);
-        setFlag("Apparatus", ESM::NPC::Apparatus);
-        setFlag("RepairItem", ESM::NPC::RepairItem);
-        setFlag("Misc", ESM::NPC::Misc);
-        setFlag("Potions", ESM::NPC::Potions);
-        setFlag("MagicItems", ESM::NPC::MagicItems);
-
-        npc.mAiData.mServices = flags;
-    }
-
-    // Travel destinations
-    if (rec["travelDestinations"] != sol::nil)
-    {
-        const sol::table travelDests = rec["travelDestinations"];
-        npc.mTransport.clear();
-        for (std::size_t i = 1; i <= travelDests.size(); ++i)
+        if (rec["isMale"] != sol::nil)
         {
-            sol::table t = travelDests[i];
-            ESM::Transport destination;
-
-            // Position
-            destination.mPos.pos = t["position"];
-            destination.mPos.rot = Misc::Convert::toRotation(LuaUtil::fromTransform(t["rotation"]));
-
-            // Cell
-            std::string cellId = t["cellId"];
-            destination.mCellName = cellId; // If empty, it will be handled as exterior
-
-            npc.mTransport.push_back(destination);
+            bool male = rec["isMale"];
+            if (male)
+                npc.mFlags &= ~ESM::NPC::Female;
+            else
+                npc.mFlags |= ESM::NPC::Female;
         }
-    }
 
-    return npc;
-}
-        // Blood type
+        if (rec["isEssential"] != sol::nil)
+        {
+            bool essential = rec["isEssential"];
+            if (essential)
+                npc.mFlags |= ESM::NPC::Essential;
+            else
+                npc.mFlags &= ~ESM::NPC::Essential;
+        }
+
+        if (rec["isRespawning"] != sol::nil)
+        {
+            bool respawn = rec["isRespawning"];
+            if (respawn)
+                npc.mFlags |= ESM::NPC::Respawn;
+            else
+                npc.mFlags &= ~ESM::NPC::Respawn;
+        }
+
+        if (rec["baseDisposition"] != sol::nil)
+            npc.mNpdt.mDisposition = static_cast<int>(rec["baseDisposition"]);
+
+        if (rec["baseGold"] != sol::nil)
+            npc.mNpdt.mGold = static_cast<int>(rec["baseGold"]);
+
         if (rec["bloodType"] != sol::nil)
             npc.mBloodType = static_cast<int>(rec["bloodType"]);
+
+        // Services offered
+        if (rec["servicesOffered"] != sol::nil)
+        {
+            const sol::table services = rec["servicesOffered"];
+            int flags = 0;
+            auto setFlag = [&](const char* key, int mask) {
+                if (services[key] != sol::nil && services[key])
+                    flags |= mask;
+            };
+
+            setFlag("Spells", ESM::NPC::Spells);
+            setFlag("Spellmaking", ESM::NPC::Spellmaking);
+            setFlag("Enchanting", ESM::NPC::Enchanting);
+            setFlag("Training", ESM::NPC::Training);
+            setFlag("Repair", ESM::NPC::Repair);
+            setFlag("Barter", ESM::NPC::AllItems);
+            setFlag("Weapon", ESM::NPC::Weapon);
+            setFlag("Armor", ESM::NPC::Armor);
+            setFlag("Clothing", ESM::NPC::Clothing);
+            setFlag("Books", ESM::NPC::Books);
+            setFlag("Ingredients", ESM::NPC::Ingredients);
+            setFlag("Picks", ESM::NPC::Picks);
+            setFlag("Probes", ESM::NPC::Probes);
+            setFlag("Lights", ESM::NPC::Lights);
+            setFlag("Apparatus", ESM::NPC::Apparatus);
+            setFlag("RepairItem", ESM::NPC::RepairItem);
+            setFlag("Misc", ESM::NPC::Misc);
+            setFlag("Potions", ESM::NPC::Potions);
+            setFlag("MagicItems", ESM::NPC::MagicItems);
+
+            npc.mAiData.mServices = flags;
+        }
 
         return npc;
     }
