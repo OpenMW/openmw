@@ -49,7 +49,8 @@ namespace MWGui
             Button mButton;
             std::string mName;
             InputType mInputType;
-            union {
+            union
+            {
                 SDL_GameControllerButton mButton;
                 SDL_GameControllerAxis mAxis;
             } mId;
@@ -63,7 +64,12 @@ namespace MWGui
             MyGUI::TextBox* mText;
             Gui::HBox* mHBox;
 
-            ButtonWidgets() : mImage(nullptr), mText(nullptr), mHBox(nullptr) {}
+            ButtonWidgets()
+                : mImage(nullptr)
+                , mText(nullptr)
+                , mHBox(nullptr)
+            {
+            }
         };
 
         std::array<ButtonWidgets, Button::Button_Max> mButtons;
