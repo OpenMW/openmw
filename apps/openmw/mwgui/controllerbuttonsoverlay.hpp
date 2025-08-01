@@ -18,7 +18,6 @@ namespace MWGui
         int getHeight();
         void setButtons(ControllerButtons* buttons);
 
-    private:
         enum Button
         {
             Button_A = 0,
@@ -39,16 +38,23 @@ namespace MWGui
             Button_Max,
         };
 
-        struct ButtonDetails
+        struct ButtonDefinition
         {
-            std::string mLayoutName;
-            std::string mImagePath;
+            Button mButton;
+            std::string mName;
+            std::variant<SDL_GameControllerButton, SDL_GameControllerAxis> mId;
+            std::string MWGui::ControllerButtons::* mField;
+        };
+
+    private:
+        struct ButtonWidgets
+        {
             MyGUI::ImageBox* mImage = nullptr;
             MyGUI::TextBox* mText = nullptr;
             Gui::HBox* mHBox = nullptr;
         };
 
-        std::array<ButtonDetails, Button::Button_Max> mButtons;
+        std::array<ButtonWidgets, Button::Button_Max> mButtons;
 
         Gui::HBox* mHBox;
 
