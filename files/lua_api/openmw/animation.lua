@@ -254,7 +254,7 @@
 -- Can only be used on self.
 -- @function [parent=#animation] removeVfx
 -- @param openmw.core#GameObject actor
--- @param #string vfxId an string ID that uniquely identifies the VFX to remove
+-- @param #string vfxId a string ID that uniquely identifies the VFX to remove
 
 ---
 -- Removes all vfx from the actor.
