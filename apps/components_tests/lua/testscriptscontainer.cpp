@@ -638,8 +638,9 @@ CUSTOM: customdata.lua
             sol::object deserialized = LuaUtil::deserialize(lua.sol(), data2.mScripts[0].mData, &serializer1);
             EXPECT_TRUE(deserialized.is<sol::table>());
             sol::table table = deserialized;
-            for (const auto& [key, value] : table)
+            if (!table.empty())
             {
+                const auto [key, value] = *table.cbegin();
                 EXPECT_TRUE(key.is<ESM::RefNum>());
                 EXPECT_TRUE(value.is<ESM::RefNum>());
                 EXPECT_EQ(key.as<ESM::RefNum>(), (ESM::RefNum{ 42, 34 }));

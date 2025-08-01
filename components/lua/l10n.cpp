@@ -66,7 +66,7 @@ namespace LuaUtil
               };
 
         return sol::make_object(
-            lua, [manager](const std::string& contextName, sol::optional<std::string> fallbackLocale) {
+            lua, [manager](std::string_view contextName, sol::optional<std::string> fallbackLocale) {
                 if (fallbackLocale)
                     return L10nContext{ manager->getContext(contextName, *fallbackLocale) };
                 else

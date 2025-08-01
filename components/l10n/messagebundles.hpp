@@ -10,6 +10,8 @@
 #include <unicode/locid.h>
 #include <unicode/msgfmt.h>
 
+#include <components/misc/strings/algorithm.hpp>
+
 namespace L10n
 {
     /**
@@ -41,18 +43,23 @@ namespace L10n
         void setPreferredLocales(const std::vector<icu::Locale>& preferredLocales);
         const std::vector<icu::Locale>& getPreferredLocales() const { return mPreferredLocales; }
         void load(std::istream& input, const icu::Locale& lang);
-        bool isLoaded(const icu::Locale& loc) const { return mBundles.find(loc.getName()) != mBundles.end(); }
+        bool isLoaded(const icu::Locale& loc) const
+        {
+            return mBundles.find(std::string_view(loc.getName())) != mBundles.end();
+        }
         const icu::Locale& getFallbackLocale() const { return mFallbackLocale; }
         void setGmstLoader(std::function<std::string(std::string_view)> fn) { mGmstLoader = std::move(fn); }
 
     private:
+        template <class T>
+        using StringMap = std::unordered_map<std::string, T, Misc::StringUtils::StringHash, std::equal_to<>>;
         // icu::Locale isn't hashable (or comparable), so we use the string form instead, which is canonicalized
-        std::unordered_map<std::string, std::unordered_map<std::string, icu::MessageFormat>> mBundles;
+        StringMap<StringMap<icu::MessageFormat>> mBundles;
         const icu::Locale mFallbackLocale;
         std::vector<std::string> mPreferredLocaleStrings;
         std::vector<icu::Locale> mPreferredLocales;
         std::function<std::string(std::string_view)> mGmstLoader;
-        const icu::MessageFormat* findMessage(std::string_view key, const std::string& localeName) const;
+        const icu::MessageFormat* findMessage(std::string_view key, std::string_view localeName) const;
     };
 
 }
