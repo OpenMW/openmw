@@ -537,7 +537,11 @@ namespace MWScript
                     return;
 
                 MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-                creatureStats.getSpells().remove(id);
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(id);
+                creatureStats.getSpells().remove(spell);
+                if (spell->mData.mType == ESM::Spell::ST_Ability || spell->mData.mType == ESM::Spell::ST_Blight
+                    || spell->mData.mType == ESM::Spell::ST_Curse || spell->mData.mType == ESM::Spell::ST_Disease)
+                    creatureStats.getActiveSpells().removeEffectsBySourceSpellId(ptr, id);
 
                 MWBase::WindowManager* wm = MWBase::Environment::get().getWindowManager();
 
