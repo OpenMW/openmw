@@ -6,7 +6,6 @@
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 
-
 namespace sol
 {
     template <>
