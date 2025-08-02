@@ -269,13 +269,29 @@ namespace MWWorld
             list.push_back((*it)->mId);
         }
     }
+    template <class IdType, class StaticMap>
+    inline bool shouldInsert(const IdType& id, const StaticMap& map)
+    {
+        auto it = map.find(id);
+        return it != map.end();
+    }
+
+    template <class StaticMap>
+    inline bool shouldInsert(const ESM::RefId& id, const StaticMap& map)
+    {
+        if (!id.template is<ESM::GeneratedRefId>())
+        {
+            auto it = map.find(id);
+            return it != map.end();
+        }
+        return true;
+    }
     template <class T, class Id>
     T* TypedDynamicStore<T, Id>::insert(const T& item, bool overrideOnly)
     {
         if (overrideOnly)
         {
-            auto it = mStatic.find(item.mId);
-            if (it == mStatic.end())
+            if (!shouldInsert(item.mId, mStatic))
                 return nullptr;
         }
         std::pair<typename Dynamic::iterator, bool> result = mDynamic.insert_or_assign(item.mId, item);

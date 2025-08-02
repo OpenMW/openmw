@@ -91,10 +91,10 @@ namespace
             npc.mNpdt.mDisposition = rec["baseDisposition"].get<int>();
 
         if (rec["baseGold"] != sol::nil)
-            npc.mNpdt.mGold = static_cast<int>(rec["baseGold"]);
+            npc.mNpdt.mGold = rec["baseGold"].get<int>();
 
         if (rec["bloodType"] != sol::nil)
-            npc.mBloodType = static_cast<int>(rec["bloodType"]);
+            npc.mBloodType = rec["bloodType"].get<int>();
 
         // Services offered
         if (rec["servicesOffered"] != sol::nil)
