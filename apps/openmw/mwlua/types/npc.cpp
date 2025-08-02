@@ -101,7 +101,7 @@ namespace
         {
             const sol::table services = rec["servicesOffered"];
             int flags = 0;
-            auto setFlag = [&](const std::string_view& key, int mask) {
+            auto setFlag = [&](std::string_view key, int mask) {
                 if (services[key] != sol::nil && services[key])
                     flags |= mask;
             };
