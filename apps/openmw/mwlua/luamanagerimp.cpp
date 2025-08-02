@@ -490,6 +490,11 @@ namespace MWLua
             EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
     }
 
+    void LuaManager::jailTimeServed(const MWWorld::Ptr& actor, int days)
+    {
+        mEngineEvents.addToQueue(EngineEvents::OnJailTimeServed{ getId(actor), days });
+    }
+
     void LuaManager::onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
         const MWWorld::Ptr& ammo, int attackType, float attackStrength, float damage, bool isHealth,
         const osg::Vec3f& hitPos, bool successful, MWMechanics::DamageSourceType sourceType)

@@ -89,6 +89,7 @@ namespace MWLua
         {
             callEngineHandlers(mOnSkillLevelUp, skillId, source);
         }
+        void onJailTimeServed(int days) { callEngineHandlers(mOnJailTimeServed, days); }
 
         void applyStatsCache();
 
@@ -118,6 +119,7 @@ namespace MWLua
         EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
         EngineHandlerList mOnSkillUse{ "_onSkillUse" };
         EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
+        EngineHandlerList mOnJailTimeServed{ "_onJailTimeServed" };
     };
 
 }
