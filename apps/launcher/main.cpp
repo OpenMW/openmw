@@ -42,7 +42,7 @@ int runLauncher(int argc, char* argv[])
             resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
         }
 
-        l10n::installQtTranslations(app, "launcher", resourcesPath);
+        L10n::installQtTranslations(app, "launcher", resourcesPath);
 
         Launcher::MainDialog mainWin(configurationManager);
 

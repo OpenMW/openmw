@@ -331,6 +331,7 @@
 ---
 -- Adds a new spell to the list of active spells (only in global scripts or on self).
 -- Note that this does not play any related VFX or sounds.
+-- Note that this should not be used to add spells without durations (i.e. abilities, curses, and diseases) as they will expire instantly. Use @{#ActorSpells.add} instead.
 -- @function [parent=#ActorActiveSpells] add
 -- @param self
 -- @param #table options A table of parameters. Must contain the following required parameters:
@@ -862,6 +863,7 @@
 -- @field #boolean isBiped whether the creature is a biped
 -- @field #boolean isEssential whether the creature is essential
 -- @field #boolean isRespawning whether the creature respawns after death
+-- @field #number bloodType integer representing the blood type of the Creature. Used to generate the correct blood vfx.
 
 
 --- @{#NPC} functions
@@ -1136,6 +1138,7 @@
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 -- @field #boolean isEssential whether the NPC is essential
 -- @field #boolean isRespawning whether the NPC respawns after death
+-- @field #number bloodType integer representing the blood type of the NPC. Used to generate the correct blood vfx.
 
 ---
 -- @type TravelDestination
@@ -2450,5 +2453,7 @@
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
+-- @field #string openSound FormId of the door opening sound
+-- @field #string closeSound FormId of the door closing sound
 
 return nil

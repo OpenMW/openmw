@@ -85,7 +85,7 @@ void CSVWorld::NotEditableSubDelegate::setEditorData(QWidget* editor, const QMod
     CSMWorld::Columns::ColumnId columnId
         = static_cast<CSMWorld::Columns::ColumnId>(mTable->getColumnId(index.column()));
 
-    if (QVariant::String == v.type())
+    if (QMetaType::QString == v.typeId())
     {
         label->setText(v.toString());
     }

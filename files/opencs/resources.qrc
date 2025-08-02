@@ -160,4 +160,7 @@
         <file alias="brush-circle">brush-circle.svg</file>
         <file alias="brush-custom">brush-custom.svg</file>
     </qresource>
+    <qresource prefix="/render">
+        <file alias="selection-marker">selectionmarker.osgt</file>
+    </qresource>
 </RCC>

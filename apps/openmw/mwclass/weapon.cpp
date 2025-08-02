@@ -105,7 +105,7 @@ namespace MWClass
         return std::make_pair(slots_, stack);
     }
 
-    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
@@ -270,13 +270,13 @@ namespace MWClass
 
     std::pair<int, std::string_view> Weapon::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
-        if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
-            return { 0, "#{sInventoryMessage1}" };
-
         // Do not allow equip weapons from inventory during attack
         if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
             return { 0, "#{sCantEquipWeapWarning}" };
+
+        if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
+            return { 0, "#{sInventoryMessage1}" };
 
         std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
 

@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -48,7 +48,7 @@ namespace sol {
 		using is_lua_value_single_constructible = meta::any<std::is_same<T, lua_value>, is_reference_or_lua_value_init_list<T>>;
 
 		static lua_State*& thread_local_lua_state() {
-#if SOL_IS_ON(SOL_USE_THREAD_LOCAL_I_)
+#if SOL_IS_ON(SOL_USE_THREAD_LOCAL)
 			static thread_local lua_State* L = nullptr;
 #else
 			static lua_State* L = nullptr;

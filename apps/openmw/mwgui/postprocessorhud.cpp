@@ -17,6 +17,7 @@
 #include <MyGUI_WidgetInput.h>
 #include <MyGUI_Window.h>
 
+#include <components/files/configurationmanager.hpp>
 #include <components/fx/technique.hpp>
 #include <components/fx/widgets.hpp>
 
@@ -33,6 +34,14 @@
 
 namespace MWGui
 {
+    namespace
+    {
+        std::shared_ptr<Fx::Technique>& getTechnique(const MyGUI::ListBox& list, size_t selected)
+        {
+            return *list.getItemDataAt<std::shared_ptr<Fx::Technique>>(selected);
+        }
+    }
+
     void PostProcessorHud::ListWrapper::onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char ch)
     {
         if (MyGUI::InputManager::getInstance().isShiftPressed()
@@ -42,8 +51,9 @@ namespace MWGui
         MyGUI::ListBox::onKeyButtonPressed(key, ch);
     }
 
-    PostProcessorHud::PostProcessorHud()
+    PostProcessorHud::PostProcessorHud(Files::ConfigurationManager& cfgMgr)
         : WindowBase("openmw_postprocessor_hud.layout")
+        , mCfgMgr(cfgMgr)
     {
         getWidget(mActiveList, "ActiveList");
         getWidget(mInactiveList, "InactiveList");
@@ -102,7 +112,7 @@ namespace MWGui
     {
         for (size_t i = 1; i < mConfigArea->getChildCount(); ++i)
         {
-            if (auto* child = dynamic_cast<fx::Widgets::UniformBase*>(mConfigArea->getChildAt(i)))
+            if (auto* child = dynamic_cast<Fx::Widgets::UniformBase*>(mConfigArea->getChildAt(i)))
                 child->toDefault();
         }
     }
@@ -117,7 +127,7 @@ namespace MWGui
         if (index >= sender->getItemCount())
             return;
 
-        updateConfigView(sender->getItemNameAt(index));
+        updateConfigView(getTechnique(*sender, index)->getFileName());
     }
 
     void PostProcessorHud::toggleTechnique(bool enabled)
@@ -131,7 +141,7 @@ namespace MWGui
             auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
             mOverrideHint = list->getItemNameAt(selected);
 
-            auto technique = *list->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            auto technique = getTechnique(*list, selected);
             if (technique->getDynamic())
                 return;
 
@@ -167,7 +177,7 @@ namespace MWGui
 
         if (static_cast<size_t>(index) != selected)
         {
-            auto technique = *mActiveList->getItemDataAt<std::shared_ptr<fx::Technique>>(selected);
+            auto technique = getTechnique(*mActiveList, selected);
             if (technique->getDynamic() || technique->getInternal())
                 return;
 
@@ -235,6 +245,8 @@ namespace MWGui
 
     void PostProcessorHud::onClose()
     {
+        Settings::ShaderManager::get().save();
+        Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
         toggleMode(Settings::ShaderManager::Mode::Normal);
     }
 
@@ -290,18 +302,18 @@ namespace MWGui
             return;
 
         if (mInactiveList->getIndexSelected() != MyGUI::ITEM_NONE)
-            updateConfigView(mInactiveList->getItemNameAt(mInactiveList->getIndexSelected()));
+            updateConfigView(getTechnique(*mInactiveList, mInactiveList->getIndexSelected())->getFileName());
         else if (mActiveList->getIndexSelected() != MyGUI::ITEM_NONE)
-            updateConfigView(mActiveList->getItemNameAt(mActiveList->getIndexSelected()));
+            updateConfigView(getTechnique(*mActiveList, mActiveList->getIndexSelected())->getFileName());
     }
 
-    void PostProcessorHud::updateConfigView(const std::string& name)
+    void PostProcessorHud::updateConfigView(VFS::Path::NormalizedView path)
     {
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
-        auto technique = processor->loadTechnique(name);
+        auto technique = processor->loadTechnique(path);
 
-        if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
+        if (technique->getStatus() == Fx::Technique::Status::File_Not_exists)
             return;
 
         while (mConfigArea->getChildCount() > 0)
@@ -322,15 +334,15 @@ namespace MWGui
 
         const auto flags = technique->getFlags();
 
-        const auto flag_interior = serializeBool(!(flags & fx::Technique::Flag_Disable_Interiors));
-        const auto flag_exterior = serializeBool(!(flags & fx::Technique::Flag_Disable_Exteriors));
-        const auto flag_underwater = serializeBool(!(flags & fx::Technique::Flag_Disable_Underwater));
-        const auto flag_abovewater = serializeBool(!(flags & fx::Technique::Flag_Disable_Abovewater));
+        const auto flag_interior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Interiors));
+        const auto flag_exterior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Exteriors));
+        const auto flag_underwater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Underwater));
+        const auto flag_abovewater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Abovewater));
 
         switch (technique->getStatus())
         {
-            case fx::Technique::Status::Success:
-            case fx::Technique::Status::Uncompiled:
+            case Fx::Technique::Status::Success:
+            case Fx::Technique::Status::Uncompiled:
             {
                 if (technique->getDynamic())
                     ss << "#{fontcolourhtml=header}#{OMWShaders:ShaderLocked}:      #{fontcolourhtml=normal} "
@@ -352,13 +364,13 @@ namespace MWGui
                    << flag_abovewater;
                 break;
             }
-            case fx::Technique::Status::Parse_Error:
+            case Fx::Technique::Status::Parse_Error:
                 ss << "#{fontcolourhtml=negative}Shader Compile Error: #{fontcolourhtml=normal} <"
                    << std::string(technique->getName()) << "> failed to compile." << endl
                    << endl
                    << technique->getLastError();
                 break;
-            case fx::Technique::Status::File_Not_exists:
+            case Fx::Technique::Status::File_Not_exists:
                 break;
         }
 
@@ -390,7 +402,7 @@ namespace MWGui
                     divider->setCaptionWithReplacing(uniform->mHeader);
                 }
 
-                fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<fx::Widgets::UniformBase>(
+                Fx::Widgets::UniformBase* uwidget = mConfigArea->createWidget<Fx::Widgets::UniformBase>(
                     "MW_UniformEdit", { 0, 0, 0, 22 }, MyGUI::Align::Default);
                 uwidget->init(uniform);
                 uwidget->getLabel()->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);
@@ -423,22 +435,22 @@ namespace MWGui
 
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
-        std::vector<std::string> techniques;
-        for (const auto& [name, _] : processor->getTechniqueMap())
-            techniques.push_back(name);
-        std::sort(techniques.begin(), techniques.end(), Misc::StringUtils::ciLess);
+        std::vector<VFS::Path::NormalizedView> techniques;
+        for (const auto& vfsPath : processor->getTechniqueFiles())
+            techniques.emplace_back(vfsPath);
+        std::sort(techniques.begin(), techniques.end());
 
-        for (const std::string& name : techniques)
+        for (VFS::Path::NormalizedView path : techniques)
         {
-            auto technique = processor->loadTechnique(name);
+            auto technique = processor->loadTechnique(path);
 
             if (!technique->getHidden() && !processor->isTechniqueEnabled(technique))
             {
-                std::string lowerName = Utf8Stream::lowerCaseUtf8(name);
+                std::string lowerName = Utf8Stream::lowerCaseUtf8(technique->getName());
                 std::string lowerCaption = mFilter->getCaption();
                 lowerCaption = Utf8Stream::lowerCaseUtf8(lowerCaption);
                 if (lowerName.find(lowerCaption) != std::string::npos)
-                    mInactiveList->addItem(name, technique);
+                    mInactiveList->addItem(technique->getName(), technique);
             }
         }
 
@@ -481,14 +493,14 @@ namespace MWGui
     void PostProcessorHud::registerMyGUIComponents()
     {
         MyGUI::FactoryManager& factory = MyGUI::FactoryManager::getInstance();
-        factory.registerFactory<fx::Widgets::UniformBase>("Widget");
-        factory.registerFactory<fx::Widgets::EditNumberFloat4>("Widget");
-        factory.registerFactory<fx::Widgets::EditNumberFloat3>("Widget");
-        factory.registerFactory<fx::Widgets::EditNumberFloat2>("Widget");
-        factory.registerFactory<fx::Widgets::EditNumberFloat>("Widget");
-        factory.registerFactory<fx::Widgets::EditNumberInt>("Widget");
-        factory.registerFactory<fx::Widgets::EditBool>("Widget");
-        factory.registerFactory<fx::Widgets::EditChoice>("Widget");
+        factory.registerFactory<Fx::Widgets::UniformBase>("Widget");
+        factory.registerFactory<Fx::Widgets::EditNumberFloat4>("Widget");
+        factory.registerFactory<Fx::Widgets::EditNumberFloat3>("Widget");
+        factory.registerFactory<Fx::Widgets::EditNumberFloat2>("Widget");
+        factory.registerFactory<Fx::Widgets::EditNumberFloat>("Widget");
+        factory.registerFactory<Fx::Widgets::EditNumberInt>("Widget");
+        factory.registerFactory<Fx::Widgets::EditBool>("Widget");
+        factory.registerFactory<Fx::Widgets::EditChoice>("Widget");
         factory.registerFactory<ListWrapper>("Widget");
     }
 }

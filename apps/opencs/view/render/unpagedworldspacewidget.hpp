@@ -104,6 +104,8 @@ namespace CSVRender
         /// Erase all overrides and restore the visual representation to its true state.
         void reset(unsigned int elementMask) override;
 
+        CSVRender::Object* getObjectByReferenceId(const std::string& id) override;
+
     private:
         void referenceableDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 

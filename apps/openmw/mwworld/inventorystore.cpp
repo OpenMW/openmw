@@ -55,7 +55,7 @@ void MWWorld::InventoryStore::storeEquipmentState(
     }
 
     if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
-        inventory.mSelectedEnchantItem = index;
+        inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
 
 void MWWorld::InventoryStore::readEquipmentState(
@@ -378,137 +378,117 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
 
 void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
 {
-    // Only NPCs can wear armor for now.
-    // For creatures we equip only shields.
     const Ptr& actor = getPtr();
-    if (!actor.getClass().isNpc())
+
+    // Creatures only want shields and don't benefit from armor rating or unarmored skill
+    const MWWorld::Class& actorCls = actor.getClass();
+    const bool actorIsNpc = actorCls.isNpc();
+
+    int equipmentTypes = ContainerStore::Type_Armor;
+    float unarmoredRating = 0.f;
+    if (actorIsNpc)
     {
-        autoEquipShield(slots_);
-        return;
+        equipmentTypes |= ContainerStore::Type_Clothing;
+        const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        const float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
+        const float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
+        const float unarmoredSkill = actorCls.getSkill(actor, ESM::Skill::Unarmored);
+        unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
+        unarmoredRating = std::max(unarmoredRating, 0.f);
     }
 
-    const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-    static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
-    static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-
-    float unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
-    float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
-
-    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter != end();
-         ++iter)
+    for (ContainerStoreIterator iter(begin(equipmentTypes)); iter != end(); ++iter)
     {
         Ptr test = *iter;
+        const MWWorld::Class& testCls = test.getClass();
+        const bool isArmor = iter.getType() == ContainerStore::Type_Armor;
 
-        switch (test.getClass().canBeEquipped(test, actor).first)
+        // Discard armor that is worse than unarmored for NPCs and non-shields for creatures
+        if (isArmor)
         {
-            case 0:
-                continue;
-            default:
-                break;
+            if (actorIsNpc)
+            {
+                if (testCls.getSkillAdjustedArmorRating(test, actor) <= unarmoredRating)
+                    continue;
+            }
+            else
+            {
+                if (test.get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
+                    continue;
+            }
         }
 
-        if (iter.getType() == ContainerStore::Type_Armor
-            && test.getClass().getEffectiveArmorRating(test, actor) <= std::max(unarmoredRating, 0.f))
-        {
+        // Don't equip the item if it cannot be equipped
+        if (testCls.canBeEquipped(test, actor).first == 0)
             continue;
-        }
 
-        std::pair<std::vector<int>, bool> itemsSlots = iter->getClass().getEquipmentSlots(*iter);
+        const auto [itemSlots, canStack] = testCls.getEquipmentSlots(test);
 
         // checking if current item pointed by iter can be equipped
-        for (int slot : itemsSlots.first)
+        for (const int slot : itemSlots)
         {
-            // if true then it means slot is equipped already
             // check if slot may require swapping if current item is more valuable
             if (slots_.at(slot) != end())
             {
                 Ptr old = *slots_.at(slot);
+                const MWWorld::Class& oldCls = old.getClass();
+                unsigned int oldType = old.getType();
 
-                if (iter.getType() == ContainerStore::Type_Armor)
+                if (!isArmor)
                 {
-                    if (old.getType() == ESM::Armor::sRecordId)
-                    {
-                        if (old.get<ESM::Armor>()->mBase->mData.mType < test.get<ESM::Armor>()->mBase->mData.mType)
-                            continue;
+                    // Armor should replace clothing and weapons, but clothing should only replace clothing
+                    if (oldType != ESM::Clothing::sRecordId)
+                        continue;
 
-                        if (old.get<ESM::Armor>()->mBase->mData.mType == test.get<ESM::Armor>()->mBase->mData.mType)
-                        {
-                            if (old.getClass().getEffectiveArmorRating(old, actor)
-                                >= test.getClass().getEffectiveArmorRating(test, actor))
-                                // old armor had better armor rating
-                                continue;
-                        }
-                    }
-                    // suitable armor should replace already equipped clothing
-                }
-                else if (iter.getType() == ContainerStore::Type_Clothing)
-                {
-                    // if left ring is equipped
+                    // If the left ring slot is filled, don't swap if the right ring is cheaper
                     if (slot == Slot_LeftRing)
                     {
-                        // if there is a place for right ring dont swap it
                         if (slots_.at(Slot_RightRing) == end())
-                        {
                             continue;
-                        }
-                        else // if right ring is equipped too
-                        {
-                            Ptr rightRing = *slots_.at(Slot_RightRing);
 
-                            // we want to swap cheaper ring only if both are equipped
-                            if (old.getClass().getValue(old) >= rightRing.getClass().getValue(rightRing))
+                        Ptr rightRing = *slots_.at(Slot_RightRing);
+                        if (rightRing.getClass().getValue(rightRing) <= oldCls.getValue(old))
+                            continue;
+                    }
+
+                    if (testCls.getValue(test) <= oldCls.getValue(old))
+                        continue;
+                }
+                else if (oldType == ESM::Armor::sRecordId)
+                {
+                    const int32_t oldArmorType = old.get<ESM::Armor>()->mBase->mData.mType;
+                    const int32_t newArmorType = test.get<ESM::Armor>()->mBase->mData.mType;
+                    if (oldArmorType == newArmorType)
+                    {
+                        // For NPCs, compare armor rating; for creatures, compare condition
+                        if (actorIsNpc)
+                        {
+                            const float rating = testCls.getSkillAdjustedArmorRating(test, actor);
+                            const float oldRating = oldCls.getSkillAdjustedArmorRating(old, actor);
+                            if (rating <= oldRating)
+                                continue;
+                        }
+                        else
+                        {
+                            if (testCls.getItemHealth(test) <= oldCls.getItemHealth(old))
                                 continue;
                         }
                     }
-
-                    if (old.getType() == ESM::Clothing::sRecordId)
-                    {
-                        // check value
-                        if (old.getClass().getValue(old) >= test.getClass().getValue(test))
-                            // old clothing was more valuable
-                            continue;
-                    }
-                    else
-                        // suitable clothing should NOT replace already equipped armor
+                    else if (oldArmorType < newArmorType)
                         continue;
                 }
             }
 
-            if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
+            // unstack the item if required
+            if (!canStack && test.getCellRef().getCount() > 1)
             {
-                // unstack item pointed to by iterator if required
-                if (iter->getCellRef().getCount() > 1)
-                {
-                    unstack(*iter);
-                }
+                unstack(test);
             }
 
             // if we are here it means item can be equipped or swapped
             slots_[slot] = iter;
             break;
         }
-    }
-}
-
-void MWWorld::InventoryStore::autoEquipShield(TSlots& slots_)
-{
-    for (ContainerStoreIterator iter(begin(ContainerStore::Type_Armor)); iter != end(); ++iter)
-    {
-        if (iter->get<ESM::Armor>()->mBase->mData.mType != ESM::Armor::Shield)
-            continue;
-        if (iter->getClass().canBeEquipped(*iter, getPtr()).first != 1)
-            continue;
-        std::pair<std::vector<int>, bool> shieldSlots = iter->getClass().getEquipmentSlots(*iter);
-        int slot = shieldSlots.first[0];
-        const ContainerStoreIterator& shield = slots_[slot];
-        if (shield != end() && shield.getType() == Type_Armor
-            && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
-        {
-            if (shield->getClass().getItemHealth(*shield) >= iter->getClass().getItemHealth(*iter))
-                continue;
-        }
-        slots_[slot] = iter;
     }
 }
 
@@ -522,8 +502,6 @@ void MWWorld::InventoryStore::autoEquip()
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    // Note: creatures ignore equipment armor rating and only equip shields
-    // Use custom logic for them - select shield based on its health instead of armor rating
     autoEquipWeapon(slots_);
     autoEquipArmor(slots_);
 
@@ -749,6 +727,16 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::ConstPtr& item)
     for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
     {
         if (getSlot(i) != end() && *getSlot(i) == item)
+            return true;
+    }
+    return false;
+}
+
+bool MWWorld::InventoryStore::isEquipped(const ESM::RefId& id)
+{
+    for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
+        if (getSlot(i) != end() && getSlot(i)->getCellRef().getRefId() == id)
             return true;
     }
     return false;

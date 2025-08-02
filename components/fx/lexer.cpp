@@ -8,7 +8,7 @@
 
 #include <components/misc/strings/format.hpp>
 
-namespace fx
+namespace Fx
 {
     namespace Lexer
     {

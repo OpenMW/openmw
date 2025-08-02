@@ -8,7 +8,7 @@ namespace
 {
     struct L10nContext
     {
-        std::shared_ptr<const l10n::MessageBundles> mData;
+        std::shared_ptr<const L10n::MessageBundles> mData;
     };
 
     void getICUArgs(std::string_view messageId, const sol::table& table, std::vector<icu::UnicodeString>& argNames,
@@ -18,7 +18,11 @@ namespace
         {
             // Argument values
             if (value.is<std::string>())
-                args.push_back(icu::Formattable(LuaUtil::cast<std::string>(value).c_str()));
+            {
+                const auto& str = LuaUtil::cast<std::string>(value);
+                args.push_back(icu::Formattable(icu::UnicodeString::fromUTF8(str.c_str())));
+            }
+
             // Note: While we pass all numbers as doubles, they still seem to be handled appropriately.
             // Numbers can be forced to be integers using the argType number and argStyle integer
             //     E.g. {var, number, integer}
@@ -48,7 +52,7 @@ namespace sol
 
 namespace LuaUtil
 {
-    sol::function initL10nLoader(lua_State* L, l10n::Manager* manager)
+    sol::function initL10nLoader(lua_State* L, L10n::Manager* manager)
     {
         sol::state_view lua(L);
         sol::usertype<L10nContext> ctxDef = lua.new_usertype<L10nContext>("L10nContext");
@@ -62,7 +66,7 @@ namespace LuaUtil
               };
 
         return sol::make_object(
-            lua, [manager](const std::string& contextName, sol::optional<std::string> fallbackLocale) {
+            lua, [manager](std::string_view contextName, sol::optional<std::string> fallbackLocale) {
                 if (fallbackLocale)
                     return L10nContext{ manager->getContext(contextName, *fallbackLocale) };
                 else

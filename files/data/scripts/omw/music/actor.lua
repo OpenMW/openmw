@@ -11,7 +11,7 @@ local function emitTargetsChanged()
     end
 end
 
-local function onUpdate()
+local function onUpdate(dt)
     if types.Actor.isDeathFinished(self) or not types.Actor.isInActorsProcessingRange(self) then
         if next(targets) ~= nil then
             targets = {}
@@ -21,10 +21,10 @@ local function onUpdate()
         return
     end
 
-    -- Early-out for actors without targets and without combat state
+    -- Early-out for actors without targets and without combat state when the game is not paused
     -- TODO: use events or engine handlers to detect when targets change
     local isStanceNothing = types.Actor.getStance(self) == types.Actor.STANCE.Nothing
-    if isStanceNothing and next(targets) == nil and not AI.isFleeing() then
+    if isStanceNothing and next(targets) == nil and not AI.isFleeing() and dt > 0 then
         return
     end
 

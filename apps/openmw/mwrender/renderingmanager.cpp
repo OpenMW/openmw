@@ -943,8 +943,8 @@ namespace MWRender
         stateUpdater->setIsUnderwater(isUnderwater);
         stateUpdater->setFogColor(fogColor);
         stateUpdater->setGameHour(world->getTimeStamp().getHour());
-        stateUpdater->setWeatherId(world->getCurrentWeather());
-        stateUpdater->setNextWeatherId(world->getNextWeather());
+        stateUpdater->setWeatherId(world->getCurrentWeatherScriptId());
+        stateUpdater->setNextWeatherId(world->getNextWeatherScriptId());
         stateUpdater->setWeatherTransition(world->getWeatherTransition());
         stateUpdater->setWindSpeed(world->getWindSpeed());
         stateUpdater->setSkyColor(mSky->getSkyColor());

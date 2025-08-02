@@ -242,11 +242,36 @@ void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
 {
     if (mode == Settings::WindowMode::Fullscreen || mode == Settings::WindowMode::WindowedFullscreen)
     {
+        QString customSizeMessage = tr("Custom window size is available only in Windowed mode.");
+        QString windowBorderMessage = tr("Window border is available only in Windowed mode.");
+
         standardRadioButton->toggle();
         customRadioButton->setEnabled(false);
         customWidthSpinBox->setEnabled(false);
         customHeightSpinBox->setEnabled(false);
         windowBorderCheckBox->setEnabled(false);
+        windowBorderCheckBox->setToolTip(windowBorderMessage);
+        customWidthSpinBox->setToolTip(customSizeMessage);
+        customHeightSpinBox->setToolTip(customSizeMessage);
+        customRadioButton->setToolTip(customSizeMessage);
+    }
+
+    if (mode == Settings::WindowMode::Fullscreen)
+    {
+        resolutionComboBox->setEnabled(true);
+        resolutionComboBox->setToolTip("");
+        standardRadioButton->setToolTip("");
+    }
+    else if (mode == Settings::WindowMode::WindowedFullscreen)
+    {
+        QString fullScreenMessage = tr("Windowed Fullscreen mode always uses the native display resolution.");
+
+        resolutionComboBox->setEnabled(false);
+        resolutionComboBox->setToolTip(fullScreenMessage);
+        standardRadioButton->setToolTip(fullScreenMessage);
+
+        // Assume that a first item is a native screen resolution
+        resolutionComboBox->setCurrentIndex(0);
     }
     else
     {
@@ -254,6 +279,13 @@ void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
         windowBorderCheckBox->setEnabled(true);
+        resolutionComboBox->setEnabled(true);
+        resolutionComboBox->setToolTip("");
+        standardRadioButton->setToolTip("");
+        windowBorderCheckBox->setToolTip("");
+        customWidthSpinBox->setToolTip("");
+        customHeightSpinBox->setToolTip("");
+        customRadioButton->setToolTip("");
     }
 }
 

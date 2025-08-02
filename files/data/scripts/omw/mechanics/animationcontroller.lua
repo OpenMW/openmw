@@ -41,6 +41,10 @@ end
 local initialized = false
 
 local function onUpdate(dt)
+    if dt <= 0 then
+        return
+    end
+
     -- The script is loaded before the actor's CharacterController object is initialized, therefore
     -- we have to delay this initialization step or the call won't have any effect.
     if not initialized then

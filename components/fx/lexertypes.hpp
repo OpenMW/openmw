@@ -4,7 +4,7 @@
 #include <string_view>
 #include <variant>
 
-namespace fx
+namespace Fx
 {
     namespace Lexer
     {

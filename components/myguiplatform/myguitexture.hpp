@@ -17,7 +17,7 @@ namespace Resource
     class ImageManager;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class OSGTexture final : public MyGUI::ITexture

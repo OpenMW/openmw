@@ -9,8 +9,6 @@
 #include <fstream>
 #include <iostream>
 
-namespace sfs = std::filesystem;
-
 namespace
 {
     // from configfileparser.cpp

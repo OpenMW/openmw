@@ -77,17 +77,16 @@ GUI Settings
    :type: boolean
    :range: true, false
    :default: true
-   
+
 
    Enables or disables the red flash overlay when the character takes damage.
-   Disabling causes the player to "bleed" like NPCs.
 
 .. omw-setting::
    :title: werewolf overlay
    :type: boolean
    :range: true, false
    :default: true
-   
+
 
    Enable or disable the werewolf visual effect in first-person mode.
 
@@ -96,7 +95,7 @@ GUI Settings
    :type: color
    :range: [0, 1]
    :default: 0.15 0.0 0.0 1.0
-   
+
 
    Background color of tooltip and crosshair when hovering over an NPC-owned item.
    Four floating point values: red, green, blue, alpha (alpha ignored).
@@ -107,7 +106,7 @@ GUI Settings
    :type: color
    :range: [0, 1]
    :default: 1.0 0.15 0.15 1.0
-   
+
 
    Crosshair color when hovering over an NPC-owned item.
    Four floating point values: red, green, blue, alpha (alpha ignored).

@@ -368,17 +368,28 @@ namespace MWMechanics
 
     bool MechanicsManager::isRunning(const MWWorld::Ptr& ptr)
     {
-        return mActors.isRunning(ptr);
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (!stats.getStance(MWMechanics::CreatureStats::Stance_Run))
+            return false;
+
+        if (mActors.isRunning(ptr))
+            return true;
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        return !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
     }
 
     bool MechanicsManager::isSneaking(const MWWorld::Ptr& ptr)
     {
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+        if (!stats.getStance(MWMechanics::CreatureStats::Stance_Sneak))
+            return false;
+
+        if (mActors.isSneaking(ptr))
+            return true;
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        bool animActive = mActors.isSneaking(ptr);
-        bool stanceOn = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool inair = !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
-        return stanceOn && (animActive || inair);
+        return !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
     }
 
     void MechanicsManager::rest(double hours, bool sleep)
@@ -1442,6 +1453,7 @@ namespace MWMechanics
                     }
 
                     startCombat(actor, player, &playerFollowers);
+                    observerStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId());
 
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
@@ -1725,6 +1737,8 @@ namespace MWMechanics
                         .getActorId()); // Stops guard from ending combat if player is unreachable
                 for (const Actor& actor : mActors)
                 {
+                    if (actor.isInvalid())
+                        continue;
                     if (actor.getPtr().getClass().isClass(actor.getPtr(), "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq

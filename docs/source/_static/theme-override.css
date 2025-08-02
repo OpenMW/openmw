@@ -36,8 +36,8 @@
         --muted: 223 27% 14%;
         --card: 220 14% 9%;
 
-        --link: #ffffff;
-        --link-hover: #ffffff;
+        --link: #95b1dd;
+        --link-hover: #dde2eb;
     }
 
     .contents ul li a.reference:hover, .sd-dropdown .toctree-wrapper ul li a.reference, details.sd-dropdown .sd-summary-title {
@@ -137,4 +137,22 @@ tbody tr:hover {
 /* Always enable scrollbar in left TOC to prevent layout shifts when expanding */
 #left-sidebar {
     overflow-y: scroll;
+}
+
+#content div[class^=highlight], #content pre.literal-block, p, h4, h5, h6 {
+    margin-bottom: 1.5rem;
+}
+
+#content table p {
+    margin-bottom: 0;
+}
+
+h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+h6 {
+    font-size: 1.08rem;
+    font-weight: 600;
 }

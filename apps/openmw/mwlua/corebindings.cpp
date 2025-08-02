@@ -11,6 +11,7 @@
 #include <components/lua/util.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/settings/values.hpp>
 #include <components/version/version.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -27,6 +28,7 @@
 #include "magicbindings.hpp"
 #include "soundbindings.hpp"
 #include "stats.hpp"
+#include "weatherbindings.hpp"
 
 namespace MWLua
 {
@@ -104,6 +106,9 @@ namespace MWLua
 
         api["land"] = context.cachePackage("openmw_core_land", [context]() { return initCoreLandBindings(context); });
 
+        api["weather"]
+            = context.cachePackage("openmw_core_weather", [context]() { return initCoreWeatherBindings(context); });
+
         api["factions"]
             = context.cachePackage("openmw_core_factions", [context]() { return initCoreFactionBindings(context); });
         api["dialogue"]
@@ -154,6 +159,8 @@ namespace MWLua
                     { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
         }
+
+        api["getGameDifficulty"] = []() { return Settings::game().mDifficulty.get(); };
 
         sol::table readOnlyApi = LuaUtil::makeReadOnly(api);
         return context.setTypePackage(readOnlyApi, "openmw_core");

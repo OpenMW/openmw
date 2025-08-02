@@ -13,6 +13,7 @@
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include "instancedragmodes.hpp"
+#include "objectmarker.hpp"
 #include "scenewidget.hpp"
 
 class QDragEnterEvent;
@@ -89,7 +90,6 @@ namespace CSVRender
         QPoint mToolTipPos;
         bool mShowToolTips;
         int mToolTipDelay;
-        bool mInConstructor;
         int mSelectedNavigationMode;
 
     public:
@@ -186,6 +186,12 @@ namespace CSVRender
 
         virtual void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) = 0;
 
+        template <typename Tag>
+        std::optional<WorldspaceHitResult> checkTag(
+            const osgUtil::LineSegmentIntersector::Intersection& intersection) const;
+
+        std::tuple<osg::Vec3d, osg::Vec3d, osg::Vec3d> getStartEndDirection(int pointX, int pointY) const;
+
         /// Return the next intersection with scene elements matched by
         /// \a interactionMask based on \a localPos and the camera vector.
         /// If there is no such intersection, instead a point "in front" of \a localPos will be
@@ -216,7 +222,14 @@ namespace CSVRender
 
         EditMode* getEditMode();
 
+        virtual CSVRender::Object* getObjectByReferenceId(const std::string& id) = 0;
+
+        ObjectMarker* getSelectionMarker() { return mSelectionMarker.get(); }
+        const ObjectMarker* getSelectionMarker() const { return mSelectionMarker.get(); }
+
     protected:
+        const std::unique_ptr<CSVRender::ObjectMarker> mSelectionMarker;
+
         /// Visual elements in a scene
         /// @note do not change the enumeration values, they are used in pre-existing button file names!
         enum ButtonId
@@ -247,11 +260,13 @@ namespace CSVRender
 
         void settingChanged(const CSMPrefs::Setting* setting) override;
 
-        bool getSpeedMode();
-
         void cycleNavigationMode();
 
     private:
+        bool hitBehindMarker(const osg::Vec3d& hitPos) const;
+
+        void handleMarkerHighlight(const int x, const int y);
+
         void dragEnterEvent(QDragEnterEvent* event) override;
 
         void dropEvent(QDropEvent* event) override;

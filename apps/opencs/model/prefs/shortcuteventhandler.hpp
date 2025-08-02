@@ -42,11 +42,11 @@ namespace CSMPrefs
 
         void updateParent(QWidget* widget);
 
-        bool activate(QWidget* widget, unsigned int mod, unsigned int button);
+        bool activate(QWidget* widget, QKeyCombination keyCombination);
 
-        bool deactivate(QWidget* widget, unsigned int mod, unsigned int button);
+        bool deactivate(QWidget* widget, QKeyCombination keyCombination);
 
-        bool checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate);
+        bool checkModifier(QKeyCombination keyCombination, Shortcut* shortcut, bool activate);
 
         MatchResult match(unsigned int mod, unsigned int button, unsigned int value);
 

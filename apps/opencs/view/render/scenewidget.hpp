@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <QWidget>
 
+#include <osg/PositionAttitudeTransform>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
@@ -105,6 +106,11 @@ namespace CSVRender
 
         void setExterior(bool isExterior);
 
+        void setSelectionMarkerRoot(osg::ref_ptr<osg::PositionAttitudeTransform> selectionMarker)
+        {
+            mSelectionMarkerNode = selectionMarker;
+        }
+
     protected:
         void setLighting(Lighting* lighting);
         ///< \attention The ownership of \a lighting is not transferred to *this.
@@ -122,6 +128,7 @@ namespace CSVRender
 
         Lighting* mLighting;
 
+        osg::ref_ptr<osg::PositionAttitudeTransform> mSelectionMarkerNode;
         osg::ref_ptr<osg::Camera> mGradientCamera;
         osg::Vec4f mDefaultAmbient;
         bool mHasDefaultAmbient;
@@ -130,7 +137,7 @@ namespace CSVRender
         LightingNight mLightingNight;
         LightingBright mLightingBright;
 
-        int mPrevMouseX, mPrevMouseY;
+        QPointF mPrevMouse;
 
         /// Tells update that camera isn't set
         bool mCamPositionSet;

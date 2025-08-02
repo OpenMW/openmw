@@ -7,7 +7,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/std140/ubo.hpp>
 
-namespace fx
+namespace Fx
 {
     class StateUpdater : public SceneUtil::StateSetUpdater
     {

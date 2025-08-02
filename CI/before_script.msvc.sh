@@ -377,6 +377,8 @@ case $VS_VERSION in
 		MSVC_DISPLAY_YEAR="2022"
 
 		QT_MSVC_YEAR="2019"
+
+		VCPKG_TRIPLET="x64-windows"
 		;;
 
 	16|16.0|2019 )
@@ -386,6 +388,8 @@ case $VS_VERSION in
 		MSVC_DISPLAY_YEAR="2019"
 
 		QT_MSVC_YEAR="2019"
+
+		VCPKG_TRIPLET="x64-windows-2019"
 		;;
 
 	15|15.0|2017 )
@@ -546,7 +550,7 @@ fi
 QT_VER='6.6.3'
 AQT_VERSION='v3.1.15'
 
-VCPKG_TAG="2024-11-10"
+VCPKG_TAG="2025-07-23"
 VCPKG_PATH="vcpkg-x64-${VS_VERSION:?}-${VCPKG_TAG:?}"
 VCPKG_PDB_PATH="vcpkg-x64-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
 VCPKG_MANIFEST="${VCPKG_PATH:?}.txt"
@@ -633,16 +637,16 @@ printf "vcpkg packages ${VCPKG_TAG:?}... "
 	fi
 
 	add_cmake_opts -DCMAKE_TOOLCHAIN_FILE="$(real_pwd)/${VCPKG_PATH:?}/scripts/buildsystems/vcpkg.cmake"
-	add_cmake_opts -DLuaJit_INCLUDE_DIR="$(real_pwd)/${VCPKG_PATH:?}/installed/x64-windows/include/luajit"
-	add_cmake_opts -DLuaJit_LIBRARY="$(real_pwd)/${VCPKG_PATH:?}/installed/x64-windows/lib/lua51.lib"
+	add_cmake_opts -DLuaJit_INCLUDE_DIR="$(real_pwd)/${VCPKG_PATH:?}/installed/${VCPKG_TRIPLET}/include/luajit"
+	add_cmake_opts -DLuaJit_LIBRARY="$(real_pwd)/${VCPKG_PATH:?}/installed/${VCPKG_TRIPLET}/lib/lua51.lib"
 
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
 		if [[ ${CONFIGURATION:?} == "Debug" ]]; then
-			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/x64-windows/debug/bin"
+			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/${VCPKG_TRIPLET}/debug/bin"
 
 			add_runtime_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/Debug/MyGUIEngine_d.dll"
 		else
-			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/x64-windows/bin"
+			VCPKG_DLL_BIN="$(pwd)/${VCPKG_PATH:?}/installed/${VCPKG_TRIPLET}/bin"
 
 			add_runtime_dlls ${CONFIGURATION:?} "${VCPKG_DLL_BIN:?}/Release/MyGUIEngine.dll"
 		fi
@@ -704,17 +708,12 @@ printf "Qt ${QT_VER}... "
 			DLLSUFFIX=""
 		fi
 
-		if [ "${QT_MAJOR_VER}" -eq 6 ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
+		add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets,Svg}${DLLSUFFIX}.dll
 
-			# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
-			if [ "${QT_MINOR_VER}" -ge 7 ]; then
-				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
-			else
-				add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
-			fi
+		# Since Qt 6.7.0 plugin is called "qmodernwindowsstyle"
+		if [ "${QT_MINOR_VER}" -ge 7 ]; then
+			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qmodernwindowsstyle${DLLSUFFIX}.dll"
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_MAJOR_VER}"{Core,Gui,Network,OpenGL,Widgets,Svg}${DLLSUFFIX}.dll
 			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		fi
 

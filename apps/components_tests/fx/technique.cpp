@@ -91,7 +91,7 @@ namespace
 )" };
 
     using namespace testing;
-    using namespace fx;
+    using namespace Fx;
 
     struct TechniqueTest : Test
     {
@@ -113,7 +113,8 @@ namespace
 
         void compile(const std::string& name)
         {
-            mTechnique = std::make_unique<Technique>(*mVFS.get(), mImageManager, name, 1, 1, true, true);
+            mTechnique = std::make_unique<Technique>(
+                *mVFS.get(), mImageManager, Technique::makeFileName(name), name, 1, 1, true, true);
             mTechnique->compile();
         }
     };

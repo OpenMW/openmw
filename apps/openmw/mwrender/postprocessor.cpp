@@ -12,6 +12,7 @@
 #include <osg/Texture3D>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -206,7 +207,7 @@ namespace MWRender
 
         mGLSLVersion = ext->glslLanguageVersion * 100;
         mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
-        mStateUpdater = new fx::StateUpdater(mUBO);
+        mStateUpdater = new Fx::StateUpdater(mUBO);
 
         addChild(mHUDCamera);
         addChild(mRootNode);
@@ -250,14 +251,12 @@ namespace MWRender
 
     void PostProcessor::populateTechniqueFiles()
     {
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator(Fx::Technique::sSubdir))
         {
-            std::filesystem::path path = Files::pathFromUnicodeString(name);
-            std::string fileExt = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(path.extension()));
-            if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
+            std::string_view fileExt = Misc::getFileExtension(path);
+            if (path.parent().parent().empty() && fileExt == Fx::Technique::sExt)
             {
-                const auto absolutePath = mVFS->getAbsoluteFileName(path);
-                mTechniqueFileMap[Files::pathToUnicodeString(absolutePath.stem())] = absolutePath;
+                mTechniqueFiles.emplace(path);
             }
         }
     }
@@ -348,10 +347,10 @@ namespace MWRender
 
         for (auto& technique : mTechniques)
         {
-            if (technique->getStatus() == fx::Technique::Status::File_Not_exists)
+            if (technique->getStatus() == Fx::Technique::Status::File_Not_exists)
                 continue;
 
-            const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
+            const auto lastWriteTime = mVFS->getLastModified(technique->getFileName());
             const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
             if (!isDirty)
@@ -363,7 +362,7 @@ namespace MWRender
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
-                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()];
+                Log(Debug::Info) << "Reloaded technique : " << technique->getFileName();
 
             mReload = technique->isValid();
         }
@@ -401,7 +400,7 @@ namespace MWRender
             createObjectsForFrame(frameId);
 
             mDirty = false;
-            mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
+            mCanvases[frameId]->setPasses(Fx::DispatchArray(mTemplateData));
         }
 
         if ((mNormalsSupported && mNormals != mPrevNormals) || (mPassLights != mPrevPassLights))
@@ -566,7 +565,7 @@ namespace MWRender
         mNormals = false;
         mPassLights = false;
 
-        std::vector<fx::Types::RenderTarget> attachmentsToDirty;
+        std::vector<Fx::Types::RenderTarget> attachmentsToDirty;
 
         for (const auto& technique : mTechniques)
         {
@@ -580,7 +579,7 @@ namespace MWRender
                 continue;
             }
 
-            fx::DispatchNode node;
+            Fx::DispatchNode node;
 
             node.mFlags = technique->getFlags();
 
@@ -593,7 +592,7 @@ namespace MWRender
             if (technique->getLights())
                 mPassLights = true;
 
-            if (node.mFlags & fx::Technique::Flag_Disable_SunGlare)
+            if (node.mFlags & Fx::Technique::Flag_Disable_SunGlare)
                 sunglare = false;
 
             // required default samplers available to every shader pass
@@ -639,7 +638,7 @@ namespace MWRender
             for (const auto& pass : technique->getPasses())
             {
                 int subTexUnit = texUnit;
-                fx::DispatchNode::SubPass subPass;
+                Fx::DispatchNode::SubPass subPass;
 
                 pass->prepareStateSet(subPass.mStateSet, technique->getName());
 
@@ -655,6 +654,14 @@ namespace MWRender
                     const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
 
+                    if (subPass.mMipMap)
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+                    }
+                    else
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(0);
+                    }
                     subPass.mRenderTexture->setTextureSize(w, h);
                     subPass.mRenderTexture->dirtyTextureObject();
 
@@ -666,7 +673,7 @@ namespace MWRender
                             [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
                         == attachmentsToDirty.cend())
                     {
-                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                        attachmentsToDirty.push_back(Fx::Types::RenderTarget(renderTarget));
                     }
                 }
 
@@ -685,7 +692,7 @@ namespace MWRender
                             [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
                         == attachmentsToDirty.cend())
                     {
-                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                        attachmentsToDirty.push_back(Fx::Types::RenderTarget(renderTarget));
                     }
                     subTexUnit++;
                 }
@@ -698,7 +705,7 @@ namespace MWRender
             mTemplateData.emplace_back(std::move(node));
         }
 
-        mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
+        mCanvases[frameId]->setPasses(Fx::DispatchArray(mTemplateData));
 
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
@@ -710,7 +717,7 @@ namespace MWRender
     }
 
     PostProcessor::Status PostProcessor::enableTechnique(
-        std::shared_ptr<fx::Technique> technique, std::optional<int> location)
+        std::shared_ptr<Fx::Technique> technique, std::optional<int> location)
     {
         if (technique->getLocked() || (location.has_value() && location.value() < 0))
             return Status_Error;
@@ -725,7 +732,7 @@ namespace MWRender
         return Status_Toggled;
     }
 
-    PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
+    PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<Fx::Technique> technique, bool dirty)
     {
         if (technique->getLocked())
             return Status_Error;
@@ -741,7 +748,7 @@ namespace MWRender
         return Status_Toggled;
     }
 
-    bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const
+    bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<Fx::Technique>& technique) const
     {
         if (auto it = std::find(mTechniques.begin(), mTechniques.end(), technique); it == mTechniques.end())
             return false;
@@ -749,28 +756,35 @@ namespace MWRender
         return technique->isValid();
     }
 
-    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
+    std::shared_ptr<Fx::Technique> PostProcessor::loadTechnique(std::string_view name, bool loadNextFrame)
+    {
+        VFS::Path::Normalized path = Fx::Technique::makeFileName(name);
+        return loadTechnique(VFS::Path::NormalizedView(path), loadNextFrame);
+    }
+
+    std::shared_ptr<Fx::Technique> PostProcessor::loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame)
     {
         for (const auto& technique : mTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
         for (const auto& technique : mQueuedTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
-        std::string realName = name;
-        auto fileIter = mTechniqueFileMap.find(name);
-        if (fileIter != mTechniqueFileMap.end())
-            realName = fileIter->first;
+        std::string name;
+        if (mTechniqueFiles.contains(path))
+            name = mVFS->getStem(path);
+        else
+            name = path.stem();
 
-        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
-            std::move(realName), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+        auto technique = std::make_shared<Fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
+            path, std::move(name), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
-        if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(std::filesystem::last_write_time(fileIter->second));
+        if (technique->getStatus() != Fx::Technique::Status::File_Not_exists)
+            technique->setLastModificationTime(mVFS->getLastModified(path));
 
         if (loadNextFrame)
         {
@@ -825,7 +839,11 @@ namespace MWRender
     void PostProcessor::toggleMode()
     {
         for (auto& technique : mTemplates)
+        {
+            if (technique->getStatus() == Fx::Technique::Status::File_Not_exists)
+                continue;
             technique->compile();
+        }
 
         dirtyTechniques(true);
     }

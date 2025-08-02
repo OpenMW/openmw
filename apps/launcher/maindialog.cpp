@@ -497,11 +497,7 @@ bool Launcher::MainDialog::writeSettings()
     }
 
     // Game settings
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QFile file(userPath / Files::openmwCfgFile);
-#else
-    QFile file(Files::getUserConfigPathQString(mCfgMgr));
-#endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {

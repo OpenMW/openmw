@@ -215,10 +215,6 @@ namespace MWMechanics
             bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
             effect.mDuration = hasDuration ? static_cast<float>(enam.mData.mDuration) : 1.f;
 
-            bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
-            if (!appliedOnce)
-                effect.mDuration = std::max(1.f, effect.mDuration);
-
             effect.mTimeLeft = effect.mDuration;
 
             // add to list of active effects, to apply in next frame

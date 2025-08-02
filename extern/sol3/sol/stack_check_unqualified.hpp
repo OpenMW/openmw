@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -32,7 +32,7 @@
 #include <utility>
 #include <cmath>
 #include <optional>
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 #include <variant>
 #endif // variant shenanigans
 
@@ -116,7 +116,7 @@ namespace sol { namespace stack {
 			}
 			else if constexpr (meta::any_same_v<T,
 				                   char
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
+#if SOL_IS_ON(SOL_CHAR8_T)
 				                   ,
 				                   char8_t
 #endif
@@ -129,7 +129,7 @@ namespace sol { namespace stack {
 				tracking.use(1);
 #if SOL_LUA_VERSION_I_ >= 503
 				// Lua 5.3 and greater checks for numeric precision
-#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS_I_)
+#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS)
 				// imprecise, sloppy conversions
 				int isnum = 0;
 				lua_tointegerx(L_, index, &isnum);
@@ -138,7 +138,7 @@ namespace sol { namespace stack {
 					// expected type, actual type
 					handler(L_, index, type::number, type_of(L_, index), detail::not_a_number_or_number_string_integral);
 				}
-#elif SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS_I_)
+#elif SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS)
 				// this check is precise, do not convert
 				if (lua_isinteger(L_, index) == 1) {
 					return true;
@@ -160,7 +160,7 @@ namespace sol { namespace stack {
 				return success;
 #else
 				// Lua 5.2 and below checks
-#if SOL_IS_OFF(SOL_STRINGS_ARE_NUMBERS_I_)
+#if SOL_IS_OFF(SOL_STRINGS_ARE_NUMBERS)
 				// must pre-check, because it will convert
 				type t = type_of(L_, index);
 				if (t != type::number) {
@@ -170,7 +170,7 @@ namespace sol { namespace stack {
 				}
 #endif // Do not allow strings to be numbers
 
-#if SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS_I_)
+#if SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS)
 				int isnum = 0;
 				const lua_Number v = lua_tonumberx(L_, index, &isnum);
 				const bool success = isnum != 0 && static_cast<lua_Number>(llround(v)) == v;
@@ -179,9 +179,9 @@ namespace sol { namespace stack {
 #endif // Safe numerics and number precision checking
 				if (!success) {
 					// Use defines to provide a better error message!
-#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS_I_)
+#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS)
 					handler(L_, index, type::number, type_of(L_, index), detail::not_a_number_or_number_string);
-#elif SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS_I_)
+#elif SOL_IS_ON(SOL_NUMBER_PRECISION_CHECKS)
 					handler(L_, index, type::number, t, detail::not_a_number_or_number_string);
 #else
 					handler(L_, index, type::number, t, detail::not_a_number);
@@ -192,7 +192,7 @@ namespace sol { namespace stack {
 			}
 			else if constexpr (std::is_floating_point_v<T> || std::is_same_v<T, lua_Number>) {
 				tracking.use(1);
-#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS_I_)
+#if SOL_IS_ON(SOL_STRINGS_ARE_NUMBERS)
 				bool success = lua_isnumber(L_, index) == 1;
 				if (!success) {
 					// expected type, actual type
@@ -218,6 +218,7 @@ namespace sol { namespace stack {
 			}
 			else if constexpr (is_unique_usertype_v<T>) {
 				using element = unique_usertype_element_t<T>;
+				using element_no_cv = meta::unqualified_t<element>;
 				using actual = unique_usertype_actual_t<T>;
 				const type indextype = type_of(L_, index);
 				tracking.use(1);
@@ -229,7 +230,7 @@ namespace sol { namespace stack {
 					return true;
 				}
 				int metatableindex = lua_gettop(L_);
-				if (stack_detail::check_metatable<d::u<element>>(L_, metatableindex)) {
+				if (stack_detail::check_metatable<d::u<element_no_cv>>(L_, metatableindex)) {
 					void* memory = lua_touserdata(L_, index);
 					memory = detail::align_usertype_unique_destructor(memory);
 					detail::unique_destructor& pdx = *static_cast<detail::unique_destructor*>(memory);
@@ -371,7 +372,7 @@ namespace sol { namespace stack {
 				}
 				return stack::unqualified_check<ValueType>(L_, index, &no_panic, tracking);
 			}
-#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE)
 			else if constexpr (std::is_function_v<T> || (std::is_pointer_v<T> && std::is_function_v<std::remove_pointer_t<T>>)) {
 				return stack_detail::check_function_pointer<std::remove_pointer_t<T>>(L_, index, std::forward<Handler>(handler), tracking);
 			}
@@ -388,9 +389,7 @@ namespace sol { namespace stack {
 					return success;
 				}
 				else if constexpr (meta::is_specialization_of_v<T, user>) {
-					unqualified_checker<lightuserdata_value, type::userdata> c;
-					(void)c;
-					return c.check(L_, index, std::forward<Handler>(handler), tracking);
+					return stack::unqualified_check<detail::as_value_tag<lightuserdata_value>>(L_, index, std::forward<Handler>(handler), tracking);
 				}
 				else {
 					if constexpr (std::is_pointer_v<T>) {
@@ -508,13 +507,13 @@ namespace sol { namespace stack {
 				return true;
 			}
 			else {
-#if SOL_IS_ON(SOL_USE_INTEROP_I_)
+#if SOL_IS_ON(SOL_USE_INTEROP)
 				if (stack_detail::interop_check<U>(L_, index, indextype, handler, tracking)) {
 					return true;
 				}
 #endif // interop extensibility
 				tracking.use(1);
-#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE)
 				if (lua_iscfunction(L_, index) != 0) {
 					// a potential match...
 					return true;
@@ -539,7 +538,7 @@ namespace sol { namespace stack {
 				bool success = false;
 				bool has_derived = derive<T>::value || weak_derive<T>::value;
 				if (has_derived) {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 					luaL_checkstack(L_, 1, detail::not_enough_stack_space_string);
 #endif // make sure stack doesn't overflow
 					auto pn = stack::pop_n(L_, 1);
@@ -579,6 +578,104 @@ namespace sol { namespace stack {
 		}
 	};
 
+	template <typename T, std::size_t N, type expect>
+	struct unqualified_checker<exhaustive_until<T, N>, expect> {
+		template <typename K, typename V, typename Handler>
+		static bool check_two(types<K, V>, lua_State* arg_L, int relindex, type, Handler&& handler, record& tracking) {
+			tracking.use(1);
+
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
+			luaL_checkstack(arg_L, 3, detail::not_enough_stack_space_generic);
+#endif // make sure stack doesn't overflow
+
+			int index = lua_absindex(arg_L, relindex);
+			lua_pushnil(arg_L);
+			while (lua_next(arg_L, index) != 0) {
+				const bool is_key_okay = stack::check<K>(arg_L, -2, std::forward<Handler>(handler), tracking);
+				if (!is_key_okay) {
+					lua_pop(arg_L, 2);
+					return false;
+				}
+				const bool is_value_okay = stack::check<V>(arg_L, -1, std::forward<Handler>(handler), tracking);
+				if (!is_value_okay) {
+					lua_pop(arg_L, 2);
+					return false;
+				}
+				lua_pop(arg_L, 1);
+			}
+			return true;
+		}
+
+		template <typename V, typename Handler>
+		static bool check_one(types<V>, lua_State* arg_L, int relindex, type, Handler&& handler, record& tracking) {
+			tracking.use(1);
+
+			size_t index = lua_absindex(arg_L, relindex);
+			// Zzzz slower but necessary thanks to the lower version API and missing functions qq
+			std::size_t idx = 0;
+			int vi = 0;
+			for (lua_Integer i = 0;; (void)(i += lua_size<V>::value), lua_pop(arg_L, static_cast<int>(vi))) {
+				vi = 0;
+				if (idx >= N) {
+					return true;
+				}
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
+				luaL_checkstack(arg_L, 2, detail::not_enough_stack_space_generic);
+#endif // make sure stack doesn't overflow
+				bool isnil = false;
+				for (; vi < static_cast<int>(lua_size<V>::value); ++vi) {
+					lua_pushinteger(arg_L, i);
+					lua_gettable(arg_L, static_cast<int>(index));
+					type vt = type_of(arg_L, -1);
+					isnil = vt == type::lua_nil;
+					if (isnil) {
+						if (i == 0) {
+							vi += 1;
+							goto loop_continue;
+						}
+						lua_pop(arg_L, static_cast<int>(vi + 1));
+						return true;
+					}
+				}
+				if (!stack::check<V>(arg_L, -lua_size<V>::value, std::forward<Handler>(handler), tracking)) {
+					lua_pop(arg_L, lua_size<V>::value);
+					return false;
+				}
+				++idx;
+			loop_continue:;
+			}
+		}
+
+		template <typename Handler>
+		static bool check(lua_State* arg_L, int index, Handler&& handler, record& tracking) {
+			using Tu = meta::unqualified_t<T>;
+			if constexpr (is_container_v<Tu>) {
+				if constexpr (meta::is_associative<Tu>::value) {
+					typedef typename Tu::value_type P;
+					typedef typename P::first_type K;
+					typedef typename P::second_type V;
+					return check_two(types<K, V>(), arg_L, index, expect, std::forward<Handler>(handler), tracking);
+				}
+				else {
+					typedef typename Tu::value_type V;
+					return check_one(types<V>(), arg_L, index, expect, std::forward<Handler>(handler), tracking);
+				}
+			}
+			else {
+				unqualified_checker<Tu, expect> c {};
+				return c.check(arg_L, index, std::forward<Handler>(handler), tracking);
+			}
+		}
+	};
+
+	template <typename T, type expect>
+	struct unqualified_checker<non_exhaustive<T>, expect> {
+		template <typename Handler>
+		static bool check(lua_State* arg_L, int index, Handler&& handler, record& tracking) {
+			return stack::check<T>(arg_L, index, std::forward<Handler>(handler), tracking);
+		}
+	};
+
 	template <typename... Args>
 	struct unqualified_checker<std::tuple<Args...>, type::poly> {
 		template <typename Handler>
@@ -595,7 +692,7 @@ namespace sol { namespace stack {
 		}
 	};
 
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 
 	template <typename... Tn>
 	struct unqualified_checker<std::variant<Tn...>, type::poly> {

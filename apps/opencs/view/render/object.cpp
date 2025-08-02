@@ -18,25 +18,11 @@
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/render/tagbase.hpp>
 
-#include <osg/Array>
-#include <osg/BoundingSphere>
-#include <osg/GL>
-#include <osg/Geometry>
-#include <osg/Group>
-#include <osg/Math>
-#include <osg/Node>
-#include <osg/PositionAttitudeTransform>
-#include <osg/PrimitiveSet>
 #include <osg/Quat>
-#include <osg/Shape>
 #include <osg/ShapeDrawable>
-#include <osg/StateAttribute>
-#include <osg/StateSet>
-#include <osg/Vec3>
 
 #include <osgFX/Scribe>
 
-#include "../../model/prefs/state.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/commandmacro.hpp"
 #include "../../model/world/commands.hpp"
@@ -63,11 +49,6 @@ namespace ESM
     struct Light;
 }
 
-const float CSVRender::Object::MarkerShaftWidth = 30;
-const float CSVRender::Object::MarkerShaftBaseLength = 70;
-const float CSVRender::Object::MarkerHeadWidth = 50;
-const float CSVRender::Object::MarkerHeadLength = 50;
-
 namespace
 {
 
@@ -93,12 +74,6 @@ CSVRender::ObjectTag::ObjectTag(Object* object)
 QString CSVRender::ObjectTag::getToolTip(bool /*hideBasics*/, const WorldspaceHitResult& /*hit*/) const
 {
     return QString::fromUtf8(mObject->getReferenceableId().c_str());
-}
-
-CSVRender::ObjectMarkerTag::ObjectMarkerTag(Object* object, int axis)
-    : ObjectTag(object)
-    , mAxis(axis)
-{
 }
 
 void CSVRender::Object::clear() {}
@@ -204,238 +179,6 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord(mReferenceId).get();
 }
 
-void CSVRender::Object::updateMarker()
-{
-    for (int i = 0; i < 3; ++i)
-    {
-        if (mMarker[i])
-        {
-            mRootNode->removeChild(mMarker[i]);
-            mMarker[i] = osg::ref_ptr<osg::Node>();
-        }
-
-        if (mSelected)
-        {
-            if (mSubMode == 0)
-            {
-                mMarker[i] = makeMoveOrScaleMarker(i);
-                mMarker[i]->setUserData(new ObjectMarkerTag(this, i));
-
-                mRootNode->addChild(mMarker[i]);
-            }
-            else if (mSubMode == 1)
-            {
-                mMarker[i] = makeRotateMarker(i);
-                mMarker[i]->setUserData(new ObjectMarkerTag(this, i));
-
-                mRootNode->addChild(mMarker[i]);
-            }
-            else if (mSubMode == 2)
-            {
-                mMarker[i] = makeMoveOrScaleMarker(i);
-                mMarker[i]->setUserData(new ObjectMarkerTag(this, i));
-
-                mRootNode->addChild(mMarker[i]);
-            }
-        }
-    }
-}
-
-osg::ref_ptr<osg::Node> CSVRender::Object::makeMoveOrScaleMarker(int axis)
-{
-    osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-
-    float shaftLength = MarkerShaftBaseLength + mBaseNode->getBound().radius();
-
-    // shaft
-    osg::Vec3Array* vertices = new osg::Vec3Array;
-
-    for (int i = 0; i < 2; ++i)
-    {
-        float length = i ? shaftLength : MarkerShaftWidth;
-
-        vertices->push_back(getMarkerPosition(-MarkerShaftWidth / 2, -MarkerShaftWidth / 2, length, axis));
-        vertices->push_back(getMarkerPosition(-MarkerShaftWidth / 2, MarkerShaftWidth / 2, length, axis));
-        vertices->push_back(getMarkerPosition(MarkerShaftWidth / 2, MarkerShaftWidth / 2, length, axis));
-        vertices->push_back(getMarkerPosition(MarkerShaftWidth / 2, -MarkerShaftWidth / 2, length, axis));
-    }
-
-    // head backside
-    vertices->push_back(getMarkerPosition(-MarkerHeadWidth / 2, -MarkerHeadWidth / 2, shaftLength, axis));
-    vertices->push_back(getMarkerPosition(-MarkerHeadWidth / 2, MarkerHeadWidth / 2, shaftLength, axis));
-    vertices->push_back(getMarkerPosition(MarkerHeadWidth / 2, MarkerHeadWidth / 2, shaftLength, axis));
-    vertices->push_back(getMarkerPosition(MarkerHeadWidth / 2, -MarkerHeadWidth / 2, shaftLength, axis));
-
-    // head
-    vertices->push_back(getMarkerPosition(0, 0, shaftLength + MarkerHeadLength, axis));
-
-    geometry->setVertexArray(vertices);
-
-    osg::DrawElementsUShort* primitives = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, 0);
-
-    // shaft
-    for (int i = 0; i < 4; ++i)
-    {
-        int i2 = i == 3 ? 0 : i + 1;
-        primitives->push_back(i);
-        primitives->push_back(4 + i);
-        primitives->push_back(i2);
-
-        primitives->push_back(4 + i);
-        primitives->push_back(4 + i2);
-        primitives->push_back(i2);
-    }
-
-    // cap
-    primitives->push_back(0);
-    primitives->push_back(1);
-    primitives->push_back(2);
-
-    primitives->push_back(2);
-    primitives->push_back(3);
-    primitives->push_back(0);
-
-    // head, backside
-    primitives->push_back(0 + 8);
-    primitives->push_back(1 + 8);
-    primitives->push_back(2 + 8);
-
-    primitives->push_back(2 + 8);
-    primitives->push_back(3 + 8);
-    primitives->push_back(0 + 8);
-
-    for (int i = 0; i < 4; ++i)
-    {
-        primitives->push_back(12);
-        primitives->push_back(8 + (i == 3 ? 0 : i + 1));
-        primitives->push_back(8 + i);
-    }
-
-    geometry->addPrimitiveSet(primitives);
-
-    osg::Vec4Array* colours = new osg::Vec4Array;
-
-    for (int i = 0; i < 8; ++i)
-        colours->push_back(
-            osg::Vec4f(axis == 0 ? 1.0f : 0.2f, axis == 1 ? 1.0f : 0.2f, axis == 2 ? 1.0f : 0.2f, mMarkerTransparency));
-
-    for (int i = 8; i < 8 + 4 + 1; ++i)
-        colours->push_back(
-            osg::Vec4f(axis == 0 ? 1.0f : 0.0f, axis == 1 ? 1.0f : 0.0f, axis == 2 ? 1.0f : 0.0f, mMarkerTransparency));
-
-    geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
-
-    setupCommonMarkerState(geometry);
-
-    osg::ref_ptr<osg::Group> group(new osg::Group);
-    group->addChild(geometry);
-
-    return group;
-}
-
-osg::ref_ptr<osg::Node> CSVRender::Object::makeRotateMarker(int axis)
-{
-    const float InnerRadius = std::max(MarkerShaftBaseLength, mBaseNode->getBound().radius());
-    const float OuterRadius = InnerRadius + MarkerShaftWidth;
-
-    const float SegmentDistance = 100.f;
-    const size_t SegmentCount = std::clamp<int>(OuterRadius * 2 * osg::PI / SegmentDistance, 24, 64);
-    const size_t VerticesPerSegment = 4;
-    const size_t IndicesPerSegment = 24;
-
-    const size_t VertexCount = SegmentCount * VerticesPerSegment;
-    const size_t IndexCount = SegmentCount * IndicesPerSegment;
-
-    const float Angle = 2 * osg::PI / SegmentCount;
-
-    const unsigned short IndexPattern[IndicesPerSegment]
-        = { 0, 4, 5, 0, 5, 1, 2, 6, 4, 2, 4, 0, 3, 7, 6, 3, 6, 2, 1, 5, 7, 1, 7, 3 };
-
-    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
-
-    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
-    osg::ref_ptr<osg::DrawElementsUShort> primitives
-        = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, IndexCount);
-
-    // prevent some depth collision issues from overlaps
-    osg::Vec3f offset = getMarkerPosition(0, MarkerShaftWidth / 4, 0, axis);
-
-    for (size_t i = 0; i < SegmentCount; ++i)
-    {
-        size_t index = i * VerticesPerSegment;
-
-        float innerX = InnerRadius * std::cos(i * Angle);
-        float innerY = InnerRadius * std::sin(i * Angle);
-
-        float outerX = OuterRadius * std::cos(i * Angle);
-        float outerY = OuterRadius * std::sin(i * Angle);
-
-        vertices->at(index++) = getMarkerPosition(innerX, innerY, MarkerShaftWidth / 2, axis) + offset;
-        vertices->at(index++) = getMarkerPosition(innerX, innerY, -MarkerShaftWidth / 2, axis) + offset;
-        vertices->at(index++) = getMarkerPosition(outerX, outerY, MarkerShaftWidth / 2, axis) + offset;
-        vertices->at(index++) = getMarkerPosition(outerX, outerY, -MarkerShaftWidth / 2, axis) + offset;
-    }
-
-    colors->at(0)
-        = osg::Vec4f(axis == 0 ? 1.0f : 0.2f, axis == 1 ? 1.0f : 0.2f, axis == 2 ? 1.0f : 0.2f, mMarkerTransparency);
-
-    for (size_t i = 0; i < SegmentCount; ++i)
-    {
-        size_t indices[IndicesPerSegment];
-        for (size_t j = 0; j < IndicesPerSegment; ++j)
-        {
-            indices[j] = i * VerticesPerSegment + j;
-
-            if (indices[j] >= VertexCount)
-                indices[j] -= VertexCount;
-        }
-
-        size_t elementOffset = i * IndicesPerSegment;
-        for (size_t j = 0; j < IndicesPerSegment; ++j)
-        {
-            primitives->setElement(elementOffset++, indices[IndexPattern[j]]);
-        }
-    }
-
-    geometry->setVertexArray(vertices);
-    geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
-    geometry->addPrimitiveSet(primitives);
-
-    setupCommonMarkerState(geometry);
-
-    osg::ref_ptr<osg::Group> group = new osg::Group();
-    group->addChild(geometry);
-
-    return group;
-}
-
-void CSVRender::Object::setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry)
-{
-    osg::ref_ptr<osg::StateSet> state = geometry->getOrCreateStateSet();
-    state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    state->setMode(GL_BLEND, osg::StateAttribute::ON);
-
-    state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-}
-
-osg::Vec3f CSVRender::Object::getMarkerPosition(float x, float y, float z, int axis)
-{
-    switch (axis)
-    {
-        case 2:
-            return osg::Vec3f(x, y, z);
-        case 0:
-            return osg::Vec3f(z, x, y);
-        case 1:
-            return osg::Vec3f(y, z, x);
-
-        default:
-
-            throw std::logic_error("invalid axis for marker geometry");
-    }
-}
-
 CSVRender::Object::Object(
     CSMWorld::Data& data, osg::Group* parentNode, const std::string& id, bool referenceable, bool forceBaseToZero)
     : mData(data)
@@ -446,8 +189,6 @@ CSVRender::Object::Object(
     , mForceBaseToZero(forceBaseToZero)
     , mScaleOverride(1)
     , mOverrideFlags(0)
-    , mSubMode(-1)
-    , mMarkerTransparency(0.5f)
 {
     mRootNode = new osg::PositionAttitudeTransform;
 
@@ -476,7 +217,6 @@ CSVRender::Object::Object(
 
     adjustTransform();
     update();
-    updateMarker();
 }
 
 CSVRender::Object::~Object()
@@ -506,9 +246,6 @@ void CSVRender::Object::setSelected(bool selected, const osg::Vec4f& color)
     }
     else
         mRootNode->addChild(mBaseNode);
-
-    mMarkerTransparency = CSMPrefs::get()["Rendering"]["object-marker-alpha"].toDouble();
-    updateMarker();
 }
 
 bool CSVRender::Object::getSelected() const
@@ -536,9 +273,6 @@ void CSVRender::Object::setSnapTarget(bool isSnapTarget)
     }
     else
         mRootNode->addChild(mBaseNode);
-
-    mMarkerTransparency = CSMPrefs::get()["Rendering"]["object-marker-alpha"].toDouble();
-    updateMarker();
 }
 
 bool CSVRender::Object::getSnapTarget() const
@@ -566,7 +300,6 @@ bool CSVRender::Object::referenceableDataChanged(const QModelIndex& topLeft, con
     {
         adjustTransform();
         update();
-        updateMarker();
         return true;
     }
 
@@ -614,7 +347,6 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
                 = ESM::RefId::stringRefId(references.getData(index, columnIndex).toString().toUtf8().constData());
 
             update();
-            updateMarker();
         }
 
         return true;
@@ -626,7 +358,6 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 void CSVRender::Object::reloadAssets()
 {
     update();
-    updateMarker();
 }
 
 std::string CSVRender::Object::getReferenceId() const
@@ -720,12 +451,6 @@ void CSVRender::Object::setScale(float scale)
     adjustTransform();
 }
 
-void CSVRender::Object::setMarkerTransparency(float value)
-{
-    mMarkerTransparency = value;
-    updateMarker();
-}
-
 void CSVRender::Object::apply(CSMWorld::CommandMacro& commands)
 {
     const CSMWorld::RefCollection& collection = mData.getReferences();
@@ -796,18 +521,8 @@ void CSVRender::Object::apply(CSMWorld::CommandMacro& commands)
     mOverrideFlags = 0;
 }
 
-void CSVRender::Object::setSubMode(int subMode)
-{
-    if (subMode != mSubMode)
-    {
-        mSubMode = subMode;
-        updateMarker();
-    }
-}
-
 void CSVRender::Object::reset()
 {
     mOverrideFlags = 0;
     adjustTransform();
-    updateMarker();
 }

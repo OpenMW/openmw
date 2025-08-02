@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -31,7 +31,7 @@
 #include <sol/object.hpp>
 #include <sol/lua_value.hpp>
 
-#if SOL_IS_ON(SOL_PRINT_ERRORS_I_)
+#if SOL_IS_ON(SOL_PRINT_ERRORS)
 #include <iostream>
 #endif
 
@@ -51,7 +51,7 @@ namespace sol {
 	}
 
 	inline int default_at_panic(lua_State* L) {
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 		(void)L;
 		return -1;
 #else
@@ -60,7 +60,7 @@ namespace sol {
 		if (message) {
 			std::string err(message, messagesize);
 			lua_settop(L, 0);
-#if SOL_IS_ON(SOL_PRINT_ERRORS_I_)
+#if SOL_IS_ON(SOL_PRINT_ERRORS)
 			std::cerr << "[sol2] An error occurred and panic has been invoked: ";
 			std::cerr << err;
 			std::cerr << std::endl;
@@ -85,7 +85,7 @@ namespace sol {
 			const string_view& traceback = maybetraceback.value();
 			msg.assign(traceback.data(), traceback.size());
 		}
-#if SOL_IS_ON(SOL_PRINT_ERRORS_I_)
+#if SOL_IS_ON(SOL_PRINT_ERRORS)
 		// std::cerr << "[sol2] An error occurred and was caught in traceback: ";
 		// std::cerr << msg;
 		// std::cerr << std::endl;
@@ -120,7 +120,7 @@ namespace sol {
 		std::string err = "sol: ";
 		err += to_string(result.status());
 		err += " error";
-#if SOL_IS_ON(SOL_EXCEPTIONS_I_)
+#if SOL_IS_ON(SOL_EXCEPTIONS)
 		std::exception_ptr eptr = std::current_exception();
 		if (eptr) {
 			err += " with a ";
@@ -149,7 +149,7 @@ namespace sol {
 			string_view serr = stack::unqualified_get<string_view>(L, result.stack_index());
 			err.append(serr.data(), serr.size());
 		}
-#if SOL_IS_ON(SOL_PRINT_ERRORS_I_)
+#if SOL_IS_ON(SOL_PRINT_ERRORS)
 		std::cerr << "[sol2] An error occurred and has been passed to an error handler: ";
 		std::cerr << err;
 		std::cerr << std::endl;
@@ -165,7 +165,7 @@ namespace sol {
 		if (towards != 0) {
 			lua_rotate(L, top, towards);
 		}
-#if SOL_IS_OFF(SOL_EXCEPTIONS_I_)
+#if SOL_IS_OFF(SOL_EXCEPTIONS)
 		return result;
 #else
 		// just throw our error
@@ -174,7 +174,7 @@ namespace sol {
 	}
 
 	inline protected_function_result script_default_on_error(lua_State* L, protected_function_result pfr) {
-#if SOL_IS_ON(SOL_DEFAULT_PASS_ON_ERROR_I_)
+#if SOL_IS_ON(SOL_DEFAULT_PASS_ON_ERROR)
 		return script_pass_on_error(L, std::move(pfr));
 #else
 		return script_throw_on_error(L, std::move(pfr));

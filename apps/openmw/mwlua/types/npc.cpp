@@ -102,6 +102,7 @@ namespace MWLua
         record["isRespawning"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Respawn; });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
+        record["bloodType"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mBloodType; });
         addActorServicesBindings<ESM::NPC>(record, context);
 
         npc["classes"] = initClassRecordBindings(context);

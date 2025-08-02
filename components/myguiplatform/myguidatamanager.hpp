@@ -11,7 +11,7 @@ namespace VFS
     class Manager;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class DataManager : public MyGUI::DataManager

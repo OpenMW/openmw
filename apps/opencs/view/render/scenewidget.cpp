@@ -161,8 +161,6 @@ namespace CSVRender
         , mLighting(nullptr)
         , mHasDefaultAmbient(false)
         , mIsExterior(true)
-        , mPrevMouseX(0)
-        , mPrevMouseY(0)
         , mCamPositionSet(false)
     {
         mFreeCamControl = new FreeCameraController(this);
@@ -423,10 +421,10 @@ namespace CSVRender
 
     void SceneWidget::mouseMoveEvent(QMouseEvent* event)
     {
-        mCurrentCamControl->handleMouseMoveEvent(event->x() - mPrevMouseX, event->y() - mPrevMouseY);
+        QPointF pos = event->position();
+        mCurrentCamControl->handleMouseMoveEvent(pos.x() - mPrevMouse.x(), pos.y() - mPrevMouse.y());
 
-        mPrevMouseX = event->x();
-        mPrevMouseY = event->y();
+        mPrevMouse = pos;
     }
 
     void SceneWidget::wheelEvent(QWheelEvent* event)
@@ -444,6 +442,32 @@ namespace CSVRender
         {
             mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
             mCamPositionSet = true;
+        }
+
+        if (mSelectionMarkerNode)
+        {
+            osg::MatrixList worldMats = mSelectionMarkerNode->getWorldMatrices();
+            if (!worldMats.empty())
+            {
+                osg::Matrixd markerWorldMat = worldMats[0];
+
+                osg::Vec3f eye, _;
+                mView->getCamera()->getViewMatrix().getLookAt(eye, _, _);
+                osg::Vec3f cameraLocalPos = eye * osg::Matrixd::inverse(markerWorldMat);
+
+                bool isInFrontRightQuadrant = (cameraLocalPos.x() > 0.1f) && (cameraLocalPos.y() > 0.1f);
+                bool isSignificantlyBehind = (cameraLocalPos.x() < 1.f) && (cameraLocalPos.y() < 1.f);
+
+                if (!isInFrontRightQuadrant && isSignificantlyBehind)
+                {
+                    osg::Quat current = mSelectionMarkerNode->getAttitude();
+                    mSelectionMarkerNode->setAttitude(current * osg::Quat(osg::PI, osg::Vec3f(0, 0, 1)));
+                }
+
+                float distance = (markerWorldMat.getTrans() - eye).length();
+                float scale = std::max(distance / 75.0f, 1.0f);
+                mSelectionMarkerNode->setScale(osg::Vec3(scale, scale, scale));
+            }
         }
     }
 

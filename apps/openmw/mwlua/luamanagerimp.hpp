@@ -43,7 +43,7 @@ namespace MWLua
         void init();
 
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
-        void savePermanentStorage(const std::filesystem::path& userConfigPath);
+        void savePermanentStorage(const std::filesystem::path& userConfigPath) override;
 
         // \brief Executes lua handlers. Defaults to running in parallel with OSG Cull.
         //
@@ -92,6 +92,10 @@ namespace MWLua
             bool loopfallback) override;
         void skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale) override;
         void skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source) override;
+        void jailTimeServed(const MWWorld::Ptr& actor, int days) override;
+        void onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
+            const MWWorld::Ptr& ammo, int attackType, float attackStrength, float damage, bool isHealth,
+            const osg::Vec3f& hitPos, bool successful, MWMechanics::DamageSourceType sourceType) override;
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
@@ -165,6 +169,9 @@ namespace MWLua
 
         LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
         LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
+
+        void sendLocalEvent(
+            const MWWorld::Ptr& target, const std::string& name, const std::optional<sol::table>& data = std::nullopt);
 
     private:
         void initConfiguration();

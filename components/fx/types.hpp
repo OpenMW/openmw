@@ -12,7 +12,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
 
-namespace fx
+namespace Fx
 {
     namespace Types
     {
@@ -220,10 +220,11 @@ namespace fx
                             return osg::Uniform::FLOAT;
                         else if constexpr (std::is_same_v<T, int>)
                             return osg::Uniform::INT;
-                        else if constexpr (std::is_same_v<T, bool>)
+                        else
+                        {
+                            static_assert(std::is_same_v<T, bool>, "Non-exhaustive visitor");
                             return osg::Uniform::BOOL;
-
-                        return std::nullopt;
+                        }
                     },
                     mData);
             }
@@ -293,15 +294,14 @@ namespace fx
 
                             return Misc::StringUtils::format("const int %s=%i;", mName, value);
                         }
-                        else if constexpr (std::is_same_v<T, bool>)
+                        else
                         {
+                            static_assert(std::is_same_v<T, bool>, "Non-exhaustive visitor");
                             if (useUniform)
                                 return Misc::StringUtils::format("uniform bool %s;", uname);
 
                             return Misc::StringUtils::format("const bool %s=%s;", mName, value ? "true" : "false");
                         }
-
-                        return std::nullopt;
                     },
                     mData);
             }

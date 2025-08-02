@@ -3,7 +3,7 @@
 
 #include <MyGUI_OverlappedLayer.h>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     ///@brief A Layer that lays out and renders widgets in screen-relative coordinates. The "Size" property determines

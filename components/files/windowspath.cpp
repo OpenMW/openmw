@@ -54,19 +54,7 @@ namespace Files
     {
         // The concept of a global config path is absurd on Windows.
         // Always use local config instead.
-        // The virtual base class requires that we provide this, though.
-        std::filesystem::path globalPath = std::filesystem::current_path();
-
-        PWSTR cString;
-        HRESULT result = SHGetKnownFolderPath(FOLDERID_ProgramFiles, 0, nullptr, &cString);
-        if (SUCCEEDED(result))
-            globalPath = std::filesystem::path(cString);
-        else
-            Log(Debug::Error) << "Error " << result << " when getting Program Files path";
-
-        CoTaskMemFree(cString);
-
-        return globalPath / mName;
+        return {};
     }
 
     std::filesystem::path WindowsPath::getLocalPath() const

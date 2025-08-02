@@ -362,7 +362,29 @@ CSVRender::InstanceMode::InstanceMode(
 
     for (const char axis : "xyz")
         connect(new CSMPrefs::Shortcut(std::string("scene-axis-") + axis, worldspaceWidget),
-            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, axis] { this->setDragAxis(axis); });
+            qOverload<>(&CSMPrefs::Shortcut::activated), this, [this, axis] {
+                this->setDragAxis(axis);
+                std::string axisStr(1, toupper(axis));
+                switch (getSubMode())
+                {
+                    case (Object::Mode_Move):
+                        axisStr += "_Axis";
+                        break;
+                    case (Object::Mode_Rotate):
+                        axisStr += "_Axis_Rot";
+                        break;
+                    case (Object::Mode_Scale):
+                        axisStr += "_Axis_Scale";
+                        break;
+                }
+
+                auto selectionMarker = getWorldspaceWidget().getSelectionMarker();
+
+                if (mDragAxis != -1)
+                    selectionMarker->updateMarkerHighlight(axisStr, axis - 'x');
+                else
+                    selectionMarker->resetMarkerHighlight();
+            });
 }
 
 void CSVRender::InstanceMode::activate(CSVWidget::SceneToolbar* toolbar)
@@ -460,52 +482,58 @@ void CSVRender::InstanceMode::secondaryEditPressed(const WorldspaceHitResult& hi
 
 void CSVRender::InstanceMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    getWorldspaceWidget().clearSelection(Mask_Reference);
+    auto& worldspaceWidget = getWorldspaceWidget();
 
-    if (hit.tag)
+    worldspaceWidget.clearSelection(Mask_Reference);
+
+    if (!hit.tag)
+        return;
+
+    if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
-        {
-            // hit an Object, select it
-            CSVRender::Object* object = objectTag->mObject;
-            object->setSelected(true);
-            return;
-        }
+        // hit an Object, select it
+        CSVRender::Object* object = objectTag->mObject;
+        object->setSelected(true);
+        worldspaceWidget.getSelectionMarker()->addToSelectionHistory(object->getReferenceId());
     }
 }
 
 void CSVRender::InstanceMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if (hit.tag)
+    if (!hit.tag)
+        return;
+
+    if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
-        {
-            // hit an Object, toggle its selection state
-            CSVRender::Object* object = objectTag->mObject;
-            object->setSelected(!object->getSelected());
-            return;
-        }
+        // hit an Object, toggle its selection state
+        CSVRender::Object* object = objectTag->mObject;
+        object->setSelected(!object->getSelected());
+
+        const auto selectionMarker = getWorldspaceWidget().getSelectionMarker();
+
+        if (object->getSelected())
+            selectionMarker->addToSelectionHistory(object->getReferenceId(), false);
+
+        selectionMarker->updateSelectionMarker();
     }
 }
 
 void CSVRender::InstanceMode::tertiarySelectPressed(const WorldspaceHitResult& hit)
 {
-    auto* snapTarget = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get());
-
-    if (snapTarget)
+    if (auto* snapTarget
+        = dynamic_cast<CSVRender::ObjectTag*>(getWorldspaceWidget().getSnapTarget(Mask_Reference).get()))
     {
         snapTarget->mObject->setSnapTarget(false);
     }
 
-    if (hit.tag)
+    if (!hit.tag)
+        return;
+
+    if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
-        {
-            // hit an Object, toggle its selection state
-            CSVRender::Object* object = objectTag->mObject;
-            object->setSnapTarget(!object->getSnapTarget());
-            return;
-        }
+        // hit an Object, toggle its selection state
+        CSVRender::Object* object = objectTag->mObject;
+        object->setSnapTarget(!object->getSnapTarget());
     }
 }
 
@@ -514,23 +542,26 @@ bool CSVRender::InstanceMode::primaryEditStartDrag(const QPoint& pos)
     if (mDragMode != DragMode_None || mLocked)
         return false;
 
-    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
+    auto& worldspaceWidget = getWorldspaceWidget();
 
-    std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    WorldspaceHitResult hit = worldspaceWidget.mousePick(pos, worldspaceWidget.getInteractionMask());
+
+    std::vector<osg::ref_ptr<TagBase>> selection = worldspaceWidget.getSelection(Mask_Reference);
     if (selection.empty())
     {
         // Only change selection at the start of drag if no object is already selected
         if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         {
-            getWorldspaceWidget().clearSelection(Mask_Reference);
+            worldspaceWidget.clearSelection(Mask_Reference);
             if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
             {
                 CSVRender::Object* object = objectTag->mObject;
                 object->setSelected(true);
+                worldspaceWidget.getSelectionMarker()->addToSelectionHistory(object->getReferenceId());
             }
         }
 
-        selection = getWorldspaceWidget().getSelection(Mask_Reference);
+        selection = worldspaceWidget.getSelection(Mask_Reference);
         if (selection.empty())
             return false;
     }
@@ -591,23 +622,26 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag(const QPoint& pos)
     if (mDragMode != DragMode_None || mLocked)
         return false;
 
-    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
+    auto& worldspaceWidget = getWorldspaceWidget();
 
-    std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Reference);
+    WorldspaceHitResult hit = worldspaceWidget.mousePick(pos, worldspaceWidget.getInteractionMask());
+
+    std::vector<osg::ref_ptr<TagBase>> selection = worldspaceWidget.getSelection(Mask_Reference);
     if (selection.empty())
     {
         // Only change selection at the start of drag if no object is already selected
         if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         {
-            getWorldspaceWidget().clearSelection(Mask_Reference);
+            worldspaceWidget.clearSelection(Mask_Reference);
             if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(hit.tag.get()))
             {
                 CSVRender::Object* object = objectTag->mObject;
                 object->setSelected(true);
+                worldspaceWidget.getSelectionMarker()->addToSelectionHistory(object->getReferenceId());
             }
         }
 
-        selection = getWorldspaceWidget().getSelection(Mask_Reference);
+        selection = worldspaceWidget.getSelection(Mask_Reference);
         if (selection.empty())
             return false;
     }
@@ -641,10 +675,10 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag(const QPoint& pos)
                 mDragMode = DragMode_Scale_Snap;
 
                 // Calculate scale factor
-                std::vector<osg::ref_ptr<TagBase>> editedSelection = getWorldspaceWidget().getEdited(Mask_Reference);
+                std::vector<osg::ref_ptr<TagBase>> editedSelection = worldspaceWidget.getEdited(Mask_Reference);
                 osg::Vec3f center = getScreenCoords(getSelectionCenter(editedSelection));
 
-                int widgetHeight = getWorldspaceWidget().height();
+                int widgetHeight = worldspaceWidget.height();
 
                 float dx = pos.x() - center.x();
                 float dy = (widgetHeight - pos.y()) - center.y();
@@ -1098,7 +1132,7 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
             return;
 
         WorldspaceHitResult hit
-            = getWorldspaceWidget().mousePick(event->pos(), getWorldspaceWidget().getInteractionMask());
+            = getWorldspaceWidget().mousePick(event->position().toPoint(), getWorldspaceWidget().getInteractionMask());
 
         std::string cellId = getWorldspaceWidget().getCellId(hit.worldPos);
 

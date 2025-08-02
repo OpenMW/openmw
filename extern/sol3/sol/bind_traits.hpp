@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -31,7 +31,7 @@
 namespace sol { namespace meta {
 	namespace meta_detail {
 		template <typename F>
-		using detect_deducible_signature = decltype(&F::operator(), void());
+		using detect_deducible_signature = decltype(&F::operator());
 	} // namespace meta_detail
 
 	template <typename F>
@@ -196,7 +196,7 @@ namespace sol { namespace meta {
 			typedef R (T::*function_pointer_type)(Args..., ...) const volatile&&;
 		};
 
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 
 		template <typename R, typename... Args>
 		struct fx_traits<R(Args...) noexcept, false> : public basic_traits<true, false, void, R, Args...> {
@@ -311,7 +311,7 @@ namespace sol { namespace meta {
 
 #endif // noexcept is part of a function's type
 
-#if SOL_IS_ON(SOL_COMPILER_VCXX_I_) && SOL_IS_ON(SOL_PLATFORM_X86_I_)
+#if SOL_IS_ON(SOL_COMPILER_VCXX) && SOL_IS_ON(SOL_PLATFORM_X86)
 		template <typename R, typename... Args>
 		struct fx_traits<R __stdcall(Args...), false> : public basic_traits<false, false, void, R, Args...> {
 			typedef R(__stdcall* function_pointer_type)(Args...);
@@ -369,7 +369,7 @@ namespace sol { namespace meta {
 			typedef R (__stdcall T::*function_pointer_type)(Args...) const volatile&&;
 		};
 
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 
 		template <typename R, typename... Args>
 		struct fx_traits<R __stdcall(Args...) noexcept, false> : public basic_traits<true, false, void, R, Args...> {

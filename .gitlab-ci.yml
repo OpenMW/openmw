@@ -27,14 +27,14 @@ variables:
 .Ubuntu_Image:
   tags:
     - saas-linux-medium-amd64
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
 Ubuntu_GCC_preprocess:
   extends: .Ubuntu_Image
   cache:
-    key: Ubuntu_GCC_preprocess.ubuntu_22.04.v1
+    key: Ubuntu_GCC_preprocess.ubuntu_24.04.v1
     paths:
       - apt-cache/
       - .cache/pip/
@@ -43,9 +43,12 @@ Ubuntu_GCC_preprocess:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
     - CI/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
-    - pip3 install --user click termtables
+    - pip3 install --user --break-system-packages click termtables
   script:
     - CI/ubuntu_gcc_preprocess.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -77,9 +80,9 @@ Ubuntu_GCC_preprocess:
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
-    - ccache -s
+    - ccache -svv
     - df -h
-    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
+    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then ~/.local/bin/gcovr --xml-pretty --exclude-unreachable-branches --gcov-ignore-parse-errors=negative_hits.warn_once_per_file --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
     - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
     - cd ..
     - df -h
@@ -94,12 +97,12 @@ Ubuntu_GCC_preprocess:
 Coverity:
   tags:
     - saas-linux-medium-amd64
-  image: ubuntu:22.04
+  image: ubuntu:24.04
   stage: build
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_22.04.v1
+    key: Coverity.ubuntu_24.04.v1
     paths:
     - apt-cache/
     - ccache/
@@ -124,7 +127,7 @@ Coverity:
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     # Remove the specific targets and build everything once we can do it under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
-    - ccache -s
+    - ccache -svv
   after_script:
     - tar cfz cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
@@ -138,7 +141,7 @@ Coverity:
 Ubuntu_GCC:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC.ubuntu_22.04.v1
+    key: Ubuntu_GCC.ubuntu_24.04.v1
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -151,7 +154,7 @@ Ubuntu_GCC:
 Ubuntu_GCC_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_asan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_asan.ubuntu_24.04.v1
   variables:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
@@ -164,7 +167,7 @@ Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
   cache:
-    key: Ubuntu_Clang_Format.ubuntu_22.04.v1
+    key: Ubuntu_Clang_Format.ubuntu_24.04.v1
     paths:
       - apt-cache/
   variables:
@@ -180,11 +183,11 @@ Lupdate:
   extends: .Ubuntu_Image
   stage: checks
   cache:
-    key: Ubuntu_lupdate.ubuntu_22.04.v1
+    key: Ubuntu_lupdate.ubuntu_24.04.v1
     paths:
       - apt-cache/
   variables:
-    LUPDATE: lupdate
+    LUPDATE: /usr/lib/qt6/bin/lupdate
   before_script:
     - CI/install_debian_deps.sh openmw-qt-translations
   script:
@@ -206,7 +209,7 @@ Teal:
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC_Debug.ubuntu_22.04.v2
+    key: Ubuntu_GCC_Debug.ubuntu_24.04.v2
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -222,7 +225,7 @@ Ubuntu_GCC_Debug:
 Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -236,7 +239,7 @@ Ubuntu_GCC_tests:
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_Debug.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_Debug.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -252,7 +255,7 @@ Ubuntu_GCC_tests:
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_asan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_asan.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -268,11 +271,14 @@ Ubuntu_GCC_tests_asan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_ubsan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_ubsan.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -285,11 +291,14 @@ Ubuntu_GCC_tests_ubsan:
     when: always
     reports:
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tests_tsan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_tsan.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -307,11 +316,15 @@ Ubuntu_GCC_tests_ubsan:
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
   cache:
-    key: Ubuntu_GCC_tests_coverage.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_coverage.ubuntu_24.04.v1
+    paths:
+      - .cache/pip
   variables:
     BUILD_WITH_CODE_COVERAGE: 1
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
+    - pipx install gcovr
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     paths: []
@@ -322,6 +335,9 @@ Ubuntu_GCC_tests_coverage:
         coverage_format: cobertura
         path: coverage.xml
       junit: build/*-tests.xml
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -333,7 +349,7 @@ Ubuntu_GCC_tests_coverage:
         - "CI/**/*"
         - ".gitlab-ci.yml"
   cache:
-    key: Ubuntu_Static_Deps.ubuntu_22.04.v1
+    key: Ubuntu_Static_Deps.ubuntu_24.04.v1
     paths:
       - apt-cache/
       - ccache/
@@ -350,7 +366,7 @@ Ubuntu_GCC_tests_coverage:
 .Ubuntu_Static_Deps_tests:
   extends: .Ubuntu_Static_Deps
   cache:
-    key: Ubuntu_Static_Deps_tests.ubuntu_22.04.v1
+    key: Ubuntu_Static_Deps_tests.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -369,7 +385,7 @@ Ubuntu_Clang:
   before_script:
     - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang.ubuntu_22.04.v2
+    key: Ubuntu_Clang.ubuntu_24.04.v2
   variables:
     CC: clang
     CXX: clang++
@@ -382,7 +398,7 @@ Ubuntu_Clang:
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
   cache:
-    key: Ubuntu_Clang_Tidy.ubuntu_22.04.v1
+    key: Ubuntu_Clang_Tidy.ubuntu_24.04.v1
   variables:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
@@ -396,12 +412,15 @@ Ubuntu_Clang:
     - cd build
     - find . -name *.o -exec touch {} \;
     - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
-    - ccache -s
+    - ccache -svv
   artifacts:
     paths:
       - build/
     expire_in: 12h
   timeout: 3h
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
 Ubuntu_Clang_Tidy_components:
   extends: .Ubuntu_Clang_Tidy_Base
@@ -414,7 +433,7 @@ Ubuntu_Clang_Tidy_openmw:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: openmw
+    BUILD_TARGETS: openmw openmw-tests
   timeout: 3h
 
 Ubuntu_Clang_Tidy_openmw-cs:
@@ -430,13 +449,13 @@ Ubuntu_Clang_Tidy_other:
   needs:
     - Ubuntu_Clang_Tidy_components
   variables:
-    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest components-tests openmw-tests openmw-cs-tests openmw-navmeshtool openmw-bulletobjecttool
+    BUILD_TARGETS: components-tests bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests.ubuntu_22.04.v1
+    key: Ubuntu_Clang_tests.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -450,7 +469,7 @@ Ubuntu_Clang_Tidy_other:
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_tests_Debug.ubuntu_22.04.v1
+    key: Ubuntu_Clang_tests_Debug.ubuntu_24.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -474,7 +493,7 @@ Ubuntu_Clang_tests_Debug:
       - apt-cache/
   before_script:
     - CI/install_debian_deps.sh $OPENMW_DEPS
-    - pip3 install --user numpy matplotlib termtables click
+    - pip3 install --user --break-system-packages numpy matplotlib termtables click
   script:
     - CI/run_integration_tests.sh
   after_script:
@@ -485,7 +504,7 @@ Ubuntu_Clang_integration_tests:
   needs:
     - Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v2
+    key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v2
   variables:
     OPENMW_DEPS: openmw-integration-tests
 
@@ -494,15 +513,22 @@ Ubuntu_GCC_integration_tests_asan:
   needs:
     - Ubuntu_GCC_asan
   cache:
-    key: Ubuntu_GCC_integration_tests_asan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_integration_tests_asan.ubuntu_24.04.v1
   variables:
-    OPENMW_DEPS: openmw-integration-tests libasan6
+    OPENMW_DEPS: openmw-integration-tests libasan
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
 
 .MacOS:
   stage: build
   rules:
-    - if: $CI_PROJECT_ID == "7107382"
+    - if: $CI_PROJECT_ID != "7107382"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
+  image: macos-15-xcode-16
+  tags:
+    - saas-macos-medium-m1
   cache:
     paths:
     - ccache/
@@ -535,28 +561,28 @@ Ubuntu_GCC_integration_tests_asan:
     paths:
       - build/OpenMW-*.dmg
 
-macOS14_Xcode15_amd64:
+macOS15_Xcode16_amd64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_amd64.v2
+    key: macOS15_Xcode16_amd64.v1
   variables:
     CCACHE_SIZE: 3G
     DMG_IDENTIFIER: amd64
     MACOS_AMD64: true
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
 
-macOS14_Xcode15_arm64:
+macOS15_Xcode16_arm64:
   extends: .MacOS
-  image: macos-14-xcode-15
-  tags:
-    - saas-macos-medium-m1
   cache:
-    key: macOS14_Xcode15_arm64.v1
+    key: macOS15_Xcode16_arm64.v1
   variables:
     DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
+    HOMEBREW_NO_AUTO_UPDATE: 1
+    HOMEBREW_NO_EMOJI: true
+    HOMEBREW_NO_INSTALL_CLEANUP: true
 
 .Compress_And_Upload_Symbols_Base:
   extends: .Ubuntu_Image
@@ -681,7 +707,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v12
+    key: ninja-2022-v13
     paths:
     - ccache
     - deps
@@ -839,7 +865,7 @@ macOS14_Xcode15_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-2022-v12
+    key: msbuild-2022-v13
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -940,7 +966,7 @@ Windows_MSBuild_CacheInit:
     - cd build
     - cmake --build . -- -j $(nproc)
     # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
-    - ccache -s
+    - ccache -svv
     - df -h
     - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
     - cd ..
@@ -968,7 +994,7 @@ Windows_MSBuild_CacheInit:
     paths:
       - .cache/pip
   before_script:
-    - pip3 install --user requests click discord_webhook
+    - pip3 install --user --break-system-packages requests click discord_webhook
   script:
     - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
 

@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -289,7 +289,7 @@ namespace sol {
 		}
 
 		stateless_reference(lua_State* L_, global_tag_t) noexcept {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			lua_pushglobaltable(L_);
@@ -352,7 +352,7 @@ namespace sol {
 		}
 
 		stateless_reference(lua_State* L_, int index = -1) noexcept {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			lua_pushvalue(L_, index);
@@ -383,7 +383,7 @@ namespace sol {
 		}
 
 		int push(lua_State* L_) const noexcept {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			lua_rawgeti(L_, LUA_REGISTRYINDEX, ref);
@@ -407,7 +407,7 @@ namespace sol {
 
 		void reset(lua_State* L_, int index_) noexcept {
 			reset(L_);
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			lua_pushvalue(L_, index_);
@@ -616,7 +616,7 @@ namespace sol {
 		}
 		basic_reference(lua_State* L_, int index = -1) noexcept : luastate(detail::pick_main_thread<main_only>(L_, L_)) {
 			// use L_ to stick with that state's execution stack
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			lua_pushvalue(L_, index);
@@ -693,7 +693,7 @@ namespace sol {
 		}
 
 		int push(lua_State* L_) const noexcept {
-#if SOL_IS_ON(SOL_SAFE_STACK_CHECK_I_)
+#if SOL_IS_ON(SOL_SAFE_STACK_CHECK)
 			luaL_checkstack(L_, 1, "not enough Lua stack space to push this reference value");
 #endif // make sure stack doesn't overflow
 			if (lua_state() == nullptr) {
@@ -828,6 +828,8 @@ namespace sol {
 		stateless_reference_equals(lua_State* L_) noexcept : stateless_stack_reference_equals(L_) {
 		}
 
+		using stateless_stack_reference_equals::operator();
+
 		bool operator()(const lua_nil_t& lhs, const stateless_reference& rhs) const noexcept {
 			return rhs.equals(lua_state(), lhs);
 		}
@@ -837,6 +839,14 @@ namespace sol {
 		}
 
 		bool operator()(const stateless_reference& lhs, const stateless_reference& rhs) const noexcept {
+			return lhs.equals(lua_state(), rhs);
+		}
+
+		bool operator()(const stateless_stack_reference& lhs, const stateless_reference& rhs) const noexcept {
+			return rhs.equals(lua_state(), lhs);
+		}
+
+		bool operator()(const stateless_reference& lhs, const stateless_stack_reference& rhs) const noexcept {
 			return lhs.equals(lua_state(), rhs);
 		}
 	};
@@ -877,6 +887,8 @@ namespace sol {
 
 		stateless_reference_hash(lua_State* L_) noexcept : stateless_stack_reference_hash(L_) {
 		}
+
+		using stateless_stack_reference_hash::operator();
 
 		result_type operator()(const stateless_reference& lhs) const noexcept {
 			std::hash<const void*> h;

@@ -425,6 +425,18 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
     </message>
+    <message>
+        <source>Custom window size is available only in Windowed mode.</source>
+        <translation>La taille personalisée de fenêtre n&apos;est disponible qu&apos;en mode fenêtré.</translation>
+    </message>
+    <message>
+        <source>Window border is available only in Windowed mode.</source>
+        <translation>Les bordures de fenêtres ne sont disponibles qu&apos;en mode fenêtré.</translation>
+    </message>
+    <message>
+        <source>Windowed Fullscreen mode always uses the native display resolution.</source>
+        <translation>Le mode &quot;Fenêtré plein écran&quot; utilise toujours la résolution native de l&apos;écran.</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::ImportPage</name>
@@ -677,10 +689,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat. In this case we have to increment death counter and run disposed actor&apos;s script instantly.&lt;/p&gt;&lt;p&gt;If this setting is false, player has to wait until end of death animation in all cases. Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder. Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lorsque cette option est activée, le joueur est autorisé à piller créatures et PNJ (p. ex. les créatures invoquées) durant leur animation de mort, si elles ne sont pas en combat. Dans ce cas, le jeu incrémente le conteur de mort et lance son script instantanément.&lt;/p&gt;&lt;p&gt;Lorsque cette option est désactivée, le joueur doit attendre la fin de l&apos;animation de mort. Dans ce cas, l&apos;utilisation de l&apos;exploit des créatures invoquées (piller des créatures invoquées telles que des Drémoras ou des Saintes Dorées afin d&apos;obtenir des armes de grandes valeurs) est rendu beaucoup plus ardu. Cette option entre en confit avec les Mods de mannequin. En effet, ceux-ci utilisent SkipAnim afin d&apos;éviter la fin de l&apos;animation de mort.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;L&apos;option donne aux créatures non armées la capacité d&apos;endommager les pièces d&apos;armure, comme le font les PNJ et les créatures armées.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Off</source>
@@ -1145,10 +1153,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Classic Reflected Absorb Spells Behavior</source>
         <translation>Comportement traditionnel de la réflexion des sorts d&apos;absorbtion</translation>
-    </message>
-    <message>
-        <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation>L&apos;attaque des créatures non armées endomage les armures</translation>
     </message>
     <message>
         <source>Affect Werewolves</source>

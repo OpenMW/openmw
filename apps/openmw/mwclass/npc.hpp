@@ -81,8 +81,8 @@ namespace MWClass
         void hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim,
             const osg::Vec3f& hitPosition, bool success) const override;
 
-        void onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-            const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        void onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, const MWWorld::Ptr& object,
+            const MWWorld::Ptr& attacker, bool successful,
             const MWMechanics::DamageSourceType sourceType) const override;
 
         void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const override;
@@ -112,7 +112,7 @@ namespace MWClass
         ///< Returns total weight of objects inside this object (including modifications from magic
         /// effects). Throws an exception, if the object can't hold other objects.
 
-        float getArmorRating(const MWWorld::Ptr& ptr) const override;
+        float getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable) const override;
         ///< @return combined armor rating of this actor
 
         void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const override;
@@ -136,9 +136,6 @@ namespace MWClass
         VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const override;
 
         float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const override;
-
-        /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
-        int getBloodTexture(const MWWorld::ConstPtr& ptr) const override;
 
         bool isNpc() const override { return true; }
 

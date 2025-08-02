@@ -41,7 +41,7 @@ namespace MWClass
         ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
         /// stay stacked when equipped?
 
-        ESM::RefId getEquipmentSkill(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const override;
 
         MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
         ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
@@ -81,7 +81,8 @@ namespace MWClass
         bool canSell(const MWWorld::ConstPtr& item, int npcServices) const override;
 
         /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-        float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const override;
+        float getSkillAdjustedArmorRating(
+            const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor, bool useLuaInterfaceIfAvailable) const override;
     };
 }
 

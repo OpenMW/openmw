@@ -119,7 +119,7 @@
 -- @param #number ratio
 
 ---
--- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- Whether the world is paused.
 -- @function [parent=#world] isWorldPaused
 -- @return #boolean
 
@@ -195,7 +195,7 @@
 --   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
 --   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
 --   * `scale` - A number that scales the size of the vfx (Default: 1)
---   * `useAmbientLighting` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: 1)
+--   * `useAmbientLight` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: true)
 --
 -- @usage -- Spawn a sanctuary effect near the player
 -- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]

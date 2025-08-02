@@ -192,12 +192,13 @@ namespace MWClass
         {
             if (!isTrapped)
             {
-                if (canBeHarvested(ptr))
-                {
-                    return std::make_unique<MWWorld::ActionHarvest>(ptr);
-                }
+                if (!canBeHarvested(ptr))
+                    return std::make_unique<MWWorld::ActionOpen>(ptr);
 
-                return std::make_unique<MWWorld::ActionOpen>(ptr);
+                if (hasToolTip(ptr))
+                    return std::make_unique<MWWorld::ActionHarvest>(ptr);
+
+                return std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
             }
             else
             {

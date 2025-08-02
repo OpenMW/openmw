@@ -317,9 +317,16 @@ namespace MWWorld
 
         void changeWeather(const ESM::RefId& region, const unsigned int id) override;
 
-        int getCurrentWeather() const override;
+        void changeWeather(const ESM::RefId& region, const ESM::RefId& id) override;
 
-        int getNextWeather() const override;
+        const std::vector<MWWorld::Weather>& getAllWeather() const override;
+
+        int getCurrentWeatherScriptId() const override;
+        const MWWorld::Weather& getCurrentWeather() const override;
+        const MWWorld::Weather* getWeather(size_t index) const override;
+        const MWWorld::Weather* getWeather(const ESM::RefId& id) const override;
+        int getNextWeatherScriptId() const override;
+        const MWWorld::Weather* getNextWeather() const override;
 
         float getWeatherTransition() const override;
 
@@ -573,6 +580,7 @@ namespace MWWorld
         // Allow NPCs to use torches?
         bool useTorches() const override;
 
+        const osg::Vec4f& getSunLightPosition() const override;
         float getSunVisibility() const override;
         float getSunPercentage() const override;
 
@@ -599,9 +607,6 @@ namespace MWWorld
 
         /// Spawn a random creature from a levelled list next to the player
         void spawnRandomCreature(const ESM::RefId& creatureList) override;
-
-        /// Spawn a blood effect for \a ptr at \a worldPosition
-        void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
 
         void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true,
@@ -656,8 +661,7 @@ namespace MWWorld
         bool hasCollisionWithDoor(
             const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
-        bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const override;
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const override;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 

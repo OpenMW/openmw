@@ -28,7 +28,7 @@ namespace osg
     class StateSet;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class Drawable;

@@ -753,7 +753,6 @@ void CSMWorld::RefIdCollection::cloneRecord(
 bool CSMWorld::RefIdCollection::touchRecord(const ESM::RefId& id)
 {
     throw std::runtime_error("RefIdCollection::touchRecord is unimplemented");
-    return false;
 }
 
 void CSMWorld::RefIdCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)

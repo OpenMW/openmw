@@ -35,24 +35,22 @@ namespace
     };
 }
 
-namespace fx
+namespace Fx
 {
-    namespace
+    VFS::Path::Normalized Technique::makeFileName(std::string_view name)
     {
-        VFS::Path::Normalized makeFilePath(std::string_view name)
-        {
-            std::string fileName(name);
-            fileName += Technique::sExt;
-            VFS::Path::Normalized result(Technique::sSubdir);
-            result /= fileName;
-            return result;
-        }
+        std::string fileName(name);
+        fileName += '.';
+        fileName += Technique::sExt;
+        VFS::Path::Normalized result(Technique::sSubdir);
+        result /= fileName;
+        return result;
     }
 
-    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
-        int height, bool ubo, bool supportsNormals)
+    Technique::Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager,
+        VFS::Path::NormalizedView fileName, std::string name, int width, int height, bool ubo, bool supportsNormals)
         : mName(std::move(name))
-        , mFilePath(makeFilePath(mName))
+        , mFilePath(fileName)
         , mLastModificationTime(std::filesystem::file_time_type::clock::now())
         , mWidth(width)
         , mHeight(height)
@@ -282,7 +280,7 @@ namespace fx
         if (mRenderTargets.count(mBlockName))
             error(Misc::StringUtils::format("redeclaration of render target '%s'", std::string(mBlockName)));
 
-        fx::Types::RenderTarget rt;
+        Fx::Types::RenderTarget rt;
         rt.mTarget->setTextureSize(mWidth, mHeight);
         rt.mTarget->setSourceFormat(GL_RGB);
         rt.mTarget->setInternalFormat(GL_RGB);
@@ -343,7 +341,7 @@ namespace fx
         auto& pass = mPassMap[mBlockName];
 
         if (!pass)
-            pass = std::make_shared<fx::Pass>();
+            pass = std::make_shared<Fx::Pass>();
 
         pass->mName = mBlockName;
 
@@ -366,7 +364,7 @@ namespace fx
         auto& pass = mPassMap[mBlockName];
 
         if (!pass)
-            pass = std::make_shared<fx::Pass>();
+            pass = std::make_shared<Fx::Pass>();
 
         pass->mUBO = mUBO;
         pass->mName = mBlockName;
@@ -390,7 +388,7 @@ namespace fx
         auto& pass = mPassMap[mBlockName];
 
         if (!pass)
-            pass = std::make_shared<fx::Pass>();
+            pass = std::make_shared<Fx::Pass>();
 
         pass->mName = mBlockName;
 
@@ -530,8 +528,6 @@ namespace fx
         {
             return parseBool();
         }
-
-        error(Misc::StringUtils::format("failed setting uniform type"));
     }
 
     template <class SrcT, class T>
@@ -559,10 +555,12 @@ namespace fx
             {
                 if constexpr (std::is_same_v<bool, SrcT>)
                     error("bool arrays currently unsupported");
-
-                int size = parseInteger();
-                if (size > 1)
-                    data.mArray = std::vector<SrcT>(size);
+                else
+                {
+                    int size = parseInteger();
+                    if (size > 1)
+                        data.mArray = std::vector<SrcT>(size);
+                }
             }
             else if (key == "min")
             {
@@ -812,7 +810,7 @@ namespace fx
         auto& pass = mPassMap[mBlockName];
 
         if (!pass)
-            pass = std::make_shared<fx::Pass>();
+            pass = std::make_shared<Fx::Pass>();
 
         while (!isNext<Lexer::Eof>())
         {
@@ -885,7 +883,7 @@ namespace fx
     FlagsType Technique::parseFlags()
     {
         auto parseBit = [this](std::string_view term) {
-            for (const auto& [identifer, bit] : constants::TechniqueFlag)
+            for (const auto& [identifer, bit] : Constants::TechniqueFlag)
             {
                 if (Misc::StringUtils::ciEqual(term, identifer))
                     return bit;
@@ -904,7 +902,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::FilterMode)
+        for (const auto& [identifer, mode] : Constants::FilterMode)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -917,7 +915,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::WrapMode)
+        for (const auto& [identifer, mode] : Constants::WrapMode)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -935,7 +933,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::Compression)
+        for (const auto& [identifer, mode] : Constants::Compression)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -948,7 +946,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::InternalFormat)
+        for (const auto& [identifer, mode] : Constants::InternalFormat)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -961,7 +959,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::SourceType)
+        for (const auto& [identifer, mode] : Constants::SourceType)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -974,7 +972,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::SourceFormat)
+        for (const auto& [identifer, mode] : Constants::SourceFormat)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -987,7 +985,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::BlendEquation)
+        for (const auto& [identifer, mode] : Constants::BlendEquation)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -1000,7 +998,7 @@ namespace fx
     {
         expect<Lexer::Literal>();
 
-        for (const auto& [identifer, mode] : constants::BlendFunc)
+        for (const auto& [identifer, mode] : Constants::BlendFunc)
         {
             if (asLiteral() == identifer)
                 return mode;
@@ -1027,11 +1025,11 @@ namespace fx
             */
             expect<Lexer::Open_Parenthesis>();
 
-            std::vector<fx::Types::Choice<SrcT>> choices;
+            std::vector<Fx::Types::Choice<SrcT>> choices;
 
             while (!isNext<Lexer::Eof>())
             {
-                fx::Types::Choice<SrcT> choice;
+                Fx::Types::Choice<SrcT> choice;
                 choice.mLabel = parseString();
                 expect<Lexer::Equal>();
                 choice.mValue = getUniformValue<SrcT, T>();

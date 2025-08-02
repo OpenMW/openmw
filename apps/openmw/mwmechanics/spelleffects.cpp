@@ -359,8 +359,7 @@ namespace
         // Notify the target actor they've been hit
         bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
         if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
-            target.getClass().onHit(
-                target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true, MWMechanics::DamageSourceType::Magical);
+            target.getClass().onHit(target, {}, MWWorld::Ptr(), caster, true, MWMechanics::DamageSourceType::Magical);
         // Apply resistances
         if (!(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Resistances))
         {
@@ -377,8 +376,11 @@ namespace
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
                 return MWMechanics::MagicApplicationResult::Type::REMOVED;
             }
-            effect.mMinMagnitude *= magnitudeMult;
-            effect.mMaxMagnitude *= magnitudeMult;
+            else if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+            {
+                effect.mMinMagnitude *= magnitudeMult;
+                effect.mMaxMagnitude *= magnitudeMult;
+            }
         }
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
@@ -519,8 +521,31 @@ namespace MWMechanics
             case ESM::MagicEffect::ExtraSpell:
                 if (target.getClass().hasInventoryStore(target))
                 {
-                    auto& store = target.getClass().getInventoryStore(target);
-                    store.unequipAll();
+                    if (target != getPlayer())
+                    {
+                        auto& store = target.getClass().getInventoryStore(target);
+                        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                        {
+                            // Unequip everything except weapons, torches, and pants
+                            switch (slot)
+                            {
+                                case MWWorld::InventoryStore::Slot_Ammunition:
+                                case MWWorld::InventoryStore::Slot_CarriedRight:
+                                case MWWorld::InventoryStore::Slot_Pants:
+                                    continue;
+                                case MWWorld::InventoryStore::Slot_CarriedLeft:
+                                {
+                                    auto carried = store.getSlot(slot);
+                                    if (carried == store.end()
+                                        || carried.getType() != MWWorld::ContainerStore::Type_Armor)
+                                        continue;
+                                    [[fallthrough]];
+                                }
+                                default:
+                                    store.unequipSlot(slot);
+                            }
+                        }
+                    }
                 }
                 else
                     invalid = true;
@@ -891,7 +916,7 @@ namespace MWMechanics
     }
 
     MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt)
+        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt, bool playNonLooping)
     {
         const auto world = MWBase::Environment::get().getWorld();
         bool invalid = false;
@@ -988,11 +1013,13 @@ namespace MWMechanics
         else
         {
             // Morrowind.exe doesn't apply magic effects while the menu is open, we do because we like to see stats
-            // updated instantly. We don't want to teleport instantly though
+            // updated instantly. We don't want to teleport instantly though. Nor do we want to force players to drink
+            // invisibility potions in the "right" order
             if (!dt
                 && (effect.mEffectId == ESM::MagicEffect::Recall
                     || effect.mEffectId == ESM::MagicEffect::DivineIntervention
-                    || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention))
+                    || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention
+                    || effect.mEffectId == ESM::MagicEffect::Invisibility))
                 return { MagicApplicationResult::Type::APPLIED, receivedMagicDamage, affectedHealth };
             auto& stats = target.getClass().getCreatureStats(target);
             auto& magnitudes = stats.getMagicEffects();
@@ -1009,9 +1036,12 @@ namespace MWMechanics
                 oldMagnitude = effect.mMagnitude;
             else
             {
-                if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Equipment)
-                    && !spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
-                    playEffects(target, *magicEffect, spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary));
+                bool isTemporary = spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary);
+                bool isEquipment = spellParams.hasFlag(ESM::ActiveSpells::Flag_Equipment);
+
+                if (!spellParams.hasFlag(ESM::ActiveSpells::Flag_Lua))
+                    playEffects(target, *magicEffect, (isTemporary || (isEquipment && playNonLooping)));
+
                 if (effect.mEffectId == ESM::MagicEffect::Soultrap && !target.getClass().isNpc()
                     && target.getType() == ESM::Creature::sRecordId
                     && target.get<ESM::Creature>()->mBase->mData.mSoul == 0 && caster == getPlayer())
@@ -1083,7 +1113,7 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::ExtraSpell:
-                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f)
+                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f && target != getPlayer())
                     target.getClass().getInventoryStore(target).autoEquip();
                 break;
             case ESM::MagicEffect::TurnUndead:

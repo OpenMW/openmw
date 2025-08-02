@@ -93,7 +93,7 @@ void CSVTools::ReportTable::contextMenuEvent(QContextMenuEvent* event)
 void CSVTools::ReportTable::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton)
-        startDragFromTable(*this, indexAt(event->pos()));
+        startDragFromTable(*this, indexAt(event->position().toPoint()));
 }
 
 void CSVTools::ReportTable::mouseDoubleClickEvent(QMouseEvent* event)

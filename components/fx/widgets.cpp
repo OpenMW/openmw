@@ -6,7 +6,7 @@ namespace
 {
     template <class T, class WidgetT>
     void createVectorWidget(
-        const std::shared_ptr<fx::Types::UniformBase>& uniform, MyGUI::Widget* client, fx::Widgets::UniformBase* base)
+        const std::shared_ptr<Fx::Types::UniformBase>& uniform, MyGUI::Widget* client, Fx::Widgets::UniformBase* base)
     {
         int height = client->getHeight();
         base->setSize(base->getSize().width, (base->getSize().height - height) + (height * T::num_components));
@@ -16,13 +16,13 @@ namespace
         {
             auto* widget = client->createWidget<WidgetT>(
                 "MW_ValueEditNumber", { 0, height * i, client->getWidth(), height }, MyGUI::Align::Default);
-            widget->setData(uniform, static_cast<fx::Widgets::Index>(i));
+            widget->setData(uniform, static_cast<Fx::Widgets::Index>(i));
             base->addItem(widget);
         }
     }
 }
 
-namespace fx
+namespace Fx
 {
     namespace Widgets
     {
@@ -127,7 +127,7 @@ namespace fx
             mChoices->eventComboChangePosition += MyGUI::newDelegate(this, &EditChoice::notifyComboBoxChanged);
         }
 
-        void UniformBase::init(const std::shared_ptr<fx::Types::UniformBase>& uniform)
+        void UniformBase::init(const std::shared_ptr<Fx::Types::UniformBase>& uniform)
         {
             if (uniform->mDisplayName.empty())
                 mLabel->setCaption(uniform->mName);

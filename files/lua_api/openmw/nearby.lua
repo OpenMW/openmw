@@ -180,6 +180,7 @@
 -- @field [parent=#FindPathOptions] #AreaCosts areaCosts a table defining relative cost for each type of area.
 -- @field [parent=#FindPathOptions] #number destinationTolerance a floating point number representing maximum allowed
 -- distance between destination and a nearest point on the navigation mesh in addition to agent size (default: 1).
+-- @field [parent=#FindPathOptions] #table checkpoints an array of positions to build path over if possible.
 
 ---
 -- A table of parameters for @{#nearby.findRandomPointAroundCircle} and @{#nearby.castNavigationRay}

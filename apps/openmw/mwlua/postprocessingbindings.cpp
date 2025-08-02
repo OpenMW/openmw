@@ -35,9 +35,9 @@ namespace MWLua
 {
     struct Shader
     {
-        std::shared_ptr<fx::Technique> mShader;
+        std::shared_ptr<Fx::Technique> mShader;
 
-        Shader(std::shared_ptr<fx::Technique> shader)
+        Shader(std::shared_ptr<Fx::Technique> shader)
             : mShader(std::move(shader))
         {
         }

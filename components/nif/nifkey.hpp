@@ -3,8 +3,7 @@
 #ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 #define OPENMW_COMPONENTS_NIF_NIFKEY_HPP
 
-#include <algorithm>
-#include <map>
+#include <utility>
 #include <vector>
 
 #include "exception.hpp"
@@ -47,7 +46,8 @@ namespace Nif
     template <typename T, T (NIFStream::*getValue)()>
     struct KeyMapT
     {
-        using MapType = std::map<float, KeyT<T>>;
+        // This is theoretically a "flat map" sorted by time
+        using MapType = std::vector<std::pair<float, KeyT<T>>>;
 
         using ValueType = T;
         using KeyType = KeyT<T>;
@@ -79,8 +79,12 @@ namespace Nif
             uint32_t count;
             nif->read(count);
 
-            if (count != 0 || morph)
-                nif->read(mInterpolationType);
+            if (count == 0 && !morph)
+                return;
+
+            nif->read(mInterpolationType);
+
+            mKeys.reserve(count);
 
             KeyType key = {};
 
@@ -91,7 +95,7 @@ namespace Nif
                     float time;
                     nif->read(time);
                     readValue(*nif, key);
-                    mKeys[time] = key;
+                    mKeys.emplace_back(time, key);
                 }
             }
             else if (mInterpolationType == InterpolationType_Quadratic)
@@ -101,23 +105,24 @@ namespace Nif
                     float time;
                     nif->read(time);
                     readQuadratic(*nif, key);
-                    mKeys[time] = key;
+                    mKeys.emplace_back(time, key);
                 }
             }
             else if (mInterpolationType == InterpolationType_TCB)
             {
                 std::vector<TCBKey<T>> tcbKeys(count);
-                for (TCBKey<T>& key : tcbKeys)
+                for (TCBKey<T>& tcbKey : tcbKeys)
                 {
-                    nif->read(key.mTime);
-                    key.mValue = ((*nif).*getValue)();
-                    nif->read(key.mTension);
-                    nif->read(key.mContinuity);
-                    nif->read(key.mBias);
+                    nif->read(tcbKey.mTime);
+                    tcbKey.mValue = ((*nif).*getValue)();
+                    nif->read(tcbKey.mTension);
+                    nif->read(tcbKey.mContinuity);
+                    nif->read(tcbKey.mBias);
                 }
                 generateTCBTangents(tcbKeys);
-                for (TCBKey<T>& key : tcbKeys)
-                    mKeys[key.mTime] = KeyType{ std::move(key.mValue), std::move(key.mInTan), std::move(key.mOutTan) };
+                for (TCBKey<T>& tcbKey : tcbKeys)
+                    mKeys.emplace_back(std::move(tcbKey.mTime),
+                        KeyType{ std::move(tcbKey.mValue), std::move(tcbKey.mInTan), std::move(tcbKey.mOutTan) });
             }
             else if (mInterpolationType == InterpolationType_XYZ)
             {
@@ -133,6 +138,8 @@ namespace Nif
                 throw Nif::Exception("Unhandled interpolation type: " + std::to_string(mInterpolationType),
                     nif->getFile().getFilename());
             }
+
+            // Note: NetImmerse does NOT sort keys or remove duplicates
         }
 
     private:
@@ -154,35 +161,23 @@ namespace Nif
             if (keys.size() <= 1)
                 return;
 
-            std::sort(keys.begin(), keys.end(), [](const auto& a, const auto& b) { return a.mTime < b.mTime; });
-            for (size_t i = 0; i < keys.size(); ++i)
+            for (std::size_t i = 0; i < keys.size(); ++i)
             {
                 TCBKey<U>& curr = keys[i];
-                const TCBKey<U>& prev = (i == 0) ? curr : keys[i - 1];
-                const TCBKey<U>& next = (i == keys.size() - 1) ? curr : keys[i + 1];
-                const float prevLen = curr.mTime - prev.mTime;
-                const float nextLen = next.mTime - curr.mTime;
-                if (prevLen + nextLen <= 0.f)
+                const TCBKey<U>* prev = (i == 0) ? nullptr : &keys[i - 1];
+                const TCBKey<U>* next = (i == keys.size() - 1) ? nullptr : &keys[i + 1];
+                const float prevLen = prev != nullptr && next != nullptr ? curr.mTime - prev->mTime : 1.f;
+                const float nextLen = prev != nullptr && next != nullptr ? next->mTime - curr.mTime : 1.f;
+                if (prevLen + nextLen == 0.f)
                     continue;
-
-                const U prevDelta = curr.mValue - prev.mValue;
-                const U nextDelta = next.mValue - curr.mValue;
-                const float t = curr.mTension;
-                const float c = curr.mContinuity;
-                const float b = curr.mBias;
-
-                U x{}, y{}, z{}, w{};
-                if (prevLen > 0.f)
-                    x = prevDelta / prevLen * (1 - t) * (1 - c) * (1 + b);
-                if (nextLen > 0.f)
-                    y = nextDelta / nextLen * (1 - t) * (1 + c) * (1 - b);
-                if (prevLen > 0.f)
-                    z = prevDelta / prevLen * (1 - t) * (1 + c) * (1 + b);
-                if (nextLen > 0.f)
-                    w = nextDelta / nextLen * (1 - t) * (1 - c) * (1 - b);
-
-                curr.mInTan = (x + y) * prevLen / (prevLen + nextLen);
-                curr.mOutTan = (z + w) * nextLen / (prevLen + nextLen);
+                const float x = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f + curr.mBias);
+                const float y = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f - curr.mBias);
+                const float z = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f + curr.mBias);
+                const float w = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f - curr.mBias);
+                const U prevDelta = prev != nullptr ? curr.mValue - prev->mValue : next->mValue - curr.mValue;
+                const U nextDelta = next != nullptr ? next->mValue - curr.mValue : curr.mValue - prev->mValue;
+                curr.mInTan = (prevDelta * x + nextDelta * y) * prevLen / (prevLen + nextLen);
+                curr.mOutTan = (prevDelta * z + nextDelta * w) * nextLen / (prevLen + nextLen);
             }
         }
 
@@ -196,6 +191,7 @@ namespace Nif
             // TODO: implement TCB interpolation for quaternions
         }
     };
+
     using FloatKeyMap = KeyMapT<float, &NIFStream::get<float>>;
     using Vector3KeyMap = KeyMapT<osg::Vec3f, &NIFStream::get<osg::Vec3f>>;
     using Vector4KeyMap = KeyMapT<osg::Vec4f, &NIFStream::get<osg::Vec4f>>;

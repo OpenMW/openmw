@@ -10,6 +10,7 @@
 #include <components/lua/scriptscontainer.hpp>
 
 #include "../mwbase/luamanager.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "object.hpp"
 
@@ -67,7 +68,7 @@ namespace MWLua
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
         const MWWorld::Ptr& getPtrOrEmpty() const { return mData.ptrOrEmpty(); }
 
-        void setActive(bool active);
+        void setActive(bool active, bool callHandlers = true);
         bool isActive() const override { return mData.mIsActive; }
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
@@ -88,8 +89,22 @@ namespace MWLua
         {
             callEngineHandlers(mOnSkillLevelUp, skillId, source);
         }
+        void onJailTimeServed(int days) { callEngineHandlers(mOnJailTimeServed, days); }
 
         void applyStatsCache();
+
+        // Calls a lua interface on the player's scripts. This call is only meant for use in updating UI elements.
+        template <typename T, typename... Args>
+        static std::optional<T> callPlayerInterface(
+            std::string_view interfaceName, std::string_view identifier, const Args&... args)
+        {
+            auto player = MWMechanics::getPlayer();
+            auto scripts = player.getRefData().getLuaScripts();
+            if (scripts)
+                return scripts->callInterface<T>(interfaceName, identifier, args...);
+
+            return std::nullopt;
+        }
 
     protected:
         SelfObject mData;
@@ -104,6 +119,7 @@ namespace MWLua
         EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
         EngineHandlerList mOnSkillUse{ "_onSkillUse" };
         EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
+        EngineHandlerList mOnJailTimeServed{ "_onJailTimeServed" };
     };
 
 }

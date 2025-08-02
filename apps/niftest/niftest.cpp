@@ -113,7 +113,7 @@ bool isBSA(const std::filesystem::path& path)
 std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
 {
     if (isBSA(path))
-        return VFS::makeBsaArchive(path);
+        return VFS::makeBsaArchive(path, nullptr);
     if (std::filesystem::is_directory(path))
         return std::make_unique<VFS::FileSystemArchive>(path);
     return nullptr;
@@ -198,7 +198,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
             {
                 try
                 {
-                    readVFS(VFS::makeBsaArchive(file.second), file.second, quiet);
+                    readVFS(VFS::makeBsaArchive(file.second, nullptr), file.second, quiet);
                 }
                 catch (const std::exception& e)
                 {

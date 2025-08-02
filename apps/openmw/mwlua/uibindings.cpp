@@ -108,6 +108,10 @@ namespace MWLua
                   }
                   luaManager->addUIMessage(message, mode);
               };
+
+        api["_showInteractiveMessage"] = [windowManager](std::string_view message, sol::optional<sol::table>) {
+            windowManager->interactiveMessageBox(message, { "#{Interface:OK}" });
+        };
         api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string, Misc::Color>(lua,
             {
                 { "Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1)) },
@@ -296,6 +300,8 @@ namespace MWLua
                   luaManager->addAction(
                       [=, window = std::move(window)]() { windowManager->setDisabledByLua(window, disabled); });
               };
+        api["_isWindowVisible"]
+            = [windowManager](std::string_view window) { return windowManager->isWindowVisible(window); };
 
         // TODO
         // api["_showMouseCursor"] = [](bool) {};

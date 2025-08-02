@@ -27,10 +27,9 @@ namespace MWGui
 
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
-        , mTimeAdvancer(0.05f)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
-        getWidget(mCancelButton, "CancelButton");
+        getWidget(mCancelButton, "OkButton");
         getWidget(mPlayerGold, "PlayerGold");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onCancelButtonClicked);
@@ -116,14 +115,14 @@ namespace MWGui
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold
                     ? "SandTextButton"
                     : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
-                MyGUI::IntCoord(5, 5 + i * lineHeight, mTrainingOptions->getWidth() - 10, lineHeight),
+                MyGUI::IntCoord(4, 3 + i * lineHeight, mTrainingOptions->getWidth() - 10, lineHeight),
                 MyGUI::Align::Default);
 
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
             button->setCaptionWithReplacing(
-                MyGUI::TextIterator::toTagsString(skill->mName) + " - " + MyGUI::utility::toString(price));
+                MyGUI::TextIterator::toTagsString(skill->mName) + "  - " + MyGUI::utility::toString(price) + "#{sgp}");
 
             button->setSize(button->getTextSize().width + 12, button->getSize().height);
 

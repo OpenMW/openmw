@@ -5,7 +5,7 @@
 
 #include "myguirendermanager.hpp"
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     AdditiveLayer::AdditiveLayer()

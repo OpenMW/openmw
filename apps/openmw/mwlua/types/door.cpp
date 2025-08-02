@@ -149,5 +149,9 @@ namespace MWLua
         addModelProperty(record);
         record["isAutomatic"] = sol::readonly_property(
             [](const ESM4::Door& rec) -> bool { return rec.mDoorFlags & ESM4::Door::Flag_AutomaticDoor; });
+        record["openSound"] = sol::readonly_property(
+            [](const ESM4::Door& rec) -> std::string { return ESM::RefId(rec.mOpenSound).serializeText(); });
+        record["closeSound"] = sol::readonly_property(
+            [](const ESM4::Door& rec) -> std::string { return ESM::RefId(rec.mCloseSound).serializeText(); });
     }
 }

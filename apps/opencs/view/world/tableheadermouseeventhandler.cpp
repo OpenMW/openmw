@@ -31,7 +31,7 @@ namespace CSVWorld
             auto& clickEvent = static_cast<QMouseEvent&>(*event);
             if ((clickEvent.button() == Qt::MiddleButton))
             {
-                const auto& index = table.indexAt(clickEvent.pos());
+                const auto& index = table.indexAt(clickEvent.position().toPoint());
                 table.setColumnHidden(index.column(), true);
                 clickEvent.accept();
                 return true;

@@ -14,7 +14,7 @@ namespace VFS
 {
 
     void registerArchives(VFS::Manager* vfs, const Files::Collections& collections,
-        const std::vector<std::string>& archives, bool useLooseFiles)
+        const std::vector<std::string>& archives, bool useLooseFiles, const ToUTF8::StatelessUtf8Encoder* encoder)
     {
         const Files::PathContainer& dataDirs = collections.getPaths();
 
@@ -25,7 +25,7 @@ namespace VFS
                 // Last BSA has the highest priority
                 const auto archivePath = collections.getPath(*archive);
                 Log(Debug::Info) << "Adding BSA archive " << archivePath;
-                vfs->addArchive(makeBsaArchive(archivePath));
+                vfs->addArchive(makeBsaArchive(archivePath, encoder));
             }
             else
             {

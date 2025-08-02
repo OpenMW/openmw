@@ -50,7 +50,7 @@ namespace CSVFilter
         std::pair<std::string, FilterType> operator()(const QVariant& variantData)
         {
             FilterType filterType = FilterType::String;
-            QMetaType::Type dataType = static_cast<QMetaType::Type>(variantData.type());
+            QMetaType::Type dataType = static_cast<QMetaType::Type>(variantData.typeId());
             if (dataType == QMetaType::QString || dataType == QMetaType::Bool || dataType == QMetaType::Int)
                 filterType = FilterType::String;
             if (dataType == QMetaType::Int || dataType == QMetaType::Float)
