@@ -241,7 +241,25 @@ namespace MWMechanics
         // Erase no longer active spells and effects
         for (auto spellIt = mSpells.begin(); spellIt != mSpells.end();)
         {
-            if (!spellIt->hasFlag(ESM::ActiveSpells::Flag_Temporary))
+            if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
+            {
+                const ESM::Spell* spell
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellIt->mSourceSpellId);
+                if (spell && ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(spell))
+                    ++spellIt;
+                else
+                {
+                    if (spell == nullptr)
+                        Log(Debug::Error) << "Dropping non-existent active effect: " << spellIt->mSourceSpellId;
+                    auto params = *spellIt;
+                    spellIt = mSpells.erase(spellIt);
+                    for (const auto& effect : params.mEffects)
+                        onMagicEffectRemoved(ptr, params, effect);
+                    applyPurges(ptr, &spellIt);
+                }
+                continue;
+            }
+            else if (!spellIt->hasFlag(ESM::ActiveSpells::Flag_Temporary))
             {
                 ++spellIt;
                 continue;
@@ -416,20 +434,7 @@ namespace MWMechanics
         if (context.mEraseRemoved)
         {
             bool remove = false;
-            if (spellIt->hasFlag(ESM::ActiveSpells::Flag_SpellStore))
-            {
-                try
-                {
-                    auto& spells = ptr.getClass().getCreatureStats(ptr).getSpells();
-                    remove = !spells.hasSpell(spellIt->mSourceSpellId);
-                }
-                catch (const std::runtime_error& e)
-                {
-                    remove = true;
-                    Log(Debug::Error) << "Removing active effect: " << e.what();
-                }
-            }
-            else if (spellIt->hasFlag(ESM::ActiveSpells::Flag_Equipment))
+            if (spellIt->hasFlag(ESM::ActiveSpells::Flag_Equipment))
             {
                 // Remove effects tied to equipment that has been unequipped
                 const auto& store = ptr.getClass().getInventoryStore(ptr);
