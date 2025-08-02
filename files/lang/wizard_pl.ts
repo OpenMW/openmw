@@ -90,7 +90,7 @@
     </message>
     <message>
         <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
-        <translation>Importuj ustawienia czionek bitmapowych z pliku Morrowind.ini</translation>
+        <translation>Importuj ustawienia czcionek bitmapowych z pliku Morrowind.ini</translation>
     </message>
     <message>
         <source>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,
