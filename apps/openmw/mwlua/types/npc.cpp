@@ -88,7 +88,7 @@ namespace
         }
 
         if (rec["baseDisposition"] != sol::nil)
-            npc.mNpdt.mDisposition = static_cast<int>(rec["baseDisposition"]);
+            npc.mNpdt.mDisposition = rec["baseDisposition"].get<int>();
 
         if (rec["baseGold"] != sol::nil)
             npc.mNpdt.mGold = static_cast<int>(rec["baseGold"]);
@@ -101,7 +101,7 @@ namespace
         {
             const sol::table services = rec["servicesOffered"];
             int flags = 0;
-            auto setFlag = [&](const char* key, int mask) {
+            auto setFlag = [&](const std::string_view& key, int mask) {
                 if (services[key] != sol::nil && services[key])
                     flags |= mask;
             };
