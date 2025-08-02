@@ -511,8 +511,7 @@ namespace MWGui
     {
         if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX)
         {
-            if (arg.value < -1000 || arg.value > 1000)
-                onPreviewScroll(nullptr, arg.value < 0 ? 1 : -1);
+            onPreviewScroll(nullptr, arg.value < 0 ? 1 : -1);
             return true;
         }
 

@@ -355,22 +355,25 @@ namespace MWInput
             MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
             if (topWin)
             {
-                bool isPastDeadzone = std::abs(arg.value) > 2000;
                 // Update cursor state
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
                 if (!mGamepadGuiCursorEnabled)
                     winMgr->setCursorActive(false);
 
+                // Deadzone check
+                if (std::abs(arg.value) < 2000)
+                    return !mGamepadGuiCursorEnabled;
+
                 if (mGamepadGuiCursorEnabled
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
-                    if (isPastDeadzone && winMgr->getControllerTooltip())
+                    if (winMgr->getControllerTooltip())
                     {
                         winMgr->setControllerTooltip(false);
                         winMgr->setCursorVisible(true);
                     }
-                    else if (isPastDeadzone && mGamepadGuiCursorEnabled)
+                    else if (mGamepadGuiCursorEnabled)
                     {
                         winMgr->setCursorVisible(true);
                     }
@@ -378,8 +381,7 @@ namespace MWInput
                 }
 
                 // Some windows have a specific widget to scroll with the right stick. Move the mouse there.
-                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && isPastDeadzone
-                    && topWin->getControllerScrollWidget() != nullptr)
+                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && topWin->getControllerScrollWidget() != nullptr)
                 {
                     mMouseManager->warpMouseToWidget(topWin->getControllerScrollWidget());
                     winMgr->setCursorVisible(false);
