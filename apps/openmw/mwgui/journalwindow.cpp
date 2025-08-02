@@ -754,13 +754,15 @@ namespace
                 {
                     // Choose a quest
                     Gui::MWList* list = getWidget<Gui::MWList>(QuestsList);
-                    notifyQuestClicked(list->getItemNameAt(mSelectedQuest), 0);
+                    if (mSelectedQuest < list->getItemCount())
+                        notifyQuestClicked(list->getItemNameAt(mSelectedQuest), 0);
                 }
                 else if (mTopicsMode)
                 {
                     // Choose a topic
                     Gui::MWList* list = getWidget<Gui::MWList>(TopicsList);
-                    notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
+                    if (mSelectedQuest < list->getItemCount())
+                        notifyTopicSelected(list->getItemNameAt(mSelectedQuest), 0);
                 }
                 else
                 {
