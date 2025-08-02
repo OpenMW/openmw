@@ -73,9 +73,7 @@
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
             </Widget>
-                <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold">
-	        </Widget>
-            
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold"/>
             <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
