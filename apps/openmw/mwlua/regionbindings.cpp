@@ -6,20 +6,6 @@
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 
-namespace
-{
-    struct RegionSoundRef
-    {
-        ESM::RefId mSoundId;
-        uint8_t mChance;
-
-        RegionSoundRef(const ESM::Region::SoundRef& ref)
-            : mSoundId(ref.mSound)
-            , mChance(ref.mChance)
-        {
-        }
-    };
-}
 
 namespace sol
 {
@@ -53,9 +39,6 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Region::SoundRef& ref) { return ref.mSound.serializeText(); });
 
         soundRefT["chance"] = sol::readonly_property([](const ESM::Region::SoundRef& ref) { return ref.mChance; });
-        soundRefT["sound"] = sol::readonly_property([](const ESM::Region::SoundRef& ref) -> const ESM::Sound* {
-            return MWBase::Environment::get().getESMStore()->get<ESM::Sound>().find(ref.mSound);
-        });
 
         // Region record
         auto regionT = lua.new_usertype<ESM::Region>("ESM3_Region");
