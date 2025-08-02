@@ -17,10 +17,6 @@ namespace sol
     struct is_automagical<ESM::Region::SoundRef> : std::false_type
     {
     };
-    template <>
-    struct is_automagical<MWWorld::Store<RegionSoundRef>> : std::false_type
-    {
-    };
 }
 
 namespace MWLua
@@ -67,7 +63,7 @@ namespace MWLua
             sol::table res(lua, sol::create);
             for (const auto& soundRef : rec.mSoundList)
                 res.add(soundRef);
-            return res;
+            return LuaUtil::makeReadOnly(res);
         });
         return LuaUtil::makeReadOnly(regions);
     }
