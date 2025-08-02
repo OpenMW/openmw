@@ -69,14 +69,14 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Region& rec) { return LuaUtil::serializeRefId(rec.mSleepList); });
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
-            static const std::array<const char*, 10> WeatherNames
+            constexpr std::array<const char*, 10> WeatherNames
                 = { "clear", "cloudy", "foggy", "overcast", "rain", "thunder", "ash", "blight", "snow", "blizzard" };
 
             sol::table res(lua, sol::create);
             for (size_t i = 0; i < rec.mData.mProbabilities.size(); ++i)
             {
-                res[i + 1] = rec.mData.mProbabilities[i]; // Numeric index (Lua-style 1-based)
-                res[WeatherNames[i]] = rec.mData.mProbabilities[i]; // Named index
+                res[LuaUtil::toLuaIndex(i)] = rec.mData.mProbabilities[i];
+                res[WeatherNames[i]] = rec.mData.mProbabilities[i];
             }
             return res;
         });
