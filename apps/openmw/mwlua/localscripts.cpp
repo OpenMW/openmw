@@ -232,7 +232,7 @@ namespace MWLua
             [&](LuaUtil::LuaView& view) { addPackage("openmw.self", sol::make_object(view.sol(), &mData)); });
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
             &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse,
-            &mOnSkillLevelUp });
+            &mOnSkillLevelUp, &mOnJailTimeServed });
     }
 
     void LocalScripts::setActive(bool active, bool callHandlers)
