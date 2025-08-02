@@ -340,7 +340,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Clone Content List</source>
-        <translation>Skopiuj listę treści</translation>
+        <translation>Sklonuj listę treści</translation>
     </message>
     <message>
         <source>&amp;Check Selected</source>
