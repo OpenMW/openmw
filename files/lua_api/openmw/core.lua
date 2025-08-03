@@ -1186,8 +1186,7 @@
 -- Region sound reference
 -- @type RegionSoundRef
 -- @field #string soundId Sound record ID
--- @field #number chance Probability that this sound plays periodically in the region
--- @field #Sound sound The full sound record referenced by `soundId`, or `nil` if not found
+-- @field #number chance Multiplicative percentage used to determine whether to play the sound
 
 --- @{#Factions}: Factions
 -- @field [parent=#core] #Factions factions
