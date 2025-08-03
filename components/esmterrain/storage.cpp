@@ -12,6 +12,8 @@
 #include <components/esm/util.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm4/loadland.hpp>
+#include <components/esm4/loadltex.hpp>
+#include <components/esm4/loadtxst.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
@@ -89,6 +91,8 @@ namespace ESMTerrain
     LandObject::LandObject(const ESM4::Land& land, int loadFlags)
         : mData(land, loadFlags)
     {
+        mEsm4DefaultLayerInfo.mDiffuseMap = land.mDefaultDiffuseMap;
+        mEsm4DefaultLayerInfo.mNormalMap = land.mDefaultNormalMap;
     }
 
     LandObject::LandObject(const ESM::Land& land, int loadFlags)
@@ -385,9 +389,105 @@ namespace ESMTerrain
         return Misc::ResourceHelpers::correctTexturePath(texture, mVFS);
     }
 
+    void Storage::getEsm4Blendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+        std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace)
+    {
+        const osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize - 1, chunkSize + 1) * 0.5f;
+        const int startCellX = static_cast<int>(std::floor(origin.x()));
+        const int startCellY = static_cast<int>(std::floor(origin.y()));
+
+        constexpr int quadsPerCell = 2;
+        constexpr int quadSize = ESM4::Land::sVertsPerSide / quadsPerCell;
+        const int quadCount = static_cast<int>(chunkSize * quadsPerCell);
+        assert(quadCount > 0);
+
+        const int blendmapSize = quadCount * quadSize + 1;
+
+        LandCache cache(startCellX - 1, startCellY - 1, static_cast<std::size_t>(std::ceil(chunkSize)) + 2);
+        std::pair lastCell{ startCellX, startCellY };
+        const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
+
+        std::map<ESM::FormId, std::size_t> textureIndicesMap;
+
+        auto getOrCreateBlendmap = [&](ESM::FormId texId) -> unsigned char* {
+            auto found = textureIndicesMap.find(texId);
+            if (found != textureIndicesMap.end())
+                return blendmaps[found->second]->data();
+            Terrain::LayerInfo info
+                = texId.isZeroOrUnset() ? land->getEsm4DefaultLayerInfo() : getLandTextureLayerInfo(texId);
+            osg::ref_ptr<osg::Image> image(new osg::Image);
+            image->allocateImage(blendmapSize, blendmapSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+            std::memset(image->data(), 0, image->getTotalDataSize());
+            textureIndicesMap.emplace(texId, blendmaps.size());
+            blendmaps.push_back(std::move(image));
+            layerList.push_back(std::move(info));
+            return blendmaps.back()->data();
+        };
+
+        const auto handleSample = [&](const CellSample& sample) {
+            const std::pair cell{ sample.mCellX, sample.mCellY };
+            if (lastCell != cell)
+            {
+                land = getLand(ESM::ExteriorCellLocation(sample.mCellX, sample.mCellY, worldspace), cache);
+                lastCell = cell;
+            }
+            if (!land)
+                return;
+            const ESM::LandData* ldata = land->getData(0);
+            if (!ldata)
+                return;
+            int quad;
+            if (sample.mSrcRow == 0)
+                quad = sample.mSrcCol == 0 ? 0 : 2;
+            else
+                quad = sample.mSrcCol == 0 ? 1 : 3;
+            const ESM4::Land::Texture& ltex = ldata->getEsm4Texture(quad);
+
+            unsigned char* const baseBlendmap = getOrCreateBlendmap(ESM::FormId::fromUint32(ltex.base.formId));
+            int starty = (static_cast<int>(sample.mDstCol) - 1) * quadSize;
+            int startx = sample.mDstRow * quadSize;
+            for (int y = std::max(0, starty + 1); y <= starty + quadSize && y < blendmapSize; ++y)
+            {
+                unsigned char* const row = baseBlendmap + (blendmapSize - y - 1) * blendmapSize;
+                for (int x = startx; x < startx + quadSize && x < blendmapSize; ++x)
+                    row[x] = 255;
+            }
+
+            for (const auto& layer : ltex.layers)
+            {
+                unsigned char* const layerBlendmap = getOrCreateBlendmap(ESM::FormId::fromUint32(layer.texture.formId));
+                for (const ESM4::Land::VTXT& v : layer.data)
+                {
+                    int y = v.position / (quadSize + 1);
+                    int x = v.position % (quadSize + 1);
+                    if (x == quadSize || startx + x >= blendmapSize || y == 0 || starty + y >= blendmapSize
+                        || starty + y < 0)
+                    {
+                        continue;
+                    }
+                    int index = (blendmapSize - starty - y - 1) * blendmapSize + startx + x;
+                    int delta = std::clamp(static_cast<int>(v.opacity * 255), 0, 255);
+                    baseBlendmap[index] = std::max(0, baseBlendmap[index] - delta);
+                    layerBlendmap[index] = delta;
+                }
+            }
+        };
+
+        sampleBlendmaps(chunkSize, origin.x(), origin.y(), quadsPerCell, handleSample);
+
+        if (blendmaps.size() == 1)
+            blendmaps.clear(); // If a single texture fills the whole terrain, there is no need to blend
+    }
+
     void Storage::getBlendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
         std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace)
     {
+        if (ESM::isEsm4Ext(worldspace))
+        {
+            getEsm4Blendmaps(chunkSize, chunkCenter, blendmaps, layerList, worldspace);
+            return;
+        }
+
         const osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize, chunkSize) * 0.5f;
         const int startCellX = static_cast<int>(std::floor(origin.x()));
         const int startCellY = static_cast<int>(std::floor(origin.y()));
@@ -613,6 +713,47 @@ namespace ESMTerrain
         return info;
     }
 
+    Terrain::LayerInfo Storage::getLandTextureLayerInfo(ESM::FormId id)
+    {
+        if (const ESM4::LandTexture* ltex = getEsm4LandTexture(id))
+        {
+            if (!ltex->mTextureFile.empty())
+                return getLayerInfo("textures/landscape/" + ltex->mTextureFile); // TES4
+            if (const ESM4::TextureSet* txst = getEsm4TextureSet(ltex->mTexture))
+                return getTextureSetLayerInfo(*txst); // TES5
+            else
+                Log(Debug::Warning) << "TextureSet not found: " << ltex->mTexture.toString();
+        }
+        else
+            Log(Debug::Warning) << "LandTexture not found: " << id.toString();
+        return getLayerInfo("");
+    }
+
+    Terrain::LayerInfo Storage::getTextureSetLayerInfo(const ESM4::TextureSet& txst)
+    {
+        Terrain::LayerInfo info;
+
+        assert(!txst.mDiffuse.empty() && "getlayerInfo: empty diffuse map");
+        info.mDiffuseMap = "textures/" + txst.mDiffuse;
+
+        if (!txst.mNormalMap.empty())
+            info.mNormalMap = "textures/" + txst.mNormalMap;
+
+        // FIXME: this flag indicates height info in alpha channel of normal map
+        //        but the normal map alpha channel has specular info instead
+        //        (probably needs some flag in the terrain shader to fix)
+        info.mParallax = false;
+        // FIXME: this flag indicates specular info in alpha channel of diffuse
+        //        but the diffuse alpha channel has transparency data instead
+        //        (probably needs some flag in the terrain shader to fix)
+        info.mSpecular = false;
+
+        // FIXME: should support other features of ESM4::TextureSet
+        //        probably need corresponding support in the terrain shader
+
+        return info;
+    }
+
     float Storage::getCellWorldSize(ESM::RefId worldspace)
     {
         return static_cast<float>(ESM::getCellSize(worldspace));
@@ -623,9 +764,12 @@ namespace ESMTerrain
         return ESM::getLandSize(worldspace);
     }
 
-    int Storage::getBlendmapScale(float chunkSize)
+    int Storage::getTextureTileCount(float chunkSize, ESM::RefId worldspace)
     {
-        return ESM::Land::LAND_TEXTURE_SIZE * chunkSize;
+        if (ESM::isEsm4Ext(worldspace))
+            return static_cast<int>(2 * ESM4::Land::sQuadTexturePerSide * chunkSize);
+        else
+            return static_cast<int>(ESM::Land::LAND_TEXTURE_SIZE * chunkSize);
     }
 
 }

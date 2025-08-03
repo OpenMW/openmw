@@ -88,7 +88,8 @@ namespace Terrain
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         virtual int getCellVertices(ESM::RefId worldspace) = 0;
 
-        virtual int getBlendmapScale(float chunkSize) = 0;
+        /// Get the number of texture tiles on one side per chunk (chunkSize 1.0 = 1 cell).
+        virtual int getTextureTileCount(float chunkSize, ESM::RefId worldspace) = 0;
     };
 
 }

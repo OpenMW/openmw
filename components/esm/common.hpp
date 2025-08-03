@@ -31,6 +31,7 @@ namespace ESM
         VER_134 = 0x3fab851f, // FONV, GunRunnersArsenal, LonesomeRoad, OldWorldBlues
         VER_094 = 0x3f70a3d7, // TES5/FO3
         VER_170 = 0x3fd9999a, // TES5
+        VER_171 = 0x3fdae148, // TES5
         VER_095 = 0x3f733333, // FO4
     };
 

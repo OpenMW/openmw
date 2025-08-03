@@ -32,6 +32,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace ESM4
 {
@@ -124,6 +125,8 @@ namespace ESM4
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<ESM::FormId> mIds; // land texture (LTEX) formids
         ESM::FormId mCell;
+        VFS::Path::NormalizedView mDefaultDiffuseMap;
+        VFS::Path::NormalizedView mDefaultNormalMap;
 
         void load(Reader& reader);
 

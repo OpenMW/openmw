@@ -79,6 +79,7 @@
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/loadterm.hpp>
 #include <components/esm4/loadtree.hpp>
+#include <components/esm4/loadtxst.hpp>
 #include <components/esm4/loadweap.hpp>
 #include <components/esm4/loadwrld.hpp>
 
