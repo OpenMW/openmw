@@ -4,8 +4,6 @@
 
 #include <Recast.h>
 
-#include <cstring>
-
 namespace
 {
     void initPolyMeshDetail(rcPolyMeshDetail& value) noexcept

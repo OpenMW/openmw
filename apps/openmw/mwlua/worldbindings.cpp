@@ -8,7 +8,6 @@
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
-#include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/finitenumbers.hpp>
@@ -28,6 +27,7 @@
 #include "luamanagerimp.hpp"
 
 #include "animationbindings.hpp"
+#include "context.hpp"
 #include "corebindings.hpp"
 #include "mwscriptbindings.hpp"
 

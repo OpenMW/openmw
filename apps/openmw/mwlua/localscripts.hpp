@@ -1,9 +1,7 @@
 #ifndef MWLUA_LOCALSCRIPTS_H
 #define MWLUA_LOCALSCRIPTS_H
 
-#include <memory>
-#include <set>
-#include <string>
+#include <string_view>
 #include <utility>
 
 #include <components/lua/luastate.hpp>
@@ -89,6 +87,7 @@ namespace MWLua
         {
             callEngineHandlers(mOnSkillLevelUp, skillId, source);
         }
+        void onJailTimeServed(int days) { callEngineHandlers(mOnJailTimeServed, days); }
 
         void applyStatsCache();
 
@@ -118,6 +117,7 @@ namespace MWLua
         EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
         EngineHandlerList mOnSkillUse{ "_onSkillUse" };
         EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
+        EngineHandlerList mOnJailTimeServed{ "_onJailTimeServed" };
     };
 
 }

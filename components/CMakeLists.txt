@@ -407,6 +407,7 @@ add_component_dir(detournavigator
     areatype
     asyncnavmeshupdater
     bounds
+    cellgridbounds
     changetype
     collisionshapetype
     commulativeaabb

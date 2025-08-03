@@ -352,6 +352,7 @@ namespace MWGui
         getWidget(mAvailableEffectsList, "AvailableEffects");
         getWidget(mUsedEffectsView, "UsedEffects");
         getWidget(mPriceLabel, "PriceLabel");
+        getWidget(mPlayerGold, "PlayerGold");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mCancelButton, "CancelButton");
 
@@ -369,6 +370,10 @@ namespace MWGui
 
         mPtr = actor;
         mNameEdit->setCaption({});
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        mPlayerGold->setCaptionWithReplacing(MyGUI::utility::toString(playerGold));
 
         startEditing();
     }

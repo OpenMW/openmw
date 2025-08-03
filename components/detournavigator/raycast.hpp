@@ -3,8 +3,9 @@
 
 #include "flags.hpp"
 
-#include <optional>
 #include <osg/Vec3f>
+
+#include <optional>
 
 class dtNavMeshQuery;
 

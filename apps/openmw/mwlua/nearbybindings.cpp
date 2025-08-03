@@ -13,8 +13,11 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/scene.hpp"
 
+#include "context.hpp"
 #include "luamanagerimp.hpp"
 #include "objectlists.hpp"
+
+#include <vector>
 
 namespace
 {

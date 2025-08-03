@@ -13,6 +13,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwinput/actions.hpp"
 
+#include "context.hpp"
 #include "luamanagerimp.hpp"
 
 namespace sol

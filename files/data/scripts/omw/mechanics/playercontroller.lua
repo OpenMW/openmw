@@ -39,7 +39,8 @@ end
 
 local function skillLevelUpHandler(skillid, source, params)
     local skillStat = NPC.stats.skills[skillid](self)
-    if skillStat.base >= 100 then 
+    if (skillStat.base >= 100 and params.skillIncreaseValue > 0) or 
+        (skillStat.base <= 0 and params.skillIncreaseValue < 0) then 
         return false 
     end
 
@@ -62,25 +63,67 @@ local function skillLevelUpHandler(skillid, source, params)
             = levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization] + params.levelUpSpecializationIncreaseValue;
     end
 
-    local skillRecord = Skill.record(skillid)
-    local npcRecord = NPC.record(self)
-    local class = NPC.classes.record(npcRecord.class)
+    if source ~= 'jail' then
+        local skillRecord = Skill.record(skillid)
+        local npcRecord = NPC.record(self)
+        local class = NPC.classes.record(npcRecord.class)
 
-    ambient.playSound("skillraise")
+        ambient.playSound("skillraise")
 
-    local message = string.format(core.getGMST('sNotifyMessage39'),skillRecord.name,skillStat.base)
+        local message = string.format(core.getGMST('sNotifyMessage39'),skillRecord.name,skillStat.base)
 
-    if source == I.SkillProgression.SKILL_INCREASE_SOURCES.Book then
-        message = '#{sBookSkillMessage}\n'..message
+        if source == I.SkillProgression.SKILL_INCREASE_SOURCES.Book then
+            message = '#{sBookSkillMessage}\n'..message
+        end
+
+        ui.showMessage(message, { showInDialogue = false })
+        
+        if levelStat.progress >= core.getGMST('iLevelUpTotal') then
+            ui.showMessage('#{sLevelUpMsg}', { showInDialogue = false })
+        end
+        
+        if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end
     end
+end
 
-    ui.showMessage(message, { showInDialogue = false })
+local function jailTimeServed(days)
+    if not days or days <= 0 then
+        return
+    end
     
-    if levelStat.progress >= core.getGMST('iLevelUpTotal') then
-        ui.showMessage('#{sLevelUpMsg}', { showInDialogue = false })
+    local oldSkillLevels = {}
+    local skillByNumber = {}
+    for skillid, skillStat in pairs(NPC.stats.skills) do
+        oldSkillLevels[skillid] = skillStat(self).base
+        skillByNumber[#skillByNumber+1] = skillid
+    end
+    
+    math.randomseed(core.getSimulationTime())
+    for day=1,days do
+        local skillid = skillByNumber[math.random(#skillByNumber)]
+        -- skillLevelUp() handles skill-based increase/decrease
+        I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Jail)
     end
 
-    if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end
+    local message = ''
+    if days == 1 then
+        message = string.format(core.getGMST('sNotifyMessage42'), days)
+    else
+        message = string.format(core.getGMST('sNotifyMessage43'), days)
+    end
+    for skillid, skillStat in pairs(NPC.stats.skills) do
+        local diff = skillStat(self).base - oldSkillLevels[skillid]
+        if diff ~= 0 then
+            local skillMsg = core.getGMST('sNotifyMessage39')
+            if diff < 0 then
+                skillMsg = core.getGMST('sNotifyMessage44')
+            end
+            local skillRecord = Skill.record(skillid)
+            message = message..'\n'..string.format(skillMsg, skillRecord.name, skillStat(self).base)
+        end
+    end
+    
+    I.UI.showInteractiveMessage(message)
 end
 
 local function skillUsedHandler(skillid, params)
@@ -114,6 +157,7 @@ I.SkillProgression.addSkillLevelUpHandler(skillLevelUpHandler)
 return {
     engineHandlers = {
         onUpdate = onUpdate,
+        _onJailTimeServed = jailTimeServed,
     },
 
     eventHandlers = {

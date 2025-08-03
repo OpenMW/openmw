@@ -171,7 +171,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#UI] #number version
-        version = 2,
+        version = 3,
 
         --- All available UI modes.
         -- Use `view(I.UI.MODE)` in `luap` console mode to see the list.
@@ -253,6 +253,13 @@ return {
         -- @param #string windowName
         -- @return #boolean
         isWindowVisible = isWindowVisible,
+
+        ---
+        -- Shows a message as an interactive message box pausing the game, with a single button with the localized text OK.
+        -- @function [parent=#UI] showInteractiveMessage
+        -- @param #string message Message to display
+        -- @param #table options Options (none yet)
+        showInteractiveMessage = ui._showInteractiveMessage
 
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,

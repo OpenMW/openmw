@@ -113,6 +113,15 @@ namespace MWLua
                 scripts->onSkillLevelUp(event.mSkill, event.mSource);
         }
 
+        void operator()(const OnJailTimeServed& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onJailTimeServed(event.mDays);
+        }
+
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const
         {
