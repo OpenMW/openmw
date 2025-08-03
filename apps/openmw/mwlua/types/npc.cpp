@@ -41,8 +41,7 @@ namespace
         else
             npc.blank();
 
-            if (npc.mId == ESM::RefId::deserializeText("Player"))
-                npc.mId = ESM::RefId::deserializeText("blank");
+        npc.mId = {};
 
         // Basic fields
         if (rec["name"] != sol::nil)

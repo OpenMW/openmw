@@ -191,7 +191,11 @@ namespace MWLua
             },
             [lua = context.mLua](const ESM::NPC& npc) -> const ESM::NPC* {
                 checkGameInitialized(lua);
-                return MWBase::Environment::get().getESMStore()->insert(npc);
+                if (npc.mId.empty())
+                    return MWBase::Environment::get().getESMStore()->insert(npc);
+                ESM::NPC copy = npc;
+                copy.mId = {};
+                return MWBase::Environment::get().getESMStore()->insert(copy);
             },
             [lua = context.mLua](const ESM::Weapon& weapon) -> const ESM::Weapon* {
                 checkGameInitialized(lua);
