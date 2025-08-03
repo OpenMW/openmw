@@ -107,7 +107,7 @@ Example:
     local attack = {
         attacker = self,
         weapon = Actor.getEquipment(self, Actor.EQUIPMENT_SLOT.CarriedRight),
-        sourceType = I.Combat.ATTACK_SOURCE_TYPE.Melee,
+        sourceType = I.Combat.ATTACK_SOURCE_TYPES.Melee,
         strength = 1,
         type = self.ATTACK_TYPE.Chop,
         damage = {
