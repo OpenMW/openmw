@@ -109,7 +109,6 @@
 
 ---
 -- Additional summand for the yaw angle; useful for camera shaking effects.
--- Setting extra pitch doesn't block player input.
 -- Full yaw is `getYaw()+getExtraYaw()`.
 -- @function [parent=#camera] setExtraYaw
 -- @param #number value
@@ -122,7 +121,7 @@
 
 ---
 -- Additional summand for the roll angle; useful for camera shaking effects.
--- Full yaw is `getRoll()+getExtraRoll()`.
+-- Full roll is `getRoll()+getExtraRoll()`.
 -- @function [parent=#camera] setExtraRoll
 -- @param #number value
 
@@ -150,7 +149,7 @@
 ---
 -- Set preferred offset between tracked position (see `getTrackedPosition`) and the camera focal point (the center of the screen) in third person mode.
 -- The offset is a 2d vector (X, Y) where X is horizontal (to the right from the character) and Y component is vertical (upward).
--- The real offset can differ from the preferred one during smooth transition of if blocked by an obstacle.
+-- The real offset can differ from the preferred one during smooth transition or if blocked by an obstacle.
 -- Smooth transition happens by default every time when the preferred offset was changed. Use `instantTransition()` to skip the current transition.
 -- @function [parent=#camera] setFocalPreferredOffset
 -- @param openmw.util#Vector2 offset
