@@ -876,10 +876,10 @@
 -- @field [parent=#NPC] #NpcStats stats
 
 ---
--- Creates a @{#NpcRecord} without adding it to the world database.
+-- Creates an @{#NpcRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#NPC] createRecordDraft
--- @param #NpcRecord book A Lua table with the fields of a NpcRecord, with an optional field `template` that accepts a @{#NpcRecord} as a base.
+-- @param #NpcRecord npc A Lua table with the fields of an NpcRecord, with an optional field `template` that accepts an @{#NpcRecord} as a base.
 -- @return #NpcRecord A strongly typed NPC record.
 
 ---

@@ -269,12 +269,6 @@ namespace MWWorld
             list.push_back((*it)->mId);
         }
     }
-    template <class IdType, class StaticMap>
-    inline bool shouldInsert(const IdType& id, const StaticMap& map)
-    {
-        auto it = map.find(id);
-        return it != map.end();
-    }
 
     template <class T, class Id>
     T* TypedDynamicStore<T, Id>::insert(const T& item, bool overrideOnly)
