@@ -6,6 +6,8 @@
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 
+#include "../mwworld/weather.hpp"
+
 namespace sol
 {
     template <>
@@ -47,14 +49,12 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Region& rec) { return LuaUtil::serializeRefId(rec.mSleepList); });
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
-            constexpr std::array<const char*, 10> WeatherNames
-                = { "clear", "cloudy", "foggy", "overcast", "rain", "thunder", "ash", "blight", "snow", "blizzard" };
 
             sol::table res(lua, sol::create);
             for (size_t i = 0; i < rec.mData.mProbabilities.size(); ++i)
             {
-                res[LuaUtil::toLuaIndex(i)] = rec.mData.mProbabilities[i];
-                res[WeatherNames[i]] = rec.mData.mProbabilities[i];
+                const MWWorld::Weather* weather =  MWBase::Environment::get().getWorld()->getWeather(i);
+                res[weather->mId.serializeText()] = rec.mData.mProbabilities[i];
             }
             return res;
         });
