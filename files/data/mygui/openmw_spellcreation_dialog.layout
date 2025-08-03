@@ -68,6 +68,12 @@
         <Widget type="HBox" position="0 336 558 60">
             <Property key="Padding" value="16"/>
 
+            <Widget type="AutoSizedTextBox" skin="NormalText" name="PlayerGoldTextBox">
+                <Property key="Caption" value="#{sGold}"/>
+                <UserString key="ToolTipType" value="Layout"/>
+                <UserString key="ToolTipLayout" value="TextToolTip"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="PlayerGold"/>
             <Widget type="Spacer"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
