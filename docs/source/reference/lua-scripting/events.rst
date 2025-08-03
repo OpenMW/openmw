@@ -108,7 +108,7 @@ Example:
         attacker = self,
         weapon = Actor.getEquipment(self, Actor.EQUIPMENT_SLOT.CarriedRight),
         sourceType = I.Combat.ATTACK_SOURCE_TYPE.Melee,
-        strenght = 1,
+        strength = 1,
         type = self.ATTACK_TYPE.Chop,
         damage = {
             health = 20,
