@@ -522,16 +522,14 @@ namespace MWSound
 
         /* We need to make sure ffmpeg is initialized. Optionally silence warning
          * output from the lib */
-        static bool done_init = false;
-        if (!done_init)
-        {
+        [[maybe_unused]] static const bool doneInit = [] {
 // This is not needed anymore above FFMpeg version 4.0
 #if LIBAVCODEC_VERSION_INT < 3805796
             av_register_all();
 #endif
             av_log_set_level(AV_LOG_ERROR);
-            done_init = true;
-        }
+            return true;
+        }();
     }
 
     FFmpegDecoder::~FFmpegDecoder()

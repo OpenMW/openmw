@@ -774,12 +774,10 @@ namespace MWGui
         , mGlobalMapRender(std::make_unique<MWRender::GlobalMap>(localMapRender->getRoot(), workQueue))
         , mEditNoteDialog()
     {
-        static bool registered = false;
-        if (!registered)
-        {
+        [[maybe_unused]] static const bool registered = [] {
             MyGUI::FactoryManager::getInstance().registerFactory<MarkerWidget>("Widget");
-            registered = true;
-        }
+            return true;
+        }();
 
         mEditNoteDialog.setVisible(false);
         mEditNoteDialog.eventOkClicked += MyGUI::newDelegate(this, &MapWindow::onNoteEditOk);
