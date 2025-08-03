@@ -125,18 +125,28 @@ Coverity:
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
-    # Remove the specific targets and build everything once we can do it under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
     - ccache -svv
-  after_script:
     - tar cfz cov-int.tar.gz cov-int
-    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
-      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
-      --form file=@cov-int.tar.gz --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
-      --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
   artifacts:
+    expire_in: 1 day
     paths:
       - /builds/OpenMW/openmw/cov-int/build-log.txt
+      - /builds/OpenMW/openmw/cov-int.tar.gz
+
+Coverity_Upload:
+  image: ubuntu:24.04
+  stage: build
+  before_script:
+    - CI/install_debian_deps.sh coverity_upload
+  script:
+    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
+      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
+      --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
+      --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+      --form url="$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_DEFAULT_BRANCH_SLUG/raw/cov-int.tar.gz?job=Coverity"
+  needs:
+    - Coverity
 
 Ubuntu_GCC:
   extends: .Ubuntu
