@@ -2,6 +2,7 @@
 
 #include "actor.hpp"
 #include "modelproperty.hpp"
+#include "servicesoffered.hpp"
 
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -58,6 +59,8 @@ namespace
             npc.mHead = ESM::RefId::deserializeText(rec["head"].get<std::string_view>());
         if (rec["hair"] != sol::nil)
             npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
+        if (rec["primaryFaction"] != sol::nil)
+            npc.mFaction = ESM::RefId::deserializeText(rec["primaryFaction"].get<std::string_view>());
 
         if (rec["isMale"] != sol::nil)
         {
@@ -75,6 +78,15 @@ namespace
                 npc.mFlags |= ESM::NPC::Essential;
             else
                 npc.mFlags &= ~ESM::NPC::Essential;
+        }
+
+        if (rec["autocalc"] != sol::nil)
+        {
+            bool respawn = rec["autocalc"];
+            if (respawn)
+                npc.mFlags |= ESM::NPC::Autocalc;
+            else
+                npc.mFlags &= ~ESM::NPC::Autocalc;
         }
 
         if (rec["isRespawning"] != sol::nil)
@@ -95,35 +107,20 @@ namespace
         if (rec["bloodType"] != sol::nil)
             npc.mBloodType = rec["bloodType"].get<int>();
 
-        // Services offered
+        if (rec["primaryFactionRank"] != sol::nil)
+            npc.mNpdt.mRank = rec["primaryFactionRank"].get<int>();
+
         if (rec["servicesOffered"] != sol::nil)
         {
             const sol::table services = rec["servicesOffered"];
             int flags = 0;
-            auto setFlag = [&](std::string_view key, int mask) {
-                if (services[key] != sol::nil && services[key])
-                    flags |= mask;
-            };
 
-            setFlag("Spells", ESM::NPC::Spells);
-            setFlag("Spellmaking", ESM::NPC::Spellmaking);
-            setFlag("Enchanting", ESM::NPC::Enchanting);
-            setFlag("Training", ESM::NPC::Training);
-            setFlag("Repair", ESM::NPC::Repair);
-            setFlag("Barter", ESM::NPC::AllItems);
-            setFlag("Weapon", ESM::NPC::Weapon);
-            setFlag("Armor", ESM::NPC::Armor);
-            setFlag("Clothing", ESM::NPC::Clothing);
-            setFlag("Books", ESM::NPC::Books);
-            setFlag("Ingredients", ESM::NPC::Ingredients);
-            setFlag("Picks", ESM::NPC::Picks);
-            setFlag("Probes", ESM::NPC::Probes);
-            setFlag("Lights", ESM::NPC::Lights);
-            setFlag("Apparatus", ESM::NPC::Apparatus);
-            setFlag("RepairItem", ESM::NPC::RepairItem);
-            setFlag("Misc", ESM::NPC::Misc);
-            setFlag("Potions", ESM::NPC::Potions);
-            setFlag("MagicItems", ESM::NPC::MagicItems);
+            for (const auto& [mask, key] : ServiceNames)
+            {
+                sol::object value = services[key];
+                if (value != sol::nil && value.as<bool>())
+                    flags |= mask;
+            }
 
             npc.mAiData.mServices = flags;
         }
@@ -198,9 +195,20 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> int { return (int)rec.mNpdt.mDisposition; });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
+        record["primaryFaction"] = sol::readonly_property(
+            [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
+        record["primaryFactionRank"]
+            = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> sol::object {
+                  sol::state_view lua(s);
+                  if (rec.mFaction.empty())
+                      return sol::make_object(lua, sol::nil); // return nil
+                  return sol::make_object(lua, rec.mNpdt.mRank); // return the rank as a number
+              });
         addModelProperty(record);
         record["isEssential"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Essential; });
+        record["autocalc"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Autocalc; });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["isRespawning"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Respawn; });
