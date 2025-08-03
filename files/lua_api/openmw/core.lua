@@ -1177,10 +1177,9 @@
 -- @field #list<#RegionSoundRef> sounds A read-only list of ambient sound references for this region.
 -- Each reference includes a chance and a resolved link to the full sound record.
 -- @field #table weatherProbabilities A table mapping weather ids to their probability (0–100), should sum to 100.
--- Supports both numeric indices (1–10) and ids, for example:
+-- Valid weather ids include:
 --   `"clear"`, `"cloudy"`, `"foggy"`, `"overcast"`, `"rain"`, `"thunder"`, `"ash"`, `"blight"`, `"snow"`, `"blizzard"`
--- @usage print(region.weatherProbabilities[1])         -- access by index
--- @usage print(region.weatherProbabilities["rain"])    -- access by id
+-- @usage print(region.weatherProbabilities["rain"])
 
 ---
 -- Region sound reference
