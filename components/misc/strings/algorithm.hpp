@@ -86,7 +86,7 @@ namespace Misc::StringUtils
     {
         using is_transparent = void;
 
-        constexpr std::size_t operator()(std::string_view str) const
+        std::size_t operator()(std::string_view str) const
         {
             // FNV-1a
             std::uint64_t hash{ 0xcbf29ce484222325ull };
@@ -96,16 +96,7 @@ namespace Misc::StringUtils
                 hash ^= static_cast<std::uint64_t>(toLower(c));
                 hash *= prime;
             }
-            if constexpr (sizeof(std::uint64_t) <= sizeof(std::size_t))
-                return hash;
-            else if constexpr (sizeof(std::uint32_t) == sizeof(std::size_t))
-            {
-                std::uint32_t low = hash & 0xFFFFFFFF;
-                std::uint32_t high = hash >> 32;
-                return low ^ high;
-            }
-            static_assert(sizeof(std::uint64_t) <= sizeof(std::size_t) || sizeof(std::uint32_t) == sizeof(std::size_t));
-            return {};
+            return std::hash<std::uint64_t>()(hash);
         }
     };
 
