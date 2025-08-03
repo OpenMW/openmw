@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initNearbyPackage(const Context&);
+    struct Context;
+
+    sol::table initNearbyPackage(const Context& context);
 }
 
 #endif // MWLUA_NEARBYBINDINGS_H

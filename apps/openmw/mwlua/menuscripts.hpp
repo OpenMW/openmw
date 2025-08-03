@@ -9,11 +9,11 @@
 
 #include "../mwbase/luamanager.hpp"
 
-#include "context.hpp"
 #include "inputprocessor.hpp"
 
 namespace MWLua
 {
+    struct Context;
 
     sol::table initMenuPackage(const Context& context);
 

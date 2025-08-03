@@ -1,13 +1,7 @@
 #include "animationbindings.hpp"
 
-#include <components/esm3/loadmgef.hpp>
-#include <components/esm3/loadstat.hpp>
-#include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/lua/utilpackage.hpp>
 #include <components/misc/finitenumbers.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -15,11 +9,8 @@
 
 #include "../mwmechanics/character.hpp"
 
-#include "../mwworld/esmstore.hpp"
-
 #include "context.hpp"
 #include "luamanagerimp.hpp"
-#include "objectvariant.hpp"
 
 namespace MWLua
 {

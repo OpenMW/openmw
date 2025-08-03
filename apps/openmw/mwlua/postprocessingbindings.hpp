@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initPostprocessingPackage(const Context&);
+    struct Context;
+
+    sol::table initPostprocessingPackage(const Context& context);
 }
 
 #endif // MWLUA_POSTPROCESSINGBINDINGS_H

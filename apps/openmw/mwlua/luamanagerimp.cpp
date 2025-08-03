@@ -5,6 +5,10 @@
 #include <MyGUI_InputManager.h>
 #include <osg/Stats>
 
+#include <sol/object.hpp>
+#include <sol/table.hpp>
+#include <sol/types.hpp>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/luascripts.hpp>
@@ -15,7 +19,6 @@
 
 #include <components/l10n/manager.hpp>
 
-#include <components/lua_ui/content.hpp>
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
