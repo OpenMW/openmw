@@ -99,8 +99,8 @@ Coverity:
     - saas-linux-medium-amd64
   image: ubuntu:24.04
   stage: build
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     key: Coverity.ubuntu_24.04.v1
     paths:
@@ -140,6 +140,8 @@ Coverity:
 Coverity_Upload:
   image: ubuntu:24.04
   stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
     - CI/install_debian_deps.sh coverity_upload
   script:
