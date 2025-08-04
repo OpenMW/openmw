@@ -486,7 +486,7 @@ Ubuntu_Clang_tests_Debug:
   stage: test
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    EXAMPLE_SUITE_REVISION: 599987b52bd2d064e26299d3317b11049499f32b
+    EXAMPLE_SUITE_REVISION: 3e01d10e073474a886a9efe3658088db14869627
   cache:
     paths:
       - .cache/pip
