@@ -108,7 +108,10 @@ namespace
             npc.mBloodType = rec["bloodType"].get<int>();
 
         if (rec["primaryFactionRank"] != sol::nil)
-            npc.mNpdt.mRank = rec["primaryFactionRank"].get<int>();
+        {
+            if (!npc.mFaction.empty())
+                npc.mNpdt.mRank = LuaUtil::fromLuaIndex(rec["primaryFactionRank"]);
+        }
 
         if (rec["servicesOffered"] != sol::nil)
         {
@@ -197,13 +200,12 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
         record["primaryFaction"] = sol::readonly_property(
             [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
-        record["primaryFactionRank"]
-            = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> sol::object {
-                  sol::state_view lua(s);
-                  if (rec.mFaction.empty())
-                      return sol::make_object(lua, sol::nil); // return nil
-                  return sol::make_object(lua, rec.mNpdt.mRank); // return the rank as a number
-              });
+        record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int {
+            sol::state_view lua(s);
+            if (rec.mFaction.empty())
+                return 0;
+            return LuaUtil::toLuaIndex(rec.mNpdt.mRank);
+        });
         addModelProperty(record);
         record["isEssential"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Essential; });
