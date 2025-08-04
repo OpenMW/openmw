@@ -1,6 +1,5 @@
-#pragma once
 #include <array>
-#include <components/esm3/loadnpc.hpp> // for ESM::NPC constants
+#include <components/esm3/loadnpc.hpp>
 #include <string_view>
 
 inline constexpr std::array<std::pair<int, std::string_view>, 19> ServiceNames

@@ -80,10 +80,10 @@ namespace
                 npc.mFlags &= ~ESM::NPC::Essential;
         }
 
-        if (rec["autocalc"] != sol::nil)
+        if (rec["isAutocalc"] != sol::nil)
         {
-            bool respawn = rec["autocalc"];
-            if (respawn)
+            bool autoCalc = rec["isAutocalc"];
+            if (autoCalc)
                 npc.mFlags |= ESM::NPC::Autocalc;
             else
                 npc.mFlags &= ~ESM::NPC::Autocalc;
@@ -207,7 +207,7 @@ namespace MWLua
         addModelProperty(record);
         record["isEssential"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Essential; });
-        record["autocalc"]
+        record["isAutocalc"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Autocalc; });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["isRespawning"]

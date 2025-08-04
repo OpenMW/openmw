@@ -861,7 +861,7 @@
 -- @field #boolean canWalk whether the creature can walk
 -- @field #boolean canUseWeapons whether the creature can use weapons and shields
 -- @field #boolean isBiped whether the creature is a biped
--- @field #boolean autocalc If true, the actors stats will be automatically calculated based on level and class.
+-- @field #boolean isAutocalc If true, the actors stats will be automatically calculated based on level and class.
 -- @field #string primaryFaction Faction ID of the NPCs default faction. Nil if no faction
 -- @field #number primaryFactionRank Faction rank of the NPCs default faction. Nil if no faction
 -- @field #boolean isEssential whether the creature is essential
