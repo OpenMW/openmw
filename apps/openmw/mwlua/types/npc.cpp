@@ -32,6 +32,19 @@ namespace sol
 
 namespace
 {
+    size_t getValidRanksCount(const ESM::Faction* faction)
+    {
+        if (!faction)
+            return 0;
+
+        for (size_t i = 0; i < faction->mRanks.size(); i++)
+        {
+            if (faction->mRanks[i].empty())
+                return i;
+        }
+
+        return faction->mRanks.size();
+    }
     ESM::NPC tableToNPC(const sol::table& rec)
     {
         ESM::NPC npc;
@@ -60,8 +73,16 @@ namespace
         if (rec["hair"] != sol::nil)
             npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
         if (rec["primaryFaction"] != sol::nil)
-            npc.mFaction = ESM::RefId::deserializeText(rec["primaryFaction"].get<std::string_view>());
+        {
+            auto factionStr = rec["primaryFaction"].get<std::string_view>();
+            ESM::RefId factionId = ESM::RefId::deserializeText(factionStr);
 
+            const auto& factionStore = MWBase::Environment::get().getESMStore()->get<ESM::Faction>();
+            if (!factionStore.search(factionId))
+                throw std::runtime_error("Invalid faction '" + std::string(factionStr) + "' in primaryFaction");
+
+            npc.mFaction = factionId;
+        }
         if (rec["isMale"] != sol::nil)
         {
             bool male = rec["isMale"];
@@ -110,7 +131,22 @@ namespace
         if (rec["primaryFactionRank"] != sol::nil)
         {
             if (!npc.mFaction.empty())
-                npc.mNpdt.mRank = LuaUtil::fromLuaIndex(rec["primaryFactionRank"]);
+            {
+                const ESM::RefId factionId = npc.mFaction;
+                const ESM::Faction* faction
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
+
+                int luaValue = rec["primaryFactionRank"];
+                int rank = LuaUtil::fromLuaIndex(luaValue);
+
+                int maxRank = static_cast<int>(getValidRanksCount(faction));
+
+                if (rank < 0 || rank >= maxRank)
+                    throw std::runtime_error("primaryFactionRank: Requested rank " + std::to_string(rank)
+                        + " is out of bounds for faction " + factionId.toDebugString());
+
+                npc.mNpdt.mRank = rank;
+            }
         }
 
         if (rec["servicesOffered"] != sol::nil)
@@ -134,19 +170,6 @@ namespace
 
 namespace
 {
-    size_t getValidRanksCount(const ESM::Faction* faction)
-    {
-        if (!faction)
-            return 0;
-
-        for (size_t i = 0; i < faction->mRanks.size(); i++)
-        {
-            if (faction->mRanks[i].empty())
-                return i;
-        }
-
-        return faction->mRanks.size();
-    }
 
     ESM::RefId parseFactionId(std::string_view faction)
     {
