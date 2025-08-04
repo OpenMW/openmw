@@ -201,7 +201,6 @@ namespace MWLua
         record["primaryFaction"] = sol::readonly_property(
             [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
         record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int {
-            sol::state_view lua(s);
             if (rec.mFaction.empty())
                 return 0;
             return LuaUtil::toLuaIndex(rec.mNpdt.mRank);
