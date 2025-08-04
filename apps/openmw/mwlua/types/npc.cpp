@@ -74,13 +74,14 @@ namespace
             npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
         if (rec["primaryFaction"] != sol::nil)
         {
-            const auto str = rec["primaryFaction"].get<std::string>();
+            auto factionStr = rec["primaryFaction"].get<std::string_view>();
+            ESM::RefId factionId = ESM::RefId::deserializeText(factionStr);
+
             const auto& factionStore = MWBase::Environment::get().getESMStore()->get<ESM::Faction>();
+            if (!factionStore.search(factionId))
+                throw std::runtime_error("Invalid faction '" + std::string(factionStr) + "' in primaryFaction");
 
-            if (!factionStore.search(ESM::RefId::deserializeText(str)))
-                throw std::runtime_error("Invalid faction '" + str + "' in primaryFaction");
-
-            npc.mFaction = ESM::RefId::deserializeText(str);
+            npc.mFaction = factionId;
         }
         if (rec["isMale"] != sol::nil)
         {
@@ -131,9 +132,8 @@ namespace
         {
             if (!npc.mFaction.empty())
             {
-                const ESM::RefId factionId = npc.mFaction;
                 const ESM::Faction* faction
-                    = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc.mFaction);
 
                 int luaValue = rec["primaryFactionRank"];
                 int rank = LuaUtil::fromLuaIndex(luaValue);
@@ -142,7 +142,7 @@ namespace
 
                 if (rank < 0 || rank >= maxRank)
                     throw std::runtime_error("primaryFactionRank: Requested rank " + std::to_string(rank)
-                        + " is out of bounds for faction " + factionId.toDebugString());
+                        + " is out of bounds for faction " + npc.mFaction.toDebugString());
 
                 npc.mNpdt.mRank = rank;
             }
