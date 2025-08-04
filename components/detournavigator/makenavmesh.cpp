@@ -3,8 +3,6 @@
 #include "exceptions.hpp"
 #include "flags.hpp"
 #include "navmeshdata.hpp"
-#include "navmeshdb.hpp"
-#include "navmeshtilescache.hpp"
 #include "offmeshconnection.hpp"
 #include "preparednavmeshdata.hpp"
 #include "recastcontext.hpp"
@@ -22,8 +20,6 @@
 
 #include <algorithm>
 #include <array>
-#include <iomanip>
-#include <limits>
 
 namespace DetourNavigator
 {

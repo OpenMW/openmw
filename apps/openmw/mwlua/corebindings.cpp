@@ -4,7 +4,6 @@
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm3/loadfact.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
@@ -20,6 +19,7 @@
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "context.hpp"
 #include "coremwscriptbindings.hpp"
 #include "dialoguebindings.hpp"
 #include "factionbindings.hpp"

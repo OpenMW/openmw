@@ -95,13 +95,10 @@ namespace SceneUtil
 
         static void setReversed(bool reverseZ)
         {
-            static bool init = false;
-
-            if (!init)
-            {
+            [[maybe_unused]] static const bool init = [&] {
                 AutoDepth::sReversed = reverseZ;
-                init = true;
-            }
+                return true;
+            }();
         }
 
         static bool isReversed()

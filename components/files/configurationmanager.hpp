@@ -1,7 +1,6 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
-#include <map>
 #include <optional>
 #include <stack>
 #include <string_view>

@@ -11,6 +11,7 @@ Interfaces
     AI <interface_ai>
     AnimationController <interface_animation>
     Camera <interface_camera>
+    Combat <interface_combat>
     Controls <interface_controls>
     Crimes <interface_crimes>
     GamepadControls <interface_gamepadcontrols>

@@ -1,9 +1,11 @@
 #include "stats.hpp"
 
 #include <algorithm>
-#include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <variant>
 
 #include <components/esm3/loadclas.hpp>

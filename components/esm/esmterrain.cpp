@@ -33,6 +33,7 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     , mNormals(mData->mNormals)
     , mColors(mData->mColours)
     , mTextures(mData->mTextures)
+    , mIsEsm4(false)
 {
 }
 
@@ -43,9 +44,11 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     , mMaxHeight(std::numeric_limits<float>::lowest())
     , mSize(Constants::ESM4CellSizeInUnits)
     , mLandSize(ESM4::Land::sVertsPerSide)
+    , mPlugin(land.mId.mContentFile)
     , mNormals(land.mVertNorm)
     , mColors(land.mVertColr)
     , mTextures(textures)
+    , mIsEsm4(true)
 {
     float rowOffset = land.mHeightMap.heightOffset;
     for (int y = 0; y < mLandSize; y++)
@@ -69,6 +72,9 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     }
 
     mHeights = mHeightsData;
+
+    for (int i = 0; i < 4; ++i)
+        mEsm4Textures[i] = land.mTextures[i];
 }
 
 namespace ESM

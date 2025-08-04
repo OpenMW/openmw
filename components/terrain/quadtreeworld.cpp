@@ -289,11 +289,12 @@ namespace Terrain
         , mLodFactor(lodFactor)
         , mVertexLodMod(vertexLodMod)
         , mViewDistance(std::numeric_limits<float>::max())
-        , mMinSize(ESM::isEsm4Ext(worldspace) ? 1 / 4.f : 1 / 8.f)
+        , mMinSize(ESM::isEsm4Ext(worldspace) ? 1 / 2.f : 1 / 8.f)
         , mDebugTerrainChunks(debugChunks)
     {
         mChunkManager->setCompositeMapSize(compMapResolution);
-        mChunkManager->setCompositeMapLevel(compMapLevel);
+        mChunkManager->setCompositeMapLevel(
+            ESM::isEsm4Ext(worldspace) ? compMapLevel * 2 /*because cells are twice smaller*/ : compMapLevel);
         mChunkManager->setMaxCompositeGeometrySize(maxCompGeometrySize);
         mChunkManagers.push_back(mChunkManager.get());
 

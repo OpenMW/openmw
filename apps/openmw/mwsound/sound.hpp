@@ -31,6 +31,8 @@ namespace MWSound
     struct SoundParams
     {
         osg::Vec3f mPos;
+        osg::Vec3f mLastPos;
+        osg::Vec3f mVel;
         float mVolume = 1.0f;
         float mBaseVolume = 1.0f;
         float mPitch = 1.0f;
@@ -57,6 +59,8 @@ namespace MWSound
 
     public:
         void setPosition(const osg::Vec3f& pos) { mParams.mPos = pos; }
+        void setLastPosition(const osg::Vec3f& lastpos) { mParams.mLastPos = lastpos; }
+        void setVelocity(const osg::Vec3f& vel) { mParams.mVel = vel; }
         void setVolume(float volume) { mParams.mVolume = volume; }
         void setBaseVolume(float volume) { mParams.mBaseVolume = volume; }
         void setFadeout(float duration) { setFade(duration, 0.0, Play_StopAtFadeEnd); }
@@ -150,6 +154,8 @@ namespace MWSound
         }
 
         const osg::Vec3f& getPosition() const { return mParams.mPos; }
+        const osg::Vec3f& getLastPosition() const { return mParams.mLastPos; }
+        const osg::Vec3f& getVelocity() const { return mParams.mVel; }
         float getRealVolume() const { return mParams.mVolume * mParams.mBaseVolume * mParams.mFadeVolume; }
         float getPitch() const { return mParams.mPitch; }
         float getMinDistance() const { return mParams.mMinDistance; }

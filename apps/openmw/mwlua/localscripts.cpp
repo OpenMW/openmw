@@ -1,9 +1,5 @@
 #include "localscripts.hpp"
 
-#include <components/esm3/loadcell.hpp>
-#include <components/esm3/loadweap.hpp>
-#include <components/misc/strings/lower.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwmechanics/aicombat.hpp"
@@ -232,7 +228,7 @@ namespace MWLua
             [&](LuaUtil::LuaView& view) { addPackage("openmw.self", sol::make_object(view.sol(), &mData)); });
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
             &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse,
-            &mOnSkillLevelUp });
+            &mOnSkillLevelUp, &mOnJailTimeServed });
     }
 
     void LocalScripts::setActive(bool active, bool callHandlers)

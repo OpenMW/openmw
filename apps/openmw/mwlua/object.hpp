@@ -1,9 +1,7 @@
 #ifndef MWLUA_OBJECT_H
 #define MWLUA_OBJECT_H
 
-#include <map>
 #include <stdexcept>
-#include <typeindex>
 
 #include <sol/sol.hpp>
 

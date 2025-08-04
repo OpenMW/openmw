@@ -1,12 +1,12 @@
 #ifndef MWLUA_OBJECTBINDINGS_H
 #define MWLUA_OBJECTBINDINGS_H
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    void initObjectBindingsForLocalScripts(const Context&);
-    void initObjectBindingsForGlobalScripts(const Context&);
+    struct Context;
+
+    void initObjectBindingsForLocalScripts(const Context& context);
+    void initObjectBindingsForGlobalScripts(const Context& context);
 }
 
 #endif // MWLUA_OBJECTBINDINGS_H

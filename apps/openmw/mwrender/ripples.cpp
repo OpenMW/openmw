@@ -88,14 +88,13 @@ namespace MWRender
 
         if (mProgramBlobber != nullptr)
         {
-            static bool pipelineLogged = [&] {
+            [[maybe_unused]] static const bool pipelineLogged = [&] {
                 if (mUseCompute)
                     Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
                 else
                     Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
                 return true;
             }();
-            (void)pipelineLogged;
         }
 
         setCullCallback(new osg::NodeCallback);

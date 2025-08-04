@@ -14,7 +14,7 @@ namespace L10n
         mPreferredLocales.clear();
         if (gmstHasPriority)
             mPreferredLocales.push_back(icu::Locale("gmst"));
-        std::set<std::string> langSet;
+        std::set<std::string_view, std::less<>> langSet;
         for (const auto& lang : langs)
         {
             if (langSet.contains(lang))
@@ -31,10 +31,10 @@ namespace L10n
                 msg << " " << l.getName();
         }
         for (auto& [key, context] : mCache)
-            updateContext(key.first, *context);
+            updateContext(std::get<0>(key), *context);
     }
 
-    void Manager::readLangData(const std::string& name, MessageBundles& ctx, const icu::Locale& lang)
+    void Manager::readLangData(std::string_view name, MessageBundles& ctx, const icu::Locale& lang)
     {
         std::string langName(lang.getName());
         langName += ".yaml";
@@ -58,7 +58,7 @@ namespace L10n
         }
     }
 
-    void Manager::updateContext(const std::string& name, MessageBundles& ctx)
+    void Manager::updateContext(std::string_view name, MessageBundles& ctx)
     {
         icu::Locale fallbackLocale = ctx.getFallbackLocale();
         ctx.setPreferredLocales(mPreferredLocales);
@@ -89,9 +89,9 @@ namespace L10n
     }
 
     std::shared_ptr<const MessageBundles> Manager::getContext(
-        const std::string& contextName, const std::string& fallbackLocaleName)
+        std::string_view contextName, const std::string& fallbackLocaleName)
     {
-        std::pair<std::string, std::string> key(contextName, fallbackLocaleName);
+        std::tuple<std::string_view, std::string_view> key(contextName, fallbackLocaleName);
         auto it = mCache.find(key);
         if (it != mCache.end())
             return it->second;
@@ -102,7 +102,7 @@ namespace L10n
         for (char c : contextName)
             valid = valid && allowedChar(c);
         if (!valid)
-            throw std::runtime_error(std::string("Invalid l10n context name: ") + contextName);
+            throw std::runtime_error("Invalid l10n context name: " + std::string(contextName));
         icu::Locale fallbackLocale(fallbackLocaleName.c_str());
         std::shared_ptr<MessageBundles> ctx = std::make_shared<MessageBundles>(mPreferredLocales, fallbackLocale);
         ctx->setGmstLoader(mGmstLoader);

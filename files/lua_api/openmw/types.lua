@@ -1004,7 +1004,7 @@
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
 -- @usage local NPC = require('openmw.types').NPC;
--- NPC.clearExpell(player, "mages guild");
+-- NPC.clearExpelled(player, "mages guild");
 
 ---
 -- Check if NPC is expelled from given faction.

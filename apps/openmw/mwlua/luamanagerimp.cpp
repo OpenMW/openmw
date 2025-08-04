@@ -5,6 +5,10 @@
 #include <MyGUI_InputManager.h>
 #include <osg/Stats>
 
+#include <sol/object.hpp>
+#include <sol/table.hpp>
+#include <sol/types.hpp>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/luascripts.hpp>
@@ -15,7 +19,6 @@
 
 #include <components/l10n/manager.hpp>
 
-#include <components/lua_ui/content.hpp>
 #include <components/lua_ui/registerscriptsettings.hpp>
 #include <components/lua_ui/util.hpp>
 
@@ -212,13 +215,12 @@ namespace MWLua
 
         // Run engine handlers
         mEngineEvents.callEngineHandlers();
-        if (!timeManager.isPaused())
-        {
-            float frameDuration = MWBase::Environment::get().getFrameDuration();
-            for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->update(frameDuration);
-            mGlobalScripts.update(frameDuration);
-        }
+        bool isPaused = timeManager.isPaused();
+
+        float frameDuration = MWBase::Environment::get().getFrameDuration();
+        for (LocalScripts* scripts : mActiveLocalScripts)
+            scripts->update(isPaused ? 0 : frameDuration);
+        mGlobalScripts.update(isPaused ? 0 : frameDuration);
 
         mLua.protectedCall([&](LuaUtil::LuaView& lua) { mScriptTracker.unloadInactiveScripts(lua); });
     }
@@ -489,6 +491,11 @@ namespace MWLua
     {
         mEngineEvents.addToQueue(
             EngineEvents::OnSkillLevelUp{ getId(actor), skillId.serializeText(), std::string(source) });
+    }
+
+    void LuaManager::jailTimeServed(const MWWorld::Ptr& actor, int days)
+    {
+        mEngineEvents.addToQueue(EngineEvents::OnJailTimeServed{ getId(actor), days });
     }
 
     void LuaManager::onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
