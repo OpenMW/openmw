@@ -74,14 +74,13 @@ namespace
             npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
         if (rec["primaryFaction"] != sol::nil)
         {
-            auto factionStr = rec["primaryFaction"].get<std::string_view>();
-            ESM::RefId factionId = ESM::RefId::deserializeText(factionStr);
-
+            const auto str = rec["primaryFaction"].get<std::string>();
             const auto& factionStore = MWBase::Environment::get().getESMStore()->get<ESM::Faction>();
-            if (!factionStore.search(factionId))
-                throw std::runtime_error("Invalid faction '" + std::string(factionStr) + "' in primaryFaction");
 
-            npc.mFaction = factionId;
+            if (!factionStore.search(ESM::RefId::deserializeText(str)))
+                throw std::runtime_error("Invalid faction '" + str + "' in primaryFaction");
+
+            npc.mFaction = ESM::RefId::deserializeText(str);
         }
         if (rec["isMale"] != sol::nil)
         {
@@ -166,10 +165,6 @@ namespace
 
         return npc;
     }
-}
-
-namespace
-{
 
     ESM::RefId parseFactionId(std::string_view faction)
     {
