@@ -1466,5 +1466,13 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Use the Camera as the Sound Listener</source>
         <translation>Использовать камеру как слушателя</translation>
     </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет силу эффекта Доплера. Нулевое значение означает, что эффект отключен полностью.&lt;/p&gt;&lt;p&gt;Эффект Доплера увеличивает или уменьшает высоту звуков в зависимости от скорости источника звука и слушателя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Doppler Factor</source>
+        <translation>Множитель эффекта Доплера</translation>
+    </message>
 </context>
 </TS>

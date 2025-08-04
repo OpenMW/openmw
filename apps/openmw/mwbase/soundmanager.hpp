@@ -234,6 +234,8 @@ namespace MWBase
             const osg::Vec3f& pos, const osg::Vec3f& dir, const osg::Vec3f& up, bool underwater)
             = 0;
 
+        virtual void setListenerVel(const osg::Vec3f& vel) = 0;
+
         virtual void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) = 0;
 
         void setSimulationTimeScale(float scale) { mSimulationTimeScale = scale; }

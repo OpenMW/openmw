@@ -24,6 +24,7 @@ namespace Settings
         SettingValue<HrtfMode> mHrtfEnable{ mIndex, "Sound", "hrtf enable" };
         SettingValue<std::string> mHrtf{ mIndex, "Sound", "hrtf" };
         SettingValue<bool> mCameraListener{ mIndex, "Sound", "camera listener" };
+        SettingValue<float> mDopplerFactor{ mIndex, "Sound", "doppler factor", makeClampSanitizerFloat(0, 1) };
     };
 }
 
