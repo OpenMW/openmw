@@ -7,7 +7,7 @@
 
 namespace MWLua
 {
-    
+
     inline constexpr std::array<std::pair<int, std::string_view>, 19> ServiceNames
         = { { { ESM::NPC::Spells, "Spells" }, { ESM::NPC::Spellmaking, "Spellmaking" },
             { ESM::NPC::Enchanting, "Enchanting" }, { ESM::NPC::Training, "Training" }, { ESM::NPC::Repair, "Repair" },
@@ -17,6 +17,5 @@ namespace MWLua
             { ESM::NPC::Apparatus, "Apparatus" }, { ESM::NPC::RepairItem, "RepairItem" }, { ESM::NPC::Misc, "Misc" },
             { ESM::NPC::Potions, "Potions" }, { ESM::NPC::MagicItems, "MagicItems" } } };
 }
-
 
 #endif
