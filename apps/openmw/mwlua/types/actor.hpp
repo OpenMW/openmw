@@ -34,7 +34,7 @@ namespace MWLua
                     services
                         = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(rec.mClass)->mData.mServices;
             }
-            for (const auto& [flag, name] : ServiceNames)
+            for (const auto& [flag, name] : MWLua::ServiceNames)
             {
                 providedServices[name] = (services & flag) != 0;
             }

@@ -115,7 +115,7 @@ namespace
             const sol::table services = rec["servicesOffered"];
             int flags = 0;
 
-            for (const auto& [mask, key] : ServiceNames)
+            for (const auto& [mask, key] : MWLua::ServiceNames)
             {
                 sol::object value = services[key];
                 if (value != sol::nil && value.as<bool>())
