@@ -645,6 +645,9 @@ namespace MWLua
             }
             inventoryT["isResolved"] = [](const InventoryT& inventory) -> bool {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
+                // Avoid initializing custom data
+                if (!ptr.getRefData().getCustomData())
+                    return false;
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 return store.isResolved();
             };
