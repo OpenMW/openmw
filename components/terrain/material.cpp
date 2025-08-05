@@ -224,7 +224,7 @@ namespace Terrain
 {
     std::vector<osg::ref_ptr<osg::StateSet>> createPasses(bool useShaders, Resource::SceneManager* sceneManager,
         const std::vector<TextureLayer>& layers, const std::vector<osg::ref_ptr<osg::Texture2D>>& blendmaps,
-        int blendmapScale, float layerTileSize)
+        int blendmapScale, float layerTileSize, bool esm4terrain)
     {
         auto& shaderManager = sceneManager->getShaderManager();
         std::vector<osg::ref_ptr<osg::StateSet>> passes;
@@ -269,7 +269,8 @@ namespace Terrain
                     osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
 
                     stateset->setTextureAttributeAndModes(1, blendmap.get());
-                    stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
+                    if (!esm4terrain)
+                        stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
                     stateset->addUniform(UniformCollection::value().mBlendMap);
                 }
 
@@ -329,7 +330,8 @@ namespace Terrain
                     stateset->setTextureAttributeAndModes(1, blendmap.get());
 
                     // This is to map corner vertices directly to the center of a blendmap texel.
-                    stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
+                    if (!esm4terrain)
+                        stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
                     stateset->setTextureAttributeAndModes(1, TexEnvCombine::value(), osg::StateAttribute::ON);
                 }
             }

@@ -4,6 +4,7 @@
 #include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -86,46 +87,6 @@ namespace MWGui
 
         // We should not worsen corprus when in prison
         player.getClass().getCreatureStats(player).getActiveSpells().skipWorsenings(mDays * 24);
-
-        const auto& skillStore = MWBase::Environment::get().getESMStore()->get<ESM::Skill>();
-        std::set<const ESM::Skill*> skills;
-        for (int day = 0; day < mDays; ++day)
-        {
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Skill* skill = skillStore.searchRandom({}, prng);
-            skills.insert(skill);
-
-            MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mId);
-            if (skill->mId == ESM::Skill::Security || skill->mId == ESM::Skill::Sneak)
-                value.setBase(std::min(100.f, value.getBase() + 1));
-            else
-                value.setBase(std::max(0.f, value.getBase() - 1));
-        }
-
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-        std::string message;
-        if (mDays == 1)
-            message = gmst.find("sNotifyMessage42")->mValue.getString();
-        else
-            message = gmst.find("sNotifyMessage43")->mValue.getString();
-
-        message = Misc::StringUtils::format(message, mDays);
-
-        for (const ESM::Skill* skill : skills)
-        {
-            int skillValue = player.getClass().getNpcStats(player).getSkill(skill->mId).getBase();
-            std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (skill->mId == ESM::Skill::Sneak || skill->mId == ESM::Skill::Security)
-                skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
-
-            skillMsg = Misc::StringUtils::format(skillMsg, skill->mName, skillValue);
-            message += "\n" + skillMsg;
-        }
-
-        std::vector<std::string> buttons;
-        buttons.emplace_back("#{Interface:OK}");
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
+        MWBase::Environment::get().getLuaManager()->jailTimeServed(player, mDays);
     }
 }

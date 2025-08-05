@@ -604,7 +604,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view effect = runtime.getStringLiteral(runtime[0].mInteger);
+                const std::string_view effectName = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 if (!ptr.getClass().isActor())
@@ -615,11 +615,11 @@ namespace MWScript
 
                 long key;
 
-                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect);
+                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effectName);
                     k.has_value() && *k >= 0 && *k <= 32767)
                     key = *k;
                 else
-                    key = ESM::MagicEffect::effectGmstIdToIndex(effect);
+                    key = ESM::MagicEffect::effectGmstIdToIndex(effectName);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                 for (const auto& spell : stats.getActiveSpells())

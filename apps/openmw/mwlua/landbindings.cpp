@@ -1,14 +1,24 @@
 #include "landbindings.hpp"
 
+#include <span>
+#include <string>
+
+#include <sol/object.hpp>
+#include <sol/table.hpp>
+#include <sol/variadic_results.hpp>
+
 #include <components/esm/refid.hpp>
 #include <components/esm/util.hpp>
 #include <components/esmterrain/storage.hpp>
+#include <components/lua/luastate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/worldmodel.hpp"
+
+#include "context.hpp"
 #include "object.hpp"
 
 namespace

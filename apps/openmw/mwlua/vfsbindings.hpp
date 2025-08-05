@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initVFSPackage(const Context&);
+    struct Context;
+
+    sol::table initVFSPackage(const Context& context);
 }
 
 #endif // MWLUA_VFSBINDINGS_H

@@ -175,6 +175,7 @@ namespace MWGui
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
+        MyGUI::TextBox* mPlayerGold;
 
         ESM::Spell mSpell;
     };

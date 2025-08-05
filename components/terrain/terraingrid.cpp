@@ -9,6 +9,8 @@
 #include "heightcull.hpp"
 #include "storage.hpp"
 #include "view.hpp"
+
+#include <components/esm/util.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 namespace Terrain
@@ -27,13 +29,13 @@ namespace Terrain
         unsigned int borderMask)
         : Terrain::World(
             parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask, worldspace, expiryDelay)
-        , mNumSplits(4)
+        , mNumSplits(ESM::isEsm4Ext(worldspace) ? 2 : 4)
     {
     }
 
     TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, ESM::RefId worldspace, unsigned int nodeMask)
         : Terrain::World(parent, storage, nodeMask, worldspace)
-        , mNumSplits(4)
+        , mNumSplits(ESM::isEsm4Ext(worldspace) ? 2 : 4)
     {
     }
 

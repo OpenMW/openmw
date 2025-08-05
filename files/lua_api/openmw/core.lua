@@ -801,7 +801,7 @@
 --   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
 --   * `loop` - a boolean, to set if sound should be repeated when it ends (default: false);
 -- @usage local params = {
---    timeOffset=0.1
+--    timeOffset=0.1,
 --    volume=0.3,
 --    loop=false,
 --    pitch=1.0
@@ -822,7 +822,7 @@
 --   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
 --   * `loop` - a boolean, to set if sound should be repeated when it ends (default: false);
 -- @usage local params = {
---    timeOffset=0.1
+--    timeOffset=0.1,
 --    volume=0.3,
 --    loop=false,
 --    pitch=1.0

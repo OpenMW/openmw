@@ -401,14 +401,12 @@ namespace MWRender
     {
         if (mViewMode == VM_FirstPerson)
         {
-            static bool prototypeAdded = false;
-            if (!prototypeAdded)
-            {
+            [[maybe_unused]] static const bool prototypeAdded = [&] {
                 osg::ref_ptr<osgUtil::RenderBin> depthClearBin(new osgUtil::RenderBin);
                 depthClearBin->setDrawCallback(new DepthClearCallback());
                 osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
-                prototypeAdded = true;
-            }
+                return true;
+            }();
             mObjectRoot->getOrCreateStateSet()->setRenderBinDetails(
                 RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
         }

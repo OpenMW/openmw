@@ -10,10 +10,8 @@
 
 #include <osg/io_utils>
 
-#include <functional>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <vector>
 
 namespace DetourNavigator
@@ -79,7 +77,7 @@ namespace DetourNavigator
                 return;
             }
 
-            const auto data
+            const std::unique_ptr<PreparedNavMeshData> data
                 = prepareNavMeshTileData(*recastMesh, mWorldspace, mTilePosition, mAgentBounds, mSettings.mRecast);
 
             if (data == nullptr)

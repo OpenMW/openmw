@@ -108,8 +108,8 @@ Coverity:
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: clang-12
-    CXX: clang++-12
+    CC: clang
+    CXX: clang++
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
@@ -125,18 +125,34 @@ Coverity:
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
-    # Remove the specific targets and build everything once we can do it under 3h
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
     - ccache -svv
-  after_script:
     - tar cfz cov-int.tar.gz cov-int
-    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
-      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
-      --form file=@cov-int.tar.gz --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
-      --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+    - echo "OPENMW_JOB_ID=$CI_JOB_ID" >> build.env
   artifacts:
+    expire_in: 1 day
     paths:
       - /builds/OpenMW/openmw/cov-int/build-log.txt
+      - /builds/OpenMW/openmw/cov-int.tar.gz
+    reports:
+      dotenv: build.env
+
+Coverity_Upload:
+  image: ubuntu:24.04
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  before_script:
+    - CI/install_debian_deps.sh coverity_upload
+  script:
+    - echo "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/$OPENMW_JOB_ID/artifacts/cov-int.tar.gz"
+    - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
+      --form token=$COVERITY_SCAN_TOKEN --form email=$GITLAB_USER_EMAIL
+      --form version="$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA"
+      --form description="CI_COMMIT_SHORT_SHA / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID"
+      --form url="$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/$OPENMW_JOB_ID/artifacts/cov-int.tar.gz"
+  needs:
+    - Coverity
 
 Ubuntu_GCC:
   extends: .Ubuntu

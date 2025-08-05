@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initWorldPackage(const Context&);
+    struct Context;
+
+    sol::table initWorldPackage(const Context& context);
 }
 
 #endif // MWLUA_WORLDBINDINGS_H

@@ -7,6 +7,8 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwstate/character.hpp"
 
+#include "context.hpp"
+
 namespace MWLua
 {
     static const MWState::Character* findCharacter(std::string_view characterDir)

@@ -291,6 +291,7 @@ bool Launcher::SettingsPage::loadSettings()
             }
         }
         loadSettingBool(Settings::sound().mCameraListener, *cameraListenerCheckBox);
+        dopplerSpinBox->setValue(Settings::sound().mDopplerFactor);
     }
 
     // Interface Changes
@@ -482,6 +483,8 @@ void Launcher::SettingsPage::saveSettings()
 
         const bool cCameraListener = cameraListenerCheckBox->checkState() != Qt::Unchecked;
         Settings::sound().mCameraListener.set(cCameraListener);
+
+        Settings::sound().mDopplerFactor.set(dopplerSpinBox->value());
     }
 
     // Interface Changes

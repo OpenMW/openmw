@@ -119,6 +119,7 @@ namespace MWSound
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
         , mListenerUp(0, 0, 1)
+        , mListenerVel(0, 0, 0)
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
         , mPlaybackPaused(false)
@@ -960,7 +961,7 @@ namespace MWSound
         }
 
         mOutput->startUpdate();
-        mOutput->updateListener(mListenerPos, mListenerDir, mListenerUp, env);
+        mOutput->updateListener(mListenerPos, mListenerDir, mListenerUp, mListenerVel, env);
 
         updateMusic(duration);
 
@@ -977,7 +978,13 @@ namespace MWSound
                 if (sound->getIs3D())
                 {
                     if (!ptr.isEmpty())
+                    {
+                        sound->setLastPosition(sound->getPosition());
                         sound->setPosition(ptr.getRefData().getPosition().asVec3());
+                        MWBase::World* world = MWBase::Environment::get().getWorld();
+                        sound->setVelocity(
+                            (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDt());
+                    }
 
                     cull3DSound(sound);
                 }
@@ -1013,8 +1020,11 @@ namespace MWSound
             {
                 if (!ptr.isEmpty())
                 {
+                    sound->setLastPosition(sound->getPosition());
                     MWBase::World* world = MWBase::Environment::get().getWorld();
                     sound->setPosition(world->getActorHeadTransform(ptr).getTrans());
+                    sound->setVelocity(
+                        (sound->getPosition() - sound->getLastPosition()) / world->getPhysicsFrameRateDt());
                 }
 
                 cull3DSound(sound);
@@ -1151,6 +1161,11 @@ namespace MWSound
         mListenerUnderwater = underwater;
 
         mWaterSoundUpdater.setUnderwater(underwater);
+    }
+
+    void SoundManager::setListenerVel(const osg::Vec3f& vel)
+    {
+        mListenerVel = vel;
     }
 
     void SoundManager::updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated)

@@ -5,7 +5,8 @@
 #include <future>
 #include <system_error>
 
-#include <osgDB/WriteFile>
+#include <osgDB/ReaderWriter>
+#include <osgDB/Registry>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <SDL.h>
@@ -28,7 +29,6 @@
 
 #include <components/compiler/extensions0.hpp>
 
-#include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 
 #include <components/sceneutil/glextensions.hpp>

@@ -1460,6 +1460,8 @@ namespace MWWorld
     void World::queueMovement(const Ptr& ptr, const osg::Vec3f& velocity)
     {
         mPhysics->queueObjectMovement(ptr, velocity);
+        if (ptr == MWMechanics::getPlayer())
+            MWBase::Environment::get().getSoundManager()->setListenerVel(velocity);
     }
 
     void World::updateAnimatedCollisionShape(const Ptr& ptr)
@@ -3180,6 +3182,11 @@ namespace MWWorld
     float World::getSunPercentage() const
     {
         return mWeatherManager->getSunPercentage(getTimeStamp().getHour());
+    }
+
+    float World::getPhysicsFrameRateDt() const
+    {
+        return mPhysics->mPhysicsDt;
     }
 
     bool World::findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result)

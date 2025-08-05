@@ -59,14 +59,13 @@ namespace CSMWorld
 
     const Record<ESM::LandTexture>* IdCollection<ESM::LandTexture>::searchRecord(std::uint16_t index, int plugin) const
     {
-        auto found = mIndices.find({ plugin, index });
-        if (found != mIndices.end())
-        {
-            int index = searchId(found->second);
-            if (index != -1)
-                return &getRecord(index);
-        }
-        return nullptr;
+        const auto it = mIndices.find({ plugin, index });
+        if (it == mIndices.end())
+            return nullptr;
+        const int recordIndex = searchId(it->second);
+        if (recordIndex == -1)
+            return nullptr;
+        return &getRecord(recordIndex);
     }
 
     const std::string* IdCollection<ESM::LandTexture>::getLandTexture(std::uint16_t index, int plugin) const

@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwrender/postprocessor.hpp"
 
+#include "context.hpp"
 #include "luamanagerimp.hpp"
 
 namespace

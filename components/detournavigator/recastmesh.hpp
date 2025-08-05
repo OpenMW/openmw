@@ -11,9 +11,7 @@
 #include <osg/Vec3f>
 
 #include <cstdint>
-#include <memory>
 #include <numeric>
-#include <string>
 #include <tuple>
 #include <vector>
 

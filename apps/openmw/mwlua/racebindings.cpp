@@ -8,7 +8,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "idcollectionbindings.hpp"
-#include "types/types.hpp"
+#include "recordstore.hpp"
 
 namespace
 {

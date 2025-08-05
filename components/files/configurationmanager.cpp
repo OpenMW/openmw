@@ -1,6 +1,7 @@
 #include "configurationmanager.hpp"
 
 #include <fstream>
+#include <map>
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/validate.hpp>
