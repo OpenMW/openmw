@@ -291,8 +291,7 @@ int CSMDoc::WriteCellCollectionStage::setup()
     return mDocument.getData().getCells().getSize();
 }
 
-void CSMDoc::WriteCellCollectionStage::writeReferences(
-    const std::deque<int>& references, bool interior, unsigned int& newRefNum)
+void CSMDoc::WriteCellCollectionStage::writeReferences(const std::deque<int>& references, bool interior)
 {
     ESM::ESMWriter& writer = mState.getWriter();
 
@@ -359,9 +358,6 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         CSMWorld::Cell cellRecord = cell.get();
         const bool interior = !cellRecord.mId.startsWith("#");
 
-        // count new references and adjust RefNumCount accordingsly
-        unsigned int newRefNum = cellRecord.mRefNumCounter;
-
         if (references != nullptr)
         {
             for (std::deque<int>::const_iterator iter(references->begin()); iter != references->end(); ++iter)
@@ -387,9 +383,6 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
                         ESM::RefId::stringRefId(CSMWorld::CellCoordinates(refRecord.getCellIndex()).getId(""))
                             != refRecord.mCell))
                     ++cellRecord.mRefNumCounter;
-
-                if (refRecord.mRefNum.mIndex >= newRefNum)
-                    newRefNum = refRecord.mRefNum.mIndex + 1;
             }
         }
 
@@ -412,9 +405,9 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         // write references
         if (references != nullptr)
         {
-            writeReferences(persistentRefs, interior, newRefNum);
+            writeReferences(persistentRefs, interior);
             cellRecord.saveTempMarker(writer, static_cast<int>(references->size()) - persistentRefs.size());
-            writeReferences(tempRefs, interior, newRefNum);
+            writeReferences(tempRefs, interior);
         }
 
         writer.endRecord(cellRecord.sRecordId);
