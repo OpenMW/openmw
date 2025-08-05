@@ -49,13 +49,12 @@ namespace MWGui
 
         {
             const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
-            const size_t perCol
-                = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
+            mPerCol = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
             size_t i = 0;
             for (const ESM::Attribute& attribute : store)
             {
-                const int offset = sColumnOffsets[i / perCol];
-                const int row = static_cast<int>(i % perCol);
+                const int offset = sColumnOffsets[i / mPerCol];
+                const int row = static_cast<int>(i % mPerCol);
                 Widgets widgets;
                 widgets.mMultiplier = mAssignWidget->createWidget<MyGUI::TextBox>(
                     "SandTextVCenter", { offset, 20 * row, 100, 20 }, MyGUI::Align::Default);
@@ -79,7 +78,7 @@ namespace MWGui
 
             mAssignWidget->setVisibleVScroll(false);
             mAssignWidget->setCanvasSize(MyGUI::IntSize(
-                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * perCol))));
+                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * mPerCol))));
             mAssignWidget->setVisibleVScroll(true);
             mAssignWidget->setViewOffset(MyGUI::IntPoint());
         }
@@ -397,10 +396,8 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            if (mControllerFocus == 0)
-                mControllerFocus = 3;
-            else if (mControllerFocus == 4)
-                mControllerFocus = 7;
+            if (mControllerFocus % mPerCol == 0)
+                mControllerFocus += mPerCol - 1;
             else
                 mControllerFocus--;
             setControllerFocus(mAttributeButtons, mControllerFocus, true);
@@ -408,10 +405,8 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            if (mControllerFocus == 3)
-                mControllerFocus = 0;
-            else if (mControllerFocus == 7)
-                mControllerFocus = 4;
+            if (mControllerFocus % mPerCol == mPerCol - 1)
+                mControllerFocus -= mPerCol - 1;
             else
                 mControllerFocus++;
             setControllerFocus(mAttributeButtons, mControllerFocus, true);
@@ -419,7 +414,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             setControllerFocus(mAttributeButtons, mControllerFocus, false);
-            mControllerFocus = (mControllerFocus + 4) % mAttributeButtons.size();
+            mControllerFocus = (mControllerFocus + mPerCol) % mAttributeButtons.size();
             setControllerFocus(mAttributeButtons, mControllerFocus, true);
         }
 

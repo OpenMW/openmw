@@ -37,6 +37,7 @@ namespace MWGui
 
         std::vector<ESM::Attribute::AttributeID> mSpentAttributes;
 
+        size_t mPerCol;
         unsigned int mCoinCount;
 
         void onOkButtonClicked(MyGUI::Widget* sender);

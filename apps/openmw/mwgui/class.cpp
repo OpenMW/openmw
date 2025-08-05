@@ -1047,6 +1047,7 @@ namespace MWGui
             skillWidget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
             ToolTips::createSkillToolTip(skillWidget, skill.mId);
             mSkillButtons.emplace_back(skillWidget);
+            mNumSkillsPerSpecialization[skill.mData.mSpecialization]++;
         }
         for (const auto& [widget, coord] : specializations)
         {
@@ -1115,26 +1116,50 @@ namespace MWGui
             mControllerFocus = wrap(mControllerFocus + 1, mSkillButtons.size());
             mSkillButtons[mControllerFocus]->setStateSelected(true);
         }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             mSkillButtons[mControllerFocus]->setStateSelected(false);
-            if (mControllerFocus < 9)
-                mControllerFocus += 18;
-            else
-                mControllerFocus -= 9;
-            mSkillButtons[mControllerFocus]->setStateSelected(true);
-        }
-        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
-        {
-            mSkillButtons[mControllerFocus]->setStateSelected(false);
-            if (mControllerFocus >= 18)
-                mControllerFocus -= 18;
-            else
-                mControllerFocus += 9;
+            selectNextColumn(arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ? -1 : 1);
             mSkillButtons[mControllerFocus]->setStateSelected(true);
         }
 
         return true;
+    }
+
+    void SelectSkillDialog::selectNextColumn(int direction)
+    {
+        // Find which column (specialization) the current index is in.
+        size_t specialization = 0;
+        size_t nextSpecializationIndex = 0;
+        for (; specialization < mNumSkillsPerSpecialization.size(); ++specialization)
+        {
+            nextSpecializationIndex += mNumSkillsPerSpecialization[specialization];
+            if (mControllerFocus < nextSpecializationIndex)
+                break;
+        }
+
+        if (direction < 0)
+        {
+            if (mControllerFocus < mNumSkillsPerSpecialization[0])
+            {
+                // Wrap around to the right column
+                for (size_t i = 0; i < mNumSkillsPerSpecialization.size() - 1; ++i)
+                    mControllerFocus += mNumSkillsPerSpecialization[i];
+            }
+            else
+                mControllerFocus -= mNumSkillsPerSpecialization[specialization];
+        }
+        else
+        {
+            if (mControllerFocus + mNumSkillsPerSpecialization.back() >= mSkillButtons.size())
+            {
+                // Wrap around to the left column
+                for (size_t i = 0; i < mNumSkillsPerSpecialization.size() - 1; ++i)
+                    mControllerFocus -= mNumSkillsPerSpecialization[i];
+            }
+            else
+                mControllerFocus += mNumSkillsPerSpecialization[specialization];
+        }
     }
 
     /* DescriptionDialog */

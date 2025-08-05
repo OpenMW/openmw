@@ -257,6 +257,9 @@ namespace MWGui
 
     private:
         ESM::RefId mSkillId;
+        std::array<size_t, 3> mNumSkillsPerSpecialization;
+
+        void selectNextColumn(int direction);
     };
 
     class DescriptionDialog : public WindowModal
