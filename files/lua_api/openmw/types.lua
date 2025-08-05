@@ -861,6 +861,9 @@
 -- @field #boolean canWalk whether the creature can walk
 -- @field #boolean canUseWeapons whether the creature can use weapons and shields
 -- @field #boolean isBiped whether the creature is a biped
+-- @field #boolean isAutocalc If true, the actors stats will be automatically calculated based on level and class.
+-- @field #string primaryFaction Faction ID of the NPCs default faction. Nil if no faction
+-- @field #number primaryFactionRank Faction rank of the NPCs default faction. Nil if no faction
 -- @field #boolean isEssential whether the creature is essential
 -- @field #boolean isRespawning whether the creature respawns after death
 -- @field #number bloodType integer representing the blood type of the Creature. Used to generate the correct blood vfx.
@@ -874,6 +877,13 @@
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
 -- @field [parent=#NPC] #NpcStats stats
+
+---
+-- Creates an @{#NpcRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#NPC] createRecordDraft
+-- @param #NpcRecord npc A Lua table with the fields of an NpcRecord, with an optional field `template` that accepts an @{#NpcRecord} as a base.
+-- @return #NpcRecord A strongly typed NPC record.
 
 ---
 -- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
