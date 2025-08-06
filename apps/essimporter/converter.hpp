@@ -181,14 +181,14 @@ namespace ESSImport
     public:
         void read(ESM::ESMReader& esm) override
         {
-            ESM::Class class_;
+            ESM::Class classRecord;
             bool isDeleted = false;
 
-            class_.load(esm, isDeleted);
-            if (class_.mId == "NEWCLASSID_CHARGEN")
-                mContext->mCustomPlayerClassName = class_.mName;
+            classRecord.load(esm, isDeleted);
+            if (classRecord.mId == "NEWCLASSID_CHARGEN")
+                mContext->mCustomPlayerClassName = classRecord.mName;
 
-            mRecords[class_.mId] = class_;
+            mRecords[classRecord.mId] = classRecord;
         }
     };
 

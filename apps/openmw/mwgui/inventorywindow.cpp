@@ -731,8 +731,8 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
-        const osg::Vec2f viewport_coords = mapPreviewWindowToViewport(x, y);
-        int slot = mPreview->getSlotSelected(viewport_coords.x(), viewport_coords.y());
+        const osg::Vec2f viewportCoords = mapPreviewWindowToViewport(x, y);
+        int slot = mPreview->getSlotSelected(viewportCoords.x(), viewportCoords.y());
 
         if (slot == -1)
             return MWWorld::Ptr();

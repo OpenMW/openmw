@@ -262,10 +262,8 @@ namespace MWPhysics
         btSphereShape shape(radius);
         const btQuaternion btrot = btQuaternion::getIdentity();
 
-        btTransform from_(btrot, Misc::Convert::toBullet(from));
-        btTransform to_(btrot, Misc::Convert::toBullet(to));
-
-        mTaskScheduler->convexSweepTest(&shape, from_, to_, callback);
+        mTaskScheduler->convexSweepTest(&shape, btTransform(btrot, Misc::Convert::toBullet(from)),
+            btTransform(btrot, Misc::Convert::toBullet(to)), callback);
 
         RayCastingResult result;
         result.mHit = callback.hasHit();

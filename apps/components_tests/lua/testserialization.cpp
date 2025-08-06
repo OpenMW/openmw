@@ -171,10 +171,10 @@ namespace
 
         std::string serialized = LuaUtil::serialize(table);
         EXPECT_EQ(serialized.size(), 139);
-        sol::table res_table = LuaUtil::deserialize(lua, serialized);
-        sol::table res_readonly_table = LuaUtil::deserialize(lua, serialized, nullptr, true);
+        sol::table resTable = LuaUtil::deserialize(lua, serialized);
+        sol::table resReadonlyTable = LuaUtil::deserialize(lua, serialized, nullptr, true);
 
-        for (auto t : { res_table, res_readonly_table })
+        for (auto t : { resTable, resReadonlyTable })
         {
             EXPECT_EQ(t.get<int>("aa"), 1);
             EXPECT_EQ(t.get<bool>("ab"), true);
@@ -185,8 +185,8 @@ namespace
             EXPECT_EQ(t.get<osg::Vec2f>(2), osg::Vec2f(2, 1));
         }
 
-        lua["t"] = res_table;
-        lua["ro_t"] = res_readonly_table;
+        lua["t"] = resTable;
+        lua["ro_t"] = resReadonlyTable;
         EXPECT_NO_THROW(lua.safe_script("t.x = 5"));
         EXPECT_NO_THROW(lua.safe_script("t.nested.x = 5"));
         EXPECT_ERROR(lua.safe_script("ro_t.x = 5"), "userdata value");

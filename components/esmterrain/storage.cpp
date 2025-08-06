@@ -681,29 +681,29 @@ namespace ESMTerrain
 
         if (mAutoUseNormalMaps)
         {
-            std::string texture_ = texture;
-            Misc::StringUtils::replaceLast(texture_, ".", mNormalHeightMapPattern + ".");
-            if (mVFS->exists(texture_))
+            std::string normalMapTexture = texture;
+            Misc::StringUtils::replaceLast(normalMapTexture, ".", mNormalHeightMapPattern + ".");
+            if (mVFS->exists(normalMapTexture))
             {
-                info.mNormalMap = std::move(texture_);
+                info.mNormalMap = std::move(normalMapTexture);
                 info.mParallax = true;
             }
             else
             {
-                texture_ = texture;
-                Misc::StringUtils::replaceLast(texture_, ".", mNormalMapPattern + ".");
-                if (mVFS->exists(texture_))
-                    info.mNormalMap = std::move(texture_);
+                normalMapTexture = texture;
+                Misc::StringUtils::replaceLast(normalMapTexture, ".", mNormalMapPattern + ".");
+                if (mVFS->exists(normalMapTexture))
+                    info.mNormalMap = std::move(normalMapTexture);
             }
         }
 
         if (mAutoUseSpecularMaps)
         {
-            std::string texture_ = texture;
-            Misc::StringUtils::replaceLast(texture_, ".", mSpecularMapPattern + ".");
-            if (mVFS->exists(texture_))
+            std::string specularMapTexture = texture;
+            Misc::StringUtils::replaceLast(specularMapTexture, ".", mSpecularMapPattern + ".");
+            if (mVFS->exists(specularMapTexture))
             {
-                info.mDiffuseMap = std::move(texture_);
+                info.mDiffuseMap = std::move(specularMapTexture);
                 info.mSpecular = true;
             }
         }

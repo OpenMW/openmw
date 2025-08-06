@@ -96,8 +96,8 @@ namespace MWDialogue
             if (tok->isExplicitLink())
             {
                 // calculation of standard form for all hyperlinks
-                size_t asterisk_count = HyperTextParser::removePseudoAsterisks(topicId);
-                for (; asterisk_count > 0; --asterisk_count)
+                size_t asteriskCount = HyperTextParser::removePseudoAsterisks(topicId);
+                for (; asteriskCount > 0; --asteriskCount)
                     topicId.append("*");
 
                 topicId = mTranslationDataStorage.topicStandardForm(topicId);

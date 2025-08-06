@@ -46,8 +46,8 @@ namespace MWWorld
         }
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = getTarget().getClass().getEquipmentSlots(getTarget());
-        if (slots_.first.empty())
+        std::pair<std::vector<int>, bool> slots = getTarget().getClass().getEquipmentSlots(getTarget());
+        if (slots.first.empty())
             return;
 
         // retrieve ContainerStoreIterator to the item
@@ -64,8 +64,8 @@ namespace MWWorld
             throw std::runtime_error("ActionEquip can't find item " + object.getCellRef().getRefId().toDebugString());
 
         // equip the item in the first free slot
-        std::vector<int>::const_iterator slot = slots_.first.begin();
-        for (; slot != slots_.first.end(); ++slot)
+        std::vector<int>::const_iterator slot = slots.first.begin();
+        for (; slot != slots.first.end(); ++slot)
         {
             // if the item is equipped already, nothing to do
             if (invStore.getSlot(*slot) == it)
@@ -81,14 +81,14 @@ namespace MWWorld
 
         // all slots are occupied -> cycle
         // move all slots one towards begin(), then equip the item in the slot that is now free
-        if (slot == slots_.first.end())
+        if (slot == slots.first.end())
         {
             ContainerStoreIterator enchItem = invStore.getSelectedEnchantItem();
             bool reEquip = false;
-            for (slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
+            for (slot = slots.first.begin(); slot != slots.first.end(); ++slot)
             {
                 invStore.unequipSlot(*slot, false);
-                if (slot + 1 != slots_.first.end())
+                if (slot + 1 != slots.first.end())
                 {
                     invStore.equip(*slot, invStore.getSlot(*(slot + 1)));
                 }

@@ -86,14 +86,14 @@ namespace CSMWorld
 
     QVariant LandNormalsColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS * 3;
+        const int size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VNML))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mNormals[i];
         }
 
@@ -133,14 +133,14 @@ namespace CSMWorld
 
     QVariant LandHeightsColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS;
+        const int size = Land::LAND_NUM_VERTS;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VHGT))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mHeights[i];
         }
 
@@ -182,14 +182,14 @@ namespace CSMWorld
 
     QVariant LandColoursColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS * 3;
+        const int size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VCLR))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mColours[i];
         }
 
@@ -231,14 +231,14 @@ namespace CSMWorld
 
     QVariant LandTexturesColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_TEXTURES;
+        const int size = Land::LAND_NUM_TEXTURES;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VTEX))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mTextures[i];
         }
 

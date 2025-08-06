@@ -122,23 +122,23 @@ std::string CSVWorld::GenericCreator::getNamespace() const
 
 void CSVWorld::GenericCreator::updateNamespace()
 {
-    std::string namespace_ = getNamespace();
+    std::string namespaceName = getNamespace();
 
-    mValidator->setNamespace(namespace_);
+    mValidator->setNamespace(namespaceName);
 
     int index = mId->text().indexOf("::");
 
     if (index == -1)
     {
         // no namespace in old text
-        mId->setText(QString::fromUtf8(namespace_.c_str()) + mId->text());
+        mId->setText(QString::fromUtf8(namespaceName.c_str()) + mId->text());
     }
     else
     {
         std::string oldNamespace = Misc::StringUtils::lowerCase(mId->text().left(index).toUtf8().constData());
 
         if (oldNamespace == "project" || oldNamespace == "session")
-            mId->setText(QString::fromUtf8(namespace_.c_str()) + mId->text().mid(index + 2));
+            mId->setText(QString::fromUtf8(namespaceName.c_str()) + mId->text().mid(index + 2));
     }
 }
 

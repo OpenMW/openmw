@@ -68,37 +68,37 @@ static void generateCube(osg::Geometry& geom, float dim)
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
 
-    for (int i_face = 0; i_face < 6; i_face++)
+    for (int iFace = 0; iFace < 6; iFace++)
     {
         osg::Vec3f normale(0., 0., 0.);
         osg::Vec3f u(0., 0., 0.);
         osg::Vec3f v(0., 0., 0.);
-        int axis = i_face / 2;
-        int dir = i_face % 2 == 0 ? -1 : 1;
-        float float_dir = dir;
-        normale[axis] = float_dir;
+        int axis = iFace / 2;
+        int dir = iFace % 2 == 0 ? -1 : 1;
+        float floatDir = dir;
+        normale[axis] = floatDir;
         u[(axis + 1) % 3] = 1.0;
         v[(axis + 2) % 3] = 1.0;
 
-        for (int i_point = 0; i_point < 4; i_point++)
+        for (int iPoint = 0; iPoint < 4; iPoint++)
         {
-            float iu = i_point % 2 == 1
-                ? float_dir
-                : -float_dir; // This is to get the right triangle orientation when the normal changes*
-            float iv = i_point / 2 == 1 ? 1.0 : -1.0;
+            float iu = iPoint % 2 == 1
+                ? floatDir
+                : -floatDir; // This is to get the right triangle orientation when the normal changes*
+            float iv = iPoint / 2 == 1 ? 1.0 : -1.0;
             osg::Vec3f point = (u * iu) + (v * iv);
             point = (point + normale);
             point = point * (dim * 0.5f);
             vertices->push_back(point);
             normals->push_back(normale);
         }
-        int start_vertex(i_face * 4);
-        int newFace1[] = { start_vertex, start_vertex + 1, start_vertex + 2 };
+        int startVertex(iFace * 4);
+        int newFace1[] = { startVertex, startVertex + 1, startVertex + 2 };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace1[i]);
         }
-        int newFace2[] = { start_vertex + 2, start_vertex + 1, start_vertex + 3 };
+        int newFace2[] = { startVertex + 2, startVertex + 1, startVertex + 3 };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace2[i]);
@@ -146,7 +146,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
         iVertex += 1;
     }
     // bottom disk
-    auto begin_bot = iVertex;
+    auto beginBot = iVertex;
     for (int i = 0; i < subdiv; i++)
     {
         float theta = float(i) / float(subdiv) * osg::PI * 2.;
@@ -179,11 +179,11 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     // create triangles sides
     for (int i = 0; i < subdiv; i++)
     {
-        auto next_vert = (i + 1) % subdiv;
+        auto nextVert = (i + 1) % subdiv;
         auto v1 = (beginSide + 2 * i);
         auto v2 = (beginSide + 2 * i + 1);
-        auto v3 = (beginSide + 2 * next_vert);
-        auto v4 = (beginSide + 2 * next_vert + 1);
+        auto v3 = (beginSide + 2 * nextVert);
+        auto v4 = (beginSide + 2 * nextVert + 1);
         indices->push_back(v1);
         indices->push_back(v2);
         indices->push_back(v4);
@@ -194,12 +194,12 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     }
     for (int i = 0; i < subdiv; i++)
     {
-        auto next_vert = (i + 1) % subdiv;
+        auto nextVert = (i + 1) % subdiv;
         auto top1 = (beginTop + i);
-        auto top2 = (beginTop + next_vert);
+        auto top2 = (beginTop + nextVert);
 
-        auto bot1 = (begin_bot + i);
-        auto bot2 = (begin_bot + next_vert);
+        auto bot1 = (beginBot + i);
+        auto bot2 = (beginBot + nextVert);
 
         indices->push_back(top2);
         indices->push_back(centerTop);

@@ -75,7 +75,7 @@ namespace MWMechanics
         void setPlayerClass(const ESM::RefId& id) override;
         ///< Set player class to stock class.
 
-        void setPlayerClass(const ESM::Class& class_) override;
+        void setPlayerClass(const ESM::Class& value) override;
         ///< Set player class to custom class.
 
         void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) override;

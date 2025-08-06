@@ -323,21 +323,21 @@ namespace MWGui
 
         std::ostringstream ss;
 
-        const std::string_view NA = "#{Interface:NotAvailableShort}";
+        const std::string_view notAvailable = "#{Interface:NotAvailableShort}";
         const char endl = '\n';
 
-        std::string_view author = technique->getAuthor().empty() ? NA : technique->getAuthor();
-        std::string_view version = technique->getVersion().empty() ? NA : technique->getVersion();
-        std::string_view description = technique->getDescription().empty() ? NA : technique->getDescription();
+        std::string_view author = technique->getAuthor().empty() ? notAvailable : technique->getAuthor();
+        std::string_view version = technique->getVersion().empty() ? notAvailable : technique->getVersion();
+        std::string_view description = technique->getDescription().empty() ? notAvailable : technique->getDescription();
 
         auto serializeBool = [](bool value) { return value ? "#{Interface:Yes}" : "#{Interface:No}"; };
 
         const auto flags = technique->getFlags();
 
-        const auto flag_interior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Interiors));
-        const auto flag_exterior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Exteriors));
-        const auto flag_underwater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Underwater));
-        const auto flag_abovewater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Abovewater));
+        const auto flagInterior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Interiors));
+        const auto flagExterior = serializeBool(!(flags & Fx::Technique::Flag_Disable_Exteriors));
+        const auto flagUnderwater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Underwater));
+        const auto flagAbovewater = serializeBool(!(flags & Fx::Technique::Flag_Disable_Abovewater));
 
         switch (technique->getStatus())
         {
@@ -356,12 +356,11 @@ namespace MWGui
                    << "#{fontcolourhtml=header}#{OMWShaders:Description}: #{fontcolourhtml=normal} " << description
                    << endl
                    << endl
-                   << "#{fontcolourhtml=header}#{OMWShaders:InInteriors}: #{fontcolourhtml=normal} " << flag_interior
-                   << "#{fontcolourhtml=header}   #{OMWShaders:InExteriors}: #{fontcolourhtml=normal} " << flag_exterior
-                   << "#{fontcolourhtml=header}   #{OMWShaders:Underwater}: #{fontcolourhtml=normal} "
-                   << flag_underwater
+                   << "#{fontcolourhtml=header}#{OMWShaders:InInteriors}: #{fontcolourhtml=normal} " << flagInterior
+                   << "#{fontcolourhtml=header}   #{OMWShaders:InExteriors}: #{fontcolourhtml=normal} " << flagExterior
+                   << "#{fontcolourhtml=header}   #{OMWShaders:Underwater}: #{fontcolourhtml=normal} " << flagUnderwater
                    << "#{fontcolourhtml=header}   #{OMWShaders:Abovewater}: #{fontcolourhtml=normal} "
-                   << flag_abovewater;
+                   << flagAbovewater;
                 break;
             }
             case Fx::Technique::Status::Parse_Error:

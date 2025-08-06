@@ -67,15 +67,15 @@ namespace MWWorld
 
         TSlots mSlots;
 
-        void autoEquipWeapon(TSlots& slots_);
-        void autoEquipArmor(TSlots& slots_);
+        void autoEquipWeapon(TSlots& slots);
+        void autoEquipArmor(TSlots& slots);
 
         // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
         ContainerStoreIterator mSelectedEnchantItem;
 
         void copySlots(const InventoryStore& store);
 
-        void initSlots(TSlots& slots_);
+        void initSlots(TSlots& slots);
 
         void fireEquipmentChangedEvent();
 

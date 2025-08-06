@@ -550,17 +550,17 @@ namespace NifOsg
 
         for (int i = 0; i < n; ++i)
         {
-            osgParticle::Particle* P = getParticleSystem()->createParticle(nullptr);
-            if (P)
+            osgParticle::Particle* const particle = getParticleSystem()->createParticle(nullptr);
+            if (particle)
             {
                 if (useGeometryEmitter)
-                    P->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
+                    particle->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
                 else if (mPlacer)
-                    mPlacer->place(P);
+                    mPlacer->place(particle);
 
-                mShooter->shoot(P);
+                mShooter->shoot(particle);
 
-                P->transformPositionVelocity(emitterToPs);
+                particle->transformPositionVelocity(emitterToPs);
             }
         }
     }

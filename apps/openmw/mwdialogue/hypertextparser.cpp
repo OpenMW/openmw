@@ -16,27 +16,28 @@ namespace MWDialogue
         std::vector<Token> parseHyperText(const std::string& text)
         {
             std::vector<Token> result;
-            size_t pos_end = std::string::npos, iteration_pos = 0;
+            size_t posEnd = std::string::npos;
+            size_t iterationPos = 0;
             for (;;)
             {
-                size_t pos_begin = text.find('@', iteration_pos);
-                if (pos_begin != std::string::npos)
-                    pos_end = text.find('#', pos_begin);
+                const size_t posBegin = text.find('@', iterationPos);
+                if (posBegin != std::string::npos)
+                    posEnd = text.find('#', posBegin);
 
-                if (pos_begin != std::string::npos && pos_end != std::string::npos)
+                if (posBegin != std::string::npos && posEnd != std::string::npos)
                 {
-                    if (pos_begin != iteration_pos)
-                        tokenizeKeywords(text.substr(iteration_pos, pos_begin - iteration_pos), result);
+                    if (posBegin != iterationPos)
+                        tokenizeKeywords(text.substr(iterationPos, posBegin - iterationPos), result);
 
-                    std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                    std::string link = text.substr(posBegin + 1, posEnd - posBegin - 1);
                     result.emplace_back(link, Token::ExplicitLink);
 
-                    iteration_pos = pos_end + 1;
+                    iterationPos = posEnd + 1;
                 }
                 else
                 {
-                    if (iteration_pos != text.size())
-                        tokenizeKeywords(text.substr(iteration_pos), result);
+                    if (iterationPos != text.size())
+                        tokenizeKeywords(text.substr(iterationPos), result);
                     break;
                 }
             }

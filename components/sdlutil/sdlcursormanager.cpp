@@ -35,12 +35,12 @@ namespace SDLUtil
 
     SDLCursorManager::~SDLCursorManager()
     {
-        CursorMap::const_iterator curs_iter = mCursorMap.begin();
+        CursorMap::const_iterator cursIter = mCursorMap.begin();
 
-        while (curs_iter != mCursorMap.end())
+        while (cursIter != mCursorMap.end())
         {
-            SDL_FreeCursor(curs_iter->second);
-            ++curs_iter;
+            SDL_FreeCursor(cursIter->second);
+            ++cursIter;
         }
 
         mCursorMap.clear();

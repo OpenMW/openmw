@@ -1054,14 +1054,14 @@ namespace CSMWorld
 
     QVariant RegionWeatherAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
     {
-        const char* WeatherNames[]
+        const char* weatherNames[]
             = { "Clear", "Cloudy", "Fog", "Overcast", "Rain", "Thunder", "Ash", "Blight", "Snow", "Blizzard" };
 
         const ESM::Region& region = record.get();
 
         if (subColIndex == 0 && subRowIndex >= 0 && subRowIndex < 10)
         {
-            return WeatherNames[subRowIndex];
+            return weatherNames[subRowIndex];
         }
         else if (subColIndex == 1)
         {

@@ -83,8 +83,8 @@ void CSVRender::Object::update()
     clear();
 
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
-    const int TypeIndex = referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
-    const int ModelIndex = referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_Model);
+    const int typeIndex = referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_RecordType);
+    const int modelIndex = referenceables.findColumnIndex(CSMWorld::Columns::ColumnId_Model);
 
     int index = referenceables.searchId(mReferenceableId);
     const ESM::Light* light = nullptr;
@@ -99,8 +99,8 @@ void CSVRender::Object::update()
 
     /// \todo check for Deleted state (error 1)
 
-    int recordType = referenceables.getData(index, TypeIndex).toInt();
-    std::string model = referenceables.getData(index, ModelIndex).toString().toUtf8().constData();
+    int recordType = referenceables.getData(index, typeIndex).toInt();
+    std::string model = referenceables.getData(index, modelIndex).toString().toUtf8().constData();
 
     if (recordType == CSMWorld::UniversalId::Type_Light)
     {

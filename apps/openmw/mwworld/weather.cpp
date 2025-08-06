@@ -858,12 +858,12 @@ namespace MWWorld
             if (mTimeSettings.mNightStart < mSunriseTime)
                 adjustedNightStart += 24.f;
 
-            const bool is_night = adjustedHour >= adjustedNightStart;
+            const bool isNight = adjustedHour >= adjustedNightStart;
             const float dayDuration = adjustedNightStart - mSunriseTime;
             const float nightDuration = 24.f - dayDuration;
 
             float orbit;
-            if (!is_night)
+            if (!isNight)
             {
                 float t = (adjustedHour - mSunriseTime) / dayDuration;
                 orbit = 1.f - 2.f * t;
@@ -877,7 +877,7 @@ namespace MWWorld
             // Hardcoded constant from Morrowind
             const osg::Vec3f sunDir(-400.f * orbit, 75.f, -100.f);
             mRendering.setSunDirection(sunDir);
-            mRendering.setNight(is_night);
+            mRendering.setNight(isNight);
         }
 
         float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");

@@ -101,9 +101,9 @@ Allowed options)");
 
         try
         {
-            bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(all).positional(p).run();
+            bpo::parsed_options validOpts = bpo::command_line_parser(argc, argv).options(all).positional(p).run();
 
-            bpo::store(valid_opts, variables);
+            bpo::store(validOpts, variables);
         }
         catch (std::exception& e)
         {

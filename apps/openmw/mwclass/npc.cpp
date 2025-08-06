@@ -87,9 +87,9 @@ namespace
 
     int is_even(double d)
     {
-        double int_part;
-        modf(d / 2.0, &int_part);
-        return 2.0 * int_part == d;
+        double intPart;
+        modf(d / 2.0, &intPart);
+        return 2.0 * intPart == d;
     }
 
     int round_ieee_754(double d)
@@ -118,9 +118,9 @@ namespace
             creatureStats.setAttribute(attribute.mId, race->mData.getAttribute(attribute.mId, male));
 
         // class bonus
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
+        const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
 
-        for (int attribute : class_->mData.mAttribute)
+        for (int attribute : npcClass->mData.mAttribute)
         {
             if (attribute >= 0 && attribute < ESM::Attribute::Length)
             {
@@ -143,7 +143,7 @@ namespace
                 // is this a minor or major skill?
                 float add = 0.2f;
                 int index = ESM::Skill::refIdToIndex(skill.mId);
-                for (const auto& skills : class_->mData.mSkills)
+                for (const auto& skills : npcClass->mData.mSkills)
                 {
                     if (skills[0] == index)
                         add = 0.5;
@@ -164,14 +164,14 @@ namespace
 
         int multiplier = 3;
 
-        if (class_->mData.mSpecialization == ESM::Class::Combat)
+        if (npcClass->mData.mSpecialization == ESM::Class::Combat)
             multiplier += 2;
-        else if (class_->mData.mSpecialization == ESM::Class::Stealth)
+        else if (npcClass->mData.mSpecialization == ESM::Class::Stealth)
             multiplier += 1;
 
-        if (std::find(class_->mData.mAttribute.begin(), class_->mData.mAttribute.end(),
+        if (std::find(npcClass->mData.mAttribute.begin(), npcClass->mData.mAttribute.end(),
                 ESM::Attribute::refIdToIndex(ESM::Attribute::Endurance))
-            != class_->mData.mAttribute.end())
+            != npcClass->mData.mAttribute.end())
             multiplier += 1;
 
         creatureStats.setHealth(floor(0.5f * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
@@ -194,7 +194,7 @@ namespace
     void autoCalculateSkills(
         const ESM::NPC* npc, MWMechanics::NpcStats& npcStats, const MWWorld::Ptr& ptr, bool spellsInitialised)
     {
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
+        const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
 
         unsigned int level = npcStats.getLevel();
 
@@ -204,7 +204,7 @@ namespace
         {
             int bonus = (i == 0) ? 10 : 25;
 
-            for (const auto& skills : class_->mData.mSkills)
+            for (const auto& skills : npcClass->mData.mSkills)
             {
                 ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
                 if (!id.empty())
@@ -228,7 +228,7 @@ namespace
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
-            for (const auto& skills : class_->mData.mSkills)
+            for (const auto& skills : npcClass->mData.mSkills)
             {
                 // is this a minor or major skill?
                 if (std::find(skills.begin(), skills.end(), index) != skills.end())
@@ -239,7 +239,7 @@ namespace
             }
 
             // is this skill in the same Specialization as the class?
-            if (skill.mData.mSpecialization == class_->mData.mSpecialization)
+            if (skill.mData.mSpecialization == npcClass->mData.mSpecialization)
             {
                 specMultiplier = 0.5f;
                 specBonus = 5;
@@ -1166,8 +1166,8 @@ namespace MWClass
         const ESM::NPC* npc = actor.get<ESM::NPC>()->mBase;
         if (npc->mFlags & ESM::NPC::Autocalc)
         {
-            const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
-            return class_->mData.mServices;
+            const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
+            return npcClass->mData.mServices;
         }
         return npc->mAiData.mServices;
     }

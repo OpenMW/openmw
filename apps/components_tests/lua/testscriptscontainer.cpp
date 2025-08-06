@@ -285,17 +285,17 @@ CUSTOM: customdata.lua
         EXPECT_TRUE(scripts.addCustomScript(getId(test2Path)));
 
         sol::state_view sol = mLua.unsafeState();
-        std::string X0 = LuaUtil::serialize(sol.create_table_with("x", 0.5));
-        std::string X1 = LuaUtil::serialize(sol.create_table_with("x", 1.5));
+        std::string x0 = LuaUtil::serialize(sol.create_table_with("x", 0.5));
+        std::string x1 = LuaUtil::serialize(sol.create_table_with("x", 1.5));
 
         {
             testing::internal::CaptureStdout();
-            scripts.receiveEvent("SomeEvent", X1);
+            scripts.receiveEvent("SomeEvent", x1);
             EXPECT_EQ(internal::GetCapturedStdout(), "");
         }
         {
             testing::internal::CaptureStdout();
-            scripts.receiveEvent("Event1", X1);
+            scripts.receiveEvent("Event1", x1);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event1 1.5\n"
                 "Test[stopevent.lua]:\t event1 1.5\n"
@@ -303,21 +303,21 @@ CUSTOM: customdata.lua
         }
         {
             testing::internal::CaptureStdout();
-            scripts.receiveEvent("Event2", X1);
+            scripts.receiveEvent("Event2", x1);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event2 1.5\n"
                 "Test[test1.lua]:\t event2 1.5\n");
         }
         {
             testing::internal::CaptureStdout();
-            scripts.receiveEvent("Event1", X0);
+            scripts.receiveEvent("Event1", x0);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event1 0.5\n"
                 "Test[stopevent.lua]:\t event1 0.5\n");
         }
         {
             testing::internal::CaptureStdout();
-            scripts.receiveEvent("Event2", X0);
+            scripts.receiveEvent("Event2", x0);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t event2 0.5\n"
                 "Test[test1.lua]:\t event2 0.5\n");
@@ -333,12 +333,12 @@ CUSTOM: customdata.lua
         EXPECT_TRUE(scripts.addCustomScript(getId(test2Path)));
 
         sol::state_view sol = mLua.unsafeState();
-        std::string X = LuaUtil::serialize(sol.create_table_with("x", 0.5));
+        std::string x = LuaUtil::serialize(sol.create_table_with("x", 0.5));
 
         {
             testing::internal::CaptureStdout();
             scripts.update(1.5f);
-            scripts.receiveEvent("Event1", X);
+            scripts.receiveEvent("Event1", x);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test1.lua]:\t update 1.5\n"
                 "Test[test2.lua]:\t update 1.5\n"
@@ -352,7 +352,7 @@ CUSTOM: customdata.lua
             scripts.removeScript(stopEventScriptId);
             EXPECT_FALSE(scripts.hasScript(stopEventScriptId));
             scripts.update(1.5f);
-            scripts.receiveEvent("Event1", X);
+            scripts.receiveEvent("Event1", x);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test1.lua]:\t update 1.5\n"
                 "Test[test2.lua]:\t update 1.5\n"
@@ -363,7 +363,7 @@ CUSTOM: customdata.lua
             testing::internal::CaptureStdout();
             scripts.removeScript(getId(test1Path));
             scripts.update(1.5f);
-            scripts.receiveEvent("Event1", X);
+            scripts.receiveEvent("Event1", x);
             EXPECT_EQ(internal::GetCapturedStdout(),
                 "Test[test2.lua]:\t update 1.5\n"
                 "Test[test2.lua]:\t event1 0.5\n");

@@ -43,7 +43,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     bool isFO3 = false;
 
     bool isMale = false;
-    int curr_part = -1; // 0 = head, 1 = body, 2 = egt, 3 = hkx
+    int currPart = -1; // 0 = head, 1 = body, 2 = egt, 3 = hkx
     std::uint32_t currentIndex = 0xffffffff;
 
     while (reader.getSubRecordHeader())
@@ -278,7 +278,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //
             case ESM::fourCC("NAM0"): // start marker head data /* 1 */
             {
-                curr_part = 0; // head part
+                currPart = 0; // head part
 
                 if (isFO3 || isFONV)
                 {
@@ -319,7 +319,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 {
                     reader.skipSubRecordData();
                 }
-                else if (curr_part == 0) // head part
+                else if (currPart == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].mesh);
@@ -328,7 +328,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                     // TES5 keeps head part formid in mHeadPartIdsMale and mHeadPartIdsFemale
                 }
-                else if (curr_part == 1) // body part
+                else if (currPart == 1) // body part
                 {
                     if (isMale)
                         reader.getZString(mBodyPartsMale[currentIndex].mesh);
@@ -359,14 +359,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 {
                     reader.skipSubRecordData();
                 }
-                else if (curr_part == 0) // head part
+                else if (currPart == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].texture);
                     else
                         reader.getZString(mHeadPartsFemale[currentIndex].texture); // TODO: check TES4
                 }
-                else if (curr_part == 1) // body part
+                else if (currPart == 1) // body part
                 {
                     if (isMale)
                         reader.getZString(mBodyPartsMale[currentIndex].texture);
@@ -384,20 +384,20 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 if (isFO3 || isFONV)
                 {
-                    curr_part = 1; // body part
+                    currPart = 1; // body part
 
                     mBodyPartsMale.resize(4);
                     mBodyPartsFemale.resize(4);
                 }
                 else if (isTES4)
                 {
-                    curr_part = 1; // body part
+                    currPart = 1; // body part
 
                     mBodyPartsMale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
                     mBodyPartsFemale.resize(5); // 0 = upper body, 1 = legs, 2 = hands, 3 = feet, 4 = tail
                 }
                 else // TES5
-                    curr_part = 2; // for TES5 NAM1 indicates the start of EGT model
+                    currPart = 2; // for TES5 NAM1 indicates the start of EGT model
 
                 if (isTES4)
                     currentIndex = 4; // FIXME: argonian tail mesh without preceeding INDX
@@ -613,7 +613,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("NAM3"): // start of hkx model
             {
-                curr_part = 3; // for TES5 NAM3 indicates the start of hkx model
+                currPart = 3; // for TES5 NAM3 indicates the start of hkx model
 
                 break;
             }

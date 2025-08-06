@@ -46,8 +46,8 @@ namespace Gui
 
     void MWList::redraw(bool scrollbarShown)
     {
-        constexpr int _scrollBarWidth = 20; // fetch this from skin?
-        const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
+        constexpr int scrollbarShownScrollBarWidth = 20; // fetch this from skin?
+        const int scrollBarWidth = scrollbarShown ? scrollbarShownScrollBarWidth : 0;
         int viewPosition = -mScrollView->getViewOffset().top;
 
         while (mScrollView->getChildCount())

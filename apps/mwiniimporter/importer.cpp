@@ -326,10 +326,10 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
             continue;
         }
 
-        int comment_pos = static_cast<int>(utf8.find(';'));
-        if (comment_pos > 0)
+        const std::string::size_type commentPos = utf8.find(';');
+        if (commentPos != std::string::npos)
         {
-            utf8 = utf8.substr(0, comment_pos);
+            utf8 = utf8.substr(0, commentPos);
         }
 
         int pos = static_cast<int>(utf8.find('='));

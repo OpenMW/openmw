@@ -186,9 +186,9 @@ namespace MWMechanics
         // class
         if (mClassSelected)
         {
-            const ESM::Class* class_ = esmStore.get<ESM::Class>().find(player->mClass);
+            const ESM::Class* playerClass = esmStore.get<ESM::Class>().find(player->mClass);
 
-            for (int attribute : class_->mData.mAttribute)
+            for (int attribute : playerClass->mData.mAttribute)
             {
                 ESM::RefId id = ESM::Attribute::indexToRefId(attribute);
                 if (!id.empty())
@@ -199,7 +199,7 @@ namespace MWMechanics
             {
                 int bonus = i == 0 ? 10 : 25;
 
-                for (const auto& skills : class_->mData.mSkills)
+                for (const auto& skills : playerClass->mData.mSkills)
                 {
                     ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
                     if (!id.empty())
@@ -209,7 +209,7 @@ namespace MWMechanics
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
-                if (skill.mData.mSpecialization == class_->mData.mSpecialization)
+                if (skill.mData.mSpecialization == playerClass->mData.mSpecialization)
                     npcStats.getSkill(skill.mId).setBase(npcStats.getSkill(skill.mId).getBase() + 5);
             }
         }
@@ -466,11 +466,11 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    void MechanicsManager::setPlayerClass(const ESM::Class& cls)
+    void MechanicsManager::setPlayerClass(const ESM::Class& value)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        const ESM::Class* ptr = world->getStore().insert(cls);
+        const ESM::Class* ptr = world->getStore().insert(value);
 
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;

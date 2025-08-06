@@ -395,8 +395,8 @@ namespace Gui
         if (one != 1)
             fail(*file, fileName, "Unexpected value");
 
-        char name_[284];
-        file->read(name_, sizeof(name_));
+        char nameBuffer[284];
+        file->read(nameBuffer, sizeof(nameBuffer));
         if (!file->good())
             fail(*file, fileName, "File too small to be a valid font");
 
@@ -408,7 +408,7 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        const std::string name(name_);
+        const std::string name(nameBuffer);
         const std::string bitmapFilename = "fonts/" + name + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);

@@ -111,11 +111,11 @@ namespace MWSound
         if (!mStream)
             return false;
 
-        std::ptrdiff_t stream_idx = mStream - mFormatCtx->streams;
+        std::ptrdiff_t streamIdx = mStream - mFormatCtx->streams;
         while (av_read_frame(mFormatCtx.get(), &mPacket) >= 0)
         {
             /* Check if the packet belongs to this stream */
-            if (stream_idx == mPacket.stream_index)
+            if (streamIdx == mPacket.stream_index)
             {
                 if (mPacket.pts != (int64_t)AV_NOPTS_VALUE)
                     mNextPts = av_q2d((*mStream)->time_base) * mPacket.pts;
@@ -131,7 +131,7 @@ namespace MWSound
 
     bool FFmpegDecoder::getAVAudioData()
     {
-        bool got_frame = false;
+        bool gotFrame = false;
 
         if (mCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO)
             return false;
@@ -156,7 +156,7 @@ namespace MWSound
 
             if (mFrame->nb_samples == 0)
                 continue;
-            got_frame = true;
+            gotFrame = true;
 
             if (mSwr)
             {
@@ -186,7 +186,7 @@ namespace MWSound
             else
                 mFrameData = &mFrame->data[0];
 
-        } while (!got_frame);
+        } while (!gotFrame);
         mNextPts += (double)mFrame->nb_samples / mCodecCtx->sample_rate;
 
         return true;
@@ -416,11 +416,11 @@ namespace MWSound
 
         *samplerate = mCodecCtx->sample_rate;
 #if OPENMW_FFMPEG_5_OR_GREATER
-        AVChannelLayout ch_layout = mCodecCtx->ch_layout;
-        if (ch_layout.u.mask == 0)
-            av_channel_layout_default(&ch_layout, mCodecCtx->ch_layout.nb_channels);
+        AVChannelLayout chLayout = mCodecCtx->ch_layout;
+        if (chLayout.u.mask == 0)
+            av_channel_layout_default(&chLayout, mCodecCtx->ch_layout.nb_channels);
 
-        if (mOutputSampleFormat != mCodecCtx->sample_fmt || mOutputChannelLayout.u.mask != ch_layout.u.mask)
+        if (mOutputSampleFormat != mCodecCtx->sample_fmt || mOutputChannelLayout.u.mask != chLayout.u.mask)
 #else
         int64_t ch_layout = mCodecCtx->channel_layout;
         if (ch_layout == 0)
@@ -435,7 +435,7 @@ namespace MWSound
                 &mOutputChannelLayout, // output ch layout
                 mOutputSampleFormat, // output sample format
                 mCodecCtx->sample_rate, // output sample rate
-                &ch_layout, // input ch layout
+                &chLayout, // input ch layout
                 mCodecCtx->sample_fmt, // input sample format
                 mCodecCtx->sample_rate, // input sample rate
                 0, // logging level offset

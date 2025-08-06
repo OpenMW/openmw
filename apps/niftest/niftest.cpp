@@ -235,8 +235,8 @@ Allowed options)");
     bpo::variables_map variables;
     try
     {
-        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).positional(p).run();
-        bpo::store(valid_opts, variables);
+        bpo::parsed_options validOpts = bpo::command_line_parser(argc, argv).options(desc).positional(p).run();
+        bpo::store(validOpts, variables);
         bpo::notify(variables);
         if (variables.count("help"))
         {
