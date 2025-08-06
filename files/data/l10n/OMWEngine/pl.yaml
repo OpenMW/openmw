@@ -9,6 +9,7 @@ LogViewer: "Podgląd logów"
 LuaProfiler: "Profilowanie Lua"
 PhysicsProfiler: "Profilowanie fizyki"
 
+
 # Messages
 
 AskLoadLastSave: "Ostatni zapis to '%s'. Czy chcesz go wczytać?"
@@ -30,6 +31,7 @@ SaveGameDenied: "Gra nie może być teraz zapisana."
 SavingInProgress: "Zapisywanie..."
 ScreenshotFailed: "Nie udało się zapisać zrzutu ekranu"
 ScreenshotMade: "%s został zapisany"
+
 
 # Save game menu
 
@@ -59,6 +61,7 @@ OverwriteGameConfirmation: "Czy na pewno chcesz nadpisać ten zapis gry?"
 SelectCharacter: "Wybierz postać..."
 TimePlayed: "Czas gry"
 
+
 # Settings menu
 
 ActorsProcessingRange: "Zasięg przetwarzania postaci"
@@ -82,6 +85,7 @@ ClassicFalloffTooltip: |-
 
     Taka metoda jest fizycznie poprawna, ale może powodować artefakty świetlne, ponieważ światła nie obejmują całej sceny.
     Wczesne wygaszanie pomaga zminimalizować te artefakty kosztem ciemniejszej sceny.
+
 
     Morrowind używa tej tradycyjnej metody, więc możesz ją włączyć, jeśli nie lubisz różnic w jasności.
     Alternatywnie spróbuj zmienić minimalną jasność wnętrz.
@@ -130,14 +134,10 @@ LightsBoundingSphereMultiplier: "Mnożnik sfery ograniczającej"
 LightsBoundingSphereMultiplierTooltip: "Domyślnie: 1.65\nMnożnik sfery ograniczającej światła.\nWiększe wartości pozwalają na płynniejsze zanikanie,\nale wymagają zwiększenia liczby maksymalnych świateł.\n\nNie wpływa na siłę ani zasięg światła."
 LightsFadeStartMultiplier: "Mnożnik początku zanikania"
 LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasięgu, w którym światła zaczną zanikać.\n\nNiska wartość = wolniejsze przejścia.\nWysoka wartość = szybsze przejścia."
-LightsLightingMethodTooltip: |-
-    Ustawia wewnętrzne przetwarzanie źródeł światła.
-
-    "Klasyczna" zawsze używa 8 świateł na obiekt. Najbardziej przypomina oryginalne oświetlenie Morrowinda.
-
-    "Shadery (kompatybilne)" usuwa limit 8 świateł. Obsługuje również oświetlenie trawy. Zalecane dla starszego sprzętu.
-
-    "Shadery" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności.
+LightsLightingMethodTooltip: "Ustawia wewnętrzne przetwarzanie źródeł światła.\n\n
+    \"Klasyczna\" zawsze używa 8 świateł na obiekt. Najbardziej przypomina oryginalne oświetlenie Morrowinda.\n\n
+    \"Shadery (kompatybilne)\" usuwa limit 8 świateł. Obsługuje również oświetlenie trawy. Zalecane dla starszego sprzętu.\n\n
+    \"Shadery\" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności.
 LightsMaximumDistance: "Maksymalny zasięg światła"
 LightsMaximumDistanceTooltip: "Domyślnie: 8192\nMaksymalna odległość wyświetlania świateł (w jednostkach).\n\n0 = brak ograniczenia."
 LightsMinimumInteriorBrightness: "Minimalna jasność wnętrz"
@@ -212,3 +212,14 @@ WindowModeHint: "Wskazówka: tryb pełnoekranowy w oknie\nzawsze używa natywnej
 WindowModeWindowed: "W oknie"
 WindowModeWindowedFullscreen: "Pełny ekran w oknie"
 WobblyShores: "Falujące brzegi"
+
+
+# Controller button names
+
+EnchantType: "Typ rzucania"
+InventorySelect: "Włóż"
+JournalQuests: "Zadania"
+JournalShowAll: "Pokaż wszystkie"
+LoadingSelectCharacter: "Zmień postać"
+RechargeSelect: "Doładuj"
+RepairTool: "Narzędzie"
