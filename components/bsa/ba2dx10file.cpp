@@ -138,7 +138,7 @@ namespace Bsa
             fileName.resize(fileNameSize);
             input.read(fileName.data(), fileName.size());
             fileName.push_back('\0');
-            mFileNames.push_back(fileName);
+            mFileNames.push_back(std::move(fileName));
             mFiles[i].setNameInfos(0, &mFileNames.back());
         }
 

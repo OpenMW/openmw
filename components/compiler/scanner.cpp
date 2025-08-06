@@ -205,7 +205,7 @@ namespace Compiler
             else if (!c.isMinusSign() && isStringCharacter(c))
             {
                 /// workaround that allows names to begin with digits
-                return scanName(c, parser, cont, value);
+                return scanName(c, parser, cont, std::move(value));
             }
             else if (c == '.')
             {

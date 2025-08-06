@@ -339,7 +339,7 @@ namespace Shader
                 if (!parseLinkDirective(source, linkTarget, templateName, foundPos))
                     return false;
                 if (!linkTarget.empty() && linkTarget != templateName)
-                    linkedShaderTemplateNames.push_back(linkTarget);
+                    linkedShaderTemplateNames.push_back(std::move(linkTarget));
             }
             else
             {

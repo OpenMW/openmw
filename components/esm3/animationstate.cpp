@@ -23,7 +23,7 @@ namespace ESM
             esm.getHNOT(anim.mAbsolute, "ABST");
             esm.getHNT(anim.mLoopCount, "COUN");
 
-            mScriptedAnims.push_back(anim);
+            mScriptedAnims.push_back(std::move(anim));
         }
     }
 

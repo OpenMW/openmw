@@ -1395,7 +1395,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 subset.push_back(geometry);
                 if (subset.size()>1) needToDoMerge = true;
             }
-            if (!subset.empty()) mergeList.push_back(subset);
+            if (!subset.empty()) mergeList.push_back(std::move(subset));
         }
 
         if (needToDoMerge)

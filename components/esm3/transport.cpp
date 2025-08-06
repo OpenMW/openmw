@@ -14,7 +14,7 @@ namespace ESM
         {
             Dest dodt;
             esm.getSubComposite(dodt.mPos);
-            mList.push_back(dodt);
+            mList.push_back(std::move(dodt));
         }
         else if (esm.retSubName().toInt() == fourCC("DNAM"))
         {

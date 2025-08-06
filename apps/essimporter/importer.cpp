@@ -136,9 +136,9 @@ namespace ESSImport
                 sub.mName = esm.retSubName().toString();
                 sub.mData.resize(esm.getSubSize());
                 esm.getExact(sub.mData.data(), sub.mData.size());
-                rec.mSubrecords.push_back(sub);
+                rec.mSubrecords.push_back(std::move(sub));
             }
-            file.mRecords.push_back(rec);
+            file.mRecords.push_back(std::move(rec));
         }
     }
 

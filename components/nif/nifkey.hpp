@@ -174,8 +174,12 @@ namespace Nif
                 const float y = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f - curr.mBias);
                 const float z = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f + curr.mBias);
                 const float w = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f - curr.mBias);
-                const U prevDelta = prev != nullptr ? curr.mValue - prev->mValue : next->mValue - curr.mValue;
-                const U nextDelta = next != nullptr ? next->mValue - curr.mValue : curr.mValue - prev->mValue;
+                const U prevDelta = prev != nullptr ? curr.mValue - prev->mValue
+                    : next != nullptr               ? next->mValue - curr.mValue
+                                                    : U{};
+                const U nextDelta = next != nullptr ? next->mValue - curr.mValue
+                    : prev != nullptr               ? curr.mValue - prev->mValue
+                                                    : U{};
                 curr.mInTan = (prevDelta * x + nextDelta * y) * prevLen / (prevLen + nextLen);
                 curr.mOutTan = (prevDelta * z + nextDelta * w) * nextLen / (prevLen + nextLen);
             }
@@ -205,4 +209,4 @@ namespace Nif
     using BoolKeyMapPtr = std::shared_ptr<BoolKeyMap>;
 
 } // Namespace
-#endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP
+#endif // #ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

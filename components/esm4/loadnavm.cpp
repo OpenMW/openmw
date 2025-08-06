@@ -178,7 +178,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
         {
             reader.get(*it);
         }
-        triSegments.push_back(indices);
+        triSegments.push_back(std::move(indices));
     }
     if (triSegments.size() != divisor * divisor)
         throw std::runtime_error("Triangle segments size is not the square of divisor");
@@ -221,7 +221,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 
                 NVNMstruct nvnm;
                 nvnm.load(reader);
-                mData.push_back(nvnm); // FIXME try swap
+                mData.push_back(std::move(nvnm)); // FIXME try swap
                 break;
             }
             case ESM::fourCC("ONAM"):

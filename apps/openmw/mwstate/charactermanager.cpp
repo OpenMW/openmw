@@ -25,7 +25,7 @@ MWState::CharacterManager::CharacterManager(std::filesystem::path saves, const s
                 Character character(characterDir, mGame);
 
                 if (character.begin() != character.end())
-                    mCharacters.push_back(character);
+                    mCharacters.push_back(std::move(character));
             }
         }
         mCharacters.sort();

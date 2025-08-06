@@ -1033,7 +1033,7 @@ namespace Fx
                 choice.mLabel = parseString();
                 expect<Lexer::Equal>();
                 choice.mValue = getUniformValue<SrcT, T>();
-                choices.push_back(choice);
+                choices.push_back(std::move(choice));
 
                 if (isNext<Lexer::Comma>())
                 {

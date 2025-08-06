@@ -702,9 +702,10 @@ namespace MWInput
 
     void BindingsManager::saveBindings()
     {
-        const std::string newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
+        std::string newFileName;
         try
         {
+            newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
             if (mInputBinder->save(newFileName))
             {
                 std::filesystem::rename(Files::pathFromUnicodeString(newFileName), mUserFile);

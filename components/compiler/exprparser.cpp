@@ -327,7 +327,7 @@ namespace Compiler
 
             if (mExplicit.empty() && getContext().isId(ESM::RefId::stringRefId(name2)))
             {
-                mExplicit = name2;
+                mExplicit = std::move(name2);
                 return true;
             }
 

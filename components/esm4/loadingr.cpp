@@ -59,7 +59,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
                     if (!reader.getZString(scriptEffectName))
                         throw std::runtime_error("INGR FULL data read error");
 
-                    mScriptEffect.push_back(scriptEffectName);
+                    mScriptEffect.push_back(std::move(scriptEffectName));
 
                     break;
                 }

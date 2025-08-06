@@ -49,7 +49,7 @@ namespace ESSImport
             }
 
             if (!separateStacks)
-                mItems.push_back(item);
+                mItems.push_back(std::move(item));
         }
 
         // equipped items
