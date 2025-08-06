@@ -273,15 +273,6 @@ namespace CSMWorld
         copy->mState = RecordBase::State_ModifiedOnly;
         setRecordId(destination, copy->get());
 
-        if constexpr (std::is_same_v<ESXRecordT, CSMWorld::CellRef>)
-        {
-            if (type == UniversalId::Type_Reference)
-            {
-                CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
-                ptr->mRefNum.mIndex = 0;
-            }
-        }
-
         if constexpr (std::is_same_v<ESXRecordT, ESM::Dialogue>)
         {
             copy->mModified.mStringId = copy->mModified.mId.getRefIdString();
