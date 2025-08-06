@@ -273,13 +273,13 @@ namespace MWMechanics
                 {
                     // not in closedset - i.e. have not traversed this edge destination
                     size_t dest = edge.index;
-                    float tentative_g = gScore[current] + edge.cost;
+                    float tentativeG = gScore[current] + edge.cost;
                     bool isInOpenSet = std::find(openset.begin(), openset.end(), dest) != openset.end();
-                    if (!isInOpenSet || tentative_g < gScore[dest])
+                    if (!isInOpenSet || tentativeG < gScore[dest])
                     {
                         graphParent[dest] = current;
-                        gScore[dest] = tentative_g;
-                        fScore[dest] = tentative_g + costAStar(mPathgrid->mPoints[dest], mPathgrid->mPoints[goal]);
+                        gScore[dest] = tentativeG;
+                        fScore[dest] = tentativeG + costAStar(mPathgrid->mPoints[dest], mPathgrid->mPoints[goal]);
                         if (!isInOpenSet)
                         {
                             // add this edge to openset, lowest cost goes to the front

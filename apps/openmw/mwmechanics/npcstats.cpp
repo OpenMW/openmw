@@ -167,7 +167,7 @@ void MWMechanics::NpcStats::setFactionReputation(const ESM::RefId& faction, int 
     mFactionReputation[faction] = value;
 }
 
-float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ESM::Class& class_) const
+float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ESM::Class& npcClass) const
 {
     float progressRequirement = 1.f + getSkill(id).getBase();
 
@@ -176,7 +176,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
 
     float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
     int index = ESM::Skill::refIdToIndex(skill->mId);
-    for (const auto& skills : class_.mData.mSkills)
+    for (const auto& skills : npcClass.mData.mSkills)
     {
         if (skills[0] == index)
         {
@@ -197,7 +197,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
 
     float specialisationFactor = 1;
 
-    if (skill->mData.mSpecialization == class_.mData.mSpecialization)
+    if (skill->mData.mSpecialization == npcClass.mData.mSpecialization)
     {
         specialisationFactor = gmst.find("fSpecialSkillBonus")->mValue.getFloat();
 

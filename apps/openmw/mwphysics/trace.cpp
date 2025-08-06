@@ -50,16 +50,16 @@ namespace MWPhysics
         // This trace needs to be at least a couple units long, but there's no one particular ideal length.
         // The length of 2.1 chosen here is a "works well in practice after testing a few random lengths" value.
         // (Also, we only do this short test if the intended collision trace is long enough for it to make sense.)
-        const float fallback_length = 2.1f;
-        bool doing_short_trace = false;
+        const float fallbackLength = 2.1f;
+        bool doingShortTrace = false;
         // For some reason, typical scenes perform a little better if we increase the threshold length for the length
         // test. (Multiplying by 2 in 'square distance' units gives us about 1.4x the threshold length. In benchmarks
         // this was
         //  slightly better for the performance of normal scenes than 4.0, and just plain better than 1.0.)
-        if (attempt_short_trace && (btend - btstart).length2() > fallback_length * fallback_length * 2.0)
+        if (attempt_short_trace && (btend - btstart).length2() > fallbackLength * fallbackLength * 2.0)
         {
-            btend = btstart + (btend - btstart).normalized() * fallback_length;
-            doing_short_trace = true;
+            btend = btstart + (btend - btstart).normalized() * fallbackLength;
+            doingShortTrace = true;
         }
 
         const auto traceCallback = sweepHelper(actor, btstart, btend, world, false);
@@ -69,7 +69,7 @@ namespace MWPhysics
         {
             mFraction = traceCallback.m_closestHitFraction;
             // ensure fraction is correct (covers intended distance traveled instead of actual distance traveled)
-            if (doing_short_trace && (end - start).length2() > 0.0)
+            if (doingShortTrace && (end - start).length2() > 0.0)
                 mFraction *= (btend - btstart).length() / (end - start).length();
             mPlaneNormal = Misc::Convert::toOsg(traceCallback.m_hitNormalWorld);
             mEndPos = (end - start) * mFraction + start;
@@ -78,7 +78,7 @@ namespace MWPhysics
         }
         else
         {
-            if (doing_short_trace)
+            if (doingShortTrace)
             {
                 btend = Misc::Convert::toBullet(end);
                 const auto newTraceCallback = sweepHelper(actor, btstart, btend, world, false);

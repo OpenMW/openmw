@@ -43,10 +43,10 @@ std::vector<std::string> Launcher::enumerateOpenALDevicesHrtf()
             LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
             void* funcPtr = alcGetProcAddress(device, "alcGetStringiSOFT");
             memcpy(&alcGetStringiSOFT, &funcPtr, sizeof(funcPtr));
-            ALCint num_hrtf;
-            alcGetIntegerv(device, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
-            ret.reserve(num_hrtf);
-            for (ALCint i = 0; i < num_hrtf; ++i)
+            ALCint numHrtf;
+            alcGetIntegerv(device, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &numHrtf);
+            ret.reserve(numHrtf);
+            for (ALCint i = 0; i < numHrtf; ++i)
             {
                 const ALCchar* entry = alcGetStringiSOFT(device, ALC_HRTF_SPECIFIER_SOFT, i);
                 if (strcmp(entry, "") == 0)

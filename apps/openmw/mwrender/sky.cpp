@@ -56,7 +56,7 @@ namespace
 
         osg::Object* clone(const osg::CopyOp& op) const override { return nullptr; }
 
-        void operate(osgParticle::Particle* P, double dt) override {}
+        void operate(osgParticle::Particle* particle, double dt) override {}
 
         void operateParticles(osgParticle::ParticleSystem* ps, double dt) override
         {

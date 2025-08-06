@@ -1,5 +1,6 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
 #define OPENMW_COMPONENTS_SCENEUTIL_SHADOWBIN_H
+
 #include <array>
 #include <osgUtil/RenderBin>
 #include <unordered_set>

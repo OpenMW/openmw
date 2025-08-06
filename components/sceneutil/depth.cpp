@@ -16,15 +16,15 @@ namespace SceneUtil
 
     osg::Matrix getReversedZProjectionMatrixAsPerspectiveInf(double fov, double aspect, double near)
     {
-        double A = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
-        return osg::Matrix(A / aspect, 0, 0, 0, 0, A, 0, 0, 0, 0, 0, -1, 0, 0, near, 0);
+        const double a = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
+        return osg::Matrix(a / aspect, 0, 0, 0, 0, a, 0, 0, 0, 0, 0, -1, 0, 0, near, 0);
     }
 
     osg::Matrix getReversedZProjectionMatrixAsPerspective(double fov, double aspect, double near, double far)
     {
-        double A = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
+        const double a = 1.0 / std::tan(osg::DegreesToRadians(fov) / 2.0);
         return osg::Matrix(
-            A / aspect, 0, 0, 0, 0, A, 0, 0, 0, 0, near / (far - near), -1, 0, 0, (far * near) / (far - near), 0);
+            a / aspect, 0, 0, 0, 0, a, 0, 0, 0, 0, near / (far - near), -1, 0, 0, (far * near) / (far - near), 0);
     }
 
     osg::Matrix getReversedZProjectionMatrixAsOrtho(

@@ -95,9 +95,9 @@ namespace MWLua
                     contentFiles[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
 
                 {
-                    auto system_time = std::chrono::system_clock::now()
+                    const auto systemTime = std::chrono::system_clock::now()
                         - (std::filesystem::file_time_type::clock::now() - slot.mTimeStamp);
-                    slotInfo["creationTime"] = std::chrono::duration<double>(system_time.time_since_epoch()).count();
+                    slotInfo["creationTime"] = std::chrono::duration<double>(systemTime.time_since_epoch()).count();
                 }
 
                 slotInfo["contentFiles"] = contentFiles;

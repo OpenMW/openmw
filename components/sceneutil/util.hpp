@@ -68,19 +68,19 @@ namespace SceneUtil
         bsphere._center = bsphere._center * matrix;
 
         xdash -= bsphere._center;
-        typename VT::value_type sqrlen_xdash = xdash.length2();
+        typename VT::value_type sqrlenXdash = xdash.length2();
 
         ydash -= bsphere._center;
-        typename VT::value_type sqrlen_ydash = ydash.length2();
+        typename VT::value_type sqrlenYdash = ydash.length2();
 
         zdash -= bsphere._center;
-        typename VT::value_type sqrlen_zdash = zdash.length2();
+        typename VT::value_type sqrlenZdash = zdash.length2();
 
-        bsphere._radius = sqrlen_xdash;
-        if (bsphere._radius < sqrlen_ydash)
-            bsphere._radius = sqrlen_ydash;
-        if (bsphere._radius < sqrlen_zdash)
-            bsphere._radius = sqrlen_zdash;
+        bsphere._radius = sqrlenXdash;
+        if (bsphere._radius < sqrlenYdash)
+            bsphere._radius = sqrlenYdash;
+        if (bsphere._radius < sqrlenZdash)
+            bsphere._radius = sqrlenZdash;
         bsphere._radius = sqrtf(bsphere._radius);
     }
 

@@ -123,14 +123,14 @@ namespace
             texture = magicEffect->mParticle;
         }
 
-        if (projectileEffects.mList.size()
-            > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
+        // insert a VFX_Multiple projectile if there are multiple projectile effects
+        if (projectileEffects.mList.size() > 1)
         {
-            const ESM::RefId ID = ESM::RefId::stringRefId("VFX_Multiple" + std::to_string(effects->mList.size()));
-            std::vector<ESM::RefId>::iterator it;
-            it = projectileIDs.begin();
-            it = projectileIDs.insert(it, ID);
+            const ESM::RefId projectileId
+                = ESM::RefId::stringRefId("VFX_Multiple" + std::to_string(effects->mList.size()));
+            projectileIDs.insert(projectileIDs.begin(), projectileId);
         }
+
         return projectileEffects;
     }
 

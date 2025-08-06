@@ -45,7 +45,7 @@ namespace MWScript
         {
             mErrorHandler.setContext(script->mId.getRefIdString());
 
-            bool Success = true;
+            bool success = true;
             try
             {
                 std::istringstream input(script->mScriptText);
@@ -55,25 +55,25 @@ namespace MWScript
                 scanner.scan(mParser);
 
                 if (!mErrorHandler.isGood())
-                    Success = false;
+                    success = false;
             }
             catch (const Compiler::SourceException&)
             {
                 // error has already been reported via error handler
-                Success = false;
+                success = false;
             }
             catch (const std::exception& error)
             {
                 Log(Debug::Error) << "Error: An exception has been thrown: " << error.what();
-                Success = false;
+                success = false;
             }
 
-            if (!Success)
+            if (!success)
             {
                 Log(Debug::Error) << "Error: script compiling failed: " << name;
             }
 
-            if (Success)
+            if (success)
             {
                 mScripts.emplace(name, CompiledScript(mParser.getProgram(), mParser.getLocals()));
 

@@ -403,12 +403,12 @@ namespace SDLUtil
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width / 4;
-        const int FUDGE_FACTOR_Y = height / 4;
+        const int fudgeFactorX = width / 4;
+        const int fudgeFactorY = height / 4;
 
         // warp the mouse if it's about to go outside the window
-        if (evt.x - FUDGE_FACTOR_X < 0 || evt.x + FUDGE_FACTOR_X > width || evt.y - FUDGE_FACTOR_Y < 0
-            || evt.y + FUDGE_FACTOR_Y > height)
+        if (evt.x - fudgeFactorX < 0 || evt.x + fudgeFactorX > width || evt.y - fudgeFactorY < 0
+            || evt.y + fudgeFactorY > height)
         {
             warpMouse(width / 2, height / 2);
         }
@@ -417,37 +417,37 @@ namespace SDLUtil
     /// \brief Package mouse and mousewheel motions into a single event
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event& evt)
     {
-        MouseMotionEvent pack_evt = {};
-        pack_evt.x = mMouseX * mScaleX;
-        pack_evt.y = mMouseY * mScaleY;
-        pack_evt.z = mMouseZ;
+        MouseMotionEvent packEvt = {};
+        packEvt.x = mMouseX * mScaleX;
+        packEvt.y = mMouseY * mScaleY;
+        packEvt.z = mMouseZ;
 
         if (evt.type == SDL_MOUSEMOTION)
         {
-            pack_evt.x = mMouseX = evt.motion.x * mScaleX;
-            pack_evt.y = mMouseY = evt.motion.y * mScaleY;
-            pack_evt.xrel = evt.motion.xrel * mScaleX;
-            pack_evt.yrel = evt.motion.yrel * mScaleY;
-            pack_evt.type = SDL_MOUSEMOTION;
+            packEvt.x = mMouseX = evt.motion.x * mScaleX;
+            packEvt.y = mMouseY = evt.motion.y * mScaleY;
+            packEvt.xrel = evt.motion.xrel * mScaleX;
+            packEvt.yrel = evt.motion.yrel * mScaleY;
+            packEvt.type = SDL_MOUSEMOTION;
             if (mFirstMouseMove)
             {
                 // first event should be treated as non-relative, since there's no point of reference
                 // SDL then (incorrectly) uses (0,0) as point of reference, on Linux at least...
-                pack_evt.xrel = pack_evt.yrel = 0;
+                packEvt.xrel = packEvt.yrel = 0;
                 mFirstMouseMove = false;
             }
         }
         else if (evt.type == SDL_MOUSEWHEEL)
         {
-            mMouseZ += pack_evt.zrel = (evt.wheel.y * 120);
-            pack_evt.z = mMouseZ;
-            pack_evt.type = SDL_MOUSEWHEEL;
+            mMouseZ += packEvt.zrel = (evt.wheel.y * 120);
+            packEvt.z = mMouseZ;
+            packEvt.type = SDL_MOUSEWHEEL;
         }
         else
         {
             throw std::runtime_error("Tried to package non-motion event!");
         }
 
-        return pack_evt;
+        return packEvt;
     }
 }

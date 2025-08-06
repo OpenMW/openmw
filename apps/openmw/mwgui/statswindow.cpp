@@ -334,15 +334,15 @@ namespace MWGui
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        const MWMechanics::NpcStats& PCstats = player.getClass().getNpcStats(player);
+        const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
         const auto& store = MWBase::Environment::get().getESMStore();
 
         std::stringstream detail;
         bool first = true;
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
-            float mult = PCstats.getLevelupAttributeMultiplier(attribute.mId);
-            mult = std::min(mult, 100 - PCstats.getAttribute(attribute.mId).getBase());
+            float mult = playerStats.getLevelupAttributeMultiplier(attribute.mId);
+            mult = std::min(mult, 100 - playerStats.getAttribute(attribute.mId).getBase());
             if (mult > 1)
             {
                 if (!first)
@@ -361,21 +361,21 @@ namespace MWGui
             getWidget(levelWidget, i == 0 ? "Level_str" : "LevelText");
 
             levelWidget->setUserString(
-                "RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
+                "RangePosition_LevelProgress", MyGUI::utility::toString(playerStats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelProgressText",
-                MyGUI::utility::toString(PCstats.getLevelProgress()) + "/" + MyGUI::utility::toString(max));
+                MyGUI::utility::toString(playerStats.getLevelProgress()) + "/" + MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelDetailText", detailText);
         }
 
-        setFactions(PCstats.getFactionRanks());
-        setExpelled(PCstats.getExpelled());
+        setFactions(playerStats.getFactionRanks());
+        setExpelled(playerStats.getExpelled());
 
         const auto& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         setBirthSign(signId);
-        setReputation(PCstats.getReputation());
-        setBounty(PCstats.getBounty());
+        setReputation(playerStats.getReputation());
+        setBounty(playerStats.getBounty());
 
         if (mChanged)
             updateSkillArea();
@@ -587,8 +587,8 @@ namespace MWGui
         if (!mFactions.empty())
         {
             MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
-            const MWMechanics::NpcStats& PCstats = playerPtr.getClass().getNpcStats(playerPtr);
-            const std::set<ESM::RefId>& expelled = PCstats.getExpelled();
+            const MWMechanics::NpcStats& playerStats = playerPtr.getClass().getNpcStats(playerPtr);
+            const std::set<ESM::RefId>& expelled = playerStats.getExpelled();
 
             bool firstFaction = true;
             for (const auto& [factionId, factionRank] : mFactions)

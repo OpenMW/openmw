@@ -172,10 +172,10 @@ namespace LuaUtil
             std::optional<T> res = std::nullopt;
             mLua.protectedCall([&](LuaUtil::LuaView& view) {
                 LoadedData& data = ensureLoaded();
-                auto I = data.mPublicInterfaces.get<sol::optional<sol::table>>(interfaceName);
-                if (I)
+                auto interface = data.mPublicInterfaces.get<sol::optional<sol::table>>(interfaceName);
+                if (interface)
                 {
-                    auto o = I->get_or<sol::object>(identifier, sol::nil);
+                    auto o = interface->get_or<sol::object>(identifier, sol::nil);
                     if (o.is<sol::function>())
                     {
                         sol::object luaRes = o.as<sol::function>().call(args...);

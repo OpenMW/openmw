@@ -474,8 +474,8 @@ namespace CSMWorld
             return;
         }
 
-        const int TypeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
-        int type = mReferenceables.getData(index, TypeColumn).toInt();
+        const int typeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
+        int type = mReferenceables.getData(index, typeColumn).toInt();
         if (type == UniversalId::Type_Creature)
         {
             // Valid creature record
@@ -606,8 +606,8 @@ namespace CSMWorld
             }
         };
 
-        int TypeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
-        int type = mReferenceables.getData(index, TypeColumn).toInt();
+        const int typeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
+        int type = mReferenceables.getData(index, typeColumn).toInt();
         if (type == UniversalId::Type_Armor)
         {
             auto& armor = dynamic_cast<const Record<ESM::Armor>&>(record).get();

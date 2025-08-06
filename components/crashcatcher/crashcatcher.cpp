@@ -320,9 +320,9 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
     else
         crash_info.siginfo = *siginfo;
 
-    const pid_t dbg_pid = fork();
+    const pid_t dbgPid = fork();
     /* Fork off to start a crash handler */
-    switch (dbg_pid)
+    switch (dbgPid)
     {
         /* Error */
         case -1:
@@ -342,7 +342,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
 
         default:
 #ifdef __linux__
-            prctl(PR_SET_PTRACER, dbg_pid, 0, 0, 0);
+            prctl(PR_SET_PTRACER, dbgPid, 0, 0, 0);
 #endif
             safe_write(fd[1], &crash_info, sizeof(crash_info));
             close(fd[0]);
@@ -352,7 +352,7 @@ static void crash_catcher(int signum, siginfo_t* siginfo, void* /*context*/)
             do
             {
                 int status;
-                if (waitpid(dbg_pid, &status, 0) == dbg_pid && (WIFEXITED(status) || WIFSIGNALED(status)))
+                if (waitpid(dbgPid, &status, 0) == dbgPid && (WIFEXITED(status) || WIFSIGNALED(status)))
                 {
                     /* The debug process died before it could kill us */
                     raise(signum);

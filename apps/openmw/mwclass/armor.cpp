@@ -85,7 +85,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
         const int size = 11;
 
@@ -104,11 +104,11 @@ namespace MWClass
         for (int i = 0; i < size; ++i)
             if (sMapping[i][0] == ref->mBase->mData.mType)
             {
-                slots_.push_back(int(sMapping[i][1]));
+                slots.push_back(int(sMapping[i][1]));
                 break;
             }
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
     ESM::RefId Armor::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
@@ -352,9 +352,9 @@ namespace MWClass
             return { 0, "#{sInventoryMessage1}" };
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots = getEquipmentSlots(ptr);
 
-        if (slots_.first.empty())
+        if (slots.first.empty())
             return { 0, {} };
 
         if (npc.getClass().isNpc())
@@ -377,7 +377,7 @@ namespace MWClass
             }
         }
 
-        for (std::vector<int>::const_iterator slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot = slots.first.begin(); slot != slots.first.end(); ++slot)
         {
             // If equipping a shield, check if there's a twohanded weapon conflicting with it
             if (*slot == MWWorld::InventoryStore::Slot_CarriedLeft)

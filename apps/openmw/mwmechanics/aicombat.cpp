@@ -140,9 +140,9 @@ namespace MWMechanics
                 const osg::Vec3f destination = storage.mUseCustomDestination
                     ? storage.mCustomDestination
                     : target.getRefData().getPosition().asVec3();
-                const bool is_target_reached = pathTo(actor, destination, duration,
+                const bool isTargetReached = pathTo(actor, destination, duration,
                     characterController.getSupportedMovementDirections(), targetReachedTolerance);
-                if (is_target_reached)
+                if (isTargetReached)
                     storage.mReadyToAttack = true;
             }
 
@@ -348,11 +348,11 @@ namespace MWMechanics
     void MWMechanics::AiCombat::updateLOS(
         const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, MWMechanics::AiCombatStorage& storage)
     {
-        static const float LOS_UPDATE_DURATION = 0.5f;
+        const float losUpdateDuration = 0.5f;
         if (storage.mUpdateLOSTimer <= 0.f)
         {
             storage.mLOS = MWBase::Environment::get().getWorld()->getLOS(actor, target);
-            storage.mUpdateLOSTimer = LOS_UPDATE_DURATION;
+            storage.mUpdateLOSTimer = losUpdateDuration;
         }
         else
             storage.mUpdateLOSTimer -= duration;
@@ -361,7 +361,7 @@ namespace MWMechanics
     void MWMechanics::AiCombat::updateFleeing(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration,
         MWWorld::MovementDirectionFlags supportedMovementDirections, AiCombatStorage& storage)
     {
-        static const float BLIND_RUN_DURATION = 1.0f;
+        const float blindRunDuration = 1.0f;
 
         updateLOS(actor, target, duration, storage);
 
@@ -427,7 +427,7 @@ namespace MWMechanics
             case AiCombatStorage::FleeState_RunBlindly:
             {
                 // timer to prevent twitchy movement that can be observed in vanilla MW
-                if (storage.mFleeBlindRunTimer < BLIND_RUN_DURATION)
+                if (storage.mFleeBlindRunTimer < blindRunDuration)
                 {
                     storage.mFleeBlindRunTimer += duration;
 
@@ -803,7 +803,7 @@ namespace
         float velDir = vTargetMoveDir * vDirToTargetNormalized;
 
         // time to collision between target and projectile
-        float t_collision;
+        float tCollision;
 
         float projVelDirSquared = projSpeed * projSpeed - velPerp * velPerp;
         if (projVelDirSquared > 0)
@@ -814,12 +814,12 @@ namespace
             float projDistDiff = vDirToTarget * vTargetMoveDirNormalized; // dot product
             projDistDiff = std::sqrt(distToTarget * distToTarget - projDistDiff * projDistDiff);
 
-            t_collision = projDistDiff / (std::sqrt(projVelDirSquared) - velDir);
+            tCollision = projDistDiff / (std::sqrt(projVelDirSquared) - velDir);
         }
         else
-            t_collision = 0; // speed of projectile is not enough to reach moving target
+            tCollision = 0; // speed of projectile is not enough to reach moving target
 
-        return vDirToTarget + vTargetMoveDir * t_collision;
+        return vDirToTarget + vTargetMoveDir * tCollision;
     }
 
 }

@@ -132,12 +132,12 @@ namespace MWMechanics
         dir.z() = 0;
         dir.normalize();
         float verticalOffset = 200; // instead of '200' here we want the height of the actor
-        osg::Vec3f _from = from + dir * offsetXY + osg::Z_AXIS * verticalOffset;
+        const osg::Vec3f adjustedFrom = from + dir * offsetXY + osg::Z_AXIS * verticalOffset;
 
         // cast up-down ray and find height of hit in world space
-        float h = _from.z()
+        float h = adjustedFrom.z()
             - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(
-                _from, -osg::Z_AXIS, verticalOffset + PATHFIND_Z_REACH + 1);
+                adjustedFrom, -osg::Z_AXIS, verticalOffset + PATHFIND_Z_REACH + 1);
 
         return (std::abs(from.z() - h) <= PATHFIND_Z_REACH);
     }

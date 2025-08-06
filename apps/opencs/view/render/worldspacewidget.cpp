@@ -270,9 +270,9 @@ CSVWidget::SceneToolRun* CSVRender::WorldspaceWidget::makeRunTool(CSVWidget::Sce
     {
         int state = debugProfiles.data(debugProfiles.index(i, stateColumn)).toInt();
 
-        bool default_ = debugProfiles.data(debugProfiles.index(i, defaultColumn)).toInt();
+        const bool defaultValue = debugProfiles.data(debugProfiles.index(i, defaultColumn)).toInt();
 
-        if (state != CSMWorld::RecordBase::State_Deleted && default_)
+        if (state != CSMWorld::RecordBase::State_Deleted && defaultValue)
             profiles.emplace_back(debugProfiles.data(debugProfiles.index(i, idColumn)).toString().toUtf8().constData());
     }
 

@@ -59,11 +59,10 @@ namespace MWGui
     void LoadingScreen::findSplashScreens()
     {
         auto isSupportedExtension = [](const std::string_view& ext) {
-            static const std::array<std::string, 7> supported_extensions{ { "tga", "dds", "ktx", "png", "bmp", "jpeg",
+            static const std::array<std::string, 7> supportedExtensions{ { "tga", "dds", "ktx", "png", "bmp", "jpeg",
                 "jpg" } };
             return !ext.empty()
-                && std::find(supported_extensions.begin(), supported_extensions.end(), ext)
-                != supported_extensions.end();
+                && std::find(supportedExtensions.begin(), supportedExtensions.end(), ext) != supportedExtensions.end();
         };
 
         constexpr VFS::Path::NormalizedView splash("splash/");

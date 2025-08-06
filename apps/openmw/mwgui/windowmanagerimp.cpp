@@ -1223,19 +1223,19 @@ namespace MWGui
     {
         std::string_view tag = _tag;
 
-        std::string_view MyGuiPrefix = "setting=";
+        constexpr std::string_view myGuiPrefix = "setting=";
 
-        std::string_view tokenToFind = "sCell=";
+        constexpr std::string_view tokenToFind = "sCell=";
 
-        if (tag.starts_with(MyGuiPrefix))
+        if (tag.starts_with(myGuiPrefix))
         {
-            tag = tag.substr(MyGuiPrefix.length());
-            size_t comma_pos = tag.find(',');
-            if (comma_pos == std::string_view::npos)
+            tag = tag.substr(myGuiPrefix.length());
+            const size_t commaPos = tag.find(',');
+            if (commaPos == std::string_view::npos)
                 throw std::runtime_error("Invalid setting tag (expected comma): " + std::string(tag));
 
-            std::string_view settingSection = tag.substr(0, comma_pos);
-            std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
+            std::string_view settingSection = tag.substr(0, commaPos);
+            std::string_view settingTag = tag.substr(commaPos + 1, tag.length());
 
             _result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
         }
@@ -2419,12 +2419,12 @@ namespace MWGui
             if (image.valid())
             {
                 // everything looks good, send it to the cursor manager
-                Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
-                Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
+                const Uint8 hotspotX = imgSetPointer->getHotSpot().left;
+                const Uint8 hotspotY = imgSetPointer->getHotSpot().top;
                 int rotation = imgSetPointer->getRotation();
                 MyGUI::IntSize pointerSize = imgSetPointer->getSize();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y,
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspotX, hotspotY,
                     pointerSize.width, pointerSize.height);
             }
         }

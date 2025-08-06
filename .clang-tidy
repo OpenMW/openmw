@@ -18,3 +18,5 @@ CheckOptions:
   value: CamelCase
 - key: readability-identifier-naming.NamespaceIgnoredRegexp
   value: 'bpo|osg(DB|FX|Particle|Shadow|Viewer|Util)?'
+- key: readability-identifier-naming.LocalVariableCase
+  value: camelBack

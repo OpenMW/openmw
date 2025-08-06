@@ -270,25 +270,29 @@ namespace LuaUtil
                     return res;
                 });
         transMType[sol::meta_function::to_string] = [](const TransformM& m) {
-            osg::Vec3f trans, scale;
-            osg::Quat rotation, so;
+            osg::Vec3f trans;
+            osg::Vec3f scale;
+            osg::Quat rotation;
+            osg::Quat so;
             m.mM.decompose(trans, rotation, scale, so);
-            osg::Quat::value_type rot_angle, so_angle;
-            osg::Vec3f rot_axis, so_axis;
-            rotation.getRotate(rot_angle, rot_axis);
-            so.getRotate(so_angle, so_axis);
+            osg::Quat::value_type rotationAngle;
+            osg::Quat::value_type soAngle;
+            osg::Vec3f rotationAxis;
+            osg::Vec3f soAxis;
+            rotation.getRotate(rotationAngle, rotationAxis);
+            so.getRotate(soAngle, soAxis);
             std::stringstream ss;
             ss << "TransformM{ ";
             if (trans.length2() > 0)
                 ss << "move(" << trans.x() << ", " << trans.y() << ", " << trans.z() << ") ";
-            if (rot_angle != 0)
-                ss << "rotation(angle=" << rot_angle << ", axis=(" << rot_axis.x() << ", " << rot_axis.y() << ", "
-                   << rot_axis.z() << ")) ";
+            if (rotationAngle != 0)
+                ss << "rotation(angle=" << rotationAngle << ", axis=(" << rotationAxis.x() << ", " << rotationAxis.y()
+                   << ", " << rotationAxis.z() << ")) ";
             if (scale.x() != 1 || scale.y() != 1 || scale.z() != 1)
                 ss << "scale(" << scale.x() << ", " << scale.y() << ", " << scale.z() << ") ";
-            if (so_angle != 0)
-                ss << "rotation(angle=" << so_angle << ", axis=(" << so_axis.x() << ", " << so_axis.y() << ", "
-                   << so_axis.z() << ")) ";
+            if (soAngle != 0)
+                ss << "rotation(angle=" << soAngle << ", axis=(" << soAxis.x() << ", " << soAxis.y() << ", "
+                   << soAxis.z() << ")) ";
             ss << "}";
             return ss.str();
         };

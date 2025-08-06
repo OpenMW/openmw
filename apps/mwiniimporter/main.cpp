@@ -62,7 +62,7 @@ int wmain(int argc, wchar_t* wargv[])
     try
     {
         bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
-        bpo::positional_options_description p_desc;
+        bpo::positional_options_description positionalDesc;
         auto addOption = desc.add_options();
         addOption("help,h", "produce help message");
         addOption("verbose,v", "verbose output");
@@ -79,11 +79,12 @@ int wmain(int argc, wchar_t* wargv[])
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
         ;
-        p_desc.add("ini", 1).add("cfg", 1);
+        positionalDesc.add("ini", 1).add("cfg", 1);
 
         bpo::variables_map vm;
 
-        bpo::parsed_options parsed = bpo::command_line_parser(argc, argv).options(desc).positional(p_desc).run();
+        bpo::parsed_options parsed
+            = bpo::command_line_parser(argc, argv).options(desc).positional(positionalDesc).run();
         bpo::store(parsed, vm);
 
         if (vm.count("help") || !vm.count("ini") || !vm.count("cfg"))

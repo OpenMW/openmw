@@ -425,6 +425,7 @@ Ubuntu_Clang:
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
+    - cp extern/.clang-tidy build/.clang-tidy
     - cd build
     - find . -name *.o -exec touch {} \;
     - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
