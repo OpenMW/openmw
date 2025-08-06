@@ -157,7 +157,7 @@ namespace MWMechanics
                 int bonus = 0;
                 int index = ESM::Skill::refIdToIndex(skill.mId);
                 auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                    [&](const auto& bonus) { return bonus.mSkill == index; });
+                    [&](const auto& v) { return v.mSkill == index; });
                 if (bonusIt != race->mData.mBonus.end())
                     bonus = bonusIt->mBonus;
 

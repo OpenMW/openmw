@@ -359,10 +359,10 @@ namespace LuaUtil
         if (it == data.mEventHandlers.end())
             return;
         mLua.protectedCall([&](LuaView& view) {
-            sol::object data;
+            sol::object object;
             try
             {
-                data = LuaUtil::deserialize(view.sol(), eventData, mSerializer);
+                object = LuaUtil::deserialize(view.sol(), eventData, mSerializer);
             }
             catch (std::exception& e)
             {
@@ -375,7 +375,7 @@ namespace LuaUtil
                 const Handler& h = list[i];
                 try
                 {
-                    sol::object res = LuaUtil::call({ this, h.mScriptId }, h.mFn, data);
+                    sol::object res = LuaUtil::call({ this, h.mScriptId }, h.mFn, object);
                     if (res.is<bool>() && !res.as<bool>())
                         break; // Skip other handlers if 'false' was returned.
                 }

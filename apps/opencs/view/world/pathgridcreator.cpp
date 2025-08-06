@@ -30,9 +30,9 @@ CSMWorld::IdTable& CSVWorld::PathgridCreator::getPathgridsTable() const
     return dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
 }
 
-CSVWorld::PathgridCreator::PathgridCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
-    CSMWorld::IdCompletionManager& completionManager)
-    : GenericCreator(data, undoStack, id)
+CSVWorld::PathgridCreator::PathgridCreator(CSMWorld::Data& worldData, QUndoStack& undoStack,
+    const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
+    : GenericCreator(worldData, undoStack, id)
 {
     setManualEditing(false);
 

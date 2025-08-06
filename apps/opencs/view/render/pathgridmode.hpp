@@ -50,11 +50,11 @@ namespace CSVRender
         void dragAborted() override;
 
     private:
-        enum DragMode
+        enum class DragMode
         {
-            DragMode_None,
-            DragMode_Move,
-            DragMode_Edge
+            None,
+            Move,
+            Edge
         };
 
         DragMode mDragMode;

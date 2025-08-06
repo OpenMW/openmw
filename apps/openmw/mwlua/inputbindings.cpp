@@ -84,7 +84,7 @@ namespace MWLua
             inputActions[sol::meta_function::index]
                 = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
             {
-                auto pairs = [](LuaUtil::InputAction::Registry& registry) {
+                auto pairs = [](LuaUtil::InputAction::Registry& self) {
                     auto next = [](LuaUtil::InputAction::Registry& registry, std::string_view key)
                         -> sol::optional<std::tuple<std::string, LuaUtil::InputAction::Info>> {
                         std::optional<std::string> nextKey(registry.nextKey(key));
@@ -93,7 +93,7 @@ namespace MWLua
                         else
                             return std::make_tuple(*nextKey, registry[*nextKey].value());
                     };
-                    return std::make_tuple(next, registry, registry.firstKey());
+                    return std::make_tuple(next, self, self.firstKey());
                 };
                 inputActions[sol::meta_function::pairs] = pairs;
             }
@@ -122,7 +122,7 @@ namespace MWLua
             inputTriggers[sol::meta_function::index]
                 = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
             {
-                auto pairs = [](LuaUtil::InputTrigger::Registry& registry) {
+                auto pairs = [](LuaUtil::InputTrigger::Registry& self) {
                     auto next = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key)
                         -> sol::optional<std::tuple<std::string, LuaUtil::InputTrigger::Info>> {
                         std::optional<std::string> nextKey(registry.nextKey(key));
@@ -131,7 +131,7 @@ namespace MWLua
                         else
                             return std::make_tuple(*nextKey, registry[*nextKey].value());
                     };
-                    return std::make_tuple(next, registry, registry.firstKey());
+                    return std::make_tuple(next, self, self.firstKey());
                 };
                 inputTriggers[sol::meta_function::pairs] = pairs;
             }

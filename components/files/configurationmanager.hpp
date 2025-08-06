@@ -97,7 +97,7 @@ namespace Files
 
     typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 
-    PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
+    PathContainer asPathContainer(const MaybeQuotedPathContainer& value);
 
 } /* namespace Files */
 

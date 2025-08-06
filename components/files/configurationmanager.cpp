@@ -475,11 +475,11 @@ namespace Files
         return istream;
     }
 
-    PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer)
+    PathContainer asPathContainer(const MaybeQuotedPathContainer& value)
     {
         PathContainer res;
-        res.reserve(MaybeQuotedPathContainer.size());
-        for (const auto& maybeQuotedPath : MaybeQuotedPathContainer)
+        res.reserve(value.size());
+        for (const auto& maybeQuotedPath : value)
         {
             res.emplace_back(maybeQuotedPath.u8string()); // This call to u8string is redundant, but required to build
                                                           // on MSVC 14.26 due to implementation bugs.

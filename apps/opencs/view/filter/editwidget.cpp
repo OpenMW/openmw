@@ -25,16 +25,16 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtablebase.hpp"
 
-CSVFilter::EditWidget::EditWidget(CSMWorld::Data& data, QWidget* parent)
+CSVFilter::EditWidget::EditWidget(CSMWorld::Data& worldData, QWidget* parent)
     : QLineEdit(parent)
-    , mParser(data)
+    , mParser(worldData)
     , mIsEmpty(true)
 {
     mPalette = palette();
     connect(this, &QLineEdit::textChanged, this, &EditWidget::textChanged);
 
     const CSMWorld::IdTableBase* model
-        = static_cast<const CSMWorld::IdTableBase*>(data.getTableModel(CSMWorld::UniversalId::Type_Filters));
+        = static_cast<const CSMWorld::IdTableBase*>(worldData.getTableModel(CSMWorld::UniversalId::Type_Filters));
 
     connect(model, &CSMWorld::IdTableBase::dataChanged, this, &EditWidget::filterDataChanged, Qt::QueuedConnection);
     connect(model, &CSMWorld::IdTableBase::rowsRemoved, this, &EditWidget::filterRowsRemoved, Qt::QueuedConnection);

@@ -89,18 +89,18 @@ namespace LuaUtil
 
         // Pushing to the stack from outside a Lua context crashes the engine if no memory can be allocated to grow the
         // stack
-        template <class Lambda>
-        [[nodiscard]] int invokeProtectedCall(Lambda&& f) const
+        template <class Function>
+        [[nodiscard]] int invokeProtectedCall(Function&& function) const
         {
             if (!lua_checkstack(mSol.lua_state(), 2))
                 return LUA_ERRMEM;
             lua_pushcfunction(mSol.lua_state(), [](lua_State* L) {
                 void* f = lua_touserdata(L, 1);
                 LuaView view(L);
-                (*static_cast<Lambda*>(f))(view);
+                (*static_cast<Function*>(f))(view);
                 return 0;
             });
-            lua_pushlightuserdata(mSol.lua_state(), &f);
+            lua_pushlightuserdata(mSol.lua_state(), &function);
             return lua_pcall(mSol.lua_state(), 1, 0, 0);
         }
 

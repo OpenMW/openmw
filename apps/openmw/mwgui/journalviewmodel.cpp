@@ -75,11 +75,11 @@ namespace MWGui
         {
             typedef t_iterator iterator_t;
 
-            iterator_t itr;
+            iterator_t mItr;
             JournalViewModelImpl const* mModel;
 
             BaseEntry(JournalViewModelImpl const* model, iterator_t itr)
-                : itr(itr)
+                : mItr(itr)
                 , mModel(model)
                 , loaded(false)
             {
@@ -235,7 +235,7 @@ namespace MWGui
         template <typename iterator_t>
         struct JournalEntryImpl : BaseEntry<iterator_t, JournalEntry>
         {
-            using BaseEntry<iterator_t, JournalEntry>::itr;
+            using BaseEntry<iterator_t, JournalEntry>::mItr;
 
             mutable std::string timestamp_buffer;
 
@@ -244,7 +244,7 @@ namespace MWGui
             {
             }
 
-            std::string getText() const override { return itr->getText(); }
+            std::string getText() const override { return mItr->getText(); }
 
             Utf8Span timestamp() const override
             {
@@ -254,9 +254,9 @@ namespace MWGui
 
                     std::ostringstream os;
 
-                    os << itr->mDayOfMonth << ' '
-                       << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(itr->mMonth) << " ("
-                       << dayStr << " " << (itr->mDay) << ')';
+                    os << mItr->mDayOfMonth << ' '
+                       << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(mItr->mMonth) << " ("
+                       << dayStr << " " << (mItr->mDay) << ')';
 
                     timestamp_buffer = os.str();
                 }
@@ -334,9 +334,9 @@ namespace MWGui
             {
             }
 
-            std::string getText() const override { return itr->getText(); }
+            std::string getText() const override { return mItr->getText(); }
 
-            Utf8Span source() const override { return toUtf8Span(itr->mActorName); }
+            Utf8Span source() const override { return toUtf8Span(mItr->mActorName); }
         };
 
         void visitTopicEntries(TopicId topicId, std::function<void(TopicEntry const&)> visitor) const override

@@ -394,12 +394,12 @@ namespace LuaUtil
         }
 
         util["loadCode"] = [](const std::string& code, const sol::table& env, sol::this_state s) {
-            sol::state_view lua(s);
-            sol::load_result res = lua.load(code, "", sol::load_mode::text);
+            sol::state_view thisState(s);
+            sol::load_result res = thisState.load(code, "", sol::load_mode::text);
             if (!res.valid())
                 throw std::runtime_error("Lua error: " + res.get<std::string>());
             sol::function fn = res;
-            sol::environment newEnv(lua, sol::create, env);
+            sol::environment newEnv(thisState, sol::create, env);
             newEnv[sol::metatable_key][sol::meta_function::new_index] = env;
             sol::set_environment(newEnv, fn);
             return fn;

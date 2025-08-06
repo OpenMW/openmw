@@ -466,10 +466,10 @@ namespace MWLua
             ESM::RefId factionId = parseFactionId(faction);
             return ptr.getClass().getNpcStats(ptr).getExpelled(factionId);
         };
-        npc["getFactions"] = [](sol::this_state lua, const Object& actor) {
+        npc["getFactions"] = [](sol::this_state thisState, const Object& actor) {
             const MWWorld::Ptr ptr = actor.ptr();
             MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
-            sol::table res(lua, sol::create);
+            sol::table res(thisState, sol::create);
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             {
                 for (const auto& [factionId, _] : npcStats.getFactionRanks())

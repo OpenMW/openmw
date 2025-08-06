@@ -472,10 +472,10 @@ namespace MWWorld
     {
         if (listener != nullptr)
             listener->setProgressRange(::EsmLoader::fileProgress);
-        auto visitorRec = [this, listener](ESM4::Reader& reader) {
-            bool result = ESMStoreImp::readRecord(reader, *this);
+        auto visitorRec = [this, listener](ESM4::Reader& r) {
+            bool result = ESMStoreImp::readRecord(r, *this);
             if (listener != nullptr)
-                listener->setProgress(::EsmLoader::fileProgress * reader.getFileOffset() / reader.getFileSize());
+                listener->setProgress(::EsmLoader::fileProgress * r.getFileOffset() / r.getFileSize());
             return result;
         };
         ESM4::ReaderUtils::readAll(reader, visitorRec, [](ESM4::Reader&) {});

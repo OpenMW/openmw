@@ -209,7 +209,7 @@ namespace Compiler
         bool mIgnoreSpecial;
 
     public:
-        enum keyword
+        enum Keyword
         {
             K_begin,
             K_end,
@@ -228,7 +228,7 @@ namespace Compiler
             K_to
         };
 
-        enum special
+        enum Special
         {
             S_newline,
             S_open,

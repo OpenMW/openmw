@@ -47,7 +47,7 @@ namespace
     bool isNear(const btVector3& lhs, const btVector3& rhs)
     {
         return std::equal(static_cast<const btScalar*>(lhs), static_cast<const btScalar*>(lhs) + 3,
-            static_cast<const btScalar*>(rhs), [](btScalar lhs, btScalar rhs) { return isNear(lhs, rhs); });
+            static_cast<const btScalar*>(rhs), [](btScalar l, btScalar r) { return isNear(l, r); });
     }
 
     bool isNear(const btMatrix3x3& lhs, const btMatrix3x3& rhs)

@@ -149,8 +149,8 @@ void CSVWorld::GenericCreator::addScope(const QString& name, CSMWorld::Scope sco
 }
 
 CSVWorld::GenericCreator::GenericCreator(
-    CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id, bool relaxedIdRules)
-    : mData(data)
+    CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id, bool relaxedIdRules)
+    : mData(worldData)
     , mUndoStack(undoStack)
     , mListId(id)
     , mLocked(false)

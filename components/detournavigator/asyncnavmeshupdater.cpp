@@ -316,7 +316,7 @@ namespace DetourNavigator
         {
             if (mPushed.emplace(agentBounds, changedTile).second)
             {
-                const auto processTime = [&, changedTile = changedTile, changeType = changeType] {
+                const std::chrono::steady_clock::time_point processTime = [&] {
                     if (changeType != ChangeType::update)
                         return std::chrono::steady_clock::time_point();
                     const auto lastUpdate = mLastUpdates.find(std::tie(agentBounds, changedTile));
@@ -947,11 +947,11 @@ namespace DetourNavigator
                             mNextTileId = TileId(mDb->getMaxTileId() + 1);
                             Log(Debug::Info) << "Updated navmeshdb tile_id to: " << mNextTileId;
                         }
-                        catch (const std::exception& e)
+                        catch (const std::exception& exception)
                         {
                             mWriteToDb = false;
-                            Log(Debug::Warning)
-                                << "Failed to update next tile_id, writes to navmeshdb are disabled: " << e.what();
+                            Log(Debug::Warning) << "Failed to update next tile_id, writes to navmeshdb are disabled: "
+                                                << exception.what();
                         }
                     }
                 }
@@ -960,12 +960,12 @@ namespace DetourNavigator
 
         if (isWritingDbJob(*job))
         {
-            process([&](JobIt job) { processWritingJob(job); });
+            process([&](JobIt it) { processWritingJob(it); });
             mUpdater.removeJob(job);
             return;
         }
 
-        process([&](JobIt job) { processReadingJob(job); });
+        process([&](JobIt it) { processReadingJob(it); });
         job->mState = JobState::WithDbResult;
         mUpdater.enqueueJob(job);
     }

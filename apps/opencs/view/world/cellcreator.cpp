@@ -37,8 +37,8 @@ void CSVWorld::CellCreator::configureCreateCommand(CSMWorld::CreateCommand& comm
     command.addNestedValue(parentIndex, index, mType->currentIndex() == 0);
 }
 
-CSVWorld::CellCreator::CellCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-    : GenericCreator(data, undoStack, id)
+CSVWorld::CellCreator::CellCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+    : GenericCreator(worldData, undoStack, id)
 {
     mY = new QSpinBox(this);
     mY->setVisible(false);

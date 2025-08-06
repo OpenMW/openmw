@@ -21,7 +21,7 @@ namespace CSVWorld
         Q_OBJECT
 
     public:
-        GlobalCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        explicit GlobalCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
     protected:
         void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
