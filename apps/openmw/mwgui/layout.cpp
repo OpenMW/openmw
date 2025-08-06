@@ -9,10 +9,10 @@
 
 namespace MWGui
 {
-    void Layout::initialise(std::string_view _layout)
+    void Layout::initialise(std::string_view layout)
     {
         constexpr char mainWindow[] = "_Main";
-        mLayoutName = _layout;
+        mLayoutName = layout;
 
         mPrefix = MyGUI::utility::toString(this, "_");
         mListWindowRoot = MyGUI::LayoutManager::getInstance().loadLayout(mLayoutName, mPrefix);
@@ -62,10 +62,10 @@ namespace MWGui
             window->setCaptionWithReplacing(MyGUI::UString(title));
     }
 
-    MyGUI::Widget* Layout::getWidget(std::string_view _name)
+    MyGUI::Widget* Layout::getWidget(std::string_view name)
     {
         std::string target = mPrefix;
-        target += _name;
+        target += name;
         for (MyGUI::Widget* widget : mListWindowRoot)
         {
             MyGUI::Widget* find = widget->findWidget(target);
@@ -74,7 +74,7 @@ namespace MWGui
                 return find;
             }
         }
-        MYGUI_EXCEPT("widget name '" << _name << "' in layout '" << mLayoutName << "' not found.");
+        MYGUI_EXCEPT("widget name '" << name << "' in layout '" << mLayoutName << "' not found.");
     }
 
 }

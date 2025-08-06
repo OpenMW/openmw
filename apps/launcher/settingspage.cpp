@@ -126,16 +126,16 @@ void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
 
 namespace
 {
-    constexpr double CellSizeInUnits = 8192;
+    constexpr double cellSizeInUnits = 8192;
 
     double convertToCells(double unitRadius)
     {
-        return unitRadius / CellSizeInUnits;
+        return unitRadius / cellSizeInUnits;
     }
 
-    int convertToUnits(double CellGridRadius)
+    int convertToUnits(double cellGridRadius)
     {
-        return static_cast<int>(CellSizeInUnits * CellGridRadius);
+        return static_cast<int>(cellSizeInUnits * cellGridRadius);
     }
 }
 

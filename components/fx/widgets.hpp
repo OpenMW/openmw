@@ -152,7 +152,7 @@ namespace Fx
                 mDragger->eventMouseWheel += MyGUI::newDelegate(this, &EditNumber::notifyMouseWheel);
             }
 
-            void notifyMouseWheel(MyGUI::Widget* sender, int rel)
+            void notifyMouseWheel(MyGUI::Widget* /*sender*/, int rel)
             {
                 if (rel > 0)
                     increment(mUniform->mStep);
@@ -160,7 +160,7 @@ namespace Fx
                     increment(-mUniform->mStep);
             }
 
-            void notifyMouseButtonDragged(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
+            void notifyMouseButtonDragged(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)
             {
                 if (id != MyGUI::MouseButton::Left)
                     return;
@@ -188,7 +188,7 @@ namespace Fx
                 mLastPointerX = left;
             }
 
-            void notifyMouseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
+            void notifyMouseButtonPressed(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)
             {
                 if (id != MyGUI::MouseButton::Left)
                     return;

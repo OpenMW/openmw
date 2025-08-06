@@ -59,10 +59,10 @@ namespace LuaUtil
 
     bool LuaState::sProfilerEnabled = true;
 
-    void LuaState::countHook(lua_State* L, lua_Debug* ar)
+    void LuaState::countHook(lua_State* state, lua_Debug* /*ar*/)
     {
         LuaState* self;
-        (void)lua_getallocf(L, reinterpret_cast<void**>(&self));
+        (void)lua_getallocf(state, reinterpret_cast<void**>(&self));
         if (self->mActiveScriptIdStack.empty())
             return;
         const ScriptId& activeScript = self->mActiveScriptIdStack.back();
@@ -71,10 +71,10 @@ namespace LuaUtil
         if (self->mSettings.mInstructionLimit > 0
             && self->mWatchdogInstructionCounter > self->mSettings.mInstructionLimit)
         {
-            lua_pushstring(L,
+            lua_pushstring(state,
                 "Lua instruction count exceeded, probably an infinite loop in a script. "
                 "To change the limit set \"[Lua] instruction limit per call\" in settings.cfg");
-            lua_error(L);
+            lua_error(state);
         }
     }
 

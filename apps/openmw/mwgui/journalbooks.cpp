@@ -15,17 +15,17 @@ namespace
         MWGui::BookTypesetter::Ptr mTypesetter;
         MWGui::BookTypesetter::Style* mBodyStyle;
 
-        AddContent(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
+        explicit AddContent(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* bodyStyle)
             : mTypesetter(std::move(typesetter))
-            , mBodyStyle(body_style)
+            , mBodyStyle(bodyStyle)
         {
         }
     };
 
     struct AddSpan : AddContent
     {
-        AddSpan(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : AddContent(std::move(typesetter), body_style)
+        explicit AddSpan(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* bodyStyle)
+            : AddContent(std::move(typesetter), bodyStyle)
         {
         }
 
@@ -47,9 +47,9 @@ namespace
         MWGui::BookTypesetter::Ptr mTypesetter;
         MWGui::BookTypesetter::Style* mBodyStyle;
 
-        AddEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
+        AddEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* bodyStyle)
             : mTypesetter(std::move(typesetter))
-            , mBodyStyle(body_style)
+            , mBodyStyle(bodyStyle)
         {
         }
 
@@ -66,11 +66,11 @@ namespace
         bool mAddHeader;
         MWGui::BookTypesetter::Style* mHeaderStyle;
 
-        AddJournalEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
-            MWGui::BookTypesetter::Style* header_style, bool add_header)
-            : AddEntry(std::move(typesetter), body_style)
-            , mAddHeader(add_header)
-            , mHeaderStyle(header_style)
+        explicit AddJournalEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* bodyStyle,
+            MWGui::BookTypesetter::Style* headerStyle, bool addHeader)
+            : AddEntry(std::move(typesetter), bodyStyle)
+            , mAddHeader(addHeader)
+            , mHeaderStyle(headerStyle)
         {
         }
 
@@ -93,11 +93,11 @@ namespace
         intptr_t mContentId;
         MWGui::BookTypesetter::Style* mHeaderStyle;
 
-        AddTopicEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
-            MWGui::BookTypesetter::Style* header_style, intptr_t contentId)
-            : AddEntry(std::move(typesetter), body_style)
+        explicit AddTopicEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* bodyStyle,
+            MWGui::BookTypesetter::Style* headerStyle, intptr_t contentId)
+            : AddEntry(std::move(typesetter), bodyStyle)
             , mContentId(contentId)
-            , mHeaderStyle(header_style)
+            , mHeaderStyle(headerStyle)
         {
         }
 

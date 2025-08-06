@@ -357,13 +357,13 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
     }
 
-    void CharacterCreation::onClassChoice(int _index)
+    void CharacterCreation::onClassChoice(int index)
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mClassChoiceDialog));
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
 
-        switch (_index)
+        switch (index)
         {
             case ClassChoiceDialog::Class_Generate:
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_ClassGenerate);
@@ -500,20 +500,20 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
     }
 
-    void CharacterCreation::onClassQuestionChosen(int _index)
+    void CharacterCreation::onClassQuestionChosen(int index)
     {
         MWBase::Environment::get().getSoundManager()->stopSay();
 
         MWBase::Environment::get().getWindowManager()->removeDialog(std::move(mGenerateClassQuestionDialog));
 
-        if (_index < 0 || _index >= 3)
+        if (index < 0 || index >= 3)
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
             return;
         }
 
-        ESM::Class::Specialization specialization = mGenerateClassResponses[_index];
+        ESM::Class::Specialization specialization = mGenerateClassResponses[index];
         if (specialization == ESM::Class::Combat)
             ++mGenerateClassSpecializations[0];
         else if (specialization == ESM::Class::Magic)

@@ -54,7 +54,7 @@ namespace Fx
             mCheckbutton->eventMouseButtonClick += MyGUI::newDelegate(this, &EditBool::notifyMouseButtonClick);
         }
 
-        void EditBool::notifyMouseButtonClick(MyGUI::Widget* sender)
+        void EditBool::notifyMouseButtonClick(MyGUI::Widget* /*sender*/)
         {
             setValue(!mUniform->getValue<bool>());
         }
@@ -215,7 +215,7 @@ namespace Fx
             }
         }
 
-        void UniformBase::notifyResetClicked(MyGUI::Widget* sender)
+        void UniformBase::notifyResetClicked(MyGUI::Widget* /*sender*/)
         {
             toDefault();
         }

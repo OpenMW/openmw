@@ -720,9 +720,9 @@ namespace MWWorld
         get<ESM::Light>().write(writer, progress);
     }
 
-    bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t type_id)
+    bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t typeId)
     {
-        ESM::RecNameInts type = (ESM::RecNameInts)type_id;
+        ESM::RecNameInts type = static_cast<ESM::RecNameInts>(typeId);
         switch (type)
         {
             case ESM::REC_ALCH:

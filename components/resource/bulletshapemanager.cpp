@@ -40,7 +40,7 @@ namespace Resource
         inline btVector3 toBullet(const osg::Vec3f& vec) { return btVector3(vec.x(), vec.y(), vec.z()); }
 
         void inline operator()(const osg::Vec3& v1, const osg::Vec3& v2, const osg::Vec3& v3,
-            bool _temp = false) // Note: unused temp argument left here for OSG versions less than 3.5.6
+            bool /*temp*/ = false) // Note: unused temp argument left here for OSG versions less than 3.5.6
         {
             if (mTriMesh)
                 mTriMesh->addTriangle(

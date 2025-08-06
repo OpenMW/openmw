@@ -461,7 +461,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void notifyOptions(MyGUI::Widget* _sender)
+        void notifyOptions(MyGUI::Widget* /*sender*/)
         {
             setOptionsMode();
 
@@ -484,7 +484,7 @@ namespace
                 setIndexControllerFocus(true);
         }
 
-        void notifyJournal(MyGUI::Widget* _sender)
+        void notifyJournal(MyGUI::Widget* /*sender*/)
         {
             assert(mStates.size() > 1);
             popBook();
@@ -493,16 +493,16 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void addControllerButtons(Gui::MWList* _list, size_t _selectedIndex)
+        void addControllerButtons(Gui::MWList* list, size_t selectedIndex)
         {
             mButtons.clear();
-            for (size_t i = 0; i < _list->getItemCount(); i++)
+            for (size_t i = 0; i < list->getItemCount(); i++)
             {
-                MyGUI::Button* listItem = _list->getItemWidget(_list->getItemNameAt(i));
+                MyGUI::Button* listItem = list->getItemWidget(list->getItemNameAt(i));
                 if (listItem)
                 {
                     listItem->setTextColour(
-                        mButtons.size() == _selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
+                        mButtons.size() == selectedIndex ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
                     mButtons.push_back(listItem);
                 }
             }
@@ -536,7 +536,7 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void notifyTopics(MyGUI::Widget* _sender)
+        void notifyTopics(MyGUI::Widget* /*sender*/)
         {
             mQuestMode = false;
             mTopicsMode = false;
@@ -579,7 +579,7 @@ namespace
             }
         };
 
-        void notifyQuests(MyGUI::Widget* _sender)
+        void notifyQuests(MyGUI::Widget* /*sender*/)
         {
             mQuestMode = true;
 
@@ -617,23 +617,23 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void notifyShowAll(MyGUI::Widget* _sender)
+        void notifyShowAll(MyGUI::Widget* sender)
         {
             mAllQuests = true;
-            notifyQuests(_sender);
+            notifyQuests(sender);
         }
 
-        void notifyShowActive(MyGUI::Widget* _sender)
+        void notifyShowActive(MyGUI::Widget* sender)
         {
             mAllQuests = false;
-            notifyQuests(_sender);
+            notifyQuests(sender);
         }
 
-        void notifyCancel(MyGUI::Widget* _sender)
+        void notifyCancel(MyGUI::Widget* sender)
         {
             if (mTopicsMode)
             {
-                notifyTopics(_sender);
+                notifyTopics(sender);
             }
             else
             {
@@ -642,7 +642,7 @@ namespace
             }
         }
 
-        void notifyClose(MyGUI::Widget* _sender)
+        void notifyClose(MyGUI::Widget* /*sender*/)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
             winMgr->playSound(ESM::RefId::stringRefId("book close"));
@@ -657,7 +657,7 @@ namespace
                 notifyPrevPage(sender);
         }
 
-        void notifyNextPage(MyGUI::Widget* _sender)
+        void notifyNextPage(MyGUI::Widget* /*sender*/)
         {
             if (mOptionsMode)
                 return;
@@ -676,7 +676,7 @@ namespace
             }
         }
 
-        void notifyPrevPage(MyGUI::Widget* _sender)
+        void notifyPrevPage(MyGUI::Widget* /*sender*/)
         {
             if (mOptionsMode)
                 return;
@@ -932,9 +932,9 @@ namespace
 
 // glue the implementation to the interface
 std::unique_ptr<MWGui::JournalWindow> MWGui::JournalWindow::create(
-    JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
+    JournalViewModel::Ptr model, bool questList, ToUTF8::FromType encoding)
 {
-    return std::make_unique<JournalWindowImpl>(Model, questList, encoding);
+    return std::make_unique<JournalWindowImpl>(model, questList, encoding);
 }
 
 MWGui::JournalWindow::JournalWindow()

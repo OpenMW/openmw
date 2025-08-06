@@ -14,11 +14,11 @@ namespace Gui
     public:
         WindowCaption();
 
-        void setCaption(const MyGUI::UString& _value) override;
+        void setCaption(const MyGUI::UString& value) override;
         void initialiseOverride() override;
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
     private:
         MyGUI::Widget* mLeft;

@@ -58,7 +58,7 @@ namespace MWGui
 
     // widget controls
 
-    void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
+    void TextInputDialog::onOkClicked(MyGUI::Widget* /*sender*/)
     {
         if (mTextEdit->getCaption().empty())
         {
@@ -69,9 +69,9 @@ namespace MWGui
             eventDone(this);
     }
 
-    void TextInputDialog::onTextAccepted(MyGUI::EditBox* _sender)
+    void TextInputDialog::onTextAccepted(MyGUI::EditBox* sender)
     {
-        onOkClicked(_sender);
+        onOkClicked(sender);
 
         // To do not spam onTextAccepted() again and again
         MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);

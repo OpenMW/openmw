@@ -69,7 +69,7 @@ namespace MWGui
         void setBirthSign(const ESM::RefId& signId);
 
         void onWindowResize(MyGUI::Window* window);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
 
         MyGUI::Widget* mLeftPane;
         MyGUI::Widget* mRightPane;

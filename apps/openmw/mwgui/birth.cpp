@@ -124,32 +124,32 @@ namespace MWGui
 
     // widget controls
 
-    void BirthDialog::onOkClicked(MyGUI::Widget* _sender)
+    void BirthDialog::onOkClicked(MyGUI::Widget* /*sender*/)
     {
         if (mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);
     }
 
-    void BirthDialog::onAccept(MyGUI::ListBox* _sender, size_t _index)
+    void BirthDialog::onAccept(MyGUI::ListBox* sender, size_t index)
     {
-        onSelectBirth(_sender, _index);
+        onSelectBirth(sender, index);
         if (mBirthList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);
     }
 
-    void BirthDialog::onBackClicked(MyGUI::Widget* _sender)
+    void BirthDialog::onBackClicked(MyGUI::Widget* /*sender*/)
     {
         eventBack();
     }
 
-    void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
+    void BirthDialog::onSelectBirth(MyGUI::ListBox* /*sender*/, size_t index)
     {
-        if (_index == MyGUI::ITEM_NONE)
+        if (index == MyGUI::ITEM_NONE)
             return;
 
-        const ESM::RefId& birthId = *mBirthList->getItemDataAt<ESM::RefId>(_index);
+        const ESM::RefId& birthId = *mBirthList->getItemDataAt<ESM::RefId>(index);
         if (mCurrentBirthId == birthId)
             return;
 

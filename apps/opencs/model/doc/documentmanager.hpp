@@ -46,18 +46,18 @@ namespace CSMDoc
         ~DocumentManager();
 
         void addDocument(
-            const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_);
-        ///< \param new_ Do not load the last content file in \a files and instead create in an
+            const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew);
+        ///< \param isNew Do not load the last content file in \a files and instead create in an
         /// appropriate way.
 
         /// Create a new document. The ownership of the created document is transferred to
         /// the calling function. The DocumentManager does not manage it. Loading has not
         /// taken place at the point when the document is returned.
         ///
-        /// \param new_ Do not load the last content file in \a files and instead create in an
+        /// \param isNew Do not load the last content file in \a files and instead create in an
         /// appropriate way.
         Document* makeDocument(
-            const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_);
+            const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew);
 
         void setResourceDir(const std::filesystem::path& parResDir);
 

@@ -74,8 +74,8 @@ namespace MWGui
         void dragItem(MyGUI::Widget* sender, std::size_t count);
         void transferItem(MyGUI::Widget* sender, std::size_t count);
         void dropItem();
-        void onCloseButtonClicked(MyGUI::Widget* _sender);
-        void onTakeAllButtonClicked(MyGUI::Widget* _sender);
+        void onCloseButtonClicked(MyGUI::Widget* sender);
+        void onTakeAllButtonClicked(MyGUI::Widget* sender);
         void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
 
         void onReferenceUnavailable() override;

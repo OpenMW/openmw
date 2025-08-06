@@ -91,7 +91,7 @@ namespace CSMDoc
         void addOptionalMagicEffect(const ESM::MagicEffect& effect);
 
     public:
-        Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool new_,
+        Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool isNew,
             const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
             const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 

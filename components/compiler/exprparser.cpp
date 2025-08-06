@@ -57,12 +57,12 @@ namespace Compiler
         return 0;
     }
 
-    char ExprParser::getOperandType(int Index) const
+    char ExprParser::getOperandType(int index) const
     {
         assert(!mOperands.empty());
-        assert(Index >= 0);
-        assert(Index < static_cast<int>(mOperands.size()));
-        return mOperands[mOperands.size() - 1 - Index];
+        assert(index >= 0);
+        assert(index < static_cast<int>(mOperands.size()));
+        return mOperands[mOperands.size() - 1 - index];
     }
 
     char ExprParser::getOperator() const

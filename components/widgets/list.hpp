@@ -50,15 +50,15 @@ namespace Gui
         void scrollToTop();
         void setViewOffset(int offset);
 
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
 
     protected:
         void initialiseOverride() override;
 
         void redraw(bool scrollbarShown = false);
 
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
-        void onItemSelected(MyGUI::Widget* _sender);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
+        void onItemSelected(MyGUI::Widget* sender);
 
     private:
         MyGUI::ScrollView* mScrollView;

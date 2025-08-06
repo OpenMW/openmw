@@ -280,7 +280,7 @@ namespace MWGui
         return c == ' ' || c == '\t';
     }
 
-    void Console::commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char)
+    void Console::commandBoxKeyPress(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char /*value*/)
     {
         if (MyGUI::InputManager::getInstance().isControlPressed())
         {
@@ -368,7 +368,7 @@ namespace MWGui
         }
     }
 
-    void Console::acceptCommand(MyGUI::EditBox* _sender)
+    void Console::acceptCommand(MyGUI::EditBox* /*sender*/)
     {
         const std::string& cm = mCommandLine->getOnlyText();
         if (cm.empty())
@@ -395,7 +395,7 @@ namespace MWGui
         execute(cm);
     }
 
-    void Console::toggleCaseSensitiveSearch(MyGUI::Widget* _sender)
+    void Console::toggleCaseSensitiveSearch(MyGUI::Widget* /*sender*/)
     {
         mCaseSensitiveSearch = !mCaseSensitiveSearch;
 
@@ -407,7 +407,7 @@ namespace MWGui
         mCaseSensitiveToggleButton->setTextColour(mCaseSensitiveSearch ? textColours.link : textColours.normal);
     }
 
-    void Console::toggleRegExSearch(MyGUI::Widget* _sender)
+    void Console::toggleRegExSearch(MyGUI::Widget* /*sender*/)
     {
         mRegExSearch = !mRegExSearch;
 
@@ -426,7 +426,7 @@ namespace MWGui
         mCaseSensitiveToggleButton->setEnabled(!mRegExSearch);
     }
 
-    void Console::acceptSearchTerm(MyGUI::EditBox* _sender)
+    void Console::acceptSearchTerm(MyGUI::EditBox* /*sender*/)
     {
         const std::string& searchTerm = mSearchTerm->getOnlyText();
 
@@ -453,12 +453,12 @@ namespace MWGui
         Reverse
     };
 
-    void Console::findNextOccurrence(MyGUI::Widget* _sender)
+    void Console::findNextOccurrence(MyGUI::Widget* /*sender*/)
     {
         findOccurrence(SearchDirection::Forward);
     }
 
-    void Console::findPreviousOccurrence(MyGUI::Widget* _sender)
+    void Console::findPreviousOccurrence(MyGUI::Widget* /*sender*/)
     {
         findOccurrence(SearchDirection::Reverse);
     }

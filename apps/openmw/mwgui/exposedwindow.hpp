@@ -16,7 +16,7 @@ namespace MWGui
     public:
         MyGUI::VectorWidgetPtr getSkinWidgetsByName(const std::string& name);
 
-        MyGUI::Widget* getSkinWidget(const std::string& _name, bool _throw = true);
+        MyGUI::Widget* getSkinWidget(const std::string& name);
         ///< Get a widget defined in the inner skin of this window.
     };
 

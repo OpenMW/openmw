@@ -11,12 +11,15 @@ Checks: >
   readability-identifier-naming
 WarningsAsErrors: '*'
 HeaderFilterRegex: '(apps|components)/'
+ExcludeHeaderFilterRegex: '_autogen/'
 CheckOptions:
 - key: readability-identifier-naming.ConceptCase
   value: CamelCase
+- key: readability-identifier-naming.LocalVariableCase
+  value: camelBack
 - key: readability-identifier-naming.NamespaceCase
   value: CamelCase
 - key: readability-identifier-naming.NamespaceIgnoredRegexp
   value: 'bpo|osg(DB|FX|Particle|Shadow|Viewer|Util)?'
-- key: readability-identifier-naming.LocalVariableCase
+- key: readability-identifier-naming.ParameterCase
   value: camelBack

@@ -110,7 +110,7 @@ namespace MWGui
         center();
     }
 
-    void Repair::onSelectItem(MyGUI::Widget* sender)
+    void Repair::onSelectItem(MyGUI::Widget* /*sender*/)
     {
         mItemSelectionDialog = std::make_unique<ItemSelectionDialog>("#{sRepair}");
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &Repair::onItemSelected);

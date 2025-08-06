@@ -171,9 +171,9 @@ int Wizard::ExistingInstallationPage::nextId() const
     return MainWizard::Page_LanguageSelection;
 }
 
-bool Wizard::ExistingInstallationPage::versionIsOK(QString directory_name)
+bool Wizard::ExistingInstallationPage::versionIsOK(QString directoryName)
 {
-    QDir directory = QDir(directory_name);
+    QDir directory = QDir(directoryName);
     QFileInfoList infoList = directory.entryInfoList(QStringList(QString("Morrowind.bsa")));
     if (infoList.size() == 1)
     {

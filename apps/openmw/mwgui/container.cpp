@@ -223,12 +223,12 @@ namespace MWGui
         mItemTransfer->removeTarget(*mItemView);
     }
 
-    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
-    void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
+    void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (!mModel)
             return;
@@ -279,7 +279,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
 
-    void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget* sender)
+    void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (mDragAndDrop == nullptr || !mDragAndDrop->mIsOnDragAndDrop)
         {

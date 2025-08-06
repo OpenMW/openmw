@@ -53,7 +53,7 @@ namespace MyGUIPlatform
         return mVfs->exists(Files::pathToUnicodeString(mResourcePath / name));
     }
 
-    const MyGUI::VectorString& DataManager::getDataListNames(const std::string& pattern) const
+    const MyGUI::VectorString& DataManager::getDataListNames(const std::string& /*pattern*/) const
     {
         throw std::runtime_error("DataManager::getDataListNames is not implemented - VFS is used");
     }

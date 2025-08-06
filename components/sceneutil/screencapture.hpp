@@ -29,7 +29,7 @@ namespace SceneUtil
         WriteScreenshotToFileOperation(const std::filesystem::path& screenshotPath, const std::string& screenshotFormat,
             std::function<void(std::string)> callback);
 
-        void operator()(const osg::Image& image, const unsigned int context_id) override;
+        void operator()(const osg::Image& image, unsigned int contextId) override;
 
     private:
         const std::filesystem::path mScreenshotPath;
@@ -47,7 +47,7 @@ namespace SceneUtil
 
         void stop();
 
-        void operator()(const osg::Image& image, const unsigned int context_id) override;
+        void operator()(const osg::Image& image, unsigned int contextId) override;
 
     private:
         const osg::ref_ptr<SceneUtil::WorkQueue> mQueue;

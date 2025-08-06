@@ -22,7 +22,7 @@ namespace MyGUIPlatform
         AdditiveLayer();
         ~AdditiveLayer() override;
 
-        void renderToTarget(MyGUI::IRenderTarget* _target, bool _update) override;
+        void renderToTarget(MyGUI::IRenderTarget* target, bool update) override;
 
     private:
         osg::ref_ptr<osg::StateSet> mStateSet;

@@ -161,15 +161,15 @@ namespace MWRender
     }
 
     void LocalMap::setupRenderToTexture(
-        int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
+        int segmentX, int segmentY, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
     {
         mLocalMapRTTs.emplace_back(
             new LocalMapRenderToTexture(mSceneRoot, mMapResolution, mMapWorldSize, left, top, upVector, zmin, zmax));
 
         mRoot->addChild(mLocalMapRTTs.back());
 
-        MapSegment& segment = mInterior ? mInteriorSegments[std::make_pair(segment_x, segment_y)]
-                                        : mExteriorSegments[std::make_pair(segment_x, segment_y)];
+        MapSegment& segment = mInterior ? mInteriorSegments[std::make_pair(segmentX, segmentY)]
+                                        : mExteriorSegments[std::make_pair(segmentX, segmentY)];
         segment.mMapTexture = static_cast<osg::Texture2D*>(mLocalMapRTTs.back()->getColorTexture(nullptr));
     }
 

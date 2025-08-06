@@ -68,7 +68,7 @@ namespace MWGui
         eventItemSelected(item.mBase);
     }
 
-    void ItemSelectionDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void ItemSelectionDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         exit();
     }

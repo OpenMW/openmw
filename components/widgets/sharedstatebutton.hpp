@@ -21,19 +21,19 @@ namespace Gui
     public:
         SharedStateButton();
 
-        void onMouseSetFocus(MyGUI::Widget* _old) override;
-        void onMouseLostFocus(MyGUI::Widget* _new) override;
+        void onMouseSetFocus(MyGUI::Widget* oldWidget) override;
+        void onMouseLostFocus(MyGUI::Widget* newWidget) override;
 
     protected:
         void updateButtonState();
 
-        void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) override;
-        void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) override;
+        void onMouseButtonPressed(int left, int top, MyGUI::MouseButton id) override;
+        void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id) override;
         void baseUpdateEnable() override;
 
         void shutdownOverride() override;
 
-        bool _setState(const std::string& _value);
+        bool _setState(const std::string& value);
 
     public:
         void shareStateWith(const ButtonGroup& shared);
@@ -42,7 +42,7 @@ namespace Gui
         static void createButtonGroup(ButtonGroup& group);
 
         //! Set button selected state
-        void setStateSelected(bool _value);
+        void setStateSelected(bool value);
 
     private:
         ButtonGroup mSharedWith;

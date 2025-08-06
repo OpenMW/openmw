@@ -278,18 +278,18 @@ namespace MWGui
         mGroupIndices.push_back(mButtons.size());
     }
 
-    void SpellView::setSize(const MyGUI::IntSize& _value)
+    void SpellView::setSize(const MyGUI::IntSize& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setSize(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setSize(value);
         if (changed)
             layoutWidgets();
     }
 
-    void SpellView::setCoord(const MyGUI::IntCoord& _value)
+    void SpellView::setCoord(const MyGUI::IntCoord& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setCoord(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setCoord(value);
         if (changed)
             layoutWidgets();
     }
@@ -318,18 +318,18 @@ namespace MWGui
         return MyGUI::utility::parseInt(widget->getUserString(sSpellModelIndex));
     }
 
-    void SpellView::onSpellSelected(MyGUI::Widget* _sender)
+    void SpellView::onSpellSelected(MyGUI::Widget* sender)
     {
-        eventSpellClicked(getSpellModelIndex(_sender));
+        eventSpellClicked(getSpellModelIndex(sender));
     }
 
-    void SpellView::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
+    void SpellView::onMouseWheelMoved(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mScrollView->getViewOffset().top + _rel * 0.3f > 0)
+        if (mScrollView->getViewOffset().top + rel * 0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mScrollView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel * 0.3f)));
+                MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + rel * 0.3f)));
     }
 
     void SpellView::resetScrollbars()

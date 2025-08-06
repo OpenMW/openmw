@@ -25,8 +25,8 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onTextAccepted(MyGUI::EditBox* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onTextAccepted(MyGUI::EditBox* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:

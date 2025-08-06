@@ -63,15 +63,15 @@ namespace MWGui
         EventHandle_Int eventActivateDialog;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
-        void onNameClicked(MyGUI::Widget* _sender);
-        void onRaceClicked(MyGUI::Widget* _sender);
-        void onClassClicked(MyGUI::Widget* _sender);
-        void onBirthSignClicked(MyGUI::Widget* _sender);
+        void onNameClicked(MyGUI::Widget* sender);
+        void onRaceClicked(MyGUI::Widget* sender);
+        void onClassClicked(MyGUI::Widget* sender);
+        void onBirthSignClicked(MyGUI::Widget* sender);
 
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:

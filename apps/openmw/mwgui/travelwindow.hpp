@@ -29,9 +29,9 @@ namespace MWGui
 
         MyGUI::ScrollView* mDestinationsView;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onTravelButtonClick(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onTravelButtonClick(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         void addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior);
         void clearDestinations();
         int mCurrentY;

@@ -187,11 +187,11 @@ void CSMWorld::TouchLandCommand::onUndo()
 }
 
 CSMWorld::ModifyCommand::ModifyCommand(
-    QAbstractItemModel& model, const QModelIndex& index, const QVariant& new_, QUndoCommand* parent)
+    QAbstractItemModel& model, const QModelIndex& index, const QVariant& newValue, QUndoCommand* parent)
     : QUndoCommand(parent)
     , mModel(&model)
     , mIndex(index)
-    , mNew(new_)
+    , mNew(newValue)
     , mHasRecordState(false)
     , mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {

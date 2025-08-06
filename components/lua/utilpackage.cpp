@@ -179,9 +179,9 @@ namespace LuaUtil
         }
     }
 
-    sol::table initUtilPackage(lua_State* L)
+    sol::table initUtilPackage(lua_State* state)
     {
-        sol::state_view lua(L);
+        sol::state_view lua(state);
         sol::table util(lua, sol::create);
 
         // Lua bindings for Vec2

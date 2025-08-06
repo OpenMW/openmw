@@ -129,12 +129,12 @@ namespace MWGui
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
     }
 
-    void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void MerchantRepair::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mList->getViewOffset().top + _rel * 0.3f > 0)
+        if (mList->getViewOffset().top + rel * 0.3f > 0)
             mList->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel * 0.3f)));
+            mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + rel * 0.3f)));
     }
 
     void MerchantRepair::onOpen()
@@ -169,7 +169,7 @@ namespace MWGui
         setPtr(mActor);
     }
 
-    void MerchantRepair::onOkButtonClick(MyGUI::Widget* sender)
+    void MerchantRepair::onOkButtonClick(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
     }

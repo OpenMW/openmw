@@ -417,18 +417,18 @@ namespace MWGui
         return nullptr;
     }
 
-    void InteractiveMessageBox::mousePressed(MyGUI::Widget* pressed)
+    void InteractiveMessageBox::mousePressed(MyGUI::Widget* widget)
     {
-        buttonActivated(pressed);
+        buttonActivated(widget);
     }
 
-    void InteractiveMessageBox::buttonActivated(MyGUI::Widget* pressed)
+    void InteractiveMessageBox::buttonActivated(MyGUI::Widget* widget)
     {
         mMarkedToDelete = true;
         int index = 0;
         for (const MyGUI::Button* button : mButtons)
         {
-            if (button == pressed)
+            if (button == widget)
             {
                 mButtonPressed = index;
                 mMessageBoxManager.onButtonPressed(mButtonPressed);

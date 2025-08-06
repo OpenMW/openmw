@@ -106,13 +106,13 @@ namespace MWGui
         bool mIsDrowning;
         float mDrowningFlashTheta;
 
-        void onWorldClicked(MyGUI::Widget* _sender);
-        void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
-        void onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new);
-        void onHMSClicked(MyGUI::Widget* _sender);
-        void onWeaponClicked(MyGUI::Widget* _sender);
-        void onMagicClicked(MyGUI::Widget* _sender);
-        void onMapClicked(MyGUI::Widget* _sender);
+        void onWorldClicked(MyGUI::Widget* sender);
+        void onWorldMouseOver(MyGUI::Widget* sender, int x, int y);
+        void onWorldMouseLostFocus(MyGUI::Widget* sender, MyGUI::Widget* newWidget);
+        void onHMSClicked(MyGUI::Widget* sender);
+        void onWeaponClicked(MyGUI::Widget* sender);
+        void onMagicClicked(MyGUI::Widget* sender);
+        void onMapClicked(MyGUI::Widget* sender);
 
         // LocalMapBase
         void customMarkerCreated(MyGUI::Widget* marker) override;

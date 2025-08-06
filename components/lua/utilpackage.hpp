@@ -40,7 +40,7 @@ namespace LuaUtil
         return obj.is<TransformM>() || obj.is<TransformQ>();
     }
 
-    sol::table initUtilPackage(lua_State*);
+    sol::table initUtilPackage(lua_State* state);
 }
 
 #endif // COMPONENTS_LUA_UTILPACKAGE_H

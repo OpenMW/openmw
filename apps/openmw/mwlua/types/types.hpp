@@ -22,8 +22,8 @@ namespace MWLua
     std::string_view getLuaObjectTypeName(const MWWorld::Ptr& ptr);
     const MWWorld::Ptr& verifyType(ESM::RecNameInts type, const MWWorld::Ptr& ptr);
 
-    sol::table getTypeToPackageTable(lua_State* L);
-    sol::table getPackageToTypeTable(lua_State* L);
+    sol::table getTypeToPackageTable(lua_State* state);
+    sol::table getPackageToTypeTable(lua_State* state);
 
     sol::table initTypesPackage(const Context& context);
 
@@ -44,7 +44,7 @@ namespace MWLua
     void addRepairBindings(sol::table repair, const Context& context);
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
     void addPotionBindings(sol::table potion, const Context& context);
-    void addIngredientBindings(sol::table Ingredient, const Context& context);
+    void addIngredientBindings(sol::table ingredient, const Context& context);
     void addArmorBindings(sol::table armor, const Context& context);
     void addLockableBindings(sol::table lockable);
     void addClothingBindings(sol::table clothing, const Context& context);

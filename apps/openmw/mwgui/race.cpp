@@ -221,24 +221,24 @@ namespace MWGui
 
     // widget controls
 
-    void RaceDialog::onOkClicked(MyGUI::Widget* _sender)
+    void RaceDialog::onOkClicked(MyGUI::Widget* /*sender*/)
     {
         if (mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);
     }
 
-    void RaceDialog::onBackClicked(MyGUI::Widget* _sender)
+    void RaceDialog::onBackClicked(MyGUI::Widget* /*sender*/)
     {
         eventBack();
     }
 
-    void RaceDialog::onPreviewScroll(MyGUI::Widget*, int _delta)
+    void RaceDialog::onPreviewScroll(MyGUI::Widget*, int delta)
     {
         size_t oldPos = mHeadRotate->getScrollPosition();
         size_t maxPos = mHeadRotate->getScrollRange() - 1;
         size_t scrollPage = mHeadRotate->getScrollWheelPage();
-        if (_delta < 0)
+        if (delta < 0)
             mHeadRotate->setScrollPosition(oldPos + std::min(maxPos - oldPos, scrollPage));
         else
             mHeadRotate->setScrollPosition(oldPos - std::min(oldPos, scrollPage));
@@ -246,9 +246,9 @@ namespace MWGui
         onHeadRotate(mHeadRotate, mHeadRotate->getScrollPosition());
     }
 
-    void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
+    void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t position)
     {
-        float angle = (float(_position) / (scroll->getScrollRange() - 1) - 0.5f) * osg::PI * 2;
+        float angle = (float(position) / (scroll->getScrollRange() - 1) - 0.5f) * osg::PI * 2;
         mPreview->setAngle(angle);
 
         mCurrentAngle = angle;
@@ -294,12 +294,12 @@ namespace MWGui
         updatePreview();
     }
 
-    void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
+    void RaceDialog::onSelectRace(MyGUI::ListBox* sender, size_t index)
     {
-        if (_index == MyGUI::ITEM_NONE)
+        if (index == MyGUI::ITEM_NONE)
             return;
 
-        ESM::RefId& raceId = *mRaceList->getItemDataAt<ESM::RefId>(_index);
+        ESM::RefId& raceId = *mRaceList->getItemDataAt<ESM::RefId>(index);
         if (mCurrentRaceId == raceId)
             return;
 
@@ -312,9 +312,9 @@ namespace MWGui
         updateSpellPowers();
     }
 
-    void RaceDialog::onAccept(MyGUI::ListBox* _sender, size_t _index)
+    void RaceDialog::onAccept(MyGUI::ListBox* sender, size_t index)
     {
-        onSelectRace(_sender, _index);
+        onSelectRace(sender, index);
         if (mRaceList->getIndexSelected() == MyGUI::ITEM_NONE)
             return;
         eventDone(this);

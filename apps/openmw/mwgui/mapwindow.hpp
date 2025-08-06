@@ -275,9 +275,9 @@ namespace MWGui
         void setActiveControllerWindow(bool active) override;
 
     private:
-        void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onWorldButtonClicked(MyGUI::Widget* _sender);
+        void onDragStart(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onMouseDrag(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onWorldButtonClicked(MyGUI::Widget* sender);
         void onMapDoubleClicked(MyGUI::Widget* sender);
         void onMapZoomed(MyGUI::Widget* sender, int rel);
         void zoomOnCursor(float speedDiff);

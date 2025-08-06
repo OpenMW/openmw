@@ -105,18 +105,18 @@ namespace MWGui
 
         int getMerchantServices();
 
-        void onFilterChanged(MyGUI::Widget* _sender);
-        void onNameFilterChanged(MyGUI::EditBox* _sender);
-        void onOfferButtonClicked(MyGUI::Widget* _sender);
+        void onFilterChanged(MyGUI::Widget* sender);
+        void onNameFilterChanged(MyGUI::EditBox* sender);
+        void onOfferButtonClicked(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox* sender);
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
-        void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onMaxSaleButtonClicked(MyGUI::Widget* sender);
+        void onIncreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onDecreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onBalanceButtonReleased(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
         void onBalanceValueChanged(int value);
         void onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller);
-        void onOfferSubmitted(MyGUI::Widget* _sender, size_t offerAmount);
+        void onOfferSubmitted(MyGUI::Widget* sender, size_t offerAmount);
 
         void addRepeatController(MyGUI::Widget* widget);
 

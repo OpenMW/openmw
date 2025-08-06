@@ -82,7 +82,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
     }
 
-    void ScrollWindow::onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void ScrollWindow::onKeyButtonPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char character)
     {
         int scroll = 0;
         if (key == MyGUI::KeyCode::ArrowUp)
@@ -106,12 +106,12 @@ namespace MWGui
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
     }
 
-    void ScrollWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void ScrollWindow::onCloseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }
 
-    void ScrollWindow::onTakeButtonClicked(MyGUI::Widget* _sender)
+    void ScrollWindow::onTakeButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Book Up"));
 

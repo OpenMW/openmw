@@ -26,8 +26,8 @@ namespace LuaUi
         MyGUI::IntCoord mMoveResize;
 
     protected:
-        void notifyMousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
-        void notifyMouseDrag(MyGUI::Widget*, int, int, MyGUI::MouseButton);
+        void notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void notifyMouseDrag(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
     };
 }
 

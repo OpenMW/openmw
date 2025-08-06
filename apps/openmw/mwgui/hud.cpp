@@ -199,7 +199,7 @@ namespace MWGui
         mDragAndDrop->drop(&drop, nullptr);
     }
 
-    void HUD::onWorldClicked(MyGUI::Widget* _sender)
+    void HUD::onWorldClicked(MyGUI::Widget* /*sender*/)
     {
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
@@ -238,7 +238,7 @@ namespace MWGui
         }
     }
 
-    void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
+    void HUD::onWorldMouseOver(MyGUI::Widget* /*sender*/, int x, int y)
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -266,23 +266,23 @@ namespace MWGui
         }
     }
 
-    void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
+    void HUD::onWorldMouseLostFocus(MyGUI::Widget* /*sender*/, MyGUI::Widget* newWidget)
     {
         MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         mWorldMouseOver = false;
     }
 
-    void HUD::onHMSClicked(MyGUI::Widget* _sender)
+    void HUD::onHMSClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
     }
 
-    void HUD::onMapClicked(MyGUI::Widget* _sender)
+    void HUD::onMapClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Map);
     }
 
-    void HUD::onWeaponClicked(MyGUI::Widget* _sender)
+    void HUD::onWeaponClicked(MyGUI::Widget* /*sender*/)
     {
         const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
@@ -294,7 +294,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
     }
 
-    void HUD::onMagicClicked(MyGUI::Widget* _sender)
+    void HUD::onMagicClicked(MyGUI::Widget* /*sender*/)
     {
         const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())

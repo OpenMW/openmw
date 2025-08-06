@@ -64,12 +64,12 @@ namespace MWGui
         mItemEdit->setValue(count);
     }
 
-    void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void CountDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
     }
 
-    void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
+    void CountDialog::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         // The order here matters. Hide the dialog first so the OK event tooltips reappear.
         setVisible(false);
@@ -78,9 +78,9 @@ namespace MWGui
 
     // essentially duplicating what the OK button does if user presses
     // Enter key
-    void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
+    void CountDialog::onEnterKeyPressed(MyGUI::EditBox* sender)
     {
-        onOkButtonClicked(_sender);
+        onOkButtonClicked(sender);
 
         // To do not spam onEnterKeyPressed() again and again
         MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
@@ -91,9 +91,9 @@ namespace MWGui
         mSlider->setScrollPosition(value - 1);
     }
 
-    void CountDialog::onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position)
+    void CountDialog::onSliderMoved(MyGUI::ScrollBar* sender, size_t position)
     {
-        mItemEdit->setValue(_position + 1);
+        mItemEdit->setValue(position + 1);
     }
 
     bool CountDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

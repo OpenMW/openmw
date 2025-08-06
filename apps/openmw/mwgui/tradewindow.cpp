@@ -251,23 +251,23 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    void TradeWindow::onNameFilterChanged(MyGUI::EditBox* sender)
     {
-        mSortModel->setNameFilter(_sender->getCaption());
+        mSortModel->setNameFilter(sender->getCaption());
         mItemView->update();
     }
 
-    void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
+    void TradeWindow::onFilterChanged(MyGUI::Widget* sender)
     {
-        if (_sender == mFilterAll)
+        if (sender == mFilterAll)
             mSortModel->setCategory(SortFilterItemModel::Category_All);
-        else if (_sender == mFilterWeapon)
+        else if (sender == mFilterWeapon)
             mSortModel->setCategory(SortFilterItemModel::Category_Weapon);
-        else if (_sender == mFilterApparel)
+        else if (sender == mFilterApparel)
             mSortModel->setCategory(SortFilterItemModel::Category_Apparel);
-        else if (_sender == mFilterMagic)
+        else if (sender == mFilterMagic)
             mSortModel->setCategory(SortFilterItemModel::Category_Magic);
-        else if (_sender == mFilterMisc)
+        else if (sender == mFilterMisc)
             mSortModel->setCategory(SortFilterItemModel::Category_Misc);
 
         mFilterAll->setStateSelected(false);
@@ -276,7 +276,7 @@ namespace MWGui
         mFilterMagic->setStateSelected(false);
         mFilterMisc->setStateSelected(false);
 
-        _sender->castType<MyGUI::Button>()->setStateSelected(true);
+        sender->castType<MyGUI::Button>()->setStateSelected(true);
 
         mItemView->update();
     }
@@ -382,14 +382,14 @@ namespace MWGui
         }
     }
 
-    void TradeWindow::onOfferSubmitted(MyGUI::Widget* _sender, size_t offerAmount)
+    void TradeWindow::onOfferSubmitted(MyGUI::Widget* /*sender*/, size_t offerAmount)
     {
         mCurrentBalance = offerAmount * (mCurrentBalance < 0 ? -1 : 1);
         updateLabels();
         onOfferButtonClicked(mOfferButton);
     }
 
-    void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
+    void TradeWindow::onOfferButtonClicked(MyGUI::Widget* /*sender*/)
     {
         TradeItemModel* playerItemModel
             = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
@@ -492,13 +492,13 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
     }
 
-    void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void TradeWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         exit();
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
-    void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
+    void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* /*sender*/)
     {
         mCurrentBalance = getMerchantGold();
         updateLabels();
@@ -513,15 +513,15 @@ namespace MWGui
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);
     }
 
-    void TradeWindow::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    void TradeWindow::onIncreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
     {
-        addRepeatController(_sender);
+        addRepeatController(sender);
         onIncreaseButtonTriggered();
     }
 
-    void TradeWindow::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    void TradeWindow::onDecreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
     {
-        addRepeatController(_sender);
+        addRepeatController(sender);
         onDecreaseButtonTriggered();
     }
 
@@ -533,9 +533,9 @@ namespace MWGui
             onDecreaseButtonTriggered();
     }
 
-    void TradeWindow::onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+    void TradeWindow::onBalanceButtonReleased(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
     {
-        MyGUI::ControllerManager::getInstance().removeItem(_sender);
+        MyGUI::ControllerManager::getInstance().removeItem(sender);
     }
 
     void TradeWindow::onBalanceValueChanged(int value)

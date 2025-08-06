@@ -18,8 +18,8 @@ namespace ESM
     {
     public:
         LandData();
-        LandData(const ESM::Land& Land, int loadFlags);
-        LandData(const ESM4::Land& Land, int loadFlags);
+        explicit LandData(const ESM::Land& land, int loadFlags);
+        explicit LandData(const ESM4::Land& land, int loadFlags);
 
         ~LandData();
 

@@ -32,13 +32,13 @@ namespace Gui
         static bool sDefaultNeedKeyFocus;
 
     protected:
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
-        void onMouseLostFocus(MyGUI::Widget* _new) override;
-        void onMouseSetFocus(MyGUI::Widget* _old) override;
-        void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) override;
-        void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) override;
-        void onKeySetFocus(MyGUI::Widget* _old) override;
-        void onKeyLostFocus(MyGUI::Widget* _new) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
+        void onMouseLostFocus(MyGUI::Widget* newWidget) override;
+        void onMouseSetFocus(MyGUI::Widget* oldWidget) override;
+        void onMouseButtonPressed(int left, int top, MyGUI::MouseButton id) override;
+        void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id) override;
+        void onKeySetFocus(MyGUI::Widget* newWidget) override;
+        void onKeyLostFocus(MyGUI::Widget* oldWidget) override;
 
         std::string mImageHighlighted;
         std::string mImageNormal;

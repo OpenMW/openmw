@@ -151,32 +151,32 @@ namespace MWGui
         eventItemClicked(index);
     }
 
-    void ItemView::onSelectedBackground(MyGUI::Widget* sender)
+    void ItemView::onSelectedBackground(MyGUI::Widget* /*sender*/)
     {
         eventBackgroundClicked();
     }
 
-    void ItemView::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
+    void ItemView::onMouseWheelMoved(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mScrollView->getViewOffset().left + _rel * 0.3f > 0)
+        if (mScrollView->getViewOffset().left + rel * 0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mScrollView->setViewOffset(
-                MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + _rel * 0.3f), 0));
+                MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + rel * 0.3f), 0));
     }
 
-    void ItemView::setSize(const MyGUI::IntSize& _value)
+    void ItemView::setSize(const MyGUI::IntSize& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setSize(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setSize(value);
         if (changed)
             layoutWidgets();
     }
 
-    void ItemView::setCoord(const MyGUI::IntCoord& _value)
+    void ItemView::setCoord(const MyGUI::IntCoord& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setCoord(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setCoord(value);
         if (changed)
             layoutWidgets();
     }

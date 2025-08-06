@@ -94,7 +94,7 @@ namespace MWGui
     public:
         InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
             const std::vector<std::string>& buttons, bool immediate, size_t defaultFocus);
-        void mousePressed(MyGUI::Widget* _widget);
+        void mousePressed(MyGUI::Widget* widget);
         int readPressedButton();
 
         MyGUI::Widget* getDefaultKeyFocus() override;
@@ -106,7 +106,7 @@ namespace MWGui
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
-        void buttonActivated(MyGUI::Widget* _widget);
+        void buttonActivated(MyGUI::Widget* widget);
 
         MessageBoxManager& mMessageBoxManager;
         MyGUI::EditBox* mMessageWidget;

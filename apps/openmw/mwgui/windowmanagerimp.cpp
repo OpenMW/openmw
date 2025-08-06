@@ -849,14 +849,14 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
-    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view default_)
+    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view defaultValue)
     {
         const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType() == ESM::VT_String)
             return setting->mValue.getString();
 
-        return default_;
+        return defaultValue;
     }
 
     void WindowManager::updateMap()
@@ -1222,47 +1222,47 @@ namespace MWGui
         mCursorActive = active;
     }
 
-    void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
+    void WindowManager::onRetrieveTag(const MyGUI::UString& tag, MyGUI::UString& result)
     {
-        std::string_view tag = _tag;
+        std::string_view tagView = tag;
 
         constexpr std::string_view myGuiPrefix = "setting=";
 
         constexpr std::string_view tokenToFind = "sCell=";
 
-        if (tag.starts_with(myGuiPrefix))
+        if (tagView.starts_with(myGuiPrefix))
         {
-            tag = tag.substr(myGuiPrefix.length());
-            const size_t commaPos = tag.find(',');
+            tagView = tagView.substr(myGuiPrefix.length());
+            const size_t commaPos = tagView.find(',');
             if (commaPos == std::string_view::npos)
-                throw std::runtime_error("Invalid setting tag (expected comma): " + std::string(tag));
+                throw std::runtime_error("Invalid setting tag (expected comma): " + std::string(tagView));
 
-            std::string_view settingSection = tag.substr(0, commaPos);
-            std::string_view settingTag = tag.substr(commaPos + 1, tag.length());
+            std::string_view settingSection = tagView.substr(0, commaPos);
+            std::string_view settingTag = tagView.substr(commaPos + 1, tagView.length());
 
-            _result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
+            result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
         }
-        else if (tag.starts_with(tokenToFind))
+        else if (tagView.starts_with(tokenToFind))
         {
-            std::string_view cellName = mTranslationDataStorage.translateCellName(tag.substr(tokenToFind.length()));
-            _result.assign(cellName.data(), cellName.size());
-            _result = MyGUI::TextIterator::toTagsString(_result);
+            std::string_view cellName = mTranslationDataStorage.translateCellName(tagView.substr(tokenToFind.length()));
+            result.assign(cellName.data(), cellName.size());
+            result = MyGUI::TextIterator::toTagsString(result);
         }
-        else if (Gui::replaceTag(tag, _result))
+        else if (Gui::replaceTag(tagView, result))
         {
             return;
         }
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(tag, split, ":");
+            Misc::StringUtils::split(tagView, split, ":");
 
             L10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
             // If a key has a "Context:KeyName" format, use YAML to translate data
             if (split.size() == 2)
             {
-                _result = l10nManager.getContext(split[0])->formatMessage(split[1], {}, {});
+                result = l10nManager.getContext(split[0])->formatMessage(split[1], {}, {});
                 return;
             }
 
@@ -1270,16 +1270,16 @@ namespace MWGui
             if (!mStore)
             {
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '"
-                                  << tag << "'";
-                _result.assign(tag.data(), tag.size());
+                                  << tagView << "'";
+                result.assign(tagView.data(), tagView.size());
                 return;
             }
-            const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(tag);
+            const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(tagView);
 
             if (setting && setting->mValue.getType() == ESM::VT_String)
-                _result = setting->mValue.getString();
+                result = setting->mValue.getString();
             else
-                _result.assign(tag.data(), tag.size());
+                result.assign(tagView.data(), tagView.size());
         }
     }
 
@@ -2173,9 +2173,9 @@ namespace MWGui
             mKeyboardNavigation->setModalWindow(mCurrentModals.back()->mMainWidget);
     }
 
-    void WindowManager::onVideoKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    void WindowManager::onVideoKeyPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char value)
     {
-        if (_key == MyGUI::KeyCode::Escape)
+        if (key == MyGUI::KeyCode::Escape)
             mVideoWidget->stop();
     }
 
@@ -2279,20 +2279,20 @@ namespace MWGui
             mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
-    void WindowManager::onClipboardChanged(std::string_view _type, std::string_view _data)
+    void WindowManager::onClipboardChanged(std::string_view type, std::string_view data)
     {
-        if (_type == "Text")
-            SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(_data)).asUTF8().c_str());
+        if (type == "Text")
+            SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(data)).asUTF8().c_str());
     }
 
-    void WindowManager::onClipboardRequested(std::string_view _type, std::string& _data)
+    void WindowManager::onClipboardRequested(std::string_view type, std::string& data)
     {
-        if (_type != "Text")
+        if (type != "Text")
             return;
         char* text = nullptr;
         text = SDL_GetClipboardText();
         if (text)
-            _data = MyGUI::TextIterator::toTagsString(text);
+            data = MyGUI::TextIterator::toTagsString(text);
 
         SDL_free(text);
     }

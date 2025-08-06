@@ -19,13 +19,13 @@ namespace MyGUIPlatform
         // defined in .cpp file since we can't delete incomplete types
     }
 
-    void AdditiveLayer::renderToTarget(MyGUI::IRenderTarget* _target, bool _update)
+    void AdditiveLayer::renderToTarget(MyGUI::IRenderTarget* target, bool update)
     {
         RenderManager& renderManager = static_cast<RenderManager&>(MyGUI::RenderManager::getInstance());
 
         renderManager.setInjectState(mStateSet.get());
 
-        MyGUI::OverlappedLayer::renderToTarget(_target, _update);
+        MyGUI::OverlappedLayer::renderToTarget(target, update);
 
         renderManager.setInjectState(nullptr);
     }

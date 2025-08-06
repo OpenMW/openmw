@@ -172,9 +172,9 @@ namespace MWGui
         mDestinationsView->setVisibleVScroll(true);
     }
 
-    void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)
+    void TravelWindow::onTravelButtonClick(MyGUI::Widget* sender)
     {
-        const int price = Misc::StringUtils::toNumeric<int>(_sender->getUserString("price"), 0);
+        const int price = Misc::StringUtils::toNumeric<int>(sender->getUserString("price"), 0);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
@@ -197,9 +197,9 @@ namespace MWGui
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
-        ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        std::string_view cellname = _sender->getUserString("Destination");
-        bool interior = _sender->getUserString("interior") == "y";
+        ESM::Position pos = *sender->getUserData<ESM::Position>();
+        std::string_view cellname = sender->getUserString("Destination");
+        bool interior = sender->getUserString("interior") == "y";
         if (mPtr.getCell()->isExterior())
         {
             ESM::Position playerPos = player.getRefData().getPosition();
@@ -230,7 +230,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
 
-    void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void TravelWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
@@ -250,13 +250,13 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
-    void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void TravelWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mDestinationsView->getViewOffset().top + _rel * 0.3f > 0)
+        if (mDestinationsView->getViewOffset().top + rel * 0.3f > 0)
             mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mDestinationsView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + _rel * 0.3f)));
+                MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + rel * 0.3f)));
     }
 
     bool TravelWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

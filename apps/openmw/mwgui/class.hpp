@@ -41,7 +41,7 @@ namespace MWGui
         EventHandle_Int eventButtonSelected;
 
     protected:
-        void onButtonClicked(MyGUI::Widget* _sender);
+        void onButtonClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
@@ -92,8 +92,8 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         bool mOkButtonFocus = true;
 
@@ -133,11 +133,11 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
-        void onAccept(MyGUI::ListBox* _sender, size_t _index);
+        void onSelectClass(MyGUI::ListBox* sender, size_t index);
+        void onAccept(MyGUI::ListBox* sender, size_t index);
 
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
     private:
         void updateClasses();
@@ -181,8 +181,8 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onSpecializationClicked(MyGUI::Widget* _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onSpecializationClicked(MyGUI::Widget* sender);
+        void onCancelClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
@@ -215,8 +215,8 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onAttributeClicked(Widgets::MWAttributePtr _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onAttributeClicked(Widgets::MWAttributePtr sender);
+        void onCancelClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         size_t mControllerFocus = 0;
         std::vector<Widgets::MWAttribute*> mAttributeButtons;
@@ -249,8 +249,8 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onSkillClicked(Widgets::MWSkillPtr _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onSkillClicked(Widgets::MWSkillPtr sender);
+        void onCancelClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         size_t mControllerFocus = 0;
         std::vector<Widgets::MWSkill*> mSkillButtons;
@@ -277,7 +277,7 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
@@ -315,16 +315,16 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
-        void onSpecializationClicked(MyGUI::Widget* _sender);
+        void onSpecializationClicked(MyGUI::Widget* sender);
         void onSpecializationSelected();
-        void onAttributeClicked(Widgets::MWAttributePtr _sender);
+        void onAttributeClicked(Widgets::MWAttributePtr sender);
         void onAttributeSelected();
-        void onSkillClicked(Widgets::MWSkillPtr _sender);
+        void onSkillClicked(Widgets::MWSkillPtr sender);
         void onSkillSelected();
-        void onDescriptionClicked(MyGUI::Widget* _sender);
+        void onDescriptionClicked(MyGUI::Widget* sender);
         void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();
 

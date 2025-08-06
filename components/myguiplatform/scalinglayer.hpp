@@ -15,18 +15,18 @@ namespace MyGUIPlatform
     public:
         MYGUI_RTTI_DERIVED(ScalingLayer)
 
-        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) override;
+        void deserialization(MyGUI::xml::ElementPtr node, MyGUI::Version version) override;
 
-        MyGUI::ILayerItem* getLayerItemByPoint(int _left, int _top) const override;
-        MyGUI::IntPoint getPosition(int _left, int _top) const override;
-        void renderToTarget(MyGUI::IRenderTarget* _target, bool _update) override;
+        MyGUI::ILayerItem* getLayerItemByPoint(int left, int top) const override;
+        MyGUI::IntPoint getPosition(int left, int top) const override;
+        void renderToTarget(MyGUI::IRenderTarget* target, bool update) override;
 
-        void resizeView(const MyGUI::IntSize& _viewSize) override;
+        void resizeView(const MyGUI::IntSize& viewSize) override;
 
-        static float getScaleFactor(const MyGUI::IntSize& _layerViewSize);
+        static float getScaleFactor(const MyGUI::IntSize& layerViewSize);
 
     private:
-        void screenToLayerCoords(int& _left, int& _top) const;
+        void screenToLayerCoords(int& left, int& top) const;
     };
 
 }

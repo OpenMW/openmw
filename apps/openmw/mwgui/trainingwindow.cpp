@@ -155,7 +155,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
 
-    void TrainingWindow::onCancelButtonClicked(MyGUI::Widget* sender)
+    void TrainingWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }

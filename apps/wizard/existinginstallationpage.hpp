@@ -24,7 +24,7 @@ namespace Wizard
     private:
         MainWizard* mWizard;
 
-        bool versionIsOK(QString directory_name);
+        bool versionIsOK(QString directoryName);
 
     protected:
         void initializePage() override;

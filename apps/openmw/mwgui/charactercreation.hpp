@@ -93,13 +93,13 @@ namespace MWGui
         void selectRace();
 
         // Class dialogs
-        void onClassChoice(int _index);
+        void onClassChoice(int index);
         void onPickClassDialogDone(WindowBase* parWindow);
         void onPickClassDialogBack();
         void onCreateClassDialogDone(WindowBase* parWindow);
         void onCreateClassDialogBack();
         void showClassQuestionDialog();
-        void onClassQuestionChosen(int _index);
+        void onClassQuestionChosen(int index);
         void onGenerateClassBack();
         void onGenerateClassDone(WindowBase* parWindow);
         void selectGeneratedClass();

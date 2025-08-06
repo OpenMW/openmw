@@ -155,7 +155,7 @@ namespace MWRender
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
         void setupRenderToTexture(
-            int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
+            int segmentX, int segmentY, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
         osg::BoundingBox mBounds;
         osg::Vec2f mCenter;

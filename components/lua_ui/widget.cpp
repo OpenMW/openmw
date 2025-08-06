@@ -399,12 +399,12 @@ namespace LuaUi
         propagateEvent("mouseMove", [left, top, button](auto w) { return w->mouseEvent(left, top, button); });
     }
 
-    void WidgetExtension::mouseClick(MyGUI::Widget* _widget)
+    void WidgetExtension::mouseClick(MyGUI::Widget* /*widget*/)
     {
         propagateEvent("mouseClick", [](auto) { return sol::nil; });
     }
 
-    void WidgetExtension::mouseDoubleClick(MyGUI::Widget* _widget)
+    void WidgetExtension::mouseDoubleClick(MyGUI::Widget* /*widget*/)
     {
         propagateEvent("mouseDoubleClick", [](auto) { return sol::nil; });
     }

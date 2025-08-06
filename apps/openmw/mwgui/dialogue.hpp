@@ -179,9 +179,9 @@ namespace MWGui
         bool isCompanion();
 
         void onSelectListItem(const std::string& topic, int id);
-        void onByeClicked(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-        void onWindowResize(MyGUI::Window* _sender);
+        void onByeClicked(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
+        void onWindowResize(MyGUI::Window* sender);
         void onTopicActivated(const std::string& topicId);
         void onChoiceActivated(int id);
         void onGoodbyeActivated();

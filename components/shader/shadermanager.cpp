@@ -442,18 +442,18 @@ namespace Shader
             }
         }
 
-        void update(ShaderManager& Manager, osgViewer::Viewer& viewer)
+        void update(ShaderManager& manager, osgViewer::Viewer& viewer)
         {
             auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
             if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
             {
-                reloadTouchedShaders(Manager, viewer);
+                reloadTouchedShaders(manager, viewer);
             }
             mTriggerReload = false;
         }
 
-        void reloadTouchedShaders(ShaderManager& Manager, osgViewer::Viewer& viewer)
+        void reloadTouchedShaders(ShaderManager& manager, osgViewer::Viewer& viewer)
         {
             bool threadsRunningToStop = false;
             for (auto& [pathShaderToTest, shaderKeys] : mShaderFiles)
@@ -471,19 +471,19 @@ namespace Shader
                     for (const auto& [templateName, shaderDefines] : shaderKeys)
                     {
                         ShaderManager::ShaderMap::iterator shaderIt
-                            = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
-                        if (shaderIt == Manager.mShaders.end())
+                            = manager.mShaders.find(std::make_pair(templateName, shaderDefines));
+                        if (shaderIt == manager.mShaders.end())
                         {
                             Log(Debug::Error) << "Failed to find shader " << templateName;
                             continue;
                         }
 
-                        ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(
+                        ShaderManager::TemplateMap::iterator templateIt = manager.mShaderTemplates.find(
                             templateName); // Can't be Null, if we're here it means the template was added
-                        assert(templateIt != Manager.mShaderTemplates.end());
+                        assert(templateIt != manager.mShaderTemplates.end());
                         std::string& shaderSource = templateIt->second;
                         std::set<std::filesystem::path> insertedPaths;
-                        std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
+                        std::filesystem::path path = (std::filesystem::path(manager.mPath) / templateName);
                         std::ifstream stream;
                         stream.open(path);
                         if (stream.fail())
@@ -497,7 +497,7 @@ namespace Shader
                         int fileNumber = 1;
                         std::string source = buffer.str();
                         if (!addLineDirectivesAfterConditionalBlocks(source)
-                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber,
+                            || !parseIncludes(std::filesystem::path(manager.mPath), source, templateName, fileNumber,
                                 {}, insertedPaths))
                         {
                             break;
@@ -505,7 +505,7 @@ namespace Shader
                         shaderSource = std::move(source);
 
                         std::vector<std::string> linkedShaderNames;
-                        if (!Manager.createSourceFromTemplate(
+                        if (!manager.createSourceFromTemplate(
                                 shaderSource, linkedShaderNames, templateName, shaderDefines))
                         {
                             break;

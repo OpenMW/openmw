@@ -87,23 +87,23 @@ namespace
     };
 
     static osg::FrameBufferAttachment createFrameBufferAttachmentFromTemplate(
-        Usage usage, int width, int height, osg::Texture* template_, int samples)
+        Usage usage, int width, int height, osg::Texture* textureTemplate, int samples)
     {
         if (usage == Usage::RENDER_BUFFER && !Stereo::getMultiview())
         {
             osg::ref_ptr<osg::RenderBuffer> attachment
-                = new osg::RenderBuffer(width, height, template_->getInternalFormat(), samples);
+                = new osg::RenderBuffer(width, height, textureTemplate->getInternalFormat(), samples);
             return osg::FrameBufferAttachment(attachment);
         }
 
         auto texture = Stereo::createMultiviewCompatibleTexture(width, height, samples);
-        texture->setSourceFormat(template_->getSourceFormat());
-        texture->setSourceType(template_->getSourceType());
-        texture->setInternalFormat(template_->getInternalFormat());
-        texture->setFilter(osg::Texture2D::MIN_FILTER, template_->getFilter(osg::Texture2D::MIN_FILTER));
-        texture->setFilter(osg::Texture2D::MAG_FILTER, template_->getFilter(osg::Texture2D::MAG_FILTER));
-        texture->setWrap(osg::Texture::WRAP_S, template_->getWrap(osg::Texture2D::WRAP_S));
-        texture->setWrap(osg::Texture::WRAP_T, template_->getWrap(osg::Texture2D::WRAP_T));
+        texture->setSourceFormat(textureTemplate->getSourceFormat());
+        texture->setSourceType(textureTemplate->getSourceType());
+        texture->setInternalFormat(textureTemplate->getInternalFormat());
+        texture->setFilter(osg::Texture2D::MIN_FILTER, textureTemplate->getFilter(osg::Texture2D::MIN_FILTER));
+        texture->setFilter(osg::Texture2D::MAG_FILTER, textureTemplate->getFilter(osg::Texture2D::MAG_FILTER));
+        texture->setWrap(osg::Texture::WRAP_S, textureTemplate->getWrap(osg::Texture2D::WRAP_S));
+        texture->setWrap(osg::Texture::WRAP_T, textureTemplate->getWrap(osg::Texture2D::WRAP_T));
 
         return Stereo::createMultiviewCompatibleAttachment(texture);
     }

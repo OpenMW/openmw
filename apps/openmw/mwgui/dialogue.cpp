@@ -102,7 +102,7 @@ namespace MWGui
         totalHeight += lineHeight;
     }
 
-    void PersuasionDialog::onCancel(MyGUI::Widget* sender)
+    void PersuasionDialog::onCancel(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
     }
@@ -413,27 +413,27 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
+    void DialogueWindow::onWindowResize(MyGUI::Window* sender)
     {
         // if the window has only been moved, not resized, we don't need to update
-        if (mCurrentWindowSize == _sender->getSize())
+        if (mCurrentWindowSize == sender->getSize())
             return;
 
         redrawTopicsList();
         updateHistory();
-        mCurrentWindowSize = _sender->getSize();
+        mCurrentWindowSize = sender->getSize();
     }
 
-    void DialogueWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void DialogueWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
         if (!mScrollBar->getVisible())
             return;
         mScrollBar->setScrollPosition(
-            std::clamp<int>(mScrollBar->getScrollPosition() - _rel * 0.3, 0, mScrollBar->getScrollRange() - 1));
+            std::clamp<int>(mScrollBar->getScrollPosition() - rel * 0.3, 0, mScrollBar->getScrollRange() - 1));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 
-    void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
+    void DialogueWindow::onByeClicked(MyGUI::Widget* /*sender*/)
     {
         if (exit())
         {

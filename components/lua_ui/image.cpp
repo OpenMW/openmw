@@ -6,7 +6,7 @@
 
 namespace LuaUi
 {
-    void LuaTileRect::_setAlign(const MyGUI::IntSize& _oldsize)
+    void LuaTileRect::_setAlign(const MyGUI::IntSize& /*oldSize*/)
     {
         mCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
         mTileSize = mSetTileSize;

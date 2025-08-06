@@ -114,9 +114,9 @@ namespace MWGui
             dragItem(nullptr, count);
     }
 
-    void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* sender)
     {
-        mSortModel->setNameFilter(_sender->getCaption());
+        mSortModel->setNameFilter(sender->getCaption());
         mItemView->update();
     }
 
@@ -186,7 +186,7 @@ namespace MWGui
             mProfitLabel->setCaption({});
     }
 
-    void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (exit())
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);

@@ -500,43 +500,43 @@ namespace MWGui
 
     // widget controls
 
-    void ReviewDialog::onOkClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onOkClicked(MyGUI::Widget* /*sender*/)
     {
         eventDone(this);
     }
 
-    void ReviewDialog::onBackClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onBackClicked(MyGUI::Widget* /*sender*/)
     {
         eventBack();
     }
 
-    void ReviewDialog::onNameClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onNameClicked(MyGUI::Widget* /*sender*/)
     {
         eventActivateDialog(NAME_DIALOG);
     }
 
-    void ReviewDialog::onRaceClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onRaceClicked(MyGUI::Widget* /*sender*/)
     {
         eventActivateDialog(RACE_DIALOG);
     }
 
-    void ReviewDialog::onClassClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onClassClicked(MyGUI::Widget* /*sender*/)
     {
         eventActivateDialog(CLASS_DIALOG);
     }
 
-    void ReviewDialog::onBirthSignClicked(MyGUI::Widget* _sender)
+    void ReviewDialog::onBirthSignClicked(MyGUI::Widget* /*sender*/)
     {
         eventActivateDialog(BIRTHSIGN_DIALOG);
     }
 
-    void ReviewDialog::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void ReviewDialog::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mSkillView->getViewOffset().top + _rel * 0.3 > 0)
+        if (mSkillView->getViewOffset().top + rel * 0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mSkillView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
+                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + rel * 0.3)));
     }
 
     bool ReviewDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

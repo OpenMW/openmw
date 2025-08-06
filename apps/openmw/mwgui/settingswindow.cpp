@@ -468,17 +468,17 @@ namespace MWGui
         mControllerButtons.mLStick = "#{sMouse}";
     }
 
-    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
+    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*sender*/, size_t /*index*/)
     {
         resetScrollbars();
     }
 
-    void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
+    void SettingsWindow::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->toggleSettingsWindow();
     }
 
-    void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
+    void SettingsWindow::onResolutionSelected(MyGUI::ListBox* /*sender*/, size_t index)
     {
         if (index == MyGUI::ITEM_NONE)
             return;
@@ -528,7 +528,7 @@ namespace MWGui
         }
     }
 
-    void SettingsWindow::onRefractionButtonClicked(MyGUI::Widget* _sender)
+    void SettingsWindow::onRefractionButtonClicked(MyGUI::Widget* /*sender*/)
     {
         const bool refractionEnabled = Settings::water().mRefraction;
 
@@ -536,7 +536,7 @@ namespace MWGui
         mWobblyShoresButton->setEnabled(refractionEnabled);
     }
 
-    void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
     {
         int size = 0;
         if (pos == 0)
@@ -549,39 +549,39 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
     {
         Settings::water().mReflectionDetail.set(static_cast<int>(pos));
         apply();
     }
 
-    void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
     {
         Settings::water().mRainRippleDetail.set(static_cast<int>(pos));
         apply();
     }
 
-    void SettingsWindow::onLightingMethodButtonChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onLightingMethodButtonChanged(MyGUI::ComboBox* sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
+        sender->setCaptionWithReplacing(sender->getItemNameAt(sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
             "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
 
         Settings::shaders().mLightingMethod.set(
-            Settings::parseLightingMethod(*_sender->getItemDataAt<std::string>(pos)));
+            Settings::parseLightingMethod(*sender->getItemDataAt<std::string>(pos)));
         apply();
     }
 
-    void SettingsWindow::onLanguageChanged(size_t langPriority, MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onLanguageChanged(size_t langPriority, MyGUI::ComboBox* sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
+        sender->setCaptionWithReplacing(sender->getItemNameAt(sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
             "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
@@ -590,7 +590,7 @@ namespace MWGui
         if (currentLocales.size() <= langPriority)
             currentLocales.resize(langPriority + 1, "en");
 
-        const auto& languageCode = *_sender->getItemDataAt<std::string>(pos);
+        const auto& languageCode = *sender->getItemDataAt<std::string>(pos);
         if (!languageCode.empty())
             currentLocales[langPriority] = languageCode;
         else
@@ -640,14 +640,14 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
     {
         Settings::shaders().mMaxLights.set(8 * (pos + 1));
         apply();
         configureWidgets(mMainWidget, false);
     }
 
-    void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* _sender)
+    void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* /*sender*/)
     {
         std::vector<std::string> buttons = { "#{Interface:Yes}", "#{Interface:No}" };
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
@@ -675,31 +675,31 @@ namespace MWGui
         configureWidgets(mMainWidget, false);
     }
 
-    void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
+    void SettingsWindow::onButtonToggled(MyGUI::Widget* sender)
     {
         const std::string on = MWBase::Environment::get().getL10nManager()->getMessage("Interface", "On");
         const std::string off = MWBase::Environment::get().getL10nManager()->getMessage("Interface", "Off");
         bool newState;
-        if (_sender->castType<MyGUI::Button>()->getCaption() == on)
+        if (sender->castType<MyGUI::Button>()->getCaption() == on)
         {
-            _sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(off));
+            sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(off));
             newState = false;
         }
         else
         {
-            _sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(on));
+            sender->castType<MyGUI::Button>()->setCaption(MyGUI::UString(on));
             newState = true;
         }
 
-        if (getSettingType(_sender) == checkButtonType)
+        if (getSettingType(sender) == checkButtonType)
         {
-            Settings::get<bool>(getSettingCategory(_sender), getSettingName(_sender)).set(newState);
+            Settings::get<bool>(getSettingCategory(sender), getSettingName(sender)).set(newState);
             apply();
             return;
         }
     }
 
-    void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
     {
         auto& generalSettings = Settings::general();
         switch (pos)
@@ -722,7 +722,7 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onResChange(int width, int height)
+    void SettingsWindow::onResChange(int /*width*/, int /*height*/)
     {
         center();
         highlightCurrentResolution();
@@ -785,7 +785,7 @@ namespace MWGui
         Settings::Manager::resetPendingChanges();
     }
 
-    void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)
+    void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* /*sender*/)
     {
         if (mKeyboardMode)
             return;
@@ -796,7 +796,7 @@ namespace MWGui
         resetScrollbars();
     }
 
-    void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
+    void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* /*sender*/)
     {
         if (!mKeyboardMode)
             return;
@@ -1048,11 +1048,11 @@ namespace MWGui
         }
     }
 
-    void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
+    void SettingsWindow::onRebindAction(MyGUI::Widget* sender)
     {
-        int actionId = *_sender->getUserData<int>();
+        int actionId = *sender->getUserData<int>();
 
-        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{Interface:None}");
+        sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{Interface:None}");
 
         MWBase::Environment::get().getWindowManager()->staticMessageBox("#{OMWEngine:RebindAction}");
         MWBase::Environment::get().getWindowManager()->disallowMouse();
@@ -1060,16 +1060,16 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->enableDetectingBindingMode(actionId, mKeyboardMode);
     }
 
-    void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mControlsBox->getViewOffset().top + _rel * 0.3f > 0)
+        if (mControlsBox->getViewOffset().top + rel * 0.3f > 0)
             mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mControlsBox->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mControlsBox->getViewOffset().top + _rel * 0.3f)));
+                MyGUI::IntPoint(0, static_cast<int>(mControlsBox->getViewOffset().top + rel * 0.3f)));
     }
 
-    void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
+    void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* /*sender*/)
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->askForConfirmation("#{OMWEngine:ConfirmResetBindings}");
@@ -1107,7 +1107,7 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->saveBindings();
     }
 
-    void SettingsWindow::onWindowResize(MyGUI::Window* _sender)
+    void SettingsWindow::onWindowResize(MyGUI::Window* /*sender*/)
     {
         layoutControlsBox();
     }
