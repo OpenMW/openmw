@@ -118,6 +118,8 @@ namespace MWGui
     class JailScreen;
     class KeyboardNavigation;
     class ItemTransfer;
+    class ControllerButtonsOverlay;
+    class InventoryTabsOverlay;
 
     class WindowManager : public MWBase::WindowManager
     {
@@ -183,7 +185,9 @@ namespace MWGui
         MWGui::CountDialog* getCountDialog() override;
         MWGui::ConfirmationDialog* getConfirmationDialog() override;
         MWGui::TradeWindow* getTradeWindow() override;
+        MWGui::HUD* getHud() override;
         MWGui::PostProcessorHud* getPostProcessorHud() override;
+        std::vector<MWGui::WindowBase*> getGuiModeWindows(GuiMode mode) override;
 
         /// Make the player use an item, while updating GUI state accordingly
         void useItem(const MWWorld::Ptr& item, bool bypassBeastRestrictions = false) override;
@@ -387,6 +391,14 @@ namespace MWGui
 
         void asyncPrepareSaveMap() override;
 
+        WindowBase* getActiveControllerWindow() override;
+        int getControllerMenuHeight() override;
+        void cycleActiveControllerWindow(bool next) override;
+        void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
+        bool getControllerTooltip() const override { return mControllerTooltip; }
+        void setControllerTooltip(bool enabled) override;
+        void updateControllerButtonsOverlay() override;
+
         // Used in Lua bindings
         const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
         void setDisabledByLua(std::string_view windowId, bool disabled) override;
@@ -456,6 +468,8 @@ namespace MWGui
         PostProcessorHud* mPostProcessorHud;
         JailScreen* mJailScreen;
         ContainerWindow* mContainerWindow;
+        ControllerButtonsOverlay* mControllerButtonsOverlay;
+        InventoryTabsOverlay* mInventoryTabsOverlay;
 
         std::vector<std::unique_ptr<WindowBase>> mWindows;
 
@@ -495,6 +509,11 @@ namespace MWGui
         std::map<GuiMode, GuiModeState> mGuiModeStates;
         // The currently active stack of GUI modes (top mode is the one we are in).
         std::vector<GuiMode> mGuiModes;
+        // The active window for controller mode for each GUI mode.
+        std::map<GuiMode, int> mActiveControllerWindows;
+        bool mControllerTooltip;
+
+        void reapplyActiveControllerWindow();
 
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
 

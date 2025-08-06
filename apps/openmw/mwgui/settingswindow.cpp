@@ -462,6 +462,10 @@ namespace MWGui
 
             i++;
         }
+
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:OK}";
+        mControllerButtons.mLStick = "#{sMouse}";
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -471,7 +475,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        setVisible(false);
+        MWBase::Environment::get().getWindowManager()->toggleSettingsWindow();
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -1139,4 +1143,32 @@ namespace MWGui
         mResolutionList->setScrollPosition(0);
         mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
     }
+
+    bool SettingsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onOkButtonClicked(mOkButton);
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            size_t index = mSettingsTab->getIndexSelected();
+            index = wrap(index - 1, mSettingsTab->getItemCount());
+            mSettingsTab->setIndexSelected(index);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            return true;
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            size_t index = mSettingsTab->getIndexSelected();
+            index = wrap(index + 1, mSettingsTab->getItemCount());
+            mSettingsTab->setIndexSelected(index);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            return true;
+        }
+
+        return false;
+    }
+
 }

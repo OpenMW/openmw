@@ -1471,6 +1471,22 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Vid aktivering gör denna funktion att övergångarna mellan olika animationer och poser blir mycket mjukare. Funktionen gör det också möjligt att konfigurera animationsövergångarna i YAML-filer. Dessa filer kan buntas ihop tillsammans med nya animationsfiler.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make it easier to use game menus with a controller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör det enklare att använda spelmenyer med en handkontroll.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Enable Controller Menus</source>
+        <translation>Aktivera handkontrollmenyer</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When using controller menus, make tooltips visible by default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Visar inforutor som standard när handkontrollmenyer används.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Show Controller Tooltips By Default</source>
+        <translation>Visa handkontrollinforutor som standard</translation>
+    </message>
+    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kontrollerar styrkan på dopplereffekten. Noll innebär helt inaktiverat.&lt;/p&gt;&lt;p&gt;Dopplereffekten höjer eller sänker tonhöjden på ljud i förhållande till ljudkällans hastighet och lyssnaren.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>

@@ -58,6 +58,7 @@ namespace MWGui
         : mItem(nullptr)
         , mItemShadow(nullptr)
         , mFrame(nullptr)
+        , mControllerBorder(nullptr)
         , mText(nullptr)
     {
     }
@@ -82,8 +83,20 @@ namespace MWGui
         assignWidget(mText, "Text");
         if (mText)
             mText->setNeedMouseFocus(false);
+        if (Settings::gui().mControllerMenus)
+        {
+            assignWidget(mControllerBorder, "ControllerBorder");
+            if (mControllerBorder)
+                mControllerBorder->setNeedMouseFocus(false);
+        }
 
         Base::initialiseOverride();
+    }
+
+    void ItemWidget::setControllerFocus(bool focus)
+    {
+        if (mControllerBorder)
+            mControllerBorder->setVisible(focus);
     }
 
     void ItemWidget::setCount(int count)

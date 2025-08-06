@@ -18,8 +18,10 @@ namespace MWGui
         void setInventoryAllowed(bool allowed);
 
         void onResChange(int, int) override { center(); }
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         std::string_view getWindowIdForLua() const override { return "Book"; }
+        ControllerButtons* getControllerButtons() override;
 
     protected:
         void onNextPageButtonClicked(MyGUI::Widget* sender);

@@ -83,6 +83,7 @@
 #include "confirmationdialog.hpp"
 #include "console.hpp"
 #include "container.hpp"
+#include "controllerbuttonsoverlay.hpp"
 #include "controllers.hpp"
 #include "countdialog.hpp"
 #include "cursor.hpp"
@@ -91,6 +92,7 @@
 #include "enchantingdialog.hpp"
 #include "exposedwindow.hpp"
 #include "hud.hpp"
+#include "inventorytabsoverlay.hpp"
 #include "inventorywindow.hpp"
 #include "itemchargeview.hpp"
 #include "itemtransfer.hpp"
@@ -182,6 +184,8 @@ namespace MWGui
         , mPostProcessorHud(nullptr)
         , mJailScreen(nullptr)
         , mContainerWindow(nullptr)
+        , mControllerButtonsOverlay(nullptr)
+        , mInventoryTabsOverlay(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
         , mHudEnabled(true)
@@ -508,6 +512,15 @@ namespace MWGui
         mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
 
+        auto controllerButtonsOverlay = std::make_unique<ControllerButtonsOverlay>();
+        mControllerButtonsOverlay = controllerButtonsOverlay.get();
+        mWindows.push_back(std::move(controllerButtonsOverlay));
+
+        auto inventoryTabsOverlay = std::make_unique<InventoryTabsOverlay>();
+        mInventoryTabsOverlay = inventoryTabsOverlay.get();
+        mWindows.push_back(std::move(inventoryTabsOverlay));
+        mActiveControllerWindows[GM_Inventory] = 1; // Start on Inventory page
+
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
             {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
 
@@ -665,6 +678,14 @@ namespace MWGui
                 && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
             mSpellWindow->setVisible(
                 mSpellWindow->pinned() && !isConsoleMode() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
+
+            if (Settings::gui().mControllerMenus)
+            {
+                if (mControllerButtonsOverlay)
+                    mControllerButtonsOverlay->setVisible(false);
+                if (mInventoryTabsOverlay)
+                    mInventoryTabsOverlay->setVisible(false);
+            }
             return;
         }
         else if (getMode() != GM_Inventory)
@@ -693,6 +714,8 @@ namespace MWGui
             mSpellWindow->setVisible(eff & GW_Magic);
             mStatsWindow->setVisible(eff & GW_Stats);
         }
+
+        updateControllerButtonsOverlay();
 
         switch (mode)
         {
@@ -723,6 +746,7 @@ namespace MWGui
             return;
         dialog->setVisible(false);
         mGarbageDialogs.push_back(std::move(dialog));
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::exitCurrentGuiMode()
@@ -862,6 +886,103 @@ namespace MWGui
         mHud->setPlayerPos(x, y, u, v);
     }
 
+    WindowBase* WindowManager::getActiveControllerWindow()
+    {
+        if (!mCurrentModals.empty())
+            return mCurrentModals.back();
+
+        if (isSettingsWindowVisible())
+            return mSettingsWindow;
+
+        if (!mGuiModes.empty())
+        {
+            GuiMode mode = mGuiModes.back();
+            GuiModeState& state = mGuiModeStates[mode];
+            if (state.mWindows.size() == 0)
+                return nullptr;
+
+            int activeIndex
+                = std::clamp(mActiveControllerWindows[mode], 0, static_cast<int>(state.mWindows.size()) - 1);
+
+            // If the active window is no longer visible, find the next visible window.
+            if (!state.mWindows[activeIndex]->isVisible())
+                cycleActiveControllerWindow(true);
+
+            return state.mWindows[activeIndex];
+        }
+
+        return nullptr;
+    }
+
+    void WindowManager::cycleActiveControllerWindow(bool next)
+    {
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
+            return;
+
+        GuiMode mode = mGuiModes.back();
+        int winCount = mGuiModeStates[mode].mWindows.size();
+
+        int activeIndex = 0;
+        if (winCount > 1)
+        {
+            // Find next/previous visible window
+            activeIndex = mActiveControllerWindows[mode];
+            int delta = next ? 1 : -1;
+
+            for (int i = 0; i < winCount; i++)
+            {
+                activeIndex = wrap(activeIndex + delta, winCount);
+                if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
+                    break;
+            }
+        }
+
+        if (mActiveControllerWindows[mode] != activeIndex)
+            setActiveControllerWindow(mode, activeIndex);
+    }
+
+    void WindowManager::reapplyActiveControllerWindow()
+    {
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
+            return;
+
+        const GuiMode mode = mGuiModes.back();
+        int winCount = mGuiModeStates[mode].mWindows.size();
+
+        for (int i = 0; i < winCount; i++)
+        {
+            // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
+            if (i != mActiveControllerWindows[mode])
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
+        }
+        if (winCount > 0)
+            mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
+    }
+
+    void WindowManager::setActiveControllerWindow(GuiMode mode, int activeIndex)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        int winCount = mGuiModeStates[mode].mWindows.size();
+        if (winCount == 0)
+            return;
+
+        activeIndex = std::clamp(activeIndex, 0, winCount - 1);
+        mActiveControllerWindows[mode] = activeIndex;
+
+        reapplyActiveControllerWindow();
+
+        MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
+            mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
+
+        updateControllerButtonsOverlay();
+        setCursorActive(false);
+
+        if (winCount > 1)
+            playSound(ESM::RefId::stringRefId("Menu Size"));
+    }
+
     void WindowManager::update(float frameDuration)
     {
         handleScheduledMessageBoxes();
@@ -924,6 +1045,12 @@ namespace MWGui
 
         if (isSettingsWindowVisible())
             mSettingsWindow->onFrame(frameDuration);
+
+        if (mControllerButtonsOverlay && mControllerButtonsOverlay->isVisible())
+            mControllerButtonsOverlay->onFrame(frameDuration);
+
+        if (mInventoryTabsOverlay && mInventoryTabsOverlay->isVisible())
+            mInventoryTabsOverlay->onFrame(frameDuration);
 
         if (!gameRunning)
             return;
@@ -1218,6 +1345,9 @@ namespace MWGui
         for (const auto& window : mWindows)
             window->onResChange(x, y);
 
+        // Re-apply any controller-specific window changes.
+        reapplyActiveControllerWindow();
+
         // TODO: check if any windows are now off-screen and move them back if so
     }
 
@@ -1296,6 +1426,15 @@ namespace MWGui
 
         updateVisible();
         MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mode == GM_Container)
+                mActiveControllerWindows[mode] = 0; // Ensure controller focus is on container
+            // Activate first visible window. This needs to be called after updateVisible.
+            mActiveControllerWindows[mode] = std::max(mActiveControllerWindows[mode] - 1, -1);
+            cycleActiveControllerWindow(true);
+        }
     }
 
     void WindowManager::setCullMask(uint32_t mask)
@@ -1350,6 +1489,14 @@ namespace MWGui
         // To make sure that console window get focus again
         if (mConsole && mConsole->isVisible())
             mConsole->onOpen();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mGuiModes.empty())
+                setControllerTooltip(false);
+            else
+                reapplyActiveControllerWindow();
+        }
     }
 
     void WindowManager::removeGuiMode(GuiMode mode)
@@ -1475,6 +1622,10 @@ namespace MWGui
         mConsole->executeFile(path);
     }
 
+    std::vector<MWGui::WindowBase*> WindowManager::getGuiModeWindows(GuiMode mode)
+    {
+        return mGuiModeStates[mode].mWindows;
+    }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow()
     {
         return mInventoryWindow;
@@ -1486,6 +1637,10 @@ namespace MWGui
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog()
     {
         return mConfirmationDialog;
+    }
+    MWGui::HUD* WindowManager::getHud()
+    {
+        return mHud;
     }
     MWGui::TradeWindow* WindowManager::getTradeWindow()
     {
@@ -1770,6 +1925,13 @@ namespace MWGui
 
     void WindowManager::onWindowChangeCoord(MyGUI::Window* window)
     {
+        // If using controller menus, don't persist changes to size of the stats or magic
+        // windows.
+        if (Settings::gui().mControllerMenus
+            && (window == mStatsWindow->mMainWidget->castType<MyGUI::Window>()
+                || window == mSpellWindow->mMainWidget->castType<MyGUI::Window>()))
+            return;
+
         const auto it = mTrackedWindows.find(window);
         if (it == mTrackedWindows.end())
             return;
@@ -1963,6 +2125,7 @@ namespace MWGui
             if (!window->exit())
                 return;
             window->setVisible(false);
+            updateControllerButtonsOverlay();
         }
     }
 
@@ -1976,6 +2139,8 @@ namespace MWGui
 
         mKeyboardNavigation->setModalWindow(input->mMainWidget);
         mKeyboardNavigation->setDefaultFocus(input->mMainWidget, input->getDefaultKeyFocus());
+
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -2013,6 +2178,16 @@ namespace MWGui
 
     void WindowManager::updatePinnedWindows()
     {
+        if (Settings::gui().mControllerMenus)
+        {
+            // In controller mode, don't hide any menus and only allow pinning the map.
+            mInventoryWindow->setPinned(false);
+            mMap->setPinned(Settings::windows().mMapPin);
+            mSpellWindow->setPinned(false);
+            mStatsWindow->setPinned(false);
+            return;
+        }
+
         mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
         if (Settings::windows().mInventoryHidden)
             mShown = (GuiWindow)(mShown ^ GW_Inventory);
@@ -2450,5 +2625,47 @@ namespace MWGui
             }
         }
         return res;
+    }
+
+    int WindowManager::getControllerMenuHeight()
+    {
+        int height = MyGUI::RenderManager::getInstance().getViewSize().height;
+        if (mControllerButtonsOverlay != nullptr && mControllerButtonsOverlay->isVisible())
+            height -= mControllerButtonsOverlay->getHeight();
+        if (mInventoryTabsOverlay != nullptr && mInventoryTabsOverlay->isVisible())
+            height -= mInventoryTabsOverlay->getHeight();
+        return height;
+    }
+
+    void WindowManager::setControllerTooltip(bool enabled)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mControllerTooltip = enabled;
+    }
+
+    void WindowManager::updateControllerButtonsOverlay()
+    {
+        if (!Settings::gui().mControllerMenus || !mControllerButtonsOverlay)
+            return;
+
+        WindowBase* topWin = getActiveControllerWindow();
+        if (!topWin || !topWin->isVisible())
+        {
+            mControllerButtonsOverlay->setVisible(false);
+            mInventoryTabsOverlay->setVisible(false);
+            return;
+        }
+
+        // setButtons will handle setting visibility based on if any buttons are defined.
+        mControllerButtonsOverlay->setButtons(topWin->getControllerButtons());
+        if (getMode() == GM_Inventory)
+        {
+            mInventoryTabsOverlay->setVisible(true);
+            mInventoryTabsOverlay->setTab(mActiveControllerWindows[GM_Inventory]);
+        }
+        else
+            mInventoryTabsOverlay->setVisible(false);
     }
 }

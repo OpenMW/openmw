@@ -2,6 +2,8 @@
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_Window.h>
 
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -27,6 +29,7 @@
 #include "confirmationdialog.hpp"
 #include "spellicons.hpp"
 #include "spellview.hpp"
+#include "statswindow.hpp"
 
 namespace MWGui
 {
@@ -55,6 +58,14 @@ namespace MWGui
         // Adjust the spell filtering widget size because of MyGUI limitations.
         int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
         mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            setPinButtonVisible(false);
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mR3 = "#{sInfo}";
+        }
     }
 
     void SpellWindow::onPinToggled()
@@ -66,7 +77,9 @@ namespace MWGui
 
     void SpellWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
             MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
@@ -287,5 +300,40 @@ namespace MWGui
             else
                 onSpellSelected(selectedSpell.mId);
         }
+    }
+
+    bool SpellWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        else
+            mSpellView->onControllerButton(arg.button);
+
+        return true;
+    }
+
+    void SpellWindow::setActiveControllerWindow(bool active)
+    {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // match the size of the stats window.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, StatsWindow::getIdealWidth());
+            int height = std::min(winMgr->getControllerMenuHeight(), StatsWindow::getIdealHeight());
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
+
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+
+            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
+                active && Settings::gui().mControllerTooltips);
+        }
+
+        mSpellView->setActiveControllerWindow(active);
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

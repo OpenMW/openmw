@@ -49,6 +49,9 @@ namespace MWGui
 
         MyGUI::Widget* getDefaultKeyFocus() override;
 
+    protected:
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+
     private:
         std::unique_ptr<ResponseCallback> mCallback;
 
@@ -64,6 +67,9 @@ namespace MWGui
         MyGUI::Button* mBribe1000Button;
         MyGUI::Widget* mActionsBox;
         Gui::AutoSizedTextBox* mGoldLabel;
+
+        std::vector<MyGUI::Button*> mButtons;
+        int mControllerFocus = 0;
 
         void adjustAction(MyGUI::Widget* action, int& totalHeight);
 
@@ -186,6 +192,8 @@ namespace MWGui
 
         void onReferenceUnavailable() override;
 
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+
     private:
         void updateDisposition();
         void restock();
@@ -197,6 +205,7 @@ namespace MWGui
 
         std::vector<std::unique_ptr<DialogueText>> mHistoryContents;
         std::vector<std::pair<std::string, int>> mChoices;
+        std::vector<BookTypesetter::Style*> mChoiceStyles;
         bool mGoodbye;
 
         std::vector<std::unique_ptr<Link>> mLinks;
@@ -219,6 +228,10 @@ namespace MWGui
 
         std::unique_ptr<ResponseCallback> mCallback;
         std::unique_ptr<ResponseCallback> mGreetingCallback;
+
+        void setControllerFocus(size_t index, bool focused);
+        int mControllerFocus = 0;
+        int mControllerChoice = -1;
 
         void updateTopicFormat();
     };

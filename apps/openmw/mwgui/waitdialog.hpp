@@ -36,6 +36,7 @@ namespace MWGui
         void clear() override;
 
         void onFrame(float dt) override;
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();
@@ -44,6 +45,8 @@ namespace MWGui
         WindowBase* getProgressBar() { return &mProgressBar; }
 
         std::string_view getWindowIdForLua() const override { return "WaitDialog"; }
+
+        ControllerButtons* getControllerButtons() override;
 
     protected:
         MyGUI::TextBox* mDateTimeText;

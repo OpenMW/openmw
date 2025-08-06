@@ -61,6 +61,8 @@ namespace MWGui
 
         void clear() override;
 
+        void dropDraggedItem(float mouseX, float mouseY);
+
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;

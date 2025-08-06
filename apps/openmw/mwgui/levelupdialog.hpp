@@ -37,6 +37,7 @@ namespace MWGui
 
         std::vector<ESM::Attribute::AttributeID> mSpentAttributes;
 
+        size_t mPerCol;
         unsigned int mCoinCount;
 
         void onOkButtonClicked(MyGUI::Widget* sender);
@@ -49,6 +50,10 @@ namespace MWGui
 
         std::string_view getLevelupClassImage(
             const int combatIncreases, const int magicIncreases, const int stealthIncreases);
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        std::vector<MyGUI::Button*> mAttributeButtons;
+        size_t mControllerFocus;
     };
 
 }

@@ -93,7 +93,7 @@ namespace MWGui
     {
     public:
         InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-            const std::vector<std::string>& buttons, bool immediate, int defaultFocus);
+            const std::vector<std::string>& buttons, bool immediate, size_t defaultFocus);
         void mousePressed(MyGUI::Widget* _widget);
         int readPressedButton();
 
@@ -102,6 +102,8 @@ namespace MWGui
         bool exit() override { return false; }
 
         bool mMarkedToDelete;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void buttonActivated(MyGUI::Widget* _widget);
@@ -112,8 +114,9 @@ namespace MWGui
         std::vector<MyGUI::Button*> mButtons;
 
         int mButtonPressed;
-        int mDefaultFocus;
+        size_t mDefaultFocus;
         bool mImmediate;
+        size_t mControllerFocus;
     };
 
 }

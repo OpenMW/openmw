@@ -81,6 +81,7 @@ namespace MWInput
         float getControllerAxisValue(SDL_GameControllerAxis axis) const override;
         int getMouseMoveX() const override;
         int getMouseMoveY() const override;
+        void warpMouseToWidget(MyGUI::Widget* widget) override;
 
         int getNumActions() override { return A_Last; }
         const std::initializer_list<int>& getActionKeySorting() override;
@@ -91,6 +92,8 @@ namespace MWInput
 
         void setJoystickLastUsed(bool enabled) override;
         bool joystickLastUsed() override;
+        std::string getControllerButtonIcon(int button) override;
+        std::string getControllerAxisIcon(int axis) override;
 
         int countSavedGameRecords() const override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;

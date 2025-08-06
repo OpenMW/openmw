@@ -6,6 +6,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -61,6 +63,11 @@ namespace MWGui
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
         setCoord(200, 0, 600, 300);
+
+        mControllerButtons.mA = "#{sTake}";
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mR3 = "#{sInfo}";
+        mControllerButtons.mL2 = "#{sInventory}";
     }
 
     void CompanionWindow::onItemSelected(int index)
@@ -96,13 +103,12 @@ namespace MWGui
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
             dialog->openCountDialog(name, "#{sTake}", count);
             dialog->eventOkClicked.clear();
-
-            if (MyGUI::InputManager::getInstance().isAltPressed())
+            if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
         }
-        else if (MyGUI::InputManager::getInstance().isAltPressed())
+        else if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
             transferItem(nullptr, count);
         else
             dragItem(nullptr, count);
@@ -242,5 +248,33 @@ namespace MWGui
     void CompanionWindow::onClose()
     {
         mItemTransfer->removeTarget(*mItemView);
+    }
+
+    bool CompanionWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            int index = mItemView->getControllerFocus();
+            if (index >= 0 && index < mItemView->getItemCount())
+                onItemSelected(index);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCloseButtonClicked(mCloseButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mItemView->onControllerButton(arg.button);
+        }
+
+        return true;
+    }
+
+    void CompanionWindow::setActiveControllerWindow(bool active)
+    {
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 }

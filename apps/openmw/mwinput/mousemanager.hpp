@@ -32,6 +32,7 @@ namespace MWInput
         bool injectMouseButtonRelease(Uint8 button);
         void injectMouseMove(float xMove, float yMove, float mouseWheelMove);
         void warpMouse();
+        void warpMouseToWidget(MyGUI::Widget* widget);
 
         void setMouseLookEnabled(bool enabled) { mMouseLookEnabled = enabled; }
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }

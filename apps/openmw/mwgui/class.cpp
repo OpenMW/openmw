@@ -18,6 +18,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "tooltips.hpp"
@@ -46,15 +47,21 @@ namespace MWGui
         getWidget(mClassImage, "ClassImage");
         getWidget(mClassName, "ClassName");
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->setCaptionWithReplacing("#{sMessageQuestionAnswer3}");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+        getWidget(mOkButton, "OKButton");
+        mOkButton->setCaptionWithReplacing("#{sMessageQuestionAnswer2}");
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mOkButton->setStateSelected(true);
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
+        }
 
         center();
     }
@@ -69,6 +76,30 @@ namespace MWGui
             MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mCurrentClassId)->mName);
 
         center();
+    }
+
+    bool GenerateClassResultDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mOkButtonFocus)
+                onOkClicked(mOkButton);
+            else
+                onBackClicked(mBackButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(mBackButton);
+        }
+        else if ((arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && mOkButtonFocus)
+            || (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mOkButtonFocus))
+        {
+            mOkButtonFocus = !mOkButtonFocus;
+            mOkButton->setStateSelected(mOkButtonFocus);
+            mBackButton->setStateSelected(!mOkButtonFocus);
+        }
+
+        return true;
     }
 
     // widget controls
@@ -110,13 +141,18 @@ namespace MWGui
 
         getWidget(mClassImage, "ClassImage");
 
-        MyGUI::Button* backButton;
-        getWidget(backButton, "BackButton");
-        backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
+        getWidget(mBackButton, "BackButton");
+        mBackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
 
-        MyGUI::Button* okButton;
-        getWidget(okButton, "OKButton");
-        okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
+        getWidget(mOkButton, "OKButton");
+        mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
+        }
 
         updateClasses();
         updateStats();
@@ -128,8 +164,17 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
+        {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+            mControllerButtons.mX = "#{sNext}";
+        }
+        else if (Settings::gui().mControllerMenus)
+        {
+            okButton->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
+            mControllerButtons.mX = "#{sDone}";
+        }
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
@@ -278,6 +323,32 @@ namespace MWGui
         setClassImage(mClassImage, mCurrentClassId);
     }
 
+    bool PickClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(mBackButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mClassList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            winMgr->setKeyFocusWidget(mClassList);
+            winMgr->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        }
+
+        return true;
+    }
+
     /* InfoBoxDialog */
 
     void InfoBoxDialog::fitToText(MyGUI::TextBox* widget)
@@ -312,6 +383,7 @@ namespace MWGui
 
     InfoBoxDialog::InfoBoxDialog()
         : WindowModal("openmw_infobox.layout")
+        , mControllerFocus(0)
     {
         getWidget(mTextBox, "TextBox");
         getWidget(mText, "Text");
@@ -319,6 +391,9 @@ namespace MWGui
         getWidget(mButtonBar, "ButtonBar");
 
         center();
+
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
+        mControllerButtons.mA = "#{sSelect}";
     }
 
     void InfoBoxDialog::setText(const std::string& str)
@@ -353,6 +428,13 @@ namespace MWGui
             fitToText(button);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &InfoBoxDialog::onButtonClicked);
             coord.top += button->getHeight();
+
+            if (Settings::gui().mControllerMenus && buttons.size() > 1 && this->mButtons.empty())
+            {
+                // First button is selected by default
+                button->setStateSelected(true);
+            }
+
             this->mButtons.push_back(button);
         }
     }
@@ -382,6 +464,44 @@ namespace MWGui
         }
     }
 
+    bool InfoBoxDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mButtons.size())
+                onButtonClicked(mButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            if (mButtons.size() == 1)
+                onButtonClicked(mButtons[0]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == 0)
+                return true;
+
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == 1)
+                return true;
+
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+
+        return true;
+    }
+
     /* ClassChoiceDialog */
 
     ClassChoiceDialog::ClassChoiceDialog()
@@ -405,6 +525,7 @@ namespace MWGui
         : WindowModal("openmw_chargen_create_class.layout")
         , mAffectedAttribute(nullptr)
         , mAffectedSkill(nullptr)
+        , mControllerFocus(2)
     {
         // Centre dialog
         center();
@@ -450,14 +571,25 @@ namespace MWGui
         MyGUI::Button* descriptionButton;
         getWidget(descriptionButton, "DescriptionButton");
         descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
+        mButtons.push_back(descriptionButton);
 
         MyGUI::Button* backButton;
         getWidget(backButton, "BackButton");
         backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
+        mButtons.push_back(backButton);
 
         MyGUI::Button* okButton;
         getWidget(okButton, "OKButton");
         okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onOkClicked);
+        mButtons.push_back(okButton);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            okButton->setStateSelected(true);
+            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{sBack}";
+        }
 
         // Set default skills, attributes
 
@@ -545,11 +677,54 @@ namespace MWGui
         getWidget(okButton, "OKButton");
 
         if (shown)
+        {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
+            mControllerButtons.mX = "#{sNext}";
+        }
+        else if (Settings::gui().mControllerMenus)
+        {
+            okButton->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
+            mControllerButtons.mX = "#{sDone}";
+        }
         else
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", {})));
+    }
+
+    bool CreateClassDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus == 0)
+                onDescriptionClicked(mButtons[0]);
+            else if (mControllerFocus == 1)
+                onBackClicked(mButtons[1]);
+            else
+                onOkClicked(mButtons[2]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onBackClicked(mButtons[1]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkClicked(mButtons[2]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+        return true;
     }
 
     // widget controls
@@ -708,6 +883,9 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
+
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
     SelectSpecializationDialog::~SelectSpecializationDialog() {}
@@ -739,6 +917,16 @@ namespace MWGui
         return true;
     }
 
+    bool SelectSpecializationDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+            return true;
+        }
+        return false;
+    }
+
     /* SelectAttributeDialog */
 
     SelectAttributeDialog::SelectAttributeDialog()
@@ -760,6 +948,7 @@ namespace MWGui
             widget->setAttributeId(attribute.mId);
             widget->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
             ToolTips::createAttributeToolTip(widget, attribute.mId);
+            mAttributeButtons.emplace_back(widget);
         }
 
         attributes->setVisibleVScroll(false);
@@ -770,6 +959,16 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mAttributeButtons.size() > 0)
+                mAttributeButtons[0]->setStateSelected(true);
+
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+        }
     }
 
     // widget controls
@@ -788,6 +987,33 @@ namespace MWGui
     bool SelectAttributeDialog::exit()
     {
         eventCancel();
+        return true;
+    }
+
+    bool SelectAttributeDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mAttributeButtons.size())
+                onAttributeClicked(mAttributeButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            mAttributeButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mAttributeButtons.size());
+            mAttributeButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mAttributeButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mAttributeButtons.size());
+            mAttributeButtons[mControllerFocus]->setStateSelected(true);
+        }
+
         return true;
     }
 
@@ -820,6 +1046,8 @@ namespace MWGui
             skillWidget->setSkillId(skill.mId);
             skillWidget->eventClicked += MyGUI::newDelegate(this, &SelectSkillDialog::onSkillClicked);
             ToolTips::createSkillToolTip(skillWidget, skill.mId);
+            mSkillButtons.emplace_back(skillWidget);
+            mNumSkillsPerSpecialization[skill.mData.mSpecialization]++;
         }
         for (const auto& [widget, coord] : specializations)
         {
@@ -832,6 +1060,16 @@ namespace MWGui
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mSkillButtons.size() > 0)
+                mSkillButtons[0]->setStateSelected(true);
+
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+        }
     }
 
     SelectSkillDialog::~SelectSkillDialog() {}
@@ -855,6 +1093,75 @@ namespace MWGui
         return true;
     }
 
+    bool SelectSkillDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mSkillButtons.size())
+                onSkillClicked(mSkillButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelClicked(nullptr);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus - 1, mSkillButtons.size());
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus + 1, mSkillButtons.size());
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mSkillButtons[mControllerFocus]->setStateSelected(false);
+            selectNextColumn(arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT ? -1 : 1);
+            mSkillButtons[mControllerFocus]->setStateSelected(true);
+        }
+
+        return true;
+    }
+
+    void SelectSkillDialog::selectNextColumn(int direction)
+    {
+        // Find which column (specialization) the current index is in.
+        size_t specialization = 0;
+        size_t nextSpecializationIndex = 0;
+        for (; specialization < mNumSkillsPerSpecialization.size(); ++specialization)
+        {
+            nextSpecializationIndex += mNumSkillsPerSpecialization[specialization];
+            if (mControllerFocus < nextSpecializationIndex)
+                break;
+        }
+
+        if (direction < 0)
+        {
+            if (mControllerFocus < mNumSkillsPerSpecialization[0])
+            {
+                // Wrap around to the right column
+                for (size_t i = 0; i < mNumSkillsPerSpecialization.size() - 1; ++i)
+                    mControllerFocus += mNumSkillsPerSpecialization[i];
+            }
+            else
+                mControllerFocus -= mNumSkillsPerSpecialization[specialization];
+        }
+        else
+        {
+            if (mControllerFocus + mNumSkillsPerSpecialization.back() >= mSkillButtons.size())
+            {
+                // Wrap around to the left column
+                for (size_t i = 0; i < mNumSkillsPerSpecialization.size() - 1; ++i)
+                    mControllerFocus -= mNumSkillsPerSpecialization[i];
+            }
+            else
+                mControllerFocus += mNumSkillsPerSpecialization[specialization];
+        }
+    }
+
     /* DescriptionDialog */
 
     DescriptionDialog::DescriptionDialog()
@@ -873,6 +1180,8 @@ namespace MWGui
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+
+        mControllerButtons.mA = "#{Interface:OK}";
     }
 
     DescriptionDialog::~DescriptionDialog() {}
@@ -904,4 +1213,13 @@ namespace MWGui
         imageBox->setImageTexture(classImage);
     }
 
+    bool DescriptionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onOkClicked(nullptr);
+            return true;
+        }
+        return false;
+    }
 }

@@ -6,6 +6,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Window.h>
@@ -79,6 +80,14 @@ namespace MWGui
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            setPinButtonVisible(false);
+            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mRStick = "#{sScrolldown}";
+            mControllerButtons.mB = "#{sBack}";
+        }
 
         onWindowResize(t);
     }
@@ -714,7 +723,9 @@ namespace MWGui
 
     void StatsWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
             MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
             MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
@@ -722,5 +733,36 @@ namespace MWGui
         }
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
+    }
+
+    bool StatsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+
+        return true;
+    }
+
+    void StatsWindow::setActiveControllerWindow(bool active)
+    {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // show all stats.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, getIdealWidth());
+            int height = std::min(winMgr->getControllerMenuHeight(), getIdealHeight());
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
+
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+
+            if (active)
+                onWindowResize(window);
+        }
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

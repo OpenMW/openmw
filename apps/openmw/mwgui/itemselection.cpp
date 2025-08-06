@@ -3,6 +3,8 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_TextBox.h>
 
+#include <components/settings/values.hpp>
+
 #include "inventoryitemmodel.hpp"
 #include "itemview.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -26,6 +28,10 @@ namespace MWGui
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemSelectionDialog::onCancelButtonClicked);
 
         center();
+
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
+        mControllerButtons.mR3 = "#{sInfo}";
     }
 
     bool ItemSelectionDialog::exit()
@@ -40,6 +46,8 @@ namespace MWGui
         mSortModel = sortModel.get();
         mItemView->setModel(std::move(sortModel));
         mItemView->resetScrollBars();
+        if (Settings::gui().mControllerMenus)
+            mItemView->setActiveControllerWindow(true);
     }
 
     void ItemSelectionDialog::setCategory(int category)
@@ -65,4 +73,13 @@ namespace MWGui
         exit();
     }
 
+    bool ItemSelectionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(nullptr);
+        else
+            mItemView->onControllerButton(arg.button);
+
+        return true;
+    }
 }

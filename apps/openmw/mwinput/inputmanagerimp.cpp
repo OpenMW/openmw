@@ -189,6 +189,13 @@ namespace MWInput
         return mMouseManager->getMouseMoveY();
     }
 
+    void InputManager::warpMouseToWidget(MyGUI::Widget* widget)
+    {
+        mMouseManager->warpMouseToWidget(widget);
+        mMouseManager->injectMouseMove(1, 0, 0);
+        MWBase::Environment::get().getWindowManager()->setCursorActive(true);
+    }
+
     const std::initializer_list<int>& InputManager::getActionKeySorting()
     {
         return mBindingsManager->getActionKeySorting();
@@ -240,6 +247,16 @@ namespace MWInput
     bool InputManager::joystickLastUsed()
     {
         return mControllerManager->joystickLastUsed();
+    }
+
+    std::string InputManager::getControllerButtonIcon(int button)
+    {
+        return mControllerManager->getControllerButtonIcon(button);
+    }
+
+    std::string InputManager::getControllerAxisIcon(int axis)
+    {
+        return mControllerManager->getControllerAxisIcon(axis);
     }
 
     void InputManager::executeAction(int action)

@@ -40,6 +40,12 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Companion"; }
 
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
+
+        MWGui::ItemView* getItemView() { return mItemView; }
+        CompanionItemModel* getModel() { return mModel; }
+
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;

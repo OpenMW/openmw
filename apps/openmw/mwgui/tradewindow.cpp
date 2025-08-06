@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
+#include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 
 #include <components/misc/rng.hpp>
@@ -11,6 +12,7 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -169,6 +171,29 @@ namespace MWGui
             std::numeric_limits<int>::min() + 1); // disallow INT_MIN since abs(INT_MIN) is undefined
 
         setCoord(400, 0, 400, 300);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Show L1 and R1 buttons next to tabs
+            MyGUI::ImageBox* image;
+            getWidget(image, "BtnL1Image");
+            image->setVisible(true);
+            image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_LEFTSHOULDER));
+
+            getWidget(image, "BtnR1Image");
+            image->setVisible(true);
+            image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
+
+            mControllerButtons.mA = "#{sBuy}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+            mControllerButtons.mX = "#{sOffer}";
+            mControllerButtons.mR3 = "#{sInfo}";
+            mControllerButtons.mL2 = "#{sInventory}";
+        }
     }
 
     void TradeWindow::setPtr(const MWWorld::Ptr& actor)
@@ -202,6 +227,10 @@ namespace MWGui
 
         onFilterChanged(mFilterAll);
         mFilterEdit->setCaption({});
+
+        // Cycle to the buy window if it's not active.
+        if (Settings::gui().mControllerMenus && !mActiveControllerWindow)
+            MWBase::Environment::get().getWindowManager()->cycleActiveControllerWindow(true);
 
         for (const auto& source : itemSources)
             source.getClass().getContainerStore(source).setContListener(this);
@@ -351,6 +380,13 @@ namespace MWGui
         {
             store.remove(MWWorld::ContainerStore::sGoldId, -amount);
         }
+    }
+
+    void TradeWindow::onOfferSubmitted(MyGUI::Widget* _sender, size_t offerAmount)
+    {
+        mCurrentBalance = offerAmount * (mCurrentBalance < 0 ? -1 : 1);
+        updateLabels();
+        onOfferButtonClicked(mOfferButton);
     }
 
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
@@ -656,6 +692,91 @@ namespace MWGui
     {
         if (mTradeModel && mTradeModel->usesContainer(ptr))
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+    }
+
+    bool TradeWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            int index = mItemView->getControllerFocus();
+            if (index >= 0 && index < mItemView->getItemCount())
+                onItemSelected(index);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            if (mCurrentBalance == 0)
+                return true;
+            // Show a count dialog to allow for bartering.
+            CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+            if (mCurrentBalance < 0)
+            {
+                // Buying from the merchant
+                dialog->openCountDialog("#{sTotalcost}:", "#{sOffer}", -mCurrentMerchantOffer);
+                dialog->setCount(-mCurrentBalance);
+            }
+            else
+            {
+                // Selling to the merchant
+                dialog->openCountDialog("#{sTotalsold}:", "#{sOffer}", getMerchantGold());
+                dialog->setCount(mCurrentBalance);
+            }
+            dialog->eventOkClicked.clear();
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::onOfferSubmitted);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterAll);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterMagic);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterMagic);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterAll);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mItemView->onControllerButton(arg.button);
+        }
+
+        return true;
+    }
+
+    void TradeWindow::setActiveControllerWindow(bool active)
+    {
+        // Show L1 and R1 buttons next to tabs
+        MyGUI::Widget* image;
+        getWidget(image, "BtnL1Image");
+        image->setVisible(active);
+
+        getWidget(image, "BtnR1Image");
+        image->setVisible(active);
+
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 
     void TradeWindow::updateItemView()

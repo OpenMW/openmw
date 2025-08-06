@@ -88,6 +88,10 @@ namespace MWGui
         mBribe10Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe100Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
         mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
+
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
+        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
     void PersuasionDialog::adjustAction(MyGUI::Widget* action, int& totalHeight)
@@ -144,12 +148,55 @@ namespace MWGui
         else
             mMainWidget->setSize(mInitialMainWidgetWidth, mMainWidget->getSize().height);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            mButtons.clear();
+            mButtons.push_back(mAdmireButton);
+            mButtons.push_back(mIntimidateButton);
+            mButtons.push_back(mTauntButton);
+            if (mBribe10Button->getEnabled())
+                mButtons.push_back(mBribe10Button);
+            if (mBribe100Button->getEnabled())
+                mButtons.push_back(mBribe100Button);
+            if (mBribe1000Button->getEnabled())
+                mButtons.push_back(mBribe1000Button);
+
+            for (size_t i = 0; i < mButtons.size(); i++)
+                mButtons[i]->setStateSelected(i == 0);
+        }
+
         WindowModal::onOpen();
     }
 
     MyGUI::Widget* PersuasionDialog::getDefaultKeyFocus()
     {
         return mAdmireButton;
+    }
+
+    bool PersuasionDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onPersuade(mButtons[mControllerFocus]);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancel(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+
+        return true;
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -300,6 +347,9 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
+    // Morrowind uses 3 px invisible borders for padding topics
+    static constexpr int sVerticalPadding = 3;
+
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
         , mIsCompanion(false)
@@ -335,6 +385,11 @@ namespace MWGui
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
             += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
+
+        mControllerScrollWidget = mHistory->getParent();
+        mControllerButtons.mA = "#{sAsk}";
+        mControllerButtons.mB = "#{sGoodbye}";
+        mControllerButtons.mRStick = "#{sScrollup}";
     }
 
     void DialogueWindow::onTradeComplete()
@@ -488,6 +543,14 @@ namespace MWGui
         updateTopics();
         updateTopicsPane(); // force update for new services
 
+        if (Settings::gui().mControllerMenus && !sameActor)
+        {
+            setControllerFocus(mControllerFocus, false);
+            // Reset focus to very top. Maybe change this to mTopicsList->getItemCount() - mKeywords.size()?
+            mControllerFocus = 0;
+            setControllerFocus(mControllerFocus, true);
+        }
+
         updateDisposition();
         restock();
     }
@@ -543,6 +606,10 @@ namespace MWGui
 
     void DialogueWindow::updateTopicsPane()
     {
+        std::string focusedTopic;
+        if (Settings::gui().mControllerMenus && mControllerFocus < static_cast<int>(mTopicsList->getItemCount()))
+            focusedTopic = mTopicsList->getItemNameAt(mControllerFocus);
+
         mTopicsList->clear();
         for (auto& linkPair : mTopicLinks)
             mDeleteLater.push_back(std::move(linkPair.second));
@@ -588,22 +655,25 @@ namespace MWGui
         if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
-        // Morrowind uses 3 px invisible borders for padding topics
-        constexpr int verticalPadding = 3;
-
         for (const auto& keyword : mKeywords)
         {
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
-            mTopicsList->addItem(keyword, verticalPadding);
+            mTopicsList->addItem(keyword, sVerticalPadding);
 
             auto t = std::make_unique<Topic>(keyword);
             mKeywordSearch.seed(topicId, intptr_t(t.get()));
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
+
+            if (keyword == focusedTopic)
+                mControllerFocus = mTopicsList->getItemCount() - 1;
         }
 
         redrawTopicsList();
         updateHistory();
+
+        if (Settings::gui().mControllerMenus)
+            setControllerFocus(mControllerFocus, true);
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -630,6 +700,8 @@ namespace MWGui
         // choices
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
         mChoices = MWBase::Environment::get().getDialogueManager()->getChoices();
+        mChoiceStyles.clear();
+        mControllerChoice = -1; // -1 so you must make a choice (and can't accidentally pick the first answer)
         for (std::pair<std::string, int>& choice : mChoices)
         {
             auto link = std::make_unique<Choice>(choice.second);
@@ -641,6 +713,7 @@ namespace MWGui
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->write(questionStyle, to_utf8_span(choice.first));
+            mChoiceStyles.push_back(questionStyle);
         }
 
         mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
@@ -850,4 +923,120 @@ namespace MWGui
             && actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion");
     }
 
+    void DialogueWindow::setControllerFocus(size_t index, bool focused)
+    {
+        // List is mTopicsList + "Goodbye" button below the list.
+        if (index > mTopicsList->getItemCount())
+            return;
+
+        if (index == mTopicsList->getItemCount())
+        {
+            mGoodbyeButton->setStateSelected(focused);
+        }
+        else
+        {
+            const std::string& keyword = mTopicsList->getItemNameAt(mControllerFocus);
+            if (keyword.empty())
+                return;
+
+            MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
+            button->setStateSelected(focused);
+        }
+
+        if (focused)
+        {
+            // Scroll the side bar to keep the active item in view
+            int offset = 0;
+            for (int i = 6; i < static_cast<int>(index); i++)
+            {
+                const std::string& keyword = mTopicsList->getItemNameAt(i);
+                if (keyword.empty())
+                    offset += 18 + sVerticalPadding * 2;
+                else
+                    offset += mTopicsList->getItemWidget(keyword)->getHeight() + sVerticalPadding * 2;
+            }
+            mTopicsList->setViewOffset(-offset);
+        }
+    }
+
+    bool DialogueWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mChoices.size() > 0)
+            {
+                if (mChoices.size() == 1)
+                    onChoiceActivated(mChoices[0].second);
+                else if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
+                    onChoiceActivated(mChoices[mControllerChoice].second);
+            }
+            else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()))
+                onGoodbyeActivated();
+            else
+                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.empty())
+        {
+            onGoodbyeActivated();
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mChoices.size() > 0)
+            {
+                // In-dialogue choice (red text)
+                mControllerChoice = std::clamp(mControllerChoice - 1, 0, static_cast<int>(mChoices.size()) - 1);
+                mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
+            }
+            else
+            {
+                // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+                setControllerFocus(mControllerFocus, false);
+                if (mControllerFocus <= 0)
+                    mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
+                else if (mTopicsList->getItemNameAt(mControllerFocus - 1).empty())
+                    mControllerFocus -= 2; // Skip separator
+                else
+                    mControllerFocus--;
+                setControllerFocus(mControllerFocus, true);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mChoices.size() > 0)
+            {
+                // In-dialogue choice (red text)
+                mControllerChoice = std::clamp(mControllerChoice + 1, 0, static_cast<int>(mChoices.size()) - 1);
+                mHistory->setFocusItem(mChoiceStyles.at(mControllerChoice));
+            }
+            else
+            {
+                // Number of items is mTopicsList.length+1 because of "Goodbye" button.
+                setControllerFocus(mControllerFocus, false);
+                if (mControllerFocus >= static_cast<int>(mTopicsList->getItemCount()))
+                    mControllerFocus = 0;
+                else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()) - 1)
+                    mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
+                else if (mTopicsList->getItemNameAt(mControllerFocus + 1).empty())
+                    mControllerFocus += 2; // Skip separator
+                else
+                    mControllerFocus++;
+                setControllerFocus(mControllerFocus, true);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER && mChoices.size() == 0)
+        {
+            setControllerFocus(mControllerFocus, false);
+            mControllerFocus = std::max(mControllerFocus - 5, 0);
+            setControllerFocus(mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER && mChoices.size() == 0)
+        {
+            setControllerFocus(mControllerFocus, false);
+            mControllerFocus = std::min(mControllerFocus + 5, static_cast<int>(mTopicsList->getItemCount()));
+            setControllerFocus(mControllerFocus, true);
+        }
+
+        return true;
+    }
 }
