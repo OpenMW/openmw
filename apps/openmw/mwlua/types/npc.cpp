@@ -2,6 +2,7 @@
 
 #include "actor.hpp"
 #include "modelproperty.hpp"
+#include "servicesoffered.hpp"
 
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -43,6 +44,126 @@ namespace
         }
 
         return faction->mRanks.size();
+    }
+    ESM::NPC tableToNPC(const sol::table& rec)
+    {
+        ESM::NPC npc;
+
+        // Start from template if provided
+        if (rec["template"] != sol::nil)
+            npc = LuaUtil::cast<ESM::NPC>(rec["template"]);
+        else
+            npc.blank();
+
+        npc.mId = {};
+
+        // Basic fields
+        if (rec["name"] != sol::nil)
+            npc.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            npc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["mwscript"] != sol::nil)
+            npc.mScript = ESM::RefId::deserializeText(rec["mwscript"].get<std::string_view>());
+        if (rec["race"] != sol::nil)
+            npc.mRace = ESM::RefId::deserializeText(rec["race"].get<std::string_view>());
+        if (rec["class"] != sol::nil)
+            npc.mClass = ESM::RefId::deserializeText(rec["class"].get<std::string_view>());
+        if (rec["head"] != sol::nil)
+            npc.mHead = ESM::RefId::deserializeText(rec["head"].get<std::string_view>());
+        if (rec["hair"] != sol::nil)
+            npc.mHair = ESM::RefId::deserializeText(rec["hair"].get<std::string_view>());
+        if (rec["primaryFaction"] != sol::nil)
+        {
+            auto factionStr = rec["primaryFaction"].get<std::string_view>();
+            ESM::RefId factionId = ESM::RefId::deserializeText(factionStr);
+
+            const auto& factionStore = MWBase::Environment::get().getESMStore()->get<ESM::Faction>();
+            if (!factionStore.search(factionId))
+                throw std::runtime_error("Invalid faction '" + std::string(factionStr) + "' in primaryFaction");
+
+            npc.mFaction = factionId;
+        }
+        if (rec["isMale"] != sol::nil)
+        {
+            bool male = rec["isMale"];
+            if (male)
+                npc.mFlags &= ~ESM::NPC::Female;
+            else
+                npc.mFlags |= ESM::NPC::Female;
+        }
+
+        if (rec["isEssential"] != sol::nil)
+        {
+            bool essential = rec["isEssential"];
+            if (essential)
+                npc.mFlags |= ESM::NPC::Essential;
+            else
+                npc.mFlags &= ~ESM::NPC::Essential;
+        }
+
+        if (rec["isAutocalc"] != sol::nil)
+        {
+            bool autoCalc = rec["isAutocalc"];
+            if (autoCalc)
+                npc.mFlags |= ESM::NPC::Autocalc;
+            else
+                npc.mFlags &= ~ESM::NPC::Autocalc;
+        }
+
+        if (rec["isRespawning"] != sol::nil)
+        {
+            bool respawn = rec["isRespawning"];
+            if (respawn)
+                npc.mFlags |= ESM::NPC::Respawn;
+            else
+                npc.mFlags &= ~ESM::NPC::Respawn;
+        }
+
+        if (rec["baseDisposition"] != sol::nil)
+            npc.mNpdt.mDisposition = rec["baseDisposition"].get<int>();
+
+        if (rec["baseGold"] != sol::nil)
+            npc.mNpdt.mGold = rec["baseGold"].get<int>();
+
+        if (rec["bloodType"] != sol::nil)
+            npc.mBloodType = rec["bloodType"].get<int>();
+
+        if (rec["primaryFactionRank"] != sol::nil)
+        {
+            if (!npc.mFaction.empty())
+            {
+                const ESM::Faction* faction
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc.mFaction);
+
+                int luaValue = rec["primaryFactionRank"];
+                int rank = LuaUtil::fromLuaIndex(luaValue);
+
+                int maxRank = static_cast<int>(getValidRanksCount(faction));
+
+                if (rank < 0 || rank >= maxRank)
+                    throw std::runtime_error("primaryFactionRank: Requested rank " + std::to_string(rank)
+                        + " is out of bounds for faction " + npc.mFaction.toDebugString());
+
+                npc.mNpdt.mRank = rank;
+            }
+        }
+
+        if (rec["servicesOffered"] != sol::nil)
+        {
+            const sol::table services = rec["servicesOffered"];
+            int flags = 0;
+
+            for (const auto& [mask, key] : MWLua::ServiceNames)
+            {
+                sol::object value = services[key];
+                if (value != sol::nil && value.as<bool>())
+                    flags |= mask;
+            }
+
+            npc.mAiData.mServices = flags;
+        }
+
+        return npc;
     }
 
     ESM::RefId parseFactionId(std::string_view faction)
@@ -95,9 +216,18 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> int { return (int)rec.mNpdt.mDisposition; });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
+        record["primaryFaction"] = sol::readonly_property(
+            [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
+        record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int {
+            if (rec.mFaction.empty())
+                return 0;
+            return LuaUtil::toLuaIndex(rec.mNpdt.mRank);
+        });
         addModelProperty(record);
         record["isEssential"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Essential; });
+        record["isAutocalc"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Autocalc; });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["isRespawning"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Respawn; });
@@ -152,6 +282,7 @@ namespace MWLua
             stats.setBaseDisposition(stats.getBaseDisposition() + value);
         };
 
+        npc["createRecordDraft"] = tableToNPC;
         npc["getFactionRank"] = [](const Object& actor, std::string_view faction) -> size_t {
             const MWWorld::Ptr ptr = actor.ptr();
             ESM::RefId factionId = parseFactionId(faction);

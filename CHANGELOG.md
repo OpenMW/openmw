@@ -75,6 +75,7 @@
     Feature #8580: Sort characters in the save loading menu
     Feature #8597: Lua: Add more built-in event handlers
     Feature #8629: Expose path grid data to Lua
+    Feature #8654: Allow lua world.createRecord to create NPC records
 
 0.49.0
 ------

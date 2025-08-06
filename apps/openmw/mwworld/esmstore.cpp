@@ -726,8 +726,6 @@ namespace MWWorld
         switch (type)
         {
             case ESM::REC_ALCH:
-            case ESM::REC_MISC:
-            case ESM::REC_ACTI:
             case ESM::REC_ARMO:
             case ESM::REC_BOOK:
             case ESM::REC_CLAS:
@@ -735,14 +733,16 @@ namespace MWWorld
             case ESM::REC_ENCH:
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
-            case ESM::REC_LEVI:
-            case ESM::REC_LEVC:
-            case ESM::REC_LIGH:
                 mStoreImp->mRecNameToStore[type]->read(reader);
                 return true;
             case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
+            case ESM::REC_MISC:
+            case ESM::REC_ACTI:
+            case ESM::REC_LEVI:
+            case ESM::REC_LEVC:
+            case ESM::REC_LIGH:
                 mStoreImp->mRecNameToStore[type]->read(reader, true);
                 return true;
 
