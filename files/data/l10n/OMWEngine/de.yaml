@@ -213,3 +213,14 @@ WindowModeWindowed: "Fenster"
 WindowModeWindowedFullscreen: "Fenster in Vollbildgröße"
 # More fitting translations of "wobbly" are welcome
 WobblyShores: "Wabbelige Uferlinien"
+
+
+# Controller button names
+
+EnchantType: "Zaubertyp"
+InventorySelect: "Geben"
+JournalQuests: "Quests"
+JournalShowAll: "Alle Anzeigen"
+LoadingSelectCharacter: "Charakter auswählen"
+RechargeSelect: "Aufladen"
+RepairTool: "Werkzeug"

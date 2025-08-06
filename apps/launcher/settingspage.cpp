@@ -303,6 +303,9 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::gui().mColorTopicEnable, *changeDialogTopicsCheckBox);
         showOwnedComboBox->setCurrentIndex(Settings::game().mShowOwned);
         loadSettingBool(Settings::gui().mStretchMenuBackground, *stretchBackgroundCheckBox);
+        connect(controllerMenusCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotControllerMenusToggled);
+        loadSettingBool(Settings::gui().mControllerMenus, *controllerMenusCheckBox);
+        loadSettingBool(Settings::gui().mControllerTooltips, *controllerMenuTooltipsCheckBox);
         loadSettingBool(Settings::map().mAllowZooming, *useZoomOnMapCheckBox);
         loadSettingBool(Settings::game().mGraphicHerbalism, *graphicHerbalismCheckBox);
         scalingSpinBox->setValue(Settings::gui().mScalingFactor);
@@ -496,6 +499,8 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*changeDialogTopicsCheckBox, Settings::gui().mColorTopicEnable);
         saveSettingInt(*showOwnedComboBox, Settings::game().mShowOwned);
         saveSettingBool(*stretchBackgroundCheckBox, Settings::gui().mStretchMenuBackground);
+        saveSettingBool(*controllerMenusCheckBox, Settings::gui().mControllerMenus);
+        saveSettingBool(*controllerMenuTooltipsCheckBox, Settings::gui().mControllerTooltips);
         saveSettingBool(*useZoomOnMapCheckBox, Settings::map().mAllowZooming);
         saveSettingBool(*graphicHerbalismCheckBox, Settings::game().mGraphicHerbalism);
         Settings::gui().mScalingFactor.set(scalingSpinBox->value());
@@ -552,6 +557,11 @@ void Launcher::SettingsPage::slotAnimSourcesToggled(bool checked)
         weaponSheathingCheckBox->setCheckState(Qt::Unchecked);
         shieldSheathingCheckBox->setCheckState(Qt::Unchecked);
     }
+}
+
+void Launcher::SettingsPage::slotControllerMenusToggled(bool checked)
+{
+    controllerMenuTooltipsCheckBox->setEnabled(checked);
 }
 
 void Launcher::SettingsPage::slotPostProcessToggled(bool checked)

@@ -8,6 +8,7 @@
 #include <MyGUI_UString.h>
 
 #include <components/fallback/fallback.hpp>
+#include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -48,13 +49,12 @@ namespace MWGui
 
         {
             const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
-            const size_t perCol
-                = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
+            mPerCol = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
             size_t i = 0;
             for (const ESM::Attribute& attribute : store)
             {
-                const int offset = sColumnOffsets[i / perCol];
-                const int row = static_cast<int>(i % perCol);
+                const int offset = sColumnOffsets[i / mPerCol];
+                const int row = static_cast<int>(i % mPerCol);
                 Widgets widgets;
                 widgets.mMultiplier = mAssignWidget->createWidget<MyGUI::TextBox>(
                     "SandTextVCenter", { offset, 20 * row, 100, 20 }, MyGUI::Align::Default);
@@ -72,12 +72,13 @@ namespace MWGui
                 widgets.mButton->setCaption(attribute.mName);
                 widgets.mValue = hbox->createWidget<Gui::AutoSizedTextBox>("SandText", {}, MyGUI::Align::Default);
                 mAttributeWidgets.emplace(attribute.mId, widgets);
+                mAttributeButtons.emplace_back(widgets.mButton);
                 ++i;
             }
 
             mAssignWidget->setVisibleVScroll(false);
             mAssignWidget->setCanvasSize(MyGUI::IntSize(
-                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * perCol))));
+                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * mPerCol))));
             mAssignWidget->setVisibleVScroll(true);
             mAssignWidget->setViewOffset(MyGUI::IntPoint());
         }
@@ -88,6 +89,15 @@ namespace MWGui
                 "ImageBox", MyGUI::IntCoord(0, 0, 16, 16), MyGUI::Align::Default);
             image->setImageTexture("icons\\tx_goldicon.dds");
             mCoins.push_back(image);
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mX = "#{sDone}";
+            mOkButton->setCaption(
+                MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
         }
 
         center();
@@ -216,6 +226,13 @@ namespace MWGui
         setAttributeValues();
 
         center();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            for (size_t i = 0; i < mAttributeButtons.size(); i++)
+                setControllerFocus(mAttributeButtons, i, i == 0);
+        }
 
         // Play LevelUp Music
         MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Normal);
@@ -362,5 +379,45 @@ namespace MWGui
         }
 
         return ret;
+    }
+
+    bool LevelupDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mAttributeButtons.size())
+                onAttributeClicked(mAttributeButtons[mControllerFocus]);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            onOkButtonClicked(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            setControllerFocus(mAttributeButtons, mControllerFocus, false);
+            if (mControllerFocus % mPerCol == 0)
+                mControllerFocus += mPerCol - 1;
+            else
+                mControllerFocus--;
+            setControllerFocus(mAttributeButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            setControllerFocus(mAttributeButtons, mControllerFocus, false);
+            if (mControllerFocus % mPerCol == mPerCol - 1)
+                mControllerFocus -= mPerCol - 1;
+            else
+                mControllerFocus++;
+            setControllerFocus(mAttributeButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            setControllerFocus(mAttributeButtons, mControllerFocus, false);
+            mControllerFocus = (mControllerFocus + mPerCol) % mAttributeButtons.size();
+            setControllerFocus(mAttributeButtons, mControllerFocus, true);
+        }
+
+        return true;
     }
 }

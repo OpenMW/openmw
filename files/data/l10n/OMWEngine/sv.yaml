@@ -213,3 +213,14 @@ WindowModeHint: "Notera: Helskärm i fönsterläge\nanvänder alltid skärmens n
 WindowModeWindowed: "Fönster"
 WindowModeWindowedFullscreen: "Helskärm i fönsterläge"
 WobblyShores: "Vaggande stränder"
+
+
+# Controller button names
+
+EnchantType: "Typ av förtrollning"
+InventorySelect: "Placera"
+JournalQuests: "Uppdrag"
+JournalShowAll: "Visa Alla"
+LoadingSelectCharacter: "Välj spelfigur"
+RechargeSelect: "Ladda"
+RepairTool: "Verktyg"

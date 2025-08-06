@@ -77,8 +77,12 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Inventory"; }
 
+        ControllerButtons* getControllerButtons() override;
+
     protected:
         void onTitleDoubleClicked() override;
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
 
     private:
         Misc::NotNullPtr<DragAndDrop> mDragAndDrop;
@@ -126,9 +130,20 @@ namespace MWGui
 
         void onBackgroundSelected();
 
+        enum class ControllerAction
+        {
+            None,
+            Use,
+            Transfer,
+            Sell,
+            Drop,
+        };
+        ControllerAction mPendingControllerAction;
+
         void sellItem(MyGUI::Widget* sender, std::size_t count);
         void dragItem(MyGUI::Widget* sender, std::size_t count);
         void transferItem(MyGUI::Widget* sender, std::size_t count);
+        void dropItem(MyGUI::Widget* sender, std::size_t count);
 
         void onWindowResize(MyGUI::Window* _sender);
         void onFilterChanged(MyGUI::Widget* _sender);

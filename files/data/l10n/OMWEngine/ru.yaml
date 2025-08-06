@@ -212,3 +212,14 @@ WindowModeHint: "Подсказка: режим \"Оконный без поле
 WindowModeWindowed: "Оконный"
 WindowModeWindowedFullscreen: "Оконный без полей"
 WobblyShores: "Колеблющиеся берега"
+
+
+# Controller button names
+
+EnchantType: "Тип заклинания"
+InventorySelect: "Поместить"
+JournalQuests: "Квесты"
+JournalShowAll: "Показать все"
+LoadingSelectCharacter: "Выбрать персонажа"
+RechargeSelect: "Перезарядить"
+RepairTool: "Инструмент"

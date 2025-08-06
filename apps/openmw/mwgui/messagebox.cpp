@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -217,7 +218,7 @@ namespace MWGui
     }
 
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message,
-        const std::vector<std::string>& buttons, bool immediate, int defaultFocus)
+        const std::vector<std::string>& buttons, bool immediate, size_t defaultFocus)
         : WindowModal(MWBase::Environment::get().getWindowManager()->isGuiMode()
                 ? "openmw_interactive_messagebox_notransp.layout"
                 : "openmw_interactive_messagebox.layout")
@@ -225,6 +226,7 @@ namespace MWGui
         , mButtonPressed(-1)
         , mDefaultFocus(defaultFocus)
         , mImmediate(immediate)
+        , mControllerFocus(0)
     {
         int textPadding = 10; // padding between text-widget and main-widget
         int textButtonPadding = 10; // padding between the text-widget und the button-widget
@@ -277,6 +279,22 @@ namespace MWGui
             if (buttonWidth > biggestButtonWidth)
             {
                 biggestButtonWidth = buttonWidth;
+            }
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{Interface:OK}";
+
+            // If we have more than one button, we need to set the focus to the first one.
+            if (mButtons.size() > 1)
+            {
+                mControllerFocus = 0;
+                if (mDefaultFocus < mButtons.size())
+                    mControllerFocus = mDefaultFocus;
+                for (size_t i = 0; i < mButtons.size(); ++i)
+                    mButtons[i]->setStateSelected(i == mControllerFocus);
             }
         }
 
@@ -380,7 +398,7 @@ namespace MWGui
 
     MyGUI::Widget* InteractiveMessageBox::getDefaultKeyFocus()
     {
-        if (mDefaultFocus >= 0 && mDefaultFocus < static_cast<int>(mButtons.size()))
+        if (mDefaultFocus < mButtons.size())
             return mButtons[mDefaultFocus];
         auto& languageManager = MyGUI::LanguageManager::getInstance();
         std::vector<MyGUI::UString> keywords{ languageManager.replaceTags("#{sOk}"),
@@ -431,4 +449,45 @@ namespace MWGui
         return mButtonPressed;
     }
 
+    bool InteractiveMessageBox::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (!mButtons.empty())
+            {
+                if (mControllerFocus >= mButtons.size())
+                    mControllerFocus = mButtons.size() - 1;
+                buttonActivated(mButtons[mControllerFocus]);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            if (mButtons.size() == 1)
+                buttonActivated(mButtons[0]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == 0)
+                return true;
+
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+            if (mButtons.size() == 2 && mControllerFocus == 1)
+                return true;
+
+            setControllerFocus(mButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            setControllerFocus(mButtons, mControllerFocus, true);
+        }
+
+        return true;
+    }
 }

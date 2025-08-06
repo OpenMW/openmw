@@ -15,6 +15,7 @@ namespace MWGui
     public:
         CountDialog();
         void openCountDialog(const std::string& item, const std::string& message, const int maxCount);
+        void setCount(int count);
 
         /** Event : Ok button was clicked.\n
             signature : void method(MyGUI::Widget* sender, std::size_t count)\n
@@ -34,6 +35,7 @@ namespace MWGui
         void onEditValueChanged(int value);
         void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
         void onEnterKeyPressed(MyGUI::EditBox* _sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
 }

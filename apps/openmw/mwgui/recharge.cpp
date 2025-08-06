@@ -39,6 +39,10 @@ namespace MWGui
         mBox->setDisplayMode(ItemChargeView::DisplayMode_EnchantmentCharge);
 
         mGemIcon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onSelectItem);
+
+        mControllerButtons.mA = "#{OMWEngine:RechargeSelect}";
+        mControllerButtons.mB = "#{Interface:Cancel}";
+        mControllerButtons.mY = "#{sSoulGem}";
     }
 
     void Recharge::onOpen()
@@ -136,4 +140,18 @@ namespace MWGui
         updateView();
     }
 
+    bool Recharge::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if ((arg.button == SDL_CONTROLLER_BUTTON_A && !mGemBox->getVisible()) || arg.button == SDL_CONTROLLER_BUTTON_Y)
+        {
+            onSelectItem(mGemIcon);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancel(mCancelButton);
+        else
+            mBox->onControllerButton(arg.button);
+
+        return true;
+    }
 }

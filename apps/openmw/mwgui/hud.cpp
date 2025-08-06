@@ -188,6 +188,17 @@ namespace MWGui
         mDrowningBar->setVisible(visible);
     }
 
+    void HUD::dropDraggedItem(float mouseX, float mouseY)
+    {
+        if (!mDragAndDrop->mIsOnDragAndDrop)
+            return;
+
+        MWBase::Environment::get().getWorld()->breakInvisibility(MWMechanics::getPlayer());
+
+        WorldItemModel drop(mouseX, mouseY);
+        mDragAndDrop->drop(&drop, nullptr);
+    }
+
     void HUD::onWorldClicked(MyGUI::Widget* _sender)
     {
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())

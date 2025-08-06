@@ -16,6 +16,7 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwgui/windowbase.hpp"
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
@@ -31,6 +32,7 @@ namespace MWInput
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
+        , mGamepadMousePressed(false)
     {
         if (!controllerBindingsFile.empty())
         {
@@ -141,6 +143,7 @@ namespace MWInput
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonPress(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = true;
                     if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
                         MyGUI::Button* b
@@ -185,12 +188,13 @@ namespace MWInput
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            if (mGamepadGuiCursorEnabled)
+            if (mGamepadGuiCursorEnabled && (!Settings::gui().mControllerMenus || mGamepadMousePressed))
             {
                 // Temporary mouse binding until keyboard controls are available:
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
                     bool mousePressSuccess = mMouseManager->injectMouseButtonRelease(SDL_BUTTON_LEFT);
+                    mGamepadMousePressed = false;
                     if (mBindingsManager->isDetectingBindingState()) // If the player just triggered binding, don't let
                                                                      // button release bind.
                         return;
@@ -217,7 +221,8 @@ namespace MWInput
         mJoystickLastUsed = true;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            gamepadToGuiControl(arg);
+            if (gamepadToGuiControl(arg))
+                return;
         }
         else if (mBindingsManager->actionIsActive(A_TogglePOV)
             && (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT || arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT))
@@ -241,6 +246,33 @@ namespace MWInput
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent& arg)
     {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Update cursor state.
+            bool treatAsMouse = winMgr->getCursorVisible();
+            winMgr->setCursorActive(false);
+
+            MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
+            if (topWin)
+            {
+                // When the inventory tooltip is visible, we don't actually want the A button to
+                // act like a mouse button; it should act normally.
+                if (treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A && winMgr->getControllerTooltip())
+                    treatAsMouse = false;
+
+                mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
+
+                // Fall through to mouse click
+                if (mGamepadGuiCursorEnabled && treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A)
+                    return false;
+
+                if (topWin->onControllerButtonEvent(arg))
+                    return true;
+            }
+        }
+
         // Presumption of GUI mode will be removed in the future.
         // MyGUI KeyCodes *may* change.
         MyGUI::KeyCode key = MyGUI::KeyCode::None;
@@ -266,9 +298,9 @@ namespace MWInput
                 break;
             case SDL_CONTROLLER_BUTTON_B:
                 if (MyGUI::InputManager::getInstance().isModalAny())
-                    MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+                    winMgr->exitCurrentModal();
                 else
-                    MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+                    winMgr->exitCurrentGuiMode();
                 return true;
             case SDL_CONTROLLER_BUTTON_X:
                 key = MyGUI::KeyCode::Semicolon;
@@ -278,7 +310,7 @@ namespace MWInput
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
                 MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::LeftShift);
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
+                winMgr->injectKeyPress(MyGUI::KeyCode::Tab, 0, false);
                 MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::LeftShift);
                 return true;
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
@@ -286,7 +318,7 @@ namespace MWInput
                 return true;
             case SDL_CONTROLLER_BUTTON_LEFTSTICK:
                 mGamepadGuiCursorEnabled = !mGamepadGuiCursorEnabled;
-                MWBase::Environment::get().getWindowManager()->setCursorActive(mGamepadGuiCursorEnabled);
+                winMgr->setCursorActive(mGamepadGuiCursorEnabled);
                 return true;
             default:
                 return false;
@@ -296,21 +328,87 @@ namespace MWInput
         if (SDL_IsTextInputActive())
             return false;
 
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+        winMgr->injectKeyPress(key, 0, false);
         return true;
     }
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerAxisEvent& arg)
     {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Left and right triggers toggle through open GUI windows.
+            if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    winMgr->cycleActiveControllerWindow(true);
+                return true;
+            }
+            else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+            {
+                if (arg.value == 32767) // Treat like a button.
+                    winMgr->cycleActiveControllerWindow(false);
+                return true;
+            }
+
+            MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
+            if (topWin)
+            {
+                // Update cursor state
+                mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
+                if (!mGamepadGuiCursorEnabled)
+                    winMgr->setCursorActive(false);
+
+                // Deadzone check
+                if (std::abs(arg.value) < 2000)
+                    return !mGamepadGuiCursorEnabled;
+
+                if (mGamepadGuiCursorEnabled
+                    && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
+                {
+                    // Treat the left stick like a cursor, which is the default behavior.
+                    if (winMgr->getControllerTooltip())
+                    {
+                        winMgr->setControllerTooltip(false);
+                        winMgr->setCursorVisible(true);
+                    }
+                    else if (mGamepadGuiCursorEnabled)
+                    {
+                        winMgr->setCursorVisible(true);
+                    }
+                    return false;
+                }
+
+                // Some windows have a specific widget to scroll with the right stick. Move the mouse there.
+                if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTY && topWin->getControllerScrollWidget() != nullptr)
+                {
+                    mMouseManager->warpMouseToWidget(topWin->getControllerScrollWidget());
+                    winMgr->setCursorVisible(false);
+                }
+
+                if (topWin->onControllerThumbstickEvent(arg))
+                {
+                    // Window handled the event.
+                    return true;
+                }
+                else if (arg.axis == SDL_CONTROLLER_AXIS_RIGHTX || arg.axis == SDL_CONTROLLER_AXIS_RIGHTY)
+                {
+                    // Only right-stick scroll if mouse is visible or there's a widget to scroll.
+                    return !winMgr->getCursorVisible() && topWin->getControllerScrollWidget() == nullptr;
+                }
+            }
+        }
+
         switch (arg.axis)
         {
             case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
                 if (arg.value == 32767) // Treat like a button.
-                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Minus, 0, false);
+                    winMgr->injectKeyPress(MyGUI::KeyCode::Minus, 0, false);
                 break;
             case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
                 if (arg.value == 32767) // Treat like a button.
-                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Equals, 0, false);
+                    winMgr->injectKeyPress(MyGUI::KeyCode::Equals, 0, false);
                 break;
             case SDL_CONTROLLER_AXIS_LEFTX:
             case SDL_CONTROLLER_AXIS_LEFTY:
@@ -378,6 +476,106 @@ namespace MWInput
                 Log(Debug::Error) << "Failed to get game controller sensor data: " << SDL_GetError();
         }
         return std::array<float, 3>({ gyro[0], gyro[1], gyro[2] });
+    }
+
+    int ControllerManager::getControllerType()
+    {
+        SDL_GameController* cntrl = mBindingsManager->getControllerOrNull();
+        if (cntrl)
+            return SDL_GameControllerGetType(cntrl);
+        return 0;
+    }
+
+    std::string ControllerManager::getControllerButtonIcon(int button)
+    {
+        int controllerType = ControllerManager::getControllerType();
+
+        bool isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        bool isPsx = controllerType == SDL_CONTROLLER_TYPE_PS3 || controllerType == SDL_CONTROLLER_TYPE_PS4
+            || controllerType == SDL_CONTROLLER_TYPE_PS5;
+        bool isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
+
+        switch (button)
+        {
+            case SDL_CONTROLLER_BUTTON_A:
+                if (isPsx)
+                    return "textures/omw_psx_button_x.dds";
+                return "textures/omw_steam_button_a.dds";
+            case SDL_CONTROLLER_BUTTON_B:
+                if (isPsx)
+                    return "textures/omw_psx_button_circle.dds";
+                return "textures/omw_steam_button_b.dds";
+            case SDL_CONTROLLER_BUTTON_BACK:
+                return "textures/omw_steam_button_view.dds";
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                if (isPsx)
+                    return "textures/omw_psx_button_dpad.dds";
+                return "textures/omw_steam_button_dpad.dds";
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                if (isXbox)
+                    return "textures/omw_xbox_button_lb.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_l.dds";
+                return "textures/omw_steam_button_l1.dds";
+            case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+                return "textures/omw_steam_button_l3.dds";
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                if (isXbox)
+                    return "textures/omw_xbox_button_rb.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_r.dds";
+                return "textures/omw_steam_button_r1.dds";
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                return "textures/omw_steam_button_r3.dds";
+            case SDL_CONTROLLER_BUTTON_START:
+                return "textures/omw_steam_button_menu.dds";
+            case SDL_CONTROLLER_BUTTON_X:
+                if (isPsx)
+                    return "textures/omw_psx_button_square.dds";
+                return "textures/omw_steam_button_x.dds";
+            case SDL_CONTROLLER_BUTTON_Y:
+                if (isPsx)
+                    return "textures/omw_psx_button_triangle.dds";
+                return "textures/omw_steam_button_y.dds";
+            case SDL_CONTROLLER_BUTTON_GUIDE:
+            default:
+                return {};
+        }
+    }
+
+    std::string ControllerManager::getControllerAxisIcon(int axis)
+    {
+        int controllerType = ControllerManager::getControllerType();
+
+        bool isXbox = controllerType == SDL_CONTROLLER_TYPE_XBOX360 || controllerType == SDL_CONTROLLER_TYPE_XBOXONE;
+        bool isSwitch = controllerType == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO;
+
+        switch (axis)
+        {
+            case SDL_CONTROLLER_AXIS_LEFTX:
+            case SDL_CONTROLLER_AXIS_LEFTY:
+                return "textures/omw_steam_button_lstick.dds";
+            case SDL_CONTROLLER_AXIS_RIGHTX:
+            case SDL_CONTROLLER_AXIS_RIGHTY:
+                return "textures/omw_steam_button_rstick.dds";
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+                if (isXbox)
+                    return "textures/omw_xbox_button_lt.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_zl.dds";
+                return "textures/omw_steam_button_l2.dds";
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+                if (isXbox)
+                    return "textures/omw_xbox_button_rt.dds";
+                else if (isSwitch)
+                    return "textures/omw_switch_button_zr.dds";
+                return "textures/omw_steam_button_r2.dds";
+            default:
+                return {};
+        }
     }
 
     void ControllerManager::touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg)

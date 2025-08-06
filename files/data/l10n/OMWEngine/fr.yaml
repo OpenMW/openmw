@@ -212,3 +212,14 @@ WindowModeHint: "Info : Le mode \"Fenêtré plein écran\" utilise toujours la r
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
 WobblyShores: "Rivages vacillants"
+
+
+# Controller button names
+
+EnchantType: "Type de lancement"
+InventorySelect: "Placer"
+JournalQuests: "Quêtes"
+JournalShowAll: "Tout Afficher"
+LoadingSelectCharacter: "Sélection du personnage"
+RechargeSelect: "Recharge"
+RepairTool: "Outil"

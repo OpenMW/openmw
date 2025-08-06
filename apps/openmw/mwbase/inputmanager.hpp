@@ -19,6 +19,11 @@ namespace ESM
     class ESMWriter;
 }
 
+namespace MyGUI
+{
+    class Widget;
+}
+
 namespace MWBase
 {
     /// \brief Interface for input manager (implemented in MWInput)
@@ -61,6 +66,7 @@ namespace MWBase
         virtual float getControllerAxisValue(SDL_GameControllerAxis axis) const = 0; // returns value in range [-1, 1]
         virtual int getMouseMoveX() const = 0;
         virtual int getMouseMoveY() const = 0;
+        virtual void warpMouseToWidget(MyGUI::Widget* widget) = 0;
 
         /// Actions available for binding to keyboard buttons
         virtual const std::initializer_list<int>& getActionKeySorting() = 0;
@@ -77,6 +83,8 @@ namespace MWBase
         /// @return true if joystick, false otherwise
         virtual bool joystickLastUsed() = 0;
         virtual void setJoystickLastUsed(bool enabled) = 0;
+        virtual std::string getControllerButtonIcon(int button) = 0;
+        virtual std::string getControllerAxisIcon(int axis) = 0;
 
         virtual int countSavedGameRecords() const = 0;
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
