@@ -167,13 +167,13 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        sol::usertype<FileHandle> handle = context.sol().new_usertype<FileHandle>("FileHandle");
-        handle["fileName"]
+        sol::usertype<FileHandle> fileHandle = context.sol().new_usertype<FileHandle>("FileHandle");
+        fileHandle["fileName"]
             = sol::readonly_property([](const FileHandle& self) -> std::string_view { return self.mFileName; });
-        handle[sol::meta_function::to_string] = [](const FileHandle& self) {
+        fileHandle[sol::meta_function::to_string] = [](const FileHandle& self) {
             return "FileHandle{'" + self.mFileName + "'" + (!self.mFilePtr ? ", closed" : "") + "}";
         };
-        handle["seek"] = sol::overload(
+        fileHandle["seek"] = sol::overload(
             [](sol::this_state lua, FileHandle& self, std::string_view whence, sol::optional<long> offset) {
                 validateFile(self);
 
@@ -189,7 +189,7 @@ namespace MWLua
 
                 return seek(lua, self, std::ios_base::cur, off);
             });
-        handle["lines"] = [](sol::this_main_state lua, sol::main_object self) {
+        fileHandle["lines"] = [](sol::this_main_state lua, sol::main_object self) {
             if (!self.is<FileHandle*>())
                 throw std::runtime_error("self should be a file handle");
             return sol::as_function([lua, self]() -> sol::object {
@@ -212,7 +212,7 @@ namespace MWLua
                 });
         };
 
-        handle["close"] = [](sol::this_state lua, FileHandle& self) {
+        fileHandle["close"] = [](sol::this_state lua, FileHandle& self) {
             sol::variadic_results values;
             try
             {
@@ -236,7 +236,7 @@ namespace MWLua
             return values;
         };
 
-        handle["read"] = [](sol::this_state lua, FileHandle& self, const sol::variadic_args args) {
+        fileHandle["read"] = [](sol::this_state lua, FileHandle& self, const sol::variadic_args args) {
             validateFile(self);
 
             if (args.size() > sMaximumReadArguments)

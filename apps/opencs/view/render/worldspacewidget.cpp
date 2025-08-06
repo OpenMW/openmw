@@ -454,7 +454,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
     std::vector<osgUtil::LineSegmentIntersector::Intersection> validIntersections
         = { intersections.begin(), intersections.end() };
 
-    const auto& removeBackfaces = [direction = direction](const osgUtil::LineSegmentIntersector::Intersection& i) {
+    const auto& removeBackfaces = [direction](const osgUtil::LineSegmentIntersector::Intersection& i) {
         return direction * i.getWorldIntersectNormal() > 0;
     };
 

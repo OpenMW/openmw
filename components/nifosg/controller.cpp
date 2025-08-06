@@ -375,7 +375,7 @@ namespace NifOsg
             return true;
 
         auto iter = std::upper_bound(mData->begin(), mData->end(), time,
-            [](float time, const std::pair<float, bool>& key) { return time < key.first; });
+            [](float t, const std::pair<float, bool>& key) { return t < key.first; });
         if (iter != mData->begin())
             --iter;
         return iter->second;

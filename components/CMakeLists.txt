@@ -324,6 +324,10 @@ add_component_dir (files
     istreamptr streamwithbuffer
     )
 
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    set_source_files_properties(files/configfileparser.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+endif()
+
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler

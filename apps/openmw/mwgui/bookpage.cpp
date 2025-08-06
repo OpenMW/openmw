@@ -1122,10 +1122,10 @@ namespace MWGui
 
         struct CreateActiveFormat
         {
-            PageDisplay* this_;
+            PageDisplay* mPageDisplay;
 
-            CreateActiveFormat(PageDisplay* this_)
-                : this_(this_)
+            explicit CreateActiveFormat(PageDisplay* pageDisplay)
+                : mPageDisplay(pageDisplay)
             {
             }
 
@@ -1133,15 +1133,15 @@ namespace MWGui
             {
                 MyGUI::IFont* const font = run.mStyle->mFont;
 
-                ActiveTextFormats::iterator j = this_->mActiveTextFormats.find(font);
+                ActiveTextFormats::iterator j = mPageDisplay->mActiveTextFormats.find(font);
 
-                if (j == this_->mActiveTextFormats.end())
+                if (j == mPageDisplay->mActiveTextFormats.end())
                 {
-                    auto textFormat = std::make_unique<TextFormat>(font, this_);
+                    auto textFormat = std::make_unique<TextFormat>(font, mPageDisplay);
 
                     textFormat->mTexture = font->getTextureFont();
 
-                    j = this_->mActiveTextFormats.insert(std::make_pair(font, std::move(textFormat))).first;
+                    j = mPageDisplay->mActiveTextFormats.insert(std::make_pair(font, std::move(textFormat))).first;
                 }
 
                 j->second->mCountVertex += run.mPrintableChars * 6;
@@ -1189,24 +1189,24 @@ namespace MWGui
 
         struct RenderRun
         {
-            PageDisplay* this_;
-            GlyphStream& glyphStream;
+            PageDisplay* mPageDisplay;
+            GlyphStream& mGlyphStream;
 
-            RenderRun(PageDisplay* this_, GlyphStream& glyphStream)
-                : this_(this_)
-                , glyphStream(glyphStream)
+            explicit RenderRun(PageDisplay* pageDisplay, GlyphStream& glyphStream)
+                : mPageDisplay(pageDisplay)
+                , mGlyphStream(glyphStream)
             {
             }
 
             void operator()(Section const& section, Line const& line, Run const& run) const
             {
-                bool isActive = run.mStyle->mInteractiveId && (run.mStyle == this_->mFocusItem);
+                bool isActive = run.mStyle->mInteractiveId && (run.mStyle == mPageDisplay->mFocusItem);
 
                 MyGUI::Colour colour = isActive
-                    ? (this_->mItemActive ? run.mStyle->mActiveColour : run.mStyle->mHotColour)
+                    ? (mPageDisplay->mItemActive ? run.mStyle->mActiveColour : run.mStyle->mHotColour)
                     : run.mStyle->mNormalColour;
 
-                glyphStream.reset(static_cast<float>(section.mRect.left + line.mRect.left + run.mLeft),
+                mGlyphStream.reset(static_cast<float>(section.mRect.left + line.mRect.left + run.mLeft),
                     static_cast<float>(line.mRect.top), colour);
 
                 Utf8Stream stream(run.mRange);
@@ -1219,9 +1219,9 @@ namespace MWGui
                         continue;
 
                     if (!ucsSpace(codePoint))
-                        glyphStream.emitGlyph(codePoint);
+                        mGlyphStream.emitGlyph(codePoint);
                     else
-                        glyphStream.emitSpace(codePoint);
+                        mGlyphStream.emitSpace(codePoint);
                 }
             }
         };

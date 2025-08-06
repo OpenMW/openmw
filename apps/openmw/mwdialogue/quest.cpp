@@ -71,8 +71,8 @@ namespace MWDialogue
         const ESM::Dialogue* dialogue
             = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(entry.mTopic);
 
-        auto info = std::find_if(dialogue->mInfo.begin(), dialogue->mInfo.end(),
-            [&](const auto& info) { return info.mId == entry.mInfoId; });
+        auto info = std::find_if(
+            dialogue->mInfo.begin(), dialogue->mInfo.end(), [&](const auto& i) { return i.mId == entry.mInfoId; });
 
         if (info == dialogue->mInfo.end() || info->mData.mJournalIndex == -1)
             throw std::runtime_error("unknown journal entry for topic " + mTopic.toDebugString());

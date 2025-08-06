@@ -29,9 +29,9 @@ CSMWorld::IdTable& CSVWorld::StartScriptCreator::getStartScriptsTable() const
     return dynamic_cast<CSMWorld::IdTable&>(*getData().getTableModel(getCollectionId()));
 }
 
-CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data& data, QUndoStack& undoStack,
+CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data& worldData, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
-    : GenericCreator(data, undoStack, id)
+    : GenericCreator(worldData, undoStack, id)
 {
     setManualEditing(false);
 

@@ -25,8 +25,8 @@ void CSVWorld::ReferenceableCreator::configureCreateCommand(CSMWorld::CreateComm
 }
 
 CSVWorld::ReferenceableCreator::ReferenceableCreator(
-    CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-    : GenericCreator(data, undoStack, id)
+    CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+    : GenericCreator(worldData, undoStack, id)
 {
     QLabel* label = new QLabel("Type", this);
     insertBeforeButtons(label, false);

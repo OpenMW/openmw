@@ -19,7 +19,7 @@ namespace Nif
         union
         {
             intptr_t index;
-            X* ptr;
+            X* mPtr;
         };
 
     public:
@@ -29,7 +29,7 @@ namespace Nif
         }
 
         RecordPtrT(X* ptr)
-            : ptr(ptr)
+            : mPtr(ptr)
         {
         }
 
@@ -48,26 +48,26 @@ namespace Nif
         void post(Reader& nif)
         {
             if (index < 0)
-                ptr = nullptr;
+                mPtr = nullptr;
             else
             {
                 Record* r = nif.getRecord(index);
                 // And cast it
-                ptr = dynamic_cast<X*>(r);
-                assert(ptr != nullptr);
+                mPtr = dynamic_cast<X*>(r);
+                assert(mPtr != nullptr);
             }
         }
 
         /// Look up the actual object from the index
         const X* getPtr() const
         {
-            assert(ptr != nullptr);
-            return ptr;
+            assert(mPtr != nullptr);
+            return mPtr;
         }
         X* getPtr()
         {
-            assert(ptr != nullptr);
-            return ptr;
+            assert(mPtr != nullptr);
+            return mPtr;
         }
 
         const X& get() const { return *getPtr(); }
@@ -78,7 +78,7 @@ namespace Nif
         X* operator->() { return getPtr(); }
 
         /// Pointers are allowed to be empty
-        bool empty() const { return ptr == nullptr; }
+        bool empty() const { return mPtr == nullptr; }
     };
 
     /** A list of references to other records. These are read as a list,

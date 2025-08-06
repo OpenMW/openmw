@@ -77,8 +77,8 @@ namespace DetourNavigator
         if (itByTilePosition == values->mByTilePosition.end())
             return result;
 
-        std::for_each(itByTilePosition->second.begin(), itByTilePosition->second.end(), [&](const ObjectId v) {
-            const auto byId = values->mById.equal_range(v);
+        std::for_each(itByTilePosition->second.begin(), itByTilePosition->second.end(), [&](const ObjectId id) {
+            const auto byId = values->mById.equal_range(id);
             std::for_each(byId.first, byId.second, [&](const auto& v) {
                 if (getTilePosition(mSettings, v.second.mStart) == tilePosition
                     || getTilePosition(mSettings, v.second.mEnd) == tilePosition)

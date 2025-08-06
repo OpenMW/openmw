@@ -32,18 +32,18 @@ namespace Stereo
     {
     public:
         StereoUpdateCallback(Manager* stereoView)
-            : stereoView(stereoView)
+            : mStereoView(stereoView)
         {
         }
 
         bool run(osg::Object* object, osg::Object* data) override
         {
             auto b = traverse(object, data);
-            stereoView->update();
+            mStereoView->update();
             return b;
         }
 
-        Manager* stereoView;
+        Manager* mStereoView;
     };
 
     // Update states during cull

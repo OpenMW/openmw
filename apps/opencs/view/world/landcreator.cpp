@@ -15,8 +15,8 @@
 
 namespace CSVWorld
 {
-    LandCreator::LandCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-        : GenericCreator(data, undoStack, id)
+    LandCreator::LandCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+        : GenericCreator(worldData, undoStack, id)
         , mXLabel(nullptr)
         , mYLabel(nullptr)
         , mX(nullptr)

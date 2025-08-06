@@ -289,28 +289,28 @@ namespace MWLua
         sol::state_view lua = context.sol();
         addJournalEntryBindings(player, lua, journal);
 
-        player["quests"] = [](const Object& player) {
-            verifyPlayer(player);
-            bool allowChanges = dynamic_cast<const GObject*>(&player) != nullptr
-                || dynamic_cast<const SelfObject*>(&player) != nullptr;
+        player["quests"] = [](const Object& object) {
+            verifyPlayer(object);
+            bool allowChanges = dynamic_cast<const GObject*>(&object) != nullptr
+                || dynamic_cast<const SelfObject*>(&object) != nullptr;
             return Quests{ .mMutable = allowChanges };
         };
         sol::usertype<Quests> quests = lua.new_usertype<Quests>("Quests");
-        quests[sol::meta_function::to_string] = [](const Quests& quests) { return "Quests"; };
-        quests[sol::meta_function::index] = [](const Quests& quests, std::string_view questId) -> sol::optional<Quest> {
+        quests[sol::meta_function::to_string] = [](const Quests& /*self*/) { return "Quests"; };
+        quests[sol::meta_function::index] = [](const Quests& self, std::string_view questId) -> sol::optional<Quest> {
             ESM::RefId quest = ESM::RefId::deserializeText(questId);
             const ESM::Dialogue* dial = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(quest);
             if (dial == nullptr || dial->mType != ESM::Dialogue::Journal)
                 return sol::nullopt;
-            return Quest{ .mQuestId = quest, .mMutable = quests.mMutable };
+            return Quest{ .mQuestId = quest, .mMutable = self.mMutable };
         };
-        quests[sol::meta_function::pairs] = [journal](const Quests& quests) {
+        quests[sol::meta_function::pairs] = [journal](const Quests& self) {
             std::vector<ESM::RefId> ids;
             for (auto it = journal->questBegin(); it != journal->questEnd(); ++it)
                 ids.push_back(it->first);
             size_t i = 0;
             return [ids = std::move(ids), i,
-                       allowChanges = quests.mMutable]() mutable -> sol::optional<std::tuple<std::string, Quest>> {
+                       allowChanges = self.mMutable]() mutable -> sol::optional<std::tuple<std::string, Quest>> {
                 if (i >= ids.size())
                     return sol::nullopt;
                 const ESM::RefId& id = ids[i++];
@@ -320,19 +320,19 @@ namespace MWLua
 
         sol::usertype<Quest> quest = lua.new_usertype<Quest>("Quest");
         quest[sol::meta_function::to_string]
-            = [](const Quest& quest) { return "Quest[" + quest.mQuestId.serializeText() + "]"; };
+            = [](const Quest& self) { return "Quest[" + self.mQuestId.serializeText() + "]"; };
 
-        auto getQuestStage = [journal](const Quest& q) -> int {
-            const MWDialogue::Quest* quest = journal->getQuestOrNull(q.mQuestId);
-            if (quest == nullptr)
+        auto getQuestStage = [journal](const Quest& self) -> int {
+            const MWDialogue::Quest* questPtr = journal->getQuestOrNull(self.mQuestId);
+            if (questPtr == nullptr)
                 return 0;
-            return journal->getJournalIndex(q.mQuestId);
+            return journal->getJournalIndex(self.mQuestId);
         };
-        auto setQuestStage = [context](const Quest& q, int stage) {
-            if (!q.mMutable)
+        auto setQuestStage = [context](const Quest& self, int stage) {
+            if (!self.mMutable)
                 throw std::runtime_error("Value can only be changed in global or player scripts!");
             context.mLuaManager->addAction(
-                [q, stage] { MWBase::Environment::get().getJournal()->setJournalIndex(q.mQuestId, stage); },
+                [self, stage] { MWBase::Environment::get().getJournal()->setJournalIndex(self.mQuestId, stage); },
                 "setQuestStageAction");
         };
         quest["stage"] = sol::property(getQuestStage, setQuestStage);
@@ -342,10 +342,10 @@ namespace MWLua
             [journal](const Quest& q) { return journal->getQuestOrNull(q.mQuestId) != nullptr; });
         quest["finished"] = sol::property(
             [journal](const Quest& q) -> bool {
-                const MWDialogue::Quest* quest = journal->getQuestOrNull(q.mQuestId);
-                if (quest == nullptr)
+                const MWDialogue::Quest* questPtr = journal->getQuestOrNull(q.mQuestId);
+                if (questPtr == nullptr)
                     return false;
-                return quest->isFinished();
+                return questPtr->isFinished();
             },
             [journal, context](const Quest& q, bool finished) {
                 if (!q.mMutable)
@@ -382,28 +382,28 @@ namespace MWLua
                 }));
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-        player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
-            verifyPlayer(player);
+        player["getControlSwitch"] = [input](const Object& object, std::string_view key) {
+            verifyPlayer(object);
             return input->getControlSwitch(key);
         };
-        player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
-            verifyPlayer(player);
-            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+        player["setControlSwitch"] = [input](const Object& object, std::string_view key, bool v) {
+            verifyPlayer(object);
+            if (dynamic_cast<const LObject*>(&object) && !dynamic_cast<const SelfObject*>(&object))
                 throw std::runtime_error("Only player and global scripts can toggle control switches.");
             input->toggleControlSwitch(key, v);
         };
-        player["isTeleportingEnabled"] = [](const Object& player) -> bool {
-            verifyPlayer(player);
+        player["isTeleportingEnabled"] = [](const Object& object) -> bool {
+            verifyPlayer(object);
             return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
         };
-        player["setTeleportingEnabled"] = [](const Object& player, bool state) {
-            verifyPlayer(player);
-            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+        player["setTeleportingEnabled"] = [](const Object& object, bool state) {
+            verifyPlayer(object);
+            if (dynamic_cast<const LObject*>(&object) && !dynamic_cast<const SelfObject*>(&object))
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
             MWBase::Environment::get().getWorld()->enableTeleporting(state);
         };
-        player["addTopic"] = [](const Object& player, std::string_view topicId) {
-            verifyPlayer(player);
+        player["addTopic"] = [](const Object& object, std::string_view topicId) {
+            verifyPlayer(object);
 
             ESM::RefId topic = ESM::RefId::deserializeText(topicId);
             const ESM::Dialogue* dialogueRecord
@@ -418,8 +418,8 @@ namespace MWLua
 
             MWBase::Environment::get().getDialogueManager()->addTopic(topic);
         };
-        player["sendMenuEvent"] = [context](const Object& player, std::string eventName, const sol::object& eventData) {
-            verifyPlayer(player);
+        player["sendMenuEvent"] = [context](const Object& object, std::string eventName, const sol::object& eventData) {
+            verifyPlayer(object);
             context.mLuaEvents->addMenuEvent({ std::move(eventName), LuaUtil::serialize(eventData) });
         };
 
@@ -471,13 +471,13 @@ namespace MWLua
         };
 
         player["birthSigns"] = initBirthSignRecordBindings(context);
-        player["getBirthSign"] = [](const Object& player) -> std::string {
-            verifyPlayer(player);
+        player["getBirthSign"] = [](const Object& object) -> std::string {
+            verifyPlayer(object);
             return MWBase::Environment::get().getWorld()->getPlayer().getBirthSign().serializeText();
         };
-        player["setBirthSign"] = [](const Object& player, const sol::object& recordOrId) {
-            verifyPlayer(player);
-            if (!dynamic_cast<const GObject*>(&player))
+        player["setBirthSign"] = [](const Object& object, const sol::object& recordOrId) {
+            verifyPlayer(object);
+            if (!dynamic_cast<const GObject*>(&object))
                 throw std::runtime_error("Only global scripts can change birth signs");
             MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(toBirthSignId(recordOrId));
         };

@@ -12,10 +12,10 @@
 class QWidget;
 
 CSVRender::PreviewWidget::PreviewWidget(
-    CSMWorld::Data& data, const std::string& id, bool referenceable, QWidget* parent)
-    : SceneWidget(data.getResourceSystem(), parent)
-    , mData(data)
-    , mObject(data, mRootNode, id, referenceable)
+    CSMWorld::Data& worldData, const std::string& id, bool referenceable, QWidget* parent)
+    : SceneWidget(worldData.getResourceSystem(), parent)
+    , mData(worldData)
+    , mObject(worldData, mRootNode, id, referenceable)
 {
     selectNavigationMode("orbit");
 

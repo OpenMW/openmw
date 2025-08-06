@@ -173,18 +173,18 @@ namespace MWLua
         sol::table types(lua, sol::create);
         auto addType = [&](std::string_view name, std::vector<ESM::RecNameInts> recTypes,
                            std::optional<std::string_view> base = std::nullopt) -> sol::table {
-            sol::table t(lua, sol::create);
-            sol::table ro = LuaUtil::makeReadOnly(t);
+            sol::table table(lua, sol::create);
+            sol::table ro = LuaUtil::makeReadOnly(table);
             sol::table meta = ro[sol::metatable_key];
             meta[sol::meta_function::to_string] = [name]() { return name; };
             if (base)
             {
-                t["baseType"] = types[*base];
+                table["baseType"] = types[*base];
                 sol::table baseMeta(lua, sol::create);
                 baseMeta[sol::meta_function::index] = LuaUtil::getMutableFromReadOnly(types[*base]);
-                t[sol::metatable_key] = baseMeta;
+                table[sol::metatable_key] = baseMeta;
             }
-            t["objectIsInstance"] = [types = recTypes](const Object& o) {
+            table["objectIsInstance"] = [types = recTypes](const Object& o) {
                 unsigned int type = getLiveCellRefType(o.ptr().mRef);
                 for (ESM::RecNameInts t : types)
                     if (t == type)
@@ -192,7 +192,7 @@ namespace MWLua
                 return false;
             };
             types[name] = ro;
-            return t;
+            return table;
         };
 
         addActorBindings(

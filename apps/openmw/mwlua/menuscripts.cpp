@@ -81,16 +81,16 @@ namespace MWLua
             manager->saveGame(description, slot);
         };
 
-        auto getSaves = [](sol::state_view lua, const MWState::Character& character) {
-            sol::table saves(lua, sol::create);
+        auto getSaves = [](sol::state_view currentState, const MWState::Character& character) {
+            sol::table saves(currentState, sol::create);
             for (const MWState::Slot& slot : character)
             {
-                sol::table slotInfo(lua, sol::create);
+                sol::table slotInfo(currentState, sol::create);
                 slotInfo["description"] = slot.mProfile.mDescription;
                 slotInfo["playerName"] = slot.mProfile.mPlayerName;
                 slotInfo["playerLevel"] = slot.mProfile.mPlayerLevel;
                 slotInfo["timePlayed"] = slot.mProfile.mTimePlayed;
-                sol::table contentFiles(lua, sol::create);
+                sol::table contentFiles(currentState, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
                     contentFiles[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
 
@@ -106,18 +106,18 @@ namespace MWLua
             return saves;
         };
 
-        api["getSaves"] = [getSaves](sol::this_state lua, std::string_view dir) -> sol::table {
+        api["getSaves"] = [getSaves](sol::this_state thisState, std::string_view dir) -> sol::table {
             const MWState::Character* character = findCharacter(dir);
             if (!character)
                 throw std::runtime_error("Saves not found: " + std::string(dir));
-            return getSaves(lua, *character);
+            return getSaves(thisState, *character);
         };
 
-        api["getAllSaves"] = [getSaves](sol::this_state lua) -> sol::table {
-            sol::table saves(lua, sol::create);
+        api["getAllSaves"] = [getSaves](sol::this_state thisState) -> sol::table {
+            sol::table saves(thisState, sol::create);
             MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
             for (auto it = manager->characterBegin(); it != manager->characterEnd(); ++it)
-                saves[it->getPath().filename().string()] = getSaves(lua, *it);
+                saves[it->getPath().filename().string()] = getSaves(thisState, *it);
             return saves;
         };
 

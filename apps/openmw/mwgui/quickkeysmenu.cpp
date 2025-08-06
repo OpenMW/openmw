@@ -626,8 +626,8 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
-        auto assign = [this](auto type, MWWorld::Ptr item) {
-            if (type == ESM::QuickKeys::Type::Item)
+        auto assign = [this](ESM::QuickKeys::Type keyType, MWWorld::Ptr item) {
+            if (keyType == ESM::QuickKeys::Type::Item)
                 assignItem(item);
             else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
                 onAssignMagicItem(item);

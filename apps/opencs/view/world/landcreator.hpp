@@ -30,7 +30,7 @@ namespace CSVWorld
         QSpinBox* mY;
 
     public:
-        LandCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        explicit LandCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
         void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;
 

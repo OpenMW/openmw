@@ -120,8 +120,7 @@ namespace MWLua
         record["enchantCapacity"]
             = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
         record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string> {
-            ESM::RefId skill = ESM::Skill::indexToRefId(rec.mData.mSkillId);
-            return LuaUtil::serializeRefId(skill);
+            return LuaUtil::serializeRefId(ESM::Skill::indexToRefId(rec.mData.mSkillId));
         });
     }
 }

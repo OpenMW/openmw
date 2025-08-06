@@ -42,7 +42,7 @@ namespace CSVWorld
         CSMWorld::IdTable& getPathgridsTable() const;
 
     public:
-        PathgridCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+        explicit PathgridCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
             CSMWorld::IdCompletionManager& completionManager);
 
         /// \brief Set cell ID input widget to ID of record to be cloned.

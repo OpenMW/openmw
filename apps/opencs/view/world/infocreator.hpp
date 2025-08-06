@@ -40,7 +40,7 @@ namespace CSVWorld
         void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
     public:
-        InfoCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+        explicit InfoCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
             CSMWorld::IdCompletionManager& completionManager);
 
         void cloneMode(const std::string& originId, const CSMWorld::UniversalId::Type type) override;

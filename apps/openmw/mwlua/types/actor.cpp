@@ -248,7 +248,7 @@ namespace MWLua
             stats.setDrawState(newDrawState);
         };
 
-        actor["getSelectedEnchantedItem"] = [](sol::this_state lua, const Object& o) -> sol::object {
+        actor["getSelectedEnchantedItem"] = [](sol::this_state thisState, const Object& o) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return sol::nil;
@@ -258,9 +258,9 @@ namespace MWLua
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
             if (dynamic_cast<const GObject*>(&o))
-                return sol::make_object(lua, GObject(*it));
+                return sol::make_object(thisState, GObject(*it));
             else
-                return sol::make_object(lua, LObject(*it));
+                return sol::make_object(thisState, LObject(*it));
         };
         actor["setSelectedEnchantedItem"] = [context](const SelfObject& obj, const sol::object& item) {
             const MWWorld::Ptr& ptr = obj.ptr();
@@ -310,9 +310,9 @@ namespace MWLua
 
         actor["inventory"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
             [](const GObject& o) { return Inventory<GObject>{ o }; });
-        auto getAllEquipment = [](sol::this_state lua, const Object& o) {
+        auto getAllEquipment = [](sol::this_state thisState, const Object& o) {
             const MWWorld::Ptr& ptr = o.ptr();
-            sol::table equipment(lua, sol::create);
+            sol::table equipment(thisState, sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return equipment;
 
@@ -324,13 +324,13 @@ namespace MWLua
                     continue;
                 MWBase::Environment::get().getWorldModel()->registerPtr(*it);
                 if (dynamic_cast<const GObject*>(&o))
-                    equipment[slot] = sol::make_object(lua, GObject(*it));
+                    equipment[slot] = sol::make_object(thisState, GObject(*it));
                 else
-                    equipment[slot] = sol::make_object(lua, LObject(*it));
+                    equipment[slot] = sol::make_object(thisState, LObject(*it));
             }
             return equipment;
         };
-        auto getEquipmentFromSlot = [](sol::this_state lua, const Object& o, int slot) -> sol::object {
+        auto getEquipmentFromSlot = [](sol::this_state thisState, const Object& o, int slot) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return sol::nil;
@@ -340,9 +340,9 @@ namespace MWLua
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
             if (dynamic_cast<const GObject*>(&o))
-                return sol::make_object(lua, GObject(*it));
+                return sol::make_object(thisState, GObject(*it));
             else
-                return sol::make_object(lua, LObject(*it));
+                return sol::make_object(thisState, LObject(*it));
         };
         actor["getEquipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
         actor["equipment"] = actor["getEquipment"]; // for compatibility; should be removed later
@@ -373,10 +373,10 @@ namespace MWLua
             context.mLuaManager->addAction(
                 [obj = Object(ptr), eqp = std::move(eqp)] { setEquipment(obj.ptr(), eqp); }, "SetEquipmentAction");
         };
-        actor["getPathfindingAgentBounds"] = [](sol::this_state lua, const LObject& o) {
+        actor["getPathfindingAgentBounds"] = [](sol::this_state thisState, const LObject& o) {
             const DetourNavigator::AgentBounds agentBounds
                 = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
-            sol::table result(lua, sol::create);
+            sol::table result(thisState, sol::create);
             result["shapeType"] = agentBounds.mShapeType;
             result["halfExtents"] = agentBounds.mHalfExtents;
             return result;
@@ -410,13 +410,13 @@ namespace MWLua
             return target.getClass().getCreatureStats(target).isDeathAnimationFinished();
         };
 
-        actor["getEncumbrance"] = [](const Object& actor) -> float {
-            const MWWorld::Ptr ptr = actor.ptr();
+        actor["getEncumbrance"] = [](const Object& object) -> float {
+            const MWWorld::Ptr ptr = object.ptr();
             return ptr.getClass().getEncumbrance(ptr);
         };
 
-        actor["getCapacity"] = [](const Object& actor) -> float {
-            const MWWorld::Ptr ptr = actor.ptr();
+        actor["getCapacity"] = [](const Object& object) -> float {
+            const MWWorld::Ptr ptr = object.ptr();
             return ptr.getClass().getCapacity(ptr);
         };
 
