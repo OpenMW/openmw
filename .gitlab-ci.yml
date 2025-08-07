@@ -9,6 +9,8 @@ stages:
   - test
 
 workflow:
+  auto_cancel:
+    on_new_commit: interruptible
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
@@ -99,6 +101,7 @@ Coverity:
     - saas-linux-medium-amd64
   image: ubuntu:24.04
   stage: build
+  interruptible: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
@@ -140,6 +143,7 @@ Coverity:
 Coverity_Upload:
   image: ubuntu:24.04
   stage: build
+  interruptible: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
