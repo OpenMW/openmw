@@ -48,9 +48,9 @@ namespace MWGui
 
         for (size_t i = 0; i < mButtons.size(); i++)
         {
-            getWidget(mButtons[i].mImage, "Btn" + sButtonDefs[i].mName + "Image");
-            getWidget(mButtons[i].mText, "Btn" + sButtonDefs[i].mName + "Text");
-            getWidget(mButtons[i].mHBox, "Btn" + sButtonDefs[i].mName);
+            getWidget(mButtons[i].mImage, "Btn" + std::string(sButtonDefs[i].mName) + "Image");
+            getWidget(mButtons[i].mText, "Btn" + std::string(sButtonDefs[i].mName) + "Text");
+            getWidget(mButtons[i].mHBox, "Btn" + std::string(sButtonDefs[i].mName));
 
             if (sButtonDefs[i].mInputType == InputType_Axis)
                 setIcon(mButtons[i].mImage, inputMgr->getControllerAxisIcon(sButtonDefs[i].mId.mAxis));

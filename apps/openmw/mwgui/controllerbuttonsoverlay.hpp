@@ -2,6 +2,7 @@
 #define MWGUI_CONTROLLERBUTTONSOVERLAY_H
 
 #include <array>
+#include <string_view>
 
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_TextBox.h>
@@ -49,7 +50,7 @@ namespace MWGui
         struct ButtonDefinition
         {
             Button mButton;
-            std::string mName;
+            std::string_view mName;
             InputType mInputType;
             union
             {
