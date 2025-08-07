@@ -49,7 +49,7 @@ namespace MWGui
         struct ButtonDefinition
         {
             Button mButton;
-            std::string mName;
+            const char* mName;
             InputType mInputType;
             union
             {
