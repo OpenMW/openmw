@@ -1,6 +1,8 @@
 #ifndef MWGUI_CONTROLLERBUTTONSOVERLAY_H
 #define MWGUI_CONTROLLERBUTTONSOVERLAY_H
 
+#include <array>
+
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_TextBox.h>
 

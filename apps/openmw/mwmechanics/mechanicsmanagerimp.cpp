@@ -1609,7 +1609,7 @@ namespace MWMechanics
         commitCrime(player, victim, MWBase::MechanicsManager::OT_Murder);
     }
 
-    bool MechanicsManager::awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer)
+    bool MechanicsManager::awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer, bool useCache)
     {
         if (observer.getClass().getCreatureStats(observer).isDead() || !observer.getRefData().isEnabled())
             return false;
@@ -1676,8 +1676,10 @@ namespace MWMechanics
         }
 
         float target = x - y;
+        if (useCache)
+            return observerStats.getAwarenessRoll() >= target;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        return (Misc::Rng::roll0to99(prng) >= target);
+        return Misc::Rng::roll0to99(prng) >= target;
     }
 
     void MechanicsManager::startCombat(

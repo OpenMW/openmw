@@ -433,7 +433,7 @@ namespace MWMechanics
         ESM::Position enemyPos = enemy.getRefData().getPosition();
 
         if (isTargetMagicallyHidden(enemy)
-            && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(enemy, actor))
+            && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(enemy, actor, false))
         {
             return false;
         }
