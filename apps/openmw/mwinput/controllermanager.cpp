@@ -255,7 +255,7 @@ namespace MWInput
             winMgr->setCursorActive(false);
 
             MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
-            if (topWin)
+            if (topWin && topWin->isVisible())
             {
                 // When the inventory tooltip is visible, we don't actually want the A button to
                 // act like a mouse button; it should act normally.
