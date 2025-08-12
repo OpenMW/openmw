@@ -168,7 +168,7 @@ namespace MWLua
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             context.mLuaManager->addAction(
-                [=]() {
+                [afterName = std::move(afterName), name = std::move(name), options]() {
                     size_t index = LuaUi::Layer::indexOf(afterName);
                     if (index == LuaUi::Layer::count())
                         throw std::logic_error(

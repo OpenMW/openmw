@@ -422,7 +422,7 @@ namespace MWGui
                     continue; // fake locale to get gmst strings from content files
                 if (std::find(availableLanguages.begin(), availableLanguages.end(), localeName)
                     == availableLanguages.end())
-                    availableLanguages.push_back(localeName);
+                    availableLanguages.push_back(std::move(localeName));
             }
         }
 

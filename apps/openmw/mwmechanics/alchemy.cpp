@@ -628,7 +628,7 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
             const ESM::Skill* skill = store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(data.mSkills[i]));
             std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skill);
 
-            effects.push_back(effect);
+            effects.push_back(std::move(effect));
         }
     }
     return effects;

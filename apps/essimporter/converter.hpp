@@ -584,7 +584,7 @@ namespace ESSImport
             script.load(esm);
             ESM::GlobalScript out;
             convertSCPT(script, out);
-            mScripts.push_back(out);
+            mScripts.push_back(std::move(out));
         }
         void write(ESM::ESMWriter& esm) override
         {

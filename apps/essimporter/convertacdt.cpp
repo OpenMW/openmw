@@ -90,7 +90,7 @@ namespace ESSImport
             scriptedAnim.mAbsolute = true;
             // Neither loop count nor queueing seems to be supported by the ess format.
             scriptedAnim.mLoopCount = std::numeric_limits<size_t>::max();
-            state.mScriptedAnims.push_back(scriptedAnim);
+            state.mScriptedAnims.push_back(std::move(scriptedAnim));
         }
         else
             // TODO: Handle 0xFF index, which seems to be used for finished animations.

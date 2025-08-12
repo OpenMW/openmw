@@ -133,10 +133,10 @@ QModelIndexList CSVWorld::RegionMap::getMissingRegionCells() const
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string region = model->data(*iter, CSMWorld::RegionMap::Role_Region).toString().toUtf8().constData();
+        std::string_view region = model->data(*iter, CSMWorld::RegionMap::Role_Region).toString().toUtf8().constData();
 
         if (!region.empty())
-            regions.insert(region);
+            regions.emplace(region);
     }
 
     QModelIndexList list;

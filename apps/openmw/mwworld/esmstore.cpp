@@ -150,7 +150,7 @@ namespace
             }
 
             if (changed)
-                npcsToReplace.push_back(npc);
+                npcsToReplace.push_back(std::move(npc));
         }
 
         return npcsToReplace;

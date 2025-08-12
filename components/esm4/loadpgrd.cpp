@@ -114,7 +114,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                 for (std::size_t i = 0; i < numNodes; ++i)
                     reader.get(objLink.linkedNodes.at(i));
 
-                mObjects.push_back(objLink);
+                mObjects.push_back(std::move(objLink));
 
                 break;
             }

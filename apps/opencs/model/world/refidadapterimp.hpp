@@ -1466,7 +1466,7 @@ namespace CSMWorld
             newRow.mCellName.clear();
 
             if (position >= (int)list.size())
-                list.push_back(newRow);
+                list.push_back(std::move(newRow));
             else
                 list.insert(list.begin() + position, newRow);
 
@@ -1636,7 +1636,7 @@ namespace CSMWorld
             newRow.mCellName.clear();
 
             if (position >= (int)list.size())
-                list.push_back(newRow);
+                list.push_back(std::move(newRow));
             else
                 list.insert(list.begin() + position, newRow);
 

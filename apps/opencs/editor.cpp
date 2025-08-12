@@ -166,7 +166,7 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
     if (!local.empty())
     {
         std::filesystem::create_directories(local);
-        dataLocal.push_back(local);
+        dataLocal.push_back(std::move(local));
     }
     mCfgMgr.filterOutNonExistingPaths(dataDirs);
     mCfgMgr.filterOutNonExistingPaths(dataLocal);

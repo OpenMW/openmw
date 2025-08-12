@@ -127,7 +127,7 @@ namespace ESM
         Header::MasterData d;
         d.name = name;
         d.size = size;
-        mHeader.mMaster.push_back(d);
+        mHeader.mMaster.push_back(std::move(d));
     }
 
     void ESMWriter::save(std::ostream& file)

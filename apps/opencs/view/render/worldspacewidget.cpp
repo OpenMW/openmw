@@ -449,7 +449,7 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
 
     mView->getCamera()->accept(visitor);
 
-    auto intersections = intersector->getIntersections();
+    const auto& intersections = intersector->getIntersections();
 
     std::vector<osgUtil::LineSegmentIntersector::Intersection> validIntersections
         = { intersections.begin(), intersections.end() };

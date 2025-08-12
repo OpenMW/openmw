@@ -65,7 +65,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
 
                 // NOTE: some mods do not have DATA following MAST so can't read DATA here
                 m.size = 0;
-                mMaster.push_back(m);
+                mMaster.push_back(std::move(m));
                 break;
             }
             case ESM::fourCC("DATA"):

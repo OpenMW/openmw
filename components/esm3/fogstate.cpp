@@ -82,7 +82,7 @@ namespace ESM
             if (dataFormat <= MaxOldFogOfWarFormatVersion)
                 convertFogOfWar(tex.mImageData);
 
-            mFogTextures.push_back(tex);
+            mFogTextures.push_back(std::move(tex));
         }
     }
 

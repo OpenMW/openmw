@@ -19,7 +19,8 @@ namespace MWLua
             = [](const ESM::Script& rec) { return "ESM3_Script[" + rec.mId.toDebugString() + "]"; };
         recordBindingsClass["id"]
             = sol::readonly_property([](const ESM::Script& rec) { return rec.mId.serializeText(); });
-        recordBindingsClass["text"] = sol::readonly_property([](const ESM::Script& rec) { return rec.mScriptText; });
+        recordBindingsClass["text"]
+            = sol::readonly_property([](const ESM::Script& rec) -> std::string_view { return rec.mScriptText; });
 
         addRecordFunctionBinding<ESM::Script>(api, context);
 

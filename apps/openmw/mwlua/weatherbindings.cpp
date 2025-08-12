@@ -48,7 +48,8 @@ namespace MWLua
         auto weatherT = lua.new_usertype<MWWorld::Weather>("Weather");
         weatherT[sol::meta_function::to_string]
             = [](const MWWorld::Weather& w) -> std::string { return "Weather[" + w.mName + "]"; };
-        weatherT["name"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mName; });
+        weatherT["name"]
+            = sol::readonly_property([](const MWWorld::Weather& w) -> std::string_view { return w.mName; });
         weatherT["windSpeed"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mWindSpeed; });
         weatherT["cloudSpeed"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mCloudSpeed; });
         weatherT["cloudTexture"] = sol::readonly_property([vfs](const MWWorld::Weather& w) {
@@ -139,7 +140,8 @@ namespace MWLua
         weatherT["scriptId"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mScriptId; });
         weatherT["recordId"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mId.serializeText(); });
 
-        api["getCurrent"] = []() { return MWBase::Environment::get().getWorld()->getCurrentWeather(); };
+        api["getCurrent"]
+            = []() -> const MWWorld::Weather* { return &MWBase::Environment::get().getWorld()->getCurrentWeather(); };
         api["getNext"]
             = []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); };
         api["getTransition"] = []() { return MWBase::Environment::get().getWorld()->getWeatherTransition(); };

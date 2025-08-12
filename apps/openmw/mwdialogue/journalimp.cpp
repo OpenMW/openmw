@@ -111,7 +111,7 @@ namespace MWDialogue
         // there is no need to show empty entries in journal
         if (!entry.getText().empty())
         {
-            mJournal.push_back(entry);
+            mJournal.push_back(std::move(entry));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sJournalEntry}");
         }
     }

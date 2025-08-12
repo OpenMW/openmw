@@ -1096,7 +1096,7 @@ namespace MWWorld
         Weather weather(
             id, mWeatherSettings.size(), name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
 
-        mWeatherSettings.push_back(weather);
+        mWeatherSettings.push_back(std::move(weather));
     }
 
     inline void WeatherManager::importRegions()

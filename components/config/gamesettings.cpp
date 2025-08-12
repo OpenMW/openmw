@@ -202,7 +202,7 @@ bool Config::GameSettings::readFile(
 
     if (settings.isEmpty())
     {
-        settings = cache; // This is the first time we read a file
+        settings = std::move(cache); // This is the first time we read a file
         validatePaths();
         return true;
     }
