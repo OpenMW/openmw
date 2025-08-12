@@ -16,7 +16,9 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -627,6 +629,14 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
+        MWWorld::CellStore& draftCell = MWBase::Environment::get().getWorldModel()->getDraftCell();
+
+        auto assignItem = [this](auto type, MWWorld::Ptr item) {
+            if (type == ESM::QuickKeys::Type::Item)
+                onAssignItem(item);
+            else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
+                onAssignMagicItem(item);
+        };
 
         int i = 0;
         for (ESM::QuickKeys::QuickKey& quickKey : keys.mKeys)
@@ -648,16 +658,28 @@ namespace MWGui
                 {
                     // Find the item by id
                     MWWorld::Ptr item = store.findReplacement(quickKey.mId);
-
                     if (item.isEmpty())
-                        unassign(mSelected);
-                    else
                     {
-                        if (quickKey.mType == ESM::QuickKeys::Type::Item)
-                            assignItem(item);
-                        else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
-                            onAssignMagicItem(item);
+                        unassign(mSelected);
+                        if (!quickKey.mId.empty())
+                        {
+                            // Fallback to a temporary object for UI display purposes
+                            try
+                            {
+                                MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), quickKey.mId);
+                                item = mref.getPtr().getClass().copyToCell(mref.getPtr(), draftCell, 1);
+                            }
+                            catch (const std::exception& e)
+                            {
+                                break;
+                            }
+                            assignItem(quickKey.mType, item);
+                            MWBase::Environment::get().getWorld()->disable(item);
+                            MWBase::Environment::get().getWorld()->deleteObject(item);
+                        }
                     }
+                    else
+                        assignItem(quickKey.mType, item);
 
                     break;
                 }
