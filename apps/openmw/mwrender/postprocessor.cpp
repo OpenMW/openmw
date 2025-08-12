@@ -185,7 +185,7 @@ namespace MWRender
         auto distortion = loadTechnique("internal_distortion");
         distortion->setInternal(true);
         distortion->setLocked(true);
-        mInternalTechniques.push_back(distortion);
+        mInternalTechniques.push_back(std::move(distortion));
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();

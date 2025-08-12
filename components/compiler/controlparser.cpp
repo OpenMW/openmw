@@ -22,7 +22,7 @@ namespace Compiler
 
             std::copy(mCodeBlock.begin(), mCodeBlock.end(), std::back_inserter(entry.second));
 
-            mIfCode.push_back(entry);
+            mIfCode.push_back(std::move(entry));
 
             mCodeBlock.clear();
 

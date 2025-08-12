@@ -207,7 +207,7 @@ namespace MWGui
         mQueue.pop_front();
 
         if (mRepeat)
-            mQueue.push_back(op);
+            mQueue.push_back(std::move(op));
     }
 
     float ScreenFader::getCurrentAlpha()

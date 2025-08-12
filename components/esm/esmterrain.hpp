@@ -51,19 +51,19 @@ namespace ESM
 
     private:
         std::unique_ptr<const ESM::LandRecordData> mData;
-        int mLoadFlags = 0;
         std::vector<float> mHeightsData;
-        float mMinHeight = 0.f;
-        float mMaxHeight = 0.f;
-        float mSize = 0.f;
-        int mLandSize = 0;
-        int mPlugin = 0;
         std::span<const float> mHeights;
         std::span<const std::int8_t> mNormals;
         std::span<const std::uint8_t> mColors;
         std::span<const std::uint16_t> mTextures;
         std::array<ESM4::Land::Texture, 4> mEsm4Textures;
-        bool mIsEsm4;
+        int mLoadFlags = 0;
+        float mMinHeight = 0.f;
+        float mMaxHeight = 0.f;
+        float mSize = 0.f;
+        int mLandSize = 0;
+        int mPlugin = 0;
+        bool mIsEsm4 = false;
     };
 
 }

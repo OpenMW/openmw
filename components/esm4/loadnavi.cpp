@@ -130,7 +130,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     {
         Navigation::IslandInfo island2;
         island2.load(reader);
-        islandInfo.push_back(island2); // Maybe don't use a vector for just one entry?
+        islandInfo.push_back(std::move(island2)); // Maybe don't use a vector for just one entry?
     }
     // else if (flags == FLG_Island) // FIXME: debug only
     //   std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
@@ -350,7 +350,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 // std::cout << "\nNVMI start" << std::endl;
                 NavMeshInfo nvmi;
                 nvmi.load(reader);
-                mNavMeshInfo.push_back(nvmi);
+                mNavMeshInfo.push_back(std::move(nvmi));
                 break;
             }
             case ESM::fourCC("NVSI"): // from Dawnguard onwards

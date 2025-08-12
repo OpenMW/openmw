@@ -351,7 +351,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
         if (it == map.end())
             it = map.emplace_hint(it, std::move(key), std::vector<std::string>());
 
-        it->second.push_back(std::string(value));
+        it->second.emplace_back(value);
     }
 
     return map;
@@ -393,7 +393,7 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
         {
             map.insert(std::make_pair(key, std::vector<std::string>()));
         }
-        map[key].push_back(value);
+        map[key].push_back(std::move(value));
     }
 
     return map;

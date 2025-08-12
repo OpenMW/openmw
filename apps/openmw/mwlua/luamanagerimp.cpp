@@ -161,7 +161,7 @@ namespace MWLua
         {
             binary = LuaUtil::serialize(*data, mLocalSerializer.get());
         }
-        mLuaEvents.addLocalEvent({ getId(target), name, binary });
+        mLuaEvents.addLocalEvent({ getId(target), name, std::move(binary) });
     }
 
     void LuaManager::update()

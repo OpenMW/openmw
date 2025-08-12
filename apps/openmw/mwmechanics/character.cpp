@@ -2531,7 +2531,7 @@ namespace MWMechanics
                 anim.mTime = 0.f;
             }
 
-            state.mScriptedAnims.push_back(anim);
+            state.mScriptedAnims.push_back(std::move(anim));
         }
     }
 
@@ -2563,7 +2563,7 @@ namespace MWMechanics
                     entry.mTime = (time - start) / (stop - start);
                 }
 
-                mAnimQueue.push_back(entry);
+                mAnimQueue.push_back(std::move(entry));
             }
 
             playAnimQueue();
@@ -2644,7 +2644,7 @@ namespace MWMechanics
             mAnimQueue.resize(1);
         }
 
-        mAnimQueue.push_back(entry);
+        mAnimQueue.push_back(std::move(entry));
 
         if (playImmediately)
             playAnimQueue(mode == 2);
@@ -2675,7 +2675,7 @@ namespace MWMechanics
 
         if (mAnimQueue.size() > 1)
             mAnimQueue.resize(1);
-        mAnimQueue.push_back(entry);
+        mAnimQueue.push_back(std::move(entry));
 
         if (mAnimQueue.size() == 1)
             playAnimQueue();

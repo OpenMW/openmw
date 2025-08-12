@@ -335,7 +335,7 @@ namespace MWWorld
         }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
-        mMagicBolts.push_back(state);
+        mMagicBolts.push_back(std::move(state));
     }
 
     void ProjectileManager::launchProjectile(const Ptr& actor, const ConstPtr& projectile, const osg::Vec3f& pos,
@@ -361,7 +361,7 @@ namespace MWWorld
 
         state.mProjectileId = mPhysics->addProjectile(actor, pos, model, false);
         state.mToDelete = false;
-        mProjectiles.push_back(state);
+        mProjectiles.push_back(std::move(state));
     }
 
     void ProjectileManager::updateCasters()
@@ -725,7 +725,7 @@ namespace MWWorld
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false, false,
                 osg::Vec4(0, 0, 0, 0));
 
-            mProjectiles.push_back(state);
+            mProjectiles.push_back(std::move(state));
             return true;
         }
         if (type == ESM::REC_MPRJ)

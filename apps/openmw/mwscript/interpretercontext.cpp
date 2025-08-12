@@ -130,7 +130,7 @@ namespace MWScript
         if (ptr)
             mReference = *ptr;
         else
-            mGlobalScriptDesc = globalScriptDesc;
+            mGlobalScriptDesc = std::move(globalScriptDesc);
     }
 
     ESM::RefId InterpreterContext::getTarget() const

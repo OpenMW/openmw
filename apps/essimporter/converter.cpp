@@ -303,7 +303,7 @@ namespace ESSImport
             marker.mWorldY = notepos[1];
             marker.mNote = std::move(note);
             marker.mCell = cell.mId;
-            mMarkers.push_back(marker);
+            mMarkers.push_back(std::move(marker));
         }
 
         newcell.mRefs = std::move(cellrefs);
