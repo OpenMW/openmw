@@ -398,6 +398,23 @@ namespace
         { ESM::MagicEffect::BoundShield, "sMagicBoundShieldID" },
         { ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID" },
     };
+
+    using SpellsPurge = void (MWMechanics::Spells::*)();
+    void purgePermanent(const MWWorld::Ptr& target, SpellsPurge method, ESM::Spell::SpellType type)
+    {
+        MWMechanics::CreatureStats& stats = target.getClass().getCreatureStats(target);
+        (stats.getSpells().*method)();
+        stats.getActiveSpells().purge(
+            [type](const MWMechanics::ActiveSpells::ActiveSpellParams& params) {
+                if (params.hasFlag(ESM::ActiveSpells::Flag_SpellStore))
+                {
+                    const ESM::Spell* spell = params.getSpell();
+                    return spell && spell->mData.mType == type;
+                }
+                return false;
+            },
+            target);
+    }
 }
 
 namespace MWMechanics
@@ -412,13 +429,13 @@ namespace MWMechanics
         switch (effect.mEffectId)
         {
             case ESM::MagicEffect::CureCommonDisease:
-                target.getClass().getCreatureStats(target).getSpells().purgeCommonDisease();
+                purgePermanent(target, &Spells::purgeCommonDisease, ESM::Spell::ST_Disease);
                 break;
             case ESM::MagicEffect::CureBlightDisease:
-                target.getClass().getCreatureStats(target).getSpells().purgeBlightDisease();
+                purgePermanent(target, &Spells::purgeBlightDisease, ESM::Spell::ST_Blight);
                 break;
             case ESM::MagicEffect::RemoveCurse:
-                target.getClass().getCreatureStats(target).getSpells().purgeCurses();
+                purgePermanent(target, &Spells::purgeCurses, ESM::Spell::ST_Curse);
                 break;
             case ESM::MagicEffect::CureCorprusDisease:
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(
