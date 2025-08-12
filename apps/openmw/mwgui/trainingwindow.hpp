@@ -55,7 +55,7 @@ namespace MWGui
         TimeAdvancer mTimeAdvancer;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        size_t mControllerFocus;
+        size_t mControllerFocus = 0;
     };
 
 }

@@ -1021,8 +1021,8 @@ namespace MWGui
 
     SelectSkillDialog::SelectSkillDialog()
         : WindowModal("openmw_chargen_select_skill.layout")
-        , mSkillId(ESM::Skill::Block)
         , mControllerFocus(0)
+        , mSkillId(ESM::Skill::Block)
         , mNumSkillsPerSpecialization{}
     {
         // Centre dialog
