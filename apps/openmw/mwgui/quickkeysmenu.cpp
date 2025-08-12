@@ -664,18 +664,14 @@ namespace MWGui
                         if (!quickKey.mId.empty())
                         {
                             // Fallback to a temporary object for UI display purposes
-                            try
+                            if (MWBase::Environment::get().getESMStore()->find(quickKey.mId) != 0)
                             {
                                 MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), quickKey.mId);
                                 item = mref.getPtr().getClass().copyToCell(mref.getPtr(), draftCell, 1);
+                                assignItem(quickKey.mType, item);
+                                MWBase::Environment::get().getWorld()->disable(item);
+                                MWBase::Environment::get().getWorld()->deleteObject(item);
                             }
-                            catch (const std::exception& e)
-                            {
-                                break;
-                            }
-                            assignItem(quickKey.mType, item);
-                            MWBase::Environment::get().getWorld()->disable(item);
-                            MWBase::Environment::get().getWorld()->deleteObject(item);
                         }
                     }
                     else
