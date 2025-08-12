@@ -175,12 +175,12 @@ namespace
     {
         for (const ESM::Transport::Dest& dest : transport)
         {
-            std::cout << "  Destination Position: " << std::format("{:12.3f}", dest.mPos.pos[0]) << ","
-                      << std::format("{:12.3f}", dest.mPos.pos[1]) << "," << std::format("{:12.3f}", dest.mPos.pos[2])
-                      << ")" << std::endl;
-            std::cout << "  Destination Rotation: " << std::format("{:9.6f}", dest.mPos.rot[0]) << ","
-                      << std::format("{:9.6f}", dest.mPos.rot[1]) << "," << std::format("{:9.6f}", dest.mPos.rot[2])
-                      << ")" << std::endl;
+            std::cout << "  Destination Position: (" << std::format("{:12.3f}", dest.mPos.pos[0]) << ','
+                      << std::format("{:12.3f}", dest.mPos.pos[1]) << ',' << std::format("{:12.3f}", dest.mPos.pos[2])
+                      << ")\n";
+            std::cout << "  Destination Rotation: (" << std::format("{:9.6f}", dest.mPos.rot[0]) << ','
+                      << std::format("{:9.6f}", dest.mPos.rot[1]) << ',' << std::format("{:9.6f}", dest.mPos.rot[2])
+                      << ")\n";
             if (!dest.mCellName.empty())
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
