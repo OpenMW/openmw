@@ -1225,6 +1225,79 @@
 -- types.Player.quests(player)["ms_fargothring"].stage = 0
 
 ---
+-- Returns @{#PlayerJournal}, which contains the read-only access to journal text data accumulated by the player.
+-- Not the same as @{openmw_core#Dialogue.journal} which holds raw game records: with placeholders for dynamic variables and no player-specific info.
+-- @function [parent=#Player] journal
+-- @param openmw.core#GameObject player
+-- @return #PlayerJournal
+-- @usage -- Get text of the 1st journal entry player made
+-- local entryText = types.Player.journal(player).journalTextEntries[1].text
+-- @usage -- Get the number of "my trade" conversation topic lines the player journal accumulated
+-- local num = #types.Player.journal(player).topics["my trade"].entries
+
+---
+-- A read-only list of player's accumulated journal (quest etc.) entries (@{#PlayerJournalTextEntry} elements), ordered from oldest entry to newest.
+-- Implements [iterables#list-iterable](iterables.html#list-iterable) of @{#PlayerJournalTextEntry}.
+-- @field [parent=#PlayerJournal] #list<#PlayerJournalTextEntry> journalTextEntries
+-- @usage -- The `firstQuestName` variable below is likely to be "a1_1_findspymaster" in vanilla MW
+-- local firstQuestName = types.Player.journal(player).journalTextEntries[1].questId
+-- @usage -- The number of journal entries accumulated in the player journal
+-- local num = #types.Player.journal(player).journalTextEntries
+-- @usage -- Print all journal entries accumulated in the player journal
+-- for idx, journalEntry in pairs(types.Player.journal(player).journalTextEntries) do
+--     print(idx, journalEntry.text)
+-- end
+
+---
+-- A read-only table of player's accumulated @{#PlayerJournalTopic}s, indexed by the topic name.
+-- Implements [iterables#Map](iterables.html#map-iterable) of @{#PlayerJournalTopic}.
+-- Topic name index doesn't have to be lowercase.
+-- @field [parent=#PlayerJournal] #map<#string, #PlayerJournalTopic> topics
+-- @usage local record = types.Player.journal(player).topics["my trade"]
+-- @usage local record = types.Player.journal(player).topics["Vivec"]
+
+---
+-- @type PlayerJournalTopic
+-- @field #string id Topic id. It's a lowercase version of name.
+-- @field #string name Topic name. Same as id, but with upper cases preserved.
+
+---
+-- A read-only list of player's accumulated conversation lines (@{#PlayerJournalTopicEntry}) for this topic.
+-- Implements [iterables#list-iterable](iterables.html#list-iterable) of #PlayerJournalTopicEntry.
+-- @field [parent=#PlayerJournalTopic] #list<#PlayerJournalTopicEntry> entries
+-- @usage -- First NPC topic line entry in the "Background" topic
+-- local firstBackgroundLine = types.Player.journal(player).topics["Background"].entries[1]
+-- @usage -- The number of topic entries accumulated in the player journal for "Vivec"
+-- local num = #types.Player.journal(player).topics["vivec"].entries
+-- @usage -- Print all conversation lines accumulated in the player journal for "Balmora"
+-- for idx, topicEntry in pairs(types.Player.journal(player).topics["balmora"].entries) do
+--     print(idx, topicEntry.text)
+-- end
+
+---
+-- @type PlayerJournalTopicEntry
+-- @field #string text Text of this topic line.
+-- @field #string actor Name of an NPC who is recorded in the player journal as an origin of this topic line.
+
+---
+-- Identifier for this topic line. Is unique only within the @{#PlayerJournalTopic} it belongs to.
+-- Has a counterpart in raw data game dialogue records at @{openmw_core#DialogueRecordInfo} held by @{openmw_core#Dialogue.topic}
+-- @field [parent=#PlayerJournalTopicEntry] #string id
+
+---
+-- @type PlayerJournalTextEntry
+-- @field #string text Text of this journal entry.
+-- @field #string questId Quest id this journal entry is associated with. Can be nil if there is no quest associated with this entry or if journal quest sorting functionality is not available in game.
+-- @field #number day Number of the day this journal entry was written at.
+-- @field #number month Number of the month this journal entry was written at.
+-- @field #number dayOfMonth Number of the day in the month this journal entry was written at.
+
+---
+-- Identifier for this journal entry line. Is unique only within the @{#PlayerJournalTextEntry} it belongs to.
+-- Has a counterpart in raw data game dialogue records at @{openmw_core#DialogueRecordInfo} held by @{openmw_core#Dialogue.journal}
+-- @field [parent=#PlayerJournalTextEntry] #string id
+
+---
 -- @type PlayerQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.

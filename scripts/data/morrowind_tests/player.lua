@@ -1,4 +1,5 @@
 local core = require('openmw.core')
+local calendar = require('openmw_aux.calendar')
 local input = require('openmw.input')
 local self = require('openmw.self')
 local testing = require('testing_util')
@@ -75,6 +76,49 @@ testing.registerLocalTest('Guard in Imperial Prison Ship should find path (#7241
                 matchers.closeToVector(util.vector3(90, -90, -104.83390045166015625), 1e-1),
             }))
         end
+    end)
+
+testing.registerLocalTest('Player quest status should update and its journal entries should be accessible',
+    function()
+        testing.expectEqual(#types.Player.journal(self).topics, 0, 'Fresh player has more journal topics than zero')
+        testing.expectEqual(#types.Player.journal(self).journalTextEntries, 0, 'Fresh player has more journal text entries than zero')
+        testing.expectEqual(types.Player.quests(self)["ms_fargothring"].stage, 0, "Player's not started quest has an unexpected stage")
+        types.Player.quests(self)["ms_fargothring"]:addJournalEntry(10)
+        coroutine.yield()
+        testing.expectEqual(types.Player.quests(self)["ms_fargothring"].stage, 10, "Unexpected quest stage number")
+        testing.expectEqual(types.Player.quests(self)["ms_fargothring"].finished, false, "Quest should not have been finished yet")
+        testing.expectEqual(#types.Player.journal(self).journalTextEntries, 1, 'Unexpected number of entries in the player journal')
+
+        local expectedJournalEntry = core.dialogue.journal.records["ms_fargothring"].infos[#core.dialogue.journal.records["ms_fargothring"].infos-1]
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[1].id,
+            expectedJournalEntry.id, 'Quest journal entries ids differ')
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[1].text,
+            expectedJournalEntry.text, 'Quest journal entries texts differ')
+
+        local dateWhenStageShouldHaveBeenUpdated = calendar.formatGameTime('*t')
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[1].dayOfMonth,
+            dateWhenStageShouldHaveBeenUpdated.day, 'Unexpected journal update day (of month)')
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[1].month,
+            dateWhenStageShouldHaveBeenUpdated.month, 'Unexpected journal update month')
+
+        types.Player.quests(self)["ms_fargothring"]:addJournalEntry(100)
+        types.Player.quests(self)["ms_fargothring"].finished = true
+        coroutine.yield()
+        testing.expectEqual(types.Player.quests(self)["ms_fargothring"].stage, 100, "Unexpected quest stage number")
+        testing.expectEqual(types.Player.quests(self)["ms_fargothring"].finished, true, "Quest should have been finished now")
+        testing.expectEqual(#types.Player.journal(self).journalTextEntries, 2, 'Unexpected number of entries in the player journal')
+        expectedJournalEntry = core.dialogue.journal.records["ms_fargothring"].infos[#core.dialogue.journal.records["ms_fargothring"].infos]
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[2].id,
+            expectedJournalEntry.id, 'Quest journal entries ids differ')
+        testing.expectEqual(
+            types.Player.journal(self).journalTextEntries[2].text,
+            expectedJournalEntry.text,
+            'Quest journal entries texts differ')
     end)
 
 return {
