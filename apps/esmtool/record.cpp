@@ -15,8 +15,7 @@ namespace
 
     void printAIPackage(const ESM::AIPackage& p)
     {
-        std::cout << "  AI Type: " << aiTypeLabel(p.mType) << " (" << std::format("0x{:08X}", std::uint32_t(p.mType))
-                  << ")" << std::endl;
+        std::cout << std::format("  AI Type: {} (0x{:08X})\n", aiTypeLabel(p.mType), std::uint32_t(p.mType));
         if (p.mType == ESM::AI_Wander)
         {
             std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
@@ -51,7 +50,7 @@ namespace
         }
         else
         {
-            std::cout << "    BadPackage: " << std::format("0x{:08X}", std::uint32_t(p.mType)) << std::endl;
+            std::cout << std::format("    BadPackage: 0x{:08X}\n", std::uint32_t(p.mType));
         }
 
         if (!p.mCellName.empty())
@@ -175,12 +174,10 @@ namespace
     {
         for (const ESM::Transport::Dest& dest : transport)
         {
-            std::cout << "  Destination Position: (" << std::format("{:12.3f}", dest.mPos.pos[0]) << ','
-                      << std::format("{:12.3f}", dest.mPos.pos[1]) << ',' << std::format("{:12.3f}", dest.mPos.pos[2])
-                      << ")\n";
-            std::cout << "  Destination Rotation: (" << std::format("{:9.6f}", dest.mPos.rot[0]) << ','
-                      << std::format("{:9.6f}", dest.mPos.rot[1]) << ',' << std::format("{:9.6f}", dest.mPos.rot[2])
-                      << ")\n";
+            std::cout << std::format("  Destination Position: ({:12.3f},{:12.3f},{:12.3f})\n", dest.mPos.pos[0],
+                dest.mPos.pos[1], dest.mPos.pos[2]);
+            std::cout << std::format("  Destination Rotation: ({:9.6f},{:9.6f},{:9.6f})\n", dest.mPos.rot[0],
+                dest.mPos.rot[1], dest.mPos.rot[2]);
             if (!dest.mCellName.empty())
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
@@ -582,7 +579,7 @@ namespace EsmTool
             std::cout << "  Water Level: " << mData.mWater << std::endl;
         }
         else
-            std::cout << "  Map Color: " << std::format("0x{:08X}", mData.mMapColor) << std::endl;
+            std::cout << std::format("  Map Color: 0x{:08X}\n", mData.mMapColor);
         std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -593,7 +590,7 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Playable: " << mData.mData.mIsPlayable << std::endl;
-        std::cout << "  AI Services: " << std::format("0x{:08X}", mData.mData.mServices) << std::endl;
+        std::cout << std::format("  AI Services: 0x{:08X}\n", mData.mData.mServices);
         for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
             std::cout << "  Attribute" << (i + 1) << ": " << attributeLabel(mData.mData.mAttribute[i]) << " ("
                       << mData.mData.mAttribute[i] << ")" << std::endl;
@@ -641,8 +638,7 @@ namespace EsmTool
         std::cout << "  Flags: " << containerFlags(mData.mFlags) << std::endl;
         std::cout << "  Weight: " << mData.mWeight << std::endl;
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << std::format("{:4d}", item.mCount) << " Item: " << item.mItem
-                      << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 
@@ -679,8 +675,7 @@ namespace EsmTool
         std::cout << "  Gold: " << mData.mData.mGold << std::endl;
 
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << std::format("{:4d}", item.mCount) << " Item: " << item.mItem
-                      << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
 
         for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
@@ -692,7 +687,7 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI Services:" << std::format("0x{:08X}", mData.mAiData.mServices) << std::endl;
+        std::cout << std::format("    AI Services:0x{:08X}\n", mData.mAiData.mServices);
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
             printAIPackage(package);
@@ -1067,8 +1062,7 @@ namespace EsmTool
         }
 
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << std::format("{:4d}", item.mCount) << " Item: " << item.mItem
-                      << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
 
         for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
@@ -1080,7 +1074,7 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI Services:" << std::format("0x{:08X}", mData.mAiData.mServices) << std::endl;
+        std::cout << std::format("    AI Services:0x{:08X}\n", mData.mAiData.mServices);
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
             printAIPackage(package);
