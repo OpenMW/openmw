@@ -31,7 +31,7 @@ namespace MWDialogue
 
         Topic(const ESM::RefId& topic);
 
-        virtual ~Topic();
+        virtual ~Topic() = default;
 
         virtual bool addEntry(const JournalEntry& entry);
         ///< Add entry
@@ -53,6 +53,10 @@ namespace MWDialogue
 
         TEntryIter end() const;
         ///< Iterator pointing past the end of the journal for this topic.
+
+        std::size_t size() const { return mEntries.size(); }
+
+        const Entry& operator[](std::size_t i) const { return mEntries[i]; }
     };
 }
 
