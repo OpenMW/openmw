@@ -104,14 +104,10 @@ namespace
 
     const MWDialogue::Topic& getTopicDataOrThrow(const ESM::RefId& topicId, const MWBase::Journal* journal)
     {
-        const MWBase::Journal::TTopicIter iterToFoundTopic = std::find_if(journal->topicBegin(), journal->topicEnd(),
-            [&topicId](const auto& topicKeyAndValue) { return topicKeyAndValue.first == topicId; });
-        if (iterToFoundTopic == journal->topicEnd())
-        {
-            throw std::runtime_error(
-                "Topic id: \"" + topicId.serializeText() + "\" expected to be present in player journal data");
-        }
-        return iterToFoundTopic->second;
+        const auto it = journal->getTopics().find(topicId);
+        if (it == journal->topicEnd())
+            throw std::runtime_error("Topic " + topicId.toDebugString() + " could not be found in the journal");
+        return it->second;
     }
 }
 
@@ -133,8 +129,8 @@ namespace MWLua
     {
         auto journalBindingsClass = lua.new_usertype<MWBase::Journal>("MWDialogue_Journal");
         journalBindingsClass[sol::meta_function::to_string] = [](const MWBase::Journal& store) {
-            const size_t numberOfTopics = std::distance(store.topicBegin(), store.topicEnd());
-            const size_t numberOfJournalEntries = std::distance(store.begin(), store.end());
+            const size_t numberOfTopics = store.getTopics().size();
+            const size_t numberOfJournalEntries = store.getEntries().size();
             return "{MWDialogue_Journal: " + std::to_string(numberOfTopics) + " topic entries, "
                 + std::to_string(numberOfJournalEntries) + " journal entries}";
         };
@@ -148,21 +144,19 @@ namespace MWLua
     {
         auto topicsBindingsClass = lua.new_usertype<MWLua::Topics>("MWDialogue_Journal_Topics");
         topicsBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::Topics& topicEntriesStore) {
-            const size_t numberOfTopics = std::distance(journal->topicBegin(), journal->topicEnd());
+            const size_t numberOfTopics = journal->getTopics().size();
             return "{MWDialogue_Journal_Topics: " + std::to_string(numberOfTopics) + " topics}";
         };
         topicsBindingsClass[sol::meta_function::index]
             = [journal](
                   const MWLua::Topics& topicEntriesStore, std::string_view givenTopicId) -> const MWDialogue::Topic* {
-            const MWBase::Journal::TTopicIter iterToFoundTopic
-                = std::find_if(journal->topicBegin(), journal->topicEnd(),
-                    [&givenTopicId](const auto& topicKeyAndValue) { return topicKeyAndValue.first == givenTopicId; });
-
-            return (iterToFoundTopic != journal->topicEnd()) ? &(iterToFoundTopic->second) : nullptr;
+            const auto it = journal->getTopics().find(ESM::RefId::deserializeText(givenTopicId));
+            if (it == journal->topicEnd())
+                return nullptr;
+            return &it->second;
         };
-        topicsBindingsClass[sol::meta_function::length] = [journal](const MWLua::Topics&) -> size_t {
-            return std::distance(journal->topicBegin(), journal->topicEnd());
-        };
+        topicsBindingsClass[sol::meta_function::length]
+            = [journal](const MWLua::Topics&) -> size_t { return journal->getTopics().size(); };
         topicsBindingsClass[sol::meta_function::pairs] = [journal](const MWLua::Topics&) {
             MWBase::Journal::TTopicIter iterator = journal->topicBegin();
             return sol::as_function(
@@ -196,28 +190,21 @@ namespace MWLua
             = lua.new_usertype<MWLua::TopicEntries>("MWDialogue_Journal_Topic_WrittenEntries");
         topicEntriesBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::TopicEntries& topicEntries) {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
-            const size_t numberOfTopics = std::distance(topic.begin(), topic.end());
             return "MWDialogue_Journal_Topic_WrittenEntries for \"" + std::string{ topic.getName() }
-            + "\": " + std::to_string(numberOfTopics) + " elements";
+            + "\": " + std::to_string(topic.size()) + " elements";
         };
         topicEntriesBindingsClass[sol::meta_function::length] = [journal](const MWLua::TopicEntries& topicEntries) {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
-            return std::distance(topic.begin(), topic.end());
+            return topic.size();
         };
         topicEntriesBindingsClass[sol::meta_function::index]
             = [journal](const MWLua::TopicEntries& topicEntries, size_t index) -> const MWDialogue::Entry* {
             const MWDialogue::Topic& topic = getTopicDataOrThrow(topicEntries.mTopicId, journal);
 
-            const size_t numberOfTopicEntries = std::distance(topic.begin(), topic.end());
-            if (index == 0 || index > numberOfTopicEntries)
-            {
+            if (index == 0 || index > topic.size())
                 return nullptr;
-            }
             index = LuaUtil::fromLuaIndex(index);
-
-            MWDialogue::Topic::TEntryIter iter{ topic.begin() };
-            std::advance(iter, index);
-            return &(*iter);
+            return &topic[index];
         };
         topicEntriesBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         topicEntriesBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -241,23 +228,17 @@ namespace MWLua
     {
         auto journalEntriesBindingsClass = lua.new_usertype<MWLua::JournalEntries>("MWDialogue_Journal_WrittenEntries");
         journalEntriesBindingsClass[sol::meta_function::to_string] = [journal](const MWLua::JournalEntries&) {
-            const size_t numberOfEntries = std::distance(journal->begin(), journal->end());
+            const size_t numberOfEntries = journal->getEntries().size();
             return "{MWDialogue_Journal_WrittenEntries: " + std::to_string(numberOfEntries) + " journal text entries}";
         };
         journalEntriesBindingsClass[sol::meta_function::length]
-            = [journal](const MWLua::JournalEntries&) { return std::distance(journal->begin(), journal->end()); };
+            = [journal](const MWLua::JournalEntries&) { return journal->getEntries().size(); };
         journalEntriesBindingsClass[sol::meta_function::index]
             = [journal](const MWLua::JournalEntries&, size_t index) -> const MWDialogue::StampedJournalEntry* {
-            const size_t numberOfEntries = std::distance(journal->begin(), journal->end());
-            if (index == 0 || index > numberOfEntries)
-            {
+            if (index == 0 || index > journal->getEntries().size())
                 return nullptr;
-            }
             index = LuaUtil::fromLuaIndex(index);
-
-            MWBase::Journal::TEntryIter iter{ journal->begin() };
-            std::advance(iter, index);
-            return &(*iter);
+            return &journal->getEntries()[index];
         };
         journalEntriesBindingsClass[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         journalEntriesBindingsClass[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();

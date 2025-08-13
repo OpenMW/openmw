@@ -55,6 +55,8 @@ namespace MWDialogue
         TEntryIter end() const override;
         ///< Iterator pointing past the end of the main journal.
 
+        const TEntryContainer& getEntries() const override { return mJournal; }
+
         TQuestIter questBegin() const override;
         ///< Iterator pointing to the first quest (sorted by topic ID)
 
@@ -68,6 +70,8 @@ namespace MWDialogue
 
         TTopicIter topicEnd() const override;
         ///< Iterator pointing past the last topic.
+
+        const TTopicContainer& getTopics() const override { return mTopics; }
 
         int countSavedGameRecords() const override;
 

@@ -47,7 +47,7 @@ namespace MWBase
 
         virtual void clear() = 0;
 
-        virtual ~Journal() {}
+        virtual ~Journal() = default;
 
         virtual MWDialogue::Quest& getOrStartQuest(const ESM::RefId& id) = 0;
         ///< Gets the quest requested. Creates it and inserts it in quests if it is not yet started.
@@ -79,6 +79,8 @@ namespace MWBase
         virtual TEntryIter end() const = 0;
         ///< Iterator pointing past the end of the main journal.
 
+        virtual const TEntryContainer& getEntries() const = 0;
+
         virtual TQuestIter questBegin() const = 0;
         ///< Iterator pointing to the first quest (sorted by topic ID)
 
@@ -92,6 +94,8 @@ namespace MWBase
 
         virtual TTopicIter topicEnd() const = 0;
         ///< Iterator pointing past the last topic.
+
+        virtual const TTopicContainer& getTopics() const = 0;
 
         virtual int countSavedGameRecords() const = 0;
 
