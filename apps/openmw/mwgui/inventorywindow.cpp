@@ -666,19 +666,18 @@ namespace MWGui
         if (excess > 0 && canStack)
             invStore.unequipItemQuantity(ptr, excess);
 
+        if (mDragAndDrop->mIsOnDragAndDrop && isFromDragAndDrop)
+        {
+            // Feature: Don't finish draganddrop if potion or ingredient was used
+            if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
+                mDragAndDrop->update();
+            else
+                mDragAndDrop->finish();
+        }
+
         if (isVisible())
         {
-            if (isFromDragAndDrop)
-            {
-                // Feature: Don't stop draganddrop if potion or ingredient was used
-                if (ptr.getType() != ESM::Potion::sRecordId && ptr.getType() != ESM::Ingredient::sRecordId)
-                    mDragAndDrop->finish();
-                else
-                    mDragAndDrop->update();
-            }
-
             mItemView->update();
-
             notifyContentChanged();
         }
         // else: will be updated in open()
