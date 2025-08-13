@@ -14,7 +14,7 @@ PhysicsProfiler: "Profilowanie fizyki"
 
 AskLoadLastSave: "Ostatni zapis to '%s'. Czy chcesz go wczytać?"
 BuildingNavigationMesh: "Tworzenie siatki nawigacyjnej"
-InitializingData: "Inicjowanie danych..."
+InitializingData: "Inicjalizacja..."
 LoadingExterior: "Wczytywanie obszaru zewnętrznego"
 LoadingFailed: "Nie udało się wczytać zapisu gry"
 LoadingInterior: "Wczytywanie obszaru wewnętrznego"
@@ -26,7 +26,7 @@ LoadingRequiresOldVersionError: |-
     Ten zapis gry został utworzony w starszej wersji OpenMW w formacie, który nie jest już obsługiwany.
     Załaduj i zapisz ten plik przy użyciu wersji {version}, aby go zaktualizować.
 NewGameConfirmation: "Czy chcesz rozpocząć nową grę i porzucić obecną?"
-QuitGameConfirmation: "Zakończyć grę?"
+QuitGameConfirmation: "Wyjść z gry?"
 SaveGameDenied: "Gra nie może być teraz zapisana."
 SavingInProgress: "Zapisywanie..."
 ScreenshotFailed: "Nie udało się zapisać zrzutu ekranu"
@@ -78,10 +78,10 @@ CameraSensitivity: "Czułość kamery"
 CameraZoomIn: "Przybliż kamerę"
 CameraZoomOut: "Oddal kamerę"
 ChangeRequiresRestart: "Ta zmiana wymaga ponownego uruchomienia gry."
-ClassicFalloff: "Klasyczne zanikanie światła"
+ClassicFalloff: "Klasyczne zanikanie"
 ClassicFalloffTooltip: |-
     Domyślnie: wyłączone
-    Używa tradycyjnego wzoru tłumienia światła punktowego, który nie wygasa całkowicie.
+    Używa tradycyjnego wzoru tłumienia światła punktowego, który nie uwzględnia całkowitego wygaszania.
 
     Taka metoda jest fizycznie poprawna, ale może powodować artefakty świetlne, ponieważ światła nie obejmują całej sceny.
     Wczesne wygaszanie pomaga zminimalizować te artefakty kosztem ciemniejszej sceny.
@@ -112,14 +112,14 @@ ForcePerPixelLightingTooltip: |-
 
     Dotyczy tylko obiektów renderowanych z użyciem shaderów.
 
-    Może powodować różnice wizualne względem oryginalnego silnika Morrowinda.
+    Może powodować różnice wizualne względem oryginalnego silnika Morrowind.
 
     Shadery trawy i efekty cząsteczkowe ignorują to ustawienie.
 FrameRateHint: "Podpowiedź: naciśnij F3,\naby zobaczyć liczbę klatek na sekundę."
 GammaCorrection: "Korekcja gamma"
 GammaDark: "Ciemno"
 GammaLight: "Jasno"
-GmstOverridesL10n: "Teksty z plików ESM mają priorytet"
+GmstOverridesL10n: "Teksty z plików ESM mają pierwszeństwo"
 InvertXAxis: "Odwróć oś X"
 InvertYAxis: "Odwróć oś Y"
 Language: "Język"
@@ -144,7 +144,7 @@ LightsMinimumInteriorBrightness: "Minimalna jasność wnętrz"
 LightsMinimumInteriorBrightnessTooltip: "Domyślnie: 0.08\nMinimalna jasność w pomieszczeniach.\n\nZwiększ to, jeśli wnętrza są zbyt ciemne.\n\nNie działa, gdy używana jest klasyczna metoda zanikania."
 MatchSunlightToSun: "Dopasuj światło słoneczne do pozycji słońca"
 MatchSunlightToSunTooltip: |-
-    W Morrowindzie pozycja słońca nie pokrywa się z kierunkiem jego światła z niejasnych przyczyn.
+    W orginalnym silniku Morrowind pozycja słońca nie pokrywa się z kierunkiem jego światła z niejasnych przyczyn.
     Zachowujemy to dla kompatybilności.
 
     Ta opcja sprawia, że źródło światła słonecznego zgadza się z faktyczną pozycją słońca.
@@ -153,12 +153,12 @@ MaxLightsTooltip: "Domyślnie: 8\nMaksymalna liczba świateł na obiekt.\n\nNisk
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"
 MouseAndKeyboard: "Mysz i klawiatura"
-PostProcessing: "Postprocessing"
-PostProcessingIsNotEnabled: "Postprocessing nie jest włączony"
-PostProcessingTooltip: "Dostosowywany przez HUD Postprocessingu, patrz przypisania klawiszy."
+PostProcessing: "Post-processing"
+PostProcessingIsNotEnabled: "Post-processing nie jest włączony"
+PostProcessingTooltip: "Dostosowywany przez HUD Post-processingu, patrz przypisania klawiszy."
 Preferences: "Preferencje"
 PrimaryLanguage: "Język główny"
-PrimaryLanguageTooltip: "Pliki tłumaczeń dla tego języka mają najwyższy priorytet."
+PrimaryLanguageTooltip: "Pliki tłumaczeń dla tego języka mają pierwszeństwo."
 QualityHigh: "Wysoka"
 QualityLow: "Niska"
 QualityMedium: "Średnia"
@@ -178,7 +178,7 @@ Refraction: "Załamanie światła"
 ResetControls: "Przywróć sterowanie"
 Screenshot: "Zrzut ekranu"
 Scripts: "Skrypty"
-ScriptsDisabled: "Załaduj grę, aby uzyskać dostęp do ustawień skryptów."
+ScriptsDisabled: "Wczytaj grę, aby uzyskać dostęp do ustawień skryptów."
 SecondaryLanguage: "Język pomocniczy"
 SecondaryLanguageTooltip: "Używany, jeśli brakuje linii w plikach języka głównego."
 SensitivityHigh: "Wysoka"
@@ -186,14 +186,14 @@ SensitivityLow: "Niska"
 SettingsWindow: "Opcje"
 Subtitles: "Napisy"
 SunlightScattering: "Rozpraszanie światła słonecznego"
-TestingExteriorCells: "Testowanie komórek zewnętrznych"
-TestingInteriorCells: "Testowanie komórek wewnętrznych"
+TestingExteriorCells: "Testowanie obszarów zewnętrznych"
+TestingInteriorCells: "Testowanie obszarów wewnętrznych"
 TextureFiltering: "Filtrowanie tekstur"
-TextureFilteringBilinear: "Bilinearne"
-TextureFilteringNearest: "Najbliższe"
+TextureFilteringBilinear: "Dwuliniowe"
+TextureFilteringNearest: "\"Najbliższy sąsiad\""
 TextureFilteringDisabled: "Brak"
 TextureFilteringOther: "Inne"
-TextureFilteringTrilinear: "Trilinearne"
+TextureFilteringTrilinear: "Trójliniowe"
 ToggleHUD: "Przełącz HUD"
 TogglePostProcessorHUD: "Przełącz HUD postprocessingu"
 TransparencyFull: "Pełna"
@@ -216,7 +216,7 @@ WobblyShores: "Falujące brzegi"
 
 # Controller button names
 
-EnchantType: "Typ rzucania"
+EnchantType: "Rodzaj zaklęcia"
 InventorySelect: "Włóż"
 JournalQuests: "Zadania"
 JournalShowAll: "Pokaż wszystkie"

@@ -38,7 +38,7 @@ deferredPreviewRotationDescription: |
     Jeśli włączone, postać płynnie obraca się w kierunku kamery po wyjściu z trybu podglądu lub kamery swobodnej.
     Jeśli wyłączone, obraca się kamera zamiast postaci.
 
-ignoreNC: "Ignoruj flagę "Brak kolizji""
+ignoreNC: "Ignoruj flagę \"Brak kolizji\""
 ignoreNCDescription: >
     Zapobiega przenikaniu kamery przez obiekty, które mają w modelu NIF ustawioną flagę NC (Brak kolizji).
 
