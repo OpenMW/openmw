@@ -16,9 +16,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -400,11 +398,9 @@ namespace MWGui
                 if (*it == item)
                     break;
             }
-            if (it == store.end())
-                item = nullptr;
 
-            // check the quickkey item is available
-            if (item.isEmpty() || item.getCellRef().getCount() < 1)
+            // Is the quickkey item not in the inventory?
+            if (it == store.end())
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
                 return;
@@ -629,11 +625,10 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
-        MWWorld::CellStore& draftCell = MWBase::Environment::get().getWorldModel()->getDraftCell();
 
-        auto assignItem = [this](auto type, MWWorld::Ptr item) {
+        auto assign = [this](auto type, MWWorld::Ptr item) {
             if (type == ESM::QuickKeys::Type::Item)
-                onAssignItem(item);
+                assignItem(item);
             else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
                 onAssignMagicItem(item);
         };
@@ -666,16 +661,14 @@ namespace MWGui
                             // Fallback to a temporary object for UI display purposes
                             if (MWBase::Environment::get().getESMStore()->find(quickKey.mId) != 0)
                             {
-                                MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), quickKey.mId);
-                                item = mref.getPtr().getClass().copyToCell(mref.getPtr(), draftCell, 1);
-                                assignItem(quickKey.mType, item);
-                                MWBase::Environment::get().getWorld()->disable(item);
-                                MWBase::Environment::get().getWorld()->deleteObject(item);
+                                // Tie temporary item lifetime to this window
+                                mTemp.emplace_back(*MWBase::Environment::get().getESMStore(), quickKey.mId, 0);
+                                assign(quickKey.mType, mTemp.back().getPtr());
                             }
                         }
                     }
                     else
-                        assignItem(quickKey.mType, item);
+                        assign(quickKey.mType, item);
 
                     break;
                 }

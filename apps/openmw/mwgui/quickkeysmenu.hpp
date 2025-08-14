@@ -5,6 +5,8 @@
 
 #include "components/esm3/quickkeys.hpp"
 
+#include "../mwworld/manualref.hpp"
+
 #include "itemselection.hpp"
 #include "spellmodel.hpp"
 #include "windowbase.hpp"
@@ -57,6 +59,7 @@ namespace MWGui
         };
 
         std::vector<keyData> mKey;
+        std::vector<MWWorld::ManualRef> mTemp;
         keyData* mSelected;
         keyData* mActivated;
 
