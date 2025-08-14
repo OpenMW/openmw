@@ -75,6 +75,8 @@ namespace MWGui
         {
             unassign(&mKey[i]);
         }
+
+        mTemp.clear();
     }
 
     inline void QuickKeysMenu::validate(int index)
