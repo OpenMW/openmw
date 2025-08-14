@@ -54,7 +54,7 @@ namespace MWGui
         MyGUI::ScrollView* mScrollView;
 
         int mItemCount = 0;
-        int mRows;
+        int mRows = 1;
         int mControllerFocus = 0;
         bool mControllerActiveWindow;
         void updateControllerFocus(int prevFocus, int newFocus);

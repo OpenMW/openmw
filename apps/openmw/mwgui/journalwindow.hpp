@@ -25,16 +25,15 @@ namespace MWGui
             std::shared_ptr<JournalViewModel> model, bool questList, ToUTF8::FromType encoding);
 
         /// destroy this instance of the JournalWindow implementation
-        virtual ~JournalWindow() {}
+        virtual ~JournalWindow() = default;
 
         /// show/hide the journal window
         void setVisible(bool newValue) override = 0;
 
         std::string_view getWindowIdForLua() const override { return "Journal"; }
 
-        size_t mIndexRowCount;
-
         std::vector<MyGUI::Button*> mButtons;
+        size_t mIndexRowCount = 1;
         size_t mSelectedQuest = 0;
         size_t mSelectedIndex = 0;
         void moveSelectedIndex(int offset);
