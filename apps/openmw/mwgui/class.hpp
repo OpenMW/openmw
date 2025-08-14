@@ -257,7 +257,7 @@ namespace MWGui
 
     private:
         ESM::RefId mSkillId;
-        std::array<size_t, 3> mNumSkillsPerSpecialization;
+        std::array<size_t, 3> mNumSkillsPerSpecialization{};
 
         void selectNextColumn(int direction);
     };
@@ -353,7 +353,7 @@ namespace MWGui
         Widgets::MWSkillPtr mAffectedSkill;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        size_t mControllerFocus = 0;
+        size_t mControllerFocus = 2;
     };
 }
 #endif

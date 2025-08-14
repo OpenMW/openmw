@@ -383,7 +383,6 @@ namespace MWGui
 
     InfoBoxDialog::InfoBoxDialog()
         : WindowModal("openmw_infobox.layout")
-        , mControllerFocus(0)
     {
         getWidget(mTextBox, "TextBox");
         getWidget(mText, "Text");
@@ -525,7 +524,6 @@ namespace MWGui
         : WindowModal("openmw_chargen_create_class.layout")
         , mAffectedAttribute(nullptr)
         , mAffectedSkill(nullptr)
-        , mControllerFocus(2)
     {
         // Centre dialog
         center();
@@ -962,7 +960,6 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerFocus = 0;
             if (mAttributeButtons.size() > 0)
                 mAttributeButtons[0]->setStateSelected(true);
 
@@ -1021,9 +1018,7 @@ namespace MWGui
 
     SelectSkillDialog::SelectSkillDialog()
         : WindowModal("openmw_chargen_select_skill.layout")
-        , mControllerFocus(0)
         , mSkillId(ESM::Skill::Block)
-        , mNumSkillsPerSpecialization{}
     {
         // Centre dialog
         center();
