@@ -667,6 +667,9 @@ namespace MWGui
                                 mTemp.emplace_back(*MWBase::Environment::get().getESMStore(), quickKey.mId, 0);
                                 assign(quickKey.mType, mTemp.back().getPtr());
                             }
+                            else
+                                Log(Debug::Warning) << "Failed to load quick key " << (i + 1)
+                                                    << ": could not find object " << quickKey.mId;
                         }
                     }
                     else
