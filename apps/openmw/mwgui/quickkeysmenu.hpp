@@ -75,7 +75,7 @@ namespace MWGui
         void assignItem(MWWorld::Ptr item);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        size_t mControllerFocus;
+        size_t mControllerFocus = 0;
     };
 
     class QuickKeysMenuAssign : public WindowModal
@@ -93,7 +93,7 @@ namespace MWGui
         QuickKeysMenu* mParent;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        int mControllerFocus = 0;
     };
 
     class MagicSelectionDialog : public WindowModal
@@ -114,7 +114,7 @@ namespace MWGui
         void onModelIndexSelected(SpellModel::ModelIndex index);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        int mControllerFocus = 0;
     };
 }
 

@@ -116,7 +116,7 @@ namespace MWGui
         int mButtonPressed;
         size_t mDefaultFocus;
         bool mImmediate;
-        size_t mControllerFocus;
+        size_t mControllerFocus = 0;
     };
 
 }

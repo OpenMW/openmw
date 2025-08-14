@@ -225,7 +225,7 @@ namespace MWGui
         MyGUI::Button* mDeleteButton;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus;
+        int mControllerFocus = 0;
     };
 
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop

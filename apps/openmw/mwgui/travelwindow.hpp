@@ -42,7 +42,7 @@ namespace MWGui
 
     private:
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        size_t mControllerFocus;
+        size_t mControllerFocus = 0;
     };
 }
 

@@ -94,7 +94,7 @@ namespace MWGui
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         void updateControllerFocus(int prevFocus, int newFocus);
-        int mControllerFocus;
+        int mControllerFocus = 0;
         std::vector<MyGUI::TextBox*> mButtons;
     };
 

@@ -511,7 +511,7 @@ namespace MWGui
         std::vector<GuiMode> mGuiModes;
         // The active window for controller mode for each GUI mode.
         std::map<GuiMode, int> mActiveControllerWindows;
-        bool mControllerTooltip;
+        bool mControllerTooltip = false;
 
         void reapplyActiveControllerWindow();
 
