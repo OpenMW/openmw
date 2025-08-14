@@ -353,7 +353,7 @@ namespace MWInput
             }
 
             MWGui::WindowBase* topWin = winMgr->getActiveControllerWindow();
-            if (topWin)
+            if (topWin && topWin->isVisible())
             {
                 // Update cursor state
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
