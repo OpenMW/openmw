@@ -1172,13 +1172,13 @@
 -- @type RegionRecord
 -- @field #string id Region ID
 -- @field #string name Region display name
--- @field openmw.util#Color mapColor Map color for this region.
+-- @field openmw.util#Color mapColor Editor map color for this region.
 -- @field #string sleepList A leveled creature list used when sleeping outdoors in this region
 -- @field #list<#RegionSoundRef> sounds A read-only list of ambient sound references for this region.
 -- Each reference includes a chance and a resolved link to the full sound record.
--- @field #table weatherProbabilities A table mapping weather ids to their probability (0–100), should sum to 100.
+-- @field #table weatherProbabilities A table mapping @{#WeatherRecord.recordId}s to their probability (0–100), should sum to 100.
 -- Valid weather ids include:
---   `"clear"`, `"cloudy"`, `"foggy"`, `"overcast"`, `"rain"`, `"thunder"`, `"ash"`, `"blight"`, `"snow"`, `"blizzard"`
+--   `"clear"`, `"cloudy"`, `"foggy"`, `"overcast"`, `"rain"`, `"thunderstorm"`, `"ashstorm"`, `"blight"`, `"snow"`, `"blizzard"`
 -- @usage print(region.weatherProbabilities["rain"])
 
 ---

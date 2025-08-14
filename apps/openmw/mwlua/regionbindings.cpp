@@ -55,7 +55,7 @@ namespace MWLua
                 const MWWorld::Weather* weather = MWBase::Environment::get().getWorld()->getWeather(i);
                 res[weather->mId.serializeText()] = rec.mData.mProbabilities[i];
             }
-            return res;
+            return LuaUtil::makeReadOnly(res);
         });
         regionT["sounds"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
