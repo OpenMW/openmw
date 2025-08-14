@@ -106,7 +106,7 @@ namespace MWGui
             newSpell.mSelected = (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == spell->mId);
             newSpell.mActive = true;
             newSpell.mCount = 1;
-            mSpells.push_back(newSpell);
+            mSpells.push_back(std::move(newSpell));
         }
 
         MWWorld::InventoryStore& invStore = mActor.getClass().getInventoryStore(mActor);

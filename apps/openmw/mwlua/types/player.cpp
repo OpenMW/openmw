@@ -218,10 +218,10 @@ namespace MWLua
         };
         topicEntryBindingsClass["id"] = sol::readonly_property(
             [](const MWDialogue::Entry& topicEntry) { return topicEntry.mInfoId.serializeText(); });
-        topicEntryBindingsClass["text"]
-            = sol::readonly_property([](const MWDialogue::Entry& topicEntry) { return topicEntry.mText; });
-        topicEntryBindingsClass["actor"]
-            = sol::readonly_property([](const MWDialogue::Entry& topicEntry) { return topicEntry.mActorName; });
+        topicEntryBindingsClass["text"] = sol::readonly_property(
+            [](const MWDialogue::Entry& topicEntry) -> std::string_view { return topicEntry.mText; });
+        topicEntryBindingsClass["actor"] = sol::readonly_property(
+            [](const MWDialogue::Entry& topicEntry) -> std::string_view { return topicEntry.mActorName; });
     }
 
     void addJournalClassJournalEntriesListBindings(sol::state_view& lua, const MWBase::Journal* journal)
@@ -255,7 +255,7 @@ namespace MWLua
         journalEntryBindingsClass["id"] = sol::readonly_property(
             [](const MWDialogue::StampedJournalEntry& journalEntry) { return journalEntry.mInfoId.serializeText(); });
         journalEntryBindingsClass["text"] = sol::readonly_property(
-            [](const MWDialogue::StampedJournalEntry& journalEntry) { return journalEntry.mText; });
+            [](const MWDialogue::StampedJournalEntry& journalEntry) -> std::string_view { return journalEntry.mText; });
         journalEntryBindingsClass["questId"] = sol::readonly_property(
             [](const MWDialogue::StampedJournalEntry& journalEntry) { return journalEntry.mTopic.serializeText(); });
         journalEntryBindingsClass["day"] = sol::readonly_property(
