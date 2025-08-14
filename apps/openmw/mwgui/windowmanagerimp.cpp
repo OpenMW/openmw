@@ -891,6 +891,9 @@ namespace MWGui
         if (!mCurrentModals.empty())
             return mCurrentModals.back();
 
+        if (mWindows.empty())
+            return nullptr;
+
         if (isSettingsWindowVisible())
             return mSettingsWindow;
 
@@ -2648,6 +2651,9 @@ namespace MWGui
     void WindowManager::updateControllerButtonsOverlay()
     {
         if (!Settings::gui().mControllerMenus || !mControllerButtonsOverlay)
+            return;
+
+        if (mWindows.empty())
             return;
 
         WindowBase* topWin = getActiveControllerWindow();
