@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>Import Add-on and Plugin Selection</source>
-        <translation>Importowanie dodatków i wtyczek</translation>
+        <translation>Importuj dodatkki i wtyczki</translation>
     </message>
     <message>
         <source>Import Bitmap Fonts Setup From Morrowind.ini</source>
@@ -113,7 +113,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Please wait while Morrowind is installed on your computer.</source>
-        <translation>Proszę poczekać, aż Morrowind zostanie zainstalowana na komputerze.</translation>
+        <translation>Proszę poczekać, aż Morrowind zostanie zainstalowany na komputerze.</translation>
     </message>
 </context>
 <context>
@@ -132,7 +132,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Morrowind will be installed to the following location. </source>
-        <translation>Morrowind zostanie zainstalowane do następującej lokalizacji. </translation>
+        <translation>Morrowind zostanie zainstalowany do następującej lokalizacji. </translation>
     </message>
     <message>
         <source>Browse...</source>
@@ -216,7 +216,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <name>QObject</name>
     <message>
         <source>&lt;br&gt;&lt;b&gt;Could not find Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;The Wizard needs to update settings in this file.&lt;br&gt;&lt;br&gt;Press &quot;Browse...&quot; to specify the location manually.&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Nie udało się znaleźć Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;Kreator potrzebuje zaktualizować ustawienia w tym pliku.&lt;br&gt;&lt;br&gt;Naciśnij przycisk „Przeglądaj...”, aby ręcznie określić lokalizację.&lt;br&gt;</translation>
+        <translation>&lt;br&gt;&lt;b&gt;Nie udało się znaleźć Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;Kreator potrzebuje zaktualizować ustawienia w tym pliku.&lt;br&gt;&lt;br&gt;Naciśnij przycisk &quot;Przeglądaj...&quot;, aby ręcznie określić lokalizację.&lt;br&gt;</translation>
     </message>
     <message>
         <source>B&amp;rowse...</source>
@@ -228,7 +228,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;b&gt;Morrowind.bsa&lt;/b&gt; is missing!&lt;br&gt;Make sure your Morrowind installation is complete.</source>
-        <translation>Brakuje &lt;b&gt;Morrowind.bsa!&lt;/b&gt;&lt;br&gt;Upewnij się, że instalacja Morrowind została zakończona.</translation>
+        <translation>Brakuje &lt;b&gt;Morrowind.bsa&lt;/b&gt;!&lt;br&gt;Upewnij się, że instalacja Morrowind została zakończona.</translation>
     </message>
     <message>
         <source>Most recent Morrowind not detected</source>
@@ -350,7 +350,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <source>%1 Installation</source>
         <translatorcomment>kinda didnt know how to translate it so I translated it literally
 -Igilq</translatorcomment>
-        <translation>%1 Instalacja</translation>
+        <translation>%1 - Instalacja</translation>
     </message>
     <message>
         <source>Select %1 installation media</source>
@@ -378,7 +378,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Installation completed successfully!</source>
-        <translation>Instalacja ukończyła się pomyślnie!</translation>
+        <translation>Instalacja zakończyła się pomyślnie!</translation>
     </message>
     <message>
         <source>Installation failed!</source>
@@ -491,7 +491,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Are you sure you want to exit the Wizard?</source>
-        <translation>Czy jesteś pewny że chcesz opuścić kreator?</translation>
+        <translation>Czy na pewno chcesz opuścić kreator?</translation>
     </message>
     <message>
         <source>Error creating OpenMW configuration directory</source>
@@ -499,7 +499,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not create %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Nie można utworzyć %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upewnij się, że masz odpowiednie uprawnienia, a następnie spróbuj ponownie</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Nie można utworzyć %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upewnij się, że masz odpowiednie uprawnienia, a następnie spróbuj ponownie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Error writing OpenMW configuration file</source>

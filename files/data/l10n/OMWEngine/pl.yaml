@@ -137,7 +137,7 @@ LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasię
 LightsLightingMethodTooltip: "Ustawia wewnętrzne przetwarzanie źródeł światła.\n\n
     \"Klasyczna\" zawsze używa 8 świateł na obiekt. Najbardziej przypomina oryginalne oświetlenie Morrowinda.\n\n
     \"Shadery (kompatybilne)\" usuwa limit 8 świateł. Obsługuje również oświetlenie trawy. Zalecane dla starszego sprzętu.\n\n
-    \"Shadery\" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności.
+    \"Shadery\" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności."
 LightsMaximumDistance: "Maksymalny zasięg światła"
 LightsMaximumDistanceTooltip: "Domyślnie: 8192\nMaksymalna odległość wyświetlania świateł (w jednostkach).\n\n0 = brak ograniczenia."
 LightsMinimumInteriorBrightness: "Minimalna jasność wnętrz"
@@ -166,7 +166,7 @@ RainRippleDetail: "Szczegółowość kółek deszczu"
 RainRippleDetailDense: "Gęste"
 RainRippleDetailSimple: "Proste"
 RainRippleDetailSparse: "Rzadkie"
-RebindAction: "Naciśnij klawisz lub przycisk, aby przypisać kontrolę."
+RebindAction: "Naciśnij klawisz lub przycisk, który ma zostać przypisany do tej funkcji."
 ReflectionShaderDetail: "Szczegółowość odbić"
 ReflectionShaderDetailActors: "Postacie"
 ReflectionShaderDetailGroundcover: "Trawa"

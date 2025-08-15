@@ -9,7 +9,7 @@ unarmedCreatureAttacksDamageArmorDescription: |
 
 redistributeShieldHitsWhenNotWearingShield: "Rozdziel trafienia w tarczę, gdy tarcza nie jest założona"
 redistributeShieldHitsWhenNotWearingShieldDescription: |
-    Odpowiednik „Poprawki trafień w tarczę” z Morrowind Code Patch. Rozdziela trafienia w slot pancerza tarczy na lewy naramiennik lub napierśnik, gdy tarcza nie jest założona.
+    Odpowiednik "Poprawki trafień w tarczę" z Morrowind Code Patch. Rozdziela trafienia w slot pancerza tarczy na lewy naramiennik lub napierśnik, gdy tarcza nie jest założona.
     
 spawnBloodEffectsOnPlayer: "Efekty krwi na postaci gracza"
 spawnBloodEffectsOnPlayerDescription: |

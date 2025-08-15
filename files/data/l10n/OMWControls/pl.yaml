@@ -56,10 +56,10 @@ Sneak_description: "Przytrzymaj, aby się skradać (jeśli 'Przełącz skradanie
 ToggleSneak_name: "Przełącz skradanie"
 ToggleSneak_description: "Przełącza skradanie (jeśli opcja 'Przełącz skradanie' jest włączona)."
 
-ToggleWeapon_name: "Gotuj broń"
+ToggleWeapon_name: "Przygotuj broń"
 ToggleWeapon_description: "Wejdź lub wyjdź z pozycji bojowej."
 
-ToggleSpell_name: "Gotuj magię"
+ToggleSpell_name: "Przygotuj magię"
 ToggleSpell_description: "Wejdź lub wyjdź z pozycji rzucania zaklęć."
 
 Inventory_name: "Ekwipunek"
@@ -68,8 +68,8 @@ Inventory_description: "Otwiera ekwipunek."
 Journal_name: "Dziennik"
 Journal_description: "Otwiera dziennik."
 
-QuickKeysMenu_name: "Szybkie menu"
-QuickKeysMenu_description: "Otwiera menu szybkich klawiszy."
+QuickKeysMenu_name: "Menu skrótów"
+QuickKeysMenu_description: "Otwiera menu skrótów."
 
 SmoothMoveForward_name: "Płynny ruch do przodu"
 SmoothMoveForward_description: "Ruch do przodu z płynnym przejściem między chodzeniem a bieganiem."

@@ -4,4 +4,4 @@ settingsPageDescription: "Ustawienia muzyki OpenMW."
 musicSettings: "Konfiguracja muzyki"
 
 CombatMusicEnabled: "Odtwórz muzykę bojową"
-CombatMusicEnabledDescription: "Jeśli ta opcja jest włączona, gra przełącza się na muzykę bojową, jeśli w walce biorą udział aktorzy."
+CombatMusicEnabledDescription: "Jeśli ta opcja jest włączona, gra przełącza się na muzykę bojową podczas walki."

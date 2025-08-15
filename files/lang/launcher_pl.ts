@@ -81,7 +81,7 @@
     </message>
     <message>
         <source>Generate navigation mesh cache for all content. Will be used by the engine to make cell loading faster.</source>
-        <translation>Wygeneruj pamięć podręczną siatki nawigacyjnej dla całej zawartości. Zostanie użyta przez silnik, aby przyspieszyć ładowanie komórek.</translation>
+        <translation>Wygeneruj pamięć podręczną siatki nawigacyjnej dla całej zawartości. Zostanie użyta przez silnik, aby przyspieszyć ładowanie obszarów gry.</translation>
     </message>
     <message>
         <source>Update</source>
@@ -172,15 +172,15 @@
     </message>
     <message>
         <source> × </source>
-        <translation> x </translation>
+        <translation> × </translation>
     </message>
     <message>
         <source>Custom:</source>
-        <translation>Niestandardowe:</translation>
+        <translation>Niestandardowa:</translation>
     </message>
     <message>
         <source>Standard:</source>
-        <translation>Standardowe:</translation>
+        <translation>Standardowa:</translation>
     </message>
     <message>
         <source>0</source>
@@ -204,23 +204,23 @@
     </message>
     <message>
         <source>Framerate Limit</source>
-        <translation>Limit Liczby Klatek Na Sekundę</translation>
+        <translation>Limit liczby klatek na sekundę</translation>
     </message>
     <message>
         <source>Window Border</source>
-        <translation>Obramowanie Okna</translation>
+        <translation>Obramowanie okna</translation>
     </message>
     <message>
         <source>Disabled</source>
-        <translation>Wyłączone</translation>
+        <translation>Wyłączona</translation>
     </message>
     <message>
         <source>Enabled</source>
-        <translation>Włączone</translation>
+        <translation>Włączona</translation>
     </message>
     <message>
         <source>Adaptive</source>
-        <translation>Adaptacyjne</translation>
+        <translation>Adaptacyjna</translation>
     </message>
     <message>
         <source>Fullscreen</source>
@@ -228,7 +228,7 @@
     </message>
     <message>
         <source>Windowed Fullscreen</source>
-        <translation>Okno Pełnoekranowe</translation>
+        <translation>Okno pełnoekranowe</translation>
     </message>
     <message>
         <source>Windowed</source>
@@ -561,7 +561,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Error writing Launcher configuration file</source>
-        <translation>Błąd zapisu pliku konfiguracyjnego Launchera</translation>
+        <translation>Błąd zapisu pliku konfiguracyjnego programu uruchamiącego</translation>
     </message>
     <message>
         <source>No game file selected</source>
@@ -654,7 +654,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make Damage Fatigue magic effect uncapped like Drain Fatigue effect.&lt;/p&gt;&lt;p&gt;This means that unlike Morrowind you will be able to knock down actors using this effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że efekt magiczny Obniżenie Kondycji nie ma limitu, tak jak Osłabienie Kondycji.&lt;/p&gt;&lt;p&gt;Oznacza to, że w przeciwieństwie do Morrowinda będziesz mógł powalać postacie za pomocą tego efektu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że efekt magiczny Obniżenie Kondycji nie ma limitu, tak jak Osłabienie Kondycji.&lt;/p&gt;&lt;p&gt;Oznacza to, że w przeciwieństwie do orginalnej gry będziesz mógł powalać postacie za pomocą tego efektu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Uncapped Damage Fatigue</source>
@@ -686,7 +686,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stops combat with NPCs affected by Calm spells every frame -- like in Morrowind without the MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zatrzymuje walkę z NPC pod wpływem zaklęć Uspokojenia w każdej klatce — tak jak w Morrowind bez MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zatrzymuje walkę z NPC pod wpływem zaklęć Uspokojenia podczas ka każdej klatce -- tak jak w Morrowind bez MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Classic Calm Spells Behavior</source>
@@ -1081,7 +1081,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If true, use paging and LOD algorithms to display the entire terrain. If false, only display terrain of the loaded cells.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone, używaj stronicowania i algorytmów LOD do wyświetlania całego terenu. Jeśli wyłączone, wyświetlany jest tylko teren załadowanych komórek.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone, używaj stronicowania i algorytmów LOD do wyświetlania całego terenu. Jeśli wyłączone, wyświetlany jest tylko teren załadowanych obszarów gry.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Distant Land</source>
@@ -1089,7 +1089,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use object paging for active cells grid.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Używaj stronicowania obiektów dla siatki aktywnych komórek.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Używaj stronicowania obiektów dla siatki aktywnych obszarów gry.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Active Grid Object Paging</source>

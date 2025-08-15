@@ -77,7 +77,7 @@
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not start %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An error occurred while starting %1.&lt;/p&gt;&lt;p&gt;Press &quot;Show Details...&quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Nie można uruchomić %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Aby uzyskać więcej informacji, naciśnij przycisk „Pokaż szczegóły...”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Nie można uruchomić %1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Aby uzyskać więcej informacji, naciśnij przycisk &quot;Pokaż szczegóły...&quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Error running executable</source>
@@ -85,14 +85,14 @@
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Executable %1 returned an error&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An error occurred while running %1.&lt;/p&gt;&lt;p&gt;Press &quot;Show Details...&quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Plik wykonywalny %1 zwrócił błąd&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Naciśnij przycisk „Pokaż szczegóły...”, aby uzyskać więcej informacji.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Plik wykonywalny %1 zwrócił błąd&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Naciśnij przycisk &quot;pokaż szczegóły...&quot;, aby uzyskać więcej informacji.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>
 Arguments:
 </source>
         <translation>
-Argumenty:
+Parametry:
 </translation>
     </message>
 </context>
