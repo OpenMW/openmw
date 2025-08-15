@@ -786,7 +786,7 @@ namespace MWWorld
                     state.mSounds.push_back(sound);
             }
 
-            mMagicBolts.push_back(state);
+            mMagicBolts.push_back(std::move(state));
             return true;
         }
 
