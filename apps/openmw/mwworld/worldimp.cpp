@@ -2546,7 +2546,7 @@ namespace MWWorld
         }
     }
 
-    float World::getWindSpeed()
+    float World::getWindSpeed() const
     {
         if (isCellExterior() || isCellQuasiExterior())
             return mWeatherManager->getWindSpeed();

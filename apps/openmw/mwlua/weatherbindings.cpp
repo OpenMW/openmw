@@ -1,5 +1,7 @@
 #include "weatherbindings.hpp"
 
+#include <type_traits>
+
 #include <osg/Vec4f>
 
 #include <components/esm3/loadregn.hpp>
@@ -10,10 +12,13 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/scene.hpp"
 #include "../mwworld/weather.hpp"
 
 #include "context.hpp"
+#include "object.hpp"
 
 namespace
 {
@@ -34,6 +39,43 @@ namespace
     Misc::Color color(const osg::Vec4f& color)
     {
         return Misc::Color(color.r(), color.g(), color.b(), color.a());
+    }
+
+    template <class Cell>
+    bool hasWeather(const Cell& cell)
+    {
+        if (!cell.mStore->isQuasiExterior() && !cell.mStore->isExterior())
+            return false;
+        return MWBase::Environment::get().getWorldScene()->isCellActive(*cell.mStore);
+    }
+
+    template <class Getter>
+    auto overloadForActiveCell(const Getter&& getter)
+    {
+        using Result = std::invoke_result_t<Getter>;
+        return sol::overload(
+            [=](const MWLua::GCell& cell) -> Result {
+                if (!hasWeather(cell))
+                    return Result{};
+                return getter();
+            },
+            [=](const MWLua::LCell& cell) -> Result {
+                if (!hasWeather(cell))
+                    return Result{};
+                return getter();
+            });
+    }
+
+    template <class T>
+    using WeatherGetter = T (MWBase::World::*)() const;
+
+    template <class T>
+    auto overloadWeatherGetter(WeatherGetter<T> getter)
+    {
+        return overloadForActiveCell([=]() -> std::optional<T> {
+            const MWBase::World& world = *MWBase::Environment::get().getWorld();
+            return (world.*getter)();
+        });
     }
 }
 
@@ -140,12 +182,6 @@ namespace MWLua
         weatherT["scriptId"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mScriptId; });
         weatherT["recordId"] = sol::readonly_property([](const MWWorld::Weather& w) { return w.mId.serializeText(); });
 
-        api["getCurrent"]
-            = []() -> const MWWorld::Weather* { return &MWBase::Environment::get().getWorld()->getCurrentWeather(); };
-        api["getNext"]
-            = []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); };
-        api["getTransition"] = []() { return MWBase::Environment::get().getWorld()->getWeatherTransition(); };
-
         api["changeWeather"] = [](std::string_view regionId, const MWWorld::Weather& weather) {
             ESM::RefId region = ESM::RefId::deserializeText(regionId);
             MWBase::Environment::get().getESMStore()->get<ESM::Region>().find(region);
@@ -169,18 +205,23 @@ namespace MWLua
         // Provide access to the store.
         api["records"] = WeatherStore{};
 
-        api["getCurrentSunLightDirection"] = []() {
+        api["getCurrent"] = overloadForActiveCell(
+            []() -> const MWWorld::Weather* { return &MWBase::Environment::get().getWorld()->getCurrentWeather(); });
+        api["getNext"] = overloadForActiveCell(
+            []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); });
+        api["getTransition"] = overloadWeatherGetter(&MWBase::World::getWeatherTransition);
+        api["getCurrentSunLightDirection"] = overloadForActiveCell([]() -> std::optional<osg::Vec4f> {
             osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
             // normalize to get the direction towards the sun
             sunPos.normalize();
 
             // and invert it to get the direction of the sun light
             return -sunPos;
-        };
-        api["getCurrentSunVisibility"] = []() { return MWBase::Environment::get().getWorld()->getSunVisibility(); };
-        api["getCurrentSunPercentage"] = []() { return MWBase::Environment::get().getWorld()->getSunPercentage(); };
-        api["getCurrentWindSpeed"] = []() { return MWBase::Environment::get().getWorld()->getWindSpeed(); };
-        api["getCurrentStormDirection"] = []() { return MWBase::Environment::get().getWorld()->getStormDirection(); };
+        });
+        api["getCurrentSunVisibility"] = overloadWeatherGetter(&MWBase::World::getSunVisibility);
+        api["getCurrentSunPercentage"] = overloadWeatherGetter(&MWBase::World::getSunPercentage);
+        api["getCurrentWindSpeed"] = overloadWeatherGetter(&MWBase::World::getWindSpeed);
+        api["getCurrentStormDirection"] = overloadWeatherGetter(&MWBase::World::getStormDirection);
 
         return LuaUtil::makeReadOnly(api);
     }
