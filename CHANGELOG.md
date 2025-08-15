@@ -5,6 +5,7 @@
     Bug #4437: Transformations for NiSkinInstance are ignored
     Bug #4885: Disable in dialogue result script causes a crash
     Bug #5331: Pathfinding works incorrectly when actor is moved from one interior cell to another
+    Bug #6029: Hostile NPCs are perfectly aware of a player character with a 75% Chameleon effect
     Bug #6039: Next Spell keybind fails while selected enchanted item has multiple copies
     Bug #6573: Editor: Selection behaves incorrectly on high-DPI displays
     Bug #6792: Birth sign info box has no line breaks
@@ -16,9 +17,11 @@
     Bug #7799: Picking up ingredients while object paging active grid is on may cause a hiccup
     Bug #7871: Kwama Queen doesn't start combat with player
     Bug #7979: Paralyzed NPCs battlecry
+    Bug #8012: Startcombat and Stopcombat do not affect music in the menu mode
     Bug #8245: The console command ShowVars does not list global mwscripts
     Bug #8265: Topics are linked incorrectly
     Bug #8303: On target spells cast by non-actors should fire underwater
+    Bug #8309: RemoveSpell should instantly remove the spell's effects
     Bug #8318: Missing global variables are not handled gracefully in dialogue conditions
     Bug #8333: Quest status subrecords should not actually cause parsing to skip remaining data
     Bug #8340: Multi-effect enchantments are too expensive
@@ -29,6 +32,7 @@
     Bug #8375: Moon phase cycle doesn't match Morrowind
     Bug #8383: Casting bound helm or boots on beast races doesn't cleanup properly
     Bug #8385: Russian encoding broken with locale parameters and calendar
+    Bug #8399: Jail skill increases don't count as progress towards the next level
     Bug #8404: Prevent merchant equipping breaks on lights
     Bug #8408: OpenMW doesn't report all the potential resting hindrances
     Bug #8414: Waterwalking works when collision is disabled
@@ -48,6 +52,7 @@
     Bug #8540: Magic resistance is applied to effects without a magnitude
     Bug #8557: Charm's disposition changes capped on 100, uncapped below 0
     Bug #8582: addScript-attached local scripts start out inactive
+    Bug #8584: Spacing of service menu list entries is inconsistent
     Bug #8585: Dialogue topic list doesn't have enough padding
     Bug #8587: Minor INI importer problems
     Bug #8593: Render targets do not generate mipmaps
@@ -59,23 +64,33 @@
     Bug #8612: Using aiactivate on an ingredient when graphical herbalism is enabled triggers non-stop pickup sounds
     Bug #8614: Lua garbage collection fails to remove unused data
     Bug #8615: Rest/wait time progress speed is different from vanilla
+    Bug #8620: Create/CloneCommand can reuse refNums, causing severe issues in-game
+    Bug #8650: Some plants turn invisible when being called types.Container.inventory(cont):isResolved()
     Feature #2522: Support quick item transfer
+    Feature #3740: Gamepad GUI Mode
     Feature #3769: Allow GetSpellEffects on enchantments
+    Feature #6000: Oblivion terrain rendering
     Feature #6976: [Lua] Weather API
+    Feature #7813: Add audio doppler for 3d sounds
+    Feature #7966: Add Lua read access to TES3 player's journal records
     Feature #8077: Save settings changes when clicking "ok"/closing the window
     Feature #8112: Expose landscape record data to Lua
     Feature #8113: Support extended selection in autodetected subdirectory dialog
     Feature #8139: Editor: Redesign the selection markers
     Feature #8285: Expose list of active shaders in postprocessing API
+    Feature #8290: Show player gold in Spellmaking
     Feature #8313: Show the character name in the savegame details
     Feature #8320: Add access mwscript source text to lua api
     Feature #8334: Lua: AddTopic equivalent
     Feature #8355: Lua: Window visibility checking in interfaces.UI
     Feature #8509: FillJournal script instruction
+    Feature #8579: Bulk (un)indentation in mwscript editor
     Feature #8580: Sort characters in the save loading menu
     Feature #8597: Lua: Add more built-in event handlers
     Feature #8629: Expose path grid data to Lua
+    Feature #8642: Partially dehardcode on-hit mechanics
     Feature #8654: Allow lua world.createRecord to create NPC records
+    Task #8578: Drop support for Qt5
 
 0.49.0
 ------
