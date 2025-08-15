@@ -1159,6 +1159,34 @@
 -- Always nil for journal records or if there is no value set.
 -- @field [parent=#DialogueRecordInfo] #string resultScript
 
+--- @{#Regions}: Regions
+-- @field [parent=#core] #Regions regions
+
+---
+-- A read-only list of all @{#RegionRecord}s in the world database.
+-- @field [parent=#Regions] #list<#RegionRecord> records
+-- @usage local record = core.regions.records['bitter coast region']
+-- @usage local record = core.regions.records[1]
+---
+-- Region data record
+-- @type RegionRecord
+-- @field #string id Region ID
+-- @field #string name Region display name
+-- @field openmw.util#Color mapColor Editor map color for this region.
+-- @field #string sleepList A leveled creature list used when sleeping outdoors in this region
+-- @field #list<#RegionSoundRef> sounds A read-only list of ambient sound references for this region.
+-- Each reference includes a chance and a resolved link to the full sound record.
+-- @field #table weatherProbabilities A table mapping @{#WeatherRecord.recordId}s to their probability (0–100), should sum to 100.
+-- Valid weather ids include:
+--   `"clear"`, `"cloudy"`, `"foggy"`, `"overcast"`, `"rain"`, `"thunderstorm"`, `"ashstorm"`, `"blight"`, `"snow"`, `"blizzard"`
+-- @usage print(region.weatherProbabilities["rain"])
+
+---
+-- Region sound reference
+-- @type RegionSoundRef
+-- @field #string soundId Sound record ID
+-- @field #number chance Multiplicative percentage used to determine whether to play the sound
+
 --- @{#Factions}: Factions
 -- @field [parent=#core] #Factions factions
 

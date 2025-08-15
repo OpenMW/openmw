@@ -137,6 +137,7 @@ testing.registerGlobalTest('record stores', function()
 
     testRecordStore(core.sound, "sound")
     testRecordStore(core.factions, "factions")
+    testRecordStore(core.regions, "regions")
     testRecordStore(core.dialogue.greeting, "dialogue greeting")
     testRecordStore(core.dialogue.topic, "dialogue topic")
     testRecordStore(core.dialogue.journal, "dialogue journal")
