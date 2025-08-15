@@ -247,8 +247,7 @@ namespace MWGui
                             info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school->mName).asUTF8();
                         }
                     }
-                    auto cost = focus->getUserString("SpellCost");
-                    if (!cost.empty() && cost != "0")
+                    if (focus->getUserString("SpellCost") == "true")
                         info.text
                             += MWGui::ToolTips::getValueString(MWMechanics::calcSpellCost(*spell), "#{sCastCost}");
                     info.effects = std::move(effects);
