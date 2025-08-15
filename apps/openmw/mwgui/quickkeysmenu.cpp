@@ -74,6 +74,8 @@ namespace MWGui
         {
             unassign(&mKey[i]);
         }
+
+        mTemp.clear();
     }
 
     inline void QuickKeysMenu::validate(int index)
@@ -397,11 +399,9 @@ namespace MWGui
                 if (*it == item)
                     break;
             }
-            if (it == store.end())
-                item = nullptr;
 
-            // check the quickkey item is available
-            if (item.isEmpty() || item.getCellRef().getCount() < 1)
+            // Is the quickkey item not in the inventory?
+            if (it == store.end())
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sQuickMenu5} " + key->name);
                 return;
@@ -626,6 +626,13 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
+        auto assign = [this](auto type, MWWorld::Ptr item) {
+            if (type == ESM::QuickKeys::Type::Item)
+                assignItem(item);
+            else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
+                onAssignMagicItem(item);
+        };
+
         int i = 0;
         for (ESM::QuickKeys::QuickKey& quickKey : keys.mKeys)
         {
@@ -646,16 +653,25 @@ namespace MWGui
                 {
                     // Find the item by id
                     MWWorld::Ptr item = store.findReplacement(quickKey.mId);
-
                     if (item.isEmpty())
-                        unassign(mSelected);
-                    else
                     {
-                        if (quickKey.mType == ESM::QuickKeys::Type::Item)
-                            assignItem(item);
-                        else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
-                            onAssignMagicItem(item);
+                        unassign(mSelected);
+                        if (!quickKey.mId.empty())
+                        {
+                            // Fallback to a temporary object for UI display purposes
+                            if (MWBase::Environment::get().getESMStore()->find(quickKey.mId) != 0)
+                            {
+                                // Tie temporary item lifetime to this window
+                                mTemp.emplace_back(*MWBase::Environment::get().getESMStore(), quickKey.mId, 0);
+                                assign(quickKey.mType, mTemp.back().getPtr());
+                            }
+                            else
+                                Log(Debug::Warning) << "Failed to load quick key " << (i + 1)
+                                                    << ": could not find object " << quickKey.mId;
+                        }
                     }
+                    else
+                        assign(quickKey.mType, item);
 
                     break;
                 }

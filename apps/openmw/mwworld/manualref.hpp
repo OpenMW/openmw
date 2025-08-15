@@ -15,12 +15,15 @@ namespace MWWorld
         std::any mRef;
         Ptr mPtr;
 
-        ManualRef(const ManualRef&);
-        ManualRef& operator=(const ManualRef&);
-
     public:
         ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count = 1);
         ManualRef(const MWWorld::ESMStore& store, const MWWorld::Ptr& template_, const int count = 1);
+
+        ManualRef(const ManualRef&) = delete;
+        ManualRef& operator=(const ManualRef&) = delete;
+
+        ManualRef(ManualRef&&) noexcept = default;
+        ManualRef& operator=(ManualRef&&) noexcept = default;
 
         const Ptr& getPtr() const { return mPtr; }
     };
