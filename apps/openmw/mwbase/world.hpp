@@ -404,7 +404,7 @@ namespace MWBase
         ///< Apply a health difference to any actors colliding with \a object.
         /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
-        virtual float getWindSpeed() = 0;
+        virtual float getWindSpeed() const = 0;
 
         virtual void getContainersOwnedBy(const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) = 0;
         ///< get all containers in active cells owned by this Npc
