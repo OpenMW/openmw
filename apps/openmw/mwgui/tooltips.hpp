@@ -67,12 +67,12 @@ namespace MWGui
         void setFocusObjectScreenCoords(float x, float y);
         ///< set the screen-space position of the tooltip for focused object
 
-        static std::string getWeightString(const float weight, const std::string& prefix);
-        static std::string getPercentString(const float value, const std::string& prefix);
-        static std::string getValueString(const int value, const std::string& prefix);
+        static std::string getWeightString(const float weight, std::string_view prefix);
+        static std::string getPercentString(const float value, std::string_view prefix);
+        static std::string getValueString(const int value, std::string_view prefix);
         ///< @return "prefix: value" or "" if value is 0
 
-        static std::string getMiscString(const std::string& text, const std::string& prefix);
+        static std::string getMiscString(std::string_view text, std::string_view prefix);
         ///< @return "prefix: text" or "" if text is empty
 
         static std::string toString(const float value);
@@ -87,14 +87,14 @@ namespace MWGui
         static std::string getCellRefString(const MWWorld::CellRef& cellref);
         ///< Returns a string containing debug tooltip information about the given cellref.
 
-        static std::string getDurationString(float duration, const std::string& prefix);
+        static std::string getDurationString(float duration, std::string_view prefix);
         ///< Returns duration as two largest time units, rounded down. Note: not localized; no line break.
 
         // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
         // system knows what to show in case this widget is hovered
         static void createSkillToolTip(MyGUI::Widget* widget, ESM::RefId skillId);
         static void createAttributeToolTip(MyGUI::Widget* widget, ESM::RefId attributeId);
-        static void createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId);
+        static void createSpecializationToolTip(MyGUI::Widget* widget, std::string_view name, int specId);
         static void createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId);
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);

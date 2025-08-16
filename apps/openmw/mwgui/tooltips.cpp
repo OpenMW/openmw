@@ -657,28 +657,28 @@ namespace MWGui
         return std::to_string(value);
     }
 
-    std::string ToolTips::getWeightString(const float weight, const std::string& prefix)
+    std::string ToolTips::getWeightString(const float weight, std::string_view prefix)
     {
         if (weight == 0)
             return {};
         return std::format("\n{}: {}", prefix, toString(weight));
     }
 
-    std::string ToolTips::getPercentString(const float value, const std::string& prefix)
+    std::string ToolTips::getPercentString(const float value, std::string_view prefix)
     {
         if (value == 0)
             return {};
         return std::format("\n{}: {}%", prefix, toString(value * 100));
     }
 
-    std::string ToolTips::getValueString(const int value, const std::string& prefix)
+    std::string ToolTips::getValueString(const int value, std::string_view prefix)
     {
         if (value == 0)
             return {};
         return std::format("\n{}: {}", prefix, value);
     }
 
-    std::string ToolTips::getMiscString(const std::string& text, const std::string& prefix)
+    std::string ToolTips::getMiscString(std::string_view text, std::string_view prefix)
     {
         if (text.empty())
             return {};
@@ -745,7 +745,7 @@ namespace MWGui
         return ret;
     }
 
-    std::string ToolTips::getDurationString(float duration, const std::string& prefix)
+    std::string ToolTips::getDurationString(float duration, std::string_view prefix)
     {
         auto l10n = MWBase::Environment::get().getL10nManager()->getContext("Interface");
 
@@ -853,7 +853,7 @@ namespace MWGui
         widget->setUserString("ImageTexture_AttributeImage", attribute->mIcon);
     }
 
-    void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId)
+    void ToolTips::createSpecializationToolTip(MyGUI::Widget* widget, std::string_view name, int specId)
     {
         widget->setUserString("Caption_Caption", name);
         std::string specText;
