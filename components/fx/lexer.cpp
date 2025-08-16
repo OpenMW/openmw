@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 
 #include <cctype>
-#include <cstdlib>
+#include <charconv>
 #include <format>
 
 namespace Fx
@@ -132,7 +132,7 @@ namespace Fx
             mColumn++;
         }
 
-        char Lexer::head()
+        unsigned char Lexer::head()
         {
             return *mHead;
         }
@@ -289,21 +289,15 @@ namespace Fx
         Token Lexer::scanNumber()
         {
             double buffer;
-
-            char* endPtr;
-            buffer = std::strtod(mHead, &endPtr);
-
-            if (endPtr == nullptr)
+            const auto [endPtr, ec] = std::from_chars(mHead, mTail, buffer);
+            if (ec != std::errc())
                 error("critical error while parsing number");
 
-            const char* tmp = mHead;
+            std::string_view literal(mHead, endPtr);
             mHead = endPtr;
 
-            for (; tmp != endPtr; ++tmp)
-            {
-                if ((*tmp == '.'))
-                    return Float{ static_cast<float>(buffer) };
-            }
+            if (literal.find('.') != std::string_view::npos)
+                return Float{ static_cast<float>(buffer) };
 
             return Integer{ static_cast<int>(buffer) };
         }
