@@ -300,7 +300,7 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
                 header.replace(pos, define.size(), value);
 
         for (const auto& target : mRenderTargets)
-            header.append("uniform sampler2D " + std::string(target) + ";");
+            header.append("uniform sampler2D " + target + ";");
 
         for (auto& uniform : technique.getUniformMap())
             if (auto glsl = uniform->getGLSL())

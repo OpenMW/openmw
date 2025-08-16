@@ -2,11 +2,7 @@
 
 #include <cctype>
 #include <cstdlib>
-#include <optional>
-#include <string>
-#include <string_view>
-
-#include <components/misc/strings/format.hpp>
+#include <format>
 
 namespace Fx
 {
@@ -126,7 +122,7 @@ namespace Fx
 
         [[noreturn]] void Lexer::error(const std::string& msg)
         {
-            throw LexerException(Misc::StringUtils::format("Line %zu Col %zu. %s", mLine + 1, mColumn, msg));
+            throw LexerException(std::format("Line {} Col {}. {}", mLine + 1, mColumn, msg));
         }
 
         void Lexer::advance()
@@ -209,7 +205,7 @@ namespace Fx
                     advance();
                     return { Comma{} };
                 default:
-                    error(Misc::StringUtils::format("unexpected token <%c>", head()));
+                    error(std::format("unexpected token <{}>", head()));
             }
         }
 

@@ -3,6 +3,7 @@
 #include "MyGUI_LanguageManager.h"
 
 #include <components/lua/util.hpp>
+#include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
