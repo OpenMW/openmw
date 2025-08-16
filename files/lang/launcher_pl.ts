@@ -881,7 +881,6 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wczytuj pliki KF i pliki szkieletów z folderu Animations w celu modyfikacji grup animacji&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-
     </message>
     <message>
         <source>Use Additional Animation Sources</source>
