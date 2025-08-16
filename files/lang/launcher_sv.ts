@@ -931,7 +931,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Huruvida chansen att lyckas kommer visas i förtrollningsmenyn.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Huruvida chansen att lyckas kommer visas i förtrollningsmenyn (enchanting).&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Prevents merchants from equipping items that are sold to them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -939,7 +939,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trainers now only choose which skills to train using their base skill points, allowing mercantile improving effects to be used without making mercantile an offered skill.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tränare väljer nu endast de färdigheter som kan tränas genom att använda deras basfärdighetsvärde, vilket tillåter förbättring av merkantil utan att göra merkantil till en erbjuden färdighet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tränare väljer nu endast de färdigheter som kan tränas genom att använda deras basfärdighetsvärde, vilket tillåter förbättring av färdigheten "merchantile" utan att göra den till en erbjuden färdighet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Miscellaneous</source>
