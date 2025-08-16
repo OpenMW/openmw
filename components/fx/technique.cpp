@@ -95,10 +95,10 @@ namespace Fx
         return std::format("\n#line {}\n{}\n", block.line + 1, block.content);
     }
 
-    Technique::UniformMap::iterator Technique::findUniform(const std::string& name)
+    Technique::UniformMap::iterator Technique::findUniform(std::string_view name)
     {
         return std::find_if(mDefinedUniforms.begin(), mDefinedUniforms.end(),
-            [&name](const auto& uniform) { return uniform->mName == name; });
+            [=](const auto& uniform) { return uniform->mName == name; });
     }
 
     bool Technique::compile()
@@ -201,7 +201,7 @@ namespace Fx
         return isDirty;
     }
 
-    [[noreturn]] void Technique::error(const std::string& msg)
+    [[noreturn]] void Technique::error(std::string_view msg)
     {
         mLexer->error(msg);
     }
@@ -405,7 +405,7 @@ namespace Fx
     template <class T>
     void Technique::parseSampler()
     {
-        if (findUniform(std::string(mBlockName)) != mDefinedUniforms.end())
+        if (findUniform(mBlockName) != mDefinedUniforms.end())
             error(std::format("redeclaration of uniform '{}'", mBlockName));
 
         ProxyTextureData proxy;
@@ -530,7 +530,7 @@ namespace Fx
     template <class SrcT, class T>
     void Technique::parseUniform()
     {
-        if (findUniform(std::string(mBlockName)) != mDefinedUniforms.end())
+        if (findUniform(mBlockName) != mDefinedUniforms.end())
             error(std::format("redeclaration of uniform '{}'", mBlockName));
 
         std::shared_ptr<Types::UniformBase> uniform = std::make_shared<Types::UniformBase>();
@@ -671,7 +671,7 @@ namespace Fx
     }
 
     template <class T>
-    void Technique::expect(const std::string& err)
+    void Technique::expect(std::string_view err)
     {
         mToken = mLexer->next();
         if (!std::holds_alternative<T>(mToken))
@@ -684,7 +684,7 @@ namespace Fx
     }
 
     template <class T, class T2>
-    void Technique::expect(const std::string& err)
+    void Technique::expect(std::string_view err)
     {
         mToken = mLexer->next();
         if (!std::holds_alternative<T>(mToken) && !std::holds_alternative<T2>(mToken))

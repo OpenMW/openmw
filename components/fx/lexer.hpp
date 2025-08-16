@@ -46,7 +46,7 @@ namespace Fx
 
             Block getLastJumpBlock() const;
 
-            [[noreturn]] void error(const std::string& msg);
+            [[noreturn]] void error(std::string_view msg);
 
         private:
             void drop();

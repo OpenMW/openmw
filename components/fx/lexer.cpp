@@ -120,7 +120,7 @@ namespace Fx
             return mLastJumpBlock;
         }
 
-        [[noreturn]] void Lexer::error(const std::string& msg)
+        [[noreturn]] void Lexer::error(std::string_view msg)
         {
             throw LexerException(std::format("Line {} Col {}. {}", mLine + 1, mColumn, msg));
         }
