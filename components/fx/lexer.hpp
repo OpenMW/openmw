@@ -51,7 +51,7 @@ namespace Fx
         private:
             void drop();
             void advance();
-            char head();
+            unsigned char head();
             bool peekChar(char c);
 
             Token scanToken();
