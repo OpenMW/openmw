@@ -939,7 +939,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trainers now only choose which skills to train using their base skill points, allowing mercantile improving effects to be used without making mercantile an offered skill.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tränare väljer nu endast de färdigheter som kan tränas genom att använda deras basfärdighetsvärde, vilket tillåter förbättring av färdigheten "mercantile" utan att göra den till en erbjuden färdighet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tränare väljer nu endast de färdigheter som kan tränas genom att använda deras basfärdighetsvärde, vilket tillåter förbättring av färdigheten ”mercantile” utan att göra den till en erbjuden färdighet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Miscellaneous</source>
