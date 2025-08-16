@@ -397,6 +397,8 @@ namespace MWGui
         void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
         bool getControllerTooltip() const override { return mControllerTooltip; }
         void setControllerTooltip(bool enabled) override;
+        bool getControllerTooltipUserPreference() const override { return mControllerTooltipUserPreference; }
+        void setControllerTooltipUserPreference(bool enabled) override;
         void updateControllerButtonsOverlay() override;
 
         // Used in Lua bindings
@@ -511,7 +513,10 @@ namespace MWGui
         std::vector<GuiMode> mGuiModes;
         // The active window for controller mode for each GUI mode.
         std::map<GuiMode, int> mActiveControllerWindows;
+        // Current tooltip state (can be disabled by mouse movement)
         bool mControllerTooltip = false;
+        // Toggleable preference. Restores tooltips on controller input after pointer movement
+        bool mControllerTooltipUserPreference = false;
 
         void reapplyActiveControllerWindow();
 

@@ -394,6 +394,8 @@ namespace MWBase
         virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;
         virtual bool getControllerTooltip() const = 0;
         virtual void setControllerTooltip(bool enabled) = 0;
+        virtual bool getControllerTooltipUserPreference() const = 0;
+        virtual void setControllerTooltipUserPreference(bool enabled) = 0;
         virtual void updateControllerButtonsOverlay() = 0;
 
         // Used in Lua bindings

@@ -519,6 +519,8 @@ namespace MWGui
         auto inventoryTabsOverlay = std::make_unique<InventoryTabsOverlay>();
         mInventoryTabsOverlay = inventoryTabsOverlay.get();
         mWindows.push_back(std::move(inventoryTabsOverlay));
+
+        mControllerTooltipUserPreference = Settings::gui().mControllerTooltips;
         mActiveControllerWindows[GM_Inventory] = 1; // Start on Inventory page
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
@@ -2645,6 +2647,15 @@ namespace MWGui
         if (!Settings::gui().mControllerMenus)
             return;
 
+        mControllerTooltip = enabled;
+    }
+
+    void WindowManager::setControllerTooltipUserPreference(bool enabled)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mControllerTooltipUserPreference = enabled;
         mControllerTooltip = enabled;
     }
 

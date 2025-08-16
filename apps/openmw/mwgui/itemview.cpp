@@ -205,6 +205,7 @@ namespace MWGui
             return;
 
         int prevFocus = mControllerFocus;
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (button)
         {
@@ -218,27 +219,34 @@ namespace MWGui
                 break;
             case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
                 // Toggle info tooltip
-                MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                    !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+                winMgr->setControllerTooltipUserPreference(!winMgr->getControllerTooltip());
                 updateControllerFocus(-1, mControllerFocus);
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                if (winMgr->getControllerTooltipUserPreference() && !winMgr->getControllerTooltip())
+                    winMgr->setControllerTooltip(true);
                 if (mControllerFocus % mRows == 0)
                     mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
                 else
                     mControllerFocus--;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                if (winMgr->getControllerTooltipUserPreference() && !winMgr->getControllerTooltip())
+                    winMgr->setControllerTooltip(true);
                 if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
                     mControllerFocus -= mControllerFocus % mRows;
                 else
                     mControllerFocus++;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                if (winMgr->getControllerTooltipUserPreference() && !winMgr->getControllerTooltip())
+                    winMgr->setControllerTooltip(true);
                 if (mControllerFocus >= mRows)
                     mControllerFocus -= mRows;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                if (winMgr->getControllerTooltipUserPreference() && !winMgr->getControllerTooltip())
+                    winMgr->setControllerTooltip(true);
                 if (mControllerFocus + mRows < mItemCount)
                     mControllerFocus += mRows;
                 else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
