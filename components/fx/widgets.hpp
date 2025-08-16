@@ -10,6 +10,7 @@
 #include <MyGUI_Widget.h>
 
 #include <algorithm>
+#include <format>
 #include <memory>
 #include <string>
 #include <vector>
@@ -17,8 +18,6 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
-
-#include <components/misc/strings/format.hpp>
 
 #include "types.hpp"
 
@@ -88,7 +87,7 @@ namespace Fx
             {
                 mValue = value;
                 if constexpr (std::is_floating_point_v<T>)
-                    mValueLabel->setCaption(Misc::StringUtils::format("%.3f", mValue));
+                    mValueLabel->setCaption(std::format("{:.3f}", mValue));
                 else
                     mValueLabel->setCaption(std::to_string(mValue));
 
