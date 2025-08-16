@@ -686,7 +686,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stops combat with NPCs affected by Calm spells every frame -- like in Morrowind without the MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zatrzymuje walkę z NPC pod wpływem zaklęć Uspokojenia podczas ka każdej klatce -- tak jak w Morrowind bez MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zatrzymuje walkę z NPC pod wpływem zaklęć Uspokojenia podczas każdej klatki gry -- tak jak w Morrowind bez MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Classic Calm Spells Behavior</source>
@@ -694,7 +694,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone, NPC wykonują manewr uniku, aby unikać kolizji z innymi.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone, NPC wykonują manewr uniku, aby zapobiec kolizji z innymi.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>NPCs Avoid Collisions</source>
@@ -726,7 +726,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;When enabled, a navigation mesh is built in the background for world geometry to be used for pathfinding. When disabled only the path grid is used to build paths. Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn&apos;t know where to go when you stand behind that stone and cast a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Po włączeniu w tle tworzona jest siatka nawigacyjna dla geometrii świata, używana do wyznaczania ścieżek. Po wyłączeniu do wyznaczania ścieżek używana jest tylko siatka ścieżek. Systemy z jednordzeniowym procesorem mogą doświadczyć znacznego spadku wydajności w istniejących lokacjach wewnętrznych oraz podczas poruszania się po świecie zewnętrznym. Może to nieznacznie wpływać na wydajność w systemach wielordzeniowych. Systemy wielordzeniowe mogą mieć różne opóźnienia w aktualizacji siatki nawigacyjnej, zależnie od innych ustawień i wydajności systemu. Poruszanie się po świecie zewnętrznym oraz wchodzenie/wychodzenie z lokacji powoduje aktualizację siatki. NPC i stworzenia mogą mieć problem ze znalezieniem ścieżki, zanim siatka nawigacyjna zostanie utworzona wokół nich. Wyłącz to, jeśli chcesz mieć staromodną sztuczną inteligencję, która nie wie, dokąd iść, gdy stoisz za kamieniem i rzucasz kulę ognia.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Po włączeniu w tle tworzona jest siatka nawigacyjna dla geometrii świata, używana do wyznaczania ścieżek. Po wyłączeniu do wyznaczania ścieżek używana jest tylko graf ścieżek. Systemy z jednordzeniowym procesorem mogą doświadczyć znacznego spadku wydajności w istniejących lokacjach wewnętrznych oraz podczas poruszania się po świecie zewnętrznym. W systemach wielordzeniowych ta opcja może mieć nieznaczny wpływ na wydajność.Systemy wielordzeniowe mogą mieć różne opóźnienia w aktualizacji siatki nawigacyjnej, zależnie od innych ustawień i wydajności systemu. Poruszanie się po świecie zewnętrznym oraz wchodzenie/wychodzenie z lokacji powoduje aktualizację siatki. NPC i stworzenia mogą mieć problem ze znalezieniem ścieżki, zanim siatka nawigacyjna zostanie utworzona wokół nich. Wyłącz to, jeśli chcesz mieć staromodną sztuczną inteligencję, która nie wie, dokąd iść, gdy stoisz za kamieniem i rzucasz kulę ognia.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Use Navigation Mesh for Pathfinding</source>
@@ -742,7 +742,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, containers supporting graphic herbalism will do so instead of opening the menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, pojemniki obsługujące graficzne zielarstwo będą z niego korzystać zamiast otwierać menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, pojemniki obsługujące graficzne zielarstwo (Graphic Herbalism) będą z niego korzystać zamiast otwierać menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Graphic Herbalism</source>
@@ -758,7 +758,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make enchanted weapons without Magical flag bypass normal weapons resistance, like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że zaczarowana broń bez flagi Magiczna omija odporność na zwykłą broń, tak jak w Morrowindzie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że zaczarowana broń bez flagi Magiczna omija odporność na zwykłą broń, tak jak w Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Enchanted Weapons Are Magical</source>
@@ -774,7 +774,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trainers now only choose which skills to train using their base skill points, allowing mercantile improving effects to be used without making mercantile an offered skill.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trenerzy teraz wybierają umiejętności do trenowania tylko na podstawie swoich bazowych punktów umiejętności, co pozwala na korzystanie z efektów poprawiających handlowość bez konieczności oferowania handlowości jako umiejętności do trenowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trenerzy teraz wybierają umiejętności do trenowania tylko na podstawie swoich bazowych punktów umiejętności, co pozwala na korzystanie z efektów poprawiających umiejętność Handlu bez konieczności oferowania handlowości jako umiejętności do trenowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Trainers Choose Offered Skills by Base Value</source>
@@ -782,7 +782,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, if they are not in combat. In this case we have to increment death counter and run disposed actor&apos;s script instantly.&lt;/p&gt;&lt;p&gt;If this setting is false, player has to wait until end of death animation in all cases. Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder. Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, gracz może przeszukiwać postacie (np. przywołane stworzenia) podczas animacji śmierci, jeśli nie są w walce. W takim przypadku licznik śmierci jest zwiększany, a skrypt usuniętej postaci jest uruchamiany natychmiast.&lt;/p&gt;&lt;p&gt;Jeśli to ustawienie jest wyłączone, gracz musi czekać do końca animacji śmierci w każdej sytuacji. Utrudnia to wykorzystywanie przywołanych stworzeń (np. plądrowanie przywołanych Dremorów i Złotych Świętych dla drogich broni). Konfliktuje z modami manekina, które używają SkipAnim, aby zapobiec końcowi animacji śmierci.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, gracz może przeszukiwać postacie (np. przywołane stworzenia) podczas animacji śmierci, jeśli nie są w walce. W takim przypadku licznik śmierci jest zwiększany, a skrypt usuniętej postaci jest uruchamiany natychmiast.&lt;/p&gt;&lt;p&gt;Jeśli to ustawienie jest wyłączone, gracz musi czekać do końca animacji śmierci w każdej sytuacji. Utrudnia to wykorzystywanie przywołanych stworzeń (np. plądrowanie przywołanych Dremor i Złotych Bóstw dla drogich broni). Konfliktuje z modami manekina, które używają SkipAnim, aby zapobiec końcowi animacji śmierci.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Can Loot During Death Animation</source>
@@ -846,7 +846,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Collision is used for both physics simulation and navigation mesh generation for pathfinding. Cylinder gives the best consistency between available navigation paths and ability to move by them. Changing this value affects navigation mesh generation therefore navigation mesh disk cache generated for one value will not be useful with another.</source>
-        <translation>Kolizja jest używana zarówno do symulacji fizyki, jak i generowania siatki nawigacyjnej do wyznaczania ścieżek. Cylinder zapewnia najlepszą zgodność między dostępnymi ścieżkami nawigacji a możliwością poruszania się po nich. Zmiana tej wartości wpływa na generowanie siatki nawigacyjnej, dlatego pamięć podręczna siatki nawigacyjnej na dysku utworzona dla jednej wartości nie będzie użyteczna dla innej.</translation>
+        <translation>Kolizja jest używana zarówno do symulacji fizyki, jak i generowania siatki nawigacyjnej do wyznaczania ścieżek. Walec zapewnia najlepszą zgodność między dostępnymi ścieżkami nawigacji a możliwością poruszania się po nich. Zmiana tej wartości wpływa na generowanie siatki nawigacyjnej, dlatego pamięć podręczna siatki nawigacyjnej na dysku utworzona dla jednej wartości nie będzie użyteczna dla innej.</translation>
     </message>
     <message>
         <source>Axis-Aligned Bounding Box</source>
@@ -856,11 +856,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <source>Rotating Box</source>
         <translatorcomment>Translated based on context
 -Igilq</translatorcomment>
-        <translation>Obrotowy box</translation>
+        <translation>Prostopadłościan zwrócony zgodnie z kierunkiem aktora</translation>
     </message>
     <message>
         <source>Cylinder</source>
-        <translation>Cylinder</translation>
+        <translation>Walec</translation>
     </message>
     <message>
         <source>Visuals</source>
@@ -872,7 +872,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że ruch NPC i gracza jest płynniejszy. Zalecane do użycia wraz z włączonym „obracaniem się w kierunku ruchu”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że ruch NPC i gracza jest płynniejszy. Zalecane do użycia wraz z włączoną opcją &quot;Obracaj się w kierunku ruchu&quot;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Smooth Movement</source>
@@ -880,7 +880,8 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wczytuj pliki KF i szkielety na grupy z folderu Animations&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wczytuj pliki KF i pliki szkieletów z folderu Animations w celu modyfikacji grup animacji&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+
     </message>
     <message>
         <source>Use Additional Animation Sources</source>
@@ -935,7 +936,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
                   (see &apos;normal map pattern&apos;, e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
                   If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli ta opcja jest włączona, mapy normalne są automatycznie rozpoznawane i używane, jeśli mają odpowiednią nazwę
-                  (zobacz &apos;wzorzec mapy normalnej&apos;, np. dla tekstury bazowej foo.dds, tekstura mapy normalnej musi mieć nazwę foo_n.dds).
+                  (zobacz ustawienie &apos;normal map pattern&apos; w settings.cfg, np. dla tekstury bazowej foo.dds, tekstura mapy normalnej musi mieć nazwę foo_n.dds).
                   Jeśli ta opcja jest wyłączona, mapy normalne są używane tylko wtedy, gdy są wyraźnie wymienione w pliku siatki (.nif lub .osg).
                   Dotyczy obiektów.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
@@ -958,7 +959,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
                   If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
                   (.osg file, not supported in .nif files). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli ta opcja jest włączona, mapy spekularne są automatycznie rozpoznawane i używane, jeśli mają odpowiednią nazwę
-                  (zobacz &apos;wzorzec mapy spekularnej&apos;, np. dla tekstury bazowej foo.dds,
+                  (zobacz &apos;specular map pattern&apos;, np. dla tekstury bazowej foo.dds,
                   tekstura mapy spekularnej musi mieć nazwę foo_spec.dds).
                   Jeśli ta opcja jest wyłączona, mapy normalne są używane tylko wtedy, gdy są wyraźnie wymienione w pliku siatki
                   (.osg, nieobsługiwane w plikach .nif). Dotyczy obiektów.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
@@ -969,7 +970,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See &apos;auto use object normal maps&apos;. Affects terrain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zobacz &apos;automatyczne używanie map normalnych obiektów&apos;. Dotyczy terenu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zobacz &apos;auto use object normal maps&apos;. Dotyczy terenu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Auto Use Terrain Normal Maps</source>
@@ -977,7 +978,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a file with pattern &apos;terrain specular map pattern&apos; exists, use that file as a &apos;diffuse specular&apos; map. The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli istnieje plik zgodny z &apos;wzorem mapy spekularnej terenu&apos;, użyj tego pliku jako mapy &apos;diffuse specular&apos;. Tekstura musi zawierać kolor warstwy w kanale RGB (jak zwykle) oraz mnożnik spekularny w kanale alfa.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli istnieje plik zgodny z &apos;terrain specular map pattern&apos;, użyj tego pliku jako mapy &apos;diffuse specular&apos;. Tekstura musi zawierać kolor warstwy w kanale RGB (jak zwykle) oraz mnożnik spekularny w kanale alfa.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Auto Use Terrain Specular Maps</source>
@@ -1005,8 +1006,8 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
                   Affected objects will use shaders.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zazwyczaj odbicia z mapy środowiska nie są wpływane przez oświetlenie, co powoduje, że obiekty z mapą środowiska (a więc również z mapą wypukłości) świecą w ciemności. 
-                  Morrowind Code Patch zawiera opcję rozwiązującą ten problem przez nakładanie mapy środowiska przed zastosowaniem oświetlenia — to jest jej odpowiednik.
-                  Dotknięte obiekty będą korzystać z shaderów.
+                  Morrowind Code Patch zawiera opcję rozwiązującą ten problem przez nakładanie mapy środowiska przed zastosowaniem oświetlenia -- to jest jej odpowiednik.
+                  Dotknięte obiekty tą opcją będą korzystać z shaderów.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -1077,7 +1078,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source> cells</source>
-        <translation> komórki</translation>
+        <translation> obszaru gry</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If true, use paging and LOD algorithms to display the entire terrain. If false, only display terrain of the loaded cells.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1097,7 +1098,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Post Processing</source>
-        <translation>Postprocessing</translation>
+        <translation>Post-processing</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Re-render transparent objects with forced alpha clipping.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1121,7 +1122,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Enable Post Processing</source>
-        <translation>Włącz postprocessing</translation>
+        <translation>Włącz post-processing</translation>
     </message>
     <message>
         <source>Shadows</source>
@@ -1141,7 +1142,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of &quot;compute scene bounds&quot; computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Typ metody obliczania „granicy sceny” do użycia. „Granice” (domyślnie) zapewniają dobrą równowagę między wydajnością a jakością cieni, „elementy podstawowe” dla lepszego wyglądu cieni, a „brak” oznacza brak obliczeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Typ metody obliczania &quot;granicy sceny&quot; do użycia. &quot;Granice&quot; (domyślnie) zapewniają dobrą równowagę między wydajnością a jakością cieni, &quot;elementy podstawowe&quot; dla lepszego wyglądu cieni, a &quot;brak&quot; oznacza brak obliczeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Shadow Planes Computation Method</source>
@@ -1245,9 +1246,9 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
 &lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
 &lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ustaw wewnętrzne zarządzanie źródłami światła.&lt;/p&gt;
-&lt;p&gt;„Tryb klasyczny” zawsze używa 8 świateł na obiekt. Zapewnia efekty najbardziej zbliżone do oświetlenia w Morrowind.&lt;/p&gt;
-&lt;p&gt;„Shadery (kompatybilność)” usuwa limit 8 świateł. Ten tryb włącza także oświetlenie na pokrywie terenu. Zaleca się używać go na starszym sprzęcie z limitem świateł bliskim 8.&lt;/p&gt;
-&lt;p&gt;„Shadery” zawiera wszystkie zalety trybu „Shadery (kompatybilność)”, ale stosuje nowoczesne podejście pozwalające na większą maksymalną liczbę świateł bez lub z minimalnymi spadkami wydajności na nowoczesnym sprzęcie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p&gt;&quot;Tryb klasyczny&quot; zawsze używa 8 świateł na obiekt. Zapewnia efekty najbardziej zbliżone do oświetlenia w Morrowind.&lt;/p&gt;
+&lt;p&gt;&quot;Shadery (kompatybilność)&quot; usuwa limit 8 świateł. Ten tryb włącza także oświetlenie na pokrywie terenu. Zaleca się używać go na starszym sprzęcie z limitem świateł bliskim 8.&lt;/p&gt;
+&lt;p&gt;„Shadery” zawiera wszystkie zalety trybu &quot;Shadery (kompatybilność)&quot;, ale stosuje nowoczesne podejście pozwalające na większą maksymalną liczbę świateł bez lub z minimalnymi spadkami wydajności na nowoczesnym sprzęcie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Lighting Method</source>
@@ -1263,7 +1264,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Audio</source>
-        <translation>Audio</translation>
+        <translation>Dźwięk</translation>
     </message>
     <message>
         <source>Select your preferred audio device.</source>
@@ -1335,15 +1336,15 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting scales GUI windows. A value of 1.0 results in the normal scale.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;To ustawienie skaluje okna interfejsu GUI. Wartość 1,0 oznacza normalną skalę.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;To ustawienie skaluje okna interfejsu użytkownika. Wartość 1,0 oznacza normalną skalę.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>GUI Scaling Factor</source>
-        <translation>Współczynnik skalowania GUI</translation>
+        <translation>Współczynnik skalowania interfejsu użytkownika</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pokazuje pozostały czas trwania efektów magicznych i świateł, jeśli to ustawienie jest włączone. Pozostały czas trwania jest wyświetlany w podpowiedzi po najechaniu kursorem na efekt magiczny.&lt;/p&gt;&lt;p&gt;Domyślna wartość to „fałsz”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pokazuje pozostały czas trwania efektów magicznych i świateł, jeśli to ustawienie jest włączone. Pozostały czas trwania jest wyświetlany w podpowiedzi po najechaniu kursorem na efekt magiczny.&lt;/p&gt;&lt;p&gt;Opcja domyślnie wyłączona&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Effect Duration</source>
@@ -1351,7 +1352,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, tematy dialogowe będą miały inny kolor, jeśli temat jest specyficzny dla NPC, z którym rozmawiasz, lub jeśli był już wcześniej widziany. Kolor można zmienić w settings.cfg.&lt;/p&gt;&lt;p&gt;Domyślna wartość to „fałsz”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, tematy dialogowe będą miały inny kolor, jeśli temat jest specyficzny dla NPC, z którym rozmawiasz, lub jeśli był już wcześniej widziany. Kolor można zmienić w settings.cfg.&lt;/p&gt;&lt;p&gt;Opcja domyślne wyłączona&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Change Dialogue Topic Color</source>
@@ -1375,7 +1376,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, premia do obrażeń strzał i bełtów będzie wyświetlana w podpowiedzi przedmiotu.&lt;/p&gt;&lt;p&gt;Domyślna wartość to „fałsz”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, premia do obrażeń strzał i bełtów będzie wyświetlana w podpowiedzi przedmiotu.&lt;/p&gt;&lt;p&gt;Opcja domyślnie wyłączona.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Projectile Damage</source>
@@ -1383,7 +1384,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be shown on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, zasięg i szybkość broni do walki wręcz będą wyświetlane w podpowiedzi przedmiotu.&lt;/p&gt;&lt;p&gt;Domyślna wartość to „fałsz”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli to ustawienie jest włączone, zasięg i szybkość broni do walki wręcz będą wyświetlane w podpowiedzi przedmiotu.&lt;/p&gt;&lt;p&gt;Opcja domyślnie wyłączona.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Melee Info</source>
@@ -1419,7 +1420,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Czy szansa powodzenia będzie wyświetlana w menu zaklinania.&lt;/p&gt;&lt;p&gt;Domyślna wartość to „fałsz”.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Czy szansa powodzenia będzie wyświetlana w menu zaklinania.&lt;/p&gt;&lt;p&gt;Opcja domyślnie wyłączona.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Show Enchant Chance</source>
@@ -1435,7 +1436,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Maximum Quicksaves</source>
-        <translation>Maksymalna liczba szybkich zapisywań</translation>
+        <translation>Maksymalna liczba szybkich zapisów</translation>
     </message>
     <message>
         <source>Screenshots</source>
@@ -1471,7 +1472,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW will capture control of the cursor if this setting is true.&lt;/p&gt;&lt;p&gt;In “look mode”, OpenMW will center the cursor regardless of the value of this setting (since the cursor/crosshair is always centered in the OpenMW window). However, in GUI mode, this setting determines the behavior when the cursor is moved outside the OpenMW window. If true, the cursor movement stops at the edge of the window preventing access to other applications. If false, the cursor is allowed to move freely on the desktop.&lt;/p&gt;&lt;p&gt;This setting does not apply to the screen where escape has been pressed, where the cursor is never captured. Regardless of this setting “Alt-Tab” or some other operating system dependent key sequence can be used to allow the operating system to regain control of the mouse cursor. This setting interacts with the minimize on focus loss setting by affecting what counts as a focus loss. Specifically on a two-screen configuration it may be more convenient to access the second screen with setting disabled.&lt;/p&gt;&lt;p&gt;Note for developers: it’s desirable to have this setting disabled when running the game in a debugger, to prevent the mouse cursor from becoming unusable when the game pauses on a breakpoint.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW przejmie kontrolę nad kursorem, jeśli to ustawienie jest włączone.&lt;/p&gt;&lt;p&gt;W „trybie oglądania” OpenMW wyśrodkuje kursor niezależnie od wartości tego ustawienia (ponieważ kursor/celownik jest zawsze wyśrodkowany w oknie OpenMW). Jednak w trybie GUI to ustawienie decyduje o zachowaniu kursora, gdy zostanie przesunięty poza okno OpenMW. Jeśli jest włączone, ruch kursora zatrzymuje się na krawędzi okna, uniemożliwiając dostęp do innych aplikacji. Jeśli jest wyłączone, kursor może swobodnie poruszać się po pulpicie.&lt;/p&gt;&lt;p&gt;To ustawienie nie dotyczy ekranu, na którym wciśnięto Escape — tam kursor nigdy nie jest przechwytywany. Niezależnie od tego ustawienia, kombinacja „Alt-Tab” lub inne skróty systemowe mogą być użyte, by przywrócić kontrolę nad kursorem myszy systemowi operacyjnemu. To ustawienie współdziała z opcją minimalizacji po utracie fokusu, wpływając na to, co jest uznawane za utratę fokusu. Szczególnie w konfiguracji z dwoma monitorami wygodniej może być mieć to ustawienie wyłączone, aby łatwiej uzyskać dostęp do drugiego ekranu.&lt;/p&gt;&lt;p&gt;Uwaga dla deweloperów: zaleca się wyłączyć to ustawienie podczas uruchamiania gry w debuggerze, aby zapobiec problemom z używaniem kursora myszy, gdy gra zatrzymuje się na punkcie przerwania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenMW przejmie kontrolę nad kursorem, jeśli to ustawienie jest włączone.&lt;/p&gt;&lt;p&gt;W „trybie oglądania” OpenMW wyśrodkuje kursor niezależnie od wartości tego ustawienia (ponieważ kursor/celownik jest zawsze wyśrodkowany w oknie OpenMW). Jednak w trybie GUI to ustawienie decyduje o zachowaniu kursora, gdy zostanie przesunięty poza okno OpenMW. Jeśli jest włączone, ruch kursora zatrzymuje się na krawędzi okna, uniemożliwiając dostęp do innych aplikacji. Jeśli jest wyłączone, kursor może swobodnie poruszać się po pulpicie.&lt;/p&gt;&lt;p&gt;To ustawienie nie dotyczy ekranu, na którym wciśnięto Escape -- tam kursor nigdy nie jest przechwytywany. Niezależnie od tego ustawienia, kombinacja „Alt-Tab” lub inne skróty systemowe mogą być użyte, by przywrócić kontrolę nad kursorem myszy systemowi operacyjnemu. To ustawienie współdziała z opcją minimalizacji po utracie fokusu, wpływając na to, co jest uznawane za utratę fokusu. Szczególnie w konfiguracji z dwoma monitorami wygodniej może być mieć to ustawienie wyłączone, aby łatwiej uzyskać dostęp do drugiego ekranu.&lt;/p&gt;&lt;p&gt;Uwaga dla deweloperów: zaleca się wyłączyć to ustawienie podczas uruchamiania gry w debuggerze, aby zapobiec problemom z używaniem kursora myszy, gdy gra zatrzymuje się na punkcie przerwania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Grab Cursor</source>
@@ -1487,7 +1488,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Default Cell</source>
-        <translation>Domyślna komórka</translation>
+        <translation>Domyślny obszar gry</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
@@ -1503,7 +1504,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone — sprawia, że przejścia między różnymi animacjami/pozycjami są znacznie płynniejsze. Pozwala również na ładowanie plików konfiguracyjnych blendowania animacji w formacie YAML, które mogą być dołączone do animacji w celu dostosowania stylów blendowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone -- sprawia, że przejścia między różnymi animacjami/pozycjami są znacznie płynniejsze. Pozwala również na ładowanie plików konfiguracyjnych blendowania animacji w formacie YAML, które mogą być dołączone do animacji w celu dostosowania stylów blendowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>
