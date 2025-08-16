@@ -30,6 +30,50 @@
 
 #include "itemmodel.hpp"
 
+namespace
+{
+    template <unsigned short Precision = 2>
+    struct LimitedFloat
+    {
+        float mValue;
+
+        constexpr unsigned short getPrecision() { return Precision; }
+    };
+}
+
+template <>
+struct std::formatter<LimitedFloat<>, char>
+{
+    template <class ParseContext>
+    constexpr ParseContext::iterator parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template <class FmtContext>
+    FmtContext::iterator format(LimitedFloat<> v, FmtContext& ctx) const
+    {
+        constexpr unsigned short precision = v.getPrecision();
+        // FLOAT_MAX needs 39 digits + 1 for the sign + 1 for the decimal separator
+        constexpr std::size_t bufferSize = 41 + precision;
+        char buffer[bufferSize];
+        std::to_chars_result result
+            = std::to_chars(buffer, buffer + bufferSize, v.mValue, std::chars_format::fixed, precision);
+        if (result.ec != std::errc())
+        {
+            // Should never happen, but just default to regular float formatting
+            return std::format_to(ctx.out(), "{}", v.mValue);
+        }
+        // Trim result so 1.00 turns into 1
+        char* end = result.ptr;
+        while (end > buffer && *(end - 1) == '0')
+            --end;
+        if (end > buffer && *(end - 1) == '.')
+            --end;
+        return std::ranges::copy(buffer, end, ctx.out()).out;
+    }
+};
+
 namespace MWGui
 {
     ToolTips::ToolTips()
@@ -643,13 +687,7 @@ namespace MWGui
 
     std::string ToolTips::toString(const float value)
     {
-        std::ostringstream stream;
-
-        if (value != int(value))
-            stream << std::setprecision(3);
-
-        stream << value;
-        return stream.str();
+        return std::format("{}", LimitedFloat(value));
     }
 
     std::string ToolTips::toString(const int value)
@@ -661,14 +699,14 @@ namespace MWGui
     {
         if (weight == 0)
             return {};
-        return std::format("\n{}: {}", prefix, toString(weight));
+        return std::format("\n{}: {}", prefix, LimitedFloat(weight));
     }
 
     std::string ToolTips::getPercentString(const float value, std::string_view prefix)
     {
         if (value == 0)
             return {};
-        return std::format("\n{}: {}%", prefix, toString(value * 100));
+        return std::format("\n{}: {}%", prefix, LimitedFloat(value * 100));
     }
 
     std::string ToolTips::getValueString(const int value, std::string_view prefix)
