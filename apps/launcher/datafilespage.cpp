@@ -1041,6 +1041,9 @@ void Launcher::DataFilesPage::reloadCells()
 
     while (true)
     {
+        if (mAbortReloadCells)
+            return;
+
         mStartReloadCells.wait(lock);
 
         if (mAbortReloadCells)
@@ -1071,9 +1074,6 @@ void Launcher::DataFilesPage::reloadCells()
         }
 
         lock.lock();
-
-        if (mAbortReloadCells)
-            return;
     }
 }
 
