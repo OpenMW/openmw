@@ -98,7 +98,7 @@ namespace Fx
     Technique::UniformMap::iterator Technique::findUniform(std::string_view name)
     {
         return std::find_if(mDefinedUniforms.begin(), mDefinedUniforms.end(),
-            [=](const auto& uniform) { return uniform->mName == name; });
+            [name](const auto& uniform) { return uniform->mName == name; });
     }
 
     bool Technique::compile()
@@ -372,7 +372,7 @@ namespace Fx
         else if (!pass->mFragment)
             pass->mFragment = new osg::Shader(osg::Shader::FRAGMENT, getBlockWithLineDirective());
         else
-            error(std::format("duplicate vertex shader for block '{}'", mBlockName));
+            error(std::format("duplicate fragment shader for block '{}'", mBlockName));
 
         pass->mType = Pass::Type::Pixel;
     }
@@ -397,7 +397,7 @@ namespace Fx
         else if (!pass->mFragment)
             pass->mCompute = new osg::Shader(osg::Shader::COMPUTE, getBlockWithLineDirective());
         else
-            error(std::format("duplicate vertex shader for block '{}'", mBlockName));
+            error(std::format("duplicate compute shader for block '{}'", mBlockName));
 
         pass->mType = Pass::Type::Compute;
     }
@@ -690,9 +690,9 @@ namespace Fx
         if (!std::holds_alternative<T>(mToken) && !std::holds_alternative<T2>(mToken))
         {
             if (err.empty())
-                error(std::format("{}. Expected {} or {}", err, T::repr, T2::repr));
-            else
                 error(std::format("Expected {} or {}", T::repr, T2::repr));
+            else
+                error(std::format("{}. Expected {} or {}", err, T::repr, T2::repr));
         }
     }
 

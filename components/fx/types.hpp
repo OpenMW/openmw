@@ -112,12 +112,7 @@ namespace Fx
 
             size_t getNumElements() const
             {
-                return std::visit(
-                    [&](auto&& arg) {
-                        ;
-                        return arg.isArray() ? arg.getArray().size() : 1;
-                    },
-                    mData);
+                return std::visit([](auto&& arg) { return arg.isArray() ? arg.getArray().size() : 1; }, mData);
             }
 
             template <class T>
@@ -261,29 +256,30 @@ namespace Fx
                             if (useUniform)
                                 return std::format("uniform vec2 {};", uname);
 
-                            return std::format("const vec2 {}=vec2({},{});", mName, value[0], value[1]);
+                            return std::format("const vec2 {}=vec2({:f},{:f});", mName, value[0], value[1]);
                         }
                         else if constexpr (std::is_same_v<T, osg::Vec3f>)
                         {
                             if (useUniform)
                                 return std::format("uniform vec3 {};", uname);
 
-                            return std::format("const vec3 {}=vec3({},{},{});", mName, value[0], value[1], value[2]);
+                            return std::format(
+                                "const vec3 {}=vec3({:f},{:f},{:f});", mName, value[0], value[1], value[2]);
                         }
                         else if constexpr (std::is_same_v<T, osg::Vec4f>)
                         {
                             if (useUniform)
                                 return std::format("uniform vec4 {};", uname);
 
-                            return std::format(
-                                "const vec4 {}=vec4({},{},{},{});", mName, value[0], value[1], value[2], value[3]);
+                            return std::format("const vec4 {}=vec4({:f},{:f},{:f},{:f});", mName, value[0], value[1],
+                                value[2], value[3]);
                         }
                         else if constexpr (std::is_same_v<T, float>)
                         {
                             if (useUniform)
                                 return std::format("uniform float {};", uname);
 
-                            return std::format("const float {}={};", mName, value);
+                            return std::format("const float {}={:f};", mName, value);
                         }
                         else if constexpr (std::is_same_v<T, int>)
                         {
@@ -298,7 +294,7 @@ namespace Fx
                             if (useUniform)
                                 return std::format("uniform bool {};", uname);
 
-                            return std::format("const bool {}={};", mName, value ? "true" : "false");
+                            return std::format("const bool {}={};", mName, value);
                         }
                     },
                     mData);
