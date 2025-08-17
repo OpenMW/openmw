@@ -42,25 +42,25 @@ namespace
     }
 
     template <class Cell>
-    bool hasWeather(const Cell& cell)
+    bool hasWeather(const Cell& cell, bool requireExterior)
     {
-        if (!cell.mStore->isQuasiExterior() && !cell.mStore->isExterior())
+        if (requireExterior && !cell.mStore->isQuasiExterior() && !cell.mStore->isExterior())
             return false;
         return MWBase::Environment::get().getWorldScene()->isCellActive(*cell.mStore);
     }
 
     template <class Getter>
-    auto overloadForActiveCell(const Getter&& getter)
+    auto overloadForActiveCell(Getter&& getter, bool requireExterior = true)
     {
         using Result = std::invoke_result_t<Getter>;
         return sol::overload(
             [=](const MWLua::GCell& cell) -> Result {
-                if (!hasWeather(cell))
+                if (!hasWeather(cell, requireExterior))
                     return Result{};
                 return getter();
             },
             [=](const MWLua::LCell& cell) -> Result {
-                if (!hasWeather(cell))
+                if (!hasWeather(cell, requireExterior))
                     return Result{};
                 return getter();
             });
@@ -210,14 +210,16 @@ namespace MWLua
         api["getNext"] = overloadForActiveCell(
             []() -> const MWWorld::Weather* { return MWBase::Environment::get().getWorld()->getNextWeather(); });
         api["getTransition"] = overloadWeatherGetter(&MWBase::World::getWeatherTransition);
-        api["getCurrentSunLightDirection"] = overloadForActiveCell([]() -> std::optional<osg::Vec4f> {
-            osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
-            // normalize to get the direction towards the sun
-            sunPos.normalize();
+        api["getCurrentSunLightDirection"] = overloadForActiveCell(
+            []() -> std::optional<osg::Vec4f> {
+                osg::Vec4f sunPos = MWBase::Environment::get().getWorld()->getSunLightPosition();
+                // normalize to get the direction towards the sun
+                sunPos.normalize();
 
-            // and invert it to get the direction of the sun light
-            return -sunPos;
-        });
+                // and invert it to get the direction of the sun light
+                return -sunPos;
+            },
+            false);
         api["getCurrentSunVisibility"] = overloadWeatherGetter(&MWBase::World::getSunVisibility);
         api["getCurrentSunPercentage"] = overloadWeatherGetter(&MWBase::World::getSunPercentage);
         api["getCurrentWindSpeed"] = overloadWeatherGetter(&MWBase::World::getWindSpeed);

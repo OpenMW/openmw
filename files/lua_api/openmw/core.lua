@@ -1275,7 +1275,7 @@
 -- Get the current direction of the light of the sun.
 -- @function [parent=#Weather] getCurrentSunLightDirection
 -- @param #Cell The cell to get the sun direction for
--- @return openmw.util#Vector4 or nil if the cell is inactive or has no weather
+-- @return openmw.util#Vector4 or nil if the cell is inactive
 
 ---
 -- Get the current sun visibility taking weather transition into account.
