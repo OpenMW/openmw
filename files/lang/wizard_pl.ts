@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>Import Add-on and Plugin Selection</source>
-        <translation>Importuj dodatkki i wtyczki</translation>
+        <translation>Importuj dodatki i wtyczki</translation>
     </message>
     <message>
         <source>Import Bitmap Fonts Setup From Morrowind.ini</source>

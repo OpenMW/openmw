@@ -85,7 +85,7 @@
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Executable %1 returned an error&lt;/b&gt;&lt;/p&gt;&lt;p&gt;An error occurred while running %1.&lt;/p&gt;&lt;p&gt;Press &quot;Show Details...&quot; for more information.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Plik wykonywalny %1 zwrócił błąd&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Naciśnij przycisk &quot;pokaż szczegóły...&quot;, aby uzyskać więcej informacji.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Plik wykonywalny %1 zwrócił błąd&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Wystąpił błąd podczas uruchamiania %1.&lt;/p&gt;&lt;p&gt;Naciśnij przycisk &quot;Pokaż szczegóły...&quot;, aby uzyskać więcej informacji.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>

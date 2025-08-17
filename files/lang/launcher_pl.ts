@@ -654,7 +654,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make Damage Fatigue magic effect uncapped like Drain Fatigue effect.&lt;/p&gt;&lt;p&gt;This means that unlike Morrowind you will be able to knock down actors using this effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że efekt magiczny Obniżenie Kondycji nie ma limitu, tak jak Osłabienie Kondycji.&lt;/p&gt;&lt;p&gt;Oznacza to, że w przeciwieństwie do orginalnej gry będziesz mógł powalać postacie za pomocą tego efektu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że efekt magiczny Obniżenie Kondycji nie ma limitu, tak jak Osłabienie Kondycji.&lt;/p&gt;&lt;p&gt;Oznacza to, że w przeciwieństwie do oryginalnej gry będziesz mógł powalać postacie za pomocą tego efektu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Uncapped Damage Fatigue</source>
@@ -726,7 +726,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;When enabled, a navigation mesh is built in the background for world geometry to be used for pathfinding. When disabled only the path grid is used to build paths. Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn&apos;t know where to go when you stand behind that stone and cast a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Po włączeniu w tle tworzona jest siatka nawigacyjna dla geometrii świata, używana do wyznaczania ścieżek. Po wyłączeniu do wyznaczania ścieżek używana jest tylko graf ścieżek. Systemy z jednordzeniowym procesorem mogą doświadczyć znacznego spadku wydajności w istniejących lokacjach wewnętrznych oraz podczas poruszania się po świecie zewnętrznym. W systemach wielordzeniowych ta opcja może mieć nieznaczny wpływ na wydajność.Systemy wielordzeniowe mogą mieć różne opóźnienia w aktualizacji siatki nawigacyjnej, zależnie od innych ustawień i wydajności systemu. Poruszanie się po świecie zewnętrznym oraz wchodzenie/wychodzenie z lokacji powoduje aktualizację siatki. NPC i stworzenia mogą mieć problem ze znalezieniem ścieżki, zanim siatka nawigacyjna zostanie utworzona wokół nich. Wyłącz to, jeśli chcesz mieć staromodną sztuczną inteligencję, która nie wie, dokąd iść, gdy stoisz za kamieniem i rzucasz kulę ognia.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Po włączeniu w tle tworzona jest siatka nawigacyjna dla geometrii świata, używana do wyznaczania ścieżek. Po wyłączeniu do wyznaczania ścieżek używany jest tylko graf ścieżek. Systemy z jednordzeniowym procesorem mogą doświadczyć znacznego spadku wydajności w istniejących lokacjach wewnętrznych oraz podczas poruszania się po świecie zewnętrznym. W systemach wielordzeniowych ta opcja może mieć nieznaczny wpływ na wydajność.Systemy wielordzeniowe mogą mieć różne opóźnienia w aktualizacji siatki nawigacyjnej, zależnie od innych ustawień i wydajności systemu. Poruszanie się po świecie zewnętrznym oraz wchodzenie/wychodzenie z lokacji powoduje aktualizację siatki. NPC i stworzenia mogą mieć problem ze znalezieniem ścieżki, zanim siatka nawigacyjna zostanie utworzona wokół nich. Wyłącz to, jeśli chcesz mieć staromodną sztuczną inteligencję, która nie wie, dokąd iść, gdy stoisz za kamieniem i rzucasz kulę ognia.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Use Navigation Mesh for Pathfinding</source>
@@ -774,7 +774,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trainers now only choose which skills to train using their base skill points, allowing mercantile improving effects to be used without making mercantile an offered skill.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trenerzy teraz wybierają umiejętności do trenowania tylko na podstawie swoich bazowych punktów umiejętności, co pozwala na korzystanie z efektów poprawiających umiejętność Handlu bez konieczności oferowania handlowości jako umiejętności do trenowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trenerzy teraz wybierają umiejętności do trenowania tylko na podstawie swoich bazowych punktów umiejętności, co pozwala na korzystanie z efektów poprawiających umiejętność Handlu bez konieczności oferowania umiejętności Handlu jako umiejętności do trenowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Trainers Choose Offered Skills by Base Value</source>
@@ -1006,7 +1006,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zazwyczaj odbicia z mapy środowiska nie są wpływane przez oświetlenie, co powoduje, że obiekty z mapą środowiska (a więc również z mapą wypukłości) świecą w ciemności. 
                   Morrowind Code Patch zawiera opcję rozwiązującą ten problem przez nakładanie mapy środowiska przed zastosowaniem oświetlenia -- to jest jej odpowiednik.
-                  Dotknięte obiekty tą opcją będą korzystać z shaderów.
+                  Obiekty objęte tą opcją będą korzystać z shaderów.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -1133,7 +1133,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Primitives</source>
-        <translation>Prymitywy</translation>
+        <translation>Elementy podstawowe</translation>
     </message>
     <message>
         <source>None</source>

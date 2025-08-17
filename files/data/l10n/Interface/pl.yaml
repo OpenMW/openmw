@@ -2,36 +2,48 @@ DurationDay: |-
   {days, plural,
     one{{days} dzień }
     other{{days} dni }
+    few{{days} dni }
+    many{{days} dni }
   }
 
 DurationHour: |-
   {hours, plural,
     one{{hours} godzina }
     other{{hours} godzin }
+    few{{hours} godziny }
+    many{{hours} godzin }
   }
 
 DurationMinute: |-
   {minutes, plural,
     one{{minutes} minuta }
     other{{minutes} minut }
+    few{{minutes} minuty }
+    many{{minutes} minut }
   }
 
 DurationSecond: |-
   {seconds, plural,
     one{{seconds} sekunda }
     other{{seconds} sekund }
+    few{{seconds} sekundy }
+    many{{seconds} sekund }
   }
 
 DurationMonth: |-
   {months, plural,
     one{{months} miesiąc }
     other{{months} miesięcy }
+    few{{months} miesiące }
+    many{{months} miesięcy }
   }
 
 DurationYear: |-
   {years, plural,
     one{{years} rok }
     other{{years} lat }
+    few{{years} lata }
+    many{{years} lat }
   }
 
 No: "Nie"
