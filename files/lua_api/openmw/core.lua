@@ -1250,56 +1250,56 @@
 ---
 -- Get the current weather
 -- @function [parent=#Weather] getCurrent
--- @param #Cell The cell to get the current weather for
--- @return #WeatherData or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the current weather for
+-- @return #Weather Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the next weather if any
 -- @function [parent=#Weather] getNext
--- @param #Cell The cell to get the next weather for
--- @return #any can be nil
+-- @param #Cell cell The cell to get the next weather for
+-- @return #Weather Can be nil
 
 ---
 -- Get current weather transition value
 -- @function [parent=#Weather] getTransition
--- @param #Cell The cell to get the transition value for
--- @return #number or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the transition value for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Change the weather
 -- @function [parent=#Weather] changeWeather
 -- @param #string regionId
--- @param #WeatherData The weather to change to
+-- @param #Weather weather The weather to change to
 
 ---
 -- Get the current direction of the light of the sun.
 -- @function [parent=#Weather] getCurrentSunLightDirection
--- @param #Cell The cell to get the sun direction for
--- @return openmw.util#Vector4 or nil if the cell is inactive
+-- @param #Cell cell The cell to get the sun direction for
+-- @return openmw.util#Vector4 Can be nil if the cell is inactive
 
 ---
 -- Get the current sun visibility taking weather transition into account.
 -- @function [parent=#Weather] getCurrentSunVisibility
--- @param #Cell The cell to get the sun visibility for
--- @return #number or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the sun visibility for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current sun percentage taking weather transition into account.
 -- @function [parent=#Weather] getCurrentSunPercentage
--- @param #Cell The cell to get the sun percentage for
--- @return #number or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the sun percentage for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current wind speed taking weather transition into account.
 -- @function [parent=#Weather] getCurrentWindSpeed
--- @param #Cell The cell to get the wind speed for
--- @return #number or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the wind speed for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current storm direction taking weather transition into account.
 -- @function [parent=#Weather] getCurrentStormDirection
--- @param #Cell The cell to get the storm direction for
--- @return openmw.util#Vector3 or nil if the cell is inactive or has no weather
+-- @param #Cell cell The cell to get the storm direction for
+-- @return openmw.util#Vector3 Can be nil if the cell is inactive or has no weather
 
 ---
 -- Weather data
