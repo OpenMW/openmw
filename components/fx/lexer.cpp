@@ -205,7 +205,7 @@ namespace Fx
                     advance();
                     return { Comma{} };
                 default:
-                    error(std::format("unexpected token <{}>", head()));
+                    error(std::format("unexpected token <{:c}>", head()));
             }
         }
 
