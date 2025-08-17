@@ -1,8 +1,13 @@
 #include "lexer.hpp"
 
 #include <cctype>
-#include <charconv>
 #include <format>
+
+#ifndef __cpp_lib_to_chars
+#include <cstdlib>
+#else
+#include <charconv>
+#endif
 
 namespace Fx
 {
@@ -289,8 +294,14 @@ namespace Fx
         Token Lexer::scanNumber()
         {
             double buffer;
+#ifndef __cpp_lib_to_chars
+            char* endPtr = nullptr;
+            buffer = std::strtod(mHead, &endPtr);
+            if (endPtr == nullptr || endPtr == mHead)
+#else
             const auto [endPtr, ec] = std::from_chars(mHead, mTail, buffer);
             if (ec != std::errc())
+#endif
                 error("critical error while parsing number");
 
             std::string_view literal(mHead, endPtr);
