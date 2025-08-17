@@ -5,7 +5,7 @@ local I = require('openmw.interfaces')
 -- Table with information needed to commit crimes.
 -- @type CommitCrimeInputs
 -- @field openmw.core#GameObject victim The victim of the crime (optional)
--- @field openmw.types#OFFENSE_TYPE type The type of the crime to commit. See @{openmw.types#OFFENSE_TYPE} (required)
+-- @field openmw.types#OFFENSE_TYPE_IDS type The type of the crime to commit. See @{openmw.types#OFFENSE_TYPE_IDS} (required)
 -- @field #string faction ID of the faction the crime is committed against (optional)
 -- @field #number arg The amount to increase the player bounty by, if the crime type is theft. Ignored otherwise (optional, defaults to 0)
 -- @field #boolean victimAware Whether the victim is aware of the crime (optional, defaults to false)

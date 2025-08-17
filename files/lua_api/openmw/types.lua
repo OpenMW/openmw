@@ -741,7 +741,7 @@
 
 ---
 -- @type NpcStats
--- @extends ActorStats
+-- @extends #ActorStats
 -- @field #SkillStats skills
 
 
@@ -1157,34 +1157,34 @@
 -- @field openmw.util#Transform rotation Destination rotation for this TravelDestination.
 
 --------------------------------------------------------------------------------
--- @{#Player} functions
--- @field [parent=#types] #Player Player
+-- @{#PLAYER} functions
+-- @field [parent=#types] #PLAYER Player
 
 ---
--- @type Player
+-- @type PLAYER
 -- @extends #NPC
 -- @field #NPC baseType @{#NPC}
 
 ---
 -- Whether the object is a player.
--- @function [parent=#Player] objectIsInstance
+-- @function [parent=#PLAYER] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
 ---
 -- Returns the bounty or crime level of the player
--- @function [parent=#Player] getCrimeLevel
+-- @function [parent=#PLAYER] getCrimeLevel
 -- @param openmw.core#GameObject player
 -- @return #number
 
 ---
 -- Sets the bounty or crime level of the player, may only be used in global scripts
--- @function [parent=#Player] setCrimeLevel
+-- @function [parent=#PLAYER] setCrimeLevel
 -- @param openmw.core#GameObject player
 -- @param #number crimeLevel The requested crime level
 
 ---
--- @type OFFENSE_TYPE
+-- @type OFFENSE_TYPE_IDS
 -- @field #number Theft
 -- @field #number Assault
 -- @field #number Murder
@@ -1193,32 +1193,32 @@
 -- @field #number Pickpocket
 
 ---
--- Available @{#OFFENSE_TYPE} values. Used in `I.Crimes.commitCrime`.
--- @field [parent=#Player] #OFFENSE_TYPE OFFENSE_TYPE
+-- Available @{#OFFENSE_TYPE_IDS} values. Used in `I.Crimes.commitCrime`.
+-- @field [parent=#PLAYER] #OFFENSE_TYPE_IDS OFFENSE_TYPE
 
 ---
 -- Whether the character generation for this player is finished.
--- @function [parent=#Player] isCharGenFinished
+-- @function [parent=#PLAYER] isCharGenFinished
 -- @param openmw.core#GameObject player
 -- @return #boolean
 
 ---
 -- Whether teleportation for this player is enabled.
--- @function [parent=#Player] isTeleportingEnabled
+-- @function [parent=#PLAYER] isTeleportingEnabled
 -- @param openmw.core#GameObject player
 -- @return #boolean
 
 ---
 -- Enables or disables teleportation for this player.
--- @function [parent=#Player] setTeleportingEnabled
+-- @function [parent=#PLAYER] setTeleportingEnabled
 -- @param openmw.core#GameObject player
 -- @param #boolean state True to enable teleporting, false to disable.
 
 ---
--- Returns a list containing quests @{#PlayerQuest} for the specified player, indexed by quest ID.
--- @function [parent=#Player] quests
+-- Returns a list containing quests @{#PLAYERQuest} for the specified player, indexed by quest ID.
+-- @function [parent=#PLAYER] quests
 -- @param openmw.core#GameObject player
--- @return #list<#PlayerQuest>
+-- @return #list<#PLAYERQuest>
 -- @usage -- Get stage of a specific quest
 -- stage = types.Player.quests(player)["ms_fargothring"].stage
 -- @usage -- Start a new quest, add it to the player's quest list but don't add any journal entries
@@ -1227,7 +1227,7 @@
 ---
 -- Returns @{#PlayerJournal}, which contains the read-only access to journal text data accumulated by the player.
 -- Not the same as @{openmw_core#Dialogue.journal} which holds raw game records: with placeholders for dynamic variables and no player-specific info.
--- @function [parent=#Player] journal
+-- @function [parent=#PLAYER] journal
 -- @param openmw.core#GameObject player
 -- @return #PlayerJournal
 -- @usage -- Get text of the 1st journal entry player made
@@ -1306,14 +1306,14 @@
 
 ---
 -- Sets the quest stage for the given quest, on the given player, and adds the entry to the journal, if there is an entry at the specified stage. Can only be used in global or player scripts.
--- @function [parent=#PlayerQuest] addJournalEntry
+-- @function [parent=#PLAYERQuest] addJournalEntry
 -- @param self
 -- @param #number stage Quest stage
 -- @param openmw.core#GameObject actor (optional) The actor who is the source of the journal entry, it may be used in journal entries with variables such as `%name(The speaker's name)` or `%race(The speaker's race)`.
 
 ---
 -- Get state of a control switch. I.e. is the player able to move/fight/jump/etc.
--- @function [parent=#Player] getControlSwitch
+-- @function [parent=#PLAYER] getControlSwitch
 -- @param openmw.core#GameObject player
 -- @param #ControlSwitch key Control type (see @{openmw.types#CONTROL_SWITCH})
 -- @return #boolean
@@ -1321,7 +1321,7 @@
 ---
 -- Set state of a control switch. I.e. forbid or allow the player to move/fight/jump/etc.
 -- Can be used only in global or player scripts.
--- @function [parent=#Player] setControlSwitch
+-- @function [parent=#PLAYER] setControlSwitch
 -- @param openmw.core#GameObject player
 -- @param #ControlSwitch key Control type (see @{openmw.types#CONTROL_SWITCH})
 -- @param #boolean value
@@ -1342,21 +1342,21 @@
 
 ---
 -- Values that can be used with getControlSwitch/setControlSwitch.
--- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
+-- @field [parent=#PLAYER] #CONTROL_SWITCH CONTROL_SWITCH
 
 ---
--- @function [parent=#Player] getBirthSign
+-- @function [parent=#PLAYER] getBirthSign
 -- @param openmw.core#GameObject player
 -- @return #string The player's birth sign
 
 ---
 -- Can be used only in global scripts. Note that this does not update the player's spells.
--- @function [parent=#Player] setBirthSign
+-- @function [parent=#PLAYER] setBirthSign
 -- @param openmw.core#GameObject player
 -- @param #any recordOrId Record or string ID of the birth sign to assign
 
 --- @{#BirthSigns}: Birth Sign Data
--- @field [parent=#Player] #BirthSigns birthSigns
+-- @field [parent=#PLAYER] #BirthSigns birthSigns
 
 ---
 -- A read-only list of all @{#BirthSignRecord}s in the world database.
@@ -1382,7 +1382,7 @@
 
 ---
 -- Send an event to menu scripts.
--- @function [parent=#Player] sendMenuEvent
+-- @function [parent=#PLAYER] sendMenuEvent
 -- @param openmw.core#GameObject player
 -- @param #string eventName
 -- @param eventData
@@ -1654,62 +1654,62 @@
 -- @field #list<openmw.core#MagicEffectWithParams> effects The effects (@{#list<openmw.core#MagicEffectWithParams>}) of the ingredient
 
 
---- @{#Lockable} functions
--- @field [parent=#types] #Lockable Lockable
+--- @{#LOCKABLE} functions
+-- @field [parent=#types] #LOCKABLE Lockable
 
 ---
 -- Whether the object is a Lockable.
--- @function [parent=#Lockable] objectIsInstance
+-- @function [parent=#LOCKABLE] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
 ---
 -- Returns the key record of a lockable object(door, container)
--- @function [parent=#Lockable] getKeyRecord
+-- @function [parent=#LOCKABLE] getKeyRecord
 -- @param openmw.core#GameObject object
 -- @return #MiscellaneousRecord
 
 ---
 -- Sets the key of a lockable object(door, container); removes it if empty string is provided. Must be used in a global script.
--- @function [parent=#Lockable] setKeyRecord
+-- @function [parent=#LOCKABLE] setKeyRecord
 -- @param openmw.core#GameObject object
 -- @param #any miscOrId @{#MiscellaneousRecord} or string misc item id Record ID of the key to use.
 
 ---
 -- Returns the trap spell of a lockable object(door, container)
--- @function [parent=#Lockable] getTrapSpell
+-- @function [parent=#LOCKABLE] getTrapSpell
 -- @param openmw.core#GameObject object
 -- @return openmw.core#Spell
 
 ---
 -- Sets the trap spell of a lockable object(door, container); removes it if empty string is provided. Must be used in a global script.
--- @function [parent=#Lockable] setTrapSpell
+-- @function [parent=#LOCKABLE] setTrapSpell
 -- @param openmw.core#GameObject object
 -- @param #any spellOrId @{openmw.core#Spell} or string spell id Record ID for the trap to use
 
 ---
 -- Returns the lock level of a lockable object(door, container). Does not determine if an object is locked or not, if an object is locked while this is set above 0, this value will be used if no other value is specified.
--- @function [parent=#Lockable] getLockLevel
+-- @function [parent=#LOCKABLE] getLockLevel
 -- @param openmw.core#GameObject object
 -- @return #number
 
 
 ---
 -- Returns true if the lockable object is locked, and false if it is not.
--- @function [parent=#Lockable] isLocked
+-- @function [parent=#LOCKABLE] isLocked
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
 
 ---
 -- Sets the lock level level of a lockable object(door, container);Locks if not already locked; Must be used in a global script.
--- @function [parent=#Lockable] lock
+-- @function [parent=#LOCKABLE] lock
 -- @param openmw.core#GameObject object
 -- @param #number lockLevel Level to lock the object at. Optional, if not specified, then 1 will be used, or the previous level if it was locked before.
 
 ---
 -- Unlocks the lockable object. Does not change the lock level, it can be kept for future use.
--- @function [parent=#Lockable] unlock
+-- @function [parent=#LOCKABLE] unlock
 -- @param openmw.core#GameObject object
 
 
@@ -2168,8 +2168,8 @@
 
 ---
 -- @type Container
--- @extends #Lockable
--- @field #Lockable baseType @{#Lockable}
+-- @extends #LOCKABLE
+-- @field #LOCKABLE baseType @{#LOCKABLE}
 
 ---
 -- A read-only list of all @{#ContainerRecord}s in the world database.
@@ -2230,8 +2230,8 @@
 
 ---
 -- @type Door
--- @extends #Lockable
--- @field #Lockable baseType @{#Lockable}
+-- @extends #LOCKABLE
+-- @field #LOCKABLE baseType @{#LOCKABLE}
 
 --- Door.STATE
 -- @type DoorSTATE
@@ -2485,8 +2485,8 @@
 
 ---
 -- @type ESM4Door
--- @extends #Lockable
--- @field #Lockable baseType @{#Lockable}
+-- @extends #LOCKABLE
+-- @field #LOCKABLE baseType @{#LOCKABLE}
 
 ---
 -- Whether the object is a ESM4Door.
