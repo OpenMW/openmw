@@ -300,9 +300,9 @@ namespace MWGui
         ESM::Class::Specialization specialization
             = static_cast<ESM::Class::Specialization>(currentClass->mData.mSpecialization);
 
-        std::string specName{ MWBase::Environment::get().getWindowManager()->getGameSettingString(
-            ESM::Class::sGmstSpecializationIds[specialization], ESM::Class::sGmstSpecializationIds[specialization]) };
-        mSpecializationName->setCaption(specName);
+        std::string_view specName = MWBase::Environment::get().getWindowManager()->getGameSettingString(
+            ESM::Class::sGmstSpecializationIds[specialization], ESM::Class::sGmstSpecializationIds[specialization]);
+        mSpecializationName->setCaption(MyGUI::UString(specName));
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
         mFavoriteAttribute[0]->setAttributeId(ESM::Attribute::indexToRefId(currentClass->mData.mAttribute[0]));
