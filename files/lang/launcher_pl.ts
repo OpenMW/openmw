@@ -224,7 +224,7 @@
     </message>
     <message>
         <source>Fullscreen</source>
-        <translation>Pełny Ekran</translation>
+        <translation>Pełny ekran</translation>
     </message>
     <message>
         <source>Windowed Fullscreen</source>
