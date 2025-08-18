@@ -90,6 +90,56 @@ namespace
     technique { passes = main; }
 )" };
 
+    constexpr VFS::Path::NormalizedView invalidNumberInfPath("shaders/invalid_number_inf.omwfx");
+
+    TestingOpenMW::VFSTestFile invalidNumberInf{ R"(
+    uniform_vec4 uVec4 {
+        step = inf;
+    }
+    fragment main { }
+    technique { passes = main; }
+)" };
+
+    constexpr VFS::Path::NormalizedView invalidNumberNegativeInfPath("shaders/invalid_number_negative_inf.omwfx");
+
+    TestingOpenMW::VFSTestFile invalidNumberNegativeInf{ R"(
+    uniform_vec4 uVec4 {
+        step = -inf;
+    }
+    fragment main { }
+    technique { passes = main; }
+)" };
+
+    constexpr VFS::Path::NormalizedView invalidNumberUnsignedLongPath("shaders/invalid_number_ulong.omwfx");
+
+    TestingOpenMW::VFSTestFile invalidNumberUnsignedLong{ R"(
+    uniform_vec4 uVec4 {
+        step = 18446744073709551615;
+    }
+    fragment main { }
+    technique { passes = main; }
+)" };
+
+    constexpr VFS::Path::NormalizedView invalidNumberHexFloatPath("shaders/invalid_number_hex.omwfx");
+
+    TestingOpenMW::VFSTestFile invalidNumberHexFloat{ R"(
+    uniform_vec4 uVec4 {
+        step = 0x1.fffffep+12;
+    }
+    fragment main { }
+    technique { passes = main; }
+)" };
+
+    constexpr VFS::Path::NormalizedView invalidNumberDoublePath("shaders/invalid_number_double.omwfx");
+
+    TestingOpenMW::VFSTestFile invalidNumberDouble{ R"(
+    uniform_vec4 uVec4 {
+        step = 1.79769e+50;
+    }
+    fragment main { }
+    technique { passes = main; }
+)" };
+
     using namespace testing;
     using namespace Fx;
 
@@ -106,6 +156,11 @@ namespace
                 { uniformPropertiesPath, &uniformProperties },
                 { missingSamplerSourcePath, &missingSamplerSource },
                 { repeatedSharedBlockPath, &repeatedSharedBlock },
+                { invalidNumberInfPath, &invalidNumberInf },
+                { invalidNumberNegativeInfPath, &invalidNumberNegativeInf },
+                { invalidNumberUnsignedLongPath, &invalidNumberUnsignedLong },
+                { invalidNumberHexFloatPath, &invalidNumberHexFloat },
+                { invalidNumberDoublePath, &invalidNumberDouble },
             }))
             , mImageManager(mVFS.get(), 0)
         {
@@ -116,6 +171,17 @@ namespace
             mTechnique = std::make_unique<Technique>(
                 *mVFS.get(), mImageManager, Technique::makeFileName(name), name, 1, 1, true, true);
             mTechnique->compile();
+        }
+
+        void expectFailure(const std::string& name, std::string_view errorString)
+        {
+            internal::CaptureStdout();
+
+            compile(name);
+
+            std::string output = internal::GetCapturedStdout();
+            Log(Debug::Error) << output;
+            EXPECT_THAT(output, HasSubstr(errorString));
         }
     };
 
@@ -183,23 +249,24 @@ namespace
 
     TEST_F(TechniqueTest, fail_with_missing_source_for_sampler)
     {
-        internal::CaptureStdout();
-
-        compile("missing_sampler_source");
-
-        std::string output = internal::GetCapturedStdout();
-        Log(Debug::Error) << output;
-        EXPECT_THAT(output, HasSubstr("sampler_1d 'mysampler1d' requires a filename"));
+        expectFailure("missing_sampler_source", "sampler_1d 'mysampler1d' requires a filename");
     }
 
     TEST_F(TechniqueTest, fail_with_repeated_shared_block)
     {
-        internal::CaptureStdout();
+        expectFailure("repeated_shared_block", "repeated 'shared' block");
+    }
 
-        compile("repeated_shared_block");
+    TEST_F(TechniqueTest, fail_with_invalid_float)
+    {
+        expectFailure("invalid_number_inf", "expected float value");
+        expectFailure("invalid_number_negative_inf", "expected float value");
+        expectFailure("invalid_number_hex", "expected float value");
+    }
 
-        std::string output = internal::GetCapturedStdout();
-        Log(Debug::Error) << output;
-        EXPECT_THAT(output, HasSubstr("repeated 'shared' block"));
+    TEST_F(TechniqueTest, fail_with_out_of_range)
+    {
+        expectFailure("invalid_number_ulong", "number out of range");
+        expectFailure("invalid_number_double", "number out of range");
     }
 }

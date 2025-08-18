@@ -135,6 +135,17 @@ namespace
         EXPECT_EQ(std::get<Integer>(token).value, 123);
     }
 
+    TEST(LexerTest, float_suffix_should_be_float)
+    {
+        Lexer lexer(R"(
+            123f
+        )");
+
+        auto token = lexer.next();
+        EXPECT_TRUE(std::holds_alternative<Float>(token));
+        EXPECT_FLOAT_EQ(std::get<Float>(token).value, 123.f);
+    }
+
     TEST(LexerTest, simple_string)
     {
         Lexer lexer(R"(

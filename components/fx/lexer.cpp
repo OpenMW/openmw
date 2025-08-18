@@ -1,13 +1,11 @@
 #include "lexer.hpp"
 
 #include <cctype>
+#include <cmath>
+#include <cstdlib>
 #include <format>
 
-#ifndef __cpp_lib_to_chars
-#include <cstdlib>
-#else
-#include <charconv>
-#endif
+#include <components/misc/strings/algorithm.hpp>
 
 namespace Fx
 {
@@ -294,23 +292,42 @@ namespace Fx
         Token Lexer::scanNumber()
         {
             double buffer;
-#ifndef __cpp_lib_to_chars
             char* endPtr = nullptr;
             buffer = std::strtod(mHead, &endPtr);
             if (endPtr == nullptr || endPtr == mHead)
-#else
-            const auto [endPtr, ec] = std::from_chars(mHead, mTail, buffer);
-            if (ec != std::errc())
-#endif
                 error("critical error while parsing number");
+
+            bool isDefinitelyAFloat = false;
+            // GLSL allows floats to end on f/F
+            if (endPtr != mTail && Misc::StringUtils::toLower(*endPtr) == 'f')
+            {
+                isDefinitelyAFloat = true;
+                ++endPtr;
+            }
 
             std::string_view literal(mHead, endPtr);
             mHead = endPtr;
 
-            if (literal.find('.') != std::string_view::npos)
-                return Float{ static_cast<float>(buffer) };
+            // Disallow -inf, -nan, and values that cannot be represented as doubles
+            if (!std::isfinite(buffer))
+                return Literal{ literal };
+            // Disallow hex notation (not allowed in GLSL so confusing to partially allow)
+            if (Misc::StringUtils::ciStartsWith(literal, "0x") || Misc::StringUtils::ciStartsWith(literal, "-0x"))
+                return Literal{ literal };
 
-            return Integer{ static_cast<int>(buffer) };
+            constexpr std::string_view floatCharacters = ".eE";
+            if (!isDefinitelyAFloat && literal.find_first_of(floatCharacters) == std::string_view::npos)
+            {
+                // This is supposed to be an int, but that doesn't mean it can fit in one
+                int intValue = static_cast<int>(buffer);
+                if (intValue != buffer)
+                    error("number out of range");
+                return Integer{ intValue };
+            }
+            float floatValue = static_cast<float>(buffer);
+            if (!std::isfinite(floatValue))
+                error("number out of range");
+            return Float{ floatValue };
         }
     }
 }

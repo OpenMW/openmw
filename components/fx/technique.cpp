@@ -758,7 +758,7 @@ namespace Fx
 
         if (named)
         {
-            expect<Lexer::Literal>("name is required for preceeding block decleration");
+            expect<Lexer::Literal>("name is required for preceeding block declaration");
 
             mBlockName = std::get<Lexer::Literal>(mToken).value;
 
