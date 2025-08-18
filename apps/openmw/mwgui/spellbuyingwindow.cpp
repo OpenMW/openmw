@@ -78,7 +78,7 @@ namespace MWGui
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
         toAdd->setUserString("Spell", spell.mId.serialize());
-        toAdd->setUserString("SpellCost", std::to_string(spell.mData.mCost));
+        toAdd->setUserString("SpellCost", "true");
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onSpellButtonClick);
         mSpellsWidgetMap.insert(std::make_pair(toAdd, spell.mId));
         if (price <= playerGold)
