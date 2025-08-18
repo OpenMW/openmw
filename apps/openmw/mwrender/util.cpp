@@ -6,6 +6,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/texturetype.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
@@ -56,6 +57,7 @@ namespace MWRender
             = new osg::Texture2D(resourceSystem->getImageManager()->getImage(correctedTexture));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        resourceSystem->getSceneManager()->applyFilterSettings(tex);
 
         osg::ref_ptr<osg::StateSet> stateset;
         if (const osg::StateSet* const src = node.getStateSet())
