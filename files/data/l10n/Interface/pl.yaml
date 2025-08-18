@@ -1,0 +1,59 @@
+DurationDay: |-
+  {days, plural,
+    one{{days} d. }
+    other{{days} d. }
+    few{{days} d. }
+    many{{days} d. }
+  }
+
+DurationHour: |-
+  {hours, plural,
+    one{{hours} godz. }
+    other{{hours} godz. }
+    few{{hours} godz. }
+    many{{hours} godz. }
+  }
+
+DurationMinute: |-
+  {minutes, plural,
+    one{{minutes} min }
+    other{{minutes} min }
+    few{{minutes} min }
+    many{{minutes} min }
+  }
+
+DurationSecond: |-
+  {seconds, plural,
+    one{{seconds} s }
+    other{{seconds} s }
+    few{{seconds} s }
+    many{{seconds} s }
+  }
+
+DurationMonth: |-
+  {months, plural,
+    one{{months} mies. }
+    other{{months} mies. }
+    few{{months} mies. }
+    many{{months} mies. }
+  }
+
+DurationYear: |-
+  {years, plural,
+    one{{years} rok }
+    other{{years} lat }
+    few{{years} lata }
+    many{{years} lat }
+  }
+
+No: "Nie"
+NotAvailableShort: "N/D"
+Reset: "Przywróć"
+Yes: "Tak"
+On: "Wł."
+Off: "Wył."
+None: "Brak"
+OK: "OK"
+Cancel: "Anuluj"
+Close: "Zamknij"
+Copy: "Kopiuj"

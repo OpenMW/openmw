@@ -10,6 +10,7 @@ set(BUILTIN_DATA_MW_FILES
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
     l10n/Calendar/fr.yaml
+    l10n/Calendar/pl.yaml
 
     # Generic UI messages that can be reused by mods
     l10n/Interface/gmst.yaml
