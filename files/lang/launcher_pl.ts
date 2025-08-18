@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="pl">
+<TS version="2.1" language="pl_PL">
 <context>
     <name>DataFilesPage</name>
     <message>
@@ -168,7 +168,7 @@
     </message>
     <message>
         <source>Window Mode</source>
-        <translation>Tryb Okna</translation>
+        <translation>Tryb okna</translation>
     </message>
     <message>
         <source> × </source>
@@ -261,15 +261,15 @@
     </message>
     <message>
         <source>Morrowind Installation Wizard</source>
-        <translation>Kreator Instalacji Morrowind</translation>
+        <translation>Kreator instalacji Morrowind</translation>
     </message>
     <message>
         <source>Run &amp;Installation Wizard</source>
-        <translation>Uruchom &amp;Kreator Instalacji</translation>
+        <translation>Uruchom &amp;kreator instalacji</translation>
     </message>
     <message>
         <source>Morrowind Settings Importer</source>
-        <translation>Importer Ustawień Morrowind</translation>
+        <translation>Importer ustawień Morrowind</translation>
     </message>
     <message>
         <source>File to Import Settings From:</source>
@@ -281,7 +281,7 @@
     </message>
     <message>
         <source>Import Add-on and Plugin Selection</source>
-        <translation>Importowanie Dodatków i Wyboru Wtyczek</translation>
+        <translation>Importowanie dodatków i wyboru wtyczek</translation>
     </message>
     <message>
         <source>Fonts shipped with the original engine are blurry with UI scaling and support only a small amount of characters,
@@ -293,11 +293,11 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Import Bitmap Fonts</source>
-        <translation>Importuj Czcionki Bitmapowe</translation>
+        <translation>Importuj czcionki bitmapowe</translation>
     </message>
     <message>
         <source>Run &amp;Settings Importer</source>
-        <translation>Uruchom &amp;Ustawienia Importera</translation>
+        <translation>Uruchom &amp;ustawienia importera</translation>
     </message>
 </context>
 <context>
@@ -497,7 +497,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Run &amp;Installation Wizard</source>
-        <translation>Uruchom &amp;Kreator Instalacji</translation>
+        <translation>Uruchom &amp;kreator instalacji</translation>
     </message>
     <message>
         <source>Skip</source>
@@ -537,7 +537,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Run &amp;Installation Wizard...</source>
-        <translation>Uruchom &amp;Kreator Instalacji...</translation>
+        <translation>Uruchom &amp;kreator instalacji...</translation>
     </message>
     <message>
         <source>Error reading OpenMW configuration files</source>
@@ -1271,7 +1271,7 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     </message>
     <message>
         <source>Audio Device</source>
-        <translation>Urządzenie Audio</translation>
+        <translation>Urządzenie dźwięku</translation>
     </message>
     <message>
         <source>Default</source>
