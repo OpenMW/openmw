@@ -497,7 +497,7 @@ namespace MWWorld
         ///< Apply a health difference to any actors colliding with \a object.
         /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
-        float getWindSpeed() override;
+        float getWindSpeed() const override;
 
         void getContainersOwnedBy(const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
         ///< get all containers in active cells owned by this Npc

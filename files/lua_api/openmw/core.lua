@@ -243,7 +243,7 @@
 -- Can be used to move objects from an inventory or a container to the world.
 -- @function [parent=#GameObject] teleport
 -- @param self
--- @param #any cellOrName A cell to define the destination worldspace; can be either #Cell, or cell name, or an empty string (empty string means the default exterior worldspace).
+-- @param #any cellOrName A cell to define the destination worldspace; can be either @{#Cell}, or cell name, or an empty string (empty string means the default exterior worldspace).
 -- If the worldspace has multiple cells (i.e. an exterior), the destination cell is calculated using `position`.
 -- @param openmw.util#Vector3 position New position.
 -- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Transform} rotation.
@@ -1250,48 +1250,56 @@
 ---
 -- Get the current weather
 -- @function [parent=#Weather] getCurrent
--- @return #WeatherData
+-- @param #Cell cell The cell to get the current weather for
+-- @return #Weather Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the next weather if any
 -- @function [parent=#Weather] getNext
--- @return #any can be nil
+-- @param #Cell cell The cell to get the next weather for
+-- @return #Weather Can be nil
 
 ---
 -- Get current weather transition value
 -- @function [parent=#Weather] getTransition
--- @return #number
+-- @param #Cell cell The cell to get the transition value for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Change the weather
 -- @function [parent=#Weather] changeWeather
 -- @param #string regionId
--- @param #WeatherData The weather to change to
+-- @param #Weather weather The weather to change to
 
 ---
 -- Get the current direction of the light of the sun.
 -- @function [parent=#Weather] getCurrentSunLightDirection
--- @return openmw.util#Vector4
+-- @param #Cell cell The cell to get the sun direction for
+-- @return openmw.util#Vector4 Can be nil if the cell is inactive
 
 ---
 -- Get the current sun visibility taking weather transition into account.
 -- @function [parent=#Weather] getCurrentSunVisibility
--- @return #number
+-- @param #Cell cell The cell to get the sun visibility for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current sun percentage taking weather transition into account.
 -- @function [parent=#Weather] getCurrentSunPercentage
--- @return #number
+-- @param #Cell cell The cell to get the sun percentage for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current wind speed taking weather transition into account.
 -- @function [parent=#Weather] getCurrentWindSpeed
--- @return #number
+-- @param #Cell cell The cell to get the wind speed for
+-- @return #number Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the current storm direction taking weather transition into account.
 -- @function [parent=#Weather] getCurrentStormDirection
--- @return openmw.util#Vector3
+-- @param #Cell cell The cell to get the storm direction for
+-- @return openmw.util#Vector3 Can be nil if the cell is inactive or has no weather
 
 ---
 -- Weather data
