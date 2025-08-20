@@ -1,12 +1,32 @@
 #include "messageformatparser.hpp"
 
+#include <charconv>
+
+namespace
+{
+    int parseNumber(std::size_t& i, std::string_view m)
+    {
+        if (i < m.size() && m[i] >= '0' && m[i] <= '9')
+        {
+            size_t start = i++;
+            while (i < m.size() && m[i] >= '0' && m[i] <= '9')
+                ++i;
+            int parsed;
+            auto [ptr, ec] = std::from_chars(m.data() + start, m.data() + i, parsed);
+            if (ec == std::errc())
+                return parsed;
+        }
+        return -1;
+    }
+}
+
 namespace Misc
 {
-    MessageFormatParser::~MessageFormatParser() {}
+    MessageFormatParser::~MessageFormatParser() = default;
 
     void MessageFormatParser::process(std::string_view m)
     {
-        for (unsigned int i = 0; i < m.size(); ++i)
+        for (std::size_t i = 0; i < m.size(); ++i)
         {
             if (m[i] == '%')
             {
@@ -23,31 +43,19 @@ namespace Misc
                             ++i;
                         }
 
-                        int width = 0;
-                        bool widthSet = false;
-                        while (i < m.size() && m[i] >= '0' && m[i] <= '9')
-                        {
-                            width = width * 10 + (m[i] - '0');
-                            widthSet = true;
-                            ++i;
-                        }
+                        int width = parseNumber(i, m);
 
                         if (i < m.size())
                         {
                             int precision = -1;
                             if (m[i] == '.')
                             {
-                                precision = 0;
-                                while (++i < m.size() && m[i] >= '0' && m[i] <= '9')
-                                {
-                                    precision = precision * 10 + (m[i] - '0');
-                                }
+                                ++i;
+                                precision = parseNumber(i, m);
                             }
 
                             if (i < m.size())
                             {
-                                width = (widthSet) ? width : -1;
-
                                 if (m[i] == 'S' || m[i] == 's')
                                     visitedPlaceholder(StringPlaceholder, pad, width, precision, FixedNotation);
                                 else if (m[i] == 'd' || m[i] == 'i')
