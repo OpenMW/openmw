@@ -39,7 +39,7 @@ namespace CSVRender
     PathgridMode::PathgridMode(WorldspaceWidget* worldspaceWidget, QWidget* parent)
         : EditMode(worldspaceWidget, Misc::ScalableIcon::load(":scenetoolbar/editing-pathgrid"),
             Mask_Pathgrid | Mask_Terrain | Mask_Reference, getTooltip(), parent)
-        , mDragMode(DragMode_None)
+        , mDragMode(DragMode::None)
         , mFromNode(0)
         , mSelectionMode(nullptr)
     {
@@ -174,7 +174,7 @@ namespace CSVRender
 
         if (!selection.empty())
         {
-            mDragMode = DragMode_Move;
+            mDragMode = DragMode::Move;
             return true;
         }
 
@@ -188,7 +188,7 @@ namespace CSVRender
         {
             if (PathgridTag* tag = dynamic_cast<PathgridTag*>(hit.tag.get()))
             {
-                mDragMode = DragMode_Edge;
+                mDragMode = DragMode::Edge;
                 mEdgeId = tag->getPathgrid()->getId();
                 mFromNode = SceneUtil::getPathgridNode(hit.index0);
 
@@ -202,7 +202,7 @@ namespace CSVRender
 
     void PathgridMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
     {
-        if (mDragMode == DragMode_Move)
+        if (mDragMode == DragMode::Move)
         {
             std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Pathgrid);
 
@@ -219,7 +219,7 @@ namespace CSVRender
                 }
             }
         }
-        else if (mDragMode == DragMode_Edge)
+        else if (mDragMode == DragMode::Edge)
         {
             WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
 
@@ -243,7 +243,7 @@ namespace CSVRender
 
     void PathgridMode::dragCompleted(const QPoint& pos)
     {
-        if (mDragMode == DragMode_Move)
+        if (mDragMode == DragMode::Move)
         {
             std::vector<osg::ref_ptr<TagBase>> selection = getWorldspaceWidget().getSelection(Mask_Pathgrid);
             for (std::vector<osg::ref_ptr<TagBase>>::iterator it = selection.begin(); it != selection.end(); ++it)
@@ -258,7 +258,7 @@ namespace CSVRender
                 }
             }
         }
-        else if (mDragMode == DragMode_Edge)
+        else if (mDragMode == DragMode::Edge)
         {
             WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
 
@@ -283,7 +283,7 @@ namespace CSVRender
             mFromNode = 0;
         }
 
-        mDragMode = DragMode_None;
+        mDragMode = DragMode::None;
         getWorldspaceWidget().reset(Mask_Pathgrid);
     }
 

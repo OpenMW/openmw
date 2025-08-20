@@ -23,8 +23,8 @@ namespace CSVWorld
         command.addValue(index, type);
     }
 
-    GlobalCreator::GlobalCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-        : GenericCreator(data, undoStack, id, true)
+    GlobalCreator::GlobalCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+        : GenericCreator(worldData, undoStack, id, true)
     {
     }
 }

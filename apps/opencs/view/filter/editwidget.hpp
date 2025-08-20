@@ -71,7 +71,7 @@ namespace CSVFilter
         QAction* mHelpAction;
 
     public:
-        EditWidget(CSMWorld::Data& data, QWidget* parent = nullptr);
+        explicit EditWidget(CSMWorld::Data& worldData, QWidget* parent = nullptr);
 
         void createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action);
 

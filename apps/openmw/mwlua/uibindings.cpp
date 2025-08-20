@@ -245,14 +245,14 @@ namespace MWLua
 
         api["screenSize"] = []() { return osg::Vec2f(Settings::video().mResolutionX, Settings::video().mResolutionY); };
 
-        api["_getAllUiModes"] = [](sol::this_state lua) {
-            sol::table res(lua, sol::create);
+        api["_getAllUiModes"] = [](sol::this_state thisState) {
+            sol::table res(thisState, sol::create);
             for (const auto& [_, name] : modeToName)
                 res[name] = name;
             return res;
         };
-        api["_getUiModeStack"] = [windowManager](sol::this_state lua) {
-            sol::table res(lua, sol::create);
+        api["_getUiModeStack"] = [windowManager](sol::this_state thisState) {
+            sol::table res(thisState, sol::create);
             int i = 1;
             for (MWGui::GuiMode m : windowManager->getGuiModeStack())
                 res[i++] = modeToName.at(m);
@@ -283,14 +283,14 @@ namespace MWLua
                       },
                       "Set UI modes");
               };
-        api["_getAllWindowIds"] = [windowManager](sol::this_state lua) {
-            sol::table res(lua, sol::create);
+        api["_getAllWindowIds"] = [windowManager](sol::this_state thisState) {
+            sol::table res(thisState, sol::create);
             for (std::string_view name : windowManager->getAllWindowIds())
                 res[name] = name;
             return res;
         };
-        api["_getAllowedWindows"] = [windowManager](sol::this_state lua, std::string_view mode) {
-            sol::table res(lua, sol::create);
+        api["_getAllowedWindows"] = [windowManager](sol::this_state thisState, std::string_view mode) {
+            sol::table res(thisState, sol::create);
             for (std::string_view name : windowManager->getAllowedWindowIds(nameToMode.at(mode)))
                 res[name] = name;
             return res;
@@ -313,23 +313,23 @@ namespace MWLua
     {
         if (context.initializeOnce("openmw_ui_usertypes"))
         {
-            auto element = context.sol().new_usertype<LuaUi::Element>("UiElement");
-            element[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
+            auto uiElement = context.sol().new_usertype<LuaUi::Element>("UiElement");
+            uiElement[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
                 std::stringstream res;
                 res << "UiElement";
                 if (element.mLayer != "")
                     res << "[" << element.mLayer << "]";
                 return res.str();
             };
-            element["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
+            uiElement["layout"] = sol::property([](const LuaUi::Element& element) { return element.mLayout; },
                 [](LuaUi::Element& element, const sol::main_table& layout) { element.mLayout = layout; });
-            element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
+            uiElement["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState != LuaUi::Element::Created)
                     return;
                 element->mState = LuaUi::Element::Update;
                 luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
             };
-            element["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
+            uiElement["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState == LuaUi::Element::Destroyed)
                     return;
                 element->mState = LuaUi::Element::Destroy;

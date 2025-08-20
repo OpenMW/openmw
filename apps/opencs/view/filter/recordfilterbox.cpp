@@ -9,7 +9,7 @@
 #include "editwidget.hpp"
 #include "filterdata.hpp"
 
-CSVFilter::RecordFilterBox::RecordFilterBox(CSMWorld::Data& data, QWidget* parent)
+CSVFilter::RecordFilterBox::RecordFilterBox(CSMWorld::Data& worldData, QWidget* parent)
     : QWidget(parent)
 {
     QHBoxLayout* layout = new QHBoxLayout(this);
@@ -20,7 +20,7 @@ CSVFilter::RecordFilterBox::RecordFilterBox(CSMWorld::Data& data, QWidget* paren
     label->setIndent(2);
     layout->addWidget(label);
 
-    mEdit = new EditWidget(data, this);
+    mEdit = new EditWidget(worldData, this);
 
     layout->addWidget(mEdit);
 

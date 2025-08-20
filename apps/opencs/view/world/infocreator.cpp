@@ -81,9 +81,9 @@ void CSVWorld::InfoCreator::configureCreateCommand(CSMWorld::CreateCommand& comm
     }
 }
 
-CSVWorld::InfoCreator::InfoCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+CSVWorld::InfoCreator::InfoCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
     CSMWorld::IdCompletionManager& completionManager)
-    : GenericCreator(data, undoStack, id)
+    : GenericCreator(worldData, undoStack, id)
 {
     // Determine if we're dealing with topics or journals.
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;

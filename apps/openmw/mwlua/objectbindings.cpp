@@ -445,16 +445,16 @@ namespace MWLua
                     if (!ptr.getContainerStore() && currentCount > countToRemove)
                         return std::nullopt;
                     // Delayed action to trigger side effects
-                    return [signedCountToRemove](MWWorld::Ptr ptr) {
+                    return [signedCountToRemove](MWWorld::Ptr p) {
                         // Restore the original count
-                        ptr.getCellRef().setCount(ptr.getCellRef().getCount(false) + signedCountToRemove);
+                        p.getCellRef().setCount(p.getCellRef().getCount(false) + signedCountToRemove);
                         // And now remove properly
-                        if (ptr.getContainerStore())
-                            ptr.getContainerStore()->remove(ptr, std::abs(signedCountToRemove), false);
+                        if (p.getContainerStore())
+                            p.getContainerStore()->remove(p, std::abs(signedCountToRemove), false);
                         else
                         {
-                            MWBase::Environment::get().getWorld()->disable(ptr);
-                            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                            MWBase::Environment::get().getWorld()->disable(p);
+                            MWBase::Environment::get().getWorld()->deleteObject(p);
                         }
                     };
                 };

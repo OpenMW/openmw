@@ -21,8 +21,8 @@ void CSVWorld::DialogueCreator::configureCreateCommand(CSMWorld::CreateCommand& 
 }
 
 CSVWorld::DialogueCreator::DialogueCreator(
-    CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id, int type)
-    : GenericCreator(data, undoStack, id, true)
+    CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id, int type)
+    : GenericCreator(worldData, undoStack, id, true)
     , mType(type)
 {
 }

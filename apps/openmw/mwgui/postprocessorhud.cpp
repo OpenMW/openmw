@@ -465,11 +465,11 @@ namespace MWGui
             }
         }
 
-        auto tryFocus = [this](ListWrapper* widget, const std::string& hint) {
+        auto tryFocus = [this](ListWrapper* widget, const std::string& focusHint) {
             MyGUI::Widget* oldFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
             if (oldFocus == mFilter)
                 return;
-            size_t index = widget->findItemIndexWith(hint);
+            size_t index = widget->findItemIndexWith(focusHint);
 
             if (index != MyGUI::ITEM_NONE)
             {

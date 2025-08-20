@@ -335,8 +335,7 @@ void Wizard::MainWizard::addInstallation(const QString& path)
 
     // Add it to the openmw.cfg too
     const auto& dataDirs = mGameSettings.getDataDirs();
-    if (std::none_of(
-            dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& dir) { return dir.value == path; }))
+    if (std::none_of(dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& d) { return d.value == path; }))
     {
         mGameSettings.setMultiValue(QLatin1String("data"), { path });
         mGameSettings.addDataDir({ path });
