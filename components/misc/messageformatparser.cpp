@@ -4,7 +4,7 @@
 
 namespace
 {
-    int parseNumber(std::size_t& i, std::string_view m)
+    int parseNumber(std::size_t& i, std::string_view m, int fallback)
     {
         if (i < m.size() && m[i] >= '0' && m[i] <= '9')
         {
@@ -16,7 +16,7 @@ namespace
             if (ec == std::errc())
                 return parsed;
         }
-        return -1;
+        return fallback;
     }
 }
 
@@ -43,7 +43,7 @@ namespace Misc
                             ++i;
                         }
 
-                        int width = parseNumber(i, m);
+                        int width = parseNumber(i, m, -1);
 
                         if (i < m.size())
                         {
@@ -51,7 +51,7 @@ namespace Misc
                             if (m[i] == '.')
                             {
                                 ++i;
-                                precision = parseNumber(i, m);
+                                precision = parseNumber(i, m, 0);
                             }
 
                             if (i < m.size())
