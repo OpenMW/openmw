@@ -56,15 +56,21 @@ namespace Misc
                             if (i < m.size())
                             {
                                 if (m[i] == 'S' || m[i] == 's')
-                                    visitedPlaceholder(StringPlaceholder, pad, width, precision, FixedNotation);
+                                    visitedPlaceholder(StringPlaceholder, pad, width, precision, Notation::Fixed);
                                 else if (m[i] == 'd' || m[i] == 'i')
-                                    visitedPlaceholder(IntegerPlaceholder, pad, width, precision, FixedNotation);
+                                    visitedPlaceholder(IntegerPlaceholder, pad, width, precision, Notation::Fixed);
                                 else if (m[i] == 'f' || m[i] == 'F')
-                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, FixedNotation);
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, Notation::Fixed);
                                 else if (m[i] == 'e' || m[i] == 'E')
-                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, ScientificNotation);
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, Notation::Scientific);
                                 else if (m[i] == 'g' || m[i] == 'G')
-                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, ShortestNotation);
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, Notation::Shortest);
+                                else if (m[i] == 'a')
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, Notation::HexLower);
+                                else if (m[i] == 'A')
+                                    visitedPlaceholder(FloatPlaceholder, pad, width, precision, Notation::HexUpper);
+                                else
+                                    visitedCharacter(m[i]);
                             }
                         }
                     }
