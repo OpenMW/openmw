@@ -820,6 +820,18 @@
 -- @field #Actor baseType @{#Actor}
 
 ---
+-- Creates a @{#CreatureRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Creature] createRecordDraft
+-- @param #CreatureRecord creature A Lua table with the fields of a CreatureRecord, with an additional field `template` that accepts a @{#CreatureRecord} as a base.
+-- @return #CreatureRecord A strongly typed Creature record.
+-- @usage local creatureTemplate = types.Creature.records['mudcrab']
+-- local creatureTable = {name = "Epic Mudcrab", template = creatureTemplate, soulValue = 500, isEssential = true}
+-- local recordDraft = types.Creature.createRecordDraft(creatureTable)
+-- local newRecord = world.createRecord(recordDraft)
+-- world.createObject(newRecord.id):teleport(playerCell, playerPosition)
+
+---
 -- A read-only list of all @{#CreatureRecord}s in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) of #CreatureRecord.
 -- @field [parent=#Creature] #list<#CreatureRecord> records
@@ -2219,6 +2231,18 @@
 -- @function [parent=#Container] content
 -- @param openmw.core#GameObject object
 -- @return openmw.core#Inventory
+
+---
+-- Creates a @{#ContainerRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Container] createRecordDraft
+-- @param #ContainerRecord container A Lua table with the fields of a ContainerRecord, with an additional field `template` that accepts a @{#ContainerRecord} as a base.
+-- @return #ContainerRecord A strongly typed Container record.
+-- @usage local chestTemplate = types.Container.records['chest_small_01']
+-- local containerTable = {name = "Respawning Treasure Chest", template = chestTemplate, isRespawning = true, weight = 150.0}
+-- local recordDraft = types.Container.createRecordDraft(containerTable)
+-- local newRecord = world.createRecord(recordDraft)
+-- world.createObject(newRecord.id):teleport(playerCell, playerPosition)
 
 ---
 -- Container content (same as `Container.content`, added for consistency with `Actor.inventory`).
