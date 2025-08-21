@@ -60,11 +60,11 @@ namespace MWGui
         mTypeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onTypeButtonClicked);
         mName->eventEditSelectAccept += MyGUI::newDelegate(this, &EnchantingDialog::onAccept);
 
-        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mA = "#{Interface:Select}";
         mControllerButtons.mB = "#{Interface:Cancel}";
         mControllerButtons.mY = "#{OMWEngine:EnchantType}";
-        mControllerButtons.mL1 = "#{sItem}";
-        mControllerButtons.mR1 = "#{sSoulGem}";
+        mControllerButtons.mL1 = "#{Interface:Item}";
+        mControllerButtons.mR1 = "#{Interface:SoulGem}";
     }
 
     void EnchantingDialog::onOpen()
@@ -158,7 +158,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(false);
             mEnchanting.setEnchanter(ptr);
             mBuyButton->setCaptionWithReplacing("#{sBuy}");
-            mControllerButtons.mX = "#{sBuy}";
+            mControllerButtons.mX = "#{Interface:Buy}";
             mChanceLayout->setVisible(false);
             mPtr = ptr;
             setSoulGem(MWWorld::Ptr());
@@ -170,7 +170,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(true);
             mEnchanting.setEnchanter(MWMechanics::getPlayer());
             mBuyButton->setCaptionWithReplacing("#{sCreate}");
-            mControllerButtons.mX = "#{sCreate}";
+            mControllerButtons.mX = "#{Interface:Create}";
             mChanceLayout->setVisible(Settings::game().mShowEnchantChance);
             mPtr = MWMechanics::getPlayer();
             setSoulGem(ptr);
