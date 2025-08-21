@@ -57,12 +57,12 @@ namespace Interpreter
                     float value = mRuntime[0].mFloat;
                     mRuntime.pop();
 
-                    if (notation == FixedNotation)
+                    if (notation == Notation::Fixed)
                     {
                         out << std::fixed << value;
                         mFormattedMessage += out.str();
                     }
-                    else if (notation == ShortestNotation)
+                    else if (notation == Notation::Shortest)
                     {
                         out << value;
                         std::string standard = out.str();
@@ -74,6 +74,17 @@ namespace Interpreter
                         std::string scientific = out.str();
 
                         mFormattedMessage += standard.length() < scientific.length() ? standard : scientific;
+                    }
+                    // TODO switch to std::format so the precision argument applies to these two
+                    else if (notation == Notation::HexLower)
+                    {
+                        out << std::hexfloat << value;
+                        mFormattedMessage += out.str();
+                    }
+                    else if (notation == Notation::HexUpper)
+                    {
+                        out << std::uppercase << std::hexfloat << value;
+                        mFormattedMessage += out.str();
                     }
                     else
                     {
