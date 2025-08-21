@@ -66,8 +66,8 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, (64 - 7) * scale, mNextPageButton->getSize().height * scale));
         }
 
-        mControllerButtons.mL1 = "#{sPrev}";
-        mControllerButtons.mR1 = "#{sNext}";
+        mControllerButtons.mL1 = "#{Interface:Prev}";
+        mControllerButtons.mR1 = "#{Interface:Next}";
         mControllerButtons.mB = "#{Interface:Close}";
 
         center();
@@ -224,7 +224,7 @@ namespace MWGui
 
     ControllerButtons* BookWindow::getControllerButtons()
     {
-        mControllerButtons.mA = mTakeButton->getVisible() ? "#{sTake}" : "";
+        mControllerButtons.mA = mTakeButton->getVisible() ? "#{Interface:Take}" : {};
         return &mControllerButtons;
     }
 

@@ -94,11 +94,11 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mB = "#{Interface:Cancel}";
-            mControllerButtons.mX = "#{sCreate}";
-            mControllerButtons.mY = "#{sMagicEffects}";
-            mControllerButtons.mR3 = "#{sInfo}";
+            mControllerButtons.mX = "#{Interface:Create}";
+            mControllerButtons.mY = "#{Interface:MagicEffects}";
+            mControllerButtons.mR3 = "#{Interface:Info}";
         }
 
         center();

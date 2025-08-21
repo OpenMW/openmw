@@ -60,9 +60,9 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.mLStick = "#{sMouse}";
-            mControllerButtons.mA = "#{sSelect}";
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mLStick = "#{Interface:Mouse}";
+            mControllerButtons.mA = "#{Interface:Select}";
+            mControllerButtons.mB = "#{Interface:Back}";
         }
 
         updateBirths();
@@ -78,13 +78,13 @@ namespace MWGui
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.mX = "#{sNext}";
+            mControllerButtons.mX = "#{Interface:Next}";
         }
         else if (Settings::gui().mControllerMenus)
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.mX = "#{sDone}";
+            mControllerButtons.mX = "#{Interface:Done}";
         }
         else
             okButton->setCaption(
