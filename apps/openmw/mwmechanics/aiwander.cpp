@@ -636,6 +636,12 @@ namespace MWMechanics
 
         const MWWorld::Cell& cell = *actor.getCell()->getCell();
         const ESM::Pathgrid* pathgrid = world.getStore().get<ESM::Pathgrid>().search(cell);
+        // Moved to a cell without a pathgrid
+        if (pathgrid == nullptr || pathgrid->mPoints.size() < 2)
+        {
+            storage.mAllowedPositions.clear();
+            return;
+        }
         const PathgridGraph& pathgridGraph = getPathGridGraph(pathgrid);
 
         const Misc::CoordinateConverter converter = Misc::makeCoordinateConverter(cell);
