@@ -622,6 +622,7 @@ namespace MWGui
         bool isWeaponOrArmor = type == ESM::Weapon::sRecordId || type == ESM::Armor::sRecordId;
         bool isBroken = ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0;
         const bool isFromDragAndDrop = mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == ptr;
+        const auto [canEquipResult, canEquipMsg] = ptr.getClass().canBeEquipped(ptr, mPtr);
 
         // In vanilla, broken armor or weapons cannot be equipped
         // tools with 0 charges is equippable
@@ -629,15 +630,14 @@ namespace MWGui
         {
             if (isFromDragAndDrop)
                 mDragAndDrop->drop(mTradeModel, mItemView);
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
+            MWBase::Environment::get().getWindowManager()->messageBox(canEquipMsg);
             return;
         }
 
-        bool canEquip = ptr.getClass().canBeEquipped(ptr, mPtr).first != 0;
-        bool shouldSetOnPcEquip = canEquip || force;
+        const bool willEquip = canEquipResult != 0 || force;
 
         // If the item has a script, set OnPCEquip or PCSkipEquip to 1
-        if (!script.empty() && shouldSetOnPcEquip)
+        if (!script.empty() && willEquip)
         {
             // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
             bool isBook = type == ESM::Book::sRecordId;
@@ -661,7 +661,7 @@ namespace MWGui
                 useCount += it->getCellRef().getCount();
         }
 
-        action->execute(player, !canEquip);
+        action->execute(player, !willEquip);
 
         // Partial equipping
         int excess = ptr.getCellRef().getCount() - useCount;
@@ -673,7 +673,7 @@ namespace MWGui
             // Feature: Don't finish draganddrop if potion or ingredient was used
             if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
                 mDragAndDrop->update();
-            else if (!shouldSetOnPcEquip)
+            else if (!willEquip)
                 mDragAndDrop->drop(mTradeModel, mItemView);
             else
                 mDragAndDrop->finish();
