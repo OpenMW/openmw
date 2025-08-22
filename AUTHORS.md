@@ -238,7 +238,7 @@ Programmers
     trav
     tri4ng1e
     Thoronador
-    Tobias Tribble (zackhasacat)
+    Hailey Tribble (daisyhasacat)
     Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
