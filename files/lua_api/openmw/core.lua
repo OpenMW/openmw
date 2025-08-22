@@ -1251,13 +1251,13 @@
 -- Get the current weather
 -- @function [parent=#Weather] getCurrent
 -- @param #Cell cell The cell to get the current weather for
--- @return #Weather Can be nil if the cell is inactive or has no weather
+-- @return #WeatherRecord Can be nil if the cell is inactive or has no weather
 
 ---
 -- Get the next weather if any
 -- @function [parent=#Weather] getNext
 -- @param #Cell cell The cell to get the next weather for
--- @return #Weather Can be nil
+-- @return #WeatherRecord Can be nil
 
 ---
 -- Get current weather transition value
@@ -1269,7 +1269,7 @@
 -- Change the weather
 -- @function [parent=#Weather] changeWeather
 -- @param #string regionId
--- @param #Weather weather The weather to change to
+-- @param #WeatherRecord weather The weather to change to
 
 ---
 -- Get the current direction of the light of the sun.
