@@ -99,6 +99,7 @@ Programmers
     Gohan1989
     gugus/gus
     guidoj
+    Hailey Tribble (daisyhasacat)
     Haoda Wang (h313)
     holorat
     hristoast
@@ -238,7 +239,6 @@ Programmers
     trav
     tri4ng1e
     Thoronador
-    Hailey Tribble (daisyhasacat)
     Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
