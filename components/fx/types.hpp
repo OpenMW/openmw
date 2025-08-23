@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_FX_TYPES_HPP
 #define OPENMW_COMPONENTS_FX_TYPES_HPP
 
+#include <format>
 #include <optional>
 #include <variant>
 
@@ -8,7 +9,6 @@
 #include <osg/Uniform>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/shadermanager.hpp>
 
@@ -112,12 +112,7 @@ namespace Fx
 
             size_t getNumElements() const
             {
-                return std::visit(
-                    [&](auto&& arg) {
-                        ;
-                        return arg.isArray() ? arg.getArray().size() : 1;
-                    },
-                    mData);
+                return std::visit([](auto&& arg) { return arg.isArray() ? arg.getArray().size() : 1; }, mData);
             }
 
             template <class T>
@@ -236,11 +231,11 @@ namespace Fx
                     switch (mSamplerType.value())
                     {
                         case Texture_1D:
-                            return Misc::StringUtils::format("uniform sampler1D %s;", mName);
+                            return std::format("uniform sampler1D {};", mName);
                         case Texture_2D:
-                            return Misc::StringUtils::format("uniform sampler2D %s;", mName);
+                            return std::format("uniform sampler2D {};", mName);
                         case Texture_3D:
-                            return Misc::StringUtils::format("uniform sampler3D %s;", mName);
+                            return std::format("uniform sampler3D {};", mName);
                     }
                 }
 
@@ -253,54 +248,53 @@ namespace Fx
                         const bool useUniform = arg.isArray()
                             || (Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug
                                 || mStatic == false);
-                        const std::string uname = arg.isArray()
-                            ? Misc::StringUtils::format("%s[%zu]", mName, arg.getArray().size())
-                            : mName;
+                        const std::string uname
+                            = arg.isArray() ? std::format("{}[{}]", mName, arg.getArray().size()) : mName;
 
                         if constexpr (std::is_same_v<T, osg::Vec2f>)
                         {
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform vec2 %s;", uname);
+                                return std::format("uniform vec2 {};", uname);
 
-                            return Misc::StringUtils::format("const vec2 %s=vec2(%f,%f);", mName, value[0], value[1]);
+                            return std::format("const vec2 {}=vec2({:f},{:f});", mName, value[0], value[1]);
                         }
                         else if constexpr (std::is_same_v<T, osg::Vec3f>)
                         {
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform vec3 %s;", uname);
+                                return std::format("uniform vec3 {};", uname);
 
-                            return Misc::StringUtils::format(
-                                "const vec3 %s=vec3(%f,%f,%f);", mName, value[0], value[1], value[2]);
+                            return std::format(
+                                "const vec3 {}=vec3({:f},{:f},{:f});", mName, value[0], value[1], value[2]);
                         }
                         else if constexpr (std::is_same_v<T, osg::Vec4f>)
                         {
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform vec4 %s;", uname);
+                                return std::format("uniform vec4 {};", uname);
 
-                            return Misc::StringUtils::format(
-                                "const vec4 %s=vec4(%f,%f,%f,%f);", mName, value[0], value[1], value[2], value[3]);
+                            return std::format("const vec4 {}=vec4({:f},{:f},{:f},{:f});", mName, value[0], value[1],
+                                value[2], value[3]);
                         }
                         else if constexpr (std::is_same_v<T, float>)
                         {
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform float %s;", uname);
+                                return std::format("uniform float {};", uname);
 
-                            return Misc::StringUtils::format("const float %s=%f;", mName, value);
+                            return std::format("const float {}={:f};", mName, value);
                         }
                         else if constexpr (std::is_same_v<T, int>)
                         {
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform int %s;", uname);
+                                return std::format("uniform int {};", uname);
 
-                            return Misc::StringUtils::format("const int %s=%i;", mName, value);
+                            return std::format("const int {}={};", mName, value);
                         }
                         else
                         {
                             static_assert(std::is_same_v<T, bool>, "Non-exhaustive visitor");
                             if (useUniform)
-                                return Misc::StringUtils::format("uniform bool %s;", uname);
+                                return std::format("uniform bool {};", uname);
 
-                            return Misc::StringUtils::format("const bool %s=%s;", mName, value ? "true" : "false");
+                            return std::format("const bool {}={};", mName, value);
                         }
                     },
                     mData);

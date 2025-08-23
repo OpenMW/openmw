@@ -1,12 +1,11 @@
 #include "lexer.hpp"
 
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
-#include <optional>
-#include <string>
-#include <string_view>
+#include <format>
 
-#include <components/misc/strings/format.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 namespace Fx
 {
@@ -124,9 +123,9 @@ namespace Fx
             return mLastJumpBlock;
         }
 
-        [[noreturn]] void Lexer::error(const std::string& msg)
+        [[noreturn]] void Lexer::error(std::string_view msg)
         {
-            throw LexerException(Misc::StringUtils::format("Line %zu Col %zu. %s", mLine + 1, mColumn, msg));
+            throw LexerException(std::format("Line {} Col {}. {}", mLine + 1, mColumn, msg));
         }
 
         void Lexer::advance()
@@ -136,7 +135,7 @@ namespace Fx
             mColumn++;
         }
 
-        char Lexer::head()
+        unsigned char Lexer::head()
         {
             return *mHead;
         }
@@ -209,7 +208,7 @@ namespace Fx
                     advance();
                     return { Comma{} };
                 default:
-                    error(Misc::StringUtils::format("unexpected token <%c>", head()));
+                    error(std::format("unexpected token <{:c}>", head()));
             }
         }
 
@@ -293,23 +292,42 @@ namespace Fx
         Token Lexer::scanNumber()
         {
             double buffer;
-
-            char* endPtr;
+            char* endPtr = nullptr;
             buffer = std::strtod(mHead, &endPtr);
-
-            if (endPtr == nullptr)
+            if (endPtr == nullptr || endPtr == mHead)
                 error("critical error while parsing number");
 
-            const char* tmp = mHead;
-            mHead = endPtr;
-
-            for (; tmp != endPtr; ++tmp)
+            bool isDefinitelyAFloat = false;
+            // GLSL allows floats to end on f/F
+            if (endPtr != mTail && Misc::StringUtils::toLower(*endPtr) == 'f')
             {
-                if ((*tmp == '.'))
-                    return Float{ static_cast<float>(buffer) };
+                isDefinitelyAFloat = true;
+                ++endPtr;
             }
 
-            return Integer{ static_cast<int>(buffer) };
+            std::string_view literal(mHead, endPtr);
+            mHead = endPtr;
+
+            // Disallow -inf, -nan, and values that cannot be represented as doubles
+            if (!std::isfinite(buffer))
+                return Literal{ literal };
+            // Disallow hex notation (not allowed in GLSL so confusing to partially allow)
+            if (Misc::StringUtils::ciStartsWith(literal, "0x") || Misc::StringUtils::ciStartsWith(literal, "-0x"))
+                return Literal{ literal };
+
+            constexpr std::string_view floatCharacters = ".eE";
+            if (!isDefinitelyAFloat && literal.find_first_of(floatCharacters) == std::string_view::npos)
+            {
+                // This is supposed to be an int, but that doesn't mean it can fit in one
+                int intValue = static_cast<int>(buffer);
+                if (intValue != buffer)
+                    error("number out of range");
+                return Integer{ intValue };
+            }
+            float floatValue = static_cast<float>(buffer);
+            if (!std::isfinite(floatValue))
+                error("number out of range");
+            return Float{ floatValue };
         }
     }
 }
