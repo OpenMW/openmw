@@ -701,6 +701,10 @@ namespace Resource
                 node->accept(renamingVisitor);
             }
 
+            // Replace osg::Depth with reverse-Z-compatible SceneUtil::AutoDepth
+            SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
+            node->accept(replaceDepthVisitor);
+
             for (osg::Node* foundRigNode : rigFinder.mFoundNodes)
             {
                 if (foundRigNode->libraryName() == std::string_view("osgAnimation"))
@@ -1018,9 +1022,6 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(
                 mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
-
-            SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
-            loaded->accept(replaceDepthVisitor);
 
             osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor());
             loaded->accept(*shaderVisitor);
