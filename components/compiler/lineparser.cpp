@@ -481,7 +481,7 @@ namespace Compiler
     }
 
     void GetArgumentsFromMessageFormat::visitedPlaceholder(
-        Placeholder placeholder, char /*padding*/, int /*width*/, int /*precision*/, Notation /*notation*/)
+        Placeholder placeholder, int /*flags*/, int /*width*/, int /*precision*/, Notation /*notation*/)
     {
         switch (placeholder)
         {

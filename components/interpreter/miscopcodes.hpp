@@ -2,8 +2,7 @@
 #define INTERPRETER_MISCOPCODES_H_INCLUDED
 
 #include <algorithm>
-#include <sstream>
-#include <stdexcept>
+#include <format>
 #include <string>
 #include <vector>
 
@@ -23,78 +22,79 @@ namespace Interpreter
 
     protected:
         void visitedPlaceholder(
-            Placeholder placeholder, char padding, int width, int precision, Notation notation) override
+            Placeholder placeholder, int flags, int width, int precision, Notation notation) override
         {
-            std::ostringstream out;
-            out.fill(padding);
-            if (width != -1)
-                out.width(width);
-            if (precision != -1)
-                out.precision(precision);
+            std::string formatString;
 
-            switch (placeholder)
+            if (placeholder == StringPlaceholder)
             {
-                case StringPlaceholder:
-                {
-                    int index = mRuntime[0].mInteger;
-                    mRuntime.pop();
+                int index = mRuntime[0].mInteger;
+                mRuntime.pop();
 
-                    out << mRuntime.getStringLiteral(index);
-                    mFormattedMessage += out.str();
-                }
-                break;
-                case IntegerPlaceholder:
+                std::string_view value = mRuntime.getStringLiteral(index);
+                if (precision >= 0)
+                    value = value.substr(0, static_cast<std::size_t>(precision));
+                if (width < 0)
+                    mFormattedMessage += value;
+                else
                 {
-                    Type_Integer value = mRuntime[0].mInteger;
-                    mRuntime.pop();
-
-                    out << value;
-                    mFormattedMessage += out.str();
+                    formatString = "{:";
+                    if (flags & PrependZero)
+                        formatString += '0';
+                    if (flags & AlignLeft)
+                        formatString += '<';
+                    else
+                        formatString += '>';
+                    formatString += "{}}";
+                    mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width));
                 }
-                break;
-                case FloatPlaceholder:
+            }
+            else
+            {
+                formatString = "{:";
+                if (flags & AlignLeft)
+                    formatString += '<';
+                if (flags & PositiveSign)
+                    formatString += '+';
+                else if (flags & PositiveSpace)
+                    formatString += ' ';
+                if (flags & AlternateForm)
+                    formatString += '#';
+                if (flags & PrependZero)
+                    formatString += '0';
+                if (width >= 0)
+                    formatString += "{}";
+                if (placeholder == FloatPlaceholder)
+                {
+                    if (precision >= 0)
+                        formatString += ".{}";
+                    formatString += static_cast<char>(notation);
+                }
+                else
+                    precision = -1;
+                formatString += '}';
+                const auto appendMessage = [&](auto value) {
+                    if (width >= 0 && precision >= 0)
+                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width, precision));
+                    else if (width >= 0)
+                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width));
+                    else if (precision >= 0)
+                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, precision));
+                    else
+                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value));
+                };
+                if (placeholder == FloatPlaceholder)
                 {
                     float value = mRuntime[0].mFloat;
                     mRuntime.pop();
-
-                    if (notation == Notation::Fixed)
-                    {
-                        out << std::fixed << value;
-                        mFormattedMessage += out.str();
-                    }
-                    else if (notation == Notation::Shortest)
-                    {
-                        out << value;
-                        std::string standard = out.str();
-
-                        out.str(std::string());
-                        out.clear();
-
-                        out << std::scientific << value;
-                        std::string scientific = out.str();
-
-                        mFormattedMessage += standard.length() < scientific.length() ? standard : scientific;
-                    }
-                    // TODO switch to std::format so the precision argument applies to these two
-                    else if (notation == Notation::HexLower)
-                    {
-                        out << std::hexfloat << value;
-                        mFormattedMessage += out.str();
-                    }
-                    else if (notation == Notation::HexUpper)
-                    {
-                        out << std::uppercase << std::hexfloat << value;
-                        mFormattedMessage += out.str();
-                    }
-                    else
-                    {
-                        out << std::scientific << value;
-                        mFormattedMessage += out.str();
-                    }
+                    appendMessage(value);
                 }
-                break;
-                default:
-                    break;
+                else
+                {
+                    Type_Integer value = mRuntime[0].mInteger;
+                    mRuntime.pop();
+                    appendMessage(value);
+                }
             }
         }
 
