@@ -15,11 +15,13 @@ namespace Misc
             FloatPlaceholder
         };
 
-        enum Notation
+        enum class Notation
         {
-            FixedNotation,
-            ScientificNotation,
-            ShortestNotation
+            Fixed,
+            Scientific,
+            Shortest,
+            HexUpper,
+            HexLower
         };
 
         virtual void visitedPlaceholder(
