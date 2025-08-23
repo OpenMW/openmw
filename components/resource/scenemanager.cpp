@@ -42,7 +42,6 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
-#include <components/sceneutil/extradata.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
@@ -1002,9 +1001,6 @@ namespace Resource
             try
             {
                 loaded = load(path, mVFS, mImageManager, mNifFileManager, mBgsmFileManager);
-
-                SceneUtil::ProcessExtraDataVisitor extraDataVisitor(this);
-                loaded->accept(extraDataVisitor);
             }
             catch (const std::exception& e)
             {

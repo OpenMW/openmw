@@ -1,13 +1,6 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_EXTRADATA_H
 #define OPENMW_COMPONENTS_RESOURCE_EXTRADATA_H
 
-#include <osg/NodeVisitor>
-
-namespace Resource
-{
-    class SceneManager;
-}
-
 namespace osg
 {
     class Node;
@@ -15,23 +8,20 @@ namespace osg
 
 namespace SceneUtil
 {
-    void setupSoftEffect(osg::Node& node, float size, bool falloff, float falloffDepth);
-    void setupDistortion(osg::Node& node, float distortionStrength);
-
-    class ProcessExtraDataVisitor : public osg::NodeVisitor
+    struct SoftEffectConfig
     {
-    public:
-        ProcessExtraDataVisitor(Resource::SceneManager* sceneMgr)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mSceneMgr(sceneMgr)
-        {
-        }
-
-        void apply(osg::Node& node) override;
-
-    private:
-        Resource::SceneManager* mSceneMgr;
+        float mSize = 45.f;
+        float mFalloffDepth = 300.f;
+        bool mFalloff = false;
     };
+
+    struct DistortionConfig
+    {
+        float mStrength = 0.1f;
+    };
+
+    void setupSoftEffect(osg::Node& node, const SoftEffectConfig& config);
+    void setupDistortion(osg::Node& node, const DistortionConfig& config);
 }
 
 #endif

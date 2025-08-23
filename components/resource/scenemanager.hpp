@@ -230,9 +230,6 @@ namespace Resource
 
         void setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled);
 
-        void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
-        bool getSoftParticles() const { return mSoftParticles; }
-
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
     private:
@@ -255,7 +252,6 @@ namespace Resource
         bool mAdjustCoverageForAlphaTest;
         bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
-        bool mSoftParticles = false;
         bool mWeatherParticleOcclusion = false;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;

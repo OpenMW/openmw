@@ -512,7 +512,6 @@ namespace MWRender
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
-        resourceSystem->getSceneManager()->setSoftParticles(Settings::shaders().mSoftParticles);
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
 
@@ -583,6 +582,7 @@ namespace MWRender
         MWBase::Environment::get().getWindowManager()->setCullMask(mask);
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
+        NifOsg::Loader::setSoftEffectEnabled(Settings::shaders().mSoftParticles);
         Nif::Reader::setLoadUnsupportedFiles(Settings::models().mLoadUnsupportedNifFiles);
 
         mStateUpdater->setFogEnd(mViewDistance);
