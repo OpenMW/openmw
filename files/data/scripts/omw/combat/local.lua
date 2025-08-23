@@ -192,7 +192,7 @@ local function applyArmor(attack)
             I.SkillProgression.skillUsed(skillid, {useType = I.SkillProgression.SKILL_USE_TYPES.Armor_HitByOpponent})
         end
         if item and Armor.objectIsInstance(item) then
-            local attackerIsUnarmedCreature = attack.attacker and not attack.weapon and Creature.objectIsInstance(attack.attacker)
+            local attackerIsUnarmedCreature = attack.attacker and not attack.weapon and not attack.ammo and Creature.objectIsInstance(attack.attacker)
             if settings:get('unarmedCreatureAttacksDamageArmor') or not attackerIsUnarmedCreature then
                 core.sendGlobalEvent('ModifyItemCondition', { actor = self, item = item, amount = diff })
             end
@@ -307,7 +307,7 @@ end
 -- @field [parent=#AttackInfo] openmw.self#ATTACK_TYPE type (Optional) Attack variant if applicable. For melee attacks this represents chop vs thrust vs slash. For unarmed creatures this implies which of its 3 possible attacks were used. For other attacks this field can be ignored.
 -- @field [parent=#AttackInfo] openmw.types#Actor attacker (Optional) Attacking actor
 -- @field [parent=#AttackInfo] openmw.types#Weapon weapon (Optional) Attacking weapon
--- @field [parent=#AttackInfo] openmw.types#Weapon ammo (Optional) Ammo
+-- @field [parent=#AttackInfo] #string ammo (Optional) Ammo record ID
 -- @field [parent=#AttackInfo] openmw.util#Vector3 hitPos (Optional) Where on the victim the attack is landing. Used to spawn blood effects. Blood effects are skipped if nil.
 return {
     --- Basic combat interface
@@ -330,7 +330,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#Combat] #number version
-        version = 0,
+        version = 1,
 
         --- Add new onHit handler for this actor
         -- If `handler(attack)` returns false, other handlers for

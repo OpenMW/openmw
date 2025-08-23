@@ -15,6 +15,7 @@
 #include "apps/openmw/mwmechanics/drawstate.hpp"
 #include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/inventorystore.hpp"
+#include "apps/openmw/mwworld/manualref.hpp"
 #include "apps/openmw/mwworld/worldmodel.hpp"
 
 #include "../localscripts.hpp"
@@ -439,19 +440,29 @@ namespace MWLua
             else if (sourceTypeStr == "magic")
                 sourceType = MWMechanics::DamageSourceType::Magical;
             sol::optional<Object> weapon = options.get<sol::optional<Object>>("weapon");
-            sol::optional<Object> ammo = options.get<sol::optional<Object>>("ammo");
+            std::string_view ammoId = options.get_or<std::string_view>("ammo", {});
+            ESM::RefId ammo = ESM::RefId::deserializeText(ammoId);
 
             context.mLuaManager->addAction(
                 [self = Object(self), damages = std::move(damageCpp),
-                    attacker = options.get<sol::optional<Object>>("attacker"), weapon = ammo ? ammo : weapon,
+                    attacker = options.get<sol::optional<Object>>("attacker"), weapon, ammo,
                     successful = options.get<bool>("successful"), sourceType = sourceType] {
                     MWWorld::Ptr attackerPtr;
                     MWWorld::Ptr weaponPtr;
                     if (attacker)
                         attackerPtr = attacker->ptr();
                     if (weapon)
-                        weaponPtr = weapon->ptr();
-                    self.ptr().getClass().onHit(self.ptr(), damages, weaponPtr, attackerPtr, successful, sourceType);
+                        weaponPtr = weapon->ptrOrEmpty();
+                    if (!ammo.empty())
+                    {
+                        MWWorld::ManualRef projectileRef(*MWBase::Environment::get().getESMStore(), ammo);
+                        weaponPtr = projectileRef.getPtr();
+                        self.ptr().getClass().onHit(
+                            self.ptr(), damages, weaponPtr, attackerPtr, successful, sourceType);
+                    }
+                    else
+                        self.ptr().getClass().onHit(
+                            self.ptr(), damages, weaponPtr, attackerPtr, successful, sourceType);
                 },
                 "HitAction");
         };
