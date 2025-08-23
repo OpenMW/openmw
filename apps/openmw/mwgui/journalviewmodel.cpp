@@ -205,21 +205,21 @@ namespace MWGui
                 // Unfortunately Morrowind.esm has no quest names, since the quest book was added with tribunal.
                 // Note that even with Tribunal, some quests still don't have quest names. I'm assuming those are not
                 // supposed to appear in the quest book.
-                if (quest.getName().empty())
+                const std::string_view questName = quest.getName();
+                if (questName.empty())
                     continue;
                 // Don't list the same quest name twice
-                if (!visitedQuests.insert(quest.getName()).second)
+                if (!visitedQuests.insert(questName).second)
                     continue;
 
                 bool isFinished = std::ranges::find_if(journal->getQuests(), [&](const auto& pair) {
-                    return pair.second.isFinished()
-                        && Misc::StringUtils::ciEqual(quest.getName(), pair.second.getName());
+                    return pair.second.isFinished() && Misc::StringUtils::ciEqual(questName, pair.second.getName());
                 }) != journal->getQuests().end();
 
                 if (activeOnly && isFinished)
                     continue;
 
-                visitor(quest.getName(), isFinished);
+                visitor(questName, isFinished);
             }
         }
 
