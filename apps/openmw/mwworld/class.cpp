@@ -119,7 +119,7 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::onHit(const Ptr& ptr, const std::map<std::string, float>& damages, const Ptr& object,
+    void Class::onHit(const Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,
         const Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         throw std::runtime_error("class cannot be hit");

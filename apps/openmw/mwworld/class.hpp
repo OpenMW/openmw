@@ -147,9 +147,8 @@ namespace MWWorld
         ///               enums. ignored for creature attacks.
         /// (default implementation: throw an exception)
 
-        virtual void onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages,
-            const MWWorld::Ptr& object, const MWWorld::Ptr& attacker, bool successful,
-            const MWMechanics::DamageSourceType sourceType) const;
+        virtual void onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,
+            const MWWorld::Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const;
         ///< Alerts \a ptr that it's being hit for \a damages by \a object (sword, arrow, etc). \a attacker specifies
         ///< the
         /// actor responsible for the attack. \a successful specifies if the hit is

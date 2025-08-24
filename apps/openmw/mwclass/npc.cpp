@@ -700,7 +700,7 @@ namespace MWClass
             damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
-    void Npc::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, const MWWorld::Ptr& object,
+    void Npc::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,
         const MWWorld::Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
@@ -735,8 +735,8 @@ namespace MWClass
                 statsAttacker.setHitAttemptActorId(stats.getActorId());
         }
 
-        if (!object.isEmpty())
-            stats.setLastHitAttemptObject(object.getCellRef().getRefId());
+        if (!object.empty())
+            stats.setLastHitAttemptObject(object);
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -752,8 +752,8 @@ namespace MWClass
             return;
         }
 
-        if (!object.isEmpty())
-            stats.setLastHitObject(object.getCellRef().getRefId());
+        if (!object.empty())
+            stats.setLastHitObject(object);
 
         if (ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState())
             return;
