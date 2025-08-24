@@ -1,10 +1,10 @@
 #include "animblendrules.hpp"
 
+#include <format>
 #include <iterator>
 #include <utility>
 
 #include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -68,8 +68,7 @@ namespace SceneUtil
 
         if (!root.IsDefined() || root.IsNull() || root.IsScalar())
         {
-            Log(Debug::Error) << Misc::StringUtils::format(
-                "Can't parse file '%s'. Check that it's a valid YAML/JSON file.", configPath);
+            Log(Debug::Error) << "Can't parse file '" << configPath << "'. Check that it's a valid YAML/JSON file.";
             return nullptr;
         }
 
@@ -104,12 +103,11 @@ namespace SceneUtil
         }
         else
         {
-            throw std::domain_error(
-                Misc::StringUtils::format("'blending_rules' object not found in '%s' file!", configPath));
+            throw std::domain_error(std::format("'blending_rules' object not found in '{}' file!", configPath.value()));
         }
 
         // If no rules then dont allocate any instance
-        if (rules.size() == 0)
+        if (rules.empty())
             return nullptr;
 
         return new AnimBlendRules(rules);
