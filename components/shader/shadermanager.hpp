@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SHADERMANAGER_H
 
 #include <array>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -9,11 +10,9 @@
 #include <string>
 #include <vector>
 
-#include <osg/ref_ptr>
-
-#include <filesystem>
 #include <osg/Program>
 #include <osg/Shader>
+#include <osg/ref_ptr>
 
 namespace osgViewer
 {

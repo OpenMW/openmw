@@ -3,44 +3,47 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <components/debug/debuglog.hpp>
-#include <components/files/conversion.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/conversion.hpp>
-#include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
 #include <filesystem>
 #include <fstream>
-#include <osg/Program>
-#include <osgViewer/Viewer>
 #include <regex>
 #include <set>
 #include <sstream>
 #include <unordered_map>
 
+#include <osg/Program>
+#include <osgViewer/Viewer>
+
+#include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
+#include <components/misc/pathhelpers.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
+#include <components/misc/strings/format.hpp>
+#include <components/settings/settings.hpp>
+
 namespace
 {
     osg::Shader::Type getShaderType(const std::string& templateName)
     {
-        auto ext = std::filesystem::path(templateName).extension();
+        std::string_view ext = Misc::getFileExtension(templateName);
 
-        if (ext == ".vert")
+        if (ext == "vert")
             return osg::Shader::VERTEX;
-        if (ext == ".frag")
+        if (ext == "frag")
             return osg::Shader::FRAGMENT;
-        if (ext == ".geom")
+        if (ext == "geom")
             return osg::Shader::GEOMETRY;
-        if (ext == ".comp")
+        if (ext == "comp")
             return osg::Shader::COMPUTE;
-        if (ext == ".tese")
+        if (ext == "tese")
             return osg::Shader::TESSEVALUATION;
-        if (ext == ".tesc")
+        if (ext == "tesc")
             return osg::Shader::TESSCONTROL;
 
         throw std::runtime_error("unrecognized shader template name: " + templateName);
     }
 
-    std::string getRootPrefix(const std::string& path)
+    std::string_view getRootPrefix(std::string_view path)
     {
         if (path.starts_with("lib"))
             return "lib";
@@ -48,8 +51,26 @@ namespace
             return "compatibility";
         else if (path.starts_with("core"))
             return "core";
+        return {};
+    }
+
+    int getLineNumber(std::string_view source, std::size_t foundPos, int lineNumber, int offset)
+    {
+        constexpr std::string_view tag = "#line";
+        std::size_t lineDirectivePosition = source.rfind(tag, foundPos);
+        if (lineDirectivePosition != std::string_view::npos)
+        {
+            std::size_t lineNumberStart = lineDirectivePosition + tag.size() + 1;
+            std::size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+            std::string_view lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) + offset;
+        }
         else
-            return "";
+        {
+            lineDirectivePosition = 0;
+        }
+        lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+        return lineNumber;
     }
 }
 
@@ -85,21 +106,7 @@ namespace Shader
             if (foundPos == std::string::npos)
                 break;
 
-            size_t lineDirectivePosition = source.rfind("#line", foundPos);
-            int lineNumber;
-            if (lineDirectivePosition != std::string::npos)
-            {
-                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
-            }
-            else
-            {
-                lineDirectivePosition = 0;
-                lineNumber = 1;
-            }
-            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+            int lineNumber = getLineNumber(source, foundPos, 1, -1);
 
             source.replace(foundPos, 0, "#line " + std::to_string(lineNumber) + "\n");
 
@@ -154,21 +161,7 @@ namespace Shader
             std::filesystem::path includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
-            size_t lineDirectivePosition = source.rfind("#line", foundPos);
-            int lineNumber;
-            if (lineDirectivePosition != std::string::npos)
-            {
-                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
-            }
-            else
-            {
-                lineDirectivePosition = 0;
-                lineNumber = 0;
-            }
-            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+            int lineNumber = getLineNumber(source, foundPos, 0, -1);
 
             // Include the file recursively
             std::ifstream includeFstream;
@@ -202,7 +195,8 @@ namespace Shader
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos)
     {
-        size_t iterNameStart = foundPos + strlen("$foreach") + 1;
+        constexpr std::string_view directiveStart = "$foreach";
+        size_t iterNameStart = foundPos + directiveStart.size() + 1;
         size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
         if (iterNameEnd == std::string::npos)
         {
@@ -218,46 +212,32 @@ namespace Shader
             Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
             return false;
         }
-        std::string list = source.substr(listStart, listEnd - listStart);
+        std::string_view list = std::string_view(source).substr(listStart, listEnd - listStart);
         std::vector<std::string> listElements;
-        if (list != "")
+        if (!list.empty())
             Misc::StringUtils::split(list, listElements, ",");
 
         size_t contentStart = source.find_first_not_of("\n\r", listEnd);
-        size_t contentEnd = source.find("$endforeach", contentStart);
+        constexpr std::string_view directiveEnd = "$endforeach";
+        size_t contentEnd = source.find(directiveEnd, contentStart);
         if (contentEnd == std::string::npos)
         {
             Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
             return false;
         }
-        std::string content = source.substr(contentStart, contentEnd - contentStart);
+        std::string_view content = std::string_view(source).substr(contentStart, contentEnd - contentStart);
 
-        size_t overallEnd = contentEnd + std::string("$endforeach").length();
+        size_t overallEnd = contentEnd + directiveEnd.size();
 
-        size_t lineDirectivePosition = source.rfind("#line", overallEnd);
-        int lineNumber;
-        if (lineDirectivePosition != std::string::npos)
-        {
-            size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-            size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-            std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2);
-        }
-        else
-        {
-            lineDirectivePosition = 0;
-            lineNumber = 2;
-        }
-        lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + overallEnd, '\n');
+        int lineNumber = getLineNumber(source, overallEnd, 2, 0);
 
         std::string replacement;
-        for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend();
-             element++)
+        for (const std::string& element : listElements)
         {
-            std::string contentInstance = content;
+            std::string contentInstance(content);
             size_t foundIterator;
             while ((foundIterator = contentInstance.find(iteratorName)) != std::string::npos)
-                contentInstance.replace(foundIterator, iteratorName.length(), *element);
+                contentInstance.replace(foundIterator, iteratorName.length(), element);
             replacement += contentInstance;
         }
         replacement += "\n#line " + std::to_string(lineNumber);
@@ -327,7 +307,7 @@ namespace Shader
                 Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
                 return false;
             }
-            std::string directive = source.substr(foundPos + 1, endPos - (foundPos + 1));
+            std::string_view directive = std::string_view(source).substr(foundPos + 1, endPos - (foundPos + 1));
             if (directive == "foreach")
             {
                 if (!parseForeachDirective(source, templateName, foundPos))
