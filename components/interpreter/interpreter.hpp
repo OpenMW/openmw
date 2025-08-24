@@ -4,13 +4,9 @@
 #include <map>
 #include <memory>
 #include <stack>
-#include <stdexcept>
 #include <utility>
 
-#include <components/misc/strings/format.hpp>
-
 #include "opcodes.hpp"
-#include "program.hpp"
 #include "runtime.hpp"
 #include "types.hpp"
 
@@ -34,12 +30,13 @@ namespace Interpreter
 
         void end();
 
+        [[noreturn]] void abortDuplicateInstruction(std::string_view name, int code);
+
         template <typename T, typename... Args>
         void installSegment(auto& segment, std::string_view name, int code, Args&&... args)
         {
             if (segment.find(code) != segment.end())
-                throw std::invalid_argument(Misc::StringUtils::format(
-                    "Duplicated interpreter instruction code in segment %s: 0x%x", name, code));
+                abortDuplicateInstruction(name, code);
             segment.emplace(code, std::make_unique<T>(std::forward<Args>(args)...));
         }
 
