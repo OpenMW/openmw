@@ -15,7 +15,6 @@
 #include "apps/openmw/mwmechanics/drawstate.hpp"
 #include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/inventorystore.hpp"
-#include "apps/openmw/mwworld/manualref.hpp"
 #include "apps/openmw/mwworld/worldmodel.hpp"
 
 #include "../localscripts.hpp"
