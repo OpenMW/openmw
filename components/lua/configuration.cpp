@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <bitset>
 #include <cassert>
+#include <format>
 #include <sstream>
 
 #include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace LuaUtil
@@ -187,13 +187,13 @@ namespace LuaUtil
                 line = line.substr(0, line.size() - 1);
 
             if (!Misc::StringUtils::ciEndsWith(line, ".lua"))
-                throw std::runtime_error(Misc::StringUtils::format(
-                    "Lua script should have suffix '.lua', got: %s", std::string(line.substr(0, 300))));
+                throw std::runtime_error(
+                    std::format("Lua script should have suffix '.lua', got: {}", line.substr(0, 300)));
 
             // Split tags and script path
             size_t semicolonPos = line.find(':');
-            if (semicolonPos == std::string::npos)
-                throw std::runtime_error(Misc::StringUtils::format("No flags found in: %s", std::string(line)));
+            if (semicolonPos == std::string_view::npos)
+                throw std::runtime_error(std::format("No flags found in: {}", line));
             std::string_view tagsStr = line.substr(0, semicolonPos);
             std::string_view scriptPath = line.substr(semicolonPos + 1);
             while (isSpace(scriptPath[0]))
@@ -222,8 +222,7 @@ namespace LuaUtil
                 else if (typesIt != typeTagsByName.end())
                     script.mTypes.push_back(typesIt->second);
                 else
-                    throw std::runtime_error(
-                        Misc::StringUtils::format("Unknown tag '%s' in: %s", std::string(tagName), std::string(line)));
+                    throw std::runtime_error(std::format("Unknown tag '{}' in: {}", tagName, line));
             }
         }
     }

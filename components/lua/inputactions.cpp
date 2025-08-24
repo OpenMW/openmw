@@ -116,14 +116,14 @@ namespace LuaUtil
         void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
-                throw std::domain_error(Misc::StringUtils::format("Action key \"%s\" is already in use", info.mKey));
+                throw std::domain_error(std::format("Action key \"{}\" is already in use", info.mKey));
             if (info.mKey.empty())
                 throw std::domain_error("Action key can't be an empty string");
             if (info.mL10n.empty())
                 throw std::domain_error("Localization context can't be empty");
             if (!validateActionValue(info.mDefaultValue, info.mType))
-                throw std::logic_error(Misc::StringUtils::format(
-                    "Invalid value: \"%s\" for action \"%s\"", LuaUtil::toString(info.mDefaultValue), info.mKey));
+                throw std::logic_error(std::format(
+                    "Invalid value: \"{}\" for action \"{}\"", LuaUtil::toString(info.mDefaultValue), info.mKey));
             Id id = mBindingTree.insert();
             mKeys.push_back(info.mKey);
             mIds[std::string(info.mKey)] = id;
@@ -156,7 +156,7 @@ namespace LuaUtil
         {
             auto iter = mIds.find(key);
             if (iter == mIds.end())
-                throw std::logic_error(Misc::StringUtils::format("Unknown action key: \"%s\"", key));
+                throw std::logic_error(std::format("Unknown action key: \"{}\"", key));
             return iter->second;
         }
 
@@ -183,7 +183,7 @@ namespace LuaUtil
             Info info = mInfo[id];
             if (info.mType != type)
                 throw std::logic_error(
-                    Misc::StringUtils::format("Attempt to get value of type \"%s\" from action \"%s\" with type \"%s\"",
+                    std::format("Attempt to get value of type \"{}\" from action \"{}\" with type \"{}\"",
                         typeName(type), key, typeName(info.mType)));
             return mValues[id];
         }
@@ -210,10 +210,9 @@ namespace LuaUtil
                                        catch (std::exception& e)
                                        {
                                            if (!validateActionValue(newValue, mInfo[node].mType))
-                                               Log(Debug::Error) << Misc::StringUtils::format(
-                                                   "Error due to invalid value of action \"%s\"(\"%s\"): ", mKeys[node],
-                                                   LuaUtil::toString(newValue))
-                                                                 << e.what();
+                                               Log(Debug::Error)
+                                                   << "Error due to invalid value of action \"" << mKeys[node]
+                                                   << "\"(\"" << LuaUtil::toString(newValue) << "\"): " << e.what();
                                            else
                                                Log(Debug::Error) << "Error in callback: " << e.what();
                                        }
@@ -222,8 +221,8 @@ namespace LuaUtil
                     bindings.end());
 
                 if (!validateActionValue(newValue, mInfo[node].mType))
-                    Log(Debug::Error) << Misc::StringUtils::format(
-                        "Invalid value of action \"%s\": %s", mKeys[node], LuaUtil::toString(newValue));
+                    Log(Debug::Error) << "Invalid value of action \"" << mKeys[node]
+                                      << "\": " << LuaUtil::toString(newValue);
                 if (mValues[node] != newValue)
                 {
                     mValues[node] = sol::object(newValue);
@@ -270,14 +269,14 @@ namespace LuaUtil
         {
             auto it = mIds.find(key);
             if (it == mIds.end())
-                throw std::domain_error(Misc::StringUtils::format("Unknown trigger key \"%s\"", key));
+                throw std::domain_error(std::format("Unknown trigger key \"{}\"", key));
             return it->second;
         }
 
         void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
-                throw std::domain_error(Misc::StringUtils::format("Trigger key \"%s\" is already in use", info.mKey));
+                throw std::domain_error(std::format("Trigger key \"{}\" is already in use", info.mKey));
             if (info.mKey.empty())
                 throw std::domain_error("Trigger key can't be an empty string");
             if (info.mL10n.empty())
