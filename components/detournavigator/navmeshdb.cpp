@@ -2,7 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/compression.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/sqlite3/db.hpp>
 #include <components/sqlite3/request.hpp>
 
@@ -11,6 +10,7 @@
 #include <sqlite3.h>
 
 #include <cstddef>
+#include <format>
 #include <string_view>
 #include <vector>
 
@@ -148,7 +148,7 @@ namespace DetourNavigator
 
         void setMaxPageCount(sqlite3& db, std::uint64_t value)
         {
-            const auto query = Misc::StringUtils::format("pragma max_page_count = %lu;", value);
+            const auto query = std::format("pragma max_page_count = {};", value);
             if (const int ec = sqlite3_exec(&db, query.c_str(), nullptr, nullptr, nullptr); ec != SQLITE_OK)
                 throw std::runtime_error("Failed set max page count: " + std::string(sqlite3_errmsg(&db)));
         }

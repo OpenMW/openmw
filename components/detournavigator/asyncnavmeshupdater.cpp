@@ -10,7 +10,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/conversion.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/thread.hpp>
 
 #include <DetourNavMesh.h>
@@ -20,6 +19,7 @@
 #include <boost/geometry.hpp>
 
 #include <algorithm>
+#include <format>
 #include <optional>
 #include <set>
 #include <tuple>
@@ -78,7 +78,7 @@ namespace DetourNavigator
 
         std::string makeRevision(const Version& version)
         {
-            return Misc::StringUtils::format(".%zu.%zu", version.mGeneration, version.mRevision);
+            return std::format(".{}.{}", version.mGeneration, version.mRevision);
         }
 
         void writeDebugRecastMesh(
@@ -90,9 +90,8 @@ namespace DetourNavigator
             if (settings.mEnableRecastMeshFileNameRevision)
                 revision = makeRevision(recastMesh.getVersion());
             writeToFile(recastMesh,
-                Misc::StringUtils::format(
-                    "%s%d.%d.", settings.mRecastMeshPathPrefix, tilePosition.x(), tilePosition.y()),
-                revision, settings.mRecast);
+                std::format("{}{}.{}.", settings.mRecastMeshPathPrefix, tilePosition.x(), tilePosition.y()), revision,
+                settings.mRecast);
         }
 
         void writeDebugNavMesh(
