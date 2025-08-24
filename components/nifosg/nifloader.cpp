@@ -13,6 +13,8 @@
 #include <osg/TexMat>
 #include <osg/ValueObject>
 
+#include <yaml-cpp/yaml.h>
+
 // resource
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
@@ -23,6 +25,7 @@
 #include <components/nif/parent.hpp>
 #include <components/resource/bgsmfilemanager.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/serialization/osgyaml.hpp>
 
 // particle
 #include <osgParticle/BoxPlacer>
@@ -197,6 +200,33 @@ namespace
             }
         }
     }
+
+    void handleExtraData(const std::string& data, osg::Group* node)
+    {
+        YAML::Node root = YAML::Load(data);
+
+        for (const auto& it : root["shader"])
+        {
+            std::string key = it.first.as<std::string>();
+
+            if (key == "soft_effect" && NifOsg::Loader::getSoftEffectEnabled())
+            {
+                SceneUtil::SoftEffectConfig config;
+                config.mSize = it.second["size"].as<float>(config.mSize);
+                config.mFalloff = it.second["falloff"].as<bool>(config.mFalloff);
+                config.mFalloffDepth = it.second["falloffDepth"].as<float>(config.mFalloffDepth);
+
+                SceneUtil::setupSoftEffect(*node, config);
+            }
+            else if (key == "distortion")
+            {
+                SceneUtil::DistortionConfig config;
+                config.mStrength = it.second["strength"].as<float>(config.mStrength);
+
+                SceneUtil::setupDistortion(*node, config);
+            }
+        }
+    }
 }
 
 namespace NifOsg
@@ -234,6 +264,18 @@ namespace NifOsg
     unsigned int Loader::getIntersectionDisabledNodeMask()
     {
         return sIntersectionDisabledNodeMask;
+    }
+
+    bool Loader::sSoftEffectEnabled = false;
+
+    void Loader::setSoftEffectEnabled(bool enabled)
+    {
+        sSoftEffectEnabled = enabled;
+    }
+
+    bool Loader::getSoftEffectEnabled()
+    {
+        return sSoftEffectEnabled;
     }
 
     class LoaderImpl
@@ -649,6 +691,8 @@ namespace NifOsg
             // - finding a random child NiNode in NiBspArrayController
             node->setUserValue("recIndex", nifNode->recIndex);
 
+            std::string extraData;
+
             for (const auto& e : nifNode->getExtraList())
             {
                 if (e->recType == Nif::RC_NiTextKeyExtraData && args.mTextKeys)
@@ -676,8 +720,7 @@ namespace NifOsg
                     }
                     else if (sd->mData.rfind(extraDataIdentifer, 0) == 0)
                     {
-                        node->setUserValue(
-                            Misc::OsgUserValues::sExtraData, sd->mData.substr(extraDataIdentifer.length()));
+                        extraData = sd->mData.substr(extraDataIdentifer.length());
                     }
                 }
                 else if (e->recType == Nif::RC_BSXFlags)
@@ -751,6 +794,13 @@ namespace NifOsg
 
             applyNodeProperties(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
 
+            if (nifNode->recType == Nif::RC_NiParticles)
+                handleParticleSystem(nifNode, parent, node, composite, args.mAnimFlags);
+
+            // Apply any extra effects after processing the nodes children and particle system handling
+            if (!extraData.empty())
+                handleExtraData(extraData, node);
+
             const bool isNiGeometry = isTypeNiGeometry(nifNode->recType);
             const bool isBSGeometry = isTypeBSGeometry(nifNode->recType);
             const bool isGeometry = isNiGeometry || isBSGeometry;
@@ -781,9 +831,6 @@ namespace NifOsg
                         handleMeshControllers(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
                 }
             }
-
-            if (nifNode->recType == Nif::RC_NiParticles)
-                handleParticleSystem(nifNode, parent, node, composite, args.mAnimFlags);
 
             if (composite->getNumControllers() > 0)
             {
@@ -1412,6 +1459,12 @@ namespace NifOsg
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
+
+            if (Loader::getSoftEffectEnabled())
+                SceneUtil::setupSoftEffect(*partsys,
+                    {
+                        .mSize = partsys->getDefaultParticleTemplate().getSizeRange().maximum,
+                    });
         }
 
         void handleNiGeometryData(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Geometry* geometry,
@@ -2313,8 +2366,9 @@ namespace NifOsg
             {
                 auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat);
                 mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
-                if (bgem->mSoft)
-                    SceneUtil::setupSoftEffect(node, bgem->mSoftDepth, true, bgem->mSoftDepth);
+                if (bgem->mSoft && Loader::getSoftEffectEnabled())
+                    SceneUtil::setupSoftEffect(
+                        node, { .mSize = bgem->mSoftDepth, .mFalloffDepth = bgem->mSoftDepth, .mFalloff = true });
             }
         }
 
@@ -2507,7 +2561,7 @@ namespace NifOsg
                             node->getName(), stateset, boundTextures);
                     handleTextureControllers(texprop, composite, stateset, animflags);
                     if (texprop->refraction())
-                        SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
+                        SceneUtil::setupDistortion(*node, { .mStrength = texprop->mRefraction.mStrength });
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2558,7 +2612,7 @@ namespace NifOsg
                         stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
                     if (texprop->refraction())
-                        SceneUtil::setupDistortion(*node, texprop->mRefractionStrength);
+                        SceneUtil::setupDistortion(*node, { .mStrength = texprop->mRefractionStrength });
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:
@@ -2821,9 +2875,13 @@ namespace NifOsg
                             break;
                         }
                         handleDecal(shaderprop->decal(), hasSortAlpha, *node);
-                        if (shaderprop->softEffect())
-                            SceneUtil::setupSoftEffect(
-                                *node, shaderprop->mFalloffDepth, true, shaderprop->mFalloffDepth);
+                        if (shaderprop->softEffect() && Loader::getSoftEffectEnabled())
+                            SceneUtil::setupSoftEffect(*node,
+                                {
+                                    .mSize = shaderprop->mFalloffDepth,
+                                    .mFalloffDepth = shaderprop->mFalloffDepth,
+                                    .mFalloff = true,
+                                });
                         break;
                     }
                     default:
