@@ -4,6 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <regex>
 #include <set>
@@ -18,7 +19,6 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 
 namespace
@@ -108,7 +108,7 @@ namespace Shader
 
             int lineNumber = getLineNumber(source, foundPos, 1, -1);
 
-            source.replace(foundPos, 0, "#line " + std::to_string(lineNumber) + "\n");
+            source.replace(foundPos, 0, std::format("#line {}\n", lineNumber));
 
             position = foundPos;
         }
@@ -554,7 +554,7 @@ namespace Shader
             // Assign a unique prefix to allow the SharedStateManager to compare shaders efficiently.
             // Append shader source filename for debugging.
             static unsigned int counter = 0;
-            shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
+            shader->setName(std::format("{} {}", counter++, templateName));
 
             mHotReloadManager->addShaderFiles(templateName, defines);
 
