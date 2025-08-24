@@ -46,7 +46,7 @@
 
 namespace
 {
-    std::string textureFilteringToStr(const std::string& mipFilter, const std::string& magFilter)
+    std::string_view textureFilteringToStr(const std::string& mipFilter, const std::string& magFilter)
     {
         if (mipFilter == "none")
             return "#{OMWEngine:TextureFilteringDisabled}";
@@ -65,9 +65,9 @@ namespace
         return "#{OMWEngine:TextureFilteringOther}";
     }
 
-    std::string lightingMethodToStr(SceneUtil::LightingMethod method)
+    MyGUI::UString lightingMethodToStr(SceneUtil::LightingMethod method)
     {
-        std::string result;
+        std::string_view result;
         switch (method)
         {
             case SceneUtil::LightingMethod::FFP:
@@ -82,7 +82,7 @@ namespace
                 break;
         }
 
-        return MyGUI::LanguageManager::getInstance().replaceTags(result);
+        return MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString(result));
     }
 
     bool sortResolutions(std::pair<int, int> left, std::pair<int, int> right)
@@ -840,7 +840,7 @@ namespace MWGui
     void SettingsWindow::updateLightSettings()
     {
         auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();
-        std::string lightingMethodStr = lightingMethodToStr(lightingMethod);
+        MyGUI::UString lightingMethodStr = lightingMethodToStr(lightingMethod);
 
         mLightingMethodButton->removeAllItems();
 
