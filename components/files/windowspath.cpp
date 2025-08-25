@@ -113,13 +113,14 @@ namespace Files
         return getUserConfigPath() / "cache";
     }
 
-    std::filesystem::path WindowsPath::getInstallPath() const
+    std::vector<std::filesystem::path> WindowsPath::getInstallPaths() const
     {
+        std::vector<std::filesystem::path> paths;
         std::filesystem::path installPath
             = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path");
         if (!installPath.empty() && std::filesystem::is_directory(installPath))
-            return installPath;
-        return {};
+            paths.emplace_back(std::move(installPath));
+        return paths;
     }
 
 } /* namespace Files */

@@ -66,9 +66,9 @@ namespace Files
         return std::filesystem::path(g_path_user);
     }
 
-    std::filesystem::path AndroidPath::getInstallPath() const
+    std::vector<std::filesystem::path> AndroidPath::getInstallPaths() const
     {
-        return std::filesystem::path();
+        return {};
     }
 
 } /* namespace Files */

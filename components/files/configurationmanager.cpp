@@ -419,9 +419,9 @@ namespace Files
         return mFixedPath.getCachePath();
     }
 
-    const std::filesystem::path& ConfigurationManager::getInstallPath() const
+    const std::vector<std::filesystem::path>& ConfigurationManager::getInstallPaths() const
     {
-        return mFixedPath.getInstallPath();
+        return mFixedPath.getInstallPaths();
     }
 
     const std::filesystem::path& ConfigurationManager::getScreenshotPath() const

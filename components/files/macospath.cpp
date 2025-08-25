@@ -106,12 +106,17 @@ namespace Files
         return globalDataPath / mName;
     }
 
-    std::filesystem::path MacOsPath::getInstallPath() const
+    std::vector<std::filesystem::path> MacOsPath::getInstallPaths() const
     {
+        std::vector<std::filesystem::path> paths;
         std::filesystem::path homePath = getUserHome();
         if (!homePath.empty())
-            return Wine::getInstallPath(homePath);
-        return {};
+        {
+            std::filesystem::path wine = Wine::getInstallPath(homePath);
+            if (!wine.empty())
+                paths.emplace_back(std::move(wine));
+        }
+        return paths;
     }
 
 } /* namespace Files */
