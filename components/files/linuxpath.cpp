@@ -110,6 +110,9 @@ namespace Files
             std::filesystem::path wine = Wine::getInstallPath(homePath);
             if (!wine.empty())
                 paths.emplace_back(std::move(wine));
+            std::filesystem::path steam = homePath / ".local/share/Steam/steamapps/common/Morrowind";
+            if (std::filesystem::is_directory(steam))
+                paths.emplace_back(std::move(steam));
         }
         return paths;
     }

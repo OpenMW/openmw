@@ -35,10 +35,13 @@ namespace Files
             }
         };
 
-        std::filesystem::path getRegistryPath(LPCWSTR subKey, LPCWSTR valueName)
+        std::filesystem::path getRegistryPath(LPCWSTR subKey, LPCWSTR valueName, bool use32)
         {
             RegistryKey key;
-            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, KEY_READ | KEY_WOW64_32KEY, &key.mKey) == ERROR_SUCCESS)
+            REGSAM flags = KEY_READ;
+            if (use32)
+                flags |= KEY_WOW64_32KEY;
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, flags, &key.mKey) == ERROR_SUCCESS)
             {
                 // Key existed, let's try to read the install dir
                 std::array<wchar_t, 512> buf{};
@@ -116,10 +119,18 @@ namespace Files
     std::vector<std::filesystem::path> WindowsPath::getInstallPaths() const
     {
         std::vector<std::filesystem::path> paths;
-        std::filesystem::path installPath
-            = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path");
-        if (!installPath.empty() && std::filesystem::is_directory(installPath))
-            paths.emplace_back(std::move(installPath));
+        {
+            std::filesystem::path disk
+                = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path", true);
+            if (!disk.empty() && std::filesystem::is_directory(disk))
+                paths.emplace_back(std::move(disk));
+        }
+        {
+            std::filesystem::path steam = getRegistryPath(
+                L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 22320", L"InstallLocation", false);
+            if (!steam.empty() && std::filesystem::is_directory(steam))
+                paths.emplace_back(std::move(steam));
+        }
         return paths;
     }
 
