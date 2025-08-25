@@ -438,20 +438,27 @@ namespace MWLua
                 sourceType = MWMechanics::DamageSourceType::Ranged;
             else if (sourceTypeStr == "magic")
                 sourceType = MWMechanics::DamageSourceType::Magical;
-            sol::optional<Object> weapon = options.get<sol::optional<Object>>("weapon");
-            sol::optional<Object> ammo = options.get<sol::optional<Object>>("ammo");
+            std::string_view ammoId = options.get_or<std::string_view>("ammo", {});
+            ESM::RefId weaponId = ESM::RefId::deserializeText(ammoId);
+            if (weaponId.empty())
+            {
+                if (sol::optional<Object> weapon = options.get<sol::optional<Object>>("weapon"))
+                {
+                    MWWorld::Ptr weaponPtr = weapon->ptrOrEmpty();
+                    if (!weaponPtr.isEmpty())
+                        weaponId = weaponPtr.getCellRef().getRefId();
+                }
+            }
 
             context.mLuaManager->addAction(
                 [self = Object(self), damages = std::move(damageCpp),
-                    attacker = options.get<sol::optional<Object>>("attacker"), weapon = ammo ? ammo : weapon,
+                    attacker = options.get<sol::optional<Object>>("attacker"), weaponId,
                     successful = options.get<bool>("successful"), sourceType = sourceType] {
                     MWWorld::Ptr attackerPtr;
                     MWWorld::Ptr weaponPtr;
                     if (attacker)
                         attackerPtr = attacker->ptr();
-                    if (weapon)
-                        weaponPtr = weapon->ptr();
-                    self.ptr().getClass().onHit(self.ptr(), damages, weaponPtr, attackerPtr, successful, sourceType);
+                    self.ptr().getClass().onHit(self.ptr(), damages, weaponId, attackerPtr, successful, sourceType);
                 },
                 "HitAction");
         };

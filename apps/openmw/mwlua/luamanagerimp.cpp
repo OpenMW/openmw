@@ -515,7 +515,7 @@ namespace MWLua
             if (!weapon.isEmpty())
                 data["weapon"] = LObject(weapon);
             if (!ammo.isEmpty())
-                data["ammo"] = LObject(weapon);
+                data["ammo"] = ammo.getCellRef().getRefId().serializeText();
             data["type"] = attackType;
             data["strength"] = attackStrength;
             data["damage"] = damageTable;

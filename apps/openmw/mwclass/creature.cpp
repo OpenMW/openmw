@@ -349,9 +349,8 @@ namespace MWClass
             damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
-    void Creature::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages,
-        const MWWorld::Ptr& object, const MWWorld::Ptr& attacker, bool successful,
-        const MWMechanics::DamageSourceType sourceType) const
+    void Creature::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,
+        const MWWorld::Ptr& attacker, bool successful, const MWMechanics::DamageSourceType sourceType) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
@@ -386,8 +385,8 @@ namespace MWClass
                 statsAttacker.setHitAttemptActorId(stats.getActorId());
         }
 
-        if (!object.isEmpty())
-            stats.setLastHitAttemptObject(object.getCellRef().getRefId());
+        if (!object.empty())
+            stats.setLastHitAttemptObject(object);
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -403,8 +402,8 @@ namespace MWClass
             return;
         }
 
-        if (!object.isEmpty())
-            stats.setLastHitObject(object.getCellRef().getRefId());
+        if (!object.empty())
+            stats.setLastHitObject(object);
 
         bool hasDamage = false;
         bool hasHealthDamage = false;
