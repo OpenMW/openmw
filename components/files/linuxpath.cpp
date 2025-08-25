@@ -2,6 +2,7 @@
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 
+#include <array>
 #include <cstring>
 #include <pwd.h>
 #include <unistd.h>
@@ -110,9 +111,17 @@ namespace Files
             std::filesystem::path wine = Wine::getInstallPath(homePath);
             if (!wine.empty())
                 paths.emplace_back(std::move(wine));
-            std::filesystem::path steam = homePath / ".local/share/Steam/steamapps/common/Morrowind";
-            if (std::filesystem::is_directory(steam))
-                paths.emplace_back(std::move(steam));
+            constexpr std::string_view steamPath = ".local/share/Steam/steamapps/common/Morrowind";
+            std::array steamPaths{
+                homePath / steamPath, // Default
+                homePath / "snap/steam/common" / steamPath, // Snap
+                homePath / ".var/app/com.valvesoftware.Steam" / steamPath, // Flatpak
+            };
+            for (std::filesystem::path steam : steamPaths)
+            {
+                if (std::filesystem::is_directory(steam))
+                    paths.emplace_back(std::move(steam));
+            }
         }
         return paths;
     }
