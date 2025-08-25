@@ -482,11 +482,11 @@ namespace MWGui
 
     void SettingsWindow::onResolutionAccept()
     {
-        auto resultion = mResolutionList->getItemDataAt<std::pair<int, int>>(mResolutionList->getIndexSelected());
-        if (resultion)
+        auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(mResolutionList->getIndexSelected());
+        if (resolution)
         {
-            Settings::video().mResolutionX.set(resultion->first);
-            Settings::video().mResolutionY.set(resultion->second);
+            Settings::video().mResolutionX.set(resolution->first);
+            Settings::video().mResolutionY.set(resolution->second);
 
             apply();
         }
@@ -506,8 +506,8 @@ namespace MWGui
 
         for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
         {
-            auto resultion = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
-            if (resultion && resultion->first == currentX && resultion->second == currentY)
+            auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
+            if (resolution && resolution->first == currentX && resolution->second == currentY)
             {
                 mResolutionList->setIndexSelected(i);
                 break;
@@ -873,12 +873,12 @@ namespace MWGui
             // check if this resolution is supported in fullscreen
             if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
             {
-                auto resultion
+                auto resolution
                     = mResolutionList->getItemDataAt<std::pair<int, int>>(mResolutionList->getIndexSelected());
-                if (resultion)
+                if (resolution)
                 {
-                    Settings::video().mResolutionX.set(resultion->first);
-                    Settings::video().mResolutionY.set(resultion->second);
+                    Settings::video().mResolutionX.set(resolution->first);
+                    Settings::video().mResolutionY.set(resolution->second);
                 }
             }
 
@@ -886,18 +886,18 @@ namespace MWGui
             int fallbackX = 0, fallbackY = 0;
             for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
             {
-                auto resultion = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
-                if (!resultion)
+                auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
+                if (!resolution)
                     continue;
 
                 if (i == 0)
                 {
-                    fallbackX = resultion->first;
-                    fallbackY = resultion->second;
+                    fallbackX = resolution->first;
+                    fallbackY = resolution->second;
                 }
 
-                if (resultion->first == Settings::video().mResolutionX
-                    && resultion->second == Settings::video().mResolutionY)
+                if (resolution->first == Settings::video().mResolutionX
+                    && resolution->second == Settings::video().mResolutionY)
                     supported = true;
             }
 

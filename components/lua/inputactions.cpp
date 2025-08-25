@@ -1,6 +1,5 @@
 #include "inputactions.hpp"
 
-#include <format>
 #include <queue>
 #include <set>
 
@@ -116,14 +115,14 @@ namespace LuaUtil
         void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
-                throw std::domain_error(std::format("Action key \"{}\" is already in use", info.mKey));
+                throw std::domain_error("Action key \"" + info.mKey + "\" is already in use");
             if (info.mKey.empty())
                 throw std::domain_error("Action key can't be an empty string");
             if (info.mL10n.empty())
                 throw std::domain_error("Localization context can't be empty");
             if (!validateActionValue(info.mDefaultValue, info.mType))
-                throw std::logic_error(std::format(
-                    "Invalid value: \"{}\" for action \"{}\"", LuaUtil::toString(info.mDefaultValue), info.mKey));
+                throw std::logic_error("Invalid value: \"" + LuaUtil::toString(info.mDefaultValue) + "\" for action \""
+                    + info.mKey + "\"");
             Id id = mBindingTree.insert();
             mKeys.push_back(info.mKey);
             mIds[std::string(info.mKey)] = id;
@@ -156,7 +155,7 @@ namespace LuaUtil
         {
             auto iter = mIds.find(key);
             if (iter == mIds.end())
-                throw std::logic_error(std::format("Unknown action key: \"{}\"", key));
+                throw std::logic_error("Unknown action key: \"" + std::string(key) + "\"");
             return iter->second;
         }
 
@@ -182,9 +181,16 @@ namespace LuaUtil
             Id id = safeIdByKey(key);
             Info info = mInfo[id];
             if (info.mType != type)
-                throw std::logic_error(
-                    std::format("Attempt to get value of type \"{}\" from action \"{}\" with type \"{}\"",
-                        typeName(type), key, typeName(info.mType)));
+            {
+                std::string message("Attempt to get value of type \"");
+                message += typeName(type);
+                message += "\" from action \"";
+                message += key;
+                message += "\" with type \"";
+                message += typeName(info.mType);
+                message += "\"";
+                throw std::logic_error(message);
+            }
             return mValues[id];
         }
 
@@ -269,14 +275,14 @@ namespace LuaUtil
         {
             auto it = mIds.find(key);
             if (it == mIds.end())
-                throw std::domain_error(std::format("Unknown trigger key \"{}\"", key));
+                throw std::domain_error("Unknown trigger key \"" + std::string(key) + "\"");
             return it->second;
         }
 
         void Registry::insert(const Info& info)
         {
             if (mIds.find(info.mKey) != mIds.end())
-                throw std::domain_error(std::format("Trigger key \"{}\" is already in use", info.mKey));
+                throw std::domain_error("Trigger key \"" + info.mKey + "\" is already in use");
             if (info.mKey.empty())
                 throw std::domain_error("Trigger key can't be an empty string");
             if (info.mL10n.empty())

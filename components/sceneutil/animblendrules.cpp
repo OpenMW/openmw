@@ -1,6 +1,5 @@
 #include "animblendrules.hpp"
 
-#include <format>
 #include <iterator>
 #include <utility>
 
@@ -103,7 +102,8 @@ namespace SceneUtil
         }
         else
         {
-            throw std::domain_error(std::format("'blending_rules' object not found in '{}' file!", configPath.value()));
+            throw std::domain_error(
+                "'blending_rules' object not found in '" + std::string(configPath.value()) + "' file!");
         }
 
         // If no rules then dont allocate any instance
