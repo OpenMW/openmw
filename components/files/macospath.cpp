@@ -4,14 +4,14 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include <fstream>
 #include <mach-o/dyld.h>
 #include <pwd.h>
 #include <unistd.h>
 #include <vector>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/strings/lower.hpp>
+
+#include "wine.hpp"
 
 namespace
 {
@@ -108,72 +108,10 @@ namespace Files
 
     std::filesystem::path MacOsPath::getInstallPath() const
     {
-        std::filesystem::path installPath;
-
         std::filesystem::path homePath = getUserHome();
-
         if (!homePath.empty())
-        {
-            std::filesystem::path wineDefaultRegistry(homePath);
-            wineDefaultRegistry /= ".wine/system.reg";
-
-            if (std::filesystem::is_regular_file(wineDefaultRegistry))
-            {
-                std::ifstream file(wineDefaultRegistry);
-                bool isRegEntry = false;
-                std::string line;
-                std::string mwpath;
-
-                while (std::getline(file, line))
-                {
-                    if (line[0] == '[') // we found an entry
-                    {
-                        if (isRegEntry)
-                        {
-                            break;
-                        }
-
-                        isRegEntry = (line.find("Softworks\\\\Morrowind]") != std::string::npos);
-                    }
-                    else if (isRegEntry)
-                    {
-                        if (line[0] == '"') // empty line means new registry key
-                        {
-                            std::string key = line.substr(1, line.find('"', 1) - 1);
-                            if (strcasecmp(key.c_str(), "Installed Path") == 0)
-                            {
-                                std::string::size_type valuePos = line.find('=') + 2;
-                                mwpath = line.substr(valuePos, line.rfind('"') - valuePos);
-
-                                std::string::size_type pos = mwpath.find("\\");
-                                while (pos != std::string::npos)
-                                {
-                                    mwpath.replace(pos, 2, "/");
-                                    pos = mwpath.find("\\", pos + 1);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (!mwpath.empty())
-                {
-                    // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
-                    mwpath[0] = Misc::StringUtils::toLower(mwpath[0]);
-                    installPath /= homePath;
-                    installPath /= ".wine/dosdevices/";
-                    installPath /= mwpath;
-
-                    if (!std::filesystem::is_directory(installPath))
-                    {
-                        installPath.clear();
-                    }
-                }
-            }
-        }
-
-        return installPath;
+            return Wine::getInstallPath(homePath);
+        return {};
     }
 
 } /* namespace Files */
