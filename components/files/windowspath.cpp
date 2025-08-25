@@ -22,6 +22,37 @@
  */
 namespace Files
 {
+    namespace
+    {
+        struct RegistryKey
+        {
+            HKEY mKey = nullptr;
+
+            ~RegistryKey()
+            {
+                if (mKey)
+                    RegCloseKey(mKey);
+            }
+        };
+
+        std::filesystem::path getRegistryPath(LPCWSTR subKey, LPCWSTR valueName)
+        {
+            RegistryKey key;
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, KEY_READ | KEY_WOW64_32KEY, &key.mKey) == ERROR_SUCCESS)
+            {
+                // Key existed, let's try to read the install dir
+                std::array<wchar_t, 512> buf{};
+                DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
+
+                if (RegQueryValueExW(key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
+                    == ERROR_SUCCESS)
+                {
+                    return std::filesystem::path(buf.data(), buf.data() + len);
+                }
+            }
+            return {};
+        }
+    }
 
     WindowsPath::WindowsPath(const std::string& application_name)
         : mName(application_name)
@@ -84,25 +115,11 @@ namespace Files
 
     std::filesystem::path WindowsPath::getInstallPath() const
     {
-        std::filesystem::path installPath{};
-
-        if (HKEY hKey; RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Bethesda Softworks\\Morrowind", 0,
-                           KEY_READ | KEY_WOW64_32KEY, &hKey)
-            == ERROR_SUCCESS)
-        {
-            // Key existed, let's try to read the install dir
-            std::array<wchar_t, 512> buf{};
-            DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
-
-            if (RegQueryValueExW(hKey, L"Installed Path", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
-                == ERROR_SUCCESS)
-            {
-                installPath = std::filesystem::path(buf.data());
-            }
-            RegCloseKey(hKey);
-        }
-
-        return installPath;
+        std::filesystem::path installPath
+            = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path");
+        if (!installPath.empty() && std::filesystem::is_directory(installPath))
+            return installPath;
+        return {};
     }
 
 } /* namespace Files */
