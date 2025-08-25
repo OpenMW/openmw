@@ -27,6 +27,9 @@ Configuration files and log files
 |              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW``                               |
 +--------------+---------------+-------------------------------------------------------------------------------+
 
+.. note::
+    Flatpak sets ``$XDG_CONFIG_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/config``, so these files will be at ``$HOME/.var/app/org.openmw.OpenMW/config/openmw`` if you use the Flatpak.
+
 Savegames
 ---------
 
@@ -44,6 +47,9 @@ Savegames
 |              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW\saves``                               |
 +--------------+---------------+-------------------------------------------------------------------------------------+
 
+.. note::
+    Flatpak sets ``$XDG_DATA_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/data``, so saves will be at ``$HOME/.var/app/org.openmw.OpenMW/data/openmw/saves`` if you use the Flatpak.
+
 Screenshots
 -----------
 
@@ -60,6 +66,9 @@ Screenshots
 |              |               |                                                                                           |
 |              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW\screenshots``                               |
 +--------------+---------------+-------------------------------------------------------------------------------------------+
+
+.. note::
+    Flatpak sets ``$XDG_DATA_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/data``, so screenshots will be at ``$HOME/.var/app/org.openmw.OpenMW/data/openmw/screenshots`` if you use the Flatpak.
 
 Custom configuration directories
 ================================
@@ -184,6 +193,9 @@ Tokens are used in the `Default paths`_.
     | Windows      | ``Documents\My Games\OpenMW\``                            |
     +--------------+-----------------------------------------------------------+
 
+.. note::
+    Flatpak sets ``$XDG_CONFIG_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/config``, so ``?userconfig?`` will mean ``$HOME/.var/app/org.openmw.OpenMW/config/openmw/`` if you use the Flatpak.
+
 :``?userdata?``: Platform-dependent:
 
     +--------------+--------------------------------------------------------------+
@@ -195,6 +207,9 @@ Tokens are used in the `Default paths`_.
     +--------------+--------------------------------------------------------------+
     | Windows      | ``Documents\My Games\OpenMW\``                               |
     +--------------+--------------------------------------------------------------+
+
+.. note::
+    Flatpak sets ``$XDG_DATA_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/data``, so ``?userdata?`` will mean ``$HOME/.var/app/org.openmw.OpenMW/data/openmw/`` if you use the Flatpak.
 
 :``?global?``: Platform-dependent:
 
