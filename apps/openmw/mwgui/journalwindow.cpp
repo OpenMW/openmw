@@ -435,11 +435,9 @@ namespace
             ESM::RefId topic = ESM::RefId::stringRefId(topicIdString);
             const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
             intptr_t topicId = 0; /// \todo get rid of intptr ids
-            for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
-            {
-                if (i->first == topic)
-                    topicId = intptr_t(&i->second);
-            }
+            const auto it = journal->getTopics().find(topic);
+            if (it != journal->getTopics().end())
+                topicId = intptr_t(&it->second);
 
             notifyTopicClicked(topicId);
         }

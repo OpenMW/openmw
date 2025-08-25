@@ -61,9 +61,8 @@ namespace MWDialogue
             if (infoId.empty())
                 return true;
 
-            for (ESM::Dialogue::InfoContainer::const_iterator iter(dialogue->mInfo.begin());
-                 iter != dialogue->mInfo.end(); ++iter)
-                if (iter->mId == infoId)
+            for (const ESM::DialInfo& info : dialogue->mInfo)
+                if (info.mId == infoId)
                     return true;
         }
 
@@ -83,8 +82,8 @@ namespace MWDialogue
     {
         // bail out if we already have heard this...
         const ESM::RefId& infoId = JournalEntry::idFromIndex(id, index);
-        for (TEntryIter i = mJournal.begin(); i != mJournal.end(); ++i)
-            if (i->mTopic == id && i->mInfoId == infoId)
+        for (const JournalEntry& entry : mJournal)
+            if (entry.mTopic == id && entry.mInfoId == infoId)
             {
                 if (getJournalIndex(id) < index)
                 {
@@ -152,95 +151,61 @@ namespace MWDialogue
         return iter->second.getIndex();
     }
 
-    Journal::TEntryIter Journal::begin() const
-    {
-        return mJournal.begin();
-    }
-
-    Journal::TEntryIter Journal::end() const
-    {
-        return mJournal.end();
-    }
-
-    Journal::TQuestIter Journal::questBegin() const
-    {
-        return mQuests.begin();
-    }
-
-    Journal::TQuestIter Journal::questEnd() const
-    {
-        return mQuests.end();
-    }
-
-    Journal::TTopicIter Journal::topicBegin() const
-    {
-        return mTopics.begin();
-    }
-
-    Journal::TTopicIter Journal::topicEnd() const
-    {
-        return mTopics.end();
-    }
-
     int Journal::countSavedGameRecords() const
     {
-        int count = static_cast<int>(mQuests.size());
+        std::size_t count = mQuests.size();
 
-        for (TQuestIter iter(mQuests.begin()); iter != mQuests.end(); ++iter)
-            count += std::distance(iter->second.begin(), iter->second.end());
+        for (const auto& [_, quest] : mQuests)
+            count += quest.size();
 
-        count += std::distance(mJournal.begin(), mJournal.end());
+        count += mJournal.size();
 
-        for (TTopicIter iter(mTopics.begin()); iter != mTopics.end(); ++iter)
-            count += std::distance(iter->second.begin(), iter->second.end());
+        for (const auto& [_, topic] : mTopics)
+            count += topic.size();
 
-        return count;
+        return static_cast<int>(count);
     }
 
     void Journal::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
     {
-        for (TQuestIter iter(mQuests.begin()); iter != mQuests.end(); ++iter)
+        for (const auto& [_, quest] : mQuests)
         {
-            const Quest& quest = iter->second;
-
             ESM::QuestState state;
             quest.write(state);
             writer.startRecord(ESM::REC_QUES);
             state.save(writer);
             writer.endRecord(ESM::REC_QUES);
 
-            for (Topic::TEntryIter entryIter(quest.begin()); entryIter != quest.end(); ++entryIter)
+            for (const Entry& questEntry : quest)
             {
                 ESM::JournalEntry entry;
                 entry.mType = ESM::JournalEntry::Type_Quest;
                 entry.mTopic = quest.getTopic();
-                entryIter->write(entry);
+                questEntry.write(entry);
                 writer.startRecord(ESM::REC_JOUR);
                 entry.save(writer);
                 writer.endRecord(ESM::REC_JOUR);
             }
         }
 
-        for (TEntryIter iter(mJournal.begin()); iter != mJournal.end(); ++iter)
+        for (const StampedJournalEntry& journalEntry : mJournal)
         {
             ESM::JournalEntry entry;
             entry.mType = ESM::JournalEntry::Type_Journal;
-            iter->write(entry);
+            journalEntry.write(entry);
             writer.startRecord(ESM::REC_JOUR);
             entry.save(writer);
             writer.endRecord(ESM::REC_JOUR);
         }
 
-        for (TTopicIter iter(mTopics.begin()); iter != mTopics.end(); ++iter)
+        for (const auto& [_, topic] : mTopics)
         {
-            const Topic& topic = iter->second;
-
-            for (Topic::TEntryIter entryIter(topic.begin()); entryIter != topic.end(); ++entryIter)
+            for (const Entry& topicEntry : topic)
             {
                 ESM::JournalEntry entry;
                 entry.mType = ESM::JournalEntry::Type_Topic;
                 entry.mTopic = topic.getTopic();
-                entryIter->write(entry);
+                topicEntry.write(entry);
                 writer.startRecord(ESM::REC_JOUR);
                 entry.save(writer);
                 writer.endRecord(ESM::REC_JOUR);

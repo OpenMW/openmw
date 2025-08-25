@@ -264,24 +264,13 @@ namespace MWDialogue
 
     bool DialogueManager::inJournal(const ESM::RefId& topicId, const ESM::RefId& infoId) const
     {
-        const MWDialogue::Topic* topicHistory = nullptr;
         MWBase::Journal* journal = MWBase::Environment::get().getJournal();
-        for (auto it = journal->topicBegin(); it != journal->topicEnd(); ++it)
+        const auto topic = journal->getTopics().find(topicId);
+        if (topic != journal->getTopics().end())
         {
-            if (it->first == topicId)
-            {
-                topicHistory = &it->second;
-                break;
-            }
-        }
-
-        if (!topicHistory)
-            return false;
-
-        for (const auto& topic : *topicHistory)
-        {
-            if (topic.mInfoId == infoId)
-                return true;
+            return std::ranges::find_if(topic->second, [&](const MWDialogue::Entry& entry) {
+                return entry.mInfoId == infoId;
+            }) != topic->second.end();
         }
         return false;
     }

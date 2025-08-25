@@ -105,7 +105,7 @@ namespace
     const MWDialogue::Topic& getTopicDataOrThrow(const ESM::RefId& topicId, const MWBase::Journal* journal)
     {
         const auto it = journal->getTopics().find(topicId);
-        if (it == journal->topicEnd())
+        if (it == journal->getTopics().end())
             throw std::runtime_error("Topic " + topicId.toDebugString() + " could not be found in the journal");
         return it->second;
     }
@@ -151,17 +151,17 @@ namespace MWLua
             = [journal](
                   const MWLua::Topics& topicEntriesStore, std::string_view givenTopicId) -> const MWDialogue::Topic* {
             const auto it = journal->getTopics().find(ESM::RefId::deserializeText(givenTopicId));
-            if (it == journal->topicEnd())
+            if (it == journal->getTopics().end())
                 return nullptr;
             return &it->second;
         };
         topicsBindingsClass[sol::meta_function::length]
             = [journal](const MWLua::Topics&) -> size_t { return journal->getTopics().size(); };
         topicsBindingsClass[sol::meta_function::pairs] = [journal](const MWLua::Topics&) {
-            MWBase::Journal::TTopicIter iterator = journal->topicBegin();
+            auto iterator = journal->getTopics().begin();
             return sol::as_function(
                 [iterator, journal]() mutable -> std::pair<sol::optional<std::string>, const MWDialogue::Topic*> {
-                    if (iterator != journal->topicEnd())
+                    if (iterator != journal->getTopics().end())
                     {
                         return { iterator->first.serializeText(), &((iterator++)->second) };
                     }
@@ -306,8 +306,8 @@ namespace MWLua
         };
         quests[sol::meta_function::pairs] = [journal](const Quests& self) {
             std::vector<ESM::RefId> ids;
-            for (auto it = journal->questBegin(); it != journal->questEnd(); ++it)
-                ids.push_back(it->first);
+            for (const auto& [id, _] : journal->getQuests())
+                ids.push_back(id);
             size_t i = 0;
             return [ids = std::move(ids), i,
                        allowChanges = self.mMutable]() mutable -> sol::optional<std::tuple<std::string, Quest>> {

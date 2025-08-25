@@ -47,31 +47,11 @@ namespace MWDialogue
         ///< Removes the last topic response added for the given topicId and actor name.
         /// \note topicId must be lowercase
 
-        TEntryIter begin() const override;
-        ///< Iterator pointing to the begin of the main journal.
-        ///
-        /// \note Iterators to main journal entries will never become invalid.
-
-        TEntryIter end() const override;
-        ///< Iterator pointing past the end of the main journal.
-
         const TEntryContainer& getEntries() const override { return mJournal; }
 
-        TQuestIter questBegin() const override;
-        ///< Iterator pointing to the first quest (sorted by topic ID)
-
-        TQuestIter questEnd() const override;
-        ///< Iterator pointing past the last quest.
-
-        TTopicIter topicBegin() const override;
-        ///< Iterator pointing to the first topic (sorted by topic ID)
-        ///
-        /// \note The topic ID is identical with the user-visible topic string.
-
-        TTopicIter topicEnd() const override;
-        ///< Iterator pointing past the last topic.
-
         const TTopicContainer& getTopics() const override { return mTopics; }
+
+        const TQuestContainer& getQuests() const override { return mQuests; }
 
         int countSavedGameRecords() const override;
 
