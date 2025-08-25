@@ -419,7 +419,7 @@ namespace Files
         return mFixedPath.getCachePath();
     }
 
-    const std::vector<std::filesystem::path>& ConfigurationManager::getInstallPaths() const
+    std::vector<std::filesystem::path> ConfigurationManager::getInstallPaths() const
     {
         return mFixedPath.getInstallPaths();
     }

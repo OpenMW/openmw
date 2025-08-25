@@ -67,7 +67,6 @@ namespace Files
             , mLocalPath(mPath.getLocalPath())
             , mGlobalDataPath(mPath.getGlobalDataPath())
             , mCachePath(mPath.getCachePath())
-            , mInstallPaths(mPath.getInstallPaths())
         {
         }
 
@@ -88,7 +87,7 @@ namespace Files
          */
         const std::filesystem::path& getLocalPath() const { return mLocalPath; }
 
-        const std::vector<std::filesystem::path>& getInstallPaths() const { return mInstallPaths; }
+        std::vector<std::filesystem::path> getInstallPaths() const { return mPath.getInstallPaths(); }
 
         const std::filesystem::path& getGlobalDataPath() const { return mGlobalDataPath; }
 
@@ -105,8 +104,6 @@ namespace Files
         std::filesystem::path mGlobalDataPath; /**< Global application data path */
 
         std::filesystem::path mCachePath;
-
-        std::vector<std::filesystem::path> mInstallPaths;
     };
 
 } /* namespace Files */
