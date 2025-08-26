@@ -196,7 +196,7 @@ namespace LuaUtil
                 throw std::runtime_error(std::format("No flags found in: {}", line));
             std::string_view tagsStr = line.substr(0, semicolonPos);
             std::string_view scriptPath = line.substr(semicolonPos + 1);
-            while (isSpace(scriptPath[0]))
+            while (!scriptPath.empty() && isSpace(scriptPath[0]))
                 scriptPath = scriptPath.substr(1);
 
             ESM::LuaScriptCfg& script = cfg.mScripts.emplace_back();
