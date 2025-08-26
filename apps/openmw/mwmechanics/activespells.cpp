@@ -294,19 +294,22 @@ namespace MWMechanics
             addToSpells(ptr, spell, context);
         mQueue.clear();
 
-        // Vanilla only does this on cell change I think
-        const auto& spells = creatureStats.getSpells();
-        for (const ESM::Spell* spell : spells)
+        if (!creatureStats.isDead())
         {
-            if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
-                && !isSpellActive(spell->mId))
+            // Vanilla only does this on cell change I think
+            const auto& spells = creatureStats.getSpells();
+            for (const ESM::Spell* spell : spells)
             {
-                initParams(ptr, ActiveSpellParams{ spell, ptr, true }, context);
+                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power
+                    && !isSpellActive(spell->mId))
+                {
+                    initParams(ptr, ActiveSpellParams{ spell, ptr, true }, context);
+                }
             }
         }
 
         if (ptr.getClass().hasInventoryStore(ptr)
-            && !(creatureStats.isDead() && !creatureStats.isDeathAnimationFinished()))
+            && !(creatureStats.isDead() && creatureStats.isDeathAnimationFinished()))
         {
             auto& store = ptr.getClass().getInventoryStore(ptr);
             if (store.getInvListener() != nullptr)
