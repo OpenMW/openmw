@@ -355,7 +355,10 @@ namespace MWGui
 
     ControllerButtons* ContainerWindow::getControllerButtons()
     {
-        mControllerButtons.mR1 = mDisposeCorpseButton->getVisible() ? "#{Interface:DisposeOfCorpse}" : {};
+        if (mDisposeCorpseButton->getVisible())
+            mControllerButtons.mR1 = "#{Interface:DisposeOfCorpse}";
+        else
+            mControllerButtons.mR1.clear();
         return &mControllerButtons;
     }
 

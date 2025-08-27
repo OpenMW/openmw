@@ -224,7 +224,10 @@ namespace MWGui
 
     ControllerButtons* BookWindow::getControllerButtons()
     {
-        mControllerButtons.mA = mTakeButton->getVisible() ? "#{Interface:Take}" : {};
+        if (mTakeButton->getVisible())
+            mControllerButtons.mA = "#{Interface:Take}";
+        else
+            mControllerButtons.mA.clear();
         return &mControllerButtons;
     }
 
