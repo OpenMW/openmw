@@ -64,7 +64,7 @@ namespace MWGui
         mControllerButtons.mB = "#{Interface:Cancel}";
         mControllerButtons.mY = "#{OMWEngine:EnchantType}";
         mControllerButtons.mL1 = "#{Interface:Item}";
-        mControllerButtons.mR1 = "#{Interface:SoulGem}";
+        mControllerButtons.mR1 = "#{Interface:Soul}";
     }
 
     void EnchantingDialog::onOpen()
