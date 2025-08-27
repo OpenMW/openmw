@@ -2762,7 +2762,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
     }
 #endif
 
-#if 1
+#if 0
     if (renderStage)
     {
 #if 1
@@ -2984,7 +2984,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
     OSG_NOTICE<<"convexHull max_z_ratio = "<<max_z_ratio<<std::endl;
 #endif
 
-    #if 1
+    #if 0
     if (renderStage)
     {
 #if 1
