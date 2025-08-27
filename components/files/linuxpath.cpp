@@ -111,11 +111,13 @@ namespace Files
             std::filesystem::path wine = Wine::getInstallPath(homePath);
             if (!wine.empty())
                 paths.emplace_back(std::move(wine));
-            constexpr std::string_view steamPath = ".local/share/Steam/steamapps/common/Morrowind";
             std::array steamPaths{
-                homePath / steamPath, // Default
-                homePath / "snap/steam/common" / steamPath, // Snap
-                homePath / ".var/app/com.valvesoftware.Steam" / steamPath, // Flatpak
+                // Default (~/.steam/steam can be a symlink or a real directory)
+                homePath / ".steam/steam/steamapps/common/Morrowind",
+                // Snap
+                homePath / "snap/steam/common/.local/share/Steam/steamapps/common/Morrowind",
+                // Flatpak
+                homePath / ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Morrowind",
             };
             for (std::filesystem::path steam : steamPaths)
             {
