@@ -1,43 +1,17 @@
-DurationDay: |-
-  {days, plural,
-    one{{days} d. }
-    other{{days} d. }
-    few{{days} d. }
-    many{{days} d. }
-  }
-
-DurationHour: |-
-  {hours, plural,
-    one{{hours} godz. }
-    other{{hours} godz. }
-    few{{hours} godz. }
-    many{{hours} godz. }
-  }
-
-DurationMinute: |-
-  {minutes, plural,
-    one{{minutes} min }
-    other{{minutes} min }
-    few{{minutes} min }
-    many{{minutes} min }
-  }
-
-DurationSecond: |-
-  {seconds, plural,
-    one{{seconds} s }
-    other{{seconds} s }
-    few{{seconds} s }
-    many{{seconds} s }
-  }
-
-DurationMonth: |-
-  {months, plural,
-    one{{months} mies. }
-    other{{months} mies. }
-    few{{months} mies. }
-    many{{months} mies. }
-  }
-
+Ask: "Zapytaj"
+Back: "Wstecz"
+Buy: "Kup"
+Cancel: "Anuluj"
+Close: "Zamknij"
+Copy: "Kopiuj"
+Create: "Utwórz"
+DisposeOfCorpse: "Usuń zwłoki"
+Done: "Koniec"
+DurationDay: "{days} d. "
+DurationHour: "{hours} godz. "
+DurationMinute: "{minutes} min "
+DurationMonth: "{months} mies. "
+DurationSecond: "{seconds} s "
 DurationYear: |-
   {years, plural,
     one{{years} rok }
@@ -45,15 +19,24 @@ DurationYear: |-
     few{{years} lata }
     many{{years} lat }
   }
-
+Goodbye: "Do widzenia"
+Info: "Info"
+Inventory: "Ekwipunek"
+Item: "Przedmiot"
+MagicEffects: "Magiczne efekty"
+Mouse: "Mysz"
+Next: "Nast."
 No: "Nie"
-NotAvailableShort: "N/D"
-Reset: "Przywróć"
-Yes: "Tak"
-On: "Wł."
-Off: "Wył."
 None: "Brak"
+NotAvailableShort: "N/D"
+Off: "Wył."
 OK: "OK"
-Cancel: "Anuluj"
-Close: "Zamknij"
-Copy: "Kopiuj"
+On: "Wł."
+Prev: "Poprz."
+Reset: "Przywróć"
+ScrollUp: "Przewiń w górę"
+Select: "Wybierz"
+Soul: "Dusza"
+Take: "Weź"
+TakeAll: "Weź wszystko"
+Yes: "Tak"
