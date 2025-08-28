@@ -33,11 +33,11 @@ namespace CSMWorld
         virtual void assign(const RecordBase& record) = 0;
         ///< Will throw an exception if the types don't match.
 
-        bool isDeleted() const;
+        bool isDeleted() const { return mState == State_Deleted || mState == State_Erased; }
 
-        bool isErased() const;
+        bool isErased() const { return mState == State_Erased; }
 
-        bool isModified() const;
+        bool isModified() const { return mState == State_Modified || mState == State_ModifiedOnly; }
     };
 
     template <typename ESXRecordT>
