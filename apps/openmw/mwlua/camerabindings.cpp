@@ -2,7 +2,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
-#include <components/misc/finitenumbers.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"

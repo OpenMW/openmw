@@ -27,9 +27,11 @@ namespace Misc
 
         static Color fromHex(std::string_view hex);
         static Color fromRGB(unsigned int value);
+        static Color fromVec(osg::Vec4f value);
 
         std::string toHex() const;
         unsigned int toRGBA() const { return mValue.asRGBA(); }
+        osg::Vec4f toVec() const { return mValue; }
 
         friend bool operator==(const Color& l, const Color& r);
 

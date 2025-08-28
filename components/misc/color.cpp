@@ -45,6 +45,11 @@ namespace Misc
         return Color(SceneUtil::colourFromRGB(value));
     }
 
+    Color Color::fromVec(osg::Vec4f value)
+    {
+        return Color(std::move(value));
+    }
+
     std::string Color::toHex() const
     {
         std::string result(6, '0');
