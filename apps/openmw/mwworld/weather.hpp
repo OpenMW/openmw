@@ -114,6 +114,11 @@ namespace MWWorld
         const T& getSunsetValue() const { return mSunsetValue; }
         const T& getNightValue() const { return mNightValue; }
 
+        void setSunriseValue(const T& sunriseValue) { mSunriseValue = sunriseValue; }
+        void setDayValue(const T& dayValue) { mDayValue = dayValue; }
+        void setSunsetValue(const T& sunsetValue) { mSunsetValue = sunsetValue; }
+        void setNightValue(const T& nightValue) { mNightValue = nightValue; }
+
     private:
         T mSunriseValue, mDayValue, mSunsetValue, mNightValue;
     };

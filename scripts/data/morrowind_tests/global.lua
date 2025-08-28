@@ -12,6 +12,7 @@ require('global_issues')
 require('global_dialogues')
 require('global_mwscript')
 require('global_regions')
+require('global_weather')
 
 return {
     engineHandlers = {

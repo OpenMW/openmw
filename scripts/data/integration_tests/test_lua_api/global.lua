@@ -351,11 +351,18 @@ testing.registerGlobalTest('load while teleporting - teleport', function()
     landracer:teleport(player.cell, player.position)
 end)
 
-testing.registerGlobalTest('nan', function()
+testing.registerGlobalTest('nan float', function()
     local nan = 0.0 / 0.0
     local ok, err = pcall(function() world.setGameTimeScale(nan) end)
     testing.expectEqual(ok, false)
     testing.expectEqual(err, 'Value must be a finite number')
+end)
+
+testing.registerGlobalTest('nan vector', function()
+    local nan = 0.0 / 0.0
+    local ok, err = pcall(function() core.weather.records[1].stormDirection = util.vector3(nan, nan, nan) end)
+    testing.expectEqual(ok, false)
+    testing.expectEqual(err, 'Vector must contain finite numbers')
 end)
 
 testing.registerGlobalTest('mwscript magic interactions', function()

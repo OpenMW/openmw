@@ -10,7 +10,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/misc/finitenumbers.hpp>
+#include <components/misc/finitevalues.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
