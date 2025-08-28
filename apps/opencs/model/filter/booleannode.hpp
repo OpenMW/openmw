@@ -18,7 +18,7 @@ namespace CSMFilter
         bool mTrue;
 
     public:
-        BooleanNode(bool true_);
+        explicit BooleanNode(bool value);
 
         bool test(const CSMWorld::IdTableBase& table, int row, const std::map<int, int>& columns) const override;
         ///< \return Can the specified table row pass through to filter?

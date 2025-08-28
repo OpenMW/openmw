@@ -512,19 +512,19 @@ namespace MWGui
         mItemTransfer->removeTarget(*mItemView);
     }
 
-    void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
+    void InventoryWindow::onWindowResize(MyGUI::Window* sender)
     {
-        WindowBase::clampWindowCoordinates(_sender);
+        WindowBase::clampWindowCoordinates(sender);
 
         adjustPanes();
         const WindowSettingValues settings = getModeSettings(mGuiMode);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
-        settings.mRegular.mX.set(_sender->getPosition().left / static_cast<float>(viewSize.width));
-        settings.mRegular.mY.set(_sender->getPosition().top / static_cast<float>(viewSize.height));
-        settings.mRegular.mW.set(_sender->getSize().width / static_cast<float>(viewSize.width));
-        settings.mRegular.mH.set(_sender->getSize().height / static_cast<float>(viewSize.height));
+        settings.mRegular.mX.set(sender->getPosition().left / static_cast<float>(viewSize.width));
+        settings.mRegular.mY.set(sender->getPosition().top / static_cast<float>(viewSize.height));
+        settings.mRegular.mW.set(sender->getSize().width / static_cast<float>(viewSize.width));
+        settings.mRegular.mH.set(sender->getSize().height / static_cast<float>(viewSize.height));
         settings.mIsMaximized.set(false);
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
@@ -557,23 +557,23 @@ namespace MWGui
                 viewport.height / float(mPreview->getTextureHeight())));
     }
 
-    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* sender)
     {
-        mSortModel->setNameFilter(_sender->getCaption());
+        mSortModel->setNameFilter(sender->getCaption());
         mItemView->update();
     }
 
-    void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
+    void InventoryWindow::onFilterChanged(MyGUI::Widget* sender)
     {
-        if (_sender == mFilterAll)
+        if (sender == mFilterAll)
             mSortModel->setCategory(SortFilterItemModel::Category_All);
-        else if (_sender == mFilterWeapon)
+        else if (sender == mFilterWeapon)
             mSortModel->setCategory(SortFilterItemModel::Category_Weapon);
-        else if (_sender == mFilterApparel)
+        else if (sender == mFilterApparel)
             mSortModel->setCategory(SortFilterItemModel::Category_Apparel);
-        else if (_sender == mFilterMagic)
+        else if (sender == mFilterMagic)
             mSortModel->setCategory(SortFilterItemModel::Category_Magic);
-        else if (_sender == mFilterMisc)
+        else if (sender == mFilterMisc)
             mSortModel->setCategory(SortFilterItemModel::Category_Misc);
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
@@ -583,7 +583,7 @@ namespace MWGui
 
         mItemView->update();
 
-        _sender->castType<MyGUI::Button>()->setStateSelected(true);
+        sender->castType<MyGUI::Button>()->setStateSelected(true);
     }
 
     void InventoryWindow::onPinToggled()
@@ -683,7 +683,7 @@ namespace MWGui
         // else: will be updated in open()
     }
 
-    void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
+    void InventoryWindow::onAvatarClicked(MyGUI::Widget* /*sender*/)
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {

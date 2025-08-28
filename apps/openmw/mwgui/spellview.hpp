@@ -54,8 +54,8 @@ namespace MWGui
 
         void initialiseOverride() override;
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
         void resetScrollbars();
 
@@ -106,10 +106,10 @@ namespace MWGui
         int mControllerFocus;
         void updateControllerFocus(int prevFocus, int newFocus);
 
-        void onSpellSelected(MyGUI::Widget* _sender);
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
+        void onSpellSelected(MyGUI::Widget* sender);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
 
-        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* _sender);
+        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* sender);
 
         static const char* sSpellModelIndex;
     };

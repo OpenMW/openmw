@@ -30,11 +30,11 @@ namespace MWGui
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onOkButtonClicked(MyGUI::Widget* _sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onOkButtonClicked(MyGUI::Widget* sender);
         void onEditValueChanged(int value);
-        void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
-        void onEnterKeyPressed(MyGUI::EditBox* _sender);
+        void onSliderMoved(MyGUI::ScrollBar* sender, size_t position);
+        void onEnterKeyPressed(MyGUI::EditBox* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 

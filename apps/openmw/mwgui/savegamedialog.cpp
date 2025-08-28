@@ -274,12 +274,12 @@ namespace MWGui
         center();
     }
 
-    void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void SaveGameDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
     }
 
-    void SaveGameDialog::onDeleteButtonClicked(MyGUI::Widget* sender)
+    void SaveGameDialog::onDeleteButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (mCurrentSlot)
             confirmDeleteSave();
@@ -347,13 +347,13 @@ namespace MWGui
         }
     }
 
-    void SaveGameDialog::onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void SaveGameDialog::onKeyButtonPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char character)
     {
         if (key == MyGUI::KeyCode::Delete && mCurrentSlot)
             confirmDeleteSave();
     }
 
-    void SaveGameDialog::onOkButtonClicked(MyGUI::Widget* sender)
+    void SaveGameDialog::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         accept();
     }

@@ -38,9 +38,9 @@ namespace MWGui
         MyGUI::Widget* getWidget(std::string_view name);
 
         template <typename T>
-        void getWidget(T*& _widget, std::string_view _name)
+        void getWidget(T*& widget, std::string_view name)
         {
-            MyGUI::Widget* w = getWidget(_name);
+            MyGUI::Widget* w = getWidget(name);
             T* cast = w->castType<T>(false);
             if (!cast)
             {
@@ -49,7 +49,7 @@ namespace MWGui
                                                           << "' in layout '" << mLayoutName << "'");
             }
             else
-                _widget = cast;
+                widget = cast;
         }
 
     private:

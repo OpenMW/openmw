@@ -65,9 +65,9 @@ namespace
     }
 
     // returns: first - character pos in bytes, second - character codepoint
-    std::pair<int64_t, int64_t> decodeNextUTF8Character(std::string_view s, std::vector<int64_t>& pos_byte)
+    std::pair<int64_t, int64_t> decodeNextUTF8Character(std::string_view s, std::vector<int64_t>& posByte)
     {
-        const int64_t pos = pos_byte.back() - 1;
+        const int64_t pos = posByte.back() - 1;
         const unsigned char ch = static_cast<unsigned char>(s[pos]);
         int64_t codepoint = -1;
         size_t byteSize = 0;
@@ -104,9 +104,9 @@ namespace
             codepoint = (codepoint << 6) | (static_cast<unsigned char>(s[pos + i]) & 0b00111111);
         }
 
-        std::pair<size_t, int64_t> res = std::make_pair(pos_byte.back(), codepoint);
+        std::pair<size_t, int64_t> res = std::make_pair(posByte.back(), codepoint);
 
-        pos_byte.push_back(pos_byte.back() + byteSize); /* the next character (if exists) starts at this byte */
+        posByte.push_back(posByte.back() + byteSize); /* the next character (if exists) starts at this byte */
 
         return res;
     }

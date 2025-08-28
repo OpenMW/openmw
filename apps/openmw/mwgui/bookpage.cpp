@@ -137,7 +137,7 @@ namespace MWGui
         }
 
         template <typename Visitor>
-        void visitRuns(int top, int bottom, MyGUI::IFont* Font, Visitor const& visitor) const
+        void visitRuns(int top, int bottom, MyGUI::IFont* font, Visitor const& visitor) const
         {
             for (Sections::const_iterator i = mSections.begin(); i != mSections.end(); ++i)
             {
@@ -150,7 +150,7 @@ namespace MWGui
                         continue;
 
                     for (Runs::const_iterator k = j->mRuns.begin(); k != j->mRuns.end(); ++k)
-                        if (!Font || k->mStyle->mFont == Font)
+                        if (!font || k->mStyle->mFont == font)
                             visitor(*i, *j, *k);
                 }
             }
@@ -506,9 +506,9 @@ namespace MWGui
             return mBook;
         }
 
-        void writeImpl(StyleImpl* style, Utf8Stream::Point _begin, Utf8Stream::Point _end)
+        void writeImpl(StyleImpl* style, Utf8Stream::Point begin, Utf8Stream::Point end)
         {
-            Utf8Stream stream(_begin, _end);
+            Utf8Stream stream(begin, end);
 
             while (!stream.eof())
             {
@@ -762,9 +762,9 @@ namespace MWGui
             RenderXform mRenderXform;
             MyGUI::VertexColourType mVertexColourType;
 
-            GlyphStream(MyGUI::IFont* font, float left, float top, float Z, MyGUI::Vertex* vertices,
+            explicit GlyphStream(MyGUI::IFont* font, float left, float top, float z, MyGUI::Vertex* vertices,
                 RenderXform const& renderXform)
-                : mZ(Z)
+                : mZ(z)
                 , mC(0)
                 , mFont(font)
                 , mOrigin(left, top)
@@ -900,7 +900,7 @@ namespace MWGui
 
             // this isn't really a sub-widget, its just a "drawitem" which
             // should have its own interface
-            void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) override {}
+            void createDrawItem(MyGUI::ITexture* /*texture*/, MyGUI::ILayerNode* /*node*/) override {}
             void destroyDrawItem() override {}
         };
 
@@ -1321,7 +1321,7 @@ namespace MWGui
             }
         }
 
-        void onMouseLostFocus(Widget* _new) override
+        void onMouseLostFocus(MyGUI::Widget* /*newWidget*/) override
         {
             // NOTE: MyGUI also fires eventMouseLostFocus for widgets that are about to be destroyed (if they had
             // focus). Child widgets may already be destroyed! So be careful.

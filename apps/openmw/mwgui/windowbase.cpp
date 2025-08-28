@@ -58,7 +58,7 @@ void WindowBase::onTitleDoubleClicked()
         MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
 }
 
-void WindowBase::onDoubleClick(MyGUI::Widget* _sender)
+void WindowBase::onDoubleClick(MyGUI::Widget* /*sender*/)
 {
     onTitleDoubleClicked();
 }

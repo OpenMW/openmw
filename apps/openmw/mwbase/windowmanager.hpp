@@ -275,7 +275,7 @@ namespace MWBase
          * @param id Identifier for the GMST setting, e.g. "aName"
          * @param default Default value if the GMST setting cannot be used.
          */
-        virtual std::string_view getGameSettingString(std::string_view id, std::string_view default_) = 0;
+        virtual std::string_view getGameSettingString(std::string_view id, std::string_view defaultValue) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 

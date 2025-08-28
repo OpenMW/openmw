@@ -110,8 +110,8 @@ namespace MWGui
         /// Create a hyper-link style with a user-defined identifier based on an
         /// existing style. The unique flag forces a new instance of this style
         /// to be created even if an existing instance is present.
-        virtual Style* createHotStyle(Style* BaseStyle, const Colour& NormalColour, const Colour& HoverColour,
-            const Colour& ActiveColour, InteractiveId Id, bool Unique = true)
+        virtual Style* createHotStyle(Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
+            const Colour& activeColour, InteractiveId id, bool unique = true)
             = 0;
 
         /// Insert a line break into the document. Newline characters in the input
@@ -129,19 +129,19 @@ namespace MWGui
         virtual void setSectionAlignment(Alignment sectionAlignment) = 0;
 
         // Layout a block of text with the specified style into the document.
-        virtual void write(Style* Style, Utf8Span Text) = 0;
+        virtual void write(Style* style, Utf8Span text) = 0;
 
         /// Adds a content block to the document without laying it out. An
         /// identifier is returned that can be used to refer to it. If select
         /// is true, the block is activated to be references by future writes.
-        virtual intptr_t addContent(Utf8Span Text, bool Select = true) = 0;
+        virtual intptr_t addContent(Utf8Span text, bool select = true) = 0;
 
         /// Select a previously created content block for future writes.
         virtual void selectContent(intptr_t contentHandle) = 0;
 
         /// Layout a span of the selected content block into the document
         /// using the specified style.
-        virtual void write(Style* Style, size_t Begin, size_t End) = 0;
+        virtual void write(Style* style, size_t begin, size_t end) = 0;
 
         /// Finalize the document layout, and return a pointer to it.
         virtual TypesetBook::Ptr complete() = 0;
@@ -156,7 +156,7 @@ namespace MWGui
         typedef std::function<void(InteractiveId)> ClickCallback;
 
         /// Make the widget display the specified page from the specified book.
-        virtual void showPage(TypesetBook::Ptr Book, size_t Page) = 0;
+        virtual void showPage(TypesetBook::Ptr book, size_t page) = 0;
 
         /// Set the callback for a clicking a hyper-link in the document.
         virtual void adviseLinkClicked(ClickCallback callback) = 0;

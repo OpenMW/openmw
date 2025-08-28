@@ -50,7 +50,7 @@ namespace MWGui
 
         void onItemClicked(MyGUI::Widget* sender, const MWWorld::Ptr& item);
         void onCancel(MyGUI::Widget* sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };

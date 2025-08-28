@@ -38,7 +38,7 @@ namespace MWPhysics
     }
 
     void ActorTracer::doTrace(const btCollisionObject* actor, const osg::Vec3f& start, const osg::Vec3f& end,
-        const btCollisionWorld* world, bool attempt_short_trace)
+        const btCollisionWorld* world, bool attemptShortTrace)
     {
         const btVector3 btstart = Misc::Convert::toBullet(start);
         btVector3 btend = Misc::Convert::toBullet(end);
@@ -56,7 +56,7 @@ namespace MWPhysics
         // test. (Multiplying by 2 in 'square distance' units gives us about 1.4x the threshold length. In benchmarks
         // this was
         //  slightly better for the performance of normal scenes than 4.0, and just plain better than 1.0.)
-        if (attempt_short_trace && (btend - btstart).length2() > fallbackLength * fallbackLength * 2.0)
+        if (attemptShortTrace && (btend - btstart).length2() > fallbackLength * fallbackLength * 2.0)
         {
             btend = btstart + (btend - btstart).normalized() * fallbackLength;
             doingShortTrace = true;

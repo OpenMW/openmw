@@ -5,8 +5,8 @@ namespace CSMWorld
     class IdTableBase;
 }
 
-CSMFilter::BooleanNode::BooleanNode(bool true_)
-    : mTrue(true_)
+CSMFilter::BooleanNode::BooleanNode(bool value)
+    : mTrue(value)
 {
 }
 

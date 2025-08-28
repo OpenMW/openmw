@@ -440,7 +440,7 @@ namespace Files
         bpo::store(Files::parse_config_file(stream, description, true), variables);
     }
 
-    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
+    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& value)
     {
         // If the stream starts with a double quote, read from stream using boost::filesystem::path rules (which are not
         // the same as std::filesystem::path rules), then discard anything remaining. This prevents
@@ -459,18 +459,18 @@ namespace Files
             // ampersands, and because it's backwards-compatible with the previous format, which used
             // boost::filesystem::path's operator>>.
             istream >> std::quoted(intermediate, '"', '&');
-            static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
+            static_cast<std::filesystem::path&>(value) = Misc::StringUtils::stringToU8String(intermediate);
             if (istream && !istream.eof() && istream.peek() != EOF)
             {
                 std::string remainder{ std::istreambuf_iterator(istream), {} };
-                Log(Debug::Warning) << "Trailing data in path setting. Used '" << MaybeQuotedPath << "' but '"
-                                    << remainder << "' remained";
+                Log(Debug::Warning) << "Trailing data in path setting. Used '" << value << "' but '" << remainder
+                                    << "' remained";
             }
         }
         else
         {
             std::string intermediate{ std::istreambuf_iterator(istream), {} };
-            static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
+            static_cast<std::filesystem::path&>(value) = Misc::StringUtils::stringToU8String(intermediate);
         }
         return istream;
     }

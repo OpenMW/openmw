@@ -106,7 +106,7 @@ namespace MWGui
             typedef MyGUI::delegates::MultiDelegate<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
-                signature : void method(MWSkill* _sender)\n
+                signature : void method(MWSkill* sender)\n
             */
             EventHandle_SkillVoid eventClicked;
 
@@ -117,7 +117,7 @@ namespace MWGui
 
             void initialiseOverride() override;
 
-            void onClicked(MyGUI::Widget* _sender);
+            void onClicked(MyGUI::Widget* sender);
 
         private:
             void updateWidgets();
@@ -147,7 +147,7 @@ namespace MWGui
             typedef MyGUI::delegates::MultiDelegate<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
-                signature : void method(MWAttribute* _sender)\n
+                signature : void method(MWAttribute* sender)\n
             */
             EventHandle_AttributeVoid eventClicked;
 
@@ -158,7 +158,7 @@ namespace MWGui
 
             void initialiseOverride() override;
 
-            void onClicked(MyGUI::Widget* _sender);
+            void onClicked(MyGUI::Widget* sender);
 
         private:
             void updateWidgets();

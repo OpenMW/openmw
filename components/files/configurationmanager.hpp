@@ -93,7 +93,7 @@ namespace Files
     {
     };
 
-    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& MaybeQuotedPath);
+    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& value);
 
     typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 

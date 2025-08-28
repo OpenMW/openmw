@@ -27,9 +27,9 @@ namespace MyGUIPlatform
 
         void end() override { mTarget->end(); }
 
-        void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) override
+        void doRender(MyGUI::IVertexBuffer* buffer, MyGUI::ITexture* texture, size_t count) override
         {
-            mTarget->doRender(_buffer, _texture, _count);
+            mTarget->doRender(buffer, texture, count);
         }
 
         const MyGUI::RenderTargetInfo& getInfo() const override
@@ -49,14 +49,14 @@ namespace MyGUIPlatform
         mutable MyGUI::RenderTargetInfo mInfo;
     };
 
-    MyGUI::ILayerItem* ScalingLayer::getLayerItemByPoint(int _left, int _top) const
+    MyGUI::ILayerItem* ScalingLayer::getLayerItemByPoint(int left, int top) const
     {
-        screenToLayerCoords(_left, _top);
+        screenToLayerCoords(left, top);
 
-        return OverlappedLayer::getLayerItemByPoint(_left, _top);
+        return OverlappedLayer::getLayerItemByPoint(left, top);
     }
 
-    void ScalingLayer::screenToLayerCoords(int& _left, int& _top) const
+    void ScalingLayer::screenToLayerCoords(int& left, int& top) const
     {
         float scale = getScaleFactor(mViewSize);
         if (scale <= 0.f)
@@ -64,34 +64,34 @@ namespace MyGUIPlatform
 
         MyGUI::IntSize globalViewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
-        _left -= globalViewSize.width / 2;
-        _top -= globalViewSize.height / 2;
+        left -= globalViewSize.width / 2;
+        top -= globalViewSize.height / 2;
 
-        _left = static_cast<int>(_left / scale);
-        _top = static_cast<int>(_top / scale);
+        left = static_cast<int>(left / scale);
+        top = static_cast<int>(top / scale);
 
-        _left += mViewSize.width / 2;
-        _top += mViewSize.height / 2;
+        left += mViewSize.width / 2;
+        top += mViewSize.height / 2;
     }
 
-    float ScalingLayer::getScaleFactor(const MyGUI::IntSize& _layerViewSize)
+    float ScalingLayer::getScaleFactor(const MyGUI::IntSize& layerViewSize)
     {
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         float w = static_cast<float>(viewSize.width);
         float h = static_cast<float>(viewSize.height);
 
-        float heightScale = (h / _layerViewSize.height);
-        float widthScale = (w / _layerViewSize.width);
+        float heightScale = (h / layerViewSize.height);
+        float widthScale = (w / layerViewSize.width);
         return std::min(widthScale, heightScale);
     }
 
-    MyGUI::IntPoint ScalingLayer::getPosition(int _left, int _top) const
+    MyGUI::IntPoint ScalingLayer::getPosition(int left, int top) const
     {
-        screenToLayerCoords(_left, _top);
-        return MyGUI::IntPoint(_left, _top);
+        screenToLayerCoords(left, top);
+        return MyGUI::IntPoint(left, top);
     }
 
-    void ScalingLayer::renderToTarget(MyGUI::IRenderTarget* _target, bool _update)
+    void ScalingLayer::renderToTarget(MyGUI::IRenderTarget* target, bool update)
     {
         MyGUI::IntSize globalViewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntSize viewSize = globalViewSize;
@@ -104,21 +104,21 @@ namespace MyGUIPlatform
         float voffset = (globalViewSize.height - mViewSize.height * getScaleFactor(mViewSize)) / 2.f
             / static_cast<float>(globalViewSize.height);
 
-        ProxyRenderTarget proxy(_target, viewSize, hoffset, voffset);
+        ProxyRenderTarget proxy(target, viewSize, hoffset, voffset);
 
-        MyGUI::OverlappedLayer::renderToTarget(&proxy, _update);
+        MyGUI::OverlappedLayer::renderToTarget(&proxy, update);
     }
 
-    void ScalingLayer::resizeView(const MyGUI::IntSize& _viewSize)
+    void ScalingLayer::resizeView(const MyGUI::IntSize& /*viewSize*/)
     {
         // do nothing
     }
 
-    void ScalingLayer::deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version)
+    void ScalingLayer::deserialization(MyGUI::xml::ElementPtr node, MyGUI::Version version)
     {
-        MyGUI::OverlappedLayer::deserialization(_node, _version);
+        MyGUI::OverlappedLayer::deserialization(node, version);
 
-        MyGUI::xml::ElementEnumerator info = _node->getElementEnumerator();
+        MyGUI::xml::ElementEnumerator info = node->getElementEnumerator();
         while (info.next())
         {
             if (info->getName() == "Property")

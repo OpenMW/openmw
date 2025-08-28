@@ -48,15 +48,15 @@ namespace MWGui
             leftPadding, topPadding, screenSize.width - leftPadding * 2, screenSize.height - topPadding * 2);
     }
 
-    void BackgroundImage::setSize(const MyGUI::IntSize& _value)
+    void BackgroundImage::setSize(const MyGUI::IntSize& value)
     {
-        MyGUI::Widget::setSize(_value);
+        MyGUI::Widget::setSize(value);
         adjustSize();
     }
 
-    void BackgroundImage::setCoord(const MyGUI::IntCoord& _value)
+    void BackgroundImage::setCoord(const MyGUI::IntCoord& value)
     {
-        MyGUI::Widget::setCoord(_value);
+        MyGUI::Widget::setCoord(value);
         adjustSize();
     }
 

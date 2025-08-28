@@ -47,8 +47,8 @@ namespace
 namespace Files
 {
 
-    LinuxPath::LinuxPath(const std::string& application_name)
-        : mName(application_name)
+    LinuxPath::LinuxPath(const std::string& applicationName)
+        : mName(applicationName)
     {
     }
 

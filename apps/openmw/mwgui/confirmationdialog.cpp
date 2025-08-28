@@ -61,12 +61,12 @@ namespace MWGui
         return true;
     }
 
-    void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void ConfirmationDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         exit();
     }
 
-    void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* _sender)
+    void ConfirmationDialog::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
 

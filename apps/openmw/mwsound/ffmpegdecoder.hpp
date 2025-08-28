@@ -93,13 +93,13 @@ namespace MWSound
 
         Files::IStreamPtr mDataStream;
 
-        static int readPacket(void* user_data, uint8_t* buf, int buf_size);
+        static int readPacket(void* userData, uint8_t* buf, int bufSize);
 #if OPENMW_FFMPEG_CONST_WRITEPACKET
-        static int writePacket(void* user_data, const uint8_t* buf, int buf_size);
+        static int writePacket(void* userData, const uint8_t* buf, int bufSize);
 #else
-        static int writePacket(void* user_data, uint8_t* buf, int buf_size);
+        static int writePacket(void* userData, uint8_t* buf, int bufSize);
 #endif
-        static int64_t seek(void* user_data, int64_t offset, int whence);
+        static int64_t seek(void* userData, int64_t offset, int whence);
 
         bool getAVAudioData();
         size_t readAVAudioData(void* data, size_t length);

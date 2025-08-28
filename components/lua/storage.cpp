@@ -29,15 +29,15 @@ namespace LuaUtil
             }));
     }
 
-    sol::object LuaStorage::Value::getCopy(lua_State* L) const
+    sol::object LuaStorage::Value::getCopy(lua_State* state) const
     {
-        return deserialize(L, mSerializedValue);
+        return deserialize(state, mSerializedValue);
     }
 
-    sol::object LuaStorage::Value::getReadOnly(lua_State* L) const
+    sol::object LuaStorage::Value::getReadOnly(lua_State* state) const
     {
         if (mReadOnlyValue == sol::nil && !mSerializedValue.empty())
-            mReadOnlyValue = sol::main_object(deserialize(L, mSerializedValue, nullptr, true));
+            mReadOnlyValue = sol::main_object(deserialize(state, mSerializedValue, nullptr, true));
         return mReadOnlyValue;
     }
 
@@ -115,12 +115,12 @@ namespace LuaUtil
         runCallbacks(sol::nullopt);
     }
 
-    sol::table LuaStorage::Section::asTable(lua_State* L)
+    sol::table LuaStorage::Section::asTable(lua_State* state)
     {
         checkIfActive();
-        sol::table res(L, sol::create);
+        sol::table res(state, sol::create);
         for (const auto& [k, v] : mValues)
-            res[k] = v.getCopy(L);
+            res[k] = v.getCopy(state);
         return res;
     }
 
@@ -241,7 +241,7 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::load(lua_State* L, const std::filesystem::path& path)
+    void LuaStorage::load(lua_State* state, const std::filesystem::path& path)
     {
         assert(mData.empty()); // Shouldn't be used before loading
         try
@@ -253,7 +253,7 @@ namespace LuaUtil
 
             std::ifstream fin(path, std::fstream::binary);
             std::string serializedData((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
-            sol::table data = deserialize(L, serializedData);
+            sol::table data = deserialize(state, serializedData);
             for (const auto& [sectionName, sectionTable] : data)
             {
                 const std::shared_ptr<Section>& section = getSection(cast<std::string_view>(sectionName));
@@ -267,13 +267,13 @@ namespace LuaUtil
         }
     }
 
-    void LuaStorage::save(lua_State* L, const std::filesystem::path& path) const
+    void LuaStorage::save(lua_State* state, const std::filesystem::path& path) const
     {
-        sol::table data(L, sol::create);
+        sol::table data(state, sol::create);
         for (const auto& [sectionName, section] : mData)
         {
             if (section->mLifeTime == Section::Persistent && !section->mValues.empty())
-                data[sectionName] = section->asTable(L);
+                data[sectionName] = section->asTable(state);
         }
         std::string serializedData = serialize(data);
         Log(Debug::Info) << "Saving Lua storage \"" << path << "\" (" << serializedData.size() << " bytes)";
@@ -294,19 +294,20 @@ namespace LuaUtil
         return newIt->second;
     }
 
-    sol::object LuaStorage::getSection(lua_State* L, std::string_view sectionName, bool readOnly, bool forMenuScripts)
+    sol::object LuaStorage::getSection(
+        lua_State* state, std::string_view sectionName, bool readOnly, bool forMenuScripts)
     {
         checkIfActive();
         const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionView>(L, SectionView{ section, readOnly, forMenuScripts });
+        return sol::make_object<SectionView>(state, SectionView{ section, readOnly, forMenuScripts });
     }
 
-    sol::table LuaStorage::getAllSections(lua_State* L, bool readOnly)
+    sol::table LuaStorage::getAllSections(lua_State* state, bool readOnly)
     {
         checkIfActive();
-        sol::table res(L, sol::create);
+        sol::table res(state, sol::create);
         for (const auto& [sectionName, _] : mData)
-            res[sectionName] = getSection(L, sectionName, readOnly);
+            res[sectionName] = getSection(state, sectionName, readOnly);
         return res;
     }
 

@@ -98,10 +98,10 @@ MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& 
     mPtr.getCellRef().setCount(count);
 }
 
-MWWorld::ManualRef::ManualRef(const ESMStore& store, const Ptr& template_, const int count)
+MWWorld::ManualRef::ManualRef(const ESMStore& store, const Ptr& templatePtr, const int count)
 {
-    auto cb = [&](const auto& typedStore) { create(typedStore, template_, mRef, mPtr); };
-    visitRefStore(store, template_.getCellRef().getRefId(), cb);
+    auto cb = [&](const auto& typedStore) { create(typedStore, templatePtr, mRef, mPtr); };
+    visitRefStore(store, templatePtr.getCellRef().getRefId(), cb);
 
     mPtr.getCellRef().setCount(count);
     mPtr.getCellRef().unsetRefNum();

@@ -29,7 +29,7 @@ namespace MWGui
     private:
         void confirmDeleteSave();
 
-        void onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
         void onDeleteButtonClicked(MyGUI::Widget* sender);

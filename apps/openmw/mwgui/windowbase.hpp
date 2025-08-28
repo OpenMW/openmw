@@ -94,7 +94,7 @@ namespace MWGui
         MyGUI::Widget* mControllerScrollWidget = nullptr;
 
     private:
-        void onDoubleClick(MyGUI::Widget* _sender);
+        void onDoubleClick(MyGUI::Widget* sender);
 
         bool mDisabledByLua = false;
     };

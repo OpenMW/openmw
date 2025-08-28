@@ -63,7 +63,7 @@ namespace MWGui
         MessageBoxManager* mMessageBoxManager;
 
         void onItemSelected(int index);
-        void onNameFilterChanged(MyGUI::EditBox* _sender);
+        void onNameFilterChanged(MyGUI::EditBox* sender);
         void onBackgroundSelected();
         void dragItem(MyGUI::Widget* sender, std::size_t count);
         void transferItem(MyGUI::Widget* sender, std::size_t count);
@@ -72,7 +72,7 @@ namespace MWGui
 
         void updateEncumbranceBar();
 
-        void onCloseButtonClicked(MyGUI::Widget* _sender);
+        void onCloseButtonClicked(MyGUI::Widget* sender);
 
         void onReferenceUnavailable() override;
 

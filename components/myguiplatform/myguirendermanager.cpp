@@ -550,15 +550,15 @@ namespace MyGUIPlatform
         return &item->second;
     }
 
-    bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
+    bool RenderManager::checkTexture(MyGUI::ITexture* /*texture*/)
     {
         // We support external textures that aren't registered via this manager, so can't implement this method
         // sensibly.
         return true;
     }
 
-    void RenderManager::registerShader(
-        const std::string& _shaderName, const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile)
+    void RenderManager::registerShader(const std::string& /*shaderName*/, const std::string& /*vertexProgramFile*/,
+        const std::string& /*fragmentProgramFile*/)
     {
         MYGUI_PLATFORM_LOG(Warning, "osgMyGUI::RenderManager::registerShader is not implemented");
     }

@@ -145,19 +145,19 @@ namespace MWLua
         return ptr;
     }
 
-    sol::table getTypeToPackageTable(lua_State* L)
+    sol::table getTypeToPackageTable(lua_State* state)
     {
         constexpr std::string_view key = "typeToPackage";
-        sol::state_view lua(L);
+        sol::state_view lua(state);
         if (lua[key] == sol::nil)
             lua[key] = sol::table(lua, sol::create);
         return lua[key];
     }
 
-    sol::table getPackageToTypeTable(lua_State* L)
+    sol::table getPackageToTypeTable(lua_State* state)
     {
         constexpr std::string_view key = "packageToType";
-        sol::state_view lua(L);
+        sol::state_view lua(state);
         if (lua[key] == sol::nil)
             lua[key] = sol::table(lua, sol::create);
         return lua[key];

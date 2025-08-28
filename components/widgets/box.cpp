@@ -33,22 +33,22 @@ namespace Gui
         return getCaption().empty() ? MyGUI::IntSize{ 0, 0 } : getTextSize();
     }
 
-    void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
+    void AutoSizedTextBox::setCaption(const MyGUI::UString& value)
     {
-        TextBox::setCaption(_value);
+        TextBox::setCaption(value);
 
         notifySizeChange(this);
     }
 
-    void AutoSizedTextBox::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void AutoSizedTextBox::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (_key == "ExpandDirection")
+        if (key == "ExpandDirection")
         {
-            mExpandDirection = MyGUI::Align::parse(_value);
+            mExpandDirection = MyGUI::Align::parse(value);
         }
         else
         {
-            Gui::TextBox::setPropertyOverride(_key, _value);
+            Gui::TextBox::setPropertyOverride(key, value);
         }
     }
 
@@ -87,9 +87,9 @@ namespace Gui
         return MyGUI::IntSize(getWidth(), getTextSize().height);
     }
 
-    void AutoSizedEditBox::setCaption(const MyGUI::UString& _value)
+    void AutoSizedEditBox::setCaption(const MyGUI::UString& value)
     {
-        EditBox::setCaption(_value);
+        EditBox::setCaption(value);
         mWasResized = false;
 
         notifySizeChange(this);
@@ -103,19 +103,19 @@ namespace Gui
         setEditStatic(true);
     }
 
-    void AutoSizedEditBox::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void AutoSizedEditBox::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (_key == "ExpandDirection")
+        if (key == "ExpandDirection")
         {
-            mExpandDirection = MyGUI::Align::parse(_value);
+            mExpandDirection = MyGUI::Align::parse(value);
         }
-        else if (_key == "Shrink")
+        else if (key == "Shrink")
         {
-            mShrink = MyGUI::utility::parseValue<bool>(_value);
+            mShrink = MyGUI::utility::parseValue<bool>(value);
         }
         else
         {
-            Gui::EditBox::setPropertyOverride(_key, _value);
+            Gui::EditBox::setPropertyOverride(key, value);
         }
     }
 
@@ -129,22 +129,22 @@ namespace Gui
         return size;
     }
 
-    void AutoSizedButton::setCaption(const MyGUI::UString& _value)
+    void AutoSizedButton::setCaption(const MyGUI::UString& value)
     {
-        Button::setCaption(_value);
+        Button::setCaption(value);
 
         notifySizeChange(this);
     }
 
-    void AutoSizedButton::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void AutoSizedButton::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (_key == "ExpandDirection")
+        if (key == "ExpandDirection")
         {
-            mExpandDirection = MyGUI::Align::parse(_value);
+            mExpandDirection = MyGUI::Align::parse(value);
         }
         else
         {
-            Gui::Button::setPropertyOverride(_key, _value);
+            Gui::Button::setPropertyOverride(key, value);
         }
     }
 
@@ -160,14 +160,14 @@ namespace Gui
         align();
     }
 
-    bool Box::_setPropertyImpl(std::string_view _key, std::string_view _value)
+    bool Box::_setPropertyImpl(std::string_view key, std::string_view value)
     {
-        if (_key == "Spacing")
-            mSpacing = MyGUI::utility::parseValue<int>(_value);
-        else if (_key == "Padding")
-            mPadding = MyGUI::utility::parseValue<int>(_value);
-        else if (_key == "AutoResize")
-            mAutoResize = MyGUI::utility::parseValue<bool>(_value);
+        if (key == "Spacing")
+            mSpacing = MyGUI::utility::parseValue<int>(value);
+        else if (key == "Padding")
+            mPadding = MyGUI::utility::parseValue<int>(value);
+        else if (key == "AutoResize")
+            mAutoResize = MyGUI::utility::parseValue<bool>(value);
         else
             return false;
 
@@ -260,21 +260,21 @@ namespace Gui
         }
     }
 
-    void HBox::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void HBox::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (!Box::_setPropertyImpl(_key, _value))
-            MyGUI::Widget::setPropertyOverride(_key, _value);
+        if (!Box::_setPropertyImpl(key, value))
+            MyGUI::Widget::setPropertyOverride(key, value);
     }
 
-    void HBox::setSize(const MyGUI::IntSize& _value)
+    void HBox::setSize(const MyGUI::IntSize& value)
     {
-        MyGUI::Widget::setSize(_value);
+        MyGUI::Widget::setSize(value);
         align();
     }
 
-    void HBox::setCoord(const MyGUI::IntCoord& _value)
+    void HBox::setCoord(const MyGUI::IntCoord& value)
     {
-        MyGUI::Widget::setCoord(_value);
+        MyGUI::Widget::setCoord(value);
         align();
     }
 
@@ -286,7 +286,7 @@ namespace Gui
         setWidgetClient(client);
     }
 
-    void HBox::onWidgetCreated(MyGUI::Widget* _widget)
+    void HBox::onWidgetCreated(MyGUI::Widget* /*widget*/)
     {
         align();
     }
@@ -415,21 +415,21 @@ namespace Gui
         }
     }
 
-    void VBox::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void VBox::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (!Box::_setPropertyImpl(_key, _value))
-            MyGUI::Widget::setPropertyOverride(_key, _value);
+        if (!Box::_setPropertyImpl(key, value))
+            MyGUI::Widget::setPropertyOverride(key, value);
     }
 
-    void VBox::setSize(const MyGUI::IntSize& _value)
+    void VBox::setSize(const MyGUI::IntSize& value)
     {
-        MyGUI::Widget::setSize(_value);
+        MyGUI::Widget::setSize(value);
         align();
     }
 
-    void VBox::setCoord(const MyGUI::IntCoord& _value)
+    void VBox::setCoord(const MyGUI::IntCoord& value)
     {
-        MyGUI::Widget::setCoord(_value);
+        MyGUI::Widget::setCoord(value);
         align();
     }
 
@@ -476,7 +476,7 @@ namespace Gui
         return size;
     }
 
-    void VBox::onWidgetCreated(MyGUI::Widget* _widget)
+    void VBox::onWidgetCreated(MyGUI::Widget* /*widget*/)
     {
         align();
     }

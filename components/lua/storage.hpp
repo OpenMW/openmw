@@ -25,19 +25,20 @@ namespace LuaUtil
         explicit LuaStorage() {}
 
         void clearTemporaryAndRemoveCallbacks();
-        void load(lua_State* L, const std::filesystem::path& path);
-        void save(lua_State* L, const std::filesystem::path& path) const;
+        void load(lua_State* state, const std::filesystem::path& path);
+        void save(lua_State* state, const std::filesystem::path& path) const;
 
-        sol::object getSection(lua_State* L, std::string_view sectionName, bool readOnly, bool forMenuScripts = false);
-        sol::object getMutableSection(lua_State* L, std::string_view sectionName, bool forMenuScripts = false)
+        sol::object getSection(
+            lua_State* state, std::string_view sectionName, bool readOnly, bool forMenuScripts = false);
+        sol::object getMutableSection(lua_State* state, std::string_view sectionName, bool forMenuScripts = false)
         {
-            return getSection(L, sectionName, false, forMenuScripts);
+            return getSection(state, sectionName, false, forMenuScripts);
         }
-        sol::object getReadOnlySection(lua_State* L, std::string_view sectionName)
+        sol::object getReadOnlySection(lua_State* state, std::string_view sectionName)
         {
-            return getSection(L, sectionName, true);
+            return getSection(state, sectionName, true);
         }
-        sol::table getAllSections(lua_State* L, bool readOnly = false);
+        sol::table getAllSections(lua_State* state, bool readOnly = false);
 
         void setSingleValue(std::string_view section, std::string_view key, const sol::object& value)
         {
@@ -69,8 +70,8 @@ namespace LuaUtil
                 : mSerializedValue(serialize(value))
             {
             }
-            sol::object getCopy(lua_State* L) const;
-            sol::object getReadOnly(lua_State* L) const;
+            sol::object getCopy(lua_State* state) const;
+            sol::object getReadOnly(lua_State* state) const;
 
         private:
             std::string mSerializedValue;
@@ -94,7 +95,7 @@ namespace LuaUtil
             const Value& get(std::string_view key) const;
             void set(std::string_view key, const sol::object& value);
             void setAll(const sol::optional<sol::table>& values);
-            sol::table asTable(lua_State* L);
+            sol::table asTable(lua_State* state);
             void runCallbacks(sol::optional<std::string_view> changedKey);
             void throwIfCallbackRecursionIsTooDeep();
 

@@ -42,9 +42,9 @@ namespace MWGui
         /// List of enabled/purchasable spells and their index in the full list.
         std::vector<std::pair<MyGUI::Button*, size_t>> mSpellButtons;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onSpellButtonClick(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onSpellButtonClick(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         void addSpell(const ESM::Spell& spell);
         void clearSpells();
         int mCurrentY;

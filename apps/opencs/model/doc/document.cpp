@@ -293,11 +293,11 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files,
-    bool new_, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
+    bool isNew, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
     const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
     : mSavePath(savePath)
     , mContentFiles(std::move(files))
-    , mNew(new_)
+    , mNew(isNew)
     , mData(encoding, dataPaths, archives, resDir)
     , mTools(*this, encoding)
     , mProjectPath((configuration.getUserDataPath() / "projects") / (savePath.filename().u8string() + u8".project"))

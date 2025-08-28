@@ -20,7 +20,7 @@ namespace MWPhysics
         float mFraction;
 
         void doTrace(const btCollisionObject* actor, const osg::Vec3f& start, const osg::Vec3f& end,
-            const btCollisionWorld* world, bool attempt_short_trace = false);
+            const btCollisionWorld* world, bool attemptShortTrace = false);
         void findGround(
             const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, const btCollisionWorld* world);
     };

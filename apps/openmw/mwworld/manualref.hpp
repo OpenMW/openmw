@@ -16,8 +16,8 @@ namespace MWWorld
         Ptr mPtr;
 
     public:
-        ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count = 1);
-        ManualRef(const MWWorld::ESMStore& store, const MWWorld::Ptr& template_, const int count = 1);
+        explicit ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& name, const int count = 1);
+        explicit ManualRef(const MWWorld::ESMStore& store, const MWWorld::Ptr& templatePtr, const int count = 1);
 
         ManualRef(const ManualRef&) = delete;
         ManualRef& operator=(const ManualRef&) = delete;

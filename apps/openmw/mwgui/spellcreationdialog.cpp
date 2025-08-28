@@ -279,7 +279,7 @@ namespace MWGui
         }
     }
 
-    void EditEffectDialog::onRangeButtonClicked(MyGUI::Widget* sender)
+    void EditEffectDialog::onRangeButtonClicked(MyGUI::Widget* /*sender*/)
     {
         mEffect.mRange = (mEffect.mRange + 1) % 3;
 
@@ -313,19 +313,19 @@ namespace MWGui
         eventEffectModified(mEffect);
     }
 
-    void EditEffectDialog::onDeleteButtonClicked(MyGUI::Widget* sender)
+    void EditEffectDialog::onDeleteButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
 
         eventEffectRemoved(mEffect);
     }
 
-    void EditEffectDialog::onOkButtonClicked(MyGUI::Widget* sender)
+    void EditEffectDialog::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
     }
 
-    void EditEffectDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void EditEffectDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         setVisible(false);
         exit();
@@ -621,12 +621,12 @@ namespace MWGui
         startEditing();
     }
 
-    void SpellCreationDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void SpellCreationDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_SpellCreation);
     }
 
-    void SpellCreationDialog::onBuyButtonClicked(MyGUI::Widget* sender)
+    void SpellCreationDialog::onBuyButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (mEffects.size() <= 0)
         {

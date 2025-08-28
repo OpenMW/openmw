@@ -92,13 +92,13 @@ namespace MWGui
         onWindowResize(t);
     }
 
-    void StatsWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void StatsWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mSkillView->getViewOffset().top + _rel * 0.3 > 0)
+        if (mSkillView->getViewOffset().top + rel * 0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mSkillView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
+                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + rel * 0.3)));
     }
 
     void StatsWindow::onWindowResize(MyGUI::Window* window)

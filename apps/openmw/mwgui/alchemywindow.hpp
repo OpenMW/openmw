@@ -63,22 +63,22 @@ namespace MWGui
         MyGUI::EditBox* mNameEdit;
         Gui::NumericEditBox* mBrewCountEdit;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onCreateButtonClicked(MyGUI::Widget* _sender);
-        void onIngredientSelected(MyGUI::Widget* _sender);
-        void onApparatusSelected(MyGUI::Widget* _sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onCreateButtonClicked(MyGUI::Widget* sender);
+        void onIngredientSelected(MyGUI::Widget* sender);
+        void onApparatusSelected(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox*);
-        void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onCountButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+        void onIncreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onDecreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onCountButtonReleased(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
         void onCountValueChanged(int value);
         void onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller);
 
         void applyFilter(const std::string& filter);
         void initFilter();
-        void onFilterChanged(MyGUI::ComboBox* _sender, size_t _index);
-        void onFilterEdited(MyGUI::EditBox* _sender);
-        void switchFilterType(MyGUI::Widget* _sender);
+        void onFilterChanged(MyGUI::ComboBox* sender, size_t index);
+        void onFilterEdited(MyGUI::EditBox* sender);
+        void switchFilterType(MyGUI::Widget* sender);
         void updateFilters();
 
         void addRepeatController(MyGUI::Widget* widget);

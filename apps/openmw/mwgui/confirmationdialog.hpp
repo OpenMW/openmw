@@ -25,8 +25,8 @@ namespace MWGui
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onOkButtonClicked(MyGUI::Widget* _sender);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onOkButtonClicked(MyGUI::Widget* sender);
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
         bool mOkButtonFocus = true;

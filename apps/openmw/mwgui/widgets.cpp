@@ -74,7 +74,7 @@ namespace MWGui::Widgets
         mSkillNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
     }
 
-    void MWSkill::onClicked(MyGUI::Widget* _sender)
+    void MWSkill::onClicked(MyGUI::Widget* /*sender*/)
     {
         eventClicked(this);
     }
@@ -125,7 +125,7 @@ namespace MWGui::Widgets
         updateWidgets();
     }
 
-    void MWAttribute::onClicked(MyGUI::Widget* _sender)
+    void MWAttribute::onClicked(MyGUI::Widget* /*sender*/)
     {
         eventClicked(this);
     }

@@ -43,12 +43,12 @@ namespace MWGui
 
         void layoutWidgets();
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
         void onSelectedItem(MyGUI::Widget* sender);
         void onSelectedBackground(MyGUI::Widget* sender);
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
 
         std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;

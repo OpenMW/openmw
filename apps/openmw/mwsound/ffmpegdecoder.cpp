@@ -44,13 +44,13 @@ namespace MWSound
         av_frame_free(&ptr);
     }
 
-    int FFmpegDecoder::readPacket(void* user_data, uint8_t* buf, int buf_size)
+    int FFmpegDecoder::readPacket(void* userData, uint8_t* buf, int bufSize)
     {
         try
         {
-            std::istream& stream = *static_cast<FFmpegDecoder*>(user_data)->mDataStream;
+            std::istream& stream = *static_cast<FFmpegDecoder*>(userData)->mDataStream;
             stream.clear();
-            stream.read((char*)buf, buf_size);
+            stream.read((char*)buf, bufSize);
             std::streamsize count = stream.gcount();
             if (count == 0)
                 return AVERROR_EOF;
@@ -74,9 +74,9 @@ namespace MWSound
         return -1;
     }
 
-    int64_t FFmpegDecoder::seek(void* user_data, int64_t offset, int whence)
+    int64_t FFmpegDecoder::seek(void* userData, int64_t offset, int whence)
     {
-        std::istream& stream = *static_cast<FFmpegDecoder*>(user_data)->mDataStream;
+        std::istream& stream = *static_cast<FFmpegDecoder*>(userData)->mDataStream;
 
         whence &= ~AVSEEK_FORCE;
 

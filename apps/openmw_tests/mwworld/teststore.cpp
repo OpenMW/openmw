@@ -343,11 +343,11 @@ TYPED_TEST_P(StoreTest, delete_test)
 }
 
 template <typename T>
-static unsigned int hasSameRecordId(const MWWorld::Store<T>& store, ESM::RecNameInts RecName)
+static unsigned int hasSameRecordId(const MWWorld::Store<T>& store, ESM::RecNameInts recName)
 {
     if constexpr (MWWorld::HasRecordId<T>::value)
     {
-        return T::sRecordId == RecName ? 1 : 0;
+        return T::sRecordId == recName ? 1 : 0;
     }
     else
     {

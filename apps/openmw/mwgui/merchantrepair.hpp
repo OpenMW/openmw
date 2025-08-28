@@ -30,7 +30,7 @@ namespace MWGui
         size_t mControllerFocus = 0;
 
     protected:
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         void onRepairButtonClick(MyGUI::Widget* sender);
         void onOkButtonClick(MyGUI::Widget* sender);
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;

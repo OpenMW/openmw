@@ -174,14 +174,14 @@ namespace MWGui
         mDateTimeText->setCaptionWithReplacing(dateTimeText);
     }
 
-    void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* /*sender*/)
     {
         int autoHours = MWBase::Environment::get().getMechanicsManager()->getHoursToRest();
 
         startWaiting(autoHours);
     }
 
-    void WaitDialog::onWaitButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onWaitButtonClicked(MyGUI::Widget* /*sender*/)
     {
         startWaiting(mManualHours);
     }
@@ -231,7 +231,7 @@ namespace MWGui
         mProgressBar.setProgress(0, hoursToWait);
     }
 
-    void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
     }
@@ -243,7 +243,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
     }
 
-    void WaitDialog::onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void WaitDialog::onKeyButtonPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char character)
     {
         if (key == MyGUI::KeyCode::ArrowUp)
             mHourSlider->setScrollPosition(

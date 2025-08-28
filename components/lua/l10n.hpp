@@ -10,7 +10,7 @@ namespace L10n
 
 namespace LuaUtil
 {
-    sol::function initL10nLoader(lua_State*, L10n::Manager* manager);
+    sol::function initL10nLoader(lua_State* state, L10n::Manager* manager);
 }
 
 #endif // COMPONENTS_LUA_L10N_H

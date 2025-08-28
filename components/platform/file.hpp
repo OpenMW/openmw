@@ -25,7 +25,7 @@ namespace Platform::File
 
     size_t size(Handle handle);
 
-    void seek(Handle handle, size_t Position, SeekType type = SeekType::Begin);
+    void seek(Handle handle, size_t position, SeekType type = SeekType::Begin);
     size_t tell(Handle handle);
 
     size_t read(Handle handle, void* data, size_t size);

@@ -172,9 +172,9 @@ namespace MWGui
         return player.getClass().getCreatureStats(player).getSpells().hasSpell(id);
     }
 
-    void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)
+    void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* sender)
     {
-        int price = *_sender->getUserData<int>();
+        int price = *sender->getUserData<int>();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
@@ -182,7 +182,7 @@ namespace MWGui
 
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
-        auto spell = mSpellsWidgetMap.find(_sender);
+        auto spell = mSpellsWidgetMap.find(sender);
         assert(spell != mSpellsWidgetMap.end());
 
         spells.add(spell->second);
@@ -197,7 +197,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
     }
 
-    void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_SpellBuying);
     }
@@ -219,13 +219,13 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
-    void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mSpellsView->getViewOffset().top + _rel * 0.3 > 0)
+        if (mSpellsView->getViewOffset().top + rel * 0.3 > 0)
             mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mSpellsView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + _rel * 0.3f)));
+                MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + rel * 0.3f)));
     }
 
     bool SpellBuyingWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)

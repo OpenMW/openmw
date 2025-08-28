@@ -52,16 +52,16 @@ bool CSMDoc::DocumentManager::isEmpty()
 }
 
 void CSMDoc::DocumentManager::addDocument(
-    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_)
+    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew)
 {
-    Document* document = makeDocument(files, savePath, new_);
+    Document* document = makeDocument(files, savePath, isNew);
     insertDocument(document);
 }
 
 CSMDoc::Document* CSMDoc::DocumentManager::makeDocument(
-    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_)
+    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew)
 {
-    return new Document(mConfiguration, files, new_, savePath, mResDir, mEncoding, mDataPaths, mArchives);
+    return new Document(mConfiguration, files, isNew, savePath, mResDir, mEncoding, mDataPaths, mArchives);
 }
 
 void CSMDoc::DocumentManager::insertDocument(CSMDoc::Document* document)

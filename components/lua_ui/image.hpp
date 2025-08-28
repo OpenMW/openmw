@@ -13,7 +13,7 @@ namespace LuaUi
         MYGUI_RTTI_DERIVED(LuaTileRect)
 
     public:
-        void _setAlign(const MyGUI::IntSize& _oldsize) override;
+        void _setAlign(const MyGUI::IntSize& oldSize) override;
 
         void updateSize(MyGUI::IntSize tileSize) { mSetTileSize = tileSize; }
 

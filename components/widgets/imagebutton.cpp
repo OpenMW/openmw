@@ -34,51 +34,51 @@ namespace Gui
         updateImage();
     }
 
-    void ImageButton::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void ImageButton::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (_key == "ImageHighlighted")
-            mImageHighlighted = _value;
-        else if (_key == "ImagePushed")
-            mImagePushed = _value;
-        else if (_key == "ImageNormal")
+        if (key == "ImageHighlighted")
+            mImageHighlighted = value;
+        else if (key == "ImagePushed")
+            mImagePushed = value;
+        else if (key == "ImageNormal")
         {
             if (mImageNormal.empty())
             {
-                setImageTexture(_value);
+                setImageTexture(value);
             }
-            mImageNormal = _value;
+            mImageNormal = value;
         }
-        else if (_key == "TextureRect")
+        else if (key == "TextureRect")
         {
-            mTextureRect = MyGUI::IntCoord::parse(_value);
+            mTextureRect = MyGUI::IntCoord::parse(value);
             mUseWholeTexture = (mTextureRect == MyGUI::IntCoord(0, 0, 0, 0));
         }
         else
-            ImageBox::setPropertyOverride(_key, _value);
+            ImageBox::setPropertyOverride(key, value);
     }
 
-    void ImageButton::onMouseSetFocus(Widget* _old)
+    void ImageButton::onMouseSetFocus(MyGUI::Widget* oldWidget)
     {
         mMouseFocus = true;
         updateImage();
-        Base::onMouseSetFocus(_old);
+        Base::onMouseSetFocus(oldWidget);
     }
 
-    void ImageButton::onMouseLostFocus(Widget* _new)
+    void ImageButton::onMouseLostFocus(MyGUI::Widget* newWidget)
     {
         mMouseFocus = false;
         updateImage();
-        Base::onMouseLostFocus(_new);
+        Base::onMouseLostFocus(newWidget);
     }
 
-    void ImageButton::onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id)
+    void ImageButton::onMouseButtonPressed(int left, int top, MyGUI::MouseButton id)
     {
-        if (_id == MyGUI::MouseButton::Left)
+        if (id == MyGUI::MouseButton::Left)
         {
             mMousePress = true;
             updateImage();
         }
-        Base::onMouseButtonPressed(_left, _top, _id);
+        Base::onMouseButtonPressed(left, top, id);
     }
 
     void ImageButton::updateImage()
@@ -136,24 +136,24 @@ namespace Gui
         updateImage();
     }
 
-    void ImageButton::onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id)
+    void ImageButton::onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
-        if (_id == MyGUI::MouseButton::Left)
+        if (id == MyGUI::MouseButton::Left)
         {
             mMousePress = false;
             updateImage();
         }
 
-        Base::onMouseButtonReleased(_left, _top, _id);
+        Base::onMouseButtonReleased(left, top, id);
     }
 
-    void ImageButton::onKeySetFocus(MyGUI::Widget* _old)
+    void ImageButton::onKeySetFocus(MyGUI::Widget* /*newWidget*/)
     {
         mKeyFocus = true;
         updateImage();
     }
 
-    void ImageButton::onKeyLostFocus(MyGUI::Widget* _new)
+    void ImageButton::onKeyLostFocus(MyGUI::Widget* /*oldWidget*/)
     {
         mKeyFocus = false;
         updateImage();

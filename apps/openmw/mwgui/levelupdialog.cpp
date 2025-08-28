@@ -238,7 +238,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->streamMusic(MWSound::triumphMusic, MWSound::MusicType::Normal);
     }
 
-    void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
+    void LevelupDialog::onOkButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);

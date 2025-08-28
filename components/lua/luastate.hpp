@@ -44,8 +44,8 @@ namespace LuaUtil
 
         LuaView(const LuaView&) = delete;
 
-        LuaView(lua_State* L)
-            : mSol(L)
+        LuaView(lua_State* state)
+            : mSol(state)
         {
         }
 
@@ -59,9 +59,9 @@ namespace LuaUtil
     };
 
     template <typename Key, typename Value>
-    sol::table tableFromPairs(lua_State* L, std::initializer_list<std::pair<Key, Value>> list)
+    sol::table tableFromPairs(lua_State* state, std::initializer_list<std::pair<Key, Value>> list)
     {
-        sol::table res(L, sol::create);
+        sol::table res(state, sol::create);
         for (const auto& [k, v] : list)
             res[k] = v;
         return res;
@@ -94,9 +94,9 @@ namespace LuaUtil
         {
             if (!lua_checkstack(mSol.lua_state(), 2))
                 return LUA_ERRMEM;
-            lua_pushcfunction(mSol.lua_state(), [](lua_State* L) {
-                void* f = lua_touserdata(L, 1);
-                LuaView view(L);
+            lua_pushcfunction(mSol.lua_state(), [](lua_State* state) {
+                void* f = lua_touserdata(state, 1);
+                LuaView view(state);
                 (*static_cast<Function*>(f))(view);
                 return 0;
             });
@@ -186,7 +186,7 @@ namespace LuaUtil
             ScriptId scriptId, const sol::protected_function& fn, Args&&... args);
 
         sol::function loadScriptAndCache(const VFS::Path::Normalized& path);
-        static void countHook(lua_State* L, lua_Debug* ar);
+        static void countHook(lua_State* state, lua_Debug* ar);
         static void* trackingAllocator(void* ud, void* ptr, size_t osize, size_t nsize);
 
         static LuaStatePtr createLuaRuntime(LuaState* luaState);

@@ -80,15 +80,15 @@ namespace MWGui
 
         void updateConsoleTitle();
 
-        void commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char);
-        void acceptCommand(MyGUI::EditBox* _sender);
+        void commandBoxKeyPress(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char value);
+        void acceptCommand(MyGUI::EditBox* sender);
 
         enum class SearchDirection;
-        void toggleCaseSensitiveSearch(MyGUI::Widget* _sender);
-        void toggleRegExSearch(MyGUI::Widget* _sender);
-        void acceptSearchTerm(MyGUI::EditBox* _sender);
-        void findNextOccurrence(MyGUI::Widget* _sender);
-        void findPreviousOccurrence(MyGUI::Widget* _sender);
+        void toggleCaseSensitiveSearch(MyGUI::Widget* sender);
+        void toggleRegExSearch(MyGUI::Widget* sender);
+        void acceptSearchTerm(MyGUI::EditBox* sender);
+        void findNextOccurrence(MyGUI::Widget* sender);
+        void findPreviousOccurrence(MyGUI::Widget* sender);
         void findOccurrence(SearchDirection direction);
         void findInHistoryText(
             const std::string& historyText, SearchDirection direction, size_t firstIndex, size_t lastIndex);

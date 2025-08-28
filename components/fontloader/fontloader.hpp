@@ -28,7 +28,7 @@ namespace Gui
         /// @param exportFonts export the converted fonts (Images and XML with glyph metrics) to files?
         FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor, bool exportFonts);
 
-        void overrideLineHeight(MyGUI::xml::ElementPtr _node, std::string_view _file, MyGUI::Version _version);
+        void overrideLineHeight(MyGUI::xml::ElementPtr node, std::string_view file, MyGUI::Version version);
 
         static std::string_view getFontForFace(std::string_view face);
 

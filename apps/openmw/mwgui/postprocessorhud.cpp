@@ -108,7 +108,7 @@ namespace MWGui
         layout();
     }
 
-    void PostProcessorHud::notifyResetButtonClicked(MyGUI::Widget* sender)
+    void PostProcessorHud::notifyResetButtonClicked(MyGUI::Widget* /*sender*/)
     {
         for (size_t i = 1; i < mConfigArea->getChildCount(); ++i)
         {
@@ -153,12 +153,12 @@ namespace MWGui
         }
     }
 
-    void PostProcessorHud::notifyActivatePressed(MyGUI::Widget* sender)
+    void PostProcessorHud::notifyActivatePressed(MyGUI::Widget* /*sender*/)
     {
         toggleTechnique(true);
     }
 
-    void PostProcessorHud::notifyDeactivatePressed(MyGUI::Widget* sender)
+    void PostProcessorHud::notifyDeactivatePressed(MyGUI::Widget* /*sender*/)
     {
         toggleTechnique(false);
     }
@@ -187,12 +187,12 @@ namespace MWGui
         }
     }
 
-    void PostProcessorHud::notifyShaderUpPressed(MyGUI::Widget* sender)
+    void PostProcessorHud::notifyShaderUpPressed(MyGUI::Widget* /*sender*/)
     {
         moveShader(Direction::Up);
     }
 
-    void PostProcessorHud::notifyShaderDownPressed(MyGUI::Widget* sender)
+    void PostProcessorHud::notifyShaderDownPressed(MyGUI::Widget* /*sender*/)
     {
         moveShader(Direction::Down);
     }
@@ -277,7 +277,7 @@ namespace MWGui
         mConfigLayout->setSize(mConfigLayout->getWidth(), mConfigLayout->getParentSize().height - padding2);
     }
 
-    void PostProcessorHud::notifyMouseWheel(MyGUI::Widget* sender, int rel)
+    void PostProcessorHud::notifyMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
         int offset = mConfigLayout->getViewOffset().top + rel * 0.3;
         if (offset > 0)

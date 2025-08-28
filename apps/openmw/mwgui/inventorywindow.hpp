@@ -145,10 +145,10 @@ namespace MWGui
         void transferItem(MyGUI::Widget* sender, std::size_t count);
         void dropItem(MyGUI::Widget* sender, std::size_t count);
 
-        void onWindowResize(MyGUI::Window* _sender);
-        void onFilterChanged(MyGUI::Widget* _sender);
-        void onNameFilterChanged(MyGUI::EditBox* _sender);
-        void onAvatarClicked(MyGUI::Widget* _sender);
+        void onWindowResize(MyGUI::Window* sender);
+        void onFilterChanged(MyGUI::Widget* sender);
+        void onNameFilterChanged(MyGUI::EditBox* sender);
+        void onAvatarClicked(MyGUI::Widget* sender);
         void onPinToggled() override;
 
         void updateEncumbranceBar();

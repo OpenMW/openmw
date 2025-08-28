@@ -290,7 +290,7 @@ namespace MWWorld
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord(ESM::ESMReader& reader, uint32_t type);
+        bool readRecord(ESM::ESMReader& reader, uint32_t typeId);
         ///< \return Known type?
 
         // To be called when we are done with dynamic record loading
