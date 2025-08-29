@@ -719,10 +719,10 @@ bool CSVRender::PagedWorldspaceWidget::handleDrop(
     return true;
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::getDropRequirements(
+CSVRender::WorldspaceWidget::DropRequirements CSVRender::PagedWorldspaceWidget::getDropRequirements(
     CSVRender::WorldspaceWidget::DropType type) const
 {
-    dropRequirments requirements = WorldspaceWidget::getDropRequirements(type);
+    DropRequirements requirements = WorldspaceWidget::getDropRequirements(type);
 
     if (requirements != ignored)
         return requirements;
