@@ -55,11 +55,6 @@ namespace VFS
 
         Files::IStreamPtr get(Path::NormalizedView name) const;
 
-        /// Retrieve a file by name (name is already normalized).
-        /// @note Throws an exception if the file can not be found.
-        /// @note May be called from any thread once the index has been built.
-        Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
-
         std::string getArchive(const Path::Normalized& name) const;
 
         /// Recursively iterate over the elements of the given path
@@ -82,6 +77,11 @@ namespace VFS
         FileMap mIndex;
 
         inline Files::IStreamPtr findNormalized(std::string_view normalizedPath) const;
+
+        /// Retrieve a file by name (name is already normalized).
+        /// @note Throws an exception if the file can not be found.
+        /// @note May be called from any thread once the index has been built.
+        Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
     };
 
 }
