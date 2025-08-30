@@ -23,14 +23,14 @@ opencs_units (model/world
 
 
 opencs_units (model/world
-    universalid record commands columnbase columnimp scriptcontext cell refidcollection
+    universalid commands columnbase columnimp scriptcontext refidcollection
     refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    pathgrid land nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
 opencs_hdrs (model/world
-    columnimp disabletag idcollection collection info subcellcollection
+    columnimp disabletag idcollection collection info subcellcollection cell nestedtablewrapper record
     )
 
 
@@ -52,7 +52,7 @@ opencs_hdrs (model/tools
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview sizehint
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
     )
 
 
@@ -61,7 +61,7 @@ opencs_units (view/doc
     )
 
 opencs_hdrs (view/doc
-    subviewfactoryimp
+    subviewfactoryimp sizehint
     )
 
 
@@ -92,12 +92,12 @@ opencs_units (view/render
     )
 
 opencs_units (view/render
-    lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
+    lighting lightingday lightingnight lightingbright object cell terrainstorage
     cellarrow cellmarker cellborder pathgrid
     )
 
 opencs_hdrs (view/render
-    mask
+    mask tagbase
     )
 
 
@@ -123,7 +123,11 @@ opencs_units (model/prefs
     )
 
 opencs_units (model/filter
-    unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
+    unarynode narynode parser andnode ornode notnode textnode valuenode
+    )
+
+opencs_hdrs (model/filter
+    leafnode booleannode
     )
 
 opencs_units (view/filter

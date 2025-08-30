@@ -115,7 +115,15 @@ namespace Compiler
     {
         const int numberOfControls = 7;
 
-        extern const char* controls[numberOfControls];
+        inline constexpr const char* controls[numberOfControls] = {
+            "playercontrols",
+            "playerfighting",
+            "playerjumping",
+            "playerlooking",
+            "playermagic",
+            "playerviewswitch",
+            "vanitymode",
+        };
 
         const int opcodeEnable = 0x200007e;
         const int opcodeDisable = 0x2000085;

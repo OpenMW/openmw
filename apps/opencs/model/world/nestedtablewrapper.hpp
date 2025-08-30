@@ -7,7 +7,7 @@ namespace CSMWorld
     {
         virtual ~NestedTableWrapperBase() = default;
 
-        virtual int size() const;
+        virtual int size() const { return -5; }
 
         NestedTableWrapperBase() = default;
     };

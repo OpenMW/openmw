@@ -17,7 +17,6 @@ set(ESSIMPORTER_FILES
     importscpt.cpp
     importproj.cpp
     importsplm.cpp
-    importercontext.cpp
     converter.cpp
     convertacdt.cpp
     convertnpcc.cpp
