@@ -46,7 +46,7 @@
 
 namespace
 {
-    std::string textureFilteringToStr(const std::string& mipFilter, const std::string& magFilter)
+    std::string_view textureFilteringToStr(const std::string& mipFilter, const std::string& magFilter)
     {
         if (mipFilter == "none")
             return "#{OMWEngine:TextureFilteringDisabled}";
@@ -65,9 +65,9 @@ namespace
         return "#{OMWEngine:TextureFilteringOther}";
     }
 
-    std::string lightingMethodToStr(SceneUtil::LightingMethod method)
+    MyGUI::UString lightingMethodToStr(SceneUtil::LightingMethod method)
     {
-        std::string result;
+        std::string_view result;
         switch (method)
         {
             case SceneUtil::LightingMethod::FFP:
@@ -82,18 +82,7 @@ namespace
                 break;
         }
 
-        return MyGUI::LanguageManager::getInstance().replaceTags(result);
-    }
-
-    void parseResolution(int& x, int& y, const std::string& str)
-    {
-        std::vector<std::string> split;
-        Misc::StringUtils::split(str, split, "@(x");
-        assert(split.size() >= 2);
-        Misc::StringUtils::trim(split[0]);
-        Misc::StringUtils::trim(split[1]);
-        x = MyGUI::utility::parseInt(split[0]);
-        y = MyGUI::utility::parseInt(split[1]);
+        return MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString(result));
     }
 
     bool sortResolutions(std::pair<int, int> left, std::pair<int, int> right)
@@ -368,10 +357,10 @@ namespace MWGui
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
-            std::string str = Misc::getResolutionText(resolution.first, resolution.second, "%i x %i (%i:%i)");
+            std::string str = Misc::getResolutionText(resolution.first, resolution.second);
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
-                mResolutionList->addItem(str);
+                mResolutionList->addItem(str, resolution);
         }
         highlightCurrentResolution();
 
@@ -493,14 +482,14 @@ namespace MWGui
 
     void SettingsWindow::onResolutionAccept()
     {
-        const std::string& resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
-        int resX, resY;
-        parseResolution(resX, resY, resStr);
+        auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(mResolutionList->getIndexSelected());
+        if (resolution)
+        {
+            Settings::video().mResolutionX.set(resolution->first);
+            Settings::video().mResolutionY.set(resolution->second);
 
-        Settings::video().mResolutionX.set(resX);
-        Settings::video().mResolutionY.set(resY);
-
-        apply();
+            apply();
+        }
     }
 
     void SettingsWindow::onResolutionCancel()
@@ -517,10 +506,8 @@ namespace MWGui
 
         for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
         {
-            int resX, resY;
-            parseResolution(resX, resY, mResolutionList->getItemNameAt(i));
-
-            if (resX == currentX && resY == currentY)
+            auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
+            if (resolution && resolution->first == currentX && resolution->second == currentY)
             {
                 mResolutionList->setIndexSelected(i);
                 break;
@@ -853,7 +840,7 @@ namespace MWGui
     void SettingsWindow::updateLightSettings()
     {
         auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();
-        std::string lightingMethodStr = lightingMethodToStr(lightingMethod);
+        MyGUI::UString lightingMethodStr = lightingMethodToStr(lightingMethod);
 
         mLightingMethodButton->removeAllItems();
 
@@ -886,28 +873,31 @@ namespace MWGui
             // check if this resolution is supported in fullscreen
             if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
             {
-                const std::string& resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
-                int resX, resY;
-                parseResolution(resX, resY, resStr);
-                Settings::video().mResolutionX.set(resX);
-                Settings::video().mResolutionY.set(resY);
+                auto resolution
+                    = mResolutionList->getItemDataAt<std::pair<int, int>>(mResolutionList->getIndexSelected());
+                if (resolution)
+                {
+                    Settings::video().mResolutionX.set(resolution->first);
+                    Settings::video().mResolutionY.set(resolution->second);
+                }
             }
 
             bool supported = false;
             int fallbackX = 0, fallbackY = 0;
             for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
             {
-                const std::string& resStr = mResolutionList->getItemNameAt(i);
-                int resX, resY;
-                parseResolution(resX, resY, resStr);
+                auto resolution = mResolutionList->getItemDataAt<std::pair<int, int>>(i);
+                if (!resolution)
+                    continue;
 
                 if (i == 0)
                 {
-                    fallbackX = resX;
-                    fallbackY = resY;
+                    fallbackX = resolution->first;
+                    fallbackY = resolution->second;
                 }
 
-                if (resX == Settings::video().mResolutionX && resY == Settings::video().mResolutionY)
+                if (resolution->first == Settings::video().mResolutionX
+                    && resolution->second == Settings::video().mResolutionY)
                     supported = true;
             }
 

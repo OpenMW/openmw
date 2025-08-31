@@ -201,7 +201,7 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
             return result;
         }
 
-        auto str = Misc::getResolutionText(mode.w, mode.h, "%i × %i (%i:%i)");
+        auto str = Misc::getResolutionText(mode.w, mode.h);
         result.append(QString(str.c_str()));
     }
 
