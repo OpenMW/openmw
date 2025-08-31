@@ -621,20 +621,23 @@ namespace MWGui
         auto type = ptr.getType();
         bool isWeaponOrArmor = type == ESM::Weapon::sRecordId || type == ESM::Armor::sRecordId;
         bool isBroken = ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0;
+        const bool isFromDragAndDrop = mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == ptr;
+        const auto [canEquipResult, canEquipMsg] = ptr.getClass().canBeEquipped(ptr, mPtr);
 
         // In vanilla, broken armor or weapons cannot be equipped
         // tools with 0 charges is equippable
         if (isBroken && isWeaponOrArmor)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
+            if (isFromDragAndDrop)
+                mDragAndDrop->drop(mTradeModel, mItemView);
+            MWBase::Environment::get().getWindowManager()->messageBox(canEquipMsg);
             return;
         }
 
-        bool canEquip = ptr.getClass().canBeEquipped(ptr, mPtr).first != 0;
-        bool shouldSetOnPcEquip = canEquip || force;
+        const bool willEquip = canEquipResult != 0 || force;
 
         // If the item has a script, set OnPCEquip or PCSkipEquip to 1
-        if (!script.empty() && shouldSetOnPcEquip)
+        if (!script.empty() && willEquip)
         {
             // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
             bool isBook = type == ESM::Book::sRecordId;
@@ -649,7 +652,6 @@ namespace MWGui
 
         MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
         auto [eqSlots, canStack] = ptr.getClass().getEquipmentSlots(ptr);
-        bool isFromDragAndDrop = mDragAndDrop->mItem.mBase == ptr;
         int useCount = isFromDragAndDrop ? mDragAndDrop->mDraggedCount : ptr.getCellRef().getCount();
 
         if (!eqSlots.empty())
@@ -659,18 +661,20 @@ namespace MWGui
                 useCount += it->getCellRef().getCount();
         }
 
-        action->execute(player, !canEquip);
+        action->execute(player, !willEquip);
 
         // Partial equipping
         int excess = ptr.getCellRef().getCount() - useCount;
         if (excess > 0 && canStack)
             invStore.unequipItemQuantity(ptr, excess);
 
-        if (mDragAndDrop->mIsOnDragAndDrop && isFromDragAndDrop)
+        if (isFromDragAndDrop)
         {
             // Feature: Don't finish draganddrop if potion or ingredient was used
             if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
                 mDragAndDrop->update();
+            else if (!willEquip)
+                mDragAndDrop->drop(mTradeModel, mItemView);
             else
                 mDragAndDrop->finish();
         }
@@ -688,14 +692,6 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
-
-            auto [canEquipRes, canEquipMsg] = ptr.getClass().canBeEquipped(ptr, mPtr);
-            if (canEquipRes == 0) // cannot equip
-            {
-                mDragAndDrop->drop(mTradeModel, mItemView); // also plays down sound
-                MWBase::Environment::get().getWindowManager()->messageBox(canEquipMsg);
-                return;
-            }
 
             if (mDragAndDrop->mSourceModel != mTradeModel)
             {
