@@ -17,6 +17,7 @@
     Bug #7799: Picking up ingredients while object paging active grid is on may cause a hiccup
     Bug #7871: Kwama Queen doesn't start combat with player
     Bug #7979: Paralyzed NPCs battlecry
+    Bug #7996: Instant magic effects are not always instant
     Bug #8012: Startcombat and Stopcombat do not affect music in the menu mode
     Bug #8245: The console command ShowVars does not list global mwscripts
     Bug #8265: Topics are linked incorrectly
@@ -50,7 +51,9 @@
     Bug #8500: OpenMW Alarm behaviour doesn't match morrowind.exe
     Bug #8519: Multiple bounty is sometimes assigned to player when detected during a pickpocketing action
     Bug #8540: Magic resistance is applied to effects without a magnitude
+    Bug #8551: Quick keys are not saved if the item is not present anymore
     Bug #8557: Charm's disposition changes capped on 100, uncapped below 0
+    Bug #8560: Global filtering setting doesn't apply to spell effect in hands
     Bug #8582: addScript-attached local scripts start out inactive
     Bug #8584: Spacing of service menu list entries is inconsistent
     Bug #8585: Dialogue topic list doesn't have enough padding
@@ -66,12 +69,15 @@
     Bug #8615: Rest/wait time progress speed is different from vanilla
     Bug #8620: Create/CloneCommand can reuse refNums, causing severe issues in-game
     Bug #8650: Some plants turn invisible when being called types.Container.inventory(cont):isResolved()
+    Bug #8680: Dead ancestor ghosts stop being dust when you rest near them
+    Bug #8686: openmw-cs: Crash when smoothing terrain of a not-yet-created cell.
     Feature #2522: Support quick item transfer
     Feature #3740: Gamepad GUI Mode
     Feature #3769: Allow GetSpellEffects on enchantments
     Feature #6000: Oblivion terrain rendering
     Feature #6976: [Lua] Weather API
     Feature #7813: Add audio doppler for 3d sounds
+    Feature #7879: Lua: Region record store bindings
     Feature #7966: Add Lua read access to TES3 player's journal records
     Feature #8077: Save settings changes when clicking "ok"/closing the window
     Feature #8112: Expose landscape record data to Lua
@@ -90,6 +96,7 @@
     Feature #8629: Expose path grid data to Lua
     Feature #8642: Partially dehardcode on-hit mechanics
     Feature #8654: Allow lua world.createRecord to create NPC records
+    Feature #8665: Polish localization for Qt tools and exposed in-game lines
     Task #8578: Drop support for Qt5
 
 0.49.0
