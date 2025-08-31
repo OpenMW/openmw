@@ -797,10 +797,6 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_NiParticles)
                 handleParticleSystem(nifNode, parent, node, composite, args.mAnimFlags);
 
-            // Apply any extra effects after processing the nodes children and particle system handling
-            if (!extraData.empty())
-                handleExtraData(extraData, node);
-
             const bool isNiGeometry = isTypeNiGeometry(nifNode->recType);
             const bool isBSGeometry = isTypeBSGeometry(nifNode->recType);
             const bool isGeometry = isNiGeometry || isBSGeometry;
@@ -831,6 +827,10 @@ namespace NifOsg
                         handleMeshControllers(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
                 }
             }
+
+            // Apply any extra effects after processing the nodes children and particle system handling
+            if (!extraData.empty())
+                handleExtraData(extraData, node);
 
             if (composite->getNumControllers() > 0)
             {
