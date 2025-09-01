@@ -59,8 +59,8 @@ namespace MWGui
         {
             mOkButton->setStateSelected(true);
             mDisableGamepadCursor = true;
-            mControllerButtons.mA = "#{sSelect}";
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mA = "#{Interface:Select}";
+            mControllerButtons.mB = "#{Interface:Back}";
         }
 
         center();
@@ -149,9 +149,9 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.mLStick = "#{sMouse}";
-            mControllerButtons.mA = "#{sSelect}";
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mLStick = "#{Interface:Mouse}";
+            mControllerButtons.mA = "#{Interface:Select}";
+            mControllerButtons.mB = "#{Interface:Back}";
         }
 
         updateClasses();
@@ -167,13 +167,13 @@ namespace MWGui
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.mX = "#{sNext}";
+            mControllerButtons.mX = "#{Interface:Next}";
         }
         else if (Settings::gui().mControllerMenus)
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.mX = "#{sDone}";
+            mControllerButtons.mX = "#{Interface:Done}";
         }
         else
             okButton->setCaption(
@@ -392,7 +392,7 @@ namespace MWGui
         center();
 
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
-        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mA = "#{Interface:Select}";
     }
 
     void InfoBoxDialog::setText(const std::string& str)
@@ -584,9 +584,9 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             okButton->setStateSelected(true);
-            mControllerButtons.mLStick = "#{sMouse}";
-            mControllerButtons.mA = "#{sSelect}";
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mLStick = "#{Interface:Mouse}";
+            mControllerButtons.mA = "#{Interface:Select}";
+            mControllerButtons.mB = "#{Interface:Back}";
         }
 
         // Set default skills, attributes
@@ -678,13 +678,13 @@ namespace MWGui
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", {})));
-            mControllerButtons.mX = "#{sNext}";
+            mControllerButtons.mX = "#{Interface:Next}";
         }
         else if (Settings::gui().mControllerMenus)
         {
             okButton->setCaption(
                 MyGUI::UString(MWBase::Environment::get().getWindowManager()->getGameSettingString("sDone", {})));
-            mControllerButtons.mX = "#{sDone}";
+            mControllerButtons.mX = "#{Interface:Done}";
         }
         else
             okButton->setCaption(
@@ -882,7 +882,7 @@ namespace MWGui
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
 
-        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mA = "#{Interface:Select}";
         mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
@@ -963,7 +963,7 @@ namespace MWGui
             if (mAttributeButtons.size() > 0)
                 mAttributeButtons[0]->setStateSelected(true);
 
-            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mB = "#{Interface:Cancel}";
         }
     }
@@ -1063,7 +1063,7 @@ namespace MWGui
             if (mSkillButtons.size() > 0)
                 mSkillButtons[0]->setStateSelected(true);
 
-            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mB = "#{Interface:Cancel}";
         }
     }

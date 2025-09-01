@@ -90,7 +90,7 @@ namespace MWGui
         mBribe1000Button->eventMouseButtonClick += MyGUI::newDelegate(this, &PersuasionDialog::onPersuade);
 
         mDisableGamepadCursor = Settings::gui().mControllerMenus;
-        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mA = "#{Interface:Select}";
         mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
@@ -387,9 +387,9 @@ namespace MWGui
             += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
 
         mControllerScrollWidget = mHistory->getParent();
-        mControllerButtons.mA = "#{sAsk}";
-        mControllerButtons.mB = "#{sGoodbye}";
-        mControllerButtons.mRStick = "#{sScrollup}";
+        mControllerButtons.mA = "#{Interface:Ask}";
+        mControllerButtons.mB = "#{Interface:Goodbye}";
+        mControllerButtons.mRStick = "#{Interface:ScrollUp}";
     }
 
     void DialogueWindow::onTradeComplete()
