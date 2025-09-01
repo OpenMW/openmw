@@ -24,7 +24,7 @@ vec4 applyDistortion(in vec4 color, in float strength, in float pixelDepth, in f
     }
     distortion.rg = color.rg * 2.0 - 1.0;
 
-    distortion.rg *= invOcclusion * strength;
+    distortion.rg *= invOcclusion * strength * color.a;
 
     return distortion;
 }
