@@ -10,11 +10,11 @@ cd build
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
 if [[ "${MACOS_AMD64}" ]]; then
-    QT_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix qt@6)
+    QT_PATH=$(arch -x86_64 /bin/bash -c "qmake -v | sed -rn -e 's/Using Qt version [.0-9]+ in //p'")
     ICU_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix icu4c)
     OPENAL_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix openal-soft)
 else
-    QT_PATH=$(brew --prefix qt@6)
+    QT_PATH=$(qmake -v | sed -rn -e "s/Using Qt version [.0-9]+ in //p")
     ICU_PATH=$(brew --prefix icu4c)
     OPENAL_PATH=$(brew --prefix openal-soft)
 fi
