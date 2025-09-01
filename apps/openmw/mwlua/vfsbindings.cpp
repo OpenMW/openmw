@@ -200,16 +200,15 @@ namespace MWLua
         };
 
         api["lines"] = [vfs](sol::this_main_state lua, std::string_view fileName) {
-            auto normalizedName = VFS::Path::normalizeFilename(fileName);
-            return sol::as_function(
-                [lua, file = FileHandle(vfs->getNormalized(normalizedName), normalizedName)]() mutable {
-                    validateFile(file);
-                    auto result = readLineFromFile(lua, file);
-                    if (result == sol::nil)
-                        file.mFilePtr.reset();
+            const VFS::Path::Normalized normalizedName(fileName);
+            return sol::as_function([lua, file = FileHandle(vfs->get(normalizedName), normalizedName)]() mutable {
+                validateFile(file);
+                auto result = readLineFromFile(lua, file);
+                if (result == sol::nil)
+                    file.mFilePtr.reset();
 
-                    return result;
-                });
+                return result;
+            });
         };
 
         fileHandle["close"] = [](sol::this_state lua, FileHandle& self) {
@@ -314,11 +313,11 @@ namespace MWLua
             sol::variadic_results values;
             try
             {
-                auto normalizedName = VFS::Path::normalizeFilename(fileName);
-                auto handle = FileHandle(vfs->getNormalized(normalizedName), normalizedName);
+                const VFS::Path::Normalized normalizedName(fileName);
+                FileHandle handle(vfs->get(normalizedName), normalizedName);
                 values.push_back(sol::make_object<FileHandle>(lua, std::move(handle)));
             }
-            catch (std::exception& e)
+            catch (const std::exception& e)
             {
                 auto msg = "Can not open file: " + std::string(e.what());
                 values.push_back(sol::nil);
