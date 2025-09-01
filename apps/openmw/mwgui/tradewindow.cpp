@@ -188,11 +188,11 @@ namespace MWGui
             image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
                 SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
-            mControllerButtons.mA = "#{sBuy}";
+            mControllerButtons.mA = "#{Interface:Buy}";
             mControllerButtons.mB = "#{Interface:Cancel}";
             mControllerButtons.mX = "#{sOffer}";
-            mControllerButtons.mR3 = "#{sInfo}";
-            mControllerButtons.mL2 = "#{sInventory}";
+            mControllerButtons.mR3 = "#{Interface:Info}";
+            mControllerButtons.mL2 = "#{Interface:Inventory}";
         }
     }
 

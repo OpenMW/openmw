@@ -834,7 +834,7 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mB = "#{Interface:Back}";
             mControllerButtons.mX = global ? "#{sLocal}" : "#{sWorld}";
             mControllerButtons.mY = "#{sCenter}";
             mControllerButtons.mDpad = Settings::map().mAllowZooming ? "" : "#{sMove}";

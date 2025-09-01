@@ -130,7 +130,10 @@ namespace MWGui
 
     ControllerButtons* ScrollWindow::getControllerButtons()
     {
-        mControllerButtons.mA = mTakeButton->getVisible() ? "#{sTake}" : "";
+        if (mTakeButton->getVisible())
+            mControllerButtons.mA = "#{Interface:Take}";
+        else
+            mControllerButtons.mA.clear();
         return &mControllerButtons;
     }
 

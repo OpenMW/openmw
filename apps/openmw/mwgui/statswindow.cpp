@@ -84,9 +84,9 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             setPinButtonVisible(false);
-            mControllerButtons.mLStick = "#{sMouse}";
+            mControllerButtons.mLStick = "#{Interface:Mouse}";
             mControllerButtons.mRStick = "#{sScrolldown}";
-            mControllerButtons.mB = "#{sBack}";
+            mControllerButtons.mB = "#{Interface:Back}";
         }
 
         onWindowResize(t);

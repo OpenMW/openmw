@@ -224,7 +224,7 @@ namespace
             if (isRussian) // Cyrillic is either (10 + 10 + 10) or (15 + 15)
                 mIndexRowCount = MWGui::getCyrillicIndexPageCount();
 
-            mControllerButtons.mA = "#{sSelect}";
+            mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mX = "#{OMWEngine:JournalQuests}";
             mControllerButtons.mY = "#{sTopics}";
 

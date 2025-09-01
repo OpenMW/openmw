@@ -151,7 +151,7 @@ namespace MWGui
             image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
                 SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
 
-            mControllerButtons.mR3 = "#{sInfo}";
+            mControllerButtons.mR3 = "#{Interface:Info}";
         }
 
         adjustPanes();
@@ -973,7 +973,7 @@ namespace MWGui
             case MWGui::GM_Container:
                 mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.mB = "#{Interface:Close}";
-                mControllerButtons.mX = "#{sTakeAll}";
+                mControllerButtons.mX = "#{Interface:TakeAll}";
                 mControllerButtons.mR2 = "#{sContainer}";
                 break;
             case MWGui::GM_Barter:
@@ -985,7 +985,7 @@ namespace MWGui
             case MWGui::GM_Inventory:
             default:
                 mControllerButtons.mA = "#{sEquip}";
-                mControllerButtons.mB = "#{sBack}";
+                mControllerButtons.mB = "#{Interface:Back}";
                 mControllerButtons.mX = "#{sDrop}";
                 mControllerButtons.mR2.clear();
                 break;

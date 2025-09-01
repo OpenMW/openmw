@@ -67,7 +67,7 @@ namespace MWGui
         // To avoid accidental deletions
         mDeleteButton->setNeedKeyFocus(false);
 
-        mControllerButtons.mA = "#{sSelect}";
+        mControllerButtons.mA = "#{Interface:Select}";
         mControllerButtons.mB = "#{Interface:Cancel}";
     }
 
