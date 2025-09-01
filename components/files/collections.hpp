@@ -15,8 +15,7 @@ namespace Files
         ///< Directories are listed with increasing priority.
         Collections(const Files::PathContainer& directories);
 
-        ///< Return a file collection for the given extension. Extension must contain the
-        /// leading dot
+        ///< Return a file collection for the given extension.
         const MultiDirCollection& getCollection(std::string_view extension) const;
 
         std::filesystem::path getPath(std::string_view file) const;

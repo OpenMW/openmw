@@ -32,6 +32,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/mathutil.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 
@@ -2885,9 +2886,7 @@ namespace MWWorld
         int idx = 0;
         for (const std::string& file : content)
         {
-            const auto filename = Files::pathFromUnicodeString(file);
-            const Files::MultiDirCollection& col
-                = fileCollections.getCollection(Files::pathToUnicodeString(filename.extension()));
+            const Files::MultiDirCollection& col = fileCollections.getCollection(Misc::getFileExtension(file));
             if (col.doesExist(file))
             {
                 gameContentLoader.load(col.getPath(file), idx, listener);

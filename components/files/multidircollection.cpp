@@ -22,7 +22,8 @@ namespace Files
             {
                 const auto& path = dirIter.path();
 
-                if (!Misc::StringUtils::ciEqual(extension, Files::pathToUnicodeString(path.extension())))
+                std::string ext = Files::pathToUnicodeString(path.extension());
+                if (ext.size() != extension.size() + 1 || !Misc::StringUtils::ciEndsWith(ext, extension))
                     continue;
 
                 const auto filename = Files::pathToUnicodeString(path.filename());
@@ -41,7 +42,7 @@ namespace Files
                 {
                     // handle case folding
                     mFiles.erase(result->first);
-                    mFiles.insert(std::make_pair(filename, path));
+                    mFiles.emplace(filename, path);
                 }
             }
         }

@@ -2,7 +2,6 @@
 #include "conversion.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/lower.hpp>
 
 namespace Files
 {
