@@ -18,14 +18,12 @@ namespace Files
     {
     }
 
-    const MultiDirCollection& Collections::getCollection(const std::string& extension) const
+    const MultiDirCollection& Collections::getCollection(std::string_view extension) const
     {
-        std::string ext = Misc::StringUtils::lowerCase(extension);
-        auto iter = mCollections.find(ext);
+        auto iter = mCollections.find(extension);
         if (iter == mCollections.end())
         {
-            std::pair<MultiDirCollectionContainer::iterator, bool> result
-                = mCollections.emplace(ext, MultiDirCollection(mDirectories, ext));
+            auto result = mCollections.emplace(extension, MultiDirCollection(mDirectories, extension));
 
             iter = result.first;
         }
@@ -33,7 +31,7 @@ namespace Files
         return iter->second;
     }
 
-    std::filesystem::path Collections::getPath(const std::string& file) const
+    std::filesystem::path Collections::getPath(std::string_view file) const
     {
         for (auto iter = mDirectories.rbegin(); iter != mDirectories.rend(); iter++)
         {
@@ -47,10 +45,10 @@ namespace Files
             }
         }
 
-        throw std::runtime_error("file " + file + " not found");
+        throw std::runtime_error("file " + std::string(file) + " not found");
     }
 
-    bool Collections::doesExist(const std::string& file) const
+    bool Collections::doesExist(std::string_view file) const
     {
         for (auto iter = mDirectories.rbegin(); iter != mDirectories.rend(); iter++)
         {

@@ -16,26 +16,25 @@ namespace Files
         Collections(const Files::PathContainer& directories);
 
         ///< Return a file collection for the given extension. Extension must contain the
-        /// leading dot and must be all lower-case.
-        const MultiDirCollection& getCollection(const std::string& extension) const;
+        /// leading dot
+        const MultiDirCollection& getCollection(std::string_view extension) const;
 
-        std::filesystem::path getPath(const std::string& file) const;
+        std::filesystem::path getPath(std::string_view file) const;
         ///< Return full path (including filename) of \a file.
         ///
         /// If the file does not exist in any of the collection's
         /// directories, an exception is thrown. \a file must include the
         /// extension.
 
-        bool doesExist(const std::string& file) const;
+        bool doesExist(std::string_view file) const;
         ///< \return Does a file with the given name exist?
 
         const Files::PathContainer& getPaths() const;
 
     private:
-        typedef std::map<std::string, MultiDirCollection> MultiDirCollectionContainer;
         Files::PathContainer mDirectories;
 
-        mutable MultiDirCollectionContainer mCollections;
+        mutable std::map<std::string, MultiDirCollection, Misc::StringUtils::CiComp> mCollections;
     };
 }
 
