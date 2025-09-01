@@ -200,7 +200,7 @@
 -- @usage -- Spawn a sanctuary effect near the player
 -- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
 -- local pos = self.position + util.vector3(0, 100, 0)
--- local model = types.Static.record(effect.castingStatic).model
+-- local model = types.Static.records[effect.castStatic].model
 -- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
 --
 
