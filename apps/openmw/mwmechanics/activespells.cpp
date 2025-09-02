@@ -340,8 +340,8 @@ namespace MWMechanics
                     // invisibility manually
                     purgeEffect(ptr, ESM::MagicEffect::Invisibility);
                     applyPurges(ptr);
-                    ActiveSpellParams* params = initParams(ptr, ActiveSpellParams{ *slot, enchantment, ptr }, context);
-                    if (params)
+                    const bool added = initParams(ptr, ActiveSpellParams{ *slot, enchantment, ptr }, context);
+                    if (added)
                         context.mUpdateSpellWindow = true;
                 }
             }
@@ -468,16 +468,15 @@ namespace MWMechanics
         return false;
     }
 
-    ActiveSpells::ActiveSpellParams* ActiveSpells::initParams(
-        const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context)
+    bool ActiveSpells::initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context)
     {
         mSpells.emplace_back(params).setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
         auto it = mSpells.end();
         --it;
         // We instantly apply the effect with a duration of 0 so continuous effects can be purged before truly applying
         if (context.mUpdate && updateActiveSpell(ptr, 0.f, it, context))
-            return nullptr;
-        return &*it;
+            return false;
+        return true;
     }
 
     void ActiveSpells::addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell, UpdateContext& context)
