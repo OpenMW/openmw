@@ -2,8 +2,8 @@
 
 command -v /usr/local/bin/brew || arch -x86_64 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-arch -x86_64 bash -c "command -v ccache || /usr/local/bin/brew install ccache"
-arch -x86_64 bash -c "command -v cmake >/dev/null 2>&1 || /usr/local/bin/brew install cmake"
+command -v ccache >/dev/null 2>&1 || brew install ccache
+command -v cmake >/dev/null 2>&1 || brew install cmake
 arch -x86_64 bash -c "command -v qmake >/dev/null 2>&1 && qmake -v | grep -F 'Using Qt version 6.' >/dev/null || /usr/local/bin/brew install qt@6"
 
 arch -x86_64 /usr/local/bin/brew install curl xquartz gd fontconfig freetype harfbuzz brotli openal-soft icu4c yaml-cpp sqlite
