@@ -577,7 +577,7 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ../CI/macos/ccache_save.sh
+    - ../CI/macos/ccache_show_stats.sh
   artifacts:
     paths:
       - build/OpenMW-*.dmg
