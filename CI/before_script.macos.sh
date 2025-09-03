@@ -62,14 +62,7 @@ else
     )
 fi
 
-if [[ "${MACOS_AMD64}" ]]; then
-    arch -x86_64 cmake \
-        "${CMAKE_CONF_OPTS[@]}" \
-        "${BUILD_OPTS[@]}" \
-        ..
-else
-    cmake \
-        "${CMAKE_CONF_OPTS[@]}" \
-        "${BUILD_OPTS[@]}" \
-        ..
-fi
+cmake \
+    "${CMAKE_CONF_OPTS[@]}" \
+    "${BUILD_OPTS[@]}" \
+    ..
