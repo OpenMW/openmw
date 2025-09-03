@@ -13,18 +13,16 @@ if [[ "${MACOS_AMD64}" ]]; then
     QT_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix qt@6)
     ICU_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix icu4c)
     OPENAL_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix openal-soft)
-    CCACHE_EXECUTABLE=$(arch -x86_64 /usr/local/bin/brew --prefix ccache)/bin/ccache
 else
     QT_PATH=$(brew --prefix qt@6)
     ICU_PATH=$(brew --prefix icu4c)
     OPENAL_PATH=$(brew --prefix openal-soft)
-    CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache
 fi
 
 declare -a CMAKE_CONF_OPTS=(
 -D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH;$OPENAL_PATH"
--D CMAKE_C_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE"
--D CMAKE_CXX_COMPILER_LAUNCHER="$CCACHE_EXECUTABLE"
+-D CMAKE_C_COMPILER_LAUNCHER="ccache"
+-D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
 -D CMAKE_CXX_FLAGS="-stdlib=libc++"
 -D CMAKE_C_COMPILER="clang"
 -D CMAKE_CXX_COMPILER="clang++"
