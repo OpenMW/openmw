@@ -131,7 +131,7 @@ namespace MWMechanics
         bool updateActiveSpell(
             const MWWorld::Ptr& ptr, float duration, Collection::iterator& spellIt, UpdateContext& context);
 
-        ActiveSpellParams* initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context);
+        bool initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context);
 
     public:
         ActiveSpells();
