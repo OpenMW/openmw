@@ -285,7 +285,7 @@ namespace MWClass
                 bool activeWeapUsesAmmo = activeWeapon->mWeaponClass == ESM::WeaponType::Class::Ranged;
                 bool sameAmmoType = activeWeapon->mAmmoType == type;
                 // special case for ammo equipping
-                if (!((!activeWeapUsesAmmo && isAmmo) || (activeWeapUsesAmmo && isAmmo && sameAmmoType)))
+                if ((activeWeapUsesAmmo && !sameAmmoType) || !isAmmo)
                     return { 0, "#{sCantEquipWeapWarning}" };
             }
         }
