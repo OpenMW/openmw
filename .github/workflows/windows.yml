@@ -246,3 +246,4 @@ jobs:
       with:
         files: ${{ github.workspace }}/install/*.exe
         prerelease: true
+        draft: true
