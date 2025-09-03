@@ -110,5 +110,38 @@ function aux_util.mapFilterSort(array, scoreFn)
     return sortedValues, sortedScores
 end
 
+---
+-- Iterates over an array of event handlers, calling each in turn until one returns false.
+-- @function [parent=#util] callEventHandlers
+-- @param #table handlers An optional array of handlers to invoke
+-- @param #any ... Arguments to pass to each event handler
+-- @return boolean True if no further handlers should be called
+function aux_util.callEventHandlers(handlers, ...)
+    if handlers then
+        for i = #handlers, 1, -1 do
+            if handlers[i](...) == false then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+---
+-- Iterates over an array of event handler arrays, passing each to `aux_util.callEventHandlers` until the event is handled.
+-- @function [parent=#util] callMultipleEventHandlers
+-- @param #table handlers An array of event handler arrays
+-- @param #any ... Arguments to pass to each event handler
+-- @return boolean True if no further handlers should be called
+function aux_util.callMultipleEventHandlers(handlers, ...)
+    for i = 1, #handlers do
+        local stop = aux_util.callEventHandlers(handlers[i], ...)
+        if stop then
+            return true
+        end
+    end
+    return false
+end
+
 return aux_util
 
