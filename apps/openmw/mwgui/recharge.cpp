@@ -42,7 +42,7 @@ namespace MWGui
 
         mControllerButtons.mA = "#{OMWEngine:RechargeSelect}";
         mControllerButtons.mB = "#{Interface:Cancel}";
-        mControllerButtons.mY = "#{sSoulGem}";
+        mControllerButtons.mY = "#{Interface:Soul}";
     }
 
     void Recharge::onOpen()
