@@ -563,6 +563,7 @@ Ubuntu_GCC_integration_tests_asan:
     - CI/macos/build.sh
     - cd build
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
+    - brew install s3cmd
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
         echo "[default]" > ~/.s3cfg
@@ -577,7 +578,7 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ../CI/macos/ccache_save.sh
+    - ../CI/macos/ccache_show_stats.sh
   artifacts:
     paths:
       - build/OpenMW-*.dmg
