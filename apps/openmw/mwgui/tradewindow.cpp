@@ -190,7 +190,7 @@ namespace MWGui
 
             mControllerButtons.mA = "#{Interface:Buy}";
             mControllerButtons.mB = "#{Interface:Cancel}";
-            mControllerButtons.mX = "#{sOffer}";
+            mControllerButtons.mX = "#{Interface:Offer}";
             mControllerButtons.mR3 = "#{Interface:Info}";
             mControllerButtons.mL2 = "#{Interface:Inventory}";
         }
