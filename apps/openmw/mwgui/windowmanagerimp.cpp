@@ -520,7 +520,7 @@ namespace MWGui
         mInventoryTabsOverlay = inventoryTabsOverlay.get();
         mWindows.push_back(std::move(inventoryTabsOverlay));
 
-        mControllerTooltipUserPreference = Settings::gui().mControllerTooltips;
+        mControllerTooltipEnabled = Settings::gui().mControllerTooltips;
         mActiveControllerWindows[GM_Inventory] = 1; // Start on Inventory page
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
@@ -1498,7 +1498,7 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             if (mGuiModes.empty())
-                setControllerTooltip(false);
+                setControllerTooltipVisible(false);
             else
                 reapplyActiveControllerWindow();
         }
@@ -2642,21 +2642,22 @@ namespace MWGui
         return height;
     }
 
-    void WindowManager::setControllerTooltip(bool enabled)
+    void WindowManager::setControllerTooltipVisible(bool visible)
     {
         if (!Settings::gui().mControllerMenus)
             return;
 
-        mControllerTooltip = enabled;
+        mControllerTooltipVisible = visible;
     }
 
-    void WindowManager::setControllerTooltipUserPreference(bool enabled)
+    void WindowManager::setControllerTooltipEnabled(bool enabled)
     {
         if (!Settings::gui().mControllerMenus)
             return;
 
-        mControllerTooltipUserPreference = enabled;
-        mControllerTooltip = enabled;
+        mControllerTooltipEnabled = enabled;
+        // When user toggles the setting, also update visibility
+        mControllerTooltipVisible = enabled;
     }
 
     void WindowManager::updateControllerButtonsOverlay()

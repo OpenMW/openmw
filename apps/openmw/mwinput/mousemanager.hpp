@@ -49,6 +49,8 @@ namespace MWInput
         int mMouseWheel;
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        float mLastWarpX;
+        float mLastWarpY;
 
         int mMouseMoveX;
         int mMouseMoveY;

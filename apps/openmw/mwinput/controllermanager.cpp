@@ -259,7 +259,7 @@ namespace MWInput
             {
                 // When the inventory tooltip is visible, we don't actually want the A button to
                 // act like a mouse button; it should act normally.
-                if (treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A && winMgr->getControllerTooltip())
+                if (treatAsMouse && arg.button == SDL_CONTROLLER_BUTTON_A && winMgr->getControllerTooltipVisible())
                     treatAsMouse = false;
 
                 mGamepadGuiCursorEnabled = topWin->isGamepadCursorAllowed();
@@ -368,9 +368,9 @@ namespace MWInput
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
-                    if (winMgr->getControllerTooltip())
+                    if (winMgr->getControllerTooltipVisible())
                     {
-                        winMgr->setControllerTooltip(false);
+                        winMgr->setControllerTooltipVisible(false);
                         winMgr->setCursorVisible(true);
                     }
                     else if (mGamepadGuiCursorEnabled)

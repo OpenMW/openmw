@@ -151,8 +151,8 @@ namespace MWGui
                 mSpellButtons[0].first->setStateSelected(true);
 
                 MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-                winMgr->setControllerTooltip(Settings::gui().mControllerTooltips);
-                if (winMgr->getControllerTooltip())
+                winMgr->setControllerTooltipVisible(Settings::gui().mControllerTooltips);
+                if (winMgr->getControllerTooltipVisible())
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[0].first);
             }
         }
@@ -230,6 +230,8 @@ namespace MWGui
 
     bool SpellBuyingWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
     {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
         if (arg.button == SDL_CONTROLLER_BUTTON_A)
         {
             if (mControllerFocus < mSpellButtons.size())
@@ -242,11 +244,14 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
             // Toggle info tooltip
-            MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+            winMgr->setControllerTooltipEnabled(!winMgr->getControllerTooltipEnabled());
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
+            // Restore tooltip visibility if user has them enabled but they were hidden by mouse
+            if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
+                winMgr->setControllerTooltipVisible(true);
+
             if (mSpellButtons.size() <= 1)
                 return true;
 
@@ -256,6 +261,10 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
+            // Restore tooltip visibility if user has them enabled but they were hidden by mouse
+            if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
+                winMgr->setControllerTooltipVisible(true);
+
             if (mSpellButtons.size() <= 1)
                 return true;
 
@@ -279,7 +288,7 @@ namespace MWGui
             }
 
             // Warp the mouse to the selected spell to show the tooltip
-            if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+            if (MWBase::Environment::get().getWindowManager()->getControllerTooltipVisible())
                 MWBase::Environment::get().getInputManager()->warpMouseToWidget(mSpellButtons[mControllerFocus].first);
         }
 

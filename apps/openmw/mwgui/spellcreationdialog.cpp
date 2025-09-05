@@ -850,7 +850,7 @@ namespace MWGui
             if (mAvailableButtons.size() > 0)
             {
                 mAvailableButtons[0]->setStateSelected(true);
-                if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                if (MWBase::Environment::get().getWindowManager()->getControllerTooltipVisible())
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(mAvailableButtons[0]);
             }
         }
@@ -1058,7 +1058,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
             // Toggle info tooltip
-            winMgr->setControllerTooltip(!mRightColumn && !winMgr->getControllerTooltip());
+            winMgr->setControllerTooltipVisible(!mRightColumn && !winMgr->getControllerTooltipVisible());
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
@@ -1102,7 +1102,7 @@ namespace MWGui
             if (mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
                 mAvailableButtons[mAvailableFocus]->setStateSelected(true);
 
-            winMgr->setControllerTooltip(Settings::gui().mControllerTooltips);
+            winMgr->setControllerTooltipVisible(Settings::gui().mControllerTooltips);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mRightColumn && mEffectButtons.size() > 0)
         {
@@ -1112,7 +1112,7 @@ namespace MWGui
             if (mEffectFocus >= 0 && mEffectFocus < static_cast<int>(mEffectButtons.size()))
                 mEffectButtons[mEffectFocus].first->setStateSelected(true);
 
-            winMgr->setControllerTooltip(false);
+            winMgr->setControllerTooltipVisible(false);
         }
         else
             return true;
@@ -1129,7 +1129,7 @@ namespace MWGui
         if (!mRightColumn && mAvailableFocus >= 0 && mAvailableFocus < static_cast<int>(mAvailableButtons.size()))
         {
             // Warp the mouse to the selected spell to show the tooltip
-            if (winMgr->getControllerTooltip())
+            if (winMgr->getControllerTooltipVisible())
                 MWBase::Environment::get().getInputManager()->warpMouseToWidget(mAvailableButtons[mAvailableFocus]);
         }
 

@@ -32,6 +32,8 @@ namespace MWInput
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mLastWarpX(-1)
+        , mLastWarpY(-1)
         , mMouseMoveX(0)
         , mMouseMoveY(0)
     {
@@ -72,13 +74,23 @@ namespace MWInput
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
             winMgr->setCursorActive(true);
+
+            // Check if this movement is from our recent mouse warp
+            bool isFromWarp = (mLastWarpX >= 0 && mLastWarpY >= 0
+                && std::abs(mGuiCursorX - mLastWarpX) < 0.5f
+                && std::abs(mGuiCursorY - mLastWarpY) < 0.5f);
+
             if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible()
-                && (std::abs(arg.xrel) > 1 || std::abs(arg.yrel) > 1))
+                && (std::abs(arg.xrel) > 1 || std::abs(arg.yrel) > 1) && !isFromWarp)
             {
                 // Unhide the cursor if it was hidden to show a controller tooltip.
-                winMgr->setControllerTooltip(false);
+                winMgr->setControllerTooltipVisible(false);
                 winMgr->setCursorVisible(true);
             }
+
+            // Clear warp tracking after processing
+            mLastWarpX = -1;
+            mLastWarpY = -1;
         }
 
         if (mMouseLookEnabled && !input->controlsDisabled())
@@ -280,6 +292,9 @@ namespace MWInput
         {
             mGuiCursorX = widgetX;
             mGuiCursorY = widgetY;
+            // Remember where we warped to so we can ignore movement from this warp
+            mLastWarpX = widgetX;
+            mLastWarpY = widgetY;
             warpMouse();
         }
     }
