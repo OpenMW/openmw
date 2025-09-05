@@ -558,7 +558,7 @@ Ubuntu_GCC_integration_tests_asan:
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
-    - CI/macos/ccache_prep.sh
+    - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.macos.sh
     - CI/macos/build.sh
     - cd build
@@ -578,7 +578,7 @@ Ubuntu_GCC_integration_tests_asan:
           s3cmd put "${dmg}" s3://openmw-artifacts/${artifactDirectory}
         done
       fi
-    - ../CI/macos/ccache_show_stats.sh
+    - ccache -svv
   artifacts:
     paths:
       - build/OpenMW-*.dmg
