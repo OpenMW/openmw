@@ -85,7 +85,7 @@ namespace MWGui
         {
             setPinButtonVisible(false);
             mControllerButtons.mLStick = "#{Interface:Mouse}";
-            mControllerButtons.mRStick = "#{sScrolldown}";
+            mControllerButtons.mRStick = "#{Interface:ScrollDown}";
             mControllerButtons.mB = "#{Interface:Back}";
         }
 
