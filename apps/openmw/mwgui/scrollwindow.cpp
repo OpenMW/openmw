@@ -41,7 +41,7 @@ namespace MWGui
 
         mControllerScrollWidget = mTextView;
         mControllerButtons.mB = "#{Interface:Close}";
-        mControllerButtons.mDpad = "#{sScrolldown}";
+        mControllerButtons.mDpad = "#{Interface:ScrollDown}";
 
         center();
     }
