@@ -76,8 +76,7 @@ namespace MWInput
             winMgr->setCursorActive(true);
 
             // Check if this movement is from our recent mouse warp
-            bool isFromWarp = (mLastWarpX >= 0 && mLastWarpY >= 0
-                && std::abs(mGuiCursorX - mLastWarpX) < 0.5f
+            bool isFromWarp = (mLastWarpX >= 0 && mLastWarpY >= 0 && std::abs(mGuiCursorX - mLastWarpX) < 0.5f
                 && std::abs(mGuiCursorY - mLastWarpY) < 0.5f);
 
             if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible()
