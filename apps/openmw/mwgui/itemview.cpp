@@ -223,34 +223,26 @@ namespace MWGui
                 updateControllerFocus(-1, mControllerFocus);
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_UP:
-                // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-                if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                    winMgr->setControllerTooltipVisible(true);
+                winMgr->restoreControllerTooltips();
                 if (mControllerFocus % mRows == 0)
                     mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
                 else
                     mControllerFocus--;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-                // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-                if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                    winMgr->setControllerTooltipVisible(true);
+                winMgr->restoreControllerTooltips();
                 if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
                     mControllerFocus -= mControllerFocus % mRows;
                 else
                     mControllerFocus++;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-                // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-                if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                    winMgr->setControllerTooltipVisible(true);
+                winMgr->restoreControllerTooltips();
                 if (mControllerFocus >= mRows)
                     mControllerFocus -= mRows;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-                // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-                if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                    winMgr->setControllerTooltipVisible(true);
+                winMgr->restoreControllerTooltips();
                 if (mControllerFocus + mRows < mItemCount)
                     mControllerFocus += mRows;
                 else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
@@ -297,10 +289,8 @@ namespace MWGui
                 else
                     mScrollView->setViewOffset(MyGUI::IntPoint(-42 * (column - 3), 0));
 
-                // Restore tooltip visibility if user has them enabled but they were hidden by mouse movement
                 MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-                if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                    winMgr->setControllerTooltipVisible(true);
+                winMgr->restoreControllerTooltips();
 
                 if (winMgr->getControllerTooltipVisible())
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);

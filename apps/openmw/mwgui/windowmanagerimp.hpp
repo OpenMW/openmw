@@ -399,6 +399,7 @@ namespace MWGui
         void setControllerTooltipVisible(bool visible) override;
         bool getControllerTooltipEnabled() const override { return mControllerTooltipEnabled; }
         void setControllerTooltipEnabled(bool enabled) override;
+        void restoreControllerTooltips() override;
         void updateControllerButtonsOverlay() override;
 
         // Used in Lua bindings

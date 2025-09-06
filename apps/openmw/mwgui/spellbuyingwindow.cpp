@@ -248,9 +248,7 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
-            // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-            if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                winMgr->setControllerTooltipVisible(true);
+            winMgr->restoreControllerTooltips();
 
             if (mSpellButtons.size() <= 1)
                 return true;
@@ -261,9 +259,7 @@ namespace MWGui
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
-            // Restore tooltip visibility if user has them enabled but they were hidden by mouse
-            if (winMgr->getControllerTooltipEnabled() && !winMgr->getControllerTooltipVisible())
-                winMgr->setControllerTooltipVisible(true);
+            winMgr->restoreControllerTooltips();
 
             if (mSpellButtons.size() <= 1)
                 return true;

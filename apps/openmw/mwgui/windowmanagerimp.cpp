@@ -2660,6 +2660,13 @@ namespace MWGui
         mControllerTooltipVisible = enabled;
     }
 
+    void WindowManager::restoreControllerTooltips()
+    {
+        // Restore tooltip visibility if user has them enabled but they were hidden by mouse movement
+        if (mControllerTooltipEnabled && !mControllerTooltipVisible)
+            setControllerTooltipVisible(true);
+    }
+
     void WindowManager::updateControllerButtonsOverlay()
     {
         if (!Settings::gui().mControllerMenus || !mControllerButtonsOverlay)

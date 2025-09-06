@@ -396,6 +396,8 @@ namespace MWBase
         virtual void setControllerTooltipVisible(bool visible) = 0;
         virtual bool getControllerTooltipEnabled() const = 0;
         virtual void setControllerTooltipEnabled(bool enabled) = 0;
+        /// Restore tooltip visibility if user has them enabled but they were hidden by mouse movement
+        virtual void restoreControllerTooltips() = 0;
         virtual void updateControllerButtonsOverlay() = 0;
 
         // Used in Lua bindings

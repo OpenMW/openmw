@@ -1058,7 +1058,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
             // Toggle info tooltip
-            winMgr->setControllerTooltipVisible(!mRightColumn && !winMgr->getControllerTooltipVisible());
+            winMgr->setControllerTooltipEnabled(!winMgr->getControllerTooltipEnabled());
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
