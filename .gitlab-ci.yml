@@ -555,11 +555,12 @@ Ubuntu_GCC_integration_tests_asan:
     - ccache/
   script:
     - CI/before_install.macos.sh
+    - brew install ccache
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.macos.sh
+    - CI/before_script.macos.sh -C
     - CI/macos/build.sh
     - cd build
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done

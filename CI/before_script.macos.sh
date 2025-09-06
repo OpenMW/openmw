@@ -1,7 +1,69 @@
 #!/bin/bash -e
 
-rm -fr build
-mkdir build
+VERBOSE=""
+USE_CCACHE=""
+KEEP=""
+USE_WERROR=""
+
+while [ $# -gt 0 ]; do
+	ARGSTR=$1
+	shift
+
+	if [ ${ARGSTR:0:1} != "-" ]; then
+		echo "Unknown argument $ARGSTR"
+		echo "Try '$0 -h'"
+		wrappedExit 1
+	fi
+
+	for (( i=1; i<${#ARGSTR}; i++ )); do
+		ARG=${ARGSTR:$i:1}
+		case $ARG in
+			V )
+				VERBOSE=true ;;
+
+			C )
+				USE_CCACHE=true ;;
+
+			k )
+				KEEP=true ;;
+
+			E )
+				USE_WERROR=true ;;
+
+			h )
+				cat <<EOF
+Usage: $0 [-VCkETh]
+Options:
+	-C
+		Use ccache.
+	-h
+		Show this message.
+	-k
+		Keep the old build directory, default is to delete it.
+	-V
+		Run verbosely
+	-E
+		Use warnings as errors (-Werror)
+EOF
+				exit 0
+				;;
+
+			* )
+				echo "Unknown argument $ARG."
+				echo "Try '$0 -h'"
+				exit 1 ;;
+		esac
+	done
+done
+
+if [[ -z $KEEP ]]; then
+    if [[ -n $VERBOSE && -d "build" ]]; then
+        echo "Deleting existing build directory"
+    fi
+    rm -fr build
+fi
+
+mkdir -p build
 cd build
 
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
@@ -16,10 +78,14 @@ else
     OPENAL_PATH=$(brew --prefix openal-soft)
 fi
 
+if [[ -n $VERBOSE ]]; then
+    echo "Using Qt path: ${QT_PATH}"
+    echo "Using ICU path: ${ICU_PATH}"
+    echo "Using OpenAL path: ${OPENAL_PATH}"
+fi
+
 declare -a CMAKE_CONF_OPTS=(
 -D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH;$OPENAL_PATH"
--D CMAKE_C_COMPILER_LAUNCHER="ccache"
--D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
 -D CMAKE_CXX_FLAGS="-stdlib=libc++"
 -D CMAKE_C_COMPILER="clang"
 -D CMAKE_CXX_COMPILER="clang++"
@@ -57,6 +123,26 @@ else
     CMAKE_CONF_OPTS+=(
         -D CMAKE_BUILD_TYPE=RelWithDebInfo
     )
+fi
+
+if [[ -n $USE_CCACHE ]]; then
+    CMAKE_CONF_OPTS+=(
+        -D CMAKE_C_COMPILER_LAUNCHER="ccache"
+        -D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
+    )
+fi
+
+if [[ -n $USE_WERROR ]]; then
+    CMAKE_CONF_OPTS+=(
+        -D OPENMW_CXX_FLAGS="-Werror"
+    )
+fi
+
+if [[ -n $VERBOSE ]]; then
+    echo CMake arguments: \
+        "${CMAKE_CONF_OPTS[@]}" \
+        "${BUILD_OPTS[@]}" \
+        ..
 fi
 
 cmake \
