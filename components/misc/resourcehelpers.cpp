@@ -37,15 +37,14 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::string_view> topLevelDirectories,
     std::string_view resPath, const VFS::Manager* vfs, std::string_view ext)
 {
-    std::string correctedPath = Misc::StringUtils::lowerCase(resPath);
+    std::string correctedPath = VFS::Path::normalizeFilename(resPath);
 
     // Flatten slashes
-    std::replace(correctedPath.begin(), correctedPath.end(), '/', '\\');
-    auto bothSeparators = [](char a, char b) { return a == '\\' && b == '\\'; };
+    auto bothSeparators = [](char a, char b) { return a == VFS::Path::separator && b == VFS::Path::separator; };
     correctedPath.erase(std::unique(correctedPath.begin(), correctedPath.end(), bothSeparators), correctedPath.end());
 
     // Remove leading separator
-    if (!correctedPath.empty() && correctedPath[0] == '\\')
+    if (!correctedPath.empty() && correctedPath[0] == VFS::Path::separator)
         correctedPath.erase(0, 1);
 
     // Handle top level directory
@@ -54,15 +53,15 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
     {
         if (correctedPath.starts_with(potentialTopLevelDirectory)
             && correctedPath.size() > potentialTopLevelDirectory.size()
-            && correctedPath[potentialTopLevelDirectory.size()] == '\\')
+            && correctedPath[potentialTopLevelDirectory.size()] == VFS::Path::separator)
         {
             needsPrefix = false;
             break;
         }
         else
         {
-            std::string topLevelPrefix = std::string{ potentialTopLevelDirectory } + '\\';
-            size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
+            std::string topLevelPrefix = std::string{ potentialTopLevelDirectory } + VFS::Path::separator;
+            size_t topLevelPos = correctedPath.find(VFS::Path::separator + topLevelPrefix);
             if (topLevelPos != std::string::npos)
             {
                 correctedPath.erase(0, topLevelPos + 1);
@@ -72,7 +71,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
         }
     }
     if (needsPrefix)
-        correctedPath = std::string{ topLevelDirectories.front() } + '\\' + correctedPath;
+        correctedPath = std::string{ topLevelDirectories.front() } + VFS::Path::separator + correctedPath;
 
     std::string origExt = correctedPath;
 
@@ -88,7 +87,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
 
     // fall back to a resource in the top level directory if it exists
     std::string fallback{ topLevelDirectories.front() };
-    fallback += '\\';
+    fallback += VFS::Path::separator;
     fallback += Misc::getFileName(correctedPath);
 
     if (vfs->exists(fallback))
@@ -97,7 +96,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
     if (isExtChanged)
     {
         fallback = topLevelDirectories.front();
-        fallback += '\\';
+        fallback += VFS::Path::separator;
         fallback += Misc::getFileName(origExt);
         if (vfs->exists(fallback))
             return fallback;

@@ -37,7 +37,7 @@ namespace Misc::ResourceHelpers
         TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtentionIfDoesNotExistInVfs)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "sound/foo.wav", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "sound/foo.wav", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtentionIfBothExistInVfs)
@@ -48,7 +48,7 @@ namespace Misc::ResourceHelpers
                 { wav, nullptr },
                 { mp3, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, wav.value(), vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, wav.value(), vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldKeepExtentionIfExistInVfs)
@@ -57,13 +57,13 @@ namespace Misc::ResourceHelpers
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
                 { wav, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, wav.value(), vfs.get(), ".mp3"), "sound\\foo.wav");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, wav.value(), vfs.get(), ".mp3"), "sound/foo.wav");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldPrefixWithGivenTopDirectory)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "foo.mp3", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "foo.mp3", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldChangeTopDirectoryAndKeepExtensionIfOriginalExistInVfs)
@@ -72,8 +72,8 @@ namespace Misc::ResourceHelpers
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
                 { a, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { "textures", "bookart" } }, "bookart/foo.a", vfs.get(), ".b"),
-                "textures\\foo.a");
+            EXPECT_EQ(
+                correctResourcePath({ { "textures", "bookart" } }, "bookart/foo.a", vfs.get(), ".b"), "textures/foo.a");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldChangeTopDirectoryAndChangeExtensionIfFallbackExistInVfs)
@@ -82,39 +82,38 @@ namespace Misc::ResourceHelpers
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
                 { b, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { "textures", "bookart" } }, "bookart/foo.a", vfs.get(), ".b"),
-                "textures\\foo.b");
+            EXPECT_EQ(
+                correctResourcePath({ { "textures", "bookart" } }, "bookart/foo.a", vfs.get(), ".b"), "textures/foo.b");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldLowerCase)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "SOUND\\Foo.MP3", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "SOUND\\Foo.MP3", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldRemoveLeadingSlash)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "\\SOUND\\Foo.MP3", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "\\SOUND\\Foo.MP3", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldRemoveDuplicateSlashes)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(
-                correctResourcePath({ { "sound" } }, "\\\\SOUND\\\\Foo.MP3", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "\\\\SOUND\\\\Foo.MP3", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
-        TEST(MiscResourceHelpersCorrectResourcePath, shouldConvertToBackSlash)
+        TEST(MiscResourceHelpersCorrectResourcePath, shouldConvertToForwardSlash)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "SOUND/Foo.MP3", vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "SOUND/Foo.MP3", vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldHandlePathEqualToDirectory)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, "sound", vfs.get(), "mp3"), "sound\\sound");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, "sound", vfs.get(), "mp3"), "sound/sound");
         }
 
         struct MiscResourceHelpersCorrectResourcePathShouldRemoveExtraPrefix : TestWithParam<std::string>
@@ -124,7 +123,7 @@ namespace Misc::ResourceHelpers
         TEST_P(MiscResourceHelpersCorrectResourcePathShouldRemoveExtraPrefix, shouldMatchExpected)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { "sound" } }, GetParam(), vfs.get(), ".mp3"), "sound\\foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { "sound" } }, GetParam(), vfs.get(), ".mp3"), "sound/foo.mp3");
         }
 
         const std::vector<std::string> pathsWithPrefix = {
