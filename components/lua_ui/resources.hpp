@@ -29,8 +29,14 @@ namespace LuaUi
     class ResourceManager
     {
     public:
-        std::shared_ptr<TextureResource> registerTexture(TextureData data);
-        void clear();
+        std::shared_ptr<TextureResource> registerTexture(TextureData data)
+        {
+            TextureResources& list = mTextures[data.mPath];
+            list.push_back(std::make_shared<TextureResource>(std::move(data)));
+            return list.back();
+        }
+
+        void clear() { mTextures.clear(); }
 
     private:
         using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
