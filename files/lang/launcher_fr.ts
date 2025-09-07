@@ -1472,11 +1472,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Doppler Factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Facteur Doppler</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controle la puissance de l&apos;effet Doppler. La valeur zéro le désactivant complétement.&lt;/p&gt;&lt;p&gt;L&apos;effet Doppler augmente ou diminue la hauteur des sons relativement à la vélocité de leur source par rapport au joueur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
 </context>
 </TS>
