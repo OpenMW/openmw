@@ -14,24 +14,59 @@ namespace VFS::Path
     inline constexpr char separator = '/';
     inline constexpr char extensionSeparator = '.';
 
-    inline constexpr char normalize(char c)
+    [[nodiscard]] inline constexpr char normalize(char c)
     {
         return c == '\\' ? separator : Misc::StringUtils::toLower(c);
     }
 
-    inline constexpr bool isNormalized(std::string_view name)
+    [[nodiscard]] inline constexpr bool isNormalized(std::string_view name)
     {
-        return std::all_of(name.begin(), name.end(), [](char v) { return v == normalize(v); });
+        if (name.empty())
+            return true;
+
+        if (name.front() != normalize(name.front()))
+            return false;
+
+        if (name.front() == separator)
+            return false;
+
+        for (std::size_t i = 1, n = name.size(); i < n; ++i)
+        {
+            if (name[i] != normalize(name[i]))
+                return false;
+
+            if (name[i] == separator && name[i - 1] == name[i])
+                return false;
+        }
+
+        return true;
     }
 
-    inline void normalizeFilenameInPlace(auto begin, auto end)
+    [[nodiscard]] inline auto removeDuplicatedSeparators(auto begin, auto end)
+    {
+        return std::unique(begin, end, [](char a, char b) { return a == separator && b == separator; });
+    }
+
+    [[nodiscard]] inline auto removeLeadingSeparator(auto begin, auto end)
+    {
+        if (begin != end && *begin == separator)
+            return begin + 1;
+        return begin;
+    }
+
+    [[nodiscard]] inline auto normalizeFilenameInPlace(auto begin, auto end)
     {
         std::transform(begin, end, begin, normalize);
+        end = removeDuplicatedSeparators(begin, end);
+        begin = removeLeadingSeparator(begin, end);
+        return std::pair(begin, end);
     }
 
     inline void normalizeFilenameInPlace(std::string& name)
     {
-        normalizeFilenameInPlace(name.begin(), name.end());
+        const auto [begin, end] = normalizeFilenameInPlace(name.begin(), name.end());
+        name.erase(end, name.end());
+        name.erase(name.begin(), begin);
     }
 
     /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing.
@@ -197,6 +232,8 @@ namespace VFS::Path
 
         bool changeExtension(std::string_view extension)
         {
+            if (!isNormalized(extension))
+                throw std::invalid_argument("Not normalized extension: " + std::string(extension));
             if (findSeparatorOrExtensionSeparator(extension.begin(), extension.end()) != extension.end())
                 throw std::invalid_argument("Invalid extension: " + std::string(extension));
             const auto it = findSeparatorOrExtensionSeparator(mValue.rbegin(), mValue.rend());
@@ -204,7 +241,7 @@ namespace VFS::Path
                 return false;
             const std::string::difference_type pos = mValue.rend() - it;
             mValue.replace(pos, mValue.size(), extension);
-            normalizeFilenameInPlace(mValue.begin() + pos, mValue.end());
+            std::transform(mValue.begin() + pos, mValue.end(), mValue.begin() + pos, normalize);
             return true;
         }
 
@@ -230,7 +267,9 @@ namespace VFS::Path
             mValue += separator;
             const std::size_t offset = mValue.size();
             mValue += value;
-            normalizeFilenameInPlace(mValue.begin() + offset, mValue.end());
+            const auto [begin, end] = normalizeFilenameInPlace(mValue.begin() + offset, mValue.end());
+            std::copy(begin, end, mValue.begin() + offset);
+            mValue.resize(offset + (end - begin));
             return *this;
         }
 

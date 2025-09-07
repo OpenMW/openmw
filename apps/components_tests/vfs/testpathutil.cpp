@@ -10,6 +10,49 @@ namespace VFS::Path
     {
         using namespace testing;
 
+        struct VFSPathIsNormalizedTest : TestWithParam<std::pair<std::string_view, bool>>
+        {
+        };
+
+        TEST_P(VFSPathIsNormalizedTest, shouldReturnExpectedResult)
+        {
+            EXPECT_EQ(isNormalized(GetParam().first), GetParam().second);
+        }
+
+        const std::pair<std::string_view, bool> isNormalizedTestParams[] = {
+            { std::string_view(), true },
+            { "foo", true },
+            { "foo/bar", true },
+            { "foo/bar/baz", true },
+            { "/foo", false },
+            { "foo//", false },
+            { "foo\\", false },
+            { "Foo", false },
+        };
+
+        INSTANTIATE_TEST_SUITE_P(IsNormalizedTestParams, VFSPathIsNormalizedTest, ValuesIn(isNormalizedTestParams));
+
+        TEST(VFSPathNormalizeFilenameInPlaceTest, shouldRemoveLeadingSeparators)
+        {
+            std::string value("//foo");
+            normalizeFilenameInPlace(value);
+            EXPECT_EQ(value, "foo");
+        }
+
+        TEST(VFSPathNormalizeFilenameInPlaceTest, shouldRemoveDuplicatedSeparators)
+        {
+            std::string value("foo//bar///baz");
+            normalizeFilenameInPlace(value);
+            EXPECT_EQ(value, "foo/bar/baz");
+        }
+
+        TEST(VFSPathNormalizeFilenameInPlaceTest, shouldRemoveDuplicatedLeadingSeparator)
+        {
+            std::string value("//foo");
+            normalizeFilenameInPlace(value);
+            EXPECT_EQ(value, "foo");
+        }
+
         TEST(VFSPathNormalizedTest, shouldSupportDefaultConstructor)
         {
             const Normalized value;
@@ -79,6 +122,13 @@ namespace VFS::Path
             EXPECT_EQ(value.value(), "foo/bar/baz");
         }
 
+        TEST(VFSPathNormalizedTest, operatorDivShouldNormalizeSuffix)
+        {
+            Normalized value("foo/bar");
+            value /= std::string_view("\\A\\\\B");
+            EXPECT_EQ(value.value(), "foo/bar/a/b");
+        }
+
         TEST(VFSPathNormalizedTest, changeExtensionShouldReplaceAfterLastDot)
         {
             Normalized value("foo/bar.a");
@@ -86,11 +136,10 @@ namespace VFS::Path
             EXPECT_EQ(value.value(), "foo/bar.so");
         }
 
-        TEST(VFSPathNormalizedTest, changeExtensionShouldNormalizeExtension)
+        TEST(VFSPathNormalizedTest, changeExtensionShouldThrowExceptionOnNotNormalizedExtension)
         {
             Normalized value("foo/bar.a");
-            ASSERT_TRUE(value.changeExtension("SO"));
-            EXPECT_EQ(value.value(), "foo/bar.so");
+            EXPECT_THROW(value.changeExtension("\\SO"), std::invalid_argument);
         }
 
         TEST(VFSPathNormalizedTest, changeExtensionShouldIgnorePathWithoutADot)
@@ -116,7 +165,7 @@ namespace VFS::Path
         TEST(VFSPathNormalizedTest, changeExtensionShouldThrowExceptionOnExtensionWithSeparator)
         {
             Normalized value("foo.a");
-            EXPECT_THROW(value.changeExtension("/so"), std::invalid_argument);
+            EXPECT_THROW(value.changeExtension("so/"), std::invalid_argument);
         }
 
         template <class T>

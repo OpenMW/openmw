@@ -1,6 +1,5 @@
 #include "resourcehelpers.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <string_view>
 
@@ -38,14 +37,6 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
     std::string_view resPath, const VFS::Manager* vfs, std::string_view ext)
 {
     std::string correctedPath = VFS::Path::normalizeFilename(resPath);
-
-    // Flatten slashes
-    auto bothSeparators = [](char a, char b) { return a == VFS::Path::separator && b == VFS::Path::separator; };
-    correctedPath.erase(std::unique(correctedPath.begin(), correctedPath.end(), bothSeparators), correctedPath.end());
-
-    // Remove leading separator
-    if (!correctedPath.empty() && correctedPath[0] == VFS::Path::separator)
-        correctedPath.erase(0, 1);
 
     // Handle top level directory
     bool needsPrefix = true;
