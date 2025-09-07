@@ -2,11 +2,12 @@
 #define OPENMW_LUAUI_RESOURCES
 
 #include <memory>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include <osg/Vec2f>
+
+#include <components/vfs/pathutil.hpp>
 
 namespace VFS
 {
@@ -17,7 +18,7 @@ namespace LuaUi
 {
     struct TextureData
     {
-        std::string mPath;
+        VFS::Path::Normalized mPath;
         osg::Vec2f mOffset;
         osg::Vec2f mSize;
     };
@@ -33,7 +34,7 @@ namespace LuaUi
 
     private:
         using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
-        std::unordered_map<std::string, TextureResources> mTextures;
+        std::unordered_map<VFS::Path::Normalized, TextureResources, VFS::Path::Hash> mTextures;
     };
 }
 
