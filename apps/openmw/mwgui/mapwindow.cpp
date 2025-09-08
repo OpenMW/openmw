@@ -394,8 +394,7 @@ namespace MWGui
             mExteriorDoorMarkerWidgets.clear();
             for (auto& [coord, doors] : mExteriorDoorsByCell)
             {
-                if (!mHasALastActiveCell || !mGrid.inside({ coord.first, coord.second })
-                    || activeGrid.inside({ coord.first, coord.second }))
+                if (!mGrid.inside({ coord.first, coord.second }) || activeGrid.inside({ coord.first, coord.second }))
                 {
                     mDoorMarkersToRecycle.insert(mDoorMarkersToRecycle.end(), doors.begin(), doors.end());
                     doors.clear();
@@ -406,15 +405,6 @@ namespace MWGui
 
             for (auto& widget : mDoorMarkersToRecycle)
                 widget->setVisible(false);
-
-            if (mHasALastActiveCell)
-            {
-                for (const auto& entry : mMaps)
-                {
-                    if (!mGrid.inside({ entry.mCellX, entry.mCellY }))
-                        mLocalMapRender->removeExteriorCell(entry.mCellX, entry.mCellY);
-                }
-            }
         }
         else
             mGrid = mLocalMapRender->getInteriorGrid();
@@ -462,9 +452,6 @@ namespace MWGui
 
         for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
             widget->setCoord(getMarkerCoordinates(widget, 8));
-
-        if (mActiveCell->isExterior())
-            mHasALastActiveCell = true;
 
         updateMagicMarkers();
         updateCustomMarkers();

@@ -119,7 +119,6 @@ namespace MWGui
         MyGUI::ScrollView* mLocalMap = nullptr;
         MyGUI::ImageBox* mCompass = nullptr;
         float mLocalMapZoom = 1.f;
-        bool mHasALastActiveCell = false;
         bool mFogOfWarToggled = true;
         bool mFogOfWarEnabled;
         bool mNeedDoorMarkersUpdate = false;
