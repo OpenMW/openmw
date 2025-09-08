@@ -568,7 +568,7 @@ namespace NifOsg
             if (st)
             {
                 if (st->mExternal)
-                    return getTextureImage(st->mFile);
+                    return getTextureImage(VFS::Path::toNormalized(st->mFile));
 
                 if (!st->mData.empty())
                     return handleInternalTexture(st->mData.getPtr());
@@ -1065,13 +1065,12 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<osg::Image> getTextureImage(std::string_view path) const
+        osg::ref_ptr<osg::Image> getTextureImage(VFS::Path::NormalizedView path) const
         {
             if (!mImageManager)
                 return nullptr;
 
-            return mImageManager->getImage(
-                VFS::Path::toNormalized(Misc::ResourceHelpers::correctTexturePath(path, mImageManager->getVFS())));
+            return mImageManager->getImage(Misc::ResourceHelpers::correctTexturePath(path, *mImageManager->getVFS()));
         }
 
         static osg::ref_ptr<osg::Texture2D> attachTexture(const std::string& name, osg::ref_ptr<osg::Image> image,
@@ -1095,8 +1094,9 @@ namespace NifOsg
             return texture2d;
         }
 
-        osg::ref_ptr<osg::Texture2D> attachExternalTexture(const std::string& name, const std::string& path, bool wrapS,
-            bool wrapT, unsigned int uvSet, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures) const
+        osg::ref_ptr<osg::Texture2D> attachExternalTexture(const std::string& name, VFS::Path::NormalizedView path,
+            bool wrapS, bool wrapT, unsigned int uvSet, osg::StateSet* stateset,
+            std::vector<unsigned int>& boundTextures) const
         {
             return attachTexture(name, getTextureImage(path), wrapS, wrapT, uvSet, stateset, boundTextures);
         }
@@ -2223,18 +2223,19 @@ namespace NifOsg
         }
 
         static Bgsm::MaterialFilePtr getShaderMaterial(
-            std::string_view path, Resource::BgsmFileManager* materialManager)
+            VFS::Path::NormalizedView path, Resource::BgsmFileManager* materialManager)
         {
             if (!materialManager)
                 return nullptr;
 
-            if (!Misc::StringUtils::ciEndsWith(path, ".bgem") && !Misc::StringUtils::ciEndsWith(path, ".bgsm"))
+            if (!path.value().ends_with(".bgem") && !path.value().ends_with(".bgsm"))
                 return nullptr;
 
-            std::string normalizedPath = Misc::ResourceHelpers::correctMaterialPath(path, materialManager->getVFS());
+            const VFS::Path::Normalized normalizedPath
+                = Misc::ResourceHelpers::correctMaterialPath(path, *materialManager->getVFS());
             try
             {
-                return materialManager->get(VFS::Path::Normalized(normalizedPath));
+                return materialManager->get(normalizedPath);
             }
             catch (std::exception& e)
             {
@@ -2254,14 +2255,16 @@ namespace NifOsg
                 const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material);
 
                 if (!bgsm->mDiffuseMap.empty())
-                    attachExternalTexture(
-                        "diffuseMap", bgsm->mDiffuseMap, wrapS, wrapT, uvSet, stateset, boundTextures);
+                    attachExternalTexture("diffuseMap", VFS::Path::toNormalized(bgsm->mDiffuseMap), wrapS, wrapT, uvSet,
+                        stateset, boundTextures);
 
                 if (!bgsm->mNormalMap.empty())
-                    attachExternalTexture("normalMap", bgsm->mNormalMap, wrapS, wrapT, uvSet, stateset, boundTextures);
+                    attachExternalTexture("normalMap", VFS::Path::toNormalized(bgsm->mNormalMap), wrapS, wrapT, uvSet,
+                        stateset, boundTextures);
 
                 if (bgsm->mGlowMapEnabled && !bgsm->mGlowMap.empty())
-                    attachExternalTexture("emissiveMap", bgsm->mGlowMap, wrapS, wrapT, uvSet, stateset, boundTextures);
+                    attachExternalTexture("emissiveMap", VFS::Path::toNormalized(bgsm->mGlowMap), wrapS, wrapT, uvSet,
+                        stateset, boundTextures);
 
                 if (bgsm->mTree)
                     stateset->addUniform(new osg::Uniform("useTreeAnim", true));
@@ -2271,7 +2274,8 @@ namespace NifOsg
                 const Bgsm::BGEMFile* bgem = static_cast<const Bgsm::BGEMFile*>(material);
 
                 if (!bgem->mBaseMap.empty())
-                    attachExternalTexture("diffuseMap", bgem->mBaseMap, wrapS, wrapT, uvSet, stateset, boundTextures);
+                    attachExternalTexture("diffuseMap", VFS::Path::toNormalized(bgem->mBaseMap), wrapS, wrapT, uvSet,
+                        stateset, boundTextures);
 
                 bool useFalloff = bgem->mFalloff;
                 stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
@@ -2386,16 +2390,16 @@ namespace NifOsg
                 switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
                     case Nif::BSShaderTextureSet::TextureType::Base:
-                        attachExternalTexture(
-                            "diffuseMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
+                        attachExternalTexture("diffuseMap", VFS::Path::toNormalized(textureSet->mTextures[i]), wrapS,
+                            wrapT, uvSet, stateset, boundTextures);
                         break;
                     case Nif::BSShaderTextureSet::TextureType::Normal:
-                        attachExternalTexture(
-                            "normalMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
+                        attachExternalTexture("normalMap", VFS::Path::toNormalized(textureSet->mTextures[i]), wrapS,
+                            wrapT, uvSet, stateset, boundTextures);
                         break;
                     case Nif::BSShaderTextureSet::TextureType::Glow:
-                        attachExternalTexture(
-                            "emissiveMap", textureSet->mTextures[i], wrapS, wrapT, uvSet, stateset, boundTextures);
+                        attachExternalTexture("emissiveMap", VFS::Path::toNormalized(textureSet->mTextures[i]), wrapS,
+                            wrapT, uvSet, stateset, boundTextures);
                         break;
                     default:
                     {
@@ -2578,8 +2582,8 @@ namespace NifOsg
                     if (!texprop->mFilename.empty())
                     {
                         const unsigned int uvSet = 0;
-                        attachExternalTexture("diffuseMap", texprop->mFilename, texprop->wrapS(), texprop->wrapT(),
-                            uvSet, stateset, boundTextures);
+                        attachExternalTexture("diffuseMap", VFS::Path::toNormalized(texprop->mFilename),
+                            texprop->wrapS(), texprop->wrapT(), uvSet, stateset, boundTextures);
                     }
                     if (mBethVersion >= 27)
                     {
@@ -2599,7 +2603,8 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
+                    if (Bgsm::MaterialFilePtr material
+                        = getShaderMaterial(VFS::Path::toNormalized(texprop->mName), mMaterialManager))
                     {
                         handleShaderMaterialNodeProperties(material.get(), stateset, boundTextures);
                         break;
@@ -2626,7 +2631,8 @@ namespace NifOsg
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     clearBoundTextures(stateset, boundTextures);
-                    if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
+                    if (Bgsm::MaterialFilePtr material
+                        = getShaderMaterial(VFS::Path::toNormalized(texprop->mName), mMaterialManager))
                     {
                         handleShaderMaterialNodeProperties(material.get(), stateset, boundTextures);
                         break;
@@ -2635,8 +2641,8 @@ namespace NifOsg
                     {
                         const unsigned int uvSet = 0;
                         unsigned int texUnit = static_cast<unsigned>(boundTextures.size());
-                        attachExternalTexture("diffuseMap", texprop->mSourceTexture, texprop->wrapS(), texprop->wrapT(),
-                            uvSet, stateset, boundTextures);
+                        attachExternalTexture("diffuseMap", VFS::Path::toNormalized(texprop->mSourceTexture),
+                            texprop->wrapS(), texprop->wrapT(), uvSet, stateset, boundTextures);
                         {
                             osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
                             // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
@@ -2845,7 +2851,8 @@ namespace NifOsg
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
-                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
+                        if (Bgsm::MaterialFilePtr shaderMat
+                            = getShaderMaterial(VFS::Path::toNormalized(shaderprop->mName), mMaterialManager))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat.get(), mat, *node, hasSortAlpha);
                             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
@@ -2871,7 +2878,8 @@ namespace NifOsg
                     case Nif::RC_BSEffectShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
-                        if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
+                        if (Bgsm::MaterialFilePtr shaderMat
+                            = getShaderMaterial(VFS::Path::toNormalized(shaderprop->mName), mMaterialManager))
                         {
                             handleShaderMaterialDrawableProperties(shaderMat.get(), mat, *node, hasSortAlpha);
                             break;

@@ -85,7 +85,7 @@ namespace MWLua
         record["mwscript"]
             = sol::readonly_property([](const ESM::Miscellaneous& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Miscellaneous& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         record["isKey"] = sol::readonly_property(
             [](const ESM::Miscellaneous& rec) -> bool { return rec.mData.mFlags & ESM::Miscellaneous::Key; });

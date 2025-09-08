@@ -386,9 +386,9 @@ namespace MWGui
             std::replace(icon.begin(), icon.end(), '/', '\\');
             size_t slashPos = icon.rfind('\\');
             icon.insert(slashPos + 1, "b_");
-            icon = Misc::ResourceHelpers::correctIconPath(
-                icon, MWBase::Environment::get().getResourceSystem()->getVFS());
-            mSpellImage->setSpellIcon(icon);
+            const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
+                VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+            mSpellImage->setSpellIcon(iconPath);
         }
         else
             mSpellImage->setSpellIcon({});

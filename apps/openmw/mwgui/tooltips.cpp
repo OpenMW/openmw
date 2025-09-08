@@ -447,8 +447,8 @@ namespace MWGui
 
         const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
-        const std::string realImage
-            = Misc::ResourceHelpers::correctIconPath(image, MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized realImage = Misc::ResourceHelpers::correctIconPath(
+            VFS::Path::toNormalized(image), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         Gui::EditBox* captionWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>(
             "NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
@@ -887,8 +887,8 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        widget->setUserString(
-            "ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture, vfs));
+        widget->setUserString("ImageTexture_BirthSignImage",
+            Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(sign->mTexture), *vfs));
         widget->setUserString("Caption_BirthSignName", sign->mName);
         widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
@@ -962,7 +962,8 @@ namespace MWGui
 
         std::string icon = effect->mIcon;
         icon.insert(icon.rfind('\\') + 1, "b_");
-        icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
+            VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
@@ -972,6 +973,6 @@ namespace MWGui
             "#{sSchool}: "
                 + MyGUI::TextIterator::toTagsString(
                     store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName));
-        widget->setUserString("ImageTexture_MagicEffectImage", icon);
+        widget->setUserString("ImageTexture_MagicEffectImage", iconPath);
     }
 }

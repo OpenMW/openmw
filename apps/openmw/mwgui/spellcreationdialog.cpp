@@ -220,7 +220,7 @@ namespace MWGui
     void EditEffectDialog::setMagicEffect(const ESM::MagicEffect* effect)
     {
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-            effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
+            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
         mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::indexToGmstString(effect->mIndex) + "}");
 

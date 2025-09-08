@@ -1196,8 +1196,8 @@ namespace MWGui
         if (const auto* id = classId.getIf<ESM::StringRefId>())
         {
             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-            classImage
-                = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + id->getValue() + ".dds", vfs);
+            classImage = Misc::ResourceHelpers::correctTexturePath(
+                VFS::Path::toNormalized("textures\\levelup\\" + id->getValue() + ".dds"), *vfs);
             if (!vfs->exists(classImage))
             {
                 Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
