@@ -168,6 +168,18 @@ namespace VFS::Path
             EXPECT_THROW(value.changeExtension("so/"), std::invalid_argument);
         }
 
+        TEST(VFSPathNormalizedTest, filenameShouldReturnLastComponentOfThePath)
+        {
+            const Normalized value("foo/bar");
+            EXPECT_EQ(value.filename(), "bar");
+        }
+
+        TEST(VFSPathNormalizedTest, filenameShouldReturnSameValueForPathWithSingleComponent)
+        {
+            const Normalized value("foo");
+            EXPECT_EQ(value.filename(), "foo");
+        }
+
         template <class T>
         struct VFSPathNormalizedOperatorsTest : Test
         {
@@ -245,6 +257,18 @@ namespace VFS::Path
             const NormalizedView b("baz");
             const Normalized result = a / b;
             EXPECT_EQ(result.value(), "foo/bar/baz");
+        }
+
+        TEST(VFSPathNormalizedViewTest, filenameShouldReturnLastComponentOfThePath)
+        {
+            const NormalizedView value("foo/bar");
+            EXPECT_EQ(value.filename(), "bar");
+        }
+
+        TEST(VFSPathNormalizedViewTest, filenameShouldReturnSameValueForPathWithSingleComponent)
+        {
+            const NormalizedView value("foo");
+            EXPECT_EQ(value.filename(), "foo");
         }
     }
 }

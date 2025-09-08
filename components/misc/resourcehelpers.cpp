@@ -25,6 +25,38 @@ namespace
         }
         return false;
     }
+
+    std::size_t findDirectory(VFS::Path::NormalizedView path, std::string_view directory)
+    {
+        const std::string_view pathValue = path.value();
+        const std::size_t directorySize = directory.size();
+
+        for (std::size_t offset = 0, pathSize = pathValue.size(); offset < pathSize;)
+        {
+            const std::size_t position = pathValue.find(directory, offset);
+
+            if (position == std::string_view::npos)
+                return std::string_view::npos;
+
+            if (position + directorySize >= pathSize)
+                return std::string_view::npos;
+
+            if ((position == 0 || pathValue[position - 1] == VFS::Path::separator)
+                && pathValue[position + directorySize] == VFS::Path::separator)
+                return position;
+
+            offset = position + directorySize;
+        }
+
+        return std::string_view::npos;
+    }
+
+    VFS::Path::Normalized withPrefix(VFS::Path::NormalizedView path, std::string_view prefix)
+    {
+        VFS::Path::Normalized prefixed(prefix);
+        prefixed /= path;
+        return prefixed;
+    }
 }
 
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
@@ -36,38 +68,29 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::string_view> topLevelDirectories,
     std::string_view resPath, const VFS::Manager* vfs, std::string_view ext)
 {
-    std::string correctedPath = VFS::Path::normalizeFilename(resPath);
+    VFS::Path::Normalized correctedPath(resPath);
 
     // Handle top level directory
     bool needsPrefix = true;
-    for (std::string_view potentialTopLevelDirectory : topLevelDirectories)
+
+    for (const std::string_view potentialTopLevelDirectory : topLevelDirectories)
     {
-        if (correctedPath.starts_with(potentialTopLevelDirectory)
-            && correctedPath.size() > potentialTopLevelDirectory.size()
-            && correctedPath[potentialTopLevelDirectory.size()] == VFS::Path::separator)
+        if (const std::size_t topLevelPos = findDirectory(correctedPath, potentialTopLevelDirectory);
+            topLevelPos != std::string::npos)
         {
+            correctedPath = VFS::Path::Normalized(correctedPath.value().substr(topLevelPos));
             needsPrefix = false;
             break;
         }
-        else
-        {
-            std::string topLevelPrefix = std::string{ potentialTopLevelDirectory } + VFS::Path::separator;
-            size_t topLevelPos = correctedPath.find(VFS::Path::separator + topLevelPrefix);
-            if (topLevelPos != std::string::npos)
-            {
-                correctedPath.erase(0, topLevelPos + 1);
-                needsPrefix = false;
-                break;
-            }
-        }
     }
-    if (needsPrefix)
-        correctedPath = std::string{ topLevelDirectories.front() } + VFS::Path::separator + correctedPath;
 
-    std::string origExt = correctedPath;
+    if (needsPrefix)
+        correctedPath = withPrefix(correctedPath, topLevelDirectories.front());
+
+    const VFS::Path::Normalized origExt = correctedPath;
 
     // replace extension if `ext` is specified (used for .tga -> .dds, .wav -> .mp3)
-    bool isExtChanged = !ext.empty() && changeExtension(correctedPath, ext);
+    const bool isExtChanged = !ext.empty() && correctedPath.changeExtension(ext);
 
     if (vfs->exists(correctedPath))
         return correctedPath;
@@ -77,18 +100,15 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
-    std::string fallback{ topLevelDirectories.front() };
-    fallback += VFS::Path::separator;
-    fallback += Misc::getFileName(correctedPath);
-
-    if (vfs->exists(fallback))
-        return fallback;
+    {
+        const VFS::Path::Normalized fallback = withPrefix(correctedPath.filename(), topLevelDirectories.front());
+        if (vfs->exists(fallback))
+            return fallback;
+    }
 
     if (isExtChanged)
     {
-        fallback = topLevelDirectories.front();
-        fallback += VFS::Path::separator;
-        fallback += Misc::getFileName(origExt);
+        const VFS::Path::Normalized fallback = withPrefix(origExt.filename(), topLevelDirectories.front());
         if (vfs->exists(fallback))
             return fallback;
     }
@@ -102,17 +122,17 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
 
 std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs, ".dds");
+    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs, "dds");
 }
 
 std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "icons" } }, resPath, vfs, ".dds");
+    return correctResourcePath({ { "icons" } }, resPath, vfs, "dds");
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs, ".dds");
+    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs, "dds");
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(
@@ -190,9 +210,9 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
     // Note: likely should be replaced with
-    //     return correctResourcePath({ { "sound" } }, resPath, vfs, ".mp3");
+    //     return correctResourcePath({ { "sound" } }, resPath, vfs, "mp3");
     // but there is a slight difference in behaviour:
-    // - `correctResourcePath(..., ".mp3")` first checks `.mp3`, then tries the original extension
+    // - `correctResourcePath(..., "mp3")` first checks `.mp3`, then tries the original extension
     // - the implementation below first tries the original extension, then falls back to `.mp3`.
 
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
