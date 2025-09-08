@@ -38,7 +38,7 @@
 namespace
 {
 
-    const int cellSize = Constants::CellSizeInUnits;
+    constexpr int cellSize = Constants::CellSizeInUnits;
     constexpr float speed = 1.08f; // the zoom speed, it should be greater than 1
 
     enum LocalMapWidgetDepth
@@ -57,7 +57,10 @@ namespace
         Global_ExploreOverlayLayer = 2,
         Global_MapLayer = 3
     };
+}
 
+namespace MWGui
+{
     /// @brief A widget that changes its color when hovered.
     class MarkerWidget final : public MyGUI::Widget
     {
@@ -109,10 +112,6 @@ namespace
     {
         scrollView->setCanvasSize(widgetSize * (grid.width() + 1), widgetSize * (grid.height() + 1));
     }
-}
-
-namespace MWGui
-{
 
     void CustomMarkerCollection::addMarker(const ESM::CustomMarker& marker, bool triggerEvent)
     {
@@ -294,7 +293,7 @@ namespace MWGui
         return MyGUI::IntCoord(position.left - halfMarkerSize, position.top - halfMarkerSize, markerSize, markerSize);
     }
 
-    MyGUI::Widget* LocalMapBase::createDoorMarker(const std::string& name, float x, float y) const
+    MarkerWidget* LocalMapBase::createDoorMarker(const std::string& name, float x, float y) const
     {
         MarkerUserData data(mLocalMapRender);
         data.caption = name;
@@ -328,7 +327,7 @@ namespace MWGui
         return MyGUI::IntCoord(position.left - markerSize / 2, position.top - markerSize / 2, markerSize, markerSize);
     }
 
-    std::vector<MyGUI::Widget*>& LocalMapBase::currentDoorMarkersWidgets()
+    std::vector<MarkerWidget*>& LocalMapBase::currentDoorMarkersWidgets()
     {
         return mActiveCell->isExterior() ? mExteriorDoorMarkerWidgets : mInteriorDoorMarkerWidgets;
     }
@@ -629,7 +628,7 @@ namespace MWGui
 
         if (!mActiveCell->isExterior())
         {
-            for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
+            for (MarkerWidget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
             MWWorld::CellStore& cell = worldModel->getInterior(mActiveCell->getNameId());
@@ -656,7 +655,7 @@ namespace MWGui
             for (auto iter = markers.first; iter != markers.second; ++iter)
                 destNotes.push_back(iter->second.mNote);
 
-            MyGUI::Widget* markerWidget = nullptr;
+            MarkerWidget* markerWidget = nullptr;
             MarkerUserData* data;
             if (mDoorMarkersToRecycle.empty())
             {
@@ -667,7 +666,7 @@ namespace MWGui
             }
             else
             {
-                markerWidget = (MarkerWidget*)mDoorMarkersToRecycle.back();
+                markerWidget = mDoorMarkersToRecycle.back();
                 mDoorMarkersToRecycle.pop_back();
 
                 data = markerWidget->getUserData<MarkerUserData>();

@@ -43,6 +43,7 @@ namespace SceneUtil
 
 namespace MWGui
 {
+    class MarkerWidget;
 
     class CustomMarkerCollection
     {
@@ -146,14 +147,14 @@ namespace MWGui
         std::vector<MapEntry> mMaps;
 
         // Keep track of created marker widgets, just to easily remove them later.
-        std::vector<MyGUI::Widget*> mExteriorDoorMarkerWidgets;
-        std::map<std::pair<int, int>, std::vector<MyGUI::Widget*>> mExteriorDoorsByCell;
-        std::vector<MyGUI::Widget*> mInteriorDoorMarkerWidgets;
+        std::vector<MarkerWidget*> mExteriorDoorMarkerWidgets;
+        std::map<std::pair<int, int>, std::vector<MarkerWidget*>> mExteriorDoorsByCell;
+        std::vector<MarkerWidget*> mInteriorDoorMarkerWidgets;
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
-        std::vector<MyGUI::Widget*> mDoorMarkersToRecycle;
+        std::vector<MarkerWidget*> mDoorMarkersToRecycle;
 
-        std::vector<MyGUI::Widget*>& currentDoorMarkersWidgets();
+        std::vector<MarkerWidget*>& currentDoorMarkersWidgets();
 
         virtual void updateCustomMarkers();
 
@@ -163,7 +164,7 @@ namespace MWGui
         MyGUI::IntPoint getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const;
         MyGUI::IntCoord getMarkerCoordinates(
             float worldX, float worldY, MarkerUserData& markerPos, unsigned short markerSize) const;
-        MyGUI::Widget* createDoorMarker(const std::string& name, float x, float y) const;
+        MarkerWidget* createDoorMarker(const std::string& name, float x, float y) const;
         MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, unsigned short markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
