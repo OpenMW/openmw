@@ -622,6 +622,7 @@ namespace MWGui
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
 
+        const bool recycledMarkers = !mInteriorDoorMarkerWidgets.empty();
         mDoorMarkersToRecycle.insert(
             mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());
         mInteriorDoorMarkerWidgets.clear();
@@ -638,12 +639,12 @@ namespace MWGui
         {
             for (MapEntry& entry : mMaps)
             {
-                if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
+                if (!entry.mMapTexture && entry.mMapWidget->getVisible() && !widgetCropped(entry.mMapWidget, mLocalMap))
                     world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellLocation(
                                               entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)),
                         doors);
             }
-            if (doors.empty())
+            if (doors.empty() && !recycledMarkers)
                 return;
         }
 
