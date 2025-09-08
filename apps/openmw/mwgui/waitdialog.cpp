@@ -330,8 +330,17 @@ namespace MWGui
 
     ControllerButtons* WaitDialog::getControllerButtons()
     {
-        mControllerButtons.mA = mSleeping ? "#{sRest}" : "#{sWait}";
-        mControllerButtons.mX = mSleeping && mUntilHealedButton->getVisible() ? "#{sUntilHealed}" : "";
+        mControllerButtons.mX.clear();
+        if (mSleeping)
+        {
+            mControllerButtons.mA = "#{Interface:Rest}";
+            if (mUntilHealedButton->getVisible())
+                mControllerButtons.mX = "#{Interface:UntilHealed}";
+        }
+        else
+        {
+            mControllerButtons.mA = "#{Interface:Wait}";
+        }
         return &mControllerButtons;
     }
 

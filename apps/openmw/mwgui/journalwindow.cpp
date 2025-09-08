@@ -226,7 +226,7 @@ namespace
 
             mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mX = "#{OMWEngine:JournalQuests}";
-            mControllerButtons.mY = "#{sTopics}";
+            mControllerButtons.mY = "#{Interface:Topics}";
 
             mQuestMode = false;
             mAllQuests = false;
@@ -696,10 +696,23 @@ namespace
 
         MWGui::ControllerButtons* getControllerButtons() override
         {
-            mControllerButtons.mB = mOptionsMode || mStates.size() > 1 ? "#{sBack}" : "#{Interface:Close}";
-            mControllerButtons.mL1 = mOptionsMode ? "" : "#{sPrev}";
-            mControllerButtons.mR1 = mOptionsMode ? "" : "#{sNext}";
-            mControllerButtons.mR3 = mOptionsMode && mQuestMode ? "#{OMWEngine:JournalShowAll}" : "";
+            if (mOptionsMode || mStates.size() > 1)
+                mControllerButtons.mB = "#{Interface:Back}";
+            else
+                mControllerButtons.mB = "#{Interface:Close}";
+
+            mControllerButtons.mL1.clear();
+            mControllerButtons.mR1.clear();
+            mControllerButtons.mR3.clear();
+            if (!mOptionsMode)
+            {
+                mControllerButtons.mL1 = "#{Interface:Prev}";
+                mControllerButtons.mR1 = "#{Interface:Next}";
+            }
+            else if (mQuestMode)
+            {
+                mControllerButtons.mR3 = "#{OMWEngine:JournalShowAll}";
+            }
             return &mControllerButtons;
         }
 

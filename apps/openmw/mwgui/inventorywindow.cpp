@@ -979,7 +979,7 @@ namespace MWGui
             case MWGui::GM_Barter:
                 mControllerButtons.mA = "#{sSell}";
                 mControllerButtons.mB = "#{Interface:Cancel}";
-                mControllerButtons.mX = "#{sOffer}";
+                mControllerButtons.mX = "#{Interface:Offer}";
                 mControllerButtons.mR2 = "#{sBarter}";
                 break;
             case MWGui::GM_Inventory:
