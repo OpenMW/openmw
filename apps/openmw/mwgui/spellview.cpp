@@ -350,6 +350,7 @@ namespace MWGui
             return;
 
         int prevFocus = mControllerFocus;
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         switch (button)
         {
@@ -363,19 +364,22 @@ namespace MWGui
                 break;
             case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
                 // Toggle info tooltip
-                MWBase::Environment::get().getWindowManager()->setControllerTooltip(
-                    !MWBase::Environment::get().getWindowManager()->getControllerTooltip());
+                winMgr->setControllerTooltipEnabled(!winMgr->getControllerTooltipEnabled());
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                winMgr->restoreControllerTooltips();
                 mControllerFocus--;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                winMgr->restoreControllerTooltips();
                 mControllerFocus++;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                winMgr->restoreControllerTooltips();
                 mControllerFocus = std::max(0, mControllerFocus - 10);
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                winMgr->restoreControllerTooltips();
                 mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
@@ -451,7 +455,10 @@ namespace MWGui
                     mScrollView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
                 }
 
-                if (MWBase::Environment::get().getWindowManager()->getControllerTooltip())
+                MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+                winMgr->restoreControllerTooltips();
+
+                if (winMgr->getControllerTooltipVisible())
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
             }
         }
