@@ -320,11 +320,12 @@ namespace MWGui
         mLocalMap->setViewOffset(viewOffset);
     }
 
-    MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(MyGUI::Widget* widget, unsigned short markerSize) const
+    void LocalMapBase::updateMarkerCoordinates(MyGUI::Widget* widget, unsigned short markerSize) const
     {
         MarkerUserData& markerPos(*widget->getUserData<MarkerUserData>());
         auto position = getPosition(markerPos.cellX, markerPos.cellY, markerPos.nX, markerPos.nY);
-        return MyGUI::IntCoord(position.left - markerSize / 2, position.top - markerSize / 2, markerSize, markerSize);
+        MyGUI::IntCoord coord(position.left - markerSize / 2, position.top - markerSize / 2, markerSize, markerSize);
+        widget->setCoord(coord);
     }
 
     std::vector<MarkerWidget*>& LocalMapBase::currentDoorMarkersWidgets()
@@ -380,6 +381,13 @@ namespace MWGui
         if (&cell == mActiveCell)
             return; // don't do anything if we're still in the same cell
 
+        // Remove all interior door markers
+        mDoorMarkersToRecycle.insert(
+            mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());
+        for (MarkerWidget* widget : mInteriorDoorMarkerWidgets)
+            widget->setVisible(false);
+        mInteriorDoorMarkerWidgets.clear();
+
         const int x = cell.getGridX();
         const int y = cell.getGridY();
 
@@ -387,26 +395,47 @@ namespace MWGui
 
         if (cell.isExterior())
         {
+            std::optional<MyGUI::IntRect> previousActiveGrid;
+            if (mActiveCell && mActiveCell->isExterior())
+                previousActiveGrid
+                    = createRect({ mActiveCell->getGridX(), mActiveCell->getGridY() }, Constants::CellGridRadius);
             mGrid = createRect({ x, y }, mExtCellDistance);
             const MyGUI::IntRect activeGrid = createRect({ x, y }, Constants::CellGridRadius);
 
             mExteriorDoorMarkerWidgets.clear();
-            for (auto& [coord, doors] : mExteriorDoorsByCell)
+            for (auto it = mExteriorDoorsByCell.begin(); it != mExteriorDoorsByCell.end();)
             {
-                if (!mGrid.inside({ coord.first, coord.second }) || activeGrid.inside({ coord.first, coord.second }))
+                const auto& [coord, doors] = *it;
+                const MyGUI::IntPoint pos(coord.first, coord.second);
+                // Remove markers that fall outside the rendered map and ones that are new to the active grid.
+                // Scripts can enable/disable doors, requiring us to update the markers. Morrowind.exe only updates
+                // markers when a cell is added to the active grid.
+                if (!mGrid.inside(pos)
+                    || (previousActiveGrid && !previousActiveGrid->inside(pos) && activeGrid.inside(pos)))
                 {
                     mDoorMarkersToRecycle.insert(mDoorMarkersToRecycle.end(), doors.begin(), doors.end());
-                    doors.clear();
+                    for (MarkerWidget* widget : doors)
+                        widget->setVisible(false);
+                    it = mExteriorDoorsByCell.erase(it);
                 }
                 else
+                {
                     mExteriorDoorMarkerWidgets.insert(mExteriorDoorMarkerWidgets.end(), doors.begin(), doors.end());
+                    ++it;
+                }
             }
-
-            for (auto& widget : mDoorMarkersToRecycle)
-                widget->setVisible(false);
         }
         else
+        {
             mGrid = mLocalMapRender->getInteriorGrid();
+            // Remove all exterior door markers
+            mDoorMarkersToRecycle.insert(
+                mDoorMarkersToRecycle.end(), mExteriorDoorMarkerWidgets.begin(), mExteriorDoorMarkerWidgets.end());
+            for (MarkerWidget* widget : mExteriorDoorMarkerWidgets)
+                widget->setVisible(false);
+            mExteriorDoorMarkerWidgets.clear();
+            mExteriorDoorsByCell.clear();
+        }
 
         mActiveCell = &cell;
 
@@ -450,7 +479,7 @@ namespace MWGui
         mNeedDoorMarkersUpdate = true;
 
         for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
-            widget->setCoord(getMarkerCoordinates(widget, 8));
+            updateMarkerCoordinates(widget, 8);
 
         updateMagicMarkers();
         updateCustomMarkers();
@@ -610,6 +639,9 @@ namespace MWGui
                     entry.mFogTexture = std::make_unique<MyGUIPlatform::OSGTexture>(std::string(), nullptr);
                 }
                 needRedraw = true;
+                // Newly uncovered chunk, make sure to draw door markers right away instead of waiting for a cell
+                // transition
+                mNeedDoorMarkersUpdate = true;
             }
         }
         if (needRedraw)
@@ -622,16 +654,8 @@ namespace MWGui
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
 
-        const bool recycledMarkers = !mInteriorDoorMarkerWidgets.empty();
-        mDoorMarkersToRecycle.insert(
-            mDoorMarkersToRecycle.end(), mInteriorDoorMarkerWidgets.begin(), mInteriorDoorMarkerWidgets.end());
-        mInteriorDoorMarkerWidgets.clear();
-
         if (!mActiveCell->isExterior())
         {
-            for (MarkerWidget* widget : mExteriorDoorMarkerWidgets)
-                widget->setVisible(false);
-
             MWWorld::CellStore& cell = worldModel->getInterior(mActiveCell->getNameId());
             world->getDoorMarkers(cell, doors);
         }
@@ -639,13 +663,13 @@ namespace MWGui
         {
             for (MapEntry& entry : mMaps)
             {
-                if (!entry.mMapTexture && entry.mMapWidget->getVisible() && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellLocation(
-                                              entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)),
-                        doors);
+                if (!entry.mMapWidget->getVisible() || widgetCropped(entry.mMapWidget, mLocalMap))
+                    continue;
+                if (mExteriorDoorsByCell.contains({ entry.mCellX, entry.mCellY }))
+                    continue;
+                ESM::ExteriorCellLocation id(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId);
+                world->getDoorMarkers(worldModel->getExterior(id), doors);
             }
-            if (doors.empty() && !recycledMarkers)
-                return;
         }
 
         // Create a widget for each marker
@@ -682,8 +706,8 @@ namespace MWGui
                 mExteriorDoorsByCell[{ data->cellX, data->cellY }].push_back(markerWidget);
         }
 
-        for (auto& widget : mDoorMarkersToRecycle)
-            widget->setVisible(false);
+        for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
+            updateMarkerCoordinates(widget, 8);
     }
 
     void LocalMapBase::updateMagicMarkers()
@@ -733,7 +757,7 @@ namespace MWGui
 
         MarkerUserData markerPos(mLocalMapRender);
         for (MyGUI::Widget* widget : currentDoorMarkersWidgets())
-            widget->setCoord(getMarkerCoordinates(widget, 8));
+            updateMarkerCoordinates(widget, 8);
 
         for (MyGUI::Widget* widget : mCustomMarkerWidgets)
         {
@@ -742,7 +766,7 @@ namespace MWGui
         }
 
         for (MyGUI::Widget* widget : mMagicMarkerWidgets)
-            widget->setCoord(getMarkerCoordinates(widget, 8));
+            updateMarkerCoordinates(widget, 8);
     }
 
     // ------------------------------------------------------------------------------------------
