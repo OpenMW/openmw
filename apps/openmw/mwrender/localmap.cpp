@@ -192,7 +192,8 @@ namespace MWRender
 
         MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
         const std::uint8_t neighbourFlags = getExteriorNeighbourFlags(cellX, cellY);
-        if ((segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
+        if (segment.mLastRenderNeighbourFlags != 0
+            && (segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
             return;
         requestExteriorMap(cell, segment);
         segment.mLastRenderNeighbourFlags = neighbourFlags;
@@ -573,8 +574,11 @@ namespace MWRender
         };
         std::uint8_t result = 0;
         for (const auto& [flag, dx, dy] : flags)
-            if (mExteriorSegments.contains(std::pair(cellX + dx, cellY + dy)))
+        {
+            auto it = mExteriorSegments.find(std::pair(cellX + dx, cellY + dy));
+            if (it != mExteriorSegments.end() && it->second.mMapTexture)
                 result |= flag;
+        }
         return result;
     }
 
