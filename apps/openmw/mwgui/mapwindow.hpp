@@ -184,7 +184,6 @@ namespace MWGui
         MWGui::LocalMapBase::MapEntry& addMapEntry();
 
         MyGUI::IntRect mGrid{ -1, -1, 1, 1 };
-        int mExtCellDistance = 0;
         float mMarkerUpdateTimer = 0.f;
 
         float mLastDirectionX = 0.f;

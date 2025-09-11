@@ -217,7 +217,6 @@ namespace MWGui
         mLocalMap = widget;
         mCompass = compass;
         mGrid = createRect({ 0, 0 }, cellDistance);
-        mExtCellDistance = cellDistance;
 
         const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
         setCanvasSize(mLocalMap, mGrid, mapWidgetSize);
@@ -399,7 +398,7 @@ namespace MWGui
             if (mActiveCell && mActiveCell->isExterior())
                 previousActiveGrid
                     = createRect({ mActiveCell->getGridX(), mActiveCell->getGridY() }, Constants::CellGridRadius);
-            mGrid = createRect({ x, y }, mExtCellDistance);
+            mGrid = createRect({ x, y }, getLocalViewingDistance());
             const MyGUI::IntRect activeGrid = createRect({ x, y }, Constants::CellGridRadius);
 
             mExteriorDoorMarkerWidgets.clear();
