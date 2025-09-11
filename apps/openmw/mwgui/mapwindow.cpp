@@ -391,7 +391,7 @@ namespace MWGui
         const int x = cell.getGridX();
         const int y = cell.getGridY();
 
-        MyGUI::IntSize oldSize{ mGrid.width(), mGrid.height() };
+        const MyGUI::IntRect prevGrid = mGrid;
 
         if (cell.isExterior())
         {
@@ -422,6 +422,18 @@ namespace MWGui
                 {
                     mExteriorDoorMarkerWidgets.insert(mExteriorDoorMarkerWidgets.end(), doors.begin(), doors.end());
                     ++it;
+                }
+            }
+
+            if (mActiveCell && mActiveCell->isExterior())
+            {
+                for (int cx = prevGrid.left; cx <= prevGrid.right; ++cx)
+                {
+                    for (int cy = prevGrid.top; cy <= prevGrid.bottom; ++cy)
+                    {
+                        if (!mGrid.inside({ cx, cy }))
+                            mLocalMapRender->removeExteriorCell(cx, cy);
+                    }
                 }
             }
         }
@@ -471,7 +483,7 @@ namespace MWGui
             resetEntry(mMaps[i], false, nullptr);
         }
 
-        if (oldSize != MyGUI::IntSize{ mGrid.width(), mGrid.height() })
+        if (prevGrid.width() != mGrid.width() || prevGrid.height() != mGrid.height())
             setCanvasSize(mLocalMap, mGrid, static_cast<int>(getWidgetSize()));
 
         // Delay the door markers update until scripts have been given a chance to run.

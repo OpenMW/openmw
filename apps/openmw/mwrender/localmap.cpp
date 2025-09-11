@@ -206,13 +206,16 @@ namespace MWRender
                 std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()), MapSegment{});
     }
 
+    void LocalMap::removeExteriorCell(int x, int y)
+    {
+        mExteriorSegments.erase({ x, y });
+    }
+
     void LocalMap::removeCell(MWWorld::CellStore* cell)
     {
         saveFogOfWar(cell);
 
-        if (cell->isExterior())
-            mExteriorSegments.erase({ cell->getCell()->getGridX(), cell->getCell()->getGridY() });
-        else
+        if (!cell->isExterior())
             mInteriorSegments.clear();
     }
 
@@ -301,6 +304,7 @@ namespace MWRender
             return;
 
         mInterior = true;
+        mExteriorSegments.clear();
 
         mBounds = bounds;
 

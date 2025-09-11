@@ -55,6 +55,7 @@ namespace MWRender
         void requestMap(const MWWorld::CellStore* cell);
 
         void addCell(MWWorld::CellStore* cell);
+        void removeExteriorCell(int x, int y);
 
         void removeCell(MWWorld::CellStore* cell);
 
