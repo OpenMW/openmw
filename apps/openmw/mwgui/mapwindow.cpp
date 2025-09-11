@@ -483,7 +483,7 @@ namespace MWGui
         }
 
         if (prevGrid.width() != mGrid.width() || prevGrid.height() != mGrid.height())
-            setCanvasSize(mLocalMap, mGrid, static_cast<int>(getWidgetSize()));
+            updateLocalMap();
 
         // Delay the door markers update until scripts have been given a chance to run.
         // If we don't do this, door markers that should be disabled will still appear on the map.
