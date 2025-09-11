@@ -604,7 +604,7 @@ namespace MWGui
         bool needRedraw = false;
         for (MapEntry& entry : mMaps)
         {
-            if (widgetCropped(entry.mMapWidget, mLocalMap))
+            if (!entry.mMapWidget->getVisible() || widgetCropped(entry.mMapWidget, mLocalMap))
                 continue;
 
             if (!entry.mMapTexture)
@@ -750,6 +750,8 @@ namespace MWGui
             = MyGUI::IntSize(static_cast<int>(std::ceil(mapWidgetSize)), static_cast<int>(std::ceil(mapWidgetSize)));
         for (auto& entry : mMaps)
         {
+            if (!entry.mMapWidget->getVisible())
+                continue;
             const auto position = getPosition(entry.mCellX, entry.mCellY, 0, 0);
             entry.mMapWidget->setCoord({ position, size });
             entry.mFogWidget->setCoord({ position, size });
@@ -1384,8 +1386,7 @@ namespace MWGui
         NoDrop::setAlpha(alpha);
         // can't allow showing map with partial transparency, as the fog of war will also go transparent
         // and reveal parts of the map you shouldn't be able to see
-        for (MapEntry& entry : mMaps)
-            entry.mMapWidget->setVisible(alpha == 1);
+        mLocalMap->setVisible(alpha == 1);
     }
 
     void MapWindow::customMarkerCreated(MyGUI::Widget* marker)
