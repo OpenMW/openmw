@@ -1,8 +1,5 @@
 #!/bin/sh -ex
 
-brew tap --repair
-brew update --quiet
-
 command -v qmake >/dev/null 2>&1 && qmake -v | grep -F "Using Qt version 6." >/dev/null || brew install qt@6
 
 brew install curl xquartz gd fontconfig freetype harfbuzz brotli openal-soft icu4c yaml-cpp sqlite
