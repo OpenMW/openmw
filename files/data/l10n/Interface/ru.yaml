@@ -18,7 +18,9 @@ DurationYear: |-
     few{{years} г }
     other{{years} л }
   }
+Face: "Лицо"
 Goodbye: "Прощание"
+Hair: "Прическа"
 Info: "Инфо"
 Inventory: "Инвентарь"
 Item: "Предмет"
@@ -39,6 +41,7 @@ Rest: "Отдых"
 ScrollDown: "Прокрутить вниз"
 ScrollUp: "Прокрутить вверх"
 Select: "Выбрать"
+Sex: "Пол"
 Soul: "Душа"
 Take: "Взять"
 TakeAll: "Взять все"

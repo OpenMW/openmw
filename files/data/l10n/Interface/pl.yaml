@@ -19,7 +19,9 @@ DurationYear: |-
     few{{years} lata }
     many{{years} lat }
   }
+Face: "Twarz"
 Goodbye: "Do widzenia"
+Hair: "Włosy"
 Info: "Info"
 Inventory: "Ekwipunek"
 Item: "Przedmiot"
@@ -40,6 +42,7 @@ Rest: "Odpocznij"
 ScrollDown: "Przewiń w dół"
 ScrollUp: "Przewiń w górę"
 Select: "Wybierz"
+Sex: "Płeć"
 Soul: "Dusza"
 Take: "Weź"
 TakeAll: "Weź wszystko"

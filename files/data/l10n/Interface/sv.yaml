@@ -21,7 +21,9 @@ DurationYear: |-
     one{{years} år }
     other{{years} år }
   }
+Face: "Ansikte"
 Goodbye: "Adjö"
+Hair: "Hår"
 Info: "Info"
 Item: "Föremål"
 Inventory: "Inventariet"
@@ -42,6 +44,7 @@ Rest: "Vila"
 ScrollDown: "Scrolla ner"
 ScrollUp: "Scrolla upp"
 Select: "Välj"
+Sex: "Kön"
 Soul: "Själ"
 Take: "Ta"
 TakeAll: "Ta allt"

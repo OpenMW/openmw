@@ -26,7 +26,9 @@ DurationYear: |-
    one{{years} Jahr }
    other{{years} Jahre }
  }
+Face: "Gesicht"
 Goodbye: "Lebt wohl!"
+Hair: "Haar"
 Info: "Info"
 Inventory: "Inventar"
 Item: "Gegenstand"
@@ -51,6 +53,7 @@ Rest: "Rasten"
 ScrollDown: "Nach unten scrollen"
 ScrollUp: "Nach oben scrollen"
 Select: "Auswählen"
+Sex: "Geschlecht"
 Soul: "Seele"
 Take: "Nehmen"
 TakeAll: "Alles nehmen"

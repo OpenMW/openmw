@@ -21,7 +21,9 @@ DurationYear: |-
     one{{years} an }
     other{{years} ans }
   }
+Face: "Face"
 Goodbye: "Au revoir"
+Hair: "Cheveux"
 Info: "Info"
 Inventory: "Inventaire"
 Item: "Objet"
@@ -42,6 +44,7 @@ Rest: "Repos"
 ScrollDown: "Défilement bas"
 ScrollUp: "Défilement haut"
 Select: "Sélectionner"
+Sex: "Sexe"
 Soul: "Ame"
 Take: "Prendre"
 TakeAll: "Tout prendre"

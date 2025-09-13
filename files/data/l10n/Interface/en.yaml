@@ -21,7 +21,9 @@ DurationYear: |-
     one{{years} yr }
     other{{years} yrs }
   }
+Face: "Face"
 Goodbye: "Goodbye"
+Hair: "Hair"
 Info: "Info"
 Inventory: "Inventory"
 Item: "Item"
@@ -42,6 +44,7 @@ Rest: "Rest"
 ScrollDown: "Scroll Down"
 ScrollUp: "Scroll Up"
 Select: "Select"
+Sex: "Sex"
 Soul: "Soul"
 Take: "Take"
 TakeAll: "Take All"

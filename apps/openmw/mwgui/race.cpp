@@ -111,9 +111,9 @@ namespace MWGui
             mControllerButtons.mLStick = "#{Interface:Mouse}";
             mControllerButtons.mA = "#{Interface:Select}";
             mControllerButtons.mB = "#{Interface:Back}";
-            mControllerButtons.mY = "#{sSex}";
-            mControllerButtons.mL1 = "#{sHair}";
-            mControllerButtons.mR1 = "#{sFace}";
+            mControllerButtons.mY = "#{Interface:Sex}";
+            mControllerButtons.mL1 = "#{Interface:Hair}";
+            mControllerButtons.mR1 = "#{Interface:Face}";
         }
 
         updateRaces();
