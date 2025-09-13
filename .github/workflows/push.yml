@@ -82,7 +82,7 @@ jobs:
         max-size: 1000M
 
     - name: Configure
-      run: CI/before_script.macos.sh
+      run: CI/before_script.macos.sh -C
     - name: Build
       run: CI/macos/build.sh
 

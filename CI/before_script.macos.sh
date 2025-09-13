@@ -1,28 +1,91 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-# Silence a git warning
-git config --global advice.detachedHead false
+VERBOSE=""
+USE_CCACHE=""
+KEEP=""
+USE_WERROR=""
 
-rm -fr build
-mkdir build
+while [ $# -gt 0 ]; do
+	ARGSTR=$1
+	shift
+
+	if [ ${ARGSTR:0:1} != "-" ]; then
+		echo "Unknown argument $ARGSTR"
+		echo "Try '$0 -h'"
+		wrappedExit 1
+	fi
+
+	for (( i=1; i<${#ARGSTR}; i++ )); do
+		ARG=${ARGSTR:$i:1}
+		case $ARG in
+			V )
+				VERBOSE=true ;;
+
+			C )
+				USE_CCACHE=true ;;
+
+			k )
+				KEEP=true ;;
+
+			E )
+				USE_WERROR=true ;;
+
+			h )
+				cat <<EOF
+Usage: $0 [-VCkETh]
+Options:
+	-C
+		Use ccache.
+	-h
+		Show this message.
+	-k
+		Keep the old build directory, default is to delete it.
+	-V
+		Run verbosely
+	-E
+		Use warnings as errors (-Werror)
+EOF
+				exit 0
+				;;
+
+			* )
+				echo "Unknown argument $ARG."
+				echo "Try '$0 -h'"
+				exit 1 ;;
+		esac
+	done
+done
+
+if [[ -z $KEEP ]]; then
+    if [[ -n $VERBOSE && -d "build" ]]; then
+        echo "Deleting existing build directory"
+    fi
+    rm -fr build
+fi
+
+mkdir -p build
 cd build
 
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
 if [[ "${MACOS_AMD64}" ]]; then
-    QT_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix qt@6)
+    QT_PATH=$(arch -x86_64 /bin/bash -c "qmake -v | sed -rn -e 's/Using Qt version [.0-9]+ in //p'")
     ICU_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix icu4c)
     OPENAL_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix openal-soft)
 else
-    QT_PATH=$(brew --prefix qt@6)
+    QT_PATH=$(qmake -v | sed -rn -e "s/Using Qt version [.0-9]+ in //p")
     ICU_PATH=$(brew --prefix icu4c)
     OPENAL_PATH=$(brew --prefix openal-soft)
 fi
 
+if [[ -n $VERBOSE ]]; then
+    echo "Using Qt path: ${QT_PATH}"
+    echo "Using ICU path: ${ICU_PATH}"
+    echo "Using OpenAL path: ${OPENAL_PATH}"
+fi
+
 declare -a CMAKE_CONF_OPTS=(
 -D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH;$OPENAL_PATH"
--D CMAKE_C_COMPILER_LAUNCHER="ccache"
--D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
 -D CMAKE_CXX_FLAGS="-stdlib=libc++"
 -D CMAKE_C_COMPILER="clang"
 -D CMAKE_CXX_COMPILER="clang++"
@@ -62,14 +125,27 @@ else
     )
 fi
 
-if [[ "${MACOS_AMD64}" ]]; then
-    arch -x86_64 cmake \
-        "${CMAKE_CONF_OPTS[@]}" \
-        "${BUILD_OPTS[@]}" \
-        ..
-else
-    cmake \
+if [[ -n $USE_CCACHE ]]; then
+    CMAKE_CONF_OPTS+=(
+        -D CMAKE_C_COMPILER_LAUNCHER="ccache"
+        -D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
+    )
+fi
+
+if [[ -n $USE_WERROR ]]; then
+    CMAKE_CONF_OPTS+=(
+        -D OPENMW_CXX_FLAGS="-Werror"
+    )
+fi
+
+if [[ -n $VERBOSE ]]; then
+    echo CMake arguments: \
         "${CMAKE_CONF_OPTS[@]}" \
         "${BUILD_OPTS[@]}" \
         ..
 fi
+
+cmake \
+    "${CMAKE_CONF_OPTS[@]}" \
+    "${BUILD_OPTS[@]}" \
+    ..
