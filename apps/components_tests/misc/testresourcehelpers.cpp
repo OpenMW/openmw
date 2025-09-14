@@ -12,6 +12,8 @@ namespace Misc::ResourceHelpers
         constexpr VFS::Path::NormalizedView sound("sound");
         constexpr VFS::Path::NormalizedView textures("textures");
         constexpr VFS::Path::NormalizedView bookart("bookart");
+        constexpr VFS::Path::ExtensionView mp3("mp3");
+        constexpr VFS::Path::ExtensionView b("b");
 
         TEST(MiscResourceHelpersCorrectSoundPath, shouldKeepWavExtensionIfExistsInVfs)
         {
@@ -29,74 +31,74 @@ namespace Misc::ResourceHelpers
 
         TEST(MiscResourceHelpersCorrectSoundPath, shouldKeepWavExtensionIfBothExistsInVfs)
         {
-            constexpr VFS::Path::NormalizedView wav("sound/foo.wav");
-            constexpr VFS::Path::NormalizedView mp3("sound/foo.mp3");
+            constexpr VFS::Path::NormalizedView wavPath("sound/foo.wav");
+            constexpr VFS::Path::NormalizedView mp3Path("sound/foo.mp3");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
-                { wav, nullptr },
-                { mp3, nullptr },
+                { wavPath, nullptr },
+                { mp3Path, nullptr },
             });
-            EXPECT_EQ(correctSoundPath(wav, *vfs), "sound/foo.wav");
+            EXPECT_EQ(correctSoundPath(wavPath, *vfs), "sound/foo.wav");
         }
 
-        TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtentionIfDoesNotExistInVfs)
+        TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtensionIfDoesNotExistInVfs)
         {
             constexpr VFS::Path::NormalizedView path("sound/foo.wav");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, "mp3"), "sound/foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, mp3), "sound/foo.mp3");
         }
 
-        TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtentionIfBothExistInVfs)
+        TEST(MiscResourceHelpersCorrectResourcePath, shouldFallbackToGivenExtensionIfBothExistInVfs)
         {
-            constexpr VFS::Path::NormalizedView wav("sound/foo.wav");
-            constexpr VFS::Path::NormalizedView mp3("sound/foo.mp3");
+            constexpr VFS::Path::NormalizedView wavPath("sound/foo.wav");
+            constexpr VFS::Path::NormalizedView mp3Path("sound/foo.mp3");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
-                { wav, nullptr },
-                { mp3, nullptr },
+                { wavPath, nullptr },
+                { mp3Path, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { sound } }, wav, *vfs, "mp3"), "sound/foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { sound } }, wavPath, *vfs, mp3), "sound/foo.mp3");
         }
 
-        TEST(MiscResourceHelpersCorrectResourcePath, shouldKeepExtentionIfExistInVfs)
+        TEST(MiscResourceHelpersCorrectResourcePath, shouldKeepExtensionIfExistInVfs)
         {
-            constexpr VFS::Path::NormalizedView wav("sound/foo.wav");
+            constexpr VFS::Path::NormalizedView wavPath("sound/foo.wav");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
-                { wav, nullptr },
+                { wavPath, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { sound } }, wav, *vfs, "mp3"), "sound/foo.wav");
+            EXPECT_EQ(correctResourcePath({ { sound } }, wavPath, *vfs, mp3), "sound/foo.wav");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldPrefixWithGivenTopDirectory)
         {
             constexpr VFS::Path::NormalizedView path("foo.mp3");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, "mp3"), "sound/foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, mp3), "sound/foo.mp3");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldChangeTopDirectoryAndKeepExtensionIfOriginalExistInVfs)
         {
             constexpr VFS::Path::NormalizedView path("bookart/foo.a");
-            constexpr VFS::Path::NormalizedView a("textures/foo.a");
+            constexpr VFS::Path::NormalizedView aPath("textures/foo.a");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
-                { a, nullptr },
+                { aPath, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { textures, bookart } }, path, *vfs, "b"), "textures/foo.a");
+            EXPECT_EQ(correctResourcePath({ { textures, bookart } }, path, *vfs, b), "textures/foo.a");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldChangeTopDirectoryAndChangeExtensionIfFallbackExistInVfs)
         {
             constexpr VFS::Path::NormalizedView path("bookart/foo.a");
-            constexpr VFS::Path::NormalizedView b("textures/foo.b");
+            constexpr VFS::Path::NormalizedView bPath("textures/foo.b");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({
-                { b, nullptr },
+                { bPath, nullptr },
             });
-            EXPECT_EQ(correctResourcePath({ { textures, bookart } }, path, *vfs, "b"), "textures/foo.b");
+            EXPECT_EQ(correctResourcePath({ { textures, bookart } }, path, *vfs, b), "textures/foo.b");
         }
 
         TEST(MiscResourceHelpersCorrectResourcePath, shouldHandlePathEqualToDirectory)
         {
             constexpr VFS::Path::NormalizedView path("sound");
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, "mp3"), "sound/sound");
+            EXPECT_EQ(correctResourcePath({ { sound } }, path, *vfs, mp3), "sound/sound");
         }
 
         struct MiscResourceHelpersCorrectResourcePathShouldRemoveExtraPrefix : TestWithParam<VFS::Path::NormalizedView>
@@ -106,7 +108,7 @@ namespace Misc::ResourceHelpers
         TEST_P(MiscResourceHelpersCorrectResourcePathShouldRemoveExtraPrefix, shouldMatchExpected)
         {
             const std::unique_ptr<const VFS::Manager> vfs = TestingOpenMW::createTestVFS({});
-            EXPECT_EQ(correctResourcePath({ { sound } }, GetParam(), *vfs, "mp3"), "sound/foo.mp3");
+            EXPECT_EQ(correctResourcePath({ { sound } }, GetParam(), *vfs, mp3), "sound/foo.mp3");
         }
 
         const std::vector<VFS::Path::NormalizedView> pathsWithPrefix = {

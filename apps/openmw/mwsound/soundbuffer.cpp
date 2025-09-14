@@ -20,6 +20,7 @@ namespace MWSound
     namespace
     {
         constexpr VFS::Path::NormalizedView soundDir("sound");
+        constexpr VFS::Path::ExtensionView mp3("mp3");
 
         struct AudioParams
         {
@@ -202,9 +203,8 @@ namespace MWSound
 
     SoundBuffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM4::Sound& sound)
     {
-        VFS::Path::Normalized path
-            = Misc::ResourceHelpers::correctResourcePath({ { soundDir } }, VFS::Path::toNormalized(sound.mSoundFile),
-                *MWBase::Environment::get().getResourceSystem()->getVFS(), "mp3");
+        VFS::Path::Normalized path = Misc::ResourceHelpers::correctResourcePath({ { soundDir } },
+            VFS::Path::toNormalized(sound.mSoundFile), *MWBase::Environment::get().getResourceSystem()->getVFS(), mp3);
         float volume = 1, min = 1, max = 255; // TODO: needs research
         SoundBuffer& sfx = mSoundBuffers.emplace_back(std::move(path), volume, min, max);
         mBufferNameMap.emplace(soundId, &sfx);
@@ -213,9 +213,8 @@ namespace MWSound
 
     SoundBuffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM4::SoundReference& sound)
     {
-        VFS::Path::Normalized path
-            = Misc::ResourceHelpers::correctResourcePath({ { soundDir } }, VFS::Path::toNormalized(sound.mSoundFile),
-                *MWBase::Environment::get().getResourceSystem()->getVFS(), "mp3");
+        VFS::Path::Normalized path = Misc::ResourceHelpers::correctResourcePath({ { soundDir } },
+            VFS::Path::toNormalized(sound.mSoundFile), *MWBase::Environment::get().getResourceSystem()->getVFS(), mp3);
         float volume = 1, min = 1, max = 255; // TODO: needs research
         // TODO: sound.mSoundId can link to another SoundReference, probably we will need to add additional lookups to
         // ESMStore.

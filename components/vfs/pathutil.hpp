@@ -107,6 +107,67 @@ namespace VFS::Path
         return std::find_if(begin, end, [](char v) { return v == extensionSeparator || v == separator; });
     }
 
+    inline constexpr bool isExtension(std::string_view value)
+    {
+        return isNormalized(value) && findSeparatorOrExtensionSeparator(value.begin(), value.end()) == value.end();
+    }
+
+    class NormalizedView;
+
+    class ExtensionView
+    {
+    public:
+        constexpr ExtensionView() noexcept = default;
+
+        constexpr explicit ExtensionView(const char* value)
+            : mValue(value)
+        {
+            if (!isExtension(mValue))
+                throw std::invalid_argument(
+                    "ExtensionView value is invalid extension: \"" + std::string(mValue) + "\"");
+        }
+
+        constexpr std::string_view value() const noexcept { return mValue; }
+
+        constexpr bool empty() const noexcept { return mValue.empty(); }
+
+        friend constexpr bool operator==(const ExtensionView& lhs, const ExtensionView& rhs) = default;
+
+        friend constexpr bool operator==(const ExtensionView& lhs, const auto& rhs) { return lhs.mValue == rhs; }
+
+#if defined(_MSC_VER) && _MSC_VER <= 1935
+        friend constexpr bool operator==(const auto& lhs, const ExtensionView& rhs)
+        {
+            return lhs == rhs.mValue;
+        }
+#endif
+
+        friend constexpr bool operator<(const ExtensionView& lhs, const ExtensionView& rhs)
+        {
+            return lhs.mValue < rhs.mValue;
+        }
+
+        friend constexpr bool operator<(const ExtensionView& lhs, const auto& rhs)
+        {
+            return lhs.mValue < rhs;
+        }
+
+        friend constexpr bool operator<(const auto& lhs, const ExtensionView& rhs)
+        {
+            return lhs < rhs.mValue;
+        }
+
+        friend std::ostream& operator<<(std::ostream& stream, const ExtensionView& value)
+        {
+            return stream << value.mValue;
+        }
+
+    private:
+        std::string_view mValue;
+
+        friend class NormalizedView;
+    };
+
     class Normalized;
 
     class NormalizedView
@@ -191,6 +252,15 @@ namespace VFS::Path
             return result;
         }
 
+        constexpr ExtensionView extension() const
+        {
+            ExtensionView result;
+            if (const std::size_t position = mValue.find_last_of(extensionSeparator);
+                position != std::string_view::npos)
+                result.mValue = mValue.substr(position + 1);
+            return result;
+        }
+
     private:
         std::string_view mValue;
     };
@@ -238,18 +308,13 @@ namespace VFS::Path
 
         operator const std::string&() const { return mValue; }
 
-        bool changeExtension(std::string_view extension)
+        bool changeExtension(ExtensionView extension)
         {
-            if (!isNormalized(extension))
-                throw std::invalid_argument("Not normalized extension: " + std::string(extension));
-            if (findSeparatorOrExtensionSeparator(extension.begin(), extension.end()) != extension.end())
-                throw std::invalid_argument("Invalid extension: " + std::string(extension));
             const auto it = findSeparatorOrExtensionSeparator(mValue.rbegin(), mValue.rend());
             if (it == mValue.rend() || *it == separator)
                 return false;
             const std::string::difference_type pos = mValue.rend() - it;
-            mValue.replace(pos, mValue.size(), extension);
-            std::transform(mValue.begin() + pos, mValue.end(), mValue.begin() + pos, normalize);
+            mValue.replace(pos, mValue.size(), extension.value());
             return true;
         }
 
@@ -340,6 +405,11 @@ namespace VFS::Path
         NormalizedView filename() const
         {
             return NormalizedView(*this).filename();
+        }
+
+        ExtensionView extension() const
+        {
+            return NormalizedView(*this).extension();
         }
 
     private:

@@ -26,7 +26,7 @@ namespace Misc
     {
         bool changeExtensionToDds(std::string& path);
         VFS::Path::Normalized correctResourcePath(std::span<const VFS::Path::NormalizedView> topLevelDirectories,
-            VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, std::string_view ext = {});
+            VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, VFS::Path::ExtensionView ext = {});
         VFS::Path::Normalized correctTexturePath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
         VFS::Path::Normalized correctIconPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
         VFS::Path::Normalized correctBookartPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);

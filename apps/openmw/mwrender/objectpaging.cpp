@@ -744,10 +744,12 @@ namespace MWRender
             if (activeGrid && type != ESM::REC_STAT && type != ESM::REC_STAT4)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
-                if (Misc::getFileExtension(model) == "nif")
+                constexpr VFS::Path::ExtensionView nif("nif");
+                if (model.extension() == nif)
                 {
                     VFS::Path::Normalized kfname = model;
-                    kfname.changeExtension("kf");
+                    constexpr VFS::Path::ExtensionView kf("kf");
+                    kfname.changeExtension(kf);
                     if (mSceneManager->getVFS()->exists(kfname))
                         continue;
                 }

@@ -19,7 +19,10 @@ namespace
     constexpr VFS::Path::NormalizedView bookart("bookart");
     constexpr VFS::Path::NormalizedView icons("icons");
     constexpr VFS::Path::NormalizedView materials("materials");
-    constexpr std::string_view dds("dds");
+    constexpr VFS::Path::ExtensionView dds("dds");
+    constexpr VFS::Path::ExtensionView kf("kf");
+    constexpr VFS::Path::ExtensionView nif("nif");
+    constexpr VFS::Path::ExtensionView mp3("mp3");
 
     bool changeExtension(std::string& path, std::string_view ext)
     {
@@ -67,7 +70,7 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 // If `ext` is not empty we first search file with extension `ext`, then if not found fallback to original extension.
 VFS::Path::Normalized Misc::ResourceHelpers::correctResourcePath(
     std::span<const VFS::Path::NormalizedView> topLevelDirectories, VFS::Path::NormalizedView resPath,
-    const VFS::Manager& vfs, std::string_view ext)
+    const VFS::Manager& vfs, VFS::Path::ExtensionView ext)
 {
     VFS::Path::Normalized correctedPath;
 
@@ -167,8 +170,8 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
         mdlname.insert(mdlname.begin(), 'x');
 
     VFS::Path::Normalized kfname(mdlname);
-    if (Misc::getFileExtension(mdlname) == "nif")
-        kfname.changeExtension("kf");
+    if (kfname.extension() == nif)
+        kfname.changeExtension(kf);
 
     if (!vfs->exists(kfname))
         return VFS::Path::Normalized(resPath);
@@ -215,16 +218,16 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
     // Note: likely should be replaced with
-    //     return correctResourcePath({ { "sound" } }, resPath, vfs, "mp3");
+    //     return correctResourcePath({ { "sound" } }, resPath, vfs, mp3);
     // but there is a slight difference in behaviour:
-    // - `correctResourcePath(..., "mp3")` first checks `.mp3`, then tries the original extension
+    // - `correctResourcePath(..., mp3)` first checks `.mp3`, then tries the original extension
     // - the implementation below first tries the original extension, then falls back to `.mp3`.
 
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
     if (!vfs.exists(resPath))
     {
         VFS::Path::Normalized sound(resPath);
-        sound.changeExtension("mp3");
+        sound.changeExtension(mp3);
         return sound;
     }
     return VFS::Path::Normalized(resPath);
