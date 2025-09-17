@@ -99,13 +99,13 @@ namespace SceneUtil
         return nullptr;
     }
 
-    unsigned int WorkQueue::getNumItems() const
+    size_t WorkQueue::getNumItems() const
     {
         std::unique_lock<std::mutex> lock(mMutex);
         return mQueue.size();
     }
 
-    unsigned int WorkQueue::getNumActiveThreads() const
+    size_t WorkQueue::getNumActiveThreads() const
     {
         return std::accumulate(
             mThreads.begin(), mThreads.end(), 0u, [](auto r, const auto& t) { return r + t->isActive(); });

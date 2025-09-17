@@ -441,7 +441,7 @@ namespace Shader
                     normalMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
                     normalMap = normalMapTex;
 
-                    int unit = texAttributes.size();
+                    int unit = static_cast<int>(texAttributes.size());
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
@@ -487,7 +487,7 @@ namespace Shader
                         osg::Texture::MAG_FILTER, diffuseMap->getFilter(osg::Texture::MAG_FILTER));
                     specularMapTex->setMaxAnisotropy(diffuseMap->getMaxAnisotropy());
 
-                    int unit = texAttributes.size();
+                    int unit = static_cast<int>(texAttributes.size());
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
                     writableStateSet->setTextureAttributeAndModes(unit, specularMapTex, osg::StateAttribute::ON);

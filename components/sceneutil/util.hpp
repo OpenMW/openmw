@@ -41,7 +41,7 @@ namespace SceneUtil
         float mDuration;
         float mOriginalDuration; // for recording that this is originally a permanent glow if it is changed to a
                                  // temporary one
-        float mStartingTime;
+        double mStartingTime;
         Resource::ResourceSystem* mResourceSystem;
         bool mColorChanged;
         bool mDone;

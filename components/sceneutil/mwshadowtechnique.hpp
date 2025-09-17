@@ -300,12 +300,12 @@ namespace SceneUtil {
         double                                  _splitPointUniformLogRatio = 0.5;
         double                                  _splitPointDeltaBias = 0.0;
 
-        float                                   _polygonOffsetFactor = 1.1;
-        float                                   _polygonOffsetUnits = 4.0;
+        float                                   _polygonOffsetFactor = 1.f;
+        float                                   _polygonOffsetUnits = 4.0f;
 
         bool                                    _useFrontFaceCulling = true;
 
-        float                                   _shadowFadeStart = 0.0;
+        float                                   _shadowFadeStart = 0.0f;
 
         unsigned int                            _worldMask = ~0u;
 

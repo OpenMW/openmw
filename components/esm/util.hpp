@@ -29,7 +29,7 @@ namespace ESM
     inline ESM::ExteriorCellLocation positionToExteriorCellLocation(
         float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)
     {
-        const float cellSize = getCellSize(worldspaceId);
+        const float cellSize = static_cast<float>(getCellSize(worldspaceId));
         return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)), worldspaceId };
     }
 

@@ -56,8 +56,8 @@ namespace DetourNavigator
 
     inline TileBounds maxCellTileBounds(const osg::Vec2i& position, int size)
     {
-        return TileBounds{ osg::Vec2f(position.x(), position.y()) * size,
-            osg::Vec2f(position.x() + 1, position.y() + 1) * size };
+        return TileBounds{ osg::Vec2f(static_cast<float>(position.x()), static_cast<float>(position.y())) * static_cast<float>(size),
+            osg::Vec2f(static_cast<float>(position.x() + 1), static_cast<float>(position.y() + 1)) * static_cast<float>(size) };
     }
 
     inline TileBounds makeObjectTileBounds(const btCollisionShape& shape, const btTransform& transform)

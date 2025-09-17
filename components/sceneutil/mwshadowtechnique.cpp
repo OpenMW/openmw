@@ -3341,7 +3341,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::setFrustumVertices(osg::ref_ptr<osg
 
 void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
 {
-    unsigned int shadowMapNumber = mDebugCameras.size();
+    size_t shadowMapNumber = mDebugCameras.size();
 
     mDebugCameras.push_back(new osg::Camera);
     mDebugCameras[shadowMapNumber]->setViewport(200 * shadowMapNumber, 0, 200, 200);

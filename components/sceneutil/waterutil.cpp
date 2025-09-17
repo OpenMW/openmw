@@ -58,7 +58,7 @@ namespace SceneUtil
         normal->push_back(osg::Vec3f(0, 0, 1));
         waterGeom->setNormalArray(normal, osg::Array::BIND_OVERALL);
 
-        waterGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, verts->size()));
+        waterGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, static_cast<GLsizei>(verts->size())));
         waterGeom->setComputeBoundingBoxCallback(new WaterBoundCallback);
         waterGeom->setCullingActive(false);
         return waterGeom;
