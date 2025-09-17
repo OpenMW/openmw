@@ -27,10 +27,22 @@
 #include "loadrace.hpp"
 
 #include <cstring>
+#include <format>
+#include <optional>
 #include <stdexcept>
 
 #include "reader.hpp"
 //#include "writer.hpp"
+
+namespace
+{
+    decltype(auto) at(auto& values, std::uint32_t index, std::string_view name, ESM4::Reader& reader)
+    {
+        if (index >= values.size())
+            reader.fail(std::format("{} index is out of range: {} >= {}", name, index, values.size()));
+        return values[index];
+    }
+}
 
 void ESM4::Race::load(ESM4::Reader& reader)
 {
@@ -44,7 +56,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
     bool isMale = false;
     int currPart = -1; // 0 = head, 1 = body, 2 = egt, 3 = hkx
-    std::uint32_t currentIndex = 0xffffffff;
+    std::optional<std::uint32_t> currentIndex;
 
     while (reader.getSubRecordHeader())
     {
@@ -293,12 +305,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     mHeadPartIdsFemale.resize(5);
                 }
 
-                currentIndex = 0xffffffff;
+                currentIndex.reset();
                 break;
             }
             case ESM::fourCC("INDX"):
             {
-                reader.get(currentIndex);
+                std::uint32_t value = 0;
+                reader.get(value);
+                currentIndex = value;
                 // FIXME: below check is rather useless
                 // if (headpart)
                 //{
@@ -315,25 +329,26 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM::fourCC("MODL"):
             {
-                if (currentIndex == 0xffffffff)
+                if (!currentIndex.has_value())
                 {
                     reader.skipSubRecordData();
                 }
                 else if (currPart == 0) // head part
                 {
                     if (isMale || isTES4)
-                        reader.getZString(mHeadParts[currentIndex].mesh);
+                        reader.getZString(at(mHeadParts, *currentIndex, "head parts", reader).mesh);
                     else
-                        reader.getZString(mHeadPartsFemale[currentIndex].mesh); // TODO: check TES4
+                        // TODO: check TES4
+                        reader.getZString(at(mHeadPartsFemale, *currentIndex, "head parts female", reader).mesh);
 
                     // TES5 keeps head part formid in mHeadPartIdsMale and mHeadPartIdsFemale
                 }
                 else if (currPart == 1) // body part
                 {
                     if (isMale)
-                        reader.getZString(mBodyPartsMale[currentIndex].mesh);
+                        reader.getZString(at(mBodyPartsMale, *currentIndex, "body parts male", reader).mesh);
                     else
-                        reader.getZString(mBodyPartsFemale[currentIndex].mesh);
+                        reader.getZString(at(mBodyPartsFemale, *currentIndex, "body parts female", reader).mesh);
 
                     // TES5 seems to have no body parts at all, instead keep EGT models
                 }
@@ -355,23 +370,24 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break; // always 0x0000?
             case ESM::fourCC("ICON"):
             {
-                if (currentIndex == 0xffffffff)
+                if (!currentIndex.has_value())
                 {
                     reader.skipSubRecordData();
                 }
                 else if (currPart == 0) // head part
                 {
                     if (isMale || isTES4)
-                        reader.getZString(mHeadParts[currentIndex].texture);
+                        reader.getZString(at(mHeadParts, *currentIndex, "head parts", reader).texture);
                     else
-                        reader.getZString(mHeadPartsFemale[currentIndex].texture); // TODO: check TES4
+                        // TODO: check TES4
+                        reader.getZString(at(mHeadPartsFemale, *currentIndex, "head parts female", reader).texture);
                 }
                 else if (currPart == 1) // body part
                 {
                     if (isMale)
-                        reader.getZString(mBodyPartsMale[currentIndex].texture);
+                        reader.getZString(at(mBodyPartsMale, *currentIndex, "body parts male", reader).texture);
                     else
-                        reader.getZString(mBodyPartsFemale[currentIndex].texture);
+                        reader.getZString(at(mBodyPartsFemale, *currentIndex, "body parts female", reader).texture);
                 }
                 else
                     reader.skipSubRecordData(); // FIXME TES5
@@ -402,7 +418,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 if (isTES4)
                     currentIndex = 4; // FIXME: argonian tail mesh without preceeding INDX
                 else
-                    currentIndex = 0xffffffff;
+                    currentIndex.reset();
 
                 break;
             }
@@ -589,20 +605,20 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 ESM::FormId formId;
                 reader.getFormId(formId);
 
-                if (currentIndex != 0xffffffff)
+                if (currentIndex.has_value())
                 {
                     // FIXME: no order? head, mouth, eyes, brow, hair
                     if (isMale)
                     {
                         if (currentIndex >= mHeadPartIdsMale.size())
-                            mHeadPartIdsMale.resize(currentIndex + 1);
-                        mHeadPartIdsMale[currentIndex] = formId;
+                            mHeadPartIdsMale.resize(*currentIndex + 1);
+                        mHeadPartIdsMale[*currentIndex] = formId;
                     }
                     else
                     {
                         if (currentIndex >= mHeadPartIdsFemale.size())
-                            mHeadPartIdsFemale.resize(currentIndex + 1);
-                        mHeadPartIdsFemale[currentIndex] = formId;
+                            mHeadPartIdsFemale.resize(*currentIndex + 1);
+                        mHeadPartIdsFemale[*currentIndex] = formId;
                     }
                 }
 
