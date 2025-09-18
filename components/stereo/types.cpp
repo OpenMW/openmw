@@ -60,15 +60,18 @@ namespace Stereo
             // that view matrix will already convert points to a camera space
             // with opengl conventions. So we need to convert offsets to opengl
             // conventions.
-            float y = position.y();
-            float z = position.z();
-            position.y() = z;
-            position.z() = -y;
-
-            y = orientation.y();
-            z = orientation.z();
-            orientation.y() = z;
-            orientation.z() = -y;
+            {
+                float y = position.y();
+                float z = position.z();
+                position.y() = z;
+                position.z() = -y;
+            }
+            {
+                double y = orientation.y();
+                double z = orientation.z();
+                orientation.y() = z;
+                orientation.z() = -y;
+            }
 
             osg::Matrix viewMatrix;
             viewMatrix.setTrans(-position);

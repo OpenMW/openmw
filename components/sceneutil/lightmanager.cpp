@@ -314,7 +314,7 @@ namespace SceneUtil
 
         bool getModeUsage(ModeUsage& usage) const override
         {
-            usage.usesMode(GL_LIGHT0 + mIndex);
+            usage.usesMode(static_cast<GLMode>(GL_LIGHT0 + mIndex));
             return true;
         }
 
@@ -325,7 +325,7 @@ namespace SceneUtil
 
         void apply(osg::State& state) const override
         {
-            int lightNum = GL_LIGHT0 + mIndex;
+            GLenum lightNum = static_cast<GLenum>(GL_LIGHT0 + mIndex);
             glLightfv(lightNum, GL_AMBIENT, mNullptr.ptr());
             glLightfv(lightNum, GL_DIFFUSE, mNullptr.ptr());
             glLightfv(lightNum, GL_SPECULAR, mNullptr.ptr());
@@ -365,7 +365,7 @@ namespace SceneUtil
         bool getModeUsage(ModeUsage& usage) const override
         {
             for (size_t i = 0; i < mLights.size(); ++i)
-                usage.usesMode(GL_LIGHT0 + static_cast<int>(mIndex) + i);
+                usage.usesMode(static_cast<GLMode>(GL_LIGHT0 + mIndex + i));
             return true;
         }
 
@@ -424,7 +424,7 @@ namespace SceneUtil
     {
         LightManager* mLightManager;
 
-        virtual ~StateSetGenerator() {}
+        virtual ~StateSetGenerator() = default;
 
         virtual osg::ref_ptr<osg::StateSet> generate(const LightManager::LightList& lightList, size_t frameNum) = 0;
 
@@ -451,7 +451,8 @@ namespace SceneUtil
                 new FFPLightStateAttribute(mLightManager->getStartLight(), std::move(lights)), osg::StateAttribute::ON);
 
             for (size_t i = 0; i < lightList.size(); ++i)
-                stateset->setMode(GL_LIGHT0 + mLightManager->getStartLight() + static_cast<int>(i), osg::StateAttribute::ON);
+                stateset->setMode(
+                    GL_LIGHT0 + mLightManager->getStartLight() + static_cast<int>(i), osg::StateAttribute::ON);
 
             // need to push some dummy attributes to ensure proper state tracking
             // lights need to reset to their default when the StateSet is popped
@@ -774,7 +775,8 @@ namespace SceneUtil
         int stride = -1;
 
         ext->glGetActiveUniformBlockiv(handle, 0, GL_UNIFORM_BLOCK_DATA_SIZE, &totalBlockSize);
-        ext->glGetActiveUniformsiv(handle, static_cast<GLsizei>(index.size()), index.data(), GL_UNIFORM_ARRAY_STRIDE, &stride);
+        ext->glGetActiveUniformsiv(
+            handle, static_cast<GLsizei>(index.size()), index.data(), GL_UNIFORM_ARRAY_STRIDE, &stride);
 
         std::array<const char*, 3> names = {
             "LightBuffer[0].packedColors",
@@ -785,7 +787,8 @@ namespace SceneUtil
         std::vector<int> offsets(names.size());
 
         ext->glGetUniformIndices(handle, static_cast<GLsizei>(names.size()), names.data(), indices.data());
-        ext->glGetActiveUniformsiv(handle, static_cast<GLsizei>(indices.size()), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
+        ext->glGetActiveUniformsiv(
+            handle, static_cast<GLsizei>(indices.size()), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
 
         mTemplate->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
     }
@@ -1291,7 +1294,7 @@ namespace SceneUtil
             const osg::Transform* transform = node->asTransform();
             if (transform)
             {
-                for (size_t i = 0; i < transform->getNumChildren(); ++i)
+                for (unsigned int i = 0; i < transform->getNumChildren(); ++i)
                     nodeBound.expandBy(transform->getChild(i)->getBound());
             }
             else

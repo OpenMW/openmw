@@ -86,8 +86,8 @@ namespace Resource
             shape->mCollisionBox.mExtents[0] = static_cast<float>(aabbMax[0] - aabbMin[0]) / 2.0f;
             shape->mCollisionBox.mExtents[1] = static_cast<float>(aabbMax[1] - aabbMin[1]) / 2.0f;
             shape->mCollisionBox.mExtents[2] = static_cast<float>(aabbMax[2] - aabbMin[2]) / 2.0f;
-            shape->mCollisionBox.mCenter = osg::Vec3f(
-                static_cast<float>(aabbMax[0] + aabbMin[0]) / 2.0f, static_cast<float>(aabbMax[1] + aabbMin[1]) / 2.0f, static_cast<float>(aabbMax[2] + aabbMin[2]) / 2.0f);
+            shape->mCollisionBox.mCenter = osg::Vec3f(static_cast<float>(aabbMax[0] + aabbMin[0]) / 2.0f,
+                static_cast<float>(aabbMax[1] + aabbMin[1]) / 2.0f, static_cast<float>(aabbMax[2] + aabbMin[2]) / 2.0f);
             shape->mCollisionShape.reset(triangleMeshShape.release());
 
             return shape;

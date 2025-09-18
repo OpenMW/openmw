@@ -29,12 +29,12 @@ namespace Fx
                 int scaledHeight = height;
 
                 if (mWidthRatio)
-                    scaledWidth = width * mWidthRatio.value();
+                    scaledWidth = static_cast<int>(width * mWidthRatio.value());
                 else if (mWidth)
                     scaledWidth = mWidth.value();
 
                 if (mHeightRatio > 0.f)
-                    scaledHeight = height * mHeightRatio.value();
+                    scaledHeight = static_cast<int>(height * mHeightRatio.value());
                 else if (mHeight)
                     scaledHeight = mHeight.value();
 
@@ -190,7 +190,7 @@ namespace Fx
                         if (arg.isArray())
                         {
                             for (size_t i = 0; i < arg.getArray().size(); ++i)
-                                uniform->setElement(i, arg.getArray()[i]);
+                                uniform->setElement(static_cast<unsigned int>(i), arg.getArray()[i]);
                             uniform->dirty();
                         }
                         else

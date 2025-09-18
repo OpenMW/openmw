@@ -39,7 +39,7 @@ namespace SDLUtil
         _setWindowScale();
     }
 
-    InputWrapper::~InputWrapper() {}
+    InputWrapper::~InputWrapper() = default;
 
     void InputWrapper::_setWindowScale()
     {
@@ -47,8 +47,8 @@ namespace SDLUtil
         SDL_GetWindowSize(mSDLWindow, &w, &h);
         int dw, dh;
         SDL_GL_GetDrawableSize(mSDLWindow, &dw, &dh);
-        mScaleX = dw / w;
-        mScaleY = dh / h;
+        mScaleX = static_cast<Uint16>(dw / w);
+        mScaleY = static_cast<Uint16>(dh / h);
     }
 
     void InputWrapper::capture(bool windowEventsOnly)
@@ -320,8 +320,8 @@ namespace SDLUtil
     {
         SDL_WarpMouseInWindow(mSDLWindow, x, y);
         mWarpCompensate = true;
-        mWarpX = x;
-        mWarpY = y;
+        mWarpX = static_cast<Uint16>(x);
+        mWarpY = static_cast<Uint16>(y);
     }
 
     /// \brief Locks the pointer to the window

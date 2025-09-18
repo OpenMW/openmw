@@ -3344,7 +3344,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     size_t shadowMapNumber = mDebugCameras.size();
 
     mDebugCameras.push_back(new osg::Camera);
-    mDebugCameras[shadowMapNumber]->setViewport(200 * shadowMapNumber, 0, 200, 200);
+    mDebugCameras[shadowMapNumber]->setViewport(static_cast<int>(200 * shadowMapNumber), 0, 200, 200);
     mDebugCameras[shadowMapNumber]->setRenderOrder(osg::Camera::POST_RENDER);
     mDebugCameras[shadowMapNumber]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
     mDebugCameras[shadowMapNumber]->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);

@@ -145,7 +145,8 @@ namespace ESM
                 effects[i] = MagicEffect::Effects::ResistMagicka;
             for (short i = MagicEffect::Effects::AbsorbAttribute; i <= MagicEffect::Effects::AbsorbSkill; ++i)
                 effects[i] = MagicEffect::Effects::ResistMagicka;
-            for (short i = MagicEffect::Effects::WeaknessToFire; i <= MagicEffect::Effects::WeaknessToNormalWeapons; ++i)
+            for (short i = MagicEffect::Effects::WeaknessToFire; i <= MagicEffect::Effects::WeaknessToNormalWeapons;
+                 ++i)
                 effects[i] = MagicEffect::Effects::ResistMagicka;
 
             effects[MagicEffect::Effects::Burden] = MagicEffect::Effects::ResistMagicka;
@@ -541,7 +542,7 @@ namespace ESM
     {
         std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
         for (size_t i = 0; i < strings.size(); i++)
-            map[strings[i]] = i;
+            map[strings[i]] = static_cast<int>(i);
 
         return map;
     }

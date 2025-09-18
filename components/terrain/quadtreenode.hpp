@@ -44,7 +44,7 @@ namespace Terrain
 
         inline QuadTreeNode* getParent() { return mParent; }
         inline QuadTreeNode* getChild(unsigned int i) { return static_cast<QuadTreeNode*>(Group::getChild(i)); }
-        inline unsigned int getNumChildren() const override { return _children.size(); }
+        inline unsigned int getNumChildren() const override { return static_cast<unsigned int>(_children.size()); }
 
         // osg::Group::addChild() does a lot of unrelated stuff, but we just really want to add a child node.
         void addChildNode(QuadTreeNode* child)

@@ -207,7 +207,7 @@ namespace Resource
         /// @warning It is unsafe to call this method while the draw thread is using textures! call
         /// Viewer::stopThreading first.
         void setFilterSettings(
-            const std::string& magfilter, const std::string& minfilter, const std::string& mipmap, int maxAnisotropy);
+            const std::string& magfilter, const std::string& minfilter, const std::string& mipmap, float maxAnisotropy);
 
         /// Apply filter settings to the given texture. Note, when loading an object through this scene manager (i.e.
         /// calling getTemplate or createInstance) the filter settings are applied automatically. This method is
@@ -263,7 +263,7 @@ namespace Resource
 
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;
-        int mMaxAnisotropy;
+        float mMaxAnisotropy;
         bool mUnRefImageDataAfterApply;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;

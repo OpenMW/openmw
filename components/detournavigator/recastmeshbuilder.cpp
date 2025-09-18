@@ -122,10 +122,10 @@ namespace DetourNavigator
             triangles.emplace_back(makeRecastMeshTriangle(vertices, AreaType_ground));
         });
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
-        const osg::Vec2f aabbShift
-            = (osg::Vec2f(aabbMax.x(), aabbMax.y()) - osg::Vec2f(aabbMin.x(), aabbMin.y())) * 0.5;
+        const btVector3 aabbShift = (aabbMax - aabbMin) * 0.5;
         const osg::Vec2f tileShift = osg::Vec2f(heightfield.mMinX, heightfield.mMinY) * scale;
-        const osg::Vec2f localShift = aabbShift + tileShift;
+        const osg::Vec2f localShift
+            = osg::Vec2f(static_cast<float>(aabbShift.x()), static_cast<float>(aabbShift.y())) + tileShift;
         const float cellSize = static_cast<float>(heightfield.mCellSize);
         const osg::Vec3f cellShift(heightfield.mCellPosition.x() * cellSize, heightfield.mCellPosition.y() * cellSize,
             (heightfield.mMinHeight + heightfield.mMaxHeight) * 0.5f);
@@ -238,7 +238,8 @@ namespace DetourNavigator
         const float stepSize = getHeightfieldScale(cellSize, size);
         const int halfCellSize = cellSize / 2;
         const auto local = [&](float v, float offset) { return (v - offset + halfCellSize) / stepSize; };
-        const auto index = [&](float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, size); };
+        const auto index
+            = [&](float v, int add) { return std::clamp<int>(static_cast<int>(v) + add, 0, static_cast<int>(size)); };
         const std::size_t minX = index(std::round(local(intersection->mMin.x(), shift.x())), -1);
         const std::size_t minY = index(std::round(local(intersection->mMin.y(), shift.y())), -1);
         const std::size_t maxX = index(std::round(local(intersection->mMax.x(), shift.x())), 1);

@@ -13,7 +13,7 @@
 static osg::Vec3 sphereCoordToCartesian(float theta, float phi, float r)
 {
     osg::Vec3 returnVec = osg::Vec3(0.0, 0.0, 0.0);
-    float phiToHorizontal = osg::PI_2 - phi;
+    float phiToHorizontal = osg::PI_2f - phi;
     returnVec.x() = std::cos(theta);
     returnVec.y() = std::sin(theta);
     returnVec.z() = std::sin(phiToHorizontal);
@@ -36,9 +36,9 @@ static void generateWireCube(osg::Geometry& geom, float dim)
 
     for (int i = 0; i < 4; i++)
     {
-        osg::Vec3 vert1 = osg::Vec3(indexPos[i].x() - 0.5, indexPos[i].y() - 0.5, 0.5);
+        osg::Vec3 vert1 = osg::Vec3(indexPos[i].x() - 0.5f, indexPos[i].y() - 0.5f, 0.5f);
         int next = (i + 1) % 4;
-        osg::Vec3 vert2 = osg::Vec3(indexPos[next].x() - 0.5, indexPos[next].y() - 0.5, 0.5);
+        osg::Vec3 vert2 = osg::Vec3(indexPos[next].x() - 0.5f, indexPos[next].y() - 0.5f, 0.5f);
 
         vertices->push_back(vert1 * dim);
         vertices->push_back(vert2 * dim);
@@ -59,7 +59,7 @@ static void generateWireCube(osg::Geometry& geom, float dim)
 
     geom.setVertexArray(vertices);
     geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
-    geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+    geom.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<GLsizei>(vertices->size())));
 }
 
 static void generateCube(osg::Geometry& geom, float dim)
@@ -68,14 +68,13 @@ static void generateCube(osg::Geometry& geom, float dim)
     osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
     osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
 
-    for (int iFace = 0; iFace < 6; iFace++)
+    for (GLushort iFace = 0; iFace < 6; iFace++)
     {
         osg::Vec3f normale(0., 0., 0.);
         osg::Vec3f u(0., 0., 0.);
         osg::Vec3f v(0., 0., 0.);
-        int axis = iFace / 2;
-        int dir = iFace % 2 == 0 ? -1 : 1;
-        float floatDir = dir;
+        GLushort axis = iFace / 2;
+        float floatDir = iFace % 2 == 0 ? -1.f : 1.f;
         normale[axis] = floatDir;
         u[(axis + 1) % 3] = 1.0;
         v[(axis + 2) % 3] = 1.0;
@@ -85,20 +84,20 @@ static void generateCube(osg::Geometry& geom, float dim)
             float iu = iPoint % 2 == 1
                 ? floatDir
                 : -floatDir; // This is to get the right triangle orientation when the normal changes*
-            float iv = iPoint / 2 == 1 ? 1.0 : -1.0;
+            float iv = iPoint / 2 == 1 ? 1.f : -1.f;
             osg::Vec3f point = (u * iu) + (v * iv);
             point = (point + normale);
             point = point * (dim * 0.5f);
             vertices->push_back(point);
             normals->push_back(normale);
         }
-        int startVertex(iFace * 4);
-        int newFace1[] = { startVertex, startVertex + 1, startVertex + 2 };
+        GLushort startVertex(iFace * 4);
+        GLushort newFace1[] = { startVertex, startVertex + 1u, startVertex + 2u };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace1[i]);
         }
-        int newFace2[] = { startVertex + 2, startVertex + 1, startVertex + 3 };
+        GLushort newFace2[] = { startVertex + 2u, startVertex + 1u, startVertex + 3u };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace2[i]);
@@ -123,25 +122,25 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     // top disk
     for (int i = 0; i < subdiv; i++)
     {
-        float theta = (float(i) / float(subdiv)) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
+        float theta = (float(i) / float(subdiv)) * osg::PIf * 2.f;
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.f);
         pos *= radius;
-        pos.z() = height / 2.;
+        pos.z() = height / 2.f;
         vertices->push_back(pos);
         normals->push_back(topNormal);
         iVertex += 1;
     }
-    auto centerTop = iVertex;
+    auto centerTop = static_cast<GLushort>(iVertex);
     // centerTop
     {
-        vertices->push_back(osg::Vec3(0., 0., height / 2.));
+        vertices->push_back(osg::Vec3(0.f, 0.f, height / 2.f));
         normals->push_back(topNormal);
         iVertex += 1;
     }
-    auto centerBot = iVertex;
+    auto centerBot = static_cast<GLushort>(iVertex);
     // centerBot
     {
-        vertices->push_back(osg::Vec3(0., 0., -height / 2));
+        vertices->push_back(osg::Vec3(0.f, 0.f, -height / 2));
         normals->push_back(-topNormal);
         iVertex += 1;
     }
@@ -149,10 +148,10 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     auto beginBot = iVertex;
     for (int i = 0; i < subdiv; i++)
     {
-        float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
+        float theta = float(i) / float(subdiv) * osg::PIf * 2.f;
+        osg::Vec3 pos = sphereCoordToCartesian(theta, osg::PI_2f, 1.f);
         pos *= radius;
-        pos.z() = -height / 2.;
+        pos.z() = -height / 2.f;
         vertices->push_back(pos);
         normals->push_back(-topNormal);
         iVertex += 1;
@@ -161,13 +160,13 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     int beginSide = iVertex;
     for (int i = 0; i < subdiv; i++)
     {
-        float theta = float(i) / float(subdiv) * osg::PI * 2.;
-        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2f, 1.);
+        float theta = float(i) / float(subdiv) * osg::PIf * 2.f;
+        osg::Vec3 normal = sphereCoordToCartesian(theta, osg::PI_2f, 1.f);
         auto posTop = normal;
         posTop *= radius;
         auto posBot = posTop;
-        posTop.z() = height / 2.;
-        posBot.z() = -height / 2.;
+        posTop.z() = height / 2.f;
+        posBot.z() = -height / 2.f;
         vertices->push_back(posTop);
         normals->push_back(normal);
         iVertex += 1;
@@ -180,10 +179,10 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         auto nextVert = (i + 1) % subdiv;
-        auto v1 = (beginSide + 2 * i);
-        auto v2 = (beginSide + 2 * i + 1);
-        auto v3 = (beginSide + 2 * nextVert);
-        auto v4 = (beginSide + 2 * nextVert + 1);
+        auto v1 = static_cast<GLushort>(beginSide + 2 * i);
+        auto v2 = static_cast<GLushort>(beginSide + 2 * i + 1);
+        auto v3 = static_cast<GLushort>(beginSide + 2 * nextVert);
+        auto v4 = static_cast<GLushort>(beginSide + 2 * nextVert + 1);
         indices->push_back(v1);
         indices->push_back(v2);
         indices->push_back(v4);
@@ -195,11 +194,11 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     for (int i = 0; i < subdiv; i++)
     {
         auto nextVert = (i + 1) % subdiv;
-        auto top1 = (beginTop + i);
-        auto top2 = (beginTop + nextVert);
+        auto top1 = static_cast<GLushort>(beginTop + i);
+        auto top2 = static_cast<GLushort>(beginTop + nextVert);
 
-        auto bot1 = (beginBot + i);
-        auto bot2 = (beginBot + nextVert);
+        auto bot1 = static_cast<GLushort>(beginBot + i);
+        auto bot2 = static_cast<GLushort>(beginBot + nextVert);
 
         indices->push_back(top2);
         indices->push_back(centerTop);
@@ -239,7 +238,7 @@ namespace Debug
         lines.setVertexArray(vertices);
         lines.setNormalArray(color, osg::Array::BIND_PER_VERTEX);
 
-        lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+        lines.addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, static_cast<GLsizei>(vertices->size())));
     }
 
     DebugCustomDraw::DebugCustomDraw()
@@ -395,5 +394,5 @@ void Debug::DebugDrawer::addLine(const osg::Vec3& start, const osg::Vec3& end, c
     colors->push_back(color);
     colors->dirty();
 
-    primitive->setCount(vertices->size());
+    primitive->setCount(static_cast<GLsizei>(vertices->size()));
 }

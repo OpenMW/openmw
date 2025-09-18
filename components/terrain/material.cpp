@@ -24,17 +24,17 @@ namespace
         static const osg::ref_ptr<osg::TexMat>& value(const int blendmapScale)
         {
             static BlendmapTexMat instance;
-            return instance.get(blendmapScale);
+            return instance.get(static_cast<float>(blendmapScale));
         }
 
-        const osg::ref_ptr<osg::TexMat>& get(const int blendmapScale)
+        const osg::ref_ptr<osg::TexMat>& get(const float blendmapScale)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             auto texMat = mTexMatMap.find(blendmapScale);
             if (texMat == mTexMatMap.end())
             {
                 osg::Matrixf matrix;
-                float scale = (blendmapScale / (static_cast<float>(blendmapScale) + 1.f));
+                float scale = (blendmapScale / (blendmapScale + 1.f));
                 matrix.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
                 matrix.preMultScale(osg::Vec3f(scale, scale, 1.f));
                 matrix.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
@@ -43,8 +43,7 @@ namespace
                 // blendmap, apparently.
                 matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, 1.0f / blendmapScale / 4.0f, 0.f));
 
-                texMat = mTexMatMap.insert(std::make_pair(static_cast<float>(blendmapScale), new osg::TexMat(matrix)))
-                             .first;
+                texMat = mTexMatMap.emplace(blendmapScale, new osg::TexMat(matrix)).first;
             }
             return texMat->second;
         }

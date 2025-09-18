@@ -84,7 +84,7 @@ namespace ESM
                 // The exact value of mDuration only matters for repeating packages.
                 // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should
                 // fix old saves.
-                mData.mDuration = std::max<float>(mRemainingDuration > 0, mRemainingDuration);
+                mData.mDuration = static_cast<int16_t>(std::max<float>(mRemainingDuration > 0, mRemainingDuration));
             }
         }
 
@@ -121,7 +121,7 @@ namespace ESM
                 // The exact value of mDuration only matters for repeating packages.
                 // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should
                 // fix old saves.
-                mData.mDuration = std::max<float>(mRemainingDuration > 0, mRemainingDuration);
+                mData.mDuration = static_cast<int16_t>(std::max<float>(mRemainingDuration > 0, mRemainingDuration));
             }
         }
 

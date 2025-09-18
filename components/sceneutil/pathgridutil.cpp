@@ -52,14 +52,17 @@ namespace SceneUtil
             assert(edgeIndexCount < std::numeric_limits<unsigned int>::max());
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(static_cast<unsigned int>(vertexCount));
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(static_cast<unsigned int>(vertexCount));
-            osg::ref_ptr<PType> pointIndices = new PType(osg::PrimitiveSet::TRIANGLES, static_cast<unsigned int>(pointIndexCount));
-            osg::ref_ptr<LType> lineIndices = new LType(osg::PrimitiveSet::LINES, static_cast<unsigned int>(edgeIndexCount));
+            osg::ref_ptr<PType> pointIndices
+                = new PType(osg::PrimitiveSet::TRIANGLES, static_cast<unsigned int>(pointIndexCount));
+            osg::ref_ptr<LType> lineIndices
+                = new LType(osg::PrimitiveSet::LINES, static_cast<unsigned int>(edgeIndexCount));
 
             // Add each point/node
             for (size_t pointIndex = 0; pointIndex < pathgrid.mPoints.size(); ++pointIndex)
             {
                 const ESM::Pathgrid::Point& point = pathgrid.mPoints[pointIndex];
-                osg::Vec3f position = osg::Vec3f(static_cast<float>(point.mX), static_cast<float>(point.mY), static_cast<float>(point.mZ));
+                osg::Vec3f position = osg::Vec3f(
+                    static_cast<float>(point.mX), static_cast<float>(point.mY), static_cast<float>(point.mZ));
 
                 size_t vertexOffset = pointIndex * DiamondTotalVertexCount;
                 size_t indexOffset = pointIndex * DiamondIndexCount;
@@ -73,7 +76,8 @@ namespace SceneUtil
 
                 for (unsigned short i = 0; i < DiamondIndexCount; ++i)
                 {
-                    pointIndices->setElement(static_cast<unsigned int>(indexOffset + i), static_cast<unsigned int>(vertexOffset + DiamondIndices[i]));
+                    pointIndices->setElement(static_cast<unsigned int>(indexOffset + i),
+                        static_cast<unsigned int>(vertexOffset + DiamondIndices[i]));
                 }
 
                 // Connectors
@@ -96,8 +100,10 @@ namespace SceneUtil
                 const ESM::Pathgrid::Point& from = pathgrid.mPoints[edge.mV0];
                 const ESM::Pathgrid::Point& to = pathgrid.mPoints[edge.mV1];
 
-                osg::Vec3f fromPos = osg::Vec3f(static_cast<float>(from.mX), static_cast<float>(from.mY), static_cast<float>(from.mZ));
-                osg::Vec3f toPos = osg::Vec3f(static_cast<float>(to.mX), static_cast<float>(to.mY), static_cast<float>(to.mZ));
+                osg::Vec3f fromPos
+                    = osg::Vec3f(static_cast<float>(from.mX), static_cast<float>(from.mY), static_cast<float>(from.mZ));
+                osg::Vec3f toPos
+                    = osg::Vec3f(static_cast<float>(to.mX), static_cast<float>(to.mY), static_cast<float>(to.mZ));
                 osg::Vec3f dir = toPos - fromPos;
                 dir.normalize();
 
@@ -153,7 +159,9 @@ namespace SceneUtil
             for (size_t it = 0; it < selected.size(); ++it)
             {
                 const ESM::Pathgrid::Point& point = pathgrid.mPoints[selected[it]];
-                osg::Vec3f position = osg::Vec3f(static_cast<float>(point.mX), static_cast<float>(point.mY), static_cast<float>(point.mZ)) + wireOffset;
+                osg::Vec3f position = osg::Vec3f(static_cast<float>(point.mX), static_cast<float>(point.mY),
+                                          static_cast<float>(point.mZ))
+                    + wireOffset;
 
                 size_t vertexOffset = it * DiamondVertexCount;
                 size_t indexOffset = it * DiamondWireframeIndexCount;
@@ -171,7 +179,8 @@ namespace SceneUtil
 
                 for (unsigned short i = 0; i < DiamondWireframeIndexCount; ++i)
                 {
-                    indices->setElement(static_cast<unsigned int>(indexOffset + i), static_cast<unsigned int>(vertexOffset + DiamondWireframeIndices[i]));
+                    indices->setElement(static_cast<unsigned int>(indexOffset + i),
+                        static_cast<unsigned int>(vertexOffset + DiamondWireframeIndices[i]));
                 }
             }
 
