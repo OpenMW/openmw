@@ -600,7 +600,7 @@ namespace Terrain
         if (m->getViewDistance())
             m->setMaxLodLevel(
                 DefaultLodCallback::convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance(),
-                    mMinSize, ESM::getCellSize(mWorldspace), mLodFactor));
+                    mMinSize, mLodFactor, ESM::getCellSize(mWorldspace)));
     }
 
     void QuadTreeWorld::rebuildViews()
