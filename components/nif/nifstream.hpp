@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <components/files/istreamptr.hpp>
+#include <components/files/utils.hpp>
 #include <components/misc/endianness.hpp>
 #include <components/misc/float16.hpp>
 
@@ -78,6 +79,7 @@ namespace Nif
         Files::IStreamPtr mStream;
         const ToUTF8::StatelessUtf8Encoder* mEncoder;
         std::string mBuffer;
+        std::size_t mStreamSize;
 
     public:
         explicit NIFStream(
@@ -85,6 +87,7 @@ namespace Nif
             : mReader(reader)
             , mStream(std::move(stream))
             , mEncoder(encoder)
+            , mStreamSize(static_cast<std::size_t>(Files::getStreamSizeLeft(*mStream)))
         {
         }
 
@@ -129,6 +132,9 @@ namespace Nif
         {
             if (size == 0)
                 return;
+
+            checkStreamSize(size * sizeof(T));
+
             vec.resize(size);
             read(vec.data(), size);
         }
@@ -159,6 +165,9 @@ namespace Nif
 
         /// Read a sequence of null-terminated strings
         std::string getStringPalette();
+
+    private:
+        void checkStreamSize(std::size_t size);
     };
 
     template <>

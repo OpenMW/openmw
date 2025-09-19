@@ -57,6 +57,7 @@ namespace Nif
 
     std::string NIFStream::getSizedString(size_t length)
     {
+        checkStreamSize(length);
         std::string str(length, '\0');
         mStream->read(str.data(), length);
         if (mStream->fail())
@@ -90,6 +91,7 @@ namespace Nif
     std::string NIFStream::getStringPalette()
     {
         size_t size = get<uint32_t>();
+        checkStreamSize(size);
         std::string str(size, '\0');
         mStream->read(str.data(), size);
         if (mStream->fail())
@@ -235,6 +237,7 @@ namespace Nif
     {
         if (getVersion() < generateVersion(4, 1, 0, 0))
         {
+            checkStreamSize(size * sizeof(int32_t));
             std::vector<int32_t> buf(size);
             read(buf.data(), size);
             for (size_t i = 0; i < size; ++i)
@@ -242,6 +245,7 @@ namespace Nif
         }
         else
         {
+            checkStreamSize(size * sizeof(int8_t));
             std::vector<int8_t> buf(size);
             read(buf.data(), size);
             for (size_t i = 0; i < size; ++i)
@@ -264,4 +268,9 @@ namespace Nif
         }
     }
 
+    void NIFStream::checkStreamSize(std::size_t size)
+    {
+        if (size > mStreamSize)
+            throw std::runtime_error(std::format("Trying to read more than stream size: {} max={}", size, mStreamSize));
+    }
 }
