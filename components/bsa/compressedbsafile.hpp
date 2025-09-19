@@ -103,6 +103,7 @@ namespace Bsa
         {
             std::uint32_t mCount;
             std::int64_t mOffset;
+            std::string mName;
             std::map<std::uint64_t, FileRecord> mFiles;
         };
 

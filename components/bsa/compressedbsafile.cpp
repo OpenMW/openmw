@@ -175,19 +175,25 @@ namespace Bsa
         for (auto& [folder, filelist] : folders)
         {
             std::map<std::uint64_t, FileRecord> fileMap;
-            for (const auto& file : filelist)
+
+            for (auto& file : filelist)
                 fileMap[file.mHash] = std::move(file);
-            auto& folderMap = mFolders[folder.mHash];
-            folderMap = FolderRecord{ folder.mCount, folder.mOffset, std::move(fileMap) };
-            for (auto& [hash, fileRec] : folderMap.mFiles)
+
+            mFolders[folder.mHash] = FolderRecord{ folder.mCount, folder.mOffset, folder.mName, std::move(fileMap) };
+        }
+
+        for (auto& [folderHash, folderRecord] : mFolders)
+        {
+            for (auto& [fileHash, fileRecord] : folderRecord.mFiles)
             {
                 FileStruct fileStruct{};
-                fileStruct.mFileSize = fileRec.mSize & (~FileSizeFlag_Compression);
-                fileStruct.mOffset = fileRec.mOffset;
+                fileStruct.mFileSize = fileRecord.mSize & (~FileSizeFlag_Compression);
+                fileStruct.mOffset = fileRecord.mOffset;
                 fileStruct.mNameOffset = 0;
-                fileStruct.mNameSize = fileRec.mName.empty() ? 0 : static_cast<uint32_t>(fileRec.mName.size() - 1);
-                fileStruct.mNamesBuffer = &fileRec.mName;
-                mFiles.emplace_back(fileStruct);
+                fileStruct.mNameSize
+                    = fileRecord.mName.empty() ? 0 : static_cast<uint32_t>(fileRecord.mName.size() - 1);
+                fileStruct.mNamesBuffer = &fileRecord.mName;
+                mFiles.push_back(fileStruct);
             }
         }
 
