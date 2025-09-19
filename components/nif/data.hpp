@@ -169,8 +169,11 @@ namespace Nif
     {
         struct Mipmap
         {
-            uint32_t mWidth, mHeight;
+            uint32_t mWidth;
+            uint32_t mHeight;
             uint32_t mOffset;
+
+            void read(NIFStream* nif);
         };
 
         NiPixelFormat mPixelFormat;
@@ -218,6 +221,8 @@ namespace Nif
         {
             uint16_t mFlags;
             uint16_t mType;
+
+            void read(NIFStream* nif);
         };
 
         std::vector<BodyPart> mParts;

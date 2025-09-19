@@ -73,9 +73,10 @@ namespace Nif
 
     void NIFStream::getSizedStrings(std::vector<std::string>& vec, size_t size)
     {
-        vec.resize(size);
-        for (size_t i = 0; i < vec.size(); i++)
-            vec[i] = getSizedString();
+        vec.clear();
+        vec.reserve(size);
+        for (size_t i = 0; i < size; i++)
+            vec.push_back(getSizedString());
     }
 
     std::string NIFStream::getVersionString()

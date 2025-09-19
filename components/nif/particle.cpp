@@ -225,11 +225,7 @@ namespace Nif
 
         bool hasData = nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3;
         if (hasData)
-        {
-            mParticles.resize(mNumVertices);
-            for (NiParticleInfo& info : mParticles)
-                info.read(nif);
-        }
+            nif->readVectorOfRecords(mNumVertices, mParticles);
 
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
             nif->skip(12); // Unknown
@@ -680,12 +676,7 @@ namespace Nif
         mFloatKeyList = std::make_shared<FloatKeyMap>();
         mFloatKeyList->read(nif);
         mVisKeyList = std::make_shared<BoolKeyMap>();
-        mVisKeyList->mKeys.resize(nif->get<uint32_t>());
-        for (auto& [time, key] : mVisKeyList->mKeys)
-        {
-            nif->read(time);
-            key.mValue = nif->get<uint8_t>() != 0;
-        }
+        nif->readVectorOfRecords<uint32_t>(readKeyMapPair<float, bool>, mVisKeyList->mKeys);
     }
 
     void NiPSysCollider::read(NIFStream* nif)

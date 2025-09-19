@@ -160,16 +160,7 @@ namespace Nif
     template <class T>
     void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        const std::uint32_t length = nif->get<std::uint32_t>();
-
-        // No reasonable list can hit this generous limit
-        if (length >= (1 << 24))
-            throw std::runtime_error("Record list too long: " + std::to_string(length));
-
-        list.resize(length);
-
-        for (auto& value : list)
-            value.read(nif);
+        nif->readVectorOfRecords<uint32_t>(list);
     }
 
     template <class T>

@@ -105,9 +105,7 @@ namespace Nif
             }
             case UNION_BV:
             {
-                mChildren.resize(nif->get<uint32_t>());
-                for (BoundingVolume& child : mChildren)
-                    child.read(nif);
+                nif->readVectorOfRecords<uint32_t>(mChildren);
                 break;
             }
             case HALFSPACE_BV:
@@ -426,6 +424,12 @@ namespace Nif
         nif->read(mInitialIndex);
     }
 
+    void NiLODNode::LODRange::read(NIFStream* nif)
+    {
+        nif->read(mMinRange);
+        nif->read(mMaxRange);
+    }
+
     void NiLODNode::read(NIFStream* nif)
     {
         NiSwitchNode::read(nif);
@@ -439,12 +443,7 @@ namespace Nif
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
             nif->read(mLODCenter);
 
-        mLODLevels.resize(nif->get<uint32_t>());
-        for (LODRange& level : mLODLevels)
-        {
-            nif->read(level.mMinRange);
-            nif->read(level.mMaxRange);
-        }
+        nif->readVectorOfRecords<uint32_t>(mLODLevels);
     }
 
     void NiFltAnimationNode::read(NIFStream* nif)

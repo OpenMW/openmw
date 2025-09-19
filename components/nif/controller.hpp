@@ -322,6 +322,8 @@ namespace Nif
         {
             NiTriBasedGeomPtr mShape;
             NiSkinInstancePtr mSkin;
+
+            void read(NIFStream* nif);
         };
 
         uint32_t mLOD;

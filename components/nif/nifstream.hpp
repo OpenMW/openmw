@@ -73,6 +73,11 @@ namespace Nif
                 Misc::swapEndiannessInplace(dest[i]);
     }
 
+    class NIFStream;
+
+    template <class T>
+    void readRecord(NIFStream& stream, T& value);
+
     class NIFStream
     {
         const Reader& mReader;
@@ -166,9 +171,46 @@ namespace Nif
         /// Read a sequence of null-terminated strings
         std::string getStringPalette();
 
+        template <class Count, class T, class Read>
+        void readVectorOfRecords(Count count, Read&& read, std::vector<T>& values)
+        {
+            values.clear();
+            values.reserve(count);
+            for (Count i = 0; i < count; ++i)
+            {
+                T value;
+                read(*this, value);
+                values.push_back(std::move(value));
+            }
+        }
+
+        template <class Count, class T, class Read>
+        void readVectorOfRecords(Read&& read, std::vector<T>& values)
+        {
+            readVectorOfRecords(get<Count>(), std::forward<Read>(read), values);
+        }
+
+        template <class Count, class T>
+        void readVectorOfRecords(Count count, std::vector<T>& values)
+        {
+            readVectorOfRecords(count, readRecord<T>, values);
+        }
+
+        template <class Count, class T>
+        void readVectorOfRecords(std::vector<T>& values)
+        {
+            readVectorOfRecords<Count>(readRecord<T>, values);
+        }
+
     private:
         void checkStreamSize(std::size_t size);
     };
+
+    template <class T>
+    void readRecord(NIFStream& stream, T& value)
+    {
+        value.read(&stream);
+    }
 
     template <>
     void NIFStream::read<osg::Vec2f>(osg::Vec2f& vec);
