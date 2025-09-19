@@ -68,18 +68,11 @@ namespace Bsa
             uint32_t mFileSize = 0;
             uint32_t mOffset = 0;
             Hash mHash{};
-
-            // Zero-terminated file name
-            const char* name() const
-            {
-                if (mNameSize == 0)
-                    return "";
-                return mNamesBuffer->data() + mNameOffset;
-            }
-
             uint32_t mNameOffset = 0;
             uint32_t mNameSize = 0;
             std::vector<char>* mNamesBuffer = nullptr;
+
+            std::string_view name() const { return std::string_view(mNamesBuffer->data() + mNameOffset, mNameSize); }
         };
         typedef std::vector<FileStruct> FileList;
 
@@ -153,7 +146,6 @@ namespace Bsa
         // checks version of BSA from file header
         static BsaVersion detectVersion(const std::filesystem::path& filePath);
     };
-
 }
 
 #endif

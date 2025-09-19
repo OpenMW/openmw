@@ -29,7 +29,7 @@ namespace Bsa
 
         std::list<std::vector<char>> mFileNames;
 
-        FileRecord getFileRecord(const std::string& str) const;
+        FileRecord getFileRecord(std::string_view str) const;
 
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
 

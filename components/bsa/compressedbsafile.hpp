@@ -108,7 +108,7 @@ namespace Bsa
 
         std::map<std::uint64_t, FolderRecord> mFolders;
 
-        FileRecord getFileRecord(const std::string& str) const;
+        FileRecord getFileRecord(std::string_view str) const;
 
         /// \brief Normalizes given filename or folder and generates format-compatible hash.
         static std::uint64_t generateHash(const std::filesystem::path& stem, std::string extension);

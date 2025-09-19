@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <filesystem>
+#include <format>
 #include <fstream>
 
 #include <zlib.h>
@@ -137,13 +138,13 @@ namespace Bsa
         mIsLoaded = true;
     }
 
-    BA2GNRLFile::FileRecord BA2GNRLFile::getFileRecord(const std::string& str) const
+    BA2GNRLFile::FileRecord BA2GNRLFile::getFileRecord(std::string_view str) const
     {
         for (const auto c : str)
         {
             if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U)
             {
-                fail("File record " + str + " contains unicode characters, refusing to load.");
+                fail(std::format("File record {} contains unicode characters, refusing to load.", str));
             }
         }
 
@@ -153,7 +154,7 @@ namespace Bsa
         // Force-convert the path into something UNIX can handle first
         // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
         // and subsequently purge it to determine the file folder.
-        std::string path = str;
+        std::string path(str);
         std::replace(path.begin(), path.end(), '\\', '/');
 #endif
 
