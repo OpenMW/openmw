@@ -37,6 +37,7 @@
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/utils.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "memorystream.hpp"
@@ -50,13 +51,7 @@ namespace Bsa
 
         std::ifstream input(mFilepath, std::ios_base::binary);
 
-        // Total archive size
-        std::streamoff fsize = 0;
-        if (input.seekg(0, std::ios_base::end))
-        {
-            fsize = input.tellg();
-            input.seekg(0);
-        }
+        const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
         if (fsize < 36) // Header is 36 bytes
             fail("File too small to be a valid BSA archive");
