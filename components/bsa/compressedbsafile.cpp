@@ -26,9 +26,11 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cerrno>
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <system_error>
 
 #include <lz4frame.h>
 #include <zlib.h>
@@ -70,8 +72,8 @@ namespace Bsa
             mHeader.mFlags &= (~ArchiveFlag_EmbeddedNames);
 
         input.seekg(mHeader.mFoldersOffset);
-        if (input.bad())
-            fail("Invalid compressed BSA folder record offset");
+        if (input.fail())
+            fail("Failed to read compressed BSA folder record offset: " + std::generic_category().message(errno));
 
         struct FlatFolderRecord
         {
@@ -102,7 +104,8 @@ namespace Bsa
             }
 
             if (input.fail())
-                fail("Failed to read compressed BSA folder records: input error");
+                fail(std::format(
+                    "Failed to read compressed BSA folder record: {}", std::generic_category().message(errno)));
 
             folders.emplace_back(std::move(folder), std::vector<FileRecord>());
         }
@@ -143,7 +146,8 @@ namespace Bsa
                 input.read(reinterpret_cast<char*>(&file.mOffset), 4);
 
                 if (input.fail())
-                    fail("Failed to read compressed BSA folder file records: input error");
+                    fail(std::format("Failed to read compressed BSA folder file record: {}",
+                        std::generic_category().message(errno)));
 
                 filelist.push_back(std::move(file));
             }
@@ -152,8 +156,8 @@ namespace Bsa
         if (mHeader.mFolderNamesLength != 0)
             input.ignore(mHeader.mFolderNamesLength);
 
-        if (input.bad())
-            fail("Failed to read compressed BSA file records: input error");
+        if (input.fail())
+            fail(std::format("Failed to read compressed BSA file records: {}", std::generic_category().message(errno)));
 
         if ((mHeader.mFlags & ArchiveFlag_FileNames) != 0)
         {
@@ -182,8 +186,8 @@ namespace Bsa
         if (mHeader.mFileNamesLength != 0)
             input.ignore(mHeader.mFileNamesLength);
 
-        if (input.bad())
-            fail("Failed to read compressed BSA filenames: input error");
+        if (input.fail())
+            fail(std::format("Failed to read compressed BSA filenames: {}", std::generic_category().message(errno)));
 
         for (auto& [folder, filelist] : folders)
         {
