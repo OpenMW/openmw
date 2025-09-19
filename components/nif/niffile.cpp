@@ -674,7 +674,7 @@ namespace Nif
         {
             std::unique_ptr<Record> r;
 
-            std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.get<std::string>();
+            std::string rec = hasRecTypeListings ? recTypes.at(recTypeIndices[i]) : nif.get<std::string>();
             if (rec.empty())
             {
                 std::stringstream error;
