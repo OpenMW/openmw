@@ -1,6 +1,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <format>
+#include <stdexcept>
+#include <typeinfo>
 #include <vector>
 
 #include "niffile.hpp"
@@ -40,8 +43,11 @@ namespace Nif
             assert(mIndex == -2);
 
             // Store the index for later
-            mIndex = nif->get<int32_t>();
-            assert(mIndex >= -1);
+            const int32_t index = nif->get<int32_t>();
+            if (index < -1)
+                throw std::runtime_error(std::format("Invalid index: {}", index));
+
+            mIndex = index;
         }
 
         /// Resolve index to pointer
@@ -51,10 +57,14 @@ namespace Nif
                 mPtr = nullptr;
             else
             {
-                Record* r = nif.getRecord(mIndex);
+                Record* const r = nif.getRecord(mIndex);
+                if (r == nullptr)
+                    throw std::runtime_error(std::format("Record at {} is nullptr", mIndex));
+
                 // And cast it
                 mPtr = dynamic_cast<X*>(r);
-                assert(mPtr != nullptr);
+                if (mPtr == nullptr)
+                    throw std::runtime_error(std::format("Failed to cast record pointer to {}", typeid(X).name()));
             }
         }
 
