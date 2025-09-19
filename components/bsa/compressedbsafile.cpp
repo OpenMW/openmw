@@ -82,9 +82,12 @@ namespace Bsa
         };
 
         std::vector<std::pair<FlatFolderRecord, std::vector<FileRecord>>> folders;
-        folders.resize(mHeader.mFolderCount);
-        for (auto& [folder, filelist] : folders)
+        folders.reserve(mHeader.mFolderCount);
+
+        for (std::uint32_t i = 0; i < mHeader.mFolderCount; ++i)
         {
+            FlatFolderRecord folder;
+
             input.read(reinterpret_cast<char*>(&folder.mHash), 8);
             input.read(reinterpret_cast<char*>(&folder.mCount), 4);
             if (mHeader.mVersion == Version_SSE) // SSE
@@ -97,10 +100,12 @@ namespace Bsa
             {
                 input.read(reinterpret_cast<char*>(&folder.mOffset), 4);
             }
-        }
 
-        if (input.bad())
-            fail("Failed to read compressed BSA folder records: input error");
+            if (input.fail())
+                fail("Failed to read compressed BSA folder records: input error");
+
+            folders.emplace_back(std::move(folder), std::vector<FileRecord>());
+        }
 
         // file record blocks
         if ((mHeader.mFlags & ArchiveFlag_FolderNames) == 0)
@@ -127,12 +132,20 @@ namespace Bsa
                 mHeader.mFolderNamesLength -= size;
             }
 
-            filelist.resize(folder.mCount);
-            for (auto& file : filelist)
+            filelist.reserve(folder.mCount);
+
+            for (std::uint32_t i = 0; i < folder.mCount; ++i)
             {
+                FileRecord file;
+
                 input.read(reinterpret_cast<char*>(&file.mHash), 8);
                 input.read(reinterpret_cast<char*>(&file.mSize), 4);
                 input.read(reinterpret_cast<char*>(&file.mOffset), 4);
+
+                if (input.fail())
+                    fail("Failed to read compressed BSA folder file records: input error");
+
+                filelist.push_back(std::move(file));
             }
         }
 

@@ -161,11 +161,11 @@ void BSAFile::readHeader()
     size_t fileDataOffset = 12 + dirsize + 8 * filenum;
 
     // Set up the the FileStruct table
-    mFiles.resize(filenum);
+    mFiles.reserve(filenum);
     size_t endOfNameBuffer = 0;
     for (size_t i = 0; i < filenum; i++)
     {
-        FileStruct& fs = mFiles[i];
+        FileStruct& fs = mFiles.emplace_back();
 
         const uint32_t fileSize = offsets[i * 2];
         const uint32_t offset = offsets[i * 2 + 1] + static_cast<uint32_t>(fileDataOffset);
