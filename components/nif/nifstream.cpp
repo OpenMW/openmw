@@ -1,6 +1,10 @@
 #include "nifstream.hpp"
 
+#include <cerrno>
+#include <format>
 #include <span>
+#include <stdexcept>
+#include <system_error>
 
 #include <components/toutf8/toutf8.hpp>
 
@@ -55,8 +59,9 @@ namespace Nif
     {
         std::string str(length, '\0');
         mStream->read(str.data(), length);
-        if (mStream->bad())
-            throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
+        if (mStream->fail())
+            throw std::runtime_error(std::format(
+                "Failed to read sized string of {} chars: {}", length, std::generic_category().message(errno)));
         size_t end = str.find('\0');
         if (end != std::string::npos)
             str.erase(end);
@@ -76,8 +81,9 @@ namespace Nif
     {
         std::string result;
         std::getline(*mStream, result);
-        if (mStream->bad())
-            throw std::runtime_error("Failed to read version string");
+        if (mStream->fail())
+            throw std::runtime_error(
+                std::format("Failed to read version string: {}", std::generic_category().message(errno)));
         return result;
     }
 
@@ -86,8 +92,9 @@ namespace Nif
         size_t size = get<uint32_t>();
         std::string str(size, '\0');
         mStream->read(str.data(), size);
-        if (mStream->bad())
-            throw std::runtime_error("Failed to read string palette of " + std::to_string(size) + " chars");
+        if (mStream->fail())
+            throw std::runtime_error(std::format(
+                "Failed to read string palette of {} chars: {}", size, std::generic_category().message(errno)));
         return str;
     }
 

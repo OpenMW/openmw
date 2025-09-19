@@ -5,10 +5,13 @@
 
 #include <array>
 #include <cassert>
+#include <cerrno>
+#include <format>
 #include <istream>
 #include <stdexcept>
 #include <stdint.h>
 #include <string>
+#include <system_error>
 #include <type_traits>
 #include <vector>
 
@@ -40,9 +43,9 @@ namespace Nif
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
         static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
-        if (pIStream->bad())
-            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") buffer of "
-                + std::to_string(numInstances) + " instances");
+        if (pIStream->fail())
+            throw std::runtime_error(std::format("Failed to read typed ({}) dynamic buffer of {} instances: {}",
+                typeid(T).name(), numInstances, std::generic_category().message(errno)));
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
@@ -61,9 +64,9 @@ namespace Nif
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
         static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
-        if (pIStream->bad())
-            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") dynamic buffer of "
-                + std::to_string(numInstances) + " instances");
+        if (pIStream->fail())
+            throw std::runtime_error(std::format("Failed to read typed ({}) dynamic buffer of {} instances: {}",
+                typeid(T).name(), numInstances, std::generic_category().message(errno)));
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
