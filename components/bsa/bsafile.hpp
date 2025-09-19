@@ -62,12 +62,6 @@ namespace Bsa
         /// Represents one file entry in the archive
         struct FileStruct
         {
-            void setNameInfos(size_t index, std::vector<char>* stringBuf)
-            {
-                mNameOffset = static_cast<uint32_t>(index);
-                mNamesBuffer = stringBuf;
-            }
-
             // File size and offset in file. We store the offset from the
             // beginning of the file, not the offset into the data buffer
             // (which is what is stored in the archive.)
@@ -76,9 +70,15 @@ namespace Bsa
             Hash mHash{};
 
             // Zero-terminated file name
-            const char* name() const { return &(*mNamesBuffer)[mNameOffset]; }
+            const char* name() const
+            {
+                if (mNameSize == 0)
+                    return "";
+                return mNamesBuffer->data() + mNameOffset;
+            }
 
             uint32_t mNameOffset = 0;
+            uint32_t mNameSize = 0;
             std::vector<char>* mNamesBuffer = nullptr;
         };
         typedef std::vector<FileStruct> FileList;

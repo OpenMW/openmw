@@ -166,27 +166,35 @@ void BSAFile::readHeader()
     for (size_t i = 0; i < filenum; i++)
     {
         FileStruct& fs = mFiles[i];
-        fs.mFileSize = offsets[i * 2];
-        fs.mOffset = static_cast<uint32_t>(offsets[i * 2 + 1] + fileDataOffset);
-        auto namesOffset = offsets[2 * filenum + i];
-        fs.setNameInfos(namesOffset, &mStringBuf);
-        fs.mHash = hashes[i];
 
-        if (namesOffset >= mStringBuf.size())
-        {
-            fail("Archive contains names offset outside itself");
-        }
-        const void* end = std::memchr(fs.name(), '\0', mStringBuf.size() - namesOffset);
-        if (!end)
-        {
-            fail("Archive contains non-zero terminated string");
-        }
+        const uint32_t fileSize = offsets[i * 2];
+        const uint32_t offset = offsets[i * 2 + 1] + static_cast<uint32_t>(fileDataOffset);
 
-        endOfNameBuffer = std::max(endOfNameBuffer, namesOffset + std::strlen(fs.name()) + 1);
-        assert(endOfNameBuffer <= mStringBuf.size());
-
-        if (fs.mOffset + fs.mFileSize > fsize)
+        if (fileSize + offset > fsize)
             fail("Archive contains offsets outside itself");
+
+        const uint32_t nameOffset = offsets[2 * filenum + i];
+
+        if (nameOffset >= mStringBuf.size())
+            fail("Archive contains names offset outside itself");
+
+        const char* const begin = mStringBuf.data() + nameOffset;
+        const char* const end = reinterpret_cast<const char*>(std::memchr(begin, '\0', mStringBuf.size() - nameOffset));
+
+        if (end == nullptr)
+            fail("Archive contains non-zero terminated string");
+
+        const std::size_t nameSize = end - begin;
+
+        fs.mFileSize = fileSize;
+        fs.mOffset = offset;
+        fs.mHash = hashes[i];
+        fs.mNameOffset = nameOffset;
+        fs.mNameSize = static_cast<uint32_t>(nameSize);
+        fs.mNamesBuffer = &mStringBuf;
+
+        endOfNameBuffer = std::max(endOfNameBuffer, nameOffset + nameSize + 1);
+        assert(endOfNameBuffer <= mStringBuf.size());
     }
     mStringBuf.resize(endOfNameBuffer);
 
@@ -282,7 +290,6 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     FileStruct newFile;
     file.seekg(0, std::ios::end);
     newFile.mFileSize = static_cast<uint32_t>(file.tellg());
-    newFile.setNameInfos(mStringBuf.size(), &mStringBuf);
     newFile.mHash = getHash(filename);
 
     if (mFiles.empty())
@@ -310,8 +317,13 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
         newFile.mOffset = static_cast<uint32_t>(stream.tellp());
     }
 
+    newFile.mNameOffset = mStringBuf.size();
+    newFile.mNameSize = filename.size();
+    newFile.mNamesBuffer = &mStringBuf;
+
     mStringBuf.insert(mStringBuf.end(), filename.begin(), filename.end());
     mStringBuf.push_back('\0');
+
     mFiles.push_back(newFile);
 
     mHasChanged = true;

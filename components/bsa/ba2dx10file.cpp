@@ -135,11 +135,12 @@ namespace Bsa
             std::vector<char> fileName;
             uint16_t fileNameSize;
             input.read(reinterpret_cast<char*>(&fileNameSize), sizeof(uint16_t));
-            fileName.resize(fileNameSize);
-            input.read(fileName.data(), fileName.size());
-            fileName.push_back('\0');
+            fileName.resize(fileNameSize + 1);
+            input.read(fileName.data(), fileNameSize);
             mFileNames.push_back(std::move(fileName));
-            mFiles[i].setNameInfos(0, &mFileNames.back());
+            mFiles[i].mNameOffset = 0;
+            mFiles[i].mNameSize = fileNameSize;
+            mFiles[i].mNamesBuffer = &mFileNames.back();
         }
 
         mIsLoaded = true;
