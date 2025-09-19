@@ -54,7 +54,8 @@ namespace Bsa
 #pragma pack(1)
         struct Hash
         {
-            uint32_t low, high;
+            uint32_t mLow;
+            uint32_t mHigh;
         };
 #pragma pack(pop)
 
@@ -63,21 +64,22 @@ namespace Bsa
         {
             void setNameInfos(size_t index, std::vector<char>* stringBuf)
             {
-                namesOffset = static_cast<uint32_t>(index);
-                namesBuffer = stringBuf;
+                mNameOffset = static_cast<uint32_t>(index);
+                mNamesBuffer = stringBuf;
             }
 
             // File size and offset in file. We store the offset from the
             // beginning of the file, not the offset into the data buffer
             // (which is what is stored in the archive.)
-            uint32_t fileSize, offset;
-            Hash hash;
+            uint32_t mFileSize = 0;
+            uint32_t mOffset = 0;
+            Hash mHash{};
 
             // Zero-terminated file name
-            const char* name() const { return &(*namesBuffer)[namesOffset]; }
+            const char* name() const { return &(*mNamesBuffer)[mNameOffset]; }
 
-            uint32_t namesOffset = 0;
-            std::vector<char>* namesBuffer = nullptr;
+            uint32_t mNameOffset = 0;
+            std::vector<char>* mNamesBuffer = nullptr;
         };
         typedef std::vector<FileStruct> FileList;
 

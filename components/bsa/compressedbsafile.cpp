@@ -181,8 +181,8 @@ namespace Bsa
             for (auto& [hash, fileRec] : folderMap.mFiles)
             {
                 FileStruct fileStruct{};
-                fileStruct.fileSize = fileRec.mSize & (~FileSizeFlag_Compression);
-                fileStruct.offset = fileRec.mOffset;
+                fileStruct.mFileSize = fileRec.mSize & (~FileSizeFlag_Compression);
+                fileStruct.mOffset = fileRec.mOffset;
                 fileStruct.setNameInfos(0, &fileRec.mName);
                 mFiles.emplace_back(fileStruct);
             }

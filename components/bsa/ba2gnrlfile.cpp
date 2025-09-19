@@ -61,8 +61,8 @@ namespace Bsa
             mFolders[dirHash][{ nameHash, extHash }] = file;
 
             FileStruct fileStruct{};
-            fileStruct.fileSize = file.size;
-            fileStruct.offset = file.offset;
+            fileStruct.mFileSize = file.size;
+            fileStruct.mOffset = file.offset;
             mFiles.push_back(fileStruct);
         }
     }
