@@ -18,13 +18,13 @@ namespace Nif
     {
         union
         {
-            intptr_t index;
+            intptr_t mIndex;
             X* mPtr;
         };
 
     public:
         RecordPtrT()
-            : index(-2)
+            : mIndex(-2)
         {
         }
 
@@ -37,21 +37,21 @@ namespace Nif
         void read(NIFStream* nif)
         {
             // Can only read the index once
-            assert(index == -2);
+            assert(mIndex == -2);
 
             // Store the index for later
-            index = nif->get<int32_t>();
-            assert(index >= -1);
+            mIndex = nif->get<int32_t>();
+            assert(mIndex >= -1);
         }
 
         /// Resolve index to pointer
         void post(Reader& nif)
         {
-            if (index < 0)
+            if (mIndex < 0)
                 mPtr = nullptr;
             else
             {
-                Record* r = nif.getRecord(index);
+                Record* r = nif.getRecord(mIndex);
                 // And cast it
                 mPtr = dynamic_cast<X*>(r);
                 assert(mPtr != nullptr);
