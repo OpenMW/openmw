@@ -8,6 +8,7 @@
 #include "../mwstate/character.hpp"
 
 #include "context.hpp"
+#include "luamanagerimp.hpp"
 
 namespace MWLua
 {
@@ -72,7 +73,9 @@ namespace MWLua
                 return sol::nullopt;
         };
 
-        api["saveGame"] = [](std::string_view description, sol::optional<std::string_view> slotName) {
+        api["saveGame"] = [context](std::string_view description, sol::optional<std::string_view> slotName) {
+            if (!context.mLuaManager->isSynchronizedUpdateRunning())
+                throw std::runtime_error("menu.saveGame can only be used during engine or event handler processing");
             MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
             const MWState::Character* character = manager->getCurrentCharacter();
             const MWState::Slot* slot = nullptr;
