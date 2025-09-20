@@ -481,8 +481,6 @@ set(SOL_INCLUDE_DIR ${OpenMW_SOURCE_DIR}/extern/sol3)
 set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
-    ${SOL_CONFIG_DIR}
-    "."
     BEFORE SYSTEM
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
@@ -490,8 +488,10 @@ include_directories(
     ${BULLET_INCLUDE_DIRS}
     ${LUA_INCLUDE_DIR}
     ${SOL_INCLUDE_DIR}
+    ${SOL_CONFIG_DIR}
     ${ICU_INCLUDE_DIRS}
 )
+include_directories(".")
 
 link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
