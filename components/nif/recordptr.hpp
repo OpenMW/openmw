@@ -19,6 +19,16 @@ namespace Nif
     template <class X>
     class RecordPtrT
     {
+#ifndef NDEBUG
+        enum class State
+        {
+            Index,
+            Ptr,
+        };
+
+        State mState;
+#endif
+
         union
         {
             intptr_t mIndex;
@@ -27,12 +37,22 @@ namespace Nif
 
     public:
         RecordPtrT()
-            : mIndex(-2)
+            :
+#ifndef NDEBUG
+            mState(State::Index)
+            ,
+#endif
+            mIndex(-2)
         {
         }
 
         RecordPtrT(X* ptr)
-            : mPtr(ptr)
+            :
+#ifndef NDEBUG
+            mState(State::Ptr)
+            ,
+#endif
+            mPtr(ptr)
         {
         }
 
@@ -40,6 +60,9 @@ namespace Nif
         void read(NIFStream* nif)
         {
             // Can only read the index once
+#ifndef NDEBUG
+            assert(mState == State::Index);
+#endif
             assert(mIndex == -2);
 
             // Store the index for later
@@ -53,6 +76,10 @@ namespace Nif
         /// Resolve index to pointer
         void post(Reader& nif)
         {
+#ifndef NDEBUG
+            assert(mState == State::Index);
+#endif
+
             if (mIndex < 0)
                 mPtr = nullptr;
             else
@@ -61,34 +88,66 @@ namespace Nif
                 if (r == nullptr)
                     throw std::runtime_error(std::format("Record at {} is nullptr", mIndex));
 
-                // And cast it
-                mPtr = dynamic_cast<X*>(r);
-                if (mPtr == nullptr)
+                X* const ptr = dynamic_cast<X*>(r);
+                if (ptr == nullptr)
                     throw std::runtime_error(std::format("Failed to cast record pointer to {}", typeid(X).name()));
+
+                mPtr = ptr;
             }
+
+#ifndef NDEBUG
+            mState = State::Ptr;
+#endif
         }
 
         /// Look up the actual object from the index
         const X* getPtr() const
         {
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
             assert(mPtr != nullptr);
             return mPtr;
         }
+
         X* getPtr()
         {
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
             assert(mPtr != nullptr);
             return mPtr;
         }
 
-        const X& get() const { return *getPtr(); }
-        X& get() { return *getPtr(); }
+        const X& get() const
+        {
+            return *getPtr();
+        }
+
+        X& get()
+        {
+            return *getPtr();
+        }
 
         /// Syntactic sugar
-        const X* operator->() const { return getPtr(); }
-        X* operator->() { return getPtr(); }
+        const X* operator->() const
+        {
+            return getPtr();
+        }
+
+        X* operator->()
+        {
+            return getPtr();
+        }
 
         /// Pointers are allowed to be empty
-        bool empty() const { return mPtr == nullptr; }
+        bool empty() const
+        {
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
+            return mPtr == nullptr;
+        }
     };
 
     /** A list of references to other records. These are read as a list,
