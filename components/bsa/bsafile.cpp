@@ -25,9 +25,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cerrno>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <fstream>
+#include <system_error>
 
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -120,6 +123,9 @@ void BSAFile::readHeader()
 
         input.read(reinterpret_cast<char*>(head), 12);
 
+        if (input.fail())
+            fail(std::format("Failed to read head: {}", std::generic_category().message(errno)));
+
         if (head[0] != 0x100)
             fail("Unrecognized BSA header");
 
@@ -141,15 +147,24 @@ void BSAFile::readHeader()
     std::vector<uint32_t> offsets(3 * filenum);
     input.read(reinterpret_cast<char*>(offsets.data()), 12 * filenum);
 
+    if (input.fail())
+        fail(std::format("Failed to read offsets: {}", std::generic_category().message(errno)));
+
     // Read the string table
     mStringBuf.resize(dirsize - 12 * filenum);
     input.read(mStringBuf.data(), mStringBuf.size());
+
+    if (input.fail())
+        fail(std::format("Failed to read string table: {}", std::generic_category().message(errno)));
 
     // Check our position
     assert(input.tellg() == std::streampos(12 + dirsize));
     std::vector<Hash> hashes(filenum);
     static_assert(sizeof(Hash) == 8);
     input.read(reinterpret_cast<char*>(hashes.data()), 8 * filenum);
+
+    if (input.fail())
+        fail(std::format("Failed to read hashes: {}", std::generic_category().message(errno)));
 
     // Calculate the offset of the data buffer. All file offsets are
     // relative to this. 12 header bytes + directory + hash table
