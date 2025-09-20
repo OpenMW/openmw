@@ -97,7 +97,7 @@ namespace Sqlite3
         value = nullptr;
     }
 
-    template <class T>
+    template <class T, class = std::enable_if_t<std::is_arithmetic_v<T>>>
     inline auto copyColumn(sqlite3& /*db*/, sqlite3_stmt& statement, int index, int type, T& value)
     {
         switch (type)
@@ -114,6 +114,12 @@ namespace Sqlite3
         }
         throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
             + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT or SQLITE_NULL");
+    }
+
+    template <class T, class V = decltype(T::mValue), class = std::enable_if_t<std::is_arithmetic_v<V>>>
+    inline auto copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, T& value)
+    {
+        return copyColumn<V>(db, statement, index, type, value.mValue);
     }
 
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::string& value)
