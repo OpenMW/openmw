@@ -300,10 +300,11 @@ namespace
 
     void copy(const btTransform& src, Nif::NiTransform& dst)
     {
-        dst.mTranslation = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
+        dst.mTranslation = osg::Vec3f(static_cast<float>(src.getOrigin().x()), static_cast<float>(src.getOrigin().y()),
+            static_cast<float>(src.getOrigin().z()));
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)
-                dst.mRotation.mValues[row][column] = src.getBasis().getRow(row)[column];
+                dst.mRotation.mValues[row][column] = static_cast<float>(src.getBasis().getRow(row)[column]);
     }
 
     struct TestBulletNifLoader : Test

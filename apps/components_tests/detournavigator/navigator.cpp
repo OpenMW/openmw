@@ -104,7 +104,7 @@ namespace
         surface.mHeights = values.data();
         surface.mMinHeight = -greater;
         surface.mMaxHeight = greater;
-        surface.mSize = static_cast<int>(std::sqrt(size));
+        surface.mSize = static_cast<std::size_t>(std::sqrt(size));
         return surface;
     }
 
@@ -331,7 +331,7 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, only_one_heightfield_per_cell_is_allowed)
     {
         const HeightfieldSurface surface1 = makeSquareHeightfieldSurface(defaultHeightfieldData);
-        const int cellSize1 = heightfieldTileSize * (surface1.mSize - 1);
+        const int cellSize1 = heightfieldTileSize * static_cast<int>(surface1.mSize - 1);
 
         const std::array<float, 5 * 5> heightfieldData2{ {
             -25, -25, -25, -25, -25, // row 0
@@ -341,7 +341,7 @@ namespace
             -25, -25, -25, -25, -25, // row 4
         } };
         const HeightfieldSurface surface2 = makeSquareHeightfieldSurface(heightfieldData2);
-        const int cellSize2 = heightfieldTileSize * (surface2.mSize - 1);
+        const int cellSize2 = heightfieldTileSize * static_cast<int>(surface2.mSize - 1);
 
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
         mNavigator->addHeightfield(mCellPosition, cellSize1, surface1, nullptr);
@@ -639,8 +639,9 @@ namespace
 
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
+            const btScalar diameter = static_cast<btScalar>(i) * 10;
             const btTransform transform(
-                btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10, shift.y() + i * 10, i * 10));
+                btMatrix3x3::getIdentity(), btVector3(shift.x() + diameter, shift.y() + diameter, diameter));
             mNavigator->addObject(
                 ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
@@ -649,8 +650,9 @@ namespace
 
         for (std::size_t i = 0; i < boxes.size(); ++i)
         {
+            const btScalar diameter = static_cast<btScalar>(i) * 10 + 1;
             const btTransform transform(
-                btMatrix3x3::getIdentity(), btVector3(shift.x() + i * 10 + 1, shift.y() + i * 10 + 1, i * 10 + 1));
+                btMatrix3x3::getIdentity(), btVector3(shift.x() + diameter, shift.y() + diameter, diameter));
             mNavigator->updateObject(
                 ObjectId(&boxes[i].shape()), ObjectShapes(boxes[i].instance(), mObjectTransform), transform, nullptr);
         }
@@ -680,7 +682,8 @@ namespace
 
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
-            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32, i * 32, i * 32));
+            const btScalar diameter = static_cast<btScalar>(i) * 32;
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(diameter, diameter, diameter));
             mNavigator->addObject(
                 ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
@@ -690,7 +693,8 @@ namespace
         const auto start = std::chrono::steady_clock::now();
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
-            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 1, i * 32 + 1, i * 32 + 1));
+            const btScalar diameter = static_cast<btScalar>(i) * 32 + 1;
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(diameter, diameter, diameter));
             mNavigator->updateObject(
                 ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }
@@ -699,7 +703,8 @@ namespace
 
         for (std::size_t i = 0; i < shapes.size(); ++i)
         {
-            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 2, i * 32 + 2, i * 32 + 2));
+            const btScalar diameter = static_cast<btScalar>(i) * 32 + 2;
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(diameter, diameter, diameter));
             mNavigator->updateObject(
                 ObjectId(&shapes[i].shape()), ObjectShapes(shapes[i].instance(), mObjectTransform), transform, nullptr);
         }

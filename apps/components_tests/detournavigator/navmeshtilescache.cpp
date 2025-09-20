@@ -21,7 +21,7 @@ namespace
     using namespace DetourNavigator::Tests;
 
     template <class T, class Random>
-    void generateRecastArray(T*& values, int size, Random& random)
+    void generateRecastArray(T*& values, size_t size, Random& random)
     {
         values = static_cast<T*>(permRecastAlloc(size * sizeof(T)));
         generateRange(values, values + static_cast<std::ptrdiff_t>(size), random);
