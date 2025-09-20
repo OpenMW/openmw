@@ -47,7 +47,7 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsContainer::printError(int scriptId, std::string_view msg, const std::exception& e)
+    void ScriptsContainer::printError(int scriptId, std::string_view msg, const std::exception& e) const
     {
         Log(Debug::Error) << mNamePrefix << "[" << scriptPath(scriptId) << "] " << msg << ": " << e.what();
     }
@@ -408,7 +408,7 @@ namespace LuaUtil
 
     void ScriptsContainer::save(ESM::LuaScripts& data)
     {
-        if (UnloadedData* unloadedData = std::get_if<UnloadedData>(&mData))
+        if (const UnloadedData* unloadedData = std::get_if<UnloadedData>(&mData))
         {
             data.mScripts = unloadedData->mScripts;
             return;
