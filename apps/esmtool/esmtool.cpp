@@ -482,7 +482,7 @@ namespace
 
         int digitCount = 1; // For a nicer output
         if (recordCount > 0)
-            digitCount = (int)std::log10(recordCount) + 1;
+            digitCount = static_cast<int>(std::log10(recordCount)) + 1;
 
         std::cout << "Loaded " << recordCount << " records:\n\n";
 
@@ -507,7 +507,7 @@ namespace
         esm.setEncoder(&encoder);
         esm.setHeader(data.mHeader);
         esm.setVersion(ESM::VER_130);
-        esm.setRecordCount(recordCount);
+        esm.setRecordCount(static_cast<int>(recordCount));
 
         std::fstream save(info.outname, std::fstream::out | std::fstream::binary);
         esm.save(save);
