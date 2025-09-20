@@ -195,7 +195,7 @@ namespace DetourNavigator
     TileId NavMeshDb::getMaxTileId()
     {
         TileId tileId{ 0 };
-        request(*mDb, mGetMaxTileId, &tileId, 1);
+        request(*mDb, mGetMaxTileId, &tileId.mValue, 1);
         return tileId;
     }
 
@@ -203,7 +203,7 @@ namespace DetourNavigator
         ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
     {
         Tile result;
-        auto row = std::tie(result.mTileId, result.mVersion);
+        auto row = std::tie(result.mTileId.mValue, result.mVersion.mValue);
         const std::vector<std::byte> compressedInput = Misc::compress(input);
         if (&row == request(*mDb, mFindTile, &row, 1, worldspace.serializeText(), tilePosition, compressedInput))
             return {};
@@ -214,7 +214,7 @@ namespace DetourNavigator
         ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
     {
         TileData result;
-        auto row = std::tie(result.mTileId, result.mVersion, result.mData);
+        auto row = std::tie(result.mTileId.mValue, result.mVersion.mValue, result.mData);
         const std::vector<std::byte> compressedInput = Misc::compress(input);
         if (&row == request(*mDb, mGetTileData, &row, 1, worldspace.serializeText(), tilePosition, compressedInput))
             return {};
@@ -255,14 +255,14 @@ namespace DetourNavigator
     ShapeId NavMeshDb::getMaxShapeId()
     {
         ShapeId shapeId{ 0 };
-        request(*mDb, mGetMaxShapeId, &shapeId, 1);
+        request(*mDb, mGetMaxShapeId, &shapeId.mValue, 1);
         return shapeId;
     }
 
     std::optional<ShapeId> NavMeshDb::findShapeId(std::string_view name, ShapeType type, const Sqlite3::ConstBlob& hash)
     {
         ShapeId shapeId;
-        if (&shapeId == request(*mDb, mFindShapeId, &shapeId, 1, name, type, hash))
+        if (&shapeId.mValue == request(*mDb, mFindShapeId, &shapeId.mValue, 1, name, type, hash))
             return {};
         return shapeId;
     }

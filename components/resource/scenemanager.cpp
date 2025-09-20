@@ -169,10 +169,8 @@ namespace Resource
         {
             if (NifOsg::FlipController* flipctrl = dynamic_cast<NifOsg::FlipController*>(&ctrl))
             {
-                for (std::vector<osg::ref_ptr<osg::Texture2D>>::iterator it = flipctrl->getTextures().begin();
-                    it != flipctrl->getTextures().end(); ++it)
+                for (const osg::ref_ptr<osg::Texture2D>& tex : flipctrl->getTextures())
                 {
-                    osg::Texture* tex = *it;
                     tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
                     tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
                     tex->setMaxAnisotropy(mMaxAnisotropy);

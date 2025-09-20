@@ -28,10 +28,10 @@ namespace Misc
             throw std::logic_error(std::string("Invalid hex color: ") += hex);
         Color col;
         col.mValue.a() = 1;
-        for (size_t i = 0; i < 3; i++)
+        for (unsigned i = 0; i < 3; i++)
         {
             auto sub = hex.substr(i * 2, 2);
-            int v = 0;
+            unsigned char v = 0;
             auto [_, ec] = std::from_chars(sub.data(), sub.data() + sub.size(), v, 16);
             if (ec != std::errc())
                 throw std::logic_error(std::string("Invalid hex color: ") += hex);
@@ -53,7 +53,7 @@ namespace Misc
     std::string Color::toHex() const
     {
         std::string result(6, '0');
-        for (size_t i = 0; i < 3; i++)
+        for (unsigned i = 0; i < 3; i++)
         {
             int b = static_cast<int>(mValue[i] * 255.0f);
             char* start = result.data() + i * 2;

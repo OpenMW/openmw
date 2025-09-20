@@ -1554,8 +1554,7 @@ namespace NifOsg
 
             const auto& uvlist = niGeometryData->mUVList;
             int textureStage = 0;
-            for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
-                ++it, ++textureStage)
+            for (auto it = boundTextures.begin(); it != boundTextures.end(); ++it, ++textureStage)
             {
                 unsigned int uvSet = *it;
                 if (uvSet >= uvlist.size())

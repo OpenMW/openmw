@@ -130,11 +130,11 @@ namespace ESMTerrain
         osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
         const int landSize = ESM::getLandSize(worldspace);
-        int startRow = (origin.x() - cellX) * landSize;
-        int startColumn = (origin.y() - cellY) * landSize;
+        int startRow = static_cast<int>((origin.x() - cellX) * landSize);
+        int startColumn = static_cast<int>((origin.y() - cellY) * landSize);
 
-        int endRow = startRow + size * (landSize - 1) + 1;
-        int endColumn = startColumn + size * (landSize - 1) + 1;
+        int endRow = static_cast<int>(startRow + size * (landSize - 1) + 1);
+        int endColumn = static_cast<int>(startColumn + size * (landSize - 1) + 1);
 
         if (data)
         {
@@ -283,8 +283,8 @@ namespace ESMTerrain
 
         const auto handleSample = [&](std::size_t cellShiftX, std::size_t cellShiftY, std::size_t row, std::size_t col,
                                       std::size_t vertX, std::size_t vertY) {
-            const int cellX = startCellX + cellShiftX;
-            const int cellY = startCellY + cellShiftY;
+            const int cellX = startCellX + static_cast<int>(cellShiftX);
+            const int cellY = startCellY + static_cast<int>(cellShiftY);
             const std::pair cell{ cellX, cellY };
             const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
 
@@ -311,7 +311,7 @@ namespace ESMTerrain
             if (heightData != nullptr)
                 height = heightData->getHeights()[col * cellSize + row];
             if (alteration)
-                height += getAlteredHeight(col, row);
+                height += getAlteredHeight(static_cast<int>(col), static_cast<int>(row));
 
             const std::size_t vertIndex = vertX * numVerts + vertY;
 
@@ -325,7 +325,7 @@ namespace ESMTerrain
 
             if (normalData != nullptr)
             {
-                for (std::size_t i = 0; i < 3; ++i)
+                for (unsigned short i = 0; i < 3; ++i)
                     normal[i] = normalData->getNormals()[srcArrayIndex + i];
 
                 normal.normalize();
@@ -333,11 +333,11 @@ namespace ESMTerrain
 
             // Normals apparently don't connect seamlessly between cells
             if (col == cellSize - 1 || row == cellSize - 1)
-                fixNormal(normal, cellLocation, col, row, cache);
+                fixNormal(normal, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             // some corner normals appear to be complete garbage (z < 0)
             if ((row == 0 || row == cellSize - 1) && (col == 0 || col == cellSize - 1))
-                averageNormal(normal, cellLocation, col, row, cache);
+                averageNormal(normal, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             assert(normal.z() > 0);
 
@@ -346,16 +346,16 @@ namespace ESMTerrain
             osg::Vec4ub color(255, 255, 255, 255);
 
             if (colourData != nullptr)
-                for (std::size_t i = 0; i < 3; ++i)
+                for (unsigned short i = 0; i < 3; ++i)
                     color[i] = colourData->getColors()[srcArrayIndex + i];
 
             // Does nothing by default, override in OpenMW-CS
             if (alteration)
-                adjustColor(col, row, heightData, color);
+                adjustColor(static_cast<int>(col), static_cast<int>(row), heightData, color);
 
             // Unlike normals, colors mostly connect seamlessly between cells, but not always...
             if (col == cellSize - 1 || row == cellSize - 1)
-                fixColour(color, cellLocation, col, row, cache);
+                fixColour(color, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             colours[vertIndex] = color;
         };
@@ -445,7 +445,7 @@ namespace ESMTerrain
 
             unsigned char* const baseBlendmap = getOrCreateBlendmap(ESM::FormId::fromUint32(ltex.base.formId));
             int starty = (static_cast<int>(sample.mDstCol) - 1) * quadSize;
-            int startx = sample.mDstRow * quadSize;
+            int startx = static_cast<int>(sample.mDstRow) * quadSize;
             for (int y = std::max(0, starty + 1); y <= starty + quadSize && y < blendmapSize; ++y)
             {
                 unsigned char* const row = baseBlendmap + (blendmapSize - y - 1) * blendmapSize;
@@ -465,9 +465,9 @@ namespace ESMTerrain
                     {
                         continue;
                     }
-                    int index = (blendmapSize - starty - y - 1) * blendmapSize + startx + x;
-                    int delta = std::clamp(static_cast<int>(v.opacity * 255), 0, 255);
-                    baseBlendmap[index] = std::max(0, baseBlendmap[index] - delta);
+                    size_t index = static_cast<size_t>((blendmapSize - starty - y - 1) * blendmapSize + startx + x);
+                    auto delta = static_cast<unsigned char>(std::clamp(static_cast<int>(v.opacity * 255.f), 0, 255));
+                    baseBlendmap[index] = std::max<unsigned char>(0, baseBlendmap[index] - delta);
                     layerBlendmap[index] = delta;
                 }
             }
@@ -567,7 +567,7 @@ namespace ESMTerrain
 
     float Storage::getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace)
     {
-        const float cellSize = ESM::getCellSize(worldspace);
+        const float cellSize = static_cast<float>(ESM::getCellSize(worldspace));
         int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
 
@@ -645,7 +645,8 @@ namespace ESMTerrain
         */
 
         // Solve plane equation for z
-        return (-plane.getNormal().x() * nX - plane.getNormal().y() * nY - plane[3]) / plane.getNormal().z() * cellSize;
+        return static_cast<float>(
+            (-plane.getNormal().x() * nX - plane.getNormal().y() * nY - plane[3]) / plane.getNormal().z() * cellSize);
     }
 
     const LandObject* Storage::getLand(ESM::ExteriorCellLocation cellLocation, LandCache& cache)
