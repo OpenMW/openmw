@@ -604,7 +604,7 @@ std::string MWMechanics::Alchemy::suggestPotionName()
     return effects.begin()->toString();
 }
 
-std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld::ConstPtr& ptr, const int alchemySkill)
+std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld::ConstPtr& ptr, const float alchemySkill)
 {
     std::vector<std::string> effects;
 

@@ -104,7 +104,7 @@ namespace MWGui
 
         // 0 = Name, 1 = Race, 2 = Class, 3 = BirthSign, 4 = Back, 5 = OK
         std::vector<MyGUI::Button*> mButtons;
-        int mControllerFocus = 0;
+        size_t mControllerFocus = 0;
     };
 }
 #endif

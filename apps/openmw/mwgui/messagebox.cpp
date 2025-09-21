@@ -473,7 +473,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
@@ -484,7 +484,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
 

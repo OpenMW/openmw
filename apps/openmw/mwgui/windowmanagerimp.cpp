@@ -903,11 +903,11 @@ namespace MWGui
         {
             GuiMode mode = mGuiModes.back();
             GuiModeState& state = mGuiModeStates[mode];
-            if (state.mWindows.size() == 0)
+            if (state.mWindows.empty())
                 return nullptr;
 
-            int activeIndex
-                = std::clamp(mActiveControllerWindows[mode], 0, static_cast<int>(state.mWindows.size()) - 1);
+            size_t activeIndex
+                = std::clamp<size_t>(mActiveControllerWindows[mode], 0, state.mWindows.size() - 1);
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -925,18 +925,18 @@ namespace MWGui
             return;
 
         GuiMode mode = mGuiModes.back();
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
 
-        int activeIndex = 0;
+        size_t activeIndex = 0;
         if (winCount > 1)
         {
             // Find next/previous visible window
             activeIndex = mActiveControllerWindows[mode];
             int delta = next ? 1 : -1;
 
-            for (int i = 0; i < winCount; i++)
+            for (size_t i = 0; i < winCount; ++i)
             {
-                activeIndex = wrap(activeIndex + delta, winCount);
+                activeIndex = wrap(activeIndex, winCount, delta);
                 if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
                     break;
             }
@@ -952,9 +952,9 @@ namespace MWGui
             return;
 
         const GuiMode mode = mGuiModes.back();
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
 
-        for (int i = 0; i < winCount; i++)
+        for (size_t i = 0; i < winCount; i++)
         {
             // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
             if (i != mActiveControllerWindows[mode])
@@ -964,16 +964,16 @@ namespace MWGui
             mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
     }
 
-    void WindowManager::setActiveControllerWindow(GuiMode mode, int activeIndex)
+    void WindowManager::setActiveControllerWindow(GuiMode mode, size_t activeIndex)
     {
         if (!Settings::gui().mControllerMenus)
             return;
 
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
         if (winCount == 0)
             return;
 
-        activeIndex = std::clamp(activeIndex, 0, winCount - 1);
+        activeIndex = std::clamp<size_t>(activeIndex, 0, winCount - 1);
         mActiveControllerWindows[mode] = activeIndex;
 
         reapplyActiveControllerWindow();
@@ -1437,7 +1437,8 @@ namespace MWGui
             if (mode == GM_Container)
                 mActiveControllerWindows[mode] = 0; // Ensure controller focus is on container
             // Activate first visible window. This needs to be called after updateVisible.
-            mActiveControllerWindows[mode] = std::max(mActiveControllerWindows[mode] - 1, -1);
+            if (mActiveControllerWindows[mode] != 0)
+                mActiveControllerWindows[mode] = mActiveControllerWindows[mode] - 1;
             cycleActiveControllerWindow(true);
         }
     }

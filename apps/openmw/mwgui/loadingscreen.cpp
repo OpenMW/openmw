@@ -120,8 +120,9 @@ namespace MWGui
 
         void operator()(osg::RenderInfo& renderInfo) const override
         {
-            int w = renderInfo.getCurrentCamera()->getViewport()->width();
-            int h = renderInfo.getCurrentCamera()->getViewport()->height();
+            const osg::Viewport* viewPort = renderInfo.getCurrentCamera()->getViewport();
+            int w = static_cast<int>(viewPort->width());
+            int h = static_cast<int>(viewPort->height());
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
 
             mOneshot = false;
@@ -208,7 +209,8 @@ namespace MWGui
     {
         if (!mSplashScreens.empty())
         {
-            std::string const& randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
+            std::string const& randomSplash
+                = mSplashScreens.at(Misc::Rng::rollDice(static_cast<int>(mSplashScreens.size())));
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed
@@ -259,10 +261,10 @@ namespace MWGui
             return false;
 
         // the minimal delay before a loading screen shows
-        const float initialDelay = 0.05;
+        constexpr float initialDelay = 0.05f;
 
         bool alreadyShown = (mLastRenderTime > mLoadingOnTime);
-        float diff = (mTimer.time_m() - mLoadingOnTime);
+        double diff = (mTimer.time_m() - mLoadingOnTime);
 
         if (!alreadyShown)
         {

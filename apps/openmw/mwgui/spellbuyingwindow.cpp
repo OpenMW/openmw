@@ -254,7 +254,7 @@ namespace MWGui
                 return true;
 
             mSpellButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus - 1, mSpellButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mSpellButtons.size(), -1);
             mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -265,7 +265,7 @@ namespace MWGui
                 return true;
 
             mSpellButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus + 1, mSpellButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mSpellButtons.size(), 1);
             mSpellButtons[mControllerFocus].first->setStateSelected(true);
         }
         else
@@ -280,7 +280,7 @@ namespace MWGui
             else
             {
                 const int lineHeight = Settings::gui().mFontSize + 2;
-                mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+                mSpellsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * static_cast<int>(line - 5)));
             }
 
             // Warp the mouse to the selected spell to show the tooltip

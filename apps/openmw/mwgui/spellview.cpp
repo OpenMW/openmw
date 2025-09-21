@@ -19,22 +19,11 @@
 namespace MWGui
 {
 
-    const char* SpellView::sSpellModelIndex = "SpellModelIndex";
-
     SpellView::LineInfo::LineInfo(
         MyGUI::Widget* leftWidget, MyGUI::Widget* rightWidget, SpellModel::ModelIndex spellIndex)
         : mLeftWidget(leftWidget)
         , mRightWidget(rightWidget)
         , mSpellIndex(spellIndex)
-    {
-    }
-
-    SpellView::SpellView()
-        : mScrollView(nullptr)
-        , mShowCostColumn(true)
-        , mHighlightSelected(true)
-        , mControllerActiveWindow(false)
-        , mControllerFocus(0)
     {
     }
 
@@ -126,7 +115,7 @@ namespace MWGui
             t->setCaption(spell.mName + captionSuffix);
             t->setTextAlign(MyGUI::Align::Left);
             adjustSpellWidget(spell, i, t);
-            mButtons.emplace_back(std::make_pair(t, i));
+            mButtons.emplace_back(t, i);
 
             if (!spell.mCostColumn.empty() && mShowCostColumn)
             {
@@ -235,8 +224,8 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerFocus = wrap(mControllerFocus, mButtons.size());
-            updateControllerFocus(-1, mControllerFocus);
+            mControllerFocus = std::min(mControllerFocus, mButtons.size());
+            updateControllerFocus(mButtons.size(), mControllerFocus);
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -307,7 +296,7 @@ namespace MWGui
             widget->setUserString("Spell", spell.mId.serialize());
         }
 
-        widget->setUserString(sSpellModelIndex, MyGUI::utility::toString(index));
+        widget->setUserString("SpellModelIndex", MyGUI::utility::toString(index));
 
         widget->eventMouseWheel += MyGUI::newDelegate(this, &SpellView::onMouseWheelMoved);
         widget->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellView::onSpellSelected);
@@ -315,7 +304,7 @@ namespace MWGui
 
     SpellModel::ModelIndex SpellView::getSpellModelIndex(MyGUI::Widget* widget)
     {
-        return MyGUI::utility::parseInt(widget->getUserString(sSpellModelIndex));
+        return MyGUI::utility::parseInt(widget->getUserString("SpellModelIndex"));
     }
 
     void SpellView::onSpellSelected(MyGUI::Widget* sender)
@@ -349,14 +338,14 @@ namespace MWGui
         if (mButtons.empty())
             return;
 
-        int prevFocus = mControllerFocus;
+        size_t prevFocus = mControllerFocus;
         MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-
+        int delta = 0;
         switch (button)
         {
             case SDL_CONTROLLER_BUTTON_A:
                 // Select the focused item, if any.
-                if (mControllerFocus >= 0 && mControllerFocus < static_cast<int>(mButtons.size()))
+                if (mControllerFocus < mButtons.size())
                 {
                     onSpellSelected(mButtons[mControllerFocus].first);
                     MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
@@ -368,25 +357,25 @@ namespace MWGui
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_UP:
                 winMgr->restoreControllerTooltips();
-                mControllerFocus--;
+                delta = -1;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
                 winMgr->restoreControllerTooltips();
-                mControllerFocus++;
+                delta = 1;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
                 winMgr->restoreControllerTooltips();
-                mControllerFocus = std::max(0, mControllerFocus - 10);
+                delta = -10;
                 break;
             case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
                 winMgr->restoreControllerTooltips();
-                mControllerFocus = std::min(mControllerFocus + 10, static_cast<int>(mButtons.size()) - 1);
+                delta = 10;
                 break;
             case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
             {
                 // Jump to first item in previous group
-                int prevGroupIndex = 0;
-                for (int groupIndex : mGroupIndices)
+                size_t prevGroupIndex = 0;
+                for (size_t groupIndex : mGroupIndices)
                 {
                     if (groupIndex >= mControllerFocus)
                         break;
@@ -399,8 +388,8 @@ namespace MWGui
             case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
             {
                 // Jump to first item in next group
-                int newFocus = mControllerFocus;
-                for (int groupIndex : mGroupIndices)
+                size_t newFocus = mControllerFocus;
+                for (size_t groupIndex : mGroupIndices)
                 {
                     if (groupIndex > mControllerFocus)
                     {
@@ -418,27 +407,27 @@ namespace MWGui
                 return;
         }
 
-        mControllerFocus = wrap(mControllerFocus, mButtons.size());
+        mControllerFocus = wrap(mControllerFocus, mButtons.size(), delta);
 
         if (prevFocus != mControllerFocus)
             updateControllerFocus(prevFocus, mControllerFocus);
         else
-            updateControllerFocus(-1, mControllerFocus);
+            updateControllerFocus(mButtons.size(), mControllerFocus);
     }
 
-    void SpellView::updateControllerFocus(int prevFocus, int newFocus)
+    void SpellView::updateControllerFocus(size_t prevFocus, size_t newFocus)
     {
         if (mButtons.empty())
             return;
 
-        if (prevFocus >= 0 && prevFocus < static_cast<int>(mButtons.size()))
+        if (prevFocus < mButtons.size())
         {
             Gui::SharedStateButton* prev = mButtons[prevFocus].first;
             if (prev)
                 prev->onMouseLostFocus(nullptr);
         }
 
-        if (mControllerActiveWindow && newFocus >= 0 && newFocus < static_cast<int>(mButtons.size()))
+        if (mControllerActiveWindow && newFocus < mButtons.size())
         {
             Gui::SharedStateButton* focused = mButtons[newFocus].first;
             if (focused)

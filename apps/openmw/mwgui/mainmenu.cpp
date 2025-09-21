@@ -364,10 +364,10 @@ namespace MWGui
             // Trim off some of the excessive padding
             // TODO: perhaps do this within ImageButton?
             int height = requested.height;
-            button->setImageTile(MyGUI::IntSize(requested.width, requested.height - 16 * scale));
-            button->setCoord(
-                (maxwidth - requested.width / scale) / 2, curH, requested.width / scale, height / scale - 16);
-            curH += height / scale - 16;
+            button->setImageTile(MyGUI::IntSize(requested.width, static_cast<int>(requested.height - 16 * scale)));
+            button->setCoord(static_cast<int>((maxwidth - requested.width / scale) / 2), curH,
+                static_cast<int>(requested.width / scale), static_cast<int>(height / scale - 16));
+            curH += static_cast<int>(height / scale - 16);
         }
 
         if (state == MWBase::StateManager::State_NoGame)

@@ -75,8 +75,8 @@ namespace MWGui
         MyGUI::ScrollView* mScrollView;
         DisplayMode mDisplayMode;
 
-        int mControllerFocus = 0;
-        void updateControllerFocus(int prevFocus, int newFocus);
+        size_t mControllerFocus = 0;
+        void updateControllerFocus(size_t prevFocus, size_t newFocus);
     };
 }
 

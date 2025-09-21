@@ -90,7 +90,7 @@ namespace MWGui
 
     ItemModel::ModelIndex ContainerItemModel::getIndex(const ItemStack& item)
     {
-        size_t i = 0;
+        ModelIndex i = 0;
         for (ItemStack& itemStack : mItems)
         {
             if (itemStack == item)
@@ -106,7 +106,7 @@ namespace MWGui
         MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
         if (item.mBase.getContainerStore() == &store)
             throw std::runtime_error("Item to add needs to be from a different container!");
-        return *store.add(item.mBase, count, allowAutoEquip);
+        return *store.add(item.mBase, static_cast<int>(count), allowAutoEquip);
     }
 
     MWWorld::Ptr ContainerItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
@@ -115,8 +115,8 @@ namespace MWGui
         MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
         if (item.mBase.getContainerStore() == &store)
             throw std::runtime_error("Item to copy needs to be from a different container!");
-        MWWorld::ManualRef newRef(*MWBase::Environment::get().getESMStore(), item.mBase, count);
-        return *store.add(newRef.getPtr(), count, allowAutoEquip);
+        MWWorld::ManualRef newRef(*MWBase::Environment::get().getESMStore(), item.mBase, static_cast<int>(count));
+        return *store.add(newRef.getPtr(), static_cast<int>(count), allowAutoEquip);
     }
 
     void ContainerItemModel::removeItem(const ItemStack& item, size_t count)

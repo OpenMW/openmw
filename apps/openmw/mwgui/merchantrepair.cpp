@@ -191,7 +191,7 @@ namespace MWGui
                 return true;
 
             mButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
             mButtons[mControllerFocus].first->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -200,7 +200,7 @@ namespace MWGui
                 return true;
 
             mButtons[mControllerFocus].first->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
             mButtons[mControllerFocus].first->setStateSelected(true);
         }
 
@@ -213,7 +213,7 @@ namespace MWGui
             else
             {
                 const int lineHeight = Settings::gui().mFontSize + 2;
-                mList->setViewOffset(MyGUI::IntPoint(0, -lineHeight * (line - 5)));
+                mList->setViewOffset(MyGUI::IntPoint(0, -lineHeight * static_cast<int>(line - 5)));
             }
         }
 

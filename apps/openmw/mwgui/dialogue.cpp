@@ -186,13 +186,13 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
 
@@ -428,8 +428,8 @@ namespace MWGui
     {
         if (!mScrollBar->getVisible())
             return;
-        mScrollBar->setScrollPosition(
-            std::clamp<int>(mScrollBar->getScrollPosition() - rel * 0.3, 0, mScrollBar->getScrollRange() - 1));
+        mScrollBar->setScrollPosition(std::clamp<size_t>(
+            static_cast<size_t>(mScrollBar->getScrollPosition() - rel * 0.3), 0, mScrollBar->getScrollRange() - 1));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 
@@ -441,7 +441,7 @@ namespace MWGui
         }
     }
 
-    void DialogueWindow::onSelectListItem(const std::string& topic, int id)
+    void DialogueWindow::onSelectListItem(const std::string& topic, int /*id*/)
     {
         MWBase::DialogueManager* dialogueManager = MWBase::Environment::get().getDialogueManager();
 
@@ -607,7 +607,7 @@ namespace MWGui
     void DialogueWindow::updateTopicsPane()
     {
         std::string focusedTopic;
-        if (Settings::gui().mControllerMenus && mControllerFocus < static_cast<int>(mTopicsList->getItemCount()))
+        if (Settings::gui().mControllerMenus && mControllerFocus < mTopicsList->getItemCount())
             focusedTopic = mTopicsList->getItemNameAt(mControllerFocus);
 
         mTopicsList->clear();
@@ -970,10 +970,10 @@ namespace MWGui
                 else if (mControllerChoice >= 0 && mControllerChoice < static_cast<int>(mChoices.size()))
                     onChoiceActivated(mChoices[mControllerChoice].second);
             }
-            else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()))
+            else if (mControllerFocus == mTopicsList->getItemCount())
                 onGoodbyeActivated();
             else
-                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), mControllerFocus);
+                onSelectListItem(mTopicsList->getItemNameAt(mControllerFocus), static_cast<int>(mControllerFocus));
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_B && mChoices.empty())
@@ -1013,9 +1013,9 @@ namespace MWGui
             {
                 // Number of items is mTopicsList.length+1 because of "Goodbye" button.
                 setControllerFocus(mControllerFocus, false);
-                if (mControllerFocus >= static_cast<int>(mTopicsList->getItemCount()))
+                if (mControllerFocus >= mTopicsList->getItemCount())
                     mControllerFocus = 0;
-                else if (mControllerFocus == static_cast<int>(mTopicsList->getItemCount()) - 1)
+                else if (mControllerFocus == mTopicsList->getItemCount() - 1)
                     mControllerFocus = mTopicsList->getItemCount(); // "Goodbye" button
                 else if (mTopicsList->getItemNameAt(mControllerFocus + 1).empty())
                     mControllerFocus += 2; // Skip separator
@@ -1027,13 +1027,13 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER && mChoices.size() == 0)
         {
             setControllerFocus(mControllerFocus, false);
-            mControllerFocus = std::max(mControllerFocus - 5, 0);
+            mControllerFocus = mControllerFocus > 5 ? mControllerFocus - 5 : 0;
             setControllerFocus(mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER && mChoices.size() == 0)
         {
             setControllerFocus(mControllerFocus, false);
-            mControllerFocus = std::min(mControllerFocus + 5, static_cast<int>(mTopicsList->getItemCount()));
+            mControllerFocus = std::min(mControllerFocus + 5, mTopicsList->getItemCount());
             setControllerFocus(mControllerFocus, true);
         }
 

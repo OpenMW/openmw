@@ -62,8 +62,8 @@ namespace MWGui
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
             mNextPageButton->setSize(64 - 7, mNextPageButton->getSize().height);
-            mNextPageButton->setImageCoord(
-                MyGUI::IntCoord(0, 0, (64 - 7) * scale, mNextPageButton->getSize().height * scale));
+            mNextPageButton->setImageCoord(MyGUI::IntCoord(
+                0, 0, static_cast<int>((64 - 7) * scale), static_cast<int>(mNextPageButton->getSize().height * scale)));
         }
 
         mControllerButtons.mL1 = "#{Interface:Prev}";

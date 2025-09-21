@@ -49,7 +49,7 @@ namespace
     {
         struct DisplayState
         {
-            unsigned int mPage;
+            size_t mPage;
             Book mBook;
         };
 
@@ -159,8 +159,8 @@ namespace
             {
                 // english button has a 7 pixel wide strip of garbage on its right edge
                 nextButton->setSize(64 - 7, nextButton->getSize().height);
-                nextButton->setImageCoord(
-                    MyGUI::IntCoord(0, 0, (64 - 7) * nextButtonScale, nextButton->getSize().height * nextButtonScale));
+                nextButton->setImageCoord(MyGUI::IntCoord(0, 0, static_cast<int>((64 - 7) * nextButtonScale),
+                    static_cast<int>(nextButton->getSize().height * nextButtonScale)));
             }
 
             if (!questList)
@@ -246,12 +246,12 @@ namespace
             else
                 journalBook = createJournalBook();
 
-            pushBook(journalBook, 0);
+            pushBook(journalBook);
 
             // fast forward to the last page
             if (!mStates.empty())
             {
-                unsigned int& page = mStates.top().mPage;
+                size_t& page = mStates.top().mPage;
                 page = mStates.top().mBook->pageCount() - 1;
                 if (page % 2)
                     --page;
@@ -326,21 +326,21 @@ namespace
             MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
         }
 
-        void pushBook(Book& book, unsigned int page)
+        void pushBook(Book& book)
         {
             DisplayState bs;
-            bs.mPage = page;
+            bs.mPage = 0;
             bs.mBook = book;
             mStates.push(bs);
             updateShowingPages();
             updateCloseJournalButton();
         }
 
-        void replaceBook(Book& book, unsigned int page)
+        void replaceBook(Book& book)
         {
             assert(!mStates.empty());
             mStates.top().mBook = book;
-            mStates.top().mPage = page;
+            mStates.top().mPage = 0;
             updateShowingPages();
         }
 
@@ -361,8 +361,8 @@ namespace
         void updateShowingPages()
         {
             Book book;
-            unsigned int page;
-            unsigned int relPages;
+            size_t page;
+            size_t relPages;
 
             if (!mStates.empty())
             {
@@ -415,9 +415,9 @@ namespace
             Book topicBook = createTopicBook(linkId);
 
             if (mStates.size() > 1)
-                replaceBook(topicBook, 0);
+                replaceBook(topicBook);
             else
-                pushBook(topicBook, 0);
+                pushBook(topicBook);
 
             setVisible(OptionsOverlay, false);
             setVisible(OptionsBTN, true);
@@ -447,9 +447,9 @@ namespace
             Book book = createQuestBook(name);
 
             if (mStates.size() > 1)
-                replaceBook(book, 0);
+                replaceBook(book);
             else
-                pushBook(book, 0);
+                pushBook(book);
 
             setVisible(OptionsOverlay, false);
             setVisible(OptionsBTN, true);
@@ -604,7 +604,7 @@ namespace
             if (Settings::gui().mControllerMenus)
             {
                 addControllerButtons(list, mSelectedQuest);
-                setControllerFocusedQuest(MWGui::wrap(mSelectedQuest, mButtons.size()));
+                setControllerFocusedQuest(std::min(mSelectedQuest, mButtons.size()));
             }
 
             if (mAllQuests)
@@ -663,7 +663,7 @@ namespace
                 return;
             if (!mStates.empty())
             {
-                unsigned int& page = mStates.top().mPage;
+                size_t& page = mStates.top().mPage;
                 Book book = mStates.top().mBook;
 
                 if (page + 2 < book->pageCount())
@@ -682,7 +682,7 @@ namespace
                 return;
             if (!mStates.empty())
             {
-                unsigned int& page = mStates.top().mPage;
+                size_t& page = mStates.top().mPage;
 
                 if (page >= 2)
                 {
@@ -718,8 +718,8 @@ namespace
 
         void setIndexControllerFocus(bool focused)
         {
-            int col = mSelectedIndex / mIndexRowCount;
-            int row = mSelectedIndex % mIndexRowCount;
+            size_t col = mSelectedIndex / mIndexRowCount;
+            size_t row = mSelectedIndex % mIndexRowCount;
             mTopicIndexBook->setColour(col, row, 0, focused ? MWGui::journalHeaderColour : MyGUI::Colour::Black);
         }
 
@@ -728,7 +728,7 @@ namespace
             setIndexControllerFocus(false);
 
             int numChars = mEncoding == ToUTF8::WINDOWS_1251 ? 30 : 26;
-            int col = mSelectedIndex / mIndexRowCount;
+            size_t col = mSelectedIndex / mIndexRowCount;
 
             if (offset == -1) // Up
             {
@@ -836,7 +836,7 @@ namespace
                         return true;
 
                     // Scroll through the list of quests or topics
-                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest - 1, mButtons.size()));
+                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest, mButtons.size(), -1));
                 }
                 else
                     moveSelectedIndex(-1);
@@ -849,19 +849,19 @@ namespace
                         return true;
 
                     // Scroll through the list of quests or topics
-                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest + 1, mButtons.size()));
+                    setControllerFocusedQuest(MWGui::wrap(mSelectedQuest, mButtons.size(), 1));
                 }
                 else
                     moveSelectedIndex(1);
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT && !mQuestMode && !mTopicsMode)
-                moveSelectedIndex(-mIndexRowCount);
+                moveSelectedIndex(-static_cast<int>(mIndexRowCount));
             else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT && !mQuestMode && !mTopicsMode)
-                moveSelectedIndex(mIndexRowCount);
+                moveSelectedIndex(static_cast<int>(mIndexRowCount));
             else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER && (mQuestMode || mTopicsMode))
             {
                 // Scroll up 5 items in the list of quests or topics
-                setControllerFocusedQuest(std::max(static_cast<int>(mSelectedQuest) - 5, 0));
+                setControllerFocusedQuest(mSelectedQuest >= 5 ? mSelectedQuest - 5 : 0);
             }
             else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER && (mQuestMode || mTopicsMode))
             {

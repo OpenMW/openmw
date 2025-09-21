@@ -163,9 +163,9 @@ namespace MWGui
         MyGUI::IntPoint getPosition(int cellX, int cellY, float nx, float ny) const;
         MyGUI::IntPoint getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const;
         MyGUI::IntCoord getMarkerCoordinates(
-            float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
+            float worldX, float worldY, MarkerUserData& markerPos, unsigned short markerSize) const;
         MyGUI::Widget* createDoorMarker(const std::string& name, float x, float y) const;
-        MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const;
+        MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, unsigned short markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
         virtual void centerView();
@@ -225,7 +225,7 @@ namespace MWGui
         MyGUI::Button* mDeleteButton;
 
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
-        int mControllerFocus = 0;
+        size_t mControllerFocus = 0;
     };
 
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop

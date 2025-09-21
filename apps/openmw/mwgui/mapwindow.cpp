@@ -92,7 +92,8 @@ namespace
             return Constants::CellGridRadius;
         if (!Settings::terrain().mDistantTerrain)
             return Constants::CellGridRadius;
-        const int viewingDistanceInCells = Settings::camera().mViewingDistance / Constants::CellSizeInUnits;
+        const int viewingDistanceInCells
+            = static_cast<int>(Settings::camera().mViewingDistance / Constants::CellSizeInUnits);
         return std::clamp(
             viewingDistanceInCells, Constants::CellGridRadius, Settings::map().mMaxLocalViewingDistance.get());
     }
@@ -255,8 +256,8 @@ namespace MWGui
     {
         // normalized cell coordinates
         auto mapWidgetSize = getWidgetSize();
-        return MyGUI::IntPoint(std::round((nX + cellX - mGrid.left) * mapWidgetSize),
-            std::round((nY - cellY + mGrid.bottom) * mapWidgetSize));
+        return MyGUI::IntPoint(static_cast<int>(std::round((nX + cellX - mGrid.left) * mapWidgetSize)),
+            static_cast<int>(std::round((nY - cellY + mGrid.bottom) * mapWidgetSize)));
     }
 
     MyGUI::IntPoint LocalMapBase::getMarkerPosition(float worldX, float worldY, MarkerUserData& markerPos) const
@@ -286,7 +287,7 @@ namespace MWGui
     }
 
     MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(
-        float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const
+        float worldX, float worldY, MarkerUserData& markerPos, unsigned short markerSize) const
     {
         int halfMarkerSize = markerSize / 2;
         auto position = getMarkerPosition(worldX, worldY, markerPos);
@@ -320,7 +321,7 @@ namespace MWGui
         mLocalMap->setViewOffset(viewOffset);
     }
 
-    MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const
+    MyGUI::IntCoord LocalMapBase::getMarkerCoordinates(MyGUI::Widget* widget, unsigned short markerSize) const
     {
         MarkerUserData& markerPos(*widget->getUserData<MarkerUserData>());
         auto position = getPosition(markerPos.cellX, markerPos.cellY, markerPos.nX, markerPos.nY);
@@ -453,7 +454,7 @@ namespace MWGui
         }
 
         if (oldSize != MyGUI::IntSize{ mGrid.width(), mGrid.height() })
-            setCanvasSize(mLocalMap, mGrid, getWidgetSize());
+            setCanvasSize(mLocalMap, mGrid, static_cast<int>(getWidgetSize()));
 
         // Delay the door markers update until scripts have been given a chance to run.
         // If we don't do this, door markers that should be disabled will still appear on the map.
@@ -665,8 +666,7 @@ namespace MWGui
         {
             std::vector<std::string> destNotes;
             CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
-            for (CustomMarkerCollection::ContainerType::const_iterator iter = markers.first; iter != markers.second;
-                 ++iter)
+            for (auto iter = markers.first; iter != markers.second; ++iter)
                 destNotes.push_back(iter->second.mNote);
 
             MyGUI::Widget* markerWidget = nullptr;
@@ -733,9 +733,10 @@ namespace MWGui
     void LocalMapBase::updateLocalMap()
     {
         auto mapWidgetSize = getWidgetSize();
-        setCanvasSize(mLocalMap, mGrid, getWidgetSize());
+        setCanvasSize(mLocalMap, mGrid, static_cast<int>(getWidgetSize()));
 
-        const auto size = MyGUI::IntSize(std::ceil(mapWidgetSize), std::ceil(mapWidgetSize));
+        const auto size
+            = MyGUI::IntSize(static_cast<int>(std::ceil(mapWidgetSize)), static_cast<int>(std::ceil(mapWidgetSize)));
         for (auto& entry : mMaps)
         {
             const auto position = getPosition(entry.mCellX, entry.mCellY, 0, 0);
@@ -1570,7 +1571,7 @@ namespace MWGui
         {
             if (getDeleteButtonShown())
             {
-                mControllerFocus = wrap(mControllerFocus - 1, 3);
+                mControllerFocus = wrap(mControllerFocus, 3, -1);
                 mDeleteButton->setStateSelected(mControllerFocus == 0);
                 mOkButton->setStateSelected(mControllerFocus == 1);
                 mCancelButton->setStateSelected(mControllerFocus == 2);
@@ -1586,7 +1587,7 @@ namespace MWGui
         {
             if (getDeleteButtonShown())
             {
-                mControllerFocus = wrap(mControllerFocus + 1, 3);
+                mControllerFocus = wrap(mControllerFocus, 3, 1);
                 mDeleteButton->setStateSelected(mControllerFocus == 0);
                 mOkButton->setStateSelected(mControllerFocus == 1);
                 mCancelButton->setStateSelected(mControllerFocus == 2);

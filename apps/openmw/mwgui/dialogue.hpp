@@ -69,7 +69,7 @@ namespace MWGui
         Gui::AutoSizedTextBox* mGoldLabel;
 
         std::vector<MyGUI::Button*> mButtons;
-        int mControllerFocus = 0;
+        size_t mControllerFocus = 0;
 
         void adjustAction(MyGUI::Widget* action, int& totalHeight);
 
@@ -230,7 +230,7 @@ namespace MWGui
         std::unique_ptr<ResponseCallback> mGreetingCallback;
 
         void setControllerFocus(size_t index, bool focused);
-        int mControllerFocus = 0;
+        size_t mControllerFocus = 0;
         int mControllerChoice = -1;
 
         void updateTopicFormat();

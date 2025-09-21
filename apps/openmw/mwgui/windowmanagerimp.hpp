@@ -394,7 +394,7 @@ namespace MWGui
         WindowBase* getActiveControllerWindow() override;
         int getControllerMenuHeight() override;
         void cycleActiveControllerWindow(bool next) override;
-        void setActiveControllerWindow(GuiMode mode, int activeIndex) override;
+        void setActiveControllerWindow(GuiMode mode, size_t activeIndex) override;
         bool getControllerTooltipVisible() const override { return mControllerTooltipVisible; }
         void setControllerTooltipVisible(bool visible) override;
         bool getControllerTooltipEnabled() const override { return mControllerTooltipEnabled; }
@@ -513,7 +513,7 @@ namespace MWGui
         // The currently active stack of GUI modes (top mode is the one we are in).
         std::vector<GuiMode> mGuiModes;
         // The active window for controller mode for each GUI mode.
-        std::map<GuiMode, int> mActiveControllerWindows;
+        std::map<GuiMode, size_t> mActiveControllerWindows;
         // Current tooltip visibility state (can be disabled by mouse movement)
         bool mControllerTooltipVisible = false;
         // User preference for tooltips (persists across mouse/controller switches)

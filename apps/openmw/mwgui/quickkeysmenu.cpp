@@ -290,8 +290,8 @@ namespace MWGui
         if (texture)
             scale = texture->getHeight() / 64.f;
 
-        mSelected->button->setFrame(
-            "textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(0, 0, 44 * scale, 44 * scale));
+        mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds",
+            MyGUI::IntCoord(0, 0, static_cast<int>(44 * scale), static_cast<int>(44 * scale)));
         mSelected->button->setIcon(item);
 
         mSelected->button->setUserString("ToolTipType", "ItemPtr");
@@ -562,9 +562,9 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
             mParent->onCancelButtonClicked(mCancelButton);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
-            mControllerFocus = wrap(mControllerFocus - 1, 4);
+            mControllerFocus = wrap(mControllerFocus, 4, -1);
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
-            mControllerFocus = wrap(mControllerFocus + 1, 4);
+            mControllerFocus = wrap(mControllerFocus, 4, 1);
 
         mItemButton->setStateSelected(mControllerFocus == 0);
         mMagicButton->setStateSelected(mControllerFocus == 1);

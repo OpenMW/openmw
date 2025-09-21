@@ -391,7 +391,7 @@ namespace MWBase
         virtual int getControllerMenuHeight() = 0;
         /// Cycle to the next window to receive controller events
         virtual void cycleActiveControllerWindow(bool next) = 0;
-        virtual void setActiveControllerWindow(MWGui::GuiMode mode, int activeIndex) = 0;
+        virtual void setActiveControllerWindow(MWGui::GuiMode mode, size_t activeIndex) = 0;
         virtual bool getControllerTooltipVisible() const = 0;
         virtual void setControllerTooltipVisible(bool visible) = 0;
         virtual bool getControllerTooltipEnabled() const = 0;

@@ -135,7 +135,7 @@ namespace MWGui
             mSections[section].mLines[line].mRuns[run].mStyle->mNormalColour = colour;
         }
 
-        virtual ~TypesetBookImpl() {}
+        virtual ~TypesetBookImpl() = default;
 
         Range addContent(const BookTypesetter::Utf8Span& text)
         {
@@ -285,7 +285,7 @@ namespace MWGui
         Book::Content const* mCurrentContent;
         Alignment mCurrentAlignment;
 
-        Typesetter(size_t width, size_t height)
+        Typesetter(int width, int height)
             : mPageWidth(width)
             , mPageHeight(height)
             , mSection(nullptr)
@@ -297,7 +297,7 @@ namespace MWGui
             mBook = std::make_shared<Book>();
         }
 
-        virtual ~Typesetter() {}
+        virtual ~Typesetter() = default;
 
         Style* createStyle(const std::string& fontName, const Colour& fontColour, bool useBookFont) override
         {
