@@ -37,46 +37,6 @@ namespace MWGui
         virtual ~TypesetBook() = default;
     };
 
-    struct GlyphInfo
-    {
-        char codePoint;
-        float width;
-        float height;
-        float advance;
-        float bearingX;
-        float bearingY;
-        bool charFound;
-        MyGUI::FloatRect uvRect;
-
-        GlyphInfo(MyGUI::IFont* font, MyGUI::Char ch)
-        {
-            const MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
-            if (gi)
-            {
-                const float scale = font->getDefaultHeight() / static_cast<float>(Settings::gui().mFontSize);
-
-                codePoint = gi->codePoint;
-                bearingX = (int)gi->bearingX / scale;
-                bearingY = (int)gi->bearingY / scale;
-                width = (int)gi->width / scale;
-                height = (int)gi->height / scale;
-                advance = (int)gi->advance / scale;
-                uvRect = gi->uvRect;
-                charFound = true;
-            }
-            else
-            {
-                codePoint = 0;
-                bearingX = 0;
-                bearingY = 0;
-                width = 0;
-                height = 0;
-                advance = 0;
-                charFound = false;
-            }
-        }
-    };
-
     /// A factory class for creating a typeset book instance.
     struct BookTypesetter
     {

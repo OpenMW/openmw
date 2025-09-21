@@ -12,6 +12,24 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/values.hpp>
 
+namespace
+{
+    std::optional<MyGUI::GlyphInfo> getGlyphInfo(MyGUI::IFont* font, MyGUI::Char ch)
+    {
+        const MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
+        if (!gi)
+            return {};
+        const float scale = font->getDefaultHeight() / static_cast<float>(Settings::gui().mFontSize);
+        MyGUI::GlyphInfo info = *gi;
+        info.bearingX /= scale;
+        info.bearingY /= scale;
+        info.width /= scale;
+        info.height /= scale;
+        info.advance /= scale;
+        return info;
+    }
+}
+
 namespace MWGui
 {
     struct TypesetBookImpl;
@@ -531,9 +549,9 @@ namespace MWGui
 
                 while (!stream.eof() && !ucsLineBreak(stream.peek()) && ucsBreakingSpace(stream.peek()))
                 {
-                    MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
-                    if (info.charFound)
-                        spaceWidth += static_cast<int>(info.advance + info.bearingX);
+                    std::optional<MyGUI::GlyphInfo> info = getGlyphInfo(style->mFont, stream.peek());
+                    if (info)
+                        spaceWidth += static_cast<int>(info->advance + info->bearingX);
                     stream.consume();
                 }
 
@@ -541,9 +559,9 @@ namespace MWGui
 
                 while (!stream.eof() && !ucsLineBreak(stream.peek()) && !ucsBreakingSpace(stream.peek()))
                 {
-                    MWGui::GlyphInfo info = GlyphInfo(style->mFont, stream.peek());
-                    if (info.charFound)
-                        wordWidth += static_cast<int>(info.advance + info.bearingX);
+                    std::optional<MyGUI::GlyphInfo> info = getGlyphInfo(style->mFont, stream.peek());
+                    if (info)
+                        wordWidth += static_cast<int>(info->advance + info->bearingX);
                     stream.consume();
                 }
 
@@ -790,32 +808,32 @@ namespace MWGui
 
             void emitGlyph(wchar_t ch)
             {
-                MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
+                std::optional<MyGUI::GlyphInfo> info = getGlyphInfo(mFont, ch);
 
-                if (!info.charFound)
+                if (!info)
                     return;
 
                 MyGUI::FloatRect vr;
 
-                vr.left = mCursor.left + info.bearingX;
-                vr.top = mCursor.top + info.bearingY;
-                vr.right = vr.left + info.width;
-                vr.bottom = vr.top + info.height;
+                vr.left = mCursor.left + info->bearingX;
+                vr.top = mCursor.top + info->bearingY;
+                vr.right = vr.left + info->width;
+                vr.bottom = vr.top + info->height;
 
-                MyGUI::FloatRect tr = info.uvRect;
+                MyGUI::FloatRect tr = info->uvRect;
 
                 if (mRenderXform.clip(vr, tr))
                     quad(vr, tr);
 
-                mCursor.left += static_cast<int>(info.bearingX + info.advance);
+                mCursor.left += static_cast<int>(info->bearingX + info->advance);
             }
 
             void emitSpace(wchar_t ch)
             {
-                MWGui::GlyphInfo info = GlyphInfo(mFont, ch);
+                std::optional<MyGUI::GlyphInfo> info = getGlyphInfo(mFont, ch);
 
-                if (info.charFound)
-                    mCursor.left += static_cast<int>(info.bearingX + info.advance);
+                if (info)
+                    mCursor.left += static_cast<int>(info->bearingX + info->advance);
             }
 
         private:
