@@ -27,16 +27,16 @@ public:
 
     void apply(osg::Switch& switchNode) override
     {
-        constexpr int noIndex = -1;
+        constexpr unsigned noIndex = static_cast<unsigned>(-1);
 
-        int initialIndex = noIndex;
+        unsigned initialIndex = noIndex;
         if (!switchNode.getUserValue("initialIndex", initialIndex))
         {
             for (size_t i = 0; i < switchNode.getValueList().size(); ++i)
             {
                 if (switchNode.getValueList()[i])
                 {
-                    initialIndex = i;
+                    initialIndex = static_cast<unsigned>(i);
                     break;
                 }
             }

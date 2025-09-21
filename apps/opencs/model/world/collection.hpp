@@ -367,7 +367,7 @@ namespace CSMWorld
     template <typename ESXRecordT>
     int Collection<ESXRecordT>::getSize() const
     {
-        return mRecords.size();
+        return static_cast<int>(mRecords.size());
     }
 
     template <typename ESXRecordT>
@@ -391,7 +391,7 @@ namespace CSMWorld
     template <typename ESXRecordT>
     int Collection<ESXRecordT>::getColumns() const
     {
-        return mColumns.size();
+        return static_cast<int>(mColumns.size());
     }
 
     template <typename ESXRecordT>

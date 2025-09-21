@@ -308,24 +308,27 @@ void CSVWidget::SceneToolTextureBrush::showPanel(const QPoint& position)
 
 void CSVWidget::SceneToolTextureBrush::updatePanel()
 {
-    mTable->setRowCount(mBrushHistory.size());
+    mTable->setRowCount(static_cast<int>(mBrushHistory.size()));
 
-    for (int i = mBrushHistory.size() - 1; i >= 0; --i)
+    for (size_t i = mBrushHistory.size(); i > 0; --i)
     {
         CSMWorld::IdCollection<ESM::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
         int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-        const int index = landtexturesCollection.searchId(mBrushHistory[i]);
+        const int index = landtexturesCollection.searchId(mBrushHistory[i - 1]);
+        const int row = static_cast<int>(i - 1);
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
-            mTable->setItem(i, 1,
+            mTable->setItem(row, 1,
                 new QTableWidgetItem(landtexturesCollection.getData(index, landTextureFilename).value<QString>()));
-            mTable->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(mBrushHistory[i].getRefIdString())));
+            mTable->setItem(
+                row, 0, new QTableWidgetItem(QString::fromStdString(mBrushHistory[i - 1].getRefIdString())));
         }
         else
         {
-            mTable->setItem(i, 1, new QTableWidgetItem("Invalid/deleted texture"));
-            mTable->setItem(i, 0, new QTableWidgetItem(QString::fromStdString(mBrushHistory[i].getRefIdString())));
+            mTable->setItem(row, 1, new QTableWidgetItem("Invalid/deleted texture"));
+            mTable->setItem(
+                row, 0, new QTableWidgetItem(QString::fromStdString(mBrushHistory[i - 1].getRefIdString())));
         }
     }
 }

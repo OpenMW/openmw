@@ -41,7 +41,7 @@ namespace CSMWorld
         point.mConnectionNum = 0;
 
         points.insert(points.begin() + position, point);
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -58,7 +58,7 @@ namespace CSMWorld
         // Do not remove dangling edges, does not work with current undo mechanism
         // Do not automatically adjust indices, what would be done with dangling edges?
         points.erase(points.begin() + rowToRemove);
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -67,7 +67,7 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
         pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList>&>(nestedTable).mNestedTable;
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -462,7 +462,7 @@ namespace CSMWorld
                 soundRef.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
                 break;
             case 1:
-                soundRef.mChance = static_cast<unsigned char>(value.toInt());
+                soundRef.mChance = static_cast<uint8_t>(value.toInt());
                 break;
             default:
                 throw std::runtime_error("Region sounds subcolumn index out of range");
@@ -543,7 +543,7 @@ namespace CSMWorld
 
         // default row
         ESM::DialogueCondition condStruct;
-        condStruct.mIndex = conditions.size();
+        condStruct.mIndex = static_cast<uint8_t>(conditions.size());
 
         conditions.insert(conditions.begin() + position, condStruct);
 
@@ -855,7 +855,7 @@ namespace CSMWorld
 
     int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
     {
-        return record.get().mData.mBonus.size();
+        return static_cast<int>(record.get().mData.mBonus.size());
     }
 
     void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const

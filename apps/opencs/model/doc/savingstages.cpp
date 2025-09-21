@@ -406,7 +406,7 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         if (references != nullptr)
         {
             writeReferences(persistentRefs, interior);
-            cellRecord.saveTempMarker(writer, static_cast<int>(references->size()) - persistentRefs.size());
+            cellRecord.saveTempMarker(writer, static_cast<int>(references->size() - persistentRefs.size()));
             writeReferences(tempRefs, interior);
         }
 

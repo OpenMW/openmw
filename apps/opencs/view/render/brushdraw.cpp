@@ -190,7 +190,7 @@ void CSVRender::BrushDraw::buildCircleGeometry(const float& radius, const osg::V
     osg::ref_ptr<osg::Vec4Array> colors(new osg::Vec4Array());
 
     const int amountOfPoints = 128;
-    const float step((osg::PI * 2.0f) / static_cast<float>(amountOfPoints));
+    const float step((osg::PIf * 2.0f) / static_cast<float>(amountOfPoints));
     const float brushOutlineHeight(1.0f);
     osg::Vec4f lineColor(1.0f, 1.0f, 1.0f, 0.6f);
 

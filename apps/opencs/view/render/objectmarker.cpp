@@ -203,11 +203,11 @@ namespace CSVRender
 
     void ObjectMarker::detachMarker()
     {
-        for (std::size_t index = mRootNode->getNumParents(); index > 0;)
+        for (unsigned index = mRootNode->getNumParents(); index > 0;)
             mRootNode->getParent(--index)->removeChild(mRootNode);
 
         osg::ref_ptr<osg::Group> widgetRoot = mMarkerNodes["unitArrows"]->asGroup();
-        for (std::size_t index = widgetRoot->getNumChildren(); index > 0;)
+        for (unsigned index = widgetRoot->getNumChildren(); index > 0;)
             widgetRoot->getChild(--index)->setNodeMask(Mask_Hidden);
     }
 
