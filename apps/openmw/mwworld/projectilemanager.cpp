@@ -581,7 +581,7 @@ namespace MWWorld
             assert(target != caster);
 
             MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = !active ? Misc::Convert::toOsg(projectile->getHitPosition()) : pos;
+            cast.mHitPosition = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mItem = magicBoltState.mItem;

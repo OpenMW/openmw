@@ -178,13 +178,13 @@ namespace
                 const btTransform closedDoorTransform(
                     Misc::Convert::makeBulletQuaternion(ptr.getCellRef().getPosition()), transform.getOrigin());
 
-                const auto start = Misc::Convert::toOsg(closedDoorTransform(center + toPoint));
+                const auto start = Misc::Convert::makeOsgVec3f(closedDoorTransform(center + toPoint));
                 const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), { ptr }, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap
                         | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
-                const auto end = Misc::Convert::toOsg(closedDoorTransform(center - toPoint));
+                const auto end = Misc::Convert::makeOsgVec3f(closedDoorTransform(center - toPoint));
                 const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), { ptr }, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap
                         | MWPhysics::CollisionType_Water);

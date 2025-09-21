@@ -37,6 +37,11 @@ namespace Misc::Convert
         return osg::Vec3d(vec.x(), vec.y(), vec.z());
     }
 
+    inline osg::Vec3f makeOsgVec3f(const btVector3& vec)
+    {
+        return toOsg(vec);
+    }
+
     inline osg::Quat toOsg(const btQuaternion& quat)
     {
         return osg::Quat(quat.x(), quat.y(), quat.z(), quat.w());
