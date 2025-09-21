@@ -86,7 +86,7 @@ namespace MWBase
         virtual std::string getControllerButtonIcon(int button) = 0;
         virtual std::string getControllerAxisIcon(int axis) = 0;
 
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
 

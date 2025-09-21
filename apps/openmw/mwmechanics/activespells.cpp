@@ -58,9 +58,9 @@ namespace
             effect.mEffectId = enam.mData.mEffectID;
             effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
             effect.mMagnitude = 0.f;
-            effect.mMinMagnitude = enam.mData.mMagnMin;
-            effect.mMaxMagnitude = enam.mData.mMagnMax;
-            effect.mEffectIndex = enam.mIndex;
+            effect.mMinMagnitude = static_cast<float>(enam.mData.mMagnMin);
+            effect.mMaxMagnitude = static_cast<float>(enam.mData.mMagnMax);
+            effect.mEffectIndex = static_cast<int32_t>(enam.mIndex);
             effect.mFlags = ESM::ActiveEffect::Flag_None;
             if (ignoreResistances)
                 effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Resistances;

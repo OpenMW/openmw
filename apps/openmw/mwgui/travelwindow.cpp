@@ -203,14 +203,13 @@ namespace MWGui
         if (mPtr.getCell()->isExterior())
         {
             ESM::Position playerPos = player.getRefData().getPosition();
-            float d
-                = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d
-                / MWBase::Environment::get()
-                    .getESMStore()
-                    ->get<ESM::GameSetting>()
-                    .find("fTravelTimeMult")
-                    ->mValue.getFloat());
+            float d = (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(playerPos.pos[0], playerPos.pos[1])).length();
+            const float fTravelTimeMult = MWBase::Environment::get()
+                                              .getESMStore()
+                                              ->get<ESM::GameSetting>()
+                                              .find("fTravelTimeMult")
+                                              ->mValue.getFloat();
+            int hours = static_cast<int>(d / fTravelTimeMult);
             MWBase::Environment::get().getMechanicsManager()->rest(hours, true);
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }

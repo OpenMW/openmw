@@ -220,7 +220,7 @@ namespace
                   return rec.mFaction.serializeText();
               });
         recordInfoBindingsClass["filterActorFactionRank"]
-            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int64_t> {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mRank == -1)
                   {
                       return sol::nullopt;
@@ -260,7 +260,7 @@ namespace
                   return rec.mPcFaction.serializeText();
               });
         recordInfoBindingsClass["filterPlayerFactionRank"]
-            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int> {
+            = sol::readonly_property([](const ESM::DialInfo& rec) -> sol::optional<int64_t> {
                   if (rec.mData.mType == ESM::Dialogue::Type::Journal || rec.mData.mPCrank == -1)
                   {
                       return sol::nullopt;

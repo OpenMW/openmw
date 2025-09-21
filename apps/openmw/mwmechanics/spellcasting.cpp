@@ -92,7 +92,7 @@ namespace MWMechanics
             }
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
-            static const int unitsPerFoot = ceil(Constants::UnitsPerFoot);
+            static const int unitsPerFoot = static_cast<int>(std::ceil(Constants::UnitsPerFoot));
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
                 mHitPosition, static_cast<float>(effectInfo.mData.mArea * unitsPerFoot), objects);
             for (const MWWorld::Ptr& affected : objects)
@@ -204,8 +204,8 @@ namespace MWMechanics
             effect.mEffectId = enam.mData.mEffectID;
             effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
             effect.mMagnitude = 0.f;
-            effect.mMinMagnitude = enam.mData.mMagnMin;
-            effect.mMaxMagnitude = enam.mData.mMagnMax;
+            effect.mMinMagnitude = static_cast<float>(enam.mData.mMagnMin);
+            effect.mMaxMagnitude = static_cast<float>(enam.mData.mMagnMax);
             effect.mTimeLeft = 0.f;
             effect.mEffectIndex = enam.mIndex;
             effect.mFlags = ESM::ActiveEffect::Flag_None;

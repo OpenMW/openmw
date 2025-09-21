@@ -442,7 +442,7 @@ namespace MWWorld
         fillGlobalVariables();
     }
 
-    int World::countSavedGameRecords() const
+    size_t World::countSavedGameRecords() const
     {
         return mWorldModel.countSavedGameRecords() + mStore.countSavedGameRecords()
             + mGlobalVariables.countSavedGameRecords() + mProjectileManager->countSavedGameRecords()
@@ -454,7 +454,7 @@ namespace MWWorld
             + 1; // random state.
     }
 
-    int World::countSavedGameCells() const
+    size_t World::countSavedGameCells() const
     {
         return mWorldModel.countSavedGameRecords();
     }
@@ -899,7 +899,7 @@ namespace MWWorld
         {
             // When we fast-forward time, we should recharge magic items
             // in all loaded cells, using game world time
-            float duration = hours * 3600;
+            float duration = static_cast<float>(hours * 3600);
             const float timeScaleFactor = mTimeManager->getGameTimeScale();
             if (timeScaleFactor != 0.0f)
                 duration /= timeScaleFactor;
@@ -1280,9 +1280,9 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            objRot[0] = std::clamp<float>(objRot[0], -osg::PI_2, osg::PI_2);
-            objRot[1] = Misc::normalizeAngle(objRot[1]);
-            objRot[2] = Misc::normalizeAngle(objRot[2]);
+            objRot[0] = std::clamp(objRot[0], -osg::PI_2f, osg::PI_2f);
+            objRot[1] = static_cast<float>(Misc::normalizeAngle(objRot[1]));
+            objRot[2] = static_cast<float>(Misc::normalizeAngle(objRot[2]));
         }
 
         ptr.getRefData().setPosition(pos);
@@ -1335,8 +1335,8 @@ namespace MWWorld
             && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
-            osg::Vec3f traced
-                = mPhysics->traceDown(ptr, pos, ESM::getCellSize(ptr.getCell()->getCell()->getWorldSpace()));
+            float height = static_cast<float>(ESM::getCellSize(ptr.getCell()->getCell()->getWorldSpace()));
+            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, height);
             pos.z() = std::min(pos.z(), traced.z());
         }
 
@@ -1372,8 +1372,8 @@ namespace MWWorld
                 break;
         }
         targetPos.z() += distance / 2.f; // move up a bit to get out from geometry, will snap down later
-        osg::Vec3f traced
-            = mPhysics->traceDown(actor, targetPos, ESM::getCellSize(actor.getCell()->getCell()->getWorldSpace()));
+        float height = static_cast<float>(ESM::getCellSize(actor.getCell()->getCell()->getWorldSpace()));
+        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, height);
         if (traced != pos)
         {
             esmPos.pos[0] = traced.x();
@@ -2379,7 +2379,7 @@ namespace MWWorld
             result |= Rest_PlayerIsUnderwater;
 
         float fallHeight = player.getClass().getCreatureStats(player).getFallHeight();
-        float epsilon = 1e-4;
+        float epsilon = 1e-4f;
         if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon))
             || isFlying(player))
             result |= Rest_PlayerIsInAir;
@@ -3366,7 +3366,7 @@ namespace MWWorld
         mWorldModel.forEachLoadedCellStore([hours](CellStore& store) { store.rest(hours); });
     }
 
-    void World::rechargeItems(double duration, bool activeOnly)
+    void World::rechargeItems(float duration, bool activeOnly)
     {
         MWWorld::Ptr player = getPlayerPtr();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
@@ -3531,7 +3531,7 @@ namespace MWWorld
     float World::feetToGameUnits(float feet)
     {
         // Original engine rounds size upward
-        static const int unitsPerFoot = ceil(Constants::UnitsPerFoot);
+        static const float unitsPerFoot = std::ceil(Constants::UnitsPerFoot);
         return feet * unitsPerFoot;
     }
 

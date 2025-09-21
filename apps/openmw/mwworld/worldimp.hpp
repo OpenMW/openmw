@@ -214,8 +214,8 @@ namespace MWWorld
 
         void clear() override;
 
-        int countSavedGameRecords() const override;
-        int countSavedGameCells() const override;
+        size_t countSavedGameRecords() const override;
+        size_t countSavedGameCells() const override;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
 
@@ -516,7 +516,7 @@ namespace MWWorld
         ///< check if the player is allowed to rest
 
         void rest(double hours) override;
-        void rechargeItems(double duration, bool activeOnly);
+        void rechargeItems(float duration, bool activeOnly);
 
         /// \todo Probably shouldn't be here
         MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr) override;

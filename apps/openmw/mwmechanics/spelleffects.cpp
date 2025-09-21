@@ -41,7 +41,8 @@ namespace
         if (effect.mMinMagnitude == effect.mMaxMagnitude)
             return effect.mMinMagnitude;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        return effect.mMinMagnitude + Misc::Rng::rollDice(effect.mMaxMagnitude - effect.mMinMagnitude + 1, prng);
+        return effect.mMinMagnitude
+            + Misc::Rng::rollDice(static_cast<int>(effect.mMaxMagnitude - effect.mMinMagnitude + 1), prng);
     }
 
     void modifyAiSetting(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect,
@@ -365,8 +366,8 @@ namespace
         {
             const ESM::Spell* spell
                 = spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary) ? spellParams.getSpell() : nullptr;
-            float magnitudeMult
-                = MWMechanics::getEffectMultiplier(effect.mEffectId, target, caster, spell, &magnitudes);
+            float magnitudeMult = MWMechanics::getEffectMultiplier(
+                static_cast<short>(effect.mEffectId), target, caster, spell, &magnitudes);
             if (magnitudeMult == 0)
             {
                 // Fully resisted, show message

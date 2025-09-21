@@ -439,7 +439,7 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
                 MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(
-                    player, itemStack.mBase, mPtr, itemStack.mCount);
+                    player, itemStack.mBase, mPtr, static_cast<int>(itemStack.mCount));
 
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();

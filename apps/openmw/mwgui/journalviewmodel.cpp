@@ -172,11 +172,8 @@ namespace MWGui
                     mModel->mKeywordSearch.highlightKeywords(utf8text.begin(), utf8text.end(), matches);
 
                     std::string::const_iterator i = utf8text.begin();
-                    for (std::vector<KeywordSearchT::Match>::const_iterator it = matches.begin(); it != matches.end();
-                         ++it)
+                    for (const KeywordSearchT::Match& match : matches)
                     {
-                        const KeywordSearchT::Match& match = *it;
-
                         if (i != match.mBeg)
                             visitor(0, i - utf8text.begin(), match.mBeg - utf8text.begin());
 

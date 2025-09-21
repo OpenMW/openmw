@@ -100,7 +100,7 @@ namespace MWBase
         /// @note Controlled by an option, gets discarded when dialogue ends by default
         virtual void applyBarterDispositionChange(int delta) = 0;
 
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 

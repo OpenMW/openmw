@@ -382,7 +382,7 @@ namespace MWGui
     void EditEffectDialog::onAreaChanged(MyGUI::ScrollBar* sender, size_t pos)
     {
         mAreaValue->setCaption(MyGUI::utility::toString(pos));
-        mEffect.mArea = pos;
+        mEffect.mArea = static_cast<int32_t>(pos);
         eventEffectModified(mEffect);
     }
 
@@ -1014,7 +1014,7 @@ namespace MWGui
     void EffectEditorBase::onEffectAdded(ESM::ENAMstruct effect)
     {
         mEffects.push_back(effect);
-        mSelectedEffect = mEffects.size() - 1;
+        mSelectedEffect = static_cast<int>(mEffects.size() - 1);
 
         updateEffectsView();
     }

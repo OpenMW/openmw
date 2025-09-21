@@ -492,7 +492,7 @@ namespace MWGui
         if (!mResourceSystem->getVFS()->exists(hitFaderTexture))
         {
             hitFaderTexture = "textures\\player_hit_01.dds";
-            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+            hitFaderCoord = MyGUI::FloatCoord(0.2f, 0.25f, 0.6f, 0.5f);
         }
         auto hitFader = std::make_unique<ScreenFader>(hitFaderTexture, hitFaderLayout, hitFaderCoord);
         mHitFader = hitFader.get();
@@ -790,8 +790,8 @@ namespace MWGui
             while (mMessageBoxManager->readPressedButton(false) == -1
                 && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                const double dt
-                    = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+                const float dt
+                    = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                           .count();
 
                 mKeyboardNavigation->onFrame();
@@ -906,8 +906,7 @@ namespace MWGui
             if (state.mWindows.empty())
                 return nullptr;
 
-            size_t activeIndex
-                = std::clamp<size_t>(mActiveControllerWindows[mode], 0, state.mWindows.size() - 1);
+            size_t activeIndex = std::clamp<size_t>(mActiveControllerWindows[mode], 0, state.mWindows.size() - 1);
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -1920,10 +1919,10 @@ namespace MWGui
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        const float x = rect.mX * viewSize.width;
-        const float y = rect.mY * viewSize.height;
-        const float w = rect.mW * viewSize.width;
-        const float h = rect.mH * viewSize.height;
+        const int x = static_cast<int>(rect.mX * viewSize.width);
+        const int y = static_cast<int>(rect.mY * viewSize.height);
+        const int w = static_cast<int>(rect.mW * viewSize.width);
+        const int h = static_cast<int>(rect.mH * viewSize.height);
         window->setCoord(x, y, w, h);
 
         settings.mIsMaximized.set(!settings.mIsMaximized.get());
@@ -1997,11 +1996,10 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (CustomMarkerCollection::ContainerType::const_iterator it = mCustomMarkers.begin();
-             it != mCustomMarkers.end(); ++it)
+        for (const auto& [_, marker] : mCustomMarkers)
         {
             writer.startRecord(ESM::REC_MARK);
-            it->second.save(writer);
+            marker.save(writer);
             writer.endRecord(ESM::REC_MARK);
         }
     }
@@ -2027,7 +2025,7 @@ namespace MWGui
         }
     }
 
-    int WindowManager::countSavedGameRecords() const
+    size_t WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
             + 1 // QuickKeysMenu
@@ -2075,8 +2073,8 @@ namespace MWGui
             = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            const double dt
-                = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+            const float dt
+                = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                       .count();
 
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
@@ -2425,8 +2423,8 @@ namespace MWGui
             if (image.valid())
             {
                 // everything looks good, send it to the cursor manager
-                const Uint8 hotspotX = imgSetPointer->getHotSpot().left;
-                const Uint8 hotspotY = imgSetPointer->getHotSpot().top;
+                const Uint8 hotspotX = static_cast<Uint8>(imgSetPointer->getHotSpot().left);
+                const Uint8 hotspotY = static_cast<Uint8>(imgSetPointer->getHotSpot().top);
                 int rotation = imgSetPointer->getRotation();
                 MyGUI::IntSize pointerSize = imgSetPointer->getSize();
 

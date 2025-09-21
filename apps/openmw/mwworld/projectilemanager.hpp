@@ -67,7 +67,7 @@ namespace MWWorld
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
     private:
         osg::ref_ptr<osg::Group> mParent;

@@ -289,7 +289,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         writer.setAuthor("");
         writer.setDescription("");
 
-        int recordCount = 1 // saved game header
+        size_t recordCount = 1 // saved game header
             + MWBase::Environment::get().getJournal()->countSavedGameRecords()
             + MWBase::Environment::get().getLuaManager()->countSavedGameRecords()
             + MWBase::Environment::get().getWorld()->countSavedGameRecords()
@@ -298,7 +298,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
             + MWBase::Environment::get().getMechanicsManager()->countSavedGameRecords()
             + MWBase::Environment::get().getInputManager()->countSavedGameRecords()
             + MWBase::Environment::get().getWindowManager()->countSavedGameRecords();
-        writer.setRecordCount(recordCount);
+        writer.setRecordCount(static_cast<int>(recordCount));
 
         writer.save(stream);
 
@@ -325,7 +325,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         MWBase::Environment::get().getWindowManager()->write(writer, listener);
 
         // Ensure we have written the number of records that was estimated
-        if (writer.getRecordCount() != recordCount + 1) // 1 extra for TES3 record
+        if (static_cast<size_t>(writer.getRecordCount()) != recordCount + 1) // 1 extra for TES3 record
             Log(Debug::Warning) << "Warning: number of written savegame records does not match. Estimated: "
                                 << recordCount + 1 << ", written: " << writer.getRecordCount();
 

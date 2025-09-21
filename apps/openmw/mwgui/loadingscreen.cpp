@@ -209,8 +209,7 @@ namespace MWGui
     {
         if (!mSplashScreens.empty())
         {
-            std::string const& randomSplash
-                = mSplashScreens.at(Misc::Rng::rollDice(static_cast<int>(mSplashScreens.size())));
+            std::string const& randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed

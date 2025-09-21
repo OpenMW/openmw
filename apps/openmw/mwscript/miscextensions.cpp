@@ -95,7 +95,7 @@ namespace
             if (stateset)
             {
                 const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
-                for (size_t i = 0; i < texAttributes.size(); i++)
+                for (unsigned i = 0; i < static_cast<unsigned>(texAttributes.size()); i++)
                 {
                     const osg::StateAttribute* attr = stateset->getTextureAttribute(i, osg::StateAttribute::TEXTURE);
                     if (!attr)
@@ -115,7 +115,7 @@ namespace
         }
     };
 
-    void addToLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, uint16_t level)
     {
         for (auto& levelItem : list->mList)
         {
@@ -1578,7 +1578,7 @@ namespace MWScript
 
                 ESM::CreatureLevList listCopy
                     = *MWBase::Environment::get().getESMStore()->get<ESM::CreatureLevList>().find(levId);
-                addToLevList(&listCopy, creatureId, level);
+                addToLevList(&listCopy, creatureId, static_cast<uint16_t>(level));
                 MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
@@ -1616,7 +1616,7 @@ namespace MWScript
 
                 ESM::ItemLevList listCopy
                     = *MWBase::Environment::get().getESMStore()->get<ESM::ItemLevList>().find(levId);
-                addToLevList(&listCopy, itemId, level);
+                addToLevList(&listCopy, itemId, static_cast<uint16_t>(level));
                 MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };

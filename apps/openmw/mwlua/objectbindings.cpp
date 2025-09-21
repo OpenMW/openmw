@@ -259,16 +259,17 @@ namespace MWLua
             };
             ownerT["factionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
 
-            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<size_t> {
+            auto getOwnerFactionRank = [](const OwnerT& o) -> sol::optional<int64_t> {
                 int rank = o.mObj.ptr().getCellRef().getFactionRank();
                 if (rank < 0)
                     return sol::nullopt;
                 return LuaUtil::toLuaIndex(rank);
             };
-            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<size_t> factionRank) {
+            auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<int64_t> factionRank) {
                 if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
                     throw std::runtime_error("Local scripts can set an owner faction rank only on self");
-                o.mObj.ptr().getCellRef().setFactionRank(LuaUtil::fromLuaIndex(factionRank.value_or(0)));
+                int64_t rank = std::max(0, LuaUtil::fromLuaIndex(factionRank.value_or(0)));
+                o.mObj.ptr().getCellRef().setFactionRank(static_cast<int>(rank));
             };
             ownerT["factionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
 

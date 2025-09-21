@@ -217,7 +217,7 @@ namespace MWScript
         }
     }
 
-    int GlobalScripts::countSavedGameRecords() const
+    size_t GlobalScripts::countSavedGameRecords() const
     {
         return mScripts.size();
     }

@@ -151,7 +151,7 @@ namespace MWDialogue
         return iter->second.getIndex();
     }
 
-    int Journal::countSavedGameRecords() const
+    size_t Journal::countSavedGameRecords() const
     {
         std::size_t count = mQuests.size();
 
@@ -163,7 +163,7 @@ namespace MWDialogue
         for (const auto& [_, topic] : mTopics)
             count += topic.size();
 
-        return static_cast<int>(count);
+        return count;
     }
 
     void Journal::write(ESM::ESMWriter& writer, Loading::Listener& progress) const

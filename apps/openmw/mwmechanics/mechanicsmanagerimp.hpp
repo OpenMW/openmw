@@ -182,7 +182,7 @@ namespace MWMechanics
         bool onOpen(const MWWorld::Ptr& ptr) override;
         void onClose(const MWWorld::Ptr& ptr) override;
 
-        int countSavedGameRecords() const override;
+        size_t countSavedGameRecords() const override;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& listener) const override;
 

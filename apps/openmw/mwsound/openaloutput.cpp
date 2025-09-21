@@ -311,7 +311,7 @@ namespace MWSound
 
         bool isPlaying();
         double getStreamDelay() const;
-        double getStreamOffset() const;
+        float getStreamOffset() const;
 
         float getCurrentLoudness() const;
 
@@ -469,7 +469,7 @@ namespace MWSound
     OpenAL_SoundStream::~OpenAL_SoundStream()
     {
         if (mBuffers[0] && alIsBuffer(mBuffers[0]))
-            alDeleteBuffers(mBuffers.size(), mBuffers.data());
+            alDeleteBuffers(static_cast<ALsizei>(mBuffers.size()), mBuffers.data());
         alGetError();
 
         mDecoder->close();
@@ -477,7 +477,7 @@ namespace MWSound
 
     bool OpenAL_SoundStream::init(bool getLoudnessData)
     {
-        alGenBuffers(mBuffers.size(), mBuffers.data());
+        alGenBuffers(static_cast<ALsizei>(mBuffers.size()), mBuffers.data());
         ALenum err = getALError();
         if (err != AL_NO_ERROR)
             return false;
@@ -509,7 +509,7 @@ namespace MWSound
                 break;
         }
 
-        mFrameSize = framesToBytes(1, chans, type);
+        mFrameSize = static_cast<ALuint>(framesToBytes(1, chans, type));
         mBufferSize = static_cast<ALuint>(sBufferLength * mSampleRate);
         mBufferSize *= mFrameSize;
 
@@ -552,11 +552,11 @@ namespace MWSound
         return d;
     }
 
-    double OpenAL_SoundStream::getStreamOffset() const
+    float OpenAL_SoundStream::getStreamOffset() const
     {
         ALint state = AL_STOPPED;
         ALint offset;
-        double t;
+        float t;
 
         alGetSourcei(mSource, AL_SAMPLE_OFFSET, &offset);
         alGetSourcei(mSource, AL_SOURCE_STATE, &state);
@@ -565,13 +565,13 @@ namespace MWSound
             ALint queued;
             alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
             ALint inqueue = mBufferSize / mFrameSize * queued - offset;
-            t = (double)(mDecoder->getSampleOffset() - inqueue) / (double)mSampleRate;
+            t = (mDecoder->getSampleOffset() - inqueue) / static_cast<float>(mSampleRate);
         }
         else
         {
             /* Underrun, or not started yet. The decoder offset is where we'll play
              * next. */
-            t = (double)mDecoder->getSampleOffset() / (double)mSampleRate;
+            t = mDecoder->getSampleOffset() / static_cast<float>(mSampleRate);
         }
 
         getALError();
@@ -642,7 +642,7 @@ namespace MWSound
                         mLoudnessAnalyzer->analyzeLoudness(data);
 
                     ALuint bufid = mBuffers[mCurrentBufIdx];
-                    alBufferData(bufid, mFormat, data.data(), data.size(), mSampleRate);
+                    alBufferData(bufid, mFormat, data.data(), static_cast<ALsizei>(data.size()), mSampleRate);
                     alSourceQueueBuffers(mSource, 1, &bufid);
                     mCurrentBufIdx = (mCurrentBufIdx + 1) % mBuffers.size();
                 }
@@ -801,7 +801,7 @@ namespace MWSound
         if (alEventControlSOFT)
         {
             static const std::array<ALenum, 1> events{ { AL_EVENT_TYPE_DISCONNECTED_SOFT } };
-            alEventControlSOFT(events.size(), events.data(), AL_TRUE);
+            alEventControlSOFT(static_cast<ALsizei>(events.size()), events.data(), AL_TRUE);
             alEventCallbackSOFT(&OpenALOutput::eventCallback, this);
         }
         else
@@ -1065,7 +1065,7 @@ namespace MWSound
         ALint size;
         ALuint buf = 0;
         alGenBuffers(1, &buf);
-        alBufferData(buf, format, data.data(), data.size(), srate);
+        alBufferData(buf, format, data.data(), static_cast<ALsizei>(data.size()), srate);
         alGetBufferi(buf, AL_SIZE, &size);
         if (getALError() != AL_NO_ERROR)
         {
@@ -1412,10 +1412,10 @@ namespace MWSound
         return stream->getStreamDelay();
     }
 
-    double OpenALOutput::getStreamOffset(Stream* sound)
+    float OpenALOutput::getStreamOffset(Stream* sound)
     {
         if (!sound->mHandle)
-            return 0.0;
+            return 0.f;
         OpenAL_SoundStream* stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
         std::lock_guard<std::mutex> lock(mStreamThread->mMutex);
         return stream->getStreamOffset();
@@ -1523,7 +1523,7 @@ namespace MWSound
         }
         if (!sources.empty())
         {
-            alSourcePausev(sources.size(), sources.data());
+            alSourcePausev(static_cast<ALsizei>(sources.size()), sources.data());
             getALError();
         }
     }
@@ -1578,7 +1578,7 @@ namespace MWSound
         }
         if (!sources.empty())
         {
-            alSourcePlayv(sources.size(), sources.data());
+            alSourcePlayv(static_cast<ALsizei>(sources.size()), sources.data());
             getALError();
         }
     }

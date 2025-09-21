@@ -748,10 +748,10 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
-        float capacity = player.getClass().getCapacity(player);
+        int capacity = static_cast<int>(player.getClass().getCapacity(player));
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
+        mEncumbranceBar->setValue(static_cast<int>(std::ceil(encumbrance)), capacity);
     }
 
     void InventoryWindow::onFrame(float dt)

@@ -653,7 +653,7 @@ namespace MWDialogue
         return info != nullptr;
     }
 
-    int DialogueManager::countSavedGameRecords() const
+    size_t DialogueManager::countSavedGameRecords() const
     {
         return 1; // known topics
     }

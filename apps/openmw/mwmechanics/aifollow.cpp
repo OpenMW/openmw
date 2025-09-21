@@ -244,7 +244,7 @@ namespace MWMechanics
         follow->mData.mX = mX;
         follow->mData.mY = mY;
         follow->mData.mZ = mZ;
-        follow->mData.mDuration = mDuration;
+        follow->mData.mDuration = static_cast<int16_t>(mDuration);
         follow->mTargetId = mTargetActorRefId;
         follow->mTargetActorId = mTargetActorId;
         follow->mRemainingDuration = mRemainingDuration;

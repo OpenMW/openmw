@@ -226,7 +226,7 @@ namespace MWScript
                 {
                     if (!repeat)
                         repeat = true;
-                    Interpreter::Type_Integer idleValue = std::clamp(runtime[0].mInteger, 0, 255);
+                    auto idleValue = static_cast<unsigned char>(std::clamp(runtime[0].mInteger, 0, 255));
                     idleList.push_back(idleValue);
                     runtime.pop();
                     --arg0;

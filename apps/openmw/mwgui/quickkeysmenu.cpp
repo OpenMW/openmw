@@ -333,8 +333,8 @@ namespace MWGui
         if (texture)
             scale = texture->getHeight() / 64.f;
 
-        mSelected->button->setFrame(
-            "textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(0, 0, 44 * scale, 44 * scale));
+        const int diameter = static_cast<int>(44 * scale);
+        mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(0, 0, diameter, diameter));
         mSelected->button->setIcon(path);
 
         if (mMagicSelectionDialog)

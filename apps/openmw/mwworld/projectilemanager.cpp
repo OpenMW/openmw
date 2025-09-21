@@ -144,8 +144,8 @@ namespace
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mData.mEffectID);
             lightDiffuseColor += magicEffect->getColor();
         }
-        int numberOfEffects = effects.mList.size();
-        lightDiffuseColor /= numberOfEffects;
+        size_t numberOfEffects = effects.mList.size();
+        lightDiffuseColor /= static_cast<float>(numberOfEffects);
 
         return lightDiffuseColor;
     }
@@ -793,7 +793,7 @@ namespace MWWorld
         return false;
     }
 
-    int ProjectileManager::countSavedGameRecords() const
+    size_t ProjectileManager::countSavedGameRecords() const
     {
         return mMagicBolts.size() + mProjectiles.size();
     }

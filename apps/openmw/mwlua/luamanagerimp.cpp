@@ -281,8 +281,8 @@ namespace MWLua
         }
         mInputEvents.clear();
         mLuaEvents.callMenuEventHandlers();
-        double frameDuration = MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
-            ? 0.0
+        float frameDuration = MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
+            ? 0.f
             : MWBase::Environment::get().getFrameDuration();
         mInputActions.update(frameDuration);
         mMenuScripts.onFrame(frameDuration);
@@ -826,7 +826,7 @@ namespace MWLua
 
     void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        stats.setAttribute(frameNumber, "Lua UsedMemory", mLua.getTotalMemoryUsage());
+        stats.setAttribute(frameNumber, "Lua UsedMemory", static_cast<double>(mLua.getTotalMemoryUsage()));
     }
 
     std::string LuaManager::formatResourceUsageStats() const
@@ -836,11 +836,11 @@ namespace MWLua
 
         std::stringstream out;
 
-        constexpr int nameW = 50;
+        constexpr unsigned nameW = 50;
         constexpr int valueW = 12;
 
-        auto outMemSize = [&](int64_t bytes) {
-            constexpr int64_t limit = 10000;
+        auto outMemSize = [&](size_t bytes) {
+            constexpr size_t limit = 10000;
             out << std::right << std::setw(valueW - 3);
             if (bytes < limit)
                 out << bytes << " B ";
@@ -924,21 +924,22 @@ namespace MWLua
                 out << "\n " << std::setw(nameW) << ""; // if path is too long, break line
             out << std::right;
             out << std::setw(valueW) << static_cast<int64_t>(activeStats[i].mAvgInstructionCount);
-            outMemSize(activeStats[i].mMemoryUsage);
-            outMemSize(mLua.getMemoryUsageByScriptIndex(i) - activeStats[i].mMemoryUsage);
+            outMemSize(static_cast<size_t>(activeStats[i].mMemoryUsage));
+            outMemSize(mLua.getMemoryUsageByScriptIndex(static_cast<unsigned>(i))
+                - static_cast<uint64_t>(activeStats[i].mMemoryUsage));
 
             if (isGlobal)
                 out << std::setw(valueW * 2) << "NA (global script)";
-            else if (isMenu && (!selectedScripts || !selectedScripts->hasScript(i)))
+            else if (isMenu && (!selectedScripts || !selectedScripts->hasScript(static_cast<int>(i))))
                 out << std::setw(valueW * 2) << "NA (menu script)";
             else if (selectedPtr.isEmpty())
                 out << std::setw(valueW * 2) << "NA (not selected) ";
-            else if (!selectedScripts || !selectedScripts->hasScript(i))
+            else if (!selectedScripts || !selectedScripts->hasScript(static_cast<int>(i)))
                 out << std::setw(valueW * 2) << "NA";
             else
             {
                 out << std::setw(valueW) << static_cast<int64_t>(selectedStats[i].mAvgInstructionCount);
-                outMemSize(selectedStats[i].mMemoryUsage);
+                outMemSize(static_cast<size_t>(selectedStats[i].mMemoryUsage));
             }
             out << "\n";
         }

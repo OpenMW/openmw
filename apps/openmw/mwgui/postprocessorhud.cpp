@@ -279,7 +279,7 @@ namespace MWGui
 
     void PostProcessorHud::notifyMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        int offset = mConfigLayout->getViewOffset().top + rel * 0.3;
+        double offset = mConfigLayout->getViewOffset().top + rel * 0.3;
         if (offset > 0)
             mConfigLayout->setViewOffset(MyGUI::IntPoint(0, 0));
         else

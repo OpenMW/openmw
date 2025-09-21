@@ -217,15 +217,15 @@ void MWMechanics::Alchemy::updateEffects()
         if (magnitude > 0 && duration > 0)
         {
             ESM::ENAMstruct effect;
-            effect.mEffectID = effectKey.mId;
+            effect.mEffectID = static_cast<int16_t>(effectKey.mId);
 
             effect.mAttribute = -1;
             effect.mSkill = -1;
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = ESM::Skill::refIdToIndex(effectKey.mArg);
+                effect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(effectKey.mArg));
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = ESM::Attribute::refIdToIndex(effectKey.mArg);
+                effect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(effectKey.mArg));
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -395,8 +395,7 @@ void MWMechanics::Alchemy::setAlchemist(const MWWorld::Ptr& npc)
 
     MWWorld::ContainerStore& store = npc.getClass().getContainerStore(npc);
 
-    for (MWWorld::ContainerStoreIterator iter(store.begin(MWWorld::ContainerStore::Type_Apparatus));
-         iter != store.end(); ++iter)
+    for (auto iter(store.begin(MWWorld::ContainerStore::Type_Apparatus)); iter != store.end(); ++iter)
     {
         MWWorld::LiveCellRef<ESM::Apparatus>* ref = iter->get<ESM::Apparatus>();
 
@@ -604,7 +603,8 @@ std::string MWMechanics::Alchemy::suggestPotionName()
     return effects.begin()->toString();
 }
 
-std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld::ConstPtr& ptr, const float alchemySkill)
+std::vector<std::string> MWMechanics::Alchemy::effectsDescription(
+    const MWWorld::ConstPtr& ptr, const float alchemySkill)
 {
     std::vector<std::string> effects;
 

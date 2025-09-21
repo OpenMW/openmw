@@ -278,10 +278,10 @@ namespace MWMechanics
                                                      .find("fEffectCostMult")
                                                      ->mValue.getFloat();
 
-            float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
-            x *= 0.1 * magicEffect->mData.mBaseCost;
+            float x = 0.5f * (std::max(1, minMagn) + std::max(1, maxMagn));
+            x *= 0.1f * magicEffect->mData.mBaseCost;
             x *= 1 + duration;
-            x += 0.05 * std::max(1, effect.mData.mArea) * magicEffect->mData.mBaseCost;
+            x += 0.05f * std::max(1, effect.mData.mArea) * magicEffect->mData.mBaseCost;
             x *= fEffectCostMult;
 
             if (effect.mData.mRange == ESM::RT_Target)

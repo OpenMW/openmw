@@ -151,7 +151,7 @@ namespace MWGui
             mReviewDialog->onFrame(duration);
     }
 
-    void CharacterCreation::spawnDialog(const char id)
+    void CharacterCreation::spawnDialog(const GuiMode id)
     {
         try
         {

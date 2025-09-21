@@ -175,7 +175,7 @@ namespace MWWorld
         , mIsStorm(mWindSpeed > stormWindSpeed)
         , mRainSpeed(rainSpeed)
         , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
-        , mRainMaxRaindrops(Fallback::Map::getFloat("Weather_" + name + "_Max_Raindrops"))
+        , mRainMaxRaindrops(Fallback::Map::getInt("Weather_" + name + "_Max_Raindrops"))
         , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
         , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
         , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
@@ -709,7 +709,7 @@ namespace MWWorld
             auto rIt = mRegions.find(regionID);
             if (rIt != mRegions.end())
             {
-                rIt->second.setWeather(std::distance(mWeatherSettings.begin(), wIt));
+                rIt->second.setWeather(wIt->mScriptId);
                 regionalWeatherChanged(rIt->first, rIt->second);
             }
         }
@@ -981,7 +981,7 @@ namespace MWWorld
     {
         // In Morrowind, when the player sleeps/waits, serves jail time, travels, or trains, all weather transitions are
         // immediately applied, regardless of whatever transition time might have been remaining.
-        mTimePassed += hours;
+        mTimePassed += static_cast<float>(hours);
         mFastForward = !incremental ? true : mFastForward;
     }
 
@@ -1093,8 +1093,8 @@ namespace MWWorld
     {
         static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
         ESM::StringRefId id(name);
-        Weather weather(
-            id, mWeatherSettings.size(), name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
+        Weather weather(id, static_cast<int>(mWeatherSettings.size()), name, fStromWindSpeed, mRainSpeed, dlFactor,
+            dlOffset, particleEffect);
 
         mWeatherSettings.push_back(std::move(weather));
     }

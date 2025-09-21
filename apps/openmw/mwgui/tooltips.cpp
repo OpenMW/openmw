@@ -961,8 +961,7 @@ namespace MWGui
         const std::string& name = ESM::MagicEffect::indexToGmstString(id);
 
         std::string icon = effect->mIcon;
-        int slashPos = icon.rfind('\\');
-        icon.insert(slashPos + 1, "b_");
+        icon.insert(icon.rfind('\\') + 1, "b_");
         icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");

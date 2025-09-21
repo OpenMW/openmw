@@ -72,7 +72,7 @@ namespace MWWorld
         }
     }
 
-    int Globals::countSavedGameRecords() const
+    size_t Globals::countSavedGameRecords() const
     {
         return mVariables.size();
     }

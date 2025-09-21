@@ -331,7 +331,7 @@ namespace MWGui
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
         void readRecord(ESM::ESMReader& reader, uint32_t type) override;
-        int countSavedGameRecords() const override;
+        size_t countSavedGameRecords() const override;
 
         /// Does the current stack of GUI-windows permit saving?
         bool isSavingAllowed() const override;

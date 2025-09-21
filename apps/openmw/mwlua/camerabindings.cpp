@@ -105,14 +105,14 @@ namespace MWLua
             double fovTan = std::tan(osg::DegreesToRadians(renderingManager->getFieldOfView()) / 2);
             osg::Matrixf invertedViewMatrix;
             invertedViewMatrix.invert(camera->getViewMatrix());
-            float x = (pos.x() * 2 - 1) * aspect * fovTan;
-            float y = (1 - pos.y() * 2) * fovTan;
+            float x = static_cast<float>((pos.x() * 2 - 1) * aspect * fovTan);
+            float y = static_cast<float>((1 - pos.y() * 2) * fovTan);
             return invertedViewMatrix.preMult(osg::Vec3f(x, y, -1)) - camera->getPosition();
         };
 
         api["worldToViewportVector"] = [camera](osg::Vec3f pos) {
-            const double width = Settings::video().mResolutionX;
-            const double height = Settings::video().mResolutionY;
+            const int width = Settings::video().mResolutionX;
+            const int height = Settings::video().mResolutionY;
 
             osg::Matrix windowMatrix
                 = osg::Matrix::translate(1.0, 1.0, 1.0) * osg::Matrix::scale(0.5 * width, 0.5 * height, 0.5);

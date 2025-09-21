@@ -670,7 +670,7 @@ namespace MWGui
                 {
                     int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
 
-                    append_run(i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + fontHeight);
+                    appendRun(i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + fontHeight);
 
                     left = mLine->mRect.right;
                 }
@@ -679,8 +679,8 @@ namespace MWGui
             for (PartialTextConstIterator i = mPartialWord.begin(); i != mPartialWord.end(); ++i)
             {
                 int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
-
-                append_run(i->mStyle, i->mBegin, i->mEnd, i->mEnd - i->mBegin, left + i->mWidth, top + fontHeight);
+                const int numChars = static_cast<int>(i->mEnd - i->mBegin);
+                appendRun(i->mStyle, i->mBegin, i->mEnd, numChars, left + i->mWidth, top + fontHeight);
 
                 left = mLine->mRect.right;
             }
@@ -689,7 +689,7 @@ namespace MWGui
             mPartialWord.clear();
         }
 
-        void append_run(StyleImpl* style, Utf8Stream::Point begin, Utf8Stream::Point end, int pc, int right, int bottom)
+        void appendRun(StyleImpl* style, Utf8Stream::Point begin, Utf8Stream::Point end, int pc, int right, int bottom)
         {
             if (mSection == nullptr)
             {

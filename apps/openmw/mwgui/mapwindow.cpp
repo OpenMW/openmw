@@ -1004,7 +1004,8 @@ namespace MWGui
 
         for (auto& [marker, col] : mGlobalMapMarkers)
         {
-            marker.widget->setCoord(createMarkerCoords(marker.position.x(), marker.position.y(), col.size()));
+            marker.widget->setCoord(
+                createMarkerCoords(marker.position.x(), marker.position.y(), static_cast<float>(col.size())));
             marker.widget->setVisible(marker.widget->getHeight() >= 6);
         }
     }
@@ -1036,10 +1037,10 @@ namespace MWGui
             // Restore the window to pinned size.
             MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-            const float x = Settings::windows().mMapX * viewSize.width;
-            const float y = Settings::windows().mMapY * viewSize.height;
-            const float w = Settings::windows().mMapW * viewSize.width;
-            const float h = Settings::windows().mMapH * viewSize.height;
+            const int x = static_cast<int>(Settings::windows().mMapX * viewSize.width);
+            const int y = static_cast<int>(Settings::windows().mMapY * viewSize.height);
+            const int w = static_cast<int>(Settings::windows().mMapW * viewSize.width);
+            const int h = static_cast<int>(Settings::windows().mMapH * viewSize.height);
             window->setCoord(x, y, w, h);
         }
     }
@@ -1063,10 +1064,10 @@ namespace MWGui
         worldPosToGlobalMapImageSpace(
             (x + 0.5f) * Constants::CellSizeInUnits, (y + 0.5f) * Constants::CellSizeInUnits, worldX, worldY);
 
-        const float markerSize = getMarkerSize(agregatedWeight);
+        const float markerSize = getMarkerSize(static_cast<size_t>(agregatedWeight));
         const float halfMarkerSize = markerSize / 2.0f;
         return MyGUI::IntCoord(static_cast<int>(worldX - halfMarkerSize), static_cast<int>(worldY - halfMarkerSize),
-            markerSize, markerSize);
+            static_cast<int>(markerSize), static_cast<int>(markerSize));
     }
 
     MyGUI::Widget* MapWindow::createMarker(const std::string& name, float x, float y, float agregatedWeight)
@@ -1075,7 +1076,7 @@ namespace MWGui
             "MarkerButton", createMarkerCoords(x, y, agregatedWeight), MyGUI::Align::Default);
         markerWidget->setVisible(markerWidget->getHeight() >= 6.0);
         markerWidget->setUserString("Caption_TextOneLine", "#{sCell=" + name + "}");
-        setGlobalMapMarkerTooltip(markerWidget, x, y);
+        setGlobalMapMarkerTooltip(markerWidget, static_cast<int>(x), static_cast<int>(y));
 
         markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
 
@@ -1098,14 +1099,15 @@ namespace MWGui
         cell.second = y;
         if (mMarkers.insert(cell).second)
         {
-            MapMarkerType mapMarkerWidget = { osg::Vec2f(x, y), createMarker(name, x, y, 0) };
+            const osg::Vec2f pos(static_cast<float>(x), static_cast<float>(y));
+            MapMarkerType mapMarkerWidget = { pos, createMarker(name, pos.x(), pos.y(), 0) };
             mGlobalMapMarkers.emplace(mapMarkerWidget, std::vector<MapMarkerType>());
 
             const std::string markerName = name.substr(0, name.find(','));
             auto& entry = mGlobalMapMarkersByName[markerName];
             if (!entry.widget)
             {
-                entry = { osg::Vec2f(x, y), entry.widget }; // update the coords
+                entry = { pos, entry.widget }; // update the coords
 
                 entry.widget = createMarker(markerName, entry.position.x(), entry.position.y(), 1);
                 mGlobalMapMarkers.emplace(entry, std::vector<MapMarkerType>{ entry });
@@ -1123,7 +1125,8 @@ namespace MWGui
                                       [](const auto& left, const auto& right) { return left + right.position; })
                     / float(elements.size());
 
-                marker.widget->setCoord(createMarkerCoords(marker.position.x(), marker.position.y(), elements.size()));
+                marker.widget->setCoord(
+                    createMarkerCoords(marker.position.x(), marker.position.y(), static_cast<float>(elements.size())));
                 marker.widget->setVisible(marker.widget->getHeight() >= 6);
             }
         }
@@ -1167,16 +1170,16 @@ namespace MWGui
     {
         float markerSize = 12.f * mGlobalMapZoom;
         if (mGlobalMapZoom < 1)
-            return markerSize * std::sqrt(agregatedWeight); // we want to see agregated object
+            return static_cast<float>(markerSize * std::sqrt(agregatedWeight)); // we want to see agregated object
         return agregatedWeight ? 0 : markerSize; // we want to see only original markers (i.e. non agregated)
     }
 
     void MapWindow::resizeGlobalMap()
     {
-        mGlobalMap->setCanvasSize(
-            mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
-        mGlobalMapImage->setSize(
-            mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
+        int width = static_cast<int>(mGlobalMapRender->getWidth() * mGlobalMapZoom);
+        int height = static_cast<int>(mGlobalMapRender->getHeight() * mGlobalMapZoom);
+        mGlobalMap->setCanvasSize(width, height);
+        mGlobalMapImage->setSize(width, height);
     }
 
     void MapWindow::worldPosToGlobalMapImageSpace(float x, float y, float& imageX, float& imageY) const
@@ -1191,7 +1194,8 @@ namespace MWGui
         LocalMapBase::updateCustomMarkers();
 
         for (auto& [widgetPair, ignore] : mGlobalMapMarkers)
-            setGlobalMapMarkerTooltip(widgetPair.widget, widgetPair.position.x(), widgetPair.position.y());
+            setGlobalMapMarkerTooltip(widgetPair.widget, static_cast<int>(widgetPair.position.x()),
+                static_cast<int>(widgetPair.position.y()));
     }
 
     void MapWindow::onDragStart(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)

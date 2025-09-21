@@ -865,10 +865,10 @@ namespace MWPhysics
 
     void PhysicsSystem::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        stats.setAttribute(frameNumber, "Physics Actors", mActors.size());
-        stats.setAttribute(frameNumber, "Physics Objects", mObjects.size());
-        stats.setAttribute(frameNumber, "Physics Projectiles", mProjectiles.size());
-        stats.setAttribute(frameNumber, "Physics HeightFields", mHeightFields.size());
+        stats.setAttribute(frameNumber, "Physics Actors", static_cast<double>(mActors.size()));
+        stats.setAttribute(frameNumber, "Physics Objects", static_cast<double>(mObjects.size()));
+        stats.setAttribute(frameNumber, "Physics Projectiles", static_cast<double>(mProjectiles.size()));
+        stats.setAttribute(frameNumber, "Physics HeightFields", static_cast<double>(mHeightFields.size()));
     }
 
     void PhysicsSystem::reportCollision(const btVector3& position, const btVector3& normal)

@@ -220,7 +220,7 @@ namespace MWRender
 
         void updateLiveReload();
 
-        void cull(size_t frameId, osgUtil::CullVisitor* cv);
+        void cull(unsigned frameId, osgUtil::CullVisitor* cv);
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Camera> mHUDCamera;
@@ -241,7 +241,7 @@ namespace MWRender
 
         size_t mDirtyFrameId = 0;
         size_t mLastFrameNumber = 0;
-        float mLastSimulationTime = 0.f;
+        double mLastSimulationTime = 0.0;
 
         bool mDirty = false;
         bool mReload = true;

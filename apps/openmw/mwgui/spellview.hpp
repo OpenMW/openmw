@@ -28,7 +28,7 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(SpellView)
     public:
-        SpellView() {};
+        SpellView() {}
 
         /// Register needed components with MyGUI's factory manager
         static void registerComponents();
