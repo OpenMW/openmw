@@ -346,7 +346,7 @@ namespace MWGui
     void EditEffectDialog::onMagnitudeMinChanged(MyGUI::ScrollBar* sender, size_t pos)
     {
         mMagnitudeMinValue->setCaption(MyGUI::utility::toString(pos + 1));
-        mEffect.mMagnMin = pos + 1;
+        mEffect.mMagnMin = static_cast<int32_t>(pos + 1);
 
         // trigger the check again (see below)
         onMagnitudeMaxChanged(mMagnitudeMaxSlider, mMagnitudeMaxSlider->getScrollPosition());
@@ -364,7 +364,7 @@ namespace MWGui
             sender->setScrollPosition(pos);
         }
 
-        mEffect.mMagnMax = pos + 1;
+        mEffect.mMagnMax = static_cast<int32_t>(pos + 1);
         const std::string to{ MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "-") };
 
         mMagnitudeMaxValue->setCaption(to + " " + MyGUI::utility::toString(pos + 1));
@@ -375,7 +375,7 @@ namespace MWGui
     void EditEffectDialog::onDurationChanged(MyGUI::ScrollBar* sender, size_t pos)
     {
         mDurationValue->setCaption(MyGUI::utility::toString(pos + 1));
-        mEffect.mDuration = pos + 1;
+        mEffect.mDuration = static_cast<int32_t>(pos + 1);
         eventEffectModified(mEffect);
     }
 

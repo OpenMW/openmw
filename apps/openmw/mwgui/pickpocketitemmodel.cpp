@@ -34,7 +34,7 @@ namespace MWGui
             for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
             {
                 if (Misc::Rng::roll0to99(prng) > chance)
-                    mHiddenItems.push_back(mSourceModel->getItem(i));
+                    mHiddenItems.push_back(mSourceModel->getItem(static_cast<ModelIndex>(i)));
             }
         }
     }
@@ -64,7 +64,7 @@ namespace MWGui
         mItems.clear();
         for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
         {
-            const ItemStack& item = mSourceModel->getItem(i);
+            const ItemStack& item = mSourceModel->getItem(static_cast<ModelIndex>(i));
 
             // Bound items may not be stolen
             if (item.mFlags & ItemStack::Flag_Bound)

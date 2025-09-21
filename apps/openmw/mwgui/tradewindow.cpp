@@ -383,7 +383,7 @@ namespace MWGui
 
     void TradeWindow::onOfferSubmitted(MyGUI::Widget* /*sender*/, size_t offerAmount)
     {
-        mCurrentBalance = offerAmount * (mCurrentBalance < 0 ? -1 : 1);
+        mCurrentBalance = static_cast<int>(offerAmount) * (mCurrentBalance < 0 ? -1 : 1);
         updateLabels();
         onOfferButtonClicked(mOfferButton);
     }
@@ -622,7 +622,7 @@ namespace MWGui
         const std::vector<ItemStack>& playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : playerBorrowed)
         {
-            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int basePrice = getEffectiveValue(itemStack.mBase, static_cast<int>(itemStack.mCount));
             const int cap
                 = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Minimum buying price -- 75% of the base
             const int buyingPrice
@@ -633,7 +633,7 @@ namespace MWGui
         const std::vector<ItemStack>& merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : merchantBorrowed)
         {
-            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int basePrice = getEffectiveValue(itemStack.mBase, static_cast<int>(itemStack.mCount));
             const int cap
                 = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Maximum selling price -- 75% of the base
             const int sellingPrice

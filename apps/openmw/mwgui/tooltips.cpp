@@ -196,7 +196,8 @@ namespace MWGui
                         = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*>>();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
                     bool isAllowedToUse = pair.second->allowedToUseItems();
-                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, !isAllowedToUse);
+                    tooltipSize = getToolTipViaPtr(
+                        static_cast<int>(pair.second->getItem(pair.first).mCount), false, !isAllowedToUse);
                 }
                 else if (type == "ToolTipInfo")
                 {

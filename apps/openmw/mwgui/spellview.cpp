@@ -188,7 +188,7 @@ namespace MWGui
         }
 
         // special case, look for spells added to model that are beyond last updatable item
-        SpellModel::ModelIndex topSpellIndex = mModel->getItemCount() - 1;
+        auto topSpellIndex = static_cast<SpellModel::ModelIndex>(mModel->getItemCount() - 1);
         if (fullUpdateRequired || ((0 <= topSpellIndex) && (maxSpellIndexFound < topSpellIndex)))
         {
             update();

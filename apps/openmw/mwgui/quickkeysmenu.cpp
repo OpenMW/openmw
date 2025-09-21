@@ -324,8 +324,7 @@ namespace MWGui
 
         std::string path = effect->mIcon;
         std::replace(path.begin(), path.end(), '/', '\\');
-        int slashPos = path.rfind('\\');
-        path.insert(slashPos + 1, "b_");
+        path.insert(path.rfind('\\') + 1, "b_");
         path = Misc::ResourceHelpers::correctIconPath(path, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         float scale = 1.f;

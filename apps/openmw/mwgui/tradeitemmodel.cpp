@@ -152,14 +152,14 @@ namespace MWGui
             size_t i = 0;
             for (; i < sourceModel->getItemCount(); ++i)
             {
-                if (itemStack.mBase == sourceModel->getItem(i).mBase)
+                if (itemStack.mBase == sourceModel->getItem(static_cast<ModelIndex>(i)).mBase)
                     break;
             }
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            sourceModel->moveItem(
-                sourceModel->getItem(i), itemStack.mCount, this, !Settings::game().mPreventMerchantEquipping);
+            sourceModel->moveItem(sourceModel->getItem(static_cast<ModelIndex>(i)), itemStack.mCount, this,
+                !Settings::game().mPreventMerchantEquipping);
         }
         mBorrowedToUs.clear();
         mBorrowedFromUs.clear();
@@ -177,7 +177,7 @@ namespace MWGui
         // add regular items
         for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
         {
-            ItemStack item = mSourceModel->getItem(i);
+            ItemStack item = mSourceModel->getItem(static_cast<ModelIndex>(i));
             if (!mMerchant.isEmpty())
             {
                 MWWorld::Ptr base = item.mBase;

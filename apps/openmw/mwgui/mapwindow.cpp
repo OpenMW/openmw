@@ -917,7 +917,7 @@ namespace MWGui
         const int localWidgetSize = Settings::map().mLocalMapWidgetSize;
         const bool zoomOut = rel < 0;
         const bool zoomIn = !zoomOut;
-        const double speedDiff = zoomOut ? 1.0 / speed : speed;
+        const float speedDiff = zoomOut ? 1.f / speed : speed;
 
         const float currentMinLocalMapZoom
             = std::max({ (float(Settings::map().mGlobalMapCellSize) * 4.f) / float(localWidgetSize),
@@ -985,8 +985,8 @@ namespace MWGui
 
         Settings::map().mGlobal ? updateGlobalMap() : updateLocalMap();
 
-        map->setViewOffset(MyGUI::IntPoint(std::round(centerView.left * speedDiff) + cursor.left,
-            std::round(centerView.top * speedDiff) + cursor.top));
+        map->setViewOffset(MyGUI::IntPoint(static_cast<int>(std::round(centerView.left * speedDiff) + cursor.left),
+            static_cast<int>(std::round(centerView.top * speedDiff) + cursor.top)));
     }
 
     void MapWindow::updateGlobalMap()

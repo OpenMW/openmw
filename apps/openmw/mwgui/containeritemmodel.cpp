@@ -121,7 +121,7 @@ namespace MWGui
 
     void ContainerItemModel::removeItem(const ItemStack& item, size_t count)
     {
-        int toRemove = count;
+        int toRemove = static_cast<int>(count);
 
         for (auto& source : mItemSources)
         {

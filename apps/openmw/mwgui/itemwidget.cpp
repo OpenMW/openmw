@@ -207,10 +207,12 @@ namespace MWGui
                 scale = found->second;
         }
 
+        const int diameter = static_cast<int>(44 * scale);
         if (state == Barter && !isMagic)
-            setFrame(backgroundTex, MyGUI::IntCoord(2 * scale, 2 * scale, 44 * scale, 44 * scale));
+            setFrame(backgroundTex,
+                MyGUI::IntCoord(static_cast<int>(2 * scale), static_cast<int>(2 * scale), diameter, diameter));
         else
-            setFrame(backgroundTex, MyGUI::IntCoord(0, 0, 44 * scale, 44 * scale));
+            setFrame(backgroundTex, MyGUI::IntCoord(0, 0, diameter, diameter));
 
         setIcon(ptr);
     }

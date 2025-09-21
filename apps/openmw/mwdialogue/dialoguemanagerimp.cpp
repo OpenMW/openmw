@@ -441,8 +441,9 @@ namespace MWDialogue
 
             // Get the sum of disposition effects minus charm (shouldn't be made permanent)
             npcStats.setBaseDisposition(0);
-            int zero = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false)
-                - npcStats.getMagicEffects().getOrDefault(ESM::MagicEffect::Charm).getMagnitude();
+            int zero = static_cast<int>(
+                MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor, false)
+                - npcStats.getMagicEffects().getOrDefault(ESM::MagicEffect::Charm).getMagnitude());
 
             // Clamp new permanent disposition to avoid negative derived disposition (can be caused by intimidate)
             int disposition = std::clamp(mOriginalDisposition + mPermanentDispositionChange, -zero, 100 - zero);
