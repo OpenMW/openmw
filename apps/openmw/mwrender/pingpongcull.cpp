@@ -34,8 +34,8 @@ namespace MWRender
     void PingPongCull::operator()(osg::Node* node, osgUtil::CullVisitor* cv)
     {
         osgUtil::RenderStage* renderStage = cv->getCurrentRenderStage();
-        size_t frame = cv->getTraversalNumber();
-        size_t frameId = frame % 2;
+        unsigned frame = cv->getTraversalNumber();
+        unsigned frameId = frame % 2;
 
         if (Stereo::getStereo())
         {

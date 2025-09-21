@@ -25,7 +25,7 @@ namespace MWGui
 
     struct BookTypesetter::Style
     {
-        virtual ~Style() {}
+        virtual ~Style() = default;
     };
 
     struct TypesetBookImpl : TypesetBook

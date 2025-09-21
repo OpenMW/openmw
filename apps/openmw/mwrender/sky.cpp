@@ -391,7 +391,7 @@ namespace MWRender
         osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight + mRainMaxHeight) / 2.f);
 
         mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
-        mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1, 0, 0));
+        mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1f, 0, 0));
         mRainParticleSystem->setAlignVectorY(osg::Vec3f(0, 0, 1));
 
         osg::ref_ptr<osg::StateSet> stateset = mRainParticleSystem->getOrCreateStateSet();

@@ -114,10 +114,10 @@ namespace MWRender
                 }
 
                 // move the plane back along its normal a little bit to prevent bleeding at the water shore
-                float fov = Settings::camera().mFieldOfView;
-                const float clipFudgeMin = 2.5; // minimum offset of clip plane
-                const float clipFudgeScale = -15000.0;
-                float clipFudge = abs(abs((*mCullPlane)[3]) - eyePoint.z()) * fov / clipFudgeScale - clipFudgeMin;
+                const float fov = Settings::camera().mFieldOfView;
+                constexpr double clipFudgeMin = 2.5; // minimum offset of clip plane
+                constexpr double clipFudgeScale = -15000.0;
+                double clipFudge = std::abs(std::abs((*mCullPlane)[3]) - eyePoint.z()) * fov / clipFudgeScale - clipFudgeMin;
                 modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
                 cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
@@ -188,7 +188,7 @@ namespace MWRender
     public:
         void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            const float fudge = 0.2;
+            const float fudge = 0.2f;
             if (std::abs(cv->getEyeLocal().z()) < fudge)
             {
                 float diff = fudge - cv->getEyeLocal().z();
@@ -422,7 +422,7 @@ namespace MWRender
         void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable* drawable) const override
         {
             static bool supported = osg::isGLExtensionOrVersionSupported(
-                renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3);
+                renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3f);
             if (!supported)
             {
                 drawable->drawImplementation(renderInfo);

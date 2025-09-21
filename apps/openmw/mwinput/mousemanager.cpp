@@ -266,14 +266,14 @@ namespace MWInput
     {
         mGuiCursorX += xMove;
         mGuiCursorY += yMove;
-        mMouseWheel += mouseWheelMove;
+        mMouseWheel += static_cast<int>(mouseWheelMove);
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1);
-        mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1);
+        mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1.f);
+        mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1.f);
 
         MyGUI::InputManager::getInstance().injectMouseMove(
-            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
     }
 
     void MouseManager::warpMouse()
@@ -285,8 +285,8 @@ namespace MWInput
 
     void MouseManager::warpMouseToWidget(MyGUI::Widget* widget)
     {
-        float widgetX = widget->getAbsoluteCoord().left + widget->getWidth() / 2;
-        float widgetY = widget->getAbsoluteCoord().top + widget->getHeight() / 4;
+        float widgetX = widget->getAbsoluteCoord().left + widget->getWidth() / 2.f;
+        float widgetY = widget->getAbsoluteCoord().top + widget->getHeight() / 4.f;
         if (std::abs(mGuiCursorX - widgetX) > 1 || std::abs(mGuiCursorY - widgetY) > 1)
         {
             mGuiCursorX = widgetX;

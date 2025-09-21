@@ -18,14 +18,7 @@ namespace MWGui
     // Makes it possible to use ItemModel::moveItem to move an item from an inventory to the world.
     class WorldItemModel : public ItemModel
     {
-    public:
-        explicit WorldItemModel(float cursorX, float cursorY)
-            : mCursorX(cursorX)
-            , mCursorY(cursorY)
-        {
-        }
-
-        MWWorld::Ptr dropItemImpl(const ItemStack& item, size_t count, bool copy)
+        MWWorld::Ptr dropItemImpl(const ItemStack& item, int count, bool copy)
         {
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
@@ -42,14 +35,21 @@ namespace MWGui
             return dropped;
         }
 
+    public:
+        explicit WorldItemModel(float cursorX, float cursorY)
+            : mCursorX(cursorX)
+            , mCursorY(cursorY)
+        {
+        }
+
         MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
         {
-            return dropItemImpl(item, count, false);
+            return dropItemImpl(item, static_cast<int>(count), false);
         }
 
         MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
         {
-            return dropItemImpl(item, count, true);
+            return dropItemImpl(item, static_cast<int>(count), true);
         }
 
         void removeItem(const ItemStack& /*item*/, size_t /*count*/) override

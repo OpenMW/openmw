@@ -479,8 +479,8 @@ namespace MWRender
     {
         if (!mViewport)
             return -1;
-        float projX = (posX / mViewport->width()) * 2 - 1.f;
-        float projY = (posY / mViewport->height()) * 2 - 1.f;
+        double projX = (posX / mViewport->width()) * 2 - 1;
+        double projY = (posY / mViewport->height()) * 2 - 1;
         // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. Seems to be a
         // precision issue - compiling with OSG_USE_FLOAT_MATRIX=0, Intersector::WINDOW works ok.
         // Using Intersector::PROJECTION results in better precision because the start/end points and the model matrices
