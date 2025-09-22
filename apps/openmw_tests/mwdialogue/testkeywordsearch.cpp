@@ -164,3 +164,20 @@ TEST_F(KeywordSearchTest, keyword_test_french_substrings)
 
     EXPECT_EQ(matches.size(), 0);
 }
+
+TEST_F(KeywordSearchTest, keyword_test_single_char_strings)
+{
+    // It should be possible to match a single character
+    MWDialogue::KeywordSearch<int> search;
+    search.seed("AB", 0);
+    search.seed("a", 0);
+
+    std::string text = "a ab";
+
+    std::vector<MWDialogue::KeywordSearch<int>::Match> matches;
+    search.highlightKeywords(text.begin(), text.end(), matches);
+
+    EXPECT_EQ(matches.size(), 2);
+    EXPECT_EQ(std::string(matches[0].mBeg, matches[0].mEnd), "a");
+    EXPECT_EQ(std::string(matches[1].mBeg, matches[1].mEnd), "ab");
+}
