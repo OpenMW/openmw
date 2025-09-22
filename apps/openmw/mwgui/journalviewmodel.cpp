@@ -22,25 +22,14 @@ namespace MWGui
 
     struct JournalViewModelImpl : JournalViewModel
     {
-        typedef MWDialogue::KeywordSearch<intptr_t> KeywordSearchT;
+        using TopicSearch = MWDialogue::KeywordSearch<const MWDialogue::Topic*>;
 
         mutable bool mKeywordSearchLoaded;
-        mutable KeywordSearchT mKeywordSearch;
+        mutable TopicSearch mKeywordSearch;
 
         JournalViewModelImpl() { mKeywordSearchLoaded = false; }
 
         virtual ~JournalViewModelImpl() = default;
-
-        /// \todo replace this nasty BS
-        static Utf8Span toUtf8Span(std::string_view str)
-        {
-            if (str.empty())
-                return Utf8Span(Utf8Point(nullptr), Utf8Point(nullptr));
-
-            Utf8Point point = reinterpret_cast<Utf8Point>(str.data());
-
-            return Utf8Span(point, point + str.size());
-        }
 
         void load() override {}
 
@@ -57,7 +46,7 @@ namespace MWGui
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
                 for (const auto& [_, topic] : journal->getTopics())
-                    mKeywordSearch.seed(topic.getName(), intptr_t(&topic));
+                    mKeywordSearch.seed(topic.getName(), &topic);
 
                 mKeywordSearchLoaded = true;
             }
@@ -88,10 +77,8 @@ namespace MWGui
             mutable bool loaded;
             mutable std::string utf8text;
 
-            typedef std::pair<size_t, size_t> Range;
-
             // hyperlinks in @link# notation
-            mutable std::map<Range, intptr_t> mHyperLinks;
+            mutable std::map<std::pair<size_t, size_t>, const MWDialogue::Topic*> mHyperLinks;
 
             virtual std::string getText() const = 0;
 
@@ -126,7 +113,7 @@ namespace MWGui
 
                             utf8text.replace(posBegin, posEnd + 1 - posBegin, displayName);
 
-                            intptr_t value = 0;
+                            const MWDialogue::Topic* value = nullptr;
                             if (mModel->mKeywordSearch.containsKeyword(topicName, value))
                                 mHyperLinks[std::make_pair(posBegin, posBegin + displayName.size())] = value;
                         }
@@ -138,14 +125,14 @@ namespace MWGui
                 }
             }
 
-            Utf8Span body() const override
+            std::string_view body() const override
             {
                 ensureLoaded();
 
-                return toUtf8Span(utf8text);
+                return utf8text;
             }
 
-            void visitSpans(std::function<void(TopicId, size_t, size_t)> visitor) const override
+            void visitSpans(std::function<void(const MWDialogue::Topic*, size_t, size_t)> visitor) const override
             {
                 ensureLoaded();
                 mModel->ensureKeyWordSearchLoaded();
@@ -154,25 +141,23 @@ namespace MWGui
                     && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
                 {
                     size_t formatted = 0; // points to the first character that is not laid out yet
-                    for (std::map<Range, intptr_t>::const_iterator it = mHyperLinks.begin(); it != mHyperLinks.end();
-                         ++it)
+                    for (const auto& [range, topicId] : mHyperLinks)
                     {
-                        intptr_t topicId = it->second;
-                        if (formatted < it->first.first)
-                            visitor(0, formatted, it->first.first);
-                        visitor(topicId, it->first.first, it->first.second);
-                        formatted = it->first.second;
+                        if (formatted < range.first)
+                            visitor(0, formatted, range.first);
+                        visitor(topicId, range.first, range.second);
+                        formatted = range.second;
                     }
                     if (formatted < utf8text.size())
                         visitor(0, formatted, utf8text.size());
                 }
                 else
                 {
-                    std::vector<KeywordSearchT::Match> matches;
+                    std::vector<TopicSearch::Match> matches;
                     mModel->mKeywordSearch.highlightKeywords(utf8text.begin(), utf8text.end(), matches);
 
                     std::string::const_iterator i = utf8text.begin();
-                    for (const KeywordSearchT::Match& match : matches)
+                    for (const TopicSearch::Match& match : matches)
                     {
                         if (i != match.mBeg)
                             visitor(0, i - utf8text.begin(), match.mBeg - utf8text.begin());
@@ -231,7 +216,7 @@ namespace MWGui
 
             std::string getText() const override { return mEntry->getText(); }
 
-            Utf8Span timestamp() const override
+            std::string_view timestamp() const override
             {
                 if (timestamp_buffer.empty())
                 {
@@ -246,7 +231,7 @@ namespace MWGui
                     timestamp_buffer = os.str();
                 }
 
-                return toUtf8Span(timestamp_buffer);
+                return timestamp_buffer;
             }
         };
 
@@ -288,10 +273,10 @@ namespace MWGui
             }
         }
 
-        void visitTopicName(TopicId topicId, std::function<void(Utf8Span)> visitor) const override
+        void visitTopicName(
+            const MWDialogue::Topic& topic, std::function<void(std::string_view)> visitor) const override
         {
-            MWDialogue::Topic const& topic = *reinterpret_cast<MWDialogue::Topic const*>(topicId);
-            visitor(toUtf8Span(topic.getName()));
+            visitor(topic.getName());
         }
 
         void visitTopicNamesStartingWith(
@@ -324,19 +309,18 @@ namespace MWGui
 
             std::string getText() const override { return mEntry->getText(); }
 
-            Utf8Span source() const override { return toUtf8Span(mEntry->mActorName); }
+            std::string_view source() const override { return mEntry->mActorName; }
         };
 
-        void visitTopicEntries(TopicId topicId, std::function<void(TopicEntry const&)> visitor) const override
+        void visitTopicEntries(
+            const MWDialogue::Topic& topic, std::function<void(TopicEntry const&)> visitor) const override
         {
-            MWDialogue::Topic const& topic = *reinterpret_cast<MWDialogue::Topic const*>(topicId);
-
             for (const MWDialogue::Entry& entry : topic)
                 visitor(TopicEntryImpl(this, topic, entry));
         }
     };
 
-    JournalViewModel::Ptr JournalViewModel::create()
+    std::shared_ptr<JournalViewModel> JournalViewModel::create()
     {
         return std::make_shared<JournalViewModelImpl>();
     }

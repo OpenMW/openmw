@@ -113,10 +113,7 @@ namespace MWGui
 
     struct TypesetBookImpl : TypesetBook
     {
-        typedef std::vector<uint8_t> Content;
-        typedef std::list<Content> Contents;
-        typedef Utf8Stream::Point Utf8Point;
-        typedef std::pair<Utf8Point, Utf8Point> Range;
+        typedef std::pair<Utf8Stream::Point, Utf8Stream::Point> Range;
 
         struct StyleImpl : BookTypesetter::Style
         {
@@ -127,28 +124,27 @@ namespace MWGui
             InteractiveId mInteractiveId;
 
             bool match(MyGUI::IFont* tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
-                const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
+                const MyGUI::Colour& tstNormalColour, InteractiveId tstInteractiveId) const
             {
                 return (mFont == tstFont)
-                    && partal_match(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
+                    && partialMatch(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
             }
 
             bool match(std::string_view tstFont, const MyGUI::Colour& tstHotColour,
-                const MyGUI::Colour& tstActiveColour, const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
+                const MyGUI::Colour& tstActiveColour, const MyGUI::Colour& tstNormalColour,
+                InteractiveId tstInteractiveId) const
             {
                 return (mFont->getResourceName() == tstFont)
-                    && partal_match(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
+                    && partialMatch(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
             }
 
-            bool partal_match(const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
-                const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
+            bool partialMatch(const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
+                const MyGUI::Colour& tstNormalColour, InteractiveId tstInteractiveId) const
             {
                 return (mHotColour == tstHotColour) && (mActiveColour == tstActiveColour)
                     && (mNormalColour == tstNormalColour) && (mInteractiveId == tstInteractiveId);
             }
         };
-
-        typedef std::list<StyleImpl> Styles;
 
         struct Run
         {
@@ -158,19 +154,15 @@ namespace MWGui
             int mPrintableChars;
         };
 
-        typedef std::vector<Run> Runs;
-
         struct Line
         {
-            Runs mRuns;
+            std::vector<Run> mRuns;
             MyGUI::IntRect mRect;
         };
 
-        typedef std::vector<Line> Lines;
-
         struct Section
         {
-            Lines mLines;
+            std::vector<Line> mLines;
             MyGUI::IntRect mRect;
         };
 
@@ -180,12 +172,10 @@ namespace MWGui
         // A page is basically a "window" into a portion of the source text, similar to a ScrollView.
         typedef std::pair<int, int> Page;
 
-        typedef std::vector<Page> Pages;
-
-        Pages mPages;
+        std::vector<Page> mPages;
         Sections mSections;
-        Contents mContents;
-        Styles mStyles;
+        std::list<Content> mContents;
+        std::list<StyleImpl> mStyles;
         MyGUI::IntRect mRect;
 
         void setColour(size_t section, size_t line, size_t run, const MyGUI::Colour& colour) const override
@@ -202,14 +192,14 @@ namespace MWGui
 
         virtual ~TypesetBookImpl() = default;
 
-        Range addContent(const BookTypesetter::Utf8Span& text)
+        Range addContent(std::string_view text)
         {
-            Contents::iterator i = mContents.insert(mContents.end(), Content(text.first, text.second));
+            Content& content = mContents.emplace_back(text.begin(), text.end());
 
-            if (i->empty())
-                return Range(Utf8Point(nullptr), Utf8Point(nullptr));
+            if (content.empty())
+                return Range(nullptr, nullptr);
 
-            return Range(i->data(), i->data() + i->size());
+            return Range(content.data(), content.data() + content.size());
         }
 
         size_t pageCount() const override { return mPages.size(); }
@@ -222,19 +212,19 @@ namespace MWGui
         template <typename Visitor>
         void visitRuns(int top, int bottom, MyGUI::IFont* font, Visitor const& visitor) const
         {
-            for (Sections::const_iterator i = mSections.begin(); i != mSections.end(); ++i)
+            for (const Section& section : mSections)
             {
-                if (top >= mRect.bottom || bottom <= i->mRect.top)
+                if (top >= mRect.bottom || bottom <= section.mRect.top)
                     continue;
-
-                for (Lines::const_iterator j = i->mLines.begin(); j != i->mLines.end(); ++j)
+                for (const Line& line : section.mLines)
                 {
-                    if (top >= j->mRect.bottom || bottom <= j->mRect.top)
+                    if (top >= line.mRect.bottom || bottom <= line.mRect.top)
                         continue;
-
-                    for (Runs::const_iterator k = j->mRuns.begin(); k != j->mRuns.end(); ++k)
-                        if (!font || k->mStyle->mFont == font)
-                            visitor(*i, *j, *k);
+                    for (const Run& run : line.mRuns)
+                    {
+                        if (!font || run.mStyle->mFont == font)
+                            visitor(section, line, run);
+                    }
                 }
             }
         }
@@ -275,26 +265,26 @@ namespace MWGui
 
         StyleImpl* hitTest(int left, int top) const
         {
-            for (Sections::const_iterator i = mSections.begin(); i != mSections.end(); ++i)
+            for (const Section& section : mSections)
             {
-                if (top < i->mRect.top || top >= i->mRect.bottom)
+                if (top < section.mRect.top || top >= section.mRect.bottom)
                     continue;
 
-                int left1 = left - i->mRect.left;
+                int left1 = left - section.mRect.left;
 
-                for (Lines::const_iterator j = i->mLines.begin(); j != i->mLines.end(); ++j)
+                for (const Line& line : section.mLines)
                 {
-                    if (top < j->mRect.top || top >= j->mRect.bottom)
+                    if (top < line.mRect.top || top >= line.mRect.bottom)
                         continue;
 
-                    int left2 = left1 - j->mRect.left;
+                    int left2 = left1 - line.mRect.left;
 
-                    for (Runs::const_iterator k = j->mRuns.begin(); k != j->mRuns.end(); ++k)
+                    for (const Run& run : line.mRuns)
                     {
-                        if (left2 < k->mLeft || left2 >= k->mRight)
+                        if (left2 < run.mLeft || left2 >= run.mRight)
                             continue;
 
-                        return k->mStyle;
+                        return run.mStyle;
                     }
                 }
             }
@@ -304,9 +294,9 @@ namespace MWGui
 
         MyGUI::IFont* affectedFont(StyleImpl* style)
         {
-            for (Styles::iterator i = mStyles.begin(); i != mStyles.end(); ++i)
-                if (&*i == style)
-                    return i->mFont;
+            for (const StyleImpl& s : mStyles)
+                if (&s == style)
+                    return s.mFont;
             return nullptr;
         }
 
@@ -331,14 +321,10 @@ namespace MWGui
             }
         };
 
-        typedef TypesetBookImpl Book;
-        typedef std::shared_ptr<Book> BookPtr;
-        typedef std::vector<PartialText>::const_iterator PartialTextConstIterator;
-
         int mPageWidth;
         int mPageHeight;
 
-        BookPtr mBook;
+        std::shared_ptr<TypesetBookImpl> mBook;
         Section* mSection;
         Line* mLine;
         Run* mRun;
@@ -347,7 +333,7 @@ namespace MWGui
         std::vector<PartialText> mPartialWhitespace;
         std::vector<PartialText> mPartialWord;
 
-        Book::Content const* mCurrentContent;
+        TypesetBookImpl::Content const* mCurrentContent;
         Alignment mCurrentAlignment;
 
         Typesetter(int width, int height)
@@ -359,12 +345,12 @@ namespace MWGui
             , mCurrentContent(nullptr)
             , mCurrentAlignment(AlignLeft)
         {
-            mBook = std::make_shared<Book>();
+            mBook = std::make_shared<TypesetBookImpl>();
         }
 
         virtual ~Typesetter() = default;
 
-        Style* createStyle(const std::string& fontName, const Colour& fontColour, bool useBookFont) override
+        Style* createStyle(const std::string& fontName, const MyGUI::Colour& fontColour, bool useBookFont) override
         {
             std::string fullFontName;
             if (fontName.empty())
@@ -375,9 +361,9 @@ namespace MWGui
             if (useBookFont)
                 fullFontName = "Journalbook " + fullFontName;
 
-            for (Styles::iterator i = mBook->mStyles.begin(); i != mBook->mStyles.end(); ++i)
-                if (i->match(fullFontName, fontColour, fontColour, fontColour, 0))
-                    return &*i;
+            for (StyleImpl& style : mBook->mStyles)
+                if (style.match(fullFontName, fontColour, fontColour, fontColour, 0))
+                    return &style;
 
             MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fullFontName);
             if (!font)
@@ -393,15 +379,15 @@ namespace MWGui
             return &style;
         }
 
-        Style* createHotStyle(Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
-            const Colour& activeColour, InteractiveId id, bool unique) override
+        Style* createHotStyle(Style* baseStyle, const MyGUI::Colour& normalColour, const MyGUI::Colour& hoverColour,
+            const MyGUI::Colour& activeColour, InteractiveId id, bool unique) override
         {
             StyleImpl* const baseStyleImpl = static_cast<StyleImpl*>(baseStyle);
 
             if (!unique)
-                for (Styles::iterator i = mBook->mStyles.begin(); i != mBook->mStyles.end(); ++i)
-                    if (i->match(baseStyleImpl->mFont, hoverColour, activeColour, normalColour, id))
-                        return &*i;
+                for (StyleImpl& style : mBook->mStyles)
+                    if (style.match(baseStyleImpl->mFont, hoverColour, activeColour, normalColour, id))
+                        return &style;
 
             StyleImpl& style = *mBook->mStyles.insert(mBook->mStyles.end(), StyleImpl());
 
@@ -414,30 +400,30 @@ namespace MWGui
             return &style;
         }
 
-        void write(Style* style, Utf8Span text) override
+        void write(Style* style, std::string_view text) override
         {
             Range range = mBook->addContent(text);
 
-            writeImpl(static_cast<StyleImpl*>(style), range.first, range.second);
+            writeImpl(static_cast<StyleImpl*>(style), Utf8Stream(range.first, range.second));
         }
 
-        intptr_t addContent(Utf8Span text, bool select) override
+        const Content* addContent(std::string_view text, bool select) override
         {
             add_partial_text();
 
-            Contents::iterator i = mBook->mContents.insert(mBook->mContents.end(), Content(text.first, text.second));
+            Content& content = mBook->mContents.emplace_back(text.begin(), text.end());
 
             if (select)
-                mCurrentContent = &(*i);
+                mCurrentContent = &content;
 
-            return reinterpret_cast<intptr_t>(&(*i));
+            return &content;
         }
 
-        void selectContent(intptr_t contentHandle) override
+        void selectContent(const Content* contentHandle) override
         {
             add_partial_text();
 
-            mCurrentContent = reinterpret_cast<Content const*>(contentHandle);
+            mCurrentContent = contentHandle;
         }
 
         void write(Style* style, size_t begin, size_t end) override
@@ -446,10 +432,10 @@ namespace MWGui
             assert(end <= mCurrentContent->size());
             assert(begin <= mCurrentContent->size());
 
-            const Utf8Point contentBegin = mCurrentContent->data() + begin;
-            const Utf8Point contentEnd = mCurrentContent->data() + end;
+            const Utf8Stream::Point contentBegin = mCurrentContent->data() + begin;
+            const Utf8Stream::Point contentEnd = mCurrentContent->data() + end;
 
-            writeImpl(static_cast<StyleImpl*>(style), contentBegin, contentEnd);
+            writeImpl(static_cast<StyleImpl*>(style), Utf8Stream(contentBegin, contentEnd));
         }
 
         void lineBreak(float margin) override
@@ -486,7 +472,7 @@ namespace MWGui
             mCurrentAlignment = sectionAlignment;
         }
 
-        TypesetBook::Ptr complete() override
+        std::shared_ptr<TypesetBook> complete() override
         {
             int curPageStart = 0;
             int curPageStop = 0;
@@ -497,26 +483,26 @@ namespace MWGui
             for (Sections::iterator i = mBook->mSections.begin(); i != mBook->mSections.end(); ++i, ++sa)
             {
                 // apply alignment to individual lines...
-                for (Lines::iterator j = i->mLines.begin(); j != i->mLines.end(); ++j)
+                for (Line& line : i->mLines)
                 {
-                    int width = j->mRect.width();
+                    int width = line.mRect.width();
                     int excess = mPageWidth - width;
 
                     switch (*sa)
                     {
                         default:
                         case AlignLeft:
-                            j->mRect.left = 0;
+                            line.mRect.left = 0;
                             break;
                         case AlignCenter:
-                            j->mRect.left = excess / 2;
+                            line.mRect.left = excess / 2;
                             break;
                         case AlignRight:
-                            j->mRect.left = excess;
+                            line.mRect.left = excess;
                             break;
                     }
 
-                    j->mRect.right = j->mRect.left + width;
+                    line.mRect.right = line.mRect.left + width;
                 }
 
                 if (curPageStop == curPageStart)
@@ -541,7 +527,7 @@ namespace MWGui
                         // one.
                         assert(curPageStart != curPageStop);
 
-                        mBook->mPages.push_back(Page(curPageStart, curPageStop));
+                        mBook->mPages.emplace_back(curPageStart, curPageStop);
 
                         curPageStart = i->mRect.top;
                         curPageStop = i->mRect.bottom;
@@ -553,7 +539,7 @@ namespace MWGui
                 {
                     // The section won't completely fit on the current page. Finish the current page and start a new
                     // one.
-                    mBook->mPages.push_back(Page(curPageStart, curPageStop));
+                    mBook->mPages.emplace_back(curPageStart, curPageStop);
 
                     curPageStart = i->mRect.top;
                     curPageStop = i->mRect.bottom;
@@ -564,16 +550,16 @@ namespace MWGui
                     {
                         // Adjust to the top of the first line that does not fit on the current page anymore
                         int splitPos = curPageStop;
-                        for (Lines::iterator j = i->mLines.begin(); j != i->mLines.end(); ++j)
+                        for (const Line& line : i->mLines)
                         {
-                            if (j->mRect.bottom > curPageStart + mPageHeight)
+                            if (line.mRect.bottom > curPageStart + mPageHeight)
                             {
-                                splitPos = j->mRect.top;
+                                splitPos = line.mRect.top;
                                 break;
                             }
                         }
 
-                        mBook->mPages.push_back(Page(curPageStart, splitPos));
+                        mBook->mPages.emplace_back(curPageStart, splitPos);
                         curPageStart = splitPos;
                         curPageStop = splitPos;
 
@@ -584,15 +570,13 @@ namespace MWGui
             }
 
             if (curPageStart != curPageStop)
-                mBook->mPages.push_back(Page(curPageStart, curPageStop));
+                mBook->mPages.emplace_back(curPageStart, curPageStop);
 
             return mBook;
         }
 
-        void writeImpl(StyleImpl* style, Utf8Stream::Point begin, Utf8Stream::Point end)
+        void writeImpl(StyleImpl* style, Utf8Stream&& stream)
         {
-            Utf8Stream stream(begin, end);
-
             while (!stream.eof())
             {
                 if (ucsLineBreak(stream.peek()))
@@ -651,10 +635,10 @@ namespace MWGui
             int spaceWidth = 0;
             int wordWidth = 0;
 
-            for (PartialTextConstIterator i = mPartialWhitespace.begin(); i != mPartialWhitespace.end(); ++i)
-                spaceWidth += i->mWidth;
-            for (PartialTextConstIterator i = mPartialWord.begin(); i != mPartialWord.end(); ++i)
-                wordWidth += i->mWidth;
+            for (const PartialText& partialText : mPartialWhitespace)
+                spaceWidth += partialText.mWidth;
+            for (const PartialText& partialText : mPartialWord)
+                wordWidth += partialText.mWidth;
 
             int left = mLine ? mLine->mRect.right : 0;
 
@@ -666,21 +650,23 @@ namespace MWGui
             }
             else
             {
-                for (PartialTextConstIterator i = mPartialWhitespace.begin(); i != mPartialWhitespace.end(); ++i)
+                for (const PartialText& partialText : mPartialWhitespace)
                 {
                     int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
 
-                    appendRun(i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + fontHeight);
+                    appendRun(partialText.mStyle, partialText.mBegin, partialText.mEnd, 0, left + partialText.mWidth,
+                        top + fontHeight);
 
                     left = mLine->mRect.right;
                 }
             }
 
-            for (PartialTextConstIterator i = mPartialWord.begin(); i != mPartialWord.end(); ++i)
+            for (const PartialText& partialText : mPartialWord)
             {
                 int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
-                const int numChars = static_cast<int>(i->mEnd - i->mBegin);
-                appendRun(i->mStyle, i->mBegin, i->mEnd, numChars, left + i->mWidth, top + fontHeight);
+                const int numChars = static_cast<int>(partialText.mEnd - partialText.mBegin);
+                appendRun(partialText.mStyle, partialText.mBegin, partialText.mEnd, numChars, left + partialText.mWidth,
+                    top + fontHeight);
 
                 left = mLine->mRect.right;
             }
@@ -747,7 +733,7 @@ namespace MWGui
         }
     };
 
-    BookTypesetter::Ptr BookTypesetter::create(int pageWidth, int pageHeight)
+    std::shared_ptr<BookTypesetter> BookTypesetter::create(int pageWidth, int pageHeight)
     {
         return std::make_shared<TypesetBookImpl::Typesetter>(pageWidth, pageHeight);
     }
@@ -932,17 +918,12 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(PageDisplay)
     protected:
-        typedef TypesetBookImpl::Section Section;
-        typedef TypesetBookImpl::Line Line;
-        typedef TypesetBookImpl::Run Run;
         bool mIsPageReset;
         size_t mPage;
 
         struct TextFormat : ISubWidget
         {
-            typedef MyGUI::IFont* Id;
-
-            Id mFont;
+            MyGUI::IFont* mFont;
             int mCountVertex;
             MyGUI::ITexture* mTexture;
             MyGUI::RenderItem* mRenderItem;
@@ -1017,16 +998,15 @@ namespace MWGui
         }
 
     public:
-        typedef TypesetBookImpl::StyleImpl Style;
-        typedef std::map<TextFormat::Id, std::unique_ptr<TextFormat>> ActiveTextFormats;
+        typedef std::map<MyGUI::IFont*, std::unique_ptr<TextFormat>> ActiveTextFormats;
 
         int mViewTop;
         int mViewBottom;
 
-        Style* mFocusItem;
+        TypesetBookImpl::StyleImpl* mFocusItem;
         bool mItemActive;
         MyGUI::MouseButton mLastDown;
-        std::function<void(intptr_t)> mLinkClicked;
+        std::function<void(TypesetBook::InteractiveId)> mLinkClicked;
 
         std::shared_ptr<TypesetBookImpl> mBook;
 
@@ -1072,7 +1052,7 @@ namespace MWGui
 
         void onMouseMove(int left, int top)
         {
-            Style* hit = nullptr;
+            TypesetBookImpl::StyleImpl* hit = nullptr;
             if (auto pos = getAdjustedPos(left, top, true))
                 if (pos->top <= mViewBottom)
                     hit = mBook->hitTestWithMargin(pos->left, pos->top);
@@ -1123,7 +1103,8 @@ namespace MWGui
 
             if (pos && mLastDown == id)
             {
-                Style* item = pos->top <= mViewBottom ? mBook->hitTestWithMargin(pos->left, pos->top) : nullptr;
+                TypesetBookImpl::StyleImpl* item
+                    = pos->top <= mViewBottom ? mBook->hitTestWithMargin(pos->left, pos->top) : nullptr;
 
                 bool clicked = mFocusItem == item;
 
@@ -1138,7 +1119,7 @@ namespace MWGui
             }
         }
 
-        void showPage(TypesetBook::Ptr book, size_t newPage)
+        void showPage(std::shared_ptr<TypesetBook> book, size_t newPage)
         {
             std::shared_ptr<TypesetBookImpl> newBook = std::dynamic_pointer_cast<TypesetBookImpl>(book);
 
@@ -1212,7 +1193,8 @@ namespace MWGui
             {
             }
 
-            void operator()(Section const& section, Line const& line, Run const& run) const
+            void operator()(const TypesetBookImpl::Section& section, const TypesetBookImpl::Line& line,
+                const TypesetBookImpl::Run& run) const
             {
                 MyGUI::IFont* const font = run.mStyle->mFont;
 
@@ -1281,7 +1263,8 @@ namespace MWGui
             {
             }
 
-            void operator()(Section const& section, Line const& line, Run const& run) const
+            void operator()(const TypesetBookImpl::Section& section, const TypesetBookImpl::Line& line,
+                const TypesetBookImpl::Run& run) const
             {
                 bool isActive = run.mStyle->mInteractiveId && (run.mStyle == mPageDisplay->mFocusItem);
 
@@ -1374,14 +1357,20 @@ namespace MWGui
         {
         }
 
-        void showPage(TypesetBook::Ptr book, size_t page) override { mPageDisplay->showPage(std::move(book), page); }
+        void showPage(std::shared_ptr<TypesetBook> book, size_t page) override
+        {
+            mPageDisplay->showPage(std::move(book), page);
+        }
 
-        void adviseLinkClicked(std::function<void(InteractiveId)> linkClicked) override
+        void adviseLinkClicked(std::function<void(TypesetBook::InteractiveId)> linkClicked) override
         {
             mPageDisplay->mLinkClicked = std::move(linkClicked);
         }
 
-        void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = std::function<void(InteractiveId)>(); }
+        void unadviseLinkClicked() override
+        {
+            mPageDisplay->mLinkClicked = std::function<void(TypesetBook::InteractiveId)>();
+        }
 
         void setFocusItem(BookTypesetter::Style* itemStyle) override
         {

@@ -79,14 +79,13 @@ namespace MWGui
 
     struct Link
     {
-        virtual ~Link() {}
+        virtual ~Link() = default;
         virtual void activated() = 0;
     };
 
     struct Topic : Link
     {
-        typedef MyGUI::delegates::MultiDelegate<const std::string&> EventHandle_TopicId;
-        EventHandle_TopicId eventTopicActivated;
+        MyGUI::delegates::MultiDelegate<const std::string&> eventTopicActivated;
         Topic(const std::string& id)
             : mTopicId(id)
         {
@@ -97,8 +96,7 @@ namespace MWGui
 
     struct Choice : Link
     {
-        typedef MyGUI::delegates::MultiDelegate<int> EventHandle_ChoiceId;
-        EventHandle_ChoiceId eventChoiceActivated;
+        MyGUI::delegates::MultiDelegate<int> eventChoiceActivated;
         Choice(int id)
             : mChoiceId(id)
         {
@@ -109,27 +107,28 @@ namespace MWGui
 
     struct Goodbye : Link
     {
-        typedef MyGUI::delegates::MultiDelegate<> Event_Activated;
-        Event_Activated eventActivated;
+        MyGUI::delegates::MultiDelegate<> eventActivated;
         void activated() override;
     };
 
-    typedef MWDialogue::KeywordSearch<intptr_t> KeywordSearchT;
+    using TopicSearch = MWDialogue::KeywordSearch<const Topic*>;
 
     struct DialogueText
     {
         virtual ~DialogueText() = default;
-        virtual void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
-            std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
+        virtual void write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
+            std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
+            = 0;
         std::string mText;
     };
 
     struct Response : DialogueText
     {
         Response(std::string_view text, std::string_view title = {}, bool needMargin = true);
-        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        void write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
-        void addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
+        void addTopicLink(
+            std::shared_ptr<BookTypesetter> typesetter, const Topic* topic, size_t begin, size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
     };
@@ -137,7 +136,7 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(std::string_view text);
-        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        void write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
     };
 
@@ -149,9 +148,6 @@ namespace MWGui
         void onTradeComplete();
 
         bool exit() override;
-
-        // Events
-        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
 
         void notifyLinkClicked(TypesetBook::InteractiveId link);
 
@@ -213,7 +209,7 @@ namespace MWGui
 
         std::vector<std::unique_ptr<Link>> mDeleteLater;
 
-        KeywordSearchT mKeywordSearch;
+        TopicSearch mKeywordSearch;
 
         BookPage* mHistory;
         Gui::MWList* mTopicsList;

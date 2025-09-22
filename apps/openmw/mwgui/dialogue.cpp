@@ -32,8 +32,6 @@
 #include "bookpage.hpp"
 #include "textcolours.hpp"
 
-#include "journalbooks.hpp" // to_utf8_span
-
 namespace MWGui
 {
     void ResponseCallback::addResponse(std::string_view title, std::string_view text)
@@ -208,7 +206,7 @@ namespace MWGui
         mText = text;
     }
 
-    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+    void Response::write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
         std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         typesetter->sectionBreak(mNeedMargin ? 9 : 0);
@@ -218,12 +216,11 @@ namespace MWGui
         {
             const MyGUI::Colour& headerColour = windowManager->getTextColours().header;
             BookTypesetter::Style* title = typesetter->createStyle({}, headerColour, false);
-            typesetter->write(title, to_utf8_span(mTitle));
+            typesetter->write(title, mTitle);
             typesetter->sectionBreak();
         }
 
-        typedef std::pair<size_t, size_t> Range;
-        std::map<Range, intptr_t> hyperLinks;
+        std::map<std::pair<size_t, size_t>, const Link*> hyperLinks;
 
         // We need this copy for when @# hyperlinks are replaced
         std::string text = mText;
@@ -250,14 +247,13 @@ namespace MWGui
                 text.replace(posBegin, posEnd + 1 - posBegin, displayName);
 
                 if (topicLinks.find(topicName) != topicLinks.end())
-                    hyperLinks[std::make_pair(posBegin, posBegin + displayName.size())]
-                        = intptr_t(topicLinks[topicName].get());
+                    hyperLinks[std::make_pair(posBegin, posBegin + displayName.size())] = topicLinks[topicName].get();
             }
             else
                 break;
         }
 
-        typesetter->addContent(to_utf8_span(text));
+        typesetter->addContent(text);
 
         if (hyperLinks.size()
             && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
@@ -266,48 +262,48 @@ namespace MWGui
 
             BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
             size_t formatted = 0; // points to the first character that is not laid out yet
-            for (auto& hyperLink : hyperLinks)
+            for (const auto& [range, link] : hyperLinks)
             {
-                intptr_t topicId = hyperLink.second;
-                BookTypesetter::Style* hotStyle = typesetter->createHotStyle(
-                    style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
-                if (formatted < hyperLink.first.first)
-                    typesetter->write(style, formatted, hyperLink.first.first);
-                typesetter->write(hotStyle, hyperLink.first.first, hyperLink.first.second);
-                formatted = hyperLink.first.second;
+                BookTypesetter::Style* hotStyle = typesetter->createHotStyle(style, textColours.link,
+                    textColours.linkOver, textColours.linkPressed, TypesetBook::InteractiveId(link));
+                if (formatted < range.first)
+                    typesetter->write(style, formatted, range.first);
+                typesetter->write(hotStyle, range.first, range.second);
+                formatted = range.second;
             }
             if (formatted < text.size())
                 typesetter->write(style, formatted, text.size());
         }
         else
         {
-            std::vector<KeywordSearchT::Match> matches;
-            keywordSearch->highlightKeywords(text.begin(), text.end(), matches);
+            std::vector<TopicSearch::Match> matches;
+            keywordSearch.highlightKeywords(text.begin(), text.end(), matches);
 
             std::string::const_iterator i = text.begin();
-            for (KeywordSearchT::Match& match : matches)
+            for (TopicSearch::Match& match : matches)
             {
                 if (i != match.mBeg)
-                    addTopicLink(typesetter, 0, i - text.begin(), match.mBeg - text.begin());
+                    addTopicLink(typesetter, nullptr, i - text.begin(), match.mBeg - text.begin());
 
                 addTopicLink(typesetter, match.mValue, match.mBeg - text.begin(), match.mEnd - text.begin());
 
                 i = match.mEnd;
             }
             if (i != text.end())
-                addTopicLink(std::move(typesetter), 0, i - text.begin(), text.size());
+                addTopicLink(std::move(typesetter), nullptr, i - text.begin(), text.size());
         }
     }
 
-    void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
+    void Response::addTopicLink(
+        std::shared_ptr<BookTypesetter> typesetter, const MWGui::Topic* topic, size_t begin, size_t end) const
     {
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
         BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
 
-        if (topicId)
-            style = typesetter->createHotStyle(
-                style, textColours.link, textColours.linkOver, textColours.linkPressed, topicId);
+        if (topic)
+            style = typesetter->createHotStyle(style, textColours.link, textColours.linkOver, textColours.linkPressed,
+                TypesetBook::InteractiveId(topic));
         typesetter->write(style, begin, end);
     }
 
@@ -316,13 +312,13 @@ namespace MWGui
         mText = text;
     }
 
-    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
-        std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
+    void Message::write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch&,
+        std::map<std::string, std::unique_ptr<Link>>&) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
         BookTypesetter::Style* title = typesetter->createStyle({}, textColour, false);
         typesetter->sectionBreak(9);
-        typesetter->write(title, to_utf8_span(mText));
+        typesetter->write(title, mText);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -661,7 +657,7 @@ namespace MWGui
             mTopicsList->addItem(keyword, sVerticalPadding);
 
             auto t = std::make_unique<Topic>(keyword);
-            mKeywordSearch.seed(topicId, intptr_t(t.get()));
+            mKeywordSearch.seed(topicId, t.get());
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
 
@@ -689,10 +685,11 @@ namespace MWGui
             mScrollBar->setVisible(true);
         }
 
-        BookTypesetter::Ptr typesetter = BookTypesetter::create(mHistory->getWidth(), std::numeric_limits<int>::max());
+        std::shared_ptr<BookTypesetter> typesetter
+            = BookTypesetter::create(mHistory->getWidth(), std::numeric_limits<int>::max());
 
         for (const auto& text : mHistoryContents)
-            text->write(typesetter, &mKeywordSearch, mTopicLinks);
+            text->write(typesetter, mKeywordSearch, mTopicLinks);
 
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::White, false);
 
@@ -712,7 +709,7 @@ namespace MWGui
             typesetter->lineBreak();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
-            typesetter->write(questionStyle, to_utf8_span(choice.first));
+            typesetter->write(questionStyle, choice.first);
             mChoiceStyles.push_back(questionStyle);
         }
 
@@ -731,10 +728,10 @@ namespace MWGui
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->lineBreak();
-            typesetter->write(questionStyle, to_utf8_span(goodbye));
+            typesetter->write(questionStyle, goodbye);
         }
 
-        TypesetBook::Ptr book = typesetter->complete();
+        std::shared_ptr<TypesetBook> book = typesetter->complete();
         mHistory->showPage(book, 0);
         size_t viewHeight = mHistory->getParent()->getHeight();
         if (!scrollbar && book->getSize().second > viewHeight)
