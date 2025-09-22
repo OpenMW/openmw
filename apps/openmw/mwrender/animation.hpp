@@ -411,7 +411,7 @@ namespace MWRender
          * \return True if the animation is active, false otherwise.
          */
         bool getInfo(std::string_view groupname, float* complete = nullptr, float* speedmult = nullptr,
-            size_t* loopcount = nullptr) const;
+            uint32_t* loopcount = nullptr) const;
 
         /// Returns the group name of the animation currently active on that bone group.
         std::string_view getActiveGroup(BoneGroup boneGroup) const;

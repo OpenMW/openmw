@@ -339,7 +339,7 @@ namespace MWClass
                                   ->mValue.getInteger();
 
         if (ref->mBase->mData.mWeight == 0)
-            return ref->mBase->mData.mArmor;
+            return static_cast<float>(ref->mBase->mData.mArmor);
         else
             return ref->mBase->mData.mArmor * armorSkill / static_cast<float>(iBaseArmorSkill);
     }

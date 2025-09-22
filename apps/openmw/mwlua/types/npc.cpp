@@ -120,7 +120,7 @@ namespace
         }
 
         if (rec["baseDisposition"] != sol::nil)
-            npc.mNpdt.mDisposition = rec["baseDisposition"].get<int>();
+            npc.mNpdt.mDisposition = rec["baseDisposition"].get<unsigned char>();
 
         if (rec["baseGold"] != sol::nil)
             npc.mNpdt.mGold = rec["baseGold"].get<int>();
@@ -136,7 +136,7 @@ namespace
                     = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc.mFaction);
 
                 int luaValue = rec["primaryFactionRank"];
-                int rank = LuaUtil::fromLuaIndex(luaValue);
+                int64_t rank = LuaUtil::fromLuaIndex(luaValue);
 
                 int maxRank = static_cast<int>(getValidRanksCount(faction));
 
@@ -144,7 +144,7 @@ namespace
                     throw std::runtime_error("primaryFactionRank: Requested rank " + std::to_string(rank)
                         + " is out of bounds for faction " + npc.mFaction.toDebugString());
 
-                npc.mNpdt.mRank = rank;
+                npc.mNpdt.mRank = static_cast<unsigned char>(rank);
             }
         }
 
@@ -218,7 +218,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
         record["primaryFaction"] = sol::readonly_property(
             [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
-        record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int {
+        record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int64_t {
             if (rec.mFaction.empty())
                 return 0;
             return LuaUtil::toLuaIndex(rec.mNpdt.mRank);
@@ -332,7 +332,7 @@ namespace MWLua
             if (!npcStats.isInFaction(factionId))
                 throw std::runtime_error("Target actor is not a member of faction " + factionId.toDebugString());
 
-            npcStats.setFactionRank(factionId, targetRank);
+            npcStats.setFactionRank(factionId, static_cast<int>(targetRank));
         };
 
         npc["modifyFactionRank"] = [](Object& actor, std::string_view faction, int value) {

@@ -50,9 +50,9 @@ namespace MWPhysics
                 btVector3 max;
 
                 shape->mCollisionShape->getAabb(transform, min, max);
-                mOriginalHalfExtents.x() = (max[0] - min[0]) / 2.f;
-                mOriginalHalfExtents.y() = (max[1] - min[1]) / 2.f;
-                mOriginalHalfExtents.z() = (max[2] - min[2]) / 2.f;
+                mOriginalHalfExtents.x() = static_cast<float>((max[0] - min[0]) / 2.f);
+                mOriginalHalfExtents.y() = static_cast<float>((max[1] - min[1]) / 2.f);
+                mOriginalHalfExtents.z() = static_cast<float>((max[2] - min[2]) / 2.f);
 
                 mMeshTranslation = osg::Vec3f(0.f, 0.f, mOriginalHalfExtents.z());
             }

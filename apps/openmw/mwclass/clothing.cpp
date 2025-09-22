@@ -190,7 +190,7 @@ namespace MWClass
         ESM::Clothing newItem = *ref->mBase;
         newItem.mId = ESM::RefId();
         newItem.mName = newName;
-        newItem.mData.mEnchant = enchCharge;
+        newItem.mData.mEnchant = static_cast<uint16_t>(enchCharge);
         newItem.mEnchant = enchId;
         const ESM::Clothing* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;

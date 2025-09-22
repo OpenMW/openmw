@@ -64,7 +64,7 @@ namespace
         {
             int weaponType = rec["type"].get<int>();
             if (weaponType >= 0 && weaponType <= ESM::Weapon::Last)
-                weapon.mData.mType = weaponType;
+                weapon.mData.mType = static_cast<int16_t>(weaponType);
             else
                 throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
         }
@@ -79,7 +79,7 @@ namespace
         if (rec["reach"] != sol::nil)
             weapon.mData.mReach = rec["reach"];
         if (rec["enchantCapacity"] != sol::nil)
-            weapon.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+            weapon.mData.mEnchant = static_cast<uint16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["chopMinDamage"] != sol::nil)
             weapon.mData.mChop[0] = rec["chopMinDamage"];
         if (rec["chopMaxDamage"] != sol::nil)

@@ -68,9 +68,9 @@ namespace MWWorld
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
-            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(i)).getModified();
+            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i))).getModified();
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(i)).getModified();
+            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i))).getModified();
     }
 
     void Player::restoreStats()
@@ -83,13 +83,13 @@ namespace MWWorld
         creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
         {
-            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(i));
+            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)));
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
         {
-            auto id = ESM::Attribute::indexToRefId(i);
+            auto id = ESM::Attribute::indexToRefId(static_cast<int>(i));
             auto attribute = npcStats.getAttribute(id);
             attribute.restore(attribute.getDamage());
             attribute.setModifier(mSaveAttributes[i] - attribute.getBase());

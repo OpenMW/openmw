@@ -49,7 +49,7 @@ namespace
         }
 
         if (rec["enchantCapacity"] != sol::nil)
-            book.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+            book.mData.mEnchant = static_cast<int32_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["mwscript"] != sol::nil)
         {
             std::string_view scriptId = rec["mwscript"].get<std::string_view>();

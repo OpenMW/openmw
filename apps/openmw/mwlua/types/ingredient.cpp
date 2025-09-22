@@ -45,14 +45,14 @@ namespace MWLua
         record["value"] = sol::readonly_property([](const ESM::Ingredient& rec) -> int { return rec.mData.mValue; });
         record["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Ingredient& rec) -> sol::table {
             sol::table res(lua, sol::create);
-            for (size_t i = 0; i < 4; ++i)
+            for (uint32_t i = 0; i < 4; ++i)
             {
                 if (rec.mData.mEffectID[i] < 0)
                     continue;
                 ESM::IndexedENAMstruct effect;
-                effect.mData.mEffectID = rec.mData.mEffectID[i];
-                effect.mData.mSkill = rec.mData.mSkills[i];
-                effect.mData.mAttribute = rec.mData.mAttributes[i];
+                effect.mData.mEffectID = static_cast<int16_t>(rec.mData.mEffectID[i]);
+                effect.mData.mSkill = static_cast<signed char>(rec.mData.mSkills[i]);
+                effect.mData.mAttribute = static_cast<signed char>(rec.mData.mAttributes[i]);
                 effect.mData.mRange = ESM::RT_Self;
                 effect.mData.mArea = 0;
                 effect.mData.mDuration = 0;

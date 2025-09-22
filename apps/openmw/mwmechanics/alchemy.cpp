@@ -514,7 +514,7 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
     return mEffects.end();
 }
 
-bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr& npc)
+bool MWMechanics::Alchemy::knownEffect(size_t potionEffectIndex, const MWWorld::Ptr& npc)
 {
     float alchemySkill = npc.getClass().getSkill(npc, ESM::Skill::Alchemy);
     static const float fWortChanceValue
