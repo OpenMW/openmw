@@ -17,8 +17,9 @@ namespace SceneUtil
     public:
         KeyframeController() {}
 
-        KeyframeController(const KeyframeController& copy)
-            : SceneUtil::Controller(copy)
+        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
+            : osg::Object(copy, copyop)
+            , SceneUtil::Controller(copy)
         {
         }
 
