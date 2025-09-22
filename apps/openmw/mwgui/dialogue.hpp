@@ -117,8 +117,7 @@ namespace MWGui
     {
         virtual ~DialogueText() = default;
         virtual void write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
-            std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
-            = 0;
+            std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
         std::string mText;
     };
 

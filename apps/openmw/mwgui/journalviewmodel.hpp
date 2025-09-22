@@ -76,22 +76,19 @@ namespace MWGui
         /// walks over the journal entries related to all quests with the given name
         /// If \a questName is empty, simply visits all journal entries
         virtual void visitJournalEntries(
-            std::string_view questName, std::function<void(JournalEntry const&)> visitor) const
-            = 0;
+            std::string_view questName, std::function<void(JournalEntry const&)> visitor) const = 0;
 
         /// provides the name of the topic specified by its id
-        virtual void visitTopicName(const MWDialogue::Topic& topic, std::function<void(std::string_view)> visitor) const
-            = 0;
+        virtual void visitTopicName(
+            const MWDialogue::Topic& topic, std::function<void(std::string_view)> visitor) const = 0;
 
         /// walks over the topics whose names start with the character
         virtual void visitTopicNamesStartingWith(
-            Utf8Stream::UnicodeChar character, std::function<void(std::string_view)> visitor) const
-            = 0;
+            Utf8Stream::UnicodeChar character, std::function<void(std::string_view)> visitor) const = 0;
 
         /// walks over the topic entries for the topic specified by its identifier
         virtual void visitTopicEntries(
-            const MWDialogue::Topic& topic, std::function<void(TopicEntry const&)> visitor) const
-            = 0;
+            const MWDialogue::Topic& topic, std::function<void(TopicEntry const&)> visitor) const = 0;
 
         // create an instance of the default journal view model implementation
         static std::shared_ptr<JournalViewModel> create();
