@@ -92,12 +92,14 @@ static void generateCube(osg::Geometry& geom, float dim)
             normals->push_back(normale);
         }
         GLushort startVertex(iFace * 4);
-        GLushort newFace1[] = { startVertex, static_cast<GLushort>(startVertex + 1u), static_cast<GLushort>(startVertex + 2u) };
+        GLushort newFace1[]
+            = { startVertex, static_cast<GLushort>(startVertex + 1u), static_cast<GLushort>(startVertex + 2u) };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace1[i]);
         }
-        GLushort newFace2[] = { static_cast<GLushort>(startVertex + 2u), static_cast<GLushort>(startVertex + 1u), static_cast<GLushort>(startVertex + 3u) };
+        GLushort newFace2[] = { static_cast<GLushort>(startVertex + 2u), static_cast<GLushort>(startVertex + 1u),
+            static_cast<GLushort>(startVertex + 3u) };
         for (int i = 0; i < 3; i++)
         {
             indices->push_back(newFace2[i]);
