@@ -272,7 +272,7 @@ namespace MWGui
             mLines[prevFocus].mIcon->setControllerFocus(false);
         }
 
-        if (newFocus >= 0 && newFocus < mLines.size())
+        if (newFocus < mLines.size())
         {
             mLines[newFocus].mText->setTextColour(textColours.link);
             mLines[newFocus].mIcon->setControllerFocus(true);

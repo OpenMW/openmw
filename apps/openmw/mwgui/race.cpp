@@ -359,10 +359,10 @@ namespace MWGui
         record.mRace = mCurrentRaceId;
         record.setIsMale(mGenderIndex == 0);
 
-        if (mFaceIndex >= 0 && mFaceIndex < mAvailableHeads.size())
+        if (mFaceIndex < mAvailableHeads.size())
             record.mHead = mAvailableHeads[mFaceIndex];
 
-        if (mHairIndex >= 0 && mHairIndex < mAvailableHairs.size())
+        if (mHairIndex < mAvailableHairs.size())
             record.mHair = mAvailableHairs[mHairIndex];
 
         try

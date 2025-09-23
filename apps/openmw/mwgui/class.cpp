@@ -127,9 +127,9 @@ namespace MWGui
         getWidget(mFavoriteAttribute[0], "FavoriteAttribute0");
         getWidget(mFavoriteAttribute[1], "FavoriteAttribute1");
 
-        for (char i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
-            char theIndex = '0' + i;
+            char theIndex = '0' + static_cast<char>(i);
             getWidget(mMajorSkill[i], std::string("MajorSkill").append(1, theIndex));
             getWidget(mMinorSkill[i], std::string("MinorSkill").append(1, theIndex));
         }
