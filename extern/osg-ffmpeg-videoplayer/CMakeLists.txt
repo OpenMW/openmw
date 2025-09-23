@@ -20,7 +20,7 @@ target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} ${FFmpeg_LIBRARIES})
 target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} ${OSG_LIBRARIES})
 target_link_libraries(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} SDL2::SDL2)
 
-target_include_directories(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} PUBLIC include ${FFmpeg_INCLUDE_DIRS})
+target_include_directories(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} SYSTEM PUBLIC include ${FFmpeg_INCLUDE_DIRS})
 target_include_directories(${OSG_FFMPEG_VIDEOPLAYER_LIBRARY} PRIVATE include/osg-ffmpeg-videoplayer)
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

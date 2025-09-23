@@ -13,7 +13,7 @@ add_library(oics STATIC
     include/oics/ICSPrerequisites.h
 )
 
-target_include_directories(oics PUBLIC include)
+target_include_directories(oics SYSTEM PUBLIC include)
 target_include_directories(oics PRIVATE include/oics)
 
 if(USE_SYSTEM_TINYXML)
@@ -25,7 +25,7 @@ else()
         tinyxml/tinyxmlerror.cpp
         tinyxml/tinystr.cpp
     )
-    target_include_directories(local_tinyxml PUBLIC tinyxml)
+    target_include_directories(local_tinyxml SYSTEM PUBLIC tinyxml)
     target_link_libraries(oics local_tinyxml)
 endif()
 
