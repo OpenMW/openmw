@@ -6,7 +6,7 @@
 #include <new>
 #include <memory>
 
-#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
+#include <osg-ffmpeg-videoplayer/libavutildefines.hpp>
 
 #if defined(_MSC_VER)
     #pragma warning (push)

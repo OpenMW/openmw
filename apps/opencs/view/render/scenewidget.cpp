@@ -14,8 +14,8 @@
 #include <apps/opencs/view/render/lightingday.hpp>
 #include <apps/opencs/view/render/lightingnight.hpp>
 
-#include <extern/osgQt/CompositeOsgRenderer.hpp>
-#include <extern/osgQt/osgQOpenGLWidget.hpp>
+#include <osgQt/CompositeOsgRenderer.hpp>
+#include <osgQt/osgQOpenGLWidget.hpp>
 
 #include <osg/Array>
 #include <osg/Camera>
