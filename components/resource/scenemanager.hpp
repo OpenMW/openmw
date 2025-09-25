@@ -237,42 +237,43 @@ namespace Resource
         osg::ref_ptr<osg::Node> loadErrorMarker();
         osg::ref_ptr<osg::Node> cloneErrorMarker();
 
+        mutable std::mutex mSharedStateMutex;
+
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
-        bool mForceShaders;
-        bool mClampLighting;
-        bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
         std::string mNormalHeightMapPattern;
-        bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
-        bool mApplyLightingToEnvMaps;
-        SceneUtil::LightingMethod mLightingMethod;
-        SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
-        bool mConvertAlphaTestToAlphaToCoverage;
-        bool mAdjustCoverageForAlphaTest;
-        bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
-        bool mWeatherParticleOcclusion = false;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        mutable std::mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
         Resource::BgsmFileManager* mBgsmFileManager;
+        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+        mutable osg::ref_ptr<osg::Node> mErrorMarker;
+        mutable std::once_flag mErrorMarkerFlag;
 
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;
         int mMaxAnisotropy;
-        bool mUnRefImageDataAfterApply;
-
-        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         unsigned int mParticleSystemMask;
-        mutable osg::ref_ptr<osg::Node> mErrorMarker;
+        SceneUtil::LightingMethod mLightingMethod;
+        SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
+        bool mForceShaders = false;
+        bool mClampLighting = true;
+        bool mAutoUseNormalMaps = false;
+        bool mAutoUseSpecularMaps = false;
+        bool mApplyLightingToEnvMaps = false;
+        bool mConvertAlphaTestToAlphaToCoverage = false;
+        bool mAdjustCoverageForAlphaTest = false;
+        bool mSupportsNormalsRT = false;
+        bool mWeatherParticleOcclusion = false;
+        bool mUnRefImageDataAfterApply = false;
 
-        SceneManager(const SceneManager&);
-        void operator=(const SceneManager&);
+        SceneManager(const SceneManager&) = delete;
+        void operator=(const SceneManager&) = delete;
     };
 }
 
