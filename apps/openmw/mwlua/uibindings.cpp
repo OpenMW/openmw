@@ -22,21 +22,6 @@ namespace MWLua
 {
     namespace
     {
-        template <typename Fn>
-        void wrapAction(const std::shared_ptr<LuaUi::Element>& element, Fn&& fn)
-        {
-            try
-            {
-                fn();
-            }
-            catch (...)
-            {
-                // prevent any actions on a potentially corrupted widget
-                element->mRoot = nullptr;
-                throw;
-            }
-        }
-
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
             { MWGui::GM_Inventory, "Interface" },
             { MWGui::GM_Container, "Container" },
@@ -142,7 +127,7 @@ namespace MWLua
 
         api["create"] = [luaManager = context.mLuaManager, menu](const sol::table& layout) {
             auto element = LuaUi::Element::make(layout, menu);
-            luaManager->addAction([element] { wrapAction(element, [&] { element->create(); }); }, "Create UI");
+            luaManager->addAction([element] { element->create(); }, "Create UI");
             return element;
         };
 
@@ -327,14 +312,13 @@ namespace MWLua
                 if (element->mState != LuaUi::Element::Created)
                     return;
                 element->mState = LuaUi::Element::Update;
-                luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
+                luaManager->addAction([element] { element->update(); }, "Update UI");
             };
             uiElement["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState == LuaUi::Element::Destroyed)
                     return;
                 element->mState = LuaUi::Element::Destroy;
-                luaManager->addAction(
-                    [element] { wrapAction(element, [&] { LuaUi::Element::erase(element.get()); }); }, "Destroy UI");
+                luaManager->addAction([element] { LuaUi::Element::erase(element.get()); }, "Destroy UI");
             };
 
             auto uiLayer = context.sol().new_usertype<LuaUi::Layer>("UiLayer");
