@@ -1361,10 +1361,10 @@ namespace MWRender
         if (mViewDistance < mNearClip)
             throw std::runtime_error("Viewing distance is less than near clip");
 
-        const double width = Settings::video().mResolutionX;
-        const double height = Settings::video().mResolutionY;
+        const int width = Settings::video().mResolutionX;
+        const int height = Settings::video().mResolutionY;
 
-        double aspect = (height == 0.0) ? 1.0 : width / height;
+        double aspect = (height == 0) ? 1.0 : static_cast<double>(width) / height;
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
@@ -1389,7 +1389,7 @@ namespace MWRender
         }
         else
         {
-            mSharedUniformStateUpdater->setScreenRes(static_cast<float>(width), static_cast<float>(height));
+            setScreenRes(width, height);
         }
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may

@@ -300,7 +300,7 @@ namespace SceneUtil {
         double                                  _splitPointUniformLogRatio = 0.5;
         double                                  _splitPointDeltaBias = 0.0;
 
-        float                                   _polygonOffsetFactor = 1.f;
+        float                                   _polygonOffsetFactor = 1.1f;
         float                                   _polygonOffsetUnits = 4.0f;
 
         bool                                    _useFrontFaceCulling = true;
