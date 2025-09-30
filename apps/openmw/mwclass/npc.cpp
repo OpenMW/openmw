@@ -92,17 +92,17 @@ namespace
         return 2.0 * intPart == d;
     }
 
-    float round_ieee_754(double d)
+    float round_ieee_754(float f)
     {
-        double i = std::floor(d);
-        d -= i;
-        if (d < 0.5)
-            return float(static_cast<int>(i));
-        if (d > 0.5)
-            return static_cast<int>(i) + 1.f;
+        float i = std::floor(f);
+        f -= i;
+        if (f < 0.5)
+            return i;
+        if (f > 0.5)
+            return i + 1.f;
         if (isEven(i))
-            return float(static_cast<int>(i));
-        return static_cast<int>(i) + 1.f;
+            return i;
+        return i + 1.f;
     }
 
     void autoCalculateAttributes(const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
