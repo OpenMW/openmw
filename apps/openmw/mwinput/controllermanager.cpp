@@ -215,6 +215,12 @@ namespace MWInput
 
     void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent& arg)
     {
+        if (mBindingsManager->isDetectingBindingState())
+        {
+            mBindingsManager->controllerAxisMoved(deviceID, arg);
+            return;
+        }
+
         if (!Settings::input().mEnableController || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
 
