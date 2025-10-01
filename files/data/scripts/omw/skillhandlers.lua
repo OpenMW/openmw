@@ -2,6 +2,7 @@ local self = require('openmw.self')
 local I = require('openmw.interfaces')
 local types = require('openmw.types')
 local core = require('openmw.core')
+local auxUtil = require('openmw_aux.util')
 local NPC = require('openmw.types').NPC
 local Skill = core.stats.Skill
 
@@ -104,11 +105,7 @@ local function skillUsed(skillid, options)
         end
     end
 
-    for i = #skillUsedHandlers, 1, -1 do
-        if skillUsedHandlers[i](skillid, options) == false then
-            return
-        end
-    end
+    auxUtil.callEventHandlers(skillUsedHandlers, skillid, options)
 end
 
 local function skillLevelUp(skillid, source)
@@ -144,11 +141,7 @@ local function skillLevelUp(skillid, source)
         options.levelUpSpecializationIncreaseValue = core.getGMST('iLevelupSpecialization')
     end
 
-    for i = #skillLevelUpHandlers, 1, -1 do
-        if skillLevelUpHandlers[i](skillid, source, options) == false then
-            return
-        end
-    end
+    auxUtil.callEventHandlers(skillLevelUpHandlers, skillid, source, options)
 end
 
 return {
