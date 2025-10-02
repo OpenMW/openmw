@@ -953,8 +953,8 @@ namespace MWGui
     osg::Vec2i InventoryWindow::mapPreviewWindowToViewport(int x, int y) const
     {
         const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
-        const float normalisedX = x / float(std::max(1, previewWindowSize.width));
-        const float normalisedY = y / float(std::max(1, previewWindowSize.height));
+        const float normalisedX = x / std::max(1.f, static_cast<float>(previewWindowSize.width));
+        const float normalisedY = y / std::max(1.f, static_cast<float>(previewWindowSize.height));
 
         const MyGUI::IntSize viewport = getPreviewViewportSize();
         return osg::Vec2i(static_cast<int>(normalisedX * (viewport.width - 1)),

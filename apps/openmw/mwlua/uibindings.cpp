@@ -243,8 +243,10 @@ namespace MWLua
             return luaManager->uiResourceManager()->registerTexture(std::move(data));
         };
 
-        api["screenSize"]
-            = []() { return osg::Vec2f(float(Settings::video().mResolutionX), float(Settings::video().mResolutionY)); };
+        api["screenSize"] = []() {
+            return osg::Vec2f(
+                static_cast<float>(Settings::video().mResolutionX), static_cast<float>(Settings::video().mResolutionY));
+        };
 
         api["_getAllUiModes"] = [](sol::this_state thisState) {
             sol::table res(thisState, sol::create);
