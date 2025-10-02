@@ -70,6 +70,31 @@ Screenshots
 .. note::
     Flatpak sets ``$XDG_DATA_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/data``, so screenshots will be at ``$HOME/.var/app/org.openmw.OpenMW/data/openmw/screenshots`` if you use the Flatpak.
 
+Override directory (data-local)
+-------------------------------
+
+This is the directory in which OpenMW-CS saves generated content files. 
+Additionally, this is always the last-loaded data directory in OpenMW, overriding any which came before it.
+This can be useful, for instance, for placing automatically-generated plugins created by external tools or to be very certain that particular assets are always overridden regardless of load order.
+You may define your own, custom ``data-local`` directory by using it as a key in ``openmw.cfg``, e.g. ``data-local=C:/Games/OpenMW/data``.
+
++--------------+----------------------------------------------------------------------------------------------------+
+| OS           | Location                                                                                           |
++==============+====================================================================================================+
+| Linux        | ``$XDG_DATA_HOME/openmw/data`` or ``$HOME/.local/share/openmw/data``                               |
++--------------+----------------------------------------------------------------------------------------------------+
+| Mac          | ``$HOME/Library/Application\ Support/openmw/data``                                                 |
++--------------+---------------+------------------------------------------------------------------------------------+
+| Windows      | File Explorer | ``Documents\My Games\OpenMW\data``                                                 |
+|              +---------------+------------------------------------------------------------------------------------+
+|              | PowerShell    | ``Join-Path ([environment]::GetFolderPath("mydocuments")) "My Games\OpenMW\data"`` |
+|              +---------------+------------------------------------------------------------------------------------+
+|              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW\data``                               |
++--------------+---------------+------------------------------------------------------------------------------------+
+
+.. note::
+    Flatpak sets ``$XDG_DATA_HOME`` to ``$HOME/.var/app/$FLATPAK_ID/data``, so data-local will be set to ``$HOME/.var/app/org.openmw.OpenMW/data/openmw/data`` if you use the Flatpak.
+
 Custom configuration directories
 ================================
 
