@@ -138,6 +138,7 @@ set fVal to 12.34
 
 MessageBox "hello world"
 MessageBox "%.0f" fVal
+MessageBox "%.f" fVal
 MessageBox "a %03.0f b" fVal
 MessageBox "%+04.0f" fVal
 MessageBox "%+4.0f" fVal
@@ -152,6 +153,8 @@ MessageBox "%.5g" fVal
 MessageBox "%#.5g" fVal
 MessageBox "%-5g" fVal
 MessageBox "%- 5g" fVal
+
+MessageBox "%.1b" fVal
 
 End)mwscript";
 
@@ -616,6 +619,7 @@ End)mwscript";
             constexpr std::array expected{
                 "hello world"sv,
                 "12"sv,
+                "12"sv,
                 "a 012 b"sv,
                 "+012"sv,
                 " +12"sv,
@@ -630,11 +634,14 @@ End)mwscript";
                 "12.340"sv,
                 "12.34"sv,
                 " 12.34"sv,
+
+                "b"sv,
             };
-            for (std::size_t i = 0; i < context.getMessages().size(); i++)
+            const std::vector<std::string>& output = context.getMessages();
+            EXPECT_EQ(expected.size(), output.size());
+            for (std::size_t i = 0; i < output.size(); i++)
             {
-                std::string_view message = context.getMessages()[i];
-                EXPECT_EQ(expected.at(i), message);
+                EXPECT_EQ(expected[i], output[i]);
             }
         }
         else

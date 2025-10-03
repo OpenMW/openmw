@@ -46,7 +46,8 @@ namespace Interpreter
                     else
                         formatString += '>';
                     formatString += "{}}";
-                    mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width));
+                    std::vformat_to(
+                        std::back_inserter(mFormattedMessage), formatString, std::make_format_args(value, width));
                 }
             }
             else
@@ -75,13 +76,17 @@ namespace Interpreter
                 formatString += '}';
                 const auto appendMessage = [&](auto value) {
                     if (width >= 0 && precision >= 0)
-                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width, precision));
+                        std::vformat_to(std::back_inserter(mFormattedMessage), formatString,
+                            std::make_format_args(value, width, precision));
                     else if (width >= 0)
-                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, width));
+                        std::vformat_to(
+                            std::back_inserter(mFormattedMessage), formatString, std::make_format_args(value, width));
                     else if (precision >= 0)
-                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value, precision));
+                        std::vformat_to(std::back_inserter(mFormattedMessage), formatString,
+                            std::make_format_args(value, precision));
                     else
-                        mFormattedMessage += std::vformat(formatString, std::make_format_args(value));
+                        std::vformat_to(
+                            std::back_inserter(mFormattedMessage), formatString, std::make_format_args(value));
                 };
                 if (placeholder == FloatPlaceholder)
                 {
