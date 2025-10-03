@@ -270,10 +270,25 @@ namespace MWClass
 
     std::pair<int, std::string_view> Weapon::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
+        int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+
         // Do not allow equip weapons from inventory during attack
         if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
-            return { 0, "#{sCantEquipWeapWarning}" };
+        {
+            int activeWeaponType = ESM::Weapon::None;
+            MWMechanics::getActiveWeapon(npc, &activeWeaponType);
+            if (activeWeaponType > ESM::Weapon::None || activeWeaponType == ESM::Weapon::HandToHand)
+            {
+                auto* activeWeapon = MWMechanics::getWeaponType(activeWeaponType);
+                bool isAmmo = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Class::Ammo;
+                bool activeWeapUsesAmmo = activeWeapon->mWeaponClass == ESM::WeaponType::Class::Ranged;
+                bool sameAmmoType = activeWeapon->mAmmoType == type;
+                // special case for ammo equipping
+                if ((activeWeapUsesAmmo && !sameAmmoType) || !isAmmo)
+                    return { 0, "#{sCantEquipWeapWarning}" };
+            }
+        }
 
         if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
             return { 0, "#{sInventoryMessage1}" };
@@ -283,7 +298,6 @@ namespace MWClass
         if (slots.first.empty())
             return { 0, {} };
 
-        int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
         if (MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded)
         {
             return { 2, {} };

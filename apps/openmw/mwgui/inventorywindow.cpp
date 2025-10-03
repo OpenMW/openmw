@@ -325,10 +325,10 @@ namespace MWGui
         // If we unequip weapon during attack, it can lead to unexpected behaviour
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
         {
-            bool isWeapon = item.mBase.getType() == ESM::Weapon::sRecordId;
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-
-            if (isWeapon && invStore.isEquipped(item.mBase))
+            MWWorld::ContainerStoreIterator weapIt = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            bool weapActive = mPtr.getClass().getCreatureStats(mPtr).getDrawState() == MWMechanics::DrawState::Weapon;
+            if (weapActive && weapIt != invStore.end() && *weapIt == item.mBase)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
                 return;
