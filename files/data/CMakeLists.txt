@@ -125,30 +125,25 @@ set(BUILTIN_DATA_FILES
 
     scripts/omw/activationhandlers.lua
     scripts/omw/ai.lua
-    scripts/omw/cellhandlers.lua
     scripts/omw/camera/camera.lua
     scripts/omw/camera/head_bobbing.lua
     scripts/omw/camera/third_person.lua
     scripts/omw/camera/settings.lua
     scripts/omw/camera/move360.lua
     scripts/omw/camera/first_person_auto_switch.lua
-    scripts/omw/combat/common.lua
-    scripts/omw/combat/global.lua
-    scripts/omw/combat/local.lua
-    scripts/omw/combat/menu.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
     scripts/omw/console/menu.lua
+    scripts/omw/interfaces/combat.lua
+    scripts/omw/interfaces/combatfunctions.lua
+    scripts/omw/interfaces/skillfunctions.lua
     scripts/omw/mechanics/actorcontroller.lua
     scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/globalcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/settings/menu.lua
     scripts/omw/music/actor.lua
-    scripts/omw/music/helpers.lua
-    scripts/omw/music/music.lua
-    scripts/omw/music/settings.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua

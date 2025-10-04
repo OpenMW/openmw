@@ -20,6 +20,20 @@ set(BUILTIN_DATA_MW_FILES
 
     # Game-specific settings for calendar.lua
     openmw_aux/calendarconfig.lua
+
+    builtin.omwscripts
+
+    scripts/omw/cellhandlers.lua
+    scripts/omw/combat/common.lua
+    scripts/omw/combat/global.lua
+    scripts/omw/combat/local.lua
+    scripts/omw/combat/menu.lua
+    scripts/omw/interfaces/combatfunctions.lua
+    scripts/omw/interfaces/skillfunctions.lua
+    scripts/omw/music/helpers.lua
+    scripts/omw/music/music.lua
+    scripts/omw/music/settings.lua
+    scripts/omw/playerskillhandlers.lua
 )
 
 foreach (f ${BUILTIN_DATA_MW_FILES})

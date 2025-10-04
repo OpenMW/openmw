@@ -2,7 +2,7 @@ paths=(
   openmw_aux/*lua
   scripts/omw/activationhandlers.lua
   scripts/omw/ai.lua
-  scripts/omw/combat/local.lua
+  scripts/omw/interfaces/combat.lua
   scripts/omw/input/playercontrols.lua
   scripts/omw/mechanics/animationcontroller.lua
   scripts/omw/input/gamepadcontrols.lua

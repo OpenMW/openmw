@@ -1,10 +1,10 @@
 local self = require('openmw.self')
 local I = require('openmw.interfaces')
-local types = require('openmw.types')
 local core = require('openmw.core')
 local auxUtil = require('openmw_aux.util')
 local NPC = require('openmw.types').NPC
 local Skill = core.stats.Skill
+local functions = require('scripts.omw.interfaces.skillfunctions')
 
 ---
 -- Table of skill use types defined by Morrowind.
@@ -47,39 +47,11 @@ local Skill = core.stats.Skill
 local skillUsedHandlers = {}
 local skillLevelUpHandlers = {}
 
-local function tableHasValue(table, value)
-    for _, v in pairs(table) do 
-        if v == value then return true end 
-    end
-    return false
-end
-
 local function shallowCopy(t1)
     local t2 = {}
     for key, value in pairs(t1) do t2[key] = value end
     return t2
 end
-
-local function getSkillProgressRequirement(skillid)
-    local npcRecord = NPC.record(self)
-    local class = NPC.classes.record(npcRecord.class)
-    local skillStat = NPC.stats.skills[skillid](self)
-    local skillRecord = Skill.record(skillid)
-    
-    local factor = core.getGMST('fMiscSkillBonus')
-    if tableHasValue(class.majorSkills, skillid) then 
-        factor = core.getGMST('fMajorSkillBonus')
-    elseif tableHasValue(class.minorSkills, skillid) then 
-        factor = core.getGMST('fMinorSkillBonus')
-    end
-
-    if skillRecord.specialization == class.specialization then
-        factor = factor * core.getGMST('fSpecialSkillBonus')
-    end
-
-    return (skillStat.base + 1) * factor
-end
-
 
 local function skillUsed(skillid, options)
     if #skillUsedHandlers == 0 then
@@ -113,34 +85,7 @@ local function skillLevelUp(skillid, source)
         -- If there are no handlers, then there won't be any effect, so skip calculations
         return
     end
-
-    local skillRecord = Skill.record(skillid)
-    local npcRecord = NPC.record(self)
-    local class = NPC.classes.record(npcRecord.class)
-    
-    local levelUpProgress = 0
-    local levelUpAttributeIncreaseValue = core.getGMST('iLevelupMiscMultAttriubte')
-
-    if tableHasValue(class.minorSkills, skillid) then 
-        levelUpProgress = core.getGMST('iLevelUpMinorMult')
-        levelUpAttributeIncreaseValue = core.getGMST('iLevelUpMinorMultAttribute')
-    elseif tableHasValue(class.majorSkills, skillid) then 
-        levelUpProgress = core.getGMST('iLevelUpMajorMult')
-        levelUpAttributeIncreaseValue = core.getGMST('iLevelUpMajorMultAttribute')
-    end
-
-    local options = {}
-    if source == 'jail' and not (skillid == 'security' or skillid == 'sneak') then
-        options.skillIncreaseValue = -1
-    else
-        options.skillIncreaseValue = 1
-        options.levelUpProgress = levelUpProgress
-        options.levelUpAttribute = skillRecord.attribute
-        options.levelUpAttributeIncreaseValue = levelUpAttributeIncreaseValue
-        options.levelUpSpecialization = skillRecord.specialization
-        options.levelUpSpecializationIncreaseValue = core.getGMST('iLevelupSpecialization')
-    end
-
+    local options = functions.getSkillLevelUpOptions(skillid, source)
     auxUtil.callEventHandlers(skillLevelUpHandlers, skillid, source, options)
 end
 
@@ -281,7 +226,7 @@ return {
         --- Compute the total skill gain required to level up a skill based on its current level, and other modifying factors such as major skills and specialization.
         -- @function [parent=#SkillProgression] getSkillProgressRequirement
         -- @param #string skillid The id of the skill to compute skill progress requirement for
-        getSkillProgressRequirement = getSkillProgressRequirement
+        getSkillProgressRequirement = functions.getSkillProgressRequirement
     },
     engineHandlers = { 
         -- Use the interface in these handlers so any overrides will receive the calls.
