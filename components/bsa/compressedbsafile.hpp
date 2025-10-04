@@ -36,7 +36,7 @@ namespace Bsa
 {
     class CompressedBSAFile : private BSAFile
     {
-    private:
+    public:
         enum ArchiveFlags
         {
             ArchiveFlag_FolderNames = 0x0001,
@@ -89,8 +89,6 @@ namespace Bsa
             std::uint32_t mFileFlags;
         };
 
-        Header mHeader;
-
         struct FileRecord
         {
             std::uint64_t mHash;
@@ -107,6 +105,8 @@ namespace Bsa
             std::map<std::uint64_t, FileRecord> mFiles;
         };
 
+    private:
+        Header mHeader;
         std::map<std::uint64_t, FolderRecord> mFolders;
 
         FileRecord getFileRecord(std::string_view str) const;
