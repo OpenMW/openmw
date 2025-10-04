@@ -756,6 +756,8 @@ namespace MWGui
 
     void InventoryWindow::onFrame(float dt)
     {
+        updateEncumbranceBar();
+
         if (mUpdateNextFrame)
         {
             if (mTrading)
@@ -766,7 +768,6 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateOffer();
             }
 
-            updateEncumbranceBar();
             mDragAndDrop->update();
             mItemView->update();
             notifyContentChanged();
