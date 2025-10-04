@@ -851,7 +851,7 @@ namespace MWMechanics
                 else if (!godmode)
                 {
                     damageSkill(target, effect, effect.mMagnitude);
-                    if (!caster.isEmpty())
+                    if (!caster.isEmpty() && caster.getClass().isNpc())
                         fortifySkill(caster, effect, effect.mMagnitude);
                 }
                 break;
@@ -1303,7 +1303,7 @@ namespace MWMechanics
             {
                 const auto caster = world->searchPtrViaActorId(spellParams.getCasterActorId());
                 restoreSkill(target, effect, effect.mMagnitude);
-                if (!caster.isEmpty())
+                if (!caster.isEmpty() && caster.getClass().isNpc())
                     fortifySkill(caster, effect, -effect.mMagnitude);
             }
             break;

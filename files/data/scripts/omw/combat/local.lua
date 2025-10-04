@@ -6,6 +6,7 @@ local self = require('openmw.self')
 local storage = require('openmw.storage')
 local types = require('openmw.types')
 local util = require('openmw.util')
+local auxUtil = require('openmw_aux.util')
 local Actor = types.Actor
 local Weapon = types.Weapon
 local Player = types.Player
@@ -270,10 +271,8 @@ local function spawnBloodEffect(position)
 end
 
 local function onHit(data)
-    for i = #onHitHandlers, 1, -1 do
-        if onHitHandlers[i](data) == false then
-            return -- skip other handlers
-        end
+    if auxUtil.callEventHandlers(onHitHandlers, data) then
+        return
     end
     if data.successful and not godMode() then
         I.Combat.applyArmor(data)

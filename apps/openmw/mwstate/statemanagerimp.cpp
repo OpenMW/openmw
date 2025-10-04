@@ -659,15 +659,13 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
     {
         const char* release;
         // Report the last version still capable of reading this save
-        if (e.getFormatVersion() <= ESM::OpenMW0_48SaveGameFormatVersion)
+        if (e.getFormatVersion() < ESM::OpenMW0_49MinSaveGameFormatVersion)
             release = "OpenMW 0.48.0";
-        else if (e.getFormatVersion() <= ESM::OpenMW0_49SaveGameFormatVersion)
-            release = "OpenMW 0.49.0";
         else
         {
             // Insert additional else if statements above to cover future releases
-            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_50SaveGameFormatVersion);
-            release = "OpenMW 0.50.0";
+            static_assert(ESM::MinSupportedSaveGameFormatVersion <= ESM::OpenMW0_49MinSaveGameFormatVersion);
+            release = "OpenMW 0.51.0";
         }
         auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
         std::string error = l10n->formatMessage("LoadingRequiresOldVersionError", { "version" }, { release });

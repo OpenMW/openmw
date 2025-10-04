@@ -1225,6 +1225,16 @@
 -- types.Player.quests(player)["ms_fargothring"].stage = 0
 
 ---
+-- Adds a topic to the list of ones known by the player, so that it can be used in dialogue with actors who can talk about that topic.
+-- @function [parent=#PLAYER] addTopic
+-- @param openmw.core#GameObject player
+-- @param string topicId
+-- @usage -- Add topic to the list of known ones, in a player script
+-- self.type.addTopic(self, "Some Work")
+-- @usage -- Give all players in the current world a specific topic, in a global script
+-- for _, player in ipairs(world.players) do player.type.addTopic(player, "Some Unrelated Work") end
+
+---
 -- Returns @{#PlayerJournal}, which contains the read-only access to journal text data accumulated by the player.
 -- Not the same as @{openmw_core#Dialogue.journal} which holds raw game records: with placeholders for dynamic variables and no player-specific info.
 -- @function [parent=#PLAYER] journal

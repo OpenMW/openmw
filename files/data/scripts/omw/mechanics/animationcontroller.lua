@@ -1,13 +1,10 @@
 local anim = require('openmw.animation')
 local self = require('openmw.self')
+local auxUtil = require('openmw_aux.util')
 
 local playBlendedHandlers = {}
-local function onPlayBlendedAnimation(groupname, options)    
-    for i = #playBlendedHandlers, 1, -1 do
-        if playBlendedHandlers[i](groupname, options) == false then
-            return
-        end
-    end
+local function onPlayBlendedAnimation(groupname, options)
+    auxUtil.callEventHandlers(playBlendedHandlers, groupname, options)
 end
 
 local function playBlendedAnimation(groupname, options)
@@ -20,22 +17,7 @@ end
 
 local textKeyHandlers = {}
 local function onAnimationTextKey(groupname, key)
-    local handlers = textKeyHandlers[groupname]
-    if handlers then
-        for i = #handlers, 1, -1 do
-            if handlers[i](groupname, key) == false then
-                return
-            end
-        end
-    end
-    handlers = textKeyHandlers['']
-    if handlers then
-        for i = #handlers, 1, -1 do
-            if handlers[i](groupname, key) == false then
-                return
-            end
-        end
-    end
+    auxUtil.callMultipleEventHandlers({ textKeyHandlers[groupname], textKeyHandlers[''] }, groupname, key)
 end
 
 local initialized = false

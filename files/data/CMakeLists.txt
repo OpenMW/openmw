@@ -76,6 +76,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/fr.yaml
     l10n/OMWCamera/pl.yaml
 
+    l10n/OMWCombat/de.yaml
     l10n/OMWCombat/en.yaml
     l10n/OMWCombat/fr.yaml
     l10n/OMWCombat/ru.yaml

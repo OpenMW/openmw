@@ -325,10 +325,10 @@ namespace MWGui
         // If we unequip weapon during attack, it can lead to unexpected behaviour
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
         {
-            bool isWeapon = item.mBase.getType() == ESM::Weapon::sRecordId;
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-
-            if (isWeapon && invStore.isEquipped(item.mBase))
+            MWWorld::ContainerStoreIterator weapIt = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            bool weapActive = mPtr.getClass().getCreatureStats(mPtr).getDrawState() == MWMechanics::DrawState::Weapon;
+            if (weapActive && weapIt != invStore.end() && *weapIt == item.mBase)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
                 return;
@@ -756,6 +756,8 @@ namespace MWGui
 
     void InventoryWindow::onFrame(float dt)
     {
+        updateEncumbranceBar();
+
         if (mUpdateNextFrame)
         {
             if (mTrading)
@@ -766,7 +768,6 @@ namespace MWGui
                 MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateOffer();
             }
 
-            updateEncumbranceBar();
             mDragAndDrop->update();
             mItemView->update();
             notifyContentChanged();
@@ -969,25 +970,25 @@ namespace MWGui
                 mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.mB = "#{Interface:Close}";
                 mControllerButtons.mX.clear();
-                mControllerButtons.mR2 = "#{sCompanionShare}";
+                mControllerButtons.mR2 = "#{Interface:Share}";
                 break;
             case MWGui::GM_Container:
                 mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
                 mControllerButtons.mB = "#{Interface:Close}";
                 mControllerButtons.mX = "#{Interface:TakeAll}";
-                mControllerButtons.mR2 = "#{sContainer}";
+                mControllerButtons.mR2 = "#{Interface:Container}";
                 break;
             case MWGui::GM_Barter:
-                mControllerButtons.mA = "#{sSell}";
+                mControllerButtons.mA = "#{Interface:Sell}";
                 mControllerButtons.mB = "#{Interface:Cancel}";
                 mControllerButtons.mX = "#{Interface:Offer}";
-                mControllerButtons.mR2 = "#{sBarter}";
+                mControllerButtons.mR2 = "#{Interface:Barter}";
                 break;
             case MWGui::GM_Inventory:
             default:
-                mControllerButtons.mA = "#{sEquip}";
+                mControllerButtons.mA = "#{Interface:Equip}";
                 mControllerButtons.mB = "#{Interface:Back}";
-                mControllerButtons.mX = "#{sDrop}";
+                mControllerButtons.mX = "#{Interface:Drop}";
                 mControllerButtons.mR2.clear();
                 break;
         }

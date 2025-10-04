@@ -1,3 +1,7 @@
+0.51.0
+------
+
+
 0.50.0
 ------
 
@@ -71,6 +75,7 @@
     Bug #8650: Some plants turn invisible when being called types.Container.inventory(cont):isResolved()
     Bug #8680: Dead ancestor ghosts stop being dust when you rest near them
     Bug #8686: openmw-cs: Crash when smoothing terrain of a not-yet-created cell.
+    Bug #8710: Absorb Skill breaks on creatures
     Feature #2522: Support quick item transfer
     Feature #3740: Gamepad GUI Mode
     Feature #3769: Allow GetSpellEffects on enchantments

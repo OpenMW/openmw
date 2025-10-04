@@ -444,15 +444,6 @@ namespace Resource
         Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay)
         : ResourceManager(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
-        , mForceShaders(false)
-        , mClampLighting(true)
-        , mAutoUseNormalMaps(false)
-        , mAutoUseSpecularMaps(false)
-        , mApplyLightingToEnvMaps(false)
-        , mLightingMethod(SceneUtil::LightingMethod::FFP)
-        , mConvertAlphaTestToAlphaToCoverage(false)
-        , mAdjustCoverageForAlphaTest(false)
-        , mSupportsNormalsRT(false)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
@@ -460,8 +451,8 @@ namespace Resource
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1.f)
-        , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
+        , mLightingMethod(SceneUtil::LightingMethod::FFP)
     {
     }
 
@@ -986,8 +977,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()
     {
-        if (!mErrorMarker)
-            mErrorMarker = loadErrorMarker();
+        std::call_once(mErrorMarkerFlag, [this] { mErrorMarker = loadErrorMarker(); });
 
         return static_cast<osg::Node*>(mErrorMarker->clone(osg::CopyOp::DEEP_COPY_ALL));
     }

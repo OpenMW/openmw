@@ -125,7 +125,7 @@ namespace MWLua
 
         // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with
         // OSG Cull), so we need to queue it and apply from the main thread.
-        void addAction(std::function<void()> action, std::string_view name = "");
+        void addAction(std::function<void()> action, std::string_view name = {});
         void addTeleportPlayerAction(std::function<void()> action);
 
         // Saving
@@ -174,6 +174,8 @@ namespace MWLua
         void sendLocalEvent(
             const MWWorld::Ptr& target, const std::string& name, const std::optional<sol::table>& data = std::nullopt);
 
+        bool isSynchronizedUpdateRunning() const { return mRunningSynchronizedUpdates; }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
@@ -187,6 +189,7 @@ namespace MWLua
         bool mApplyingDelayedActions = false;
         bool mNewGameStarted = false;
         bool mReloadAllScriptsRequested = false;
+        bool mRunningSynchronizedUpdates = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;

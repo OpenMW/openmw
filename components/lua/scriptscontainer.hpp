@@ -271,7 +271,7 @@ namespace LuaUtil
         // Returns script by id (throws an exception if doesn't exist)
         Script& getScript(int scriptId);
 
-        void printError(int scriptId, std::string_view msg, const std::exception& e);
+        void printError(int scriptId, std::string_view msg, const std::exception& e) const;
 
         const VFS::Path::Normalized& scriptPath(int scriptId) const
         {
