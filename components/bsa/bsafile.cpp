@@ -115,7 +115,8 @@ void BSAFile::readHeader(std::istream& input)
         fail("File too small to be a valid BSA archive");
 
     // Get essential header numbers
-    size_t dirsize, filenum;
+    std::streamsize dirsize;
+    std::streamsize filenum;
     {
         // First 12 bytes
         uint32_t head[3];
@@ -139,7 +140,7 @@ void BSAFile::readHeader(std::istream& input)
     // Each file must take up at least 21 bytes of data in the bsa. So
     // if files*21 overflows the file size then we are guaranteed that
     // the archive is corrupt.
-    if ((filenum * 21 > unsigned(fsize - 12)) || (dirsize + 8 * filenum > unsigned(fsize - 12)))
+    if (filenum * 21 > fsize - 12 || dirsize + 8 * filenum > fsize - 12)
         fail("Directory information larger than entire archive");
 
     // Read the offset info into a temporary buffer
@@ -168,20 +169,22 @@ void BSAFile::readHeader(std::istream& input)
     // Calculate the offset of the data buffer. All file offsets are
     // relative to this. 12 header bytes + directory + hash table
     // (skipped)
-    size_t fileDataOffset = 12 + dirsize + 8 * filenum;
+    const std::streamsize fileDataOffset = 12 + dirsize + 8 * filenum;
 
     // Set up the the FileStruct table
     mFiles.reserve(filenum);
     size_t endOfNameBuffer = 0;
-    for (size_t i = 0; i < filenum; i++)
+    for (std::streamsize i = 0; i < filenum; i++)
     {
-        FileStruct& fs = mFiles.emplace_back();
-
         const uint32_t fileSize = offsets[i * 2];
-        const uint32_t offset = offsets[i * 2 + 1] + static_cast<uint32_t>(fileDataOffset);
+        const std::streamsize offset = static_cast<std::streamsize>(offsets[i * 2 + 1]) + fileDataOffset;
 
         if (fileSize + offset > fsize)
-            fail("Archive contains offsets outside itself");
+            fail(std::format("Archive contains offsets outside itself: {} + {} > {}", fileSize, offset, fsize));
+
+        if (offset > std::numeric_limits<uint32_t>::max())
+            fail(std::format(
+                "Absolute file {} offset is too large: {} > {}", i, offset, std::numeric_limits<uint32_t>::max()));
 
         const uint32_t nameOffset = offsets[2 * filenum + i];
 
@@ -196,12 +199,16 @@ void BSAFile::readHeader(std::istream& input)
 
         const std::size_t nameSize = end - begin;
 
+        FileStruct fs;
+
         fs.mFileSize = fileSize;
-        fs.mOffset = offset;
+        fs.mOffset = static_cast<uint32_t>(offset);
         fs.mHash = hashes[i];
         fs.mNameOffset = nameOffset;
         fs.mNameSize = static_cast<uint32_t>(nameSize);
         fs.mNamesBuffer = &mStringBuf;
+
+        mFiles.push_back(fs);
 
         endOfNameBuffer = std::max(endOfNameBuffer, nameOffset + nameSize + 1);
         assert(endOfNameBuffer <= mStringBuf.size());
