@@ -6,6 +6,7 @@
 
 #include <sqlite3.h>
 
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -19,6 +20,12 @@
 
 namespace Sqlite3
 {
+    template <class T>
+    concept StrongTypedef = requires(T v)
+    {
+        v.mValue;
+    };
+
     inline void bindParameter(sqlite3& db, sqlite3_stmt& stmt, int index, int value)
     {
         if (const int ec = sqlite3_bind_int(&stmt, index, value); ec != SQLITE_OK)
@@ -97,7 +104,7 @@ namespace Sqlite3
         value = nullptr;
     }
 
-    template <class T>
+    template <std::integral T>
     inline auto copyColumn(sqlite3& /*db*/, sqlite3_stmt& statement, int index, int type, T& value)
     {
         switch (type)
@@ -105,6 +112,19 @@ namespace Sqlite3
             case SQLITE_INTEGER:
                 value = static_cast<T>(sqlite3_column_int64(&statement, index));
                 return;
+            case SQLITE_NULL:
+                value = std::decay_t<T>{};
+                return;
+        }
+        throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
+            + " that does not match expected output type: SQLITE_INTEGER or SQLITE_NULL");
+    }
+
+    template <std::floating_point T>
+    inline auto copyColumn(sqlite3& /*db*/, sqlite3_stmt& statement, int index, int type, T& value)
+    {
+        switch (type)
+        {
             case SQLITE_FLOAT:
                 value = static_cast<T>(sqlite3_column_double(&statement, index));
                 return;
@@ -113,7 +133,13 @@ namespace Sqlite3
                 return;
         }
         throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-            + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT or SQLITE_NULL");
+            + " that does not match expected output type: SQLITE_FLOAT or SQLITE_NULL");
+    }
+
+    template <StrongTypedef T>
+    inline auto copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, T& value)
+    {
+        return copyColumn(db, statement, index, type, value.mValue);
     }
 
     inline void copyColumn(sqlite3& db, sqlite3_stmt& statement, int index, int type, std::string& value)
