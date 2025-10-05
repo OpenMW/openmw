@@ -1,7 +1,5 @@
 #include "cellbindings.hpp"
 
-#include <MyGUI_LanguageManager.h>
-
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
@@ -42,7 +40,10 @@
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include <components/translation/translation.hpp>
+
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -87,13 +88,9 @@ namespace MWLua
         };
 
         cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
-        cellT["displayName"] = sol::readonly_property([](const CellT& c) {
-            std::string str(c.mStore->getCell()->getNameId());
-            if (!str.empty())
-            {
-                str = MyGUI::LanguageManager::getInstance().replaceTags(MyGUI::UString("#{sCell=" + str + "}"));
-            }
-            return str;
+        cellT["displayName"] = sol::readonly_property([](const CellT& c) -> std::string_view {
+            const auto& storage = MWBase::Environment::get().getWindowManager()->getTranslationDataStorage();
+            return storage.translateCellName(c.mStore->getCell()->getNameId());
         });
         cellT["id"]
             = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getId().serializeText(); });
