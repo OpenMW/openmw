@@ -143,5 +143,18 @@ function aux_util.callMultipleEventHandlers(handlers, ...)
     return false
 end
 
+---
+-- Copies all key-value pairs from the input table to a new table.
+-- @function [parent=#util] shallowCopy
+-- @param #table table The table to copy
+-- @return #table A shallow copy of the input table
+function aux_util.shallowCopy(table)
+    local copy = {}
+    for key, value in pairs(table) do
+        copy[key] = value
+    end
+    return copy
+end
+
 return aux_util
 

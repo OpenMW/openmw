@@ -28,8 +28,6 @@ set(BUILTIN_DATA_MW_FILES
     scripts/omw/combat/global.lua
     scripts/omw/combat/local.lua
     scripts/omw/combat/menu.lua
-    scripts/omw/interfaces/combatfunctions.lua
-    scripts/omw/interfaces/skillfunctions.lua
     scripts/omw/music/helpers.lua
     scripts/omw/music/music.lua
     scripts/omw/music/settings.lua

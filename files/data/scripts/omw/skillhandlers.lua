@@ -4,7 +4,6 @@ local core = require('openmw.core')
 local auxUtil = require('openmw_aux.util')
 local NPC = require('openmw.types').NPC
 local Skill = core.stats.Skill
-local functions = require('scripts.omw.interfaces.skillfunctions')
 
 ---
 -- Table of skill use types defined by Morrowind.
@@ -47,12 +46,6 @@ local functions = require('scripts.omw.interfaces.skillfunctions')
 local skillUsedHandlers = {}
 local skillLevelUpHandlers = {}
 
-local function shallowCopy(t1)
-    local t2 = {}
-    for key, value in pairs(t1) do t2[key] = value end
-    return t2
-end
-
 local function skillUsed(skillid, options)
     if #skillUsedHandlers == 0 then
         -- If there are no handlers, then there won't be any effect, so skip calculations
@@ -60,7 +53,7 @@ local function skillUsed(skillid, options)
     end
     
     -- Make a copy so we don't change the caller's table
-    options = shallowCopy(options)
+    options = auxUtil.shallowCopy(options)
     
     -- Compute use value if it was not supplied directly
     if not options.skillGain then
@@ -85,7 +78,7 @@ local function skillLevelUp(skillid, source)
         -- If there are no handlers, then there won't be any effect, so skip calculations
         return
     end
-    local options = functions.getSkillLevelUpOptions(skillid, source)
+    local options = I.SkillProgression.getSkillLevelUpOptions(skillid, source)
     auxUtil.callEventHandlers(skillLevelUpHandlers, skillid, source, options)
 end
 
@@ -126,7 +119,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#SkillProgression] #number version
-        version = 1,
+        version = 2,
 
         --- Add new skill level up handler for this actor.
         -- For load order consistency, handlers should be added in the body if your script.
@@ -213,6 +206,13 @@ return {
         -- @param #string skillid The id of the skill to level up.
         -- @param #SkillLevelUpSource source The source of the skill increase. Note that passing a value of @{#SkillLevelUpSource.Jail} will cause a skill decrease for all skills except sneak and security.
         skillLevelUp = skillLevelUp,
+
+        --- Construct a table of skill level up options
+        -- @function [parent=#SkillProgression] getSkillLevelUpOptions
+        -- @param #string skillid The id of the skill to level up
+        -- @param #SkillLevelUpSource source The source of the skill increase
+        -- @return #table The options to pass to the skill level up handlers
+        getSkillLevelUpOptions = function(skillid, source) return {} end,
         
         --- @{#SkillLevelUpSource}
         -- @field [parent=#SkillProgression] #SkillLevelUpSource SKILL_INCREASE_SOURCES
@@ -226,7 +226,7 @@ return {
         --- Compute the total skill gain required to level up a skill based on its current level, and other modifying factors such as major skills and specialization.
         -- @function [parent=#SkillProgression] getSkillProgressRequirement
         -- @param #string skillid The id of the skill to compute skill progress requirement for
-        getSkillProgressRequirement = functions.getSkillProgressRequirement
+        getSkillProgressRequirement = function(skillid) return 1 end
     },
     engineHandlers = { 
         -- Use the interface in these handlers so any overrides will receive the calls.
