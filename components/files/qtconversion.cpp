@@ -1,7 +1,8 @@
-
 #include "qtconversion.hpp"
 
 #include <components/misc/strings/conversion.hpp>
+
+#include <string_view>
 
 QString Files::pathToQString(const std::filesystem::path& path)
 {
@@ -17,12 +18,12 @@ QString Files::pathToQString(std::filesystem::path&& path)
 
 std::filesystem::path Files::pathFromQString(QStringView path)
 {
-    const auto tmp = path.toUtf8();
-    return std::filesystem::path{ Misc::StringUtils::stringToU8String(tmp) };
+    const QByteArray tmp = path.toUtf8();
+    return std::filesystem::path(Misc::StringUtils::stringToU8String(std::string_view(tmp.constData(), tmp.size())));
 }
 
 std::filesystem::path Files::pathFromQString(QString&& path)
 {
-    const auto tmp = path.toUtf8();
-    return std::filesystem::path{ Misc::StringUtils::stringToU8String(tmp) };
+    const QByteArray tmp = path.toUtf8();
+    return std::filesystem::path(Misc::StringUtils::stringToU8String(std::string_view(tmp.constData(), tmp.size())));
 }

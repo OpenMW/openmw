@@ -1,7 +1,8 @@
-
 #include "qtconversion.hpp"
 
 #include <components/misc/strings/conversion.hpp>
+
+#include <string_view>
 
 QString VFS::Path::normalizedToQString(NormalizedView path)
 {
@@ -15,12 +16,12 @@ QString VFS::Path::normalizedToQString(Normalized&& path)
 
 VFS::Path::Normalized VFS::Path::normalizedFromQString(QStringView path)
 {
-    const auto tmp = path.toUtf8();
-    return Normalized{ tmp };
+    const QByteArray tmp = path.toUtf8();
+    return Normalized(std::string_view(tmp.constData(), tmp.size()));
 }
 
 VFS::Path::Normalized VFS::Path::normalizedFromQString(QString&& path)
 {
-    const auto tmp = path.toUtf8();
-    return Normalized{ tmp };
+    const QByteArray tmp = std::move(path).toUtf8();
+    return Normalized(std::string_view(tmp.constData(), tmp.size()));
 }
