@@ -70,11 +70,9 @@ namespace Bsa
     }
 
     /// Read header information from the input source
-    void BA2GNRLFile::readHeader()
+    void BA2GNRLFile::readHeader(std::istream& input)
     {
         assert(!mIsLoaded);
-
-        std::ifstream input(mFilepath, std::ios_base::binary);
 
         const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
@@ -129,8 +127,6 @@ namespace Bsa
             mFiles[i].mNameSize = fileNameSize;
             mFiles[i].mNamesBuffer = &mFileNames.back();
         }
-
-        mIsLoaded = true;
     }
 
     BA2GNRLFile::FileRecord BA2GNRLFile::getFileRecord(std::string_view str) const

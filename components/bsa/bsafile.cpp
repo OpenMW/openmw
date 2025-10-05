@@ -30,6 +30,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <istream>
 #include <system_error>
 
 #include <components/esm/fourcc.hpp>
@@ -73,7 +74,7 @@ BSAFile::Hash getHash(const std::string& name)
 }
 
 /// Read header information from the input source
-void BSAFile::readHeader()
+void BSAFile::readHeader(std::istream& input)
 {
     /*
      * The layout of a BSA archive is as follows:
@@ -106,8 +107,6 @@ void BSAFile::readHeader()
      *
      */
     assert(!mIsLoaded);
-
-    std::ifstream input(mFilepath, std::ios_base::binary);
 
     // Total archive size
     const std::streamsize fsize = Files::getStreamSizeLeft(input);
@@ -211,8 +210,6 @@ void BSAFile::readHeader()
 
     std::sort(mFiles.begin(), mFiles.end(),
         [](const FileStruct& left, const FileStruct& right) { return left.mOffset < right.mOffset; });
-
-    mIsLoaded = true;
 }
 
 /// Write header information to the output sink
@@ -260,7 +257,11 @@ void BSAFile::open(const std::filesystem::path& file)
 
     mFilepath = file;
     if (std::filesystem::exists(file))
-        readHeader();
+    {
+        std::ifstream input(mFilepath, std::ios_base::binary);
+        readHeader(input);
+        mIsLoaded = true;
+    }
     else
     {
         {

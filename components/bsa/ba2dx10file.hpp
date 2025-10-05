@@ -57,7 +57,7 @@ namespace Bsa
         virtual ~BA2DX10File();
 
         /// Read header information from the input source
-        void readHeader() override;
+        void readHeader(std::istream& stream) override;
 
         Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);

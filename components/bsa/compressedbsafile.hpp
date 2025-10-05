@@ -125,7 +125,7 @@ namespace Bsa
         virtual ~CompressedBSAFile() = default;
 
         /// Read header information from the input source
-        void readHeader() override;
+        void readHeader(std::istream& input) override;
 
         Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);

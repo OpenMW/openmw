@@ -29,7 +29,7 @@
 #include <cerrno>
 #include <filesystem>
 #include <format>
-#include <fstream>
+#include <istream>
 #include <system_error>
 
 #include <lz4frame.h>
@@ -45,11 +45,9 @@
 namespace Bsa
 {
     /// Read header information from the input source
-    void CompressedBSAFile::readHeader()
+    void CompressedBSAFile::readHeader(std::istream& input)
     {
         assert(!mIsLoaded);
-
-        std::ifstream input(mFilepath, std::ios_base::binary);
 
         const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
@@ -208,8 +206,6 @@ namespace Bsa
                 mFiles.push_back(fileStruct);
             }
         }
-
-        mIsLoaded = true;
     }
 
     CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(std::string_view str) const

@@ -26,6 +26,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -95,7 +96,7 @@ namespace Bsa
         [[noreturn]] void fail(const std::string& msg) const;
 
         /// Read header information from the input source
-        virtual void readHeader();
+        virtual void readHeader(std::istream& input);
         virtual void writeHeader();
 
     public:
