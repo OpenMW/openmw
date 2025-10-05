@@ -100,7 +100,7 @@ namespace Sqlite3
     {
         if (type != SQLITE_NULL)
             throw std::logic_error("Type of column " + std::to_string(index) + " is " + sqliteTypeToString(type)
-                + " that does not match expected output type: SQLITE_INTEGER or SQLITE_FLOAT");
+                + " that does not match expected output type: SQLITE_NULL");
         value = nullptr;
     }
 
