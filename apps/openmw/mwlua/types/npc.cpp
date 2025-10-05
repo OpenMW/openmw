@@ -246,6 +246,17 @@ namespace MWLua
                 throw std::runtime_error("NPC or Player expected");
         };
 
+        npc["setWerewolf"] = [context](const Object& obj, bool werewolf) -> void {
+            const MWWorld::Ptr& ptr = obj.ptr();
+            if (!ptr.getClass().isNpc())
+                throw std::runtime_error("NPC or Player expected");
+            context.mLuaManager->addAction(
+                [obj = Object(ptr), werewolf] {
+                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(obj.ptr(), werewolf);
+                },
+                "setWerewolfAction");
+        };
+
         npc["getDisposition"] = [](const Object& o, const Object& player) -> int {
             const MWWorld::Class& cls = o.ptr().getClass();
             verifyPlayer(player);
