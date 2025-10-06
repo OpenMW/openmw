@@ -1,4 +1,5 @@
 local I = require('openmw.interfaces')
+local util = require('openmw.util')
 local auxUtil = require('openmw_aux.util')
 
 local onHitHandlers = {}
@@ -130,12 +131,12 @@ return {
 
         --- @{#AttackSourceType}
         -- @field [parent=#Combat] #AttackSourceType ATTACK_SOURCE_TYPES Available attack source types
-        ATTACK_SOURCE_TYPES = {
+        ATTACK_SOURCE_TYPES = util.makeStrictReadOnly({
             Magic = 'magic',
             Melee = 'melee',
             Ranged = 'ranged',
             Unspecified = 'unspecified',
-        },
+        }),
     },
 
     eventHandlers = {
