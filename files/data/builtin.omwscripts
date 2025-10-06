@@ -1,5 +1,3 @@
-# NB: data-mw overrides this file!
-
 # UI framework
 MENU,PLAYER: scripts/omw/mwui/init.lua
 

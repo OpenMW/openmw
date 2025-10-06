@@ -21,8 +21,6 @@ set(BUILTIN_DATA_MW_FILES
     # Game-specific settings for calendar.lua
     openmw_aux/calendarconfig.lua
 
-    builtin.omwscripts
-
     scripts/omw/cellhandlers.lua
     scripts/omw/combat/common.lua
     scripts/omw/combat/global.lua
@@ -37,3 +35,13 @@ set(BUILTIN_DATA_MW_FILES
 foreach (f ${BUILTIN_DATA_MW_FILES})
     copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/${f}")
 endforeach (f)
+
+# Concat data/builtin.omwscripts and data-mw/builtin-extra.omwscripts to create vfs-mw/builtin.omwscripts
+set(builtinBase "${CMAKE_CURRENT_SOURCE_DIR}/../data/builtin.omwscripts")
+set(builtinExtra "${CMAKE_CURRENT_SOURCE_DIR}/builtin-extra.omwscripts")
+set(builtinTemp "${CMAKE_BINARY_DIR}/tmp")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${builtinBase}" "${builtinExtra}")
+file(COPY "${builtinBase}" DESTINATION "${builtinTemp}")
+file(READ "${builtinExtra}" builtinContents)
+file(APPEND "${builtinTemp}/builtin.omwscripts" "${builtinContents}")
+copy_resource_file("${builtinTemp}/builtin.omwscripts" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")

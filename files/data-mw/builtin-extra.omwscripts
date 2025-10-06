@@ -1,0 +1,8 @@
+# Game specific scripts to append to builtin.omwscripts
+GLOBAL: scripts/omw/cellhandlers.lua
+GLOBAL: scripts/omw/combat/global.lua
+MENU: scripts/omw/combat/menu.lua
+NPC,CREATURE,PLAYER: scripts/omw/combat/local.lua
+PLAYER: scripts/omw/music/music.lua
+MENU: scripts/omw/music/settings.lua
+PLAYER: scripts/omw/playerskillhandlers.lua
