@@ -38,10 +38,6 @@ endforeach (f)
 
 # Concat data/builtin.omwscripts and data-mw/builtin-extra.omwscripts to create vfs-mw/builtin.omwscripts
 set(builtinBase "${CMAKE_CURRENT_SOURCE_DIR}/../data/builtin.omwscripts")
-set(builtinExtra "${CMAKE_CURRENT_SOURCE_DIR}/builtin-extra.omwscripts")
-set(builtinTemp "${CMAKE_BINARY_DIR}/tmp")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${builtinBase}" "${builtinExtra}")
-file(COPY "${builtinBase}" DESTINATION "${builtinTemp}")
-file(READ "${builtinExtra}" builtinContents)
-file(APPEND "${builtinTemp}/builtin.omwscripts" "${builtinContents}")
-copy_resource_file("${builtinTemp}/builtin.omwscripts" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${builtinBase}")
+file(READ "${builtinBase}" BUILTIN_SCRIPTS)
+configure_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/builtin-extra.omwscripts" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")

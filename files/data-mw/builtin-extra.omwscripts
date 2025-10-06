@@ -1,3 +1,5 @@
+@BUILTIN_SCRIPTS@
+
 # Game specific scripts to append to builtin.omwscripts
 GLOBAL: scripts/omw/cellhandlers.lua
 GLOBAL: scripts/omw/combat/global.lua
