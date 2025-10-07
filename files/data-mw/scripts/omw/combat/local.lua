@@ -54,82 +54,39 @@ local armorSlots = {
     Actor.EQUIPMENT_SLOT.CarriedLeft,
 }
 
-local function getDamage(attack, what)
-    if attack.damage then
-        return attack.damage[what] or 0
+local function getArmorSkill(item)
+    if not item or not Armor.objectIsInstance(item) then
+        return 'unarmored'
+    end
+    local record = Armor.record(item)
+    local weightGmst = armorTypeGmst[record.type]
+    local epsilon = 0.0005
+    if record.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
+        return 'lightarmor'
+    elseif record.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
+        return 'mediumarmor'
+    else
+        return 'heavyarmor'
     end
 end
 
-local function setDamage(attack, what, damage)
-    attack.damage = attack.damage or {}
-    attack.damage[what] = damage
-end
-
-local function adjustDamageForArmor(damage, actor)
-    local armor = I.Combat.getArmorRating(actor)
-    local x = damage / (damage + armor)
-    return damage * math.max(x, core.getGMST('fCombatArmorMinMult'))
-end
-
-local function adjustDamageForDifficulty(attack, defendant)
-    local attackerIsPlayer = attack.attacker and Player.objectIsInstance(attack.attacker)
-    -- The interface guarantees defendant is never nil
-    local defendantIsPlayer = Player.objectIsInstance(defendant)
-    -- If both characters are NPCs or both characters are players then
-    -- difficulty settings do not apply
-    if attackerIsPlayer == defendantIsPlayer then return end
-
-    local fDifficultyMult = core.getGMST('fDifficultyMult')
-    local difficultyTerm = core.getGameDifficulty() * 0.01
-    local x = 0
-
-    if defendantIsPlayer then
-        -- Defending actor is a player
-        if difficultyTerm > 0 then
-            x = difficultyTerm * fDifficultyMult
-        else
-            x = difficultyTerm / fDifficultyMult
-        end
-    elseif attackerIsPlayer then
-        -- Attacking actor is a player
-        if difficultyTerm > 0 then
-            x = -difficultyTerm / fDifficultyMult
-        else
-            x = -difficultyTerm * fDifficultyMult
-        end
+local function getSkillAdjustedArmorRating(item, actor)
+    local record = Armor.record(item)
+    local skillid = I.Combat.getArmorSkill(item)
+    local skill = getSkill(actor, skillid)
+    if record.weight == 0 then
+        return record.baseArmor
     end
-
-    setDamage(attack, 'health', getDamage(attack, 'health') * (1 + x))
+    return record.baseArmor * skill / core.getGMST('iBaseArmorSkill')
 end
 
-local function applyArmor(attack)
-    local healthDamage = getDamage(attack, 'health')
-    if healthDamage > 0 then
-        local healthDamageAdjusted = I.Combat.adjustDamageForArmor(healthDamage)
-        local diff = math.floor(healthDamageAdjusted - healthDamage)
-        setDamage(attack, 'health', math.max(healthDamageAdjusted, 1))
-        local item = I.Combat.pickRandomArmor()
-        local skillid = I.Combat.getArmorSkill(item)
-        if I.SkillProgression then
-            I.SkillProgression.skillUsed(skillid, {useType = I.SkillProgression.SKILL_USE_TYPES.Armor_HitByOpponent})
-        end
-        if item and Armor.objectIsInstance(item) then
-            local attackerIsUnarmedCreature = attack.attacker and not attack.weapon and not attack.ammo and Creature.objectIsInstance(attack.attacker)
-            if settings:get('unarmedCreatureAttacksDamageArmor') or not attackerIsUnarmedCreature then
-                core.sendGlobalEvent('ModifyItemCondition', { actor = self, item = item, amount = diff })
-            end
-
-            if skillid == 'lightarmor' then
-                core.sound.playSound3d('Light Armor Hit', self)
-            elseif skillid == 'mediumarmor' then
-                core.sound.playSound3d('Medium Armor Hit', self)
-            elseif skillid == 'heavyarmor' then
-                core.sound.playSound3d('Heavy Armor Hit', self)
-            else
-                core.sound.playSound3d('Hand To Hand Hit', self)
-            end
-        end
+local function getEffectiveArmorRating(item, actor)
+    local record = Armor.record(item)
+    local rating = getSkillAdjustedArmorRating(item, actor)
+    if record.health and record.health ~= 0 then
+        rating = rating * (types.Item.itemData(item).condition / record.health)
     end
+    return rating
 end
 
 local function getArmorRating(actor)
@@ -166,67 +123,10 @@ local function getArmorRating(actor)
         +  magicShield
 end
 
-local function getArmorSkill(item)
-    if not item or not Armor.objectIsInstance(item) then
-        return 'unarmored'
-    end
-    local record = Armor.record(item)
-    local weightGmst = armorTypeGmst[record.type]
-    local epsilon = 0.0005
-    if record.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
-        return 'lightarmor'
-    elseif record.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
-        return 'mediumarmor'
-    else
-        return 'heavyarmor'
-    end
-end
-
-local function getSkillAdjustedArmorRating(item, actor)
-    local record = Armor.record(item)
-    local skillid = I.Combat.getArmorSkill(item)
-    local skill = getSkill(actor, skillid)
-    if record.weight == 0 then
-        return record.baseArmor
-    end
-    return record.baseArmor * skill / core.getGMST('iBaseArmorSkill')
-end
-
-local function getEffectiveArmorRating(item, actor)
-    local record = Armor.record(item)
-    local rating = getSkillAdjustedArmorRating(item, actor)
-    if record.health and record.health ~= 0 then
-        rating = rating * (types.Item.itemData(item).condition / record.health)
-    end
-    return rating
-end
-
-local function spawnBloodEffect(position)
-    if isPlayer and not settings:get('spawnBloodEffectsOnPlayer') then
-        return
-    end
-
-    local bloodEffectModel = string.format('Blood_Model_%d', math.random(0, 2)) -- randIntUniformClosed(0, 2)
-
-    -- TODO: implement a Misc::correctMeshPath equivalent instead?
-    -- All it ever does it append 'meshes\\' though
-    bloodEffectModel = 'meshes/'..core.getGMST(bloodEffectModel)
-
-    local record = self.object.type.record(self.object)
-    local bloodTexture = string.format('Blood_Texture_%d', record.bloodType)
-    bloodTexture = core.getGMST(bloodTexture)
-    if not bloodTexture or bloodTexture == '' then
-        bloodTexture = core.getGMST('Blood_Texture_0')
-    end
-    core.sendGlobalEvent('SpawnVfx', {
-        model = bloodEffectModel,
-        position = position,
-        options = {
-            mwMagicVfx = false,
-            particleTextureOverride = bloodTexture,
-            useAmbientLight = false,
-        },
-    })
+local function adjustDamageForArmor(damage, actor)
+    local armor = I.Combat.getArmorRating(actor)
+    local x = damage / (damage + armor)
+    return damage * math.max(x, core.getGMST('fCombatArmorMinMult'))
 end
 
 local function pickRandomArmor(actor)
@@ -262,6 +162,106 @@ local function pickRandomArmor(actor)
     end
 
     return Actor.getEquipment(actor, slot)
+end
+
+local function getDamage(attack, what)
+    if attack.damage then
+        return attack.damage[what] or 0
+    end
+end
+
+local function setDamage(attack, what, damage)
+    attack.damage = attack.damage or {}
+    attack.damage[what] = damage
+end
+
+local function applyArmor(attack)
+    local healthDamage = getDamage(attack, 'health')
+    if healthDamage > 0 then
+        local healthDamageAdjusted = I.Combat.adjustDamageForArmor(healthDamage)
+        local diff = math.floor(healthDamageAdjusted - healthDamage)
+        setDamage(attack, 'health', math.max(healthDamageAdjusted, 1))
+        local item = I.Combat.pickRandomArmor()
+        local skillid = I.Combat.getArmorSkill(item)
+        if I.SkillProgression then
+            I.SkillProgression.skillUsed(skillid, {useType = I.SkillProgression.SKILL_USE_TYPES.Armor_HitByOpponent})
+        end
+        if item and Armor.objectIsInstance(item) then
+            local attackerIsUnarmedCreature = attack.attacker and not attack.weapon and not attack.ammo and Creature.objectIsInstance(attack.attacker)
+            if settings:get('unarmedCreatureAttacksDamageArmor') or not attackerIsUnarmedCreature then
+                core.sendGlobalEvent('ModifyItemCondition', { actor = self, item = item, amount = diff })
+            end
+
+            if skillid == 'lightarmor' then
+                core.sound.playSound3d('Light Armor Hit', self)
+            elseif skillid == 'mediumarmor' then
+                core.sound.playSound3d('Medium Armor Hit', self)
+            elseif skillid == 'heavyarmor' then
+                core.sound.playSound3d('Heavy Armor Hit', self)
+            else
+                core.sound.playSound3d('Hand To Hand Hit', self)
+            end
+        end
+    end
+end
+
+local function adjustDamageForDifficulty(attack, defendant)
+    local attackerIsPlayer = attack.attacker and Player.objectIsInstance(attack.attacker)
+    -- The interface guarantees defendant is never nil
+    local defendantIsPlayer = Player.objectIsInstance(defendant)
+    -- If both characters are NPCs or both characters are players then
+    -- difficulty settings do not apply
+    if attackerIsPlayer == defendantIsPlayer then return end
+
+    local fDifficultyMult = core.getGMST('fDifficultyMult')
+    local difficultyTerm = core.getGameDifficulty() * 0.01
+    local x = 0
+
+    if defendantIsPlayer then
+        -- Defending actor is a player
+        if difficultyTerm > 0 then
+            x = difficultyTerm * fDifficultyMult
+        else
+            x = difficultyTerm / fDifficultyMult
+        end
+    elseif attackerIsPlayer then
+        -- Attacking actor is a player
+        if difficultyTerm > 0 then
+            x = -difficultyTerm / fDifficultyMult
+        else
+            x = -difficultyTerm * fDifficultyMult
+        end
+    end
+
+    setDamage(attack, 'health', getDamage(attack, 'health') * (1 + x))
+end
+
+local function spawnBloodEffect(position)
+    if isPlayer and not settings:get('spawnBloodEffectsOnPlayer') then
+        return
+    end
+
+    local bloodEffectModel = string.format('Blood_Model_%d', math.random(0, 2)) -- randIntUniformClosed(0, 2)
+
+    -- TODO: implement a Misc::correctMeshPath equivalent instead?
+    -- All it ever does it append 'meshes\\' though
+    bloodEffectModel = 'meshes/'..core.getGMST(bloodEffectModel)
+
+    local record = self.object.type.record(self.object)
+    local bloodTexture = string.format('Blood_Texture_%d', record.bloodType)
+    bloodTexture = core.getGMST(bloodTexture)
+    if not bloodTexture or bloodTexture == '' then
+        bloodTexture = core.getGMST('Blood_Texture_0')
+    end
+    core.sendGlobalEvent('SpawnVfx', {
+        model = bloodEffectModel,
+        position = position,
+        options = {
+            mwMagicVfx = false,
+            particleTextureOverride = bloodTexture,
+            useAmbientLight = false,
+        },
+    })
 end
 
 local function onHit(data)
