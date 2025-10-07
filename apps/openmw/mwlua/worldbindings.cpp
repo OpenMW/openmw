@@ -60,7 +60,16 @@ namespace MWLua
     {
         using Misc::FiniteFloat;
 
-        MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
+        Misc::NotNullPtr<MWBase::World> world = MWBase::Environment::get().getWorld();
+        MWWorld::DateTimeManager* timeManager = world->getTimeManager();
+
+        api["advanceTime"] = [context, world](const FiniteFloat hours) {
+            if (hours <= 0.0f)
+                throw std::runtime_error("Time may only be advanced forward");
+
+            world->advanceTime(hours);
+            world->fastForwardAi();
+        };
 
         api["setGameTimeScale"] = [timeManager](const FiniteFloat scale) { timeManager->setGameTimeScale(scale); };
         api["setSimulationTimeScale"] = [context, timeManager](const FiniteFloat scale) {

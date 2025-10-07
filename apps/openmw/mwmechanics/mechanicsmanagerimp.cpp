@@ -2071,4 +2071,9 @@ namespace MWMechanics
     {
         return mActors.isTurningToPlayer(ptr);
     }
+
+    void MechanicsManager::fastForwardAi() const
+    {
+        mActors.fastForwardAi();
+    }
 }

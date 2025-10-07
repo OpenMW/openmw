@@ -210,6 +210,8 @@ namespace MWBase
         virtual void advanceTime(double hours, bool incremental = false) = 0;
         ///< Advance in-game time.
 
+        virtual void fastForwardAi() const = 0;
+
         virtual MWWorld::TimeStamp getTimeStamp() const = 0;
         ///< Return current in-game time and number of day since new game start.
 
