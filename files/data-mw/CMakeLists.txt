@@ -38,6 +38,11 @@ endforeach (f)
 
 # Concat data/builtin.omwscripts and data-mw/builtin-extra.omwscripts to create vfs-mw/builtin.omwscripts
 set(builtinBase "${CMAKE_CURRENT_SOURCE_DIR}/../data/builtin.omwscripts")
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${builtinBase}")
+
+# https://gitlab.kitware.com/cmake/cmake/-/issues/20181
+if (NOT CMAKE_GENERATOR MATCHES "Ninja")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${builtinBase}")
+endif()
+
 file(READ "${builtinBase}" BUILTIN_SCRIPTS)
 configure_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/builtin-extra.omwscripts" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")
