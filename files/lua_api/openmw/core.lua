@@ -322,6 +322,7 @@
 -- @field #boolean hasWater True if the cell contains water.
 -- @field #number waterLevel The water level of the cell. (nil if cell has no water).
 -- @field #boolean hasSky True if in this cell sky should be rendered.
+-- @field #boolean isLoaded Whether the cell has been loaded by a script or physically visited by the player in the current save game. Once true, it remains true for that playthrough.
 -- @field #PathGrid pathGrid The cell's @{#PathGrid} if it has one.
 
 ---
