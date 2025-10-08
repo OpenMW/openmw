@@ -63,7 +63,7 @@ namespace MWLua
         Misc::NotNullPtr<MWBase::World> world = MWBase::Environment::get().getWorld();
         MWWorld::DateTimeManager* timeManager = world->getTimeManager();
 
-        api["advanceTime"] = [context, world](const FiniteFloat hours) {
+        api["advanceTime"] = [world](const FiniteFloat hours) {
             if (hours <= 0.0f)
                 throw std::runtime_error("Time may only be advanced forward");
 
