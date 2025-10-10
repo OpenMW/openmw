@@ -13,6 +13,7 @@
 #include <components/misc/finitevalues.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -63,12 +64,14 @@ namespace MWLua
         Misc::NotNullPtr<MWBase::World> world = MWBase::Environment::get().getWorld();
         MWWorld::DateTimeManager* timeManager = world->getTimeManager();
 
-        api["advanceTime"] = [world](const FiniteFloat hours) {
+        api["advanceTime"] = [context, world](const FiniteFloat hours) {
             if (hours <= 0.0f)
                 throw std::runtime_error("Time may only be advanced forward");
 
-            world->advanceTime(hours);
-            world->fastForwardAi();
+            context.mLuaManager->addAction([world, hours] {
+                world->advanceTime(hours);
+                MWBase::Environment::get().getMechanicsManager()->fastForwardAi();
+            });
         };
 
         api["setGameTimeScale"] = [timeManager](const FiniteFloat scale) { timeManager->setGameTimeScale(scale); };
