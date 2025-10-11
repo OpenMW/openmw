@@ -895,6 +895,12 @@ namespace MWMechanics
 
     bool shouldRemoveEffect(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect)
     {
+        if ((effect.mFlags & (ESM::ActiveEffect::Flag_Remove | ESM::ActiveEffect::Flag_Applied))
+            == ESM::ActiveEffect::Flag_Remove)
+        {
+            // Previously marked invalid
+            return true;
+        }
         const auto world = MWBase::Environment::get().getWorld();
         switch (effect.mEffectId)
         {
@@ -1102,6 +1108,7 @@ namespace MWMechanics
             auto anim = world->getAnimation(target);
             if (anim)
                 anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
+            // Note that we can't return REMOVED here because the effect still needs to be detectable
         }
         else
             effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
