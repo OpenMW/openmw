@@ -25,12 +25,17 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cerrno>
 #include <cstring>
 #include <filesystem>
+#include <format>
 #include <fstream>
+#include <istream>
+#include <system_error>
 
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
+#include <components/files/utils.hpp>
 
 using namespace Bsa;
 
@@ -54,7 +59,7 @@ BSAFile::Hash getHash(const std::string& name)
         sum ^= (((unsigned)(name[i])) << (off & 0x1F));
         off += 8;
     }
-    hash.low = sum;
+    hash.mLow = sum;
 
     for (sum = off = 0; i < name.size(); i++)
     {
@@ -64,12 +69,12 @@ BSAFile::Hash getHash(const std::string& name)
         sum = (sum << (32 - n)) | (sum >> n); // binary "rotate right"
         off += 8;
     }
-    hash.high = sum;
+    hash.mHigh = sum;
     return hash;
 }
 
 /// Read header information from the input source
-void BSAFile::readHeader()
+void BSAFile::readHeader(std::istream& input)
 {
     /*
      * The layout of a BSA archive is as follows:
@@ -103,26 +108,23 @@ void BSAFile::readHeader()
      */
     assert(!mIsLoaded);
 
-    std::ifstream input(mFilepath, std::ios_base::binary);
-
     // Total archive size
-    std::streamoff fsize = 0;
-    if (input.seekg(0, std::ios_base::end))
-    {
-        fsize = input.tellg();
-        input.seekg(0);
-    }
+    const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
     if (fsize < 12)
         fail("File too small to be a valid BSA archive");
 
     // Get essential header numbers
-    size_t dirsize, filenum;
+    std::streamsize dirsize;
+    std::streamsize filenum;
     {
         // First 12 bytes
         uint32_t head[3];
 
         input.read(reinterpret_cast<char*>(head), 12);
+
+        if (input.fail())
+            fail(std::format("Failed to read head: {}", std::generic_category().message(errno)));
 
         if (head[0] != 0x100)
             fail("Unrecognized BSA header");
@@ -138,16 +140,22 @@ void BSAFile::readHeader()
     // Each file must take up at least 21 bytes of data in the bsa. So
     // if files*21 overflows the file size then we are guaranteed that
     // the archive is corrupt.
-    if ((filenum * 21 > unsigned(fsize - 12)) || (dirsize + 8 * filenum > unsigned(fsize - 12)))
+    if (filenum * 21 > fsize - 12 || dirsize + 8 * filenum > fsize - 12)
         fail("Directory information larger than entire archive");
 
     // Read the offset info into a temporary buffer
     std::vector<uint32_t> offsets(3 * filenum);
     input.read(reinterpret_cast<char*>(offsets.data()), 12 * filenum);
 
+    if (input.fail())
+        fail(std::format("Failed to read offsets: {}", std::generic_category().message(errno)));
+
     // Read the string table
     mStringBuf.resize(dirsize - 12 * filenum);
     input.read(mStringBuf.data(), mStringBuf.size());
+
+    if (input.fail())
+        fail(std::format("Failed to read string table: {}", std::generic_category().message(errno)));
 
     // Check our position
     assert(input.tellg() == std::streampos(12 + dirsize));
@@ -155,45 +163,60 @@ void BSAFile::readHeader()
     static_assert(sizeof(Hash) == 8);
     input.read(reinterpret_cast<char*>(hashes.data()), 8 * filenum);
 
+    if (input.fail())
+        fail(std::format("Failed to read hashes: {}", std::generic_category().message(errno)));
+
     // Calculate the offset of the data buffer. All file offsets are
     // relative to this. 12 header bytes + directory + hash table
     // (skipped)
-    size_t fileDataOffset = 12 + dirsize + 8 * filenum;
+    const std::streamsize fileDataOffset = 12 + dirsize + 8 * filenum;
 
     // Set up the the FileStruct table
-    mFiles.resize(filenum);
+    mFiles.reserve(filenum);
     size_t endOfNameBuffer = 0;
-    for (size_t i = 0; i < filenum; i++)
+    for (std::streamsize i = 0; i < filenum; i++)
     {
-        FileStruct& fs = mFiles[i];
-        fs.fileSize = offsets[i * 2];
-        fs.offset = static_cast<uint32_t>(offsets[i * 2 + 1] + fileDataOffset);
-        auto namesOffset = offsets[2 * filenum + i];
-        fs.setNameInfos(namesOffset, &mStringBuf);
-        fs.hash = hashes[i];
+        const uint32_t fileSize = offsets[i * 2];
+        const std::streamsize offset = static_cast<std::streamsize>(offsets[i * 2 + 1]) + fileDataOffset;
 
-        if (namesOffset >= mStringBuf.size())
-        {
+        if (fileSize + offset > fsize)
+            fail(std::format("Archive contains offsets outside itself: {} + {} > {}", fileSize, offset, fsize));
+
+        if (offset > std::numeric_limits<uint32_t>::max())
+            fail(std::format(
+                "Absolute file {} offset is too large: {} > {}", i, offset, std::numeric_limits<uint32_t>::max()));
+
+        const uint32_t nameOffset = offsets[2 * filenum + i];
+
+        if (nameOffset >= mStringBuf.size())
             fail("Archive contains names offset outside itself");
-        }
-        const void* end = std::memchr(fs.name(), '\0', mStringBuf.size() - namesOffset);
-        if (!end)
-        {
+
+        const char* const begin = mStringBuf.data() + nameOffset;
+        const char* const end = reinterpret_cast<const char*>(std::memchr(begin, '\0', mStringBuf.size() - nameOffset));
+
+        if (end == nullptr)
             fail("Archive contains non-zero terminated string");
-        }
 
-        endOfNameBuffer = std::max(endOfNameBuffer, namesOffset + std::strlen(fs.name()) + 1);
+        const std::size_t nameSize = end - begin;
+
+        FileStruct fs;
+
+        fs.mFileSize = fileSize;
+        fs.mOffset = static_cast<uint32_t>(offset);
+        fs.mHash = hashes[i];
+        fs.mNameOffset = nameOffset;
+        fs.mNameSize = static_cast<uint32_t>(nameSize);
+        fs.mNamesBuffer = &mStringBuf;
+
+        mFiles.push_back(fs);
+
+        endOfNameBuffer = std::max(endOfNameBuffer, nameOffset + nameSize + 1);
         assert(endOfNameBuffer <= mStringBuf.size());
-
-        if (fs.offset + fs.fileSize > fsize)
-            fail("Archive contains offsets outside itself");
     }
     mStringBuf.resize(endOfNameBuffer);
 
     std::sort(mFiles.begin(), mFiles.end(),
-        [](const FileStruct& left, const FileStruct& right) { return left.offset < right.offset; });
-
-    mIsLoaded = true;
+        [](const FileStruct& left, const FileStruct& right) { return left.mOffset < right.mOffset; });
 }
 
 /// Write header information to the output sink
@@ -203,7 +226,7 @@ void Bsa::BSAFile::writeHeader()
 
     uint32_t head[3];
     head[0] = 0x100;
-    auto fileDataOffset = mFiles.empty() ? 12 : mFiles.front().offset;
+    auto fileDataOffset = mFiles.empty() ? 12 : mFiles.front().mOffset;
     head[1] = static_cast<uint32_t>(fileDataOffset - 12 - 8 * mFiles.size());
 
     output.seekp(0, std::ios_base::end);
@@ -213,7 +236,7 @@ void Bsa::BSAFile::writeHeader()
     output.write(reinterpret_cast<char*>(head), 12);
 
     std::sort(mFiles.begin(), mFiles.end(), [](const FileStruct& left, const FileStruct& right) {
-        return std::make_pair(left.hash.low, left.hash.high) < std::make_pair(right.hash.low, right.hash.high);
+        return std::make_pair(left.mHash.mLow, left.mHash.mHigh) < std::make_pair(right.mHash.mLow, right.mHash.mHigh);
     });
 
     size_t filenum = mFiles.size();
@@ -222,10 +245,10 @@ void Bsa::BSAFile::writeHeader()
     for (size_t i = 0; i < filenum; i++)
     {
         auto& f = mFiles[i];
-        offsets[i * 2] = f.fileSize;
-        offsets[i * 2 + 1] = f.offset - fileDataOffset;
-        offsets[2 * filenum + i] = f.namesOffset;
-        hashes[i] = f.hash;
+        offsets[i * 2] = f.mFileSize;
+        offsets[i * 2 + 1] = f.mOffset - fileDataOffset;
+        offsets[2 * filenum + i] = f.mNameOffset;
+        hashes[i] = f.mHash;
     }
     output.write(reinterpret_cast<char*>(offsets.data()), sizeof(uint32_t) * offsets.size());
     output.write(reinterpret_cast<char*>(mStringBuf.data()), mStringBuf.size());
@@ -241,7 +264,11 @@ void BSAFile::open(const std::filesystem::path& file)
 
     mFilepath = file;
     if (std::filesystem::exists(file))
-        readHeader();
+    {
+        std::ifstream input(mFilepath, std::ios_base::binary);
+        readHeader(input);
+        mIsLoaded = true;
+    }
     else
     {
         {
@@ -265,7 +292,7 @@ void Bsa::BSAFile::close()
 
 Files::IStreamPtr Bsa::BSAFile::getFile(const FileStruct* file)
 {
-    return Files::openConstrainedFileStream(mFilepath, file->offset, file->fileSize);
+    return Files::openConstrainedFileStream(mFilepath, file->mOffset, file->mFileSize);
 }
 
 void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
@@ -281,37 +308,41 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
 
     FileStruct newFile;
     file.seekg(0, std::ios::end);
-    newFile.fileSize = static_cast<uint32_t>(file.tellg());
-    newFile.setNameInfos(mStringBuf.size(), &mStringBuf);
-    newFile.hash = getHash(filename);
+    newFile.mFileSize = static_cast<uint32_t>(file.tellg());
+    newFile.mHash = getHash(filename);
 
     if (mFiles.empty())
-        newFile.offset = static_cast<uint32_t>(newStartOfDataBuffer);
+        newFile.mOffset = static_cast<uint32_t>(newStartOfDataBuffer);
     else
     {
         std::vector<char> buffer;
-        while (mFiles.front().offset < newStartOfDataBuffer)
+        while (mFiles.front().mOffset < newStartOfDataBuffer)
         {
             FileStruct& firstFile = mFiles.front();
-            buffer.resize(firstFile.fileSize);
+            buffer.resize(firstFile.mFileSize);
 
-            stream.seekg(firstFile.offset, std::ios::beg);
-            stream.read(buffer.data(), firstFile.fileSize);
+            stream.seekg(firstFile.mOffset, std::ios::beg);
+            stream.read(buffer.data(), firstFile.mFileSize);
 
             stream.seekp(0, std::ios::end);
-            firstFile.offset = static_cast<uint32_t>(stream.tellp());
+            firstFile.mOffset = static_cast<uint32_t>(stream.tellp());
 
-            stream.write(buffer.data(), firstFile.fileSize);
+            stream.write(buffer.data(), firstFile.mFileSize);
 
             // ensure sort order is preserved
             std::rotate(mFiles.begin(), mFiles.begin() + 1, mFiles.end());
         }
         stream.seekp(0, std::ios::end);
-        newFile.offset = static_cast<uint32_t>(stream.tellp());
+        newFile.mOffset = static_cast<uint32_t>(stream.tellp());
     }
+
+    newFile.mNameOffset = mStringBuf.size();
+    newFile.mNameSize = filename.size();
+    newFile.mNamesBuffer = &mStringBuf;
 
     mStringBuf.insert(mStringBuf.end(), filename.begin(), filename.end());
     mStringBuf.push_back('\0');
+
     mFiles.push_back(newFile);
 
     mHasChanged = true;
