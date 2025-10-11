@@ -714,9 +714,7 @@ namespace MWMechanics
                     damageAttribute(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::DamageSkill:
-                if (!target.getClass().isNpc())
-                    invalid = true;
-                else if (!godmode)
+                if (!godmode && target.getClass().isNpc())
                 {
                     // Damage Skill abilities reduce base skill :todd:
                     if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
@@ -734,9 +732,7 @@ namespace MWMechanics
                 restoreAttribute(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::RestoreSkill:
-                if (!target.getClass().isNpc())
-                    invalid = true;
-                else
+                if (target.getClass().isNpc())
                     restoreSkill(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::RestoreHealth:
@@ -802,23 +798,22 @@ namespace MWMechanics
                     fortifyAttribute(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::DrainSkill:
-                if (!target.getClass().isNpc())
-                    invalid = true;
-                else if (!godmode)
+                if (!godmode && target.getClass().isNpc())
                     damageSkill(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::FortifySkill:
-                if (!target.getClass().isNpc())
-                    invalid = true;
-                else if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
+                if (target.getClass().isNpc())
                 {
-                    // Abilities affect base stats, but not for drain
-                    auto& npcStats = target.getClass().getNpcStats(target);
-                    auto& skill = npcStats.getSkill(effect.getSkillOrAttribute());
-                    skill.setBase(skill.getBase() + effect.mMagnitude);
+                    if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
+                    {
+                        // Abilities affect base stats, but not for drain
+                        auto& npcStats = target.getClass().getNpcStats(target);
+                        auto& skill = npcStats.getSkill(effect.getSkillOrAttribute());
+                        skill.setBase(skill.getBase() + effect.mMagnitude);
+                    }
+                    else
+                        fortifySkill(target, effect, effect.mMagnitude);
                 }
-                else
-                    fortifySkill(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::FortifyMaximumMagicka:
                 recalculateMagicka = true;
@@ -845,9 +840,7 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::AbsorbSkill:
-                if (!target.getClass().isNpc())
-                    invalid = true;
-                else if (!godmode)
+                if (!godmode && target.getClass().isNpc())
                 {
                     damageSkill(target, effect, effect.mMagnitude);
                     if (!caster.isEmpty() && caster.getClass().isNpc())
@@ -1281,18 +1274,22 @@ namespace MWMechanics
                     fortifyAttribute(target, effect, -effect.mMagnitude);
                 break;
             case ESM::MagicEffect::DrainSkill:
-                restoreSkill(target, effect, effect.mMagnitude);
+                if (target.getClass().isNpc())
+                    restoreSkill(target, effect, effect.mMagnitude);
                 break;
             case ESM::MagicEffect::FortifySkill:
-                // Abilities affect base stats, but not for drain
-                if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
+                if (target.getClass().isNpc())
                 {
-                    auto& npcStats = target.getClass().getNpcStats(target);
-                    auto& skill = npcStats.getSkill(effect.getSkillOrAttribute());
-                    skill.setBase(skill.getBase() - effect.mMagnitude);
+                    // Abilities affect base stats, but not for drain
+                    if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
+                    {
+                        auto& npcStats = target.getClass().getNpcStats(target);
+                        auto& skill = npcStats.getSkill(effect.getSkillOrAttribute());
+                        skill.setBase(skill.getBase() - effect.mMagnitude);
+                    }
+                    else
+                        fortifySkill(target, effect, -effect.mMagnitude);
                 }
-                else
-                    fortifySkill(target, effect, -effect.mMagnitude);
                 break;
             case ESM::MagicEffect::FortifyMaximumMagicka:
                 target.getClass().getCreatureStats(target).recalculateMagicka();
@@ -1307,8 +1304,9 @@ namespace MWMechanics
             break;
             case ESM::MagicEffect::AbsorbSkill:
             {
+                if (target.getClass().isNpc())
+                    restoreSkill(target, effect, effect.mMagnitude);
                 const auto caster = world->searchPtrViaActorId(spellParams.getCasterActorId());
-                restoreSkill(target, effect, effect.mMagnitude);
                 if (!caster.isEmpty() && caster.getClass().isNpc())
                     fortifySkill(caster, effect, -effect.mMagnitude);
             }
