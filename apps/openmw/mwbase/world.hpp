@@ -257,10 +257,10 @@ namespace MWBase
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual MWWorld::Ptr getFacedObject() = 0;
+        virtual MWWorld::Ptr getFocusObject() = 0;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
-        virtual float getDistanceToFacedObject() = 0;
+        virtual float getDistanceToFocusObject() = 0;
 
         virtual float getMaxActivationDistance() const = 0;
 

@@ -18,7 +18,7 @@ namespace MWWorld
         // Using activation distance as the trap range.
 
         if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr()
-            && MWBase::Environment::get().getWorld()->getDistanceToFacedObject()
+            && MWBase::Environment::get().getWorld()->getDistanceToFocusObject()
                 > trapRange) // player activated object outside range of trap
         {
             MWMechanics::CastSpell cast(mTrapSource, mTrapSource);

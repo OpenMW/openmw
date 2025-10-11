@@ -193,7 +193,7 @@ namespace MWWorld
         if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
-        MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFacedObject();
+        MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFocusObject();
 
         if (toActivate.isEmpty())
             return;
