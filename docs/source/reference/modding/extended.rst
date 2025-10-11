@@ -165,6 +165,7 @@ The minimum you need is the ``xbase_anim_sh.nif`` file from the `Weapon Sheathin
 
     [Game]
     weapon sheathing = true
+    use additional anim sources = true
 
 The ``xbase_anim_sh.nif`` contains default placement points for different weapon types.
 That way you'll get Gothic-style weapon sheathing for all biped actors (without quivers and scabbards).
@@ -200,6 +201,28 @@ The ``Bip01 Ammo`` should have some empty child nodes, to which the engine will 
 The appearance and count of shown ammunition depends on type and count of equipped ammunition. If the ammunition has a wrong type (e.g. bolts for bow), it won't be shown.
 
 It is important to make sure the names of empty nodes start with ``"Bip01 "``, or the engine will optimize them out.
+
+An example of a mod which uses this feature is `Weapon Sheathing`_.
+
+
+Shield sheathing support
+------------------------
+
+The minimum you need is the ``xbase_anim_sh.nif`` file from the `Weapon Sheathing`_ mod and this line in your settings.cfg:
+
+.. code-block:: ini
+    :caption: settings.cfg
+
+    [Game]
+    shield sheathing = true
+    use additional anim sources = true
+
+The ``xbase_anim_sh.nif`` contains default placement points for shields (a ``"Bip01 AttachShield"`` node). 
+You also may use meshes with ``_sh`` suffix (with ``Bip01 Sheath`` node) to tweak how particular shield looks in the sheathed mode. A stub sheath means that the shield should be excluded from this feature. 
+When a two-handed weapon is equipped, a shield is hidden when this feature is enabled.
+This feature also supports shield equipping and unequipping animations. It is a ``Shield`` group (with ``Equip Start``, ``Equip Attach``, ``Equip Stop``, ``Unequip Start``, ``Unequip Attach`` and ``Unequip Stop`` keys).
+Note that equip and unequip animation blocks should not overlap each other and weapon equip/unequip animations. 
+Basically, you need to avoid situations when you play an animation block where you need both to attach and detach the shield.
 
 An example of a mod which uses this feature is `Weapon Sheathing`_.
 

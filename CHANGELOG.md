@@ -76,6 +76,7 @@
     Bug #8680: Dead ancestor ghosts stop being dust when you rest near them
     Bug #8686: openmw-cs: Crash when smoothing terrain of a not-yet-created cell.
     Bug #8710: Absorb Skill breaks on creatures
+    Bug #8734: Shield sheathing does not work properly
     Feature #2522: Support quick item transfer
     Feature #3740: Gamepad GUI Mode
     Feature #3769: Allow GetSpellEffects on enchantments
