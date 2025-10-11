@@ -4,13 +4,15 @@
 #include <cassert>
 #include <cstring>
 #include <filesystem>
-#include <fstream>
+#include <format>
+#include <istream>
 
 #include <zlib.h>
 
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/utils.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "ba2file.hpp"
@@ -73,19 +75,11 @@ namespace Bsa
     }
 
     /// Read header information from the input source
-    void BA2DX10File::readHeader()
+    void BA2DX10File::readHeader(std::istream& input)
     {
         assert(!mIsLoaded);
 
-        std::ifstream input(mFilepath, std::ios_base::binary);
-
-        // Total archive size
-        std::streamoff fsize = 0;
-        if (input.seekg(0, std::ios_base::end))
-        {
-            fsize = input.tellg();
-            input.seekg(0);
-        }
+        const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
         if (fsize < 24) // header is 24 bytes
             fail("File too small to be a valid BSA archive");
@@ -135,23 +129,22 @@ namespace Bsa
             std::vector<char> fileName;
             uint16_t fileNameSize;
             input.read(reinterpret_cast<char*>(&fileNameSize), sizeof(uint16_t));
-            fileName.resize(fileNameSize);
-            input.read(fileName.data(), fileName.size());
-            fileName.push_back('\0');
+            fileName.resize(fileNameSize + 1);
+            input.read(fileName.data(), fileNameSize);
             mFileNames.push_back(std::move(fileName));
-            mFiles[i].setNameInfos(0, &mFileNames.back());
+            mFiles[i].mNameOffset = 0;
+            mFiles[i].mNameSize = fileNameSize;
+            mFiles[i].mNamesBuffer = &mFileNames.back();
         }
-
-        mIsLoaded = true;
     }
 
-    std::optional<BA2DX10File::FileRecord> BA2DX10File::getFileRecord(const std::string& str) const
+    std::optional<BA2DX10File::FileRecord> BA2DX10File::getFileRecord(std::string_view str) const
     {
         for (const auto c : str)
         {
             if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U)
             {
-                fail("File record " + str + " contains unicode characters, refusing to load.");
+                fail(std::format("File record {} contains unicode characters, refusing to load.", str));
             }
         }
 
@@ -161,7 +154,7 @@ namespace Bsa
         // Force-convert the path into something UNIX can handle first
         // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
         // and subsequently purge it to determine the file folder.
-        std::string path = str;
+        std::string path(str);
         std::replace(path.begin(), path.end(), '\\', '/');
 #endif
 

@@ -89,6 +89,9 @@ file(GLOB UNITTEST_SRC_FILES
     vfs/testpathutil.cpp
 
     sceneutil/osgacontroller.cpp
+
+    bsa/testbsafile.cpp
+    bsa/testcompressedbsafile.cpp
 )
 
 source_group(apps\\components-tests FILES ${UNITTEST_SRC_FILES})

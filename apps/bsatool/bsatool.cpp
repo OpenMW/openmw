@@ -170,8 +170,8 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
             // Long format
             std::ios::fmtflags f(std::cout.flags());
             std::cout << std::setw(50) << std::left << file.name();
-            std::cout << std::setw(8) << std::left << std::dec << file.fileSize;
-            std::cout << "@ 0x" << std::hex << file.offset << std::endl;
+            std::cout << std::setw(8) << std::left << std::dec << file.mFileSize;
+            std::cout << "@ 0x" << std::hex << file.mOffset << std::endl;
             std::cout.flags(f);
         }
         else

@@ -29,7 +29,7 @@ namespace Bsa
 
         std::list<std::vector<char>> mFileNames;
 
-        FileRecord getFileRecord(const std::string& str) const;
+        FileRecord getFileRecord(std::string_view str) const;
 
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
 
@@ -45,7 +45,7 @@ namespace Bsa
         virtual ~BA2GNRLFile();
 
         /// Read header information from the input source
-        void readHeader() override;
+        void readHeader(std::istream& input) override;
 
         Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);
