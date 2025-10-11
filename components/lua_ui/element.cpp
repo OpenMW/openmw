@@ -296,6 +296,7 @@ namespace LuaUi
                     children.erase(it);
                     parent->setChildren(children);
                     mRoot = nullptr;
+                    mState = New;
                     throw;
                 }
                 parent->setChildren(children);
