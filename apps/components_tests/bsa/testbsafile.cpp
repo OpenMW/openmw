@@ -284,6 +284,34 @@ namespace Bsa
                     }));
         }
 
+        TEST(BSAFileTest, shouldHandleSomewhatLargeFiles)
+        {
+            constexpr std::uint32_t maxUInt32 = std::numeric_limits<uint32_t>::max();
+            constexpr std::uint32_t fileSize = maxUInt32 / 4;
+            constexpr std::uint32_t fileOffset = maxUInt32 / 4 - 34;
+            const Buffer buffer = makeBsaBuffer(fileSize, fileOffset);
+
+            TestBSAFile file;
+            // Use capacity assuming we never read beyond small header.
+            Files::IMemStream stream(buffer.mData.get(), buffer.mCapacity);
+            file.readHeader(stream);
+
+            std::vector<char> namesBuffer = { 'a', '\0' };
+
+            EXPECT_THAT(file.getList(),
+                ElementsAre(BSAFile::FileStruct{
+                    .mFileSize = maxUInt32 / 4,
+                    .mOffset = maxUInt32 / 4,
+                    .mHash = BSAFile::Hash{ .mLow = 0xaaaabbbb, .mHigh = 0xccccdddd },
+                    .mNameOffset = 0,
+                    .mNameSize = 1,
+                    .mNamesBuffer = &namesBuffer,
+                }));
+        }
+
+// std::streambuf in MSVC does not support buffers larger than 2**31 - 1:
+// https://developercommunity.visualstudio.com/t/stdbasic-stringbuf-is-broken/290124
+#ifndef _MSC_VER
         TEST(BSAFileTest, shouldHandleSingleFileAtTheEndOfLargeFile)
         {
             constexpr std::uint32_t maxUInt32 = std::numeric_limits<uint32_t>::max();
@@ -323,5 +351,6 @@ namespace Bsa
 
             EXPECT_THAT(file.getList(), IsEmpty());
         }
+#endif
     }
 }
