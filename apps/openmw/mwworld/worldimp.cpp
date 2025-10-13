@@ -261,7 +261,7 @@ namespace MWWorld
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
         , mSwimHeightScale(0.f)
-        , mDistanceToFacedObject(-1.f)
+        , mDistanceToFocusObject(-1.f)
         , mTeleportEnabled(true)
         , mLevitationEnabled(true)
         , mGoToJail(false)
@@ -999,33 +999,33 @@ namespace MWWorld
         return static_cast<float>(iMaxActivateDist);
     }
 
-    MWWorld::Ptr World::getFacedObject()
+    MWWorld::Ptr World::getFocusObject()
     {
-        MWWorld::Ptr facedObject;
+        MWWorld::Ptr focusObject;
 
         if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
-            return facedObject;
+            return focusObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
+            focusObject = getFocusObject(getMaxActivationDistance() * 50, false);
         else
         {
             float activationDistance = getActivationDistancePlusTelekinesis();
 
-            facedObject = getFacedObject(activationDistance, true);
+            focusObject = getFocusObject(activationDistance, true);
 
-            if (!facedObject.isEmpty() && !facedObject.getClass().allowTelekinesis(facedObject)
-                && mDistanceToFacedObject > getMaxActivationDistance()
+            if (!focusObject.isEmpty() && !focusObject.getClass().allowTelekinesis(focusObject)
+                && mDistanceToFocusObject > getMaxActivationDistance()
                 && !MWBase::Environment::get().getWindowManager()->isGuiMode())
                 return nullptr;
         }
-        return facedObject;
+        return focusObject;
     }
 
-    float World::getDistanceToFacedObject()
+    float World::getDistanceToFocusObject()
     {
-        return mDistanceToFacedObject;
+        return mDistanceToFocusObject;
     }
 
     osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
@@ -1772,12 +1772,12 @@ namespace MWWorld
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
 
-    void World::updateWindowManager()
+    void World::updateFocusObject()
     {
         try
         {
             // inform the GUI about focused object
-            MWWorld::Ptr object = getFacedObject();
+            MWWorld::Ptr object = getFocusObject();
 
             // retrieve the object's top point's screen position so we know where to place the floating label
             if (!object.isEmpty())
@@ -1798,15 +1798,15 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            Log(Debug::Error) << "Error updating window manager: " << e.what();
+            Log(Debug::Error) << "Error updating focus object: " << e.what();
         }
     }
 
-    MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
+    MWWorld::Ptr World::getFocusObject(float maxDistance, bool ignorePlayer)
     {
         const float camDist = mRendering->getCamera()->getCameraDistance();
         maxDistance += camDist;
-        MWWorld::Ptr facedObject;
+        MWWorld::Ptr focusObject;
         MWRender::RenderingManager::RayResult rayToObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
@@ -1818,14 +1818,14 @@ namespace MWWorld
         else
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
-        facedObject = rayToObject.mHitObject;
-        if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
-            facedObject = MWBase::Environment::get().getWorldModel()->getPtr(rayToObject.mHitRefnum);
+        focusObject = rayToObject.mHitObject;
+        if (focusObject.isEmpty() && rayToObject.mHitRefnum.isSet())
+            focusObject = MWBase::Environment::get().getWorldModel()->getPtr(rayToObject.mHitRefnum);
         if (rayToObject.mHit)
-            mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
+            mDistanceToFocusObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
-            mDistanceToFacedObject = -1;
-        return facedObject;
+            mDistanceToFocusObject = -1;
+        return focusObject;
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
@@ -2997,7 +2997,7 @@ namespace MWWorld
         else
         {
             if (casterIsPlayer)
-                target = getFacedObject();
+                target = getFocusObject();
 
             if (target.isEmpty() || !target.getClass().hasToolTip(target))
             {

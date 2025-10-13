@@ -121,7 +121,7 @@ namespace MWWorld
 
         float mSwimHeightScale;
 
-        float mDistanceToFacedObject;
+        float mDistanceToFocusObject;
 
         bool mTeleportEnabled;
         bool mLevitationEnabled;
@@ -152,7 +152,7 @@ namespace MWWorld
 
         void preloadSpells();
 
-        MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer = true);
+        MWWorld::Ptr getFocusObject(float maxDistance, bool ignorePlayer = true);
 
         void PCDropped(const Ptr& item);
 
@@ -349,10 +349,10 @@ namespace MWWorld
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        MWWorld::Ptr getFacedObject() override;
+        MWWorld::Ptr getFocusObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
-        float getDistanceToFacedObject() override;
+        float getDistanceToFocusObject() override;
 
         /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
         void deleteObject(const Ptr& ptr) override;
@@ -419,7 +419,7 @@ namespace MWWorld
         void updatePhysics(
             float duration, bool paused, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
-        void updateWindowManager();
+        void updateFocusObject();
 
         MWWorld::Ptr placeObject(
             const MWWorld::Ptr& object, float cursorX, float cursorY, int amount, bool copy = true) override;

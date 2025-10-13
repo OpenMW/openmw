@@ -1741,7 +1741,7 @@ namespace MWMechanics
             {
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use
                 // lockpicks/probes.
-                MWWorld::Ptr target = world->getFacedObject();
+                MWWorld::Ptr target = world->getFocusObject();
 
                 if (!target.isEmpty())
                 {
