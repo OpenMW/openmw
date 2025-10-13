@@ -919,11 +919,6 @@ namespace MWWorld
         }
     }
 
-    void World::fastForwardAi() const
-    {
-        MWBase::Environment::get().getMechanicsManager()->fastForwardAi();
-    }
-
     TimeStamp World::getTimeStamp() const
     {
         return mTimeManager->getTimeStamp();

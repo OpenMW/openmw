@@ -309,8 +309,6 @@ namespace MWWorld
         void advanceTime(double hours, bool incremental = false) override;
         ///< Advance in-game time.
 
-        void fastForwardAi() const override;
-
         TimeStamp getTimeStamp() const override;
         ///< Return current in-game time and number of day since new game start.
 
