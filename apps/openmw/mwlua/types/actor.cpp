@@ -396,8 +396,8 @@ namespace MWLua
             const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
             const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
-            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length();
-            return dist <= actorsProcessingRange;
+            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length2();
+            return dist <= (actorsProcessingRange * actorsProcessingRange);
         };
 
         actor["isDead"] = [](const Object& o) {
