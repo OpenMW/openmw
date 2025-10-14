@@ -840,9 +840,10 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::AbsorbSkill:
-                if (!godmode && target.getClass().isNpc())
+                if (!godmode)
                 {
-                    damageSkill(target, effect, effect.mMagnitude);
+                    if (target.getClass().isNpc())
+                        damageSkill(target, effect, effect.mMagnitude);
                     if (!caster.isEmpty() && caster.getClass().isNpc())
                         fortifySkill(caster, effect, effect.mMagnitude);
                 }
