@@ -8,16 +8,31 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <memory>
 #include <sstream>
+#include <vector>
 
 namespace Bsa
 {
     namespace
     {
         using namespace ::testing;
+
+        struct Free
+        {
+            void operator()(void* ptr) const { std::free(ptr); }
+        };
+
+        struct Buffer
+        {
+            std::unique_ptr<char, Free> mData;
+            std::size_t mCapacity;
+        };
 
         struct Header
         {
@@ -69,13 +84,9 @@ namespace Bsa
                 std::format("{}.{}.bsa", testInfo->test_suite_name(), testInfo->name()));
         }
 
-        std::string makeBsaBuffer(std::uint32_t fileSize, std::uint32_t fileOffset)
+        Buffer makeBsaBuffer(std::uint32_t fileSize, std::uint32_t fileOffset)
         {
-            std::string buffer;
-
-            buffer.reserve(static_cast<std::size_t>(fileSize) + static_cast<std::size_t>(fileOffset) + 34);
-
-            std::ostringstream stream(std::move(buffer));
+            std::ostringstream stream;
 
             const Header header{
                 .mFormat = static_cast<std::uint32_t>(BsaVersion::Uncompressed),
@@ -98,7 +109,17 @@ namespace Bsa
 
             writeArchive(archive, stream);
 
-            return std::move(stream).str();
+            const std::string data = std::move(stream).str();
+
+            const std::size_t capacity = static_cast<std::size_t>(fileSize) + static_cast<std::size_t>(fileOffset) + 34;
+            std::unique_ptr<char, Free> buffer(reinterpret_cast<char*>(std::malloc(capacity)));
+
+            if (buffer == nullptr)
+                throw std::bad_alloc();
+
+            std::memcpy(buffer.get(), data.data(), data.size());
+
+            return Buffer{ .mData = std::move(buffer), .mCapacity = capacity };
         }
 
         TEST(BSAFileTest, shouldHandleEmpty)
@@ -263,14 +284,44 @@ namespace Bsa
                     }));
         }
 
-        TEST(BSAFileTest, shouldHandleSingleFileAtTheEndOfLargeFile)
+        TEST(BSAFileTest, shouldHandleSomewhatLargeFiles)
         {
             constexpr std::uint32_t maxUInt32 = std::numeric_limits<uint32_t>::max();
-            const std::string buffer = makeBsaBuffer(maxUInt32, maxUInt32 - 34);
+            constexpr std::uint32_t fileSize = maxUInt32 / 4;
+            constexpr std::uint32_t fileOffset = maxUInt32 / 4 - 34;
+            const Buffer buffer = makeBsaBuffer(fileSize, fileOffset);
 
             TestBSAFile file;
             // Use capacity assuming we never read beyond small header.
-            Files::IMemStream stream(buffer.data(), buffer.capacity());
+            Files::IMemStream stream(buffer.mData.get(), buffer.mCapacity);
+            file.readHeader(stream);
+
+            std::vector<char> namesBuffer = { 'a', '\0' };
+
+            EXPECT_THAT(file.getList(),
+                ElementsAre(BSAFile::FileStruct{
+                    .mFileSize = maxUInt32 / 4,
+                    .mOffset = maxUInt32 / 4,
+                    .mHash = BSAFile::Hash{ .mLow = 0xaaaabbbb, .mHigh = 0xccccdddd },
+                    .mNameOffset = 0,
+                    .mNameSize = 1,
+                    .mNamesBuffer = &namesBuffer,
+                }));
+        }
+
+// std::streambuf in MSVC does not support buffers larger than 2**31 - 1:
+// https://developercommunity.visualstudio.com/t/stdbasic-stringbuf-is-broken/290124
+#ifndef _MSC_VER
+        TEST(BSAFileTest, shouldHandleSingleFileAtTheEndOfLargeFile)
+        {
+            constexpr std::uint32_t maxUInt32 = std::numeric_limits<uint32_t>::max();
+            constexpr std::uint32_t fileSize = maxUInt32;
+            constexpr std::uint32_t fileOffset = maxUInt32 - 34;
+            const Buffer buffer = makeBsaBuffer(fileSize, fileOffset);
+
+            TestBSAFile file;
+            // Use capacity assuming we never read beyond small header.
+            Files::IMemStream stream(buffer.mData.get(), buffer.mCapacity);
             file.readHeader(stream);
 
             std::vector<char> namesBuffer = { 'a', '\0' };
@@ -289,14 +340,17 @@ namespace Bsa
         TEST(BSAFileTest, shouldThrowExceptionOnTooBigAbsoluteOffset)
         {
             constexpr std::uint32_t maxUInt32 = std::numeric_limits<uint32_t>::max();
-            const std::string buffer = makeBsaBuffer(maxUInt32, maxUInt32 - 34 + 1);
+            constexpr std::uint32_t fileSize = maxUInt32;
+            constexpr std::uint32_t fileOffset = maxUInt32 - 34 + 1;
+            const Buffer buffer = makeBsaBuffer(fileSize, fileOffset);
 
             TestBSAFile file;
             // Use capacity assuming we never read beyond small header.
-            Files::IMemStream stream(buffer.data(), buffer.capacity());
+            Files::IMemStream stream(buffer.mData.get(), buffer.mCapacity);
             EXPECT_THROW(file.readHeader(stream), std::runtime_error);
 
             EXPECT_THAT(file.getList(), IsEmpty());
         }
+#endif
     }
 }
