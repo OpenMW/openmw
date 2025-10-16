@@ -71,10 +71,8 @@ namespace MWLua
 
             object.ptr().getCellRef().setSoul(creature);
         };
-        miscellaneous["getSoul"] = [](const Object& object) -> sol::optional<std::string> {
-            ESM::RefId soul = object.ptr().getCellRef().getSoul();
-            return LuaUtil::serializeRefId(soul);
-        };
+        miscellaneous["getSoul"]
+            = [](const Object& object) -> ESM::RefId { return object.ptr().getCellRef().getSoul(); };
         miscellaneous["soul"] = miscellaneous["getSoul"]; // for compatibility; should be removed later
 
         sol::usertype<ESM::Miscellaneous> record = context.sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
@@ -84,9 +82,8 @@ namespace MWLua
             [](const ESM::Miscellaneous& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Miscellaneous& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Miscellaneous& rec) -> sol::optional<std::string> {
-            return LuaUtil::serializeRefId(rec.mScript);
-        });
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::Miscellaneous& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Miscellaneous& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

@@ -30,7 +30,6 @@ namespace sol
 
 namespace MWLua
 {
-
     static const MWWorld::Ptr& doorPtr(const Object& o)
     {
         return verifyType(ESM::REC_DOOR, o.ptr());
@@ -110,8 +109,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Door& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Door& rec) -> ESM::RefId { return rec.mScript; });
         record["openSound"] = sol::readonly_property(
             [](const ESM::Door& rec) -> std::string { return rec.mOpenSound.serializeText(); });
         record["closeSound"] = sol::readonly_property(

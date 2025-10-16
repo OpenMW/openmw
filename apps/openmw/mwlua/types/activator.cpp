@@ -52,8 +52,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Activator& rec) -> sol::optional<std::string> {
-            return LuaUtil::serializeRefId(rec.mScript);
-        });
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::Activator& rec) -> ESM::RefId { return rec.mScript; });
     }
 }
