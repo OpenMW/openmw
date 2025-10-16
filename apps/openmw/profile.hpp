@@ -73,7 +73,7 @@ namespace OMW
     inline const UserStats UserStatsValue<UserStatsType::World>::sValue{ "World", "world" };
 
     template <>
-    inline const UserStats UserStatsValue<UserStatsType::Gui>::sValue{ "Gui", "gui" };
+    inline const UserStats UserStatsValue<UserStatsType::Gui>::sValue{ "GUI", "gui" };
 
     template <>
     inline const UserStats UserStatsValue<UserStatsType::Lua>::sValue{ "Lua", "lua" };
