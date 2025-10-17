@@ -18,12 +18,10 @@ QString Files::pathToQString(std::filesystem::path&& path)
 
 std::filesystem::path Files::pathFromQString(QStringView path)
 {
-    const QByteArray tmp = path.toUtf8();
-    return std::filesystem::path(Misc::StringUtils::stringToU8String(std::string_view(tmp.constData(), tmp.size())));
+    return std::filesystem::path(std::u16string_view(path.utf16(), path.size()));
 }
 
 std::filesystem::path Files::pathFromQString(QString&& path)
 {
-    const QByteArray tmp = path.toUtf8();
-    return std::filesystem::path(Misc::StringUtils::stringToU8String(std::string_view(tmp.constData(), tmp.size())));
+    return std::filesystem::path(path.toStdU16String());
 }
