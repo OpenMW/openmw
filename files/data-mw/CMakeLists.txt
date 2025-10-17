@@ -36,7 +36,7 @@ foreach (f ${BUILTIN_DATA_MW_FILES})
     copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/${f}")
 endforeach (f)
 
-# Concat data/builtin.omwscripts and data-mw/builtin-extra.omwscripts to create vfs-mw/builtin.omwscripts
+# Concat data/builtin.omwscripts and data-mw/builtin.omwscripts.in to create vfs-mw/builtin.omwscripts
 set(builtinBase "${CMAKE_CURRENT_SOURCE_DIR}/../data/builtin.omwscripts")
 
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20181
@@ -45,4 +45,4 @@ if (NOT CMAKE_GENERATOR MATCHES "Ninja")
 endif()
 
 file(READ "${builtinBase}" BUILTIN_SCRIPTS)
-configure_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/builtin-extra.omwscripts" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")
+configure_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/builtin.omwscripts.in" "${OPENMW_RESOURCES_ROOT}" "resources/vfs-mw/builtin.omwscripts")
