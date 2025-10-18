@@ -26,7 +26,8 @@ namespace ESM
             Flag_Remove = 1 << 1,
             Flag_Ignore_Resistances = 1 << 2,
             Flag_Ignore_Reflect = 1 << 3,
-            Flag_Ignore_SpellAbsorption = 1 << 4
+            Flag_Ignore_SpellAbsorption = 1 << 4,
+            Flag_Invalid = 1 << 5
         };
 
         int32_t mEffectId;
