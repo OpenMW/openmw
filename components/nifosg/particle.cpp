@@ -487,8 +487,7 @@ namespace NifOsg
             }
             else
             {
-                int randomIndex
-                    = static_cast<int>(std::floor(Misc::Rng::rollClosedProbability() * (mTargets.size() - 1)));
+                size_t randomIndex = Misc::Rng::rollDice(mTargets.size());
                 recIndex = mTargets[randomIndex];
             }
 

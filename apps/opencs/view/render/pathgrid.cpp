@@ -316,7 +316,7 @@ namespace CSVRender
                 for (size_t row = source->mEdges.size(); row > 0; --row)
                 {
                     commands.push(
-                        new CSMWorld::DeleteNestedCommand(*model, idString, static_cast<int>(row), parentColumn));
+                        new CSMWorld::DeleteNestedCommand(*model, idString, static_cast<int>(row - 1), parentColumn));
                 }
             }
         }
