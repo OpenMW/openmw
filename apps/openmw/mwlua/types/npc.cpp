@@ -19,6 +19,7 @@
 
 #include "../classbindings.hpp"
 #include "../localscripts.hpp"
+#include "../luamanagerimp.hpp"
 #include "../racebindings.hpp"
 #include "../stats.hpp"
 
