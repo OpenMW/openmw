@@ -26,7 +26,7 @@ size_t MWGui::wrap(size_t index, size_t max, int delta)
             return 0;
         return index + absDelta;
     }
-    unsigned absDelta = static_cast<unsigned>(-delta);
+    size_t absDelta = static_cast<size_t>(-static_cast<long>(delta));
     if (index >= absDelta)
         return index - absDelta;
     else if (max == 0)
