@@ -61,6 +61,7 @@ local function registerGlobalTest(name, description)
    end)
 end
 
+registerGlobalTest('crash in lua coroutine when accessing type (#8757)')
 registerGlobalTest('timers')
 registerGlobalTest('teleport')
 registerGlobalTest('getGMST')
