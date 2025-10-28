@@ -7,6 +7,13 @@ local vfs = require('openmw.vfs')
 local world = require('openmw.world')
 local I = require('openmw.interfaces')
 
+testing.registerGlobalTest('crash in lua coroutine when accessing type (#8757)', function()
+    local co = coroutine.wrap(function()
+        testing.expectEqual(tostring(world.players[1].type), 'Player')
+    end)
+    co()
+end)
+
 testing.registerGlobalTest('timers', function()
     testing.expectAlmostEqual(core.getGameTimeScale(), 30, 'incorrect getGameTimeScale() result')
     testing.expectAlmostEqual(core.getSimulationTimeScale(), 1, 'incorrect getSimulationTimeScale result')
