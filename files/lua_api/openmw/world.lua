@@ -166,18 +166,19 @@
 -- potion = world.createObject('Generated:0x0', 1)
 
 ---
--- Creates a custom record in the world database; String ids that came from ESM3 content files are lower-cased.
+-- Creates a custom record in the world database; string IDs that came from ESM3 content files are lower-cased.
 -- Eventually meant to support all records, but the current
 -- set of supported types is limited to:
 --
--- * @{openmw.types#PotionRecord},
+-- * @{openmw.types#ActivatorRecord},
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},
--- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#ClothingRecord},
--- * @{openmw.types#WeaponRecord},
--- * @{openmw.types#ActivatorRecord},
--- * @{openmw.types#LightRecord}
+-- * @{openmw.types#LightRecord},
+-- * @{openmw.types#MiscellaneousRecord},
+-- * @{openmw.types#NpcRecord},
+-- * @{openmw.types#PotionRecord},
+-- * @{openmw.types#WeaponRecord}
 -- @function [parent=#world] createRecord
 -- @param #any record A record to be registered in the database. Must be one of the supported types. The id field is not used, one will be generated for you.
 -- @return #any A new record added to the database. The type is the same as the input's.
