@@ -19,6 +19,7 @@
     Bug #7979: Paralyzed NPCs battlecry
     Bug #7996: Instant magic effects are not always instant
     Bug #8012: Startcombat and Stopcombat do not affect music in the menu mode
+    Bug #8176: Error marker cloning is not thread-safe
     Bug #8245: The console command ShowVars does not list global mwscripts
     Bug #8265: Topics are linked incorrectly
     Bug #8303: On target spells cast by non-actors should fire underwater
@@ -72,7 +73,10 @@
     Bug #8680: Dead ancestor ghosts stop being dust when you rest near them
     Bug #8686: openmw-cs: Crash when smoothing terrain of a not-yet-created cell.
     Bug #8710: Absorb Skill breaks on creatures
+    Bug #8720: Crash due to a malformed Lua UI element
     Bug #8734: Shield sheathing does not work properly
+    Bug #8757: Crash in Lua coroutine when accessing player
+    Bug #8758: Lua UI crash on creating nested UI elements twice without destroying old parent element
     Feature #2522: Support quick item transfer
     Feature #3740: Gamepad GUI Mode
     Feature #3769: Allow GetSpellEffects on enchantments
