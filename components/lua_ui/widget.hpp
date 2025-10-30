@@ -83,9 +83,8 @@ namespace LuaUi
         void registerEvents(MyGUI::Widget* w);
         void clearEvents(MyGUI::Widget* w);
 
-        sol::table makeTable() const;
-        sol::object keyEvent(MyGUI::KeyCode) const;
-        sol::object mouseEvent(int left, int top, MyGUI::MouseButton button) const;
+        sol::object keyEvent(LuaUtil::LuaView& view, MyGUI::KeyCode) const;
+        sol::object mouseEvent(LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize() const;
         virtual MyGUI::IntSize childScalingSize() const;
@@ -104,7 +103,11 @@ namespace LuaUi
         virtual void updateProperties();
         virtual void updateChildren() {}
 
-        lua_State* lua() const { return mLua; }
+        template <class Lambda>
+        void protectedCall(Lambda&& f) const
+        {
+            LuaUtil::protectedCall(mLua, std::forward<Lambda>(f));
+        }
 
         void triggerEvent(std::string_view name, sol::object argument) const;
         template <class ArgFactory>

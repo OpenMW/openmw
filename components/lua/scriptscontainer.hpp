@@ -286,6 +286,7 @@ namespace LuaUtil
         static void removeHandler(std::vector<Handler>& list, int scriptId);
         void insertInterface(int scriptId, const Script& script);
         void removeInterface(int scriptId, const Script& script);
+        void save(LuaView&, ESM::LuaScripts&);
 
         ScriptIdsWithInitializationData mAutoStartScripts;
         const UserdataSerializer* mSerializer = nullptr;

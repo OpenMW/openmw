@@ -46,7 +46,9 @@ namespace LuaUi
 
     void LuaTextEdit::textChange(MyGUI::EditBox*)
     {
-        triggerEvent("textChanged", sol::make_object(lua(), mEditBox->getCaption().asUTF8()));
+        protectedCall([=](LuaUtil::LuaView& view) {
+            triggerEvent("textChanged", sol::make_object(view.sol(), mEditBox->getCaption().asUTF8()));
+        });
     }
 
     void LuaTextEdit::updateCoord()
