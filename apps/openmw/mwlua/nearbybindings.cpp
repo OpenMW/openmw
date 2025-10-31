@@ -30,7 +30,14 @@ namespace
         {
             ignore.push_back(ignoreObj->ptr());
         }
-        else if (const auto& ignoreTable = options.get<sol::optional<sol::table>>("ignore"))
+        else if (const auto& ignoreList = options.get<sol::optional<MWLua::LObjectList>>("ignore"))
+        {
+            for (const MWLua::ObjectId& id : *ignoreList->mIds)
+            {
+                ignore.push_back(MWLua::LObject(id).ptr());
+            }
+        }
+        else if (const auto& ignoreTable = options.get<sol::optional<sol::lua_table>>("ignore"))
         {
             ignoreTable->for_each([&](const auto& _, const sol::object& value) {
                 if (value.is<MWLua::LObject>())
