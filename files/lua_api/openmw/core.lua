@@ -165,7 +165,8 @@
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field #number scale Object scale.
--- @field openmw.util#Transform rotation Object rotation.
+-- @field openmw.util#Transform rotation Object rotation
+-- @field #Cell startingCell The object original cell. Returns nil if `cell` of the object is nil.
 -- @field openmw.util#Vector3 startingPosition The object original position
 -- @field openmw.util#Transform startingRotation The object original rotation
 -- @field #ObjectOwner owner Ownership information
