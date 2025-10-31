@@ -29,6 +29,9 @@ namespace Settings
             makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mJoystickDeadZone{ mIndex, "Input", "joystick dead zone",
             makeClampSanitizerFloat(0, 0.5f) };
+        SettingValue<bool> mEnableControllerRumble{ mIndex, "Input", "enable controller rumble" };
+        SettingValue<float> mControllerRumbleStrength{ mIndex, "Input", "controller rumble strength",
+            makeClampSanitizerFloat(0, 1.0f) };
         SettingValue<bool> mEnableGyroscope{ mIndex, "Input", "enable gyroscope" };
         SettingValue<GyroscopeAxis> mGyroHorizontalAxis{ mIndex, "Input", "gyro horizontal axis" };
         SettingValue<GyroscopeAxis> mGyroVerticalAxis{ mIndex, "Input", "gyro vertical axis" };

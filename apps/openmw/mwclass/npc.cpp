@@ -42,6 +42,7 @@
 #include "../mwmechanics/inventory.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/rumble.hpp"
 #include "../mwmechanics/setbaseaisetting.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/weapontype.hpp"
@@ -817,7 +818,16 @@ namespace MWClass
         if (hasHealthDamage && healthDamage > 0.0f)
         {
             if (ptr == MWMechanics::getPlayer())
+            {
                 MWBase::Environment::get().getWindowManager()->activateHitOverlay();
+                MWMechanics::Rumble::onPlayerDamaged(ptr, healthDamage);
+            }
+        }
+
+        if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer() && hasHealthDamage && healthDamage > 0.0f
+            && ptr != MWMechanics::getPlayer())
+        {
+            MWMechanics::Rumble::onPlayerDealtDamage(healthDamage);
         }
 
         if (!wasDead && getCreatureStats(ptr).isDead())

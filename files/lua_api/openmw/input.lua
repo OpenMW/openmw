@@ -98,6 +98,25 @@
 -- @return #number Value in range [-1, 1].
 
 ---
+-- Check if the current controller supports rumble and it is enabled in settings.
+-- @function [parent=#input] controllerHasRumble
+-- @return #boolean
+
+---
+-- Start a rumble effect on the active controller.
+-- @function [parent=#input] controllerStartRumble
+-- @param options Table of options.
+-- @param options.duration #number Duration in seconds (> 0).
+-- @param[opt] options.strength #number Strength applied to both motors (0.0-1.0). Can be overridden by ``options.low`` or ``options.high``.
+-- @param[opt] options.low #number Low-frequency motor strength (0.0-1.0). Defaults to ``options.strength``.
+-- @param[opt] options.high #number High-frequency motor strength (0.0-1.0). Defaults to ``options.low``.
+-- @return #boolean ``true`` if rumble started, ``false`` if the controller can't rumble.
+
+---
+-- Stop any active controller rumble effect.
+-- @function [parent=#input] controllerStopRumble
+
+---
 -- Returns a human readable name for the given key code
 -- @function [parent=#input] getKeyName
 -- @param #KeyCode code A key code (see @{openmw.input#KEY})

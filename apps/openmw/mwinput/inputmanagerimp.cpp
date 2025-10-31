@@ -64,6 +64,7 @@ namespace MWInput
 
         if (disableControls)
         {
+            mControllerManager->update(0.f);
             mMouseManager->updateCursorMode();
             return;
         }
@@ -177,6 +178,23 @@ namespace MWInput
     float InputManager::getControllerAxisValue(SDL_GameControllerAxis axis) const
     {
         return mControllerManager->getAxisValue(axis);
+    }
+
+    bool InputManager::controllerHasRumble() const
+    {
+        return Settings::input().mEnableController && Settings::input().mEnableControllerRumble
+            && mControllerManager->controllerHasRumble();
+    }
+
+    void InputManager::playControllerRumble(
+        float lowFrequencyStrength, float highFrequencyStrength, float durationSeconds)
+    {
+        mControllerManager->playRumble(lowFrequencyStrength, highFrequencyStrength, durationSeconds);
+    }
+
+    void InputManager::stopControllerRumble()
+    {
+        mControllerManager->stopRumble();
     }
 
     int InputManager::getMouseMoveX() const

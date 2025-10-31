@@ -23,6 +23,8 @@
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
 #include "spelleffects.hpp"
+#include "spellpriority.hpp"
+#include "rumble.hpp"
 #include "spellutil.hpp"
 #include "weapontype.hpp"
 
@@ -364,6 +366,13 @@ namespace MWMechanics
         else if (isProjectile || !mTarget.isEmpty())
             inflict(mTarget, enchantment->mEffects, ESM::RT_Target);
 
+        if (mCaster == MWMechanics::getPlayer())
+        {
+            const bool hasProjectileComponent
+                = launchProjectile || isProjectile || (getRangeTypes(enchantment->mEffects) & Target) != 0;
+            Rumble::onPlayerCastSpell(static_cast<float>(enchantment->mData.mCost), hasProjectileComponent);
+        }
+
         return true;
     }
 
@@ -439,6 +448,12 @@ namespace MWMechanics
             inflict(mTarget, spell->mEffects, ESM::RT_Touch);
 
         launchMagicBolt();
+
+        if (mCaster == MWMechanics::getPlayer())
+        {
+            const bool hasProjectileComponent = (getRangeTypes(spell->mEffects) & Target) != 0 || !mTarget.isEmpty();
+            Rumble::onPlayerCastSpell(static_cast<float>(spell->mData.mCost), hasProjectileComponent);
+        }
 
         return true;
     }

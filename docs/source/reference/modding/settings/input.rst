@@ -101,6 +101,24 @@ Input Settings
    Can be set to 0.0 when using third-party dead zone tools.
 
 .. omw-setting::
+   :title: enable controller rumble
+   :type: boolean
+   :range: true, false
+   :default: true
+
+   Enables haptic feedback for supported controllers.
+   Disable if your device lacks rumble motors or you prefer silent controllers.
+
+.. omw-setting::
+   :title: controller rumble strength
+   :type: float32
+   :range: 0.0 to 1.0
+   :default: 1.0
+
+   Global multiplier applied to all rumble effects.
+   Lower the value for subtler feedback.
+
+.. omw-setting::
    :title: enable gyroscope
    :type: boolean
    :range: true, false

@@ -64,6 +64,10 @@ namespace MWBase
         virtual float getActionValue(int action) const = 0; // returns value in range [0, 1]
         virtual bool isControllerButtonPressed(SDL_GameControllerButton button) const = 0;
         virtual float getControllerAxisValue(SDL_GameControllerAxis axis) const = 0; // returns value in range [-1, 1]
+        virtual bool controllerHasRumble() const = 0;
+        virtual void playControllerRumble(float lowFrequencyStrength, float highFrequencyStrength,
+            float durationSeconds) = 0;
+        virtual void stopControllerRumble() = 0;
         virtual int getMouseMoveX() const = 0;
         virtual int getMouseMoveY() const = 0;
         virtual void warpMouseToWidget(MyGUI::Widget* widget) = 0;

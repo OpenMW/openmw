@@ -11,7 +11,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#GamepadControls] #number version
-        version = 1,
+        version = 2,
 
         --- Checks if the gamepad cursor is active. If it is active, the left stick can move the cursor, and A will be interpreted as a mouse click.
         -- @function [parent=#GamepadControls] isGamepadCursorActive
@@ -32,6 +32,27 @@ return {
         -- @param #boolean value
         setGamepadCursorActive = function(state)
             input._setGamepadCursorActive(state)
+        end,
+
+        --- Check if the connected controller supports rumble and the feature is enabled in settings.
+        -- @function [parent=#GamepadControls] hasRumble
+        -- @return #boolean
+        hasRumble = function()
+            return input.controllerHasRumble()
+        end,
+
+        --- Trigger a rumble effect on the active controller.
+        -- @function [parent=#GamepadControls] startRumble
+        -- @param options Table passed to @{openmw.input#controllerStartRumble}.
+        -- @return #boolean ``true`` if rumble started, ``false`` otherwise.
+        startRumble = function(options)
+            return input.controllerStartRumble(options)
+        end,
+
+        --- Stop any active controller rumble effect.
+        -- @function [parent=#GamepadControls] stopRumble
+        stopRumble = function()
+            input.controllerStopRumble()
         end,
     }
 }

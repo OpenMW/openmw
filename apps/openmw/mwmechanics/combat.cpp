@@ -28,6 +28,7 @@
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "pathfinding.hpp"
+#include "rumble.hpp"
 #include "spellcasting.hpp"
 #include "spellresistance.hpp"
 
@@ -144,6 +145,11 @@ namespace MWMechanics
                 sndMgr->playSound3D(blocker, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
             else if (skill == ESM::Skill::HeavyArmor)
                 sndMgr->playSound3D(blocker, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
+
+            if (blocker == MWMechanics::getPlayer())
+                MWMechanics::Rumble::onPlayerBlock(attackStrength, damage);
+            if (attacker == MWMechanics::getPlayer())
+                MWMechanics::Rumble::onPlayerAttackWasBlocked(damage);
 
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);

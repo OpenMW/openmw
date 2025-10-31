@@ -22,6 +22,7 @@
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/rumble.hpp"
 #include "../mwmechanics/setbaseaisetting.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -453,6 +454,9 @@ namespace MWClass
                     stats.setHitRecovery(true); // Is this supposed to always occur?
             }
         }
+
+        if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer() && hasHealthDamage && healthDamage > 0.0f)
+            MWMechanics::Rumble::onPlayerDealtDamage(healthDamage);
     }
 
     std::unique_ptr<MWWorld::Action> Creature::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const

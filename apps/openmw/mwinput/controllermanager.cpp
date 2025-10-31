@@ -5,6 +5,9 @@
 
 #include <SDL.h>
 
+#include <algorithm>
+#include <cmath>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm/refid.hpp>
 #include <components/files/conversion.hpp>
@@ -33,6 +36,9 @@ namespace MWInput
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
         , mGamepadMousePressed(false)
+        , mActiveController(nullptr)
+        , mControllerHasRumble(false)
+        , mRumbleState()
     {
         if (!controllerBindingsFile.empty())
         {
@@ -80,10 +86,15 @@ namespace MWInput
         }
 
         mBindingsManager->setJoystickDeadZone(Settings::input().mJoystickDeadZone);
+
+        refreshActiveController();
     }
 
     void ControllerManager::update(float dt)
     {
+        refreshActiveController();
+        updateRumble(dt);
+
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight) * 2.0f - 1.0f;
@@ -243,11 +254,145 @@ namespace MWInput
     {
         mBindingsManager->controllerAdded(deviceID, arg);
         enableGyroSensor();
+        refreshActiveController();
     }
 
     void ControllerManager::controllerRemoved(const SDL_ControllerDeviceEvent& arg)
     {
         mBindingsManager->controllerRemoved(arg);
+        refreshActiveController();
+    }
+
+    void ControllerManager::refreshActiveController()
+    {
+        SDL_GameController* controller = mBindingsManager->getControllerOrNull();
+        if (controller == mActiveController)
+            return;
+
+        if (mActiveController != nullptr)
+        {
+            stopRumbleInternal();
+            clearRumbleState();
+        }
+
+        mActiveController = controller;
+#if SDL_VERSION_ATLEAST(2, 0, 9)
+        if (mActiveController)
+            mControllerHasRumble = SDL_GameControllerHasRumble(mActiveController) == SDL_TRUE;
+        else
+            mControllerHasRumble = false;
+#else
+        mControllerHasRumble = false;
+#endif
+    }
+
+    void ControllerManager::playRumble(
+        float lowFrequencyStrength, float highFrequencyStrength, float durationSeconds)
+    {
+        refreshActiveController();
+
+        if (!Settings::input().mEnableController || !Settings::input().mEnableControllerRumble)
+            return;
+
+        if (!mActiveController || !mControllerHasRumble)
+            return;
+
+        durationSeconds = std::max(durationSeconds, 0.0f);
+        if (durationSeconds == 0.0f)
+        {
+            stopRumbleInternal();
+            clearRumbleState();
+            return;
+        }
+
+        const float strengthScale = Settings::input().mControllerRumbleStrength;
+        const float lowScaled = std::clamp(lowFrequencyStrength, 0.0f, 1.0f) * strengthScale;
+        const float highScaled = std::clamp(highFrequencyStrength, 0.0f, 1.0f) * strengthScale;
+
+        if (lowScaled <= 0.0f && highScaled <= 0.0f)
+        {
+            stopRumbleInternal();
+            clearRumbleState();
+            return;
+        }
+
+        const float limitedDuration = std::min(durationSeconds, 30.0f);
+        const Uint32 durationMs = static_cast<Uint32>(std::round(limitedDuration * 1000.0f));
+        if (durationMs == 0)
+        {
+            stopRumbleInternal();
+            clearRumbleState();
+            return;
+        }
+
+        const Uint16 lowAmplitude = static_cast<Uint16>(std::round(std::clamp(lowScaled, 0.0f, 1.0f) * 65535.0f));
+        const Uint16 highAmplitude = static_cast<Uint16>(std::round(std::clamp(highScaled, 0.0f, 1.0f) * 65535.0f));
+#if SDL_VERSION_ATLEAST(2, 0, 9)
+        if (SDL_GameControllerRumble(mActiveController, lowAmplitude, highAmplitude, durationMs) != 0)
+        {
+            Log(Debug::Warning) << "Failed to start controller rumble: " << SDL_GetError();
+            clearRumbleState();
+            return;
+        }
+#else
+        Log(Debug::Warning) << "Controller rumble requested but SDL version does not support it";
+        clearRumbleState();
+        return;
+#endif
+
+        mRumbleState.mActive = true;
+        mRumbleState.mLowStrength = lowScaled;
+        mRumbleState.mHighStrength = highScaled;
+        mRumbleState.mRemainingTime = limitedDuration;
+    }
+
+    void ControllerManager::stopRumble()
+    {
+        refreshActiveController();
+        stopRumbleInternal();
+        clearRumbleState();
+    }
+
+    void ControllerManager::updateRumble(float dt)
+    {
+        if (!mRumbleState.mActive)
+            return;
+
+        if (!Settings::input().mEnableController || !Settings::input().mEnableControllerRumble || !mActiveController
+            || !mControllerHasRumble)
+        {
+            stopRumbleInternal();
+            clearRumbleState();
+            return;
+        }
+
+        if (dt > 0.0f)
+        {
+            mRumbleState.mRemainingTime = std::max(0.0f, mRumbleState.mRemainingTime - dt);
+            if (mRumbleState.mRemainingTime <= 0.0f)
+            {
+                stopRumbleInternal();
+                clearRumbleState();
+            }
+        }
+    }
+
+    void ControllerManager::stopRumbleInternal()
+    {
+        if (!mActiveController)
+            return;
+
+#if SDL_VERSION_ATLEAST(2, 0, 9)
+        if (SDL_GameControllerRumble(mActiveController, 0, 0, 0) != 0)
+            Log(Debug::Warning) << "Failed to stop controller rumble: " << SDL_GetError();
+#else
+        SDL_GameControllerRumble(mActiveController, 0, 0, 0);
+#endif
+    }
+
+    void ControllerManager::clearRumbleState()
+    {
+        mRumbleState = {};
     }
 
     bool ControllerManager::gamepadToGuiControl(const SDL_ControllerButtonEvent& arg)

@@ -9,6 +9,9 @@
 #include <components/sdlutil/events.hpp>
 #include <components/settings/values.hpp>
 
+#include <optional>
+#include <stdexcept>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -202,6 +205,45 @@ namespace MWLua
         api["getRangeActionValue"] = [manager = context.mLuaManager](std::string_view key) {
             return manager->inputActions().valueOfType(key, LuaUtil::InputAction::Type::Range);
         };
+        api["controllerHasRumble"] = [input]() { return input->controllerHasRumble(); };
+        api["controllerStartRumble"] = [input](const sol::object& options) {
+            if (!options.valid() || options.is<sol::nil_t>())
+                throw std::domain_error("controllerStartRumble expects an options table");
+            if (!options.is<sol::table>())
+                throw std::domain_error("controllerStartRumble expects an options table");
+
+            sol::table params = options.as<sol::table>();
+            const auto extractOptional = [](const sol::table& table, const char* key) -> std::optional<float> {
+                sol::object value = table[key];
+                if (!value.valid() || value.is<sol::nil_t>())
+                    return std::nullopt;
+                return value.as<float>();
+            };
+
+            const std::optional<float> duration = extractOptional(params, "duration");
+            if (!duration.has_value())
+                throw std::domain_error("controllerStartRumble requires options.duration");
+            if (*duration <= 0.0f)
+                throw std::domain_error("controllerStartRumble options.duration must be positive");
+
+            const std::optional<float> strength = extractOptional(params, "strength");
+            const std::optional<float> low = extractOptional(params, "low");
+            const std::optional<float> high = extractOptional(params, "high");
+            if (!strength.has_value() && !low.has_value() && !high.has_value())
+                throw std::domain_error("controllerStartRumble requires strength, low, or high");
+
+            const float lowStrength = low.value_or(strength.value_or(0.0f));
+            float highStrength = high.value_or(lowStrength);
+            if (strength.has_value() && !high.has_value())
+                highStrength = *strength;
+
+            if (!input->controllerHasRumble())
+                return false;
+
+            input->playControllerRumble(lowStrength, highStrength, *duration);
+            return true;
+        };
+        api["controllerStopRumble"] = [input]() { input->stopControllerRumble(); };
 
         api["triggers"] = std::ref(context.mLuaManager->inputTriggers());
         api["registerTrigger"]

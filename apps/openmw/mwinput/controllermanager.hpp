@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <string>
 
+#include <SDL_gamecontroller.h>
+
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
 
@@ -37,6 +39,10 @@ namespace MWInput
         void setJoystickLastUsed(bool enabled) { mJoystickLastUsed = enabled; }
         bool joystickLastUsed() const { return mJoystickLastUsed; }
 
+        bool controllerHasRumble() const { return mControllerHasRumble; }
+        void playRumble(float lowFrequencyStrength, float highFrequencyStrength, float durationSeconds);
+        void stopRumble();
+
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
         void setGamepadGuiCursorEnabled(bool enabled) { mGamepadGuiCursorEnabled = enabled; }
@@ -59,6 +65,10 @@ namespace MWInput
         void enableGyroSensor();
 
         int getControllerType();
+        void refreshActiveController();
+        void updateRumble(float dt);
+        void stopRumbleInternal();
+        void clearRumbleState();
 
         BindingsManager* mBindingsManager;
         MouseManager* mMouseManager;
@@ -68,6 +78,16 @@ namespace MWInput
         bool mGuiCursorEnabled;
         bool mJoystickLastUsed;
         bool mGamepadMousePressed;
+        SDL_GameController* mActiveController;
+        bool mControllerHasRumble;
+        struct RumbleState
+        {
+            float mRemainingTime = 0.f;
+            float mLowStrength = 0.f;
+            float mHighStrength = 0.f;
+            bool mActive = false;
+        };
+        RumbleState mRumbleState;
     };
 }
 #endif

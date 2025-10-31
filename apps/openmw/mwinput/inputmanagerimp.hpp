@@ -79,6 +79,10 @@ namespace MWInput
         float getActionValue(int action) const override;
         bool isControllerButtonPressed(SDL_GameControllerButton button) const override;
         float getControllerAxisValue(SDL_GameControllerAxis axis) const override;
+        bool controllerHasRumble() const override;
+        void playControllerRumble(float lowFrequencyStrength, float highFrequencyStrength,
+            float durationSeconds) override;
+        void stopControllerRumble() override;
         int getMouseMoveX() const override;
         int getMouseMoveY() const override;
         void warpMouseToWidget(MyGUI::Widget* widget) override;
