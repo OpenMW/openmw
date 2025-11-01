@@ -317,6 +317,7 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::game().mPreventMerchantEquipping, *preventMerchantEquippingCheckBox);
         loadSettingBool(
             Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill, *trainersTrainingSkillsBasedOnBaseSkillCheckBox);
+        loadSettingBool(Settings::game().mTrainersTrainingSkillsModifiable, *trainersTrainingSkillsModifiable);
     }
 
     // Miscellaneous
@@ -512,6 +513,8 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*preventMerchantEquippingCheckBox, Settings::game().mPreventMerchantEquipping);
         saveSettingBool(
             *trainersTrainingSkillsBasedOnBaseSkillCheckBox, Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill);
+        saveSettingBool(
+            *trainersTrainingSkillsModifiable, Settings::game().mTrainersTrainingSkillsModifiable);
     }
 
     // Miscellaneous
