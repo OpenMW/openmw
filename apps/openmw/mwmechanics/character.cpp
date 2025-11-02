@@ -1073,23 +1073,17 @@ namespace MWMechanics
         std::string_view action = evt.substr(groupname.size() + 2);
         if (action == "equip attach")
         {
-            if (mUpperBodyState == UpperBodyState::Equipping)
-            {
-                if (groupname == "shield")
-                    mAnimation->showCarriedLeft(true);
-                else
-                    mAnimation->showWeapons(true);
-            }
+            if (groupname == "shield")
+                mAnimation->showCarriedLeft(true);
+            else if (mUpperBodyState == UpperBodyState::Equipping)
+                mAnimation->showWeapons(true);
         }
         else if (action == "unequip detach")
         {
-            if (mUpperBodyState == UpperBodyState::Unequipping)
-            {
-                if (groupname == "shield")
-                    mAnimation->showCarriedLeft(false);
-                else
-                    mAnimation->showWeapons(false);
-            }
+            if (groupname == "shield")
+                mAnimation->showCarriedLeft(false);
+            else if (mUpperBodyState == UpperBodyState::Unequipping)
+                mAnimation->showWeapons(false);
         }
         else if (action == "chop hit" || action == "slash hit" || action == "thrust hit" || action == "hit")
         {
@@ -1393,7 +1387,7 @@ namespace MWMechanics
                 // We can not play un-equip animation if weapon changed since last update
                 if (!weaponChanged)
                 {
-                    // Note: we do not disable unequipping animation automatically to avoid body desync
+                    // Note: we do not disable the weapon unequipping animation automatically to avoid body desync
                     weapgroup = getWeaponAnimation(mWeaponType);
                     int unequipMask = MWRender::BlendMask_All;
                     mUpperBodyState = UpperBodyState::Unequipping;
@@ -1402,6 +1396,7 @@ namespace MWMechanics
                         && !(mWeaponType == ESM::Weapon::None && weaptype == ESM::Weapon::Spell))
                     {
                         unequipMask = unequipMask | ~MWRender::BlendMask_LeftArm;
+                        mAnimation->disable("shield");
                         playBlendedAnimation("shield", Priority_Block, MWRender::BlendMask_LeftArm, true, 1.0f,
                             "unequip start", "unequip stop", 0.0f, 0);
                     }
@@ -1459,6 +1454,7 @@ namespace MWMechanics
                             if (useShieldAnims && weaptype != ESM::Weapon::Spell)
                             {
                                 equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
+                                mAnimation->disable("shield");
                                 playBlendedAnimation("shield", Priority_Block, MWRender::BlendMask_LeftArm, true, 1.0f,
                                     "equip start", "equip stop", 0.0f, 0);
                             }
@@ -1746,7 +1742,7 @@ namespace MWMechanics
             {
                 // TODO: this will only work for the player, and needs to be fixed if NPCs should ever use
                 // lockpicks/probes.
-                MWWorld::Ptr target = world->getFacedObject();
+                MWWorld::Ptr target = world->getFocusObject();
 
                 if (!target.isEmpty())
                 {

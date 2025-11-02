@@ -106,21 +106,18 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Book& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
-        record["enchant"] = sol::readonly_property(
-            [](const ESM::Book& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mEnchant); });
+        record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mEnchant; });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
         record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });
         record["enchantCapacity"]
             = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
-        record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string> {
-            return LuaUtil::serializeRefId(ESM::Skill::indexToRefId(rec.mData.mSkillId));
-        });
+        record["skill"] = sol::readonly_property(
+            [](const ESM::Book& rec) -> ESM::RefId { return ESM::Skill::indexToRefId(rec.mData.mSkillId); });
     }
 }

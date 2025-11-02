@@ -626,7 +626,7 @@ namespace MWScript
                 {
                     for (const auto& effect : spell.getEffects())
                     {
-                        if (effect.mFlags & ESM::ActiveEffect::Flag_Applied && effect.mEffectId == key)
+                        if (effect.mFlags & ESM::ActiveEffect::Flag_Remove && effect.mEffectId == key)
                         {
                             runtime.push(1);
                             return;

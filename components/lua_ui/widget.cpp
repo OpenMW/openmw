@@ -105,7 +105,7 @@ namespace LuaUi
             if (ext->mParent)
             {
                 auto children = ext->mParent->children();
-                std::erase(children, this);
+                std::erase(children, ext);
                 ext->mParent->setChildren(children);
             }
             ext->detachFromParent();

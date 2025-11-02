@@ -208,16 +208,15 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.serializeText(); });
         record["class"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.serializeText(); });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
+        record["mwscript"] = sol::readonly_property([](const ESM::NPC& rec) -> ESM::RefId { return rec.mScript; });
         record["hair"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.serializeText(); });
         record["baseDisposition"]
             = sol::readonly_property([](const ESM::NPC& rec) -> int { return (int)rec.mNpdt.mDisposition; });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
-        record["primaryFaction"] = sol::readonly_property(
-            [](const ESM::NPC& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mFaction); });
+        record["primaryFaction"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> ESM::RefId { return rec.mFaction; });
         record["primaryFactionRank"] = sol::readonly_property([](const ESM::NPC& rec, sol::this_state s) -> int64_t {
             if (rec.mFaction.empty())
                 return 0;

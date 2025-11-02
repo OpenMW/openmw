@@ -4,6 +4,7 @@
 
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/settings/values.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
@@ -396,8 +397,8 @@ namespace MWLua
             const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
             const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
-            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length();
-            return dist <= actorsProcessingRange;
+            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length2();
+            return dist <= (actorsProcessingRange * actorsProcessingRange);
         };
 
         actor["isDead"] = [](const Object& o) {
@@ -427,7 +428,7 @@ namespace MWLua
             {
                 for (auto& [key, value] : damageLua.value())
                 {
-                    damageCpp[key.as<std::string>()] = value.as<float>();
+                    damageCpp[key.as<std::string>()] = value.as<Misc::FiniteFloat>();
                 }
             }
             std::string sourceTypeStr = options.get_or<std::string>("sourceType", "unspecified");

@@ -26,6 +26,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -54,30 +55,25 @@ namespace Bsa
 #pragma pack(1)
         struct Hash
         {
-            uint32_t low, high;
+            uint32_t mLow;
+            uint32_t mHigh;
         };
 #pragma pack(pop)
 
         /// Represents one file entry in the archive
         struct FileStruct
         {
-            void setNameInfos(size_t index, std::vector<char>* stringBuf)
-            {
-                namesOffset = static_cast<uint32_t>(index);
-                namesBuffer = stringBuf;
-            }
-
             // File size and offset in file. We store the offset from the
             // beginning of the file, not the offset into the data buffer
             // (which is what is stored in the archive.)
-            uint32_t fileSize, offset;
-            Hash hash;
+            uint32_t mFileSize = 0;
+            uint32_t mOffset = 0;
+            Hash mHash{};
+            uint32_t mNameOffset = 0;
+            uint32_t mNameSize = 0;
+            std::vector<char>* mNamesBuffer = nullptr;
 
-            // Zero-terminated file name
-            const char* name() const { return &(*namesBuffer)[namesOffset]; }
-
-            uint32_t namesOffset = 0;
-            std::vector<char>* namesBuffer = nullptr;
+            std::string_view name() const { return std::string_view(mNamesBuffer->data() + mNameOffset, mNameSize); }
         };
         typedef std::vector<FileStruct> FileList;
 
@@ -100,7 +96,7 @@ namespace Bsa
         [[noreturn]] void fail(const std::string& msg) const;
 
         /// Read header information from the input source
-        virtual void readHeader();
+        virtual void readHeader(std::istream& input);
         virtual void writeHeader();
 
     public:
@@ -151,7 +147,6 @@ namespace Bsa
         // checks version of BSA from file header
         static BsaVersion detectVersion(const std::filesystem::path& filePath);
     };
-
 }
 
 #endif

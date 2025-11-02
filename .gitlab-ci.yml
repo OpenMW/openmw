@@ -344,7 +344,7 @@ Ubuntu_GCC_tests_coverage:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
-    - pipx install gcovr
+    - pipx install gcovr==8.3
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     paths: []

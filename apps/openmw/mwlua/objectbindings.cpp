@@ -331,10 +331,9 @@ namespace MWLua
                 return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
             };
 
-            objectT["type"]
-                = sol::readonly_property([types = getTypeToPackageTable(context.sol())](const ObjectT& o) mutable {
-                      return types[getLiveCellRefType(o.ptr().mRef)];
-                  });
+            objectT["type"] = sol::readonly_property(
+                [types = getTypeToPackageTable(context.sol())](
+                    const ObjectT& o) -> sol::object { return types[getLiveCellRefType(o.ptr().mRef)]; });
 
             objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getCellRef().getCount(); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };

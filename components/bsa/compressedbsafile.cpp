@@ -26,14 +26,18 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cerrno>
 #include <filesystem>
-#include <fstream>
+#include <format>
+#include <istream>
+#include <system_error>
 
 #include <lz4frame.h>
 #include <zlib.h>
 
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
+#include <components/files/utils.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "memorystream.hpp"
@@ -41,19 +45,11 @@
 namespace Bsa
 {
     /// Read header information from the input source
-    void CompressedBSAFile::readHeader()
+    void CompressedBSAFile::readHeader(std::istream& input)
     {
         assert(!mIsLoaded);
 
-        std::ifstream input(mFilepath, std::ios_base::binary);
-
-        // Total archive size
-        std::streamoff fsize = 0;
-        if (input.seekg(0, std::ios_base::end))
-        {
-            fsize = input.tellg();
-            input.seekg(0);
-        }
+        const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
         if (fsize < 36) // Header is 36 bytes
             fail("File too small to be a valid BSA archive");
@@ -69,8 +65,8 @@ namespace Bsa
             mHeader.mFlags &= (~ArchiveFlag_EmbeddedNames);
 
         input.seekg(mHeader.mFoldersOffset);
-        if (input.bad())
-            fail("Invalid compressed BSA folder record offset");
+        if (input.fail())
+            fail("Failed to read compressed BSA folder record offset: " + std::generic_category().message(errno));
 
         struct FlatFolderRecord
         {
@@ -81,9 +77,12 @@ namespace Bsa
         };
 
         std::vector<std::pair<FlatFolderRecord, std::vector<FileRecord>>> folders;
-        folders.resize(mHeader.mFolderCount);
-        for (auto& [folder, filelist] : folders)
+        folders.reserve(mHeader.mFolderCount);
+
+        for (std::uint32_t i = 0; i < mHeader.mFolderCount; ++i)
         {
+            FlatFolderRecord folder;
+
             input.read(reinterpret_cast<char*>(&folder.mHash), 8);
             input.read(reinterpret_cast<char*>(&folder.mCount), 4);
             if (mHeader.mVersion == Version_SSE) // SSE
@@ -96,10 +95,13 @@ namespace Bsa
             {
                 input.read(reinterpret_cast<char*>(&folder.mOffset), 4);
             }
-        }
 
-        if (input.bad())
-            fail("Failed to read compressed BSA folder records: input error");
+            if (input.fail())
+                fail(std::format(
+                    "Failed to read compressed BSA folder record: {}", std::generic_category().message(errno)));
+
+            folders.emplace_back(std::move(folder), std::vector<FileRecord>());
+        }
 
         // file record blocks
         if ((mHeader.mFlags & ArchiveFlag_FolderNames) == 0)
@@ -126,20 +128,29 @@ namespace Bsa
                 mHeader.mFolderNamesLength -= size;
             }
 
-            filelist.resize(folder.mCount);
-            for (auto& file : filelist)
+            filelist.reserve(folder.mCount);
+
+            for (std::uint32_t i = 0; i < folder.mCount; ++i)
             {
+                FileRecord file;
+
                 input.read(reinterpret_cast<char*>(&file.mHash), 8);
                 input.read(reinterpret_cast<char*>(&file.mSize), 4);
                 input.read(reinterpret_cast<char*>(&file.mOffset), 4);
+
+                if (input.fail())
+                    fail(std::format("Failed to read compressed BSA folder file record: {}",
+                        std::generic_category().message(errno)));
+
+                filelist.push_back(std::move(file));
             }
         }
 
         if (mHeader.mFolderNamesLength != 0)
             input.ignore(mHeader.mFolderNamesLength);
 
-        if (input.bad())
-            fail("Failed to read compressed BSA file records: input error");
+        if (input.fail())
+            fail(std::format("Failed to read compressed BSA file records: {}", std::generic_category().message(errno)));
 
         if ((mHeader.mFlags & ArchiveFlag_FileNames) != 0)
         {
@@ -168,36 +179,42 @@ namespace Bsa
         if (mHeader.mFileNamesLength != 0)
             input.ignore(mHeader.mFileNamesLength);
 
-        if (input.bad())
-            fail("Failed to read compressed BSA filenames: input error");
+        if (input.fail())
+            fail(std::format("Failed to read compressed BSA filenames: {}", std::generic_category().message(errno)));
 
         for (auto& [folder, filelist] : folders)
         {
             std::map<std::uint64_t, FileRecord> fileMap;
-            for (const auto& file : filelist)
+
+            for (auto& file : filelist)
                 fileMap[file.mHash] = std::move(file);
-            auto& folderMap = mFolders[folder.mHash];
-            folderMap = FolderRecord{ folder.mCount, folder.mOffset, std::move(fileMap) };
-            for (auto& [hash, fileRec] : folderMap.mFiles)
-            {
-                FileStruct fileStruct{};
-                fileStruct.fileSize = fileRec.mSize & (~FileSizeFlag_Compression);
-                fileStruct.offset = fileRec.mOffset;
-                fileStruct.setNameInfos(0, &fileRec.mName);
-                mFiles.emplace_back(fileStruct);
-            }
+
+            mFolders[folder.mHash] = FolderRecord{ folder.mCount, folder.mOffset, folder.mName, std::move(fileMap) };
         }
 
-        mIsLoaded = true;
+        for (auto& [folderHash, folderRecord] : mFolders)
+        {
+            for (auto& [fileHash, fileRecord] : folderRecord.mFiles)
+            {
+                FileStruct fileStruct{};
+                fileStruct.mFileSize = fileRecord.mSize & (~FileSizeFlag_Compression);
+                fileStruct.mOffset = fileRecord.mOffset;
+                fileStruct.mNameOffset = 0;
+                fileStruct.mNameSize
+                    = fileRecord.mName.empty() ? 0 : static_cast<uint32_t>(fileRecord.mName.size() - 1);
+                fileStruct.mNamesBuffer = &fileRecord.mName;
+                mFiles.push_back(fileStruct);
+            }
+        }
     }
 
-    CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string& str) const
+    CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(std::string_view str) const
     {
         for (const auto c : str)
         {
             if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U)
             {
-                fail("File record " + str + " contains unicode characters, refusing to load.");
+                fail(std::format("File record {} contains unicode characters, refusing to load.", str));
             }
         }
 
@@ -207,7 +224,7 @@ namespace Bsa
         // Force-convert the path into something UNIX can handle first
         // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
         // and subsequently purge it to determine the file folder.
-        std::string path = str;
+        std::string path(str);
         std::replace(path.begin(), path.end(), '\\', '/');
 #endif
 

@@ -342,10 +342,10 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
     mViewer->eventTraversal();
     mViewer->updateTraversal();
 
-    // update GUI by world data
+    // update focus object for GUI
     {
-        ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
-        mWorld->updateWindowManager();
+        ScopedProfile<UserStatsType::Focus> profile(frameStart, frameNumber, *timer, *stats);
+        mWorld->updateFocusObject();
     }
 
     // if there is a separate Lua thread, it starts the update now

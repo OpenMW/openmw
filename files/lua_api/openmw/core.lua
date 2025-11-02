@@ -297,13 +297,14 @@
 -- A cell of the game world.
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
+-- @field #string displayName Human-readable cell name (takes into account *.cel file localizations). Can be empty string.
 -- @field #string id Unique record ID of the cell, based on cell name for interiors and the worldspace for exteriors, or the formID of the cell for ESM4 cells.
--- @field #string region Region of the cell.
+-- @field #string region Region of the cell (can be nil).
 -- @field #boolean isExterior Whether the cell is an exterior cell. "Exterior" means grid of cells where the player can seamless walk from one cell to another without teleports. QuasiExterior (interior with sky) is not an exterior.
 -- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the weather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
--- @field #string worldSpaceId Id of the world space.
+-- @field #string worldSpaceId Id of the world space (can be nil).
 -- @field #boolean hasWater True if the cell contains water.
 -- @field #number waterLevel The water level of the cell. (nil if cell has no water).
 -- @field #boolean hasSky True if in this cell sky should be rendered.
@@ -1305,24 +1306,24 @@
 -- Weather data
 -- @type WeatherRecord
 -- @field #string recordId
--- @field #number scriptId
--- @field #string name
--- @field #number windSpeed
+-- @field #number scriptId Read-only ID used in mwscript and dialogue
+-- @field #string name Read-only weather name
+-- @field #number windSpeed Affects the angle of falling rain
 -- @field #number cloudSpeed
 -- @field #string cloudTexture
--- @field #number cloudsMaximumPercent
--- @field #boolean isStorm
+-- @field #number cloudsMaximumPercent Affects the speed of weather transitions (0, 1]
+-- @field #boolean isStorm Controls whether the weather is considered a storm for animation and movement purposes
 -- @field openmw.util#Vector3 stormDirection
--- @field #number glareView
--- @field #number rainSpeed
--- @field #number rainEntranceSpeed
+-- @field #number glareView Strength of the sun glare [0, 1]
+-- @field #number rainSpeed The speed at which rain falls
+-- @field #number rainEntranceSpeed The number of seconds between rain particle batches being created
 -- @field #string rainEffect Will return nil if weather has no rainEffect
--- @field #number rainMaxRaindrops
--- @field #number rainDiameter
--- @field #number rainMaxHeight
--- @field #number rainMinHeight
+-- @field #number rainMaxRaindrops The maximum number of rain particle batches to create every rainEntranceSpeed
+-- @field #number rainDiameter The area around the player to spawn rain in
+-- @field #number rainMaxHeight The maximum height relative to the player to spawn rain at
+-- @field #number rainMinHeight The minimum height relative to the player to spawn rain at
 -- @field #string rainLoopSoundID
--- @field #table  thunderSoundID An array containing the recordIds of the thunder sounds
+-- @field #table thunderSoundID A read-only array containing the recordIds of the thunder sounds
 -- @field #string ambientLoopSoundID
 -- @field #string particleEffect Will return nil if weather has no particleEffect
 -- @field #number distantLandFogFactor

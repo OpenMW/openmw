@@ -225,7 +225,7 @@ namespace MWGui
             if (!winMgr->isConsoleMode() && (mode != GM_Container) && (mode != GM_Inventory))
                 return;
 
-            MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
+            MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFocusObject();
 
             if (winMgr->isConsoleMode())
                 winMgr->setConsoleSelectedObject(object);
