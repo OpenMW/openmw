@@ -11,7 +11,7 @@
 
 namespace Files::Wine
 {
-    std::filesystem::path getInstallPath(const std::filesystem::path& homePath)
+    static std::filesystem::path getInstallPath(const std::filesystem::path& homePath)
     {
         std::filesystem::path wineDefaultRegistry = homePath / ".wine/system.reg";
         if (!std::filesystem::is_regular_file(wineDefaultRegistry))

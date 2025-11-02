@@ -119,10 +119,10 @@ namespace Files
                 // Flatpak
                 homePath / ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Morrowind",
             };
-            for (std::filesystem::path steam : steamPaths)
+            for (const std::filesystem::path& steam : steamPaths)
             {
                 if (std::filesystem::is_directory(steam))
-                    paths.emplace_back(std::move(steam));
+                    paths.emplace_back(steam);
             }
         }
         return paths;
