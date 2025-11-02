@@ -82,8 +82,7 @@ namespace MWLua
         record["icon"] = sol::readonly_property([vfs](const ESM::Potion& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Potion& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
+        record["mwscript"] = sol::readonly_property([](const ESM::Potion& rec) -> ESM::RefId { return rec.mScript; });
         record["weight"] = sol::readonly_property([](const ESM::Potion& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Potion& rec) -> int { return rec.mData.mValue; });
         record["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Potion& rec) -> sol::table {

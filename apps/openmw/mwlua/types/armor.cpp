@@ -102,10 +102,8 @@ namespace MWLua
         record["icon"] = sol::readonly_property([vfs](const ESM::Armor& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
-        record["enchant"] = sol::readonly_property(
-            [](const ESM::Armor& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mEnchant); });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Armor& rec) -> sol::optional<std::string> { return LuaUtil::serializeRefId(rec.mScript); });
+        record["enchant"] = sol::readonly_property([](const ESM::Armor& rec) -> ESM::RefId { return rec.mEnchant; });
+        record["mwscript"] = sol::readonly_property([](const ESM::Armor& rec) -> ESM::RefId { return rec.mScript; });
         record["weight"] = sol::readonly_property([](const ESM::Armor& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Armor& rec) -> int { return rec.mData.mValue; });
         record["type"] = sol::readonly_property([](const ESM::Armor& rec) -> int { return rec.mData.mType; });

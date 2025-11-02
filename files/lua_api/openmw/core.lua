@@ -299,12 +299,12 @@
 -- @field #string name Name of the cell (can be empty string).
 -- @field #string displayName Human-readable cell name (takes into account *.cel file localizations). Can be empty string.
 -- @field #string id Unique record ID of the cell, based on cell name for interiors and the worldspace for exteriors, or the formID of the cell for ESM4 cells.
--- @field #string region Region of the cell.
+-- @field #string region Region of the cell (can be nil).
 -- @field #boolean isExterior Whether the cell is an exterior cell. "Exterior" means grid of cells where the player can seamless walk from one cell to another without teleports. QuasiExterior (interior with sky) is not an exterior.
 -- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the weather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
--- @field #string worldSpaceId Id of the world space.
+-- @field #string worldSpaceId Id of the world space (can be nil).
 -- @field #boolean hasWater True if the cell contains water.
 -- @field #number waterLevel The water level of the cell. (nil if cell has no water).
 -- @field #boolean hasSky True if in this cell sky should be rendered.

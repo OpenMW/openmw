@@ -199,7 +199,7 @@ namespace MWLua
         weatherT["rainMinHeight"] = sol::property([](const MWWorld::Weather& w) { return w.mRainMinHeight; },
             [](MWWorld::Weather& w, const FiniteFloat rainMinHeight) { w.mRainMinHeight = rainMinHeight; });
         weatherT["rainLoopSoundID"]
-            = sol::property([](const MWWorld::Weather& w) { return LuaUtil::serializeRefId(w.mRainLoopSoundID); },
+            = sol::property([](const MWWorld::Weather& w) -> ESM::RefId { return w.mRainLoopSoundID; },
                 [](MWWorld::Weather& w, sol::optional<std::string_view> rainLoopSoundID) {
                     w.mRainLoopSoundID = ESM::RefId::deserializeText(rainLoopSoundID.value_or(""));
                 });
@@ -209,7 +209,7 @@ namespace MWLua
                     w.mSunDiscSunsetColor = sunDiscSunsetColor.toVec();
                 });
         weatherT["ambientLoopSoundID"]
-            = sol::property([](const MWWorld::Weather& w) { return LuaUtil::serializeRefId(w.mAmbientLoopSoundID); },
+            = sol::property([](const MWWorld::Weather& w) -> ESM::RefId { return w.mAmbientLoopSoundID; },
                 [](MWWorld::Weather& w, sol::optional<std::string_view> ambientLoopSoundId) {
                     w.mAmbientLoopSoundID = ESM::RefId::deserializeText(ambientLoopSoundId.value_or(""));
                 });
