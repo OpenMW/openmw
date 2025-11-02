@@ -26,25 +26,27 @@ namespace
     {
         std::vector<T> ignore;
 
-        if (const auto& ignoreObj = options.get<sol::optional<MWLua::LObject>>("ignore"))
+        if (const auto& ignoreObj = options.get<sol::optional<sol::object>>("ignore"))
         {
-            ignore.push_back(ignoreObj->ptr());
-        }
-        else if (const auto& ignoreList = options.get<sol::optional<MWLua::LObjectList>>("ignore"))
-        {
-            for (const MWLua::ObjectId& id : *ignoreList->mIds)
+            if (ignoreObj->is<MWLua::LObject>())
+                ignore.push_back(ignoreObj->as<MWLua::LObject>().ptr());
+            else if (ignoreObj->is<MWLua::LObjectList>())
             {
-                ignore.push_back(MWLua::LObject(id).ptr());
-            }
-        }
-        else if (const auto& ignoreTable = options.get<sol::optional<sol::lua_table>>("ignore"))
-        {
-            ignoreTable->for_each([&](const auto& _, const sol::object& value) {
-                if (value.is<MWLua::LObject>())
+                for (const MWLua::ObjectId& id : *ignoreObj->as<MWLua::LObjectList>().mIds)
                 {
-                    ignore.push_back(value.as<MWLua::LObject>().ptr());
+                    ignore.push_back(MWLua::LObject(id).ptr());
                 }
-            });
+            }
+            else
+            {
+                // ignoreObj->as throws if the type doesn't match, but an unchecked value.as crashes...
+                ignoreObj->as<sol::lua_table>().for_each([&](sol::object _, sol::object value) {
+                    if (value.is<MWLua::LObject>())
+                        ignore.push_back(value.as<MWLua::LObject>().ptr());
+                    else
+                        throw std::runtime_error("Table value is not a GameObject");
+                });
+            }
         }
 
         return ignore;
