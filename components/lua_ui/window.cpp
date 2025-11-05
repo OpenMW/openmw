@@ -78,7 +78,7 @@ namespace LuaUi
         mPreviousMouse.left = left;
         mPreviousMouse.top = top;
 
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([this](LuaUtil::LuaView& view) {
             sol::table table = view.newTable();
             table["position"] = osg::Vec2f(mCoord.left, mCoord.top);
             table["size"] = osg::Vec2f(mCoord.width, mCoord.height);

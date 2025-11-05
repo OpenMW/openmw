@@ -367,7 +367,7 @@ namespace LuaUi
 
     void WidgetExtension::keyPress(MyGUI::Widget*, MyGUI::KeyCode code, MyGUI::Char ch)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             if (code == MyGUI::KeyCode::None)
             {
                 propagateEvent("textInput", [&](auto w) {
@@ -383,21 +383,21 @@ namespace LuaUi
 
     void WidgetExtension::keyRelease(MyGUI::Widget*, MyGUI::KeyCode code)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("keyRelease", [&](auto w) { return w->keyEvent(view, code); });
         });
     }
 
     void WidgetExtension::mouseMove(MyGUI::Widget*, int left, int top)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mouseMove", [&](auto w) { return w->mouseEvent(view, left, top); });
         });
     }
 
     void WidgetExtension::mouseDrag(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mouseMove", [&](auto w) { return w->mouseEvent(view, left, top, button); });
         });
     }
@@ -414,14 +414,14 @@ namespace LuaUi
 
     void WidgetExtension::mousePress(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mousePress", [&](auto w) { return w->mouseEvent(view, left, top, button); });
         });
     }
 
     void WidgetExtension::mouseRelease(MyGUI::Widget*, int left, int top, MyGUI::MouseButton button)
     {
-        protectedCall([=](LuaUtil::LuaView& view) {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mouseRelease", [&](auto w) { return w->mouseEvent(view, left, top, button); });
         });
     }
