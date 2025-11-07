@@ -730,6 +730,7 @@ namespace Nif
         std::vector<HavokFilter> mHavokFilters;
 
         void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct bhkCompressedMeshShape : public bhkShape
