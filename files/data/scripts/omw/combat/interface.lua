@@ -93,7 +93,7 @@ return {
         -- This function can still be overridden same as any other interface, but must not call any functions or interfaces that modify anything.
         -- @function [parent=#Combat] getArmorSkill
         -- @param openmw.core#GameObject item The item
-        -- @return #string The armor skill identifier, or unarmored if the item was nil or not an instace of @{openmw.types#Armor}
+        -- @return #string The armor skill identifier, or unarmored if the item was nil or not an instance of @{openmw.types#Armor}. Can return nil if unimplemented.
         getArmorSkill = function(item) return nil end,
 
         --- Computes the armor rating of a single piece of @{openmw.types#Armor}, adjusted for skill
