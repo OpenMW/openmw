@@ -293,7 +293,7 @@ namespace MWLua
 
         api["remove"] = [context](std::string vfxId) {
             context.mLuaManager->addAction(
-                [vfxId = vfxId] {
+                [vfxId = std::move(vfxId)] {
                     if (vfxId.empty())
                         throw std::runtime_error("vfxId is empty");
                     MWBase::Environment::get().getWorld()->removeEffect(vfxId);
@@ -313,7 +313,7 @@ namespace MWLua
                       bool useAmbientLight = options->get_or("useAmbientLight", true);
                       context.mLuaManager->addAction(
                           [model = VFS::Path::Normalized(model), texture = std::move(texture), worldPos, scale,
-                              magicVfx, useAmbientLight, vfxId, loop]() {
+                              magicVfx, useAmbientLight, vfxId = std::move(vfxId), loop]() {
                               MWBase::Environment::get().getWorld()->spawnEffect(
                                   model, texture, worldPos, scale, magicVfx, useAmbientLight, vfxId, loop);
                           },
