@@ -577,8 +577,7 @@ namespace MWBase
         virtual DetourNavigator::Navigator* getNavigator() const = 0;
 
         virtual void updateActorPath(const MWWorld::ConstPtr& actor, const std::deque<osg::Vec3f>& path,
-            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const
-            = 0;
+            const DetourNavigator::AgentBounds& agentBounds, const osg::Vec3f& start, const osg::Vec3f& end) const = 0;
 
         virtual void removeActorPath(const MWWorld::ConstPtr& actor) const = 0;
 
@@ -587,8 +586,7 @@ namespace MWBase
         virtual DetourNavigator::AgentBounds getPathfindingAgentBounds(const MWWorld::ConstPtr& actor) const = 0;
 
         virtual bool hasCollisionWithDoor(
-            const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const
-            = 0;
+            const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
 
         virtual bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const = 0;
 
