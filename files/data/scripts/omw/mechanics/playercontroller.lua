@@ -132,6 +132,12 @@ local function skillUsedHandler(skillid, params)
     end
 
     local skillStat = NPC.stats.skills[skillid](self)
+
+    if (skillStat.base >= 100 and params.skillGain > 0) or 
+        (skillStat.base <= 0 and params.skillGain < 0) then 
+        return false 
+    end
+
     skillStat.progress = skillStat.progress + params.skillGain / I.SkillProgression.getSkillProgressRequirement(skillid)
 
     if skillStat.progress >= 1 then
