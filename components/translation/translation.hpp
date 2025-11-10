@@ -26,7 +26,7 @@ namespace Translation
     private:
         typedef std::map<std::string, std::string, std::less<>> ContainerType;
 
-        void loadData(ContainerType& container, const std::string& fileNameNoExtension, const std::string& extension,
+        void loadData(ContainerType& container, std::string_view fileNameNoExtension, std::string_view extension,
             const Files::Collections& dataFileCollections);
 
         void loadDataFromStream(ContainerType& container, std::istream& stream);

@@ -190,8 +190,8 @@ void readVFS(std::unique_ptr<VFS::Archive>&& archive, const std::filesystem::pat
     if (!archivePath.empty() && !isBSA(archivePath))
     {
         const Files::Collections fileCollections({ archivePath });
-        const Files::MultiDirCollection& bsaCol = fileCollections.getCollection(".bsa");
-        const Files::MultiDirCollection& ba2Col = fileCollections.getCollection(".ba2");
+        const Files::MultiDirCollection& bsaCol = fileCollections.getCollection("bsa");
+        const Files::MultiDirCollection& ba2Col = fileCollections.getCollection("ba2");
         for (const Files::MultiDirCollection& collection : { bsaCol, ba2Col })
         {
             for (auto& file : collection)

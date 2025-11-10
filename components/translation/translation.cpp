@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <components/misc/pathhelpers.hpp>
+
 namespace Translation
 {
     Storage::Storage()
@@ -11,25 +13,24 @@ namespace Translation
 
     void Storage::loadTranslationData(const Files::Collections& dataFileCollections, std::string_view esmFileName)
     {
-        std::string esmNameNoExtension(Misc::StringUtils::lowerCase(esmFileName));
-        // changing the extension
-        size_t dotPos = esmNameNoExtension.rfind('.');
-        if (dotPos != std::string::npos)
-            esmNameNoExtension.resize(dotPos);
+        std::string_view esmNameNoExtension = Misc::stemFile(esmFileName);
 
-        loadData(mCellNamesTranslations, esmNameNoExtension, ".cel", dataFileCollections);
-        loadData(mPhraseForms, esmNameNoExtension, ".top", dataFileCollections);
-        loadData(mTopicIDs, esmNameNoExtension, ".mrk", dataFileCollections);
+        loadData(mCellNamesTranslations, esmNameNoExtension, "cel", dataFileCollections);
+        loadData(mPhraseForms, esmNameNoExtension, "top", dataFileCollections);
+        loadData(mTopicIDs, esmNameNoExtension, "mrk", dataFileCollections);
     }
 
-    void Storage::loadData(ContainerType& container, const std::string& fileNameNoExtension,
-        const std::string& extension, const Files::Collections& dataFileCollections)
+    void Storage::loadData(ContainerType& container, std::string_view fileNameNoExtension, std::string_view extension,
+        const Files::Collections& dataFileCollections)
     {
-        std::string fileName = fileNameNoExtension + extension;
+        std::string fileName(fileNameNoExtension);
+        fileName += '.';
+        fileName += extension;
 
-        if (dataFileCollections.getCollection(extension).doesExist(fileName))
+        const Files::MultiDirCollection& collection = dataFileCollections.getCollection(extension);
+        if (collection.doesExist(fileName))
         {
-            std::ifstream stream(dataFileCollections.getCollection(extension).getPath(fileName).c_str());
+            std::ifstream stream(collection.getPath(fileName));
 
             if (!stream.is_open())
                 throw std::runtime_error("failed to open translation file: " + fileName);

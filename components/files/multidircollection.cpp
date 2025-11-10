@@ -8,7 +8,7 @@
 namespace Files
 {
 
-    MultiDirCollection::MultiDirCollection(const Files::PathContainer& directories, const std::string& extension)
+    MultiDirCollection::MultiDirCollection(const Files::PathContainer& directories, std::string_view extension)
     {
         for (const auto& directory : directories)
         {
@@ -22,7 +22,8 @@ namespace Files
             {
                 const auto& path = dirIter.path();
 
-                if (!Misc::StringUtils::ciEqual(extension, Files::pathToUnicodeString(path.extension())))
+                std::string ext = Files::pathToUnicodeString(path.extension());
+                if (ext.size() != extension.size() + 1 || !Misc::StringUtils::ciEndsWith(ext, extension))
                     continue;
 
                 const auto filename = Files::pathToUnicodeString(path.filename());
@@ -41,25 +42,25 @@ namespace Files
                 {
                     // handle case folding
                     mFiles.erase(result->first);
-                    mFiles.insert(std::make_pair(filename, path));
+                    mFiles.emplace(filename, path);
                 }
             }
         }
     }
 
-    std::filesystem::path MultiDirCollection::getPath(const std::string& file) const
+    std::filesystem::path MultiDirCollection::getPath(std::string_view file) const
     {
         TIter iter = mFiles.find(file);
 
         if (iter == mFiles.end())
-            throw std::runtime_error("file " + file + " not found");
+            throw std::runtime_error("file " + std::string(file) + " not found");
 
         return iter->second;
     }
 
-    bool MultiDirCollection::doesExist(const std::string& file) const
+    bool MultiDirCollection::doesExist(std::string_view file) const
     {
-        return mFiles.find(file) != mFiles.end();
+        return mFiles.contains(file);
     }
 
     MultiDirCollection::TIter MultiDirCollection::begin() const
