@@ -1173,14 +1173,8 @@ namespace MWWorld
         {
             mKeywordSearch.clear();
 
-            std::vector<std::string> keywordList;
-            keywordList.reserve(getSize());
-            for (const auto& it : *this)
-                keywordList.push_back(Misc::StringUtils::lowerCase(it.mStringId));
-            sort(keywordList.begin(), keywordList.end());
-
-            for (const auto& it : keywordList)
-                mKeywordSearch.seed(it, 0 /*unused*/);
+            for (const ESM::Dialogue& topic : *this)
+                mKeywordSearch.seed(topic.mStringId, 0 /*unused*/);
 
             mKeywordSearchModFlag = false;
         }

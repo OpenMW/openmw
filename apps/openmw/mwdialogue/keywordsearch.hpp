@@ -1,9 +1,7 @@
 #ifndef GAME_MWDIALOGUE_KEYWORDSEARCH_H
 #define GAME_MWDIALOGUE_KEYWORDSEARCH_H
 
-#include <algorithm> // std::reverse
-#include <cctype>
-#include <cstring>
+#include <algorithm>
 #include <map>
 #include <stdexcept>
 #include <vector>
@@ -14,7 +12,7 @@
 namespace MWDialogue
 {
 
-    template <typename value_t>
+    template <typename Value>
     class KeywordSearch
     {
     public:
@@ -24,14 +22,14 @@ namespace MWDialogue
         {
             Point mBeg;
             Point mEnd;
-            value_t mValue;
+            Value mValue;
         };
 
-        void seed(std::string_view keyword, value_t value)
+        void seed(std::string_view keyword, Value value)
         {
             if (keyword.empty())
                 return;
-            seed_impl(keyword, std::move(value), 0, mRoot);
+            buildTrie(keyword, value, 0, mRoot);
         }
 
         void clear()
@@ -40,36 +38,23 @@ namespace MWDialogue
             mRoot.mKeyword.clear();
         }
 
-        bool containsKeyword(std::string_view keyword, value_t& value)
+        bool containsKeyword(std::string_view keyword, Value& value) const
         {
-            auto it = keyword.begin();
-            auto current = mRoot.mChildren.find(Misc::StringUtils::toLower(*it));
-            if (current == mRoot.mChildren.end())
-                return false;
-            else if (Misc::StringUtils::ciEqual(current->second.mKeyword, keyword))
+            const Entry* current = &mRoot;
+            for (char c : keyword)
             {
-                value = current->second.mValue;
-                return true;
-            }
-
-            for (++it; it != keyword.end(); ++it)
-            {
-                auto next = current->second.mChildren.find(Misc::StringUtils::toLower(*it));
-                if (next == current->second.mChildren.end())
+                auto it = current->mChildren.find(Misc::StringUtils::toLower(c));
+                if (it == current->mChildren.end())
                     return false;
-                if (Misc::StringUtils::ciEqual(next->second.mKeyword, keyword))
+                else if (Misc::StringUtils::ciEqual(it->second.mKeyword, keyword))
                 {
-                    value = next->second.mValue;
+                    value = it->second.mValue;
                     return true;
                 }
-                current = next;
+                current = &it->second;
             }
             return false;
         }
-
-        static bool isWordSeparator(char c) { return std::strchr("\n\r \t'\"", c) != nullptr; }
-
-        static bool sortMatches(const Match& left, const Match& right) { return left.mBeg < right.mBeg; }
 
         void highlightKeywords(Point beg, Point end, std::vector<Match>& out) const
         {
@@ -80,87 +65,39 @@ namespace MWDialogue
                 {
                     Point prev = i;
                     --prev;
-                    if (!isWordSeparator(*prev))
+                    constexpr std::string_view wordSeparators = "\n\r \t'\"";
+                    if (wordSeparators.find(*prev) == std::string_view::npos)
                         continue;
                 }
 
-                // check first character
-                typename Entry::childen_t::const_iterator candidate
-                    = mRoot.mChildren.find(Misc::StringUtils::toLower(*i));
-
-                // no match, on to next character
-                if (candidate == mRoot.mChildren.end())
-                    continue;
-
-                // see how far the match goes
-                Point j = i;
-
-                // some keywords might be longer variations of other keywords, so we definitely need a list of
-                // candidates the first element in the pair is length of the match, i.e. depth from the first character
-                std::vector<typename std::pair<std::ptrdiff_t, typename Entry::childen_t::const_iterator>> candidates;
-
-                while ((j + 1) != end)
+                const Entry* current = &mRoot;
+                for (Point it = i; it != end; ++it)
                 {
-                    typename Entry::childen_t::const_iterator next
-                        = candidate->second.mChildren.find(Misc::StringUtils::toLower(*++j));
-
-                    if (next == candidate->second.mChildren.end())
-                    {
-                        if (candidate->second.mKeyword.size() > 0)
-                            candidates.push_back(std::make_pair((j - i), candidate));
+                    auto found = current->mChildren.find(Misc::StringUtils::toLower(*it));
+                    if (found == current->mChildren.end())
                         break;
-                    }
-
-                    candidate = next;
-
-                    if (candidate->second.mKeyword.size() > 0)
-                        candidates.push_back(std::make_pair((j - i), candidate));
-                }
-
-                if (candidates.empty())
-                    continue; // didn't match enough to disambiguate, on to next character
-
-                // shorter candidates will be added to the vector first. however, we want to check against longer
-                // candidates first
-                std::reverse(candidates.begin(), candidates.end());
-
-                for (const auto& [pos, c] : candidates)
-                {
-                    candidate = c;
-                    // try to match the rest of the keyword
-                    Point k = i + pos;
-                    Point t = candidate->second.mKeyword.begin() + (k - i);
-
-                    while (k != end && t != candidate->second.mKeyword.end())
+                    current = &found->second;
+                    if (!current->mKeyword.empty())
                     {
-                        if (Misc::StringUtils::toLower(*k) != Misc::StringUtils::toLower(*t))
-                            break;
-
-                        ++k, ++t;
+                        std::string_view remainingText(it + 1, end);
+                        std::string_view remainingKeyword = std::string_view(current->mKeyword).substr(it + 1 - i);
+                        if (Misc::StringUtils::ciStartsWith(remainingText, remainingKeyword))
+                        {
+                            Match match;
+                            match.mValue = current->mValue;
+                            match.mBeg = i;
+                            match.mEnd = i + current->mKeyword.size();
+                            matches.push_back(match);
+                        }
                     }
-
-                    // didn't match full keyword, try the next candidate
-                    if (t != candidate->second.mKeyword.end())
-                        continue;
-
-                    // found a keyword, but there might still be longer keywords that start somewhere _within_ this
-                    // keyword we will resolve these overlapping keywords later, choosing the longest one in case of
-                    // conflict
-                    Match match;
-                    match.mValue = candidate->second.mValue;
-                    match.mBeg = i;
-                    match.mEnd = k;
-                    matches.push_back(match);
-                    break;
                 }
             }
-
             // resolve overlapping keywords
             while (!matches.empty())
             {
                 std::size_t longestKeywordSize = 0;
-                typename std::vector<Match>::iterator longestKeyword = matches.begin();
-                for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end(); ++it)
+                auto longestKeyword = matches.begin();
+                for (auto it = matches.begin(); it != matches.end(); ++it)
                 {
                     std::size_t size = it->mEnd - it->mBeg;
                     if (size > longestKeywordSize)
@@ -169,8 +106,7 @@ namespace MWDialogue
                         longestKeyword = it;
                     }
 
-                    typename std::vector<Match>::iterator next = it;
-                    ++next;
+                    auto next = it + 1;
 
                     if (next == matches.end())
                         break;
@@ -185,61 +121,55 @@ namespace MWDialogue
                 matches.erase(longestKeyword);
                 out.push_back(keyword);
                 // erase anything that overlaps with the keyword we just added to the output
-                for (typename std::vector<Match>::iterator it = matches.begin(); it != matches.end();)
-                {
-                    if (it->mBeg < keyword.mEnd && it->mEnd > keyword.mBeg)
-                        it = matches.erase(it);
-                    else
-                        ++it;
-                }
+                std::erase_if(matches,
+                    [&](const Match& match) { return match.mBeg < keyword.mEnd && match.mEnd > keyword.mBeg; });
             }
 
-            std::sort(out.begin(), out.end(), sortMatches);
+            std::sort(
+                out.begin(), out.end(), [](const Match& left, const Match& right) { return left.mBeg < right.mBeg; });
         }
 
     private:
         struct Entry
         {
-            typedef std::map<wchar_t, Entry> childen_t;
-
             std::string mKeyword;
-            value_t mValue;
-            childen_t mChildren;
+            Value mValue;
+            std::map<char, Entry> mChildren;
         };
 
-        void seed_impl(std::string_view keyword, value_t value, size_t depth, Entry& entry)
+        void buildTrie(std::string_view keyword, Value value, size_t depth, Entry& entry)
         {
-            auto ch = Misc::StringUtils::toLower(keyword.at(depth));
+            const char ch = Misc::StringUtils::toLower(keyword[depth]);
+            const auto found = entry.mChildren.find(ch);
 
-            typename Entry::childen_t::iterator j = entry.mChildren.find(ch);
-
-            if (j == entry.mChildren.end())
+            if (found == entry.mChildren.end())
             {
-                entry.mChildren[ch].mValue = std::move(value);
+                entry.mChildren[ch].mValue = value;
                 entry.mChildren[ch].mKeyword = keyword;
             }
             else
             {
-                if (j->second.mKeyword.size() > 0)
+                if (!found->second.mKeyword.empty())
                 {
-                    if (keyword == j->second.mKeyword)
+                    std::string_view existingKeyword = found->second.mKeyword;
+                    if (Misc::StringUtils::ciEqual(keyword, existingKeyword))
                         throw std::runtime_error("duplicate keyword inserted");
-
-                    const auto& pushKeyword = j->second.mKeyword;
-
-                    if (depth >= pushKeyword.size())
+                    if (depth >= existingKeyword.size())
                         throw std::runtime_error("unexpected");
-
-                    if (depth + 1 < pushKeyword.size())
+                    // Turn this Entry into a branch and append a leaf to hold its current value
+                    if (depth + 1 < existingKeyword.size())
                     {
-                        seed_impl(pushKeyword, j->second.mValue, depth + 1, j->second);
-                        j->second.mKeyword.clear();
+                        buildTrie(existingKeyword, found->second.mValue, depth + 1, found->second);
+                        found->second.mKeyword.clear();
                     }
                 }
                 if (depth + 1 == keyword.size())
-                    j->second.mKeyword = value;
+                {
+                    found->second.mValue = value;
+                    found->second.mKeyword = keyword;
+                }
                 else // depth+1 < keyword.size()
-                    seed_impl(keyword, std::move(value), depth + 1, j->second);
+                    buildTrie(keyword, value, depth + 1, found->second);
             }
         }
 
