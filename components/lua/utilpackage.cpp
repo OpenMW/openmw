@@ -247,7 +247,7 @@ namespace LuaUtil
         color["rgb"] = [](float r, float g, float b) { return Misc::Color(r, g, b, 1); };
         color["hex"] = [](std::string_view hex) { return Misc::Color::fromHex(hex); };
         color["commaString"] = [](std::string_view str) {
-            int wrongChars = std::count_if(
+            auto wrongChars = std::count_if(
                 str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c) && c != ' ' && c != ','; });
 
             if (wrongChars != 0)
