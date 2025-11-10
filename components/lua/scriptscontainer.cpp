@@ -413,6 +413,16 @@ namespace LuaUtil
             data.mScripts = unloadedData->mScripts;
             return;
         }
+        mLua.protectedCall([&](LuaView& view) { save(view, data); });
+    }
+
+    void ScriptsContainer::save(LuaView&, ESM::LuaScripts& data)
+    {
+        if (const UnloadedData* unloadedData = std::get_if<UnloadedData>(&mData))
+        {
+            data.mScripts = unloadedData->mScripts;
+            return;
+        }
         const auto& loadedData = std::get<LoadedData>(mData);
         std::map<int, std::vector<ESM::LuaTimer>> timers;
         auto saveTimerFn = [&](const Timer& timer, TimerType timerType) {
@@ -614,12 +624,12 @@ namespace LuaUtil
         return data;
     }
 
-    ScriptsContainer::UnloadedData& ScriptsContainer::ensureUnloaded(LuaView&)
+    ScriptsContainer::UnloadedData& ScriptsContainer::ensureUnloaded(LuaView& view)
     {
         if (UnloadedData* data = std::get_if<UnloadedData>(&mData))
             return *data;
         UnloadedData data;
-        save(data);
+        save(view, data);
         mAPI.erase("openmw.interfaces");
         UnloadedData& out = mData.emplace<UnloadedData>(std::move(data));
         for (auto& [_, handlers] : mEngineHandlers)
@@ -751,9 +761,11 @@ namespace LuaUtil
 
     void ScriptsContainer::processTimers(double simulationTime, double gameTime)
     {
-        LoadedData& data = ensureLoaded();
-        updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
-        updateTimerQueue(data.mGameTimersQueue, gameTime);
+        mLua.protectedCall([&](LuaView& view) {
+            LoadedData& data = ensureLoaded();
+            updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
+            updateTimerQueue(data.mGameTimersQueue, gameTime);
+        });
     }
 
     static constexpr float instructionCountAvgCoef = 1.0f / 30; // averaging over approximately 30 frames

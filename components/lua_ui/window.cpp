@@ -78,9 +78,11 @@ namespace LuaUi
         mPreviousMouse.left = left;
         mPreviousMouse.top = top;
 
-        sol::table table = makeTable();
-        table["position"] = osg::Vec2f(mCoord.left, mCoord.top);
-        table["size"] = osg::Vec2f(mCoord.width, mCoord.height);
-        triggerEvent("windowDrag", table);
+        protectedCall([this](LuaUtil::LuaView& view) {
+            sol::table table = view.newTable();
+            table["position"] = osg::Vec2f(mCoord.left, mCoord.top);
+            table["size"] = osg::Vec2f(mCoord.width, mCoord.height);
+            triggerEvent("windowDrag", table);
+        });
     }
 }
