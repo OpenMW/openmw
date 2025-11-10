@@ -218,7 +218,7 @@ Lock a container or door
 
 .. code-block:: Lua
 
-    core.sendGlobalEvent('Lock', {taret = selected, magnitude = 50})
+    core.sendGlobalEvent('Lock', {target = selected, magnitude = 50})
 
 **Unlock**
 
@@ -226,4 +226,4 @@ Unlock a container or door
 
 .. code-block:: Lua
 
-    core.sendGlobalEvent('Unlock', {taret = selected})
+    core.sendGlobalEvent('Unlock', {target = selected})
