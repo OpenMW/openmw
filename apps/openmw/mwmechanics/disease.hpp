@@ -21,11 +21,11 @@ namespace MWMechanics
 {
 
     /// Call when \a actor has got in contact with \a carrier (e.g. hit by him, or loots him)
-    /// @param actor The actor that will potentially catch diseases. Currently only the player can catch diseases.
+    /// @param actor The actor that will potentially catch diseases. Actors cannot catch diseases from the player.
     /// @param carrier The disease carrier.
     inline void diseaseContact(const MWWorld::Ptr& actor, const MWWorld::Ptr& carrier)
     {
-        if (!carrier.getClass().isActor() || actor != getPlayer())
+        if (!carrier.getClass().isActor() || carrier == getPlayer())
             return;
 
         float fDiseaseXferChance = MWBase::Environment::get()
@@ -71,13 +71,16 @@ namespace MWMechanics
                 creatureStats.getActiveSpells().addSpell(spell, actor, false);
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
-                std::string msg = MWBase::Environment::get()
-                                      .getESMStore()
-                                      ->get<ESM::GameSetting>()
-                                      .find("sMagicContractDisease")
-                                      ->mValue.getString();
-                msg = Misc::StringUtils::format(msg, spell->mName);
-                MWBase::Environment::get().getWindowManager()->messageBox(msg);
+                if (actor == getPlayer())
+                {
+                    std::string msg = MWBase::Environment::get()
+                                          .getESMStore()
+                                          ->get<ESM::GameSetting>()
+                                          .find("sMagicContractDisease")
+                                          ->mValue.getString();
+                    msg = Misc::StringUtils::format(msg, spell->mName);
+                    MWBase::Environment::get().getWindowManager()->messageBox(msg);
+                }
             }
         }
     }
