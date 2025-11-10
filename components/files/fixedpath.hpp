@@ -56,10 +56,10 @@ namespace Files
         /**
          * \brief Path constructor.
          *
-         * \param [in] application_name - Name of the application
+         * \param [in] applicationName - Name of the application
          */
-        FixedPath(const std::string& application_name)
-            : mPath(application_name + "/")
+        FixedPath(const std::string& applicationName)
+            : mPath(applicationName + "/")
             , mUserConfigPath(mPath.getUserConfigPath())
             , mUserDataPath(mPath.getUserDataPath())
             , mGlobalConfigPath(mPath.getGlobalConfigPath())
