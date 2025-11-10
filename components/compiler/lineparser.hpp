@@ -88,7 +88,7 @@ namespace Compiler
 
     protected:
         void visitedPlaceholder(
-            Placeholder placeholder, char padding, int width, int precision, Notation notation) override;
+            Placeholder placeholder, int flags, int width, int precision, Notation notation) override;
         void visitedCharacter(char c) override {}
 
     public:

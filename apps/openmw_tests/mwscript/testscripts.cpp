@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+
+#include <array>
 #include <sstream>
 
 #include "testutils.hpp"
@@ -125,6 +127,34 @@ End)mwscript";
 player -> addSpell "fire_bite", 645
 
 PositionCell "Rabenfels, Taverne" 4480.000 3968.000 15820.000 0
+
+End)mwscript";
+
+    const std::string sScript5 = R"mwscript(Begin messagebox_format_script
+
+float fVal
+
+set fVal to 12.34
+
+MessageBox "hello world"
+MessageBox "%.0f" fVal
+MessageBox "%.f" fVal
+MessageBox "a %03.0f b" fVal
+MessageBox "%+04.0f" fVal
+MessageBox "%+4.0f" fVal
+MessageBox "%+ 4.0f" fVal
+MessageBox "%0+ 4.0f" fVal
+MessageBox "%0+ #4.0f" fVal
+MessageBox "%- 5.0f" fVal
+
+MessageBox "%g" fVal
+MessageBox "%.3g" fVal
+MessageBox "%.5g" fVal
+MessageBox "%#.5g" fVal
+MessageBox "%-5g" fVal
+MessageBox "%- 5g" fVal
+
+MessageBox "%.1b" fVal
 
 End)mwscript";
 
@@ -577,6 +607,47 @@ End)mwscript";
     {
         registerExtensions();
         EXPECT_FALSE(!compile(sScript4));
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_messagebox_format)
+    {
+        if (const auto script = compile(sScript5))
+        {
+            TestInterpreterContext context;
+            run(*script, context);
+            using std::string_view_literals::operator""sv;
+            constexpr std::array expected{
+                "hello world"sv,
+                "12"sv,
+                "12"sv,
+                "a 012 b"sv,
+                "+012"sv,
+                " +12"sv,
+                " +12"sv,
+                "+012"sv,
+                "+12."sv,
+                " 12  "sv,
+
+                "12.34"sv,
+                "12.3"sv,
+                "12.34"sv,
+                "12.340"sv,
+                "12.34"sv,
+                " 12.34"sv,
+
+                "b"sv,
+            };
+            const std::vector<std::string>& output = context.getMessages();
+            EXPECT_EQ(expected.size(), output.size());
+            for (std::size_t i = 0; i < output.size(); i++)
+            {
+                EXPECT_EQ(expected[i], output[i]);
+            }
+        }
+        else
+        {
+            FAIL();
+        }
     }
 
     TEST_F(MWScriptTest, mwscript_test_587)

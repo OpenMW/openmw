@@ -145,8 +145,11 @@ namespace
     {
         LocalVariables mLocals;
         std::map<ESM::RefId, GlobalVariables> mMembers;
+        std::vector<std::string> mMessages;
 
     public:
+        const std::vector<std::string>& getMessages() { return mMessages; }
+
         ESM::RefId getTarget() const override { return ESM::RefId(); }
 
         int getLocalShort(int index) const override { return mLocals.getShort(index); }
@@ -161,7 +164,10 @@ namespace
 
         void setLocalFloat(int index, float value) override { mLocals.setFloat(index, value); }
 
-        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override {}
+        void messageBox(std::string_view message, const std::vector<std::string>& buttons) override
+        {
+            mMessages.emplace_back(message);
+        }
 
         void report(const std::string& message) override {}
 
