@@ -222,21 +222,23 @@ namespace MWLua
         // Run event handlers for events that were sent before `finalizeEventBatch`.
         mLuaEvents.callEventHandlers();
 
-        // Run queued callbacks
-        for (CallbackWithData& c : mQueuedCallbacks)
-            c.mCallback.tryCall(c.mArg);
-        mQueuedCallbacks.clear();
+        mLua.protectedCall([&](LuaUtil::LuaView& lua) {
+            // Run queued callbacks
+            for (CallbackWithData& c : mQueuedCallbacks)
+                c.mCallback.tryCall(c.mArg);
+            mQueuedCallbacks.clear();
 
-        // Run engine handlers
-        mEngineEvents.callEngineHandlers();
-        bool isPaused = timeManager.isPaused();
+            // Run engine handlers
+            mEngineEvents.callEngineHandlers();
+            bool isPaused = timeManager.isPaused();
 
-        float frameDuration = MWBase::Environment::get().getFrameDuration();
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->update(isPaused ? 0 : frameDuration);
-        mGlobalScripts.update(isPaused ? 0 : frameDuration);
+            float frameDuration = MWBase::Environment::get().getFrameDuration();
+            for (LocalScripts* scripts : mActiveLocalScripts)
+                scripts->update(isPaused ? 0 : frameDuration);
+            mGlobalScripts.update(isPaused ? 0 : frameDuration);
 
-        mLua.protectedCall([&](LuaUtil::LuaView& lua) { mScriptTracker.unloadInactiveScripts(lua); });
+            mScriptTracker.unloadInactiveScripts(lua);
+        });
     }
 
     void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)

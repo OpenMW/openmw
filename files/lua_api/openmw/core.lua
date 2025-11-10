@@ -57,10 +57,13 @@
 -- @return #number
 
 ---
--- Get a GMST setting from content files.
+-- Get a game setting with given name (from GMST ESM records or from openmw.cfg).
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
 -- @return #any
+-- @usage local skillBonus = core.getGMST('fMinorSkillBonus') -- get a numeric GMST from ESM data
+-- @usage local jailFormatString = core.getGMST('sNotifyMessage42') -- get a string GMST from ESM data
+-- @usage local bloodTextureName = core.getGMST('Blood_Texture_1') -- get a "fallback" parameter value from openmw.cfg (always a string)
 
 ---
 -- The game's difficulty setting.

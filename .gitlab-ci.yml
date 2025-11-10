@@ -429,7 +429,11 @@ Ubuntu_Clang:
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
-    - cp extern/.clang-tidy build/.clang-tidy
+    - mkdir -p build/extern build/apps/launcher build/apps/opencs build/apps/wizard
+    - cp extern/.clang-tidy build/extern/
+    - cp extern/.clang-tidy build/apps/launcher/
+    - cp extern/.clang-tidy build/apps/opencs/
+    - cp extern/.clang-tidy build/apps/wizard/
     - cd build
     - find . -name *.o -exec touch {} \;
     - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}

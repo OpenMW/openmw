@@ -478,6 +478,16 @@
 -- @return #Color
 
 ---
+-- Creates a Color from comma-separated string (in RGB or RGBA order, spaces are ignored)
+-- @function [parent=#COLOR] commaString
+-- @param #string str
+-- @return #Color
+-- @usage local color = util.color.commaString('255,0,0') -- red color
+-- @usage local color = util.color.commaString('10000,0,0') -- red color (values are still capped at 255)
+-- @usage local color = util.color.commaString('0, 0, 255, 255') -- blue color, with explicit alpha
+-- @usage local color = util.color.commaString('0,255,0,128') -- green color, semi-transparent
+
+---
 -- Creates a Color from RGB format. Equivalent to calling util.rgba with a = 1.
 -- @function [parent=#COLOR] rgb
 -- @param #number r

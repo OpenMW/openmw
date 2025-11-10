@@ -8,6 +8,9 @@
 
 #include <components/misc/color.hpp>
 #include <components/misc/mathutil.hpp>
+#include <components/misc/strings/algorithm.hpp>
+
+#include <MyGUI_StringUtility.h>
 
 #include "luastate.hpp"
 #include "util.hpp"
@@ -243,6 +246,28 @@ namespace LuaUtil
         color["rgba"] = [](float r, float g, float b, float a) { return Misc::Color(r, g, b, a); };
         color["rgb"] = [](float r, float g, float b) { return Misc::Color(r, g, b, 1); };
         color["hex"] = [](std::string_view hex) { return Misc::Color::fromHex(hex); };
+        color["commaString"] = [](std::string_view str) {
+            int wrongChars = std::count_if(
+                str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c) && c != ' ' && c != ','; });
+
+            if (wrongChars != 0)
+            {
+                throw std::runtime_error("Invalid comma-separated color: " + std::string(str));
+            }
+
+            std::vector<std::string> rgba;
+            Misc::StringUtils::split(str, rgba, ",");
+            if (rgba.size() != 3 && rgba.size() != 4)
+            {
+                throw std::runtime_error("Invalid comma-separated color: " + std::string(str));
+            }
+
+            if (rgba.size() == 3)
+                rgba.push_back("255");
+
+            return Misc::Color(MyGUI::utility::parseInt(rgba[0]) / 255.f, MyGUI::utility::parseInt(rgba[1]) / 255.f,
+                MyGUI::utility::parseInt(rgba[2]) / 255.f, MyGUI::utility::parseInt(rgba[3]) / 255.f);
+        };
         util["color"] = LuaUtil::makeReadOnly(color);
 
         // Lua bindings for Transform

@@ -1,6 +1,8 @@
 
 #include "combat.hpp"
 
+#include <array>
+
 #include <components/misc/rng.hpp>
 #include <components/settings/values.hpp>
 
@@ -504,15 +506,19 @@ namespace MWMechanics
         }
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (isWerewolf)
         {
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfHit", prng);
             if (sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }
         else if (!healthdmg)
-            sndMgr->playSound3D(victim, ESM::RefId::stringRefId("Hand To Hand Hit"), 1.0f, 1.0f);
+        {
+            static const std::array<ESM::RefId, 2> sounds
+                = { ESM::RefId::stringRefId("Hand To Hand Hit"), ESM::RefId::stringRefId("Hand To Hand Hit 2") };
+            sndMgr->playSound3D(victim, sounds[Misc::Rng::rollDice(sounds.size(), prng)], 1.0f, 1.0f);
+        }
     }
 
     void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength)

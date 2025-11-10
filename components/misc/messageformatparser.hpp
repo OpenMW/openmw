@@ -15,17 +15,28 @@ namespace Misc
             FloatPlaceholder
         };
 
-        enum class Notation
+        enum Flags
         {
-            Fixed,
-            Scientific,
-            Shortest,
-            HexUpper,
-            HexLower
+            None = 0,
+            PositiveSpace = 1,
+            PositiveSign = 2,
+            AlignLeft = 4,
+            PrependZero = 8,
+            AlternateForm = 16
         };
 
-        virtual void visitedPlaceholder(
-            Placeholder placeholder, char padding, int width, int precision, Notation notation)
+        enum class Notation : char
+        {
+            Fixed = 'f',
+            ScientificUpper = 'E',
+            ScientificLower = 'e',
+            ShortestUpper = 'G',
+            ShortestLower = 'g',
+            HexUpper = 'A',
+            HexLower = 'a'
+        };
+
+        virtual void visitedPlaceholder(Placeholder placeholder, int flags, int width, int precision, Notation notation)
             = 0;
         virtual void visitedCharacter(char c) = 0;
 

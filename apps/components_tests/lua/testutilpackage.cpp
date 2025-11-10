@@ -158,6 +158,13 @@ namespace
         EXPECT_EQ(get<std::string>(lua, "darkRed:asHex()"), "a01112");
         EXPECT_TRUE(get<bool>(lua, "green:asRgba() == util.vector4(0, 1, 0, 1)"));
         EXPECT_TRUE(get<bool>(lua, "red:asRgb() == util.vector3(1, 0, 0)"));
+        lua.safe_script("green = util.color.commaString('0,255,0')");
+        EXPECT_EQ(get<std::string>(lua, "tostring(green)"), "(0, 1, 0, 1)");
+        lua.safe_script("red = util.color.commaString('255, 0, 0, 255')");
+        EXPECT_EQ(get<std::string>(lua, "tostring(red)"), "(1, 0, 0, 1)");
+        lua.safe_script("blue = util.color.commaString('0, 0, 1000, 255')");
+        EXPECT_EQ(get<std::string>(lua, "tostring(blue)"), "(0, 0, 1, 1)");
+        EXPECT_ERROR(lua.safe_script("white = util.color.commaString('aaa')"), "Invalid comma-separated color");
     }
 
     TEST_F(LuaUtilPackageTest, Transform)

@@ -82,9 +82,10 @@ namespace MWGui
 
         if (Settings::gui().mControllerMenus)
         {
-            mControllerFocus = -1;
             if (mItemCount > 0)
                 mControllerFocus = std::clamp(mControllerFocus, 0, mItemCount - 1);
+            else
+                mControllerFocus = -1;
             updateControllerFocus(-1, mControllerFocus);
         }
 

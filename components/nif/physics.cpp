@@ -770,6 +770,11 @@ namespace Nif
             filter.read(nif);
     }
 
+    void bhkListShape::post(Reader& nif)
+    {
+        postRecordList(nif, mSubshapes);
+    }
+
     void bhkCompressedMeshShape::read(NIFStream* nif)
     {
         mTarget.read(nif);
