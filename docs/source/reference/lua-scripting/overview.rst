@@ -464,7 +464,7 @@ Using the interface:
 
     return { engineHandlers = {onUpdate = onUpdate} }
 
-The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `lua-scripts=...` in `openmw.cfg`) is correct.
+The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `content=*.omwscripts` in `openmw.cfg`) is correct.
 
 Interfaces of built-in scripts
 ------------------------------
