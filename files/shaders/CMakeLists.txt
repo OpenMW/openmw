@@ -28,6 +28,7 @@ set(SHADER_FILES
     lib/sky/passes.glsl
     lib/material/parallax.glsl
     lib/material/alpha.glsl
+    lib/terrain/deformation.glsl
     compatibility/ripples_blobber.frag
     compatibility/ripples_simulate.frag
     compatibility/fog.glsl
@@ -39,6 +40,10 @@ set(SHADER_FILES
     compatibility/objects.frag
     compatibility/terrain.vert
     compatibility/terrain.frag
+    compatibility/terrain.tesc
+    compatibility/terrain.tese
+    compatibility/terrain_deform_stamp.frag
+    compatibility/terrain_deform_decay.frag
     compatibility/shadows_vertex.glsl
     compatibility/shadows_fragment.glsl
     compatibility/shadowcasting.vert
@@ -65,6 +70,8 @@ set(SHADER_FILES
     compatibility/luminance/luminance.frag
     core/ripples_blobber.comp
     core/ripples_simulate.comp
+    core/terrain_deform_stamp.comp
+    core/terrain_deform_decay.comp
     core/gui.frag
     core/gui.vert
 )

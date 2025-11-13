@@ -31,6 +31,14 @@ varying vec3 passNormal;
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
 
+#if @terrainDeformTess
+// Tessellation outputs
+out vec3 worldPos_TC_in;
+out vec2 uv_TC_in;
+out vec3 passNormal_TC_in;
+out vec3 passViewPos_TC_in;
+#endif
+
 void main(void)
 {
     gl_Position = modelToClip(gl_Vertex);
@@ -69,5 +77,13 @@ void main(void)
 
 #if (@shadows_enabled)
     setupShadowCoords(viewPos, viewNormal);
+#endif
+
+#if @terrainDeformTess
+    // Pass data to tessellation control shader
+    worldPos_TC_in = (osg_ModelMatrix * gl_Vertex).xyz;
+    uv_TC_in = uv;
+    passNormal_TC_in = passNormal;
+    passViewPos_TC_in = passViewPos;
 #endif
 }
