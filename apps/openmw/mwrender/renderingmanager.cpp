@@ -86,6 +86,7 @@
 #include "util.hpp"
 #include "vismask.hpp"
 #include "water.hpp"
+#include "terraindeformation.hpp"
 
 namespace MWRender
 {
@@ -518,6 +519,13 @@ namespace MWRender
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
             sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation());
+
+        // terrain deformation for interactive snow/sand/ash
+        if (Settings::shaders().mTerrainDeformation)
+        {
+            mTerrainDeformation = std::make_unique<TerrainDeformation>(mResourceSystem);
+            sceneRoot->addChild(mTerrainDeformation.get());
+        }
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 
@@ -1353,6 +1361,12 @@ namespace MWRender
     void RenderingManager::emitWaterRipple(const osg::Vec3f& pos)
     {
         mWater->emitRipple(pos);
+    }
+
+    void RenderingManager::emitTerrainDeformation(const osg::Vec3f& pos, float size, TerrainMaterialType materialType)
+    {
+        if (mTerrainDeformation)
+            mTerrainDeformation->emit(pos, size, materialType);
     }
 
     void RenderingManager::updateProjectionMatrix()

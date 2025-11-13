@@ -98,6 +98,7 @@ namespace MWRender
     class Pathgrid;
     class Camera;
     class Water;
+    class TerrainDeformation;
     class TerrainStorage;
     class LandManager;
     class NavMesh;
@@ -215,6 +216,9 @@ namespace MWRender
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void emitWaterRipple(const osg::Vec3f& pos);
 
+        // Terrain deformation (interactive snow/sand/ash)
+        void emitTerrainDeformation(const osg::Vec3f& pos, float size, TerrainMaterialType materialType);
+
         void updatePlayerPtr(const MWWorld::Ptr& ptr);
 
         void removePlayer(const MWWorld::Ptr& player);
@@ -320,6 +324,7 @@ namespace MWRender
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
+        std::unique_ptr<TerrainDeformation> mTerrainDeformation;
         std::unordered_map<ESM::RefId, WorldspaceChunkMgr> mWorldspaceChunks;
         Terrain::World* mTerrain;
         std::unique_ptr<TerrainStorage> mTerrainStorage;
