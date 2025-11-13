@@ -4,6 +4,7 @@
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
+#include "terraindeformation.hpp"
 
 #include <components/settings/settings.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -98,7 +99,6 @@ namespace MWRender
     class Pathgrid;
     class Camera;
     class Water;
-    class TerrainDeformation;
     class TerrainStorage;
     class LandManager;
     class NavMesh;
