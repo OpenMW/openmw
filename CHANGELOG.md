@@ -1,6 +1,18 @@
 0.51.0
 ------
 
+    Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
+    Bug #8732: MessageBox formatting is too limited
+    Bug #8760: Single-character topics don't get linked
+    Bug #8765: Actors can't transmit diseases to other actors
+    Bug #8769: LuaUtil::call not wrapped by invokeProtectedCall
+    Bug #8771: Controller focus is often reset inappropriately in containers
+    Bug #8775: Crash when using nearby.castRay with { ignore = nearby.actors }
+    Bug #8779: Lua: addSkillLevelUpHandler does not work properly with skills that reached maximum level
+    Feature #8725: Lua: Expose localized cell names
+    Feature #8731: Use Hand to Hand Hit 2 sound
+    Feature #8788: Dehardcode script settings window font and colors
+    Task #8718: Lua: Cell fields can still return empty strings instead of nil values
 
 0.50.0
 ------
