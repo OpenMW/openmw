@@ -11,6 +11,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
 
@@ -305,6 +306,11 @@ namespace Terrain
                 defineMap["parallax"] = parallax ? "1" : "0";
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
+                // Terrain deformation support
+                bool terrainDeform = Settings::shaders().mTerrainDeformation;
+                bool terrainDeformTess = terrainDeform && Settings::shaders().mTerrainDeformationTessellation;
+                defineMap["terrainDeformation"] = terrainDeform ? "1" : "0";
+                defineMap["terrainDeformTess"] = terrainDeformTess ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
                 stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
