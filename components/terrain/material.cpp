@@ -209,12 +209,14 @@ namespace
         osg::ref_ptr<osg::Uniform> mBlendMap;
         osg::ref_ptr<osg::Uniform> mNormalMap;
         osg::ref_ptr<osg::Uniform> mColorMode;
+        osg::ref_ptr<osg::Uniform> mTerrainDeformationMap;
 
         UniformCollection()
             : mDiffuseMap(new osg::Uniform("diffuseMap", 0))
             , mBlendMap(new osg::Uniform("blendMap", 1))
             , mNormalMap(new osg::Uniform("normalMap", 2))
             , mColorMode(new osg::Uniform("colorMode", 2))
+            , mTerrainDeformationMap(new osg::Uniform("terrainDeformationMap", 3))
         {
         }
     };
@@ -309,6 +311,24 @@ namespace Terrain
 
                 stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
                 stateset->addUniform(UniformCollection::value().mColorMode);
+
+                // Add terrain deformation uniforms if enabled
+                if (terrainDeform)
+                {
+                    stateset->addUniform(UniformCollection::value().mTerrainDeformationMap);
+                    stateset->addUniform(new osg::Uniform("deformationOffset", osg::Vec2f(0.f, 0.f)));
+                    stateset->addUniform(new osg::Uniform("deformationScale", 2560.f)); // sRTTSize * sWorldScaleFactor = 1024 * 2.5
+                    stateset->addUniform(new osg::Uniform("materialType", 0));
+                    stateset->addUniform(new osg::Uniform("maxDisplacementDepth", Settings::shaders().mTerrainDeformationMaxDepth.get()));
+
+                    // Tessellation-specific uniforms
+                    if (terrainDeformTess)
+                    {
+                        stateset->addUniform(new osg::Uniform("eyePos", osg::Vec3f(0.f, 0.f, 0.f)));
+                        stateset->addUniform(new osg::Uniform("baseTessLevel", Settings::shaders().mTerrainDeformationTessBaseLevel.get()));
+                        stateset->addUniform(new osg::Uniform("maxTessLevel", Settings::shaders().mTerrainDeformationTessMaxLevel.get()));
+                    }
+                }
             }
             else
             {

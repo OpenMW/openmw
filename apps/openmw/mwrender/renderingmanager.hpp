@@ -88,6 +88,7 @@ namespace MWRender
     class StateUpdater;
     class SharedUniformStateUpdater;
     class PerViewUniformStateUpdater;
+    class TerrainDeformationStateSetUpdater;
     class IntersectionVisitorWithIgnoreList;
 
     class EffectManager;
@@ -339,6 +340,7 @@ namespace MWRender
         osg::ref_ptr<StateUpdater> mStateUpdater;
         osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;
         osg::ref_ptr<PerViewUniformStateUpdater> mPerViewUniformStateUpdater;
+        osg::ref_ptr<TerrainDeformationStateSetUpdater> mTerrainDeformationStateSetUpdater;
 
         osg::Vec4f mAmbientColor;
         float mNightEyeFactor;
