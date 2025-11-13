@@ -98,6 +98,7 @@ namespace MWRender
     class Pathgrid;
     class Camera;
     class Water;
+    class TerrainDeformation;
     class TerrainStorage;
     class LandManager;
     class NavMesh;
@@ -320,6 +321,7 @@ namespace MWRender
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
+        std::unique_ptr<TerrainDeformation> mTerrainDeformation;
         std::unordered_map<ESM::RefId, WorldspaceChunkMgr> mWorldspaceChunks;
         Terrain::World* mTerrain;
         std::unique_ptr<TerrainStorage> mTerrainStorage;

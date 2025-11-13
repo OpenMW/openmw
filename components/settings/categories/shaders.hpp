@@ -30,6 +30,16 @@ namespace Settings
         SettingValue<std::string> mNormalHeightMapPattern{ mIndex, "Shaders", "normal height map pattern" };
         SettingValue<std::string> mSpecularMapPattern{ mIndex, "Shaders", "specular map pattern" };
         SettingValue<std::string> mTerrainSpecularMapPattern{ mIndex, "Shaders", "terrain specular map pattern" };
+        SettingValue<bool> mTerrainDeformation{ mIndex, "Shaders", "terrain deformation" };
+        SettingValue<bool> mTerrainDeformationTessellation{ mIndex, "Shaders", "terrain deformation tessellation" };
+        SettingValue<float> mTerrainDeformationTessBaseLevel{ mIndex, "Shaders", "terrain deformation tess base level",
+            makeClampSanitizerFloat(4, 16) };
+        SettingValue<float> mTerrainDeformationTessMaxLevel{ mIndex, "Shaders", "terrain deformation tess max level",
+            makeClampSanitizerFloat(16, 64) };
+        SettingValue<float> mTerrainDeformationMaxDepth{ mIndex, "Shaders", "terrain deformation max depth",
+            makeClampSanitizerFloat(10, 100) };
+        SettingValue<float> mTerrainDeformationDecayRate{ mIndex, "Shaders", "terrain deformation decay rate",
+            makeClampSanitizerFloat(0.90f, 0.999f) };
         SettingValue<bool> mApplyLightingToEnvironmentMaps{ mIndex, "Shaders", "apply lighting to environment maps" };
         SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
         SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
