@@ -248,6 +248,9 @@ namespace MWLua
         };
 
         npc["setWerewolf"] = [context](const Object& obj, bool werewolf) -> void {
+            if (dynamic_cast<const LObject*>(&obj) && !dynamic_cast<const SelfObject*>(&obj))
+                throw std::runtime_error("Local scripts can modify only self");
+
             const MWWorld::Ptr& ptr = obj.ptr();
             if (!ptr.getClass().isNpc())
                 throw std::runtime_error("NPC or Player expected");
