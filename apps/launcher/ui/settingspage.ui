@@ -183,6 +183,16 @@
            </property>
           </widget>
          </item>
+         <item row="14" column="0">
+          <widget class="QCheckBox" name="trainersTrainingSkillsModifiable">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Training prices & availability are based on modified skill levels. This enables the Training Exploit from vanilla Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Use modified skill levels for training</string>
+           </property>
+          </widget>
+         </item>
          <item row="6" column="1">
           <widget class="QCheckBox" name="canLootDuringDeathAnimationCheckBox">
            <property name="toolTip">

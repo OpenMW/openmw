@@ -116,7 +116,7 @@ namespace MWGui
         {
             const ESM::Skill* skill = skills[i].first;
             int price = static_cast<int>(
-                pcStats.getSkill(skill->mId).getBase() * gmst.find("iTrainingMod")->mValue.getInteger());
+                getPlayerSkillForTraining(pcStats, skill->mId) * gmst.find("iTrainingMod")->mValue.getInteger());
             price = std::max(1, price);
             price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
@@ -168,23 +168,25 @@ namespace MWGui
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+        float playerSkill = getPlayerSkillForTraining(pcStats, skill->mId);
 
-        int price = pcStats.getSkill(skill->mId).getBase()
+        int price = playerSkill
             * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
+        price = std::max(1, price);
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
         if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skill->mId)
-            <= pcStats.getSkill(skill->mId).getBase())
+            <= playerSkill)
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sServiceTrainingWords}");
             return;
         }
 
         // You can not train a skill above its governing attribute
-        if (pcStats.getSkill(skill->mId).getBase()
+        if (playerSkill
             >= pcStats.getAttribute(ESM::Attribute::indexToRefId(skill->mData.mAttribute)).getModified())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage17}");
@@ -233,6 +235,13 @@ namespace MWGui
         if (Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill)
             return stats.getSkill(id).getBase();
         return stats.getSkill(id).getModified();
+    }
+
+    float TrainingWindow::getPlayerSkillForTraining(const MWMechanics::NpcStats& stats, ESM::RefId id) const
+    {
+        if (Settings::game().mTrainersTrainingSkillsModifiable)
+            return stats.getSkill(id).getModified();
+        return stats.getSkill(id).getBase();
     }
 
     void TrainingWindow::onFrame(float dt)

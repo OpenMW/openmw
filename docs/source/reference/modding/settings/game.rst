@@ -388,6 +388,19 @@ Game Settings
    If enabled then the 3 best skills of trainers and the training limits are based on the trainer base skills.
 
 .. omw-setting::
+   :title: use modified skill levels for training
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Gameplay`
+
+   When enabled, a trainer will base prices on modified player skill levels, instead of base skill levels.
+
+   This allows the player to adjust training prices and availability using Drain/Fortify skill magic.
+
+   This re-implements the Training Exploit from vanilla Morrowind.
+
+.. omw-setting::
    :title: always allow stealing from knocked out actors
    :type: boolean
    :range: true, false

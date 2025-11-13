@@ -63,6 +63,8 @@ namespace Settings
         SettingValue<float> mSwimUpwardCoef{ mIndex, "Game", "swim upward coef", makeClampSanitizerFloat(-1, 1) };
         SettingValue<bool> mTrainersTrainingSkillsBasedOnBaseSkill{ mIndex, "Game",
             "trainers training skills based on base skill" };
+        SettingValue<bool> mTrainersTrainingSkillsModifiable{ mIndex, "Game",
+            "use modified skill levels for training" };
         SettingValue<bool> mAlwaysAllowStealingFromKnockedOutActors{ mIndex, "Game",
             "always allow stealing from knocked out actors" };
         SettingValue<bool> mGraphicHerbalism{ mIndex, "Game", "graphic herbalism" };
