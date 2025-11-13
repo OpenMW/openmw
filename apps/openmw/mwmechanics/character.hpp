@@ -198,6 +198,8 @@ namespace MWMechanics
         bool mIsMovingBackward{ false };
         osg::Vec2f mSmoothedSpeed;
 
+        float mTimeSinceLastFootprint{ 0.f };
+
         std::string_view getMovementBasedAttackType() const;
 
         void clearStateAnimation(std::string& anim) const;
