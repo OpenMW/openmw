@@ -1,0 +1,724 @@
+uniform_int AoQuality
+{
+    header = "General";
+    default = 2;
+    min = 0;
+    max = 2;
+    display_name = "AO Quality";
+    description = "0 = HBAO (medium)\n1 = HBAO (high)\n2 = GTAO";
+}
+
+uniform_float AoIntensity
+{
+    default = 1.00;
+    min = 0.1;
+    max = 2.0;
+    step = 0.05;
+    display_name = "AO Intensity";
+    description = "Articial intensity multiplier. High values can result in various issues. (1.0 is the correct physical value)";
+}
+
+uniform_bool MultiBounce
+{
+    default = true;
+    display_name = "AO Colored Multi Bounce";
+    description = "Light bouncing approximation for more realistic AO. If you prefer only dark grey AO, then deactivate this";
+}
+
+uniform_bool FeatherEdges
+{
+    default = false;
+    display_name = "AO Feather Edges";
+    description = "Reduces AO at the edges of the screen to hide inherent screen-space limitations";
+}
+
+uniform_float HbaoThreshold
+{
+    default = 0.020;
+    min = 0.0;
+    max = 0.5;
+    step = 0.005;
+    display_name = "AO Threshold";
+    description = "Threshold for AO result. Values lower than this will be trated as no AO, useful for getting rid of random pixels that weren't denoised";
+}
+
+uniform_float BlurFalloff
+{
+    header = "Debug";
+    default = 0.010;
+    min = 0.001;
+    max = 0.05;
+    step = 0.001;
+    display_name = "Blur Falloff";
+    description = "Blur depth falloff, more means a larger depth range is blurred.";
+}
+
+uniform_float blur_radius
+{
+    default = 4.0;
+    min = 4.0;
+    max = 20.0;
+    step = 4.0;
+    display_name = "Blur Radius";
+    description = "Blur radius/intensity in pixels";
+}
+
+shared
+{
+    // Portability
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define int2 ivec2
+    #define float3x3 mat3
+    #define rsqrt inversesqrt
+    #define saturate(x) clamp(x, 0.0f, 1.0f)
+
+    #define PI      3.1415926535897932384626433832795
+    #define PI_HALF 1.5707963267948966192313216916398
+
+    const float DepthScale = 10000.0f;
+    const float InvDepthScale = 1.0f / DepthScale;
+    float sky = min(omw.fogFar, min(omw.far, DepthScale));
+
+    float2 tanHalfFov = float2(1.0f / omw.projectionMatrix[0][0], 1.0f / omw.projectionMatrix[1][1]);
+
+    float3 FetchEyePos(float2 uv)
+    {
+        float depth = min(sky, omw_GetLinearDepth(uv));
+        float2 xy = (uv - 0.5f) * depth * tanHalfFov;
+        // float2 xy = (uv * 2.0f - 1.0f) * depth * tanHalfFov;
+        return float3(xy, depth);
+    }
+
+    float3 FetchEyePos(float2 uv, float depth)
+    {
+        uv = (uv - 0.5f) * depth * tanHalfFov;
+        // uv = (uv * 2.0f - 1.0f) * depth * tanHalfFov;
+        return float3(uv, depth);
+    }
+
+    #define BLUR_TAPS 8
+    float2 taps[8] = float2[]
+    (
+        float2(-0.694235, 0.492347),
+        float2(0.670432, 0.308053),
+        float2(0.301213, -0.731788),
+        float2(-0.423565, -0.394921),
+        float2(0.850387, -0.243694),
+        float2(-0.524881, 0.276152),
+        float2(0.206151, 0.819672),
+        float2(-0.824111, -0.263762) 
+    );
+    
+    #ifndef BLUR_TAPS
+        #define BLUR_TAPS 0
+    #endif
+}
+
+render_target RT_AO1
+{
+    width_ratio  = 1.0;
+    height_ratio = 1.0;
+    internal_format = rg16f;
+    source_type = float;
+    source_format = rg;
+    min_filter = linear;
+    mag_filter = linear;
+}
+
+render_target RT_AO2
+{
+    width_ratio  = 1.0;
+    height_ratio = 1.0;
+    internal_format = rg16f;
+    source_type = float;
+    source_format = rg;
+    min_filter = linear;
+    mag_filter = linear;
+}
+
+fragment ssao(target=RT_AO1)
+{
+    omw_In float2 omw_TexCoord;
+    
+    /*
+    HBAO by Louis Bavoil & Miguel Sainz.
+    */
+    
+    float InvLength(float2 v)
+    {
+        return rsqrt(dot(v, v));
+    }
+    
+    float Tangent(float3 P, float3 S)
+    {
+        return (P.z - S.z) * InvLength(S.xy - P.xy);
+    }
+    
+    float Length2(float3 v)
+    {
+        return dot(v, v);
+    }
+    
+    float3 MinDiff(float3 P, float3 Pr, float3 Pl)
+    {
+        float3 V1 = Pr - P;
+        float3 V2 = P - Pl;
+        return (Length2(V1) < Length2(V2)) ? V1 : V2;
+    }
+    
+    void ConstructDerivatives(out float3 dPdu, out float3 dPdv, float3 P)
+    {
+        float3 Pr, Pl, Pt, Pb;
+        
+        float2 uv = omw_TexCoord;
+        float4 depths;
+        depths.x = omw_GetLinearDepth(uv + float2(+omw.rcpResolution.x, 0.0f));
+        depths.y = omw_GetLinearDepth(uv + float2(-omw.rcpResolution.x, 0.0f));
+        depths.z = omw_GetLinearDepth(uv + float2(0.0f, +omw.rcpResolution.y));
+        depths.w = omw_GetLinearDepth(uv + float2(0.0f, -omw.rcpResolution.y));
+        
+        depths = min(float4(sky), depths);
+        
+        uv -= 0.5f;
+        Pr = float3((uv + float2(+omw.rcpResolution.x, 0)) * depths.x * tanHalfFov, depths.x);
+        Pl = float3((uv + float2(-omw.rcpResolution.x, 0)) * depths.y * tanHalfFov, depths.y);
+        Pt = float3((uv + float2(0, +omw.rcpResolution.y)) * depths.z * tanHalfFov, depths.z);
+        Pb = float3((uv + float2(0, -omw.rcpResolution.y)) * depths.w * tanHalfFov, depths.w);
+
+        // Pr = float3(((uv + float2(+omw.rcpResolution.x, 0)) * 2.0f - 1.0f) * depths.x * tanHalfFov, depths.x);
+        // Pl = float3(((uv + float2(-omw.rcpResolution.x, 0)) * 2.0f - 1.0f) * depths.y * tanHalfFov, depths.y);
+        // Pt = float3(((uv + float2(0, +omw.rcpResolution.y)) * 2.0f - 1.0f) * depths.z * tanHalfFov, depths.z);
+        // Pb = float3(((uv + float2(0, -omw.rcpResolution.y)) * 2.0f - 1.0f) * depths.w * tanHalfFov, depths.w);
+
+        dPdu = MinDiff(P, Pr, Pl);
+        dPdv = MinDiff(P, Pt, Pb) * (omw.resolution.y * omw.rcpResolution.x);
+    }
+    
+    float Falloff(float d2, float negativeInverseR2)
+    {
+        return d2 * negativeInverseR2 + 1.0f;
+    }
+    
+    float2 SnapUVOffset(float2 uv, float2 screenSize, float2 texelSize)
+    {
+        return floor(uv * screenSize + float2(0.5f)) * texelSize; // not all GLs have heard of round(), and even if they have it, the way they round is non-standard
+    }
+    
+    float TanToSin(float x)
+    {
+        return x * rsqrt(x*x + 1.0f);
+    }
+    
+    float3 TangentVector(float2 deltaUV, float3 dPdu, float3 dPdv)
+    {
+        return deltaUV.x * dPdu + deltaUV.y * dPdv;
+    }
+    
+    float Tangent(float3 T)
+    {
+        return -T.z * InvLength(T.xy);
+    }
+    
+    float BiasedTangent(float3 T, float tanAngleBias)
+    {
+        return Tangent(T) + tanAngleBias;
+    }
+    
+    float IntegrateOcclusion(float2 uv0,
+        float2 snapped_duv,
+        float3 P,
+        float3 dPdu,
+        float3 dPdv,
+        inout float4 bentNormal,
+        inout float tanH,
+        float tanAngleBias,
+        float R2,
+        float negativeInverseR2)
+    {
+        float ao = 0.0f;
+    
+        float3 T1 = TangentVector(snapped_duv, dPdu, dPdv);
+        float tanT = BiasedTangent(T1, tanAngleBias);
+        float sinT = TanToSin(tanT);
+    
+        float3 S = FetchEyePos(uv0 + snapped_duv).xyz;
+        float tanS = Tangent(P, S);
+        float d2 = Length2(S - P);
+
+        if ((d2 < R2) && (tanS > tanT))
+        {
+            float sinS = TanToSin(tanS);
+            ao = Falloff(d2, negativeInverseR2) * (sinS - sinT);
+            tanH = max(tanH, tanS);
+            // if (d2 > 0.0f)
+            // {
+                // bentNormal.xyz = (S - P) * inversesqrt(d2) * ao + bentNormal.xyz;
+                // bentNormal.a += ao;
+            // }
+        }
+    
+        return ao;
+    }
+    
+    float HorizonOcclusion(
+        inout float4 bentNormal,
+        float2 deltaUV,
+        float2 texelDeltaUV,
+        float2 uv0,
+        float3 P,
+        float numSteps,
+        float randstep,
+        float3 dPdu,
+        float3 dPdv,
+        float2 screenSize,
+        float2 texelSize,
+        float tanAngleBias,
+        float R2,
+        float negativeInverseR2)
+    {
+        float ao = 0.0f;
+    
+        float2 uv = uv0 + SnapUVOffset(randstep * deltaUV, screenSize, texelSize);
+    
+        deltaUV = SnapUVOffset(deltaUV, screenSize, texelSize);
+    
+        float3 T = TangentVector(deltaUV, dPdu, dPdv);
+        float tanH = BiasedTangent(T, tanAngleBias);
+    
+    #if 1
+        float2 snapped_duv = SnapUVOffset(randstep * deltaUV + texelDeltaUV, screenSize, texelSize);
+        ao = IntegrateOcclusion(uv0, snapped_duv, P, dPdu, dPdv, bentNormal, tanH, tanAngleBias, R2, negativeInverseR2);
+        --numSteps;
+    #endif
+    
+        float sinH = tanH / sqrt(1.0f + tanH*tanH);
+    
+        for (float j = 1; j <= numSteps; ++j)
+        {
+            uv += deltaUV;
+            float3 S = FetchEyePos(uv);
+            float tanS = Tangent(P, S);
+            float d2 = Length2(S - P);
+    
+            if ((d2 < R2) && (tanS > tanH))
+            {
+                float sinS = tanS / sqrt(1.0f + tanS*tanS);
+                float currentAO = Falloff(d2, negativeInverseR2) * (sinS - sinH);
+                ao += currentAO;
+                tanH = tanS;
+                sinH = sinS;
+                // if (d2 > 0.0f)
+                // {
+                    // bentNormal.xyz = (S - P) * inversesqrt(d2) * currentAO + bentNormal.xyz;
+                    // bentNormal.a += currentAO;
+                // }
+            }
+        }
+    
+        return ao;
+    }
+    
+    float2 RotateDirections(float2 Dir, float2 CosSin)
+    {
+        return float2(Dir.x*CosSin.x - Dir.y*CosSin.y,
+            Dir.x*CosSin.y + Dir.y*CosSin.x);
+    }
+    
+    void ComputeSteps(inout float2 step_size_uv, inout float numSteps, float ray_radius_pix, float rand, float initialNumSteps, float2 texelSize)
+    {
+        float maxRadiusPixels = (AoQuality == 0) ? 400.0f : 1000.0f;
+        numSteps = min(initialNumSteps, ray_radius_pix);
+    
+        float step_size_pix = ray_radius_pix / (numSteps + 1.0f);
+    
+        float maxNumSteps = maxRadiusPixels / step_size_pix;
+        if (maxNumSteps < numSteps)
+        {
+            numSteps = floor(maxNumSteps + rand);
+            numSteps = max(numSteps, 1);
+            step_size_pix = maxRadiusPixels / numSteps;
+        }
+    
+        step_size_uv = step_size_pix * texelSize;
+    }
+
+    /*
+    GTAO (Ground Truth Ambient Occlusion) by Jorge Jimenez et al
+    */
+
+    float FastAcos(float x)
+    {
+        float absX = abs(x);
+        float res = -0.156583f * absX + PI_HALF;
+        res *= sqrt(1.0f - absX);
+        return (x >= 0.0f) ? res : PI - res;
+    }
+    
+    float2 ComputeSliceDirection(float slice, float sliceCount, float randomOffset)
+    {
+        float phi = (slice + randomOffset) / sliceCount * PI;
+        return float2(cos(phi), -sin(phi));
+    }
+    
+    void FetchViewPositions(out float3 pos0, out float3 pos1, float2 uv, float2 offset, float3 P)
+    {
+        float2 depths;
+        depths.x = omw_GetLinearDepth(uv + offset);
+        depths.y = omw_GetLinearDepth(uv - offset);
+        
+        depths = min(float2(sky), depths);
+        
+        uv -= 0.5f;
+        pos0 = float3((uv + offset) * depths.x * tanHalfFov, depths.x) - P;
+        pos1 = float3((uv - offset) * depths.y * tanHalfFov, depths.y) - P;
+        
+        // pos0 = float3(((uv + offset) * 2.0 - 1.0) * depths.x * tanHalfFov, depths.x) - P;
+        // pos1 = float3(((uv - offset) * 2.0 - 1.0) * depths.y * tanHalfFov, depths.y) - P;
+    }
+
+    void main()
+    {
+        float2 outputColor = float2(0.0f, 1.0f);
+        float3 random;// = omw_Texture2D(noise, omw_TexCoord * omw.resolution / 32.0f).xyz * 2.0f - 1.0f;
+        // random *= HbaoRandomMultiplier;
+
+        float3 P = FetchEyePos(omw_TexCoord);
+        if (P.z <= 0.0f || P.z >= sky)
+        {
+            omw_FragColor.rg = outputColor;
+            return;
+        }
+
+        const float randSize = 32.0f;
+        random.xy = floor(omw_TexCoord * omw.resolution);
+        float dirAngle = randSize * mod(floor(random.x + random.y), randSize) + mod(floor(random.x), randSize);
+        random.xy = float2(cos(dirAngle), sin(dirAngle));
+            
+        if (AoQuality < 2)
+        {
+            random.z = cos(dirAngle + random.x + random.y) * 0.5f + 0.5f;
+            random.xy *= 0.5f;
+            // random.xy *= smoothstep(50.0f, 100.0f, P.z) * 0.5f + 0.5f;
+        }
+
+        float R2 = 50.0f;//HbaoQuality > 0 ? 50.0f : HbaoRadius;//HbaoQuality > 0 ? HbaoR : HbaoR * 0.52f; // not yet R^2
+        // R2 *= clamp(P.z / 50.0f, 0.4f, 1.0f);
+        
+        float HbaoFocalLen = tanHalfFov.x;
+        float ray_radius_uv = 0.5f * R2 * HbaoFocalLen / P.z;
+        float ray_radius_pix = ray_radius_uv * omw.resolution.x;
+
+        if (ray_radius_pix < 1.0f)
+        {
+            omw_FragColor.rg = outputColor;
+            return;
+        }
+
+        float noDirections = float(AoQuality == 0 ? 2 : 3);
+        float noSteps      = float(AoQuality == 0 ? 2 : 3);
+
+        float numSteps;
+        float2 step_size;
+        ComputeSteps(step_size, numSteps, ray_radius_pix, random.z, noSteps, omw.rcpResolution);
+
+        float3 dPdu, dPdv;
+        ConstructDerivatives(dPdu, dPdv, P);
+
+        float ao = 0.0f;
+        float4 bentNormal = float4(0.0f);
+    
+        if (AoQuality < 2)
+        {
+            R2 *= R2;
+            float NegativeInverseR2 = -1.0f / R2;
+            float d;
+            float alpha = 2.0f * PI / noDirections;
+            float angleBias = AoQuality == 0 ? 0.175f : 0.275f;
+    
+            for (d = 0; d < noDirections; d++)
+            {
+                float angle = alpha * d;
+                float2 dir = RotateDirections(float2(cos(angle), sin(angle)), random.xy);
+                float2 deltaUV = dir * step_size.xy;
+                float2 texelDeltaUV = dir * omw.rcpResolution;
+                ao += HorizonOcclusion(bentNormal, deltaUV, texelDeltaUV, omw_TexCoord, P, numSteps, random.z, dPdu, dPdv,
+                    omw.resolution,
+                    omw.rcpResolution,
+                    angleBias,
+                    R2,
+                    NegativeInverseR2);
+            }
+            
+            ao = saturate(ao / noDirections);
+            // if (bentNormal.a > 0.0f)
+            // {
+                // bentNormal.a = dot(bentNormal.xyz, bentNormal.xyz);
+                // bentNormal.xyz *= inversesqrt(bentNormal.a);
+            // }
+            // else
+                // bentNormal.xyz = normalize(cross(dPdv, dPdu));
+        }
+        else
+        {
+            // GTAO
+            const float sliceCount       = 3.0f;
+            const float stepsPerSlice    = 3.0f;
+            const float invStepsPerSlice = 1.0f / stepsPerSlice;
+            
+            const float radiusPix = 60.0f;
+            const float dMul = -1.0f / (radiusPix * 0.4f);
+            const float dAdd = -dMul * radiusPix * 0.6f + 1;
+            
+            float radiusTex = radiusPix / abs(P.z * omw.rcpResolution.x);
+            float bias = 1.0f / radiusTex;
+            if (bias > 1.0f)
+            {
+                omw_FragColor.rg = outputColor;
+                return;
+            }
+
+            dPdu = cross(dPdv, dPdu);
+            numSteps = dot(dPdu, dPdu);
+            if (numSteps > 0.0f)
+                dPdu *= inversesqrt(numSteps); 
+            
+            // float3 dPdv = omw_GetNormals(omw_TexCoord);
+            // #if !defined(OMW_API_VERSION)
+                // dPdv = float3x3(omw.viewMatrix) * dPdv;
+            // #endif // defined(OMW_API_VERSION)
+
+            // float similarity = saturate(dot(dPdu, dPdv));
+            // similarity = smoothstep(0.7f, 0.9f, similarity) - 2.0f * distance(length(dPdv), 1.0f);
+            // dPdu = mix(dPdu, dPdv, similarity);//saturate(max(similarity, worldDistance * 0.001f)));
+            // similarity = length(dPdu);
+            // dPdu = similarity > 0.0f ? dPdu / similarity : float3(0.0f);
+
+            float3 viewDir = normalize(-P);
+            
+            for (float sliceIdx = 0; sliceIdx < sliceCount; sliceIdx++)
+            {
+                float2 sliceDir = ComputeSliceDirection(sliceIdx, sliceCount, random.x);
+                float2 omega = sliceDir * radiusTex;
+                
+                float3 direction = float3(sliceDir.x, -sliceDir.y, 0.0f);
+                direction = direction - dot(direction, viewDir) * viewDir;
+                float3 axis = normalize(cross(direction, viewDir));
+                
+                axis = dPdu - axis * dot(dPdu, axis);
+                float projectedNormalLength = length(axis);
+                
+                float cosGamma = saturate(dot(axis, viewDir) / projectedNormalLength);
+                float n = sign(dot(direction, axis)) * FastAcos(cosGamma);
+                
+                float sinN = sin(n);
+                float initCos0 = -sinN;//cos(n + PI_HALF);
+                float initCos1 = +sinN;//cos(n - PI_HALF);
+                float hCos0 = initCos0;
+                float hCos1 = initCos1;
+                
+                for (float stepIdx = 0; stepIdx < stepsPerSlice; stepIdx++)
+                {
+                    float s = (stepIdx + random.y) * invStepsPerSlice;
+                    s = s * s + bias;
+                    
+                    float2 sOffset = floor(s * omega + 0.5f) * omw.rcpResolution;
+                    sOffset.y = -sOffset.y;
+                    
+                    float3 s0, s1;
+                    FetchViewPositions(s0, s1, omw_TexCoord, sOffset, P);
+                    
+                    float d0 = length(s0);
+                    float d1 = length(s1);
+                    
+                    s0 /= d0;
+                    s1 /= d1;
+
+                    hCos0 = max(hCos0, mix(initCos0, dot(s0, viewDir), saturate(d0 * dMul + dAdd)));
+                    hCos1 = max(hCos1, mix(initCos1, dot(s1, viewDir), saturate(d1 * dMul + dAdd)));
+                }
+                
+                float h0 = -FastAcos(hCos1);
+                float h1 =  FastAcos(hCos0);
+                
+                sinN *= 2.0f;
+                float integral0 = (h0 * sinN + cosGamma - cos(2.0f * h0 - n));
+                float integral1 = (h1 * sinN + cosGamma - cos(2.0f * h1 - n));
+                
+                float currentAO = projectedNormalLength * 0.25f * (integral0 + integral1);
+                ao += currentAO;
+                
+                // sinN = (h0 + h1) * 0.5f;
+                // omega = float2(cos(sinN), sin(sinN));
+                // direction = normalize(omega.x * axis + omega.y * viewDir);
+                // bentNormal.xyz = direction * currentAO + bentNormal.xyz;
+                // bentNormal.a += currentAO;
+            }
+            
+            ao = saturate(1.0f - ao / sliceCount);
+            
+            // if (bentNormal.a > 0.0f)
+            // {
+                // bentNormal.a = dot(bentNormal.xyz, bentNormal.xyz);
+                // bentNormal.xyz *= inversesqrt(bentNormal.a);
+            // }
+            // else
+                // bentNormal.xyz = dPdu;
+        }
+
+        ao *= smoothstep(DepthScale, DepthScale * 0.95f, P.z);
+        outputColor = float2(ao, P.z * InvDepthScale);
+        omw_FragColor.rg = outputColor;
+        
+        // float dbg = dot(bentNormal.xyz, -omw_GetNormals(omw_TexCoord)) * 0.5f + 0.5f;
+        // omw_FragColor = float4(dbg);
+    }
+}
+
+fragment filter(rt1=RT_AO1, target=RT_AO2)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        float2 total = omw_Texture2D(RT_AO1, omw_TexCoord).rg;
+        float depth = total.g;
+        float rev = blur_radius;
+        float amount = 1.0f;
+        float falloff = smoothstep(0.0f, 0.15f, depth) * 0.04f + 0.01f;
+        
+        for (int i = 0; i < BLUR_TAPS; i++)
+        {
+            float2 s_uv = omw_TexCoord + omw.rcpResolution * taps[i] * rev;
+            float4 s_data = omw_Texture2D(RT_AO1, s_uv).rgba;
+            float s_depth = s_data.g;
+            float weight = exp2(-abs(depth - s_depth) / depth / falloff);
+
+            amount += weight;
+            total.r += s_data.r * weight;
+        }
+
+        omw_FragColor.rg = float2(total.r / amount, depth);
+    }
+}
+
+fragment combine(rt1=RT_AO2)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        float4 scene = omw_GetLastShader(omw_TexCoord);
+        float4 result = float4(0.0f);
+
+        float invfogcov = 1.0f - omw_EstimateFogCoverageFromUV(omw_TexCoord);
+        if (invfogcov <= 0.0f)
+        {
+            omw_FragColor = float4(scene.rgb, 1.0f);
+            return;
+        }
+        
+        // don't want AO between water surface and objects
+        float3 worldPos = omw_GetWorldPosFromUV(omw_TexCoord);
+        bool isCameraAboveWater = omw.eyePos.z > omw.waterHeight;
+        if (!omw.isInterior)
+        {
+            if (isCameraAboveWater && worldPos.z - 1.0f - omw.eyePos.z / 500.0f <= omw.waterHeight
+                || !isCameraAboveWater && worldPos.z + 1.0f - omw.eyePos.z / 500.0f >= omw.waterHeight)
+            {
+                omw_FragColor = float4(scene.rgb, 1.0f);
+                return;
+            }
+        }
+
+        // Second blur!
+        float2 total = omw_Texture2D(RT_AO2, omw_TexCoord).rg;
+        float depth = total.g;
+        float rev = blur_radius * 2.0f;
+        float amount = 1.0f;
+        float falloff = smoothstep(0.0f, 0.15f, depth) * 0.04f + 0.01f;
+        
+        for (int i = 0; i < BLUR_TAPS; i++)
+        {
+            float2 s_uv = omw_TexCoord + omw.rcpResolution * taps[i] * rev;
+            float4 s_data = omw_Texture2D(RT_AO2, s_uv).rgba;
+            float s_depth = s_data.g;
+            float weight = exp2(-abs(depth - s_depth) / depth / falloff);
+
+            amount += weight;
+            total.r += s_data.r * weight;
+        }
+
+        // Retrieved blurred AO data
+        total.r /= amount;
+        result.r = total.r;
+        if (AoQuality < 2)
+        {
+            result.r -= HbaoThreshold;
+            result.r /= (1.0f - HbaoThreshold);
+        }
+        
+        if (FeatherEdges)
+        {
+            float2 margins = min(omw_TexCoord.xy, 1.0 - omw_TexCoord.xy);
+            float edgeDist = min(margins.x, margins.y);
+            float weight = smoothstep(-0.03, 0.03, edgeDist);
+            result.r *= weight;
+        }
+
+        // Multi bounce
+        float3 visibilityMultiBounce = float3(1.0f - saturate(result.r));
+        if (MultiBounce)
+        {
+            float3 x = visibilityMultiBounce;
+            float3 a =  2.0404 * scene.rgb - float3(0.3324);
+            float3 b = -4.7951 * scene.rgb + float3(0.6417);
+            float3 c =  2.7552 * scene.rgb + float3(0.6903);
+            visibilityMultiBounce = max(x, ((x * a + b) * x + c) * x);
+        }
+        
+        // Blitz
+        float lum = dot(scene.rgb, float3(0.2125, 0.7154, 0.0721));
+        const float width = 0.3;
+        const float sigma = 1.0;
+        const float threshold = 0.7; // configurable
+        float f = pow((1 - (min(1,max(0, lum - threshold + width))) / (2 * width)), sigma);
+        float f2 = omw.isInterior ? 1 : 
+            isCameraAboveWater ? smoothstep(omw.waterHeight + 1.0f, omw.waterHeight + 2.0f, worldPos.z)
+                               : smoothstep(omw.waterHeight - 1.0f, omw.waterHeight - 2.0f, worldPos.z)
+            ;
+        
+        float3 final = (invfogcov * AoIntensity * (float3(1) - visibilityMultiBounce) * f * f2);
+        // if (AoQuality == 0)
+            // final *= 1.30f; // renormalize the intensity by only switching the quality, instead of fiddling around with multiple settings
+        
+        float3 aoColor = omw.fogColor.rgb * (1.0f - invfogcov);
+
+        // scene.rgb += total.rgb * invfogcov;
+        result.rgb = mix(scene.rgb, aoColor, final);
+        // result.rgb += total.rgb * invfogcov;
+
+        // result.rgb += total.rgb * invfogcov * 0.1f * visibilityMultiBounce;
+        omw_FragColor = float4(result.rgb, 1.0);
+        // omw_FragColor.rgb =  visibilityMultiBounce;
+        // omw_FragColor.rgb = total.rgb;
+        // omw_FragColor = float4(1.0f - saturate(result.a));
+        // omw_FragColor.rgb = float3(smoothstep(0.005f, 0.010f, falloff));
+        // if (result.a < 0)
+            // omw_FragColor = float4(0, 1, 0, 1);
+        // omw_FragColor = float4(float3(1.0f) - final, 1);
+        // omw_FragColor = float4(f);
+        // omw_FragColor = float4(depth);
+        // omw_FragColor = float4(smoothstep(2400, 4600, depth * DepthScale));
+    }
+}
+
+technique
+{
+    pass_normals = true;
+    passes = ssao, filter, combine;
+    description = "Horizon-Based Ambient Occlusion\nGround Truth Ambient Occlusion";
+    author = "Rafael";
+    version = "1.9";
+}

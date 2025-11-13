@@ -1,0 +1,569 @@
+uniform_float TemporalSharpness
+{
+    default = 0.7;
+    min = 0.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Temporal Filtering Sharpness";
+    description = "Defines how sharp or smooth the filtered image will be";
+}
+
+uniform_float TemporalFilteringIntensity
+{
+    default = 0.7;
+    min = 0.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Temporal Filtering Intensity";
+    description = "Minimizes flickering and other pixel instabilities over time (works only on OMW 0.49 or newer)";
+}
+
+uniform_float Intensity
+{
+    default = 1.0;
+    min = 0.0;
+    max = 3.0;
+    step = 0.025;
+    display_name = "Motion Blur Intensity";
+    description = "Intensity of the motion blur effect";
+}
+
+render_target RT_Accum
+{
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+    min_filter = nearest;
+    mag_filter = nearest;
+}
+
+render_target RT_PreviousColor
+{
+    internal_format = rgba;
+    source_type = byte;
+    source_format = rgba;
+    min_filter = linear;
+    mag_filter = linear;
+}
+
+render_target RT_PreviousDepth
+{
+    internal_format = r32f;
+    source_type = float;
+    source_format = red;
+    min_filter = nearest;
+    mag_filter = nearest;
+}
+
+render_target RT_PreviousProjection
+{
+    width   = 4;
+    height  = 1;
+    internal_format = rgba32f;
+    source_type = float;
+    source_format = rgba;
+    min_filter = nearest;
+    mag_filter = nearest;
+}
+
+shared
+{
+    // Portability
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define saturate(x) clamp(x, 0.0f, 1.0f)
+}
+
+vertex accum(rt1=RT_PreviousProjection)
+{
+    #if OMW_USE_BINDINGS
+        omw_In float2 omw_Vertex;
+    #endif
+
+    omw_Out float2 omw_TexCoord;
+    omw_Out mat4 PreviousProjectionMatrix;
+    
+    mat4 LoadPrevProjectionMatrix()
+    {
+    #if defined(OMW_API_VERSION)
+        vec4 col0 = texelFetch(RT_PreviousProjection, ivec2(0, 0), 0);
+        vec4 col1 = texelFetch(RT_PreviousProjection, ivec2(1, 0), 0);
+        vec4 col2 = texelFetch(RT_PreviousProjection, ivec2(2, 0), 0);
+        vec4 col3 = texelFetch(RT_PreviousProjection, ivec2(3, 0), 0);
+        return mat4(col0, col1, col2, col3);
+    #else
+        return omw.projectionMatrix;
+    #endif
+    }
+    
+    void main()
+    {
+        omw_Position = float4(omw_Vertex.xy, 0.0f, 1.0f);
+        omw_TexCoord = omw_Position.xy * 0.5f + 0.5f;
+
+        PreviousProjectionMatrix = LoadPrevProjectionMatrix();
+    }    
+}
+
+fragment accum(rt1=RT_PreviousProjection, rt2=RT_PreviousDepth, rt3=RT_PreviousColor, target=RT_Accum)
+{
+    omw_In float2 omw_TexCoord;
+    omw_In mat4 PreviousProjectionMatrix;
+    
+    float2 tanHalfFov = float2(1.0f / omw.projectionMatrix[0][0], 1.0f / omw.projectionMatrix[1][1]);
+
+    mat3 TransposeMatrix(mat3 m)
+    {
+        return mat3(
+            float3(m[0][0], m[1][0], m[2][0]),
+            float3(m[0][1], m[1][1], m[2][1]),
+            float3(m[0][2], m[1][2], m[2][2])
+        );
+    }
+    
+    float Trace(mat3 m)
+    {
+        return m[0][0] + m[1][1] + m[2][2];
+    }
+    
+    float ReconstructViewZ(float depth)
+    {
+#if (OMW_REVERSE_Z == 1)
+        return omw.near * omw.far / (omw.far + depth * (omw.near - omw.far));
+#else
+        return 2.0f * omw.near * omw.far / (omw.far + omw.near - depth * (omw.far - omw.near));
+#endif
+    }
+
+    float4 FilterHistory(float2 texCoord)
+    {
+        // return omw_Texture2D(RT_PreviousColor, texCoord).rgb;
+    
+        float2 position = omw.resolution * texCoord;
+        float2 centerPosition = floor(position - 0.5) + 0.5;
+        float2 f = position - centerPosition;
+        float2 f2 = f * f;
+        float2 f3 = f * f2;
+    
+        float c = 0.5f;
+        float2 w0 =        -c  * f3 +  2.0 * c         * f2 - c * f;
+        float2 w1 =  (2.0 - c) * f3 - (3.0 - c)        * f2         + 1.0;
+        float2 w2 = -(2.0 - c) * f3 + (3.0 -  2.0 * c) * f2 + c * f;
+        float2 w3 =         c  * f3 -                c * f2;
+    
+        float2 w12 = w1 + w2;
+        float2 tc12 = omw.rcpResolution * (centerPosition + w2 / w12);
+        float3 centerColor = omw_Texture2D(RT_PreviousColor, float2(tc12.x, tc12.y)).rgb;
+    
+        float2 tc0 = omw.rcpResolution * (centerPosition - 1.0);
+        float2 tc3 = omw.rcpResolution * (centerPosition + 2.0);
+        float4 color =  float4(omw_Texture2D(RT_PreviousColor, float2(tc12.x, tc0.y )).rgb, 1.0) * (w12.x * w0.y ) +
+                        float4(omw_Texture2D(RT_PreviousColor, float2(tc0.x,  tc12.y)).rgb, 1.0) * (w0.x  * w12.y) +
+                        float4(centerColor,                                      1.0)            * (w12.x * w12.y) +
+                        float4(omw_Texture2D(RT_PreviousColor, float2(tc3.x,  tc12.y)).rgb, 1.0) * (w3.x  * w12.y) +
+                        float4(omw_Texture2D(RT_PreviousColor, float2(tc12.x, tc3.y )).rgb, 1.0) * (w12.x * w3.y );
+        return color.rgba;// / (1.0f - color.a);
+        
+        // float2 pos = texCoord * omw.resolution - 0.5;
+        // float2 f   = fract(pos);
+        // float2 f2  = f * f;
+        // float2 f3  = f * f2;
+    
+        // const float c = 0.5;
+        // float2 w0 = -c   * f3 + 2.0*c * f2 - c * f;
+        // float2 w1 = (2.0-c)*f3 - (3.0 - c) * f2 + 1.0;
+        // float2 w2 = -(2.0-c)*f3 + (3.0 - 2.0*c)*f2 + c * f;
+        // float2 w3 = c * f3 - c * f2;
+    
+        // float2 wx = w0 + w1 + w2 + w3;
+        // float2 norm = float2(1.0f) / wx;
+    
+        // w0 *= norm; w1 *= norm; w2 *= norm; w3 *= norm;
+    
+        // float2 base = (floor(pos) + 0.5) * omw.rcpResolution;
+    
+        // float3 sum = float3(0);
+        // sum += omw_Texture2D(RT_PreviousColor, base + float2(-1,0) * omw.rcpResolution).rgb * w0.x;
+        // sum += omw_Texture2D(RT_PreviousColor, base + float2( 1,0) * omw.rcpResolution).rgb * w3.x;
+        // sum += omw_Texture2D(RT_PreviousColor, base + float2(0,-1) * omw.rcpResolution).rgb * w0.y;
+        // sum += omw_Texture2D(RT_PreviousColor, base + float2(0, 1) * omw.rcpResolution).rgb * w3.y;
+    
+        // float3 center = omw_Texture2D(RT_PreviousColor, base).rgb;
+        // sum += center * (w1.x + w2.x + w1.y + w2.y);
+    
+        // return sum;
+    }
+    
+    float3 FilterHistoryFilmic(
+        float3 prevCenter,
+        float3 currentNeighbors[4], // [N, W, E, S]
+        float3 currentCenter,
+        float2 texCoord)
+    {
+        float2 f = fract(texCoord * omw.resolution - 0.5);
+        
+        const float c = 0.5f;
+        float2 w = c * (f * f - f);
+    
+        float3 mixH = mix(currentNeighbors[1], currentNeighbors[2], f.x); // W-E
+        float3 mixV = mix(currentNeighbors[0], currentNeighbors[3], f.y); // N-S
+        
+        // float3 restored =
+            // prevCenter.rgb +
+            // w.x * (mixH - currentCenter) +
+            // w.y * (mixV - currentCenter);
+    
+        // return restored / (1.0 + w.x + w.y);
+        
+        float4 color = float4(mixH, 1.0) * w.x + float4(mixV, 1.0) * w.y;
+        color += float4((1.0 + color.a) * prevCenter.rgb - color.a * currentCenter, 1.0);
+        return color.rgb / color.a;
+    }
+
+    void main()
+    {
+        float decay = clamp(exp(-omw.deltaSimulationTime / 0.012f), 0.03f, 0.9f);
+        float historyStrength = omw.deltaSimulationTime < 0.0001f ? 0.0f : decay; // dbg 1.0f
+
+        mat3 deltaRotation = mat3(omw.viewMatrix) * TransposeMatrix(mat3(omw.prevViewMatrix));
+        float angle = clamp((Trace(deltaRotation) - 1.0f) * 0.5f, -1.0f, 1.0f);
+        angle = angle > 1.0f ? 0.0f : acos(angle);
+        angle = clamp(1.0f - angle / 0.5f, 0.0f, 1.0f);
+        historyStrength *= angle;
+
+        float3 currentColor = omw_GetLastShader(omw_TexCoord).rgb;
+
+        float prevDepth = omw_Texture2D(RT_PreviousDepth, omw_TexCoord).r;
+        float4 prevNDC = float4(omw_TexCoord * 2.0f - 1.0f, 
+                                #if (OMW_REVERSE_Z == 1)
+                                    (1.0f - prevDepth),
+                                #else
+                                    (prevDepth * 2.0f - 1.0f),
+                                #endif
+                                1.0f);
+    
+        float4 worldPos = inverse(PreviousProjectionMatrix * omw.prevViewMatrix) * prevNDC;
+        worldPos /= worldPos.w;
+    
+        float4 clipPos = omw.projectionMatrix * omw.viewMatrix * worldPos;
+        float2 uv2 = clipPos.xy / clipPos.w * 0.5f + 0.5f;
+    
+    #if defined(OMW_API_VERSION) // sadly this doesn't work for 0.48...
+        if (TemporalFilteringIntensity <= 0.0f || uv2.x < 0.0f || uv2.x > 1.0f || uv2.y < 0.0f || uv2.y > 1.0f)
+    #endif
+        {
+            omw_FragColor = float4(currentColor, 0.3f);
+            return;
+        }
+
+        float3 diagonals = float3(0.0f);
+        float3 neighborhoodMin = currentColor;
+        float3 neighborhoodMax = currentColor;
+        float3 m1 = float3(0.0f);
+        float3 m2 = float3(0.0f);
+        const float invTaps = 0.111111f;
+
+        const int dirIndexLUT[9] = int[](
+            -1,  0, -1, //   N
+             1, -1,  2, // W + E
+            -1,  3, -1  //   S
+        );
+        float3 neighborsFilmic[4]; // [N, W, E, S]
+        neighborsFilmic[0] = neighborsFilmic[1] = neighborsFilmic[2] = neighborsFilmic[3] = float3(0.0f);
+        
+        for (int dy = -1; dy <= 1; dy++)
+        {
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                float2 uv = float2(dx, dy) * omw.rcpResolution + omw_TexCoord;
+                float3 c = omw_GetLastPass(uv).rgb;
+        
+                neighborhoodMin = min(neighborhoodMin, c);
+                neighborhoodMax = max(neighborhoodMax, c);
+                diagonals += c;
+                m1 += c;
+                m2 += c * c;
+        
+                int lutIdx = dirIndexLUT[(dy + 1) * 3 + (dx + 1)];
+                if (lutIdx >= 0)
+                    neighborsFilmic[lutIdx] = c;
+            }
+        }
+
+        m1 *= invTaps;
+        float3 sigma = sqrt(max(float3(0.0f), m2 * invTaps - m1 * m1));
+
+        // filter
+        float4 prevColor;
+        // if (!TemporalFilmic)
+            // prevColor = FilterHistory(uv2);
+        // else
+        {
+            prevColor = omw_Texture2D(RT_PreviousColor, uv2);
+            prevColor.rgb = FilterHistoryFilmic(prevColor.rgb, neighborsFilmic, currentColor, uv2);
+        }
+
+        // prevColor.rgb = clamp(prevColor.rgb, neighborhoodMin, neighborhoodMax);
+        float clampMultiplier = mix(1.4f, 1.0f, prevColor.a); // 1.3f
+        neighborhoodMin = m1    -  clampMultiplier * sigma;
+        neighborhoodMax = sigma *  clampMultiplier + m1; // MAYBE dynamic based on a heuristic?
+        // prevColor.rgb = clamp(prevColor.rgb, neighborhoodMin, neighborhoodMax);
+        float3 boxCenter = 0.5f * (neighborhoodMax + neighborhoodMin);
+        float3 boxExtents = 0.5f * (neighborhoodMax - neighborhoodMin) + 0.0001f;
+        float3 v_offset = prevColor.rgb - boxCenter;
+        float3 v_unit = v_offset / boxExtents;
+        float maxUnit = max(abs(v_unit.x), max(abs(v_unit.y), abs(v_unit.z)));
+        if (maxUnit > 1.0f)
+            prevColor.rgb = boxCenter + v_offset / maxUnit;
+        
+        // omw_FragColor.rgb = prevColor.rgb; return;
+        
+        const float3 kLo = float3(1.0f);
+        const float3 kHi = float3(8.0f);
+        float3 wk = abs(diagonals * invTaps - currentColor);
+        float3 lf = saturate(1.0f / (0.0001f + mix(kLo, kHi, wk)));
+        
+        // float wkLuma = dot(wk, float3(0.299f, 0.587f, 0.114f));
+        // float wkLuma = dot(wk, float3(0.2126f, 0.7152f, 0.0722f));
+        // lf = float3(saturate(1.0f - wkLuma * 2.0f));
+        
+        // float wkLuma = dot(wk, float3(0.299f, 0.587f, 0.114f));
+        float wkLuma = dot(wk, float3(0.2126f, 0.7152f, 0.0722f));
+        // lf = float3(smoothstep(0.3f, 0.03f, wkLuma));
+        lf = float3(exp(-wkLuma * (1.0f - TemporalSharpness) * 10.0f)); // adjust by SMAA and prevColor.a ?
+        
+        // float contrast = length(wk); // or luminance(wk)
+        // float lf = clamp((contrast - 0.05f) / (0.15f), 0.0f, 1.0f); // map 0.05–0.2 to 0–1
+        // lf = smoothstep(0.0f, 1.0f, lf); // optional: smooth transition
+        // lf = 1.0f - lf; // so: low contrast -> high reuse
+        // lf = float3(0.0f);
+   
+        // float wkl = length(wk) * 3.0f;
+        float wkl = length(1.0f - lf);
+        float stc = saturate(1.0f - abs(wkl - prevColor.a) * 0.5f);
+        historyStrength = mix(1.0f - decay * 0.1f, historyStrength, stc);
+        // float2 currVelo = uv2 - omw_TexCoord;
+        // float2 prevVelo = float2(omw_Texture2D(RT_PreviousColor, omw_TexCoord).a);
+        // float acceleration = length(currVelo - prevVelo) * omw.resolution.x;
+        // float accelerationWeight = saturate(1.0f - acceleration * 0.5f);
+        // historyStrength *= accelerationWeight;
+
+        lf = min(float3(1.0f - decay), 1.0f - saturate(lf));
+      
+        // lf *= omw_Texture2D(RT_PreviousColor, uv2).a;
+        // lf = min(float3(1.0f - decay), 1.0f - saturate(lf));// * omw_Texture2D(RT_PreviousColor, uv2).a;
+        
+        float lumaPrev = dot(prevColor.rgb, float3(0.299f, 0.587f, 0.114f));
+        float lumaCurr = dot(currentColor, float3(0.299f, 0.587f, 0.114f));
+        float lumaContrast = 1.0f - saturate(abs(lumaCurr - lumaPrev) / max(0.2f, max(lumaCurr, lumaPrev)));
+        historyStrength *= lumaContrast;
+        
+        // float uvDelta = saturate(1.0f - length(omw_TexCoord - uv2) * 1.3f);
+        // float3 prevlf = lf;
+        // lf *= pow(uvDelta, 0.7f);
+        // omw_FragColor = float4((abs(lf - prevlf) * 5.0f), 1.0f); return;
+        
+        // blend
+        currentColor = mix(currentColor, prevColor.rgb, lf);
+        omw_FragColor.rgb = mix(currentColor, prevColor.rgb, TemporalFilteringIntensity * historyStrength);
+        omw_FragColor.a = dot(lf, float3(0.2126f, 0.7152f, 0.0722f));//length(lf);
+        // omw_FragColor.a = length(currVelo);
+        
+        // currentColor -= omw_FragColor.rgb;
+        // omw_FragColor.rgb = 2.5f * currentColor * sigma.rgb + omw_FragColor.rgb;
+        
+        // debug
+        // omw_FragColor = float4(wk, 1.0f);
+        // omw_FragColor = float4(float3(lf), 1.0f);
+        // omw_FragColor.rgb = 5.0f * abs(omw_FragColor.rgb - currentColor.rgb);
+        // omw_FragColor.rgb = sigma.rgb;
+        // omw_FragColor.rgb = float3(accelerationWeight);
+        // omw_FragColor.rgb = float3(lumaContrast);
+        // omw_FragColor.rgb = float3(abs(stc));
+        // omw_FragColor.rgb = PreviousProjectionMatrix[2].rgb - omw.projectionMatrix[2].rgb;
+        // omw_FragColor.rgb = float3(fract(omw.simulationTime));
+        return;
+    }
+}
+
+vertex blitz(rt1=RT_PreviousProjection)
+{
+    #if OMW_USE_BINDINGS
+        omw_In float2 omw_Vertex;
+    #endif
+
+    omw_Out float2 omw_TexCoord;
+    omw_Out mat4 PreviousProjectionMatrix;
+
+    mat4 LoadPrevProjectionMatrix()
+    {
+    #if defined(OMW_API_VERSION)
+        vec4 col0 = texelFetch(RT_PreviousProjection, ivec2(0, 0), 0);
+        vec4 col1 = texelFetch(RT_PreviousProjection, ivec2(1, 0), 0);
+        vec4 col2 = texelFetch(RT_PreviousProjection, ivec2(2, 0), 0);
+        vec4 col3 = texelFetch(RT_PreviousProjection, ivec2(3, 0), 0);
+        return mat4(col0, col1, col2, col3);
+    #else
+        return omw.projectionMatrix;
+    #endif
+    }
+    
+    void main()
+    {
+        omw_Position = float4(omw_Vertex.xy, 0.0f, 1.0f);
+        omw_TexCoord = omw_Position.xy * 0.5f + 0.5f;
+
+        PreviousProjectionMatrix = LoadPrevProjectionMatrix();
+    }    
+}
+
+fragment blitz(rt1=RT_PreviousProjection, rt2=RT_PreviousDepth, rt3=RT_Accum)
+{
+
+    omw_In float2 omw_TexCoord;
+    omw_In mat4 PreviousProjectionMatrix;
+    
+    float3 ReconstructWorldPos(float2 uv, float depth)
+    {
+        float4 ndc = float4(uv * 2.0f - 1.0f,
+            #if (OMW_REVERSE_Z == 1)
+                (1.0f - depth),
+            #else
+                (depth * 2.0f - 1.0f),
+            #endif
+            1.0f);
+        
+        float4 world = inverse(omw.projectionMatrix * omw.viewMatrix) * ndc;
+        return world.xyz / world.w;
+    }
+    
+    float2 ProjectToPrevUV(float3 worldPos)
+    {
+        float4 clip = PreviousProjectionMatrix * omw.prevViewMatrix * float4(worldPos, 1.0f);
+        float2 uv = clip.xy / clip.w * 0.5f + 0.5f;
+        return uv;
+    }
+
+    void main()
+    {
+        float edgeness = omw_Texture2D(RT_Accum, omw_TexCoord).a;
+        float currentDepth = omw_GetDepth(omw_TexCoord);
+        float4 currentNDC = float4(omw_TexCoord * 2.0f - 1.0f,
+                                #if (OMW_REVERSE_Z == 1)
+                                    (1.0f - currentDepth),
+                                #else
+                                    (currentDepth * 2.0f - 1.0f),
+                                #endif
+                                1.0f);
+        
+        float4 worldPos = inverse(omw.projectionMatrix * omw.viewMatrix) * currentNDC;
+        worldPos /= worldPos.w;
+        
+        float4 clipPos = PreviousProjectionMatrix * omw.prevViewMatrix * worldPos;
+        float2 uv2 = clipPos.xy / clipPos.w * 0.5f + 0.5f;
+        
+        float2 motion = uv2 - omw_TexCoord;
+        float motionLength = length(motion * omw.resolution);
+
+        float velocityScale = clamp(omw.deltaSimulationTime * 60.0f, 0.0f, 2.0f);
+        
+        float blurAmount = clamp(motionLength * velocityScale, 0.0f, 12.0f) * Intensity * edgeness * 1.5f;
+        float2 blurDir = motion;
+        float blurLength = length(motion);
+        if (blurLength > 0.0f)
+            blurDir /= blurLength;
+    
+        const float maxTexelSpacing = 10.0f; // texels
+        float2 maxStep = maxTexelSpacing * blurDir * omw.rcpResolution;
+        float2 blurStep = blurAmount * blurDir * omw.rcpResolution * 0.333f;
+        if (length(blurStep * omw.resolution) > maxTexelSpacing)
+            blurStep = maxStep;
+
+        float3 accum = omw_Texture2D(RT_Accum, omw_TexCoord).rgb;
+        float totalWeight = 1.0f;
+    
+        for (int i = -1; i <= 4; ++i)
+        {
+            float t = float(i) * 0.333f;
+            float2 offset = t * blurStep;
+            float2 sampleUV = omw_TexCoord + offset;
+
+            float weight = 1.0f - abs(t) * 0.333f;
+            float3 color = omw_Texture2D(RT_Accum, sampleUV).rgb;
+            accum += color * weight;
+            totalWeight += weight;
+        }
+    
+        accum /= totalWeight;
+        // accum = abs(acum - omw_Texture2D(RT_Accum, omw_TexCoord).rgb);
+        omw_FragColor = float4(accum, 1.0f);
+        
+        // omw_FragColor.rgb = float3(omw_TexCoord, omw_TexCoord.x * omw_TexCoord.y); // cardinal dir check!
+    }
+}
+
+fragment copyD(target=RT_PreviousDepth)
+{
+    omw_In float2 omw_TexCoord;
+    
+    void main()
+    {
+    #if !defined(OMW_API_VERSION)
+        discard;
+    #endif
+        omw_FragColor.r = omw_GetDepth(omw_TexCoord);
+    }
+}
+
+fragment copyC(target=RT_PreviousColor)
+{
+    omw_In float2 omw_TexCoord;
+    
+    void main()
+    {
+    #if !defined(OMW_API_VERSION)
+        discard;
+    #endif
+        omw_FragColor.rgba = omw_GetLastShader(omw_TexCoord).rgba;
+    }
+}
+
+fragment copyA(target=RT_PreviousColor, rt1=RT_Accum)
+{
+    omw_In float2 omw_TexCoord;
+    
+    void main()
+    {
+    #if !defined(OMW_API_VERSION)
+        discard;
+    #endif
+        omw_FragColor.rgba = omw_Texture2D(RT_Accum, omw_TexCoord).rgba;
+    }
+}
+
+fragment copyP(target=RT_PreviousProjection)
+{
+    omw_In float2 omw_TexCoord;
+    
+    void main()
+    {
+    #if !defined(OMW_API_VERSION)
+        discard;
+    #endif
+        int row = int(gl_FragCoord.x);
+        mat4 P = omw.projectionMatrix;
+        if (row == 0)      omw_FragColor = P[0];
+        else if (row == 1) omw_FragColor = P[1];
+        else if (row == 2) omw_FragColor = P[2];
+        else if (row == 3) omw_FragColor = P[3];
+    }
+}
+
+technique
+{
+    passes = accum, blitz, copyA, copyD, copyP;
+    description = "Spatiotemporal Multi Blend";
+    author = "Rafael";
+    version = "1.9";
+}

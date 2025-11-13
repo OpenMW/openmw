@@ -1,0 +1,174 @@
+uniform_float ZoomLevel
+{
+    header = "Control";
+    default = 0.0;
+    min = 0.0;
+    max = 10.0;
+    step = 0.25;
+    display_name = "Zoom Level";
+    description = "Level of zoom (as power of 2)";
+}
+
+uniform_float Brightness
+{
+    default = 0.0;
+    min = -1.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Brightness";
+    description = "Added brightness";
+}
+
+uniform_float Contrast
+{
+    default = 1.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.025;
+    display_name = "Contrast";
+    description = "Contrast control";
+}
+
+uniform_bool VisualizeNormals
+{
+    header = "Normals";
+    default = false;
+    display_name = "Visualize Normals";
+    description = "Displays normals";
+}
+
+uniform_bool NormalsWorldSpace
+{
+    default = true;
+    display_name = "Normals World Space";
+    description = "Displays normals in world space if enabled, and in view space otherwise";
+}
+
+uniform_bool ValidateNormals
+{
+    default = true;
+    display_name = "Normals Validation";
+    description = "Highlights suspicious normals:\nred - deviation from the geometric surface\npink - normals facing the wrong way";
+}
+
+uniform_bool VisualizeDepth
+{
+    header = "Depth";
+    default = false;
+    display_name = "Visualize Depth";
+    description = "Displays depth";
+}
+
+uniform_float DepthLevel
+{
+    default = -2.0;
+    min = -10.0;
+    max = 10.0;
+    step = 0.25;
+    display_name = "Depth Bias";
+    description = "Changes how depth values are shown for easier visualization";
+}
+
+render_target RT_Point
+{
+    min_filter = nearest;
+    mag_filter = nearest;
+}
+
+shared
+{
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define float3x3 mat3
+    #define saturate(x) clamp(x, 0.0f, 1.0f)
+}
+
+fragment one(target=RT_Point)
+{
+    omw_In vec2 omw_TexCoord;
+
+    float2 tanHalfFov = float2(1.0f / omw.projectionMatrix[0][0], 1.0f / omw.projectionMatrix[1][1]);
+
+    float3 ReconstructViewPos(float2 uv, float depth)
+    {
+        float2 xy = (uv * 2.0f - 1.0f) * depth * tanHalfFov;
+        return float3(xy, -depth);
+    }
+    
+    void main()
+    {
+        float4 color = omw_GetLastShader(omw_TexCoord);
+        
+        float depth = omw_GetLinearDepth(omw_TexCoord);
+        float3 normalVS = omw_GetNormals(omw_TexCoord);
+        float3 normalWS;
+        #if defined(OMW_API_VERSION)
+            normalWS = float3x3(omw.invViewMatrix) * normalVS;
+        #else
+            normalWS = normalVS;
+            normalVS = float3x3(omw.viewMatrix) * normalWS;
+        #endif // defined(OMW_API_VERSION)
+        
+        if (VisualizeNormals)
+            color.rgb = (NormalsWorldSpace ? normalWS : normalVS) * 0.5f + 0.5f;
+        
+        if (VisualizeDepth)
+        {
+            color.rgb = (omw_TexCoord.x >= (VisualizeNormals ? 0.5f : 0.0f)) ? 
+                float3(pow(depth / omw.far, pow(1.5f, DepthLevel))) 
+                : color.rgb;
+        }
+        
+        float3 viewDir = ReconstructViewPos(omw_TexCoord, depth);
+        float3 normalGeo = cross(dFdx(viewDir), dFdy(viewDir));
+        float len = length(normalGeo);
+        if (len > 0.0f)
+            normalGeo /= len;
+        
+        viewDir = normalize(-viewDir);
+        
+        if (ValidateNormals && depth < omw.far)
+        {
+            float pulse = 1.0 - fract(omw.simulationTime);
+            float normalLen = length(normalVS);
+            float3 normalShading = normalVS / normalLen;
+            float dotView = dot(viewDir, normalShading);
+            float dotGeo = dot(normalGeo, normalShading);
+            float geoLen = length(normalGeo);
+            float depthDX = dFdx(depth);
+            float depthDY = dFdy(depth);
+            float depthGradient = length(float2(depthDX, depthDY));
+            bool onEdge = depthGradient > 2.0;
+            bool geoReliable = geoLen > 0.01 && !onEdge;
+            bool backFacing = dotView < -0.1;
+            bool geoBad = geoReliable && (dotGeo < 0.5);
+            
+            if (backFacing && !onEdge)
+                color.rgb = float3(pulse, 0.0, pulse);
+            else if (geoBad)
+                color.rgb = float3(pulse, 0.0, 0.0);
+        }
+        
+        omw_FragColor = color;
+    }
+}
+
+fragment two(rt1=RT_Point)
+{
+    omw_In vec2 omw_TexCoord;
+
+    void main()
+    {
+        float4 color = omw_Texture2D(RT_Point, (omw_TexCoord - float2(0.5f)) / pow(2.0f, ZoomLevel) + float2(0.5f));
+        omw_FragColor = (color + Brightness - 0.5f) * Contrast + 0.5f;
+    }
+}
+
+technique
+{
+    passes = one, two;
+    description = "Advanced Debugger";
+    author = "Rafael";
+    version = "1.9";
+}

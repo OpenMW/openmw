@@ -1,0 +1,540 @@
+uniform_bool CausticsEnabled
+{
+    default = true;
+    display_name = "Enable Caustics";
+    description = "Enable caustics when underwater";
+}
+
+uniform_bool PhytoplanktonEnabled
+{
+    default = true;
+    display_name = "Enable Phytoplankton";
+    description = "Enable floating phytoplankton through the water";
+}
+
+uniform_bool BackscatterEnabled
+{
+    default = true;
+    display_name = "Enable Backscattering";
+    description = "Enable backscattering of light coming from underwater surfaces, making them easier to spot";
+}
+
+uniform_bool RaysEnabled
+{
+    default = true;
+    display_name = "Enable Light Rays";
+    description = "Enable underwater light rays";
+}
+
+uniform_bool WaterLightingEnabled
+{
+    default = true;
+    display_name = "Enable Water Lighting";
+    description = "Adds lighting to exterior water based on sun visibility and water depth";
+}
+
+uniform_bool InteriorFxEnabled
+{
+    default = true;
+    display_name = "Enable Interior Effects";
+    description = "Enable interior-specific effects";
+}
+
+uniform_float WaterColorR
+{
+    default = 0.015;
+    min = 0.0;
+    max = 1.0;
+    step = 0.004;
+    display_name = "Water Color Red";
+}
+
+uniform_float WaterColorG
+{
+    default = 0.115;
+    min = 0.0;
+    max = 1.0;
+    step = 0.004;
+    display_name = "Water Color Green";
+}
+
+uniform_float WaterColorB
+{
+    default = 0.145;
+    min = 0.0;
+    max = 1.0;
+    step = 0.004;
+    display_name = "Water Color Blue";
+}
+
+uniform_float DitheringStrength
+{
+    default = 1.0;
+    min = 0.0;
+    max = 5.0;
+    step = 0.125;
+    display_name = "Dithering Strength";
+    description = "Dithering strength to reduce color banding";
+}
+
+sampler_2d NoiseTex2D
+{
+    source = "textures/perlin2d.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_3d NoiseTex3D
+{
+    source = "textures/vaionoise3dw.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    wrap_r = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_3d water_nrm
+{
+    source = "textures/water_nrm.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    wrap_r = repeat;
+}
+
+shared
+{
+    // Portability
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define saturate(x) clamp(x, 0, 1)
+    
+    float3 WATER_COLOR_0 = float3(WaterColorR, WaterColorG, WaterColorB);
+    
+    float lf = (0.2 + 0.8*omw.sunVis) * (0.32*omw.sunColor.r + 0.47*omw.sunColor.g + 0.21*omw.sunColor.b);
+    const float4 lightcolour = float4(0.6, 0.91, 1.0, 0.0);
+
+    float3 toWorld(float2 tex)
+    {
+        float3 v = float3(omw.viewMatrix[0][2], omw.viewMatrix[1][2], omw.viewMatrix[2][2]);
+        v += float3(1.0/omw.projectionMatrix[0][0] * (2.0*(1.0 - tex.x)-1.0)) * float3(omw.viewMatrix[0][0], omw.viewMatrix[1][0], omw.viewMatrix[2][0]);
+        v += float3(-1.0/omw.projectionMatrix[1][1] * (2.0*tex.y-1.0)) * float3(omw.viewMatrix[0][1], omw.viewMatrix[1][1], omw.viewMatrix[2][1]);
+        return v;
+    }
+}
+
+fragment dive
+{
+    omw_In float2 omw_TexCoord;
+
+    float fetch(float3 tex, float uw)
+    {
+        float c = omw_Texture3D(water_nrm, float3(tex.xy / 3308, 0.22 * omw.simulationTime)).b;
+        return sqrt(sqrt(c)) * clamp(exp(tex.z/90.0), 0.0, 1.0) * clamp(1.0 + tex.z/uw, 0.0, 1.0);
+    }
+
+    float Hash3(vec3 p)
+    {
+        p += dot(p, vec3(0.7, 0.3, 0.5));
+        p = fract(p * vec3(0.3183099, 0.3678794, 0.6065307));
+        p = p * 17.0;
+        return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+    }
+    
+    float GetCausticEdge(vec3 P, vec3 normal)
+    {
+        P += sin(P * 0.9 + 1.7) * 0.125;
+        P += sin(P.yzx * 1.7 + 2.3) * 0.08;
+        vec3 Pi = floor(P);
+        vec3 Pf = fract(P);
+    
+        float best = 1.0;
+        float secondBest = 1.0;
+        float thirdBest = 1.0;
+    
+        for (int z = -1; z <= 1; z++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                for (int x = 0; x <= 1; x++)
+                {
+                    vec3 off = vec3(x - 0.5, y, z);
+                    vec3 cell = Pi + off;
+                    vec3 h = vec3(Hash3(cell), Hash3(cell.yzx), Hash3(cell.zxy));
+                    h = h * 2.0 - 1.0;
+                    vec3 jitter = normalize(vec3(h.x + best, h.y + h.z * 0.5 , h.z - h.x * 0.5)) * 0.5;
+                        
+                    vec3 site = off + jitter;
+                    float d = length(Pf - site);
+            
+                    if (d < best)
+                    {
+                        thirdBest = secondBest;
+                        secondBest = best;
+                        best = d;
+                    }
+                    else if (d < secondBest)
+                    {
+                        thirdBest = secondBest;
+                        secondBest = d;
+                    }
+                    else if (d < thirdBest)
+                    {
+                        thirdBest = d;
+                    }
+                }
+            }
+        }
+    
+        float edge = (secondBest - best) / 1.732;
+        float triEdge = (thirdBest - best) / 1.732;
+        float pinch = smoothstep(0.05, 0.8, triEdge);
+        return mix(edge, 1.0, pinch * 0.5);
+    }
+    
+    float ComputeCaustics(vec3 underwaterPos, float time, vec3 normal, bool isInterior)
+    {
+        const float SCALE    = 0.025;
+        const float FREQ     = 1.8;
+        const float WARP_AMT = 0.15 / SCALE * 0.04;
+        const float TMIN     = -.20;
+        const float TMAX     = 0.10;
+    
+        vec3 P = underwaterPos * SCALE;
+        float t = time * FREQ;
+        float t1 = t * 1.7;
+        float t2 = (t + 1.2) * 1.3;
+        float t3 = (t + 2.5) * 1.1;
+        
+        vec3 warpOffset;
+        warpOffset.x = sin(t1 + underwaterPos.y * 0.13) * cos(t2 + underwaterPos.z * 0.12);
+        warpOffset.y = sin(t2 + underwaterPos.z * 0.13) * cos(t3 + underwaterPos.x * 0.12);
+        warpOffset.z = sin(t3 + underwaterPos.x * 0.13) * cos(t1 + underwaterPos.y * 0.12);
+        warpOffset *= 0.4;
+        warpOffset.x += cos(t * 1.07);
+        warpOffset.y += sin(t * 1.13);
+        warpOffset.z += cos(t * 0.97);
+        
+        warpOffset += 0.25 * sin(P.yzx * 1.3 + t * 0.9);
+        
+        warpOffset += normal * 0.5;
+        // if (!isInterior)
+            // warpOffset.z -= time;
+    
+        float diff = GetCausticEdge(warpOffset * WARP_AMT + P, normal);
+    
+        float edge = smoothstep(TMIN, TMAX, diff);//clamp((diff - TMIN) / (TMAX - TMIN), 0.0, 1.0);
+        return 1.0 - edge;
+    }
+    
+    float InterleavedGradientNoise(float2 uv)
+    {
+        float noise = fract(52.9829189f * fract(0.06711056f * uv.x + 0.00583715f * uv.y));
+        // triangulate!
+        noise = noise * 2 - 1.0f;
+        return noise;
+    }
+    
+    float2 tanHalfFov = float2(1.0f / omw.projectionMatrix[0][0], 1.0f / omw.projectionMatrix[1][1]);
+    
+    float3 ReconstructViewPos(float2 tex)
+    {
+        float depth = omw_GetLinearDepth(tex);
+        float2 xy = (tex * 2.0f - 1.0f) * depth * tanHalfFov;
+        return float3(xy, -depth);
+    }
+    
+    float3 ReconstructWorldNormal(float2 uv)
+    {
+        float3 viewPos = ReconstructViewPos(uv);
+
+        float3 dx = dFdx(viewPos);
+        float3 dy = dFdy(viewPos);
+        
+        float3 viewNormal = cross(dx, dy);
+        float len2 = dot(viewNormal, viewNormal);
+        if (len2 > 0.0f)
+        {
+            viewNormal *= inversesqrt(len2);
+            
+            float3 worldNormal = mat3(omw.invViewMatrix) * viewNormal;
+            len2 = dot(worldNormal, worldNormal);
+            if (len2 > 0.0f)
+                return worldNormal * inversesqrt(len2);
+        }
+        
+        return float3(0.0f);
+    }
+    
+    float FogFar = min(omw.fogFar * 20.0f, omw.far);
+    float CalculateFog(float3 worldPosition, float3 direction, float worldDistance, float2 texCoord, float densityBlendFactor)
+    {
+        const float FogIntensity = 1.5f;
+        float fogAmount = 0.0f;
+        float fogSpeedWind = 5.0f;
+        
+        if (!omw.isInterior)
+        {
+            float dirLength = length(direction);
+            if (dirLength == 0 || FogIntensity == 0)
+                return 0.0f;
+
+            const float MaxFogDistance = 4000.0f;
+            float maxDistance = min(worldDistance, MaxFogDistance);
+
+            const int FogRaySteps = 32;
+            float rayStepLength = maxDistance / FogRaySteps;
+            float3 rayStep = normalize(direction) * rayStepLength;
+            float3 rayPos = omw.eyePos.xyz + rayStep * 0.5f;
+            float rayLength = rayStepLength * 0.5f;
+            // float wave = saturate(sin(omw.simulationTime * 0.5f) * 0.5f + 0.5f);
+
+            int i = 0;
+            float noise = 1;
+            float noiseHi = 1;
+            float noiseLo = 1;
+            float noiseHiPrev = 1;
+            float2 uv;
+            for (i = 0; i < FogRaySteps; i++)
+            {
+                noiseHiPrev = noiseHi;
+
+                noiseHi = omw_Texture3D(NoiseTex3D, rayPos.xyz * float3(1, 1, -1.17) 
+                    * 0.00014f - omw.simulationTime * fogSpeedWind * 0.002f).r;
+                
+                noiseHi = saturate(2.0 * (noiseHi - 0.5f) + 0.5f);
+                if (i < FogRaySteps - 1)
+                    noiseHi = mix(noiseHi, 0.5f, smoothstep(0.0f, 15000.0f, rayLength));
+                    
+                if (i % 2 == 0)
+                {
+                    uv = rayPos.xy + float2(noiseHi, noiseHiPrev) * 1900;
+                    noiseLo = 0.25f + 0.75f * omw_Texture2D(NoiseTex2D, uv
+                        * 0.00012f - omw.simulationTime * fogSpeedWind * 0.0021f).r; 
+                }
+                
+                // float noiseLo = omw_Texture3D(NoiseTex3D, rayPos.zxy
+                    // * 0.00021f - omw.simulationTime * fogSpeedWind * 0.003f).r;
+                    
+                noise = noiseLo * noiseHi;
+                // float noise = max(noiseLo, noiseHi);
+
+                rayPos += rayStep;
+                fogAmount += noise;
+                rayLength += rayStepLength;
+            }
+            fogAmount /= FogRaySteps;
+            
+            const int FogDistributionMethod = 1;
+            
+            if (FogDistributionMethod == 1)
+            {
+                float3 distanceTraveled = rayPos - omw.eyePos.xyz;
+                // distanceTraveled.z *= distanceTraveled.z < 0.0f ? 5.0f : 1.0f;
+                fogAmount *= sqrt(length(distanceTraveled)) * 0.019f;
+            }
+            else //if (FogDistributionMethod == 0)
+                fogAmount *= worldDistance * 0.0002f;
+            // else
+                // fogAmount *= log(worldDistance) * 0.15f;
+
+            float fogAdjustment = 0.5f;
+            fogAmount *= fogAdjustment;
+            // fogAmount = saturate(fogAmount);
+
+            if (FogDistributionMethod == 2) // classic beer-powder
+            {
+                fogAmount *= FogIntensity * 1.25f;
+                float f0 = 1.0f - exp(-fogAmount * 2.0f);
+                float f1 = exp(-fogAmount);
+                fogAmount = f0 * (1.0f - f1);
+            }
+            else
+            {
+                float f0 = 1.0f - exp(-fogAmount * FogIntensity * FogIntensity * 2.0f);
+                fogAmount = f0;
+                fogAmount *= smoothstep(-250, 250, worldDistance);
+            }
+        }
+        else
+        {
+            float intensityPow2 = 0.25f;//InteriorFogIntensity * InteriorFogIntensity;
+            fogAmount = 1.0f - exp(-abs(omw.eyePos.z - worldPosition.z) * 0.0005f * intensityPow2);
+            fogAmount = max(fogAmount, 1.0f - exp(-worldDistance * 0.0002f * intensityPow2));
+        }
+        
+        // fogAmount = saturate(fogAmount);
+
+        fogAmount = saturate(fogAmount * 1.77f);
+        return saturate(4.0 * (fogAmount - 0.5f) + 0.5f);
+    }
+    
+    float EstimateFogCoverage(float dist)
+    {    
+        if (dist >= FogFar)
+            return 1.0f; // Exponential Fog AND Distant Fog can screw things up
+
+        float fogNear = max(omw.fogNear * 0.05f, omw.fogNear);
+        dist = (dist - fogNear) / (omw.fogFar - fogNear);
+
+        return saturate(dist);
+    }
+    
+    void main()
+    {
+        //FIXME: wobble clamping
+        float2 wobble = 0.015 * (2 * omw_Texture3D(water_nrm, float3(omw_TexCoord, 0.2*omw.simulationTime)).rg - 1);
+        // wobble *= 1 - pow(2*omw_TexCoord - 1, float2(32));
+        wobble = floor(wobble * omw.resolution + 0.5f) * omw.rcpResolution;
+        wobble += omw_TexCoord;
+
+        float4 c = omw_GetLastPass(wobble);
+        // omw_FragColor = c; return;
+
+        float sunFade = saturate(omw.sunPos.z + 0.2f);
+        float3 worldPos = omw_GetWorldPosFromUV(wobble);
+        float d = distance(omw.eyePos.xyz, worldPos);
+        float3 nv = (worldPos - omw.eyePos.xyz) / max(0.001f, d);
+        if (worldPos.z > omw.waterHeight) // workaround for OMW depth buffer weirdness
+        {
+            float t = (omw.waterHeight - omw.eyePos.z) / nv.z;
+            worldPos = omw.eyePos.xyz + nv * t;
+            d = distance(omw.eyePos.xyz, worldPos);
+        }
+        float3 direction = (worldPos - omw.eyePos.xyz);
+
+        float actualWaterDepth = omw.waterHeight - worldPos.z;
+        float shoreFactor = smoothstep(2500.0, 250.0, d);//smoothstep(omw.far, 0.0, d);
+        float3 waterColor = WATER_COLOR_0 * (omw.isInterior ? 1.0 : shoreFactor * 0.6 + 0.8);
+        waterColor *= max(0.1f, saturate(omw.sunPos.z * 5.0f));
+        if (omw.isInterior)
+            waterColor *= max(float3(0.5f), omw.sunColor.rgb);
+
+        // Absorption
+        float3 SIGMA = 0.001196 * (1.0 - WATER_COLOR_0);
+        if (omw.isInterior || !WaterLightingEnabled)
+        {
+            float3 SIGMA = 0.002596 * (1.0 - WATER_COLOR_0);
+            c.rgb = mix(waterColor, c.rgb, min(float3(0.65f), exp(-SIGMA * d)));
+        }
+        else
+        {
+            float3 SIGMA = 0.0015 * (1.0 - WATER_COLOR_0 * 3.2f);
+            c.rgb = mix(waterColor * 2.2f, c.rgb, min(float3(0.75f), exp(-SIGMA * d)));
+        }
+
+        float3 worldNormal = ReconstructWorldNormal(wobble);
+        {
+            #if defined(OMW_API_VERSION)
+                float3 wnormal2 = omw_GetNormalsWorldSpace(wobble);
+            #else // defined(OMW_API_VERSION)
+                float3 wnormal2 = normalize(omw_GetNormals(wobble));
+            #endif // defined(OMW_API_VERSION)
+
+            float similarity = max(0.0f, dot(worldNormal, wnormal2));
+            similarity = smoothstep(0.8f, 0.95f, similarity);
+            worldNormal = mix(worldNormal, wnormal2, similarity);
+            similarity = length(worldNormal);
+            worldNormal = similarity > 0.0f ? worldNormal / similarity : float3(0.0f);
+            // omw_FragColor.rgb = worldNormal * 0.5f + float3(0.5f); return;
+        }
+
+        if (CausticsEnabled)
+        {
+            const float3 CAUSTICS_COLOR = float3(0.8f, 0.95f, 1.0f);
+            float causticDepth = 150.0f;//omw.isInterior ? 80.0f : 150.0f;
+            causticDepth = smoothstep(causticDepth, 0.0f, (causticDepth - actualWaterDepth));
+            c.rgb += exp(-actualWaterDepth * 0.0015f) * (omw.isInterior ? 0.3f : 0.7f) * saturate(worldNormal.z + 0.4f) * sqrt(dot(c.rgb, float3(0.2126f, 0.7152f, 0.0722f)) * sqrt(causticDepth)) * CAUSTICS_COLOR * clamp(sunFade * 1.5f - 0.1f, 0.0f, 1.0f) * ComputeCaustics(worldPos, omw.simulationTime, float3(0.0f, 0.0f, 1.0f), omw.isInterior);
+        }
+
+        // Reapply base fog, more as a "light penetrating the water" effect
+        float fogCov = EstimateFogCoverage(d);
+        if (!omw.isInterior && WaterLightingEnabled)
+        {
+            c.rgb = mix(c.rgb, WATER_COLOR_0 * 3.7f, fogCov * clamp(omw.sunVis * 4.0f, 0.15f, 1.0f) * exp((mix(worldPos.z, omw.eyePos.z, 0.5f) - omw.waterHeight) * 0.0006f));
+            // c.rgb = mix(c.rgb, WATER_COLOR_0 * 2.7f, max(fogCov, exp((mix(worldPos.z, omw.eyePos.z, 0.5f) - omw.waterHeight) * 0.0006f)) * clamp(omw.sunVis * 5.0f, 0.15f, 1.0f));
+        }
+        float fogFade = smoothstep(FogFar, FogFar * 0.8f, d);
+
+        if (PhytoplanktonEnabled)
+        {
+            float phytoplankton = CalculateFog(worldPos, direction, d, wobble, 1.0f);
+            c.rgb = saturate(c.rgb + float3(0.01, 0.04, 0.0) * 0.4f * phytoplankton * max(0.0f, omw.sunPos.z));
+            // omw_FragColor.rgb = float3(0.01, 0.04, 0.0) * 3.5f * phytoplankton; return;
+        }
+
+        if (RaysEnabled)
+        {
+            float3 v = -toWorld(wobble);
+            float3 e = float3(0.1, 0.1, 1.0) * omw.eyePos.xyz;
+            float2 r;
+            d = min(d, -omw.eyePos.z/max(1e-5, v.z));
+            float3 vn = v / length(v.xy);
+            r = -omw.sunPos.xy - v.xy * dot(-omw.sunPos.xy, vn.xy);
+
+            float3 shellpos = e + 800 * vn;
+            shellpos.xy += 0.8 * r * shellpos.z;
+
+            float rayz = fetch(shellpos, min(omw.eyePos.z, 400)) * clamp(d/800, 0.0, 1.0) * 0.294;
+
+            float3 shellpos2 = e + 1400 * vn;
+            shellpos2.xy += 1.0 * r * shellpos2.z;
+
+            rayz += fetch(shellpos2, 2*omw.eyePos.z) * clamp(d/800 - 1, 0.0, 1.0) * 0.132;
+
+            float3 shellpos3 = e + 2000 * vn;
+            shellpos3.xy += 1.2 * r * shellpos3.z;
+            rayz += fetch(shellpos3, 3*omw.eyePos.z) * clamp(d/800 - 2, 0.0, 1.0) * 0.065;
+
+            c += rayz * lf * lightcolour * smoothstep(1000.0f, 0.0f, distance(omw.eyePos.z, omw.waterHeight));
+        }
+
+        if (omw.isInterior && InteriorFxEnabled)
+        {
+            float k = 1 - omw_Texture3D(water_nrm, float3(worldPos.xy / 1783, 0.4 * omw.simulationTime)).b;
+            c *= 1 - 0.2 * step(worldPos.z, omw.waterHeight - 1) * clamp(exp((worldPos.z - omw.waterHeight)/100), 0.0, 1.0) * k;
+        }
+
+        if (BackscatterEnabled)
+        {
+            const float3 scatterTint = float3(0.03f, 0.06f, 0.08f);
+            float viewFactor = pow(clamp(dot(normalize(omw.eyePos.xyz - worldPos), worldNormal), 0.0, 1.0), 2.0);
+            float scatterAmount = 1.0f - exp(-actualWaterDepth * 0.001f);
+            if (omw.isInterior)
+                scatterAmount *= 0.25f * length(max(float3(0.2f), omw.sunColor.rgb));
+            else
+                scatterAmount *= 0.55f - 0.35f * saturate(omw.sunVis * 5.0f);
+
+            c.rgb += scatterTint * viewFactor * scatterAmount * fogFade * smoothstep(-1.5f, 0.5f, omw.sunPos.z);
+            // omw_FragColor.rgb = 10.0f * scatterTint * viewFactor * scatterAmount * fogFade; return;
+            // omw_FragColor.rgb = worldNormal * 0.5f + float3(0.5f); return;
+        }
+
+        float3 noise;
+        noise.r = noise.b = 1.4f * (InterleavedGradientNoise(omw_TexCoord * omw.resolution) * DitheringStrength / 255.0f);
+        noise.g = -noise.r;
+        
+        omw_FragColor = float4(c.rgb + noise, c.a);
+    }
+}
+
+technique
+{
+    passes = dive;
+    description = "Dive In Volumetric Effects";
+    author = "Rafael, Hrnchamd";
+    version = "1.9";
+    pass_normals = true;
+    flags = Disable_AboveWater;
+}

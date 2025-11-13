@@ -1,0 +1,2331 @@
+uniform_bool FogEnabled
+{
+    header = "Fog";
+    default = true;
+    display_name = "Enable Fog";
+    description = "Enable volumetric fog effects (used by basically all other effects in VAIO)";
+}
+
+uniform_bool AtmosphericFogEnabled
+{
+    default = true;
+    display_name = "! Enable Atmospheric Fog";
+    description = "Enable volumetric fog in the atmosphere, disabling this will automatically disable clouds and sky rendering (can cause some minor blending issues in dense fog for some transparent objects due to OMW limitations)";
+}
+
+uniform_bool DynamicFogAdjustment
+{
+    default = true;
+    display_name = "Enable Dynamic Adjustment";
+    description = "Adjusts volumetric fog parameters automatically based on weather and time of day";
+}
+
+uniform_bool DynamicAtmosphericFogAdjustment
+{
+    default = true;
+    display_name = "Enable Dynamic Atmospheric Fog";
+    description = "Adjusts atmospheric fog parameters automatically based on weather";
+}
+
+uniform_float DynamicFogSunFactor
+{
+    default = 1.0;
+    min = 0.0;
+    max = 1.0;
+    step = 0.05;
+    display_name = "Dynamic Sunrise Factor";
+    description = "Determines how much more fog is added to sunrises. Set to 0 for no extra fog";
+}
+
+uniform_float FogIntensity
+{
+    default = 0.50;
+    min = 0.0;
+    max = 1.0;
+    step = 0.01;
+    display_name = "Exterior Fog Intensity";
+    description = "Exterior fog intensity (high values might create issues)";
+}
+
+uniform_float InteriorFogIntensity
+{
+    default = 0.50;
+    min = 0.0;
+    max = 5.0;
+    step = 0.05;
+    display_name = "Interior Fog Intensity";
+    description = "Interior fog intensity";
+}
+
+uniform_float FogSpeed
+{
+    default = 5.0;
+    min = 0.0;
+    max = 25.0;
+    step = 0.25;
+    display_name = "Fog Speed";
+    description = "The speed at which the volumetric fog moves";
+}
+
+uniform_float FogScattering
+{
+    default = 1.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.05;
+    display_name = "Fog Scattering";
+    description = "Amount of Mie and Rayleigh scattering applied to the exterior fog (values above 1.0 are unrealistic and can break the mixing with the real fog)";
+}
+
+uniform_float FogHeightBasedMultiplier
+{
+    default = 5.0;
+    min = 1.0;
+    max = 20.0;
+    step = 0.4;
+    display_name = "Fog Height-based Multiplier";
+    description = "Multiplier of fog density based on height, used to get more foggy valleys and the like";
+}
+
+uniform_int FogDistance
+{
+    default = 750;
+    min = 0;
+    max = 8000;
+    step = 125;
+    display_name = "Fog Distance";
+    description = "The distance at which the fog is allowed to be full density (lower values brings fog closer, and higher values push the fog farther away";
+}
+
+uniform_float FogStampIntensity
+{
+    default = 0.350;
+    min = 0.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Fog Stamping Intensity";
+    description = "Intensity of fog stamp (the effect to the ground with another texture, making it more flat and random-looking)";
+}
+
+uniform_float FogStampContrast
+{
+    default = 1.4;
+    min = 1.0;
+    max = 2.0;
+    step = 0.05;
+    display_name = "Fog Stamping Contrast";
+    description = "Contrasts the stamp fog between the less and the more saturated pixels";
+}
+
+uniform_bool LightsEnabled
+{
+    header = "Lights";
+    default = true;
+    display_name = "Enable Lights";
+    description = "Enable glow effect surrounding lights";
+}
+
+uniform_float LightsIntensity
+{
+    default = 0.200;
+    min = 0.025;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Lights Intensity";
+    description = "Intensity of glow effect surounding lights";
+}
+
+uniform_float LightsIntensityInteriorMultiplier
+{
+    default = 0.500;
+    min = 0.0;
+    max = 1.0;
+    step = 0.05;
+    display_name = "Interior Lights Intensity Multiplier";
+    description = "Multiplier for the interior intensity of glow effect surrounding lights";
+}
+
+uniform_float LightsFadeDistanceEnd
+{
+    default = 13000;
+    min = 125;
+    max = 30000;
+    step = 125;
+    display_name = "Lights Fade Distance";
+    description = "Distance at which glow effect disappears completely (lights can disappear earlier if the game culls them)";
+}
+
+uniform_bool CloudsEnabled
+{
+    header = "Clouds";
+    default = false;
+    display_name = "! Enable Clouds";
+    description = "Enable volumetric clouds effects (best used with the Transparent Postpass option in the launcher, to fix most blending issues between transparent objects and the clouds)";
+}
+
+uniform_float CloudsSpeed
+{
+    default = 7.0;
+    min = 0.0;
+    max = 50.0;
+    step = 0.350;
+    display_name = "Clouds Speed";
+    description = "The speed at which the volumetric clouds move";
+}
+
+uniform_bool DynamicCloudsAdjustment
+{
+    default = true;
+    display_name = "Enable Dynamic Adjustment";
+    description = "Adjusts volumetric cloud parameters automatically based on weather";
+}
+
+uniform_float CloudsDensity
+{
+    default = 0.425;
+    min = 0.0;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Clouds Density";
+    description = "Density of volumetric clouds (is used only when Dynamic Adjustments is disabled!)";
+}
+
+uniform_float CloudsScattering
+{
+    default = 1.0;
+    min = 0.0;
+    max = 2.0;
+    step = 0.05;
+    display_name = "Clouds Scattering";
+    description = "Amount of Mie scattering applied to the volumetric clouds";
+}
+
+uniform_float CloudsDensityMin
+{
+    default = 0.38;
+    min = 0.0;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Minimum Dynamic Clouds Density";
+    description = "Sets the minimum clouds density when dynamic adjustment is enabled, letting the user have more clouds even during clearer weather types, while still allowing the clouds to get more dense and dark during stormy weather types";
+}
+
+uniform_int CloudsShadowRoughness
+{
+    default = 2;
+    min = 0;
+    max = 2;
+    display_name = "Clouds Shadow Roughness";
+    description = "Adjusts how rough the clouds detail shadowing will be";
+}
+
+uniform_bool SkyRenderEnabled
+{
+    header = "Sky";
+    default = false;
+    display_name = "! Enable Sky Rendering";
+    description = "Enable sky rendering (will change day and twilight sky with physically-based model, best used with the Transparent Postpass option in the launcher, to fix most blending issues between transparent objects and the sky)";
+}
+
+uniform_bool CelestialRenderEnabled
+{
+    default = true;
+    display_name = "Enable Celestial Rendering";
+    description = "Enable night sky, moons and stars rendering (requires sky rendering to be enabled)";
+}
+
+uniform_bool DynamicExposureAdjustment
+{
+    default = true;
+    display_name = "Enable Dynamic Exposure Adjustment";
+    description = "Adjusts exposure factor for sky colors automatically based on weather";
+}
+
+uniform_float StarMapOffset
+{
+    default = 0.375;
+    min = 0.0;
+    max = 1.0;
+    step = 0.0125;
+    display_name = "Stars Offset";
+    description = "Moves the stars forward or backwards in time, but still keeps the 24h rotation intact, useful if you prefer a different night sky or want different stars for a screenshot";
+}
+
+uniform_bool TwinklingEnabled
+{
+    default = true;
+    display_name = "Enable Star Twinkling";
+    description = "Enable or disable the star twinkling effect";
+}
+
+uniform_float StarBrightnessDay
+{
+    default = 0.5;
+    min = 0.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Day Star Brightness";
+    description = "Brightness of the stars during the day";
+}
+
+uniform_float StarBrightnessNight
+{
+    default = 0.5;
+    min = 0.0;
+    max = 1.0;
+    step = 0.025;
+    display_name = "Night Star Brightness";
+    description = "Brightness of the stars during the night";
+}
+
+uniform_bool MoonScatteringEnabled
+{
+    default = true;
+    display_name = "Enable Moonlight Scattering";
+    description = "Enable moonlight scattering at the horizon, making it more yellow/orange";
+}
+
+uniform_bool SkyAdjustmentEnabled
+{
+    default = true;
+    display_name = "Enable Vanilla Sky Adjustments";
+    description = "Enable adjustments for a more physically-based result after twilight hours (applies only to vanilla sky)";
+}
+
+uniform_float DitheringStrength
+{
+    header = "Debugging";
+    default = 1.0;
+    min = 0.0;
+    max = 5.0;
+    step = 0.125;
+    display_name = "Dithering Strength";
+    description = "Dithering strength to reduce color banding";
+}
+
+uniform_int RayStepsMul24
+{
+    default = 1;
+    min = 1;
+    max = 5;
+    display_name = "Ray Steps";
+    description = "Number of ray steps the marching will do, multiplied by 24 (impacts performance, higher values might be needed if using a very high view distance)";
+}
+
+uniform_float DepthThresholdPercentage
+{
+    default = 0.9;
+    min = 0.5;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Mask Depth Threshold";
+    description = "Depth percetange delta which determines where high res execution will happen";
+}
+
+uniform_bool DownscaleEffects
+{
+    default = true;
+    display_name = "Downscale volumetric effects";
+    description = "Downscales the effects to half resolution for performance reasons, disable if you run into problems with them";
+}
+
+uniform_bool FogEnableDistanceAttenuation
+{
+    default = true;
+    display_name = "Fog Distance-based Attenuation";
+    description = "Enable fog distance-based attenuation (makes the fog less detailed in the distance to prevent aliasing)";
+}
+
+uniform_float MieG
+{
+    default = 0.500;
+    min = 0;
+    max = 0.9999999;
+    step = 0.025;
+    display_name = "Mie Anisotropy";
+}
+
+uniform_bool LessAtmosphericFog
+{
+    default = false;
+    display_name = "Less Atmospheric Fog";
+    description = "Apply less fog in the amosphere";
+}
+
+uniform_bool DebugFog
+{
+    default = false;
+    display_name = "View Fog Calculations";
+    description = "See only fog results";
+}
+
+uniform_bool DebugTiles
+{
+    default = false;
+    display_name = "View Computation Tiles";
+    description = "Shows tiles: green for half res, red for full res";
+}
+
+uniform_bool ExpandTiles
+{
+    default = false;
+    display_name = "Expand Computation Tiles";
+}
+
+sampler_2d NoiseTex2D
+{
+    source = "textures/perlin2d.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_2d NoiseTexAlt2D
+{
+    source = "textures/vaionoise.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_2d NoiseTexAltW2D
+{
+    source = "textures/vaionoisew.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_3d NoiseTex3D
+{
+    source = "textures/noise3d.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    wrap_r = repeat;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_3d NoiseTexAlt3D
+{
+    source = "textures/vaionoise3dw.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+    wrap_r = clamp_to_edge;
+    source_format = red;
+    internal_format = red;
+    source_type = unsigned_byte;
+}
+
+sampler_2d NightSkyTex
+{
+    source = "textures/vaiostarmap.png";
+    mag_filter = nearest;
+    min_filter = nearest;
+    wrap_s = repeat;
+}
+
+sampler_2d NightSkyBilinearTex
+{
+    source = "textures/vaiostarmap.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+}
+
+sampler_2d MasserTex
+{
+    source = "textures/vaiomoonmasser.jpg";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+}
+
+sampler_2d SecundaTex
+{
+    source = "textures/vaiomoonsecunda.jpg";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+}
+
+shared
+{
+    // Portability
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define float2x2 mat2
+    #define float3x3 mat3
+    #define saturate(x) clamp(x, 0, 1)
+
+    #define PI 3.14159265358979323846
+    #define PI_2 6.28318530717958647692
+    #define INV_PI 0.31830988618379067154
+    
+    float FogFar = min(omw.fogFar, omw.far);
+
+    float Pow5(float x)
+    {
+        float x2 = x * x;
+        return x2 * x2 * x;
+    }
+    
+    float Pow8(float x)
+    {
+        x *= x;
+        x *= x;
+        return x * x;
+    }
+
+    float CalculateLuminance(float3 color)
+    {
+        return dot(color, float3(0.2126f, 0.7152f, 0.0722f));
+    }
+    
+    float3 ClampColorLuminance(float3 color, float maxLuminance)
+    {
+        if (maxLuminance <= 0.000001f)
+            return float3(0.0f);
+
+        float luminance = CalculateLuminance(color);
+        if (luminance > maxLuminance)
+            color = color / luminance * maxLuminance;
+            
+        return color;
+    }
+
+    float ExposureWeatherModifiers[10] = float[]
+    (
+        float(0.0697),    //Clear
+        float(0.0697),    //Cloudy
+        float(0.0697),    //Foggy
+        float(0.0477),    //Overcast
+        float(0.0358),    //Rain
+        float(0.0348),    //Thunder
+        float(0.0368),    //Ash
+        float(0.0148),    //Blight
+        float(0.0477),    //Snow
+        float(0.0258)     //Blizzard
+    );
+
+    float GetExposureFactor()
+    {
+        if (!DynamicExposureAdjustment)
+            return 0.0625f;
+            
+        float currentEF = ExposureWeatherModifiers[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentEF = mix(currentEF, ExposureWeatherModifiers[omw.nextWeatherID], omw.weatherTransition);
+        return currentEF;
+    }
+
+    float CloudsWeatherModifiers[10] = float[]
+    (
+        float(CloudsDensityMin),    //Clear
+        float(0.42),    //Cloudy
+        float(0.43),    //Foggy
+        float(0.55),    //Overcast
+        float(0.78),    //Rain
+        float(0.85),    //Thunder
+        float(0.46),    //Ash
+        float(0.52),    //Blight
+        float(0.75),    //Snow
+        float(0.85)     //Blizzard
+    );
+
+    float GetCloudsDensity()
+    {
+        if (!DynamicCloudsAdjustment)
+            return CloudsDensity;
+            
+        float currentClouds = CloudsWeatherModifiers[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentClouds = mix(currentClouds, CloudsWeatherModifiers[omw.nextWeatherID], omw.weatherTransition);
+        return max(CloudsDensityMin, currentClouds);
+    }
+
+    float CalculateLightExp(float l)
+    {
+        return exp(-l) * (1.0f - exp(-l * 2.0f));
+    }
+
+    float2 CalculateClouds(float3 direction)
+    {
+        direction = normalize(direction);
+        const float maxDirZ = 0.001f;
+        if (omw.isInterior || direction.z < maxDirZ || !CloudsEnabled)
+            return float2(1.0f, 0.0f);
+
+        const int raySteps          = 13;
+        const float bottomLayer     = 10000.0f;
+        const float topLayer        = 25000.0f;
+        const float scale           = 0.0000050f;
+        const float3 rayMultiplier  = scale * float3(1.0f, 1.0f, 7.5f);
+        const float extinctionScale = 0.01f;
+        
+        // bend Z for curvature
+        direction.z += (1.0f - sqrt(direction.z)) * 0.07f;
+        direction = normalize(direction);
+
+        float cloudAmount = 0.0f;
+        float cloudLighting = 0.0f;
+        float densityTT = 1.0f;
+        
+        float cloudCoverage = 2.0f * GetCloudsDensity();
+        float cloudThreshold = 0.9f * smoothstep(2.0f, 0.8f, cloudCoverage);
+        float absorption = 0.00175f * (1.0f + smoothstep(0.9f, 2.0f, cloudCoverage));
+
+        float3 eyePos = omw.eyePos.xyz;
+        eyePos.z = 0.0f;
+        float3 rayPos = eyePos + (bottomLayer / direction.z) * direction;
+        
+        float3 rayStep = ((eyePos + (topLayer / direction.z) * direction) - rayPos) / float3(raySteps);
+        float rayStepLength = length(rayStep);
+        const float maxRayStepLength = 6000.0f;
+        if (rayStepLength > maxRayStepLength)
+        {
+            densityTT = smoothstep(9000.0f, maxRayStepLength, rayStepLength) * 0.15f + 0.85f;
+            rayStep = rayStep / rayStepLength * maxRayStepLength;
+            rayStepLength = maxRayStepLength;
+        }
+
+        float cloudSpeed = CloudsSpeed * 0.1f;
+        
+        int i = 0;
+        float noiseHi = 1.0f;
+        float noiseHi1 = 0.0f;
+        float noisePrev = 0.0f;
+        float variance = 0.0f;
+        const float extraFluffiness = 1.3f;
+        
+        float3 lightDir = omw.sunPos.xyz;
+        lightDir.z = abs(lightDir.z); // so we'll have an "ok" lightDir at night
+        
+        float3 rayMarchSimTime = float3(omw.simulationTime * cloudSpeed * 0.00578f);
+        rayMarchSimTime.z = 0.0f;
+
+        const vec2 moveDir = normalize(vec2(1.0, -1.0));
+        const float stretchAmount = 1.5f;
+        const float2x2 stretchMat = float2x2(
+            mix(1.0, stretchAmount, moveDir.x * moveDir.x),  moveDir.x * moveDir.y * (stretchAmount - 1.0),
+            moveDir.x * moveDir.y * (stretchAmount - 1.0),  mix(1.0, stretchAmount, moveDir.y * moveDir.y)
+            );
+
+        for (i = 0; i < raySteps; i++)
+        {
+            float3 warpedPos = float3(stretchMat * rayPos.xy, rayPos.z);
+            noisePrev = noiseHi;
+            noiseHi = omw_Texture3D(NoiseTexAlt3D, warpedPos.xyz * rayMultiplier - rayMarchSimTime).r;
+
+            // if (i == 0 || i > 9)
+                // extraFluffiness *= 1.29f;
+            // else if (i > 2)
+                // extraFluffiness = max(0.9f, extraFluffiness * 0.77f);
+            
+            // if (distance(rayPos.xy, float2(60000.0f, -105000.0f)) < 5000.0f)
+                // noiseHi = 0.8f;
+            
+            if (i == 0)
+                noiseHi1 = noiseHi;
+            else
+                variance += abs(noiseHi - noisePrev);
+
+            float noiseShaped = noiseHi * noiseHi;
+            noiseShaped *= cloudCoverage * 4.0f * extraFluffiness;
+            // float noiseShaped = noiseHi;
+
+            if (noiseShaped > 0.01f)
+            {
+                const float fadeMargin = 5000.0f;
+                float lightTT = densityTT;
+
+                eyePos = warpedPos + lightDir * 1500.0f;
+                float ls = omw_Texture3D(NoiseTexAlt3D, eyePos.xyz * rayMultiplier - rayMarchSimTime).r;
+                ls *= cloudCoverage * extraFluffiness * absorption * 1500.0f
+                    * smoothstep(bottomLayer - fadeMargin, bottomLayer, eyePos.z) *
+                    smoothstep(topLayer + fadeMargin, topLayer, eyePos.z)
+                    ;
+                lightTT *= CalculateLightExp(ls);
+        
+                eyePos += lightDir * 2200.0f;
+                ls = omw_Texture3D(NoiseTexAlt3D, eyePos.xyz * rayMultiplier - rayMarchSimTime).r;
+                ls *= cloudCoverage * absorption * 2200.0f
+                    * smoothstep(bottomLayer - fadeMargin, bottomLayer, eyePos.z) *
+                    smoothstep(topLayer + fadeMargin, topLayer, eyePos.z)
+                    ;
+                lightTT *= CalculateLightExp(ls);
+
+                ls = log2(1.0f + noiseShaped) * 1.442695f; // (1.0f / log2(2.0f))
+                cloudLighting += lightTT * ls;
+            }
+            
+            // cloud and lighting accumulation based on shaped noise
+            float extinction = absorption * noiseHi * cloudCoverage * extraFluffiness * extinctionScale;
+            extinction = exp(-extinction * rayStepLength);
+            cloudAmount += densityTT * noiseShaped * (1.0f - extinction * 0.935f);
+            densityTT *= extinction;
+            
+            rayPos += rayStep;
+        }
+        // return float2(densityTT, densityTT);
+        
+        // noiseMicro = noiseMicro * noiseMicro;
+        // noiseHi = mix(noiseHi, noiseHi * (0.4f * noiseMicro + 0.9f), 0.05f);
+        
+        // cloudAmount /= raySteps;
+        // cloudAmount = saturate(cloudAmount - 0.25f) * 1.30f;
+        // variance = (1.0f - exp(-Pow5(cloudAmount)));
+        // variance = exp(-variance * 0.2f) * (1.0f - exp(-Pow8(cloudAmount) * 1.5f));
+        // variance = exp2(-variance * 0.15f) * (1.0f - exp2(-Pow8(cloudAmount) * 3.0f));
+        // variance = exp2(-variance * 0.4f);
+        // variance = mix(1.0f, 1.0f - exp2(-Pow8(cloudAmount) * 4.0f), (1.0f - Pow5(dot(lightDir, direction))) * smoothstep(0.05f, 0.2f, omw.sunPos.z));
+        variance = exp2(-variance * 0.2f) * mix(1.0f, 1.0f - exp2(-Pow8(cloudAmount) * 3.0f), (1.0f - Pow5(dot(lightDir, direction))) * smoothstep(0.05f, 0.2f, omw.sunPos.z));
+        cloudLighting = saturate(cloudLighting * mix(variance, 1.0f, rayStepLength * 0.00012f));
+        // variance = exp(-variance * 0.3f) * (1.0f - exp(-Pow5(cloudAmount) * 1.0f));
+        // cloudLighting = saturate(cloudLighting * 1.1f * mix(variance, 1.0f, rayStepLength * 0.00012f));
+        // *= 12.0f / raySteps;
+        cloudLighting *= sqrt(cloudLighting);
+        // cloudLighting *= cloudLighting;
+        // cloudLighting = saturate(1.2f * (cloudLighting - 0.7f) + 0.5f);
+
+        // theoretically these could be done in the raymarch loop (would also probably yield better results, definitely more control), but it's cheaper and easier to manage this way, even if it can end up flattening things (but it's volumetric clouds, and they never look as good as a reference photo anyways, so...)
+        // const float cloudStampingIntensity = 1.0f;//smoothstep(0.00f, 0.10f, direction.z);//(1.0f - cloudCoverage) * 0.4f + 0.25f;
+        if (cloudAmount > 0.00001f)
+        {
+            float2 uv;
+            float wave = sin(omw.simulationTime * 0.2f);
+            uv = rayPos.xy + float2(wave, -wave) * 1751.0f + float2(noiseHi, noisePrev) * 377.0f
+                + float2(cloudAmount, cloudLighting) * 413.0f;
+            float stamp = omw_Texture2D(NoiseTexAltW2D, uv * 0.0000412f
+                - omw.simulationTime * cloudSpeed * 0.08128f).r;
+            
+            uv = rayPos.xy * 0.6f + float2(noiseHi + stamp, noisePrev + cloudAmount) * 1705.0f;
+            float stamp2 = omw_Texture2D(NoiseTexAlt2D, uv.yx * 0.0000131f 
+                - omw.simulationTime * cloudSpeed * 0.0187f).r;
+            
+            // stamp = stamp2;
+            // stamp = max(stamp, stamp2);
+            // stamp = min(stamp, stamp2);
+            stamp *= stamp2;
+            // stamp = (stamp * stamp2 + min(stamp, stamp2)) * 0.5f;
+            // stamp = (stamp + stamp2) * 0.5f; // v2
+            
+            // stamp = 1.5f * (stamp - 0.5f) + 0.5f;
+            
+            // v1
+            // stamp = mix(0.5f, stamp, cloudStampingIntensity);
+            // cloudAmount *= 2.0f * max(stamp, 0.4f);
+            
+            // v2
+            // cloudAmount = (cloudAmount - mix(0.0f, stamp * 0.25f - 0.125f, CloudStampingIntensity));
+            
+            // v3
+            stamp *= 1.0f - noiseHi1;
+            cloudAmount *= stamp * 0.25f + 0.95f; // 0.85f originally
+            // cloudLighting *= mix(1.0f, stamp2 * 0.75f + 0.25f, (1.0f - direction.z) * smoothstep(0.6f, 1.1f, cloudLighting) * smoothstep(-2.0f, 0.9f, omw.sunPos.z));
+            cloudLighting *= mix(1.0f, stamp2 * 0.75f + 0.25f, (1.0f - direction.z) * smoothstep(0.3f, 1.2f, cloudLighting) * smoothstep(-2.0f, 0.9f, omw.sunPos.z));
+            // cloudLighting -= stamp2 * (1.0f - variance) * 0.2f;
+            
+            if (CloudsShadowRoughness == 1)
+                cloudLighting -= stamp2 * 0.12f * smoothstep(0.7f, 1.0f, cloudLighting);
+            else if (CloudsShadowRoughness == 2)
+                cloudLighting -= ((1.0f - stamp2 * 0.35f) * 0.35f - 0.15f) * smoothstep(1.1f, 0.7f, direction.z) * 0.8f;
+            
+            // cloudLighting *= stamp * 0.1f + 0.95f;
+            // cloudLighting *= (1.0f - stamp2) * 0.3f + 0.85f;
+            // cloudLighting *= stamp * 0.4f + 0.8f;
+            // cloudAmount = (cloudAmount - mix(0.0f, stamp2 * 0.25f - 0.125f, CloudStampingIntensity));
+            
+            // cloudAmount = stamp * 7.0f;
+            // cloudAmount = stamp2 * 3.0f;
+        }
+
+        // cloudAmount *= sqrt(length(rayEnd - rayStart)) * 0.052f;
+        // cloudAmount *= log(length(rayEnd - rayStart)) * 0.3f;
+        // cloudAmount *= 3.5f;
+        // float f0 = 1.0f - exp(-cloudAmount * 2.0f);
+        // float f1 = exp(-cloudAmount);
+        // cloudAmount = f0 * (1.0f - f1);
+
+        cloudAmount = max(0.0f, saturate(cloudAmount) - cloudThreshold) / (1.0f - cloudThreshold);
+        return float2(saturate(cloudAmount), 1.0f - saturate(cloudLighting));
+    }
+    
+    float SkyWeatherModifiers[10] = float[]
+    (
+        float(1.00),    //Clear
+        float(1.00),    //Cloudy
+        float(0.00),    //Foggy
+        float(0.50),    //Overcast
+        float(0.00),    //Rain
+        float(0.00),    //Thunder
+        float(0.00),    //Ash
+        float(0.00),    //Blight
+        float(0.00),    //Snow
+        float(0.00)     //Blizzard
+    );
+
+    float GetSkyWeatherAdjustmentFactor()
+    {
+        float currentSky = SkyWeatherModifiers[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentSky = mix(currentSky, SkyWeatherModifiers[omw.nextWeatherID], omw.weatherTransition);
+        return currentSky;
+    }
+    
+    #define FogRaySteps (24 * RayStepsMul24)
+
+    float FogWeatherModifiers[10] = float[]
+    (
+        float(1.00),    //Clear
+        float(1.12),    //Cloudy
+        float(2.30),    //Foggy
+        float(1.15),    //Overcast
+        float(1.70),    //Rain
+        float(1.70),    //Thunder
+        float(1.25),    //Ash
+        float(1.25),    //Blight
+        float(1.12),    //Snow
+        float(2.50)     //Blizzard
+    );
+
+    float GetFogWeatherAdjustmentFactor()
+    {
+        float currentFog = FogWeatherModifiers[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentFog = mix(currentFog, FogWeatherModifiers[omw.nextWeatherID], omw.weatherTransition);
+        return currentFog;
+    }
+    
+    float GetFogSunAdjustmentFactor()
+    {
+        if (omw.sunPos.z < 0 && !(AtmosphericFogEnabled && SkyRenderEnabled))
+            return saturate(omw.sunPos.z * 0.2f + 1.0f);
+        if (omw.sunPos.x > 0)
+            return (1.0f - saturate(abs(omw.sunPos.z - 0.25f) * 4.0f)) 
+                * mix(0.75f, 0.50f, (smoothstep(2000, 3000, omw.eyePos.z)))
+                * DynamicFogSunFactor * 0.75f * smoothstep(0.65f, 0.45f, GetCloudsDensity())
+                + 1.0f;
+        else
+            return 1.0f;
+    }
+    
+    float GetFogAdjustmentFactor()
+    {
+        float fogAdjustment = 1.0f;
+        if (DynamicFogAdjustment)
+        {
+            // adjust fog for weather
+            fogAdjustment = GetFogWeatherAdjustmentFactor();
+        
+            // adjust fog for sunpos
+            fogAdjustment *= GetFogSunAdjustmentFactor();
+            fogAdjustment = min(2.5f, fogAdjustment);
+        }
+        
+        return fogAdjustment;
+    }
+    
+    float AtmosphericFogDensities[10] = float[]
+    (
+        float(1.0), //Clear
+        float(1.0), //Cloudy
+        float(1.0), //Foggy
+        float(1.0), //Overcast
+        float(1.0), //Rain
+        float(1.0), //Thunder
+        float(1.5), //Ash
+        float(1.5), //Blight
+        float(1.0), //Snow
+        float(1.5)  //Blizzard
+    );
+    
+    float GetAtmosphericFogDensity()
+    {
+        if (!DynamicAtmosphericFogAdjustment)
+            return 1.0f;
+    
+        float currentParams = AtmosphericFogDensities[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentParams = mix(currentParams, AtmosphericFogDensities[omw.nextWeatherID], omw.weatherTransition);
+        
+        return currentParams;
+    }
+
+    float CalculateFog(float3 worldPosition, float3 direction, float worldDistance, float2 texCoord, float densityBlendFactor)
+    {
+        // early out
+        if (worldDistance >= FogFar && (direction.z <= 0.0f || omw.isInterior))
+            return 1.0f;
+
+        float fogAmount = 0.0f;
+        float fogSpeedWind = FogSpeed;
+        
+        if (!omw.isInterior)
+        {
+            float dirLength = length(direction);
+            if (dirLength == 0 || FogIntensity == 0)
+                return 0.0f;
+
+            bool isSky = false;
+            float atmosphericDensity = 1.0f;
+            if (worldDistance >= FogFar && direction.z > 0.0f)
+            {
+                isSky = true;
+                atmosphericDensity = mix(1.0f, GetAtmosphericFogDensity() * FogIntensity * FogIntensity * 4.0f, densityBlendFactor);
+                direction = (3500.0f / direction.z) * direction;
+                dirLength = length(direction);
+            }
+
+            float3 rayStep = direction / FogRaySteps;
+            float3 rayPos = omw.eyePos.xyz + rayStep * 0.5f;
+            float rayStepLength = length(rayStep);
+            float rayLength = rayStepLength * 0.5f;
+            // float wave = saturate(sin(omw.simulationTime * 0.5f) * 0.5f + 0.5f);
+
+            int i = 0;
+            float noise = 1;
+            float noiseHi = 1;
+            float noiseLo = 1;
+            float noiseHiPrev = 1;
+            float2 uv;
+            for (i = 0; i < FogRaySteps; i++)
+            {
+                noiseHiPrev = noiseHi;
+
+                noiseHi = omw_Texture3D(NoiseTex3D, rayPos.xyz * float3(1, 1, -1.17) 
+                    * 0.00011f - omw.simulationTime * fogSpeedWind * 0.002f).r;
+                    
+                if (FogEnableDistanceAttenuation && i < FogRaySteps - 1)
+                    noiseHi = mix(noiseHi, 0.5f, smoothstep(0.0f, 15000.0f, rayLength));
+                    
+                if (i % 2 == 0)
+                {
+                    uv = rayPos.xy + float2(noiseHi, noiseHiPrev) * 1900;
+                    noiseLo = 0.25f + 0.75f * omw_Texture2D(NoiseTex2D, uv
+                        * 0.00012f - omw.simulationTime * fogSpeedWind * 0.0021f).r; 
+                }
+                
+                // float noiseLo = omw_Texture3D(NoiseTex3D, rayPos.zxy
+                    // * 0.00021f - omw.simulationTime * fogSpeedWind * 0.003f).r;
+                    
+                noise = noiseLo * noiseHi;
+                // float noise = max(noiseLo, noiseHi);
+                
+                // Adjust fog by height (could use a 3rd texture in the raymarching though)
+                if (!isSky || LessAtmosphericFog)
+                {
+                    float heightAdjustment = smoothstep(max(3000, omw.eyePos.z + 3500), omw.eyePos.z - 500, rayPos.z);
+                    noise *= mix(sqrt(heightAdjustment), 1.0f, atmosphericDensity * 0.5f);
+                    // noise = min(noise, heightAdjustment);
+                }
+                
+                rayPos += rayStep;
+                fogAmount += noise;
+                rayLength += rayStepLength;
+            }
+            fogAmount /= i;
+            
+            const int FogDistributionMethod = 1;
+            
+            if (FogDistributionMethod == 1)
+            {
+                float3 distanceTraveled = rayPos - omw.eyePos.xyz;
+                distanceTraveled.z *= distanceTraveled.z < 0.0f ? FogHeightBasedMultiplier : 1.0f;
+                fogAmount *= sqrt(length(distanceTraveled)) * 0.019f;
+            }
+            else if (FogDistributionMethod == 0)
+                fogAmount *= worldDistance * 0.0002f;
+            else
+                fogAmount *= log(worldDistance) * 0.15f;
+
+            float fogAdjustment = GetFogAdjustmentFactor();
+            fogAmount *= fogAdjustment;
+            // fogAmount = saturate(fogAmount);
+
+            if (fogAmount > 0.00001f && FogStampIntensity > 0.0)
+            {
+                float wave = sin(omw.simulationTime * 0.2f);
+                uv = rayPos.xy + float2(wave, -wave) * 200 - rayPos.zz + float2(noiseHi, -noiseHiPrev) * 177;
+                float stamp2 = 0.75f * omw_Texture2D(NoiseTexAlt2D, uv.yx * 0.000082f + 0.21f
+                    - omw.simulationTime * fogSpeedWind * 0.00173f).r;
+                
+                // uv = rayPos.xy + float2(max(noiseLo, stamp2), fogAmount) * 1700;
+                uv = rayPos.xy + float2(noiseHi + stamp2, fogAmount) * 1700;
+                float stamp = omw_Texture2D(NoiseTex2D, uv * 0.0000505f + 0.2f
+                    - omw.simulationTime * fogSpeedWind * 0.00205f).r;
+                // float stamp = omw_Texture2D(NoiseTex2D, rayPos.xy * 0.000105f + 0.2f
+                    // - omw.simulationTime * fogSpeedWind * 0.00305f).r;
+                
+                // stamp = stamp2;
+                stamp = max(stamp, stamp2);
+                // stamp = min(stamp, stamp2);
+                // stamp *= stamp2;
+                
+                stamp = FogStampContrast * (stamp - 0.5f) + 0.5f;
+                
+                // do stamping based on depth?
+                stamp = mix(1.0f, stamp, FogStampIntensity / max(1.0f, max(fogAdjustment, FogIntensity * FogIntensity * 3.0f)));
+
+                fogAmount *= max(stamp, 0.25f);
+            }
+            
+            if (isSky)
+                fogAmount *= atmosphericDensity;
+            
+            if (FogDistributionMethod == 2) // classic beer-powder
+            {
+                fogAmount *= FogIntensity * 1.25f;
+                float f0 = 1.0f - exp(-fogAmount * 2.0f);
+                float f1 = exp(-fogAmount);
+                fogAmount = f0 * (f1);
+            }
+            else
+            {
+                fogAmount = 1.0f - exp(-fogAmount * FogIntensity * FogIntensity * 2.0f);
+                fogAmount *= smoothstep(-250, FogDistance, worldDistance);
+            }
+        }
+        else
+        {
+            float intensityPow2 = InteriorFogIntensity * InteriorFogIntensity;
+            fogAmount = 1.0f - exp(-abs(omw.eyePos.z - worldPosition.z) * 0.0005f * intensityPow2);
+            fogAmount = max(fogAmount, 1.0f - exp(-worldDistance * 0.0002f * intensityPow2));
+        }
+        
+        // fogAmount = saturate(fogAmount);
+
+        return saturate(fogAmount * 1.77f);
+    }
+
+    float3 CalculateLights(float3 worldPosition, float3 direction, float worldDistance)
+    {
+        float3 sumColor = float3(0);
+        direction = direction / worldDistance;
+        
+        float fogAverageAmount = 2.0f * FogIntensity * GetFogAdjustmentFactor();
+        float fogginess = omw.isInterior? 1.0f : 5.0f * saturate(fogAverageAmount - 1.0f);
+        
+        for (int i = 0; i < omw_GetPointLightCount(); i++)
+        {
+            float3 lightPos = omw_GetPointLightWorldPos(i);
+            float lightDist = distance(worldPosition, lightPos);
+            float3 projectedPos = worldPosition + min(worldDistance, lightDist) * direction;
+            float distanceToLight = distance(projectedPos, lightPos);
+            float lightRadius = max(0.001f, omw_GetPointLightRadius(i));
+            
+            // adjust for fog
+            lightRadius *= (fogginess + 1.0f);
+            
+            float distanceRatio = max(0, distanceToLight / lightRadius);
+            if (distanceRatio > 1.0f)
+                continue;
+
+            float intensity = LightsIntensity;
+            if (omw.isInterior)
+                intensity *= LightsIntensityInteriorMultiplier * smoothstep(2.0f, 0.0f, fogginess);
+            else if (!omw.isUnderwater)
+            {
+                float sunHeight = omw.sunPos.z;
+                float factor = saturate(max(sunHeight, 0.0f) * 2.0f);
+                factor = min(factor, omw.sunVis);
+                intensity *= mix(1.0f, 0.025f, factor) * 0.5f;
+                intensity *= smoothstep(LightsFadeDistanceEnd, LightsFadeDistanceEnd * 0.9f, lightDist);
+                
+                intensity *= 0.75f * smoothstep(5.0f, 0.0f, fogginess) + 0.25f;
+            }
+
+            if (distanceToLight > 0.0f)
+                intensity *= 1.0f - max(0.0f, dot(direction, (lightPos - projectedPos) / distanceToLight));
+            
+            distanceRatio = 1.0f - sqrt(distanceRatio);
+            float3 lightColor = omw_GetPointLightDiffuse(i) * pow(vec3(distanceRatio), vec3(1.3f, 1.4f, 1.5f)) * intensity;
+
+            sumColor = saturate(lightColor * (1.0f - sumColor) + sumColor);
+        }
+
+        return sumColor;
+    }
+    
+    // Sky
+    
+    /*
+     * Copyright (c) 2023 Fernando García Liñán
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a
+     * copy of this software and associated documentation files (the "Software"),
+     * to deal in the Software without restriction, including without limitation
+     * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+     * and/or sell copies of the Software, and to permit persons to whom the
+     * Software is furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+     * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+     * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+     * DEALINGS IN THE SOFTWARE.
+     */
+    
+    const int TRANSMITTANCE_STEPS       = 32;
+    const int IN_SCATTERING_STEPS       = 32;
+    const float EARTH_RADIUS            = 6371.0; // km
+    const float ATMOSPHERE_THICKNESS    = 100.0; // km
+    const float ATMOSPHERE_RADIUS       = EARTH_RADIUS + ATMOSPHERE_THICKNESS;
+    
+    const float EYE_ALTITUDE            = 0.5;    // km
+    const float EYE_DISTANCE_TO_EARTH_CENTER = EARTH_RADIUS + EYE_ALTITUDE;
+    const float AEROSOL_TURBIDITY       = 1.0;
+    const float4 GROUND_ALBEDO          = float4(0.3);
+    
+    const float4 MolecularScatteringCoefficientBase = float4(6.605e-3, 1.067e-2, 1.842e-2, 3.156e-2);
+    const float4 OzoneAbsorptionCrossSection = float4(3.472e-21, 3.914e-21, 1.349e-21, 11.03e-23) * 1e-4f;
+    
+    float4 SunSpectralIrradiances[10] = float4[]
+    (
+        float4(2.679, 2.828, 2.986, 2.307), //Clear
+        float4(2.679, 2.828, 2.986, 2.307), //Cloudy
+        float4(2.679, 2.828, 2.986, 2.307), //Foggy
+        float4(2.579, 2.788, 2.986, 1.807), //Overcast
+        float4(2.379, 2.728, 2.986, 1.707), //Rain
+        float4(2.379, 2.628, 2.886, 1.707), //Thunder
+        // float4(1.679, 0.628, 0.086, 0.107), //Ash
+        float4(0.979, 0.528, 0.086, 0.157), //Ash
+        // float4(0.679, 0.428, 0.086, 0.207), //Ash
+        float4(2.679, 0.628, 0.086, 0.157), //Blight
+        float4(1.679, 1.828, 2.486, 1.507), //Snow
+        float4(1.879, 2.428, 2.986, 1.807)  //Blizzard
+    );
+    
+    float4 GetSunSpectralIrradiance()
+    {
+        float4 current = SunSpectralIrradiances[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            current = mix(current, SunSpectralIrradiances[omw.nextWeatherID], omw.weatherTransition);
+            
+        return current;
+    }
+
+    void GetSkyAerosolCrossSections(out float4 absorption, out float4 scattering)
+    {
+        absorption = float4(2.8722e-24, 4.6168e-24, 7.9706e-24, 1.3578e-23);
+        scattering = float4(1.5908e-22, 1.7711e-22, 2.0942e-22, 2.4033e-22);
+    }
+    
+    float2 SkyAerosolDensities[10] = float2[] // (BaseDensity, HeightScale)
+    (
+        float2(1.3681e20, 0.73), //Clear
+        float2(1.3681e20, 0.73), //Cloudy
+        float2(5.0266e21, 2.00), //Foggy
+        float2(1.3681e21, 2.00), //Overcast
+        float2(5.0266e21, 2.20), //Rain
+        float2(5.0266e21, 2.40), //Thunder
+        float2(1.0266e20, 2.00), //Ash
+        // float2(2.0266e20, 2.00), //Ash
+        float2(2.0266e17, 2.00), //Blight
+        float2(2.0266e21, 1.00), //Snow
+        float2(6.0266e20, 2.00)  //Blizzard
+    );
+    
+    float GetAerosolDensity(float h)
+    {
+        float2 currentDensities = SkyAerosolDensities[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            currentDensities = mix(currentDensities, SkyAerosolDensities[omw.nextWeatherID], omw.weatherTransition);
+        
+        return currentDensities.x * (exp(-h / currentDensities.y)
+            + (2e6 / currentDensities.x));
+    }
+    
+    float4 GetMolecularAbsorptionCoefficient(float h)
+    {
+        h += 1e-4; // Avoid division by 0
+        float t = log(h) - 3.22261;
+        float density = 3.78547397e20 * (1.0 / h) * exp(-t * t * 5.55555555);
+        return OzoneAbsorptionCrossSection * 325.0f * density;
+    }
+    
+    float4 GetMolecularScatteringCoefficient(float h)
+    {
+        return MolecularScatteringCoefficientBase * exp(-0.07771971 * pow(h, 1.16364243));
+    }
+    
+    void GetAtmosphereCollisionCoefficients(in float h,
+                                           out float4 aerosolAbsorption,
+                                           out float4 aerosolScattering,
+                                           out float4 molecularAbsorption,
+                                           out float4 molecularScattering,
+                                           out float4 extinction)
+    {
+        h = max(h, 0.0); // In case height is negative
+
+        float aerosolDensity = GetAerosolDensity(h);
+        float4 aerosolAbsorptionCrossSection, aerosolScatteringCrossSection;
+        GetSkyAerosolCrossSections(aerosolAbsorptionCrossSection, aerosolScatteringCrossSection);
+        aerosolAbsorption = aerosolAbsorptionCrossSection * aerosolDensity * AEROSOL_TURBIDITY;
+        aerosolScattering = aerosolScatteringCrossSection * aerosolDensity * AEROSOL_TURBIDITY;
+
+        molecularAbsorption = GetMolecularAbsorptionCoefficient(h);
+        molecularScattering = GetMolecularScatteringCoefficient(h);
+        extinction = aerosolAbsorption + aerosolScattering + molecularAbsorption + molecularScattering;
+    }
+    
+    float RaySphereIntersection(float3 ro, float3 rd, float radius)
+    {
+        float b = dot(ro, rd);
+        float c = dot(ro, ro) - radius * radius;
+        if (c > 0.0 && b > 0.0)
+            return -1.0;
+        
+        float d = b * b - c;
+        if (d < 0.0)
+            return -1.0;
+        if (d > b * b)
+            return (-b + sqrt(d));
+        return (-b - sqrt(d));
+    }
+    
+    // The ACES code in this file was originally written by Stephen Hill (@self_shadow), who deserves all
+    // credit for coming up with this fit and implementing it. Buy him a beer next time you see him. :)
+
+    // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+    const float3x3 ACESInputMat  = float3x3(
+        0.59719, 0.07600, 0.02840,
+        0.35458, 0.90834, 0.13383,
+        0.04823, 0.01566, 0.83777
+        );
+    
+    // ODT_SAT => XYZ => D60_2_D65 => sRGB
+    const float3x3 ACESOutputMat  = float3x3(
+        1.60475, -0.10208, -0.00327,
+        -0.53108,  1.10813, -0.07276,
+        -0.07367, -0.00605,  1.07602
+        );
+    
+    float3 RRTAndODTFit(float3 v)
+    {
+        float3 a = v * (v + 0.0245786) - 0.000090537;
+        float3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
+        return a / b;
+    }
+    
+    float3 ACESFitted(float3 color)
+    {
+        color = ACESInputMat * color;
+        color = RRTAndODTFit(color);
+        color = ACESOutputMat * color;
+        return saturate(color);
+    }
+
+    float3 GetSkyColor(sampler2D skyTex, float2 uv, float ef)
+    {
+        float3 skyColor = omw_Texture2D(skyTex, uv).rgb;
+        skyColor = ACESFitted(skyColor * ef);
+        return saturate(sqrt(skyColor)); // kick it up
+    }
+}
+
+render_target RT_SkyTransmittance
+{
+    width = 256;
+    height = 64;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+    min_filter = linear;
+    mag_filter = linear;
+}
+
+fragment skyTransmittance(target=RT_SkyTransmittance)
+{
+    omw_In float2 omw_TexCoord;
+
+    // "Precomputed Atmospheric Scattering" by Eric Bruneton and Fabrice Neyret (2008)
+    void main()
+    {
+        if (omw.isInterior || !(AtmosphericFogEnabled && SkyRenderEnabled))
+        {
+            discard;
+            return;
+        }
+    
+        float sunCosTheta = omw_TexCoord.x * 2.0f - 1.0f;
+        float3 sunDir = float3(-sqrt(1.0f - sunCosTheta * sunCosTheta), 0.0f, sunCosTheta);
+    
+        float distanceToEarthCenter = mix(EARTH_RADIUS, ATMOSPHERE_RADIUS, omw_TexCoord.y);
+        float3 rayOrigin = float3(0.0f, 0.0f, distanceToEarthCenter);
+    
+        float t_d = RaySphereIntersection(rayOrigin, sunDir, ATMOSPHERE_RADIUS);
+        float dt = t_d / float(TRANSMITTANCE_STEPS);
+    
+        float4 result = float4(0.0);
+    
+        for (int i = 0; i < TRANSMITTANCE_STEPS; ++i) {
+            float t = (float(i) + 0.5f) * dt;
+            float3 x_t = rayOrigin + sunDir * t;
+
+            float altitude = length(x_t) - EARTH_RADIUS;
+
+            float4 aerosolAbsorption, aerosolScattering;
+            float4 molecularAbsorption, molecularScattering;
+            float4 extinction;
+            GetAtmosphereCollisionCoefficients(
+                altitude,
+                aerosolAbsorption, aerosolScattering,
+                molecularAbsorption, molecularScattering,
+                extinction);
+
+            result += extinction * dt;
+        }
+
+        float4 transmittance = exp(-result);
+        omw_FragColor = transmittance;
+    }
+}
+
+render_target RT_Sky
+{
+    width  = 256;
+    height = 256;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+    min_filter = linear;
+    mag_filter = linear;
+    wrap_s = repeat;
+    wrap_t = clamp_to_edge;
+}
+
+fragment sky(target=RT_Sky, rt1=RT_SkyTransmittance)
+{
+    omw_In float2 omw_TexCoord;
+    
+    // "A Scalable and Production Ready Sky and Atmosphere Rendering Technique" by Sébastien Hillaire (2020)
+    const float INV_4PI = 0.25 * INV_PI;
+    const float RAYLEIGH_PHASE_SCALE = (3.0 / 16.0) * INV_PI;
+    const float g = 0.825f;
+    const float gg = g*g;
+
+    float GetPhaseIsotropic()
+    {
+        // float current = (omw.weatherID == 4 || omw.weatherID == 5) ? PI * 0.5f : INV_4PI;
+        // if (omw.nextWeatherID >= 0)
+            // current = mix(current, (omw.nextWeatherID == 4 || omw.nextWeatherID == 5) ? PI * 0.5f : INV_4PI, omw.weatherTransition);
+            
+        // return current;
+        return INV_4PI;
+    }
+
+    float MolecularPhaseFunction(float cosTheta)
+    {
+        return RAYLEIGH_PHASE_SCALE * (1.0f + cosTheta * cosTheta);
+    }
+    
+    float AerosolPhaseFunction(float cosTheta)
+    {
+        float den = 1.0f + gg + 2.0f * g * cosTheta;
+        return INV_4PI * (1.0f - gg) / (den * sqrt(den));
+    }
+
+    float4 GetTransmittanceFromLUT(sampler2D lut, float cosTheta, float normalizedAltitude)
+    {
+        float u = clamp(cosTheta * 0.5f + 0.5f, 0.0f, 1.0f);
+        float v = clamp(normalizedAltitude, 0.0f, 1.0f);
+        return omw_Texture2D(lut, float2(u, v));
+    }
+
+    float4 GetMultipleScattering(sampler2D transmittanceLUT, float cosTheta, float normalizedHeight, float d)
+    {
+        // Solid angle subtended by the planet from a point at d distance
+        // from the planet center.
+        float omega = 2.0 * PI * (1.0 - sqrt(d*d - EARTH_RADIUS*EARTH_RADIUS) / d);
+    
+        float4 T_to_ground = GetTransmittanceFromLUT(transmittanceLUT, cosTheta, 0.0);
+    
+        float4 T_ground_to_sample =
+            GetTransmittanceFromLUT(transmittanceLUT, 1.0, 0.0) /
+            GetTransmittanceFromLUT(transmittanceLUT, 1.0, normalizedHeight);
+    
+        // 2nd order scattering from the ground
+        float4 L_ground = GetPhaseIsotropic() * omega * (GROUND_ALBEDO / PI) * T_to_ground * T_ground_to_sample * cosTheta;
+    
+        // Fit of Earth's multiple scattering coming from other points in the atmosphere
+        float4 L_ms = 0.02 * float4(0.217, 0.347, 0.594, 1.0) * (1.0 / (1.0 + 5.0 * exp(-17.92 * cosTheta)));
+    
+        return L_ms + L_ground;
+    }
+
+    float4 ComputeInscattering(float3 rayOrigin, float3 rayDir, float t_d, out float4 transmittance)
+    {
+        float3 sunDir = omw.sunPos.xyz;
+        if (sunDir.z < 0.0f)
+            sunDir.z *= 0.666f; // prevent sun from running away too fast from the horizon during dawn and dusk
+        sunDir = normalize(sunDir);
+        
+        float cos_theta = dot(-rayDir, sunDir);
+    
+        float molecularPhase = MolecularPhaseFunction(cos_theta);
+        float aerosolPhase = AerosolPhaseFunction(cos_theta);
+    
+        float dt = t_d / float(IN_SCATTERING_STEPS);
+    
+        float4 L_inscattering = float4(0.0);
+        transmittance = float4(1.0);
+    
+        for (int i = 0; i < IN_SCATTERING_STEPS; ++i) {
+            float t = (float(i) + 0.5) * dt;
+            float3 x_t = rayOrigin + rayDir * t;
+    
+            float distanceToEarthCenter = length(x_t);
+            float3 zenithDir = x_t / distanceToEarthCenter;
+            float altitude = distanceToEarthCenter - EARTH_RADIUS;
+            float normalizedAltitude = altitude / ATMOSPHERE_THICKNESS;
+    
+            float sampleCosTheta = dot(zenithDir, sunDir);
+    
+            float4 aerosolAbsorption, aerosolScattering;
+            float4 molecularAbsorption, molecularScattering;
+            float4 extinction;
+            GetAtmosphereCollisionCoefficients(
+                altitude,
+                aerosolAbsorption, aerosolScattering,
+                molecularAbsorption, molecularScattering,
+                extinction);
+    
+            float4 transmittanceToSun = GetTransmittanceFromLUT(
+                RT_SkyTransmittance, sampleCosTheta, normalizedAltitude);
+    
+            float4 ms = GetMultipleScattering(
+                RT_SkyTransmittance, sampleCosTheta, normalizedAltitude,
+                distanceToEarthCenter);
+    
+            float4 S = GetSunSpectralIrradiance() *
+                (molecularScattering * (molecularPhase * transmittanceToSun + ms) +
+                aerosolScattering * (aerosolPhase * transmittanceToSun + ms));
+    
+            float4 stepTransmittance = exp(-dt * extinction);
+    
+            // Energy-conserving analytical integration
+            // "Physically Based Sky, Atmosphere and Cloud Rendering in Frostbite"
+            // by Sébastien Hillaire
+            float4 S_int = (S - S * stepTransmittance) / max(extinction, 1e-7);
+            L_inscattering += transmittance * S_int;
+            transmittance *= stepTransmittance;
+        }
+    
+        return L_inscattering;
+    }
+    
+    const mat4x3 M = mat4x3(
+        137.672389239975, -8.632904716299537, -1.7181567391931372,
+        32.549094028629234, 91.29801417199785, -12.005406444382531,
+        -38.91428392614275, 34.31665471469816, 29.89044807197628,
+        8.572844237945445, -11.103384660054624, 117.47585277566478
+    );
+
+    float3 LinearSRGBFromSpectralSamples(float4 L)
+    {
+        return M * L;
+    }
+
+    void main()
+    {
+        if (omw.isInterior || !(AtmosphericFogEnabled && SkyRenderEnabled))
+        {
+            discard;
+            return;
+        }
+
+        float azimuth = 2.0f * PI * omw_TexCoord.x;
+
+        // Apply a non-linear transformation to the 1ation to dedicate more
+        // texels to the horizon, where having more detail matters.
+        float l = omw_TexCoord.y;
+        float elev = l * l * PI * 0.5f; // [0, pi/2]
+
+        float3 rayDir = float3(cos(elev) * cos(azimuth),
+                               cos(elev) * sin(azimuth),
+                               sin(elev));
+
+        float3 rayOrigin = float3(0.0f, 0.0f, EYE_DISTANCE_TO_EARTH_CENTER);
+
+        float atmosDist  = RaySphereIntersection(rayOrigin, rayDir, ATMOSPHERE_RADIUS);
+        float groundDist = RaySphereIntersection(rayOrigin, rayDir, EARTH_RADIUS);
+        float t_d;
+        if (EYE_ALTITUDE < ATMOSPHERE_THICKNESS)
+        {
+            // We are inside the atmosphere
+            if (groundDist < 0.0)
+            {
+                // No ground collision, use the distance to the outer atmosphere
+                t_d = atmosDist;
+            }
+            else
+            {
+                // We have a collision with the ground, use the distance to it
+                t_d = groundDist;
+            }
+        }
+
+        float4 transmittance;
+        float4 L = ComputeInscattering(rayOrigin, rayDir, t_d, transmittance);
+
+        float3 moonScatter = float3(0.0f);
+        if (CelestialRenderEnabled && MoonScatteringEnabled)
+        {
+            float3 lightDir = omw.sunPos.xyz;
+            if (lightDir.z < 0.0f)
+            {
+                lightDir.y -= lightDir.z * 0.8f;
+                lightDir = normalize(lightDir);
+            }
+
+            float2 AEs[2];
+            float fastDay = fract(omw.gameHour * 0.0833333f + 0.07f) * PI_2;
+            AEs[0].x = fastDay + PI + 0.1f;
+            AEs[0].y = sin(fastDay) * 0.8f;
+
+            vec3 normalizedDirection = rayDir;
+            float2 uv;
+            float horizonFactor = saturate(abs(normalizedDirection.z) * 0.6f * PI);
+            int i = 0;
+            {
+                float3 moonPos = float3(cos(AEs[i].y) * cos(AEs[i].x),
+                                        cos(AEs[i].y) * sin(AEs[i].x),
+                                        sin(AEs[i].y));
+
+                moonPos *= 200.0f;
+
+                float moonDist = length(moonPos);
+                float3 projectedPos = moonDist * normalizedDirection;
+
+                if (dot(moonPos, normalizedDirection) > 0.0f)
+                {
+                    float moonRadius = 75.0f;
+                    float3 a = -moonPos;
+                    float b = dot(a, normalizedDirection);
+                    float c = dot(a, a) - moonRadius * moonRadius;
+                    float h = b * b - c;
+
+                    if (h >= 0.0)
+                    {
+                        float d = saturate(dot(lightDir, normalizedDirection) * -0.6f + 0.4f);
+                        moonScatter = vec3(saturate(sqrt(d) * h * 0.00011f));
+
+                        float horizonFactor = saturate(abs(projectedPos.z) * 0.6f * PI);   
+                        horizonFactor = 1.0f - horizonFactor;
+                        horizonFactor *= smoothstep(1.0f, -0.1f, omw.sunPos.z);
+                        moonScatter.g -= horizonFactor * horizonFactor;
+                        moonScatter.b -= horizonFactor * 1.5f;
+                        moonScatter = saturate(moonScatter);
+                    }
+                }
+            }
+        }
+    
+        omw_FragColor = float4(max(LinearSRGBFromSpectralSamples(L), moonScatter), 1.0);
+    }
+}
+
+render_target RT_Fog
+{
+    width_ratio  = 0.5;
+    height_ratio = 0.5;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+    min_filter = linear;
+    mag_filter = linear;
+}
+
+fragment fog(target=RT_Fog)
+{
+    omw_In float2 omw_TexCoord;
+    
+    void main()
+    {
+        float3 worldPos = omw_GetWorldPosFromUV(omw_TexCoord);
+        if (worldPos.z < omw.waterHeight && !omw.isInterior)
+        {
+            float3 ray = worldPos - omw.eyePos.xyz;
+            worldPos.z = (omw.waterHeight - omw.eyePos.z) / ray.z;
+            worldPos = omw.eyePos.xyz + ray * worldPos.z;
+        }
+        float worldDistance = distance(omw.eyePos.xyz, worldPos);
+        float3 direction = (worldPos - omw.eyePos.xyz);
+
+        float pixelOK = 1.0; // determines how confident we are the current 2x2 tile was correctly computed in low res
+
+        float fogAmount = 0.0f;
+        
+        // Manual gather
+        float2 offset = omw.rcpResolution;
+        float d0 = omw_GetLinearDepth(omw_TexCoord + float2( offset.x,  offset.y));
+        float d1 = omw_GetLinearDepth(omw_TexCoord + float2(-offset.x,  offset.y));
+        float d2 = omw_GetLinearDepth(omw_TexCoord + float2( offset.x, -offset.y));
+        float d3 = omw_GetLinearDepth(omw_TexCoord + float2(-offset.x, -offset.y));
+        
+        float minD = min(min(min(d0, d1), d2), d3);
+        float maxD = max(max(max(d0, d1), d2), d3);
+        
+        if (!DownscaleEffects)
+            pixelOK = -25.0f;
+        else if (maxD >= FogFar * 0.98f && minD < FogFar)
+            pixelOK = -25.0f; // comparing geometry and sky
+        else if (minD / maxD > DepthThresholdPercentage)
+            fogAmount = FogEnabled ? CalculateFog(worldPos, direction, worldDistance, omw_TexCoord, 1.0f) : 0.0f;
+        else
+            pixelOK = -25.0; // will require full res processing
+        
+        // do cloud calculations only in very safe tiles
+        float2 clouds = (maxD < 0.5f * FogFar) && (pixelOK > 0.0f) ? float2(1.0f, 1.0f) : CalculateClouds(direction);
+        
+        omw_FragColor = float4(fogAmount, pixelOK, clouds);
+    }
+}
+
+render_target RT_Lights
+{
+    width_ratio  = 0.5;
+    height_ratio = 0.5;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+}
+
+fragment lights(target=RT_Lights, rt1=RT_Fog)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        if (!DownscaleEffects)
+            return;
+        
+        float4 lightData = float4(0);
+        float2 fogData = omw_Texture2D(RT_Fog, omw_TexCoord).rg;
+        
+        if (LightsEnabled && LightsIntensity > 0.0 && fogData.g > 0)
+        {
+            float3 worldPosition = omw_GetWorldPosFromUV(omw_TexCoord);
+    
+            float worldDistance = distance(omw.eyePos.xyz, worldPosition);
+            float3 direction = (worldPosition - omw.eyePos.xyz);
+
+            lightData.rgb = CalculateLights(omw.eyePos.xyz, direction, worldDistance);
+        }
+        
+        omw_FragColor = lightData; // A component is unused, maybe put "pixekOK" here and change fogTex to be one channel only?
+    }
+}
+
+vertex combine(rt1=RT_Sky)
+{
+    #if OMW_USE_BINDINGS
+        omw_In float2 omw_Vertex;
+    #endif
+
+    omw_Out float2 omw_TexCoord;
+    omw_Out float3 AtmoColorCenterFog;
+    omw_Out float3 AtmoColorCenterClouds;
+    omw_Out float3x3 StarsRotation;
+
+    void main()
+    {
+        omw_Position = float4(omw_Vertex.xy, 0.0f, 1.0f);
+        omw_TexCoord = omw_Position.xy * 0.5f + 0.5f;
+
+        if (!omw.isInterior && AtmosphericFogEnabled && SkyRenderEnabled)
+        {
+            float2 lutUV = omw.sunPos.xy;
+            lutUV.x = atan(lutUV.y, abs(lutUV.x) < 0.0001f ? lutUV.x + 0.0001f : lutUV.x);
+            lutUV.x = fract(lutUV.x * INV_PI * 0.5f + 0.25f);
+            lutUV.y = 0.05f + 0.05f * smoothstep(0.15f, 0.25f, omw.sunPos.z);// * smoothstep(12000.0f, 1000.0f, omw.eyePos.z);
+            AtmoColorCenterClouds = GetSkyColor(RT_Sky, lutUV, GetExposureFactor());
+
+            // lutUV.y = 0.15f + 0.25f * smoothstep(0.15f, 0.27f, omw.sunPos.z);// * smoothstep(12000.0f, 1000.0f, omw.eyePos.z);
+            lutUV.y = 0.10f * smoothstep(0.20f, 0.42f, omw.sunPos.z) + 0.10f;// * smoothstep(12000.0f, 1000.0f, omw.eyePos.z);
+            // lutUV.y = 0.2f * smoothstep(0.15f, 0.37f, omw.sunPos.z);// * smoothstep(12000.0f, 1000.0f, omw.eyePos.z);
+            float3 atmoColor = GetSkyColor(RT_Sky, lutUV, GetExposureFactor());
+            // AtmoColorCenterFog = 0.90f * atmoColor;
+            // AtmoColorCenterFog = omw.fogColor.rgb;
+            AtmoColorCenterFog = ClampColorLuminance(atmoColor, 0.7f);
+
+            const float3 axis = (float3(0.894427f, 0.0f, 0.447214f));
+            const float cosT = 0.70710678118f;
+            const float sinT = 0.70710678118f;
+
+            // this is painful
+            StarsRotation[0] = float3(cosT + axis.x * axis.x * (1.0f - cosT),
+                            axis.y * axis.x * (1.0f - cosT) + axis.z * sinT,
+                            axis.z * axis.x * (1.0f - cosT) - axis.y * sinT);
+            StarsRotation[1] = float3(axis.x * axis.y * (1.0f - cosT) - axis.z * sinT,
+                            cosT + axis.y * axis.y * (1.0f - cosT),
+                            axis.z * axis.y * (1.0f - cosT) + axis.x * sinT);
+            StarsRotation[2] = float3(axis.x * axis.z * (1.0f - cosT) + axis.y * sinT,
+                            axis.y * axis.z * (1.0f - cosT) - axis.x * sinT,
+                            cosT + axis.z * axis.z * (1.0f - cosT));
+        }
+        else
+        {
+            AtmoColorCenterFog = float3(0.0f);
+            AtmoColorCenterClouds = float3(0.0f);
+        }
+    }
+}
+
+fragment combine(rt1=RT_Sky, rt2=RT_Fog, rt3=RT_Lights)
+{
+    float Mie(float cosT, float g)
+    {
+         #if 1
+        // Draine
+        float a = 28.59534836f; //exp(3.62489f - (8.29288f / (d + 5.52825f)));
+        float g2 = g * g;
+        return (1.0f / (4.0f * PI)) * ((1.0f - g2) / pow(1.0f + g2 - 2.0f * g * cosT, 1.5f))
+            * (1.0f + a * cosT * cosT) / (1.0f + a * (1.0f + 2.0f * g2) / 3.0f)
+            ;
+        #else
+        // HG+Draine
+        float a = 28.59534836f; //exp(3.62489f - (8.29288f / (d + 5.52825f)));
+        float g2 = g * g;
+        float HG = (1.0f / (4.0f * PI)) * ((1.0f - g2) / pow(1.0f + g2 - 2.0f * g * cosT, 1.5f));
+        
+        g = 0.603345f;
+        g2 = 0.364025f;
+        float D = (1.0f / (4.0f * PI)) * ((1.0f - g2) / pow(1.0f + g2 - 2.0f * g * cosT, 1.5f)) * (1.0f + a * cosT * cosT) / (1.0f + a * (1.0f + 2.0f * g2) / 3.0f);
+
+        return mix(HG, D, 0.501334f);
+        #endif   
+    }
+
+    float Mie(float cosT)
+    {
+        return Mie(cosT, MieG);
+    }
+  
+    float InterleavedGradientNoise(float2 uv)
+    {
+        float noise = fract(52.9829189f * fract(0.06711056f * uv.x + 0.00583715f * uv.y));
+        // triangulate!
+        noise = noise * 2 - 1.0f;
+        return noise;
+    }
+
+    float3 Schlick(float3 f0, float3 f90, float VdotH)
+    {
+        return f0 + (f90 - f0) * Pow5(1.0 - VdotH);
+    }
+    
+    float Schlick(float f0, float f90, float VdotH)
+    {
+        return f0 + (f90 - f0) * Pow5(1.0 - VdotH);
+    }
+
+    float Burley(float roughness, float NdotL, float LdotH, float NdotV)
+    {
+        const float f0 = 1.0;
+        
+        float energyBias = roughness * 0.5;//mix(0.0, 0.5, roughness);
+        float f90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+        float lightScatter = Schlick(f0, f90, NdotL);
+        float viewScatter  = Schlick(f0, f90, NdotV);
+        return lightScatter * viewScatter;
+    }
+    
+    float OrenNayar(float alpha, float NdotL, float NdotV, float LdotV)
+    {
+        alpha = 0.70710678118 * atan(alpha);
+        alpha *= alpha;
+    
+        float s = LdotV - NdotL * NdotV;
+        float t = (s <= 0.0) ? 1.0 : max(NdotL, NdotV);
+        
+        float A = 1.0 - 0.5 * (alpha / (alpha + 0.33)) + 0.17 * (alpha / (alpha + 0.13));
+        float B = 0.45 * (alpha / (alpha + 0.09));
+        
+        return A + B * s / t;
+    }
+
+    float TrowbridgeReitz(float alpha, float NdotH)
+    {
+        float alpha2 = alpha * alpha;
+        float denom = (NdotH * NdotH) * (alpha2 - 1.0) + 1.0;
+        denom *= denom;
+        return alpha2 / denom;
+    }
+
+    float EstimateFogCoverage(float dist)
+    {
+        if (dist >= FogFar)
+            return 1.0f; // Exponential Fog AND Distant Fog can screw things up
+        return saturate((dist - omw.fogNear) / (omw.fogFar - omw.fogNear));
+    }
+
+    omw_In float2 omw_TexCoord;
+    omw_In float3 AtmoColorCenterFog;
+    omw_In float3 AtmoColorCenterClouds;
+    omw_In float3x3 StarsRotation;
+    
+    void main()
+    {
+        float4 outputColor = omw_GetLastShader(omw_TexCoord);
+        outputColor.a = 1.0f;
+
+        float3 worldPos = omw_GetWorldPosFromUV(omw_TexCoord);
+        if (worldPos.z < omw.waterHeight && !omw.isInterior)
+        {
+            float3 ray = worldPos - omw.eyePos.xyz;
+            worldPos.z = (omw.waterHeight - omw.eyePos.z) / ray.z;
+            worldPos = omw.eyePos.xyz + ray * worldPos.z;
+        }
+        float worldDistance = distance(omw.eyePos.xyz, worldPos);
+        float3 direction = (worldPos - omw.eyePos.xyz);
+
+        float fogAmount = 0.0f;
+        float2 cloudData = float2(0.0f);
+        bool needFogFullRes = true;
+        bool needLightsFullRes = true;
+
+        float4 fogData = omw_Texture2D(RT_Fog, omw_TexCoord).rgba;
+        
+        // always read it!
+        cloudData = fogData.ba;
+        
+        if (DownscaleEffects)
+        {
+            if (ExpandTiles)
+            {
+                float2 offset = omw.rcpResolution * 2;
+                fogData.g += omw_Texture2D(RT_Fog, omw_TexCoord + float2( offset.x,  offset.y)).g;
+                fogData.g += omw_Texture2D(RT_Fog, omw_TexCoord + float2(-offset.x,  offset.y)).g;
+                fogData.g += omw_Texture2D(RT_Fog, omw_TexCoord + float2( offset.x, -offset.y)).g;
+                fogData.g += omw_Texture2D(RT_Fog, omw_TexCoord + float2(-offset.x, -offset.y)).g;
+                fogData.g *= 0.20;
+            }
+            
+            if (fogData.g > 0) // safe to use it
+            {
+                fogAmount = fogData.r;
+                needFogFullRes = false;
+                needLightsFullRes = false;
+            }
+        }
+        
+        // Fog precalc
+        float3 normalizedDirection = normalize(direction);
+        float fogCov = EstimateFogCoverage(worldDistance);
+        if (fogCov >= 1.0f && !AtmosphericFogEnabled)
+            fogAmount = 0.0f;
+        else if (needFogFullRes && FogEnabled)
+            fogAmount = CalculateFog(worldPos, direction, worldDistance, omw_TexCoord, 1.0f);
+
+        if (!(AtmosphericFogEnabled && SkyRenderEnabled) && worldDistance <= FogFar)
+            fogAmount *= smoothstep(AtmosphericFogEnabled ? max(1.0f, 2.0f * GetAtmosphericFogDensity()) : 1.0f, 0.8f, fogCov);
+        else if (!omw.isInterior)
+        {
+            if (normalizedDirection.z > 0.0f && worldDistance >= FogFar)
+                 fogAmount = max(fogAmount, 0.0f);
+            // if (omw_TexCoord.x > 0.5f) { omw_FragColor = float4(fogAmount); return; }
+        }    
+
+        // Get rid of any remaining fog in case there should be none
+        if (!FogEnabled || (omw.isInterior ? InteriorFogIntensity : FogIntensity) <= 0.0f)
+            fogAmount = 0.0f;
+
+        float3 lightsColor = float3(0.0f);
+        if (LightsEnabled && LightsIntensity > 0.0)
+        {
+            if (DownscaleEffects && !needLightsFullRes)
+                lightsColor.rgb = omw_Texture2D(RT_Lights, omw_TexCoord).rgb;
+            else 
+                lightsColor.rgb = CalculateLights(omw.eyePos.xyz, direction, worldDistance);
+        }
+        
+        float phaseM = omw.isInterior ? 0.0f : Mie(dot(omw.sunPos.xyz, normalizedDirection));
+        float sunPosFade = smoothstep(-0.15f, -0.05f, omw.sunPos.z);
+        float3 noise;
+        noise.r = noise.b = 0.7f * (InterleavedGradientNoise(omw_TexCoord * omw.resolution) * DitheringStrength / 255.0f);
+        noise.g = -noise.r;
+        
+        float ef = GetExposureFactor(); //0.0625f;
+        const float3 minAtmoColor = float3(0.03f, 0.04f, 0.08f); // using min miiiight create problems... if so, just use a mix and lum
+        // minAtmoColor += float3(0.08f, 0.09f, 0.12f) * GetFogAdjustmentFactor() * FogIntensity * FogIntensity;
+        const float skyBlend = 0.80f;
+        float skyBlendFactor = saturate((fogCov - skyBlend) * 5.0f);// / (1.0f - skyBlend));
+        float minMoonAlpha = 999.0f;
+        
+        // Sky
+        float3 skyColor = float3(0.0f);
+        if (!omw.isInterior && skyBlendFactor > 0.0f && AtmosphericFogEnabled && SkyRenderEnabled && normalizedDirection.z >= 0.0f)
+        {
+            float3 preSkyColor = outputColor.rgb;
+        
+            float2 uv = normalizedDirection.xy;
+            uv.x = atan(uv.y, abs(uv.x) < 0.0001f ? abs(uv.x) + 0.0001f : uv.x);
+            uv.x = fract(uv.x * INV_PI * 0.5f);
+            
+            uv.y = asin(max(0.0f, normalizedDirection.z));
+            uv.y = sqrt(uv.y * INV_PI * 2.0f);
+
+            skyColor = GetSkyColor(RT_Sky, uv, ef);
+    
+            // omw_FragColor.rgb = GetSkyColor(RT_Sky, omw_TexCoord, ef).rgb; return;
+            // omw_FragColor.rg = uv; return;
+            // omw_FragColor.rgba = float4(saturate(20.0f * (0.05f - abs(omw.sunPos.z)))); return;
+            
+            float4 sunPos = omw.projectionMatrix * omw.viewMatrix * omw.sunPos.xyzw;
+            sunPos.xy /= sunPos.w;
+            sunPos.xy = sunPos.xy * 0.5f + 0.5f;
+            sunPos.xy = omw_TexCoord - sunPos.xy;
+            sunPos.y *= omw.rcpResolution.x / omw.rcpResolution.y;
+            
+            float skyFactor = CelestialRenderEnabled ? 1.0f : sunPosFade;
+            skyFactor *= skyBlendFactor;
+            outputColor.rgb = mix(outputColor.rgb, skyColor.rgb, skyFactor);
+
+            float sunFactor = step(0.0f, dot(omw.eyeVec.xyz, omw.sunPos.xyz)) * exp2(0.025f - length(sunPos.xy));
+            sunFactor = clamp((sunFactor - 0.998f) * 500.0f, 0.0f, 2.0f);
+            if (sunFactor > 0.0f)
+                outputColor.rgb = mix(outputColor.rgb, float3(1.99f, 1.45f, 1.0f), skyFactor * sunFactor * smoothstep(0.00f, 0.15f, normalizedDirection.z));
+
+            if (CelestialRenderEnabled)
+            {
+                float3 lightDir = omw.sunPos.xyz;
+                if (lightDir.z < 0.0f)
+                {
+                    lightDir.y -= lightDir.z * 0.8f;
+                    lightDir = normalize(lightDir);
+                }
+                
+                float3 rotatedDirection = StarsRotation * normalizedDirection;
+                
+                uv.x = atan(rotatedDirection.y, abs(rotatedDirection.x) < 0.0001f ? abs(rotatedDirection.x) + 0.0001f : rotatedDirection.x);
+                uv.x = -(uv.x * INV_PI * 0.5f + omw.gameHour * 0.0416666f + StarMapOffset);
+                uv.y = asin(rotatedDirection.z);
+                uv.y = uv.y / (PI * 0.5f) * 0.5f + 0.5f;
+                
+                if (TwinklingEnabled)
+                    outputColor.rgb = max(minAtmoColor, max(outputColor.rgb, mix(StarBrightnessNight, StarBrightnessDay, smoothstep(-0.05f, 0.15f, omw.sunPos.z)) * omw_Texture2D(NightSkyTex, uv).rgb * smoothstep(0.00f, 0.15f, normalizedDirection.z)));
+                else
+                    outputColor.rgb = max(minAtmoColor, max(outputColor.rgb, mix(StarBrightnessNight, StarBrightnessDay, smoothstep(-0.05f, 0.15f, omw.sunPos.z)) * omw_Texture2D(NightSkyBilinearTex, uv).rgb * smoothstep(0.00f, 0.15f, normalizedDirection.z)));
+                // outputColor.rgb = float3(uv, 0.0f);
+
+                float2 AEs[2];
+                float fastDay = fract(omw.gameHour * 0.0833333f + 0.07f) * PI_2;
+                float slowDay = fract(omw.gameHour * 0.0416666f + 0.15f) * PI_2;
+                AEs[0].x = fastDay + PI + 0.1f;
+                AEs[0].y = sin(fastDay) * 0.8f;
+                AEs[1].x = -slowDay - 0.1f;
+                AEs[1].y = sin(slowDay) * 1.1f;
+                
+                float horizonFactor = saturate(abs(normalizedDirection.z) * 0.6f * PI);
+                for (int i = 0; i < 2; i++)
+                {
+                    float3 moonPos = float3(cos(AEs[i].y) * cos(AEs[i].x),
+                                            cos(AEs[i].y) * sin(AEs[i].x),
+                                            sin(AEs[i].y));
+
+                    moonPos *= 200.0f;
+
+                    float moonDist = length(moonPos);
+                    float3 projectedPos = moonDist * normalizedDirection;
+    
+                    if (dot(moonPos, normalizedDirection) > 0.0f)
+                    {
+                        float moonRadius = (i == 0) ? 12.0f : 30.0f;
+                        float3 a = -moonPos;
+                        float b = dot(a, normalizedDirection);
+                        float c = dot(a, a) - moonRadius * moonRadius;
+                        float h = b * b - c;
+
+                        if (h >= 0.0)
+                        {
+                            projectedPos = (-b - sqrt(h)) * normalizedDirection;
+                            float3 moonNormal = normalize(projectedPos - moonPos);
+
+                            uv.x = atan(moonNormal.y, abs(moonNormal.x) < 0.0001f ? abs(moonNormal.x) + 0.0001f : moonNormal.x);
+                            uv.x = (uv.x * INV_PI * 0.5f);
+                            uv.y = asin(moonNormal.z);
+                            uv.y = uv.y / (PI * 0.5f) * 0.5f + 0.5f;
+                            // uv.y = 1.0f - uv.y;
+                            
+                            if (i == 0)
+                            {
+                                // uv.x += 0.6f;
+                                // uv.y = 1.0f - uv.y;
+                                uv.x -= fastDay / PI_2 - 0.85f;
+                                moonPos = omw_Texture2D(SecundaTex, uv.xy).rgb;
+                            }
+                            else
+                            {
+                                uv.x += slowDay / PI_2 - 0.25f;
+                                // uv.y = 1.0f - uv.y;
+                                moonPos = omw_Texture2D(MasserTex, uv.xy).rgb;
+                            }
+                            
+                            float NdotL = saturate(dot(lightDir, moonNormal));
+                            
+                            float3 H = normalize(lightDir - normalizedDirection);
+                            const float roughness = 0.775f;
+                            const float alpha = roughness * roughness;
+
+                            float NdotV = abs(dot(moonNormal, -normalizedDirection));
+                            float VdotH = dot(-normalizedDirection, H);
+                            float NdotH = max(dot(moonNormal, H), 0.0f);
+                            
+                            float3 ks = Schlick(float3(0.035f), float3(1.0f), VdotH);
+                            float3 kd = (1.0 - ks)
+                                // * Burley(roughness, NdotL, VdotH, NdotV)
+                                * OrenNayar(alpha, NdotL, NdotV, dot(lightDir, -normalizedDirection))
+                                ;
+                            
+                            float D = TrowbridgeReitz(alpha, NdotH);
+                            float denom = 2.0 * mix(2 * NdotL * NdotV, NdotL + NdotV, alpha);
+                            float specularBRDF = D / max(denom, 1e-4);
+                            
+                            moonPos = kd * moonPos + ks * specularBRDF;
+                            
+                            if (horizonFactor < 1.0f && MoonScatteringEnabled)
+                            {
+                                if (i == 1)
+                                    horizonFactor = saturate(horizonFactor + 0.5f);
+
+                                horizonFactor = 1.0f - horizonFactor;
+                                horizonFactor *= smoothstep(1.0f, -0.1f, omw.sunPos.z);
+                                // moonPos.r += moonPos.b * 2.0f * horizonFactor;
+                                // moonPos.g += moonPos.b * 0.8f * horizonFactor;
+                                // moonPos.b *= mix(1.0f, 0.5f, horizonFactor);
+                                // moonPos *= mix(float3(1.0f), float3(1.0f, 0.66f, 0.35f), horizonFactor);
+                                // horizonFactor = 1.0f - horizonFactor;
+                                
+                                moonPos.g -= horizonFactor * horizonFactor;
+                                moonPos.b -= horizonFactor * 1.5f;
+                                moonPos = saturate(moonPos);
+                            }
+                            
+                            moonPos += skyColor * 0.25f; // add ambient after scattering
+
+                            float edgeFactor = dot(moonNormal, -normalizedDirection);
+                            edgeFactor = smoothstep(0.0f, 0.25f, edgeFactor);
+                            
+                            moonPos = mix(outputColor.rgb, moonPos, edgeFactor);
+                            outputColor.rgb = max(minAtmoColor, mix(skyColor * (1.0f - sunFactor), moonPos, NdotL * smoothstep(0.0f, 0.12f, normalizedDirection.z)));
+                            minMoonAlpha = min(minMoonAlpha, 1.0f - edgeFactor);
+                            // outputColor.rgb = mix(outputColor.rgb, moonPos.rgb, saturate(dot(omw.sunPos.xyz, moonNormal)));
+                            // outputColor.rgb = float3(edgeFactor);
+                            if (edgeFactor > 0.25f)
+                                break; // don't draw other moon if overlapping
+                        }
+                    }
+                }
+            }
+            
+            outputColor.rgb = mix(preSkyColor, outputColor.rgb, skyBlendFactor);
+        }
+        else if (!omw.isInterior && fogCov >= 1.0f && SkyAdjustmentEnabled && omw.sunPos.z <= 0.15f && omw.sunPos.z >= -0.25f)
+        {
+            float skyColFade = skyBlendFactor * min(smoothstep(0.15f, 0.05f, omw.sunPos.z), smoothstep(-0.25f, 0.05f, omw.sunPos.z))
+                * smoothstep(0.10f, 0.30f, normalizedDirection.z) * GetSkyWeatherAdjustmentFactor();
+            skyColor = float3(0.266f, 0.267f, 0.306f) * 0.95f;
+            // outputColor.rgb = max(outputColor.rgb, skyColor * skyColFade);
+            outputColor.rgb = mix(outputColor.rgb, skyColor, skyColFade * (1.0f - length(outputColor.rgb)));
+            // if (omw_TexCoord.y > 0.95f && omw_TexCoord.x < skyColFade) outputColor.rgb = float3(10.0f);
+        }
+        // omw_FragColor.rgb = outputColor.rgb; return;
+
+        // Volumetrics colors, preferably atmosphere-based
+        float3 fogColor = omw.fogColor.rgb;
+        float3 cloudsColor = omw.fogColor.rgb;
+        
+        if (!omw.isInterior && AtmosphericFogEnabled && SkyRenderEnabled)
+        {
+            float3 atmoColors[2]; // edge and center
+            
+            float2 lutUV = normalizedDirection.xy;
+            lutUV.x = atan(lutUV.y, abs(lutUV.x) < 0.0001f ? lutUV.x + 0.0001f : lutUV.x);
+            lutUV.x = fract(lutUV.x * INV_PI * 0.5f);
+            lutUV.y = 0.0f;
+
+            atmoColors[0] = GetSkyColor(RT_Sky, lutUV, ef);
+
+            // minAtmoColor += float3(0.08f, 0.09f, 0.12f) * GetFogAdjustmentFactor() * FogIntensity * FogIntensity;
+            atmoColors[0] = max(atmoColors[0], minAtmoColor);//10.0f * float3(0.02f, 0.025f, 0.03f));
+            // omw_FragColor.rgb = abs(atmoColors[1] - AtmoColorCenterClouds) * 1000.0f; return;
+            
+            // atmoColors[1] = mix(float3(CalculateLuminance(AtmoColorCenterFog)), AtmoColorCenterFog, 
+                // smoothstep(1.00f, 0.75f, fogAmount) * 
+                // smoothstep(0.75f, 0.25f, CalculateLuminance(outputColor.rgb)));
+            // atmoColors[1] = float3(CalculateLuminance(AtmoColorCenterFog));
+            atmoColors[1] = AtmoColorCenterFog;
+            
+            if (!CelestialRenderEnabled)
+                atmoColors[1] = mix(omw.fogColor.rgb, atmoColors[1], sunPosFade);
+
+            float3 atmoColorMix;
+            
+            float viewFade = smoothstep(0.60f, 0.05f, abs(normalizedDirection.z));
+            // atmoColors[1] = mix(atmoColors[1], atmoColors[0], fogAmount * fogAmount * fogAmount * lutUV.x);
+            atmoColorMix = mix(mix(atmoColors[1], minAtmoColor, smoothstep(0.05f, -0.15f, omw.sunPos.z)), atmoColors[0].rgb,
+                    viewFade
+                    * 
+                    // (smoothstep(FogFar * 0.125f, max(FogFar * 0.5f, (omw.fogNear + FogFar) * 0.5f), worldDistance))
+                    skyBlendFactor
+                    // (1.0f - fogAmount * fogAmount * fogAmount)
+                    );
+            
+            // atmospheric shading
+            // lutUV.y = CalculateLuminance(atmoColorMix);
+            // atmoColorMix = mix(atmoColorMix, lutUV.y * float3(0.7463f, 1.0234f, 1.5139f), FogScattering * 0.5f * (1.0f - fogAmount) * smoothstep(0.30f, 0.15f, CalculateLuminance(outputColor.rgb)));
+            // atmoColorMix = mix(atmoColorMix, atmoColorMix * float3(0.185f, 0.403f, 1.0f), FogScattering * 0.3f * (1.0f - fogAmount) * smoothstep(0.20f, 0.05f, CalculateLuminance(outputColor.rgb)));
+            atmoColorMix += float3(0.185f, 0.403f, 1.0f) * saturate(omw.sunVis * 3.0f) * FogScattering * 0.25f * (1.0f - phaseM) * (1.0f - fogAmount) 
+                * (smoothstep(0.20f, 0.00f, CalculateLuminance(outputColor.rgb))
+                + max(2.5f * pow(smoothstep(500.0f, 4000.0f, worldPos.z - omw.eyePos.z), 1.5f),
+                    omw.sunPos.z * smoothstep(2000.0f, 4000.0f, worldPos.z)))
+                    ;
+            // atmoColorMix += float3(0.185f, 0.403f, 1.0f) * FogScattering * 0.20f * (1.0f - phaseM) * (1.0f - fogAmount) * smoothstep(0.10f, 0.00f, CalculateLuminance(outputColor.rgb));
+
+            // omw_FragColor.rgb = float3(smoothstep(0.20f, 0.00f, CalculateLuminance(outputColor.rgb))); return;
+
+            // atmoColors[0] = mix(atmoColors[0], atmoColorMix, smoothstep(0.45f, 0.6f, GetCloudsDensity()));
+            
+            // mix back in edge color in cases of thick fog (and also take the view angle in order to prevent the hemisphere slicing)
+            atmoColorMix = mix(atmoColorMix, atmoColors[0], fogAmount * fogAmount * fogAmount * viewFade);
+            
+            fogColor = mix(fogColor.rgb, atmoColorMix.rgb, CelestialRenderEnabled ? 1.0f : sunPosFade);
+            // float luminance = CalculateLuminance(fogColor.rgb);
+            // fogColor = mix(fogColor, float3(luminance), fogAmount * fogAmount * fogAmount);
+            // if (normalizedDirection.z < 0.0f)
+                // fogColor = atmoColors[1];
+
+            // fogColor = max(atmoColors[1] * 0.9f, minAtmoColor);
+
+            atmoColors[1] = AtmoColorCenterClouds;
+            if (!CelestialRenderEnabled)
+                atmoColors[1] = mix(omw.fogColor.rgb, atmoColors[1], sunPosFade);
+
+            atmoColorMix = mix(1.1f * mix(atmoColors[1], atmoColors[1] * 0.75f + float3(0.25f), clamp(omw.sunPos.z * 2.2f, 0.25f, 0.9f)), 
+                    atmoColors[0].rgb,
+                    viewFade
+                    * min(smoothstep(-0.05f, 0.05f, omw.sunPos.z), smoothstep(0.20f, 0.10f, omw.sunPos.z))
+                    );
+
+            cloudsColor = mix(omw.fogColor.rgb, atmoColorMix, CelestialRenderEnabled ? 1.0f : sunPosFade);
+
+            // omw_FragColor.rgb = cloudsColor.rgb; return;
+            // omw_FragColor.rgb = atmoColors[1].rgb; return;
+        }
+        else if(!omw.isInterior)
+        {
+            cloudsColor += float3(0.299f * cloudsColor.r + 0.587f * cloudsColor.g + 0.114f * cloudsColor.b);
+            cloudsColor *= 0.5f;
+            
+            #if defined(OMW_API_VERSION)
+            float3 fogColorCenter = mix(fogColor, omw.skyColor.rgb, 0.1f);
+            fogColor = mix(fogColorCenter, fogColor, fogAmount * fogAmount * fogAmount);
+            #endif
+        }
+        // fogColor = max(fogColor, float3(0.07f, 0.095f, 0.12f));
+        // fogColor = omw.fogColor.rgb;
+        // if (omw_TexCoord.x > 0.975f) { omw_FragColor.rgb = fogColor.rgb; return; }
+        
+        // Apply clouds
+        float viewDirFade = SkyRenderEnabled && AtmosphericFogEnabled && FogEnabled && FogIntensity > 0.0f ? smoothstep(0.10f, -0.05f, normalizedDirection.z) : smoothstep(0.15f, 0.00f, normalizedDirection.z);
+        // viewDirFade = SkyRenderEnabled ? smoothstep(0.15f, 0.05f, normalizedDirection.z) : viewDirFade;
+        viewDirFade *= viewDirFade;
+        viewDirFade = 1.0f - viewDirFade;
+        if (!omw.isInterior && skyBlendFactor > 0.0f && AtmosphericFogEnabled && CloudsEnabled && viewDirFade > 0.0f && cloudData.x > 0.001f)
+        {
+            // omw_FragColor.rgb = float3(cloudData.x); return;
+            // omw_FragColor.rgb = float3(cloudData.x, 0.0f, 1.0f - cloudData.y); return;
+            float lf = 0.0f;
+            
+            // float cloudDensity = GetCloudsDensity();
+            // float cloudThreshold = 0.8f * smoothstep(0.5f, 0.42f, cloudDensity);
+            // cloudData.x = max(0.0f, cloudData.x - cloudThreshold) / (1.0f - cloudThreshold);
+            // cloudData.x = smoothstep(cloudThreshold, 1.00001f, cloudData.x);
+            // cloudData.x *= 2.0f;
+            // lf = max(0.0f, cloudData.x - 0.9f); // puffy
+            // lf = min(lf, abs(0.25f - cloudData.x));
+            // cloudsColor = mix(max(float3(0.17f, 0.17f, 0.20f), omw.fogColor.rgb), float3(0.21f), lf);// * sqrt(lf));
+            
+            // lf = max(0.0f, exp(-3 * cloudData.x) * (1.0f - exp(-6 * cloudData.x)) - 0.05f);
+            // lf = abs(1.0f - sqrt(cloudData.x));
+            // lf = saturate(abs(1.0f - cloudData.x) * cloudDensity * 2.0f);
+            // lf = cloudData.x * (1.0f - cloudData.x);
+            // lf = max(lf, cloudData.y * cloudData.x);
+            // lf *= 0.78f;
+            // lf = mix(lf, 0.75f, smoothstep(0.5f, 1.0f, GetCloudsDensity()));
+            lf = cloudData.y * 0.8f;
+            lf = (lf - 0.5f) * 1.2f + 0.5f;
+            // cloudsColor = max(float3(0.17f, 0.17f, 0.20f), omw.fogColor.rgb) * (1.0f - lf * 0.5f);
+            
+            // (fogColor.rgb + omw.fogColor.rgb) * 0.475f
+            
+            float3 cloudShadowColor = mix(float3(0.12f, 0.13f, 0.15f) * smoothstep(-0.6f, 0.0f, omw.sunPos.z), float3(0.20f, 0.31f, 0.50f), sqrt(omw.sunVis));
+            if (AtmosphericFogEnabled && SkyRenderEnabled)
+            {
+                // cloudsColor = mix(cloudsColor, skyColor, 0.05f);
+                skyColor = ClampColorLuminance(skyColor, 0.2f);
+                cloudShadowColor = mix(cloudShadowColor, skyColor * 0.15f, sunPosFade);
+            }
+            // omw_FragColor.rgb = cloudShadowColor.rgb; return;
+
+            cloudsColor = mix(
+                mix(float3(0.14f, 0.16f, 0.19f), cloudsColor, smoothstep(-0.35f, -0.10f, omw.sunPos.z)), 
+                cloudShadowColor,
+                lf);// * sqrt(lf));
+            
+            // Scattering (reuse cloudShadowColor to save a VGPR)
+            cloudShadowColor.x = mix(phaseM, Mie(dot(omw.sunPos.xyz, normalizedDirection), 0.7f), cloudData.y);
+            cloudShadowColor = mix(float3(1.0f), float3(1.4118f, 0.9317f, 0.4935f), saturate(sunPosFade * cloudShadowColor.x * CloudsScattering * saturate(1.0f - 1.5f * lf)));
+            cloudsColor *= cloudShadowColor;
+
+            outputColor.a = cloudData.x * cloudData.x * cloudData.x * viewDirFade * skyBlendFactor;
+            outputColor.rgb = mix(outputColor.rgb, cloudsColor, outputColor.a);
+            outputColor.a *= lf;
+            outputColor.a = 1.0f - outputColor.a;
+
+            // omw_FragColor.rgb = float3(cloudData.x, 0.0f, lf); return;
+            // omw_FragColor.rgb = cloudsColor.rgb; return;
+
+            // {
+                // cloudsAmount1 *= 2.0f;
+                // lf = abs(1.0f - cloudsAmount1) * 0.0625f + 0.5f;//max(0.0f, cloudsAmount1 - 0.90f));
+                // cloudsColor = mix(max(float3(0.12f), omw.fogColor.rgb), float3(0.05f, 0.05f, 0.07f), lf);// * sqrt(lf));
+                // float bottomFade = smoothstep(0.40f, 0.50f, GetCloudsDensity());
+                // outputColor.rgb = mix(outputColor.rgb, cloudsColor, saturate(cloudsAmount1) * bottomFade * viewDirFade);
+            // }
+        }
+        
+        if (fogAmount > 0.0f && FogScattering > 0.0f && !omw.isInterior)
+        {
+            if (omw.sunVis > 0)
+            {
+                float3 fogColorSun = fogColor;
+                
+                fogColorSun *= float3(1.10f, 0.81f, 0.58f) * max(FogScattering, 1.0f); 
+                // fogColorSun *= float3(1.10f, 0.84f, 0.64f) * max(FogScattering, 1.0f);
+                // fogColorSun *= float3(1.37f, 1.29f, 1.07f);
+                // fogColorSun *= (fogColorSun + float3(0.7f));
+                // fogColorSun *= float3(1.72f, 1.39f, 1.12f); // gold version
+                // fogColorSun *= (float3(0.2f) + float3(0.984313f, 0.831372f, 0.529411f)); // Bruneton model - todo regulate luminance?
+                // fogColorSun = omw.sunColor.rgb;
+
+                float shadowProbability = saturate(worldDistance / min(omw.fogNear, 8000.0f));
+                shadowProbability *= shadowProbability;
+                
+                float depthFade = !(AtmosphericFogEnabled && SkyRenderEnabled) ? 1.0f : smoothstep(FogFar, omw.fogNear, worldDistance);
+                
+                // phaseM = mix(phaseM, Mie(dot(omw.sunPos.xyz, normalizedDirection), 0.7f), fogAmount);
+                fogColor = mix(fogColor, fogColorSun, phaseM * shadowProbability * saturate(omw.sunVis * 10.0f) * depthFade * FogScattering * smoothstep(2.5f, 2.0f, GetFogAdjustmentFactor() * FogIntensity * FogIntensity * 4.0f));
+
+                // omw_FragColor.rgb = float3(abs(phaseM)); return;
+            }
+            
+            // mix with lights (theoretically should use another phase function here, too)
+            fogColor += lightsColor * FogScattering * (0.2f / LightsIntensity)
+                * saturate(smoothstep(8000.0f, 0.0f, worldDistance) * 0.5f + 0.5f)
+                ; // prevent lights near camera to light up far away fog
+        
+            // mix back far fog
+            if (!(AtmosphericFogEnabled && SkyRenderEnabled))
+                fogColor = mix(fogColor, omw.fogColor.rgb, saturate(fogCov * 1.25f));
+        }
+        // fogColor = max(fogColor, float3(0.07f, 0.095f, 0.12f));
+
+        // Patch fog color for transparency
+        if (FogEnabled && FogIntensity > 0.0f && fogCov <= 1.0f && worldDistance <= FogFar)
+        {
+            if (!AtmosphericFogEnabled)
+            {
+                if (normalizedDirection.z > 0.0f)
+                    fogColor.rgb = mix(fogColor.rgb, outputColor.rgb, skyBlendFactor);
+                // omw_FragColor = float4(1, 0, 0, 1); return;
+            }
+            else if (skyBlendFactor > 0.0f)
+            {
+                // fogAmount = smoothstep(0.99f, 0.95f, fogAmount);
+                // fogColor.rgb = mix(fogColor.rgb, outputColor.rgb, smoothstep(0.9f, 1.0f, fogCov));
+                // fogAmount *= smoothstep(1.15f, skyBlend, fogCov);
+
+                // Try to aproximate how much atmospheric fog will be _behind_ the geometry, and use that to try a get a good blend
+                // float fogAdjustment = GetFogAdjustmentFactor() * FogIntensity * FogIntensity * 2.0f * GetAtmosphericFogDensity();
+                // fogAmount *= smoothstep(0.93f + fogAdjustment, skyBlend, fogCov); // should be 1.0f, but we're approximating, so a better fit was chosen empirically
+                
+                // Just calculate the atmo fog _behind_ the geometry and be done with it
+                float fogAdjustment = CalculateFog(worldPos, direction, FogFar, omw_TexCoord, skyBlendFactor);
+                fogAmount = mix(fogAmount, fogAdjustment, skyBlendFactor);
+                // omw_FragColor = float4(0, 1, 0, 1); return;
+                
+                // if (cloudData.x == 1.0f && cloudData.y == 1.0f)
+                // {   omw_FragColor = float4(1, 1, 1, 1); return; }
+            }
+        }
+
+        // Apply fog
+        outputColor.rgb = mix(outputColor.rgb, fogColor, fogAmount);
+
+        // Apply lights
+        outputColor.rgb += lightsColor + noise;
+
+        if (DebugFog)
+            outputColor.rgb = fogColor.rgb * fogAmount;
+         
+        if (DebugTiles)
+            outputColor.rgb = mix(outputColor.rgb, needFogFullRes ? float3(1, 0, 0) : float3(0, 1, 0), 0.25f);
+        
+        outputColor.a = min(minMoonAlpha, outputColor.a);
+        
+        // if (omw_TexCoord.y > 0.95 && omw_TexCoord.x < omw.weatherTransition * 0.5f) outputColor.rgb = float3(0.0f);
+        // if (omw_TexCoord.y > 0.95 && omw_TexCoord.x < omw.sunVis) outputColor.rgb += float3(9999.0f);
+        // if (omw_TexCoord.y > 0.95) outputColor.rgb = omw_TexCoord.x < 0.5 ? omw.fogColor.rgb : omw.sunColor.rgb;
+        // if (omw_TexCoord.x < GetFogSunAdjustmentFactor() * GetFogWeatherAdjustmentFactor() / 2.0f && omw_TexCoord.y > 0.95) outputColor.rgb = float3(0, 1, 0);
+        // if (omw_TexCoord.x < omw.sunVis && omw_TexCoord.y > 0.95) outputColor.rgb = float3(0, 1, 0);
+        // if (omw_TexCoord.x < abs(omw.sunPos.z) && omw_TexCoord.y > 0.95) outputColor.rgb = float3(0, 1, 0);
+        // outputColor.rgb = float3(fogCov);
+        // outputColor.rgb = float3(1.0f - exp(-worldDistance * 0.00025f));
+        // outputColor.rgb = InterleavedGradientNoise(omw_TexCoord * omw.resolution) * DitheringStrength / 5;
+        // outputColor.rgb = omw_Texture2D(NoiseTex2D, omw_TexCoord * 3).rrr;
+        // if (omw_TexCoord.x < (omw.weatherTransition) && omw_TexCoord.y > 0.95) outputColor.rgb = float3(0, 1, 0);
+        // float testyTest = smoothstep(FogFar, omw.fogNear, worldDistance); outputColor = float4(testyTest + fogCov);
+        // outputColor.rgb = fogColor.rgb;
+        // outputColor.rgb = float3(cloudData, 0.0f);
+        // outputColor.rgb = outputColor.aaa;
+        // outputColor.rgb = omw_Texture2D(RT_Sky, omw_TexCoord).rgb * 0.05f;
+
+        omw_FragColor = outputColor;
+    }
+}
+
+technique
+{
+    passes = skyTransmittance, sky, fog, lights, combine;
+    version = "1.9";
+    description = "Volumetrics All In One";
+    author = "Rafael";
+    flags = disable_underwater, disable_sunglare;
+    pass_lights = true;
+}

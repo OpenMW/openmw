@@ -1,0 +1,601 @@
+uniform_bool BloomEnabled
+{
+    header = "General";
+	default = true;
+    display_name = "Enable Bloom";
+	description = "Enable bloom effect";
+}
+
+uniform_bool HdrTonemapping
+{
+    default = true;
+    display_name = "Enable HDR Tonemapping";
+    description = "Enable HDR filmic tonemapping";
+}
+
+uniform_float SpecialContrast
+{
+    default = 0.5;
+    min = 0.0;
+    max = 1.0;
+    step = 0.05;
+    display_name = "Special Contrast";
+    description = "Special contrast effect intensity";
+}
+
+uniform_int SpecialSaturation
+{
+    default = 3;
+    min = 0;
+    max = 5;
+    display_name = "Special Saturation";
+    description = "Special saturation effect (0 to disable, 1 to 5 control the intensity)";
+}
+
+uniform_bool SpecialTint
+{
+    default = true;
+    display_name = "Weather Tint";
+    description = "Slight tinting based on weather";
+}
+
+uniform_float BloomThreshold
+{
+    header = "Bloom settings";
+    default = 0.5;
+    min = 0.01;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Bloom Threshold";
+}
+
+uniform_float BloomGlobalMultiplier
+{
+    default = 0.500;
+    min = 0.0;
+    max = 1.0;
+    step = 0.01;
+    display_name = "Bloom Global Multiplier";
+    description = "The overall multiplier for bloom. Effects all areas.";
+}
+
+uniform_float BloomUnderwaterMultiplier
+{
+    default = 1.50;
+    min = 0.0;
+    max = 10.0;
+    step = 0.05;
+    display_name = "Bloom Underwater Multiplier";
+    description = "Underwater mutliplier for bloom. Only takes effect when the camera is underwater.";
+}
+
+uniform_float BloomInteriorMultiplier
+{
+    default = 0.65;
+    min = 0.0;
+    max = 10.0;
+    step = 0.05;
+    display_name = "Bloom Interior Multiplier";
+    description = "Interior multiplier for bloom. Will combine with other multipliers when both are true.";
+}
+
+uniform_float BloomExteriorMultiplier
+{
+    default = 0.65;
+    min = 0.0;
+    max = 10.0;
+    step = 0.05;
+    display_name = "Bloom Exterior Multiplier";
+    description = "Exterior multiplier for bloom. Will combine with other multipliers when both are true.";
+}
+
+uniform_float HdrThreshold
+{
+    header = "HDR Tonemapping settings";
+    default = 0.25;
+    min = 0.0;
+    max = 2.0;
+    step = 0.05;
+    display_name = "HDR Threshold";
+}
+
+uniform_float LinearWhite
+{
+    default = 1.0;
+    min = 0.1;
+    max = 16.0;
+    step = 0.1;
+    display_name = "Linear White";
+}
+
+uniform_float ExposureBias
+{
+    default = 1.1;
+    min = 0.1;
+    max = 16.0;
+    step = 0.1;
+    display_name = "Exposure Bias";
+}
+
+uniform_float MaxExposure
+{
+    default = 0.26;
+    min = 0.0;
+    max = 1.0;
+    step = 0.01;
+    display_name = "Maximum Exposure";
+}
+
+uniform_float InteriorMinExposure
+{
+    default = 0.035;
+    min = 0.0;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Interior Minimum Exposure";
+}
+
+uniform_float ExteriorMinExposureDay
+{
+    default = 0.085;
+    min = 0.0;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Exterior Day Minimum Exposure";
+}
+
+uniform_float ExteriorMinExposureNight
+{
+    default = 0.015;
+    min = 0.0;
+    max = 1.0;
+    step = 0.005;
+    display_name = "Exterior Night Minimum Exposure";
+}
+
+uniform_float InteriorShoulderStrength
+{
+    default = 0.53;
+    min = 0.1;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Interior Shoulder Strength";
+}
+
+uniform_float InteriorLinearStrength
+{
+    default = 0.33;
+    min = 0.0;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Interior Linear Strength";
+}
+
+uniform_float InteriorToeStrength
+{
+    default = 0.34;
+    min = 0.0;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Interior Toe Strength";
+}
+
+uniform_float ExteriorShoulderStrength
+{
+    default = 0.41;
+    min = 0.1;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Exterior Shoulder Strength";
+}
+
+uniform_float ExteriorLinearStrength
+{
+    default = 0.13;
+    min = 0.0;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Exterior Linear Strength";
+}
+
+uniform_float ExteriorToeStrength
+{
+    default = 0.36;
+    min = 0.0;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Exterior Toe Strength";
+}
+
+uniform_float LinearAngle
+{
+    default = 0.10;
+    min = 0.0;
+    max = 1.0;
+    step = 0.02;
+    display_name = "Linear Angle";
+}
+
+render_target RT_H
+{
+    width_ratio  = 0.5;
+    height_ratio = 0.5;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+}
+
+render_target RT_Q
+{
+    width_ratio  = 0.25;
+    height_ratio = 0.25;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+}
+
+render_target RT_BlurA
+{
+    width_ratio  = 0.25;
+    height_ratio = 0.25;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+}
+
+render_target RT_BlurB
+{
+    width_ratio  = 0.25;
+    height_ratio = 0.25;
+    internal_format = rgba16f;
+    source_type = float;
+    source_format = rgba;
+}
+
+shared
+{
+    // Portability
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define saturate(x) clamp(x, 0.0f, 1.0f)
+    
+    float log10(float x)
+    {
+        return log(x) * 2.302585092994f;
+    }
+
+    float3 CalculateExposedColor(float3 color, float averageLuminance, float threshold)
+    {
+        float middleGrey = 1.03f - (2.0f / (2 + log10(averageLuminance + 1)));
+    
+        float linearExposure = (middleGrey / averageLuminance);
+        float exposure = log2(max(linearExposure, 0.0001f));
+    
+        exposure -= threshold;
+        color = exp2(exposure) * color;
+        return color;
+    }
+    
+    float GetAverageLuminance()
+    {
+        float x = omw_GetEyeAdaptation();
+        
+        float interiorMinExposure = InteriorMinExposure;
+        #if !defined(OMW_API_VERSION)
+            interiorMinExposure -= 0.02f;
+        #endif
+        x = clamp(x, omw.isInterior ? interiorMinExposure : mix(ExteriorMinExposureNight, ExteriorMinExposureDay, smoothstep(-0.5, 0.5, omw.sunPos.z)), MaxExposure);
+        return x;
+    }
+    
+    float BlurOffsets[3] = float[]( 0.0f, 1.3846153846f, 3.2307692308f );
+	// float BlurWeights[3] = float[]( 0.2270270270f, 0.3162162162f, 0.0702702703f );
+    float BlurWeights[3] = float[]( 0.2492897262f, 0.4015359892f, 0.0986914506f );
+}
+
+fragment calculate(target=RT_H)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        float3 color = omw_GetLastShader(omw_TexCoord).rgb;
+        float threshold = BloomThreshold * (omw.isInterior ? 6.0f : 2.42f);
+        
+        float averageLuminance = GetAverageLuminance();
+        color = CalculateExposedColor(color, averageLuminance, threshold);
+        
+        if (!omw.isInterior) // focus on highlights if exterior
+            color += smoothstep(BloomThreshold, BloomThreshold + 0.5f, smoothstep(0.0f, BloomThreshold, color));
+
+        omw_FragColor = float4(color, 1.0f);
+    }
+}
+
+fragment downsample(rt1=RT_H, target=RT_Q)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        if (!BloomEnabled)
+            discard;
+    
+        float2 texelSize = omw.rcpResolution * 2.0f;
+        float3 color = omw_Texture2D(RT_H, omw_TexCoord + float2(-0.5f, -0.5f) * texelSize).rgb;
+        color       += omw_Texture2D(RT_H, omw_TexCoord + float2(-0.5f,  0.5f) * texelSize).rgb;
+        color       += omw_Texture2D(RT_H, omw_TexCoord + float2( 0.5f,  0.5f) * texelSize).rgb;
+        color       += omw_Texture2D(RT_H, omw_TexCoord + float2( 0.5f, -0.5f) * texelSize).rgb;
+        
+        color *= 0.25f;
+        
+        if (!omw.isInterior)
+        {
+            color *= sqrt(color);
+            
+            // cheap GI bounce from sky
+            color += (float3(1.0f) - color) * float3(0.35f, 0.48f, 0.71f) * 0.25f * saturate(omw.sunVis * 3.0f);
+        }
+
+        omw_FragColor = float4(color.rgb, 1.0f);
+    }
+}
+
+fragment blurX(rt1=RT_Q, target=RT_BlurA)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        if (!BloomEnabled)
+            discard;
+    
+        float2 texelSize = omw.rcpResolution * 4.0f;
+        float4 color = omw_Texture2D(RT_Q, omw_TexCoord);
+
+        color *= BlurWeights[0];
+        for (int i = 1; i < 3; i++)
+		{
+			color += omw_Texture2D(RT_Q, omw_TexCoord + float2(0.0f, BlurOffsets[i]) * texelSize)
+				* BlurWeights[i];
+
+			color += omw_Texture2D(RT_Q, omw_TexCoord - float2(0.0f, BlurOffsets[i]) * texelSize)
+				* BlurWeights[i];
+		}
+            
+        omw_FragColor = color;
+    }
+}
+
+fragment blurY(rt1=RT_BlurA, target=RT_BlurB)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        if (!BloomEnabled)
+            discard;
+    
+        float2 texelSize = omw.rcpResolution * 4.0f;
+        float4 color = omw_Texture2D(RT_BlurA, omw_TexCoord);
+
+        color *= BlurWeights[0];
+        for (int i = 1; i < 3; i++)
+        {
+            color += omw_Texture2D(RT_BlurA, omw_TexCoord + float2(BlurOffsets[i], 0.0f) * texelSize)
+                * BlurWeights[i];
+                
+            color += omw_Texture2D(RT_BlurA, omw_TexCoord - float2(BlurOffsets[i], 0.0f) * texelSize)
+                * BlurWeights[i];
+        }
+
+        omw_FragColor = color;
+    }
+}
+
+fragment upsample(rt1=RT_BlurB, target=RT_H)
+{
+    omw_In float2 omw_TexCoord;
+
+    void main()
+    {
+        if (!BloomEnabled)
+            discard;
+    
+        float4 color = omw_Texture2D(RT_BlurB, omw_TexCoord);
+        // in case of high temporal instability or too many fireflies, use a smart tent blur here
+
+        omw_FragColor = color;
+    }
+}
+fragment blitz(rt1=RT_H, rt2=RT_BlurB)
+{   
+    // DO IT
+    omw_In float2 omw_TexCoord;
+
+    float3 Hable(float3 x)
+	{
+		float3 A = float3(omw.isInterior && omw.isUnderwater ? 1.0f : omw.isInterior ? InteriorShoulderStrength : ExteriorShoulderStrength);
+		float3 B = float3(omw.isInterior ? InteriorLinearStrength : ExteriorLinearStrength);
+		float3 C = float3(LinearAngle);
+		float3 D = float3(omw.isInterior ? InteriorToeStrength : ExteriorToeStrength);
+		const float3 E = float3(0.01f);
+		const float3 F = float3(0.30f);
+
+		return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+    }
+    
+    float3 Tone(float3 color)
+    {
+        float3 numerator = Hable(color * ExposureBias);
+		float3 denominator = Hable(float3(LinearWhite));
+
+		color = numerator / denominator;
+
+        return color;
+    }
+
+    float overlay_scalar(float a, float b)
+    {
+        if (a < 0.5)
+            return 2.0*a*b;
+        a = 1.0-a;
+        b = 1.0-b;
+        return 1.0 - 2.0*a*b;
+    }
+    
+    float3 overlay(float3 a, float3 b, float amount)
+    {
+        b = mix(float3(0.5), b, amount);
+        a.r = overlay_scalar(a.r, b.r);
+        a.g = overlay_scalar(a.g, b.g);
+        a.b = overlay_scalar(a.b, b.b);
+        return a;
+    }
+
+    // Array of weather data
+	float TintArr[10]=float[](
+		float(0.48),  //Clear
+		float(0.49),  //Cloudy
+		float(0.51),  //Foggy
+		float(0.53),  //Overcast
+		float(0.55),  //Rain
+		float(0.55),  //Thunder
+		float(0.50),  //Ash
+		float(0.50),  //Blight
+		float(0.55),  //Snow
+		float(0.55)   //Blizzard
+	);
+
+    float GetTint(float luma)
+    {
+        float f = TintArr[omw.weatherID];
+        if (omw.nextWeatherID >= 0)
+            f = mix(f, TintArr[omw.nextWeatherID], omw.weatherTransition);
+        return mix(0.5f, f, smoothstep(0.15f, 0.50f, luma));
+    }
+
+    void main()
+    {
+        // grab scene and blurred highlights
+        float4 scene = omw_GetLastShader(omw_TexCoord);
+		
+		if (BloomEnabled)
+		{
+            float4 blur = omw_Texture2D(RT_BlurB, omw_TexCoord);
+            
+            blur = saturate(blur);
+            
+			// apply all needed mults
+			blur *= BloomGlobalMultiplier;
+	
+			if (omw.isInterior)
+				blur *= BloomInteriorMultiplier;
+			else
+				blur *= 0.25f * BloomExteriorMultiplier;
+	
+			if (omw.isUnderwater)
+				blur *= BloomUnderwaterMultiplier;
+
+            // omw_FragColor = blur * 5.0f; return;
+
+			scene += blur;
+        }
+        
+        if (HdrTonemapping)
+        {
+            float averageLuminance = GetAverageLuminance();
+            
+            float threshold = HdrThreshold;
+            #if !defined(OMW_API_VERSION) // patch param for 0.48
+                threshold *= 2.0f;
+            #endif
+            
+            scene.rgb = CalculateExposedColor(scene.rgb, averageLuminance, threshold);
+            scene.rgb = Tone(scene.rgb);
+            
+            // if (omw_TexCoord.x < averageLuminance && omw_TexCoord.y > 0.95) scene.rgb = float3(0.3f);
+        }
+        
+        float sunVis = omw.isInterior ? 0.5f : min(omw.sunVis, omw.sunPos.z);//max(omw.sunVis, 0.5f);//clamp(max(sunHeight, 0) / 0.66f, 0, 1);
+        float contrastPower = SpecialContrast * sunVis;
+        //if (contrastPower > 0.0)
+        {
+            contrastPower = clamp(contrastPower, 0, 1);
+            float saturation = 1.0f + contrastPower; //1.0 + clamp(contrastPower * 1.5, 0.01f, 1.5f); //2.0f;
+        
+            if (!omw.isInterior)
+            {
+                if (SpecialSaturation == 0)
+                    saturation = 1.0f;
+                else if (SpecialSaturation == 2)
+                    saturation = 1.2f + contrastPower * 0.8f;
+                else if (SpecialSaturation == 3)
+                    saturation = 1.5f + contrastPower * 0.5f;
+                else if (SpecialSaturation == 4)
+                    saturation = 1.7f + contrastPower * 0.3f;
+                else if (SpecialSaturation == 5)
+                    saturation = 2.0f;
+            }
+            else
+            {
+                if (SpecialSaturation < 3)
+                    saturation = 0.8f;
+                else if (SpecialSaturation == 3)
+                    saturation = 1.0f;
+            }
+        
+            float luma = dot(scene.rgb, float3(0.299f, 0.587f, 0.114f));// guaranteed not linear color space so no float3(0.2126f, 0.7152f, 0.0722f));
+            saturation = mix(1.0f, saturation, smoothstep(1.2f, 0.6f, luma));
+            
+            float4 x = scene;
+            float3 contrasted = float3(x*x*x*(x*(x*6.0 - 15.0) + 10.0));
+            x.rgb = mix(x.rgb, contrasted, contrastPower * 0.25f);
+            float3 sat = mix(float3(luma), x.rgb, saturation);
+            
+            float3 col = x.rgb;
+        
+            col = mix(x.rgb, sat, 0.33 * (x.r+x.g+x.b));
+            
+            // blue tinting (optional)
+            if (SpecialTint)
+            {
+                float tintAmount = (omw.isInterior || omw.isUnderwater) ? 0.5f : GetTint(luma);
+                if (tintAmount < 0.5f)
+                    col.rgb = overlay(col.rgb, float3(0.75, 0.40, 0.0), (1.0 - (tintAmount*2.0)));
+                else
+                    col.rgb = overlay(col.rgb, float3(0.0, 0.5, 1.5), (tintAmount*2.0 - 1.0) * 0.75);
+            }
+
+            scene.rgb = col.rgb;
+            //scene.rgb = mix(scene.rgb, col.rgb, contrastPower);
+        }    
+        
+        // #define DEBUG_CONTRAST
+        #ifdef DEBUG_CONTRAST
+        float3 dbgColor = float3(0.1, 1.0, 0.1);
+        if (contrastPower < 0.0)
+            dbgColor = float3(1.0, 0.1, 0.1);
+            
+        if(omw_TexCoord.x < abs(contrastPower) - 0.001f && omw_TexCoord.y > 0.95) scene.rgb = mix(scene.rgb, dbgColor, float3(0.4));
+        if(omw_TexCoord.x < ((saturation) / 2.0f) + 0.001f && omw_TexCoord.y > 0.9 && omw_TexCoord.y < 0.94) scene.rgb = mix(scene.rgb, float3(0.8, -1.0, 1.0), float3(0.2));
+        #endif
+        
+        //#define DEBUG_SUNHEIGHT
+        #ifdef DEBUG_SUNHEIGHT
+        if(omw_TexCoord.x < clamp(omw.sunPos.z - 0.33f, 0, 1) * 3.0f + 0.001f && omw_TexCoord.y > 0.95) scene.rgb = mix(scene.rgb, float3(1, 0.2, 0), float3(0.4));
+        
+        #endif
+
+        omw_FragColor = scene;
+    }
+}
+
+technique {
+    passes = calculate, downsample, blurX, blurY, blitz;
+    description = "Filmic Tonemapper with Bloom";
+    author = "Rafael";
+    version = "1.7e";
+    hdr = true;
+}

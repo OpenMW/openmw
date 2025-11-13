@@ -1,0 +1,1321 @@
+uniform_bool uSnowEnabled
+{
+    header = "General";
+    default = false;
+    display_name = "Enable Snow Effects";
+    description = "Enable snow on ground, trees and characters (results can be weird as there's momentarily no way to tell if a pixel is a character or a static object, etc)";
+}
+
+uniform_bool FallingRainEnabled
+{
+    default = true;
+    display_name = "Enable Rain Effects";
+    description = "Enable falling rain effects with refraction";
+}
+
+uniform_bool uPuddlesEnabled
+{
+    default = true;
+    display_name = "Enable Puddles";
+    description = "Enable muddy puddles to form on (somewhat) flat surfaces during rain";
+}
+
+uniform_bool uWorldWetnessEnabled
+{
+    default = true;
+    display_name = "Enable World Wetness";
+    description = "Applies extra glossiness from raindrops and mud to the ground during rain";
+}
+
+uniform_bool uSSRActive
+{
+    default = true;
+    display_name = "Enable SSR for World";
+    description = "Applies SSR (screen-space reflections) instead of ambient color to wet ground and puddles";
+}
+
+uniform_bool uWaterSSRActive
+{
+    default = true;
+    display_name = "! Enable SSR for Water";
+    description = "Applies SSR (screen-space reflections) on the in-game water (to use instead of normal reflections, please set in-game Water Reflection shader detail to Sky!)";
+}
+
+uniform_bool uRealNormals
+{
+    default = true;
+    display_name = "Enable Detailed Normals";
+    description = "Enable usage of real normals which add more detail (disable this in case of terrain, groundcover or objects randomly not having wetness applied to them, or having it when they shouldn't. more of a testing feature than an actual mode to use, it's best to identify the culprit and fix it, e.g. switching groundcover mods, deleting bad normal maps, etc)";
+}
+
+uniform_bool RealWaterNormals
+{
+    default = true;
+    display_name = "Enable Water Normals";
+    description = "Enables usage of real water normals (if water refraction is off OMW sometimes randomly fails to output normals, so set this to off if water refraction is also off)";
+}
+
+uniform_float uPuddleTransparency
+{
+    default = 0.800;
+    step = 0.05;
+    min = 0.01;
+    max = 1.0;
+    display_name = "Puddles Muddiness";
+    description = "Intensity of puddle muddiness. Lower values will make puddles more transparent";
+}
+
+uniform_float uWorldSpecularSmoothness
+{
+    default = 0.05;
+    step = 0.005;
+    min = 0.025;
+    max = 0.20;
+    display_name = "World Specular Smoothness";
+    description = "Specifies how smooth the world is, which influences how sharp the reflections are";
+}
+
+uniform_float uWorldReflectionIntensity {
+    default = 0.85;
+    step = 0.025;
+    min = 0.5;
+    max = 1.0;
+    display_name = "World Reflection Intensity";
+    description = "Determines how much the world will reflect, lower values will hide SSR gaps";
+}
+
+uniform_float uPuddleReflectionIntensity
+{
+    default = 0.75;
+    step = 0.05;
+    min = 0.1;
+    max = 1.0;
+    display_name = "Puddle Reflection Intensity";
+    description = "Determines how much the puddles will reflect, lower values will hide SSR gaps";
+}
+
+uniform_float uRippleNormalIntensity {
+    default = 0.700;
+    step = 0.05;
+    min = 0.0;
+    max = 1.0;
+    display_name = "Ripple Normal Intensity";
+    description = "Affects how much the ripples distort the reflections";
+}
+
+uniform_bool ReflectionElongation
+{
+    default = true;
+    display_name = "Reflection Elongation";
+    description = "Modifies the water normals in order to elongate the resulting reflection, mimicking real life";
+}
+
+uniform_float uNormalStraighteningIntensity {
+    default = 0.1;
+    step = 0.05;
+    min = 0.0;
+    max = 1.0;
+    display_name = "Normal Straigtening Intensity";
+    description = "Affects how much normal will be bent more up, resulting in less distortion (affects all normals, regardless of orientation, so caution)";
+}
+
+sampler_2d blueNoiseTexture {
+    source = "textures/bluenoise.png";
+    mag_filter = nearest;
+    min_filter = nearest;
+    wrap_s = repeat;
+    wrap_t = repeat;
+}
+
+sampler_2d puddleTexture {
+    source = "textures/puddles.png";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+}
+
+sampler_2d rippleTexture {
+    source = "textures/ripples.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+}
+
+sampler_2d snowTexture
+{
+    source = "Textures/tx_bm_snow_02.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+}
+
+sampler_2d snowTexture2
+{
+    source = "Textures/tx_bm_snow_04.dds";
+    mag_filter = linear;
+    min_filter = linear;
+    wrap_s = repeat;
+    wrap_t = repeat;
+}
+
+shared
+{
+    #define float2 vec2
+    #define float3 vec3
+    #define float4 vec4
+    #define saturate(x) clamp(x, 0.0f, 1.0f)
+    
+    float FogFar = min(omw.fogFar, omw.far);
+}
+
+vertex wet
+{
+    #if OMW_USE_BINDINGS
+        omw_In float2 omw_Vertex;
+    #endif
+
+    omw_Out float2 omw_TexCoord;
+    omw_Out float3 PrevEyePos;
+
+    void main()
+    {
+        omw_Position = float4(omw_Vertex.xy, 0.0f, 1.0f);
+        omw_TexCoord = omw_Position.xy * 0.5f + 0.5f;
+
+        // mat4 invPrevView = inverse(omw.prevViewMatrix);
+        // PrevEyePos = invPrevView[3].xyz;
+
+        // GL "portability" workaround:
+        mat4 prevView  = omw.prevViewMatrix;
+        float3 right   = float3(prevView[0][0], prevView[1][0], prevView[2][0]);
+        float3 up      = float3(prevView[0][1], prevView[1][1], prevView[2][1]);
+        float3 forward = float3(prevView[0][2], prevView[1][2], prevView[2][2]);
+
+        PrevEyePos = float3(prevView[3][0], prevView[3][1], prevView[3][2]);
+
+        PrevEyePos =
+            -PrevEyePos.x * right -
+            PrevEyePos.y * up -
+            PrevEyePos.z * forward;
+    }
+}
+
+fragment wet
+{
+    // Decent snow textures: tx_bm_sky_snow, tx_bm_snow_02, tx_bm_snow_04
+
+    // Common
+    
+    //#define DEBUG
+    #define HORIZON 100000000
+    #define PI 3.14159265
+
+    float2 tanHalfFov = float2(1.0f / omw.projectionMatrix[0][0], 1.0f / omw.projectionMatrix[1][1]);
+    
+    omw_In float2 omw_TexCoord;
+    omw_In float3 PrevEyePos;
+    
+    float remap01(float minOutput, float maxOutput, float domain)
+    {
+        return minOutput * (1. - domain) + maxOutput * domain;
+    }
+    
+    float weather_tone[10]=float[](
+        float(0.0),  //Clear
+        float(0.0),  //Cloudy
+        float(0.0),  //Foggy
+        float(0.0),  //Overcast
+        float(1.0),  //Rain
+        float(1.0),  //Thunder
+        float(0.0),  //Ash
+        float(0.0),  //Blight
+        float(0.0),  //Snow
+        float(0.0)   //Blizzard
+    );
+
+    float GetRainAmount()
+    {
+        float prevRain = weather_tone[omw.weatherID];
+        float currentRain = prevRain;
+        
+        if (omw.nextWeatherID >= 0) // this isn't guaranteed for some reason, and omw.weatherTransition gets stuck at 0.5
+        {
+            float nextRain = weather_tone[omw.nextWeatherID];
+            currentRain = mix(prevRain, nextRain, omw.weatherTransition);
+        
+            // magic
+            if (prevRain < nextRain)
+            {
+                currentRain *= currentRain;
+                currentRain *= currentRain;
+            }
+        }
+        
+        return currentRain;
+    }
+
+    float GetRainAmountNormalized()
+    {
+        float prevRain = weather_tone[omw.weatherID];
+        float currentRain = prevRain;
+        
+        if (omw.nextWeatherID >= 0) // this isn't guaranteed for some reason, and omw.weatherTransition gets stuck at 0.5
+        {
+            float nextRain = weather_tone[omw.nextWeatherID];
+            currentRain = mix(prevRain, nextRain, omw.weatherTransition);
+        }
+        
+        return currentRain;
+    }
+
+    float GetSnowAmount()
+    {
+        float prevSnow = (omw.weatherID == 8 || omw.weatherID == 9) ? 1.0f : 0.0f;
+        float currentSnow = prevSnow;
+        
+        if (omw.nextWeatherID >= 0)
+        {
+            float nextSnow = (omw.nextWeatherID == 8 || omw.nextWeatherID == 9) ? 1.0f : 0.0f;
+            currentSnow = mix(prevSnow, nextSnow, omw.weatherTransition);
+            
+            if (prevSnow < nextSnow)
+            {
+                currentSnow *= currentSnow;
+                currentSnow *= currentSnow;
+            }
+        }
+        
+        return currentSnow * 0.8f;
+    }
+    
+    float3 ReconstructViewPos(float2 uv)
+    {
+        float depth = omw_GetLinearDepth(uv);
+        float2 xy = (uv * 2.0f - 1.0f) * depth * tanHalfFov;
+        return float3(xy, -depth);
+    }
+    
+    float2 ComputeRipple(float4 Ripple, float CurrentTime)
+    {
+        // Could also hide the latency here, but would result in an extra VGPR being used...
+        // float4 Ripple = omw_Texture2D(rippleTexture, UV);
+        
+        Ripple.yz = Ripple.yz * 2.0 - 1.0;
+
+        float DropFrac = fract(Ripple.w + CurrentTime);
+        float TimeFrac = DropFrac - 1.0 + Ripple.x;
+        float DropFactor = saturate(0.2 + 0.8 - DropFrac);
+        float FinalFactor = DropFactor * Ripple.x * sin( clamp(TimeFrac * 9.0, 0.0, 3.0) * PI);
+
+        return float2(Ripple.yz * FinalFactor * 0.35f);
+    }
+
+    float3 CalculateRippleNormal(float2 uv)
+    {
+        int i;
+        float4 Ripples[4];
+        float2 UVs[4] = float2[]
+        (
+            uv       + float2( 0.25f, 0.0f),
+            uv * 1.1 + float2(-0.55f, 0.3f),
+            uv * 1.3 + float2(0.6f,   0.85f),
+            uv * 1.5 + float2(0.5f,  -0.75f)
+        );
+        
+        // first read the textures
+        for (int i = 0; i < 4; i++)
+        {
+            Ripples[i] = omw_Texture2D(rippleTexture, UVs[i]);
+        }
+
+        float simTime = omw.simulationTime;
+        float times[4] = float[]
+        (
+            simTime * 1.65,
+            simTime * 1.65 + 1.0f,//omw.simulationTime * 1.69,
+            simTime * 1.80,
+            simTime * 1.92
+        );
+        
+        // then do the calculations using them, to hide the latencies
+        for (i = 0; i < 4; i++)
+        {
+            Ripples[i].xy = ComputeRipple(Ripples[i], 0.5f * times[i]);
+        }
+
+        return float3(Ripples[0].xy + Ripples[1].xy + Ripples[2].xy + Ripples[3].xy, 1.0f);
+    }
+
+    void RotateRippleNormal(inout float3 rippleNormal, float2 uv, float3 worldNormal)
+    {
+        float3 vpos = ReconstructViewPos(uv);
+        float3 dX = dFdx(vpos);
+        float3 dY = dFdy(vpos);
+    
+        float2 duvX = dFdx(uv);
+        float2 duvY = dFdy(uv);
+        
+        float3 tangent = duvY.y * dX - duvX.y * dY;
+        float vectorLength2 = dot(tangent, tangent);
+        if (vectorLength2 > 0.0f) // do it manually because NV can't normalize a vector in GL
+        {
+            tangent *= inversesqrt(vectorLength2);
+            
+            float3 bitangent = -duvY.x * dX + duvX.x * dY;
+            vectorLength2 = dot(bitangent, bitangent);
+            if (vectorLength2 > 0.0f)
+            {
+                bitangent *= inversesqrt(vectorLength2);
+                
+                tangent = tangent - worldNormal * dot(worldNormal, tangent);
+                vectorLength2 = dot(tangent, tangent);
+                if (vectorLength2 > 0.0f)
+                {
+                    tangent *= inversesqrt(vectorLength2);
+                    bitangent = cross(worldNormal, tangent);
+
+                    mat3 TBN = mat3(tangent, bitangent, worldNormal);
+                    
+                    tangent = TBN * rippleNormal; // not really tangent, just reusing the register
+                    vectorLength2 = dot(tangent, tangent);
+                    if (vectorLength2 > 0.0f)
+                        rippleNormal = tangent * inversesqrt(vectorLength2);
+                }
+            }
+        }
+    }
+    
+    float3 ReconstructWorldNormal(float2 uv)
+    {
+        float3 viewPos = ReconstructViewPos(uv);
+
+        float3 dx = dFdx(viewPos);
+        float3 dy = dFdy(viewPos);
+        
+        float3 viewNormal = cross(dx, dy);
+        float len2 = dot(viewNormal, viewNormal);
+        if (len2 > 0.0f)
+        {
+            viewNormal *= inversesqrt(len2);
+            
+            float3 worldNormal = mat3(omw.invViewMatrix) * viewNormal;
+            len2 = dot(worldNormal, worldNormal);
+            if (len2 > 0.0f)
+                return worldNormal * inversesqrt(len2);
+        }
+        
+        return float3(0.0f);
+    }
+    
+    float CalculatePuddleMask(float2 uv, float3 worldNormal, float ram)
+    {
+        // float puddlemask = omw_Texture2D(puddleTexture, uv).r;
+        // float pm2 = omw_Texture2D(puddleTexture, uv * 1.5).r;
+        // float pm3 = omw_Texture2D(puddleTexture, uv * 0.3).r;
+        
+        float2 UVs[3] = float2[]
+        (
+            uv,
+            uv * 1.5f,
+            uv * 0.3f
+        );
+        
+        float masks[3] = float[](0.0f, 0.0f, 0.0f);
+        for (int i = 0; i < 3; i++)
+        {
+            masks[i] = omw_Texture2D(puddleTexture, UVs[i]).r;
+        }
+        
+        // moved after reading to minimize waiting for the tex fetch
+        float hormask = smoothstep(0.92, 1.0, worldNormal.z);
+        
+        // return saturate((puddlemask * pm2 + pm3) * ram);
+        return saturate((masks[0] * masks[1] + masks[2]) * ram);
+    }
+    
+    float GetHash31(float3 p)
+    {
+        p = fract(p * 0.1031f);
+        p += dot(p, p.yzx + 33.33f);
+        return fract((p.x + p.y) * p.z);
+    }
+    
+    float2 GetRainWobble(float2 uv, float time, float3 viewDirection)
+    {
+        float2 baseUV = (uv * 0.5f + 0.5f);
+        float2 gridSize = omw.resolution * 0.25f;
+
+        float2 gridUV = baseUV * gridSize;
+        float2 cell = floor(gridUV);
+    
+        float2 cellJitter = fract(sin(cell * float2(127.1f, 311.7f)) * 43758.5453f) - 0.5f;
+        gridUV += cellJitter;
+    
+        float2 cellCoord = floor(gridUV);
+        float seed = dot(cellCoord, float2(127.1f, 311.7f));
+        float jitter = fract(sin(seed) * 43758.5453f);
+    
+        float freq = 80.0f + jitter * 40.0f;
+        float phase = jitter * 6.2831f;
+    
+        float angle = time * 13.17f + phase;
+
+        float pixelNoise = fract(sin(dot(uv * 500.0f, float2(12.9898f, 78.233f))) * 43758.5453f);
+        angle += pixelNoise * 1.5f;
+    
+        float2 dir = float2(cos(angle), sin(angle));
+        return dir * 0.5f;
+    }
+    
+    float CalculateRain(float3 eyePos, float3 viewDir, float maxDist)
+    {
+        const int numSteps = 8;
+        const float stepSize = 150.0f;
+        const float cellSize = 1.2f;
+        const float dropWidth = 0.05f;
+        const float fallSpeed = 29.7f;
+        const float depthZBias = 0.0015f;
+    
+        float rainAccum = 0.0f;
+        
+        float tiltAngle = 0.3f;
+        float3 tiltAxis = float3(-0.7071f, 0.7071f, 0.0f);
+        
+        float prevWave = sin(omw.simulationTime);
+        tiltAngle += 0.1f * prevWave;
+
+        float cosA = cos(tiltAngle);
+        float sinA = sin(tiltAngle);
+        viewDir = viewDir * cosA
+            + cross(tiltAxis, viewDir) * sinA
+            + tiltAxis * dot(tiltAxis, viewDir) * (1.0f - cosA);
+
+        float2 xy = viewDir.xy;
+        float lenXY = length(xy);
+        if (lenXY < 0.0001f)
+            return rainAccum;
+    
+        float2 dirXY = xy / lenXY;
+        float slopeZ = viewDir.z / lenXY;
+    
+        prevWave = 1.0f;
+    
+        for (int i = 0; i < numSteps; i++)
+        {
+            float radius = stepSize * float(i) + 100.0f;
+            if (radius > maxDist)
+                break;
+
+            float widthFactor = saturate(1.0f - radius / maxDist);
+
+            float2 offsetXY = dirXY * radius;
+            float2 sampleXY = eyePos.xy + offsetXY;
+            if (i < numSteps / 2)
+            {
+                float sway = fract(float(i) * 13.37f);
+                sway = sin(sway * 50.0f + omw.simulationTime * 4.0f) * 20.0f * (radius / maxDist);
+                sampleXY.x -= sway;
+            }
+            else
+            {
+                float parallaxShift = (radius / maxDist) * 25.0f;
+                sampleXY += normalize(sampleXY - eyePos.xy) * parallaxShift;
+            }
+    
+            float2 cell = floor(sampleXY * cellSize);
+            float3 hashInput = float3(cell, 13.17f) + fract(omw.simulationTime * 0.03);
+    
+            float dropSeed = GetHash31(hashInput);
+            
+            float zOffset = (fract(dropSeed * 2.13f) - 0.5f) * 20.0f;
+            float sampleZ = eyePos.z + slopeZ * radius + zOffset;
+            
+            float jitteredZ = fract(dropSeed * 1.37f + 0.13f);
+            jitteredZ = (jitteredZ - 0.5f) * 3.0f + sampleZ;
+    
+            float streakZ = fract(dropSeed - (omw.simulationTime * fallSpeed) 
+                - jitteredZ * mix(depthZBias, 0.4f * depthZBias, smoothstep(0.0f, 500.0f, radius)));
+
+            float density = smoothstep(dropWidth * (widthFactor * 0.5f + 0.5f), 0.0f, abs(streakZ - 0.5f));
+            density *= sqrt(density);
+            
+            float taper = 1.0f - saturate((streakZ - 0.5f) * 150.0f);
+            taper *= 0.4f * fract(dropSeed * 5.87f) + 0.8f;
+            density *= taper * taper;
+
+            // density *= (cos(omw.simulationTime * i) * 0.5f + 0.5f) * 3.25f;
+            density *= mix(
+                5.0f * cos(omw.simulationTime * i) * 0.5f + 0.5f,
+                7.0f * sin(omw.simulationTime * i) * 0.6f + 0.4f,
+                radius / maxDist);
+            
+            // float wave = cos(omw.simulationTime * i);
+            // prevWave = wave;
+            // wave = (wave * prevWave * 0.5f + 0.5f) * 2.0f;
+            // density *= wave;
+            
+            // BOOST IT!
+            density *= (i < numSteps / 2) ? 1.2f : 2.7f;
+            
+            rainAccum += density * smoothstep(0.0f, 150.f, radius);
+        }
+
+        rainAccum *= smoothstep(0.98f, 0.90f, -viewDir.z) * smoothstep(1.2f, 0.90f, viewDir.z);
+        return saturate(rainAccum / float(numSteps));
+    }
+    // Common
+    
+    // SSR
+    const float minRayStep          = 0.9f;
+    const float maxSteps            = 18;//18, 20, 50
+    const int rayStepAccel          = 12;// 8, 11, 32
+    const int numBinarySearchSteps  = 3;//5
+    
+    float InterleavedGradientNoise(float2 uv)
+    {
+        float noise = fract(52.9829189f * fract(0.06711056f * uv.x + 0.00583715f * uv.y));
+        // triangulate!
+        noise = noise * 2 - 1.0f;
+        return noise;
+    }
+
+    float3 BinarySearch(inout float4 dir, in float4 hitCoord, inout float dDepth)
+    {
+        float depth;
+
+        for(int i = 0; i < numBinarySearchSteps; i++)
+        {
+            dir *= 0.5f;
+            hitCoord -= dir;
+            
+            depth = omw_GetLinearDepth(hitCoord.xy / hitCoord.w * 0.5f + 0.5f);
+
+            dDepth = hitCoord.z - depth;
+            
+            if (dDepth < 0.0f)
+                hitCoord += dir;
+        }
+
+        return float3(hitCoord.xy / hitCoord.w * 0.5f + 0.5f, depth);
+    }
+    
+    float4 MarchRay(in float3 dir, inout float3 hitCoord, out float dDepth)
+    {
+        const int maxSteps2 = 3;
+        float depth;
+        float2 depthUV;
+
+        float far = max(omw.far, 15000.0f);
+        float4 hitW = omw.projectionMatrix * float4(hitCoord, 1.0f);
+        hitW.z = -hitCoord.z;
+        float4 originalHitW = hitW;
+        float originalDepth = max(0.0f, hitW.z + 50.0f); // first person meshes don't have the expected Z values, so introduce a bit of a bias
+        float4 dirW;
+        
+        // search #1 - traditional marching
+        float3 endPoint = float3(hitCoord + 0.5f * normalize(dir) * (far - hitCoord.z));
+        dir = (endPoint - hitCoord) / maxSteps;
+        // dir *= 0.001f;
+        
+        // dir *= 0.1f; // 0.07f
+        // dir *= 0.01f + 0.10f * smoothstep(0, 5000, hitW.z);
+
+        dirW = omw.projectionMatrix * float4(dir, 1.0f);
+        dirW.z = -dir.z;
+        // dirW *= 0.001f;
+        
+        // float jitter = 0.25f * smoothstep(300, 600, hitW.z) * InterleavedGradientNoise(omw_TexCoord.xy * omw.resolution + 0.1f * sin(omw.simulationTime * 0.1f));
+        float jitter = 0.5f * smoothstep(500, 900, hitW.z) * (omw_Texture2D(blueNoiseTexture, mod(omw_TexCoord * omw.resolution.xy + float2(omw.simulationTime * 3.7f, omw.simulationTime * 7.1f), 256) / 256.0f).r);
+        // hitW += dirW * (-0.4f - jitter); // pull it back more than expected in order to increase chances of hitting a neighboring pixel
+        hitW += dirW * (-0.4f);
+        // return float4(jitter);
+
+        // dirW *= 0.04f;
+
+        for (int i = 0; i < maxSteps; i++)
+        {
+            if (i > rayStepAccel)
+                dirW *= 2.0f;
+            // else if (i < 4)
+                // dirW *= 6.94f;
+
+            hitW += dirW;
+            
+            depthUV = hitW.xy / hitW.w * 0.5f + 0.5f;
+            depth = omw_GetLinearDepth(depthUV);
+            dDepth = hitW.z - depth;
+            
+            if (dDepth > -150.0f // careful with this, can cause flickering if tweaked randomly
+                && depth > originalDepth
+                )
+            {
+                float4 bsResult = float4(BinarySearch(dirW, hitW, dDepth), 1.0);
+                if (bsResult.z > originalDepth)
+                    return bsResult;
+            }
+            
+            if (hitW.z >= far)
+                dirW.w /= 1.54159f;
+        }
+
+        float4 bsResult = float4(BinarySearch(dirW, hitW, dDepth), 1.0);
+        if (bsResult.z > originalDepth)
+            return bsResult;
+
+        // search #2 - far away to fill holes
+        hitW = originalHitW;
+        dir.xy *= mix(10.0f, 1.14159f, saturate(4.0f * distance(omw_TexCoord.x, 0.5f)));
+        // dir.z *= 0.887f;
+        dir.z *= 10.2f;
+        // dir = normalize(dir);
+
+        endPoint.xyz = float3(hitCoord + normalize(dir) * (far - hitCoord.z));
+        dir = (endPoint.xyz - hitCoord) / maxSteps2 * 999999.0f;
+        // dir = origDir * 0.01f + 0.10f * smoothstep(0, 5000, hitW.z);
+        
+        dirW = omw.projectionMatrix * float4(dir, 1.0f);
+        dirW.z = -dir.z;
+
+        for (int i = 0; i < maxSteps2; i++)
+        {
+            hitW += dirW;
+            
+            depthUV = hitW.xy / hitW.w * 0.5f + 0.5f;
+            depth = omw_GetLinearDepth(depthUV);
+            dDepth = hitW.z - depth;
+            
+            if (dDepth > 0.0f
+                && depth > originalDepth
+                )
+            {
+                float4 bsResult = float4(BinarySearch(dirW, hitW, dDepth), 1.0);
+                if (bsResult.z > originalDepth)
+                    return bsResult;
+            }
+            
+            if (hitW.z >= far)
+                dirW.w /= 1.54159f;
+        }
+
+        // search #3 - far away to fill holes
+        hitW = originalHitW;
+        dir.xy *= mix(10.0f, 1.14159f, saturate(4.0f * distance(omw_TexCoord.x, 0.5f)));
+        // dir.z *= 0.887f;
+        dir.z *= 2.5f;
+        // dir = normalize(dir);
+
+        endPoint.xyz = float3(hitCoord + normalize(dir) * (far - hitCoord.z));
+        dir = (endPoint.xyz - hitCoord) / maxSteps2 * 999999.0f;
+        // dir = origDir * 0.01f + 0.10f * smoothstep(0, 5000, hitW.z);
+        
+        dirW = omw.projectionMatrix * float4(dir, 1.0f);
+        dirW.z = -dir.z;
+
+        for (int i = 0; i < 3; i++)
+        {
+            hitW += dirW;
+            
+            depthUV = hitW.xy / hitW.w * 0.5f + 0.5f;
+            depth = omw_GetLinearDepth(depthUV);
+            dDepth = hitW.z - depth;
+            
+            if (dDepth > 0.0f
+                && depth > originalDepth
+                )
+            {
+                float4 bsResult = float4(BinarySearch(dirW, hitW, dDepth), 1.0);
+                if (bsResult.z > originalDepth)
+                    return bsResult;
+            }
+            
+            if (hitW.z >= far)
+                dirW.w *= 0.154159f;
+        }
+
+        return float4(-1.0f);
+    }
+
+    float fresnel_dielectric(float3 Incoming, float3 Normal, float eta)
+    {
+        float c = abs(dot(Incoming, Normal));
+        float g = eta * eta - 1.0 + c * c;
+        float result;
+        
+        if(g > 0.0) {
+            g = sqrt(g);
+            float A =(g - c)/(g + c);
+            float B =(c *(g + c)- 1.0)/(c *(g - c)+ 1.0);
+            result = 0.5 * A * A *(1.0 + B * B);
+        }
+        else
+            result = 1.0;  /* TIR (no refracted component) */
+        
+        return result;
+    }
+
+    // #define DEBUG_SSR
+    
+    float4 ComputeSSR(float3 param_normal, float4 orgcol, float wdepth, float3 w, bool pixelIsWater)
+    {
+        float4 result = float4(0, 0, 0, 0);
+        // float4 orgcol = param_color;//omw_GetLastShader(omw_TexCoord);
+        
+        if (dot(omw.eyeVec.xyz, param_normal.xyz) < -0.7f) // low confidence
+        {
+            result = float4(omw.fogColor.rgb * 0.8f, 0); // probably reflecting the sky...
+            #ifdef DEBUG_SSR
+                result = float4(0, 0, 1, 1); // blue
+            #endif
+            return result;
+        }
+
+        // if (dot(float3(0, 0, 1), param_normal.xyz) < 0.5)
+        // {
+            // result = orgcol;
+            // #ifdef DEBUG_SSR
+                // result = float4(1, 0, 1, 1);
+            // #endif
+            // return result;
+        // }
+    
+        float depth = omw_GetDepth(omw_TexCoord);
+        
+        float raised = omw.waterHeight - 4.0 - (omw.far * 0.00059) * clamp(wdepth * 0.00005, 0,1);
+        
+        float wmask = float((w.z + raised)<0.0);
+        
+        if (omw.eyePos.z < (omw.waterHeight))
+            wmask = w.z - raised - 3;
+            
+        wmask *= float(omw.isWaterEnabled);
+        
+        if (depth == 1)
+            wmask = 0;
+
+        float4 col = orgcol;// why sample again? omw_GetLastShader(omw_TexCoord);
+        
+        if (pixelIsWater)
+        {
+            if (!omw.isInterior)
+                col.a -= smoothstep(500.0f, 4000.0f, wdepth) * 0.04f + 0.05f * smoothstep(350.0f, -30.0f, abs(omw.eyePos.z - omw.waterHeight));
+
+            float3 wnormpuddle = normalize(float3(param_normal.xy, param_normal.z * (1.0 - col.a) * 50));
+        
+            param_normal = normalize(float3(param_normal.xy, param_normal.z * 3));
+            param_normal = mix(param_normal, wnormpuddle, clamp(100 * (1-col.a), 0.0, 1.0));
+        }
+        // return float4(param_normal * 0.5 + 0.5, 1.0f);
+        
+        // mat4 viewNoTranslation = omw.viewMatrix; 
+        // viewNoTranslation[3] = float4(0.0, 0.0, 0.0, 1.0);
+        // col = viewNoTranslation * float4(param_normal, 1.0);
+        // float3 viewNormal = normalize(col.xyz);
+        param_normal = normalize(mat3(omw.viewMatrix) * param_normal);
+
+        float4 coords;
+        coords = omw.viewMatrix * float4(w, 1.0f);
+
+        // coords.xyz *= omw.far;
+        float3 viewPos = coords.xyz;
+
+        float3 viewDir = normalize(viewPos);
+        const float ior = 1.333f;//(omw.eyePos.z > 0.0f) ? (1.333f / 1.0f) : (1.0f / 1.1f); // air to water; water to air
+        float fresnel = clamp(fresnel_dielectric(-viewDir, param_normal, ior), 0.0f, 1.0f);
+                
+        // Reflection vector
+        float3 reflected = normalize(reflect(viewDir, param_normal));
+
+        // Ray cast
+        float reflection = 0.0f;
+        float dDepth;
+
+        coords = MarchRay(reflected * max(minRayStep, -viewPos.z), viewPos, dDepth);
+        if (distance(coords.xy, omw_TexCoord.xy) < 0.002f)
+            coords.y += 1.5f * omw.rcpResolution.y;
+        // col.xy = coords.xy - omw_TexCoord.xy;
+        // col.z = length(col.xy);
+        // if (col.z > 0.001f)
+        // {
+            // col.xy /= col.z;
+            // coords.xy = (floor(coords.xy * omw.resolution) + col.xy) * omw.rcpResolution;
+        // }
+        // return float4(coords.xy, 0.0f, 1.0f);
+        
+        #ifdef DEBUG_SSR
+        if (coords.w < 0.0f)
+        {
+            result = float4(1, 0, 1, 1); // pink
+            return result;
+        }
+        #endif
+        
+        if (viewPos.z - 1000 > coords.z) // low confidence!
+        {
+            #ifdef DEBUG_SSR
+                result = float4(0, 1, 1, 1); // cyan
+                return result;
+            #endif
+            // probably reflecting the sky...
+            result = float4(0.0f);
+
+            return result;
+        }
+
+        float2 dCoords = smoothstep(0.35, 0.88, float2(0,0) +  abs(float2(0.5, 0.5) - coords.xy));
+
+        float screenEdgeFactor = clamp(2.5 * clamp(1.0 - (dCoords.x + coords.y), 0.0, 1.0), 0.0, 1.0);
+
+        float underwaterFactor = coords.y + coords.y;
+
+        float reflectionMultiplier = underwaterFactor * screenEdgeFactor * -reflected.z;
+        reflectionMultiplier *= pow(fresnel, 0.8f); // * clamp(reflectionMultiplier, 0.0, 0.9);
+        reflectionMultiplier = saturate(reflectionMultiplier);
+        // reflectionMultiplier = 1.0f;
+
+        if (reflectionMultiplier <= 0.0f)
+            return float4(0.0f);
+        
+        float3 resultSSR = omw_GetLastShader(coords.xy).rgb;
+
+        if(wmask * reflection > 0.5)
+        {
+            resultSSR = orgcol.rgb;
+            #ifdef DEBUG_SSR
+            return float4(1, 1, 0, 1); // yellow
+            #endif
+            return float4(resultSSR, 0);
+        }
+
+        result = float4(float3(resultSSR), reflectionMultiplier);
+            #ifdef DEBUG_SSR
+            result = float4(reflectionMultiplier, reflectionMultiplier, reflectionMultiplier, 1);
+            // result.rgb = normalpass.rgb;
+            #endif
+            
+            #ifdef DEBUG_SSR
+            if (length(result.rgb - orgcol.rgb) < 0.01f)
+                result = 1 * float4(0.5, 0.5, 0.5, 1);
+            #endif
+            
+        return result;
+    }
+    // SSR
+
+    // Wetworld
+    void main()
+    {
+        float4 color = omw_GetLastShader(omw_TexCoord);//omw_Texture2D(omw_SamplerLastShader, omw_TexCoord);
+        float3 pos = omw_GetWorldPosFromUV(omw_TexCoord);
+        float worldDistance = distance(omw.eyePos.xyz, pos);
+        float waterHeight = omw.waterHeight;
+
+        float3 viewDir = normalize(pos - omw.eyePos.xyz);
+        
+        #if defined(OMW_API_VERSION)
+            float3 ambientColor = (omw.fogColor.rgb + omw.ambientColor.rgb) * 0.48f;
+        #else
+            float3 ambientColor = (omw.fogColor.rgb + float3(0.30f, 0.30f, 0.35f)) * 0.48f;
+        #endif
+
+        float ramn = omw.isInterior? 0.0f : saturate(GetRainAmountNormalized());
+        float ramp = omw.isInterior? 0.0f : saturate(GetRainAmount());
+
+        // if (worldDistance >= FogFar)
+        // {
+            // omw_FragColor = color;
+            // return;
+        // }
+
+        // This is a lot of headaches when the engine could/should simply give info about whether a pixel is water, a character, etc. (stencil buffer usage, for example)
+        float zTol = worldDistance / omw.projectionMatrix[1][1] * omw.rcpResolution.y;
+        bool pixelIsWater = omw.isWaterEnabled && max(0.0, pos.z - waterHeight) <= zTol;
+        // bool pixelIsWater = omw.isWaterEnabled && max(0.0f, pos.z - waterHeight) <= (worldDistance * (omw.rcpResolution.x + omw.rcpResolution.y) + 0.2f);
+        // bool pixelIsWater = !omw.isWaterEnabled ? false : pos.z - 0.20f - omw.eyePos.z / 600.0f - max(0.0f, worldDistance - 800.0f) / 1600.0f <= waterHeight;
+        if (pos.x > -11700.0f && pos.x < -11120.0f && pos.y > -75321.0f && pos.y < -74200.0f)
+        {
+            pixelIsWater = false; // don't ask...
+            // omw_FragColor.rgb = float3(1.0f); return;
+        }
+        // omw_FragColor = pixelIsWater ? float4(0, 0, 1, 1) : float4(0);return;
+            
+        if (worldDistance < FogFar || pixelIsWater) // water with no refraction has far plane depth...
+        {
+            if (omw.isInterior && !pixelIsWater)
+            {
+                omw_FragColor = color;
+                return;
+            }
+
+            if (pixelIsWater && viewDir.z < 0.0f)
+            {
+                float f = (omw.waterHeight - omw.eyePos.z) / viewDir.z;
+                if (f >= 0.0f)
+                {
+                    pos = omw.eyePos.xyz + f * viewDir;
+                    worldDistance = distance(omw.eyePos.xyz, pos);
+                    // omw_FragColor = float4(1.0f); return;
+                }
+            }
+            
+            // Normals stuff
+            float3 wnormal = ReconstructWorldNormal(omw_TexCoord);
+            float wmask = smoothstep(0.85f, 1.0f, wnormal.z);
+            if (uRealNormals && !pixelIsWater)
+            {
+                #if defined(OMW_API_VERSION)
+                    float3 wnormal2 = omw_GetNormalsWorldSpace(omw_TexCoord);
+                #else // defined(OMW_API_VERSION)
+                    float3 wnormal2 = omw_GetNormals(omw_TexCoord);
+                #endif // defined(OMW_API_VERSION)
+
+                    float similarity = saturate(dot(wnormal, wnormal2));
+                    similarity = smoothstep(0.7f, 0.9f, similarity) - 2.0f * distance(length(wnormal2), 1.0f);
+                    wnormal = mix(wnormal, wnormal2, saturate(max(similarity, worldDistance * 0.001f)));
+                    similarity = length(wnormal);
+                    wnormal = similarity > 0.0f ? wnormal / similarity : float3(0.0f);
+                            
+                #if defined(OMW_API_VERSION)
+                    wmask = smoothstep(0.35f, 1.0f, wnormal.z); // a bit more bumpy
+                #else
+                    // wmask = min(wmask, smoothstep(0.5f, 1.0f, wnormal.z));
+                    wmask = smoothstep(0.5f, 1.0f, wnormal.z);
+                #endif
+            }
+            else
+            {
+                if (!pixelIsWater)
+                {
+                    // NOP - already done above
+                }
+                else
+                {
+                    #if defined(OMW_API_VERSION)
+                    if (!omw.isInterior && RealWaterNormals)
+                        wnormal = omw_GetNormalsWorldSpace(omw_TexCoord);
+                    else
+                    #endif
+                    {
+                        // let's make up a normal!
+                        float simTime = omw.simulationTime * 0.5f;
+                        float2 fakePos = -pos.xy * 0.04f;// - float2(simTime) + 5.0f * sin(worldDistance * 10);
+                        wnormal.xyz = float3(0.0f);
+                        {
+                            float2 offset = float2(simTime, -simTime * 0.5f);
+                            float phase = worldDistance * 0.001;
+                            
+                            float2 wavesOffset = 1.7f * sin(float2(fakePos.y * 0.5f, fakePos.x * 0.5f) * 0.7f + simTime);
+                            float2 waves = float2(
+                                cos((fakePos.x + offset.x + wavesOffset.x) * 2.5f),
+                                cos((fakePos.y + offset.y + wavesOffset.y) * 3.0f)
+                                ) * 0.5;
+
+                            waves += 0.15 * sin(fakePos.xy * 1.2f + simTime);
+                            waves *= 0.1f;
+
+                            wnormal.xy += waves * smoothstep(1000.0f, 50.0f, omw.eyePos.z - waterHeight);
+                            
+                            float2 grad = normalize(waves + float2(0.001f, -0.001f));
+                            float2 detailOffset = fakePos * 2.0f + grad * 1.2f + simTime * 1.3f;
+                            float2 detailWave = 0.03f * sin(detailOffset * float2(3.5f, 2.1f) + float2(1.0f, -1.5f) * simTime);
+                            wnormal.xy += detailWave * smoothstep(1000.0f, 50.0f, omw.eyePos.z - waterHeight);
+                        }
+                        wnormal.z = sqrt(1.0f - dot(wnormal.xy, wnormal.xy));
+                    }
+                }
+    
+                wmask = smoothstep(0.8f, 1.0f, wnormal.z);
+            }
+            // omw_FragColor.rgb = wnormal.rgb * 0.5f + 0.5f; return;
+
+            if (ReflectionElongation && !omw.isInterior)
+            {
+                wnormal.xy = mix(wnormal.xy, viewDir.xy, -viewDir.z * (pixelIsWater ? 0.20f : 0.10f));
+                wnormal = normalize(wnormal);
+            }
+            // omw_FragColor.rgb = wnormal.rgb * 0.5f + 0.5f; return;
+            // omw_FragColor.rgb = float3(wmask); return;
+            // Normals stuff
+    
+            // Snow
+            float snowAmount = omw.isInterior ? 0.0f : GetSnowAmount();
+            if (uSnowEnabled && snowAmount > 0 && worldDistance < FogFar && pos.z - 0.05f > waterHeight)
+            {
+                float3 snowFetch = float3(0.8f); // default whiteness for snow, matches texture
+                
+                // If close to camera sample from a texture so it doesn't look so bland
+                if (worldDistance < 2000.0f)
+                {
+                    float2 snowUV = pos.xy / 100.0f;
+                
+                    // Try to load a Bloodmoon snow texture, for vanilla-friendliness (and convenience)
+                    float3 snowTexFetch = omw_Texture2D(snowTexture, snowUV).bgb;
+                    if (snowTexFetch.g < 0.1f) // ruh roh, couldn't load it!
+                        snowTexFetch = snowFetch;
+                        
+                    // maybe do another fetch, from a second snow tex, and blend between them based on fract(pos.z)
+                    // nah, still looks janky
+                    // float3 snowTexFetch2 = omw_Texture2D(snowTexture2, snowUV).bgb;
+                    // if (snowTexFetch2.g < 0.1f)
+                        // snowTexFetch2 = snowFetch;
+                    // snowTexFetch = mix(snowTexFetch, snowTexFetch2, abs(1.0f - 2.0f * fract(pos.z * 20)));
+                        
+                    snowFetch = mix(snowTexFetch, snowFetch, smoothstep(1750.0f, 2000.0f, worldDistance));
+                }
+    
+                // Adjust the color a bit
+                snowFetch.g *= 1.1f;
+                snowFetch.b *= 1.2f;
+                snowFetch *= 0.7f;
+                
+                // Contrast the color a bit
+                snowFetch -= 0.5f;
+                snowFetch *= 1.2f;
+                snowFetch = clamp(snowFetch + 0.5f, float3(0), float3(1));
+                
+                float minFactor = 0.05f;
+                float maxFactor = 0.5f;
+                
+                // v1
+                // float factor = max(wnormal.z * maxFactor, minFactor);
+                
+                // v2
+                float factor = wnormal.z > 0 ? dot(wnormal.xyz, float3(0, 0, 1)) * 0.8f : 0.0f;
+                factor = clamp(factor, minFactor, maxFactor);
+    
+                // Try and fix first person meshes, as they mostly don't write normals...
+                factor = max(factor * smoothstep(15, 25, worldDistance), minFactor);
+                
+                // Smooth out towards water level
+                factor *= smoothstep(waterHeight, waterHeight + 250.0f, pos.z - 0.9f);
+                
+                // factor = 1.0f; //dbg
+                
+                // v1
+                // snowFetch.rgb = mix(color.rgb, snowFetch.rgb, factor);
+                
+                // v2 - Add the snow on top, and then try to recenter colors...
+                snowFetch.rgb = color.rgb + snowFetch.rgb * factor;
+                // snowFetch.rgb /= (1 + factor);
+                
+                // Mix with fog (actually original scene)
+                factor = smoothstep(FogFar * 0.5f, omw.fogNear * 0.5f, worldDistance);
+                color.rgb = mix(color.rgb, snowFetch.rgb, factor * snowAmount);
+    
+                // color.rgb = float3(factor);
+                // color.rgb = snowFetch.rgb;
+            }
+            // Snow
+    
+            // Wet ground, puddles, and water SSR code
+            bool rainEnabled = uPuddlesEnabled || uWorldWetnessEnabled;
+            // if ((!rainEnabled || ramp == 0.0f) && !uWaterSSRActive)
+            // {
+                // omw_FragColor = color;
+                // return;
+            // }
+            
+            // if (pos.z - 200 > omw.eyePos.z)
+            // {
+                // omw_FragColor = color;
+                // return;
+            // }
+    
+            if ((rainEnabled && ramp != 0.0f || uWaterSSRActive) && pos.z - 500.0f <= omw.eyePos.z)
+            {
+                float3 screen_color = color.xyz;
+                
+                float rainAmount = 0.0f;
+                float ssrIntensity = 0.0f;
+                float3 ssrNormal = float3(0.0f, 0.0f, -1.0f);
+                float4 ssrResult = float4(0.0f);
+                float fresnel;
+        
+                bool isUp = true;
+                float cameraDot = dot(viewDir.xyz, wnormal.xyz);
+                if (cameraDot < -0.55f
+                    || dot(wnormal.xyz, float3(0.0, 0.0, 1.0)) < 0.75f
+                    )
+                    isUp = false;
+
+                // omw_FragColor.rgb = vec3(1.0 - abs(dot(viewDir.xyz, vec3(0.0, 0.0, 1.0)))); return;
+        
+                #ifdef DEBUG_SSR
+                if (!isUp)
+                {
+                    omw_FragColor = color;
+                    omw_FragColor = float4(0.0f, 1.0f, 0.0f, 1.0f); // green
+                    return;
+                }
+                #endif
+        
+                if (pixelIsWater || (wmask > 0.0f && worldDistance < 5000.0f && worldDistance > 50.0f && wnormal.z >= 0.0f))
+                {
+                    float puddlemask = !uPuddlesEnabled ? 1.0f : CalculatePuddleMask(pos.xy / 1500.0, wnormal.xyz, ramn);
+                    float pwmask = pixelIsWater? 0.0f : (1.0 - puddlemask) * wmask;
+                    // omw_FragColor = float4(pwmask); return;
+        
+                    float3 ripnorm = float3(0.0f, 0.0f, 1.0f);
+                    // if (pos.z < omw.eyePos.z)
+                    {
+                        ripnorm = CalculateRippleNormal(pos.xy / 250.0);
+                        // ripnorm = mix(float3(0.0f, 0.0f, 1.0f), ripnorm, smoothstep(0.0f, 4.0f, omw.eyePos.z - pos.z));
+                    }
+        
+                    // float zedge = saturate(1 - abs(puddlemask * 2.0  - 1.0));
+                    // zedge = zedge * zedge * wnormal.z;
+                    // ripnorm = normalize(float3(ripnorm.xy, ripnorm.z * mix(1, 0.1, ramn)));
+                    ripnorm = normalize(float3(ripnorm.xy, ripnorm.z 
+                        * mix(mix(1, 0.1, ramn), mix(5, 0.1, ramn), pwmask)
+                        ));
+                    // float3 puddleNormal = ripnorm - zedge * pwmask;
+                    
+                    if (!pixelIsWater)
+                        RotateRippleNormal(ripnorm, omw_TexCoord, wnormal);
+                    
+                    // omw_FragColor.rgb = ripnorm * 0.5f + 0.5f; return;
+                    
+                    float puddleFadeDist = smoothstep(2000.0f, 750.0f, worldDistance - 2000.0f * (1.0f - pwmask));
+                    
+                    // Maybe add another color besides mudiness to convey the feeling of wetness?
+                    float3 mudp = (color.rgb * 0.5f + 0.5f) * 1.5f * float3(0.44, 0.38, 0.28) * (ambientColor.r + 0.1) * clamp(1.0f - puddleFadeDist, 0.6f, 1.0f);
+                    // mudp = mix(mudp, omw.fogColor.rgb, smoothstep(0.0f, omw.fogNear * 0.25f, worldDistance));
+                    
+                    mudp = mix(color.rgb, mudp, uPuddleTransparency * wnormal.z * saturate(pwmask + 0.3f));
+                    // mudp = mix(color.rgb, mudp, puddleFadeDist);
+        
+                    fresnel = dot(-viewDir, ripnorm);
+                    fresnel = 2.0f * fresnel - 0.44f;
+                    fresnel = 1.0f - saturate(fresnel);
+                    fresnel *= smoothstep(0.9f, 1.0f, wnormal.z);
+                    // omw_FragColor = float4(fresnel * 1); return;
+        
+                    if (!pixelIsWater)
+                    {
+                        float3 wetGround;
+                        // wetGround = mix(mudp, ambientColor, fresnel * 0.5f * abs(ripnorm.z - wnormal.z));
+                        wetGround = mudp + ambientColor * fresnel * 0.4f * abs(ripnorm.z - wnormal.z);
+                        color.rgb = mix(color.rgb, wetGround, ramp * (uWorldWetnessEnabled ? 1.0f : pwmask));
+                    }
+        
+                    rainAmount = ramp * smoothstep(5000.0f, 2500.0f, worldDistance);
+                    ssrNormal = mix(wnormal, ripnorm, uRippleNormalIntensity * (pixelIsWater ? 0.6f * (1.0f - ramp) * smoothstep(300.0f, 400.0f, worldDistance) : rainAmount));
+                    ssrNormal = mix(ssrNormal, float3(0.0f, 0.0f, 1.0f), uNormalStraighteningIntensity);
+                    ssrIntensity = pixelIsWater ? uWorldReflectionIntensity : mix(uWorldReflectionIntensity, uWorldReflectionIntensity + uPuddleReflectionIntensity, pwmask);
+                    ssrIntensity *= (pixelIsWater && uWaterSSRActive ? 1.0f : rainAmount);
+                }
+        
+                // this is outside the wet ground on purpose, to let the GPU reuse registers
+                bool pixelCanReflect = (pixelIsWater && uWaterSSRActive)
+                    || (!pixelIsWater && uSSRActive && rainEnabled && uWorldWetnessEnabled);
+                // omw_FragColor = pixelCanReflect ? float4(1.0f) : float4(0.25f); return;
+                if (isUp && ssrIntensity > 0.0f && pixelCanReflect)
+                {
+                    ssrIntensity = pixelIsWater ? mix(1.0f, ssrIntensity, omw.sunPos.z) : ssrIntensity;
+                    ssrResult = ComputeSSR(ssrNormal, float4(color.rgb, 1.0f - uWorldSpecularSmoothness), worldDistance, pos, pixelIsWater);
+                    // color.rgb = pixelIsWater ? 
+                        // mix(color.rgb, (ssrResult.rgb) * ssrIntensity + float3(0.0f, 0.03f, 0.05f) * (1.0f - ssrIntensity), ssrResult.a) :
+                        // mix(color.rgb, ssrResult.rgb, ssrIntensity * ssrResult.a);
+                    color.rgb = pixelIsWater ? 
+                        mix(color.rgb, min(ssrResult.rgb, sqrt(ssrResult.rgb) * ssrIntensity + float3(0.0f, 0.03f, 0.05f) * (1.0f - ssrIntensity)), ssrResult.a) :
+                        mix(color.rgb, ssrResult.rgb, ssrIntensity * ssrResult.a);
+                    // color.rgb = max(color.rgb, ssrResult.rgb * ssrResult.a * ssrIntensity);
+                    // color.rgb += (float3(1.0f) - color.rgb) * ssrResult.rgb * ssrIntensity * ssrResult.a;
+                    
+                    // omw_FragColor.rgb = ssrResult.rgb; return;
+                    // omw_FragColor.rgb = ssrNormal.rgb * 0.5f + 0.5f; return;
+                    // omw_FragColor.rgb = float3(ssrResult.a * ssrIntensity); return;
+                }
+                else if (isUp)
+                {
+                    // color.rgb = mix(screen_color.rgb, color.rgb, rainAmount);
+                    color.rgb = mix(color.rgb, ambientColor.rgb, fresnel * 0.15f * ramn);
+                }
+                    
+                color.rgb = mix(screen_color.rgb, color.rgb, smoothstep(200.0f, 0.0f, pos.z - omw.eyePos.z)
+                    * (!pixelIsWater ? smoothstep(4000.0f, 200.0f, worldDistance) : 1.0f)
+                    );
+                    
+                // color.rgb = ssrResult.rgb * ssrResult.a;
+            }
+        }
+        
+        // Rain
+        if (FallingRainEnabled)
+        {
+            // omw_FragColor.rgb = abs(omw.eyePos.xyz - PrevEyePos); return;
+            float rainDensity = omw.isInterior ? 0.0f : saturate((ramn - 0.6f) * 2.5f) * CalculateRain(mix(omw.eyePos.xyz, PrevEyePos, 0.5f), viewDir, worldDistance);
+            if (rainDensity > 0.0f)
+            {
+                float viewDot = abs(viewDir.z);
+                float fresnelFactor = 1.0f - viewDot;
+                fresnelFactor *= fresnelFactor;
+                float2 refractionUV = normalize(omw_TexCoord - 0.5f) * fresnelFactor * rainDensity * 0.25f + omw_TexCoord;
+                refractionUV = saturate(GetRainWobble(omw_TexCoord, omw.simulationTime, viewDir) 
+                    * rainDensity + refractionUV);
+
+                float3 litRain = omw_GetLastShader(refractionUV).rgb;
+                litRain += sqrt(litRain) * 0.1f * smoothstep(0.7f, 0.0f, viewDot);
+                litRain += ambientColor * 0.1f;
+                
+                litRain = mix(color.rgb, litRain, rainDensity);
+                color.rgb = max(color.rgb * 0.95f, litRain);
+
+                // omw_FragColor.rg = refractionUV; return;
+                // omw_FragColor.rg = abs(omw_TexCoord - refractionUV); return;
+                
+                // omw_FragColor.rg = GetRainWobble(omw_TexCoord, omw.simulationTime, viewDir) * 0.5f + 0.5f; return;
+                // omw_FragColor.rgb = omw_GetLastShader(refractionUV).rgb; return;
+                // omw_FragColor.rgb = float3(fract(omw.simulationTime)); return; // time is in seconds, not milliseconds like documentation says it is...
+            }
+        }
+
+        #ifdef DEBUG
+        if(ramp > omw_TexCoord.y && omw_TexCoord.x > 0.9f)
+            color = float4(1);
+        #endif
+        
+        // if (omw_TexCoord.x < ramp && omw_TexCoord.y > 0.95) color.rgb = mix(color.rgb, float3(1.0), float3(0.2));
+        // if (omw_TexCoord.y > 0.90 && omw_TexCoord.y < 0.95) color.rgb = mix(color.rgb, float3(omw.weatherID - 3), float3(0.9));
+        // if (omw_TexCoord.y > 0.85 && omw_TexCoord.y < 0.90) color.rgb = mix(color.rgb, float3(omw.nextWeatherID), float3(0.9));
+
+        // color.rgb = ssrResult.aaa;
+        // color.rgb = ssrNormal.xyz * 0.5f + 0.5f;
+        // omw_FragColor = float4(float3(color.rgb), 1);
+        
+        // mat4 viewTranspose = transpose(omw.viewMatrix);
+        // mat3 viewT = mat3(viewTranspose);
+        // float4 tempNormal = float4(wnormal.xyz, 0);
+        // tempNormal.xyz = viewT * tempNormal.xyz;
+        // wnormal.rgb = tempNormal.xyz;
+        // omw_FragColor.rgb = wnormal.rgb;
+        // if (omw_TexCoord.y > 0.95f)
+        // {
+            // if (omw_TexCoord.x < 0.5f) omw_FragColor.rgb = omw.ambientColor.rgb;
+            // else omw_FragColor.rgb = ambientColor.rgb;
+        // }
+
+        // color.rgb = float3(0.000195, 0.102685, 0.20745);
+        omw_FragColor = float4(color.rgb, 1.0f);
+
+        //#define AMICRAZY
+        #ifdef AMICRAZY
+        if (omw.nextWeatherID < 0 && omw.weatherTransition != 0.0f)
+            omw_FragColor = float4(1, 0, 0, 1); // Should never happen... YET IT DOES SOMETIMES (0.48)
+        #endif
+    }
+    
+    // Wetworld
+}
+
+technique
+{
+    passes = wet;
+    version = "1.9";
+    description = "Puddles, wet ground, reflections, and snow";
+    author = "Rafael, Dexter";
+    pass_normals = true;
+    flags = disable_underwater;
+}
