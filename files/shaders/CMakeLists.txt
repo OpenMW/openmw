@@ -40,8 +40,6 @@ set(SHADER_FILES
     compatibility/objects.frag
     compatibility/terrain.vert
     compatibility/terrain.frag
-    compatibility/terrain.tesc
-    compatibility/terrain.tese
     compatibility/terrain_deform_stamp.frag
     compatibility/terrain_deform_decay.frag
     compatibility/shadows_vertex.glsl

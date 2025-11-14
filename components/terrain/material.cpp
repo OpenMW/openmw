@@ -11,6 +11,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
 
@@ -300,6 +301,10 @@ namespace Terrain
                     }
                 }
 
+                // Terrain deformation support (using dense mesh + VTF, not tessellation)
+                bool terrainDeform = Settings::shaders().mTerrainDeformation;
+                bool terrainDeformTess = false; // We don't use tessellation - using VTF instead
+
                 Shader::ShaderManager::DefineMap defineMap;
                 defineMap["normalMap"] = (it->mNormalMap) ? "1" : "0";
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
@@ -307,6 +312,7 @@ namespace Terrain
                 defineMap["parallax"] = parallax ? "1" : "0";
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
+                defineMap["terrainDeformation"] = terrainDeform ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
                 stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
@@ -320,14 +326,6 @@ namespace Terrain
                     stateset->addUniform(new osg::Uniform("deformationScale", 2560.f)); // sRTTSize * sWorldScaleFactor = 1024 * 2.5
                     stateset->addUniform(new osg::Uniform("materialType", 0));
                     stateset->addUniform(new osg::Uniform("maxDisplacementDepth", Settings::shaders().mTerrainDeformationMaxDepth.get()));
-
-                    // Tessellation-specific uniforms
-                    if (terrainDeformTess)
-                    {
-                        stateset->addUniform(new osg::Uniform("eyePos", osg::Vec3f(0.f, 0.f, 0.f)));
-                        stateset->addUniform(new osg::Uniform("baseTessLevel", Settings::shaders().mTerrainDeformationTessBaseLevel.get()));
-                        stateset->addUniform(new osg::Uniform("maxTessLevel", Settings::shaders().mTerrainDeformationTessMaxLevel.get()));
-                    }
                 }
             }
             else

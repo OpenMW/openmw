@@ -102,15 +102,6 @@ void main()
     clampLightingResult(lighting);
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
-#if @terrainDeformation && !@terrainDeformTess
-    // Non-tessellation path: darken deformed areas for visual feedback
-    vec3 worldPos = (osg_InvViewMatrix * vec4(passViewPos, 1.0)).xyz;
-    vec2 deformUV = (worldPos.xy + deformationOffset) / deformationScale;
-    float deformation = texture2D(terrainDeformationMap, deformUV).r;
-    // Darken compressed areas
-    gl_FragData[0].xyz *= mix(1.0, 0.75, deformation);
-#endif
-
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 
 #if !@disableNormals && @writeNormals

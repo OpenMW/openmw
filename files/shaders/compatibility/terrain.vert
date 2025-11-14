@@ -31,31 +31,72 @@ varying vec3 passNormal;
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
 
-#if @terrainDeformTess
-// Tessellation outputs
-out vec3 worldPos_TC_in;
-out vec2 uv_TC_in;
-out vec3 passNormal_TC_in;
-out vec3 passViewPos_TC_in;
+#if @terrainDeformation
+#include "lib/terrain/deformation.glsl"
+
+uniform sampler2D terrainDeformationMap;
+uniform vec2 deformationOffset;
+uniform float deformationScale;
+uniform int materialType;
+uniform float maxDisplacementDepth;
+uniform mat4 osg_ViewMatrixInverse;
 #endif
 
 void main(void)
 {
-    gl_Position = modelToClip(gl_Vertex);
+    vec4 modelPos = gl_Vertex;
+    vec3 modelNormal = gl_Normal.xyz;
 
-    vec4 viewPos = modelToView(gl_Vertex);
+#if @terrainDeformation
+    // Convert model position to world space for deformation texture sampling
+    vec4 worldPos4 = osg_ModelMatrix * modelPos;
+    vec3 worldPos = worldPos4.xyz;
+
+    // Sample deformation texture
+    vec2 deformUV = (worldPos.xy + deformationOffset) / deformationScale;
+    float deformValue = texture2D(terrainDeformationMap, deformUV).r;
+
+    // Apply material-specific depth multiplier
+    float depthMultiplier = getDepthMultiplier(materialType);
+
+    // Displace vertex downward in model space (negative Z)
+    float displacement = clamp(deformValue, 0.0, 1.0) * depthMultiplier * maxDisplacementDepth;
+    modelPos.z -= displacement;
+
+    // Calculate new normal by sampling neighbors for gradient
+    float texelSize = 1.0 / 1024.0;  // Match deformation map size (1024x1024)
+    float hL = texture2D(terrainDeformationMap, deformUV + vec2(-texelSize, 0.0)).r;
+    float hR = texture2D(terrainDeformationMap, deformUV + vec2(texelSize, 0.0)).r;
+    float hD = texture2D(terrainDeformationMap, deformUV + vec2(0.0, -texelSize)).r;
+    float hU = texture2D(terrainDeformationMap, deformUV + vec2(0.0, texelSize)).r;
+
+    // Compute gradient in world space (how much terrain slopes in X and Y)
+    vec3 gradient = vec3(
+        (hL - hR) * depthMultiplier * maxDisplacementDepth,
+        (hD - hU) * depthMultiplier * maxDisplacementDepth,
+        2.0 * deformationScale * texelSize
+    );
+
+    // Blend with base normal based on deformation amount
+    vec3 deformedNormal = normalize(modelNormal + gradient);
+    modelNormal = mix(modelNormal, deformedNormal, smoothstep(0.0, 0.2, deformValue));
+#endif
+
+    gl_Position = modelToClip(modelPos);
+
+    vec4 viewPos = modelToView(modelPos);
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
     passColor = gl_Color;
-    passNormal = gl_Normal.xyz;
+    passNormal = modelNormal;
     passViewPos = viewPos.xyz;
     normalToViewMatrix = gl_NormalMatrix;
 
 #if @normalMap
     mat3 tbnMatrix = generateTangentSpace(vec4(1.0, 0.0, 0.0, -1.0), passNormal);
-    tbnMatrix[0] = -normalize(cross(tbnMatrix[2], tbnMatrix[1])); // our original tangent was not at a 90 degree angle to the normal, so we need to rederive it
+    tbnMatrix[0] = -normalize(cross(tbnMatrix[2], tbnMatrix[1]));
     normalToViewMatrix *= tbnMatrix;
 #endif
 
@@ -77,13 +118,5 @@ void main(void)
 
 #if (@shadows_enabled)
     setupShadowCoords(viewPos, viewNormal);
-#endif
-
-#if @terrainDeformTess
-    // Pass data to tessellation control shader
-    worldPos_TC_in = (osg_ModelMatrix * gl_Vertex).xyz;
-    uv_TC_in = uv;
-    passNormal_TC_in = passNormal;
-    passViewPos_TC_in = passViewPos;
 #endif
 }
