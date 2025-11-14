@@ -8,6 +8,7 @@
 #include <components/esm/util.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
 
@@ -262,6 +263,17 @@ namespace Terrain
             geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
         unsigned int numVerts = (mStorage->getCellVertices(mWorldspace) - 1) * chunkSize / (1 << lod) + 1;
+
+        // Increase mesh density for terrain deformation (continuous trails need more vertices)
+        if (Settings::shaders().mTerrainDeformation)
+        {
+            // 2x density = 4x more triangles. Provides smooth deformation for continuous trails.
+            // Only apply to reasonably sized chunks to avoid excessive poly count
+            if (chunkSize <= 2.f)  // Limit to chunks of size 2 or smaller
+            {
+                numVerts = (numVerts - 1) * 2 + 1;  // Double the resolution: 65 -> 129, 33 -> 65, etc.
+            }
+        }
 
         geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 

@@ -34,6 +34,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/terraindeformation.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -2417,6 +2418,62 @@ namespace MWMechanics
 
             movement = vec;
             movementSettings.mPosition[0] = movementSettings.mPosition[1] = 0;
+
+            // Emit terrain deformation (footprints in snow, sand, ash)
+            if (Settings::shaders().mTerrainDeformation && onground && !inwater && !flying)
+            {
+                bool isMoving = (vec.x() != 0.f || vec.y() != 0.f);
+                if (isMoving)
+                {
+                    mTimeSinceLastFootprint += duration;
+                    // Emit footprints at intervals based on movement speed
+                    // Walking: ~0.4s, Running: ~0.25s
+                    float footprintInterval = isrunning ? 0.25f : 0.4f;
+                    if (mTimeSinceLastFootprint >= footprintInterval)
+                    {
+                        mTimeSinceLastFootprint = 0.f;
+
+                        // Get character position
+                        osg::Vec3f pos = mPtr.getRefData().getPosition().asVec3();
+
+                        // Determine terrain material type
+                        // For now, use a simple heuristic based on region/cell name
+                        // TODO: Implement proper terrain texture sampling
+                        MWRender::TerrainMaterialType materialType = MWRender::TERRAIN_NORMAL;
+
+                        // Check cell name for material hints
+                        std::string cellName;
+                        if (mPtr.getCell()->isExterior())
+                        {
+                            const ESM::Cell* cell = mPtr.getCell()->getCell();
+                            const ESM::Region* region = world->getStore().get<ESM::Region>().search(cell->mRegion);
+                            if (region)
+                            {
+                                std::string regionName = Misc::StringUtils::lowerCase(region->mName);
+                                if (regionName.find("snow") != std::string::npos ||
+                                    regionName.find("solstheim") != std::string::npos)
+                                    materialType = MWRender::TERRAIN_SNOW;
+                                else if (regionName.find("ashland") != std::string::npos ||
+                                         regionName.find("red mountain") != std::string::npos ||
+                                         regionName.find("molag amur") != std::string::npos)
+                                    materialType = MWRender::TERRAIN_ASH;
+                                else if (regionName.find("grazelands") != std::string::npos)
+                                    materialType = MWRender::TERRAIN_SAND;
+                            }
+                        }
+
+                        // Emit the deformation
+                        // Footprint size based on character scale
+                        float footprintSize = 30.0f * scale;
+                        world->getRenderingManager()->emitTerrainDeformation(pos, footprintSize, materialType);
+                    }
+                }
+                else
+                {
+                    // Reset timer when not moving
+                    mTimeSinceLastFootprint = 0.f;
+                }
+            }
 
             // Can't reset jump state (mPosition[2]) here in full; we don't know for sure whether the PhysicsSystem will
             // actually handle it in this frame due to the fixed minimum timestep used for the physics update. It will

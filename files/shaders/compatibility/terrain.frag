@@ -20,6 +20,12 @@ uniform sampler2D normalMap;
 uniform sampler2D blendMap;
 #endif
 
+#if @terrainDeformation
+uniform sampler2D terrainDeformationMap;
+uniform vec2 deformationOffset;
+uniform float deformationScale;
+#endif
+
 varying float euclideanDepth;
 varying float linearDepth;
 

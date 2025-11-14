@@ -45,11 +45,13 @@
 #include <components/sceneutil/writescene.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadregn.hpp>
 #include <components/esm4/loadcell.hpp>
 
 #include <components/debug/debugdraw.hpp>
@@ -269,6 +271,54 @@ namespace MWRender
         float mFogStart;
         float mFogEnd;
         bool mWireframe;
+    };
+
+    class TerrainDeformationStateSetUpdater : public SceneUtil::StateSetUpdater
+    {
+    public:
+        TerrainDeformationStateSetUpdater()
+            : mDeformationOffset(0.f, 0.f)
+            , mMaterialType(0)
+            , mDeformationTexture(nullptr)
+        {
+        }
+
+        void setDefaults(osg::StateSet* stateset) override
+        {
+            // Uniforms are already added by the terrain material system
+            // We just need to bind the texture here
+            if (mDeformationTexture)
+                stateset->setTextureAttributeAndModes(3, mDeformationTexture, osg::StateAttribute::ON);
+        }
+
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
+        {
+            if (mDeformationTexture)
+            {
+                stateset->getUniform("deformationOffset")->set(mDeformationOffset);
+                stateset->getUniform("materialType")->set(mMaterialType);
+
+                // Update eyePos for tessellation if the uniform exists
+                osg::Uniform* eyePosUniform = stateset->getUniform("eyePos");
+                if (eyePosUniform && mEyePos.length2() > 0)
+                    eyePosUniform->set(mEyePos);
+            }
+        }
+
+        void setDeformationOffset(const osg::Vec2f& offset) { mDeformationOffset = offset; }
+        void setMaterialType(int materialType) { mMaterialType = materialType; }
+        void setEyePos(const osg::Vec3f& eyePos) { mEyePos = eyePos; }
+        void setDeformationTexture(osg::Texture* texture)
+        {
+            mDeformationTexture = texture;
+            reset(); // Force recreation of stateset with new texture
+        }
+
+    private:
+        osg::Vec2f mDeformationOffset;
+        int mMaterialType;
+        osg::Vec3f mEyePos;
+        osg::ref_ptr<osg::Texture> mDeformationTexture;
     };
 
     class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
@@ -518,6 +568,19 @@ namespace MWRender
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
             sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation());
+
+        // terrain deformation for interactive snow/sand/ash
+        if (Settings::shaders().mTerrainDeformation)
+        {
+            mTerrainDeformation = std::make_unique<TerrainDeformation>(mResourceSystem);
+            sceneRoot->addChild(mTerrainDeformation.get());
+
+            // Create and attach state set updater for terrain deformation
+            mTerrainDeformationStateSetUpdater = new TerrainDeformationStateSetUpdater();
+            mTerrainDeformationStateSetUpdater->setDeformationTexture(mTerrainDeformation->getColorTexture());
+            // Note: The updater needs to be attached to terrain chunks when they're created
+            // This will be done in getWorldspaceChunkMgr
+        }
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 
@@ -913,6 +976,43 @@ namespace MWRender
             float windSpeed = mSky->getBaseWindSpeed();
             mSharedUniformStateUpdater->setWindSpeed(windSpeed);
             mSharedUniformStateUpdater->setPlayerPos(playerPos);
+
+            // Update terrain deformation state if enabled
+            if (mTerrainDeformationStateSetUpdater)
+            {
+                const float sWorldScaleFactor = 2.5f; // Must match TerrainDeformationSurface::sWorldScaleFactor
+                osg::Vec2f deformOffset(
+                    std::floor(playerPos.x() / sWorldScaleFactor),
+                    std::floor(playerPos.y() / sWorldScaleFactor)
+                );
+                mTerrainDeformationStateSetUpdater->setDeformationOffset(deformOffset);
+
+                // Set camera position for tessellation
+                mTerrainDeformationStateSetUpdater->setEyePos(mCamera->getPosition());
+
+                // Determine material type based on current cell/region
+                int materialType = 0; // TERRAIN_NORMAL
+                if (player.getCell()->isExterior())
+                {
+                    const MWWorld::Cell* cell = player.getCell()->getCell();
+                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                    const ESM::Region* region = store.get<ESM::Region>().search(cell->getRegion());
+                    if (region)
+                    {
+                        std::string regionName = Misc::StringUtils::lowerCase(region->mName);
+                        if (regionName.find("snow") != std::string::npos ||
+                            regionName.find("solstheim") != std::string::npos)
+                            materialType = 1; // TERRAIN_SNOW
+                        else if (regionName.find("ashland") != std::string::npos ||
+                                 regionName.find("red mountain") != std::string::npos ||
+                                 regionName.find("molag amur") != std::string::npos)
+                            materialType = 3; // TERRAIN_ASH
+                        else if (regionName.find("grazelands") != std::string::npos)
+                            materialType = 2; // TERRAIN_SAND
+                    }
+                }
+                mTerrainDeformationStateSetUpdater->setMaterialType(materialType);
+            }
         }
 
         updateNavMesh();
@@ -1490,6 +1590,14 @@ namespace MWRender
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
         newChunkMgr.mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
         newChunkMgr.mTerrain->enableHeightCullCallback(Settings::terrain().mWaterCulling);
+
+        // Attach terrain deformation state updater if enabled
+        if (mTerrainDeformationStateSetUpdater)
+        {
+            // Attach to the scene root so it applies to all terrain chunks
+            if (!mSceneRoot->getCullCallback())
+                mSceneRoot->addCullCallback(mTerrainDeformationStateSetUpdater);
+        }
 
         return mWorldspaceChunks.emplace(worldspace, std::move(newChunkMgr)).first->second;
     }
