@@ -27,6 +27,7 @@ size_t MWGui::wrap(size_t index, size_t max, int delta)
         return index + absDelta;
     }
     size_t absDelta = static_cast<size_t>(-static_cast<ptrdiff_t>(delta));
+    index = std::min(index, max);
     if (index >= absDelta)
         return index - absDelta;
     else if (max == 0)
