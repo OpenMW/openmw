@@ -44,6 +44,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/cell.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -2447,8 +2448,8 @@ namespace MWMechanics
                         std::string cellName;
                         if (mPtr.getCell()->isExterior())
                         {
-                            const ESM::Cell* cell = mPtr.getCell()->getCell();
-                            const ESM::Region* region = world->getStore().get<ESM::Region>().search(cell->mRegion);
+                            const MWWorld::Cell* cell = mPtr.getCell()->getCell();
+                            const ESM::Region* region = world->getStore().get<ESM::Region>().search(cell->getRegion());
                             if (region)
                             {
                                 std::string regionName = Misc::StringUtils::lowerCase(region->mName);
