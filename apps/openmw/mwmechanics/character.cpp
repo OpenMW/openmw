@@ -34,6 +34,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/terraindeformation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -43,6 +44,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"

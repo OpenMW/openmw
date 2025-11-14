@@ -1457,6 +1457,12 @@ namespace MWRender
         mWater->emitRipple(pos);
     }
 
+    void RenderingManager::emitTerrainDeformation(const osg::Vec3f& pos, float sizeInCellUnits, int materialType)
+    {
+        if (mTerrainDeformation)
+            mTerrainDeformation->emit(pos, sizeInCellUnits, static_cast<TerrainMaterialType>(materialType));
+    }
+
     void RenderingManager::updateProjectionMatrix()
     {
         if (mNearClip < 0.0f)

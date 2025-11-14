@@ -217,6 +217,8 @@ namespace MWRender
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void emitWaterRipple(const osg::Vec3f& pos);
 
+        void emitTerrainDeformation(const osg::Vec3f& pos, float sizeInCellUnits, int materialType);
+
         void updatePlayerPtr(const MWWorld::Ptr& ptr);
 
         void removePlayer(const MWWorld::Ptr& player);
