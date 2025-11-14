@@ -60,6 +60,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/groundcoverstore.hpp"
 #include "../mwworld/scene.hpp"
 
@@ -84,6 +85,7 @@
 #include "recastmesh.hpp"
 #include "screenshotmanager.hpp"
 #include "sky.hpp"
+#include "terraindeformation.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
