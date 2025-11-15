@@ -17,6 +17,8 @@ using namespace MWGui;
 
 size_t MWGui::wrap(size_t index, size_t max, int delta)
 {
+    if (max == 0)
+        return 0;
     if (delta >= 0)
     {
         unsigned absDelta = static_cast<unsigned>(delta);
@@ -30,8 +32,6 @@ size_t MWGui::wrap(size_t index, size_t max, int delta)
     index = std::min(index, max);
     if (index >= absDelta)
         return index - absDelta;
-    else if (max == 0)
-        return 0;
     return max - 1;
 }
 
