@@ -945,6 +945,8 @@ namespace MWGui
     {
         std::vector<std::string> generatePatternArray(std::string inputString)
         {
+            if (inputString.empty() || inputString.find_first_not_of(" ") == std::string::npos)
+                return std::vector<std::string>();
             Misc::StringUtils::lowerCaseInPlace(inputString);
             std::istringstream stringStream(inputString);
             return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
