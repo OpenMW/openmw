@@ -949,14 +949,12 @@ namespace MWGui
             std::istringstream stringStream(inputString);
             return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
         }
-        double weightedSearch(std::string corpus, const std::string& patternString)
+        double weightedSearch(std::string corpus, const std::vector<std::string>& patternArray)
         {
-            if (patternString.empty() || patternString.find_first_not_of(" ") == std::string::npos)
+            if (patternArray.empty())
                 return 1.0;
 
             Misc::StringUtils::lowerCaseInPlace(corpus);
-
-            const std::vector<std::string> patternArray = generatePatternArray(patternString);
 
             double numberOfMatches = 0.0;
             for (const std::string& word : patternArray)
@@ -985,14 +983,14 @@ namespace MWGui
             constexpr bool operator<(const WeightedPage& rhs) const { return tie() < rhs.tie(); }
         };
 
-        std::string searchPattern = mScriptFilter->getCaption();
+        const std::vector<std::string> patternArray = generatePatternArray(mScriptFilter->getCaption());
         std::vector<WeightedPage> weightedPages;
         weightedPages.reserve(LuaUi::scriptSettingsPageCount());
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            double nameWeight = weightedSearch(page.mName, searchPattern);
-            double hintWeight = weightedSearch(page.mSearchHints, searchPattern);
+            double nameWeight = weightedSearch(page.mName, patternArray);
+            double hintWeight = weightedSearch(page.mSearchHints, patternArray);
             if ((nameWeight + hintWeight) > 0)
                 weightedPages.push_back({ i, page.mName, -nameWeight, -hintWeight });
         }
