@@ -403,7 +403,8 @@
 -- @type Enchantment
 -- @field #string id Enchantment id
 -- @field #number type @{#EnchantmentType}
--- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
+-- @field #boolean autocalcFlag (DEPRECATED, use isAutocalc) If set, the casting cost should be computed based on the effect list rather than read from the cost field
+-- @field #boolean isAutocalc If set, the casting cost should be computed based on the effect list rather than read from the cost field
 -- @field #number cost
 -- @field #number charge Charge capacity. Should not be confused with current charge.
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the enchantment
@@ -729,7 +730,8 @@
 -- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the spell
 -- @field #boolean alwaysSucceedFlag If set, the spell should ignore skill checks and always succeed.
 -- @field #boolean starterSpellFlag If set, the spell can be selected as a player's starting spell.
--- @field #boolean autocalcFlag If set, the casting cost should be computed based on the effect list rather than read from the cost field
+-- @field #boolean autocalcFlag (DEPRECATED, use isAutocalc) If set, the casting cost should be computed based on the effect list rather than read from the cost field
+-- @field #boolean isAutocalc If set, the casting cost should be computed based on the effect list rather than read from the cost field
 
 ---
 -- @type MagicEffect

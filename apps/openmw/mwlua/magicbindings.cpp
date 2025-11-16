@@ -312,7 +312,10 @@ namespace MWLua
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Always); });
         spellT["starterSpellFlag"] = sol::readonly_property(
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_PCStart); });
+        // Deprecated for consistency with other record types
         spellT["autocalcFlag"] = sol::readonly_property(
+            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
+        spellT["isAutocalc"] = sol::readonly_property(
             [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
         spellT["effects"] = sol::readonly_property([lua = state.lua_state()](const ESM::Spell& rec) -> sol::table {
             return effectParamsListToTable(lua, rec.mEffects.mList);
@@ -325,7 +328,10 @@ namespace MWLua
         };
         enchantT["id"] = sol::readonly_property([](const ESM::Enchantment& rec) { return rec.mId.serializeText(); });
         enchantT["type"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mType; });
+        // Deprecated for consistency with other record types
         enchantT["autocalcFlag"] = sol::readonly_property(
+            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
+        enchantT["isAutocalc"] = sol::readonly_property(
             [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
         enchantT["cost"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCost; });
         enchantT["charge"]

@@ -54,6 +54,9 @@ namespace
             }
             potion.mEffects.updateIndexes();
         }
+        if (rec["isAutocalc"] != sol::nil && rec["isAutocalc"])
+            potion.mData.mFlags = ESM::Potion::Autocalc;
+
         return potion;
     }
 }
@@ -91,5 +94,7 @@ namespace MWLua
                 res[LuaUtil::toLuaIndex(i)] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
             return res;
         });
+        record["isAutocalc"] = sol::readonly_property(
+            [](const ESM::Potion& rec) -> bool { return rec.mData.mFlags & ESM::Potion::Autocalc; });
     }
 }
