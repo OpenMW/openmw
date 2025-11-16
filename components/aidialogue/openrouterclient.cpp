@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <thread>
 
 namespace AIDialogue
 {
@@ -20,9 +21,14 @@ namespace AIDialogue
     struct OpenRouterClient::Impl
     {
         std::string apiKey;
-        std::string appName = "OpenMW";
+        std::string appName = "OpenMW AI Dialogue";
         std::string siteUrl = "https://openmw.org";
         CURL* curl = nullptr;
+        int timeoutMs = 30000;
+        int maxRetries = 3;
+        int retryDelayMs = 1000;
+        float lastCost = 0.0f;
+        float sessionCost = 0.0f;
 
         Impl() { curl = curl_easy_init(); }
 
@@ -55,22 +61,39 @@ namespace AIDialogue
         mImpl->siteUrl = siteUrl;
     }
 
+    void OpenRouterClient::setRetryConfig(int maxRetries, int retryDelayMs)
+    {
+        mImpl->maxRetries = maxRetries;
+        mImpl->retryDelayMs = retryDelayMs;
+    }
+
+    void OpenRouterClient::setTimeout(int timeoutMs)
+    {
+        mImpl->timeoutMs = timeoutMs;
+    }
+
     bool OpenRouterClient::isConfigured() const
     {
         return !mImpl->apiKey.empty() && mImpl->curl != nullptr;
     }
 
-    APIResponse OpenRouterClient::chatCompletion(const std::vector<Message>& messages, const GenerationConfig& config)
+    float OpenRouterClient::getLastCost() const
     {
-        APIResponse response;
+        return mImpl->lastCost;
+    }
 
-        if (!isConfigured())
-        {
-            response.errorMessage = "OpenRouterClient not configured (missing API key)";
-            return response;
-        }
+    float OpenRouterClient::getSessionCost() const
+    {
+        return mImpl->sessionCost;
+    }
 
-        // Build request JSON
+    void OpenRouterClient::resetSessionCost()
+    {
+        mImpl->sessionCost = 0.0f;
+    }
+
+    std::string OpenRouterClient::buildRequestBody(const std::vector<Message>& messages, const GenerationConfig& config)
+    {
         JSONBuilder requestBuilder;
         requestBuilder.startObject();
         requestBuilder.addString("model", config.model);
@@ -106,17 +129,45 @@ namespace AIDialogue
         requestBuilder.addFloat("frequency_penalty", config.frequencyPenalty);
         requestBuilder.addFloat("presence_penalty", config.presencePenalty);
 
+        // Add provider routing (KEY FEATURE!)
+        const auto& routing = config.providerRouting;
+        if (!routing.order.empty() || !routing.only.empty() || !routing.ignore.empty())
+        {
+            requestBuilder.addRawValue("provider", JSON::providerRoutingToJson(routing));
+        }
+
         // Add JSON mode if requested
         if (config.jsonMode)
         {
             requestBuilder.addRawValue("response_format", "{\"type\":\"json_object\"}");
         }
 
+        // Add seed if specified
+        if (config.seed >= 0)
+        {
+            requestBuilder.addInt("seed", config.seed);
+        }
+
+        // Add stop sequences if any
+        if (!config.stopSequences.empty())
+        {
+            requestBuilder.startArray("stop");
+            for (const auto& seq : config.stopSequences)
+            {
+                requestBuilder.startObject();
+                requestBuilder.addString("sequence", seq);
+                requestBuilder.endObject();
+            }
+            requestBuilder.endArray();
+        }
+
         requestBuilder.endObject();
+        return requestBuilder.build();
+    }
 
-        std::string requestBody = requestBuilder.build();
-
-        // Prepare curl request
+    APIResponse OpenRouterClient::performRequest(const std::string& requestBody)
+    {
+        APIResponse response;
         std::string responseData;
         struct curl_slist* headers = nullptr;
 
@@ -143,7 +194,7 @@ namespace AIDialogue
         curl_easy_setopt(mImpl->curl, CURLOPT_POSTFIELDS, requestBody.c_str());
         curl_easy_setopt(mImpl->curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(mImpl->curl, CURLOPT_WRITEDATA, &responseData);
-        curl_easy_setopt(mImpl->curl, CURLOPT_TIMEOUT, 30L); // 30 second timeout
+        curl_easy_setopt(mImpl->curl, CURLOPT_TIMEOUT_MS, static_cast<long>(mImpl->timeoutMs));
 
         // Perform request
         CURLcode res = curl_easy_perform(mImpl->curl);
@@ -204,8 +255,21 @@ namespace AIDialogue
                 response.totalTokens = usage.getInt("total_tokens", 0);
             }
 
-            response.modelUsed = parser.getString("model", config.model);
+            // Extract model used
+            response.modelUsed = parser.getString("model", "");
+
+            // Extract provider used (OpenRouter-specific field)
+            if (parser.hasKey("provider"))
+            {
+                response.providerUsed = parser.getString("provider", "unknown");
+            }
+
             response.success = !response.content.empty();
+
+            // Track cost (rough estimate)
+            // Free models cost $0, paid models vary widely
+            mImpl->lastCost = 0.0f; // TODO: Implement actual cost tracking
+            mImpl->sessionCost += mImpl->lastCost;
         }
         catch (const std::exception& e)
         {
@@ -216,9 +280,133 @@ namespace AIDialogue
         return response;
     }
 
+    APIResponse OpenRouterClient::chatCompletion(const std::vector<Message>& messages, const GenerationConfig& config)
+    {
+        if (!isConfigured())
+        {
+            APIResponse response;
+            response.errorMessage = "OpenRouterClient not configured (missing API key)";
+            return response;
+        }
+
+        std::string requestBody = buildRequestBody(messages, config);
+        return performRequest(requestBody);
+    }
+
+    APIResponse OpenRouterClient::chatCompletionWithRetry(
+        const std::vector<Message>& messages, const GenerationConfig& config, int maxRetries)
+    {
+        int retries = maxRetries >= 0 ? maxRetries : mImpl->maxRetries;
+        int currentDelay = mImpl->retryDelayMs;
+
+        APIResponse lastResponse;
+
+        for (int attempt = 0; attempt <= retries; attempt++)
+        {
+            lastResponse = chatCompletion(messages, config);
+
+            if (lastResponse.success)
+            {
+                return lastResponse;
+            }
+
+            // Don't retry on certain errors (like invalid API key)
+            if (lastResponse.errorMessage.find("401") != std::string::npos
+                || lastResponse.errorMessage.find("Invalid API key") != std::string::npos)
+            {
+                return lastResponse;
+            }
+
+            // Wait before retrying (exponential backoff)
+            if (attempt < retries)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(currentDelay));
+                currentDelay *= 2; // Exponential backoff
+            }
+        }
+
+        return lastResponse;
+    }
+
     // JSON namespace utility functions
     namespace JSON
     {
+        std::string providerRoutingToJson(const ProviderRouting& routing)
+        {
+            JSONBuilder builder;
+            builder.startObject();
+
+            // Add order array if specified
+            if (!routing.order.empty())
+            {
+                builder.startArray("order");
+                for (const auto& provider : routing.order)
+                {
+                    builder.startObject();
+                    builder.addString("provider", provider);
+                    builder.endObject();
+                }
+                builder.endArray();
+            }
+
+            // Add allow_fallbacks
+            builder.addBool("allow_fallbacks", routing.allowFallbacks);
+
+            // Add only array if specified
+            if (!routing.only.empty())
+            {
+                builder.startArray("only");
+                for (const auto& provider : routing.only)
+                {
+                    builder.addString("", provider);
+                }
+                builder.endArray();
+            }
+
+            // Add ignore array if specified
+            if (!routing.ignore.empty())
+            {
+                builder.startArray("ignore");
+                for (const auto& provider : routing.ignore)
+                {
+                    builder.addString("", provider);
+                }
+                builder.endArray();
+            }
+
+            // Add sort if specified
+            if (!routing.sort.empty())
+            {
+                builder.addString("sort", routing.sort);
+            }
+
+            // Add require_parameters
+            if (routing.requireParameters)
+            {
+                builder.addBool("require_parameters", true);
+            }
+
+            // Add zdr (Zero Data Retention)
+            if (routing.zeroDataRetention)
+            {
+                builder.addBool("zdr", true);
+            }
+
+            // Add quantizations if specified
+            if (!routing.quantizations.empty())
+            {
+                builder.startArray("quantizations");
+                for (const auto& quant : routing.quantizations)
+                {
+                    builder.addString("", quant);
+                }
+                builder.endArray();
+            }
+
+            builder.endObject();
+            return builder.build();
+        }
+
         std::string messagesToJson(const std::vector<Message>& messages)
         {
             JSONBuilder builder;
@@ -257,10 +445,17 @@ namespace AIDialogue
             builder.addFloat("top_p", config.topP);
             builder.addFloat("frequency_penalty", config.frequencyPenalty);
             builder.addFloat("presence_penalty", config.presencePenalty);
+
+            if (!config.providerRouting.order.empty())
+            {
+                builder.addRawValue("provider", providerRoutingToJson(config.providerRouting));
+            }
+
             if (config.jsonMode)
             {
                 builder.addRawValue("response_format", "{\"type\":\"json_object\"}");
             }
+
             builder.endObject();
             return builder.build();
         }
@@ -298,6 +493,7 @@ namespace AIDialogue
             }
 
             response.modelUsed = parser.getString("model");
+            response.providerUsed = parser.getString("provider", "unknown");
             response.success = !response.content.empty();
 
             return response;
