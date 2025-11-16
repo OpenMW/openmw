@@ -126,7 +126,7 @@ namespace AIDialogue
         static GenerationConfig cerebrasSummary()
         {
             GenerationConfig config;
-            config.model = "deepseek/deepseek-chat";
+            config.model = "qwen/qwen3-235b-a22b-thinking-2507";
             config.providerRouting = ProviderRouting::cerebrasFirst();
             config.temperature = 0.1f; // More deterministic for summaries
             config.maxTokens = 2048;

@@ -55,6 +55,13 @@ That's it! Cerebras will handle your dialogue with blazing speed.
 | `meta-llama/llama-3.3-8b-instruct:free` | ⚡⚡ 2,000+ t/s | ⭐⭐⭐ | Good balance |
 | `meta-llama/llama-3.3-70b-instruct:free` | ⚡⚡⚡ 2,700+ t/s | ⭐⭐⭐⭐⭐ | Highest quality |
 
+### Summarization Models
+
+| Model | Best For | Notes |
+|-------|----------|-------|
+| `qwen/qwen3-235b-a22b-thinking-2507` | Context summarization | Excellent reasoning, handles complex summaries |
+| `deepseek/deepseek-chat` | Quick summaries | Fast and cheap alternative |
+
 ### Paid Models (Production Quality)
 
 | Model | Speed | Cost (per 1M tokens) | Best For |
