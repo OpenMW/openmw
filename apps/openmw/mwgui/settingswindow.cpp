@@ -943,7 +943,7 @@ namespace MWGui
 
     namespace
     {
-        std::vector<std::string> splitString(std::string inputString)
+        std::vector<std::string> generatePatternArray(std::string inputString)
         {
             Misc::StringUtils::lowerCaseInPlace(inputString);
             std::istringstream stringStream(inputString);
@@ -956,7 +956,7 @@ namespace MWGui
 
             Misc::StringUtils::lowerCaseInPlace(corpus);
 
-            const std::vector<std::string> patternArray = splitString(patternString);
+            const std::vector<std::string> patternArray = generatePatternArray(patternString);
 
             double numberOfMatches = 0.0;
             for (const std::string& word : patternArray)
