@@ -861,7 +861,7 @@
 -- @field #boolean canWalk whether the creature can walk
 -- @field #boolean canUseWeapons whether the creature can use weapons and shields
 -- @field #boolean isBiped whether the creature is a biped
--- @field #boolean isAutocalc If true, the actors stats will be automatically calculated based on level and class.
+-- @field #boolean isAutocalc If true, the actor's stats will be automatically calculated based on level and class.
 -- @field #string primaryFaction Faction ID of the NPCs default faction. Nil if no faction
 -- @field #number primaryFactionRank Faction rank of the NPCs default faction. Nil if no faction
 -- @field #boolean isEssential whether the creature is essential
@@ -1148,6 +1148,7 @@
 -- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 -- @field #boolean isEssential whether the NPC is essential
 -- @field #boolean isRespawning whether the NPC respawns after death
+-- @field #boolean isAutocalc If true, the actor's stats will be automatically calculated based on level and class.
 -- @field #number bloodType integer representing the blood type of the NPC. Used to generate the correct blood vfx.
 
 ---
@@ -1884,6 +1885,7 @@
 -- @field #number weight
 -- @field #number value
 -- @field #list<openmw.core#MagicEffectWithParams> effects The effects (@{#list<openmw.core#MagicEffectWithParams>}) of the potion
+-- @field #boolean isAutocalc If set, the gold value should be computed based on the effect list rather than read from the value field
 
 
 
