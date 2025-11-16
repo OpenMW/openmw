@@ -943,18 +943,18 @@ namespace MWGui
 
     namespace
     {
-        std::vector<std::string> splitString(const std::string& inputString)
+        std::vector<std::string> splitString(std::string inputString)
         {
+            Misc::StringUtils::lowerCaseInPlace(inputString);
             std::istringstream stringStream(inputString);
             return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
         }
-        double weightedSearch(std::string corpus, std::string patternString)
+        double weightedSearch(std::string corpus, const std::string& patternString)
         {
             if (patternString.empty() || patternString.find_first_not_of(" ") == std::string::npos)
                 return 1.0;
 
             Misc::StringUtils::lowerCaseInPlace(corpus);
-            Misc::StringUtils::lowerCaseInPlace(patternString);
 
             const std::vector<std::string> patternArray = splitString(patternString);
 
