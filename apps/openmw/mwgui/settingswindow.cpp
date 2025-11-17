@@ -951,16 +951,16 @@ namespace MWGui
             std::istringstream stringStream(inputString);
             return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
         }
-        double weightedSearch(std::string corpus, const std::vector<std::string>& patternArray)
+        size_t weightedSearch(std::string corpus, const std::vector<std::string>& patternArray)
         {
             if (patternArray.empty())
-                return 1.0;
+                return 1;
 
             Misc::StringUtils::lowerCaseInPlace(corpus);
 
-            double numberOfMatches = 0.0;
+            size_t numberOfMatches = 0;
             for (const std::string& word : patternArray)
-                numberOfMatches += corpus.find(word) != std::string::npos ? 1.0 : 0.0;
+                numberOfMatches += corpus.find(word) != std::string::npos ? 1 : 0;
 
             return numberOfMatches;
         }
@@ -977,12 +977,17 @@ namespace MWGui
         {
             size_t mIndex;
             std::string mName;
-            double mNameWeight;
-            double mHintWeight;
+            size_t mNameWeight;
+            size_t mHintWeight;
 
-            constexpr auto tie() const { return std::tie(mNameWeight, mHintWeight, mName); }
-
-            constexpr bool operator<(const WeightedPage& rhs) const { return tie() < rhs.tie(); }
+            constexpr bool operator<(const WeightedPage& rhs) const
+            {
+                if (mNameWeight != rhs.mNameWeight)
+                    return mNameWeight > rhs.mNameWeight;
+                if (mHintWeight != rhs.mHintWeight)
+                    return mHintWeight > rhs.mHintWeight;
+                return mName < rhs.mName;
+            }
         };
 
         const std::vector<std::string> patternArray = generatePatternArray(mScriptFilter->getCaption());
@@ -991,10 +996,10 @@ namespace MWGui
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            double nameWeight = weightedSearch(page.mName, patternArray);
-            double hintWeight = weightedSearch(page.mSearchHints, patternArray);
+            size_t nameWeight = weightedSearch(page.mName, patternArray);
+            size_t hintWeight = weightedSearch(page.mSearchHints, patternArray);
             if ((nameWeight + hintWeight) > 0)
-                weightedPages.push_back({ i, page.mName, -nameWeight, -hintWeight });
+                weightedPages.push_back({ i, page.mName, nameWeight, hintWeight });
         }
         std::sort(weightedPages.begin(), weightedPages.end());
         for (const WeightedPage& weightedPage : weightedPages)
