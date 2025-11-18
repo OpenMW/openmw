@@ -943,24 +943,24 @@ namespace MWGui
 
     namespace
     {
-        std::vector<std::string> generatePatternArray(std::string inputString)
+        std::vector<std::string> generatePatternArray(const MyGUI::UString& inputString)
         {
             if (inputString.empty() || inputString.find_first_not_of(" ") == std::string::npos)
                 return std::vector<std::string>();
-            Misc::StringUtils::lowerCaseInPlace(inputString);
-            std::istringstream stringStream(inputString);
+            std::string inputStringLowerCase = Misc::StringUtils::lowerCase(inputString);
+            std::istringstream stringStream(inputStringLowerCase);
             return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
         }
-        size_t weightedSearch(std::string corpus, const std::vector<std::string>& patternArray)
+        size_t weightedSearch(const std::string& corpus, const std::vector<std::string>& patternArray)
         {
             if (patternArray.empty())
                 return 1;
 
-            Misc::StringUtils::lowerCaseInPlace(corpus);
+            std::string corpusLowerCase = Misc::StringUtils::lowerCase(corpus);
 
             size_t numberOfMatches = 0;
             for (const std::string& word : patternArray)
-                numberOfMatches += corpus.find(word) != std::string::npos ? 1 : 0;
+                numberOfMatches += corpusLowerCase.find(word) != std::string::npos ? 1 : 0;
 
             return numberOfMatches;
         }
