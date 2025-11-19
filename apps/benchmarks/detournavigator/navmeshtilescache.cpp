@@ -33,7 +33,7 @@ namespace
 
     osg::Vec3f generateAgentHalfExtents(float min, float max, auto& random)
     {
-        std::uniform_int_distribution<int> distribution(min, max);
+        std::uniform_real_distribution<float> distribution(min, max);
         return osg::Vec3f(distribution(random), distribution(random), distribution(random));
     }
 
