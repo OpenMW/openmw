@@ -167,6 +167,7 @@ namespace Nif
     struct BSSkinBoneData;
     struct BSAnimNote;
     struct BSAnimNotes;
+    struct bhkRagdollTemplateData;
 
     using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -235,6 +236,7 @@ namespace Nif
     using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;
     using BSAnimNoteList = RecordListT<BSAnimNote>;
     using BSAnimNotesList = RecordListT<BSAnimNotes>;
+    using bhkRagdollTemplateDataList = RecordListT<bhkRagdollTemplateData>;
 
 } // Namespace
 #endif

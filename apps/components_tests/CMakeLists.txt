@@ -92,6 +92,9 @@ file(GLOB UNITTEST_SRC_FILES
 
     bsa/testbsafile.cpp
     bsa/testcompressedbsafile.cpp
+
+    nif/node.hpp
+    nif/testphysics.cpp
 )
 
 source_group(apps\\components-tests FILES ${UNITTEST_SRC_FILES})

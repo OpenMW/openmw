@@ -912,7 +912,7 @@ namespace Nif
 
     struct bhkRagdollTemplate : Extra
     {
-        NiAVObjectList mBones;
+        bhkRagdollTemplateDataList mBones;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
