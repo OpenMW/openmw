@@ -74,7 +74,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    enum class hkResponseType : uint8_t
+    enum class HkResponseType : uint8_t
     {
         Response_Invalid = 0,
         Response_SimpleContact = 1,
@@ -84,7 +84,7 @@ namespace Nif
 
     struct bhkEntityCInfo
     {
-        hkResponseType mResponseType;
+        HkResponseType mResponseType;
         uint16_t mProcessContactDelay;
 
         void read(NIFStream* nif);
@@ -147,7 +147,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    enum class hkMotionType : uint8_t
+    enum class HkMotionType : uint8_t
     {
         Motion_Invalid = 0,
         Motion_Dynamic = 1,
@@ -161,14 +161,14 @@ namespace Nif
         Motion_Character = 9
     };
 
-    enum class hkDeactivatorType : uint8_t
+    enum class HkDeactivatorType : uint8_t
     {
         Deactivator_Invalid = 0,
         Deactivator_Never = 1,
         Deactivator_Spatial = 2
     };
 
-    enum class hkSolverDeactivation : uint8_t
+    enum class HkSolverDeactivation : uint8_t
     {
         SolverDeactivation_Invalid = 0,
         SolverDeactivation_Off = 1,
@@ -178,7 +178,7 @@ namespace Nif
         SolverDeactivation_Max = 5
     };
 
-    enum class hkQualityType : uint8_t
+    enum class HkQualityType : uint8_t
     {
         Quality_Invalid = 0,
         Quality_Fixed = 1,
@@ -195,7 +195,7 @@ namespace Nif
     struct bhkRigidBodyCInfo
     {
         HavokFilter mHavokFilter;
-        hkResponseType mResponseType;
+        HkResponseType mResponseType;
         uint16_t mProcessContactDelay;
         osg::Vec4f mTranslation;
         osg::Quat mRotation;
@@ -214,11 +214,11 @@ namespace Nif
         float mMaxLinearVelocity;
         float mMaxAngularVelocity;
         float mPenetrationDepth;
-        hkMotionType mMotionType;
-        hkDeactivatorType mDeactivatorType;
+        HkMotionType mMotionType;
+        HkDeactivatorType mDeactivatorType;
         bool mEnableDeactivation{ true };
-        hkSolverDeactivation mSolverDeactivation;
-        hkQualityType mQualityType;
+        HkSolverDeactivation mSolverDeactivation;
+        HkQualityType mQualityType;
         uint8_t mAutoRemoveLevel;
         uint8_t mResponseModifierFlags;
         uint8_t mNumContactPointShapeKeys;
@@ -244,7 +244,7 @@ namespace Nif
         void post(Reader& nif);
     };
 
-    enum class hkMotorType : uint8_t
+    enum class HkMotorType : uint8_t
     {
         Motor_None = 0,
         Motor_Position = 1,
@@ -287,7 +287,7 @@ namespace Nif
 
     struct bhkConstraintMotorCInfo
     {
-        hkMotorType mType;
+        HkMotorType mType;
         bhkPositionConstraintMotor mPositionMotor;
         bhkVelocityConstraintMotor mVelocityMotor;
         bhkSpringDamperConstraintMotor mSpringDamperMotor;
@@ -384,7 +384,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    enum class hkConstraintType : uint32_t
+    enum class HkConstraintType : uint32_t
     {
         BallAndSocket = 0,
         Hinge = 1,
@@ -397,7 +397,7 @@ namespace Nif
 
     struct bhkWrappedConstraintDataBase
     {
-        hkConstraintType mType;
+        HkConstraintType mType;
         bhkConstraintCInfo mInfo;
         bhkBallAndSocketConstraintCInfo mBallAndSocketInfo;
         bhkHingeConstraintCInfo mHingeInfo;

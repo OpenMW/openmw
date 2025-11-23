@@ -65,13 +65,13 @@ namespace CSVWorld
 
         void replaceToolbarAndWorldspace(CSVRender::WorldspaceWidget* widget, CSVWidget::SceneToolbar* toolbar);
 
-        enum widgetType
+        enum WidgetType
         {
             widget_Paged,
             widget_Unpaged
         };
 
-        CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, widgetType type);
+        CSVWidget::SceneToolbar* makeToolbar(CSVRender::WorldspaceWidget* widget, WidgetType type);
 
     private slots:
 

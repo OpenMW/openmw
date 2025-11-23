@@ -48,7 +48,7 @@ namespace Nif
 
     void bhkEntityCInfo::read(NIFStream* nif)
     {
-        mResponseType = static_cast<hkResponseType>(nif->get<uint8_t>());
+        mResponseType = static_cast<HkResponseType>(nif->get<uint8_t>());
         nif->skip(1); // Unused
         nif->read(mProcessContactDelay);
     }
@@ -114,7 +114,7 @@ namespace Nif
             {
                 if (nif->getBethVersion() >= 83)
                     nif->skip(4); // Unused
-                mResponseType = static_cast<hkResponseType>(nif->get<uint8_t>());
+                mResponseType = static_cast<HkResponseType>(nif->get<uint8_t>());
                 nif->skip(1); // Unused
                 nif->read(mProcessContactDelay);
             }
@@ -152,23 +152,23 @@ namespace Nif
             if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_FO4)
                 nif->read(mPenetrationDepth);
         }
-        mMotionType = static_cast<hkMotionType>(nif->get<uint8_t>());
+        mMotionType = static_cast<HkMotionType>(nif->get<uint8_t>());
         if (nif->getBethVersion() < 83)
-            mDeactivatorType = static_cast<hkDeactivatorType>(nif->get<uint8_t>());
+            mDeactivatorType = static_cast<HkDeactivatorType>(nif->get<uint8_t>());
         else
             nif->read(mEnableDeactivation);
-        mSolverDeactivation = static_cast<hkSolverDeactivation>(nif->get<uint8_t>());
+        mSolverDeactivation = static_cast<HkSolverDeactivation>(nif->get<uint8_t>());
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_FO4)
         {
             nif->skip(1);
             nif->read(mPenetrationDepth);
             nif->read(mTimeFactor);
             nif->skip(4);
-            mResponseType = static_cast<hkResponseType>(nif->get<uint8_t>());
+            mResponseType = static_cast<HkResponseType>(nif->get<uint8_t>());
             nif->skip(1); // Unused
             nif->read(mProcessContactDelay);
         }
-        mQualityType = static_cast<hkQualityType>(nif->get<uint8_t>());
+        mQualityType = static_cast<HkQualityType>(nif->get<uint8_t>());
         if (nif->getBethVersion() >= 83)
         {
             nif->read(mAutoRemoveLevel);
@@ -229,19 +229,19 @@ namespace Nif
 
     void bhkConstraintMotorCInfo::read(NIFStream* nif)
     {
-        mType = static_cast<hkMotorType>(nif->get<uint8_t>());
+        mType = static_cast<HkMotorType>(nif->get<uint8_t>());
         switch (mType)
         {
-            case hkMotorType::Motor_Position:
+            case HkMotorType::Motor_Position:
                 mPositionMotor.read(nif);
                 break;
-            case hkMotorType::Motor_Velocity:
+            case HkMotorType::Motor_Velocity:
                 mVelocityMotor.read(nif);
                 break;
-            case hkMotorType::Motor_SpringDamper:
+            case HkMotorType::Motor_SpringDamper:
                 mSpringDamperMotor.read(nif);
                 break;
-            case hkMotorType::Motor_None:
+            case HkMotorType::Motor_None:
             default:
                 break;
         }
@@ -378,26 +378,26 @@ namespace Nif
 
     void bhkMalleableConstraintCInfo::read(NIFStream* nif)
     {
-        mType = static_cast<hkConstraintType>(nif->get<uint32_t>());
+        mType = static_cast<HkConstraintType>(nif->get<uint32_t>());
         mInfo.read(nif);
         switch (mType)
         {
-            case hkConstraintType::BallAndSocket:
+            case HkConstraintType::BallAndSocket:
                 mBallAndSocketInfo.read(nif);
                 break;
-            case hkConstraintType::Hinge:
+            case HkConstraintType::Hinge:
                 mHingeInfo.read(nif);
                 break;
-            case hkConstraintType::LimitedHinge:
+            case HkConstraintType::LimitedHinge:
                 mLimitedHingeInfo.read(nif);
                 break;
-            case hkConstraintType::Prismatic:
+            case HkConstraintType::Prismatic:
                 mPrismaticInfo.read(nif);
                 break;
-            case hkConstraintType::Ragdoll:
+            case HkConstraintType::Ragdoll:
                 mRagdollInfo.read(nif);
                 break;
-            case hkConstraintType::StiffSpring:
+            case HkConstraintType::StiffSpring:
                 mStiffSpringInfo.read(nif);
                 break;
             default:
@@ -417,29 +417,29 @@ namespace Nif
 
     void bhkWrappedConstraintData::read(NIFStream* nif)
     {
-        mType = static_cast<hkConstraintType>(nif->get<uint32_t>());
+        mType = static_cast<HkConstraintType>(nif->get<uint32_t>());
         mInfo.read(nif);
         switch (mType)
         {
-            case hkConstraintType::BallAndSocket:
+            case HkConstraintType::BallAndSocket:
                 mBallAndSocketInfo.read(nif);
                 break;
-            case hkConstraintType::Hinge:
+            case HkConstraintType::Hinge:
                 mHingeInfo.read(nif);
                 break;
-            case hkConstraintType::LimitedHinge:
+            case HkConstraintType::LimitedHinge:
                 mLimitedHingeInfo.read(nif);
                 break;
-            case hkConstraintType::Prismatic:
+            case HkConstraintType::Prismatic:
                 mPrismaticInfo.read(nif);
                 break;
-            case hkConstraintType::Ragdoll:
+            case HkConstraintType::Ragdoll:
                 mRagdollInfo.read(nif);
                 break;
-            case hkConstraintType::StiffSpring:
+            case HkConstraintType::StiffSpring:
                 mStiffSpringInfo.read(nif);
                 break;
-            case hkConstraintType::Malleable:
+            case HkConstraintType::Malleable:
                 mMalleableInfo.read(nif);
                 break;
             default:

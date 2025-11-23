@@ -323,7 +323,7 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType(
     return output;
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::WorldspaceWidget::getDropRequirements(DropType type) const
+CSVRender::WorldspaceWidget::DropRequirements CSVRender::WorldspaceWidget::getDropRequirements(DropType type) const
 {
     if (type == Type_DebugProfile)
         return canHandle;
