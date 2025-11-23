@@ -1454,7 +1454,7 @@ namespace MWMechanics
                     }
 
                     startCombat(actor, player, &playerFollowers);
-                    observerStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId());
+                    observerStats.setHitAttemptActor(player.getCellRef().getRefNum());
 
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
@@ -1750,10 +1750,7 @@ namespace MWMechanics
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
                             // Stops guard from ending combat if player is unreachable
-                            actor.getPtr()
-                                .getClass()
-                                .getCreatureStats(actor.getPtr())
-                                .setHitAttemptActor(playerNum);
+                            actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActor(playerNum);
                         }
                     }
                 }

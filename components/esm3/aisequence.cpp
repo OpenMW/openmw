@@ -41,7 +41,7 @@ namespace ESM
         {
             if (esm.getFormatVersion() <= MaxActorIdSaveGameFormatVersion)
             {
-                refNum.mIndex = -1;
+                refNum.mIndex = static_cast<uint32_t>(-1);
                 esm.getHNOT(refNum.mIndex, name);
             }
             else if (esm.peekNextSub(name))

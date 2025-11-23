@@ -21,7 +21,7 @@ namespace ESM
         esm.getHNT("QUAT", mOrientation.mValues);
         if (esm.getFormatVersion() <= MaxActorIdSaveGameFormatVersion)
         {
-            mCaster.mIndex = -1;
+            mCaster.mIndex = static_cast<uint32_t>(-1);
             esm.getHNT(mCaster.mIndex, "ACTO");
         }
         else
