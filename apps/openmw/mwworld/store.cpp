@@ -81,7 +81,7 @@ namespace MWWorld
         mStatic.insert_or_assign(idx, std::move(record));
     }
     template <typename T>
-    int IndexedStore<T>::getSize() const
+    size_t IndexedStore<T>::getSize() const
     {
         return mStatic.size();
     }
@@ -255,7 +255,7 @@ namespace MWWorld
     }
 
     template <class T, class Id>
-    int TypedDynamicStore<T, Id>::getDynamicSize() const
+    size_t TypedDynamicStore<T, Id>::getDynamicSize() const
     {
         return mDynamic.size();
     }

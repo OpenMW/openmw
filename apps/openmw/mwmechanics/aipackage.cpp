@@ -37,7 +37,7 @@ namespace
 
     float getPointTolerance(float speed, float duration, const osg::Vec3f& halfExtents)
     {
-        const float actorTolerance = 2 * speed * duration + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+        const float actorTolerance = 2 * speed * duration + 1.2f * std::max(halfExtents.x(), halfExtents.y());
         return std::max(MWMechanics::MIN_TOLERANCE, actorTolerance);
     }
 

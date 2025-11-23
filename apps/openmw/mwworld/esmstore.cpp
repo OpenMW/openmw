@@ -681,7 +681,7 @@ namespace MWWorld
         }
     }
 
-    int ESMStore::countSavedGameRecords() const
+    size_t ESMStore::countSavedGameRecords() const
     {
         return 1 // DYNA (dynamic name counter)
             + get<ESM::Potion>().getDynamicSize() + get<ESM::Armor>().getDynamicSize()

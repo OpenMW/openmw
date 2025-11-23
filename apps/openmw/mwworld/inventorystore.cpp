@@ -64,7 +64,7 @@ void MWWorld::InventoryStore::readEquipmentState(
     if (index == inventory.mSelectedEnchantItem)
         mSelectedEnchantItem = iter;
 
-    auto found = inventory.mEquipmentSlots.find(index);
+    auto found = inventory.mEquipmentSlots.find(static_cast<uint32_t>(index));
     if (found != inventory.mEquipmentSlots.end())
     {
         if (found->second < 0 || found->second >= MWWorld::InventoryStore::Slots)

@@ -147,8 +147,9 @@ namespace MWGui::Widgets
         }
         if (mAttributeValueWidget)
         {
-            int modified = mValue.getModified(), base = mValue.getBase();
-            mAttributeValueWidget->setCaption(MyGUI::utility::toString(modified));
+            float modified = mValue.getModified();
+            float base = mValue.getBase();
+            mAttributeValueWidget->setCaption(MyGUI::utility::toString(static_cast<int>(modified)));
             if (modified > base)
                 mAttributeValueWidget->_setWidgetState("increased");
             else if (modified < base)

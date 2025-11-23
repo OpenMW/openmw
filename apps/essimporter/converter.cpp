@@ -18,7 +18,7 @@
 namespace
 {
 
-    void convertImage(char* data, int size, int width, int height, GLenum pf, const std::string& out)
+    void convertImage(char* data, size_t size, int width, int height, GLenum pf, const std::string& out)
     {
         osg::ref_ptr<osg::Image> image(new osg::Image);
         image->allocateImage(width, height, 1, pf, GL_UNSIGNED_BYTE);

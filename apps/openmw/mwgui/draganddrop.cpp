@@ -48,9 +48,9 @@ namespace MWGui
             ItemModel::ModelIndex newIndex = -1;
             for (size_t i = 0; i < playerModel->getItemCount(); ++i)
             {
-                if (playerModel->getItem(i).mBase == item)
+                if (playerModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase == item)
                 {
-                    newIndex = i;
+                    newIndex = static_cast<ItemModel::ModelIndex>(i);
                     break;
                 }
             }
@@ -82,7 +82,7 @@ namespace MWGui
 
         mDraggedWidget->setItem(mItem.mBase);
         mDraggedWidget->setNeedMouseFocus(false);
-        mDraggedWidget->setCount(count);
+        mDraggedWidget->setCount(static_cast<int>(count));
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 
@@ -134,7 +134,7 @@ namespace MWGui
 
         mItem.mCount = count;
         mDraggedCount = count;
-        mDraggedWidget->setCount(mDraggedCount);
+        mDraggedWidget->setCount(static_cast<int>(mDraggedCount));
         mSourceSortModel->clearDragItems();
         mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
     }

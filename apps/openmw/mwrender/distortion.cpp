@@ -10,7 +10,7 @@ namespace MWRender
         osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)
     {
         osg::State* state = renderInfo.getState();
-        size_t frameId = state->getFrameStamp()->getFrameNumber() % 2;
+        unsigned frameId = state->getFrameStamp()->getFrameNumber() % 2;
 
         PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 

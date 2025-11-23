@@ -591,7 +591,7 @@ namespace Gui
         // Underscore, use for NotDefined marker (used for glyphs not existing in the font)
         additional.emplace(95, MyGUI::FontCodeType::NotDefined);
 
-        for (int i = 0; i < 256; i++)
+        for (unsigned i = 0; i < 256; i++)
         {
             float x1 = data[i].top_left.x * width;
             float y1 = data[i].top_left.y * height;
@@ -599,7 +599,7 @@ namespace Gui
             float h = data[i].bottom_left.y * height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
-            unsigned long unicodeVal = getUnicode(i, encoder, mEncoding);
+            unsigned long unicodeVal = getUnicode(static_cast<unsigned char>(i), encoder, mEncoding);
             const std::string coord = MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
                 + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h);
             float advance = data[i].width + data[i].kerningRight;

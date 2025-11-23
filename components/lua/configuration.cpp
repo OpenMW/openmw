@@ -130,7 +130,7 @@ namespace LuaUtil
         {
             const ESM::LuaScriptCfg& script = mScripts[id];
             if (script.mFlags & flag)
-                res[id] = script.mInitializationData;
+                res[static_cast<int>(id)] = script.mInitializationData;
         }
         return res;
     }

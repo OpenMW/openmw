@@ -54,7 +54,7 @@ namespace MWGui
         int maxHeight = mScrollView->getHeight();
 
         mRows = std::max(maxHeight / 42, 1);
-        mItemCount = dragArea->getChildCount();
+        mItemCount = static_cast<int>(dragArea->getChildCount());
         bool showScrollbar = static_cast<int>(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
         if (showScrollbar)
         {
@@ -129,7 +129,7 @@ namespace MWGui
             if (item.mType == ItemStack::Type_Equipped)
                 state = ItemWidget::Equip;
             itemWidget->setItem(item.mBase, state);
-            itemWidget->setCount(item.mCount);
+            itemWidget->setCount(static_cast<int>(item.mCount));
 
             itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
             itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);

@@ -86,7 +86,7 @@ namespace MWMechanics
         int countPotionsToBrew() const;
         ///< calculates maximum amount of potions, which you can make from selected ingredients
 
-        static bool knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr& npc);
+        static bool knownEffect(size_t potionEffectIndex, const MWWorld::Ptr& npc);
         ///< Does npc have sufficient alchemy skill to know about this potion effect?
 
         void setAlchemist(const MWWorld::Ptr& npc);
@@ -135,7 +135,7 @@ namespace MWMechanics
         /// adjust the skills of the alchemist accordingly.
         /// \param name must not be an empty string, or Result_NoName is returned
 
-        static std::vector<std::string> effectsDescription(const MWWorld::ConstPtr& ptr, const int alchemySKill);
+        static std::vector<std::string> effectsDescription(const MWWorld::ConstPtr& ptr, const float alchemySKill);
     };
 }
 

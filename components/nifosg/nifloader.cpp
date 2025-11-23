@@ -165,7 +165,7 @@ namespace
             osg::Matrix modelView = *cv->getModelViewMatrix();
 
             // attempt to preserve scale
-            float mag[3];
+            double mag[3];
             for (int i = 0; i < 3; ++i)
             {
                 mag[i] = std::sqrt(modelView(0, i) * modelView(0, i) + modelView(1, i) * modelView(1, i)
@@ -1083,7 +1083,7 @@ namespace NifOsg
                 texture2d->setTextureSize(image->s(), image->t());
             texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-            unsigned int texUnit = boundTextures.size();
+            auto texUnit = static_cast<unsigned int>(boundTextures.size());
             if (stateset)
             {
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
@@ -1244,12 +1244,12 @@ namespace NifOsg
             auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
             if (particleNode->mData.empty())
             {
-                partsys->setQuota(partctrl->mParticles.size());
+                partsys->setQuota(static_cast<int>(partctrl->mParticles.size()));
                 return;
             }
 
             auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->mData.getPtr());
-            partsys->setQuota(particledata->mNumParticles);
+            partsys->setQuota(static_cast<int>(particledata->mNumParticles));
 
             osg::BoundingBox box;
 
@@ -1342,7 +1342,7 @@ namespace NifOsg
         {
             for (const auto& emitterPair : mEmitterQueue)
             {
-                size_t recIndex = emitterPair.first;
+                auto recIndex = static_cast<unsigned>(emitterPair.first);
                 FindGroupByRecIndex findEmitterNode(recIndex);
                 rootNode->accept(findEmitterNode);
                 osg::Group* emitterNode = findEmitterNode.mFound;
@@ -1488,15 +1488,15 @@ namespace NifOsg
                         const std::vector<unsigned short>& trueTriangles = partition.mTrueTriangles;
                         if (!trueTriangles.empty())
                         {
-                            geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                                osg::PrimitiveSet::TRIANGLES, trueTriangles.size(), trueTriangles.data()));
+                            geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
+                                static_cast<unsigned>(trueTriangles.size()), trueTriangles.data()));
                         }
                         for (const auto& strip : partition.mTrueStrips)
                         {
                             if (strip.size() < 3)
                                 continue;
                             geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                                osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), strip.data()));
+                                osg::PrimitiveSet::TRIANGLE_STRIP, static_cast<unsigned>(strip.size()), strip.data()));
                         }
                     }
                 }
@@ -1511,8 +1511,8 @@ namespace NifOsg
                     const std::vector<unsigned short>& triangles = data->mTriangles;
                     if (triangles.empty())
                         return;
-                    geometry->addPrimitiveSet(
-                        new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
+                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                        osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles.size()), triangles.data()));
                 }
                 else if (niGeometry->recType == Nif::RC_NiTriStrips)
                 {
@@ -1522,8 +1522,8 @@ namespace NifOsg
                     {
                         if (strip.size() < 3)
                             continue;
-                        geometry->addPrimitiveSet(
-                            new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), strip.data()));
+                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                            osg::PrimitiveSet::TRIANGLE_STRIP, static_cast<unsigned>(strip.size()), strip.data()));
                         hasGeometry = true;
                     }
                     if (!hasGeometry)
@@ -1535,8 +1535,8 @@ namespace NifOsg
                     const auto& line = data->mLines;
                     if (line.empty())
                         return;
-                    geometry->addPrimitiveSet(
-                        new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(), line.data()));
+                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                        osg::PrimitiveSet::LINES, static_cast<unsigned>(line.size()), line.data()));
                 }
             }
 
@@ -1544,17 +1544,17 @@ namespace NifOsg
             const auto& normals = niGeometryData->mNormals;
             const auto& colors = niGeometryData->mColors;
             if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+                geometry->setVertexArray(new osg::Vec3Array(static_cast<unsigned>(vertices.size()), vertices.data()));
             if (!normals.empty())
-                geometry->setNormalArray(
-                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setNormalArray(new osg::Vec3Array(static_cast<unsigned>(normals.size()), normals.data()),
+                    osg::Array::BIND_PER_VERTEX);
             if (!colors.empty())
-                geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setColorArray(new osg::Vec4Array(static_cast<unsigned>(colors.size()), colors.data()),
+                    osg::Array::BIND_PER_VERTEX);
 
             const auto& uvlist = niGeometryData->mUVList;
             int textureStage = 0;
-            for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
-                 ++it, ++textureStage)
+            for (auto it = boundTextures.begin(); it != boundTextures.end(); ++it, ++textureStage)
             {
                 unsigned int uvSet = *it;
                 if (uvSet >= uvlist.size())
@@ -1566,7 +1566,8 @@ namespace NifOsg
                     uvSet = 0;
                 }
 
-                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[uvSet].size(), uvlist[uvSet].data()),
+                geometry->setTexCoordArray(textureStage,
+                    new osg::Vec2Array(static_cast<unsigned>(uvlist[uvSet].size()), uvlist[uvSet].data()),
                     osg::Array::BIND_PER_VERTEX);
             }
 
@@ -1650,8 +1651,9 @@ namespace NifOsg
                     osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
                     morphGeom->setSourceGeometry(geom);
                     for (unsigned int i = 0; i < morphs.size(); ++i)
-                        morphGeom->addMorphTarget(
-                            new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
+                        morphGeom->addMorphTarget(new osg::Vec3Array(static_cast<unsigned>(morphs[i].mVertices.size()),
+                                                      morphs[i].mVertices.data()),
+                            0.f);
 
                     osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl);
                     setupController(ctrl.getPtr(), morphctrl, animflags);
@@ -1678,8 +1680,8 @@ namespace NifOsg
                 return;
 
             osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-            geometry->addPrimitiveSet(
-                new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
+            geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                osg::PrimitiveSet::TRIANGLES, static_cast<unsigned>(triangles.size()), triangles.data()));
 
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
@@ -1743,16 +1745,16 @@ namespace NifOsg
             }
 
             if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+                geometry->setVertexArray(new osg::Vec3Array(static_cast<unsigned>(vertices.size()), vertices.data()));
             if (!normals.empty())
-                geometry->setNormalArray(
-                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setNormalArray(new osg::Vec3Array(static_cast<unsigned>(normals.size()), normals.data()),
+                    osg::Array::BIND_PER_VERTEX);
             if (!colors.empty())
-                geometry->setColorArray(
-                    new osg::Vec4ubArray(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setColorArray(new osg::Vec4ubArray(static_cast<unsigned>(colors.size()), colors.data()),
+                    osg::Array::BIND_PER_VERTEX);
             if (!uvlist.empty())
-                geometry->setTexCoordArray(
-                    0, new osg::Vec2Array(uvlist.size(), uvlist.data()), osg::Array::BIND_PER_VERTEX);
+                geometry->setTexCoordArray(0, new osg::Vec2Array(static_cast<unsigned>(uvlist.size()), uvlist.data()),
+                    osg::Array::BIND_PER_VERTEX);
 
             // This is the skinning data Fallout 4 provides
             // TODO: support Skyrim SE skinning data
@@ -2124,7 +2126,7 @@ namespace NifOsg
                         }
                     }
 
-                    const unsigned int texUnit = boundTextures.size();
+                    const auto texUnit = static_cast<unsigned>(boundTextures.size());
                     if (tex.mEnabled)
                     {
                         if (tex.mSourceTexture.empty() && texprop->mController.empty())
@@ -2632,7 +2634,7 @@ namespace NifOsg
                     if (!texprop->mSourceTexture.empty())
                     {
                         const unsigned int uvSet = 0;
-                        unsigned int texUnit = boundTextures.size();
+                        unsigned int texUnit = static_cast<unsigned>(boundTextures.size());
                         attachExternalTexture("diffuseMap", texprop->mSourceTexture, texprop->wrapS(), texprop->wrapT(),
                             uvSet, stateset, boundTextures);
                         {

@@ -402,7 +402,7 @@ namespace MWWorld
                 mTerrainViews.resize(positions.size());
             else if (mTerrainViews.size() < positions.size())
             {
-                for (unsigned int i = mTerrainViews.size(); i < positions.size(); ++i)
+                for (size_t i = mTerrainViews.size(); i < positions.size(); ++i)
                     mTerrainViews.emplace_back(mTerrain->createView());
             }
 
@@ -456,10 +456,10 @@ namespace MWWorld
 
     void CellPreloader::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        stats.setAttribute(frameNumber, "CellPreloader Count", mPreloadCells.size());
-        stats.setAttribute(frameNumber, "CellPreloader Added", mAdded);
-        stats.setAttribute(frameNumber, "CellPreloader Evicted", mEvicted);
-        stats.setAttribute(frameNumber, "CellPreloader Loaded", mLoaded);
-        stats.setAttribute(frameNumber, "CellPreloader Expired", mExpired);
+        stats.setAttribute(frameNumber, "CellPreloader Count", static_cast<double>(mPreloadCells.size()));
+        stats.setAttribute(frameNumber, "CellPreloader Added", static_cast<double>(mAdded));
+        stats.setAttribute(frameNumber, "CellPreloader Evicted", static_cast<double>(mEvicted));
+        stats.setAttribute(frameNumber, "CellPreloader Loaded", static_cast<double>(mLoaded));
+        stats.setAttribute(frameNumber, "CellPreloader Expired", static_cast<double>(mExpired));
     }
 }

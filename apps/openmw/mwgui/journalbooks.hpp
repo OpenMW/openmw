@@ -8,31 +8,29 @@
 
 namespace MWGui
 {
-    MWGui::BookTypesetter::Utf8Span to_utf8_span(std::string_view text);
     int getCyrillicIndexPageCount();
 
     const MyGUI::Colour journalHeaderColour = MyGUI::Colour(0.60f, 0.00f, 0.00f);
 
     struct JournalBooks
     {
-        typedef TypesetBook::Ptr Book;
-        JournalViewModel::Ptr mModel;
+        std::shared_ptr<JournalViewModel> mModel;
 
-        JournalBooks(JournalViewModel::Ptr model, ToUTF8::FromType encoding);
+        JournalBooks(std::shared_ptr<JournalViewModel> model, ToUTF8::FromType encoding);
 
-        Book createEmptyJournalBook();
-        Book createJournalBook();
-        Book createTopicBook(uintptr_t topicId);
-        Book createQuestBook(std::string_view questName);
-        Book createTopicIndexBook();
+        std::shared_ptr<TypesetBook> createEmptyJournalBook();
+        std::shared_ptr<TypesetBook> createJournalBook();
+        std::shared_ptr<TypesetBook> createTopicBook(const MWDialogue::Topic& topic);
+        std::shared_ptr<TypesetBook> createQuestBook(std::string_view questName);
+        std::shared_ptr<TypesetBook> createTopicIndexBook();
 
         ToUTF8::FromType mEncoding;
         int mIndexPagesCount;
 
     private:
-        BookTypesetter::Ptr createTypesetter();
-        BookTypesetter::Ptr createLatinJournalIndex();
-        BookTypesetter::Ptr createCyrillicJournalIndex();
+        std::shared_ptr<BookTypesetter> createTypesetter();
+        std::shared_ptr<BookTypesetter> createLatinJournalIndex();
+        std::shared_ptr<BookTypesetter> createCyrillicJournalIndex();
     };
 }
 

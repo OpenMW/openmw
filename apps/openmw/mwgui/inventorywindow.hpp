@@ -158,7 +158,7 @@ namespace MWGui
         void updateArmorRating();
 
         MyGUI::IntSize getPreviewViewportSize() const;
-        osg::Vec2f mapPreviewWindowToViewport(int x, int y) const;
+        osg::Vec2i mapPreviewWindowToViewport(int x, int y) const;
 
         void adjustPanes();
 

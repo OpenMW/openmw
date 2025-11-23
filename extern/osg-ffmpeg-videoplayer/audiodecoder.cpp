@@ -1,7 +1,5 @@
 #include "audiodecoder.hpp"
 
-#include <extern/osg-ffmpeg-videoplayer/libavutildefines.hpp>
-
 #include <algorithm>
 #include <stdexcept>
 #include <string>
@@ -24,6 +22,7 @@ extern "C"
     #include <libavutil/channel_layout.h>
 #endif
 
+#include "libavutildefines.hpp"
 #include "videostate.hpp"
 
 namespace

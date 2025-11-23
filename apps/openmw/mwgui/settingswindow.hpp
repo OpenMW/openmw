@@ -72,7 +72,7 @@ namespace MWGui
         MyGUI::Widget* mScriptDisabled;
         MyGUI::ScrollView* mScriptView;
         LuaUi::LuaAdapter* mScriptAdapter;
-        int mCurrentPage;
+        size_t mCurrentPage;
 
         void onTabChanged(MyGUI::TabControl* sender, size_t index);
         void onOkButtonClicked(MyGUI::Widget* sender);

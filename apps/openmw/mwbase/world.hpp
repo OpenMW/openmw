@@ -120,7 +120,7 @@ namespace MWBase
 
         World() {}
 
-        virtual ~World() {}
+        virtual ~World() = default;
 
         virtual void setRandomSeed(uint32_t seed) = 0;
         ///< \param seed The seed used when starting a new game.
@@ -130,8 +130,8 @@ namespace MWBase
 
         virtual void clear() = 0;
 
-        virtual int countSavedGameRecords() const = 0;
-        virtual int countSavedGameCells() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameCells() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 

@@ -97,7 +97,7 @@ namespace MWWorld
 
         std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id);
 
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 

@@ -130,7 +130,7 @@ namespace MWLua
                     {
                         // if the value set is less than 0, chargeInt and chargeIntRemainder is set to 0
                         ptr.getCellRef().setChargeIntRemainder(std::max(0.f, std::modf(cond, &cond)));
-                        ptr.getCellRef().setCharge(std::max(0.f, cond));
+                        ptr.getCellRef().setCharge(std::max(0, static_cast<int>(cond)));
                     }
                 }
                 else

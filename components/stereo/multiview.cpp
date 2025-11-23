@@ -52,7 +52,7 @@ namespace Stereo
 
         bool getTextureViewSupportedImpl(unsigned int contextID)
         {
-            if (!osg::isGLExtensionOrVersionSupported(contextID, "ARB_texture_view", 4.3))
+            if (!osg::isGLExtensionOrVersionSupported(contextID, "ARB_texture_view", 4.3f))
             {
                 Log(Debug::Verbose) << "Disabling texture views (opengl extension \"ARB_texture_view\" not supported)";
                 return false;

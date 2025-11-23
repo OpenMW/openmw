@@ -520,14 +520,14 @@ namespace Resource
 
     void StatsHandler::setUpScene(osgViewer::ViewerBase& viewer)
     {
-        const osg::Vec4 backgroundColor(0.0, 0.0, 0.0f, 0.3);
-        const osg::Vec4 staticTextColor(1.0, 1.0, 0.0f, 1.0);
-        const osg::Vec4 dynamicTextColor(1.0, 1.0, 1.0f, 1.0);
+        const osg::Vec4 backgroundColor(0.0f, 0.0f, 0.0f, 0.3f);
+        const osg::Vec4 staticTextColor(1.0f, 1.0f, 0.0f, 1.0f);
+        const osg::Vec4 dynamicTextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         const auto longest = std::max_element(mStatNames.begin(), mStatNames.end(),
             [](const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
         const std::size_t longestSize = longest->size();
-        const float statNamesWidth = longestSize * characterSize * 0.6 + 2 * backgroundMargin;
+        const float statNamesWidth = longestSize * characterSize * 0.6f + 2 * backgroundMargin;
         const float statTextWidth = 7 * characterSize + 2 * backgroundMargin;
         const float statHeight = pageSize * characterSize + 2 * backgroundMargin;
         const float width = statNamesWidth + backgroundSpacing + statTextWidth;

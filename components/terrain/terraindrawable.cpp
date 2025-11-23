@@ -12,7 +12,7 @@ namespace Terrain
 
     TerrainDrawable::TerrainDrawable() {}
 
-    TerrainDrawable::~TerrainDrawable() {}
+    TerrainDrawable::~TerrainDrawable() = default;
 
     TerrainDrawable::TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop)
         : osg::Geometry(copy, copyop)
@@ -37,8 +37,8 @@ namespace Terrain
 
     inline float distance(const osg::Vec3& coord, const osg::Matrix& matrix)
     {
-        return -((float)coord[0] * (float)matrix(0, 2) + (float)coord[1] * (float)matrix(1, 2)
-            + (float)coord[2] * (float)matrix(2, 2) + matrix(3, 2));
+        return -(coord[0] * static_cast<float>(matrix(0, 2)) + coord[1] * static_cast<float>(matrix(1, 2))
+            + coord[2] * static_cast<float>(matrix(2, 2)) + static_cast<float>(matrix(3, 2)));
     }
 
     // canot use ClusterCullingCallback::cull: viewpoint != eyepoint

@@ -18,7 +18,7 @@ namespace LuaUtil
         void init(ESM::LuaScriptsCfg);
 
         size_t size() const { return mScripts.size(); }
-        const ESM::LuaScriptCfg& operator[](int id) const { return mScripts[id]; }
+        const ESM::LuaScriptCfg& operator[](size_t id) const { return mScripts[id]; }
 
         std::optional<int> findId(VFS::Path::NormalizedView path) const;
 

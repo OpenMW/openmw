@@ -349,7 +349,7 @@ namespace MWGui
 
         if (mIsDrowning)
         {
-            mDrowningFlashTheta += dt * osg::PI * 2;
+            mDrowningFlashTheta += dt * osg::PIf * 2;
 
             float intensity = (cos(mDrowningFlashTheta) + 2.0f) / 3.0f;
 

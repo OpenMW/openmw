@@ -84,7 +84,7 @@ namespace MWGui
         }
 
         MWWorld::Ptr object = item.mBase;
-        int count = item.mCount;
+        size_t count = item.mCount;
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -96,7 +96,7 @@ namespace MWGui
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string name{ object.getClass().getName(object) };
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
-            dialog->openCountDialog(name, "#{sTake}", count);
+            dialog->openCountDialog(name, "#{sTake}", static_cast<int>(count));
             dialog->eventOkClicked.clear();
             if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::transferItem);
@@ -116,7 +116,7 @@ namespace MWGui
 
         const ItemStack item = mModel->getItem(mSelectedItem);
 
-        if (!mModel->onTakeItem(item.mBase, count))
+        if (!mModel->onTakeItem(item.mBase, static_cast<int>(count)))
             return;
 
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
@@ -129,7 +129,7 @@ namespace MWGui
 
         const ItemStack item = mModel->getItem(mSelectedItem);
 
-        if (!mModel->onTakeItem(item.mBase, count))
+        if (!mModel->onTakeItem(item.mBase, static_cast<int>(count)))
             return;
 
         mItemTransfer->apply(item, count, *mItemView);
@@ -140,7 +140,7 @@ namespace MWGui
         if (mModel == nullptr)
             return;
 
-        bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, mDragAndDrop->mDraggedCount);
+        bool success = mModel->onDropItem(mDragAndDrop->mItem.mBase, static_cast<int>(mDragAndDrop->mDraggedCount));
 
         if (success)
             mDragAndDrop->drop(mModel, mItemView);
@@ -248,7 +248,7 @@ namespace MWGui
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
             for (size_t i = 0; i < mModel->getItemCount(); ++i)
             {
-                const ItemStack& item = mModel->getItem(i);
+                const ItemStack& item = mModel->getItem(static_cast<ItemModel::ModelIndex>(i));
                 if (invStore.isEquipped(item.mBase) == false)
                     continue;
 
@@ -263,14 +263,14 @@ namespace MWGui
             if (i == 0)
             {
                 // play the sound of the first object
-                MWWorld::Ptr item = mModel->getItem(i).mBase;
+                MWWorld::Ptr item = mModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase;
                 const ESM::RefId& sound = item.getClass().getUpSoundId(item);
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 
-            const ItemStack item = mModel->getItem(i);
+            const ItemStack item = mModel->getItem(static_cast<ItemModel::ModelIndex>(i));
 
-            if (!mModel->onTakeItem(item.mBase, item.mCount))
+            if (!mModel->onTakeItem(item.mBase, static_cast<int>(item.mCount)))
                 break;
 
             mModel->moveItem(item, item.mCount, playerModel);

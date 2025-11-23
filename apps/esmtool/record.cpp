@@ -660,7 +660,8 @@ namespace EsmTool
 
         std::cout << "  Attributes:" << std::endl;
         for (size_t i = 0; i < mData.mData.mAttributes.size(); ++i)
-            std::cout << "    " << ESM::Attribute::indexToRefId(i) << ": " << mData.mData.mAttributes[i] << std::endl;
+            std::cout << "    " << ESM::Attribute::indexToRefId(static_cast<int>(i)) << ": "
+                      << mData.mData.mAttributes[i] << std::endl;
 
         std::cout << "  Health: " << mData.mData.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mData.mMana << std::endl;
@@ -1049,11 +1050,13 @@ namespace EsmTool
 
             std::cout << "  Attributes:" << std::endl;
             for (size_t i = 0; i != mData.mNpdt.mAttributes.size(); i++)
-                std::cout << "    " << attributeLabel(i) << ": " << int(mData.mNpdt.mAttributes[i]) << std::endl;
+                std::cout << "    " << attributeLabel(static_cast<int>(i)) << ": " << int(mData.mNpdt.mAttributes[i])
+                          << std::endl;
 
             std::cout << "  Skills:" << std::endl;
             for (size_t i = 0; i != mData.mNpdt.mSkills.size(); i++)
-                std::cout << "    " << skillLabel(i) << ": " << int(mData.mNpdt.mSkills[i]) << std::endl;
+                std::cout << "    " << skillLabel(static_cast<int>(i)) << ": " << int(mData.mNpdt.mSkills[i])
+                          << std::endl;
 
             std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
             std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;

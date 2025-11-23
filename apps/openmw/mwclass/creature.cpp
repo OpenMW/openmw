@@ -132,7 +132,8 @@ namespace MWClass
 
             // creature stats
             for (size_t i = 0; i < ref->mBase->mData.mAttributes.size(); ++i)
-                data->mCreatureStats.setAttribute(ESM::Attribute::indexToRefId(i), ref->mBase->mData.mAttributes[i]);
+                data->mCreatureStats.setAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i)),
+                    static_cast<float>(ref->mBase->mData.mAttributes[i]));
             data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
             data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
             data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));
@@ -757,11 +758,11 @@ namespace MWClass
         switch (skillRecord->mData.mSpecialization)
         {
             case ESM::Class::Combat:
-                return ref->mBase->mData.mCombat;
+                return static_cast<float>(ref->mBase->mData.mCombat);
             case ESM::Class::Magic:
-                return ref->mBase->mData.mMagic;
+                return static_cast<float>(ref->mBase->mData.mMagic);
             case ESM::Class::Stealth:
-                return ref->mBase->mData.mStealth;
+                return static_cast<float>(ref->mBase->mData.mStealth);
             default:
                 throw std::runtime_error("invalid specialisation");
         }
@@ -887,7 +888,7 @@ namespace MWClass
 
     void Creature::setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const
     {
-        MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
+        MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, static_cast<unsigned char>(value));
     }
 
     void Creature::modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const

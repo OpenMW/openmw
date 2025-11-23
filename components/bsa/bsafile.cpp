@@ -336,8 +336,8 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
         newFile.mOffset = static_cast<uint32_t>(stream.tellp());
     }
 
-    newFile.mNameOffset = mStringBuf.size();
-    newFile.mNameSize = filename.size();
+    newFile.mNameOffset = static_cast<uint32_t>(mStringBuf.size());
+    newFile.mNameSize = static_cast<uint32_t>(filename.size());
     newFile.mNamesBuffer = &mStringBuf;
 
     mStringBuf.insert(mStringBuf.end(), filename.begin(), filename.end());

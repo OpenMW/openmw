@@ -206,10 +206,10 @@ namespace Terrain
             blendmapTextures.push_back(texture);
         }
 
-        float tileCount = mStorage->getTextureTileCount(chunkSize, mWorldspace);
+        int tileCount = mStorage->getTextureTileCount(chunkSize, mWorldspace);
 
-        return ::Terrain::createPasses(
-            useShaders, mSceneManager, layers, blendmapTextures, tileCount, tileCount, ESM::isEsm4Ext(mWorldspace));
+        return ::Terrain::createPasses(useShaders, mSceneManager, layers, blendmapTextures, tileCount,
+            static_cast<float>(tileCount), ESM::isEsm4Ext(mWorldspace));
     }
 
     osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f& chunkCenter, unsigned char lod,
@@ -261,7 +261,8 @@ namespace Terrain
         if (chunkSize <= 1.f)
             geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
-        unsigned int numVerts = (mStorage->getCellVertices(mWorldspace) - 1) * chunkSize / (1 << lod) + 1;
+        unsigned int numVerts
+            = static_cast<unsigned>((mStorage->getCellVertices(mWorldspace) - 1) * chunkSize / (1 << lod) + 1);
 
         geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
@@ -303,7 +304,7 @@ namespace Terrain
                 layer.mSpecular = false;
                 geometry->setPasses(::Terrain::createPasses(
                     mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), mSceneManager,
-                    std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D>>(), 1.f, 1.f));
+                    std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D>>(), 1, 1.f));
             }
             else
             {

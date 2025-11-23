@@ -174,16 +174,17 @@ namespace LuaUi
         auto keySym = SDL_Keysym();
         keySym.sym = SDLUtil::myGuiKeyToSdl(code);
         keySym.scancode = SDL_GetScancodeFromKey(keySym.sym);
-        keySym.mod = SDL_GetModState();
+        keySym.mod = static_cast<Uint16>(SDL_GetModState());
         return sol::make_object(view.sol(), keySym);
     }
 
     sol::object WidgetExtension::mouseEvent(
         LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button = MyGUI::MouseButton::None) const
     {
-        osg::Vec2f position(left, top);
+        osg::Vec2f position(static_cast<float>(left), static_cast<float>(top));
         MyGUI::IntPoint absolutePosition = mWidget->getAbsolutePosition();
-        osg::Vec2f offset = position - osg::Vec2f(absolutePosition.left, absolutePosition.top);
+        osg::Vec2f offset = position
+            - osg::Vec2f(static_cast<float>(absolutePosition.left), static_cast<float>(absolutePosition.top));
         sol::table table = view.newTable();
         int sdlButton = SDLUtil::myGuiMouseButtonToSdl(button);
         table["position"] = position;
@@ -323,8 +324,8 @@ namespace LuaUi
         MyGUI::IntSize pSize = parentSize();
         MyGUI::IntSize newSize;
         newSize = mAbsoluteCoord.size();
-        newSize.width += mRelativeCoord.width * pSize.width;
-        newSize.height += mRelativeCoord.height * pSize.height;
+        newSize.width += static_cast<int>(mRelativeCoord.width * pSize.width);
+        newSize.height += static_cast<int>(mRelativeCoord.height * pSize.height);
         return newSize;
     }
 
@@ -335,8 +336,8 @@ namespace LuaUi
         MyGUI::IntSize pSize = parentSize();
         MyGUI::IntPoint newPosition;
         newPosition = mAbsoluteCoord.point();
-        newPosition.left += mRelativeCoord.left * pSize.width - mAnchor.width * size.width;
-        newPosition.top += mRelativeCoord.top * pSize.height - mAnchor.height * size.height;
+        newPosition.left += static_cast<int>(mRelativeCoord.left * pSize.width - mAnchor.width * size.width);
+        newPosition.top += static_cast<int>(mRelativeCoord.top * pSize.height - mAnchor.height * size.height);
         return newPosition;
     }
 

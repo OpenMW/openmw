@@ -112,8 +112,8 @@ void CSVRender::TerrainSelection::update()
 
     mGeometry->setVertexArray(vertices);
     osg::ref_ptr<osg::DrawArrays> drawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
-    drawArrays->setCount(vertices->size());
-    if (vertices->size() != 0)
+    drawArrays->setCount(static_cast<GLsizei>(vertices->size()));
+    if (!vertices->empty())
         mGeometry->addPrimitiveSet(drawArrays);
     mSelectionNode->addChild(mGeometry);
 }

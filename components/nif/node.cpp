@@ -664,13 +664,13 @@ namespace Nif
         mDynamicVertexSize = (data & 0xF0) >> 0x04;
         mUV1Offset = (data & 0xF00) >> 0x08;
         mUV2Offset = (data & 0xF000) >> 0x0C;
-        mNormalOffset = (data & 0xF0000) >> 0x10;
-        mTangentOffset = (data & 0xF00000) >> 0x14;
+        mNormalOffset = static_cast<uint8_t>((data & 0xF0000) >> 0x10);
+        mTangentOffset = static_cast<uint8_t>((data & 0xF00000) >> 0x14);
         mColorOffset = (data & 0xF000000) >> 0x18;
         mSkinningDataOffset = (data & 0xF0000000) >> 0x1C;
-        mLandscapeDataOffset = (data & 0xF00000000) >> 0x20;
-        mEyeDataOffset = (data & 0xF000000000) >> 0x24;
-        mFlags = (data & 0xFFF00000000000) >> 0x2C;
+        mLandscapeDataOffset = static_cast<uint8_t>((data & 0xF00000000) >> 0x20);
+        mEyeDataOffset = static_cast<uint8_t>((data & 0xF000000000) >> 0x24);
+        mFlags = static_cast<uint16_t>((data & 0xFFF00000000000) >> 0x2C);
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
             mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
     }

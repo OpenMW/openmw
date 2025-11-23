@@ -106,7 +106,7 @@ namespace MWRender
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
-                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                osg::Vec3d instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
                                 unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
                                     | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
@@ -146,7 +146,7 @@ namespace MWRender
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
-                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                osg::Vec3d instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
                                 unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
                                     | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
@@ -217,10 +217,10 @@ namespace MWRender
             {
                 for (unsigned int i = 0; i < geom.getNumPrimitiveSets(); ++i)
                 {
-                    geom.getPrimitiveSet(i)->setNumInstances(mInstances.size());
+                    geom.getPrimitiveSet(i)->setNumInstances(static_cast<int>(mInstances.size()));
                 }
 
-                osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(mInstances.size());
+                osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(static_cast<unsigned>(mInstances.size()));
                 osg::BoundingBox box;
                 osg::BoundingBox originalBox = geom.getBoundingBox();
                 float radius = originalBox.radius();
@@ -238,7 +238,7 @@ namespace MWRender
 
                 geom.setInitialBound(box);
 
-                osg::ref_ptr<osg::Vec3Array> rotations = new osg::Vec3Array(mInstances.size());
+                osg::ref_ptr<osg::Vec3Array> rotations = new osg::Vec3Array(static_cast<unsigned>(mInstances.size()));
                 for (unsigned int i = 0; i < rotations->getNumElements(); i++)
                 {
                     (*rotations)[i] = mInstances[i].mPos.asRotationVec3();
@@ -368,7 +368,7 @@ namespace MWRender
         mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
 
-    Groundcover::~Groundcover() {}
+    Groundcover::~Groundcover() = default;
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
@@ -379,7 +379,8 @@ namespace MWRender
         osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
         DensityCalculator calculator(mDensity);
         ESM::ReadersCache readers;
-        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+        osg::Vec2i startCell = osg::Vec2i(static_cast<int>(std::floor(center.x() - size / 2.f)),
+            static_cast<int>(std::floor(center.y() - size / 2.f)));
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)

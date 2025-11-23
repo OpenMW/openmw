@@ -12,6 +12,7 @@ namespace
     template <typename IndexArrayType>
     osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int verts)
     {
+        using IndexType = IndexArrayType::value_type;
         // LOD level n means every 2^n-th vertex is kept, but we currently handle LOD elsewhere.
         size_t lodLevel = 0; //(flags >> (4*4));
 
@@ -45,23 +46,23 @@ namespace
                 // diamond pattern
                 if ((row + col % 2) % 2 == 1)
                 {
-                    indices->push_back(verts * (col + increment) + row);
-                    indices->push_back(verts * (col + increment) + row + increment);
-                    indices->push_back(verts * col + row + increment);
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row + increment));
+                    indices->push_back(static_cast<IndexType>(verts * col + row + increment));
 
-                    indices->push_back(verts * col + row);
-                    indices->push_back(verts * (col + increment) + row);
-                    indices->push_back(verts * (col) + row + increment);
+                    indices->push_back(static_cast<IndexType>(verts * col + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col) + row + increment));
                 }
                 else
                 {
-                    indices->push_back(verts * col + row);
-                    indices->push_back(verts * (col + increment) + row + increment);
-                    indices->push_back(verts * col + row + increment);
+                    indices->push_back(static_cast<IndexType>(verts * col + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row + increment));
+                    indices->push_back(static_cast<IndexType>(verts * col + row + increment));
 
-                    indices->push_back(verts * col + row);
-                    indices->push_back(verts * (col + increment) + row);
-                    indices->push_back(verts * (col + increment) + row + increment);
+                    indices->push_back(static_cast<IndexType>(verts * col + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + increment) + row + increment));
                 }
             }
         }
@@ -77,22 +78,22 @@ namespace
             size_t outerStep = static_cast<size_t>(1) << (lodDeltas[Terrain::South] + lodLevel);
             for (size_t col = 0; col < verts - 1; col += outerStep)
             {
-                indices->push_back(verts * col + row);
-                indices->push_back(verts * (col + outerStep) + row);
+                indices->push_back(static_cast<IndexType>(verts * col + row));
+                indices->push_back(static_cast<IndexType>(verts * (col + outerStep) + row));
                 // Make sure not to touch the right edge
                 if (col + outerStep == verts - 1)
-                    indices->push_back(verts * (col + outerStep - innerStep) + row + innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col + outerStep - innerStep) + row + innerStep));
                 else
-                    indices->push_back(verts * (col + outerStep) + row + innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col + outerStep) + row + innerStep));
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the left or right edges
                     if (col + i == 0 || col + i == verts - 1 - innerStep)
                         continue;
-                    indices->push_back(verts * (col) + row);
-                    indices->push_back(verts * (col + i + innerStep) + row + innerStep);
-                    indices->push_back(verts * (col + i) + row + innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col) + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + i + innerStep) + row + innerStep));
+                    indices->push_back(static_cast<IndexType>(verts * (col + i) + row + innerStep));
                 }
             }
 
@@ -101,22 +102,22 @@ namespace
             outerStep = size_t(1) << (lodDeltas[Terrain::North] + lodLevel);
             for (size_t col = 0; col < verts - 1; col += outerStep)
             {
-                indices->push_back(verts * (col + outerStep) + row);
-                indices->push_back(verts * col + row);
+                indices->push_back(static_cast<IndexType>(verts * (col + outerStep) + row));
+                indices->push_back(static_cast<IndexType>(verts * col + row));
                 // Make sure not to touch the left edge
                 if (col == 0)
-                    indices->push_back(verts * (col + innerStep) + row - innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col + innerStep) + row - innerStep));
                 else
-                    indices->push_back(verts * col + row - innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * col + row - innerStep));
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the left or right edges
                     if (col + i == 0 || col + i == verts - 1 - innerStep)
                         continue;
-                    indices->push_back(verts * (col + i) + row - innerStep);
-                    indices->push_back(verts * (col + i + innerStep) + row - innerStep);
-                    indices->push_back(verts * (col + outerStep) + row);
+                    indices->push_back(static_cast<IndexType>(verts * (col + i) + row - innerStep));
+                    indices->push_back(static_cast<IndexType>(verts * (col + i + innerStep) + row - innerStep));
+                    indices->push_back(static_cast<IndexType>(verts * (col + outerStep) + row));
                 }
             }
 
@@ -125,22 +126,22 @@ namespace
             outerStep = size_t(1) << (lodDeltas[Terrain::West] + lodLevel);
             for (row = 0; row < verts - 1; row += outerStep)
             {
-                indices->push_back(verts * col + row + outerStep);
-                indices->push_back(verts * col + row);
+                indices->push_back(static_cast<IndexType>(verts * col + row + outerStep));
+                indices->push_back(static_cast<IndexType>(verts * col + row));
                 // Make sure not to touch the top edge
                 if (row + outerStep == verts - 1)
-                    indices->push_back(verts * (col + innerStep) + row + outerStep - innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col + innerStep) + row + outerStep - innerStep));
                 else
-                    indices->push_back(verts * (col + innerStep) + row + outerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col + innerStep) + row + outerStep));
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
                     if (row + i == 0 || row + i == verts - 1 - innerStep)
                         continue;
-                    indices->push_back(verts * col + row);
-                    indices->push_back(verts * (col + innerStep) + row + i);
-                    indices->push_back(verts * (col + innerStep) + row + i + innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * col + row));
+                    indices->push_back(static_cast<IndexType>(verts * (col + innerStep) + row + i));
+                    indices->push_back(static_cast<IndexType>(verts * (col + innerStep) + row + i + innerStep));
                 }
             }
 
@@ -149,22 +150,22 @@ namespace
             outerStep = size_t(1) << (lodDeltas[Terrain::East] + lodLevel);
             for (row = 0; row < verts - 1; row += outerStep)
             {
-                indices->push_back(verts * col + row);
-                indices->push_back(verts * col + row + outerStep);
+                indices->push_back(static_cast<IndexType>(verts * col + row));
+                indices->push_back(static_cast<IndexType>(verts * col + row + outerStep));
                 // Make sure not to touch the bottom edge
                 if (row == 0)
-                    indices->push_back(verts * (col - innerStep) + row + innerStep);
+                    indices->push_back(static_cast<IndexType>(verts * (col - innerStep) + row + innerStep));
                 else
-                    indices->push_back(verts * (col - innerStep) + row);
+                    indices->push_back(static_cast<IndexType>(verts * (col - innerStep) + row));
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
                     if (row + i == 0 || row + i == verts - 1 - innerStep)
                         continue;
-                    indices->push_back(verts * col + row + outerStep);
-                    indices->push_back(verts * (col - innerStep) + row + i + innerStep);
-                    indices->push_back(verts * (col - innerStep) + row + i);
+                    indices->push_back(static_cast<IndexType>(verts * col + row + outerStep));
+                    indices->push_back(static_cast<IndexType>(verts * (col - innerStep) + row + i + innerStep));
+                    indices->push_back(static_cast<IndexType>(verts * (col - innerStep) + row + i));
                 }
             }
         }

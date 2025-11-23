@@ -16,7 +16,7 @@ namespace MWGui
         InventoryTabsOverlay();
 
         int getHeight();
-        void setTab(int index);
+        void setTab(size_t index);
 
     private:
         std::vector<MyGUI::Button*> mTabs;

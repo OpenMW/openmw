@@ -55,7 +55,7 @@ namespace SceneUtil
         void setLight(size_t frame, const osg::Light* light, float radius)
         {
             size_t frameId = frame % 2;
-            size_t i = mIndex[frameId];
+            int i = mIndex[frameId];
 
             if (i >= (sMaxPPLights - 1))
                 return;
@@ -74,11 +74,11 @@ namespace SceneUtil
         void updateCount(size_t frame)
         {
             size_t frameId = frame % 2;
-            mUniformCount[frameId]->set(static_cast<int>(mIndex[frameId]));
+            mUniformCount[frameId]->set(mIndex[frameId]);
         }
 
     private:
-        std::array<size_t, 2> mIndex;
+        std::array<int, 2> mIndex;
         std::array<osg::ref_ptr<osg::Uniform>, 2> mUniformBuffers;
         std::array<osg::ref_ptr<osg::Uniform>, 2> mUniformCount;
     };
@@ -106,7 +106,7 @@ namespace SceneUtil
 
         float mActorFade;
 
-        unsigned int mLastAppliedFrame;
+        size_t mLastAppliedFrame;
 
         bool mEmpty = false;
 
@@ -148,9 +148,9 @@ namespace SceneUtil
         /// Get the unique ID for this light source.
         int getId() const { return mId; }
 
-        void setLastAppliedFrame(unsigned int lastAppliedFrame) { mLastAppliedFrame = lastAppliedFrame; }
+        void setLastAppliedFrame(size_t lastAppliedFrame) { mLastAppliedFrame = lastAppliedFrame; }
 
-        unsigned int getLastAppliedFrame() const { return mLastAppliedFrame; }
+        size_t getLastAppliedFrame() const { return mLastAppliedFrame; }
     };
 
     class UBOManager : public osg::StateAttribute

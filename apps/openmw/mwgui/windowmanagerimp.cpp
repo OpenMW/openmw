@@ -492,7 +492,7 @@ namespace MWGui
         if (!mResourceSystem->getVFS()->exists(hitFaderTexture))
         {
             hitFaderTexture = "textures\\player_hit_01.dds";
-            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+            hitFaderCoord = MyGUI::FloatCoord(0.2f, 0.25f, 0.6f, 0.5f);
         }
         auto hitFader = std::make_unique<ScreenFader>(hitFaderTexture, hitFaderLayout, hitFaderCoord);
         mHitFader = hitFader.get();
@@ -790,8 +790,8 @@ namespace MWGui
             while (mMessageBoxManager->readPressedButton(false) == -1
                 && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                const double dt
-                    = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+                const float dt
+                    = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                           .count();
 
                 mKeyboardNavigation->onFrame();
@@ -903,11 +903,10 @@ namespace MWGui
         {
             GuiMode mode = mGuiModes.back();
             GuiModeState& state = mGuiModeStates[mode];
-            if (state.mWindows.size() == 0)
+            if (state.mWindows.empty())
                 return nullptr;
 
-            int activeIndex
-                = std::clamp(mActiveControllerWindows[mode], 0, static_cast<int>(state.mWindows.size()) - 1);
+            size_t activeIndex = std::clamp<size_t>(mActiveControllerWindows[mode], 0, state.mWindows.size() - 1);
 
             // If the active window is no longer visible, find the next visible window.
             if (!state.mWindows[activeIndex]->isVisible())
@@ -925,18 +924,18 @@ namespace MWGui
             return;
 
         GuiMode mode = mGuiModes.back();
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
 
-        int activeIndex = 0;
+        size_t activeIndex = 0;
         if (winCount > 1)
         {
             // Find next/previous visible window
             activeIndex = mActiveControllerWindows[mode];
             int delta = next ? 1 : -1;
 
-            for (int i = 0; i < winCount; i++)
+            for (size_t i = 0; i < winCount; ++i)
             {
-                activeIndex = wrap(activeIndex + delta, winCount);
+                activeIndex = wrap(activeIndex, winCount, delta);
                 if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
                     break;
             }
@@ -952,9 +951,9 @@ namespace MWGui
             return;
 
         const GuiMode mode = mGuiModes.back();
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
 
-        for (int i = 0; i < winCount; i++)
+        for (size_t i = 0; i < winCount; i++)
         {
             // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
             if (i != mActiveControllerWindows[mode])
@@ -964,16 +963,16 @@ namespace MWGui
             mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
     }
 
-    void WindowManager::setActiveControllerWindow(GuiMode mode, int activeIndex)
+    void WindowManager::setActiveControllerWindow(GuiMode mode, size_t activeIndex)
     {
         if (!Settings::gui().mControllerMenus)
             return;
 
-        int winCount = mGuiModeStates[mode].mWindows.size();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
         if (winCount == 0)
             return;
 
-        activeIndex = std::clamp(activeIndex, 0, winCount - 1);
+        activeIndex = std::clamp<size_t>(activeIndex, 0, winCount - 1);
         mActiveControllerWindows[mode] = activeIndex;
 
         reapplyActiveControllerWindow();
@@ -1437,7 +1436,8 @@ namespace MWGui
             if (mode == GM_Container)
                 mActiveControllerWindows[mode] = 0; // Ensure controller focus is on container
             // Activate first visible window. This needs to be called after updateVisible.
-            mActiveControllerWindows[mode] = std::max(mActiveControllerWindows[mode] - 1, -1);
+            if (mActiveControllerWindows[mode] != 0)
+                mActiveControllerWindows[mode] = mActiveControllerWindows[mode] - 1;
             cycleActiveControllerWindow(true);
         }
     }
@@ -1919,10 +1919,10 @@ namespace MWGui
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        const float x = rect.mX * viewSize.width;
-        const float y = rect.mY * viewSize.height;
-        const float w = rect.mW * viewSize.width;
-        const float h = rect.mH * viewSize.height;
+        const int x = static_cast<int>(rect.mX * viewSize.width);
+        const int y = static_cast<int>(rect.mY * viewSize.height);
+        const int w = static_cast<int>(rect.mW * viewSize.width);
+        const int h = static_cast<int>(rect.mH * viewSize.height);
         window->setCoord(x, y, w, h);
 
         settings.mIsMaximized.set(!settings.mIsMaximized.get());
@@ -1996,11 +1996,10 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (CustomMarkerCollection::ContainerType::const_iterator it = mCustomMarkers.begin();
-             it != mCustomMarkers.end(); ++it)
+        for (const auto& [_, marker] : mCustomMarkers)
         {
             writer.startRecord(ESM::REC_MARK);
-            it->second.save(writer);
+            marker.save(writer);
             writer.endRecord(ESM::REC_MARK);
         }
     }
@@ -2026,7 +2025,7 @@ namespace MWGui
         }
     }
 
-    int WindowManager::countSavedGameRecords() const
+    size_t WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
             + 1 // QuickKeysMenu
@@ -2074,8 +2073,8 @@ namespace MWGui
             = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            const double dt
-                = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+            const float dt
+                = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                       .count();
 
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
@@ -2424,8 +2423,8 @@ namespace MWGui
             if (image.valid())
             {
                 // everything looks good, send it to the cursor manager
-                const Uint8 hotspotX = imgSetPointer->getHotSpot().left;
-                const Uint8 hotspotY = imgSetPointer->getHotSpot().top;
+                const Uint8 hotspotX = static_cast<Uint8>(imgSetPointer->getHotSpot().left);
+                const Uint8 hotspotY = static_cast<Uint8>(imgSetPointer->getHotSpot().top);
                 int rotation = imgSetPointer->getRotation();
                 MyGUI::IntSize pointerSize = imgSetPointer->getSize();
 

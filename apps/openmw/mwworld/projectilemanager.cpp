@@ -144,8 +144,8 @@ namespace
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mData.mEffectID);
             lightDiffuseColor += magicEffect->getColor();
         }
-        int numberOfEffects = effects.mList.size();
-        lightDiffuseColor /= numberOfEffects;
+        size_t numberOfEffects = effects.mList.size();
+        lightDiffuseColor /= static_cast<float>(numberOfEffects);
 
         return lightDiffuseColor;
     }
@@ -581,7 +581,7 @@ namespace MWWorld
             assert(target != caster);
 
             MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = !active ? Misc::Convert::toOsg(projectile->getHitPosition()) : pos;
+            cast.mHitPosition = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mItem = magicBoltState.mItem;
@@ -793,7 +793,7 @@ namespace MWWorld
         return false;
     }
 
-    int ProjectileManager::countSavedGameRecords() const
+    size_t ProjectileManager::countSavedGameRecords() const
     {
         return mMagicBolts.size() + mProjectiles.size();
     }

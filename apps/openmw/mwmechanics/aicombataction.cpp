@@ -514,7 +514,7 @@ namespace MWMechanics
 
         const int flee = stats.getAiSetting(AiSetting::Flee).getModified();
         if (flee >= 100)
-            return flee;
+            return static_cast<float>(flee);
 
         static const float fAIFleeHealthMult = gmst.find("fAIFleeHealthMult")->mValue.getFloat();
         static const float fAIFleeFleeMult = gmst.find("fAIFleeFleeMult")->mValue.getFloat();
@@ -529,7 +529,7 @@ namespace MWMechanics
             if (enemy.getClass().getNpcStats(enemy).isWerewolf() && stats.getLevel() < iWereWolfLevelToAttack)
             {
                 static const int iWereWolfFleeMod = gmst.find("iWereWolfFleeMod")->mValue.getInteger();
-                rating = iWereWolfFleeMod;
+                rating = static_cast<float>(iWereWolfFleeMod);
             }
         }
 

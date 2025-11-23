@@ -248,7 +248,7 @@ namespace MWGui
 
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t position)
     {
-        float angle = (float(position) / (scroll->getScrollRange() - 1) - 0.5f) * osg::PI * 2;
+        float angle = (float(position) / (scroll->getScrollRange() - 1) - 0.5f) * osg::PIf * 2;
         mPreview->setAngle(angle);
 
         mCurrentAngle = angle;
@@ -256,7 +256,7 @@ namespace MWGui
 
     void RaceDialog::onSelectPreviousGender(MyGUI::Widget*)
     {
-        mGenderIndex = wrap(mGenderIndex - 1, 2);
+        mGenderIndex = wrap(mGenderIndex, 2, -1);
 
         recountParts();
         updatePreview();
@@ -264,7 +264,7 @@ namespace MWGui
 
     void RaceDialog::onSelectNextGender(MyGUI::Widget*)
     {
-        mGenderIndex = wrap(mGenderIndex + 1, 2);
+        mGenderIndex = wrap(mGenderIndex, 2, 1);
 
         recountParts();
         updatePreview();
@@ -272,25 +272,25 @@ namespace MWGui
 
     void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
     {
-        mFaceIndex = wrap(mFaceIndex - 1, mAvailableHeads.size());
+        mFaceIndex = wrap(mFaceIndex, mAvailableHeads.size(), -1);
         updatePreview();
     }
 
     void RaceDialog::onSelectNextFace(MyGUI::Widget*)
     {
-        mFaceIndex = wrap(mFaceIndex + 1, mAvailableHeads.size());
+        mFaceIndex = wrap(mFaceIndex, mAvailableHeads.size(), 1);
         updatePreview();
     }
 
     void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
     {
-        mHairIndex = wrap(mHairIndex - 1, mAvailableHairs.size());
+        mHairIndex = wrap(mHairIndex, mAvailableHairs.size(), -1);
         updatePreview();
     }
 
     void RaceDialog::onSelectNextHair(MyGUI::Widget*)
     {
-        mHairIndex = wrap(mHairIndex + 1, mAvailableHairs.size());
+        mHairIndex = wrap(mHairIndex, mAvailableHairs.size(), 1);
         updatePreview();
     }
 
@@ -359,10 +359,10 @@ namespace MWGui
         record.mRace = mCurrentRaceId;
         record.setIsMale(mGenderIndex == 0);
 
-        if (mFaceIndex >= 0 && mFaceIndex < int(mAvailableHeads.size()))
+        if (mFaceIndex < mAvailableHeads.size())
             record.mHead = mAvailableHeads[mFaceIndex];
 
-        if (mHairIndex >= 0 && mHairIndex < int(mAvailableHairs.size()))
+        if (mHairIndex < mAvailableHairs.size())
             record.mHair = mAvailableHairs[mHairIndex];
 
         try

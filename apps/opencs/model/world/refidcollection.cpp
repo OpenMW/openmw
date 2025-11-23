@@ -665,7 +665,7 @@ int CSMWorld::RefIdCollection::getIndex(const ESM::RefId& id) const
 
 int CSMWorld::RefIdCollection::getColumns() const
 {
-    return mColumns.size();
+    return static_cast<int>(mColumns.size());
 }
 
 const CSMWorld::ColumnBase& CSMWorld::RefIdCollection::getColumn(int column) const

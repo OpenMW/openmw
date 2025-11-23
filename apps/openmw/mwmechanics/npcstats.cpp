@@ -493,7 +493,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     for (size_t i = 0; i < state.mSkills.size(); ++i)
     {
         // TODO extend format
-        ESM::RefId id = ESM::Skill::indexToRefId(i);
+        ESM::RefId id = ESM::Skill::indexToRefId(static_cast<int>(i));
         assert(!id.empty());
         mSkills[id].readState(state.mSkills[i]);
     }
@@ -507,7 +507,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mLevelProgress = state.mLevelProgress;
 
     for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
-        mSkillIncreases[ESM::Attribute::indexToRefId(i)] = state.mSkillIncrease[i];
+        mSkillIncreases[ESM::Attribute::indexToRefId(static_cast<int>(i))] = state.mSkillIncrease[i];
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];

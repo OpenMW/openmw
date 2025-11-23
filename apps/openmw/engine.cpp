@@ -319,7 +319,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
     const bool reportResource = stats->collectStats("resource");
 
     if (reportResource)
-        stats->setAttribute(frameNumber, "UnrefQueue", mUnrefQueue->getSize());
+        stats->setAttribute(frameNumber, "UnrefQueue", static_cast<double>(mUnrefQueue->getSize()));
 
     mUnrefQueue->flush(*mWorkQueue);
 
@@ -329,8 +329,8 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         mResourceSystem->reportStats(frameNumber, stats);
 
-        stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
-        stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+        stats->setAttribute(frameNumber, "WorkQueue", static_cast<double>(mWorkQueue->getNumItems()));
+        stats->setAttribute(frameNumber, "WorkThread", static_cast<double>(mWorkQueue->getNumActiveThreads()));
 
         mMechanicsManager->reportStats(frameNumber, *stats);
         mWorld->reportStats(frameNumber, *stats);
@@ -740,7 +740,8 @@ void OMW::Engine::prepareEngine()
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
         false); // keep to Off for now to allow better state sharing
     mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
-        Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
+        Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap,
+        static_cast<float>(Settings::general().mAnisotropy));
     mEnvironment.setResourceSystem(*mResourceSystem);
 
     mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
@@ -1039,7 +1040,7 @@ void OMW::Engine::go()
 
         const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
 
-        if (!frame(frameNumber, dt))
+        if (!frame(frameNumber, static_cast<float>(dt)))
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;

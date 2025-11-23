@@ -4,8 +4,8 @@
 
 #include <MyGUI_EditBox.h>
 
-#include <extern/oics/ICSChannelListener.h>
-#include <extern/oics/ICSInputControlSystem.h>
+#include <oics/ICSChannelListener.h>
+#include <oics/ICSInputControlSystem.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>

@@ -776,7 +776,7 @@ namespace MWLua
                 resetEnchantItem();
                 if (objPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 {
-                    int chance = MWMechanics::getSpellSuccessChance(spellId, objPtr);
+                    int chance = static_cast<int>(MWMechanics::getSpellSuccessChance(spellId, objPtr));
                     MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, chance);
                 }
                 else
@@ -969,9 +969,9 @@ namespace MWLua
                     effect.mEffectId = enam.mData.mEffectID;
                     effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
                     effect.mMagnitude = 0.f;
-                    effect.mMinMagnitude = enam.mData.mMagnMin;
-                    effect.mMaxMagnitude = enam.mData.mMagnMax;
-                    effect.mEffectIndex = enam.mIndex;
+                    effect.mMinMagnitude = static_cast<float>(enam.mData.mMagnMin);
+                    effect.mMaxMagnitude = static_cast<float>(enam.mData.mMagnMax);
+                    effect.mEffectIndex = static_cast<int32_t>(enam.mIndex);
                     effect.mFlags = ESM::ActiveEffect::Flag_None;
                     if (ignoreReflect)
                         effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Reflect;
@@ -1095,7 +1095,7 @@ namespace MWLua
                 throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
 
             MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
-            int currentValue = effects.getStore()->getOrDefault(key).getMagnitude();
+            int currentValue = static_cast<int>(effects.getStore()->getOrDefault(key).getMagnitude());
             effects.getStore()->modifyBase(key, value - currentValue);
         };
 

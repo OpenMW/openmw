@@ -93,8 +93,8 @@ namespace MWWorld
                     else
                     {
                         effect.mMagnitude = 0.f;
-                        effect.mMinMagnitude = enam.mData.mMagnMin;
-                        effect.mMaxMagnitude = enam.mData.mMagnMax;
+                        effect.mMinMagnitude = static_cast<float>(enam.mData.mMagnMin);
+                        effect.mMaxMagnitude = static_cast<float>(enam.mData.mMagnMax);
                         effect.mFlags = ESM::ActiveEffect::Flag_None;
                     }
                     params.mEffects.emplace_back(effect);
@@ -106,7 +106,7 @@ namespace MWWorld
         for (std::size_t i = 0; i < inventory.mItems.size(); ++i)
         {
             ESM::ObjectState& item = inventory.mItems[i];
-            auto slot = inventory.mEquipmentSlots.find(i);
+            auto slot = inventory.mEquipmentSlots.find(static_cast<uint32_t>(i));
             if (slot != inventory.mEquipmentSlots.end())
             {
                 MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(item.mRef);
@@ -216,7 +216,7 @@ namespace MWWorld
             dynamic.mMod = 0.f;
         }
         for (auto& setting : creatureStats.mAiSettings)
-            setting.mMod = 0.f;
+            setting.mMod = 0;
         if (npcStats)
         {
             for (auto& skill : npcStats->mSkills)
@@ -231,7 +231,7 @@ namespace MWWorld
         for (auto& dynamic : creatureStats.mDynamic)
             dynamic.mMod = 0.f;
         for (auto& setting : creatureStats.mAiSettings)
-            setting.mMod = 0.f;
+            setting.mMod = 0;
     }
 
     // Versions 17-27 wrote an equipment slot index to mItem

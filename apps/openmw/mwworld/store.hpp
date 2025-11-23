@@ -61,7 +61,7 @@ namespace MWWorld
     class DynamicStoreBase : public StoreBase
     {
     public:
-        virtual ~DynamicStoreBase() {}
+        virtual ~DynamicStoreBase() = default;
 
         virtual void setUp() {}
 
@@ -70,7 +70,7 @@ namespace MWWorld
         virtual void listIdentifier(std::vector<Id>& list) const {}
 
         virtual size_t getSize() const = 0;
-        virtual int getDynamicSize() const { return 0; }
+        virtual size_t getDynamicSize() const { return 0; }
         virtual RecordId load(ESM::ESMReader& esm) = 0;
 
         virtual bool eraseStatic(const Id& id) { return false; }
@@ -102,7 +102,7 @@ namespace MWWorld
 
         void load(ESM::ESMReader& esm);
 
-        int getSize() const;
+        size_t getSize() const;
         void setUp();
 
         const T* search(int index) const;
@@ -230,7 +230,7 @@ namespace MWWorld
         const T* at(size_t index) const { return mShared.at(index); }
 
         size_t getSize() const override;
-        int getDynamicSize() const override;
+        size_t getDynamicSize() const override;
 
         /// @note The record identifiers are listed in the order that the records were defined by the content files.
         void listIdentifier(std::vector<Id>& list) const override;

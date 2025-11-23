@@ -123,7 +123,7 @@ namespace MWGui
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold
                     ? "SandTextButton"
                     : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
-                MyGUI::IntCoord(4, 3 + i * lineHeight, mTrainingOptions->getWidth() - 10, lineHeight),
+                MyGUI::IntCoord(4, static_cast<int>(3 + i * lineHeight), mTrainingOptions->getWidth() - 10, lineHeight),
                 MyGUI::Align::Default);
 
             button->setUserData(skills[i].first);
@@ -169,8 +169,8 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        int price = pcStats.getSkill(skill->mId).getBase()
-            * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
+        int price = static_cast<int>(pcStats.getSkill(skill->mId).getBase()
+            * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
@@ -263,7 +263,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mTrainingButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mTrainingButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mTrainingButtons.size(), -1);
             setControllerFocus(mTrainingButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -272,7 +272,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mTrainingButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mTrainingButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mTrainingButtons.size(), 1);
             setControllerFocus(mTrainingButtons, mControllerFocus, true);
         }
 

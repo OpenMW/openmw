@@ -129,7 +129,7 @@ namespace MWGui
 
         for (int i = 0; i < 5; i++)
         {
-            char theIndex = '0' + i;
+            char theIndex = '0' + static_cast<char>(i);
             getWidget(mMajorSkill[i], std::string("MajorSkill").append(1, theIndex));
             getWidget(mMinorSkill[i], std::string("MinorSkill").append(1, theIndex));
         }
@@ -483,7 +483,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
@@ -494,7 +494,7 @@ namespace MWGui
                 return true;
 
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
 
@@ -546,7 +546,7 @@ namespace MWGui
             "MajorSkillT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSkillClassMajor", {}));
         setText(
             "MinorSkillT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sSkillClassMinor", {}));
-        for (int i = 0; i < 5; i++)
+        for (char i = 0; i < 5; i++)
         {
             char theIndex = '0' + i;
             getWidget(mMajorSkill[i], std::string("MajorSkill").append(1, theIndex));
@@ -713,13 +713,13 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus - 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
         {
             setControllerFocus(mButtons, mControllerFocus, false);
-            mControllerFocus = wrap(mControllerFocus + 1, mButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
             setControllerFocus(mButtons, mControllerFocus, true);
         }
         return true;
@@ -1001,13 +1001,13 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             mAttributeButtons[mControllerFocus]->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus - 1, mAttributeButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mAttributeButtons.size(), -1);
             mAttributeButtons[mControllerFocus]->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             mAttributeButtons[mControllerFocus]->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus + 1, mAttributeButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mAttributeButtons.size(), 1);
             mAttributeButtons[mControllerFocus]->setStateSelected(true);
         }
 
@@ -1103,13 +1103,13 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
         {
             mSkillButtons[mControllerFocus]->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus - 1, mSkillButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mSkillButtons.size(), -1);
             mSkillButtons[mControllerFocus]->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
         {
             mSkillButtons[mControllerFocus]->setStateSelected(false);
-            mControllerFocus = wrap(mControllerFocus + 1, mSkillButtons.size());
+            mControllerFocus = wrap(mControllerFocus, mSkillButtons.size(), 1);
             mSkillButtons[mControllerFocus]->setStateSelected(true);
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)

@@ -41,10 +41,10 @@ namespace MWLua
             list[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(contentList[i]);
         sol::table res(lua, sol::create);
         res["list"] = LuaUtil::makeReadOnly(list);
-        res["indexOf"] = [&contentList](std::string_view contentFile) -> sol::optional<int> {
+        res["indexOf"] = [&contentList](std::string_view contentFile) -> sol::optional<int64_t> {
             for (size_t i = 0; i < contentList.size(); ++i)
                 if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
-                    return LuaUtil::toLuaIndex(i);
+                    return LuaUtil::toLuaIndex(static_cast<int64_t>(i));
             return sol::nullopt;
         };
         res["has"] = [&contentList](std::string_view contentFile) -> bool {

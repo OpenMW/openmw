@@ -141,7 +141,7 @@ namespace MyGUIPlatform
                         reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 16);
                 }
 
-                glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
+                glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(batch.mVertexCount));
 
                 if (batch.mStateSet)
                 {
@@ -328,7 +328,8 @@ namespace MyGUIPlatform
 
     osg::UByteArray* OSGVertexBuffer::create()
     {
-        mVertexArray[mCurrentBuffer] = new osg::UByteArray(mNeedVertexCount * sizeof(MyGUI::Vertex));
+        mVertexArray[mCurrentBuffer]
+            = new osg::UByteArray(static_cast<unsigned int>(mNeedVertexCount * sizeof(MyGUI::Vertex)));
 
         mBuffer[mCurrentBuffer] = new osg::VertexBufferObject;
         mBuffer[mCurrentBuffer]->setDataVariance(osg::Object::DYNAMIC);
@@ -404,7 +405,7 @@ namespace MyGUIPlatform
         mSceneRoot->addChild(mGuiRoot.get());
 
         osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();
-        setViewSize(vp->width(), vp->height());
+        setViewSize(static_cast<int>(vp->width()), static_cast<int>(vp->height()));
 
         MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
         mIsInitialise = true;
@@ -500,7 +501,7 @@ namespace MyGUIPlatform
 
         mGuiRoot->setViewport(0, 0, width, height);
 
-        mViewSize.set(width * mInvScalingFactor, height * mInvScalingFactor);
+        mViewSize.set(static_cast<int>(width * mInvScalingFactor), static_cast<int>(height * mInvScalingFactor));
 
         mInfo.maximumDepth = 1;
         mInfo.hOffset = 0;

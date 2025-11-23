@@ -141,11 +141,12 @@ namespace ESM
             effects[MagicEffect::Effects::DisintegrateArmor] = MagicEffect::Effects::Sanctuary;
             effects[MagicEffect::Effects::DisintegrateWeapon] = MagicEffect::Effects::Sanctuary;
 
-            for (int i = MagicEffect::Effects::DrainAttribute; i <= MagicEffect::Effects::DamageSkill; ++i)
+            for (short i = MagicEffect::Effects::DrainAttribute; i <= MagicEffect::Effects::DamageSkill; ++i)
                 effects[i] = MagicEffect::Effects::ResistMagicka;
-            for (int i = MagicEffect::Effects::AbsorbAttribute; i <= MagicEffect::Effects::AbsorbSkill; ++i)
+            for (short i = MagicEffect::Effects::AbsorbAttribute; i <= MagicEffect::Effects::AbsorbSkill; ++i)
                 effects[i] = MagicEffect::Effects::ResistMagicka;
-            for (int i = MagicEffect::Effects::WeaknessToFire; i <= MagicEffect::Effects::WeaknessToNormalWeapons; ++i)
+            for (short i = MagicEffect::Effects::WeaknessToFire; i <= MagicEffect::Effects::WeaknessToNormalWeapons;
+                 ++i)
                 effects[i] = MagicEffect::Effects::ResistMagicka;
 
             effects[MagicEffect::Effects::Burden] = MagicEffect::Effects::ResistMagicka;
@@ -154,7 +155,7 @@ namespace ESM
             effects[MagicEffect::Effects::Blind] = MagicEffect::Effects::ResistMagicka;
             effects[MagicEffect::Effects::Sound] = MagicEffect::Effects::ResistMagicka;
 
-            for (int i = 0; i < 2; ++i)
+            for (short i = 0; i < 2; ++i)
             {
                 effects[MagicEffect::Effects::CalmHumanoid + i] = MagicEffect::Effects::ResistMagicka;
                 effects[MagicEffect::Effects::FrenzyHumanoid + i] = MagicEffect::Effects::ResistMagicka;
@@ -194,11 +195,11 @@ namespace ESM
         static std::map<short, short> effects;
         if (effects.empty())
         {
-            for (int i = DrainAttribute; i <= DamageSkill; ++i)
+            for (short i = DrainAttribute; i <= DamageSkill; ++i)
                 effects[i] = WeaknessToMagicka;
-            for (int i = AbsorbAttribute; i <= AbsorbSkill; ++i)
+            for (short i = AbsorbAttribute; i <= AbsorbSkill; ++i)
                 effects[i] = WeaknessToMagicka;
-            for (int i = WeaknessToFire; i <= WeaknessToNormalWeapons; ++i)
+            for (short i = WeaknessToFire; i <= WeaknessToNormalWeapons; ++i)
                 effects[i] = WeaknessToMagicka;
 
             effects[Burden] = WeaknessToMagicka;
@@ -207,7 +208,7 @@ namespace ESM
             effects[Blind] = WeaknessToMagicka;
             effects[Sound] = WeaknessToMagicka;
 
-            for (int i = 0; i < 2; ++i)
+            for (short i = 0; i < 2; ++i)
             {
                 effects[CalmHumanoid + i] = WeaknessToMagicka;
                 effects[FrenzyHumanoid + i] = WeaknessToMagicka;
@@ -541,7 +542,7 @@ namespace ESM
     {
         std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
         for (size_t i = 0; i < strings.size(); i++)
-            map[strings[i]] = i;
+            map[strings[i]] = static_cast<int>(i);
 
         return map;
     }

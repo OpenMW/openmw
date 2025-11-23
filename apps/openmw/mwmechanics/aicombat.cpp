@@ -432,7 +432,7 @@ namespace MWMechanics
                     storage.mFleeBlindRunTimer += duration;
 
                     storage.mMovement.mRotation[0] = -actor.getRefData().getPosition().rot[0];
-                    storage.mMovement.mRotation[2] = osg::PI
+                    storage.mMovement.mRotation[2] = osg::PIf
                         + getZAngleToDir(
                             target.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3());
                     storage.mMovement.mPosition[1] = 1;
@@ -486,7 +486,7 @@ namespace MWMechanics
         actorMovementSettings.mRotation[axis] = 0;
         bool isRangedCombat = false;
         storage.mCurrentAction->getCombatRange(isRangedCombat);
-        float eps = isRangedCombat ? osg::DegreesToRadians(0.5) : osg::DegreesToRadians(3.f);
+        float eps = isRangedCombat ? osg::DegreesToRadians(0.5f) : osg::DegreesToRadians(3.f);
         float targetAngleRadians = storage.mMovement.mRotation[axis];
         storage.mRotateMove = !smoothTurn(actor, targetAngleRadians, axis, eps);
     }
@@ -567,7 +567,7 @@ namespace MWMechanics
         else if (actor.getClass().isBipedal(actor) && !isDistantCombat)
         {
             float moveDuration = 0;
-            float angleToTarget
+            double angleToTarget
                 = Misc::normalizeAngle(mMovement.mRotation[2] - actor.getRefData().getPosition().rot[2]);
             // Apply a big side step if enemy tries to get around and come from behind.
             // Otherwise apply a random side step (kind of dodging) with some probability
@@ -683,7 +683,7 @@ namespace MWMechanics
                         MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
                     }
                 }
-                mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(prng), baseDelay + 0.9);
+                mAttackCooldown = std::min(baseDelay + 0.01f * Misc::Rng::roll0to99(prng), baseDelay + 0.9f);
             }
             else
                 mAttackCooldown -= AI_REACTION_TIME;

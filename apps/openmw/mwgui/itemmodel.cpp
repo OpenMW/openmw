@@ -109,9 +109,9 @@ namespace MWGui
         const ItemStack& itemToSearch = getItem(index);
         for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
         {
-            const ItemStack& item = mSourceModel->getItem(i);
+            const ItemStack& item = mSourceModel->getItem(static_cast<ModelIndex>(i));
             if (item.mBase == itemToSearch.mBase)
-                return i;
+                return static_cast<ModelIndex>(i);
         }
         return -1;
     }
@@ -121,9 +121,9 @@ namespace MWGui
         const ItemStack& itemToSearch = mSourceModel->getItem(index);
         for (size_t i = 0; i < getItemCount(); ++i)
         {
-            const ItemStack& item = getItem(i);
+            const ItemStack& item = getItem(static_cast<ModelIndex>(i));
             if (item.mBase == itemToSearch.mBase)
-                return i;
+                return static_cast<ModelIndex>(i);
         }
         return -1;
     }

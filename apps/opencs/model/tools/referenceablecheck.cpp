@@ -462,7 +462,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     for (size_t i = 0; i < creature.mData.mAttributes.size(); ++i)
     {
         if (creature.mData.mAttributes[i] < 0)
-            messages.add(id, ESM::Attribute::indexToRefId(i).toDebugString() + " is negative", {},
+            messages.add(id, ESM::Attribute::indexToRefId(static_cast<int>(i)).toDebugString() + " is negative", {},
                 CSMDoc::Message::Severity_Warning);
     }
 

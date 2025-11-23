@@ -245,7 +245,7 @@ namespace MWBase
 
         virtual void playerLoaded() = 0;
 
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 

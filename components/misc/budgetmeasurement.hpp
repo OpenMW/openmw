@@ -13,25 +13,25 @@ namespace Misc
         std::array<unsigned int, 4> mBudgetStepCount;
 
     public:
-        BudgetMeasurement(const float default_expense)
+        BudgetMeasurement(const float defaultExpense)
         {
-            mBudgetHistory = { default_expense, default_expense, default_expense, default_expense };
+            mBudgetHistory = { defaultExpense, defaultExpense, defaultExpense, defaultExpense };
             mBudgetStepCount = { 1, 1, 1, 1 };
         }
 
-        void reset(const float default_expense)
+        void reset(const float defaultExpense)
         {
-            mBudgetHistory = { default_expense, default_expense, default_expense, default_expense };
+            mBudgetHistory = { defaultExpense, defaultExpense, defaultExpense, defaultExpense };
             mBudgetStepCount = { 1, 1, 1, 1 };
         }
 
         void update(double delta, unsigned int stepCount, size_t cursor)
         {
-            mBudgetHistory[cursor % 4] = delta;
+            mBudgetHistory[cursor % 4] = static_cast<float>(delta);
             mBudgetStepCount[cursor % 4] = stepCount;
         }
 
-        double get() const
+        float get() const
         {
             float sum = (mBudgetHistory[0] + mBudgetHistory[1] + mBudgetHistory[2] + mBudgetHistory[3]);
             unsigned int stepCountSum

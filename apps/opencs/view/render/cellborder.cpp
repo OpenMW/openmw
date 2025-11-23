@@ -17,13 +17,16 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 
-const int CSVRender::CellBorder::CellSize = ESM::Land::REAL_SIZE;
+namespace
+{
+    constexpr int CellSize = ESM::Land::REAL_SIZE;
 
-/*
-    The number of vertices per cell border is equal to the number of vertices per edge
-    minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
-*/
-const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
+    /*
+        The number of vertices per cell border is equal to the number of vertices per edge
+        minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
+    */
+    constexpr unsigned VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
+}
 
 CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords)
     : mParentNode(cellNode)
@@ -105,7 +108,7 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP, VertexCount + 1);
 
     // Assign one primitive to each vertex.
-    for (size_t i = 0; i < VertexCount; ++i)
+    for (unsigned i = 0; i < VertexCount; ++i)
         primitives->setElement(i, i);
 
     // Assign the last primitive to the first vertex to close the loop.

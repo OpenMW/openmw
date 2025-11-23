@@ -144,8 +144,8 @@ namespace Resource
 
                 callback->addMergedAnimationTrack(std::move(mergedAnimationTrack));
 
-                float startTime = animation->getStartTime();
-                float stopTime = startTime + animation->getDuration();
+                float startTime = static_cast<float>(animation->getStartTime());
+                float stopTime = static_cast<float>(startTime + animation->getDuration());
 
                 SceneUtil::EmulatedAnimation emulatedAnimation;
                 emulatedAnimation.mStartTime = startTime;
@@ -168,7 +168,7 @@ namespace Resource
             {
                 std::string line;
                 while (getline(*textKeysFile, line))
-                    mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
+                    mTarget.mTextKeys.emplace(static_cast<float>(parseTimeSignature(line)), parseTextKey(line));
             }
             catch (const std::exception& e)
             {

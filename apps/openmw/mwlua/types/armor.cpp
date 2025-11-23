@@ -61,7 +61,7 @@ namespace
         if (rec["baseArmor"] != sol::nil)
             armor.mData.mArmor = rec["baseArmor"];
         if (rec["enchantCapacity"] != sol::nil)
-            armor.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+            armor.mData.mEnchant = static_cast<int32_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
 
         return armor;
     }

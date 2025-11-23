@@ -308,7 +308,7 @@ namespace MWWorld
         {
             mChanged = true;
             std::visit(ESM::VisitOverload{
-                           [&](ESM4::Reference& ref) { ref.mLockLevel = lockLevel; },
+                           [&](ESM4::Reference& ref) { ref.mLockLevel = static_cast<int8_t>(lockLevel); },
                            [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mLockLevel = lockLevel; },
                        },

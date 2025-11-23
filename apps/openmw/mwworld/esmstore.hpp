@@ -286,7 +286,7 @@ namespace MWWorld
         void setUp();
         void validateRecords(ESM::ReadersCache& readers);
 
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 

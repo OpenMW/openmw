@@ -258,8 +258,8 @@ namespace MWGui
         MyGUI::TextBox* nameWidget = widgets.first;
         if (valueWidget && nameWidget)
         {
-            int modified = value.getModified(), base = value.getBase();
-            std::string text = MyGUI::utility::toString(modified);
+            float modified = value.getModified(), base = value.getBase();
+            std::string text = MyGUI::utility::toString(static_cast<int>(modified));
             std::string state = "normal";
             if (modified > base)
                 state = "increased";
@@ -341,8 +341,8 @@ namespace MWGui
         bool first = true;
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
-            float mult = playerStats.getLevelupAttributeMultiplier(attribute.mId);
-            mult = std::min(mult, 100 - playerStats.getAttribute(attribute.mId).getBase());
+            int mult = playerStats.getLevelupAttributeMultiplier(attribute.mId);
+            mult = std::min(mult, static_cast<int>(100 - playerStats.getAttribute(attribute.mId).getBase()));
             if (mult > 1)
             {
                 if (!first)

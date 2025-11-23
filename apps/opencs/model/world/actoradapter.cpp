@@ -640,7 +640,7 @@ namespace CSMWorld
                 reservedList.emplace_back(pr);
             }
 
-            int priority = parts.size();
+            int priority = static_cast<int>(parts.size());
             addParts(clothing.mParts.mParts, priority);
             addParts(reservedList, priority);
 

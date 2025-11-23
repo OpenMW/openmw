@@ -171,7 +171,7 @@ namespace MWScript
         if (!mLocals)
             throw std::runtime_error("local variables not available in this context");
 
-        mLocals->mShorts.at(index) = value;
+        mLocals->mShorts.at(index) = static_cast<Interpreter::Type_Short>(value);
     }
 
     void InterpreterContext::setLocalLong(int index, int value)
@@ -483,7 +483,7 @@ namespace MWScript
     {
         Locals& locals = getMemberLocals(global, id);
 
-        locals.mShorts[findLocalVariableIndex(id, name, 's')] = value;
+        locals.mShorts[findLocalVariableIndex(id, name, 's')] = static_cast<Interpreter::Type_Short>(value);
     }
 
     void InterpreterContext::setMemberLong(ESM::RefId id, std::string_view name, int value, bool global)

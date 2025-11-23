@@ -69,7 +69,8 @@ namespace
         {
             lineDirectivePosition = 0;
         }
-        lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+        lineNumber
+            += static_cast<int>(std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n'));
         return lineNumber;
     }
 }

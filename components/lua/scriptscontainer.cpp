@@ -334,8 +334,8 @@ namespace LuaUtil
 
     void ScriptsContainer::insertHandler(std::vector<Handler>& list, int scriptId, sol::function fn)
     {
+        size_t pos = list.size();
         list.emplace_back();
-        int pos = list.size() - 1;
         while (pos > 0 && list[pos - 1].mScriptId > scriptId)
         {
             list[pos] = std::move(list[pos - 1]);
@@ -370,9 +370,9 @@ namespace LuaUtil
                 return;
             }
             EventHandlerList& list = it->second;
-            for (int i = list.size() - 1; i >= 0; --i)
+            for (size_t i = list.size(); i > 0; --i)
             {
-                const Handler& h = list[i];
+                const Handler& h = list[i - 1];
                 try
                 {
                     sol::object res = LuaUtil::call({ this, h.mScriptId }, h.mFn, object);

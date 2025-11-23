@@ -40,7 +40,7 @@ namespace
         return val * val;
     }
 
-    std::pair<int, int> divideIntoSegments(const osg::BoundingBox& bounds, float mapSize)
+    std::pair<int, int> divideIntoSegments(const osg::BoundingBox& bounds, int mapSize)
     {
         osg::Vec2f min(bounds.xMin(), bounds.yMin());
         osg::Vec2f max(bounds.xMax(), bounds.yMax());
@@ -76,8 +76,8 @@ namespace MWRender
 
     LocalMap::LocalMap(osg::Group* root)
         : mRoot(root)
-        , mMapResolution(
-              Settings::map().mLocalMapResolution * MWBase::Environment::get().getWindowManager()->getScalingFactor())
+        , mMapResolution(static_cast<int>(
+              Settings::map().mLocalMapResolution * MWBase::Environment::get().getWindowManager()->getScalingFactor()))
         , mMapWorldSize(Constants::CellSizeInUnits)
         , mCellDistance(Constants::CellGridRadius)
         , mAngle(0.f)
@@ -352,7 +352,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinX > mBounds.xMin())
                 {
                     float diff = fog->mBounds.mMinX - mBounds.xMin();
-                    xOffset = std::ceil(diff / mMapWorldSize);
+                    xOffset = static_cast<int>(std::ceil(diff / mMapWorldSize));
                     mBounds.xMin() = fog->mBounds.mMinX - xOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMinY < mBounds.yMin())
@@ -362,7 +362,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinY > mBounds.yMin())
                 {
                     float diff = fog->mBounds.mMinY - mBounds.yMin();
-                    yOffset = std::ceil(diff / mMapWorldSize);
+                    yOffset = static_cast<int>(std::ceil(diff / mMapWorldSize));
                     mBounds.yMin() = fog->mBounds.mMinY - yOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMaxX > mBounds.xMax())
@@ -388,7 +388,8 @@ namespace MWRender
         {
             for (int y = 0; y < segments.second; ++y)
             {
-                osg::Vec2f start = min + osg::Vec2f(mMapWorldSize * x, mMapWorldSize * y);
+                osg::Vec2f start
+                    = min + osg::Vec2f(static_cast<float>(mMapWorldSize * x), static_cast<float>(mMapWorldSize * y));
                 osg::Vec2f newcenter = start + osg::Vec2f(mMapWorldSize / 2.f, mMapWorldSize / 2.f);
 
                 osg::Vec2f a = newcenter - mCenter;
@@ -535,8 +536,8 @@ namespace MWRender
                         float sqrDist = square((texU + mx * (sFogOfWarResolution - 1)) - u * (sFogOfWarResolution - 1))
                             + square((texV + my * (sFogOfWarResolution - 1)) - v * (sFogOfWarResolution - 1));
 
-                        const std::uint8_t alpha = std::min<std::uint8_t>(
-                            *data >> 24, std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255);
+                        const std::uint8_t alpha = std::min<std::uint8_t>(*data >> 24,
+                            static_cast<std::uint8_t>(std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255));
                         std::uint32_t val = static_cast<std::uint32_t>(alpha << 24);
                         if (*data != val)
                         {

@@ -57,10 +57,10 @@ namespace
         osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
         osg::ref_ptr<osg::Vec3Array> verts = new osg::Vec3Array;
-        verts->push_back(osg::Vec3f(-0.5 * scale, -0.5 * scale, 0));
-        verts->push_back(osg::Vec3f(-0.5 * scale, 0.5 * scale, 0));
-        verts->push_back(osg::Vec3f(0.5 * scale, 0.5 * scale, 0));
-        verts->push_back(osg::Vec3f(0.5 * scale, -0.5 * scale, 0));
+        verts->push_back(osg::Vec3f(-0.5f * scale, -0.5f * scale, 0.f));
+        verts->push_back(osg::Vec3f(-0.5f * scale, 0.5f * scale, 0.f));
+        verts->push_back(osg::Vec3f(0.5f * scale, 0.5f * scale, 0.f));
+        verts->push_back(osg::Vec3f(0.5f * scale, -0.5f * scale, 0.f));
 
         geom->setVertexArray(verts);
 
@@ -179,7 +179,7 @@ namespace MWRender
 
             if (visibleRatio > 0.f)
             {
-                const float fadeThreshold = 0.1;
+                const float fadeThreshold = 0.1f;
                 if (visibleRatio < fadeThreshold)
                 {
                     float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
@@ -190,7 +190,7 @@ namespace MWRender
                 }
                 else if (visibleRatio < 1.f)
                 {
-                    const float threshold = 0.6;
+                    const float threshold = 0.6f;
                     visibleRatio = visibleRatio * (1.f - threshold) + threshold;
                 }
             }
@@ -304,8 +304,8 @@ namespace MWRender
 
             forward.normalize();
             sun.normalize();
-            float angleRadians = std::acos(forward * sun);
-            return angleRadians;
+            double angleRadians = std::acos(forward * sun);
+            return static_cast<float>(angleRadians);
         }
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mSunTransform;
@@ -787,7 +787,7 @@ namespace MWRender
         if (!sceneManager.getForceShaders())
         {
             osg::ref_ptr<osg::AlphaFunc> alphaFunc = new osg::AlphaFunc;
-            alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
+            alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8f);
             stateset->setAttributeAndModes(alphaFunc);
         }
         stateset->setTextureAttributeAndModes(0, sunTex);
@@ -1146,7 +1146,7 @@ namespace MWRender
     void RainShooter::shoot(osgParticle::Particle* particle) const
     {
         particle->setVelocity(mVelocity);
-        particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PI));
+        particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PIf));
     }
 
     void RainShooter::setVelocity(const osg::Vec3f& velocity)
@@ -1195,7 +1195,7 @@ namespace MWRender
                     if (i >= 49 && i <= 64)
                         alpha = 0.f; // bottom-most row
                     else if (i >= 33 && i <= 48)
-                        alpha = 0.25098; // second row
+                        alpha = 0.25098f; // second row
                     else
                         alpha = 1.f;
                     break;

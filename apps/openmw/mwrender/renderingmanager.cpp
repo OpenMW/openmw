@@ -711,9 +711,9 @@ namespace MWRender
 
         if (needsAdjusting)
         {
-            constexpr float pR = 0.2126;
-            constexpr float pG = 0.7152;
-            constexpr float pB = 0.0722;
+            constexpr float pR = 0.2126f;
+            constexpr float pG = 0.7152f;
+            constexpr float pB = 0.0722f;
 
             // we already work in linear RGB so no conversions are needed for the luminosity function
             float relativeLuminance = pR * ambient.r() + pG * ambient.g() + pB * ambient.b();
@@ -1053,14 +1053,13 @@ namespace MWRender
             PtrHolder* ptrHolder = nullptr;
             std::vector<RefnumMarker*> refnumMarkers;
             bool hitNonObjectWorld = false;
-            for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end();
-                 ++it)
+            for (osg::Node* node : intersection.nodePath)
             {
-                const auto& nodeMask = (*it)->getNodeMask();
+                const auto& nodeMask = node->getNodeMask();
                 if (!hitNonObjectWorld)
                     hitNonObjectWorld = nodeMask & nonObjectWorldMask;
 
-                osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
+                osg::UserDataContainer* userDataContainer = node->getUserDataContainer();
                 if (!userDataContainer)
                     continue;
                 for (unsigned int i = 0; i < userDataContainer->getNumUserObjects(); ++i)
@@ -1110,7 +1109,7 @@ namespace MWRender
                 result.mHit = true;
                 result.mHitPointWorld = intersection.getWorldIntersectPoint();
                 result.mHitNormalWorld = intersection.getWorldIntersectNormal();
-                result.mRatio = intersection.ratio;
+                result.mRatio = static_cast<float>(intersection.ratio);
             }
         };
 
@@ -1362,10 +1361,10 @@ namespace MWRender
         if (mViewDistance < mNearClip)
             throw std::runtime_error("Viewing distance is less than near clip");
 
-        const double width = Settings::video().mResolutionX;
-        const double height = Settings::video().mResolutionY;
+        const int width = Settings::video().mResolutionX;
+        const int height = Settings::video().mResolutionY;
 
-        double aspect = (height == 0.0) ? 1.0 : width / height;
+        double aspect = (height == 0) ? 1.0 : static_cast<double>(width) / height;
         float fov = mFieldOfView;
         if (mFieldOfViewOverridden)
             fov = mFieldOfViewOverride;
@@ -1385,12 +1384,12 @@ namespace MWRender
         if (Stereo::getStereo())
         {
             auto res = Stereo::Manager::instance().eyeResolution();
-            mSharedUniformStateUpdater->setScreenRes(res.x(), res.y());
+            setScreenRes(res.x(), res.y());
             Stereo::Manager::instance().setMasterProjectionMatrix(mPerViewUniformStateUpdater->getProjectionMatrix());
         }
         else
         {
-            mSharedUniformStateUpdater->setScreenRes(width, height);
+            setScreenRes(width, height);
         }
 
         // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may
@@ -1407,7 +1406,7 @@ namespace MWRender
 
     void RenderingManager::setScreenRes(int width, int height)
     {
-        mSharedUniformStateUpdater->setScreenRes(width, height);
+        mSharedUniformStateUpdater->setScreenRes(static_cast<float>(width), static_cast<float>(height));
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -1415,7 +1414,8 @@ namespace MWRender
         mViewer->stopThreading();
 
         mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
-            Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
+            Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap,
+            static_cast<float>(Settings::general().mAnisotropy));
 
         mTerrain->updateTextureFiltering();
         mWater->processChangedSettings({});
@@ -1428,7 +1428,7 @@ namespace MWRender
         osg::Vec4f color = mAmbientColor;
 
         if (mNightEyeFactor > 0.f)
-            color += osg::Vec4f(0.7, 0.7, 0.7, 0.0) * mNightEyeFactor;
+            color += osg::Vec4f(0.7f, 0.7f, 0.7f, 0.0f) * mNightEyeFactor;
 
         mPostProcessor->getStateUpdater()->setAmbientColor(color);
         mStateUpdater->setAmbientColor(color);
@@ -1456,7 +1456,7 @@ namespace MWRender
         {
             const int compMapResolution = Settings::terrain().mCompositeMapResolution;
             const int compMapPower = Settings::terrain().mCompositeMapLevel;
-            const float compMapLevel = std::pow(2, compMapPower);
+            const float compMapLevel = static_cast<float>(std::pow(2, compMapPower));
             const int vertexLodMod = Settings::terrain().mVertexLodMod;
             const float maxCompGeometrySize = Settings::terrain().mMaxCompositeGeometrySize;
             const bool debugChunks = Settings::terrain().mDebugChunks;

@@ -1,6 +1,7 @@
 #include "../nif/node.hpp"
 
 #include <components/bullethelpers/processtrianglecallback.hpp>
+#include <components/misc/convert.hpp>
 #include <components/nif/data.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/node.hpp>
@@ -300,10 +301,10 @@ namespace
 
     void copy(const btTransform& src, Nif::NiTransform& dst)
     {
-        dst.mTranslation = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
+        dst.mTranslation = Misc::Convert::makeOsgVec3f(src.getOrigin());
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)
-                dst.mRotation.mValues[row][column] = src.getBasis().getRow(row)[column];
+                dst.mRotation.mValues[row][column] = static_cast<float>(src.getBasis().getRow(row)[column]);
     }
 
     struct TestBulletNifLoader : Test

@@ -449,7 +449,7 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
     return result;
 }
 
-int MWWorld::WorldModel::countSavedGameRecords() const
+size_t MWWorld::WorldModel::countSavedGameRecords() const
 {
     return std::count_if(mCells.begin(), mCells.end(), [](const auto& v) { return v.second.hasState(); });
 }

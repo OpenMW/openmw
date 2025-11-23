@@ -828,8 +828,8 @@ namespace MWMechanics
 
         clearStateAnimation(mCurrentIdle);
         mCurrentIdle = std::move(idleGroup);
-        playBlendedAnimation(
-            mCurrentIdle, priority, MWRender::BlendMask_All, false, 1.0f, "start", "stop", startPoint, numLoops, true);
+        playBlendedAnimation(mCurrentIdle, priority, MWRender::BlendMask_All, false, 1.0f, "start", "stop", startPoint,
+            static_cast<uint32_t>(numLoops), true);
     }
 
     void CharacterController::refreshCurrentAnims(
@@ -851,7 +851,8 @@ namespace MWMechanics
     {
         mDeathState = death;
         mCurrentDeath = deathStateToAnimGroup(mDeathState);
-        mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(mDeathState - CharState_Death1);
+        mPtr.getClass().getCreatureStats(mPtr).setDeathAnimation(
+            static_cast<signed char>(mDeathState - CharState_Death1));
 
         // For dead actors, refreshCurrentAnims is no longer called, so we need to disable the movement state manually.
         // Note that these animations wouldn't actually be visible (due to the Death animation's priority being higher).
@@ -1920,7 +1921,7 @@ namespace MWMechanics
         else
         {
             float complete;
-            size_t loopcount;
+            uint32_t loopcount;
             mAnimation->getInfo(mAnimQueue.front().mGroup, &complete, nullptr, &loopcount);
             mAnimQueue.front().mLoopCount = loopcount;
             mAnimQueue.front().mTime = complete;
@@ -2006,10 +2007,10 @@ namespace MWMechanics
             {
                 // Force Jump
                 if (stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceJump))
-                    movementSettings.mPosition[2] = onground ? 1 : 0;
+                    movementSettings.mPosition[2] = onground ? 1.f : 0.f;
                 // Force Move Jump, only jump if they're otherwise moving
                 if (stats.getMovementFlag(MWMechanics::CreatureStats::Flag_ForceMoveJump) && isMoving)
-                    movementSettings.mPosition[2] = onground ? 1 : 0;
+                    movementSettings.mPosition[2] = onground ? 1.f : 0.f;
             }
 
             osg::Vec3f rot = cls.getRotationVector(mPtr);
@@ -2032,7 +2033,7 @@ namespace MWMechanics
                     maxDelta = 1;
                 else if (std::abs(speedDelta) < deltaLen / 2)
                     // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
-                    maxDelta = duration * (isPlayer ? 1.0 / Settings::game().mSmoothMovementPlayerTurningDelay : 6.f);
+                    maxDelta = duration * (isPlayer ? 1.0f / Settings::game().mSmoothMovementPlayerTurningDelay : 6.f);
                 else if (isPlayer && speedDelta < -deltaLen / 2)
                     // As soon as controls are released, mwinput switches player from running to walking.
                     // So stopping should be instant for player, otherwise it causes a small twitch.
@@ -2090,7 +2091,7 @@ namespace MWMechanics
                 if (std::abs(delta) < osg::DegreesToRadians(20.0f))
                     mIsMovingBackward = vec.y() < 0;
 
-                float maxDelta = osg::PI * duration * (2.5f - cosDelta);
+                float maxDelta = osg::PIf * duration * (2.5f - cosDelta);
                 delta = std::clamp(delta, -maxDelta, maxDelta);
                 stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
                 effectiveRotation += delta;
@@ -2516,7 +2517,7 @@ namespace MWMechanics
             if (iter == mAnimQueue.begin() && mAnimation)
             {
                 float complete;
-                size_t loopcount;
+                uint32_t loopcount;
                 mAnimation->getInfo(anim.mGroup, &complete, nullptr, &loopcount);
                 anim.mTime = complete;
                 anim.mLoopCount = loopcount;
@@ -2538,24 +2539,23 @@ namespace MWMechanics
         if (!state.mScriptedAnims.empty())
         {
             clearAnimQueue();
-            for (ESM::AnimationState::ScriptedAnimations::const_iterator iter = state.mScriptedAnims.begin();
-                 iter != state.mScriptedAnims.end(); ++iter)
+            for (const ESM::AnimationState::ScriptedAnimation& animation : state.mScriptedAnims)
             {
                 AnimationQueueEntry entry;
-                entry.mGroup = iter->mGroup;
-                entry.mLoopCount
-                    = static_cast<uint32_t>(std::min<uint64_t>(iter->mLoopCount, std::numeric_limits<uint32_t>::max()));
+                entry.mGroup = animation.mGroup;
+                entry.mLoopCount = static_cast<uint32_t>(
+                    std::min<uint64_t>(animation.mLoopCount, std::numeric_limits<uint32_t>::max()));
                 entry.mLooping = mAnimation->isLoopingAnimation(entry.mGroup);
                 entry.mScripted = true;
                 entry.mStartKey = "start";
                 entry.mStopKey = "stop";
                 entry.mSpeed = 1.f;
-                entry.mTime = iter->mTime;
-                if (iter->mAbsolute)
+                entry.mTime = animation.mTime;
+                if (animation.mAbsolute)
                 {
-                    float start = mAnimation->getTextKeyTime(iter->mGroup + ": start");
-                    float stop = mAnimation->getTextKeyTime(iter->mGroup + ": stop");
-                    float time = std::clamp(iter->mTime, start, stop);
+                    float start = mAnimation->getTextKeyTime(animation.mGroup + ": start");
+                    float stop = mAnimation->getTextKeyTime(animation.mGroup + ": stop");
+                    float time = std::clamp(animation.mTime, start, stop);
                     entry.mTime = (time - start) / (stop - start);
                 }
 
@@ -3083,8 +3083,8 @@ namespace MWMechanics
         if (!head)
             return;
 
-        double zAngleRadians = 0.f;
-        double xAngleRadians = 0.f;
+        float zAngleRadians = 0.f;
+        float xAngleRadians = 0.f;
 
         if (!mHeadTrackTarget.isEmpty())
         {
@@ -3118,14 +3118,15 @@ namespace MWMechanics
 
             zAngleRadians
                 = std::atan2(actorDirection.x(), actorDirection.y()) - std::atan2(direction.x(), direction.y());
-            zAngleRadians = Misc::normalizeAngle(zAngleRadians - mAnimation->getHeadYaw()) + mAnimation->getHeadYaw();
+            zAngleRadians = static_cast<float>(
+                Misc::normalizeAngle(zAngleRadians - mAnimation->getHeadYaw()) + mAnimation->getHeadYaw());
             zAngleRadians *= (1 - direction.z() * direction.z());
             xAngleRadians = std::asin(direction.z());
         }
 
-        const double xLimit = osg::DegreesToRadians(40.0);
-        const double zLimit = osg::DegreesToRadians(30.0);
-        double zLimitOffset = mAnimation->getUpperBodyYawRadians();
+        const float xLimit = osg::DegreesToRadians(40.f);
+        const float zLimit = osg::DegreesToRadians(30.f);
+        float zLimitOffset = mAnimation->getUpperBodyYawRadians();
         xAngleRadians = std::clamp(xAngleRadians, -xLimit, xLimit);
         zAngleRadians = std::clamp(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
 

@@ -80,7 +80,7 @@ namespace
     {
         const auto world = MWBase::Environment::get().getWorld();
         const auto halfExtents = world->getHalfExtents(actor);
-        return 2.0 * halfExtents.z();
+        return 2.f * halfExtents.z();
     }
 
     // Returns true if turn in `p2` is less than 10 degrees and all the 3 points are almost on one line.
@@ -93,7 +93,7 @@ namespace
         float crossProduct = v1.x() * v3.y() - v1.y() * v3.x();
 
         // Check that the angle between v1 and v3 is less or equal than 5 degrees.
-        static const float cos175 = std::cos(osg::PI * (175.0 / 180));
+        static const float cos175 = std::cos(osg::PIf * (175.f / 180));
         bool checkAngle = dotProduct <= cos175 * v1.length() * v3.length();
 
         // Check that distance from p2 to the line (p1, p3) is less or equal than `pointTolerance`.
@@ -246,12 +246,11 @@ namespace MWMechanics
                     // Add Z offset since path node can overlap with other objects.
                     // Also ignore doors in raytesting.
                     const int mask = MWPhysics::CollisionType_World;
-                    bool isPathClear = !MWBase::Environment::get()
-                                            .getWorld()
-                                            ->getRayCasting()
-                                            ->castRay(osg::Vec3f(startPoint.x(), startPoint.y(), startPoint.z() + 16),
-                                                osg::Vec3f(temp.mX, temp.mY, temp.mZ + 16), mask)
-                                            .mHit;
+                    const osg::Vec3f zOffset(0.f, 0.f, 16.f);
+                    const osg::Vec3f from = startPoint + zOffset;
+                    const osg::Vec3f to = Misc::Convert::makeOsgVec3f(temp) + zOffset;
+                    bool isPathClear
+                        = !MWBase::Environment::get().getWorld()->getRayCasting()->castRay(from, to, mask).mHit;
                     if (isPathClear)
                         path.pop_front();
                 }

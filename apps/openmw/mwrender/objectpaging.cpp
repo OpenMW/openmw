@@ -261,7 +261,7 @@ namespace MWRender
                 for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
                      callback = callback->getNestedCallback())
                 {
-                    if (callback->className() == std::string("BillboardCallback"))
+                    if (callback->className() == std::string_view("BillboardCallback"))
                     {
                         if (mOptimizeBillboards)
                         {
@@ -310,8 +310,8 @@ namespace MWRender
                 const osg::Matrix& oldMatrix = matrixTransform->getMatrix();
                 float mag[3]; // attempt to preserve scale
                 for (int i = 0; i < 3; ++i)
-                    mag[i] = std::sqrt(oldMatrix(0, i) * oldMatrix(0, i) + oldMatrix(1, i) * oldMatrix(1, i)
-                        + oldMatrix(2, i) * oldMatrix(2, i));
+                    mag[i] = static_cast<float>(std::sqrt(oldMatrix(0, i) * oldMatrix(0, i)
+                        + oldMatrix(1, i) * oldMatrix(1, i) + oldMatrix(2, i) * oldMatrix(2, i)));
                 osg::Matrix newMatrix;
                 worldToLocal.setTrans(0, 0, 0);
                 newMatrix *= worldToLocal;
@@ -651,7 +651,8 @@ namespace MWRender
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
         const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
     {
-        const osg::Vec2i startCell(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+        const osg::Vec2i startCell(static_cast<int>(std::floor(center.x() - size / 2.f)),
+            static_cast<int>(std::floor(center.y() - size / 2.f)));
         const MWBase::World& world = *MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore& store = world.getStore();
 
@@ -683,8 +684,10 @@ namespace MWRender
 
         const osg::Vec2f minBound = (center - osg::Vec2f(size / 2.f, size / 2.f));
         const osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
-        const osg::Vec2i floorMinBound(std::floor(minBound.x()), std::floor(minBound.y()));
-        const osg::Vec2i ceilMaxBound(std::ceil(maxBound.x()), std::ceil(maxBound.y()));
+        const osg::Vec2i floorMinBound(
+            static_cast<int>(std::floor(minBound.x())), static_cast<int>(std::floor(minBound.y())));
+        const osg::Vec2i ceilMaxBound(
+            static_cast<int>(std::ceil(maxBound.x())), static_cast<int>(std::ceil(maxBound.y())));
         struct InstanceList
         {
             std::vector<const PagedCellRef*> mInstances;
@@ -712,7 +715,7 @@ namespace MWRender
         {
             if (size < 1.f)
             {
-                const osg::Vec3f cellPos = ref.mPosition / cellSize;
+                const osg::Vec3f cellPos = ref.mPosition / static_cast<float>(cellSize);
                 if ((minBound.x() > floorMinBound.x() && cellPos.x() < minBound.x())
                     || (minBound.y() > floorMinBound.y() && cellPos.y() < minBound.y())
                     || (maxBound.x() < ceilMaxBound.x() && cellPos.x() >= maxBound.x())
@@ -808,7 +811,8 @@ namespace MWRender
             emplaced.first->second.mInstances.push_back(&ref);
         }
 
-        const osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * getCellSize(mWorldspace);
+        const osg::Vec3f worldCenter
+            = osg::Vec3f(center.x(), center.y(), 0) * static_cast<float>(getCellSize(mWorldspace));
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
@@ -980,8 +984,8 @@ namespace MWRender
     {
         osg::Vec2f clampToCell(const osg::Vec3f& cellPos, const osg::Vec2i& cell)
         {
-            return osg::Vec2f(std::clamp<float>(cellPos.x(), cell.x(), cell.x() + 1),
-                std::clamp<float>(cellPos.y(), cell.y(), cell.y() + 1));
+            return osg::Vec2f(std::clamp(cellPos.x(), static_cast<float>(cell.x()), cell.x() + 1.f),
+                std::clamp(cellPos.y(), static_cast<float>(cell.y()), cell.y() + 1.f));
         }
 
         class CollectIntersecting
@@ -990,7 +994,7 @@ namespace MWRender
             explicit CollectIntersecting(
                 bool activeGridOnly, const osg::Vec3f& position, const osg::Vec2i& cell, ESM::RefId worldspace)
                 : mActiveGridOnly(activeGridOnly)
-                , mPosition(clampToCell(position / getCellSize(worldspace), cell))
+                , mPosition(clampToCell(position / static_cast<float>(getCellSize(worldspace)), cell))
             {
             }
 

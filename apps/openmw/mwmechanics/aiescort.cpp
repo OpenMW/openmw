@@ -29,7 +29,7 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mDuration(duration)
+        , mDuration(static_cast<float>(duration))
         , mRemainingDuration(static_cast<float>(duration))
     {
         mTargetActorRefId = actorId;
@@ -42,7 +42,7 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mDuration(duration)
+        , mDuration(static_cast<float>(duration))
         , mRemainingDuration(static_cast<float>(duration))
     {
         mTargetActorRefId = actorId;
@@ -129,7 +129,7 @@ namespace MWMechanics
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
-        escort->mData.mDuration = mDuration;
+        escort->mData.mDuration = static_cast<int16_t>(mDuration);
         escort->mTargetId = mTargetActorRefId;
         escort->mTargetActorId = mTargetActorId;
         escort->mRemainingDuration = mRemainingDuration;

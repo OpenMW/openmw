@@ -365,9 +365,9 @@ namespace MWLua
             if (!searchAreaHalfExtents.has_value())
             {
                 const bool isEsm4 = MWBase::Environment::get().getWorldScene()->getCurrentCell()->getCell()->isEsm4();
-                const float halfExtents = isEsm4
-                    ? (1 + 2 * Constants::ESM4CellGridRadius) * Constants::ESM4CellSizeInUnits
-                    : (1 + 2 * Constants::CellGridRadius) * Constants::CellSizeInUnits;
+                const float halfExtents = static_cast<float>(isEsm4
+                        ? (1 + 2 * Constants::ESM4CellGridRadius) * Constants::ESM4CellSizeInUnits
+                        : (1 + 2 * Constants::CellGridRadius) * Constants::CellSizeInUnits);
                 searchAreaHalfExtents = osg::Vec3f(halfExtents, halfExtents, halfExtents);
             }
 

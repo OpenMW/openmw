@@ -19,7 +19,7 @@ namespace Misc::Convert
 
     inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
     {
-        return osg::Vec3f(value.mX, value.mY, value.mZ);
+        return osg::Vec3f(static_cast<float>(value.mX), static_cast<float>(value.mY), static_cast<float>(value.mZ));
     }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)
@@ -32,9 +32,14 @@ namespace Misc::Convert
         return btQuaternion(quat.x(), quat.y(), quat.z(), quat.w());
     }
 
-    inline osg::Vec3f toOsg(const btVector3& vec)
+    inline osg::Vec3d toOsg(const btVector3& vec)
     {
-        return osg::Vec3f(vec.x(), vec.y(), vec.z());
+        return osg::Vec3d(vec.x(), vec.y(), vec.z());
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const btVector3& vec)
+    {
+        return toOsg(vec);
     }
 
     inline osg::Quat toOsg(const btQuaternion& quat)

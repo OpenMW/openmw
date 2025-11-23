@@ -131,8 +131,8 @@ namespace SceneUtil
         if ((mDuration >= 0) && mStartingTime == 0)
             mStartingTime = nv->getFrameStamp()->getSimulationTime();
 
-        float time = nv->getFrameStamp()->getSimulationTime();
-        int index = (int)(time * 16) % mTextures.size();
+        double time = nv->getFrameStamp()->getSimulationTime();
+        int index = static_cast<int>(time * 16) % mTextures.size();
         stateset->setTextureAttribute(
             mTexUnit, mTextures[index], osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 

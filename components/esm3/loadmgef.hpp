@@ -117,7 +117,7 @@ namespace ESM
 
         osg::Vec4f getColor() const;
 
-        enum Effects
+        enum Effects : short
         {
             WaterBreathing = 0,
             SwiftSwim = 1,

@@ -71,7 +71,7 @@ namespace MWGui
         size_t mProgress;
 
         bool mShowWallpaper;
-        float mOldIcoMin = 0.f;
+        double mOldIcoMin = 0.0;
         unsigned int mOldIcoMax = 0;
 
         MyGUI::Widget* mLoadingBox;

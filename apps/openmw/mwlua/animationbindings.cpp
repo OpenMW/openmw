@@ -166,8 +166,8 @@ namespace MWLua
                 return completion;
             return sol::nullopt;
         };
-        api["getLoopCount"] = [](const LObject& object, std::string groupname) -> sol::optional<size_t> {
-            size_t loops = 0;
+        api["getLoopCount"] = [](const LObject& object, std::string groupname) -> sol::optional<uint32_t> {
+            uint32_t loops = 0;
             if (getConstAnimationOrThrow(object)->getInfo(groupname, nullptr, nullptr, &loops))
                 return loops;
             return sol::nullopt;

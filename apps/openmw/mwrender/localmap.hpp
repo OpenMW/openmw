@@ -144,7 +144,7 @@ namespace MWRender
         static const int sFogOfWarResolution = 32;
 
         // size of a map segment (for exteriors, 1 cell)
-        float mMapWorldSize;
+        int mMapWorldSize;
 
         int mCellDistance;
 

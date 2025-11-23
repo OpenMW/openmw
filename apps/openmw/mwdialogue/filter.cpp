@@ -400,7 +400,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
         case ESM::DialogueCondition::Function_PcLuck:
         {
             ESM::RefId attribute = ESM::Attribute::indexToRefId(select.getArgument());
-            return player.getClass().getCreatureStats(player).getAttribute(attribute).getModified();
+            return static_cast<int>(player.getClass().getCreatureStats(player).getAttribute(attribute).getModified());
         }
         case ESM::DialogueCondition::Function_PcBlock:
         case ESM::DialogueCondition::Function_PcArmorer:

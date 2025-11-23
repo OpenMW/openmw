@@ -75,10 +75,10 @@ namespace MWMechanics
             costMult = iAlchemyMod;
         }
 
-        float x = 0.5 * (minMagn + maxMagn);
-        x *= 0.1 * magicEffect->mData.mBaseCost;
+        float x = 0.5f * (minMagn + maxMagn);
+        x *= 0.1f * magicEffect->mData.mBaseCost;
         x *= durationOffset + duration;
-        x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
+        x += 0.05f * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
 
         return x * costMult;
     }
@@ -90,7 +90,7 @@ namespace MWMechanics
 
         float cost = getTotalCost(spell.mEffects);
 
-        return std::round(cost);
+        return static_cast<int>(std::round(cost));
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr& actor)
@@ -99,7 +99,7 @@ namespace MWMechanics
          * Each point of enchant skill above/under 10 subtracts/adds
          * one percent of enchantment cost while minimum is 1.
          */
-        int eSkill = actor.getClass().getSkill(actor, ESM::Skill::Enchant);
+        float eSkill = actor.getClass().getSkill(actor, ESM::Skill::Enchant);
         const float result = castCost - (castCost / 100) * (eSkill - 10);
 
         return static_cast<int>((result < 1) ? 1 : result);
@@ -154,7 +154,7 @@ namespace MWMechanics
         if (potion.mData.mFlags & ESM::Potion::Autocalc)
         {
             float cost = getTotalCost(potion.mEffects, EffectCostMethod::GamePotion);
-            return std::round(cost);
+            return static_cast<int>(std::round(cost));
         }
         return potion.mData.mValue;
     }
@@ -166,9 +166,9 @@ namespace MWMechanics
             throw std::range_error("Index out of range");
 
         ESM::ENAMstruct effect;
-        effect.mEffectID = ingredient->mData.mEffectID[index];
-        effect.mSkill = ingredient->mData.mSkills[index];
-        effect.mAttribute = ingredient->mData.mAttributes[index];
+        effect.mEffectID = static_cast<int16_t>(ingredient->mData.mEffectID[index]);
+        effect.mSkill = static_cast<signed char>(ingredient->mData.mSkills[index]);
+        effect.mAttribute = static_cast<signed char>(ingredient->mData.mAttributes[index]);
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 
@@ -275,22 +275,22 @@ namespace MWMechanics
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
-            return stats.getSpells().canUsePower(spell) ? 100 : 0;
+            return stats.getSpells().canUsePower(spell) ? 100.f : 0.f;
 
         if (godmode)
-            return 100;
+            return 100.f;
 
         if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Silence).getMagnitude())
-            return 0;
+            return 0.f;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
-            return 100;
+            return 100.f;
 
         if (checkMagicka && calcSpellCost(*spell) > 0 && stats.getMagicka().getCurrent() < calcSpellCost(*spell))
-            return 0;
+            return 0.f;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
-            return 100;
+            return 100.f;
 
         float castBonus = -stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Sound).getMagnitude();
         float castChance = baseChance + castBonus;

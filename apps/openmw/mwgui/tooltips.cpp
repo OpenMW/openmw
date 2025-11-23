@@ -196,7 +196,8 @@ namespace MWGui
                         = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*>>();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
                     bool isAllowedToUse = pair.second->allowedToUseItems();
-                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false, !isAllowedToUse);
+                    tooltipSize = getToolTipViaPtr(
+                        static_cast<int>(pair.second->getItem(pair.first).mCount), false, !isAllowedToUse);
                 }
                 else if (type == "ToolTipInfo")
                 {
@@ -960,8 +961,7 @@ namespace MWGui
         const std::string& name = ESM::MagicEffect::indexToGmstString(id);
 
         std::string icon = effect->mIcon;
-        int slashPos = icon.rfind('\\');
-        icon.insert(slashPos + 1, "b_");
+        icon.insert(icon.rfind('\\') + 1, "b_");
         icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");

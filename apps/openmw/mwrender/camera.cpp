@@ -179,7 +179,7 @@ namespace MWRender
         osg::Vec3d focal = mTrackedPosition + focalOffset;
         focalOffset.z() += 10.f; // Needed to avoid camera clipping through the ceiling because
                                  // character's head can be a bit higher than the collision area.
-        float offsetLen = focalOffset.length();
+        double offsetLen = focalOffset.length();
         if (offsetLen > 0)
         {
             MWPhysics::RayCastingResult result
@@ -280,9 +280,9 @@ namespace MWRender
         osg::Vec2d delta = mFocalPointTargetOffset - mFocalPointCurrentOffset;
         if (delta.length2() > 0)
         {
-            float coef = duration * (1.0 + 5.0 / delta.length()) * mFocalPointTransitionSpeedCoef
+            double coef = duration * (1.0 + 5.0 / delta.length()) * mFocalPointTransitionSpeedCoef
                 * (1.0f - mPreviousTransitionInfluence);
-            mFocalPointCurrentOffset += delta * std::min(coef, 1.0f);
+            mFocalPointCurrentOffset += delta * std::min(coef, 1.0);
         }
         else
         {
@@ -315,7 +315,7 @@ namespace MWRender
     void Camera::setYaw(float angle, bool force)
     {
         if (!mLockYaw || force)
-            mYaw = Misc::normalizeAngle(angle);
+            mYaw = static_cast<float>(Misc::normalizeAngle(angle));
         if (force)
             mLockYaw = true;
     }
@@ -433,8 +433,9 @@ namespace MWRender
             return;
         }
 
-        mDeferredRotation.x() = Misc::normalizeAngle(-ptr.getRefData().getPosition().rot[0] - mPitch);
-        mDeferredRotation.z() = Misc::normalizeAngle(-ptr.getRefData().getPosition().rot[2] - mYaw);
+        mDeferredRotation.x()
+            = static_cast<float>(Misc::normalizeAngle(-ptr.getRefData().getPosition().rot[0] - mPitch));
+        mDeferredRotation.z() = static_cast<float>(Misc::normalizeAngle(-ptr.getRefData().getPosition().rot[2] - mYaw));
         if (!mDeferredRotationAllowed)
             mDeferredRotationDisabled = true;
     }

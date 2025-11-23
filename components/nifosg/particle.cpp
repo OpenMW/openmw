@@ -106,7 +106,7 @@ namespace NifOsg
     {
         mNormalArray = new osg::Vec3Array(1);
         mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-        (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
+        (*mNormalArray.get())[0] = osg::Vec3(0.3f, 0.3f, 0.3f);
     }
 
     ParticleSystem::ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop)
@@ -115,7 +115,7 @@ namespace NifOsg
     {
         mNormalArray = new osg::Vec3Array(1);
         mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-        (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
+        (*mNormalArray.get())[0] = osg::Vec3(0.3f, 0.3f, 0.3f);
 
         // For some reason the osgParticle constructor doesn't copy the particles
         for (int i = 0; i < copy.numParticles() - copy.numDeadParticles(); ++i)
@@ -247,9 +247,9 @@ namespace NifOsg
     {
         float size = mCachedDefaultSize;
         if (particle->getAge() < mGrowTime && mGrowTime != 0.f)
-            size *= particle->getAge() / mGrowTime;
+            size *= static_cast<float>(particle->getAge() / mGrowTime);
         if (particle->getLifeTime() - particle->getAge() < mFadeTime && mFadeTime != 0.f)
-            size *= (particle->getLifeTime() - particle->getAge()) / mFadeTime;
+            size *= static_cast<float>(particle->getLifeTime() - particle->getAge()) / mFadeTime;
         particle->setSizeRange(osgParticle::rangef(size, size));
     }
 
@@ -326,7 +326,7 @@ namespace NifOsg
                     decayFactor = std::exp(-1.f * mDecay * distance);
                 }
 
-                particle->addVelocity(mCachedWorldDirection * mForce * dt * decayFactor * magic);
+                particle->addVelocity(mCachedWorldDirection * mForce * static_cast<float>(dt) * decayFactor * magic);
 
                 break;
             }
@@ -340,7 +340,7 @@ namespace NifOsg
 
                 diff.normalize();
 
-                particle->addVelocity(diff * mForce * dt * decayFactor * magic);
+                particle->addVelocity(diff * mForce * static_cast<float>(dt) * decayFactor * magic);
                 break;
             }
         }
@@ -421,7 +421,7 @@ namespace NifOsg
                 break;
         }
 
-        particle->addVelocity(explosionDir * mStrength * decay * dt);
+        particle->addVelocity(explosionDir * mStrength * decay * static_cast<float>(dt));
     }
 
     Emitter::Emitter()
@@ -487,7 +487,7 @@ namespace NifOsg
             }
             else
             {
-                int randomIndex = Misc::Rng::rollClosedProbability() * (mTargets.size() - 1);
+                size_t randomIndex = Misc::Rng::rollDice(mTargets.size());
                 recIndex = mTargets[randomIndex];
             }
 

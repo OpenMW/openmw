@@ -263,7 +263,7 @@ namespace NifOsg
             if (mKeyFrames.size() <= 1)
                 return;
             float input = getInputValue(nv);
-            size_t i = 1;
+            unsigned int i = 1;
             for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin() + 1; it != mKeyFrames.end();
                  ++it, ++i)
             {

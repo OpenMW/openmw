@@ -549,7 +549,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_Y)
         {
             size_t index = mCharacterSelection->getIndexSelected();
-            index = wrap(index + 1, mCharacterSelection->getItemCount());
+            index = wrap(index, mCharacterSelection->getItemCount(), 1);
             mCharacterSelection->setIndexSelected(index);
             onCharacterSelected(mCharacterSelection, index);
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
