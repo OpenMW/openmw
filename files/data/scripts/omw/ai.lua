@@ -86,7 +86,7 @@ return {
         -- @return #boolean
         isFleeing = function() return self:_isFleeing() end,
 
-        --- Start new AI package.
+        --- Start a new AI package.
         -- @function [parent=#AI] startPackage
         -- @param #table options See the "AI packages" page.
         startPackage = startPackage,
@@ -128,7 +128,7 @@ return {
             end
         end,
 
-        --- Get list of targets of all packages of the given type.
+        --- Get a list of targets from all packages of the given type.
         -- @function [parent=#AI] getTargets
         -- @param #string packageType
         -- @return #list<openmw.core#GameObject>

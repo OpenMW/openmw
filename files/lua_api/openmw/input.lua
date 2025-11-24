@@ -33,12 +33,12 @@
 
 
 ---
--- Is player idle.
+-- Is the player idle.
 -- @function [parent=#input] isIdle
 -- @return #boolean
 
 ---
--- (DEPRECATED, use getBooleanActionValue) Input bindings can be changed ingame using Options/Controls menu.
+-- (DEPRECATED, use getBooleanActionValue) Input bindings can be changed in-game using Options/Controls menu.
 -- @function [parent=#input] isActionPressed
 -- @param #number actionId One of @{openmw.input#ACTION}
 -- @return #boolean
@@ -104,13 +104,13 @@
 -- @return #string
 
 ---
--- [Deprecated, moved to types.Player] Get state of a control switch. I.e. is player able to move/fight/jump/etc.
+-- [Deprecated, moved to types.Player] Get state of a control switch. I.e. is the player able to move/fight/jump/etc.
 -- @function [parent=#input] getControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @return #boolean
 
 ---
--- [Deprecated, moved to types.Player] Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
+-- [Deprecated, moved to types.Player] Set state of a control switch. I.e. forbid or allow the player to move/fight/jump/etc.
 -- @function [parent=#input] setControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
@@ -127,7 +127,7 @@
 -- @field [parent=#CONTROL_SWITCH] #ControlSwitch Looking Ability to change view direction
 -- @field [parent=#CONTROL_SWITCH] #ControlSwitch Magic Ability to use magic
 -- @field [parent=#CONTROL_SWITCH] #ControlSwitch ViewMode Ability to toggle 1st/3rd person view
--- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if player doesn't touch controls for a long time
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if the player doesn't touch controls for a long time
 
 ---
 -- [Deprecated, moved to types.Player] Values that can be used with getControlSwitch/setControlSwitch.

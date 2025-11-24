@@ -58,7 +58,7 @@ return {
             handlers[#handlers + 1] = handler
         end,
 
-        --- Add new use action handler for a type of objects.
+        --- Add new use action handler for a type of object.
         -- If `handler(object, actor, options)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#ItemUsage] addHandlerForType

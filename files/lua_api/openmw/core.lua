@@ -7,7 +7,7 @@
 
 
 ---
--- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed. See the actual value at the top of the page.
+-- The revision of OpenMW's Lua API. It is an integer that is incremented every time the API is changed. See the actual value at the top of the page.
 -- @field [parent=#core] #number API_REVISION
 
 ---
@@ -160,8 +160,8 @@
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
 -- @extends #userdata
--- @field #string id A unique id of this object (not record id), can be used as a key in a table.
--- @field #string contentFile Lower cased file name of the content file that defines this object; nil for dynamically created objects.
+-- @field #string id The unique id of this object (not record id), can be used as a key in a table.
+-- @field #string contentFile Lowercase file name of the content file that defines this object; nil for dynamically created objects.
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field #number scale Object scale.
@@ -174,7 +174,7 @@
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.
--- @field #string globalVariable Global Variable associated with this object(read only).
+-- @field #string globalVariable Global Variable associated with this object (read only).
 
 
 ---
@@ -193,7 +193,7 @@
 -- @return #boolean
 
 ---
--- Send local event to the object.
+-- Send a local event to the object.
 -- @function [parent=#GameObject] sendEvent
 -- @param self
 -- @param #string eventName
@@ -208,7 +208,7 @@
 -- object:activateBy(self)
 
 ---
--- Add new local script to the object.
+-- Add a new local script to the object.
 -- Can be called only from a global script. Script should be specified in a content
 -- file (omwgame/omwaddon/omwscripts) with a CUSTOM flag. Scripts can not be attached to Statics.
 -- @function [parent=#GameObject] addScript
@@ -239,7 +239,7 @@
 -- @param #number scale Scale desired in game.
 
 ---
--- Moves object to given cell and position.
+-- Moves the object to given cell and position.
 -- Can be called only from a global script.
 -- The effect is not immediate: the position will be updated only in the next
 -- frame. Can be called only from a global script. Enables object if it was disabled.
@@ -252,13 +252,13 @@
 -- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Transform} rotation.
 
 ---
--- Either table with options or @{openmw.util#Vector3} rotation.
+-- Either a table with options or a @{openmw.util#Vector3} rotation.
 -- @type TeleportOptions
 -- @field openmw.util#Transform rotation New rotation; if missing, then the current rotation is used.
 -- @field #boolean onGround If true, adjust destination position to the ground.
 
 ---
--- Moves object into a container or an inventory. Enables if was disabled.
+-- Moves an object into a container or an inventory. Enables if was disabled.
 -- Can be called only from a global script.
 -- @function [parent=#GameObject] moveInto
 -- @param self
@@ -300,7 +300,7 @@
 -- A cell of the game world.
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
--- @field #string displayName Human-readable cell name (takes into account *.cel file localizations). Can be empty string.
+-- @field #string displayName Human-readable cell name (takes into account *.cel file localizations). Can be an empty string.
 -- @field #string id Unique record ID of the cell, based on cell name for interiors and the worldspace for exteriors, or the formID of the cell for ESM4 cells.
 -- @field #string region Region of the cell (can be nil).
 -- @field #boolean isExterior Whether the cell is an exterior cell. "Exterior" means grid of cells where the player can seamless walk from one cell to another without teleports. QuasiExterior (interior with sky) is not an exterior.
@@ -429,14 +429,14 @@
 -- @type Inventory
 
 ---
--- The number of items with given recordId.
+-- The number of items with the given recordId.
 -- @function [parent=#Inventory] countOf
 -- @param self
 -- @param #string recordId
 -- @return #number
 
 ---
--- Get all items of given type from the inventory.
+-- Get all items of the given type from the inventory.
 -- @function [parent=#Inventory] getAll
 -- @param self
 -- @param type (optional) items type (see @{openmw.types#types})
@@ -449,7 +449,7 @@
 -- local weapons = playerInventory:getAll(types.Weapon)
 
 ---
--- Get first item with given recordId from the inventory. Returns nil if not found.
+-- Get first item with the given recordId from the inventory. Returns nil if not found.
 -- @function [parent=#Inventory] find
 -- @param self
 -- @param #string recordId
@@ -470,7 +470,7 @@
 -- @usage inventory:isResolved()
 
 ---
--- Get all items with given recordId from the inventory.
+-- Get all items with the given recordId from the inventory.
 -- @function [parent=#Inventory] findAll
 -- @param self
 -- @param #string recordId
@@ -779,7 +779,7 @@
 -- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Effect id string
 -- @field #string name Localized name of the effect
--- @field #number magnitude current magnitude of the effect. Will be set to 0 when effect is removed or expires.
+-- @field #number magnitude Current magnitude of the effect. Will be set to 0 when the effect is removed or expires.
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
 
@@ -854,7 +854,7 @@
 -- @usage core.sound.stopSoundFile("Sound\\test.mp3", object);
 
 ---
--- Check if sound is playing on given object
+-- Check if a sound is playing on the given object
 -- @function [parent=#Sound] isSoundPlaying
 -- @param #string soundId ID of Sound record to check
 -- @param #GameObject object Object on which we want to check sound
@@ -862,7 +862,7 @@
 -- @usage local isPlaying = core.sound.isSoundPlaying("shock bolt", object);
 
 ---
--- Check if sound file is playing on given object
+-- Check if a sound file is playing on the given object
 -- @function [parent=#Sound] isSoundFilePlaying
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to check sound

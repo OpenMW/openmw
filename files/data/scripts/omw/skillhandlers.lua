@@ -7,7 +7,7 @@ local NPC = require('openmw.types').NPC
 local Skill = core.stats.Skill
 
 ---
--- Table of skill use types defined by morrowind.
+-- Table of skill use types defined by Morrowind.
 -- Each entry corresponds to an index into the available skill gain values
 -- of a @{openmw.core#SkillRecord}
 -- @type SkillUseType
@@ -188,7 +188,7 @@ return {
         -- If `handler(skillid, source, options)` returns false, other handlers (including the default skill level up handler) 
         -- will be skipped. Where skillid and source are the parameters passed to @{#SkillProgression.skillLevelUp}, and options is
         -- a modifiable table of skill level up values, and can be modified to change the behavior of later handlers. 
-        -- These values are calculated based on vanilla mechanics. Setting any value to nil will cause that mechanic to be skipped. By default contains these values:
+        -- These values are calculated based on vanilla mechanics. Setting any value to nil will cause that mechanic to be skipped. By default it contains these values:
         --
         --   * `skillIncreaseValue` - The numeric amount of skill levels gained. By default this is 1, except when the source is jail in which case it will instead be -1 for all skills except sneak and security.
         --   * `levelUpProgress` - The numeric amount of level up progress gained.
@@ -216,7 +216,7 @@ return {
         
         --- Trigger a skill use, activating relevant handlers
         -- @function [parent=#SkillProgression] skillUsed
-        -- @param #string skillid The if of the skill that was used
+        -- @param #string skillid The ID of the skill that was used
         -- @param options A table of parameters. Must contain one of `skillGain` or `useType`. It's best to always include `useType` if applicable, even if you set `skillGain`, as it may be used
         -- by handlers to make decisions. See the addSkillUsedHandler example at the top of this page.
         --

@@ -58,7 +58,7 @@ return {
         -- @field [parent=#Activation] #number version
         version = 0,
 
-        --- Add new activation handler for a specific object.
+        --- Add a new activation handler for a specific object.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#Activation] addHandlerForObject
@@ -73,7 +73,7 @@ return {
             handlers[#handlers + 1] = handler
         end,
 
-        --- Add new activation handler for a type of objects.
+        --- Add a new activation handler for a type of object.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#Activation] addHandlerForType

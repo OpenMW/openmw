@@ -250,16 +250,16 @@ return {
         -- @field [parent=#Camera] #number version
         version = 1,
 
-        --- Return primary mode (MODE.FirstPerson or MODE.ThirdPerson).
+        --- Return the primary mode (MODE.FirstPerson or MODE.ThirdPerson).
         -- @function [parent=#Camera] getPrimaryMode
         -- @return #number @{openmw.camera#MODE}
         getPrimaryMode = function() return primaryMode end,
 
-        --- Get base third person distance (without applying angle and speed modifiers).
+        --- Get the base third person distance (without applying angle and speed modifiers).
         -- @function [parent=#Camera] getBaseThirdPersonDistance
         -- @return #number
         getBaseThirdPersonDistance = function() return third_person.baseDistance end,
-        --- Set base third person distance
+        --- Set the base third person distance
         -- @function [parent=#Camera] setBaseThirdPersonDistance
         -- @param #number value
         setBaseThirdPersonDistance = function(v) third_person.baseDistance = v end,

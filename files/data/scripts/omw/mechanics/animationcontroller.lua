@@ -100,7 +100,7 @@ return {
         -- @param #table options The table of play options that will be passed to @{openmw.animation#playBlended}
         playBlendedAnimation = playBlendedAnimation,
 
-        --- Add new playBlendedAnimation handler for this actor
+        --- Add a new playBlendedAnimation handler for this actor
         -- If `handler(groupname, options)` returns false, other handlers for
         -- the call will be skipped.
         -- @function [parent=#AnimationController] addPlayBlendedAnimationHandler
@@ -109,13 +109,13 @@ return {
             playBlendedHandlers[#playBlendedHandlers + 1] = handler
         end,
 
-        --- Add new text key handler for this actor
+        --- Add a new text key handler for this actor
         -- While playing, some animations emit text key events. Register a handle to listen for all
         -- text key events associated with this actor's animations.
         -- If `handler(groupname, key)` returns false, other handlers for
         -- the call will be skipped.
         -- @function [parent=#AnimationController] addTextKeyHandler
-        -- @param #string groupname Name of the animation group to listen to keys for. If the empty string or nil, all keys will be received
+        -- @param #string groupname Name of the animation group to listen to keys for. If it is an empty string or nil, all keys will be received
         -- @param #function handler The handler.
         addTextKeyHandler = function(groupname, handler)
             if not groupname then
