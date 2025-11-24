@@ -68,15 +68,15 @@ end
 
 local function skillLevelUpHandler(skillid, source, params)
     local skillStat = NPC.stats.skills[skillid](self)
-    if (skillStat.base >= 100 and params.skillIncreaseValue > 0) or 
-        (skillStat.base <= 0 and params.skillIncreaseValue < 0) then 
-        return false 
+    if (skillStat.base >= 100 and params.skillIncreaseValue > 0) or
+        (skillStat.base <= 0 and params.skillIncreaseValue < 0) then
+        return false
     end
 
     if params.skillIncreaseValue then
         skillStat.base = skillStat.base + params.skillIncreaseValue
     end
-    
+
     local levelStat = Actor.stats.level(self)
     if params.levelUpProgress then
         levelStat.progress = levelStat.progress + params.levelUpProgress
@@ -106,11 +106,11 @@ local function skillLevelUpHandler(skillid, source, params)
         end
 
         ui.showMessage(message, { showInDialogue = false })
-        
+
         if levelStat.progress >= core.getGMST('iLevelUpTotal') then
             ui.showMessage('#{sLevelUpMsg}', { showInDialogue = false })
         end
-        
+
         if not source or source == I.SkillProgression.SKILL_INCREASE_SOURCES.Usage then skillStat.progress = 0 end
     end
 end
@@ -119,14 +119,14 @@ local function jailTimeServed(days)
     if not days or days <= 0 then
         return
     end
-    
+
     local oldSkillLevels = {}
     local skillByNumber = {}
     for skillid, skillStat in pairs(NPC.stats.skills) do
         oldSkillLevels[skillid] = skillStat(self).base
         skillByNumber[#skillByNumber+1] = skillid
     end
-    
+
     math.randomseed(core.getSimulationTime())
     for day=1,days do
         local skillid = skillByNumber[math.random(#skillByNumber)]
@@ -151,7 +151,7 @@ local function jailTimeServed(days)
             message = message..'\n'..string.format(skillMsg, skillRecord.name, skillStat(self).base)
         end
     end
-    
+
     I.UI.showInteractiveMessage(message)
 end
 

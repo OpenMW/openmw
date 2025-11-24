@@ -14,7 +14,7 @@ local onHitHandlers = {}
 
 ---
 -- @type AttackInfo
--- @field [parent=#AttackInfo] #table damage A table mapping stat name (health, fatigue, or magicka) to number. For example, {health = 50, fatigue = 10} will cause 50 damage to health and 10 to fatigue (before adjusting for armor and difficulty). This field is ignored for failed attacks.
+-- @field [parent=#AttackInfo] #table damage A table mapping a stat name (health, fatigue, or magicka) to a number. For example, {health = 50, fatigue = 10} will cause 50 damage to health and 10 to fatigue (before adjusting for armor and difficulty). This field is ignored for failed attacks.
 -- @field [parent=#AttackInfo] #number strength A number between 0 and 1 representing the attack strength. This field is ignored for failed attacks.
 -- @field [parent=#AttackInfo] #boolean successful Whether the attack was successful or not.
 -- @field [parent=#AttackInfo] #AttackSourceType sourceType What class of attack this is.
@@ -48,7 +48,7 @@ return {
 
         --- Add new onHit handler for this actor
         -- If `handler(attack)` returns false, other handlers for
-        -- the call will be skipped. where attack is the same @{#AttackInfo} passed to #Combat.onHit
+        -- the call will be skipped. Where attack is the same @{#AttackInfo} passed to #Combat.onHit
         -- @function [parent=#Combat] addOnHitHandler
         -- @param #function handler The handler.
         addOnHitHandler = function(handler)
@@ -64,7 +64,7 @@ return {
         -- @return #number Damage adjusted for armor
         adjustDamageForArmor = function(damage, actor) return damage end,
 
-        --- Calculates a difficulty multiplier based on current difficulty settings
+        --- Calculates a difficulty multiplier based on the current difficulty settings
         -- and adjusts damage accordingly. Has no effect if both this actor and the
         -- attacker are NPCs, or if both are Players.
         -- @function [parent=#Combat] adjustDamageForDifficulty
