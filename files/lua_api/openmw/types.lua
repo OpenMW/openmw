@@ -193,7 +193,7 @@
 -- @param openmw.core#Spell spell Spell (can be nil)
 
 ---
--- Clears the actor's selected castable(spell or enchanted item)
+-- Clears the actor's selected castable (spell or enchanted item)
 -- @function [parent=#Actor] clearSelectedCastable
 -- @param openmw.core#GameObject actor
 
@@ -251,7 +251,7 @@
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
 
---- (Note that using this function will override and conflict with all other sources of this effect, you probably want to use @{#ActorActiveEffects.modify} instead, this function is provided for mwscript parity only)
+--- (Note that using this function will override and conflict with all other sources of this effect. You probably want to use @{#ActorActiveEffects.modify} instead, this function is provided for mwscript parity only)
 -- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value.
 -- Note that although the modification is permanent, the magnitude will not stay equal to the value if any active spells with this effects are added/removed.
 -- Also see the notes on @{#ActorActiveEffects.modify}
@@ -1000,7 +1000,7 @@
 ---
 -- Expel NPC from given faction.
 -- Throws an exception if there is no such faction.
--- Note: expelled NPC still keeps his rank and reputation in faction, he just get an additonal flag for given faction.
+-- Note: the expelled NPC still keeps their rank and reputation in the faction, they just get an additional flag for the given faction.
 -- @function [parent=#NPC] expel
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
@@ -1459,7 +1459,7 @@
 -- @field #number enchantCapacity
 
 ---
--- Creates a @{#ArmorRecord} without adding it to the world database, for the armor to appear correctly on the body, make sure to use a template as described below.
+-- Creates an @{#ArmorRecord} without adding it to the world database, for the armor to appear correctly on the body, make sure to use a template as described below.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Armor] createRecordDraft
 -- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord, with an additional field `template` that accepts a @{#ArmorRecord} as a base.
@@ -2167,7 +2167,7 @@
 -- @field #string mwscript MWScript on this activator (can be nil)
 
 ---
--- Creates a @{#ActivatorRecord} without adding it to the world database.
+-- Creates an @{#ActivatorRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Activator] createRecordDraft
 -- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord, with an optional field `template` that accepts a @{#ActivatorRecord} as a base.

@@ -57,14 +57,14 @@
 -- @type StorageSection
 
 ---
--- Get value by a string key; if value is a table makes it readonly.
+-- Get a value by a string key; if the value is a table it is readonly.
 -- @function [parent=#StorageSection] get
 -- @param self
 -- @param #string key
 -- @return #any
 
 ---
--- Get value by a string key; if value is a table returns a copy.
+-- Get a value by a string key; if the value is a table it returns a copy.
 -- @function [parent=#StorageSection] getCopy
 -- @param self
 -- @param #string key
@@ -105,8 +105,8 @@
 -- myModData:removeOnExit()
 
 ---
--- Set the life time of given storage section.
--- New sections initially have a Persistent life time.
+-- Set the lifetime of given storage section.
+-- New sections initially have a Persistent lifetime.
 -- This function can be used for a global storage section from a global script or for a player storage section from a player or menu script.
 -- @function [parent=#StorageSection] setLifeTime
 -- @param self
@@ -117,7 +117,7 @@
 -- myModData:setLifeTime(storage.LIFE_TIME.Temporary)
 
 ---
--- Set value by a string key; can not be used for global storage from a local script.
+-- Set a value by a string key; can not be used for global storage from a local script.
 -- @function [parent=#StorageSection] set
 -- @param self
 -- @param #string key
