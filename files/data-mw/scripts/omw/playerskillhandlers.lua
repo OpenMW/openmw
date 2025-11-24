@@ -8,6 +8,7 @@ local NPC = types.NPC
 local Actor = types.Actor
 local ui = require('openmw.ui')
 local auxUtil = require('openmw_aux.util')
+local mechanicsL10n = core.l10n('Mechanics')
 
 local function tableHasValue(table, value)
     for _, v in pairs(table) do
@@ -99,7 +100,7 @@ local function skillLevelUpHandler(skillid, source, params)
 
         ambient.playSound("skillraise")
 
-        local message = string.format(core.getGMST('sNotifyMessage39'),skillRecord.name,skillStat.base)
+        local message = mechanicsL10n('SkillIncreasedTo', { skill = skillRecord.name, level = skillStat.base })
 
         if source == I.SkillProgression.SKILL_INCREASE_SOURCES.Book then
             message = '#{sBookSkillMessage}\n'..message
@@ -134,21 +135,16 @@ local function jailTimeServed(days)
         I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Jail)
     end
 
-    local message = ''
-    if days == 1 then
-        message = string.format(core.getGMST('sNotifyMessage42'), days)
-    else
-        message = string.format(core.getGMST('sNotifyMessage43'), days)
-    end
+    local message = mechanicsL10n('ReleasedFromPrison', { days = days });
     for skillid, skillStat in pairs(NPC.stats.skills) do
         local diff = skillStat(self).base - oldSkillLevels[skillid]
         if diff ~= 0 then
-            local skillMsg = core.getGMST('sNotifyMessage39')
+            local skillMsg = 'SkillIncreasedTo'
             if diff < 0 then
-                skillMsg = core.getGMST('sNotifyMessage44')
+                skillMsg = 'SkillDecreasedTo'
             end
             local skillRecord = Skill.record(skillid)
-            message = message..'\n'..string.format(skillMsg, skillRecord.name, skillStat(self).base)
+            message = message..'\n'..mechanicsL10n(skillMsg, { skill = skillRecord.name, level = skillStat(self).base })
         end
     end
 
