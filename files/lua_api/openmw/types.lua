@@ -1089,6 +1089,17 @@
 -- @return #boolean
 
 ---
+-- Turn an NPC or player into werewolf form or back to normal form.
+-- Can only be used in global scripts or on self in local scripts.
+-- @function [parent=#NPC] setWerewolf
+-- @param openmw.core#GameObject actor The NPC or player to transform
+-- @param #boolean werewolf True to transform into werewolf, false to transform back to normal
+-- @usage -- Transform player into werewolf in a global script
+-- player.type.setWerewolf(player, true)
+-- @usage -- Transform self back to normal in a local script
+-- self.type.setWerewolf(self, false)
+
+---
 -- Returns the read-only @{#NpcRecord} of an NPC
 -- @function [parent=#NPC] record
 -- @param #any objectOrRecordId

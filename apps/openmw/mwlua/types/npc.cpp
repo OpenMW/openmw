@@ -19,6 +19,7 @@
 
 #include "../classbindings.hpp"
 #include "../localscripts.hpp"
+#include "../luamanagerimp.hpp"
 #include "../racebindings.hpp"
 #include "../stats.hpp"
 
@@ -244,6 +245,20 @@ namespace MWLua
                 return cls.getNpcStats(o.ptr()).isWerewolf();
             else
                 throw std::runtime_error("NPC or Player expected");
+        };
+
+        npc["setWerewolf"] = [context](const Object& obj, bool werewolf) -> void {
+            if (dynamic_cast<const LObject*>(&obj) && !dynamic_cast<const SelfObject*>(&obj))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr& ptr = obj.ptr();
+            if (!ptr.getClass().isNpc())
+                throw std::runtime_error("NPC or Player expected");
+            context.mLuaManager->addAction(
+                [obj = Object(ptr), werewolf] {
+                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(obj.ptr(), werewolf);
+                },
+                "setWerewolfAction");
         };
 
         npc["getDisposition"] = [](const Object& o, const Object& player) -> int {
