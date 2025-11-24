@@ -116,7 +116,7 @@ namespace L10n
             }
 
         protected:
-            void visitedPlaceholder(Placeholder, char, int, int, Notation) override
+            void visitedPlaceholder(Placeholder, int, int, int, Notation) override
             {
                 mOut += '{';
                 if (mVariableIndex < mVariableNames.size() && !mVariableNames[mVariableIndex].empty())
