@@ -2,7 +2,6 @@
 
 namespace Nif
 {
-
     void NiExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
@@ -17,18 +16,17 @@ namespace Nif
         nif->getSizedStrings(mData, nif->get<uint32_t>());
     }
 
+    void NiTextKeyExtraData::TextKey::read(NIFStream* nif)
+    {
+        nif->read(mTime);
+        nif->read(mText);
+    }
+
     void NiTextKeyExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
 
-        uint32_t numKeys;
-        nif->read(numKeys);
-        mList.resize(numKeys);
-        for (TextKey& key : mList)
-        {
-            nif->read(key.mTime);
-            nif->read(key.mText);
-        }
+        nif->readVectorOfRecords<uint32_t>(mList);
     }
 
     void NiVertWeightsExtraData::read(NIFStream* nif)
@@ -66,20 +64,11 @@ namespace Nif
     {
         Extra::read(nif);
 
-        uint32_t num;
-        nif->read(num);
+        const uint32_t num = nif->get<uint32_t>();
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-        {
-            mLegacyMarkers.resize(num);
-            for (auto& marker : mLegacyMarkers)
-                marker.read(nif);
-        }
+            nif->readVectorOfRecords(num, mLegacyMarkers);
         else
-        {
-            mMarkers.resize(num);
-            for (auto& marker : mMarkers)
-                marker.read(nif);
-        }
+            nif->readVectorOfRecords(num, mMarkers);
     }
 
     void BSInvMarker::read(NIFStream* nif)

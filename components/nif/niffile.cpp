@@ -600,7 +600,9 @@ namespace Nif
         if (hasUserVersion)
             nif.read(mUserVersion);
 
-        mRecords.resize(nif.get<std::uint32_t>());
+        const std::uint32_t recordsCount = nif.get<std::uint32_t>();
+
+        mRecords.reserve(recordsCount);
 
         // Bethesda stream header
         {
@@ -646,14 +648,14 @@ namespace Nif
             else
             {
                 nif.getSizedStrings(recTypes, nif.get<std::uint16_t>());
-                nif.readVector(recTypeIndices, mRecords.size());
+                nif.readVector(recTypeIndices, recordsCount);
             }
         }
 
         if (hasRecordSizes) // Record sizes
         {
             std::vector<std::uint32_t> recSizes; // Currently unused
-            nif.readVector(recSizes, mRecords.size());
+            nif.readVector(recSizes, recordsCount);
         }
 
         if (hasStringTable)
@@ -670,11 +672,11 @@ namespace Nif
             nif.readVector(groups, nif.get<std::uint32_t>());
         }
 
-        for (std::size_t i = 0; i < mRecords.size(); i++)
+        for (std::size_t i = 0; i < recordsCount; i++)
         {
             std::unique_ptr<Record> r;
 
-            std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.get<std::string>();
+            std::string rec = hasRecTypeListings ? recTypes.at(recTypeIndices[i]) : nif.get<std::string>();
             if (rec.empty())
             {
                 std::stringstream error;
@@ -701,22 +703,23 @@ namespace Nif
             r->recName = std::move(rec);
             r->recIndex = static_cast<unsigned>(i);
             r->read(&nif);
-            mRecords[i] = std::move(r);
+            mRecords.push_back(std::move(r));
         }
 
         // Determine which records are roots
-        mRoots.resize(nif.get<uint32_t>());
-        for (std::size_t i = 0; i < mRoots.size(); i++)
+        const std::uint32_t rootsCount = nif.get<uint32_t>();
+        mRoots.reserve(rootsCount);
+        for (std::size_t i = 0; i < rootsCount; i++)
         {
             std::int32_t idx;
             nif.read(idx);
             if (idx >= 0 && static_cast<std::size_t>(idx) < mRecords.size())
             {
-                mRoots[i] = mRecords[idx].get();
+                mRoots.push_back(mRecords[idx].get());
             }
             else
             {
-                mRoots[i] = nullptr;
+                mRoots.push_back(nullptr);
                 Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
                                     << ". File: " << mFilename;
             }

@@ -555,11 +555,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->read(mScale);
         readRecordList(nif, mData);
-        uint32_t numFilters;
-        nif->read(numFilters);
-        mHavokFilters.resize(numFilters);
-        for (HavokFilter& filter : mHavokFilters)
-            filter.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mHavokFilters);
     }
 
     void bhkNiTriStripsShape::post(Reader& nif)

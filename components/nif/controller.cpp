@@ -8,6 +8,13 @@
 
 namespace Nif
 {
+    namespace
+    {
+        void readSkinnedShapeGroup(NIFStream& stream, std::vector<NiBoneLODController::SkinInfo>& value)
+        {
+            stream.readVectorOfRecords<uint32_t>(value);
+        }
+    }
 
     void NiTimeController::read(NIFStream* nif)
     {
@@ -84,11 +91,10 @@ namespace Nif
             nif->read(mAccumRootName);
             mTextKeys.read(nif);
         }
-        mControlledBlocks.resize(nif->get<uint32_t>());
+        const uint32_t size = nif->get<uint32_t>();
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
             nif->read(mArrayGrowBy);
-        for (ControlledBlock& block : mControlledBlocks)
-            block.read(nif);
+        nif->readVectorOfRecords(size, mControlledBlocks);
     }
 
     void NiSequence::post(Reader& nif)
@@ -122,13 +128,8 @@ namespace Nif
             mStringPalette.read(nif);
         else if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() >= 24)
         {
-            if (nif->getBethVersion() >= 29)
-                mAnimNotesList.resize(nif->get<uint16_t>());
-            else
-                mAnimNotesList.resize(1);
-
-            for (auto& notes : mAnimNotesList)
-                notes.read(nif);
+            const uint16_t size = nif->getBethVersion() >= 29 ? nif->get<uint16_t>() : 1;
+            nif->readVectorOfRecords(size, mAnimNotesList);
         }
     }
 
@@ -482,29 +483,27 @@ namespace Nif
         mData.post(nif);
     }
 
+    void NiBoneLODController::SkinInfo::read(NIFStream* nif)
+    {
+        mShape.read(nif);
+        mSkin.read(nif);
+    }
+
     void NiBoneLODController::read(NIFStream* nif)
     {
         NiTimeController::read(nif);
 
         nif->read(mLOD);
-        mNodeGroups.resize(nif->get<uint32_t>());
+        const uint32_t nodeGroupsCount = nif->get<uint32_t>();
+        mNodeGroups.reserve(nodeGroupsCount);
         nif->read(mNumNodeGroups);
-        for (NiAVObjectList& group : mNodeGroups)
-            readRecordList(nif, group);
+        for (uint32_t i = 0; i < nodeGroupsCount; ++i)
+            readRecordList(nif, mNodeGroups.emplace_back());
 
         if (nif->getBethVersion() != 0 || nif->getVersion() < NIFStream::generateVersion(4, 2, 2, 0))
             return;
 
-        mSkinnedShapeGroups.resize(nif->get<uint32_t>());
-        for (std::vector<SkinInfo>& group : mSkinnedShapeGroups)
-        {
-            group.resize(nif->get<uint32_t>());
-            for (SkinInfo& info : group)
-            {
-                info.mShape.read(nif);
-                info.mSkin.read(nif);
-            }
-        }
+        nif->readVectorOfRecords<uint32_t>(readSkinnedShapeGroup, mSkinnedShapeGroups);
         readRecordList(nif, mShapeGroups);
     }
 
@@ -892,9 +891,7 @@ namespace Nif
 
     void BSTreadTransfInterpolator::read(NIFStream* nif)
     {
-        mTransforms.resize(nif->get<uint32_t>());
-        for (BSTreadTransform& transform : mTransforms)
-            transform.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mTransforms);
         mData.read(nif);
     }
 

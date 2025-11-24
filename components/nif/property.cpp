@@ -73,10 +73,12 @@ namespace Nif
         if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 1))
             mApplyMode = static_cast<ApplyMode>(nif->get<uint32_t>());
 
-        mTextures.resize(nif->get<uint32_t>());
-        for (size_t i = 0; i < mTextures.size(); i++)
+        const uint32_t texturesSize = nif->get<uint32_t>();
+
+        mTextures.reserve(texturesSize);
+        for (size_t i = 0; i < texturesSize; i++)
         {
-            mTextures[i].read(nif);
+            mTextures.emplace_back().read(nif);
 
             if (i == 5 && mTextures[5].mEnabled)
             {
@@ -89,13 +91,16 @@ namespace Nif
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
         {
-            mShaderTextures.resize(nif->get<uint32_t>());
-            mShaderIds.resize(mShaderTextures.size());
-            for (size_t i = 0; i < mShaderTextures.size(); i++)
+            const uint32_t sharedTexturesSize = nif->get<uint32_t>();
+            mShaderTextures.reserve(sharedTexturesSize);
+            mShaderIds.reserve(sharedTexturesSize);
+            for (size_t i = 0; i < sharedTexturesSize; i++)
             {
-                mShaderTextures[i].read(nif);
+                mShaderTextures.emplace_back().read(nif);
+                uint32_t id = 0;
                 if (mShaderTextures[i].mEnabled)
-                    nif->read(mShaderIds[i]);
+                    nif->read(id);
+                mShaderIds.push_back(id);
             }
         }
     }
@@ -346,9 +351,10 @@ namespace Nif
                     mTranslucency.read(nif);
                 if (nif->get<uint8_t>() != 0)
                 {
-                    mTextureArrays.resize(nif->get<uint32_t>());
-                    for (std::vector<std::string>& textureArray : mTextureArrays)
-                        nif->getSizedStrings(textureArray, nif->get<uint32_t>());
+                    const uint32_t size = nif->get<uint32_t>();
+                    mTextureArrays.reserve(size);
+                    for (uint32_t i = 0; i < size; ++i)
+                        nif->getSizedStrings(mTextureArrays.emplace_back(), nif->get<uint32_t>());
                 }
             }
             if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)

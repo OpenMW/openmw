@@ -232,6 +232,8 @@ namespace Nif
         {
             float mMinRange;
             float mMaxRange;
+
+            void read(NIFStream* nif);
         };
 
         osg::Vec3f mLODCenter;
