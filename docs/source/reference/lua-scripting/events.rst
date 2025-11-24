@@ -133,7 +133,7 @@ Example:
     if item then
         -- Reduce condition by 1
         -- Note that actor should be included, if applicable, to allow forcibly unequipping items whose condition is reduced to 0
-        core:sendGlobalEvent('ModifyItemCondition', {actor = self, item = item, amount: -1})
+        core.sendGlobalEvent('ModifyItemCondition', {actor = self, item = item, amount = -1})
     end
 
 UI events
