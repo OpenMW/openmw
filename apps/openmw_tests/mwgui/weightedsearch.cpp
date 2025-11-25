@@ -18,6 +18,10 @@ namespace MWGui
         {
             EXPECT_EQ(weightedSearch(std::string(100, 'x'), std::vector<std::string>{}), 1);
         }
+        TEST(MWGuiWeightedSearchTests, weightedSearchShouldReturnTheSumOfAllPatternsWithAtLeastOneMatch)
+        {
+            EXPECT_EQ(weightedSearch(std::string("xyyzzz"), std::vector<std::string>{ "x", "y", "z" }), 3);
+        }
         TEST(MWGuiWeightedSearchTests, generatePatternArrayShouldReturnEmptyArrayIfInputIsEmptyOrOnlySpaces)
         {
             EXPECT_THAT(generatePatternArray(std::string("")), testing::IsEmpty());
