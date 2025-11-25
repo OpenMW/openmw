@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <shared_mutex>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
@@ -65,6 +66,7 @@ namespace L10n
         // icu::Locale isn't hashable (or comparable), so we use the string form instead, which is canonicalized
         mutable StringMap<StringMap<icu::MessageFormat>> mBundles;
         mutable StringMap<GmstMessageFormat> mGmsts;
+        mutable std::shared_mutex mMutex;
         const icu::Locale mFallbackLocale;
         std::vector<std::string> mPreferredLocaleStrings;
         std::vector<icu::Locale> mPreferredLocales;

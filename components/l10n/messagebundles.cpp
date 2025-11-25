@@ -2,6 +2,7 @@
 
 #include <charconv>
 #include <cstring>
+#include <mutex>
 #include <optional>
 #include <span>
 
@@ -257,17 +258,24 @@ namespace L10n
 
     const icu::MessageFormat* MessageBundles::findMessage(std::string_view key, std::string_view localeName) const
     {
-        auto iter = mBundles.find(localeName);
-        if (iter != mBundles.end())
+        std::shared_lock sharedLock(mMutex);
         {
-            auto message = iter->second.find(key);
-            if (message != iter->second.end())
+            auto iter = mBundles.find(localeName);
+            if (iter != mBundles.end())
             {
-                return &(message->second);
+                auto message = iter->second.find(key);
+                if (message != iter->second.end())
+                {
+                    return &(message->second);
+                }
             }
         }
         if (localeName == "gmst" && mGmstLoader)
         {
+            if (!mGmsts.contains(key))
+                return nullptr;
+            sharedLock.unlock();
+            std::unique_lock lock(mMutex);
             auto found = mGmsts.find(key);
             if (found != mGmsts.end())
             {
@@ -275,6 +283,7 @@ namespace L10n
                 mGmsts.erase(found);
                 if (message)
                 {
+                    auto iter = mBundles.find(localeName);
                     if (iter == mBundles.end())
                         iter = mBundles.emplace(localeName, StringMap<icu::MessageFormat>()).first;
                     return &iter->second.emplace(key, *message).first->second;
