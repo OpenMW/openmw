@@ -21,12 +21,12 @@ namespace MWMechanics
 {
     struct EffectKey
     {
-        int mId;
+        ESM::RefId mId;
         ESM::RefId mArg; // skill or ability
 
         EffectKey();
 
-        EffectKey(int id, ESM::RefId arg = {})
+        EffectKey(ESM::RefId id, ESM::RefId arg = {})
             : mId(id)
             , mArg(arg)
         {

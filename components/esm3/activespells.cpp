@@ -13,60 +13,72 @@ namespace ESM
 {
     namespace
     {
-        bool isSummon(int effectId)
+        bool isSummon(const RefId& effectId)
         {
-            switch (effectId)
+            static const std::array summonEffects
             {
-                case MagicEffect::SummonScamp:
-                case MagicEffect::SummonClannfear:
-                case MagicEffect::SummonDaedroth:
-                case MagicEffect::SummonDremora:
-                case MagicEffect::SummonAncestralGhost:
-                case MagicEffect::SummonSkeletalMinion:
-                case MagicEffect::SummonBonewalker:
-                case MagicEffect::SummonGreaterBonewalker:
-                case MagicEffect::SummonBonelord:
-                case MagicEffect::SummonWingedTwilight:
-                case MagicEffect::SummonHunger:
-                case MagicEffect::SummonGoldenSaint:
-                case MagicEffect::SummonFlameAtronach:
-                case MagicEffect::SummonFrostAtronach:
-                case MagicEffect::SummonStormAtronach:
-                case MagicEffect::SummonCenturionSphere:
-                case MagicEffect::SummonFabricant:
-                case MagicEffect::SummonWolf:
-                case MagicEffect::SummonBear:
-                case MagicEffect::SummonBonewolf:
-                case MagicEffect::SummonCreature04:
-                case MagicEffect::SummonCreature05:
+                MagicEffect::SummonScamp,
+                MagicEffect::SummonClannfear,
+                MagicEffect::SummonDaedroth,
+                MagicEffect::SummonDremora,
+                MagicEffect::SummonAncestralGhost,
+                MagicEffect::SummonSkeletalMinion,
+                MagicEffect::SummonBonewalker,
+                MagicEffect::SummonGreaterBonewalker,
+                MagicEffect::SummonBonelord,
+                MagicEffect::SummonWingedTwilight,
+                MagicEffect::SummonHunger,
+                MagicEffect::SummonGoldenSaint,
+                MagicEffect::SummonFlameAtronach,
+                MagicEffect::SummonFrostAtronach,
+                MagicEffect::SummonStormAtronach,
+                MagicEffect::SummonCenturionSphere,
+                MagicEffect::SummonFabricant,
+                MagicEffect::SummonWolf,
+                MagicEffect::SummonBear,
+                MagicEffect::SummonBonewolf,
+                MagicEffect::SummonCreature04,
+                MagicEffect::SummonCreature05,
+            };
+            if (effectId.empty())
+                return false;
+            for (size_t i = 0; i < summonEffects.size(); ++i)
+                if (summonEffects[i] == effectId)
                     return true;
-            }
             return false;
         }
-        bool affectsAttribute(int effectId)
+        bool affectsAttribute(const RefId& effectId)
         {
-            switch (effectId)
+            static const std::array affectsAttributeEffects
             {
-                case MagicEffect::DrainAttribute:
-                case MagicEffect::DamageAttribute:
-                case MagicEffect::RestoreAttribute:
-                case MagicEffect::FortifyAttribute:
-                case MagicEffect::AbsorbAttribute:
+                MagicEffect::DrainAttribute,
+                MagicEffect::DamageAttribute,
+                MagicEffect::RestoreAttribute,
+                MagicEffect::FortifyAttribute,
+                MagicEffect::AbsorbAttribute,
+            };
+            if (effectId.empty())
+                return false;
+            for (size_t i = 0; i < affectsAttributeEffects.size(); ++i)
+                if (affectsAttributeEffects[i] == effectId)
                     return true;
-            }
             return false;
         }
-        bool affectsSkill(int effectId)
+        bool affectsSkill(const RefId& effectId)
         {
-            switch (effectId)
+            static const std::array affectsSkillEffects
             {
-                case MagicEffect::DrainSkill:
-                case MagicEffect::DamageSkill:
-                case MagicEffect::RestoreSkill:
-                case MagicEffect::FortifySkill:
-                case MagicEffect::AbsorbSkill:
+                MagicEffect::DrainSkill,
+                MagicEffect::DamageSkill,
+                MagicEffect::RestoreSkill,
+                MagicEffect::FortifySkill,
+                MagicEffect::AbsorbSkill,
+            };
+            if (effectId.empty())
+                return false;
+            for (size_t i = 0; i < affectsSkillEffects.size(); ++i)
+                if (affectsSkillEffects[i] == effectId)
                     return true;
-            }
             return false;
         }
 
@@ -105,7 +117,7 @@ namespace ESM
                     esm.writeHNT("MAGN", effect.mMinMagnitude);
                     esm.writeHNT("MAGN", effect.mMaxMagnitude);
                     esm.writeHNT("DURA", effect.mDuration);
-                    esm.writeHNT("EIND", effect.mEffectIndex);
+                    esm.writeHNT("EIND", static_cast<int32_t>(-1));
                     esm.writeHNT("LEFT", effect.mTimeLeft);
                     esm.writeHNT("FLAG", effect.mFlags);
                 }
@@ -207,8 +219,7 @@ namespace ESM
                         esm.getHNT(effect.mMaxMagnitude, "MAGN");
                     }
                     esm.getHNT(effect.mDuration, "DURA");
-                    effect.mEffectIndex = -1;
-                    esm.getHNOT(effect.mEffectIndex, "EIND");
+                    esm.getHNOT(effectIdx, "EIND");
                     if (format <= MaxOldTimeLeftFormatVersion)
                         effect.mTimeLeft = effect.mDuration;
                     else

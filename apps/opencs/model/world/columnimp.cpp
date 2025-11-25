@@ -30,7 +30,7 @@ namespace CSMWorld
                 switch (value.getRecordType())
                 {
                     case ESM::REC_MGEF:
-                        return std::string(ESM::MagicEffect::sIndexNames[value.getValue()]);
+                        return std::string(ESM::MagicEffect::indexToName(value.getValue()));
                     default:
                         break;
                 }

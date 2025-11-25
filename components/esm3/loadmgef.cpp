@@ -174,18 +174,12 @@ namespace ESM
     const MagicEffectId SummonCreature04("SummonCreature04");
     const MagicEffectId SummonCreature05("SummonCreature05");
 
-    template<Misc::SameAsWithoutCvref<MagicEffect::MEDTstruct> T>
-    void decompose(T&& v, const auto& f)
-    {
-        f(v.mSchool, v.mBaseCost, v.mFlags, v.mRed, v.mGreen, v.mBlue, v.mUnknown1, v.mSpeed, v.mUnknown2)
-    }
-
     void MagicEffect::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)
         mRecordFlags = esm.getRecordFlags();
 
-        int16_t index = -1;
+        int32_t index = -1;
         esm.getHNT(index, "INDX");
         if (index < 0 || index >= Length)
             esm.fail("Invalid Index!");
@@ -591,7 +585,7 @@ namespace ESM
         "sEffectSummonCreature05",
     };
 
-    static const std::array<MagicEffectId, MagicEffect::Length> magicEffectIds
+    static const std::array<MagicEffectId, MagicEffect::Length> sMagicEffectIds
     {
         MagicEffect::WaterBreathing,
         MagicEffect::SwiftSwim,
@@ -743,39 +737,21 @@ namespace ESM
      };
 
     template <typename Collection>
-    static std::map<std::string_view, short, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
+    static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
     {
-        std::map<std::string_view, short, Misc::StringUtils::CiComp> map;
+        std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
         for (size_t i = 0; i < strings.size(); i++)
-            map[strings[i]] = static_cast<short>(i);
+            map[strings[i]] = static_cast<int>(i);
 
         return map;
     }
 
-    const std::map<std::string_view, short, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToIndexMap
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToIndexMap
         = initStringToIntMap(MagicEffect::sGmstEffectIds);
-
-    class FindSecond
-    {
-        std::string_view mName;
-
-    public:
-        FindSecond(std::string_view name)
-            : mName(name)
-        {
-        }
-
-        bool operator()(const std::pair<short, std::string>& item) const
-        {
-            if (Misc::StringUtils::ciEqual(item.second, mName))
-                return true;
-            return false;
-        }
-    };
 
     MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const
     {
-        short index = refIdToIndex(mId);
+        int index = refIdToIndex(mId);
         if (mData.mFlags & NoMagnitude)
             return MDT_None;
         if (index == 84)
@@ -823,7 +799,7 @@ namespace ESM
         return color;
     }
 
-    const std::string& MagicEffect::indexToGmstString(short effectID)
+    const std::string& MagicEffect::indexToGmstString(int effectID)
     {
         if (effectID < 0 || static_cast<std::size_t>(effectID) >= sGmstEffectIds.size())
             throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
@@ -831,7 +807,7 @@ namespace ESM
         return sGmstEffectIds[effectID];
     }
 
-    short MagicEffect::effectGmstIdToIndex(std::string_view gmstId)
+    int MagicEffect::effectGmstIdToIndex(std::string_view gmstId)
     {
         auto name = sGmstEffectIdToIndexMap.find(gmstId);
         if (name == sGmstEffectIdToIndexMap.end())
@@ -840,18 +816,48 @@ namespace ESM
         return name->second;
     }
 
-    RefId MagicEffect::indexToRefId(short index)
+    RefId MagicEffect::indexToRefId(int index)
     {
         if (index < 0 || index >= Length)
             return {};
-        return magicEffectIds[index];
+        return sMagicEffectIds[index];
     }
 
-    short MagicEffect::refIdToIndex(const RefId& effectId)
+    int MagicEffect::refIdToIndex(const RefId& effectId)
     {
-        for (size_t i = 0; i < magicEffectIds.size(); ++i)
-            if (magicEffectIds[i] == effectId)
-                return static_cast<short>(i);
+        for (size_t i = 0; i < sMagicEffectIds.size(); ++i)
+            if (sMagicEffectIds[i] == effectId)
+                return static_cast<int>(i);
+        return -1;
+    }
+
+    RefId MagicEffect::nameToRefId(std::string_view name)
+    {
+        for (const RefId& effect : sMagicEffectIds)
+            if (effect.getRefIdString() == name)
+                return effect;
+        return {};
+    }
+
+    std::string_view MagicEffect::refIdToName(const RefId& effectId)
+    {
+        if (!effectId.empty() && effectId.getIf<MagicEffectId>())
+            return effectId.getRefIdString();
+        return {};
+    }
+
+    std::string_view MagicEffect::indexToName(int index)
+    {
+        if (index < 0 || index >= Length)
+            return {};
+        return sMagicEffectIds[index].getValue();
+    }
+
+    int MagicEffect::indexNameToIndex(std::string_view name)
+    {
+        for (size_t i = 0; i < sMagicEffectIds.size(); ++i)
+            if (sMagicEffectIds[i].getValue() == name)
+                return static_cast<int>(i);
         return -1;
     }
 }

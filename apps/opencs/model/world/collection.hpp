@@ -80,8 +80,9 @@ namespace CSMWorld
 
     inline void setRecordId(const ESM::RefId& id, ESM::MagicEffect& record)
     {
-        int index = ESM::MagicEffect::indexNameToIndex(id.getRefIdString());
-        record.mId = ESM::RefId::index(ESM::REC_MGEF, static_cast<std::uint32_t>(index));
+        if (const auto* magicEffectId = id.getIf<ESM::MagicEffectId>())
+            record.mId = *magicEffectId;
+        throw std::runtime_error("Invalid magic effect id: " + id.toDebugString());
     }
 
     inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)

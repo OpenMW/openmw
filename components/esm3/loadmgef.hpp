@@ -256,16 +256,22 @@ namespace ESM
         static const MagicEffectId SummonCreature04;
         static const MagicEffectId SummonCreature05;
 
-        static constexpr short Length = 143;
+        static constexpr int Length = 143;
 
         static const std::array<std::string, Length> sGmstEffectIds;
-        static const std::map<std::string_view, short, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap;
+        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap;
 
-        static const std::string& indexToGmstString(short effectID);
-        static short effectGmstIdToIndex(std::string_view gmstId);
+        static const std::string& indexToGmstString(int effectID);
+        static int effectGmstIdToIndex(std::string_view gmstId);
 
-        static RefId indexToRefId(short index);
-        static short refIdToIndex(const RefId& effectId);
+        static RefId indexToRefId(int index);
+        static int refIdToIndex(const RefId& effectId);
+
+        static RefId nameToRefId(std::string_view name);
+        static std::string_view refIdToName(const RefId& effectId);
+
+        static std::string_view indexToName(int index);
+        static int indexNameToIndex(std::string_view name);
     };
 }
 #endif

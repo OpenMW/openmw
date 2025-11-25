@@ -3,14 +3,23 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/loadmgef.hpp>
 #include <components/misc/concepts.hpp>
 
 namespace ESM
 {
+    template <typename T>
+    constexpr bool loading = !std::is_const_v<std::remove_reference_t<T>>;
+
     template <Misc::SameAsWithoutCvref<ENAMstruct> T>
     void decompose(T&& v, const auto& f)
     {
-        f(v.mEffectID, v.mSkill, v.mAttribute, v.mRange, v.mArea, v.mDuration, v.mMagnMin, v.mMagnMax);
+        int16_t ioEffectID = static_cast<int16_t>(ESM::MagicEffect::refIdToIndex(v.mEffectID));
+        f(ioEffectID, v.mSkill, v.mAttribute, v.mRange, v.mArea, v.mDuration, v.mMagnMin, v.mMagnMax);
+        if constexpr (loading<T>)
+        {
+            v.mEffectID = ESM::MagicEffect::indexToRefId(ioEffectID);
+        }
     }
 
     void EffectList::load(ESMReader& esm)
