@@ -26,13 +26,13 @@ namespace
             script.mRunning = false;
             if (!ptr.isEmpty())
             {
-                if (ptr.getCellRef().hasContentFile())
+                if (MWBase::Environment::get().getWorld()->getPlayerPtr() == ptr)
+                    script.mTargetId = ptr.getCellRef().getRefId();
+                else if (ptr.getCellRef().getRefNum().isSet())
                 {
                     script.mTargetId = ptr.getCellRef().getRefId();
                     script.mTargetRef = ptr.getCellRef().getRefNum();
                 }
-                else if (MWBase::Environment::get().getWorld()->getPlayerPtr() == ptr)
-                    script.mTargetId = ptr.getCellRef().getRefId();
             }
             return script;
         }
@@ -60,10 +60,10 @@ namespace
 
         MWWorld::Ptr operator()(const std::pair<ESM::RefNum, ESM::RefId>& pair) const
         {
-            if (pair.second.empty())
-                return MWWorld::Ptr();
-            else if (pair.first.hasContentFile())
+            if (pair.first.isSet())
                 return MWBase::Environment::get().getWorldModel()->getPtr(pair.first);
+            else if (pair.second.empty())
+                return MWWorld::Ptr();
             return MWBase::Environment::get().getWorld()->searchPtr(pair.second, false);
         }
     };
@@ -256,7 +256,7 @@ namespace MWScript
                     try
                     {
                         auto desc = std::make_shared<GlobalScriptDesc>();
-                        if (!script.mTargetId.empty())
+                        if (!script.mTargetId.empty() || script.mTargetRef.isSet())
                         {
                             desc->mTarget = std::make_pair(script.mTargetRef, script.mTargetId);
                         }
