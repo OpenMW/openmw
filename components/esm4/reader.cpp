@@ -922,7 +922,7 @@ namespace ESM4
     std::string printLabel(const GroupLabel& label, const std::uint32_t type)
     {
         std::ostringstream ss;
-        ss << sGroupType[std::min<std::size_t>(type, std::size(sGroupType))]; // avoid out of range
+        ss << sGroupType[std::min<std::size_t>(type, std::size(sGroupType) - 1)]; // avoid out of range
 
         switch (type)
         {
