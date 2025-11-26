@@ -1498,7 +1498,11 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             if (mGuiModes.empty())
+            {
                 setControllerTooltipVisible(false);
+                // When all windows are hidden, reset tooltip visibility to user's preference.
+                mControllerTooltipEnabled = Settings::gui().mControllerTooltips;
+            }
             else
                 reapplyActiveControllerWindow();
         }
