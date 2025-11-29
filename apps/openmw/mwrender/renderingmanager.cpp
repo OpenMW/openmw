@@ -739,6 +739,7 @@ namespace MWRender
         static const osg::Vec4f interiorSunPos
             = osg::Vec4f(-1.f, osg::DegreesToRadians(45.f), osg::DegreesToRadians(45.f), 0.f);
         mPostProcessor->getStateUpdater()->setSunPos(interiorSunPos, false);
+        mPostProcessor->getStateUpdater()->setSunVec(-interiorSunPos);
         mSunLight->setPosition(interiorSunPos);
     }
 
@@ -756,19 +757,18 @@ namespace MWRender
     {
         osg::Vec3f position = -direction;
 
-        // The sun is not synchronized with the sunlight because reasons
-        // This is based on exterior sun orbit and won't make sense for interiors, see WeatherManager::update
+        // This is based on the exterior sun orbit and won't make sense for interiors, see WeatherManager::update
         position.z() = 400.f - std::abs(position.x());
 
+        // The sun is not always synchronized with the sunlight because reasons
+        const osg::Vec3f sunlightPos = Settings::shaders().mMatchSunlightToSun ? position : -direction;
         // need to wrap this in a StateUpdater?
-        if (Settings::shaders().mMatchSunlightToSun)
-            mSunLight->setPosition(osg::Vec4f(position, 0.f));
-        else
-            mSunLight->setPosition(osg::Vec4f(-direction, 0.f));
+        mSunLight->setPosition(osg::Vec4f(sunlightPos, 0.f));
 
         mSky->setSunDirection(position);
 
         mPostProcessor->getStateUpdater()->setSunPos(osg::Vec4f(position, 0.f), mNight);
+        mPostProcessor->getStateUpdater()->setSunVec(osg::Vec4f(-sunlightPos, 0.f));
     }
 
     void RenderingManager::addCell(const MWWorld::CellStore* store)
