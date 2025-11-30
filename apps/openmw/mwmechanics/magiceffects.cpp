@@ -26,7 +26,7 @@ namespace
 namespace MWMechanics
 {
     EffectKey::EffectKey()
-        : mId(0)
+        : mId(ESM::RefId{})
     {
     }
 
@@ -48,7 +48,7 @@ namespace MWMechanics
     std::string EffectKey::toString() const
     {
         const auto& store = MWBase::Environment::get().getESMStore();
-        const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().find(mId);
+        const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().search(mId);
         return getMagicEffectString(
             *magicEffect, store->get<ESM::Attribute>().search(mArg), store->get<ESM::Skill>().search(mArg));
     }
@@ -57,11 +57,9 @@ namespace MWMechanics
     {
         if (left.mId < right.mId)
             return true;
-
-        if (left.mId > right.mId)
-            return false;
-
-        return left.mArg < right.mArg;
+        if (left.mId == right.mId)
+            return left.mArg < right.mArg;
+        return false;
     }
 
     bool operator==(const EffectKey& left, const EffectKey& right)

@@ -799,21 +799,22 @@ namespace ESM
         return color;
     }
 
-    const std::string& MagicEffect::indexToGmstString(int effectID)
+    std::string_view MagicEffect::refIdToGmstString(const RefId& effectId)
     {
-        if (effectID < 0 || static_cast<std::size_t>(effectID) >= sGmstEffectIds.size())
-            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
-
-        return sGmstEffectIds[effectID];
+        if (effectId.empty())
+            return {};
+        int index = refIdToIndex(effectId);
+        if (index < 0 || index >= Length)
+            return effectId.getRefIdString();
+        return sGmstEffectIds[index];
     }
 
-    int MagicEffect::effectGmstIdToIndex(std::string_view gmstId)
+    RefId MagicEffect::effectGmstIdToRefId(std::string_view gmstId)
     {
         auto name = sGmstEffectIdToIndexMap.find(gmstId);
         if (name == sGmstEffectIdToIndexMap.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(gmstId));
-
-        return name->second;
+            return {};
+        return sMagicEffectIds[name->second];
     }
 
     RefId MagicEffect::indexToRefId(int index)

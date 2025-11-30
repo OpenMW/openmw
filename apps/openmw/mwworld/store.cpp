@@ -110,9 +110,6 @@ namespace MWWorld
         return ptr;
     }
 
-    // Need to instantiate these before they're used
-    template class IndexedStore<ESM::MagicEffect>;
-
     template <class T, class Id>
     TypedDynamicStore<T, Id>::TypedDynamicStore()
     {
@@ -379,6 +376,9 @@ namespace MWWorld
             throw std::runtime_error(msg.str());
         }
     }
+
+    // Need to instantiate these before they're used
+    template class TypedDynamicStore<ESM::MagicEffect>;
 
     // LandTexture
     //=========================================================================
@@ -978,7 +978,10 @@ namespace MWWorld
 
     // Magic effect
     //=========================================================================
-    Store<ESM::MagicEffect>::Store() {}
+    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
+    {
+        // MGEF record is complete. No further instantiation of fields is required.
+    }
 
     // Attribute
     //=========================================================================

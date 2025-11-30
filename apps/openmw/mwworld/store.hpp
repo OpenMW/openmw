@@ -19,6 +19,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadland.hpp>
@@ -31,7 +32,6 @@
 namespace ESM
 {
     struct LandTexture;
-    struct MagicEffect;
     struct WeaponType;
     class ESMReader;
     class ESMWriter;
@@ -453,10 +453,14 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
+    class Store<ESM::MagicEffect> : public TypedDynamicStore<ESM::MagicEffect>
     {
+        using TypedDynamicStore<ESM::MagicEffect>::setUp;
+
     public:
-        Store();
+        Store() = default;
+
+        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
     };
 
     template <>
