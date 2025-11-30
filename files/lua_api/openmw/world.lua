@@ -204,7 +204,7 @@
 -- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
 -- local pos = self.position + util.vector3(0, 100, 0)
 -- local model = types.Static.records[effect.castStatic].model
--- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
+-- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos, options = { useAmbientLight=false, vfxId = "myVfx" }})
 --
 
 ---

@@ -55,7 +55,6 @@ namespace MWRender
             osg::ref_ptr<osg::PositionAttitudeTransform> mTransform;
         };
 
-        std::mutex mEffectsMutex;
         std::vector<Effect> mEffects;
 
         osg::ref_ptr<osg::Group> mParentNode;

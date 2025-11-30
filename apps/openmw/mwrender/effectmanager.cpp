@@ -70,13 +70,11 @@ namespace MWRender
 
         mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
 
-        std::lock_guard<std::mutex> lock(mEffectsMutex);
         mEffects.push_back(std::move(effect));
     }
 
     void EffectManager::removeEffect(std::string_view effectId)
     {
-        std::lock_guard<std::mutex> lock(mEffectsMutex);
         mEffects.erase(std::remove_if(mEffects.begin(), mEffects.end(),
                            [effectId, this](Effect& effect) {
                                if (effectId == effect.mEffectId)
@@ -92,7 +90,6 @@ namespace MWRender
 
     void EffectManager::update(float dt)
     {
-        std::lock_guard<std::mutex> lock(mEffectsMutex);
         mEffects.erase(std::remove_if(mEffects.begin(), mEffects.end(),
                            [dt, this](Effect& effect) {
                                bool remove = false;
@@ -118,7 +115,6 @@ namespace MWRender
 
     void EffectManager::clear()
     {
-        std::lock_guard<std::mutex> lock(mEffectsMutex);
         for (const auto& effect : mEffects)
         {
             mParentNode->removeChild(effect.mTransform);
