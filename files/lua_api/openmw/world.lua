@@ -210,7 +210,7 @@
 ---
 -- Remove all VFX with the given vfxId. Best invoked through the RemoveVfx global event
 -- @function [parent=#VFX] remove
--- @param #string vfxId the vfxId of the VFX to remove. Passing an empty string removes all VFX that don't have a vfxId
+-- @param #string vfxId the vfxId of the VFX to remove. Passing an empty string removes all VFX that don't have a vfxId (this includes non-scripted VFX!)
 --
 -- @usage -- Remove all VFX with vfxId "myvfx"
 -- core.sendGlobalEvent('RemoveVfx', "myvfx")
