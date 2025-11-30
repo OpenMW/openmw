@@ -294,8 +294,6 @@ namespace MWLua
         api["remove"] = [context](std::string vfxId) {
             context.mLuaManager->addAction(
                 [vfxId = std::move(vfxId)] {
-                    if (vfxId.empty())
-                        throw std::runtime_error("vfxId is empty");
                     MWBase::Environment::get().getWorld()->removeEffect(vfxId);
                 },
                 "openmw.vfx.remove");
