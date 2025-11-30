@@ -49,6 +49,12 @@ namespace Fx
                 mData.get<SunPos>().z() *= -1.f;
         }
 
+        void setSunVec(const osg::Vec4f& vec)
+        {
+            mData.get<SunVec>() = vec;
+            mData.get<SunVec>().normalize();
+        }
+
         void setResolution(const osg::Vec2f& size)
         {
             mData.get<Resolution>() = size;
@@ -170,6 +176,11 @@ namespace Fx
             static constexpr std::string_view sName = "sunPos";
         };
 
+        struct SunVec : Std140::Vec4
+        {
+            static constexpr std::string_view sName = "sunVec";
+        };
+
         struct Resolution : Std140::Vec2
         {
             static constexpr std::string_view sName = "resolution";
@@ -270,11 +281,11 @@ namespace Fx
             static constexpr std::string_view sName = "isInterior";
         };
 
-        using UniformData
-            = Std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix, InvViewMatrix, EyePos,
-                EyeVec, FogColor, AmbientColor, SkyColor, SunColor, SunPos, Resolution, RcpResolution, FogNear, FogFar,
-                Near, Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled, SimulationTime, DeltaSimulationTime,
-                FrameNumber, WindSpeed, WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
+        using UniformData = Std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix,
+            InvViewMatrix, EyePos, EyeVec, FogColor, AmbientColor, SkyColor, SunColor, SunPos, SunVec, Resolution,
+            RcpResolution, FogNear, FogFar, Near, Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled,
+            SimulationTime, DeltaSimulationTime, FrameNumber, WindSpeed, WeatherTransition, WeatherID, NextWeatherID,
+            IsUnderwater, IsInterior>;
 
         UniformData mData;
         bool mUseUBO;

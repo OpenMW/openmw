@@ -73,9 +73,11 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | vec4        | ``omw.sunColor``             | The RGBA color of sun                            |
 +-------------+------------------------------+--------------------------------------------------+
-| vec4        | ``omw.sunPos``               | The normalized sun direction                     |
+| vec4        | ``omw.sunPos``               | The normalized sun disc position                 |
 |             |                              |                                                  |
-|             |                              | When the sun is set `omw.sunpos.z` is negated    |
+|             |                              | When the sun is set `omw.sunPos.z` is negated    |
++-------------+------------------------------+--------------------------------------------------+
+| vec4        | ``omw.sunVec``               | The normalized sunlight direction                |
 +-------------+------------------------------+--------------------------------------------------+
 | vec2        | ``omw.resolution``           | The render target's resolution                   |
 +-------------+------------------------------+--------------------------------------------------+
