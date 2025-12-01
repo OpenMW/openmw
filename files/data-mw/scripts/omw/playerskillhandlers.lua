@@ -90,7 +90,7 @@ local function skillLevelUpHandler(skillid, source, params)
 
     if params.levelUpSpecialization and params.levelUpSpecializationIncreaseValue then
         levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization]
-            = levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization] + params.levelUpSpecializationIncreaseValue;
+            = levelStat.skillIncreasesForSpecialization[params.levelUpSpecialization] + params.levelUpSpecializationIncreaseValue
     end
 
     if source ~= 'jail' then
@@ -135,7 +135,7 @@ local function jailTimeServed(days)
         I.SkillProgression.skillLevelUp(skillid, I.SkillProgression.SKILL_INCREASE_SOURCES.Jail)
     end
 
-    local message = mechanicsL10n('ReleasedFromPrison', { days = days });
+    local message = mechanicsL10n('ReleasedFromPrison', { days = days })
     for skillid, skillStat in pairs(NPC.stats.skills) do
         local diff = skillStat(self).base - oldSkillLevels[skillid]
         if diff ~= 0 then

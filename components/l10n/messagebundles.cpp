@@ -214,6 +214,19 @@ namespace L10n
             result.toUTF8String(resultString);
             return resultString;
         }
+
+        const icu::MessageFormat* getMessage(
+            const StringMap<StringMap<icu::MessageFormat>>& bundles, std::string_view key, std::string_view localeName)
+        {
+            auto iter = bundles.find(localeName);
+            if (iter != bundles.end())
+            {
+                auto message = iter->second.find(key);
+                if (message != iter->second.end())
+                    return &(message->second);
+            }
+            return nullptr;
+        }
     }
 
     MessageBundles::MessageBundles(const std::vector<icu::Locale>& preferredLocales, icu::Locale& fallbackLocale)
@@ -260,15 +273,9 @@ namespace L10n
     {
         std::shared_lock sharedLock(mMutex);
         {
-            auto iter = mBundles.find(localeName);
-            if (iter != mBundles.end())
-            {
-                auto message = iter->second.find(key);
-                if (message != iter->second.end())
-                {
-                    return &(message->second);
-                }
-            }
+            auto message = getMessage(mBundles, key, localeName);
+            if (message != nullptr)
+                return message;
         }
         if (localeName == "gmst" && mGmstLoader)
         {
@@ -277,17 +284,18 @@ namespace L10n
             sharedLock.unlock();
             std::unique_lock lock(mMutex);
             auto found = mGmsts.find(key);
-            if (found != mGmsts.end())
+            // Another thread deleted the key, retry mBundles
+            if (found == mGmsts.end())
+                return getMessage(mBundles, key, localeName);
+            // We're the first thread to resolve this key
+            auto message = convertToMessageFormat(key, found->second, mGmstLoader);
+            mGmsts.erase(found);
+            if (message)
             {
-                auto message = convertToMessageFormat(key, found->second, mGmstLoader);
-                mGmsts.erase(found);
-                if (message)
-                {
-                    auto iter = mBundles.find(localeName);
-                    if (iter == mBundles.end())
-                        iter = mBundles.emplace(localeName, StringMap<icu::MessageFormat>()).first;
-                    return &iter->second.emplace(key, *message).first->second;
-                }
+                auto iter = mBundles.find(localeName);
+                if (iter == mBundles.end())
+                    iter = mBundles.emplace(localeName, StringMap<icu::MessageFormat>()).first;
+                return &iter->second.emplace(key, *message).first->second;
             }
         }
         return nullptr;
