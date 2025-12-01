@@ -1,6 +1,7 @@
 #include "variantimp.hpp"
 
 #include <cmath>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -9,6 +10,18 @@
 
 namespace ESM
 {
+    namespace
+    {
+        template <class T>
+        T floatCast(float value)
+        {
+            constexpr float min = static_cast<float>(std::numeric_limits<T>::lowest());
+            constexpr float max = static_cast<float>(std::numeric_limits<T>::max());
+            if (std::isnan(value) || value < min || value > max)
+                return {};
+            return static_cast<T>(value);
+        }
+    }
 
     void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, std::string& out)
     {
@@ -60,9 +73,9 @@ namespace ESM
                 if (std::isnan(value))
                     out = 0;
                 else
-                    out = static_cast<int16_t>(value);
+                    out = floatCast<int16_t>(value);
             else if (type == VT_Long)
-                out = static_cast<int32_t>(value);
+                out = floatCast<int32_t>(value);
             else
                 esm.fail("unsupported global variable integer type");
         }
