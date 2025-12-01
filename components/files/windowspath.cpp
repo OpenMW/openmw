@@ -50,7 +50,9 @@ namespace Files
                 if (RegQueryValueExW(key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
                     == ERROR_SUCCESS)
                 {
-                    return std::filesystem::path(buf.data(), buf.data() + len);
+                    // This should always be true
+                    if (len % sizeof(wchar_t) == 0)
+                        return std::filesystem::path(buf.data(), buf.data() + len / sizeof(wchar_t));
                 }
             }
             return {};
