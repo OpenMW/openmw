@@ -1,6 +1,7 @@
 #include "variantimp.hpp"
 
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -15,11 +16,21 @@ namespace ESM
         template <class T>
         T floatCast(float value)
         {
-            constexpr float min = static_cast<float>(std::numeric_limits<T>::lowest());
-            constexpr float max = static_cast<float>(std::numeric_limits<T>::max());
+            // float to int conversions for values outside T's valid range are UB. This code produces a result
+            // equivalent to static_cast<T>(value) on x86 without invoking UB.
+            constexpr double min = static_cast<double>(std::numeric_limits<int32_t>::lowest());
+            constexpr double max = static_cast<double>(std::numeric_limits<int32_t>::max());
+            constexpr uint32_t magic = 0x4fffffffu;
             if (std::isnan(value) || value < min || value > max)
+            {
+                static_assert(sizeof(float) == sizeof(uint32_t));
+                uint32_t bits;
+                std::memcpy(&bits, &value, sizeof(float));
+                if (bits & magic)
+                    return static_cast<T>(std::numeric_limits<int32_t>::lowest());
                 return {};
-            return static_cast<T>(value);
+            }
+            return static_cast<T>(static_cast<int32_t>(value));
         }
     }
 
@@ -70,10 +81,7 @@ namespace ESM
             esm.getHNT(value, "FLTV");
 
             if (type == VT_Short)
-                if (std::isnan(value))
-                    out = 0;
-                else
-                    out = floatCast<int16_t>(value);
+                out = floatCast<int16_t>(value);
             else if (type == VT_Long)
                 out = floatCast<int32_t>(value);
             else
