@@ -360,27 +360,10 @@ namespace MWWorld
     template <>
     class Store<ESM::Cell> : public DynamicStore
     {
-        struct DynamicExtCmp
-        {
-            bool operator()(const std::pair<int, int>& left, const std::pair<int, int>& right) const
-            {
-                if (left.first == right.first && left.second == right.second)
-                    return false;
-
-                if (left.first == right.first)
-                    return left.second > right.second;
-
-                // Exterior cells are listed in descending, row-major order,
-                // this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
-                // there is one at -22,16 and one at -2,-9, the latter should be used.
-                return left.first > right.first;
-            }
-        };
-
         typedef std::unordered_map<std::string, ESM::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             DynamicInt;
 
-        typedef std::map<std::pair<int, int>, ESM::Cell*, DynamicExtCmp> DynamicExt;
+        typedef std::map<std::pair<int, int>, ESM::Cell*> DynamicExt;
 
         std::unordered_map<ESM::RefId, ESM::Cell> mCells;
 
@@ -410,7 +393,6 @@ namespace MWWorld
         const ESM::Cell* find(int x, int y) const;
 
         void clearDynamic() override;
-        void setUp() override;
 
         RecordId load(ESM::ESMReader& esm) override;
 
