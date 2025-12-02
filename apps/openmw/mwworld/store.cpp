@@ -749,38 +749,6 @@ namespace MWWorld
     {
         return iterator(mSharedExt.end());
     }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByName(std::string_view name) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (Misc::StringUtils::ciEqual(sharedCell->mName, name))
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
-    }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByRegion(const ESM::RefId& id) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (sharedCell->mRegion == id)
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
-    }
     size_t Store<ESM::Cell>::getSize() const
     {
         return mSharedInt.size() + mSharedExt.size();

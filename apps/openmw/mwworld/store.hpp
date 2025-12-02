@@ -419,12 +419,6 @@ namespace MWWorld
         iterator extBegin() const;
         iterator extEnd() const;
 
-        // Return the northernmost cell in the easternmost column.
-        const ESM::Cell* searchExtByName(std::string_view id) const;
-
-        // Return the northernmost cell in the easternmost column.
-        const ESM::Cell* searchExtByRegion(const ESM::RefId& id) const;
-
         size_t getSize() const override;
         size_t getExtSize() const;
         size_t getIntSize() const;
