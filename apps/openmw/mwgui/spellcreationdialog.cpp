@@ -847,10 +847,12 @@ namespace MWGui
             mAvailableFocus = 0;
             mEffectFocus = 0;
             mRightColumn = false;
-            if (mAvailableButtons.size() > 0)
+            if (!mAvailableButtons.empty())
             {
+                MWBase::WindowManager& winMgr = *MWBase::Environment::get().getWindowManager();
+                winMgr.setCursorVisible(!winMgr.getControllerTooltipVisible());
                 mAvailableButtons[0]->setStateSelected(true);
-                if (MWBase::Environment::get().getWindowManager()->getControllerTooltipVisible())
+                if (winMgr.getControllerTooltipVisible())
                     MWBase::Environment::get().getInputManager()->warpMouseToWidget(mAvailableButtons[0]);
             }
         }
@@ -1116,6 +1118,8 @@ namespace MWGui
         }
         else
             return true;
+
+        winMgr->setCursorVisible(!winMgr->getControllerTooltipVisible());
 
         // Scroll the list to keep the active item in view
         if (mAvailableFocus <= 5)

@@ -240,6 +240,7 @@ namespace MWGui
         else if (arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             onCancelButtonClicked(mCancelButton);
+            return true;
         }
         else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK)
         {
@@ -270,6 +271,8 @@ namespace MWGui
         }
         else
             return true;
+
+        winMgr->setCursorVisible(!winMgr->getControllerTooltipVisible());
 
         if (mControllerFocus < mSpellButtons.size())
         {
