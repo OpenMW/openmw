@@ -2,16 +2,25 @@
 ------
 
     Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
+    Bug #8351: Malformed potion model should consistently error out
     Bug #8732: MessageBox formatting is too limited
     Bug #8760: Single-character topics don't get linked
     Bug #8765: Actors can't transmit diseases to other actors
     Bug #8769: LuaUtil::call not wrapped by invokeProtectedCall
+    Bug #8770: Cursor should be hidden when controller tooltips are visible for spells
     Bug #8771: Controller focus is often reset inappropriately in containers
     Bug #8775: Crash when using nearby.castRay with { ignore = nearby.actors }
     Bug #8779: Lua: addSkillLevelUpHandler does not work properly with skills that reached maximum level
+    Bug #8799: 'Show Controller Tooltips By Default' option is not persistent
+    Feature #2316: ess-Importer: convert targeted scripts
+    Feature #7830: Preserve global script targets not created by content files
+    Feature #8705: Dehardcode global map color palette
     Feature #8725: Lua: Expose localized cell names
     Feature #8731: Use Hand to Hand Hit 2 sound
     Feature #8788: Dehardcode script settings window font and colors
+    Feature #8796: Expose potion autocalc flag
+    Feature #8816: Werewolf transformation binding
+    Feature #8826: OMWFX: Expose the sunlight direction
     Task #8718: Lua: Cell fields can still return empty strings instead of nil values
 
 0.50.0
