@@ -470,6 +470,7 @@ namespace Shader
                         if (stream.fail())
                         {
                             Log(Debug::Error) << "Failed to open " << Files::pathToUnicodeString(path);
+                            continue;
                         }
                         std::stringstream buffer;
                         buffer << stream.rdbuf();
