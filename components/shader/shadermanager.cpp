@@ -9,6 +9,7 @@
 #include <regex>
 #include <set>
 #include <sstream>
+#include <system_error>
 #include <unordered_map>
 
 #include <osg/Program>
@@ -169,7 +170,8 @@ namespace Shader
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
-                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath;
+                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath << ": "
+                                  << std::generic_category().message(errno);
                 return false;
             }
             int includedFileNumber = fileNumber++;
@@ -469,7 +471,8 @@ namespace Shader
                         stream.open(path);
                         if (stream.fail())
                         {
-                            Log(Debug::Error) << "Failed to open " << Files::pathToUnicodeString(path);
+                            Log(Debug::Error)
+                                << "Failed to open " << path << ": " << std::generic_category().message(errno);
                             continue;
                         }
                         std::stringstream buffer;
@@ -523,7 +526,7 @@ namespace Shader
             stream.open(path);
             if (stream.fail())
             {
-                Log(Debug::Error) << "Failed to open " << path;
+                Log(Debug::Error) << "Failed to open shader " << path << ": " << std::generic_category().message(errno);
                 return nullptr;
             }
             std::stringstream buffer;
