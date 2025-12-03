@@ -758,7 +758,7 @@ macOS15_Xcode16_arm64:
     - $env:CCACHE_IGNOREHEADERS = "$env:INCLUDE;$(Get-Location)\deps"
     - '$env:NINJA_STATUS = "[%s/%t %p :: %e] "'
     - cmake --build . --config $config --target ($targets.Split(' '))
-    - ccache --show-stats -v
+    - ccache --show-stats -vv
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
@@ -816,7 +816,7 @@ macOS15_Xcode16_arm64:
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
   variables:
-    CCACHE_SIZE: 1.5G
+    CCACHE_SIZE: 2.5G
     targets: all
 
 .Windows_Ninja_Release:
@@ -923,6 +923,7 @@ Windows_Ninja_CacheInit:
   - choco source disable -n=chocolatey
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
+  - choco install ccache -y
   - choco install vswhere -y
   - choco install python -y
   - choco install awscli -y --version=2.22.35
@@ -945,11 +946,19 @@ Windows_Ninja_CacheInit:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - $env:CCACHE_DEPEND = "true"
+    - $env:CCACHE_INODECACHE = "true"
+    - $env:CCACHE_SLOPPINESS = "pch_defines, time_macros"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
+    - $env:CCACHE_IGNOREHEADERS = "$(Get-Location)\deps"
     - cmake --build . --config $config --target ($targets.Split(' '))
+    - ccache --show-stats -vv
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
@@ -992,6 +1001,7 @@ Windows_Ninja_CacheInit:
   cache:
     key: msbuild-2022-v13
     paths:
+    - ccache
     - deps
     - MSVC2022_64/deps/Qt
   artifacts:
@@ -1003,6 +1013,7 @@ Windows_Ninja_CacheInit:
     - MSVC2022_64/**/*.log
     - "*_to-be-merged.txt"
   variables:
+    CCACHE_SIZE: 2.5G
     targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners

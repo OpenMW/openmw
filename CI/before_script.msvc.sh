@@ -532,7 +532,7 @@ if [ -n "$USE_CCACHE" ]; then
 	if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
 		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 	else
-		echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+		add_cmake_opts "-DOPENMW_MSBUILD_COMPILER_OVERRIDE=ccache"
 	fi
 fi
 

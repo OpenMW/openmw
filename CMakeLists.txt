@@ -170,6 +170,29 @@ option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    if (OPENMW_MSBUILD_COMPILER_OVERRIDE)
+        if (NOT IS_ABSOLUTE OPENMW_MSBUILD_COMPILER_OVERRIDE)
+            find_program(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH "${OPENMW_MSBUILD_COMPILER_OVERRIDE}")
+        else()
+            set(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH OPENMW_MSBUILD_COMPILER_OVERRIDE)
+        endif()
+        if (DEFINED ENV{ChocolateyInstall})
+            # if Chocolatey's installed, it's relatively likely that the command's a shim and won't work if copied
+            # it's safer to shim it
+            execute_process(COMMAND "$ENV{ChocolateyInstall}/tools/shimgen.exe" -p "${OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH}" -o "${CMAKE_BINARY_DIR}/cl.exe" -c cl.exe)
+        else()
+            file(COPY_FILE "${OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH}" "${CMAKE_BINARY_DIR}/cl.exe" ONLY_IF_DIFFERENT)
+        endif()
+
+        list(APPEND CMAKE_VS_GLOBALS
+            "CLToolPath=${CMAKE_BINARY_DIR}"
+            "UseMultiToolTask=true"
+            "TrackFileAccess=false"
+        )
+    endif()
+endif()
+
 if (MSVC)
     option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
     if (OPENMW_MP_BUILD)
@@ -185,16 +208,16 @@ if (MSVC)
 
     add_compile_options(/Zc:__cplusplus)
 
-    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
-        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER OR OPENMW_MSBUILD_COMPILER_OVERRIDE)
+        if ((CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER) AND CMAKE_GENERATOR MATCHES "Visual Studio")
             message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
         else()
             foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
                 string(TOUPPER "${config_lower}" config)
-                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache" OR OPENMW_MSBUILD_COMPILER_OVERRIDE STREQUAL "ccache")
                     string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
                 endif()
-                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache" OR OPENMW_MSBUILD_COMPILER_OVERRIDE STREQUAL "ccache")
                     string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
                 endif()
             endforeach()
