@@ -1,7 +1,6 @@
 #include "variantimp.hpp"
 
 #include <cmath>
-#include <cstring>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -20,16 +19,8 @@ namespace ESM
             // equivalent to static_cast<T>(value) on x86 without invoking UB.
             constexpr double min = static_cast<double>(std::numeric_limits<int32_t>::lowest());
             constexpr double max = static_cast<double>(std::numeric_limits<int32_t>::max());
-            constexpr uint32_t magic = 0x4fffffffu;
             if (std::isnan(value) || value < min || value > max)
-            {
-                static_assert(sizeof(float) == sizeof(uint32_t));
-                uint32_t bits;
-                std::memcpy(&bits, &value, sizeof(float));
-                if (bits & magic)
-                    return static_cast<T>(std::numeric_limits<int32_t>::lowest());
-                return {};
-            }
+                return static_cast<T>(std::numeric_limits<int32_t>::lowest());
             return static_cast<T>(static_cast<int32_t>(value));
         }
     }
