@@ -7,6 +7,7 @@
 #include "timestamp.hpp"
 
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace ESM
@@ -30,13 +31,14 @@ namespace ESM
             Flag_Invalid = 1 << 5
         };
 
-        RefId mEffectId;
+        MagicEffectId mEffectId;
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
         std::variant<RefId, RefNum> mArg; // skill, attribute, or summon
         float mDuration;
         float mTimeLeft;
+        int32_t mEffectIndex;
         int32_t mFlags;
 
         RefId getSkillOrAttribute() const;

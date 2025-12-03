@@ -23,21 +23,14 @@
 namespace MWMechanics
 {
 
-    bool isSummoningEffect(int effectId)
+    static const std::map<ESM::MagicEffectId, ESM::RefId>& getSummonMap()
     {
-        return ((effectId >= ESM::MagicEffect::SummonScamp && effectId <= ESM::MagicEffect::SummonStormAtronach)
-            || (effectId == ESM::MagicEffect::SummonCenturionSphere)
-            || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
-    }
-
-    static const std::map<int, ESM::RefId>& getSummonMap()
-    {
-        static std::map<int, ESM::RefId> summonMap;
+        static std::map<ESM::MagicEffectId, ESM::RefId> summonMap;
 
         if (summonMap.size() > 0)
             return summonMap;
 
-        const std::map<int, std::string_view> summonMapToGameSetting{
+        const std::map<ESM::MagicEffectId, std::string_view> summonMapToGameSetting{
             { ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID" },
             { ESM::MagicEffect::SummonBonelord, "sMagicBonelordID" },
             { ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID" },
@@ -70,7 +63,12 @@ namespace MWMechanics
         return summonMap;
     }
 
-    ESM::RefId getSummonedCreature(int effectId)
+    bool isSummoningEffect(const ESM::MagicEffectId& effectId)
+    {
+        return getSummonMap().contains(effectId);
+    }
+
+    ESM::RefId getSummonedCreature(const ESM::MagicEffectId& effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -81,7 +79,7 @@ namespace MWMechanics
         return ESM::RefId();
     }
 
-    ESM::RefNum summonCreature(int effectId, const MWWorld::Ptr& summoner)
+    ESM::RefNum summonCreature(const ESM::MagicEffectId& effectId, const MWWorld::Ptr& summoner)
     {
         const ESM::RefId& creatureID = getSummonedCreature(effectId);
         ESM::RefNum creature;
@@ -152,7 +150,7 @@ namespace MWMechanics
         }
     }
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, ESM::RefNum>& summon)
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::MagicEffectId, ESM::RefNum>& summon)
     {
         auto& creatureStats = summoner.getClass().getCreatureStats(summoner);
         creatureStats.getActiveSpells().purge(

@@ -12,11 +12,13 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
+    using MagicEffectId = StringRefId;
+
     // format 0, saved games only
     struct MagicEffects
     {
         // <Effect Id, Base value, Modifier>
-        std::map<int32_t, std::pair<int32_t, float>> mEffects;
+        std::map<ESM::MagicEffectId, std::pair<int32_t, float>> mEffects;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
@@ -24,14 +26,14 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(int32_t effectId, const ESM::RefId& sourceId, int32_t index)
+        SummonKey(const ESM::MagicEffectId& effectId, const ESM::RefId& sourceId, int32_t index)
             : mEffectId(effectId)
             , mSourceId(sourceId)
             , mEffectIndex(index)
         {
         }
 
-        int32_t mEffectId;
+        ESM::MagicEffectId mEffectId;
         ESM::RefId mSourceId;
         int32_t mEffectIndex;
     };

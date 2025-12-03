@@ -358,7 +358,7 @@ namespace MWMechanics
 
         if (Settings::game().mClassicCalmSpellsBehavior)
         {
-            ESM::MagicEffect::Effects effect
+            ESM::MagicEffectId effect
                 = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
             if (creatureStats.getMagicEffects().getOrDefault(effect).getMagnitude() > 0.f)
                 creatureStats.getAiSequence().stopCombat();
@@ -427,7 +427,7 @@ namespace MWMechanics
                 const VFS::Path::Normalized reflectStaticModel
                     = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(reflectStatic->mModel));
                 animation->addEffect(
-                    reflectStaticModel, ESM::MagicEffect::indexToName(ESM::MagicEffect::Reflect), false);
+                    reflectStaticModel, ESM::MagicEffect::refIdToName(ESM::MagicEffect::Reflect), false);
             }
             caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
         }
@@ -646,7 +646,7 @@ namespace MWMechanics
         purge([=](const ActiveSpellParams& params) { return params.mActiveSpellId == id; }, ptr);
     }
 
-    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, int effectId, ESM::RefId effectArg)
+    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, const ESM::MagicEffectId& effectId, ESM::RefId effectArg)
     {
         purge(
             [=](const ActiveSpellParams&, const ESM::ActiveEffect& effect) {

@@ -15,18 +15,20 @@ namespace ESM
     struct MagicEffect;
     struct MagicEffects;
     struct Skill;
+
+    using MagicEffectId = StringRefId;
 }
 
 namespace MWMechanics
 {
     struct EffectKey
     {
-        ESM::RefId mId;
+        ESM::MagicEffectId mId;
         ESM::RefId mArg; // skill or ability
 
         EffectKey();
 
-        EffectKey(ESM::RefId id, ESM::RefId arg = {})
+        EffectKey(ESM::MagicEffectId id, ESM::RefId arg = {})
             : mId(id)
             , mArg(arg)
         {

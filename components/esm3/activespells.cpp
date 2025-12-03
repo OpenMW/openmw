@@ -13,10 +13,9 @@ namespace ESM
 {
     namespace
     {
-        bool isSummon(const RefId& effectId)
+        bool isSummon(const ESM::RefId& effectId)
         {
-            static const std::array summonEffects
-            {
+            static const std::array summonEffects{
                 MagicEffect::SummonScamp,
                 MagicEffect::SummonClannfear,
                 MagicEffect::SummonDaedroth,
@@ -40,34 +39,23 @@ namespace ESM
                 MagicEffect::SummonCreature04,
                 MagicEffect::SummonCreature05,
             };
-            if (effectId.empty())
-                return false;
-            for (size_t i = 0; i < summonEffects.size(); ++i)
-                if (summonEffects[i] == effectId)
-                    return true;
-            return false;
+            return std::find(summonEffects.begin(), summonEffects.end(), effectId) != summonEffects.end();
         }
-        bool affectsAttribute(const RefId& effectId)
+        bool affectsAttribute(const ESM::RefId& effectId)
         {
-            static const std::array affectsAttributeEffects
-            {
+            static const std::array affectsAttributeEffects{
                 MagicEffect::DrainAttribute,
                 MagicEffect::DamageAttribute,
                 MagicEffect::RestoreAttribute,
                 MagicEffect::FortifyAttribute,
                 MagicEffect::AbsorbAttribute,
             };
-            if (effectId.empty())
-                return false;
-            for (size_t i = 0; i < affectsAttributeEffects.size(); ++i)
-                if (affectsAttributeEffects[i] == effectId)
-                    return true;
-            return false;
+            return std::find(affectsAttributeEffects.begin(), affectsAttributeEffects.end(), effectId)
+                != affectsAttributeEffects.end();
         }
-        bool affectsSkill(const RefId& effectId)
+        bool affectsSkill(const ESM::RefId& effectId)
         {
-            static const std::array affectsSkillEffects
-            {
+            static const std::array affectsSkillEffects{
                 MagicEffect::DrainSkill,
                 MagicEffect::DamageSkill,
                 MagicEffect::RestoreSkill,
@@ -117,7 +105,7 @@ namespace ESM
                     esm.writeHNT("MAGN", effect.mMinMagnitude);
                     esm.writeHNT("MAGN", effect.mMaxMagnitude);
                     esm.writeHNT("DURA", effect.mDuration);
-                    esm.writeHNT("EIND", static_cast<int32_t>(-1));
+                    esm.writeHNT("EIND", effect.mEffectIndex);
                     esm.writeHNT("LEFT", effect.mTimeLeft);
                     esm.writeHNT("FLAG", effect.mFlags);
                 }
@@ -219,7 +207,8 @@ namespace ESM
                         esm.getHNT(effect.mMaxMagnitude, "MAGN");
                     }
                     esm.getHNT(effect.mDuration, "DURA");
-                    esm.getHNOT(effectIdx, "EIND");
+                    effect.mEffectIndex = -1;
+                    esm.getHNOT(effect.mEffectIndex, "EIND");
                     if (format <= MaxOldTimeLeftFormatVersion)
                         effect.mTimeLeft = effect.mDuration;
                     else

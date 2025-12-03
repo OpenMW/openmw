@@ -649,7 +649,7 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::multimap<int, ESM::RefNum>& CreatureStats::getSummonedCreatureMap()
+    std::multimap<ESM::MagicEffectId, ESM::RefNum>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

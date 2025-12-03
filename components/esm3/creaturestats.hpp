@@ -43,7 +43,7 @@ namespace ESM
         std::array<StatState<int>, 4> mAiSettings;
 
         std::map<SummonKey, int> mSummonedCreatureMap;
-        std::multimap<int, RefNum> mSummonedCreatures;
+        std::multimap<ESM::RefId, RefNum> mSummonedCreatures;
         std::vector<int> mSummonGraveyard;
 
         TimeStamp mTradeTime;
