@@ -35,7 +35,6 @@ namespace MWGui
         TEST(MWGuiWeightedSearchTests, generatePatternArrayBasicSplittingTest)
         {
             std::vector<std::string> expected = { "x", "y", "z" };
-            std::sort(expected.begin(), expected.end());
 
             std::vector<std::string> output1 = generatePatternArray(std::string("x y z"));
             std::sort(output1.begin(), output1.end());
