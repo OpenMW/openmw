@@ -399,7 +399,11 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 OMW::Engine::~Engine()
 {
     if (mScreenCaptureOperation != nullptr)
+    {
         mScreenCaptureOperation->stop();
+        mScreenCaptureOperation = nullptr;
+    }
+    mScreenCaptureHandler = nullptr;
 
     mMechanicsManager = nullptr;
     mDialogueManager = nullptr;
