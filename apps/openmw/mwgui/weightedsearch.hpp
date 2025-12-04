@@ -13,7 +13,7 @@
 
 namespace MWGui
 {
-    std::vector<std::string> generatePatternArray(const MyGUI::UString& inputString)
+    inline std::vector<std::string> generatePatternArray(const MyGUI::UString& inputString)
     {
         if (inputString.empty() || inputString.find_first_not_of(" ") == std::string::npos)
             return std::vector<std::string>();
@@ -21,7 +21,7 @@ namespace MWGui
         std::istringstream stringStream(inputStringLowerCase);
         return { std::istream_iterator<std::string>(stringStream), std::istream_iterator<std::string>() };
     }
-    std::size_t weightedSearch(const std::string& corpus, const std::vector<std::string>& patternArray)
+    inline std::size_t weightedSearch(const std::string& corpus, const std::vector<std::string>& patternArray)
     {
         if (patternArray.empty())
             return 1;
