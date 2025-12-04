@@ -7,13 +7,11 @@
 #include <string>
 #include <vector>
 
-#include <MyGUI_UString.h>
-
 #include <components/misc/strings/lower.hpp>
 
 namespace MWGui
 {
-    inline std::vector<std::string> generatePatternArray(const MyGUI::UString& inputString)
+    inline std::vector<std::string> generatePatternArray(const std::string& inputString)
     {
         if (inputString.empty() || inputString.find_first_not_of(" ") == std::string::npos)
             return std::vector<std::string>();
