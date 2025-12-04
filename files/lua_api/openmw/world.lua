@@ -205,4 +205,9 @@
 -- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
 --
 
+---
+-- Advance the world time by a certain number of hours. This advances time, weather, and AI, but does not perform other functions associated with the passage of time, e.g., regeneration.
+-- @function [parent=#world] advanceTime
+-- @param #number hours Number of hours to advance time
+
 return nil
