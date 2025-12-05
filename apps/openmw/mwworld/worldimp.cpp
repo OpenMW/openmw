@@ -3713,9 +3713,15 @@ namespace MWWorld
     }
 
     void World::spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
-        const osg::Vec3f& worldPos, float scale, bool isMagicVFX, bool useAmbientLight)
+        const osg::Vec3f& worldPos, float scale, bool isMagicVFX, bool useAmbientLight, std::string_view effectId,
+        bool loop)
     {
-        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX, useAmbientLight);
+        mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX, useAmbientLight, effectId, loop);
+    }
+
+    void World::removeEffect(std::string_view effectId)
+    {
+        mRendering->removeEffect(effectId);
     }
 
     struct ResetActorsVisitor

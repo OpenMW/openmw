@@ -611,8 +611,10 @@ namespace MWWorld
         void spawnRandomCreature(const ESM::RefId& creatureList) override;
 
         void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
-            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true,
-            bool useAmbientLight = true) override;
+            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true,
+            std::string_view effectId = {}, bool loop = false) override;
+
+        void removeEffect(std::string_view effectId) override;
 
         /// @see MWWorld::WeatherManager::isInStorm
         bool isInStorm() const override;

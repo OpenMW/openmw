@@ -35,7 +35,10 @@ namespace MWRender
 
         /// Add an effect. When it's finished playing, it will be removed automatically.
         void addEffect(VFS::Path::NormalizedView model, std::string_view textureOverride,
-            const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true, bool useAmbientLight = true);
+            const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true, bool useAmbientLight = true,
+            std::string_view effectId = {}, bool loop = false);
+
+        void removeEffect(std::string_view effectId);
 
         void update(float dt);
 
@@ -45,7 +48,9 @@ namespace MWRender
     private:
         struct Effect
         {
+            std::string mEffectId;
             float mMaxControllerLength;
+            bool mLoop;
             std::shared_ptr<EffectAnimationTime> mAnimTime;
             osg::ref_ptr<osg::PositionAttitudeTransform> mTransform;
         };

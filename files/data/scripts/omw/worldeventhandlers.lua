@@ -7,5 +7,6 @@ return {
         SetGameTimeScale = function(scale) world.setGameTimeScale(scale) end,
         SetSimulationTimeScale = function(scale) world.setSimulationTimeScale(scale) end,
         SpawnVfx = function(data) world.vfx.spawn(data.model, data.position, data.options) end,
+        RemoveVfx = function(vfxId) world.vfx.remove(vfxId) end,
     },
 }

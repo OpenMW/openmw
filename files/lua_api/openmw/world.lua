@@ -197,12 +197,23 @@
 --   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
 --   * `scale` - A number that scales the size of the vfx (Default: 1)
 --   * `useAmbientLight` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: true)
+--   * `loop` - boolean, if true the effect will loop until removed (default: false).
+--   * `vfxId` - a string ID that can be used to remove the effect later, using @{#VFX.remove}. (Default: "").
 --
 -- @usage -- Spawn a sanctuary effect near the player
 -- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
 -- local pos = self.position + util.vector3(0, 100, 0)
 -- local model = types.Static.records[effect.castStatic].model
--- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos})
+-- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos, options = { useAmbientLight = false, vfxId = "myVfx" }})
+--
+
+---
+-- Remove all VFX with the given vfxId. Best invoked through the RemoveVfx global event
+-- @function [parent=#VFX] remove
+-- @param #string vfxId the vfxId of the VFX to remove. Passing an empty string removes all VFX that don't have a vfxId (this includes non-scripted VFX!)
+--
+-- @usage -- Remove all VFX with vfxId "myvfx"
+-- core.sendGlobalEvent('RemoveVfx', "myvfx")
 --
 
 ---
