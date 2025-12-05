@@ -345,6 +345,13 @@ namespace MWLua
                     { "DPadDown", SDL_CONTROLLER_BUTTON_DPAD_DOWN },
                     { "DPadLeft", SDL_CONTROLLER_BUTTON_DPAD_LEFT },
                     { "DPadRight", SDL_CONTROLLER_BUTTON_DPAD_RIGHT },
+                    { "Misc1", SDL_CONTROLLER_BUTTON_MISC1 },
+                    { "Paddle1", SDL_CONTROLLER_BUTTON_PADDLE1 },
+                    { "Paddle2", SDL_CONTROLLER_BUTTON_PADDLE2 },
+                    { "Paddle3", SDL_CONTROLLER_BUTTON_PADDLE3 },
+                    { "Paddle4", SDL_CONTROLLER_BUTTON_PADDLE4 },
+                    { "Touchpad", SDL_CONTROLLER_BUTTON_TOUCHPAD },
+                    { "Max", SDL_CONTROLLER_BUTTON_MAX },
                 }));
 
         api["CONTROLLER_AXIS"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,

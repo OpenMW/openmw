@@ -200,6 +200,12 @@
 -- @field [parent=#CONTROLLER_BUTTON] #number DPadDown
 -- @field [parent=#CONTROLLER_BUTTON] #number DPadLeft
 -- @field [parent=#CONTROLLER_BUTTON] #number DPadRight
+-- @field [parent=#CONTROLLER_BUTTON] #number Misc1
+-- @field [parent=#CONTROLLER_BUTTON] #number Paddle1
+-- @field [parent=#CONTROLLER_BUTTON] #number Paddle2
+-- @field [parent=#CONTROLLER_BUTTON] #number Paddle3
+-- @field [parent=#CONTROLLER_BUTTON] #number Paddle4
+-- @field [parent=#CONTROLLER_BUTTON] #number Touchpad
 
 ---
 -- Values that can be passed to onControllerButtonPress/onControllerButtonRelease engine handlers.
