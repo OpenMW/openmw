@@ -96,7 +96,7 @@ namespace MWRender
             mRoot->removeChild(rtt);
     }
 
-    const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
+    const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle) const
     {
         return osg::Vec2f(
             std::cos(angle) * (point.x() - center.x()) - std::sin(angle) * (point.y() - center.y()) + center.x(),
@@ -109,12 +109,15 @@ namespace MWRender
         mInteriorSegments.clear();
     }
 
-    void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
+    void LocalMap::saveFogOfWar(MWWorld::CellStore* cell) const
     {
         if (!mInterior)
         {
-            const MapSegment& segment
-                = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
+            const auto it
+                = mExteriorSegments.find(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
+            if (it == mExteriorSegments.end())
+                return;
+            const MapSegment& segment = it->second;
 
             if (segment.mFogOfWarImage && segment.mHasFogState)
             {
@@ -146,7 +149,10 @@ namespace MWRender
             {
                 for (int y = 0; y < segments.second; ++y)
                 {
-                    const MapSegment& segment = mInteriorSegments[std::make_pair(x, y)];
+                    const auto it = mInteriorSegments.find(std::make_pair(x, y));
+                    if (it == mInteriorSegments.end())
+                        continue;
+                    const MapSegment& segment = it->second;
                     if (!segment.mHasFogState)
                         continue;
                     ESM::FogTexture& texture = fog->mFogTextures.emplace_back();
@@ -186,7 +192,8 @@ namespace MWRender
 
         MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
         const std::uint8_t neighbourFlags = getExteriorNeighbourFlags(cellX, cellY);
-        if ((segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
+        if (segment.mLastRenderNeighbourFlags != 0
+            && (segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
             return;
         requestExteriorMap(cell, segment);
         segment.mLastRenderNeighbourFlags = neighbourFlags;
@@ -208,9 +215,7 @@ namespace MWRender
     {
         saveFogOfWar(cell);
 
-        if (cell->isExterior())
-            mExteriorSegments.erase({ cell->getCell()->getGridX(), cell->getCell()->getGridY() });
-        else
+        if (!cell->isExterior())
             mInteriorSegments.clear();
     }
 
@@ -299,6 +304,7 @@ namespace MWRender
             return;
 
         mInterior = true;
+        mExteriorSegments.clear();
 
         mBounds = bounds;
 
@@ -423,7 +429,7 @@ namespace MWRender
         }
     }
 
-    void LocalMap::worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y)
+    void LocalMap::worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y) const
     {
         pos = rotatePoint(pos, mCenter, mAngle);
 
@@ -436,7 +442,7 @@ namespace MWRender
         nY = 1.0f - (pos.y() - min.y() - mMapWorldSize * y) / mMapWorldSize;
     }
 
-    osg::Vec2f LocalMap::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+    osg::Vec2f LocalMap::interiorMapToWorldPosition(float nX, float nY, int x, int y) const
     {
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
         osg::Vec2f pos(mMapWorldSize * (nX + x) + min.x(), mMapWorldSize * (1.0f - nY + y) + min.y());
@@ -572,8 +578,11 @@ namespace MWRender
         };
         std::uint8_t result = 0;
         for (const auto& [flag, dx, dy] : flags)
-            if (mExteriorSegments.contains(std::pair(cellX + dx, cellY + dy)))
+        {
+            auto it = mExteriorSegments.find(std::pair(cellX + dx, cellY + dy));
+            if (it != mExteriorSegments.end() && it->second.mMapTexture)
                 result |= flag;
+        }
         return result;
     }
 
