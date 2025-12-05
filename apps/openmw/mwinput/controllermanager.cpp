@@ -546,6 +546,12 @@ namespace MWInput
                     return "textures/omw_psx_button_triangle.dds";
                 return "textures/omw_steam_button_y.dds";
             case SDL_CONTROLLER_BUTTON_GUIDE:
+            case SDL_CONTROLLER_BUTTON_MISC1:
+            case SDL_CONTROLLER_BUTTON_PADDLE1:
+            case SDL_CONTROLLER_BUTTON_PADDLE2:
+            case SDL_CONTROLLER_BUTTON_PADDLE3:
+            case SDL_CONTROLLER_BUTTON_PADDLE4:
+            case SDL_CONTROLLER_BUTTON_TOUCHPAD:
             default:
                 return {};
         }
