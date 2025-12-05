@@ -45,6 +45,14 @@ Command line options
 
     Syntax: openmw <options>
     Allowed options:
+      --config arg                          additional config directories
+      --replace arg                         settings where the values from the
+                                            current source should replace those
+                                            from lower-priority sources instead of
+                                            being appended
+      --user-data arg                       set user data directory (used for
+                                            saves, screenshots, etc)
+      --resources arg (=resources)          set resources directory
       --help                                print help message
       --version                             print version information and quit
       --data arg (=data)                    set data directories (later directories
@@ -54,12 +62,12 @@ Command line options
       --fallback-archive arg (=fallback-archive)
                                             set fallback BSA archives (later
                                             archives have higher priority)
-      --resources arg (=resources)          set resources directory
       --start arg                           set initial cell
       --content arg                         content file(s): esm/esp, or
-                                            omwgame/omwaddon
+                                            omwgame/omwaddon/omwscripts
+      --groundcover arg                     groundcover content file(s): esm/esp,
+                                            or omwgame/omwaddon
       --no-sound [=arg(=1)] (=0)            disable all sounds
-      --script-verbose [=arg(=1)] (=0)      verbose script output
       --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
                                             scripts) at startup
       --script-all-dialogue [=arg(=1)] (=0) compile all dialogue scripts at startup
@@ -97,7 +105,7 @@ Command line options
                                             win1252 - Western European (Latin)
                                             alphabet, used by default
       --fallback arg                        fallback values
-      --no-grab                             Don't grab mouse cursor
+      --no-grab [=arg(=1)] (=0)             Don't grab mouse cursor
       --export-fonts [=arg(=1)] (=0)        Export Morrowind .fnt fonts to PNG
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
