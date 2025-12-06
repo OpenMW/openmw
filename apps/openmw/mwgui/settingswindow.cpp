@@ -2,7 +2,6 @@
 
 #include <array>
 #include <iomanip>
-#include <regex>
 
 #include <unicode/locid.h>
 
@@ -43,6 +42,7 @@
 #include "../mwlua/luamanagerimp.hpp"
 
 #include "confirmationdialog.hpp"
+#include "weightedsearch.hpp"
 
 namespace
 {
@@ -942,42 +942,6 @@ namespace MWGui
         mControlsBox->setVisibleVScroll(true);
     }
 
-    namespace
-    {
-        std::string escapeRegex(const std::string& str)
-        {
-            static const std::regex specialChars(R"r([\^\.\[\$\(\)\|\*\+\?\{])r", std::regex_constants::extended);
-            return std::regex_replace(str, specialChars, R"(\$&)");
-        }
-
-        std::regex wordSearch(const std::string& query)
-        {
-            static const std::regex wordsRegex(R"([^[:space:]]+)", std::regex_constants::extended);
-            auto wordsBegin = std::sregex_iterator(query.begin(), query.end(), wordsRegex);
-            auto wordsEnd = std::sregex_iterator();
-            std::string searchRegex("(");
-            for (auto it = wordsBegin; it != wordsEnd; ++it)
-            {
-                if (it != wordsBegin)
-                    searchRegex += '|';
-                searchRegex += escapeRegex(query.substr(it->position(), it->length()));
-            }
-            searchRegex += ')';
-            // query had only whitespace characters
-            if (searchRegex == "()")
-                searchRegex = "^(.*)$";
-            return std::regex(searchRegex, std::regex_constants::extended | std::regex_constants::icase);
-        }
-
-        double weightedSearch(const std::regex& regex, const std::string& text)
-        {
-            std::smatch matches;
-            std::regex_search(text, matches, regex);
-            // need a signed value, so cast to double (not an integer type to guarantee no overflow)
-            return static_cast<double>(matches.size());
-        }
-    }
-
     void SettingsWindow::renderScriptSettings()
     {
         mScriptAdapter->detach();
@@ -989,24 +953,29 @@ namespace MWGui
         {
             size_t mIndex;
             std::string mName;
-            double mNameWeight;
-            double mHintWeight;
+            size_t mNameWeight;
+            size_t mHintWeight;
 
-            constexpr auto tie() const { return std::tie(mNameWeight, mHintWeight, mName); }
-
-            constexpr bool operator<(const WeightedPage& rhs) const { return tie() < rhs.tie(); }
+            constexpr bool operator<(const WeightedPage& rhs) const
+            {
+                if (mNameWeight != rhs.mNameWeight)
+                    return mNameWeight > rhs.mNameWeight;
+                if (mHintWeight != rhs.mHintWeight)
+                    return mHintWeight > rhs.mHintWeight;
+                return mName < rhs.mName;
+            }
         };
 
-        std::regex searchRegex = wordSearch(mScriptFilter->getCaption());
+        const std::vector<std::string> patternArray = generatePatternArray(mScriptFilter->getCaption());
         std::vector<WeightedPage> weightedPages;
         weightedPages.reserve(LuaUi::scriptSettingsPageCount());
         for (size_t i = 0; i < LuaUi::scriptSettingsPageCount(); ++i)
         {
             LuaUi::ScriptSettingsPage page = LuaUi::scriptSettingsPageAt(i);
-            double nameWeight = weightedSearch(searchRegex, page.mName);
-            double hintWeight = weightedSearch(searchRegex, page.mSearchHints);
+            size_t nameWeight = weightedSearch(page.mName, patternArray);
+            size_t hintWeight = weightedSearch(page.mSearchHints, patternArray);
             if ((nameWeight + hintWeight) > 0)
-                weightedPages.push_back({ i, page.mName, -nameWeight, -hintWeight });
+                weightedPages.push_back({ i, page.mName, nameWeight, hintWeight });
         }
         std::sort(weightedPages.begin(), weightedPages.end());
         for (const WeightedPage& weightedPage : weightedPages)
