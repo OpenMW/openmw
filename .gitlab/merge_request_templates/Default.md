@@ -15,7 +15,9 @@ PLEASE: No LLM/AI generated descriptions. Write this yourself.
 
 ## Checklist
 
+<!--
 Mark as done if not applicable.
+-->
 
 - [ ] I have read the [CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md)
 - [ ] My code builds and runs locally

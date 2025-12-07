@@ -32,7 +32,7 @@ If reporting an issue with a specific Merge Request, comment on the MR itself.
 ## Mods
 
 * **Are you using mods?** Yes/No
-* **Are you using postprocessing or non-default shaders?** Yes/No
+* **Are you using any shader mods?** Yes/No
 * **Does it happen in a clean vanilla install?** Yes/No/Untested
 
 ## Logs and Settings
