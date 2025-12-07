@@ -201,7 +201,7 @@ namespace MWSound
     SoundBuffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM4::Sound& sound)
     {
         std::string path = Misc::ResourceHelpers::correctResourcePath(
-            { { "sound" } }, sound.mSoundFile, MWBase::Environment::get().getResourceSystem()->getVFS(), ".mp3");
+            { { "sound" } }, sound.mSoundFile, MWBase::Environment::get().getResourceSystem()->getVFS(), "mp3");
         float volume = 1, min = 1, max = 255; // TODO: needs research
         SoundBuffer& sfx = mSoundBuffers.emplace_back(VFS::Path::Normalized(std::move(path)), volume, min, max);
         mBufferNameMap.emplace(soundId, &sfx);
@@ -211,7 +211,7 @@ namespace MWSound
     SoundBuffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM4::SoundReference& sound)
     {
         std::string path = Misc::ResourceHelpers::correctResourcePath(
-            { { "sound" } }, sound.mSoundFile, MWBase::Environment::get().getResourceSystem()->getVFS(), ".mp3");
+            { { "sound" } }, sound.mSoundFile, MWBase::Environment::get().getResourceSystem()->getVFS(), "mp3");
         float volume = 1, min = 1, max = 255; // TODO: needs research
         // TODO: sound.mSoundId can link to another SoundReference, probably we will need to add additional lookups to
         // ESMStore.

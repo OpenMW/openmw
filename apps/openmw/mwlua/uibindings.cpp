@@ -217,7 +217,7 @@ namespace MWLua
             LuaUi::TextureData data;
             sol::object path = LuaUtil::getFieldOrNil(options, "path");
             if (path.is<std::string>())
-                data.mPath = path.as<std::string>();
+                data.mPath = VFS::Path::Normalized(path.as<std::string>());
             if (data.mPath.empty())
                 throw std::logic_error("Invalid texture path");
             sol::object offset = LuaUtil::getFieldOrNil(options, "offset");
