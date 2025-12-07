@@ -1,17 +1,33 @@
-Closes or related to*: #ISSUE_NUMBER
+<!--
+Identify the issue number this MR fixes or relates to.
+Use "Closes #123" if it fixes the issue, or "Related to #123" if it references it.
+-->
 
-*_[Refer to GitLab documentation for the proper terms to use for closing/referring to issues](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically). Choose 'closes' if your MR implements/fixes the issue and related to if it does not but should be referenced._
+Closes #
 
-Provide a description of your changes. **No LLM Descriptions, please.**
+## Description
 
-Some things to include:
+<!--
+Provide a description of your changes.
+Reasoning, approach, and any specific architectural decisions.
+PLEASE: No LLM/AI generated descriptions. Write this yourself.
+-->
 
-- Reasoning for changes
-- Questions/concerns
-- Any steps to replicate/confirm
-- Remaining TODO items
-- If there's any supporting files or assets needed to review your MR, please link to them or include them.
+## Checklist
 
-Please review [the project CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md?ref_type=heads) before raising your MR for review.
+Mark as done if not applicable.
 
-Thank you!
+- [ ] I have read the [CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md)
+- [ ] My code builds and runs locally
+- [ ] I have included steps to replicate/confirm the changes below
+- [ ] I have attached necessary supporting files or assets
+
+## Steps to Test/Replicate
+
+1. ...
+2. ...
+3. ...
+
+## Outstanding TODOs / Questions
+
+- [ ] ...

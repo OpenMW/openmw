@@ -1,19 +1,44 @@
-If you're reporting an issue specific to an OpenMW fork, e.g. [TES3MP](https://github.com/TES3MP/openmw-tes3mp/issues) for multiplayer or [OpenMW-VR](https://gitlab.com/madsbuvi/openmw/-/issues) for OpenXR VR, please report it to that fork's author instead of here. Mod list issues or mod installer issues also do not belong here.
+<!--
+PLEASE READ THIS BEFORE POSTING:
+If you're reporting an issue specific to an OpenMW fork:
+- TES3MP (Multiplayer): Report at https://github.com/TES3MP/openmw-tes3mp/issues
+- OpenMW-VR: Report at https://gitlab.com/madsbuvi/openmw/-/issues
 
-If you're reporting an issue specific to an open merge request, report it in the comments for the merge request instead.
+Mod list issues or mod installer issues do not belong here.
+If reporting an issue with a specific Merge Request, comment on the MR itself.
+-->
 
-Describe the issue as detailed as you can. Below is a list of questions that should be answered in the description (if they apply).
+## Issue Description
 
-- Is the problem OpenMW specific or does it also happen in vanilla Morrowind?
-- What is your operating system?
-- What version of OpenMW are you using?
-- If you used a bleeding edge build, state the exact revision used.
-- What version of Morrowind are you using (i.e. retail CD or Steam)? What addons (Tribunal, Bloodmoon) do you have installed?
-- What language is your Morrowind install?
-- Do you use any mods?
-- If so, does the problem also occur in a clean vanilla install without any mods?
-- What are the exact steps to reproduce the problem?What did you expect to happen?
-- What happened instead?
-- Are there any error messages in your openmw.log file? If you're not an OpenMW team member, it's best to upload it.
-- What settings do you use? If you're not an OpenMW team member, it's best to upload your settings.cfg.
-- Where is the in-game location this problem can be observed? Avoid vague statements such as "west of town X". Instead, open the console (` key by default, the key above Tab), click on the problematic object, then use the betacomment (bc) instruction to get useful information about the object that you can copy and paste into the bugreport:
+<!-- Describe the issue in as much detail as you can. -->
+
+## Steps to Reproduce
+
+<!--
+1. Open the game
+2. Go to '...'
+3. Click on '...'
+-->
+
+## System Information
+
+* **OpenMW Version:** <!-- e.g. 0.50.0 or Revision 945c3a... -->
+* **Operating System & Version:**
+* **GPU:**
+* **Morrowind Version:** <!-- Retail CD, Steam, GOG? -->
+* **Language:** <!-- e.g. English -->
+* **Addons:** <!-- Tribunal, Bloodmoon? -->
+
+## Mods
+
+* **Are you using mods?** Yes/No
+* **Are you using postprocessing or non-default shaders?** Yes/No
+* **Does it happen in a clean vanilla install?** Yes/No/Untested
+
+## Logs and Settings
+
+<!--
+Please attach your openmw.log and settings.cfg files.
+If the issue is graphical or location-based, please paste the output of the 'bc' command below.
+(Open console with ` -> Click object -> type 'bc')
+-->
