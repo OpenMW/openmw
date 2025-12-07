@@ -26,6 +26,8 @@ namespace
     constexpr VFS::Path::NormalizedView test3DePath("l10n/test3/de.yaml");
     constexpr VFS::Path::NormalizedView test4RuPath("l10n/test4/ru.yaml");
     constexpr VFS::Path::NormalizedView test4EnPath("l10n/test4/en.yaml");
+    constexpr VFS::Path::NormalizedView test5GmstPath("l10n/test5/gmst.yaml");
+    constexpr VFS::Path::NormalizedView test5EnPath("l10n/test5/en.yaml");
 
     VFSTestFile invalidScript("not a script");
     VFSTestFile incorrectScript(
@@ -83,6 +85,31 @@ stat_increase: "Your {stat} has increased to {value}"
 speed: "Speed"
 )X");
 
+    VFSTestFile test5(R"X(
+string: "sSimpleString"
+format_string: "sFormatString"
+inject_string: "sStringInjection"
+not_found: "sNoSuchString"
+no_gmst:
+    pattern: "Hello world"
+interpreted_string:
+    pattern: "{gmst:sFormatString} {sSimpleString} {gmst:sFormatString}"
+    variables:
+        - ["a", "b"]
+        - ["b", "a"]
+plural_string:
+    pattern: |-
+        {count, plural,
+            one{{gmst:sSimpleString}}
+            other{{gmst:sFormatString}}
+        }
+    variables:
+        - []
+        - ["count", "count"]
+unnamed_string:
+    pattern: "{gmst:sFormatString}"
+)X");
+
     struct LuaL10nTest : Test
     {
         std::unique_ptr<VFS::Manager> mVFS = createTestVFS({
@@ -94,6 +121,8 @@ speed: "Speed"
             { test3DePath, &test1De },
             { test4RuPath, &test4Ru },
             { test4EnPath, &test4En },
+            { test5GmstPath, &test5 },
+            { test5EnPath, &test5 },
         });
 
         LuaUtil::ScriptsConfiguration mCfg;
@@ -195,6 +224,54 @@ speed: "Speed"
                 "Your Speed has increased to 100");
             EXPECT_EQ(get<std::string>(l, "t4('stat_increase', {stat=t4('speed'), value=100})"),
                 "Your Speed has increased to 100");
+        });
+    }
+
+    TEST_F(LuaL10nTest, L10nGMST)
+    {
+        LuaUtil::LuaState lua{ mVFS.get(), &mCfg };
+        lua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::state_view& l = view.sol();
+            L10n::Manager l10nManager(mVFS.get());
+            const std::map<std::string_view, std::string, Misc::StringUtils::CiComp> gmsts{
+                { "sSimpleString", "Hello it's the world" },
+                { "sFormatString", "You have %i %s" },
+                { "sStringInjection", "{a}" },
+            };
+            l10nManager.setGmstLoader([&](std::string_view gmst) -> const std::string* {
+                auto it = gmsts.find(gmst);
+                if (it != gmsts.end())
+                    return &it->second;
+                return nullptr;
+            });
+
+            internal::CaptureStdout();
+            l10nManager.setPreferredLocales({ "en" });
+            EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: gmst en\n");
+
+            l["l10n"] = LuaUtil::initL10nLoader(l, &l10nManager);
+            l.safe_script("t5 = l10n('Test5')");
+
+            EXPECT_EQ(get<std::string>(l, "t5('string')"), "Hello it's the world");
+            EXPECT_EQ(get<std::string>(l, "t5('format_string')"), "You have %i %s");
+            EXPECT_EQ(get<std::string>(l, "t5('format_string', { i = 1, s = 'a' })"), "You have %i %s");
+            EXPECT_EQ(
+                get<std::string>(l, "t5('interpreted_string')"), "You have {a} {b} {sSimpleString} You have {b} {a}");
+            EXPECT_EQ(get<std::string>(l, "t5('interpreted_string', { a = 1, b = 2, sSimpleString = 3 })"),
+                "You have 1 2 3 You have 2 1");
+            EXPECT_EQ(get<std::string>(l, "t5('inject_string')"), "{a}");
+            EXPECT_EQ(get<std::string>(l, "t5('inject_string', { a = 1 })"), "{a}");
+            EXPECT_EQ(get<std::string>(l, "t5('plural_string', { count = 1 })"), "Hello it's the world");
+            EXPECT_EQ(get<std::string>(l, "t5('plural_string', { count = 2 })"), "You have 2 2");
+            EXPECT_EQ(get<std::string>(l, "t5('unnamed_string')"), "You have {0} {1}");
+            EXPECT_EQ(get<std::string>(l, "t5('unnamed_string', { ['0'] = 'a', ['1'] = 'b' })"), "You have a b");
+            EXPECT_EQ(get<std::string>(l, "t5('no_gmst')"), "Hello world");
+            EXPECT_EQ(get<std::string>(l, "t5('not_found')"), "GMST:sNoSuchString");
+
+            l10nManager.setPreferredLocales({ "en" }, false);
+            EXPECT_EQ(get<std::string>(l, "t5('string')"), "sSimpleString");
+            EXPECT_EQ(get<std::string>(l, "t5('format_string')"), "sFormatString");
+            EXPECT_EQ(get<std::string>(l, "t5('not_found')"), "sNoSuchString");
         });
     }
 }

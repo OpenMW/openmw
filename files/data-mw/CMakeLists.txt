@@ -15,6 +15,9 @@ set(BUILTIN_DATA_MW_FILES
     # Generic UI messages that can be reused by mods
     l10n/Interface/gmst.yaml
 
+    # L10n for game-specific mechanics
+    l10n/Mechanics/gmst.yaml
+
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/gmst.yaml
 
