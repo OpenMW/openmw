@@ -23,10 +23,16 @@ namespace MWMechanics
 {
     struct EffectKey
     {
-        ESM::MagicEffectId mId;
+        ESM::RefId mId;
         ESM::RefId mArg; // skill or ability
 
         EffectKey();
+
+        EffectKey(ESM::RefId id, ESM::RefId arg = {})
+            : mId(id)
+            , mArg(arg)
+        {
+        }
 
         EffectKey(ESM::MagicEffectId id, ESM::RefId arg = {})
             : mId(id)

@@ -23,9 +23,41 @@
 namespace MWMechanics
 {
 
-    static const std::map<ESM::MagicEffectId, ESM::RefId>& getSummonMap()
+    bool isSummoningEffect(const ESM::RefId& effectId)
     {
-        static std::map<ESM::MagicEffectId, ESM::RefId> summonMap;
+        if (effectId.empty())
+            return false;
+        static const std::array<ESM::MagicEffectId, 22> summonEffects{
+            ESM::MagicEffect::SummonAncestralGhost,
+            ESM::MagicEffect::SummonBonelord,
+            ESM::MagicEffect::SummonBonewalker,
+            ESM::MagicEffect::SummonCenturionSphere,
+            ESM::MagicEffect::SummonClannfear,
+            ESM::MagicEffect::SummonDaedroth,
+            ESM::MagicEffect::SummonDremora,
+            ESM::MagicEffect::SummonFabricant,
+            ESM::MagicEffect::SummonFlameAtronach,
+            ESM::MagicEffect::SummonFrostAtronach,
+            ESM::MagicEffect::SummonGoldenSaint,
+            ESM::MagicEffect::SummonGreaterBonewalker,
+            ESM::MagicEffect::SummonHunger,
+            ESM::MagicEffect::SummonScamp,
+            ESM::MagicEffect::SummonSkeletalMinion,
+            ESM::MagicEffect::SummonStormAtronach,
+            ESM::MagicEffect::SummonWingedTwilight,
+            ESM::MagicEffect::SummonWolf,
+            ESM::MagicEffect::SummonBear,
+            ESM::MagicEffect::SummonBonewolf,
+            ESM::MagicEffect::SummonCreature04,
+            ESM::MagicEffect::SummonCreature05,
+        };
+        return (std::find(summonEffects.begin(), summonEffects.end(), *effectId.getIf<ESM::MagicEffectId>())
+            != summonEffects.end());
+    }
+
+    static const std::map<ESM::RefId, ESM::RefId>& getSummonMap()
+    {
+        static std::map<ESM::RefId, ESM::RefId> summonMap;
 
         if (summonMap.size() > 0)
             return summonMap;
@@ -63,12 +95,7 @@ namespace MWMechanics
         return summonMap;
     }
 
-    bool isSummoningEffect(const ESM::MagicEffectId& effectId)
-    {
-        return getSummonMap().contains(effectId);
-    }
-
-    ESM::RefId getSummonedCreature(const ESM::MagicEffectId& effectId)
+    ESM::RefId getSummonedCreature(const ESM::RefId& effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -79,7 +106,7 @@ namespace MWMechanics
         return ESM::RefId();
     }
 
-    ESM::RefNum summonCreature(const ESM::MagicEffectId& effectId, const MWWorld::Ptr& summoner)
+    ESM::RefNum summonCreature(const ESM::RefId& effectId, const MWWorld::Ptr& summoner)
     {
         const ESM::RefId& creatureID = getSummonedCreature(effectId);
         ESM::RefNum creature;
@@ -150,7 +177,7 @@ namespace MWMechanics
         }
     }
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::MagicEffectId, ESM::RefNum>& summon)
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::RefId, ESM::RefNum>& summon)
     {
         auto& creatureStats = summoner.getClass().getCreatureStats(summoner);
         creatureStats.getActiveSpells().purge(

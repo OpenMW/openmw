@@ -186,7 +186,7 @@ namespace
                     iter->mData.mAttribute = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected attribute argument of "
-                                        << iter->mData.mEffectID.getRefIdString() << " effect";
+                                        << ESM::MagicEffect::refIdToName(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 
@@ -195,7 +195,7 @@ namespace
                     iter->mData.mSkill = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected skill argument of "
-                                        <<iter->mData.mEffectID.getRefIdString() << " effect";
+                                        << ESM::MagicEffect::refIdToName(iter->mData.mEffectID) << " effect";
                     changed = true;
                 }
 

@@ -11,15 +11,13 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
-    using MagicEffectId = StringRefId;
-
     /** Defines a spell effect. Shared between SPEL (Spells), ALCH
      (Potions) and ENCH (Item enchantments) records
      */
     struct ENAMstruct
     {
         // Magical effect, serialized to int16
-        ESM::MagicEffectId mEffectID;
+        ESM::RefId mEffectID;
 
         // Which skills/attributes are affected (for restore/drain spells
         // etc.)

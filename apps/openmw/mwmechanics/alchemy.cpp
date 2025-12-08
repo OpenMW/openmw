@@ -30,12 +30,12 @@ namespace
 
     std::optional<MWMechanics::EffectKey> toKey(const ESM::Ingredient& ingredient, size_t i)
     {
-        if (ingredient.mData.mEffectID[i] < 0)
+        if (ingredient.mData.mEffectID[i].empty())
             return {};
         ESM::RefId arg = ESM::Skill::indexToRefId(ingredient.mData.mSkills[i]);
         if (arg.empty())
             arg = ESM::Attribute::indexToRefId(ingredient.mData.mAttributes[i]);
-        return MWMechanics::EffectKey(ingredient.mData.mEffectID[i], arg);
+        return MWMechanics::EffectKey(*ingredient.mData.mEffectID[i].getIf<ESM::MagicEffectId>(), arg);
     }
 
     bool containsEffect(const ESM::Ingredient& ingredient, const MWMechanics::EffectKey& effect)
@@ -172,11 +172,11 @@ void MWMechanics::Alchemy::updateEffects()
     for (const auto& effectKey : effects)
     {
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectKey.mId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(effectKey.mId);
 
         if (magicEffect->mData.mBaseCost <= 0)
         {
-            const std::string os = "invalid base cost for magic effect " + std::to_string(effectKey.mId);
+            const std::string os = "invalid base cost for magic effect " + std::string(ESM::MagicEffect::refIdToName(effectKey.mId));
             throw std::runtime_error(os);
         }
 
@@ -217,7 +217,7 @@ void MWMechanics::Alchemy::updateEffects()
         if (magnitude > 0 && duration > 0)
         {
             ESM::ENAMstruct effect;
-            effect.mEffectID = static_cast<int16_t>(effectKey.mId);
+            effect.mEffectID = effectKey.mId;
 
             effect.mAttribute = -1;
             effect.mSkill = -1;
@@ -621,7 +621,7 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(
         if (alchemySkill < fWortChanceValue * static_cast<int>(i + 1))
             break;
 
-        if (effectID != -1)
+        if (!effectID.empty())
         {
             const ESM::Attribute* attribute
                 = store->get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(data.mAttributes[i]));

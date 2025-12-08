@@ -826,6 +826,8 @@ namespace ESM
 
     int MagicEffect::refIdToIndex(const RefId& effectId)
     {
+        if (effectId.empty())
+            return -1;
         for (size_t i = 0; i < sMagicEffectIds.size(); ++i)
             if (sMagicEffectIds[i] == effectId)
                 return static_cast<int>(i);

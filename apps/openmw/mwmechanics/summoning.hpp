@@ -10,8 +10,6 @@ namespace ESM
 {
     class RefId;
     class StringRefId;
-
-    using MagicEffectId = StringRefId;
 }
 namespace MWWorld
 {
@@ -20,13 +18,13 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    bool isSummoningEffect(const ESM::MagicEffectId& effectId);
+    bool isSummoningEffect(const ESM::RefId& effectId);
 
-    ESM::RefId getSummonedCreature(const ESM::MagicEffectId& effectId);
+    ESM::RefId getSummonedCreature(const ESM::RefId& effectId);
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::MagicEffectId, ESM::RefNum>& summon);
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::RefId, ESM::RefNum>& summon);
 
-    ESM::RefNum summonCreature(const ESM::MagicEffectId& effectId, const MWWorld::Ptr& summoner);
+    ESM::RefNum summonCreature(const ESM::RefId& effectId, const MWWorld::Ptr& summoner);
 
     void updateSummons(const MWWorld::Ptr& summoner, bool cleanup);
 }

@@ -82,7 +82,7 @@ namespace MWMechanics
         MWWorld::TimeStamp mTimeOfDeath;
 
     private:
-        std::multimap<ESM::MagicEffectId, ESM::RefNum> mSummonedCreatures; // <Effect, Actor>
+        std::multimap<ESM::RefId, ESM::RefNum> mSummonedCreatures; // <Effect, Actor>
 
         float mAwarenessTimer = 0.f;
         int mAwarenessRoll = -1;
@@ -231,7 +231,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::multimap<ESM::MagicEffectId, ESM::RefNum>& getSummonedCreatureMap(); // <Effect, summoned creature>
+        std::multimap<ESM::RefId, ESM::RefNum>& getSummonedCreatureMap(); // <Effect, summoned creature>
 
         enum Flag
         {

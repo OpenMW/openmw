@@ -31,7 +31,7 @@ namespace ESM
             Flag_Invalid = 1 << 5
         };
 
-        MagicEffectId mEffectId;
+        RefId mEffectId;
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
