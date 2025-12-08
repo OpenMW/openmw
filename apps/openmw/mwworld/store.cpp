@@ -639,20 +639,9 @@ namespace MWWorld
         for (const auto& [_, cell] : mDynamicInt)
             mCells.erase(cell->mId);
         mDynamicInt.clear();
-        setUp();
-    }
 
-    void Store<ESM::Cell>::setUp()
-    {
-        mSharedInt.clear();
-        mSharedInt.reserve(mInt.size());
-        for (auto& [_, cell] : mInt)
-            mSharedInt.push_back(cell);
-
-        mSharedExt.clear();
-        mSharedExt.reserve(mExt.size());
-        for (auto& [_, cell] : mExt)
-            mSharedExt.push_back(cell);
+        mSharedInt.erase(mSharedInt.begin() + mInt.size(), mSharedInt.end());
+        mSharedExt.erase(mSharedExt.begin() + mExt.size(), mSharedExt.end());
     }
     RecordId Store<ESM::Cell>::load(ESM::ESMReader& esm)
     {
@@ -685,7 +674,10 @@ namespace MWWorld
         {
             cell.loadCell(esm, true);
             if (newCell)
+            {
                 mInt[cell.mName] = &cell;
+                mSharedInt.push_back(&cell);
+            }
         }
         else
         {
@@ -698,7 +690,10 @@ namespace MWWorld
             // push the new references on the list of references to manage
             cell.postLoad(esm);
             if (newCell)
+            {
                 mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = &cell;
+                mSharedExt.push_back(&cell);
+            }
             else
             {
                 // merge lists of leased references, use newer data in case of conflict
@@ -748,38 +743,6 @@ namespace MWWorld
     Store<ESM::Cell>::iterator Store<ESM::Cell>::extEnd() const
     {
         return iterator(mSharedExt.end());
-    }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByName(std::string_view name) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (Misc::StringUtils::ciEqual(sharedCell->mName, name))
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
-    }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByRegion(const ESM::RefId& id) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (sharedCell->mRegion == id)
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
     }
     size_t Store<ESM::Cell>::getSize() const
     {
