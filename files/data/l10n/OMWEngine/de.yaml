@@ -12,7 +12,7 @@ PhysicsProfiler: "Physik-Profiler"
 
 # Messages
 
-AskLoadLastSave: "Der aktuellste Spielstand ist '%s'. Soll er geladen werden?"
+AskLoadLastSave: "Der aktuellste Spielstand ist '{save}'. Soll er geladen werden?"
 BuildingNavigationMesh: "Erstelle Navigationsgitter..."
 InitializingData: "Initialisiere Daten..."
 LoadingExterior: "Lade Bereich..."
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Spiel verlassen?"
 SaveGameDenied: "Das Spiel kann gerade nicht gespeichert werden!"
 SavingInProgress: "Speichere Spiel..."
 ScreenshotFailed: "Speichern des Screenshots fehlgeschlagen!"
-ScreenshotMade: "%s wurde gespeichert."
+ScreenshotMade: "{file} wurde gespeichert."
 
 
 # Save game menu

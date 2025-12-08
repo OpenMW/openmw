@@ -12,7 +12,7 @@ PhysicsProfiler: "Physics Profiler"
 
 # Messages
 
-AskLoadLastSave: "The most recent save is '%s'. Do you want to load it?"
+AskLoadLastSave: "The most recent save is '{save}'. Do you want to load it?"
 BuildingNavigationMesh: "Building Navigation Mesh"
 InitializingData: "Initializing Data..."
 LoadingExterior: "Loading Area"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Quit the game?"
 SaveGameDenied: "The game cannot be saved right now."
 SavingInProgress: "Saving..."
 ScreenshotFailed: "Failed to save screenshot"
-ScreenshotMade: "%s has been saved"
+ScreenshotMade: "{file} has been saved"
 
 
 # Save game menu

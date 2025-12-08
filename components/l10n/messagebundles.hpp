@@ -74,6 +74,7 @@ namespace L10n
         const icu::MessageFormat* findMessage(std::string_view key, std::string_view localeName) const;
     };
 
+    icu::UnicodeString toUnicode(std::string_view value);
 }
 
 #endif // COMPONENTS_L10N_MESSAGEBUNDLES_H

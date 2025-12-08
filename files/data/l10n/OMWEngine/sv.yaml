@@ -12,7 +12,7 @@ PhysicsProfiler: "Fysikprofilerare"
 
 # Messages
 
-AskLoadLastSave: "Den senaste sparfilen är '%s'. Vill du ladda den?"
+AskLoadLastSave: "Den senaste sparfilen är '{save}'. Vill du ladda den?"
 BuildingNavigationMesh: "Bygger navigeringsmesh"
 InitializingData: "Initialiserar data..."
 LoadingExterior: "Laddar område"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Avsluta spelet?"
 SaveGameDenied: "Spelet kan inte sparas just nu."
 SavingInProgress: "Sparar..."
 ScreenshotFailed: "Misslyckades att spara skärmdump"
-ScreenshotMade: "%s har sparats"
+ScreenshotMade: "{file} har sparats"
 
 
 # Save game menu

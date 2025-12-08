@@ -12,7 +12,7 @@ PhysicsProfiler: "Profilowanie fizyki"
 
 # Messages
 
-AskLoadLastSave: "Ostatni zapis to '%s'. Czy chcesz go wczytać?"
+AskLoadLastSave: "Ostatni zapis to '{save}'. Czy chcesz go wczytać?"
 BuildingNavigationMesh: "Tworzenie siatki nawigacyjnej"
 InitializingData: "Inicjalizacja..."
 LoadingExterior: "Wczytywanie obszaru zewnętrznego"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Wyjść z gry?"
 SaveGameDenied: "Gra nie może być teraz zapisana."
 SavingInProgress: "Zapisywanie..."
 ScreenshotFailed: "Nie udało się zapisać zrzutu ekranu"
-ScreenshotMade: "%s został zapisany"
+ScreenshotMade: "{file} został zapisany"
 
 
 # Save game menu

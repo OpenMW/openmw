@@ -1,4 +1,7 @@
-AskLoadLastSave: "sLoadLastSaveMsg"
+AskLoadLastSave:
+  pattern: "{gmst:sLoadLastSaveMsg}"
+  variables:
+    - ["save"]
 AudioEffects: "sEffects"
 AudioFootsteps: "sFootsteps"
 AudioMaster: "sMaster"

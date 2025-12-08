@@ -13,7 +13,7 @@ PhysicsProfiler: "Profileur des performances de la physique"
 # Messages
 
 BuildingNavigationMesh: "Construction du mesh de navigation"
-AskLoadLastSave: "La sauvegarde la plus récente est '%s'. Voulez-vous la charger ?"
+AskLoadLastSave: "La sauvegarde la plus récente est '{save}'. Voulez-vous la charger ?"
 InitializingData: "Initialisation des données..."
 LoadingExterior: "Chargement de la zone de jeu"
 LoadingFailed: "Échec du chargement de la sauvegarde"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Quitter la partie ?"
 SaveGameDenied: "Sauvegarde impossible"
 SavingInProgress: "Sauvegarde en cours..."
 ScreenshotFailed: "Échec de la sauvegarde de la capture d'écran"
-ScreenshotMade: "Capture d'écran %s sauvegardée"
+ScreenshotMade: "Capture d'écran {file} sauvegardée"
 
 
 # Save game menu

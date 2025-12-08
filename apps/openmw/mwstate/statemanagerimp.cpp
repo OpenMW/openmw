@@ -148,11 +148,8 @@ void MWState::StateManager::askLoadRecent()
             std::vector<std::string> buttons;
             buttons.emplace_back("#{Interface:Yes}");
             buttons.emplace_back("#{Interface:No}");
-            std::string message
-                = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "AskLoadLastSave");
-            std::string_view tag = "%s";
-            size_t pos = message.find(tag);
-            message.replace(pos, tag.length(), saveName);
+            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+            std::string message = l10n->formatMessage("AskLoadLastSave", { "save" }, { L10n::toUnicode(saveName) });
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
             mAskLoadRecent = true;
         }

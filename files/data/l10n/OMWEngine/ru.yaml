@@ -12,7 +12,7 @@ PhysicsProfiler: "Профилировщик физики"
 
 # Messages
 
-AskLoadLastSave: "Последнее сохранение - '%s'. Загрузить?"
+AskLoadLastSave: "Последнее сохранение - '{save}'. Загрузить?"
 BuildingNavigationMesh: "Построение навигационной сетки"
 InitializingData: "Загрузка..."
 LoadingExterior: "Загрузка области"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Выйти из игры?"
 SaveGameDenied: "В данный момент игру нельзя сохранить."
 SavingInProgress: "Сохранение..."
 ScreenshotFailed: "Не удалось создать снимок экрана"
-ScreenshotMade: "Создан снимок экрана %s"
+ScreenshotMade: "Создан снимок экрана {file}"
 
 
 # Save game menu

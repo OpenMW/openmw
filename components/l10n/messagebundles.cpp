@@ -48,8 +48,7 @@ namespace L10n
         std::optional<icu::MessageFormat> parseMessageFormat(
             const icu::Locale& lang, std::string_view key, std::string_view value, std::string_view locale)
         {
-            icu::UnicodeString pattern
-                = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), static_cast<std::int32_t>(value.size())));
+            icu::UnicodeString pattern = toUnicode(value);
             icu::ErrorCode status;
             UParseError parseError;
             icu::MessageFormat message(pattern, lang, parseError, status);
@@ -308,8 +307,7 @@ namespace L10n
         std::vector<icu::Formattable> argValues;
         for (auto& [k, v] : args)
         {
-            argNames.push_back(
-                icu::UnicodeString::fromUTF8(icu::StringPiece(k.data(), static_cast<std::int32_t>(k.size()))));
+            argNames.push_back(toUnicode(k));
             argValues.push_back(v);
         }
         return formatMessage(key, argNames, argValues);
@@ -337,5 +335,11 @@ namespace L10n
             // If we can't parse the key as a pattern, just return the key
             return std::string(key);
         return formatArgs(*defaultMessage, key, argNames, args);
+    }
+
+    icu::UnicodeString toUnicode(std::string_view value)
+    {
+        icu::StringPiece piece(value.data(), static_cast<std::int32_t>(value.size()));
+        return icu::UnicodeString::fromUTF8(piece);
     }
 }
