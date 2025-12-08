@@ -65,7 +65,9 @@ SelectCharacter: "Välj spelfigur..."
 # Settings menu
 
 ActorsProcessingRange: "Processavstånd för figurer"
+ActorsProcessingRangeValue: "Processavstånd för figurer ({value, number, :: group-off})"
 Anisotropy: "Anisotropi"
+AnisotropyValue: "Anisotropi ({value})"
 Audio: "Ljud"
 AudioEffects: "Effekter"
 AudioFootsteps: "Fotsteg"
@@ -98,12 +100,14 @@ DelayLow: "Snabbt"
 DelayHigh: "Långsamt"
 DetailLevel: "Detaljnivå"
 Difficulty: "Svårighetsgrad"
+DifficultyValue: "Svårighetsgrad ({value})"
 DifficultyEasy: "Lätt"
 DifficultyHard: "Svårt"
 DistanceHigh: "Långt" #Unsure in what context this goes
 DistanceLow: "Nära" #Unsure in what context this goes
 EnableController: "Aktivera handkontroll"
 FieldOfView: "Synfält"
+FieldOfViewValue: "Synfält ({value, number, ::.00})"
 FieldOfViewLow: "Låg"
 FieldOfViewHigh: "Hög"
 ForcePerPixelLighting: "Per-pixelljussättning"
@@ -132,16 +136,20 @@ LightingMethodShadersCompatibility: "Shader (kompatibilitet)"
 LightingResetToDefaults: "Återställer till ursprungliga värden, vill du fortsätta? Ändringar till ljussättningsmetod kräver omstart."
 Lights: "Ljus"
 LightsBoundingSphereMultiplier: "Gränssfärsmultiplikator"
+LightsBoundingSphereMultiplierValue: "Gränssfärsmultiplikator ({value, number, ::.00})"
 LightsBoundingSphereMultiplierTooltip: "Förvalt: 1.65\nMultiplikator för ljusens gränssfär.\nHögre värden ger mjukare minskning av gränssfären, men kräver högre värde i Max antal ljuskällor.\n\nPåverkar inte ljusstyrkan."
 LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
+LightsFadeStartMultiplierValue: "Blekningsstartmultiplikator ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
 LightsLightingMethodTooltip: "Välj intern hantering av ljuskällor.\n\n
     \"Gammaldags\" använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.\n\n
     \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
     \"Shader\" har alla fördelar som \"Shader (kompatibilitet)\" har, med med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara."
 LightsMaximumDistance: "Maximalt ljusavstånd"
+LightsMaximumDistanceValue: "Maximalt ljusavstånd ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
 LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"
+LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "Förvalt: 0.08\nMinsta omgivande ljusstyrka i interiörer.\n\nÖka värdet om du anser att interiörer är för mörka.\n\nDetta har ingen effekt om klassiskt ljusavtagande används."
 MatchSunlightToSun: "Matcha solljus med solen"
 MatchSunlightToSunTooltip: |-
@@ -150,6 +158,7 @@ MatchSunlightToSunTooltip: |-
 
     Detta alternativ gör att solljuskällans position matchar solens synliga position.
 MaxLights: "Max antal ljuskällor"
+MaxLightsValue: "Max antal ljuskällor ({value, number, ::.00})"
 MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
@@ -201,6 +210,8 @@ TransparencyFull: "Full"
 TransparencyNone: "Ingen"
 Video: "Bild"
 ViewDistance: "Siktavstånd"
+ViewDistanceValue: "Siktavstånd ({value, number, ::.00})"
+ViewDistanceValueCells: "Siktavstånd (×{cells, number, ::.00})"
 VSync: "VSynk"
 VSyncAdaptive: "Adaptiv"
 Water: "Vatten"

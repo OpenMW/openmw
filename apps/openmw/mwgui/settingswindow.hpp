@@ -116,7 +116,7 @@ namespace MWGui
         void apply();
 
         void configureWidgets(MyGUI::Widget* widget, bool init);
-        void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
+        MyGUI::TextBox* getSliderLabel(MyGUI::ScrollBar* scroller) const;
 
         void layoutControlsBox();
         void renderScriptSettings();

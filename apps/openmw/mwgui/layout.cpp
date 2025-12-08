@@ -62,7 +62,7 @@ namespace MWGui
             window->setCaptionWithReplacing(MyGUI::UString(title));
     }
 
-    MyGUI::Widget* Layout::getWidget(std::string_view name)
+    MyGUI::Widget* Layout::getWidget(std::string_view name) const
     {
         std::string target = mPrefix;
         target += name;
