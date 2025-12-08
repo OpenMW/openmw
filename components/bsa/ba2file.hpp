@@ -4,10 +4,12 @@
 #include <cstdint>
 #include <string>
 
+#include <components/vfs/pathutil.hpp>
+
 namespace Bsa
 {
-    uint32_t generateHash(const std::string& name);
-    uint32_t generateExtensionHash(std::string_view extension);
+    uint32_t generateHash(std::string_view name);
+    uint32_t generateExtensionHash(VFS::Path::NormalizedView file);
 
     enum class BA2Version : std::uint32_t
     {
