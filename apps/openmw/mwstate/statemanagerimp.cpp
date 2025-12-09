@@ -700,7 +700,7 @@ void MWState::StateManager::quickLoad()
         if (currentCharacter->begin() == currentCharacter->end())
             return;
         // use requestLoad, otherwise we can crash by loading during the wrong part of the frame
-        requestLoad(currentCharacter->begin()->mPath);
+        requestLoad(currentCharacter, currentCharacter->begin()->mPath);
     }
 }
 
@@ -766,7 +766,14 @@ void MWState::StateManager::update(float duration)
     if (mLoadRequest)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
-        loadGame(*mLoadRequest);
+        const Character* character = mLoadRequest->first;
+        // The character may have been deleted after the request was made
+        const bool validCharacter = std::ranges::find_if(mCharacterManager, [=](const Character& c) {
+            return &c == character;
+        }) != mCharacterManager.end();
+        if (!validCharacter)
+            character = getCurrentCharacter();
+        loadGame(character, mLoadRequest->second);
         mLoadRequest = std::nullopt;
     }
 }

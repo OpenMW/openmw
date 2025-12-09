@@ -53,7 +53,7 @@ namespace MWLua
             const MWState::Slot* slot = findSlot(character, slotName);
             if (!slot)
                 throw std::runtime_error("Save game slot not found: " + std::string(dir) + "/" + std::string(slotName));
-            MWBase::Environment::get().getStateManager()->requestLoad(slot->mPath);
+            MWBase::Environment::get().getStateManager()->requestLoad(character, slot->mPath);
         };
 
         api["deleteGame"] = [](std::string_view dir, std::string_view slotName) {
