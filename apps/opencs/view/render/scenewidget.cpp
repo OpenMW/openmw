@@ -72,9 +72,11 @@ namespace CSVRender
 
         mWidget = new osgQOpenGLWidget(this);
 
-        // not the most idiomatic place to do this, but osgQt needs its guts rearranging to do things properly
-        // we *should* be setting this on the default osg::DisplaySettings instance (or relying on the fact that we want the default) or the View's instance
-        // then osgQt should, but doesn't, use that to create a GraphicsTraits instance, and propagate the details from that to Qt for us
+        // Not the most idiomatic place to do this, but osgQt needs its guts rearranging to do things properly.
+        // We *should* be setting this (or relying on the fact that we want the default value) on the default
+        // osg::DisplaySettings instance or the View's instance.
+        // Then osgQt should, but doesn't, use that to create a GraphicsTraits instance, and propagate the details from
+        // that to Qt for us.
         mWidget->setTextureFormat(GL_RGB8);
 
         mRenderer = mWidget->getCompositeViewer();
