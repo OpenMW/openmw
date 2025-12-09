@@ -386,7 +386,7 @@ namespace ESMTerrain
             }
         }
         // this is needed due to MWs messed up texture handling
-        return Misc::ResourceHelpers::correctTexturePath(texture, mVFS);
+        return Misc::ResourceHelpers::correctTexturePath(VFS::Path::Normalized(texture), *mVFS);
     }
 
     void Storage::getEsm4Blendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,

@@ -763,7 +763,7 @@ namespace MWRender
             mClouds = weather.mCloudTexture;
 
             const VFS::Path::Normalized texture
-                = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
+                = Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(mClouds), *mSceneManager->getVFS());
 
             osg::ref_ptr<osg::Texture2D> cloudTex
                 = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));
@@ -785,8 +785,8 @@ namespace MWRender
 
             if (!mNextClouds.empty())
             {
-                const VFS::Path::Normalized texture
-                    = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
+                const VFS::Path::Normalized texture = Misc::ResourceHelpers::correctTexturePath(
+                    VFS::Path::toNormalized(mNextClouds), *mSceneManager->getVFS());
 
                 osg::ref_ptr<osg::Texture2D> cloudTex
                     = new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture));

@@ -947,10 +947,20 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::loadErrorMarker()
     {
+        constexpr VFS::Path::ExtensionView meshTypes[] = {
+            VFS::Path::ExtensionView("nif"),
+            VFS::Path::ExtensionView("osg"),
+            VFS::Path::ExtensionView("osgt"),
+            VFS::Path::ExtensionView("osgb"),
+            VFS::Path::ExtensionView("osgx"),
+            VFS::Path::ExtensionView("osg2"),
+            VFS::Path::ExtensionView("dae"),
+        };
+
         try
         {
             VFS::Path::Normalized path("meshes/marker_error.****");
-            for (const auto meshType : { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" })
+            for (const VFS::Path::ExtensionView meshType : meshTypes)
             {
                 path.changeExtension(meshType);
                 if (mVFS->exists(path))

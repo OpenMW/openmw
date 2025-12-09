@@ -136,16 +136,17 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr& ptr)
     {
+        constexpr VFS::Path::NormalizedView defaultIcon("default icon.tga");
         std::string_view icon = ptr.getClass().getInventoryIcon(ptr);
         if (icon.empty())
-            icon = "default icon.tga";
+            icon = defaultIcon.value();
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        std::string invIcon = Misc::ResourceHelpers::correctIconPath(icon, vfs);
+        std::string invIcon = Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(icon), *vfs);
         if (!vfs->exists(invIcon))
         {
-            Log(Debug::Error) << "Failed to open image: '" << invIcon
-                              << "' not found, falling back to 'default-icon.tga'";
-            invIcon = Misc::ResourceHelpers::correctIconPath("default icon.tga", vfs);
+            Log(Debug::Error) << "Failed to open image: '" << invIcon << "' not found, falling back to '"
+                              << defaultIcon.value() << "'";
+            invIcon = Misc::ResourceHelpers::correctIconPath(defaultIcon, *vfs);
         }
         setIcon(invIcon);
     }

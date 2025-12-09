@@ -15,6 +15,15 @@
 
 namespace
 {
+    constexpr VFS::Path::NormalizedView textures("textures");
+    constexpr VFS::Path::NormalizedView bookart("bookart");
+    constexpr VFS::Path::NormalizedView icons("icons");
+    constexpr VFS::Path::NormalizedView materials("materials");
+    constexpr VFS::Path::ExtensionView dds("dds");
+    constexpr VFS::Path::ExtensionView kf("kf");
+    constexpr VFS::Path::ExtensionView nif("nif");
+    constexpr VFS::Path::ExtensionView mp3("mp3");
+
     bool changeExtension(std::string& path, std::string_view ext)
     {
         std::string::size_type pos = path.rfind('.');
@@ -26,14 +35,15 @@ namespace
         return false;
     }
 
-    std::size_t findDirectory(VFS::Path::NormalizedView path, std::string_view directory)
+    std::size_t findDirectory(VFS::Path::NormalizedView path, VFS::Path::NormalizedView directory)
     {
         const std::string_view pathValue = path.value();
-        const std::size_t directorySize = directory.size();
+        const std::string_view directoryValue = directory.value();
+        const std::size_t directorySize = directoryValue.size();
 
         for (std::size_t offset = 0, pathSize = pathValue.size(); offset < pathSize;)
         {
-            const std::size_t position = pathValue.find(directory, offset);
+            const std::size_t position = pathValue.find(directoryValue, offset);
 
             if (position == std::string_view::npos)
                 return std::string_view::npos;
@@ -50,13 +60,6 @@ namespace
 
         return std::string_view::npos;
     }
-
-    VFS::Path::Normalized withPrefix(VFS::Path::NormalizedView path, std::string_view prefix)
-    {
-        VFS::Path::Normalized prefixed(prefix);
-        prefixed /= path;
-        return prefixed;
-    }
 }
 
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
@@ -65,51 +68,52 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
 }
 
 // If `ext` is not empty we first search file with extension `ext`, then if not found fallback to original extension.
-std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::string_view> topLevelDirectories,
-    std::string_view resPath, const VFS::Manager* vfs, std::string_view ext)
+VFS::Path::Normalized Misc::ResourceHelpers::correctResourcePath(
+    std::span<const VFS::Path::NormalizedView> topLevelDirectories, VFS::Path::NormalizedView resPath,
+    const VFS::Manager& vfs, VFS::Path::ExtensionView ext)
 {
-    VFS::Path::Normalized correctedPath(resPath);
+    VFS::Path::Normalized correctedPath;
 
     // Handle top level directory
     bool needsPrefix = true;
 
-    for (const std::string_view potentialTopLevelDirectory : topLevelDirectories)
+    for (const VFS::Path::NormalizedView potentialTopLevelDirectory : topLevelDirectories)
     {
-        if (const std::size_t topLevelPos = findDirectory(correctedPath, potentialTopLevelDirectory);
+        if (const std::size_t topLevelPos = findDirectory(resPath, potentialTopLevelDirectory);
             topLevelPos != std::string::npos)
         {
-            correctedPath = VFS::Path::Normalized(correctedPath.value().substr(topLevelPos));
+            correctedPath = VFS::Path::Normalized(resPath.value().substr(topLevelPos));
             needsPrefix = false;
             break;
         }
     }
 
     if (needsPrefix)
-        correctedPath = withPrefix(correctedPath, topLevelDirectories.front());
+        correctedPath = topLevelDirectories.front() / resPath;
 
     const VFS::Path::Normalized origExt = correctedPath;
 
     // replace extension if `ext` is specified (used for .tga -> .dds, .wav -> .mp3)
     const bool isExtChanged = !ext.empty() && correctedPath.changeExtension(ext);
 
-    if (vfs->exists(correctedPath))
+    if (vfs.exists(correctedPath))
         return correctedPath;
 
     // fall back to original extension
-    if (isExtChanged && vfs->exists(origExt))
+    if (isExtChanged && vfs.exists(origExt))
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
     {
-        const VFS::Path::Normalized fallback = withPrefix(correctedPath.filename(), topLevelDirectories.front());
-        if (vfs->exists(fallback))
+        const VFS::Path::Normalized fallback = topLevelDirectories.front() / correctedPath.filename();
+        if (vfs.exists(fallback))
             return fallback;
     }
 
     if (isExtChanged)
     {
-        const VFS::Path::Normalized fallback = withPrefix(origExt.filename(), topLevelDirectories.front());
-        if (vfs->exists(fallback))
+        const VFS::Path::Normalized fallback = topLevelDirectories.front() / origExt.filename();
+        if (vfs.exists(fallback))
             return fallback;
     }
 
@@ -120,33 +124,36 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::span<const std::stri
 // but all texture file name references were kept as .tga. So we pass ext=".dds" to all helpers
 // looking for textures.
 
-std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctTexturePath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
-    return correctResourcePath({ { "textures", "bookart" } }, resPath, vfs, "dds");
+    return correctResourcePath({ { textures, bookart } }, resPath, vfs, dds);
 }
 
-std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctIconPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
-    return correctResourcePath({ { "icons" } }, resPath, vfs, "dds");
+    return correctResourcePath({ { icons } }, resPath, vfs, dds);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctBookartPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
-    return correctResourcePath({ { "bookart", "textures" } }, resPath, vfs, "dds");
+    return correctResourcePath({ { bookart, textures } }, resPath, vfs, dds);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(
-    std::string_view resPath, int width, int height, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctBookartPath(
+    VFS::Path::NormalizedView resPath, int width, int height, const VFS::Manager& vfs)
 {
-    std::string image = correctBookartPath(resPath, vfs);
+    VFS::Path::Normalized image = correctBookartPath(resPath, vfs);
 
     // Apparently a bug with some morrowind versions, they reference the image without the size suffix.
     // So if the image isn't found, try appending the size.
-    if (!vfs->exists(image))
+    if (!vfs.exists(image))
     {
         std::stringstream str;
-        str << image.substr(0, image.rfind('.')) << "_" << width << "_" << height << image.substr(image.rfind('.'));
-        image = Misc::ResourceHelpers::correctBookartPath(str.str(), vfs);
+        str << image.view().substr(0, image.view().rfind('.')) << "_" << width << "_" << height
+            << image.view().substr(image.view().rfind('.'));
+        image = Misc::ResourceHelpers::correctBookartPath(VFS::Path::Normalized(std::move(str).str()), vfs);
     }
 
     return image;
@@ -163,8 +170,8 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
         mdlname.insert(mdlname.begin(), 'x');
 
     VFS::Path::Normalized kfname(mdlname);
-    if (Misc::getFileExtension(mdlname) == "nif")
-        kfname.changeExtension("kf");
+    if (kfname.extension() == nif)
+        kfname.changeExtension(kf);
 
     if (!vfs->exists(kfname))
         return VFS::Path::Normalized(resPath);
@@ -172,9 +179,10 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
     return mdlname;
 }
 
-std::string Misc::ResourceHelpers::correctMaterialPath(std::string_view resPath, const VFS::Manager* vfs)
+VFS::Path::Normalized Misc::ResourceHelpers::correctMaterialPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
-    return correctResourcePath({ { "materials" } }, resPath, vfs);
+    return correctResourcePath({ { materials } }, resPath, vfs);
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::correctMeshPath(VFS::Path::NormalizedView resPath)
@@ -210,16 +218,16 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
     // Note: likely should be replaced with
-    //     return correctResourcePath({ { "sound" } }, resPath, vfs, "mp3");
+    //     return correctResourcePath({ { "sound" } }, resPath, vfs, mp3);
     // but there is a slight difference in behaviour:
-    // - `correctResourcePath(..., "mp3")` first checks `.mp3`, then tries the original extension
+    // - `correctResourcePath(..., mp3)` first checks `.mp3`, then tries the original extension
     // - the implementation below first tries the original extension, then falls back to `.mp3`.
 
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
     if (!vfs.exists(resPath))
     {
         VFS::Path::Normalized sound(resPath);
-        sound.changeExtension("mp3");
+        sound.changeExtension(mp3);
         return sound;
     }
     return VFS::Path::Normalized(resPath);

@@ -52,7 +52,8 @@ namespace Resource
         , mPath(path)
         , mVFS(&vfs)
     {
-        mPath.changeExtension("txt");
+        constexpr VFS::Path::ExtensionView txt("txt");
+        mPath.changeExtension(txt);
     }
 
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
@@ -214,7 +215,8 @@ namespace Resource
             return osg::ref_ptr<const SceneUtil::KeyframeHolder>(static_cast<SceneUtil::KeyframeHolder*>(obj.get()));
 
         osg::ref_ptr<SceneUtil::KeyframeHolder> loaded(new SceneUtil::KeyframeHolder);
-        if (Misc::getFileExtension(name.value()) == "kf")
+        constexpr VFS::Path::ExtensionView kf("kf");
+        if (name.extension() == kf)
         {
             auto file = std::make_shared<Nif::NIFFile>(name);
             Nif::Reader reader(*file, mEncoder);

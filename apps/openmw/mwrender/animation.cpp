@@ -659,21 +659,21 @@ namespace MWRender
 
         path.replace(extensionStart, path.size() - extensionStart, "/");
 
+        constexpr VFS::Path::ExtensionView kf("kf");
         for (const VFS::Path::Normalized& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(path))
-        {
-            if (Misc::getFileExtension(name) == "kf")
-            {
+            if (name.extension() == kf)
                 addSingleAnimSource(name, baseModel);
-            }
-        }
     }
 
     void Animation::addAnimSource(std::string_view model, const std::string& baseModel)
     {
+        constexpr VFS::Path::ExtensionView kf("kf");
+        constexpr VFS::Path::ExtensionView nif("nif");
+
         VFS::Path::Normalized kfname(model);
 
-        if (Misc::getFileExtension(kfname) == "nif")
-            kfname.changeExtension("kf");
+        if (kfname.extension() == nif)
+            kfname.changeExtension(kf);
 
         addSingleAnimSource(kfname, baseModel);
 
@@ -757,10 +757,12 @@ namespace MWRender
         // Get the blending rules
         if (Settings::game().mSmoothAnimTransitions)
         {
+            constexpr VFS::Path::ExtensionView yaml("yaml");
+
             // Note, even if the actual config is .json - we should send a .yaml path to AnimBlendRulesManager, the
             // manager will check for .json if it will not find a specified .yaml file.
             VFS::Path::Normalized blendConfigPath(kfname);
-            blendConfigPath.changeExtension("yaml");
+            blendConfigPath.changeExtension(yaml);
 
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
             constexpr VFS::Path::NormalizedView globalBlendConfigPath("animations/animation-config.yaml");
@@ -1795,7 +1797,7 @@ namespace MWRender
         // Notify that this animation has attached magic effects
         mHasMagicEffects = true;
 
-        overrideFirstRootTexture(texture, mResourceSystem, *node);
+        overrideFirstRootTexture(VFS::Path::toNormalized(texture), mResourceSystem, *node);
     }
 
     void Animation::removeEffect(std::string_view effectId)

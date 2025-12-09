@@ -394,7 +394,7 @@ namespace MWLua
         });
         magicEffectT["icon"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
             auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         magicEffectT["particle"]
             = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mParticle; });

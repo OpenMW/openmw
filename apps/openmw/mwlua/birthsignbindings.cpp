@@ -36,7 +36,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::BirthSign& rec) -> std::string_view { return rec.mDescription; });
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         signT["texture"] = sol::readonly_property([vfs](const ESM::BirthSign& rec) -> std::string {
-            return Misc::ResourceHelpers::correctTexturePath(rec.mTexture, vfs);
+            return Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(rec.mTexture), *vfs);
         });
         signT["spells"] = sol::readonly_property([lua](const ESM::BirthSign& rec) -> sol::table {
             return createReadOnlyRefIdTable(lua, rec.mPowers.mList);

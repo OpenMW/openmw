@@ -150,8 +150,9 @@ namespace MWGui
                         "ImageBox", MyGUI::IntCoord(w, 2, 16, 16), MyGUI::Align::Default);
                     mWidgetMap[effectId] = image;
 
-                    image->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-                        effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
+                    image->setImageTexture(
+                        Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(effect->mIcon),
+                            *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
                     const std::string& name = ESM::MagicEffect::indexToGmstString(effectId);
 

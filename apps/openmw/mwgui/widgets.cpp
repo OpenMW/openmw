@@ -477,7 +477,7 @@ namespace MWGui::Widgets
         mRequestedWidth = mTextWidget->getTextSize().width + sIconOffset;
 
         mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-            magicEffect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
+            VFS::Path::toNormalized(magicEffect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
     }
 
     MWSpellEffect::~MWSpellEffect() {}

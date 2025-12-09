@@ -649,7 +649,7 @@ namespace MWLua
         attributeT["description"]
             = sol::readonly_property([](const ESM::Attribute& rec) -> std::string_view { return rec.mDescription; });
         attributeT["icon"] = sol::readonly_property([vfs](const ESM::Attribute& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
 
         sol::table skills(lua, sol::create);
@@ -669,7 +669,7 @@ namespace MWLua
             return ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization);
         });
         skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         skillT["school"] = sol::readonly_property([](const ESM::Skill& rec) -> const ESM::MagicSchool* {
             if (!rec.mSchool)
