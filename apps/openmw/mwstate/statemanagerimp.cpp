@@ -405,7 +405,7 @@ void MWState::StateManager::loadGame(const std::filesystem::path& filepath)
     {
         for (const auto& slot : character)
         {
-            if (slot.mPath == filepath)
+            if (std::filesystem::equivalent(slot.mPath, filepath))
             {
                 loadGame(&character, slot.mPath);
                 return;
