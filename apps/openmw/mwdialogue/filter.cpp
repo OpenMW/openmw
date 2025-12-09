@@ -708,7 +708,7 @@ bool MWDialogue::Filter::hasFactionRankReputationRequirements(
 
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
-    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReaction;
+    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReputation;
 }
 
 MWDialogue::Filter::Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)

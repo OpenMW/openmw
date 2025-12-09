@@ -1220,7 +1220,8 @@
 -- @field #list<#number> attributeValues Attributes values required to get this rank.
 -- @field #number primarySkillValue Primary skill value required to get this rank.
 -- @field #number favouredSkillValue Secondary skill value required to get this rank.
--- @field #number factionReaction Reaction of faction members if player is in this faction.
+-- @field #number factionReputation Required amount of faction reputation to reach this rank.
+-- @field #number factionReaction (DEPRECATED) Returns the same as factionReputation.
 
 --- @{#MWScripts}: MWScripts
 -- @field [parent=#core] #MWScript mwscripts
