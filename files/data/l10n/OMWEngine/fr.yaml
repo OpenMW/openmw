@@ -148,7 +148,7 @@ LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceValue: "Distance maximale des sources lumineuses ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
-LightsMinimumInteriorBrightness: "Luminosité intérieure minimale ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessValue: "Luminosité intérieure minimale ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres.\n\nCela n'a aucun effet si l'atténuation classique est utilisée."
 MatchSunlightToSun: "Aligner la lumière du soleil"
 MatchSunlightToSunTooltip: |-

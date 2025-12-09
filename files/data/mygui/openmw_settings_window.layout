@@ -711,7 +711,7 @@
                             <UserString key="SettingName" value="minimum interior brightness"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
-                            <UserString key="SettingLabelCaption" value="LightsMinimumInteriorBrightness"/>
+                            <UserString key="SettingLabelCaption" value="LightsMinimumInteriorBrightnessValue"/>
                         </Widget>
                         <Widget type="AutoSizedButton" skin="MW_Button" position="0 336 0 0" align="Top Left" name="LightsResetButton">
                             <Property key="Caption" value="#{Interface:Reset}"/>

@@ -148,7 +148,7 @@ LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceValue: "Maximum Light Distance ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
 LightsMinimumInteriorBrightness: "Minimum Interior Brightness"
-LightsMinimumInteriorBrightness: "Minimum Interior Brightness ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessValue: "Minimum Interior Brightness ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark.\n\nThis has no effect if classic falloff is used."
 MatchSunlightToSun: "Match Sunlight to Sun"
 MatchSunlightToSunTooltip: |-

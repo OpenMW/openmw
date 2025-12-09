@@ -148,7 +148,7 @@ LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceValue: "Maximale Lichtreichweite ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."
 LightsMinimumInteriorBrightness: "Minimale Helligkeit in Innenräumen"
-LightsMinimumInteriorBrightness: "Minimale Helligkeit in Innenräumen ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessValue: "Minimale Helligkeit in Innenräumen ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "Standard: 0,08\nMinimale Umgebungshelligkeit in Innenräumen.\n\nKann erhöht werden, falls Innenräume zu dunkel dargestellt werden.\n\nDies hat keine Auswirkung, wenn der klassische Lichtabfall verwendet wird."
 MatchSunlightToSun: "Licht an Sonne ausrichten"
 MatchSunlightToSunTooltip: |-

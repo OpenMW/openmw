@@ -148,7 +148,7 @@ LightsMaximumDistance: "Дальность отображения источни
 LightsMaximumDistanceValue: "Дальность отображения источников света ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Значение по умолчанию: 8192\nМаксимальное расстояние, на котором будут отображаться источники света (во внутриигровых единицах измерения).\n\nЕсли 0, то расстояние не ограничено."
 LightsMinimumInteriorBrightness: "Минимальный уровень освещения в помещениях"
-LightsMinimumInteriorBrightness: "Минимальный уровень освещения в помещениях ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessValue: "Минимальный уровень освещения в помещениях ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "Значение по умолчанию: 0.08\nМинимальный уровень фонового освещения в помещениях.\n\nУвеличьте значение, если помещения в игре кажутся слишком темными. Эта настройка не имеет эффекта, если используется классическое угасание."
 MatchSunlightToSun: "Свет солнца идет от солнца"
 MatchSunlightToSunTooltip: |-

@@ -148,7 +148,7 @@ LightsMaximumDistance: "Maksymalny zasięg światła"
 LightsMaximumDistanceValue: "Maksymalny zasięg światła ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Domyślnie: 8192\nMaksymalna odległość wyświetlania świateł (w jednostkach).\n\n0 = brak ograniczenia."
 LightsMinimumInteriorBrightness: "Minimalna jasność wnętrz"
-LightsMinimumInteriorBrightness: "Minimalna jasność wnętrz ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessValue: "Minimalna jasność wnętrz ({value, number, ::.00})"
 LightsMinimumInteriorBrightnessTooltip: "Domyślnie: 0.08\nMinimalna jasność w pomieszczeniach.\n\nZwiększ to, jeśli wnętrza są zbyt ciemne.\n\nNie działa, gdy używana jest klasyczna metoda zanikania."
 MatchSunlightToSun: "Dopasuj światło słoneczne do pozycji słońca"
 MatchSunlightToSunTooltip: |-
