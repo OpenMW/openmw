@@ -139,7 +139,7 @@ namespace
     }
 
     void updateSliderLabel(MyGUI::ScrollBar* scroller, MyGUI::TextBox* textBox,
-        const std::vector<icu_74::UnicodeString>& argNames, const std::vector<icu_74::Formattable>& args)
+        const std::vector<icu::UnicodeString>& argNames, const std::vector<icu::Formattable>& args)
     {
         if (textBox != nullptr)
         {
@@ -174,8 +174,8 @@ namespace MWGui
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
                 std::string_view valueType = getSettingValueType(current);
-                std::vector<icu_74::UnicodeString> argNames;
-                std::vector<icu_74::Formattable> args;
+                std::vector<icu::UnicodeString> argNames;
+                std::vector<icu::Formattable> args;
                 if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
@@ -729,8 +729,8 @@ namespace MWGui
     {
         if (getSettingType(scroller) == "Slider")
         {
-            std::vector<icu_74::UnicodeString> argNames;
-            std::vector<icu_74::Formattable> args;
+            std::vector<icu::UnicodeString> argNames;
+            std::vector<icu::Formattable> args;
             std::string_view valueType = getSettingValueType(scroller);
             if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
             {
