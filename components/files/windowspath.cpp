@@ -2,6 +2,7 @@
 
 #if defined(_WIN32) || defined(__WINDOWS__)
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 
@@ -142,11 +143,19 @@ namespace Files
                 paths.emplace_back(std::move(disk));
         }
         {
+            std::filesystem::path gog = getRegistryPath(L"SOFTWARE\\GOG.com\\Games\\1435828767", L"path", true);
+            if (!gog.empty() && std::filesystem::is_directory(gog))
+                paths.emplace_back(std::move(gog));
+        }
+        {
             std::filesystem::path steam = getRegistryPath(
                 L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 22320", L"InstallLocation", false);
             if (!steam.empty() && std::filesystem::is_directory(steam))
                 paths.emplace_back(std::move(steam));
         }
+        std::ranges::sort(paths);
+        const auto [first, last] = std::ranges::unique(paths);
+        paths.erase(first, last);
         return paths;
     }
 
