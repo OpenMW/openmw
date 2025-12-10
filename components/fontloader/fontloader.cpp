@@ -289,8 +289,9 @@ namespace Gui
         MyGUI::IntSize bookSize = getBookSize(layersStream.get());
         float bookScale = MyGUIPlatform::ScalingLayer::getScaleFactor(bookSize);
 
-        const auto oldDataPath = dataManager->getDataPath({});
-        dataManager->setResourcePath("fonts");
+        const VFS::Path::Normalized oldDataPath(dataManager->getResourcePath());
+        constexpr VFS::Path::NormalizedView fonts("fonts");
+        dataManager->setResourcePath(fonts);
         std::unique_ptr<MyGUI::IDataStream> dataStream(dataManager->getData(fileName));
 
         MyGUI::xml::Document xmlDocument;
