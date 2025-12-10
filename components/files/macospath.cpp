@@ -11,7 +11,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include "wine.hpp"
+#include "wineutils.hpp"
 
 namespace
 {

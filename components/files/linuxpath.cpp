@@ -9,7 +9,7 @@
 
 #include <components/misc/strings/lower.hpp>
 
-#include "wine.hpp"
+#include "wineutils.hpp"
 
 namespace
 {

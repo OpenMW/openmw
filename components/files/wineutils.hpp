@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_FILES_WINE_HPP
-#define COMPONENTS_FILES_WINE_HPP
+#ifndef COMPONENTS_FILES_WINEUTILS_HPP
+#define COMPONENTS_FILES_WINEUTILS_HPP
 
 #include <algorithm>
 #include <filesystem>
@@ -53,4 +53,4 @@ namespace Files::Wine
     }
 }
 
-#endif /* COMPONENTS_FILES_WINE_HPP */
+#endif /* COMPONENTS_FILES_WINEUTILS_HPP */
