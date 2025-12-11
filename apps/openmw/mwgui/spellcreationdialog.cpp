@@ -33,20 +33,20 @@
 namespace
 {
 
-    bool sortMagicEffects(short id1, short id2)
+    bool sortMagicEffects(const ESM::RefId& id1, const ESM::RefId& id2)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
-        return gmst.find(ESM::MagicEffect::indexToGmstString(id1))->mValue.getString()
-            < gmst.find(ESM::MagicEffect::indexToGmstString(id2))->mValue.getString();
+        return gmst.find(ESM::MagicEffect::refIdToGmstString(id1))->mValue.getString()
+            < gmst.find(ESM::MagicEffect::refIdToGmstString(id2))->mValue.getString();
     }
 
     void init(ESM::ENAMstruct& effect)
     {
         effect.mArea = 0;
         effect.mDuration = 0;
-        effect.mEffectID = -1;
+        effect.mEffectID = ESM::RefId();
         effect.mMagnMax = 0;
         effect.mMagnMin = 0;
         effect.mRange = 0;
@@ -222,9 +222,9 @@ namespace MWGui
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
             VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::indexToGmstString(effect->mIndex) + "}");
+        mEffectName->setCaptionWithReplacing("#{" + std::string(ESM::MagicEffect::refIdToGmstString(effect->mId)) + "}");
 
-        mEffect.mEffectID = static_cast<int16_t>(effect->mIndex);
+        mEffect.mEffectID = effect->mId;
 
         mMagicEffect = effect;
 
@@ -761,7 +761,7 @@ namespace MWGui
         , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
         , mSelectedEffect(0)
-        , mSelectedKnownEffectId(0)
+        , mSelectedKnownEffectId(ESM::RefId())
         , mConstantEffect(false)
         , mType(type)
     {
@@ -782,7 +782,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
-        std::vector<short> knownEffects;
+        std::vector<ESM::RefId> knownEffects;
 
         for (const ESM::Spell* spell : spells)
         {
@@ -792,7 +792,7 @@ namespace MWGui
 
             for (const ESM::IndexedENAMstruct& effectInfo : spell->mEffects.mList)
             {
-                int16_t effectId = effectInfo.mData.mEffectID;
+                ESM::RefId effectId = effectInfo.mData.mEffectID;
                 const ESM::MagicEffect* effect
                     = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
 
@@ -812,12 +812,12 @@ namespace MWGui
         mAvailableEffectsList->clear();
 
         int i = 0;
-        for (const short effectId : knownEffects)
+        for (const ESM::RefId& effectId : knownEffects)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get()
                                                .getESMStore()
                                                ->get<ESM::GameSetting>()
-                                               .find(ESM::MagicEffect::indexToGmstString(effectId))
+                                               .find(ESM::MagicEffect::refIdToGmstString(effectId))
                                                ->mValue.getString());
             mButtonMapping[i] = effectId;
             ++i;
@@ -826,12 +826,12 @@ namespace MWGui
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const short effectId : knownEffects)
+        for (const ESM::RefId& effectId : knownEffects)
         {
             const std::string& name = MWBase::Environment::get()
                                           .getESMStore()
                                           ->get<ESM::GameSetting>()
-                                          .find(ESM::MagicEffect::indexToGmstString(effectId))
+                                          .find(ESM::MagicEffect::refIdToGmstString(effectId))
                                           ->mValue.getString();
             MyGUI::Button* w = mAvailableEffectsList->getItemWidget(name);
             mAvailableButtons.emplace_back(w);

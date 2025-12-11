@@ -166,7 +166,7 @@ namespace MWMechanics
             throw std::range_error("Index out of range");
 
         ESM::ENAMstruct effect;
-        effect.mEffectID = static_cast<int16_t>(ingredient->mData.mEffectID[index]);
+        effect.mEffectID = ingredient->mData.mEffectID[index];
         effect.mSkill = static_cast<signed char>(ingredient->mData.mSkills[index]);
         effect.mAttribute = static_cast<signed char>(ingredient->mData.mAttributes[index]);
         effect.mRange = ESM::RT_Self;

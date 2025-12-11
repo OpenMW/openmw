@@ -350,12 +350,14 @@ namespace MWMechanics
         if (godmode)
             return;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        static const std::array<ESM::MagicEffectId, 3> elementalShieldEffects{ ESM::MagicEffect::FireShield,
+            ESM::MagicEffect::LightningShield, ESM::MagicEffect::FrostShield };
         for (int i = 0; i < 3; ++i)
         {
             float magnitude = victim.getClass()
                                   .getCreatureStats(victim)
                                   .getMagicEffects()
-                                  .getOrDefault(ESM::MagicEffect::FireShield + i)
+                                  .getOrDefault(elementalShieldEffects[i])
                                   .getMagnitude();
 
             if (!magnitude)
@@ -375,7 +377,7 @@ namespace MWMechanics
 
             float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99(prng));
 
-            short element = ESM::MagicEffect::FireDamage;
+            ESM::MagicEffectId element = ESM::MagicEffect::FireDamage;
             if (i == 1)
                 element = ESM::MagicEffect::ShockDamage;
             if (i == 2)

@@ -28,7 +28,7 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
-        std::map<int, std::vector<MagicEffectInfo>> effects;
+        std::map<ESM::RefId, std::vector<MagicEffectInfo>> effects;
         for (const auto& params : stats.getActiveSpells())
         {
             for (const auto& effect : params.getEffects())
@@ -154,7 +154,7 @@ namespace MWGui
                         Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(effect->mIcon),
                             *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-                    const std::string& name = ESM::MagicEffect::indexToGmstString(effectId);
+                    const std::string& name = std::string(ESM::MagicEffect::refIdToGmstString(effectId));
 
                     ToolTipInfo tooltipInfo;
                     tooltipInfo.caption = "#{" + name + "}";

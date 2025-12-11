@@ -98,7 +98,7 @@ namespace MWGui
         static void createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId);
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
-        static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
+        static void createMagicEffectToolTip(MyGUI::Widget* widget, const ESM::RefId& id);
 
         bool checkOwned();
         /// Returns True if taking mFocusObject would be crime

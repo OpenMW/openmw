@@ -954,11 +954,11 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "ClassToolTip");
     }
 
-    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
+    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, const ESM::RefId& id)
     {
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(id);
-        const std::string& name = ESM::MagicEffect::indexToGmstString(id);
+        const std::string& name = std::string(ESM::MagicEffect::refIdToGmstString(id));
 
         std::string icon = effect->mIcon;
         icon.insert(icon.rfind('\\') + 1, "b_");

@@ -3108,7 +3108,7 @@ namespace MWWorld
         const MWWorld::Class& cls = ptr.getClass();
         if (cls.isActor())
         {
-            std::set<ESM::MagicEffectId> playing;
+            std::set<ESM::RefId> playing;
             for (const auto& params : cls.getCreatureStats(ptr).getActiveSpells())
             {
                 for (const auto& effect : params.getEffects())

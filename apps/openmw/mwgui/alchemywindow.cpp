@@ -459,9 +459,9 @@ namespace MWGui
         for (const MWMechanics::EffectKey& effectKey : effectIds)
         {
             Widgets::SpellEffectParams params;
-            params.mEffectID = static_cast<short>(effectKey.mId);
+            params.mEffectID = effectKey.mId;
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectKey.mId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(effectKey.mId);
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 params.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)

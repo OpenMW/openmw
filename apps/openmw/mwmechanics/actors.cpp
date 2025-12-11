@@ -796,7 +796,7 @@ namespace MWMechanics
                     continue;
                 for (const auto& effect : spell.getEffects())
                 {
-                    static const std::array<int, 7> damageEffects{
+                    static const std::array<ESM::MagicEffectId, 7> damageEffects{
                         ESM::MagicEffect::FireDamage,
                         ESM::MagicEffect::ShockDamage,
                         ESM::MagicEffect::FrostDamage,
