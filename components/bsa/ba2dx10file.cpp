@@ -157,7 +157,7 @@ namespace Bsa
             return std::nullopt; // folder not found
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = generateExtensionHash(path.filename());
+        uint32_t extHash = generateExtensionHash(path.extension().value());
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return std::nullopt; // file not found

@@ -331,7 +331,7 @@ namespace Bsa
     {
         if (str.empty())
             return 0;
-        const auto at = [&](std::size_t i) -> char {
+        const auto at = [&](std::size_t i) -> unsigned char {
             const char c = str[i];
             if (c == '/')
                 return '\\';
@@ -361,7 +361,7 @@ namespace Bsa
         else if (extension == ".wav")
             result |= 0x80000000;
         uint32_t hash = 0;
-        for (const auto& c : extension)
+        for (unsigned char c : extension)
             hash = hash * 0x1003f + c;
         result += static_cast<uint64_t>(hash) << 32;
         return result;

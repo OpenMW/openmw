@@ -1,7 +1,5 @@
 #include "ba2file.hpp"
 
-#include <components/misc/pathhelpers.hpp>
-
 namespace Bsa
 {
     constexpr const uint32_t crc32table[256] = { 0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -37,29 +35,22 @@ namespace Bsa
     uint32_t generateHash(std::string_view name)
     {
         uint32_t result = 0;
-        for (auto c : name)
+        for (unsigned char c : name)
         {
-            if (uint8_t(c) > 127)
+            if (c > 127)
                 continue;
             if (c == '/')
                 c = '\\';
-            result = (result >> 8) ^ crc32table[(result ^ (unsigned)(c)) & 0xFF];
+            result = (result >> 8) ^ crc32table[(result ^ c) & 0xFF];
         }
         return result;
     }
 
-    uint32_t generateExtensionHash(VFS::Path::NormalizedView file)
+    uint32_t generateExtensionHash(std::string_view extension)
     {
-        std::string_view extension;
-        if (const std::size_t pos = Misc::findExtension(file.value()); pos != std::string_view::npos)
-        {
-            // ext including .
-            extension = file.value();
-            extension.remove_prefix(pos);
-        }
         uint32_t result = 0;
-        for (size_t i = 0; i < 4 && i < extension.size() - 1; i++)
-            result |= static_cast<uint8_t>(extension[i + 1]) << (8 * i);
+        for (size_t i = 0; i < 3 && i < extension.size(); i++)
+            result |= static_cast<uint8_t>(extension[i]) << (8 * i);
         return result;
     }
 
