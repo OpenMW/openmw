@@ -5,7 +5,7 @@ If you're reporting an issue specific to an OpenMW fork:
 - OpenMW-VR: Report at https://gitlab.com/madsbuvi/openmw/-/issues
 
 Mod list issues or mod installer issues do not belong here.
-If reporting an issue with a specific Merge Request, comment on the MR itself.
+If reporting an issue with a specific open Merge Request, comment on the MR itself.
 -->
 
 ## Issue Description
