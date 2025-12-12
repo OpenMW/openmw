@@ -338,5 +338,23 @@ namespace VFS::Path
             const NormalizedView value("foo");
             EXPECT_EQ(value.filename(), "foo");
         }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldOmitPathAndExtension)
+        {
+            const NormalizedView value("foo/bar.a");
+            EXPECT_EQ(value.stem(), "bar");
+        }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldReturnSameValueForPathWithSingleComponent)
+        {
+            const NormalizedView value("foo");
+            EXPECT_EQ(value.stem(), "foo");
+        }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldIncludeDotsBeforeTheExtension)
+        {
+            const NormalizedView value("last voyage of the u.s.s. constitution.swf");
+            EXPECT_EQ(value.stem(), "last voyage of the u.s.s. constitution");
+        }
     }
 }
