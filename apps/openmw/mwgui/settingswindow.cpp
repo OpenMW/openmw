@@ -22,7 +22,6 @@
 #include <components/lua_ui/scriptsettings.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/display.hpp>
-#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -404,14 +403,14 @@ namespace MWGui
         constexpr VFS::Path::NormalizedView l10n("l10n/");
         for (const auto& path : vfs->getRecursiveDirectoryIterator(l10n))
         {
-            if (Misc::getFileExtension(path) == "yaml")
+            if (path.extension() == "yaml")
             {
-                std::string localeName(Misc::stemFile(path));
+                std::string_view localeName(path.stem());
                 if (localeName == "gmst")
                     continue; // fake locale to get gmst strings from content files
                 if (std::find(availableLanguages.begin(), availableLanguages.end(), localeName)
                     == availableLanguages.end())
-                    availableLanguages.push_back(std::move(localeName));
+                    availableLanguages.emplace_back(localeName);
             }
         }
 
