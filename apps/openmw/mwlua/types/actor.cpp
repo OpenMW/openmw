@@ -426,9 +426,11 @@ namespace MWLua
             return ptr.getClass().getCreatureStats(ptr).getGoldPool();
         };
 
-        actor["setBarterGold"] = [context](const SelfObject& object, int gold) {
+        actor["setBarterGold"] = [context](const Object& object, int gold) {
             if (gold < 0)
                 throw std::runtime_error("Barter gold must be positive");
+            if (dynamic_cast<const GObject*>(&object) == nullptr && dynamic_cast<const SelfObject*>(&object) == nullptr)
+                throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
             context.mLuaManager->addAction(
                 [obj = Object(object), gold] {
                     const MWWorld::Ptr ptr = obj.ptr();
