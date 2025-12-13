@@ -39,7 +39,23 @@ namespace Files::Wine
                 std::string mwpath = line.substr(keyStart.size(), line.rfind('"') - keyStart.size());
                 if (mwpath.empty())
                     break;
-                std::ranges::replace(mwpath, '\\', '/');
+                // Unescape path
+                for (auto it = mwpath.begin(); it != mwpath.end();)
+                {
+                    if (*it != '\\')
+                    {
+                        ++it;
+                        continue;
+                    }
+                    it = mwpath.erase(it);
+                    if (it == mwpath.end())
+                        break;
+                    char& c = *it;
+                    if (c == '\\')
+                        c = '/';
+                    // In theory we should probably handle \r, \n, \0, etc.
+                    ++it;
+                }
                 // Change drive letter to lowercase, so we could use ~/.wine/dosdevices symlinks
                 mwpath[0] = Misc::StringUtils::toLower(mwpath[0]);
                 std::filesystem::path installPath = homePath / ".wine/dosdevices/" / mwpath;
