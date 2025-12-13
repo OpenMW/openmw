@@ -283,6 +283,61 @@ namespace
                   }
                   return sol::optional<std::string_view>(rec.mResultScript);
               });
+        recordInfoBindingsClass["conditions"]
+            = sol::readonly_property([lua = lua.lua_state()](const ESM::DialInfo& rec) -> sol::object {
+                  if (rec.mData.mType == ESM::Dialogue::Type::Journal)
+                      return sol::nil;
+                  sol::table res(lua, sol::create);
+                  for (const ESM::DialogueCondition& condition : rec.mSelects)
+                      res.add(&condition);
+                  return res;
+              });
+    }
+
+    void prepareBindingsForDialogueConditions(sol::state_view& lua)
+    {
+        auto conditionBindingsClass = lua.new_usertype<ESM::DialogueCondition>("ESM3_Dialogue_Info_Condition");
+        conditionBindingsClass["type"] = sol::readonly_property(
+            [](const ESM::DialogueCondition& condition) -> int { return condition.mFunction; });
+        conditionBindingsClass["operator"] = sol::readonly_property(
+            [](const ESM::DialogueCondition& condition) -> int { return condition.mComparison; });
+        conditionBindingsClass["value"] = sol::readonly_property([](const ESM::DialogueCondition& condition) -> double {
+            return std::visit([](auto value) -> double { return value; }, condition.mValue);
+        });
+        conditionBindingsClass["recordId"]
+            = sol::readonly_property([](const ESM::DialogueCondition& condition) -> ESM::RefId {
+                  switch (condition.mFunction)
+                  {
+                      case ESM::DialogueCondition::Function::Function_Journal:
+                      case ESM::DialogueCondition::Function::Function_Item:
+                      case ESM::DialogueCondition::Function::Function_Dead:
+                      case ESM::DialogueCondition::Function::Function_NotId:
+                      case ESM::DialogueCondition::Function::Function_NotFaction:
+                      case ESM::DialogueCondition::Function::Function_NotClass:
+                      case ESM::DialogueCondition::Function::Function_NotRace:
+                          return ESM::StringRefId(condition.mVariable);
+                      default:
+                          return {};
+                  }
+              });
+        conditionBindingsClass["variableName"]
+            = sol::readonly_property([](const ESM::DialogueCondition& condition) -> std::optional<std::string> {
+                  switch (condition.mFunction)
+                  {
+                      case ESM::DialogueCondition::Function::Function_Global:
+                      case ESM::DialogueCondition::Function::Function_Local:
+                      case ESM::DialogueCondition::Function::Function_NotLocal:
+                          return Misc::StringUtils::lowerCase(condition.mVariable);
+                      default:
+                          return {};
+                  }
+              });
+        conditionBindingsClass["cellName"]
+            = sol::readonly_property([](const ESM::DialogueCondition& condition) -> std::optional<std::string_view> {
+                  if (condition.mFunction == ESM::DialogueCondition::Function::Function_NotCell)
+                      return condition.mVariable;
+                  return {};
+              });
     }
 
     void prepareBindingsForDialogueRecords(sol::state_view& lua)
@@ -290,6 +345,7 @@ namespace
         prepareBindingsForDialogueRecord(lua);
         prepareBindingsForDialogueRecordInfoList(lua);
         prepareBindingsForDialogueRecordInfoListElement(lua);
+        prepareBindingsForDialogueConditions(lua);
     }
 }
 
@@ -309,6 +365,10 @@ namespace sol
     };
     template <>
     struct is_automagical<ESM::DialInfo> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::DialogueCondition> : std::false_type
     {
     };
 }
@@ -337,6 +397,96 @@ namespace MWLua
         api["voice"] = LuaUtil::makeStrictReadOnly(voiceTable);
 
         prepareBindingsForDialogueRecords(lua);
+
+        api["CONDITION_OPERATOR"] = LuaUtil::makeStrictReadOnly(
+            lua.create_table_with("Equal", ESM::DialogueCondition::Comparison::Comp_Eq, "NotEqual",
+                ESM::DialogueCondition::Comparison::Comp_Ne, "Greater", ESM::DialogueCondition::Comparison::Comp_Gt,
+                "GreaterEqual", ESM::DialogueCondition::Comparison::Comp_Ge, "Less",
+                ESM::DialogueCondition::Comparison::Comp_Ls, "LessEqual", ESM::DialogueCondition::Comparison::Comp_Le));
+        api["CONDITION_TYPE"] = LuaUtil::makeStrictReadOnly(lua.create_table_with("FacReactionLowest",
+            ESM::DialogueCondition::Function::Function_FacReactionLowest, "FacReactionHighest",
+            ESM::DialogueCondition::Function::Function_FacReactionHighest, "RankRequirement",
+            ESM::DialogueCondition::Function::Function_RankRequirement, "Reputation",
+            ESM::DialogueCondition::Function::Function_Reputation, "HealthPercent",
+            ESM::DialogueCondition::Function::Function_Health_Percent, "PcReputation",
+            ESM::DialogueCondition::Function::Function_PcReputation, "PcLevel",
+            ESM::DialogueCondition::Function::Function_PcLevel, "PcHealthPercent",
+            ESM::DialogueCondition::Function::Function_PcHealthPercent, "PcMagicka",
+            ESM::DialogueCondition::Function::Function_PcMagicka, "PcFatigue",
+            ESM::DialogueCondition::Function::Function_PcFatigue, "PcStrength",
+            ESM::DialogueCondition::Function::Function_PcStrength, "PcBlock",
+            ESM::DialogueCondition::Function::Function_PcBlock, "PcArmorer",
+            ESM::DialogueCondition::Function::Function_PcArmorer, "PcMediumArmor",
+            ESM::DialogueCondition::Function::Function_PcMediumArmor, "PcHeavyArmor",
+            ESM::DialogueCondition::Function::Function_PcHeavyArmor, "PcBluntWeapon",
+            ESM::DialogueCondition::Function::Function_PcBluntWeapon, "PcLongBlade",
+            ESM::DialogueCondition::Function::Function_PcLongBlade, "PcAxe",
+            ESM::DialogueCondition::Function::Function_PcAxe, "PcSpear",
+            ESM::DialogueCondition::Function::Function_PcSpear, "PcAthletics",
+            ESM::DialogueCondition::Function::Function_PcAthletics, "PcEnchant",
+            ESM::DialogueCondition::Function::Function_PcEnchant, "PcDestruction",
+            ESM::DialogueCondition::Function::Function_PcDestruction, "PcAlteration",
+            ESM::DialogueCondition::Function::Function_PcAlteration, "PcIllusion",
+            ESM::DialogueCondition::Function::Function_PcIllusion, "PcConjuration",
+            ESM::DialogueCondition::Function::Function_PcConjuration, "PcMysticism",
+            ESM::DialogueCondition::Function::Function_PcMysticism, "PcRestoration",
+            ESM::DialogueCondition::Function::Function_PcRestoration, "PcAlchemy",
+            ESM::DialogueCondition::Function::Function_PcAlchemy, "PcUnarmored",
+            ESM::DialogueCondition::Function::Function_PcUnarmored, "PcSecurity",
+            ESM::DialogueCondition::Function::Function_PcSecurity, "PcSneak",
+            ESM::DialogueCondition::Function::Function_PcSneak, "PcAcrobatics",
+            ESM::DialogueCondition::Function::Function_PcAcrobatics, "PcLightArmor",
+            ESM::DialogueCondition::Function::Function_PcLightArmor, "PcShortBlade",
+            ESM::DialogueCondition::Function::Function_PcShortBlade, "PcMarksman",
+            ESM::DialogueCondition::Function::Function_PcMarksman, "PcMercantile",
+            ESM::DialogueCondition::Function::Function_PcMerchantile, "PcSpeechcraft",
+            ESM::DialogueCondition::Function::Function_PcSpeechcraft, "PcHandToHand",
+            ESM::DialogueCondition::Function::Function_PcHandToHand, "PcGender",
+            ESM::DialogueCondition::Function::Function_PcGender, "PcExpelled",
+            ESM::DialogueCondition::Function::Function_PcExpelled, "PcCommonDisease",
+            ESM::DialogueCondition::Function::Function_PcCommonDisease, "PcBlightDisease",
+            ESM::DialogueCondition::Function::Function_PcBlightDisease, "PcClothingModifier",
+            ESM::DialogueCondition::Function::Function_PcClothingModifier, "PcCrimeLevel",
+            ESM::DialogueCondition::Function::Function_PcCrimeLevel, "SameGender",
+            ESM::DialogueCondition::Function::Function_SameSex, "SameRace",
+            ESM::DialogueCondition::Function::Function_SameRace, "SameFaction",
+            ESM::DialogueCondition::Function::Function_SameFaction, "FactionRankDifference",
+            ESM::DialogueCondition::Function::Function_FactionRankDifference, "Detected",
+            ESM::DialogueCondition::Function::Function_Detected, "Alarmed",
+            ESM::DialogueCondition::Function::Function_Alarmed, "Choice",
+            ESM::DialogueCondition::Function::Function_Choice, "PcIntelligence",
+            ESM::DialogueCondition::Function::Function_PcIntelligence, "PcWillpower",
+            ESM::DialogueCondition::Function::Function_PcWillpower, "PcAgility",
+            ESM::DialogueCondition::Function::Function_PcAgility, "PcSpeed",
+            ESM::DialogueCondition::Function::Function_PcSpeed, "PcEndurance",
+            ESM::DialogueCondition::Function::Function_PcEndurance, "PcPersonality",
+            ESM::DialogueCondition::Function::Function_PcPersonality, "PcLuck",
+            ESM::DialogueCondition::Function::Function_PcLuck, "PcCorprus",
+            ESM::DialogueCondition::Function::Function_PcCorprus, "Weather",
+            ESM::DialogueCondition::Function::Function_Weather, "PcVampire",
+            ESM::DialogueCondition::Function::Function_PcVampire, "Level",
+            ESM::DialogueCondition::Function::Function_Level, "Attacked",
+            ESM::DialogueCondition::Function::Function_Attacked, "TalkedToPc",
+            ESM::DialogueCondition::Function::Function_TalkedToPc, "PcHealth",
+            ESM::DialogueCondition::Function::Function_PcHealth, "CreatureTarget",
+            ESM::DialogueCondition::Function::Function_CreatureTarget, "FriendHit",
+            ESM::DialogueCondition::Function::Function_FriendHit, "Fight",
+            ESM::DialogueCondition::Function::Function_Fight, "Hello", ESM::DialogueCondition::Function::Function_Hello,
+            "Alarm", ESM::DialogueCondition::Function::Function_Alarm, "Flee",
+            ESM::DialogueCondition::Function::Function_Flee, "ShouldAttack",
+            ESM::DialogueCondition::Function::Function_ShouldAttack, "Werewolf",
+            ESM::DialogueCondition::Function::Function_Werewolf, "PcWerewolfKills",
+            ESM::DialogueCondition::Function::Function_PcWerewolfKills, "Global",
+            ESM::DialogueCondition::Function::Function_Global, "Local",
+            ESM::DialogueCondition::Function::Function_Local, "Journal",
+            ESM::DialogueCondition::Function::Function_Journal, "Item", ESM::DialogueCondition::Function::Function_Item,
+            "Dead", ESM::DialogueCondition::Function::Function_Dead, "NotId",
+            ESM::DialogueCondition::Function::Function_NotId, "NotFaction",
+            ESM::DialogueCondition::Function::Function_NotFaction, "NotClass",
+            ESM::DialogueCondition::Function::Function_NotClass, "NotRace",
+            ESM::DialogueCondition::Function::Function_NotRace, "NotCell",
+            ESM::DialogueCondition::Function::Function_NotCell, "NotLocal",
+            ESM::DialogueCondition::Function::Function_NotLocal));
 
         return LuaUtil::makeReadOnly(api);
     }
