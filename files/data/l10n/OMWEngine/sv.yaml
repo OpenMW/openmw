@@ -12,7 +12,7 @@ PhysicsProfiler: "Fysikprofilerare"
 
 # Messages
 
-AskLoadLastSave: "Den senaste sparfilen är '{save}'. Vill du ladda den?"
+AskLoadLastSave: "Den senaste sparfilen är ''{save}''. Vill du ladda den?"
 BuildingNavigationMesh: "Bygger navigeringsmesh"
 InitializingData: "Initialiserar data..."
 LoadingExterior: "Laddar område"

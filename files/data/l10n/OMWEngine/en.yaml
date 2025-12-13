@@ -12,7 +12,7 @@ PhysicsProfiler: "Physics Profiler"
 
 # Messages
 
-AskLoadLastSave: "The most recent save is '{save}'. Do you want to load it?"
+AskLoadLastSave: "The most recent save is ''{save}''. Do you want to load it?"
 BuildingNavigationMesh: "Building Navigation Mesh"
 InitializingData: "Initializing Data..."
 LoadingExterior: "Loading Area"

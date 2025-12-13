@@ -12,7 +12,7 @@ PhysicsProfiler: "Профилировщик физики"
 
 # Messages
 
-AskLoadLastSave: "Последнее сохранение - '{save}'. Загрузить?"
+AskLoadLastSave: "Последнее сохранение - ''{save}''. Загрузить?"
 BuildingNavigationMesh: "Построение навигационной сетки"
 InitializingData: "Загрузка..."
 LoadingExterior: "Загрузка области"

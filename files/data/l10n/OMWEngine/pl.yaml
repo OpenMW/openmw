@@ -12,7 +12,7 @@ PhysicsProfiler: "Profilowanie fizyki"
 
 # Messages
 
-AskLoadLastSave: "Ostatni zapis to '{save}'. Czy chcesz go wczytać?"
+AskLoadLastSave: "Ostatni zapis to ''{save}''. Czy chcesz go wczytać?"
 BuildingNavigationMesh: "Tworzenie siatki nawigacyjnej"
 InitializingData: "Inicjalizacja..."
 LoadingExterior: "Wczytywanie obszaru zewnętrznego"

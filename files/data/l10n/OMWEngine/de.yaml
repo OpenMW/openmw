@@ -12,7 +12,7 @@ PhysicsProfiler: "Physik-Profiler"
 
 # Messages
 
-AskLoadLastSave: "Der aktuellste Spielstand ist '{save}'. Soll er geladen werden?"
+AskLoadLastSave: "Der aktuellste Spielstand ist ''{save}''. Soll er geladen werden?"
 BuildingNavigationMesh: "Erstelle Navigationsgitter..."
 InitializingData: "Initialisiere Daten..."
 LoadingExterior: "Lade Bereich..."

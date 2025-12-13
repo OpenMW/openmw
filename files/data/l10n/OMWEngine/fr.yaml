@@ -13,7 +13,7 @@ PhysicsProfiler: "Profileur des performances de la physique"
 # Messages
 
 BuildingNavigationMesh: "Construction du mesh de navigation"
-AskLoadLastSave: "La sauvegarde la plus récente est '{save}'. Voulez-vous la charger ?"
+AskLoadLastSave: "La sauvegarde la plus récente est ''{save}''. Voulez-vous la charger ?"
 InitializingData: "Initialisation des données..."
 LoadingExterior: "Chargement de la zone de jeu"
 LoadingFailed: "Échec du chargement de la sauvegarde"
