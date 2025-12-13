@@ -439,7 +439,7 @@ namespace MWLua
             ESM::DialogueCondition::Function::Function_PcLightArmor, "PcShortBlade",
             ESM::DialogueCondition::Function::Function_PcShortBlade, "PcMarksman",
             ESM::DialogueCondition::Function::Function_PcMarksman, "PcMercantile",
-            ESM::DialogueCondition::Function::Function_PcMerchantile, "PcSpeechcraft",
+            ESM::DialogueCondition::Function::Function_PcMercantile, "PcSpeechcraft",
             ESM::DialogueCondition::Function::Function_PcSpeechcraft, "PcHandToHand",
             ESM::DialogueCondition::Function::Function_PcHandToHand, "PcGender",
             ESM::DialogueCondition::Function::Function_PcGender, "PcExpelled",
