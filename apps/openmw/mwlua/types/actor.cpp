@@ -421,6 +421,22 @@ namespace MWLua
             return ptr.getClass().getCapacity(ptr);
         };
 
+        actor["getBarterGold"] = [](const Object& object) -> int {
+            const MWWorld::Ptr ptr = object.ptr();
+            return ptr.getClass().getCreatureStats(ptr).getGoldPool();
+        };
+
+        actor["setBarterGold"] = [context](const SelfObject& object, int gold) {
+            if (gold < 0)
+                throw std::runtime_error("Barter gold must be positive");
+            context.mLuaManager->addAction(
+                [obj = Object(object), gold] {
+                    const MWWorld::Ptr ptr = obj.ptr();
+                    ptr.getClass().getCreatureStats(ptr).setGoldPool(gold);
+                },
+                "SetBarterGoldAction");
+        };
+
         actor["_onHit"] = [context](const SelfObject& self, const sol::table& options) {
             sol::optional<sol::table> damageLua = options.get<sol::optional<sol::table>>("damage");
             std::map<std::string, float> damageCpp;
