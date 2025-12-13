@@ -580,7 +580,7 @@ namespace MWScript
                 runtime.pop();
 
                 if (ptr.getClass().isActor())
-                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ptr, effectId);
+                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ptr, ESM::MagicEffect::indexToRefId(static_cast<int>(effectId)));
             }
         };
 
@@ -1262,13 +1262,13 @@ namespace MWScript
         template <class R>
         class OpGetMagicEffect : public Interpreter::Opcode0
         {
-            int mPositiveEffect;
-            int mNegativeEffect;
+            ESM::RefId mPositiveEffect;
+            ESM::RefId mNegativeEffect;
 
         public:
             OpGetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(positiveEffect)
-                , mNegativeEffect(negativeEffect)
+                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
+                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
             {
             }
 
@@ -1284,7 +1284,7 @@ namespace MWScript
 
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
-                if (mNegativeEffect != -1)
+                if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
                 // GetResist* should take in account elemental shields
@@ -1303,13 +1303,13 @@ namespace MWScript
         template <class R>
         class OpSetMagicEffect : public Interpreter::Opcode0
         {
-            int mPositiveEffect;
-            int mNegativeEffect;
+            ESM::RefId mPositiveEffect;
+            ESM::RefId mNegativeEffect;
 
         public:
             OpSetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(positiveEffect)
-                , mNegativeEffect(negativeEffect)
+                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
+                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
             {
             }
 
@@ -1325,7 +1325,7 @@ namespace MWScript
 
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                 float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
-                if (mNegativeEffect != -1)
+                if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
                 // SetResist* should take in account elemental shields
@@ -1343,13 +1343,13 @@ namespace MWScript
         template <class R>
         class OpModMagicEffect : public Interpreter::Opcode0
         {
-            int mPositiveEffect;
-            int mNegativeEffect;
+            ESM::RefId mPositiveEffect;
+            ESM::RefId mNegativeEffect;
 
         public:
             OpModMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(positiveEffect)
-                , mNegativeEffect(negativeEffect)
+                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
+                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
             {
             }
 
@@ -1415,8 +1415,8 @@ namespace MWScript
 
         struct MagicEffect
         {
-            int mPositiveEffect;
-            int mNegativeEffect;
+            ESM::RefId mPositiveEffect;
+            ESM::RefId mNegativeEffect;
         };
 
         void installOpcodes(Interpreter::Interpreter& interpreter)
@@ -1569,36 +1569,36 @@ namespace MWScript
             interpreter.installSegment5<OpGetStat<ExplicitRef>>(Compiler::Stats::opcodeGetStatExplicit);
 
             static const MagicEffect sMagicEffects[] = {
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistMagicka), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToMagicka) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistFire), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToFire) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistFrost), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToFrost) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistShock), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToShock) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistCommonDisease), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToCommonDisease) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistBlightDisease), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToBlightDisease) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistCorprusDisease), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToCorprusDisease) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistPoison), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToPoison) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistParalysis), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::ResistNormalWeapons), ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WeaknessToNormalWeapons) },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WaterBreathing), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Chameleon), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::WaterWalking), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::SwiftSwim), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Jump), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Levitate), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Shield), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Sound), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Silence), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Blind), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Paralyze), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Invisibility), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::FortifyAttack), -1 },
-                { ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::Sanctuary), -1 },
+                { ESM::MagicEffect::ResistMagicka, ESM::MagicEffect::WeaknessToMagicka },
+                { ESM::MagicEffect::ResistFire, ESM::MagicEffect::WeaknessToFire },
+                { ESM::MagicEffect::ResistFrost, ESM::MagicEffect::WeaknessToFrost },
+                { ESM::MagicEffect::ResistShock, ESM::MagicEffect::WeaknessToShock },
+                { ESM::MagicEffect::ResistCommonDisease, ESM::MagicEffect::WeaknessToCommonDisease },
+                { ESM::MagicEffect::ResistBlightDisease, ESM::MagicEffect::WeaknessToBlightDisease },
+                { ESM::MagicEffect::ResistCorprusDisease, ESM::MagicEffect::WeaknessToCorprusDisease },
+                { ESM::MagicEffect::ResistPoison, ESM::MagicEffect::WeaknessToPoison },
+                { ESM::MagicEffect::ResistParalysis, ESM::RefId() },
+                { ESM::MagicEffect::ResistNormalWeapons, ESM::MagicEffect::WeaknessToNormalWeapons },
+                { ESM::MagicEffect::WaterBreathing, ESM::RefId() },
+                { ESM::MagicEffect::Chameleon, ESM::RefId() },
+                { ESM::MagicEffect::WaterWalking, ESM::RefId() },
+                { ESM::MagicEffect::SwiftSwim, ESM::RefId() },
+                { ESM::MagicEffect::Jump, ESM::RefId() },
+                { ESM::MagicEffect::Levitate, ESM::RefId() },
+                { ESM::MagicEffect::Shield, ESM::RefId() },
+                { ESM::MagicEffect::Sound, ESM::RefId() },
+                { ESM::MagicEffect::Silence, ESM::RefId() },
+                { ESM::MagicEffect::Blind, ESM::RefId() },
+                { ESM::MagicEffect::Paralyze, ESM::RefId() },
+                { ESM::MagicEffect::Invisibility, ESM::RefId() },
+                { ESM::MagicEffect::FortifyAttack, ESM::RefId() },
+                { ESM::MagicEffect::Sanctuary, ESM::RefId() },
             };
 
             for (int i = 0; i < 24; ++i)
             {
-                int positive = sMagicEffects[i].mPositiveEffect;
-                int negative = sMagicEffects[i].mNegativeEffect;
+                int positive = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mPositiveEffect);
+                int negative = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mNegativeEffect);
 
                 interpreter.installSegment5<OpGetMagicEffect<ImplicitRef>>(
                     Compiler::Stats::opcodeGetMagicEffect + i, positive, negative);

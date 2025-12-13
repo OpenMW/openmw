@@ -153,7 +153,7 @@ namespace
         int i = 0;
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID)) << " ("
+            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
                       << effect.mData.mEffectID << ")" << std::endl;
             if (effect.mData.mSkill != -1)
                 std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
@@ -973,9 +973,7 @@ namespace EsmTool
     template <>
     void Record<ESM::MagicEffect>::print()
     {
-        std::cout << "  Id: " << mData.mId << std::endl;
-        std::cout << "  Index: " << magicEffectLabel(ESM::MagicEffect::refIdToIndex(mData.mId)) << " ("
-                  << ESM::MagicEffect::refIdToIndex(mData.mId) << ")" << std::endl;
+        std::cout << "  Index: " << magicEffectLabel(mData.mIndex) << " (" << mData.mIndex << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
