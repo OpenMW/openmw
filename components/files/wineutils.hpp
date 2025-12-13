@@ -49,11 +49,13 @@ namespace Files::Wine
                     }
                     it = mwpath.erase(it);
                     if (it == mwpath.end())
-                        break;
+                        return {}; // Invalid string
                     char& c = *it;
+                    // Replace \ with /
                     if (c == '\\')
                         c = '/';
-                    // In theory we should probably handle \r, \n, \0, etc.
+                    else // And just give up on any non-\ value
+                        return {};
                     ++it;
                 }
                 // Change drive letter to lowercase, so we could use ~/.wine/dosdevices symlinks
