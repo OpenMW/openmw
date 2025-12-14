@@ -23,7 +23,7 @@ namespace ESM
         esm.getT(mAttribute2);
         esm.getT(mPrimarySkill);
         esm.getT(mFavouredSkill);
-        esm.getT(mFactReaction);
+        esm.getT(mFactReputation);
     }
 
     void RankData::save(ESMWriter& esm) const
@@ -32,7 +32,7 @@ namespace ESM
         esm.writeT(mAttribute2);
         esm.writeT(mPrimarySkill);
         esm.writeT(mFavouredSkill);
-        esm.writeT(mFactReaction);
+        esm.writeT(mFactReputation);
     }
 
     void Faction::FADTstruct::load(ESMReader& esm)
@@ -160,7 +160,7 @@ namespace ESM
         {
             mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
             mData.mRankData[i].mPrimarySkill = mData.mRankData[i].mFavouredSkill = 0;
-            mData.mRankData[i].mFactReaction = 0;
+            mData.mRankData[i].mFactReputation = 0;
 
             mRanks[i].clear();
         }

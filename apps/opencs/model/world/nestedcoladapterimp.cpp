@@ -1135,7 +1135,7 @@ namespace CSMWorld
             case 4:
                 return rankData.mFavouredSkill;
             case 5:
-                return rankData.mFactReaction;
+                return rankData.mFactReputation;
             default:
                 throw std::runtime_error("Rank subcolumn index out of range");
         }
@@ -1166,7 +1166,7 @@ namespace CSMWorld
                 rankData.mFavouredSkill = value.toInt();
                 break;
             case 5:
-                rankData.mFactReaction = value.toInt();
+                rankData.mFactReputation = value.toInt();
                 break;
             default:
                 throw std::runtime_error("Rank index out of range");

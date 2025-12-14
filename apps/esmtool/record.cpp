@@ -750,7 +750,7 @@ namespace EsmTool
                 std::cout << "    Attribute2 Requirement: " << mData.mData.mRankData[i].mAttribute2 << std::endl;
                 std::cout << "    One Skill at Level: " << mData.mData.mRankData[i].mPrimarySkill << std::endl;
                 std::cout << "    Two Skills at Level: " << mData.mData.mRankData[i].mFavouredSkill << std::endl;
-                std::cout << "    Faction Reaction: " << mData.mData.mRankData[i].mFactReaction << std::endl;
+                std::cout << "    Faction Reputation: " << mData.mData.mRankData[i].mFactReputation << std::endl;
             }
         for (const auto& reaction : mData.mReactions)
             std::cout << "  Reaction: " << reaction.second << " = " << reaction.first << std::endl;
