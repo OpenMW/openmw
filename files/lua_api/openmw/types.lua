@@ -30,7 +30,7 @@
 
 ---
 -- Set the actor's current barter gold.
--- Can only be used on self in local scripts.
+-- Available in global and local scripts. Can only be used on self in local scripts.
 -- @function [parent=#Actor] setBarterGold
 -- @param openmw.core#GameObject actor
 -- @param #number amount
