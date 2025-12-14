@@ -66,9 +66,9 @@ namespace MWSound
         return nullptr;
     }
 
-    SoundBuffer* SoundBufferPool::lookup(std::string_view fileName) const
+    SoundBuffer* SoundBufferPool::lookup(VFS::Path::NormalizedView fileName) const
     {
-        const auto it = mBufferFileNameMap.find(std::string(fileName));
+        const auto it = mBufferFileNameMap.find(fileName);
         if (it != mBufferFileNameMap.end())
         {
             SoundBuffer* sfx = it->second;
@@ -129,16 +129,14 @@ namespace MWSound
         return loadSfx(sfx);
     }
 
-    SoundBuffer* SoundBufferPool::load(std::string_view fileName)
+    SoundBuffer* SoundBufferPool::load(VFS::Path::NormalizedView fileName)
     {
         SoundBuffer* sfx;
-        const auto it = mBufferFileNameMap.find(std::string(fileName));
+        const auto it = mBufferFileNameMap.find(fileName);
         if (it != mBufferFileNameMap.end())
             sfx = it->second;
         else
-        {
             sfx = insertSound(fileName);
-        }
 
         return loadSfx(sfx);
     }
@@ -157,7 +155,7 @@ namespace MWSound
         mUnusedBuffers.clear();
     }
 
-    SoundBuffer* SoundBufferPool::insertSound(std::string_view fileName)
+    SoundBuffer* SoundBufferPool::insertSound(VFS::Path::NormalizedView fileName)
     {
         static const AudioParams audioParams
             = makeAudioParams(MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>());
