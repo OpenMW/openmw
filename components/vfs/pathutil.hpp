@@ -232,24 +232,20 @@ namespace VFS::Path
             return p;
         }
 
-        std::string_view stem() const
-        {
-            std::string_view stem = mValue;
-            std::size_t pos = stem.find_last_of(separator);
-            if (pos != std::string_view::npos)
-                stem = stem.substr(pos + 1);
-            pos = stem.find_first_of(extensionSeparator);
-            if (pos != std::string_view::npos)
-                stem = stem.substr(0, pos);
-            return stem;
-        }
-
         NormalizedView filename() const
         {
             NormalizedView result(*this);
             if (const std::size_t position = mValue.find_last_of(separator); position != std::string_view::npos)
                 result.mValue.remove_prefix(position + 1);
             return result;
+        }
+
+        std::string_view stem() const
+        {
+            std::string_view stem = filename().value();
+            if (const std::size_t pos = stem.find_last_of(extensionSeparator); pos != std::string_view::npos)
+                stem = stem.substr(0, pos);
+            return stem;
         }
 
         constexpr ExtensionView extension() const
