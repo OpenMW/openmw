@@ -77,16 +77,6 @@ namespace VFS::Path
         return out;
     }
 
-    struct PathCharLess
-    {
-        bool operator()(char x, char y) const { return normalize(x) < normalize(y); }
-    };
-
-    inline bool pathLess(std::string_view x, std::string_view y)
-    {
-        return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end(), PathCharLess());
-    }
-
     inline bool pathEqual(std::string_view x, std::string_view y)
     {
         if (std::size(x) != std::size(y))
@@ -94,13 +84,6 @@ namespace VFS::Path
         return std::equal(
             std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return normalize(l) == normalize(r); });
     }
-
-    struct PathLess
-    {
-        using is_transparent = void;
-
-        bool operator()(std::string_view left, std::string_view right) const { return pathLess(left, right); }
-    };
 
     inline constexpr auto findSeparatorOrExtensionSeparator(auto begin, auto end)
     {
