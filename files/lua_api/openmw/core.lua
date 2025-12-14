@@ -1175,7 +1175,7 @@
 -- @field #DialogueConditionOperator operator The #{#DialogueConditionOperator} to use in the comparison
 -- @field #DialogueConditionType type The condition's @{#DialogueConditionType}
 -- @field #number value The value to compare to
--- @field #string recordId The record id to use in the comparison
+-- @field #string recordId The record ID to use in the comparison
 -- @field #string variableName The name of the global or local mwscript variable to compare to
 -- @field #string cellName The cell name to compare to
 
@@ -1195,6 +1195,7 @@
 -- @field [parent=#Dialogue] #DialogueConditionType CONDITION_TYPE
 
 --- `core.dialogue.CONDITION_TYPE`
+-- @type DialogueConditionType
 -- @field #number FacReactionLowest Lowest faction reaction from the speaker's primary faction to the player's factions
 -- @field #number FacReactionHighest Highest faction reaction from the speaker's primary faction to the player's factions
 -- @field #number RankRequirement Check whether the player can advance in the speaker's primary faction
@@ -1239,8 +1240,8 @@
 -- @field #number PcBlightDisease Check if the player has a blight disease
 -- @field #number PcClothingModifier Check the combined value of the player's outfit
 -- @field #number PcCrimeLevel The player's bounty
--- @field #number SameGender Check if the speaker matches the player
--- @field #number SameRace Check if the speaker matches the player
+-- @field #number SameGender Check if the speaker's gender matches the player's
+-- @field #number SameRace Check if the speaker's race matches the player's
 -- @field #number SameFaction Check if the player is a member of the speaker's primary faction
 -- @field #number FactionRankDifference The difference between the player's rank in the speaker's primary faction and the speaker's
 -- @field #number Detected Whether the speaker has detected the player
@@ -1254,7 +1255,7 @@
 -- @field #number PcPersonality The player's current personality
 -- @field #number PcLuck The player's current luck
 -- @field #number PcCorprus Whether the player is affected by the Corprus magic effect
--- @field #number Weather Checks the scriptId of the player's cell
+-- @field #number Weather Checks the scriptId of the weather in the player's cell
 -- @field #number PcVampire Whether the player is affected by the Vampirism magic effect
 -- @field #number Level The speaker's level
 -- @field #number Attacked Whether the speaker was attacked
@@ -1275,10 +1276,10 @@
 -- @field #number Item The number of copies of @{#DialogueInfoCondition.recordId} the player is carrying
 -- @field #number Dead The number of dead actors of the given @{#DialogueInfoCondition.recordId}
 -- @field #number NotId The speaker's recordId should not match @{#DialogueInfoCondition.recordId}
--- @field #number NotFaction The speaker's faction id should not match @{#DialogueInfoCondition.recordId}
+-- @field #number NotFaction The speaker's faction ID should not match @{#DialogueInfoCondition.recordId}
 -- @field #number NotClass The speaker's class should not match @{#DialogueInfoCondition.recordId}
 -- @field #number NotRace The speaker's race should not match @{#DialogueInfoCondition.recordId}
--- @field #number NotCell Whether the player's cell name starts with @{#DialogueInfoCondition.cellName}
+-- @field #number NotCell The player's cell name should not start with @{#DialogueInfoCondition.cellName}
 -- @field #number NotLocal A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
 
 --- @{#Regions}: Regions
