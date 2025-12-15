@@ -23,6 +23,19 @@
 -- @return #number
 
 ---
+-- Get the actor's current barter gold.
+-- @function [parent=#Actor] getBarterGold
+-- @param openmw.core#GameObject actor
+-- @return #number
+
+---
+-- Set the actor's current barter gold.
+-- Available in global and local scripts. Can only be used on self in local scripts.
+-- @function [parent=#Actor] setBarterGold
+-- @param openmw.core#GameObject actor
+-- @param #number amount
+
+---
 -- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
 -- @param openmw.core#GameObject actor
