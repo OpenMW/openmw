@@ -62,7 +62,7 @@
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
                         <UserString key="SettingLabelWidget" value="DifficultyText"/>
-                        <UserString key="SettingLabelCaption" value="#{OMWEngine:Difficulty} (%s)"/>
+                        <UserString key="SettingLabelCaption" value="DifficultyValue"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{OMWEngine:DifficultyEasy}"/>
@@ -87,7 +87,7 @@
                         <UserString key="SettingMin" value="3584"/>
                         <UserString key="SettingMax" value="7168"/>
                         <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
-                        <UserString key="SettingLabelCaption" value="#{OMWEngine:ActorsProcessingRange} (%s)"/>
+                        <UserString key="SettingLabelCaption" value="ActorsProcessingRangeValue"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{OMWEngine:DistanceLow}"/>
@@ -339,7 +339,7 @@
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
                             <UserString key="SettingLabelWidget" value="FovText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:FieldOfView} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="FieldOfViewValue"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 286 352 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:FieldOfViewLow}"/>
@@ -394,7 +394,7 @@
                             <UserString key="SettingCategory" value="General"/>
                             <UserString key="SettingName" value="anisotropy"/>
                             <UserString key="SettingLabelWidget" value="AnisotropyLabel"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:Anisotropy} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="AnisotropyValue"/>
                         </Widget>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" position="0 104 0 18" align="Left Top" name="RenderDistanceLabel">
@@ -410,7 +410,7 @@
                             <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="7168"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="ViewDistanceValue"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79421"/>
@@ -422,7 +422,7 @@
                             <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="81920"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (x%s)"/>
+                            <UserString key="SettingLabelCaption" value="ViewDistanceValueCells"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 148 352 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:DistanceLow}"/>
@@ -585,7 +585,7 @@
                             <UserString key="SettingName" value="max lights"/>
                             <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingLabelWidget" value="MaxLightsText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:MaxLights} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="MaxLightsValue"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="258 28 250 24" align="Left Top" name="MaxLights">
                             <Property key="AddItem" value="8"/>
@@ -659,7 +659,7 @@
                             <UserString key="SettingName" value="maximum light distance"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingLabelWidget" value="MaxLightDistanceText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMaximumDistance} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="LightsMaximumDistanceValue"/>
                         </Widget>
                         <!-- Light Fade Multiplier -->
                         <Widget type="TextBox" skin="NormalText" position="0 182 500 18" align="Left Top" name="LightFadeMultiplierText">
@@ -677,7 +677,7 @@
                             <UserString key="SettingMin" value="0.0"/>
                             <UserString key="SettingMax" value="1.0"/>
                             <UserString key="SettingLabelWidget" value="LightFadeMultiplierText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsFadeStartMultiplier} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="LightsFadeStartMultiplierValue"/>
                         </Widget>
                         <!-- Bounding Sphere Multiplier -->
                         <Widget type="TextBox" skin="NormalText" position="0 230 500 18" align="Left Top" name="BoundingSphereMultText">
@@ -695,7 +695,7 @@
                             <UserString key="SettingName" value="light bounds multiplier"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingLabelWidget" value="BoundingSphereMultText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsBoundingSphereMultiplier} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="LightsBoundingSphereMultiplierValue"/>
                         </Widget>
                         <!-- Minimum Ambient Brightness -->
                         <Widget type="TextBox" skin="NormalText" position="0 278 500 18" align="Left Top" name="MinimumBrightnessText">
@@ -711,7 +711,7 @@
                             <UserString key="SettingName" value="minimum interior brightness"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
-                            <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMinimumInteriorBrightness} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="LightsMinimumInteriorBrightnessValue"/>
                         </Widget>
                         <Widget type="AutoSizedButton" skin="MW_Button" position="0 336 0 0" align="Top Left" name="LightsResetButton">
                             <Property key="Caption" value="#{Interface:Reset}"/>

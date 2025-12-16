@@ -124,10 +124,8 @@ namespace
                 return;
             }
 
-            std::string messageFormat
-                = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "ScreenshotMade");
-
-            std::string message = Misc::StringUtils::format(messageFormat, filePath);
+            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+            std::string message = l10n->formatMessage("ScreenshotMade", { "file" }, { L10n::toUnicode(filePath) });
 
             MWBase::Environment::get().getWindowManager()->scheduleMessageBox(
                 std::move(message), MWGui::ShowInDialogueMode_Never);

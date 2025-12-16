@@ -1,4 +1,7 @@
-AskLoadLastSave: "sLoadLastSaveMsg"
+AskLoadLastSave:
+  pattern: "{gmst:sLoadLastSaveMsg}"
+  variables:
+    - ["save"]
 AudioEffects: "sEffects"
 AudioFootsteps: "sFootsteps"
 AudioMaster: "sMaster"
@@ -20,6 +23,8 @@ DetailLevel: "sDetail_Level"
 DifficultyEasy: "sEasy"
 DifficultyHard: "sHard"
 Difficulty: "sDifficulty"
+DifficultyValue:
+  pattern: "{gmst:sDifficulty} ({value})"
 DistanceHigh: "sFar"
 DistanceLow: "sNear"
 EmptySaveNameError: "sNotifyMessage65"
@@ -59,3 +64,7 @@ TransparencyFull: "sFull"
 TransparencyNone: "sNone"
 Video: "sVideo"
 ViewDistance: "sRender_Distance"
+ViewDistanceValue:
+  pattern: "{gmst:sRender_Distance} ({value, number, ::.00})"
+ViewDistanceValueCells:
+  pattern: "{gmst:sRender_Distance} (×{cells, number, ::.00})"

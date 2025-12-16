@@ -1,7 +1,6 @@
 #include "settingswindow.hpp"
 
 #include <array>
-#include <iomanip>
 
 #include <unicode/locid.h>
 
@@ -24,7 +23,6 @@
 #include <components/misc/display.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -139,6 +137,18 @@ namespace
         else
             box->setIndexSelected(MyGUI::ITEM_NONE);
     }
+
+    void updateSliderLabel(MyGUI::ScrollBar* scroller, MyGUI::TextBox* textBox,
+        const std::vector<icu::UnicodeString>& argNames, const std::vector<icu::Formattable>& args)
+    {
+        if (textBox != nullptr)
+        {
+            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+            std::string labelCaption
+                = l10n->formatMessage(scroller->getUserString("SettingLabelCaption"), argNames, args);
+            textBox->setCaption(labelCaption);
+        }
+    }
 }
 
 namespace MWGui
@@ -163,8 +173,9 @@ namespace MWGui
             if (type == sliderType)
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
-                std::string valueStr;
                 std::string_view valueType = getSettingValueType(current);
+                std::vector<icu::UnicodeString> argNames;
+                std::vector<icu::Formattable> args;
                 if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
@@ -175,21 +186,20 @@ namespace MWGui
                     if (valueType == "Cell")
                     {
                         value = Settings::get<float>(getSettingCategory(current), getSettingName(current));
-                        std::stringstream ss;
-                        ss << std::fixed << std::setprecision(2) << value / Constants::CellSizeInUnits;
-                        valueStr = ss.str();
+                        argNames.emplace_back("cells");
+                        args.emplace_back(value / Constants::CellSizeInUnits);
                     }
                     else if (valueType == "Float")
                     {
                         value = Settings::get<float>(getSettingCategory(current), getSettingName(current));
-                        std::stringstream ss;
-                        ss << std::fixed << std::setprecision(2) << value;
-                        valueStr = ss.str();
+                        argNames.emplace_back("value");
+                        args.emplace_back(value);
                     }
                     else
                     {
                         const int intValue = Settings::get<int>(getSettingCategory(current), getSettingName(current));
-                        valueStr = MyGUI::utility::toString(intValue);
+                        argNames.emplace_back("value");
+                        args.emplace_back(intValue);
                         value = static_cast<float>(intValue);
                     }
 
@@ -201,14 +211,15 @@ namespace MWGui
                 else
                 {
                     const int value = Settings::get<int>(getSettingCategory(current), getSettingName(current));
-                    valueStr = MyGUI::utility::toString(value);
+                    argNames.emplace_back("value");
+                    args.emplace_back(value);
                     scroll->setScrollPosition(value);
                 }
                 if (init)
                     scroll->eventScrollChangePosition
                         += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
                 if (scroll->getVisible())
-                    updateSliderLabel(scroll, valueStr);
+                    updateSliderLabel(scroll, getSliderLabel(scroll), argNames, args);
             }
 
             configureWidgets(current, init);
@@ -225,17 +236,16 @@ namespace MWGui
         }
     }
 
-    void SettingsWindow::updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value)
+    MyGUI::TextBox* SettingsWindow::getSliderLabel(MyGUI::ScrollBar* scroller) const
     {
         auto labelWidgetName = scroller->getUserString("SettingLabelWidget");
         if (!labelWidgetName.empty())
         {
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
-            std::string labelCaption{ scroller->getUserString("SettingLabelCaption") };
-            labelCaption = Misc::StringUtils::format(labelCaption, value);
-            textBox->setCaptionWithReplacing(labelCaption);
+            return textBox;
         }
+        return nullptr;
     }
 
     SettingsWindow::SettingsWindow(Files::ConfigurationManager& cfgMgr)
@@ -719,7 +729,8 @@ namespace MWGui
     {
         if (getSettingType(scroller) == "Slider")
         {
-            std::string valueStr;
+            std::vector<icu::UnicodeString> argNames;
+            std::vector<icu::Formattable> args;
             std::string_view valueType = getSettingValueType(scroller);
             if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
             {
@@ -732,30 +743,31 @@ namespace MWGui
                 if (valueType == "Cell")
                 {
                     Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
-                    std::stringstream ss;
-                    ss << std::fixed << std::setprecision(2) << value / Constants::CellSizeInUnits;
-                    valueStr = ss.str();
+                    argNames.emplace_back("cells");
+                    args.emplace_back(value / Constants::CellSizeInUnits);
                 }
                 else if (valueType == "Float")
                 {
                     Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
-                    std::stringstream ss;
-                    ss << std::fixed << std::setprecision(2) << value;
-                    valueStr = ss.str();
+                    argNames.emplace_back("value");
+                    args.emplace_back(value);
                 }
                 else
                 {
-                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller))
-                        .set(static_cast<int>(value));
-                    valueStr = MyGUI::utility::toString(int(value));
+                    int intValue = static_cast<int>(value);
+                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(intValue);
+                    argNames.emplace_back("value");
+                    args.emplace_back(intValue);
                 }
             }
             else
             {
-                Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(static_cast<int>(pos));
-                valueStr = MyGUI::utility::toString(pos);
+                int intValue = static_cast<int>(pos);
+                Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(intValue);
+                argNames.emplace_back("value");
+                args.emplace_back(intValue);
             }
-            updateSliderLabel(scroller, valueStr);
+            updateSliderLabel(scroller, getSliderLabel(scroller), argNames, args);
 
             apply();
         }
