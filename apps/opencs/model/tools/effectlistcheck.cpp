@@ -26,7 +26,8 @@ namespace CSMTools
             const std::string number = std::to_string(i);
 
             // At the time of writing this effects, attributes and skills are mostly hardcoded
-            if (effect.mData.mEffectID < 0 || effect.mData.mEffectID >= ESM::MagicEffect::Length)
+            int effectIndex = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            if (effectIndex < -1 || effectIndex >= ESM::MagicEffect::Length)
                 messages.add(id, "Effect #" + number + ": invalid effect ID", "", CSMDoc::Message::Severity_Error);
             if (effect.mData.mSkill < -1 || effect.mData.mSkill >= ESM::Skill::Length)
                 messages.add(id, "Effect #" + number + ": invalid skill", "", CSMDoc::Message::Severity_Error);
@@ -68,13 +69,14 @@ namespace CSMTools
 
         for (size_t i = 0; i < 4; i++)
         {
-            if (ingredient.mData.mEffectID[i] == -1)
+            if (ingredient.mData.mEffectID[i].empty())
                 continue;
 
             hasEffects = true;
+            int effectIndex = ESM::MagicEffect::refIdToIndex(ingredient.mData.mEffectID[i]);
 
             const std::string number = std::to_string(i + 1);
-            if (ingredient.mData.mEffectID[i] < -1 || ingredient.mData.mEffectID[i] >= ESM::MagicEffect::Length)
+            if (effectIndex < -1 || effectIndex >= ESM::MagicEffect::Length)
                 messages.add(id, "Effect #" + number + ": invalid effect ID", "", CSMDoc::Message::Severity_Error);
             if (ingredient.mData.mSkills[i] < -1 || ingredient.mData.mSkills[i] >= ESM::Skill::Length)
                 messages.add(id, "Effect #" + number + ": invalid skill", "", CSMDoc::Message::Severity_Error);
