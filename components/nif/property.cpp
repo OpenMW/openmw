@@ -129,7 +129,9 @@ namespace Nif
 
     void BSShaderProperty::read(NIFStream* nif)
     {
-        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_F76 && recType == RC_BSLightingShaderProperty)
+        const bool isF76OrNewer = nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76;
+        const bool isLightingShader = mRecordType == RC_BSLightingShaderProperty;
+        if (!isF76OrNewer && isLightingShader)
             nif->read(mType);
 
         NiShadeProperty::read(nif);
@@ -143,7 +145,7 @@ namespace Nif
             return;
         }
 
-        if (!mName.empty() && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+        if (!mName.empty() && isF76OrNewer)
             return;
 
         if (nif->getBethVersion() <= 131)
@@ -153,7 +155,7 @@ namespace Nif
         }
         else
         {
-            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76 && recType == RC_BSLightingShaderProperty)
+            if (isF76OrNewer && isLightingShader)
             {
                 nif->read(mType);
 

@@ -94,7 +94,7 @@ namespace NifOsg
     {
         if (!keyctrl->mInterpolator.empty())
         {
-            if (keyctrl->mInterpolator->recType == Nif::RC_NiTransformInterpolator)
+            if (keyctrl->mInterpolator->mRecordType == Nif::RC_NiTransformInterpolator)
             {
                 const Nif::NiTransformInterpolator* interp
                     = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
@@ -248,7 +248,7 @@ namespace NifOsg
 
         for (std::size_t i = 0, n = ctrl->mInterpolators.size(); i < n; ++i)
         {
-            if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->recType == Nif::RC_NiFloatInterpolator)
+            if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->mRecordType == Nif::RC_NiFloatInterpolator)
             {
                 auto interpolator = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolators[i].getPtr());
                 mKeyFrames[i] = FloatInterpolator(interpolator);
@@ -346,7 +346,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
+            if (ctrl->mInterpolator->mRecordType != Nif::RC_NiBoolInterpolator)
                 return;
 
             mInterpolator = { static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()) };
@@ -395,7 +395,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
                 mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -441,7 +441,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
                 mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -483,7 +483,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiPoint3Interpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiPoint3Interpolator)
                 mData = Vec3Interpolator(static_cast<const Nif::NiPoint3Interpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -552,7 +552,7 @@ namespace NifOsg
         , mDelta(ctrl->mDelta)
         , mTextures(textures)
     {
-        if (!ctrl->mInterpolator.empty() && ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+        if (!ctrl->mInterpolator.empty() && ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
             mData = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr());
     }
 
