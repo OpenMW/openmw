@@ -7,6 +7,13 @@
 
 namespace Nif
 {
+    namespace
+    {
+        void readBoneTransformGroup(NIFStream& stream, std::vector<bhkPoseArray::BoneTransform>& value)
+        {
+            stream.readVectorOfRecords<uint32_t>(value);
+        }
+    }
 
     /// Non-record data types
 
@@ -566,13 +573,7 @@ namespace Nif
     void bhkPackedNiTriStripsShape::read(NIFStream* nif)
     {
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
-        {
-            uint16_t numSubshapes;
-            nif->read(numSubshapes);
-            mSubshapes.resize(numSubshapes);
-            for (hkSubPartData& subshape : mSubshapes)
-                subshape.read(nif);
-        }
+            nif->readVectorOfRecords<uint16_t>(mSubshapes);
         nif->read(mUserData);
         nif->skip(4); // Unused
         nif->read(mRadius);
@@ -589,12 +590,7 @@ namespace Nif
 
     void hkPackedNiTriStripsData::read(NIFStream* nif)
     {
-        uint32_t numTriangles;
-        nif->read(numTriangles);
-        mTriangles.resize(numTriangles);
-        for (uint32_t i = 0; i < numTriangles; i++)
-            mTriangles[i].read(nif);
-
+        nif->readVectorOfRecords<uint32_t>(mTriangles);
         uint32_t numVertices;
         nif->read(numVertices);
         bool compressed = false;
@@ -605,13 +601,7 @@ namespace Nif
         else
             nif->skip(6 * numVertices); // Half-precision vectors are not currently supported
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
-        {
-            uint16_t numSubshapes;
-            nif->read(numSubshapes);
-            mSubshapes.resize(numSubshapes);
-            for (hkSubPartData& subshape : mSubshapes)
-                subshape.read(nif);
-        }
+            nif->readVectorOfRecords<uint16_t>(mSubshapes);
     }
 
     void bhkSphereRepShape::read(NIFStream* nif)
@@ -733,9 +723,7 @@ namespace Nif
         nif->read(mRadius);
         nif->skip(8); // Unknown
         nif->read(mScale);
-        mShapeProperties.resize(nif->get<uint32_t>());
-        for (bhkWorldObjCInfoProperty& property : mShapeProperties)
-            property.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mShapeProperties);
         nif->skip(12); // Unknown
         readRecordList(nif, mDataList);
     }
@@ -759,11 +747,7 @@ namespace Nif
         mHavokMaterial.read(nif);
         mChildShapeProperty.read(nif);
         mChildFilterProperty.read(nif);
-        uint32_t numFilters;
-        nif->read(numFilters);
-        mHavokFilters.resize(numFilters);
-        for (HavokFilter& filter : mHavokFilters)
-            filter.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mHavokFilters);
     }
 
     void bhkListShape::post(Reader& nif)
@@ -803,35 +787,12 @@ namespace Nif
         nif->skip(nif->get<uint32_t>() * 4); // Unused
         nif->skip(nif->get<uint32_t>() * 4); // Unused
         nif->skip(nif->get<uint32_t>() * 4); // Unused
-
-        uint32_t numMaterials;
-        nif->read(numMaterials);
-        mMaterials.resize(numMaterials);
-        for (bhkMeshMaterial& material : mMaterials)
-            material.read(nif);
-
+        nif->readVectorOfRecords<uint32_t>(mMaterials);
         nif->skip(4); // Unused
-
-        uint32_t numTransforms;
-        nif->read(numTransforms);
-        mChunkTransforms.resize(numTransforms);
-        for (bhkQsTransform& transform : mChunkTransforms)
-            transform.read(nif);
-
+        nif->readVectorOfRecords<uint32_t>(mChunkTransforms);
         nif->readVector(mBigVerts, nif->get<uint32_t>());
-
-        uint32_t numBigTriangles;
-        nif->read(numBigTriangles);
-        mBigTris.resize(numBigTriangles);
-        for (bhkCMSBigTri& tri : mBigTris)
-            tri.read(nif);
-
-        uint32_t numChunks;
-        nif->read(numChunks);
-        mChunks.resize(numChunks);
-        for (bhkCMSChunk& chunk : mChunks)
-            chunk.read(nif);
-
+        nif->readVectorOfRecords<uint32_t>(mBigTris);
+        nif->readVectorOfRecords<uint32_t>(mChunks);
         nif->skip(4); // Unused
     }
 
@@ -910,9 +871,7 @@ namespace Nif
         if (numPivots % 2 != 0)
             throw Nif::Exception(
                 "Invalid number of constraints in bhkBallSocketConstraintChain", nif->getFile().getFilename());
-        mConstraints.resize(numPivots / 2);
-        for (bhkBallAndSocketConstraintCInfo& info : mConstraints)
-            info.read(nif);
+        nif->readVectorOfRecords(numPivots / 2, mConstraints);
         nif->read(mTau);
         nif->read(mDamping);
         nif->read(mConstraintForceMixing);
@@ -1009,9 +968,7 @@ namespace Nif
         nif->read(mFriction);
         nif->read(mRadius);
         mHavokMaterial.read(nif);
-        mConstraints.resize(nif->get<uint32_t>());
-        for (bhkWrappedConstraintData& constraint : mConstraints)
-            constraint.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mConstraints);
     }
 
     void bhkPoseArray::BoneTransform::read(NIFStream* nif)
@@ -1024,13 +981,7 @@ namespace Nif
     void bhkPoseArray::read(NIFStream* nif)
     {
         nif->readVector(mBones, nif->get<uint32_t>());
-        mPoses.resize(nif->get<uint32_t>());
-        for (std::vector<BoneTransform>& pose : mPoses)
-        {
-            pose.resize(nif->get<uint32_t>());
-            for (BoneTransform& transform : pose)
-                transform.read(nif);
-        }
+        nif->readVectorOfRecords<uint32_t>(readBoneTransformGroup, mPoses);
     }
 
 } // Namespace
