@@ -447,6 +447,8 @@ namespace
             refId = ESM::Attribute::Strength;
         else if constexpr (std::is_same_v<RecordType, ESM::Skill>)
             refId = ESM::Skill::Block;
+        else if constexpr (std::is_same_v<RecordType, ESM::MagicEffect>)
+            refId = ESM::MagicEffect::WaterBreathing;
         else
             refId = ESM::StringRefId(stringId);
 

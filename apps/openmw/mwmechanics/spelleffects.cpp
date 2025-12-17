@@ -391,19 +391,22 @@ namespace
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
 
-    static const std::map<ESM::RefId, std::string> sBoundItemsMap{
-        { ESM::MagicEffect::BoundBattleAxe, "sMagicBoundBattleAxeID" },
-        { ESM::MagicEffect::BoundBoots, "sMagicBoundBootsID" },
-        { ESM::MagicEffect::BoundCuirass, "sMagicBoundCuirassID" },
-        { ESM::MagicEffect::BoundDagger, "sMagicBoundDaggerID" },
-        { ESM::MagicEffect::BoundGloves, "sMagicBoundLeftGauntletID" },
-        { ESM::MagicEffect::BoundHelm, "sMagicBoundHelmID" },
-        { ESM::MagicEffect::BoundLongbow, "sMagicBoundLongbowID" },
-        { ESM::MagicEffect::BoundLongsword, "sMagicBoundLongswordID" },
-        { ESM::MagicEffect::BoundMace, "sMagicBoundMaceID" },
-        { ESM::MagicEffect::BoundShield, "sMagicBoundShieldID" },
-        { ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID" },
-    };
+    const std::map<ESM::RefId, std::string>& getBoundItemsMap() {
+        static const std::map<ESM::RefId, std::string> sBoundItemsMap{
+            { ESM::MagicEffect::BoundBattleAxe, "sMagicBoundBattleAxeID" },
+            { ESM::MagicEffect::BoundBoots, "sMagicBoundBootsID" },
+            { ESM::MagicEffect::BoundCuirass, "sMagicBoundCuirassID" },
+            { ESM::MagicEffect::BoundDagger, "sMagicBoundDaggerID" },
+            { ESM::MagicEffect::BoundGloves, "sMagicBoundLeftGauntletID" },
+            { ESM::MagicEffect::BoundHelm, "sMagicBoundHelmID" },
+            { ESM::MagicEffect::BoundLongbow, "sMagicBoundLongbowID" },
+            { ESM::MagicEffect::BoundLongsword, "sMagicBoundLongswordID" },
+            { ESM::MagicEffect::BoundMace, "sMagicBoundMaceID" },
+            { ESM::MagicEffect::BoundShield, "sMagicBoundShieldID" },
+            { ESM::MagicEffect::BoundSpear, "sMagicBoundSpearID" },
+        };
+        return sBoundItemsMap;
+    }
 
     using SpellsPurge = void (MWMechanics::Spells::*)();
     void purgePermanent(const MWWorld::Ptr& target, SpellsPurge method, ESM::Spell::SpellType type)
@@ -668,7 +671,7 @@ namespace MWMechanics
         {
             if (!target.getClass().hasInventoryStore(target))
                 return ESM::ActiveEffect::Flag_Invalid;
-            const std::string& item = sBoundItemsMap.at(effect.mEffectId);
+            const std::string& item = getBoundItemsMap().at(effect.mEffectId);
             const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
             const ESM::RefId itemId = ESM::RefId::stringRefId(gmst.find(item)->mValue.getString());
             if (!addBoundItem(itemId, target))
@@ -1278,7 +1281,7 @@ namespace MWMechanics
         effect.mEffectId == ESM::MagicEffect::BoundBoots ||
         effect.mEffectId == ESM::MagicEffect::BoundShield)
         {
-            const std::string& item = sBoundItemsMap.at(effect.mEffectId);
+            const std::string& item = getBoundItemsMap().at(effect.mEffectId);
             removeBoundItem(
                 ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()),
                 target);

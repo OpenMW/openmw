@@ -172,11 +172,13 @@ namespace MWMechanics
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 
-        if (effect.mEffectID < 0)
+        if (effect.mEffectID.empty())
             return std::nullopt;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
+        const auto magicEffect = store.get<ESM::MagicEffect>().search(effect.mEffectID);
+        if (!magicEffect)
+            return std::nullopt;
         const MWMechanics::CreatureStats& creatureStats = caster.getClass().getCreatureStats(caster);
 
         float x = (caster.getClass().getSkill(caster, ESM::Skill::Alchemy)

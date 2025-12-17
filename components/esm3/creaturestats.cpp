@@ -250,7 +250,7 @@ namespace ESM
 
         for (const auto& [effectId, actor] : mSummonedCreatures)
         {
-            esm.writeHNT("SUMM", effectId);
+            esm.writeHNT("SUMM", ESM::MagicEffect::refIdToIndex(effectId));
             esm.writeFormId(actor, true, "ACID");
         }
 
