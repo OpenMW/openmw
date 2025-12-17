@@ -8,6 +8,7 @@
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -574,7 +575,7 @@ namespace ESM
         {
             EffectList record;
             record.mList.emplace_back(IndexedENAMstruct{ {
-                                                             .mEffectID = 1,
+                                                             .mEffectID = ESM::MagicEffect::SwiftSwim,
                                                              .mSkill = 2,
                                                              .mAttribute = 3,
                                                              .mRange = 4,

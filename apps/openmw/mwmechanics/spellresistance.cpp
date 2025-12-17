@@ -72,12 +72,15 @@ namespace MWMechanics
         return x;
     }
 
-    float getEffectResistanceAttribute(const ESM::MagicEffectId& effectId, const MagicEffects* actorEffects)
+    float getEffectResistanceAttribute(const ESM::RefId& effectId, const MagicEffects* actorEffects)
     {
-        ESM::RefId resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
-        ESM::RefId weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
-
         float resistance = 0;
+        if (effectId.empty())
+            return resistance;
+
+        ESM::RefId resistanceEffect = ESM::MagicEffect::getResistanceEffect(*effectId.getIf<ESM::MagicEffectId>());
+        ESM::RefId weaknessEffect = ESM::MagicEffect::getWeaknessEffect(*effectId.getIf<ESM::MagicEffectId>());
+
         if (!resistanceEffect.empty())
             resistance += actorEffects->getOrDefault(*resistanceEffect.getIf<ESM::MagicEffectId>()).getMagnitude();
         if (!weaknessEffect.empty())

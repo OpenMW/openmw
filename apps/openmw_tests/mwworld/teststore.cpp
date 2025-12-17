@@ -501,7 +501,6 @@ namespace
         }
     }
 
-    static_assert(ESM::hasIndex<ESM::MagicEffect>);
     static_assert(ESM::hasStringId<ESM::Dialogue>);
 
     template <class T, class = std::void_t<>>

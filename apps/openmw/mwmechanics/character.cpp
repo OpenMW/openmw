@@ -2803,19 +2803,18 @@ namespace MWMechanics
         // Stop any effects that are no longer active
         std::vector<std::string_view> effects = mAnimation->getLoopingEffects();
 
-        for (std::string_view effectId : effects)
+        for (std::string_view effectStr : effects)
         {
-            auto index = ESM::MagicEffect::indexNameToIndex(effectId);
+            auto effectId = ESM::MagicEffectId(effectStr);
 
-            if (index >= 0
-                && (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
+            if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
                     || mPtr.getClass()
                             .getCreatureStats(mPtr)
                             .getMagicEffects()
-                            .getOrDefault(MWMechanics::EffectKey(index))
+                            .getOrDefault(MWMechanics::EffectKey(effectId))
                             .getMagnitude()
-                        <= 0))
-                mAnimation->removeEffect(effectId);
+                        <= 0)
+                mAnimation->removeEffect(effectStr);
         }
     }
 
