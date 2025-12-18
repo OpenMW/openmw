@@ -17,6 +17,10 @@ target_link_libraries(openmw-cs-tests PRIVATE
     GMock::GMock
 )
 
+if (WIN32)
+    target_sources(openmw-cs-tests PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
 if (UNIX AND NOT APPLE)
     target_link_libraries(openmw-cs-tests PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 endif()

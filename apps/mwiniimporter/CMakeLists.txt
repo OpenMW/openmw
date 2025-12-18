@@ -19,6 +19,10 @@ target_link_libraries(openmw-iniimporter
 )
 
 if (WIN32)
+    target_sources(openmw-iniimporter PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
+if (WIN32)
     INSTALL(TARGETS openmw-iniimporter RUNTIME DESTINATION ".")
 endif(WIN32)
 
