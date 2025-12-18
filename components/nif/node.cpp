@@ -185,7 +185,7 @@ namespace Nif
         // FIXME: if node 0 is *not* the only root node, this must not happen.
         // FIXME: doing this here is awful.
         // We want to do this on world scene graph level rather than local scene graph level.
-        if (recIndex == 0 && !Misc::StringUtils::ciEqual(mName, "bip01"))
+        if (mRecordIndex == 0 && !Misc::StringUtils::ciEqual(mName, "bip01"))
         {
             mTransform = Nif::NiTransform::getIdentity();
         }
@@ -247,29 +247,29 @@ namespace Nif
         mSkin.post(nif);
         mShaderProperty.post(nif);
         mAlphaProperty.post(nif);
-        if (recType != RC_NiParticles && !mSkin.empty())
+        if (mRecordType != RC_NiParticles && !mSkin.empty())
             nif.setUseSkinning(true);
 
         if (!mData.empty())
         {
-            switch (recType)
+            switch (mRecordType)
             {
                 case RC_NiTriShape:
                 case RC_BSLODTriShape:
                 case RC_BSSegmentedTriShape:
-                    if (mData->recType != RC_NiTriShapeData)
+                    if (mData->mRecordType != RC_NiTriShapeData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiTriStrips:
-                    if (mData->recType != RC_NiTriStripsData)
+                    if (mData->mRecordType != RC_NiTriStripsData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiParticles:
-                    if (mData->recType != RC_NiParticlesData)
+                    if (mData->mRecordType != RC_NiParticlesData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiLines:
-                    if (mData->recType != RC_NiLinesData)
+                    if (mData->mRecordType != RC_NiLinesData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 default:

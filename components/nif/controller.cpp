@@ -532,7 +532,7 @@ namespace Nif
         // Is this possible?
         if (numKeys != 0)
             throw Nif::Exception(
-                "Unsupported keys in bhkBlendController " + std::to_string(recIndex), nif->getFile().getFilename());
+                "Unsupported keys in bhkBlendController " + std::to_string(mRecordIndex), nif->getFile().getFilename());
     }
 
     void BSEffectShaderPropertyFloatController::read(NIFStream* nif)

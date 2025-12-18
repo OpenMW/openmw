@@ -159,9 +159,9 @@ namespace Nif
             {
                 const Record* const record = reader.getRecord(0);
                 ASSERT_NE(record, nullptr);
-                EXPECT_EQ(record->recIndex, 0);
-                EXPECT_EQ(record->recName, "bhkRagdollTemplate");
-                EXPECT_EQ(record->recType, RC_bhkRagdollTemplate);
+                EXPECT_EQ(record->mRecordIndex, 0);
+                EXPECT_EQ(record->mRecordName, "bhkRagdollTemplate");
+                EXPECT_EQ(record->mRecordType, RC_bhkRagdollTemplate);
 
                 const bhkRagdollTemplate* const typed = dynamic_cast<const bhkRagdollTemplate*>(record);
                 ASSERT_NE(typed, nullptr);
@@ -173,9 +173,9 @@ namespace Nif
             {
                 const Record* const record = reader.getRecord(1);
                 ASSERT_NE(record, nullptr);
-                EXPECT_EQ(record->recIndex, 1);
-                EXPECT_EQ(record->recName, "bhkRagdollTemplateData");
-                EXPECT_EQ(record->recType, RC_bhkRagdollTemplateData);
+                EXPECT_EQ(record->mRecordIndex, 1);
+                EXPECT_EQ(record->mRecordName, "bhkRagdollTemplateData");
+                EXPECT_EQ(record->mRecordType, RC_bhkRagdollTemplateData);
 
                 const bhkRagdollTemplateData* const typed = dynamic_cast<const bhkRagdollTemplateData*>(record);
                 ASSERT_NE(typed, nullptr);
