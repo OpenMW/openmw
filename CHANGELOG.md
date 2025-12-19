@@ -1,8 +1,12 @@
 0.51.0
 ------
 
+    Bug #6494: Some Raven Rock buildings are enabled from the beginning of the game
     Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
+    Bug #8270: Editor: Parts of landscape textures are transparent in the cell view, allowing you to see wallpaper or other windows below them
     Bug #8351: Malformed potion model should consistently error out
+    Bug #8601: Segfault when opening Options menu while NCGDMW is loaded
+    Bug #8657: Preloading crash on exit due to failed startup
     Bug #8732: MessageBox formatting is too limited
     Bug #8760: Single-character topics don't get linked
     Bug #8765: Actors can't transmit diseases to other actors
@@ -11,16 +15,27 @@
     Bug #8771: Controller focus is often reset inappropriately in containers
     Bug #8775: Crash when using nearby.castRay with { ignore = nearby.actors }
     Bug #8779: Lua: addSkillLevelUpHandler does not work properly with skills that reached maximum level
+    Bug #8786: Door markers aren't updated correctly
+    Bug #8789: Lua API: Incorrect field name for FactionRank reputation requirement
     Bug #8799: 'Show Controller Tooltips By Default' option is not persistent
+    Bug #8802: Lua UI layout children removal leaves dangling pointers leading to reloading crashes
+    Bug #8840: Lua UI elements accept table-like objects as properties, causing crashes
+    Bug #8842: Loading game with --load-savegame may not detect the original character profile
+    Bug #8847: Physics shape "is actor?" test should be based on ratio, not abs diff
     Feature #2316: ess-Importer: convert targeted scripts
+    Feature #2903: Barter gold bindings
     Feature #7830: Preserve global script targets not created by content files
+    Feature #8076: Lua: Add read access to Topic info Conditions
+    Feature #8644: Add loop key to world.vfx.spawn and a way to remove them
     Feature #8705: Dehardcode global map color palette
     Feature #8725: Lua: Expose localized cell names
     Feature #8731: Use Hand to Hand Hit 2 sound
     Feature #8788: Dehardcode script settings window font and colors
     Feature #8796: Expose potion autocalc flag
+    Feature #8801: Support additional controller buttons
     Feature #8816: Werewolf transformation binding
     Feature #8826: OMWFX: Expose the sunlight direction
+    Feature #8841: Time advancement binding
     Task #8718: Lua: Cell fields can still return empty strings instead of nil values
 
 0.50.0
