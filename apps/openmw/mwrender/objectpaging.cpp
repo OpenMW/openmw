@@ -230,6 +230,9 @@ namespace MWRender
                         osg::LOD* n = new osg::LOD;
                         for (const auto& [child, range] : children)
                             n->addChild(child, range.first, range.second);
+                        n->setCenterMode(lod->getCenterMode());
+                        n->setCenter(lod->getCenter());
+                        n->setRadius(lod->getRadius());
                         n->setDataVariance(osg::Object::STATIC);
                         return n;
                     }
