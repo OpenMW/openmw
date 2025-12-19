@@ -52,7 +52,7 @@ namespace ESM
             Function_PcLightArmor,
             Function_PcShortBlade,
             Function_PcMarksman,
-            Function_PcMerchantile,
+            Function_PcMercantile,
             Function_PcSpeechcraft,
             Function_PcHandToHand,
             Function_PcGender,

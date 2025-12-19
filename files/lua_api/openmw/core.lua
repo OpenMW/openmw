@@ -1165,6 +1165,123 @@
 -- Always nil for journal records or if there is no value set.
 -- @field [parent=#DialogueRecordInfo] #string resultScript
 
+---
+-- A read-only list of @{#DialogueInfoCondition}s.
+-- Always nil for journal records.
+-- @field [parent=#DialogueRecordInfo] #list<#DialogueInfoCondition> conditions
+
+---
+-- @type DialogueInfoCondition
+-- @field #DialogueConditionOperator operator The #{#DialogueConditionOperator} to use in the comparison
+-- @field #DialogueConditionType type The condition's @{#DialogueConditionType}
+-- @field #number value The value to compare to
+-- @field #string recordId The record ID to use in the comparison
+-- @field #string variableName The name of the global or local mwscript variable to compare to
+-- @field #string cellName The cell name to compare to
+
+--- Possible @{#DialogueConditionOperator} values
+-- @field [parent=#Dialogue] #DialogueConditionOperator CONDITION_OPERATOR
+
+--- `core.dialogue.CONDITION_OPERATOR`
+-- @type DialogueConditionOperator
+-- @field #number Equal ==
+-- @field #number NotEqual !=
+-- @field #number Greater >
+-- @field #number GreaterEqual >=
+-- @field #number Less <
+-- @field #number LessEqual <=
+
+--- Possible @{#DialogueConditionType} values
+-- @field [parent=#Dialogue] #DialogueConditionType CONDITION_TYPE
+
+--- `core.dialogue.CONDITION_TYPE`
+-- @type DialogueConditionType
+-- @field #number FacReactionLowest Lowest faction reaction from the speaker's primary faction to the player's factions
+-- @field #number FacReactionHighest Highest faction reaction from the speaker's primary faction to the player's factions
+-- @field #number RankRequirement Check whether the player can advance in the speaker's primary faction
+-- @field #number Reputation The speaker's reputation
+-- @field #number HealthPercent The speaker's health percentage
+-- @field #number PcReputation The player's reputation
+-- @field #number PcLevel The player's level
+-- @field #number PcHealthPercent The player's health percentage
+-- @field #number PcMagicka The player's current magicka
+-- @field #number PcFatigue The player's current fatigue
+-- @field #number PcStrength The player's current strength
+-- @field #number PcBlock The player's current block
+-- @field #number PcArmorer The player's current armorer
+-- @field #number PcMediumArmor The player's current medium armor
+-- @field #number PcHeavyArmor The player's current heavy armor
+-- @field #number PcBluntWeapon The player's current blunt weapon
+-- @field #number PcLongBlade The player's current long blade
+-- @field #number PcAxe The player's current axe
+-- @field #number PcSpear The player's current spear
+-- @field #number PcAthletics The player's current athletics
+-- @field #number PcEnchant The player's current enchant
+-- @field #number PcDestruction The player's current destruction
+-- @field #number PcAlteration The player's current alteration
+-- @field #number PcIllusion The player's current illusion
+-- @field #number PcConjuration The player's current conjuration
+-- @field #number PcMysticism The player's current mysticism
+-- @field #number PcRestoration The player's current restoration
+-- @field #number PcAlchemy The player's current alchemy
+-- @field #number PcUnarmored The player's current unarmored
+-- @field #number PcSecurity The player's current security
+-- @field #number PcSneak The player's current sneak
+-- @field #number PcAcrobatics The player's current acrobatics
+-- @field #number PcLightArmor The player's current light armor
+-- @field #number PcShortBlade The player's current short blade
+-- @field #number PcMarksman The player's current marksman
+-- @field #number PcMercantile The player's current mercantile
+-- @field #number PcSpeechcraft The player's current speechcraft
+-- @field #number PcHandToHand The player's current hand to hand
+-- @field #number PcGender The player's gender
+-- @field #number PcExpelled Check whether the player has been expelled from the speaker's primary faction
+-- @field #number PcCommonDisease Check if the player has a common disease
+-- @field #number PcBlightDisease Check if the player has a blight disease
+-- @field #number PcClothingModifier Check the combined value of the player's outfit
+-- @field #number PcCrimeLevel The player's bounty
+-- @field #number SameGender Check if the speaker's gender matches the player's
+-- @field #number SameRace Check if the speaker's race matches the player's
+-- @field #number SameFaction Check if the player is a member of the speaker's primary faction
+-- @field #number FactionRankDifference The difference between the player's rank in the speaker's primary faction and the speaker's
+-- @field #number Detected Whether the speaker has detected the player
+-- @field #number Alarmed Whether the speaker was alarmed by the player's crime
+-- @field #number Choice The choice index
+-- @field #number PcIntelligence The player's current intelligence
+-- @field #number PcWillpower The player's current willpower
+-- @field #number PcAgility The player's current agility
+-- @field #number PcSpeed The player's current speed
+-- @field #number PcEndurance The player's current endurance
+-- @field #number PcPersonality The player's current personality
+-- @field #number PcLuck The player's current luck
+-- @field #number PcCorprus Whether the player is affected by the Corprus magic effect
+-- @field #number Weather Checks the scriptId of the weather in the player's cell
+-- @field #number PcVampire Whether the player is affected by the Vampirism magic effect
+-- @field #number Level The speaker's level
+-- @field #number Attacked Whether the speaker was attacked
+-- @field #number TalkedToPc Whether the speaker has talked to the player before
+-- @field #number PcHealth The player's current health
+-- @field #number CreatureTarget Whether the speaker is targeting a creature
+-- @field #number FriendHit The number of times the player has hit the speaker follower
+-- @field #number Fight The speaker's current fight
+-- @field #number Hello The speaker's current hello
+-- @field #number Alarm The speaker's current alarm
+-- @field #number Flee The speaker's current flee
+-- @field #number ShouldAttack Whether the speaker would start combat with the player
+-- @field #number Werewolf Whether the speaker is in werewolf form
+-- @field #number PcWerewolfKills The number of werewolves killed by the player
+-- @field #number Global A comparison to the @{#DialogueInfoCondition.variableName} global variable
+-- @field #number Local A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
+-- @field #number Journal A comparison to the player's @{#DialogueInfoCondition.recordId} journal index
+-- @field #number Item The number of copies of @{#DialogueInfoCondition.recordId} the player is carrying
+-- @field #number Dead The number of dead actors of the given @{#DialogueInfoCondition.recordId}
+-- @field #number NotId The speaker's recordId should not match @{#DialogueInfoCondition.recordId}
+-- @field #number NotFaction The speaker's faction ID should not match @{#DialogueInfoCondition.recordId}
+-- @field #number NotClass The speaker's class should not match @{#DialogueInfoCondition.recordId}
+-- @field #number NotRace The speaker's race should not match @{#DialogueInfoCondition.recordId}
+-- @field #number NotCell The player's cell name should not start with @{#DialogueInfoCondition.cellName}
+-- @field #number NotLocal A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
+
 --- @{#Regions}: Regions
 -- @field [parent=#core] #Regions regions
 
