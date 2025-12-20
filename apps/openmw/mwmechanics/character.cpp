@@ -2807,6 +2807,12 @@ namespace MWMechanics
         {
             auto effectId = ESM::MagicEffectId(effectStr);
 
+            // This check is to preserve backward compatibility with mods that overload the magic effect
+            // system (e.g. using it as a mesh attachment system). This will need to be removed when effect
+            // dehardcoding is implemented so custom magic effect animations are processed correctly.
+            if (ESM::MagicEffect::refIdToIndex(effectId) < 0)
+                continue;
+
             if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
                     || mPtr.getClass()
                             .getCreatureStats(mPtr)

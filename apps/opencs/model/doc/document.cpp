@@ -289,9 +289,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; i < ESM::MagicEffect::Length; ++i)
     {
         ESM::MagicEffect record;
-
         record.mId = *ESM::MagicEffect::indexToRefId(i).getIf<ESM::MagicEffectId>();
-
         record.blank();
 
         getData().getMagicEffects().add(record);
