@@ -305,7 +305,7 @@ namespace NifOsg
         const Nif::NiSortAdjustNode* mLastAppliedNoInheritSorter = nullptr;
 
         // This is used to queue emitters that weren't attached to their node yet.
-        std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
+        std::vector<std::pair<unsigned int, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
         void loadKf(Nif::FileView nif, SceneUtil::KeyframeHolder& target) const
         {
@@ -690,7 +690,7 @@ namespace NifOsg
             // - finding the correct emitter node for a particle system
             // - establishing connections to the animated collision shapes, which are handled in a separate loader
             // - finding a random child NiNode in NiBspArrayController
-            node->setUserValue("recIndex", nifNode->mRecordIndex);
+            node->setUserValue("recordIndex", nifNode->mRecordIndex);
 
             std::string extraData;
 
@@ -1347,24 +1347,23 @@ namespace NifOsg
 
         void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::FileView nif)
         {
-            for (const auto& emitterPair : mEmitterQueue)
+            for (const auto& [recordIndex, emitter] : mEmitterQueue)
             {
-                auto recIndex = static_cast<unsigned>(emitterPair.first);
-                FindGroupByRecIndex findEmitterNode(recIndex);
+                FindGroupByRecordIndex findEmitterNode(recordIndex);
                 rootNode->accept(findEmitterNode);
                 osg::Group* emitterNode = findEmitterNode.mFound;
                 if (!emitterNode)
                 {
                     Log(Debug::Warning)
                         << "NIFFile Warning: Failed to find particle emitter emitter node (node record index "
-                        << recIndex << "). File: " << nif.getFilename();
+                        << recordIndex << "). File: " << nif.getFilename();
                     continue;
                 }
 
                 // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is
                 // that hiding its node actually causes the emitter to stop firing. Convenient, because MW behaves this
                 // way too!
-                emitterNode->addChild(emitterPair.second);
+                emitterNode->addChild(emitter);
 
                 DisableOptimizer disableOptimizer;
                 emitterNode->accept(disableOptimizer);

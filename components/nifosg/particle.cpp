@@ -476,28 +476,28 @@ namespace NifOsg
 
         if (useGeometryEmitter || !mTargets.empty())
         {
-            int recIndex;
+            int recordIndex;
 
             if (useGeometryEmitter)
             {
                 if (!mGeometryEmitterTarget.has_value())
                     return;
 
-                recIndex = mGeometryEmitterTarget.value();
+                recordIndex = mGeometryEmitterTarget.value();
             }
             else
             {
                 size_t randomIndex = Misc::Rng::rollDice(mTargets.size());
-                recIndex = mTargets[randomIndex];
+                recordIndex = mTargets[randomIndex];
             }
 
             // we could use a map here for faster lookup
-            FindGroupByRecIndex visitor(recIndex);
+            FindGroupByRecordIndex visitor(recordIndex);
             getParent(0)->accept(visitor);
 
             if (!visitor.mFound)
             {
-                Log(Debug::Info) << "Can't find emitter node" << recIndex;
+                Log(Debug::Info) << "Can't find emitter node" << recordIndex;
                 return;
             }
 
@@ -565,32 +565,32 @@ namespace NifOsg
         }
     }
 
-    FindGroupByRecIndex::FindGroupByRecIndex(unsigned int recIndex)
+    FindGroupByRecordIndex::FindGroupByRecordIndex(unsigned int recordIndex)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mFound(nullptr)
-        , mRecIndex(recIndex)
+        , mRecordIndex(recordIndex)
     {
     }
 
-    void FindGroupByRecIndex::apply(osg::Node& node)
+    void FindGroupByRecordIndex::apply(osg::Node& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::apply(osg::MatrixTransform& node)
+    void FindGroupByRecordIndex::apply(osg::MatrixTransform& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::apply(osg::Geometry& node)
+    void FindGroupByRecordIndex::apply(osg::Geometry& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::applyNode(osg::Node& searchNode)
+    void FindGroupByRecordIndex::applyNode(osg::Node& searchNode)
     {
-        unsigned int recIndex;
-        if (searchNode.getUserValue("recIndex", recIndex) && mRecIndex == recIndex)
+        unsigned int recordIndex;
+        if (searchNode.getUserValue("recordIndex", recordIndex) && mRecordIndex == recordIndex)
         {
             osg::Group* group = searchNode.asGroup();
             if (!group)

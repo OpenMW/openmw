@@ -52,7 +52,7 @@ namespace MWPhysics
 
     private:
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
-        std::map<int, osg::NodePath> mRecIndexToNodePath;
+        std::map<int, osg::NodePath> mRecordIndexToNodePath;
         bool mSolid;
         btVector3 mScale;
         osg::Vec3f mPosition;

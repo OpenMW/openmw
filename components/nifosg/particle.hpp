@@ -226,10 +226,10 @@ namespace NifOsg
 
     // NodeVisitor to find a Group node with the given record index, stored in the node's user data container.
     // Alternatively, returns the node's parent Group if that node is not a Group (i.e. a leaf node).
-    class FindGroupByRecIndex : public osg::NodeVisitor
+    class FindGroupByRecordIndex : public osg::NodeVisitor
     {
     public:
-        FindGroupByRecIndex(unsigned int recIndex);
+        FindGroupByRecordIndex(unsigned int recordIndex);
 
         void apply(osg::Node& node) override;
 
@@ -244,7 +244,7 @@ namespace NifOsg
         osg::NodePath mFoundPath;
 
     private:
-        unsigned int mRecIndex;
+        unsigned int mRecordIndex;
     };
 
     // Subclass emitter to support randomly choosing one of the child node's transforms for the emit position of new
@@ -263,7 +263,7 @@ namespace NifOsg
         void setShooter(osgParticle::Shooter* shooter) { mShooter = shooter; }
         void setPlacer(osgParticle::Placer* placer) { mPlacer = placer; }
         void setCounter(osgParticle::Counter* counter) { mCounter = counter; }
-        void setGeometryEmitterTarget(std::optional<int> recIndex) { mGeometryEmitterTarget = recIndex; }
+        void setGeometryEmitterTarget(std::optional<int> recordIndex) { mGeometryEmitterTarget = recordIndex; }
         void setFlags(int flags) { mFlags = flags; }
 
     private:
