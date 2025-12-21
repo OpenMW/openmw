@@ -6,6 +6,8 @@
 #include <numeric>
 #include <sstream>
 
+#include <osg/Math>
+
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -176,8 +178,9 @@ namespace
         {
             std::cout << std::format("  Destination Position: ({:12.3f},{:12.3f},{:12.3f})\n", dest.mPos.pos[0],
                 dest.mPos.pos[1], dest.mPos.pos[2]);
-            std::cout << std::format("  Destination Rotation: ({:9.6f},{:9.6f},{:9.6f})\n", dest.mPos.rot[0],
-                dest.mPos.rot[1], dest.mPos.rot[2]);
+            std::cout << std::format("  Destination Rotation: ({:9.6f},{:9.6f},{:9.6f})\n",
+                osg::RadiansToDegrees(dest.mPos.rot[0]), osg::RadiansToDegrees(dest.mPos.rot[1]),
+                osg::RadiansToDegrees(dest.mPos.rot[2]));
             if (!dest.mCellName.empty())
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
@@ -1308,7 +1311,8 @@ namespace EsmTool
         std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
         if (mData.mCellState.mHasFogOfWar)
         {
-            std::cout << "  North Marker Angle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  North Marker Angle: " << osg::RadiansToDegrees(mData.mFogState.mNorthMarkerAngle)
+                      << std::endl;
             std::cout << "  Bounds:" << std::endl;
             std::cout << "    Min X: " << mData.mFogState.mBounds.mMinX << std::endl;
             std::cout << "    Min Y: " << mData.mFogState.mBounds.mMinY << std::endl;
