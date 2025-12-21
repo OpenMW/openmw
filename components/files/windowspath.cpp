@@ -44,15 +44,23 @@ namespace Files
             if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, flags, &key.mKey) == ERROR_SUCCESS)
             {
                 // Key existed, let's try to read the install dir
-                std::array<wchar_t, 512> buf{};
-                DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
+                std::wstring buffer;
+                buffer.reserve(MAX_PATH);
+                DWORD len = static_cast<DWORD>(MAX_PATH * sizeof(wchar_t));
 
-                if (RegQueryValueExW(key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
-                    == ERROR_SUCCESS)
+                auto result = RegQueryValueExW(
+                    key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                if (result == ERROR_MORE_DATA)
                 {
-                    // This should always be true
+                    buffer.reserve(len / sizeof(wchar_t));
+                    result = RegQueryValueExW(
+                        key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                }
+                if (result == ERROR_SUCCESS)
+                {
+                    // This should always be true. Note that we don't need to care above because of the trailing \0
                     if (len % sizeof(wchar_t) == 0)
-                        return std::filesystem::path(buf.data(), buf.data() + len / sizeof(wchar_t));
+                        return std::filesystem::path(buffer.data(), buffer.data() + len / sizeof(wchar_t));
                 }
             }
             return {};
@@ -97,11 +105,17 @@ namespace Files
     {
         std::filesystem::path localPath = std::filesystem::current_path() / "";
 
-        WCHAR path[MAX_PATH + 1] = {};
-
-        if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
+        std::wstring executablePath;
+        DWORD copied = 0;
+        do
         {
-            localPath = std::filesystem::path(path).parent_path() / "";
+            executablePath.resize(executablePath.size() + MAX_PATH);
+            copied = GetModuleFileNameW(nullptr, executablePath.data(), static_cast<DWORD>(executablePath.size()));
+        } while (GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+
+        if (copied > 0)
+        {
+            localPath = std::filesystem::path(executablePath).parent_path() / "";
         }
 
         // lookup exe path
