@@ -749,7 +749,7 @@ variables: &target-group-two
     - Get-Volume
     - cd MSVC2022_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target @targets
+    - cmake --build . --config $config --target ($targets.Split(' '))
     - ccache --show-stats -v
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
@@ -909,7 +909,7 @@ variables: &target-group-two
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
-    - cmake --build . --config $config --target @targets
+    - cmake --build . --config $config --target ($targets.Split(' '))
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
