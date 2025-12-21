@@ -650,6 +650,61 @@ macOS15_Xcode16_arm64:
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' sym_store s3://openmw-sym
       fi
 
+.Merge_Artifacts_Base:
+  extends: .Ubuntu_Image
+  stage: build
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apt-get update
+    - apt-get install -y curl unzip zip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip" -o awscli-exe-linux-x86_64.zip
+    - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
+    - pushd awscli-exe-linux-x86_64
+    - ./aws/install
+    - popd
+    - aws --version
+    - mkdir -p incoming_artifacts
+    - mv *.zip incoming_artifacts/
+    - destinations=()
+    - |
+      # todo: this will get upset by certain characters
+      for merge_list in *_to-be-merged.txt; do
+        while IFS=: read -r partial destination; do
+          destinations+=("$destination")
+          echo "Unzipping '$partial' to '$destination'"
+          unzip -d "$destination" "incoming_artifacts/$partial"
+        done < merge_list
+      done
+    - |
+      for destination in ${destinations[@]}; do
+        pushd "$destination"
+        for ci_id in CI-ID_*.txt; do
+          cat "$ci_id" >> CI-ID.txt
+          rm "$ci_id"
+        done
+        echo "Creating $destination.zip"
+        zip -r "../$destination.zip" .
+        popd
+      done
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          artifactDirectory="$CI_PROJECT_NAMESPACE/$CI_COMMIT_REF_NAME/$CI_COMMIT_SHORT_SHA-$CI_JOB_ID/"
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp *.zip s3://openmw-artifacts/$artifactDirectory
+      fi
+  artifacts:
+    when: always
+    paths:
+    - "*.zip"
+
+variables: &target-group-one
+  targets: "bsatool components-tests esmtool niftest openmw openmw_detournavigator_navmeshtilescache_benchmark openmw_esm_refid_benchmark openmw_settings_access_benchmark openmw_bulletobjecttool openmw-essimporter openmw-iniimporter openmw-navmeshtool openmw-tests"
+  group_name: "group-one"
+
+variables: &target-group-two
+  targets: "openmw-cs openmw-launcher openmw-wizard"
+  group_name: "group-two"
+
 .Windows_Ninja_Base:
   tags:
     - saas-windows-medium-amd64
@@ -862,26 +917,28 @@ macOS15_Xcode16_arm64:
     - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
           if(!$?) { Exit $LASTEXITCODE }
         }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
-        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - Rename-Item CI-ID.txt CI-ID_${group_name}.txt
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
-        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
         if(!$?) { Exit $LASTEXITCODE }
       }
+    - echo "$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip")):$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}"))" | Out-File -Encoding UTF8 "..\..\${group_name}_to-be-merged.txt"
     - |
       if ($executables) {
         foreach ($exe in $executables.Split(',')) {
@@ -904,6 +961,7 @@ macOS15_Xcode16_arm64:
     - "*.log"
     - MSVC2022_64/*.log
     - MSVC2022_64/**/*.log
+    - "*_to-be-merged.txt"
   variables:
     targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
@@ -936,7 +994,7 @@ macOS15_Xcode16_arm64:
     - job: "Windows_MSBuild_Debug"
       artifacts: true
 
-Windows_MSBuild_RelWithDebInfo:
+.Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -948,11 +1006,38 @@ Windows_MSBuild_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
+Windows_MSBuild_RelWithDebInfo_GroupOne:
+  extends:
+   - .Windows_MSBuild_RelWithDebInfo
+  variables:
+    <<: *target-group-one
+
+Windows_MSBuild_RelWithDebInfo_GroupTwo:
+  extends:
+   - .Windows_MSBuild_RelWithDebInfo
+  variables:
+    <<: *target-group-two
+
 Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
   extends:
     - .Compress_And_Upload_Symbols_Base
   needs:
-    - job: "Windows_MSBuild_RelWithDebInfo"
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
+      artifacts: true
+  # temporarily enabled while we're linking the above on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+
+Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
+  extends:
+    - .Merge_Artifacts_Base
+  needs:
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
       artifacts: true
   # temporarily enabled while we're linking the above on the downloads page
   rules:
