@@ -698,11 +698,11 @@ macOS15_Xcode16_arm64:
     - "*.zip"
 
 variables: &target-group-one
-  targets: "bsatool components-tests esmtool niftest openmw openmw_detournavigator_navmeshtilescache_benchmark openmw_esm_refid_benchmark openmw_settings_access_benchmark openmw_bulletobjecttool openmw-essimporter openmw-iniimporter openmw-navmeshtool openmw-tests"
+  targets: "bsatool components-tests esmtool niftest openmw openmw_detournavigator_navmeshtilescache_benchmark openmw_esm_refid_benchmark openmw_settings_access_benchmark openmw-bulletobjecttool openmw-essimporter openmw-iniimporter openmw-navmeshtool openmw-tests"
   group_name: "group-one"
 
 variables: &target-group-two
-  targets: "openmw-cs openmw-launcher openmw-wizard"
+  targets: "openmw-cs openmw-cs-tests openmw-launcher openmw-wizard"
   group_name: "group-two"
 
 .Windows_Ninja_Base:
