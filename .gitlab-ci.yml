@@ -674,7 +674,7 @@ macOS15_Xcode16_arm64:
           destinations+=("$destination")
           echo "Unzipping '$partial' to '$destination'"
           unzip -d "$destination" "incoming_artifacts/$partial"
-        done < merge_list
+        done < $merge_list
       done
     - |
       for destination in ${destinations[@]}; do
