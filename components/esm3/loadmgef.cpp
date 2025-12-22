@@ -4,7 +4,6 @@
 #include "esmwriter.hpp"
 #include "loadskil.hpp"
 
-#include <components/misc/concepts.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 namespace ESM
@@ -433,9 +432,8 @@ namespace ESM
         return {};
     }
 
-    // Map effect ID to GMST name
-    const std::array<std::string, MagicEffect::Length> MagicEffect::sGmstEffectIds = {
-
+    // Map effect index to GMST name
+    const std::array<std::string_view, MagicEffect::Length> sGmstEffectIds = {
         "sEffectWaterBreathing",
         "sEffectSwiftSwim",
         "sEffectWaterWalking",
@@ -583,6 +581,156 @@ namespace ESM
         "sEffectSummonCreature03",
         "sEffectSummonCreature04",
         "sEffectSummonCreature05",
+    };
+
+    static const std::array<std::string_view, MagicEffect::Length> sMagicEffectNames{
+        "WaterBreathing",
+        "SwiftSwim",
+        "WaterWalking",
+        "Shield",
+        "FireShield",
+        "LightningShield",
+        "FrostShield",
+        "Burden",
+        "Feather",
+        "Jump",
+        "Levitate",
+        "SlowFall",
+        "Lock",
+        "Open",
+        "FireDamage",
+        "ShockDamage",
+        "FrostDamage",
+        "DrainAttribute",
+        "DrainHealth",
+        "DrainMagicka",
+        "DrainFatigue",
+        "DrainSkill",
+        "DamageAttribute",
+        "DamageHealth",
+        "DamageMagicka",
+        "DamageFatigue",
+        "DamageSkill",
+        "Poison",
+        "WeaknessToFire",
+        "WeaknessToFrost",
+        "WeaknessToShock",
+        "WeaknessToMagicka",
+        "WeaknessToCommonDisease",
+        "WeaknessToBlightDisease",
+        "WeaknessToCorprusDisease",
+        "WeaknessToPoison",
+        "WeaknessToNormalWeapons",
+        "DisintegrateWeapon",
+        "DisintegrateArmor",
+        "Invisibility",
+        "Chameleon",
+        "Light",
+        "Sanctuary",
+        "NightEye",
+        "Charm",
+        "Paralyze",
+        "Silence",
+        "Blind",
+        "Sound",
+        "CalmHumanoid",
+        "CalmCreature",
+        "FrenzyHumanoid",
+        "FrenzyCreature",
+        "DemoralizeHumanoid",
+        "DemoralizeCreature",
+        "RallyHumanoid",
+        "RallyCreature",
+        "Dispel",
+        "Soultrap",
+        "Telekinesis",
+        "Mark",
+        "Recall",
+        "DivineIntervention",
+        "AlmsiviIntervention",
+        "DetectAnimal",
+        "DetectEnchantment",
+        "DetectKey",
+        "SpellAbsorption",
+        "Reflect",
+        "CureCommonDisease",
+        "CureBlightDisease",
+        "CureCorprusDisease",
+        "CurePoison",
+        "CureParalyzation",
+        "RestoreAttribute",
+        "RestoreHealth",
+        "RestoreMagicka",
+        "RestoreFatigue",
+        "RestoreSkill",
+        "FortifyAttribute",
+        "FortifyHealth",
+        "FortifyMagicka",
+        "FortifyFatigue",
+        "FortifySkill",
+        "FortifyMaximumMagicka",
+        "AbsorbAttribute",
+        "AbsorbHealth",
+        "AbsorbMagicka",
+        "AbsorbFatigue",
+        "AbsorbSkill",
+        "ResistFire",
+        "ResistFrost",
+        "ResistShock",
+        "ResistMagicka",
+        "ResistCommonDisease",
+        "ResistBlightDisease",
+        "ResistCorprusDisease",
+        "ResistPoison",
+        "ResistNormalWeapons",
+        "ResistParalysis",
+        "RemoveCurse",
+        "TurnUndead",
+        "SummonScamp",
+        "SummonClannfear",
+        "SummonDaedroth",
+        "SummonDremora",
+        "SummonAncestralGhost",
+        "SummonSkeletalMinion",
+        "SummonBonewalker",
+        "SummonGreaterBonewalker",
+        "SummonBonelord",
+        "SummonWingedTwilight",
+        "SummonHunger",
+        "SummonGoldenSaint",
+        "SummonFlameAtronach",
+        "SummonFrostAtronach",
+        "SummonStormAtronach",
+        "FortifyAttack",
+        "CommandCreature",
+        "CommandHumanoid",
+        "BoundDagger",
+        "BoundLongsword",
+        "BoundMace",
+        "BoundBattleAxe",
+        "BoundSpear",
+        "BoundLongbow",
+        "ExtraSpell",
+        "BoundCuirass",
+        "BoundHelm",
+        "BoundBoots",
+        "BoundShield",
+        "BoundGloves",
+        "Corprus",
+        "Vampirism",
+        "SummonCenturionSphere",
+        "SunDamage",
+        "StuntedMagicka",
+
+        // Tribunal only
+        "SummonFabricant",
+
+        // Bloodmoon only
+        "SummonWolf",
+        "SummonBear",
+        "SummonBonewolf",
+        "SummonCreature04",
+        "SummonCreature05",
     };
 
     static const std::array<MagicEffectId, MagicEffect::Length> sMagicEffectIds
@@ -734,7 +882,7 @@ namespace ESM
         MagicEffect::SummonBonewolf,
         MagicEffect::SummonCreature04,
         MagicEffect::SummonCreature05,
-     };
+    };
 
     template <typename Collection>
     static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
@@ -746,8 +894,11 @@ namespace ESM
         return map;
     }
 
-    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToIndexMap
-        = initStringToIntMap(MagicEffect::sGmstEffectIds);
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap
+        = initStringToIntMap(sGmstEffectIds);
+
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> sMagicEffectNamesToIndexMap
+        = initStringToIntMap(sMagicEffectNames);
 
     MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const
     {
@@ -805,16 +956,16 @@ namespace ESM
             return {};
         int index = refIdToIndex(effectId);
         if (index < 0 || index >= Length)
-            return effectId.getRefIdString();
+            return {};
         return sGmstEffectIds[index];
     }
 
     RefId MagicEffect::effectGmstIdToRefId(std::string_view gmstId)
     {
-        auto name = sGmstEffectIdToIndexMap.find(gmstId);
-        if (name == sGmstEffectIdToIndexMap.end())
+        auto it = sGmstEffectIdToIndexMap.find(gmstId);
+        if (it == sGmstEffectIdToIndexMap.end())
             return {};
-        return sMagicEffectIds[name->second];
+        return sMagicEffectIds[it->second];
     }
 
     RefId MagicEffect::indexToRefId(int index)
@@ -836,31 +987,34 @@ namespace ESM
 
     RefId MagicEffect::nameToRefId(std::string_view name)
     {
-        for (const RefId& effect : sMagicEffectIds)
-            if (effect.getRefIdString() == name)
-                return effect;
-        return {};
+        auto it = sMagicEffectNamesToIndexMap.find(name);
+        if (it == sMagicEffectNamesToIndexMap.end())
+            return {};
+        return sMagicEffectIds[it->second];
     }
 
     std::string_view MagicEffect::refIdToName(const RefId& effectId)
     {
-        if (!effectId.empty() && effectId.getIf<MagicEffectId>())
-            return effectId.getRefIdString();
-        return {};
+        if (effectId.empty())
+            return {};
+        auto it = sMagicEffectNamesToIndexMap.find(effectId.getRefIdString());
+        if (it == sMagicEffectNamesToIndexMap.end())
+            return {};
+        return sMagicEffectNames[it->second];
     }
 
     std::string_view MagicEffect::indexToName(int index)
     {
         if (index < 0 || index >= Length)
             return {};
-        return sMagicEffectIds[index].getValue();
+        return sMagicEffectNames[index];
     }
 
     int MagicEffect::indexNameToIndex(std::string_view name)
     {
-        for (size_t i = 0; i < sMagicEffectIds.size(); ++i)
-            if (sMagicEffectIds[i].getValue() == name)
-                return static_cast<int>(i);
-        return -1;
+        auto it = sMagicEffectNamesToIndexMap.find(name);
+        if (it == sMagicEffectNamesToIndexMap.end())
+            return -1;
+        return it->second;
     }
 }

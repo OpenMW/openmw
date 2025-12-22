@@ -258,9 +258,6 @@ namespace ESM
 
         static constexpr int Length = 143;
 
-        static const std::array<std::string, Length> sGmstEffectIds;
-        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap;
-
         static std::string_view refIdToGmstString(const RefId& effectId);
         static RefId effectGmstIdToRefId(std::string_view gmstId);
 
