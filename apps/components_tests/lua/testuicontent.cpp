@@ -41,6 +41,35 @@ namespace
         EXPECT_NO_THROW(sol.safe_script(testScript));
     }
 
+    TEST_F(LuaUiContentTest, Insert)
+    {
+        mLuaState.protectedCall([&](LuaUtil::LuaView& state) {
+            sol::state_view& sol = state.sol();
+            sol["makeContent"] = mNew;
+            EXPECT_NO_THROW(sol.safe_script(R"(
+                local content = makeContent({ {}, {}, {} })
+                content:insert(2, { name = 'inserted' })
+                assert(#content == 4, 'Not inserted')
+                local inserted = content:indexOf('inserted')
+                local index = content:indexOf(content[inserted])
+                assert(index ~= nil, 'Failed to find inserted')
+                assert(index == 2, 'Inserted at the wrong index')
+                )"));
+        });
+    }
+
+    TEST_F(LuaUiContentTest, MakeHole)
+    {
+        mLuaState.protectedCall([&](LuaUtil::LuaView& state) {
+            sol::state_view& sol = state.sol();
+            sol["makeContent"] = mNew;
+            EXPECT_NO_THROW(sol.safe_script(R"(
+                local content = makeContent({ {}, {} })
+                assert(not pcall(function() content[4] = {} end), 'Allowed to make hole')
+                )"));
+        });
+    }
+
     TEST_F(LuaUiContentTest, Create)
     {
         auto table = makeTable();
@@ -58,6 +87,42 @@ namespace
         table.add("a");
         table.add(makeTable());
         EXPECT_ANY_THROW(makeContent(table));
+    }
+
+    TEST_F(LuaUiContentTest, NameAccess)
+    {
+        mLuaState.protectedCall([&](LuaUtil::LuaView& state) {
+            sol::state_view& sol = state.sol();
+            sol["makeContent"] = mNew;
+            EXPECT_NO_THROW(sol.safe_script(R"(
+                local content = makeContent({ {}, { name = 'a' } })
+                assert(content:indexOf('a') ~= nil, 'Could not find named table')
+                content['a'] = nil
+                assert(#content == 1, 'Failed to remove')
+                content:add({ name = 'b' })
+                content['b'] = {}
+                assert(#content == 2, 'Failed to insert')
+                content:add({ name = 'c' })
+                content:add({ name = 'c' })
+                content['c'] = nil
+                assert(content:indexOf('c') == nil, 'Failed to remove value inserted twice'..#content)
+                )"));
+        });
+    }
+
+    TEST_F(LuaUiContentTest, IndexOf)
+    {
+        mLuaState.protectedCall([&](LuaUtil::LuaView& state) {
+            sol::state_view& sol = state.sol();
+            sol["makeContent"] = mNew;
+            EXPECT_NO_THROW(sol.safe_script(R"(
+                local content = makeContent({ {}, {}, {} })
+                local child = {}
+                content[3] = child
+                assert(content:indexOf(child) == 3, 'Failed to assign')
+                assert(content:indexOf({}) == nil, 'Found non-existent child')
+                )"));
+        });
     }
 
     TEST_F(LuaUiContentTest, BoundsChecks)
