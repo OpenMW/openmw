@@ -16,7 +16,7 @@
 namespace MWMechanics
 {
 
-    float getEffectMultiplier(const ESM::RefId& effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+    float getEffectMultiplier(ESM::RefId effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
         const ESM::Spell* spell, const MagicEffects* effects)
     {
         if (!actor.getClass().isActor())
@@ -26,14 +26,14 @@ namespace MWMechanics
         return 1 - resistance / 100.f;
     }
 
-    float getEffectResistance(const ESM::RefId& effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
+    float getEffectResistance(ESM::RefId effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
         const ESM::Spell* spell, const MagicEffects* effects)
     {
         // Effects with no resistance attribute belonging to them can not be resisted
-        if (effectId.empty() || ESM::MagicEffect::getResistanceEffect(*effectId.getIf<ESM::MagicEffectId>()).empty())
+        if (ESM::MagicEffect::getResistanceEffect(effectId).empty())
             return 0.f;
 
-        const auto magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(effectId);
+        const auto magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
 
         const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWMechanics::MagicEffects* magicEffects = &stats.getMagicEffects();
@@ -72,19 +72,17 @@ namespace MWMechanics
         return x;
     }
 
-    float getEffectResistanceAttribute(const ESM::RefId& effectId, const MagicEffects* actorEffects)
+    float getEffectResistanceAttribute(ESM::RefId effectId, const MagicEffects* actorEffects)
     {
         float resistance = 0;
-        if (effectId.empty())
-            return resistance;
 
-        ESM::RefId resistanceEffect = ESM::MagicEffect::getResistanceEffect(*effectId.getIf<ESM::MagicEffectId>());
-        ESM::RefId weaknessEffect = ESM::MagicEffect::getWeaknessEffect(*effectId.getIf<ESM::MagicEffectId>());
+        ESM::RefId resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
+        ESM::RefId weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
 
         if (!resistanceEffect.empty())
-            resistance += actorEffects->getOrDefault(*resistanceEffect.getIf<ESM::MagicEffectId>()).getMagnitude();
+            resistance += actorEffects->getOrDefault(resistanceEffect).getMagnitude();
         if (!weaknessEffect.empty())
-            resistance -= actorEffects->getOrDefault(*weaknessEffect.getIf<ESM::MagicEffectId>()).getMagnitude();
+            resistance -= actorEffects->getOrDefault(weaknessEffect).getMagnitude();
 
         if (effectId == ESM::MagicEffect::FireDamage)
             resistance += actorEffects->getOrDefault(ESM::MagicEffect::FireShield).getMagnitude();
@@ -95,5 +93,4 @@ namespace MWMechanics
 
         return resistance;
     }
-
 }

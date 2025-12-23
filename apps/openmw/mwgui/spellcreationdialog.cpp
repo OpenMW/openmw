@@ -1,5 +1,7 @@
 #include "spellcreationdialog.hpp"
 
+#include <format>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
@@ -33,7 +35,7 @@
 namespace
 {
 
-    bool sortMagicEffects(const ESM::RefId& id1, const ESM::RefId& id2)
+    bool sortMagicEffects(ESM::RefId id1, ESM::RefId id2)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
@@ -222,7 +224,7 @@ namespace MWGui
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
             VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing("#{" + std::string(ESM::MagicEffect::refIdToGmstString(effect->mId)) + "}");
+        mEffectName->setCaptionWithReplacing(std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effect->mId)));
 
         mEffect.mEffectID = effect->mId;
 
@@ -812,7 +814,7 @@ namespace MWGui
         mAvailableEffectsList->clear();
 
         int i = 0;
-        for (const ESM::RefId& effectId : knownEffects)
+        for (const auto effectId : knownEffects)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get()
                                                .getESMStore()
@@ -826,7 +828,7 @@ namespace MWGui
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const ESM::RefId& effectId : knownEffects)
+        for (const auto effectId : knownEffects)
         {
             const std::string& name = MWBase::Environment::get()
                                           .getESMStore()

@@ -15,8 +15,6 @@ namespace ESM
     struct MagicEffect;
     struct MagicEffects;
     struct Skill;
-
-    using MagicEffectId = StringRefId;
 }
 
 namespace MWMechanics
@@ -29,12 +27,6 @@ namespace MWMechanics
         EffectKey();
 
         EffectKey(ESM::RefId id, ESM::RefId arg = {})
-            : mId(id)
-            , mArg(arg)
-        {
-        }
-
-        EffectKey(ESM::MagicEffectId id, ESM::RefId arg = {})
             : mId(id)
             , mArg(arg)
         {
@@ -115,6 +107,7 @@ namespace MWMechanics
         void modifyBase(const EffectKey& key, int diff);
 
         EffectParam getOrDefault(const EffectKey& key) const;
+        EffectParam getOrDefault(ESM::RefId effectId) const;
         std::optional<EffectParam> get(const EffectKey& key) const;
         ///< This function can safely be used for keys that are not present.
     };

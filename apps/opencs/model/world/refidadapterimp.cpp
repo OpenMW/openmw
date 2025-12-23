@@ -152,22 +152,18 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
             return effectId.empty() ? QVariant() : QString::fromStdString(effectId.getRefIdString());
         case 1:
         {
-            if (effectId == ESM::MagicEffect::DrainSkill ||
-                effectId == ESM::MagicEffect::DamageSkill ||
-                effectId == ESM::MagicEffect::RestoreSkill ||
-                effectId == ESM::MagicEffect::FortifySkill ||
-                effectId == ESM::MagicEffect::AbsorbSkill)
+            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
+                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
+                || effectId == ESM::MagicEffect::AbsorbSkill)
                 return record.get().mData.mSkills[subRowIndex];
             else
                 return QVariant();
         }
         case 2:
         {
-            if (effectId == ESM::MagicEffect::DrainAttribute ||
-                effectId == ESM::MagicEffect::DamageAttribute ||
-                effectId == ESM::MagicEffect::RestoreAttribute ||
-                effectId == ESM::MagicEffect::FortifyAttribute ||
-                effectId == ESM::MagicEffect::AbsorbAttribute)
+            if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
+                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
+                || effectId == ESM::MagicEffect::AbsorbAttribute)
                 return record.get().mData.mAttributes[subRowIndex];
             else
                 return QVariant();
@@ -188,24 +184,20 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
         throw std::runtime_error("index out of range");
 
     ESM::RefId effectId
-        = value.toString().isEmpty() ? ESM::RefId() : ESM::MagicEffectId(value.toString().toStdString());
+        = value.toString().isEmpty() ? ESM::RefId() : ESM::RefId::deserializeText(value.toString().toStdString());
 
     switch (subColIndex)
     {
         case 0:
             ingredient.mData.mEffectID[subRowIndex] = effectId;
-            if (effectId == ESM::MagicEffect::DrainSkill ||
-                effectId == ESM::MagicEffect::DamageSkill ||
-                effectId == ESM::MagicEffect::RestoreSkill ||
-                effectId == ESM::MagicEffect::FortifySkill ||
-                effectId == ESM::MagicEffect::AbsorbSkill)
-                    ingredient.mData.mAttributes[subRowIndex] = -1;
-            else if (effectId == ESM::MagicEffect::DrainAttribute ||
-                effectId == ESM::MagicEffect::DamageAttribute ||
-                effectId == ESM::MagicEffect::RestoreAttribute ||
-                effectId == ESM::MagicEffect::FortifyAttribute ||
-                effectId == ESM::MagicEffect::AbsorbAttribute)
-                    ingredient.mData.mSkills[subRowIndex] = -1;
+            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
+                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
+                || effectId == ESM::MagicEffect::AbsorbSkill)
+                ingredient.mData.mAttributes[subRowIndex] = -1;
+            else if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
+                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
+                || effectId == ESM::MagicEffect::AbsorbAttribute)
+                ingredient.mData.mSkills[subRowIndex] = -1;
             else
             {
                 ingredient.mData.mSkills[subRowIndex] = -1;

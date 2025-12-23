@@ -24,7 +24,7 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(const ESM::RefId& effectId, const ESM::RefId& sourceId, int32_t index)
+        SummonKey(ESM::RefId effectId, const ESM::RefId& sourceId, int32_t index)
             : mEffectId(effectId)
             , mSourceId(sourceId)
             , mEffectIndex(index)

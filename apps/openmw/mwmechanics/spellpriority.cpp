@@ -30,7 +30,7 @@ namespace
         Fatigue = 2
     };
 
-    int numEffectsToDispel(const MWWorld::Ptr& actor, const ESM::RefId& effectFilter = ESM::RefId(), bool negative = true)
+    int numEffectsToDispel(const MWWorld::Ptr& actor, ESM::RefId effectFilter = ESM::RefId(), bool negative = true)
     {
         int toCure = 0;
         const MWMechanics::ActiveSpells& activeSpells = actor.getClass().getCreatureStats(actor).getActiveSpells();
@@ -214,52 +214,40 @@ namespace MWMechanics
         // NOTE: enemy may be empty
 
         float rating = 1;
-        if (effect.mEffectID == ESM::MagicEffect::Soultrap ||
-            effect.mEffectID == ESM::MagicEffect::AlmsiviIntervention ||
-            effect.mEffectID == ESM::MagicEffect::DivineIntervention ||
-            effect.mEffectID == ESM::MagicEffect::CalmHumanoid ||
-            effect.mEffectID == ESM::MagicEffect::CalmCreature ||
-            effect.mEffectID == ESM::MagicEffect::FrenzyHumanoid ||
-            effect.mEffectID == ESM::MagicEffect::FrenzyCreature ||
-            effect.mEffectID == ESM::MagicEffect::DemoralizeHumanoid ||
-            effect.mEffectID == ESM::MagicEffect::DemoralizeCreature ||
-            effect.mEffectID == ESM::MagicEffect::RallyHumanoid ||
-            effect.mEffectID == ESM::MagicEffect::RallyCreature ||
-            effect.mEffectID == ESM::MagicEffect::Charm ||
-            effect.mEffectID == ESM::MagicEffect::DetectAnimal ||
-            effect.mEffectID == ESM::MagicEffect::DetectEnchantment ||
-            effect.mEffectID == ESM::MagicEffect::DetectKey ||
-            effect.mEffectID == ESM::MagicEffect::Telekinesis ||
-            effect.mEffectID == ESM::MagicEffect::Mark ||
-            effect.mEffectID == ESM::MagicEffect::Recall ||
-            effect.mEffectID == ESM::MagicEffect::Jump ||
-            effect.mEffectID == ESM::MagicEffect::WaterBreathing ||
-            effect.mEffectID == ESM::MagicEffect::SwiftSwim ||
-            effect.mEffectID == ESM::MagicEffect::WaterWalking ||
-            effect.mEffectID == ESM::MagicEffect::SlowFall ||
-            effect.mEffectID == ESM::MagicEffect::Light ||
-            effect.mEffectID == ESM::MagicEffect::Lock ||
-            effect.mEffectID == ESM::MagicEffect::Open ||
-            effect.mEffectID == ESM::MagicEffect::TurnUndead ||
-            effect.mEffectID == ESM::MagicEffect::WeaknessToCommonDisease ||
-            effect.mEffectID == ESM::MagicEffect::WeaknessToBlightDisease ||
-            effect.mEffectID == ESM::MagicEffect::WeaknessToCorprusDisease ||
-            effect.mEffectID == ESM::MagicEffect::CureCommonDisease ||
-            effect.mEffectID == ESM::MagicEffect::CureBlightDisease ||
-            effect.mEffectID == ESM::MagicEffect::CureCorprusDisease ||
-            effect.mEffectID == ESM::MagicEffect::ResistBlightDisease ||
-            effect.mEffectID == ESM::MagicEffect::ResistCommonDisease ||
-            effect.mEffectID == ESM::MagicEffect::ResistCorprusDisease ||
-            effect.mEffectID == ESM::MagicEffect::Invisibility ||
-            effect.mEffectID == ESM::MagicEffect::Chameleon ||
-            effect.mEffectID == ESM::MagicEffect::NightEye ||
-            effect.mEffectID == ESM::MagicEffect::Vampirism ||
-            effect.mEffectID == ESM::MagicEffect::StuntedMagicka ||
-            effect.mEffectID == ESM::MagicEffect::ExtraSpell ||
-            effect.mEffectID == ESM::MagicEffect::RemoveCurse ||
-            effect.mEffectID == ESM::MagicEffect::CommandCreature ||
-            effect.mEffectID == ESM::MagicEffect::CommandHumanoid)
-                return 0.f;
+        if (effect.mEffectID == ESM::MagicEffect::Soultrap || effect.mEffectID == ESM::MagicEffect::AlmsiviIntervention
+            || effect.mEffectID == ESM::MagicEffect::DivineIntervention
+            || effect.mEffectID == ESM::MagicEffect::CalmHumanoid || effect.mEffectID == ESM::MagicEffect::CalmCreature
+            || effect.mEffectID == ESM::MagicEffect::FrenzyHumanoid
+            || effect.mEffectID == ESM::MagicEffect::FrenzyCreature
+            || effect.mEffectID == ESM::MagicEffect::DemoralizeHumanoid
+            || effect.mEffectID == ESM::MagicEffect::DemoralizeCreature
+            || effect.mEffectID == ESM::MagicEffect::RallyHumanoid
+            || effect.mEffectID == ESM::MagicEffect::RallyCreature || effect.mEffectID == ESM::MagicEffect::Charm
+            || effect.mEffectID == ESM::MagicEffect::DetectAnimal
+            || effect.mEffectID == ESM::MagicEffect::DetectEnchantment
+            || effect.mEffectID == ESM::MagicEffect::DetectKey || effect.mEffectID == ESM::MagicEffect::Telekinesis
+            || effect.mEffectID == ESM::MagicEffect::Mark || effect.mEffectID == ESM::MagicEffect::Recall
+            || effect.mEffectID == ESM::MagicEffect::Jump || effect.mEffectID == ESM::MagicEffect::WaterBreathing
+            || effect.mEffectID == ESM::MagicEffect::SwiftSwim || effect.mEffectID == ESM::MagicEffect::WaterWalking
+            || effect.mEffectID == ESM::MagicEffect::SlowFall || effect.mEffectID == ESM::MagicEffect::Light
+            || effect.mEffectID == ESM::MagicEffect::Lock || effect.mEffectID == ESM::MagicEffect::Open
+            || effect.mEffectID == ESM::MagicEffect::TurnUndead
+            || effect.mEffectID == ESM::MagicEffect::WeaknessToCommonDisease
+            || effect.mEffectID == ESM::MagicEffect::WeaknessToBlightDisease
+            || effect.mEffectID == ESM::MagicEffect::WeaknessToCorprusDisease
+            || effect.mEffectID == ESM::MagicEffect::CureCommonDisease
+            || effect.mEffectID == ESM::MagicEffect::CureBlightDisease
+            || effect.mEffectID == ESM::MagicEffect::CureCorprusDisease
+            || effect.mEffectID == ESM::MagicEffect::ResistBlightDisease
+            || effect.mEffectID == ESM::MagicEffect::ResistCommonDisease
+            || effect.mEffectID == ESM::MagicEffect::ResistCorprusDisease
+            || effect.mEffectID == ESM::MagicEffect::Invisibility || effect.mEffectID == ESM::MagicEffect::Chameleon
+            || effect.mEffectID == ESM::MagicEffect::NightEye || effect.mEffectID == ESM::MagicEffect::Vampirism
+            || effect.mEffectID == ESM::MagicEffect::StuntedMagicka || effect.mEffectID == ESM::MagicEffect::ExtraSpell
+            || effect.mEffectID == ESM::MagicEffect::RemoveCurse
+            || effect.mEffectID == ESM::MagicEffect::CommandCreature
+            || effect.mEffectID == ESM::MagicEffect::CommandHumanoid)
+            return 0.f;
         else if (effect.mEffectID == ESM::MagicEffect::Blind)
         {
             if (enemy.isEmpty())
@@ -312,27 +300,24 @@ namespace MWMechanics
             return 0.f; // TODO: implement based on attribute damage
         else if (effect.mEffectID == ESM::MagicEffect::RestoreSkill)
             return 0.f; // TODO: implement based on skill damage
-        else if (effect.mEffectID == ESM::MagicEffect::ResistFire ||
-            effect.mEffectID == ESM::MagicEffect::ResistFrost ||
-            effect.mEffectID == ESM::MagicEffect::ResistMagicka ||
-            effect.mEffectID == ESM::MagicEffect::ResistNormalWeapons ||
-            effect.mEffectID == ESM::MagicEffect::ResistParalysis ||
-            effect.mEffectID == ESM::MagicEffect::ResistPoison ||
-            effect.mEffectID == ESM::MagicEffect::ResistShock ||
-            effect.mEffectID == ESM::MagicEffect::SpellAbsorption ||
-            effect.mEffectID == ESM::MagicEffect::Reflect)
-                return 0.f; // probably useless since we don't know in advance what the enemy will cast
+        else if (effect.mEffectID == ESM::MagicEffect::ResistFire || effect.mEffectID == ESM::MagicEffect::ResistFrost
+            || effect.mEffectID == ESM::MagicEffect::ResistMagicka
+            || effect.mEffectID == ESM::MagicEffect::ResistNormalWeapons
+            || effect.mEffectID == ESM::MagicEffect::ResistParalysis
+            || effect.mEffectID == ESM::MagicEffect::ResistPoison || effect.mEffectID == ESM::MagicEffect::ResistShock
+            || effect.mEffectID == ESM::MagicEffect::SpellAbsorption || effect.mEffectID == ESM::MagicEffect::Reflect)
+            return 0.f; // probably useless since we don't know in advance what the enemy will cast
 
-            // don't cast these for now as they would make the NPC cast the same effect over and over again, especially
-            // when they have potions
-        else if (effect.mEffectID == ESM::MagicEffect::FortifyAttribute ||
-            effect.mEffectID == ESM::MagicEffect::FortifyHealth ||
-            effect.mEffectID == ESM::MagicEffect::FortifyMagicka ||
-            effect.mEffectID == ESM::MagicEffect::FortifyFatigue ||
-            effect.mEffectID == ESM::MagicEffect::FortifySkill ||
-            effect.mEffectID == ESM::MagicEffect::FortifyMaximumMagicka ||
-            effect.mEffectID == ESM::MagicEffect::FortifyAttack)
-                return 0.f;
+        // don't cast these for now as they would make the NPC cast the same effect over and over again, especially
+        // when they have potions
+        else if (effect.mEffectID == ESM::MagicEffect::FortifyAttribute
+            || effect.mEffectID == ESM::MagicEffect::FortifyHealth
+            || effect.mEffectID == ESM::MagicEffect::FortifyMagicka
+            || effect.mEffectID == ESM::MagicEffect::FortifyFatigue
+            || effect.mEffectID == ESM::MagicEffect::FortifySkill
+            || effect.mEffectID == ESM::MagicEffect::FortifyMaximumMagicka
+            || effect.mEffectID == ESM::MagicEffect::FortifyAttack)
+            return 0.f;
         else if (effect.mEffectID == ESM::MagicEffect::Burden)
         {
             if (enemy.isEmpty())
@@ -424,17 +409,14 @@ namespace MWMechanics
         {
             if (effect.mRange == ESM::RT_Self)
             {
-                int index = -1;
-                if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
-                    index = Stats::Health;
-                else if (effect.mEffectID == ESM::MagicEffect::RestoreMagicka)
-                    index = Stats::Magicka;
+                auto targetStat = Stats::Health;
+                if (effect.mEffectID == ESM::MagicEffect::RestoreMagicka)
+                    targetStat = Stats::Magicka;
                 else if (effect.mEffectID == ESM::MagicEffect::RestoreFatigue)
-                    index = Stats::Fatigue;
+                    targetStat = Stats::Fatigue;
 
                 const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-                const DynamicStat<float>& current
-                    = stats.getDynamic(index);
+                const DynamicStat<float>& current = stats.getDynamic(targetStat);
                 // NB: this currently assumes the hardcoded magic effect flags are used
                 const float magnitude = (effect.mMagnMin + effect.mMagnMax) / 2.f;
                 const float toHeal = magnitude * std::max(1, effect.mDuration);
@@ -602,7 +584,7 @@ namespace MWMechanics
             rating = 3.f;
         }
 
-        static const std::array<ESM::MagicEffectId, 6> boundWeapons{
+        static const std::array<ESM::RefId, 6> boundWeapons{
             ESM::MagicEffect::BoundDagger,
             ESM::MagicEffect::BoundLongsword,
             ESM::MagicEffect::BoundMace,
@@ -611,7 +593,7 @@ namespace MWMechanics
             ESM::MagicEffect::BoundLongbow,
         };
 
-        static const std::array<ESM::MagicEffectId, 6> boundArmor{
+        static const std::array<ESM::RefId, 6> boundArmor{
             ESM::MagicEffect::ExtraSpell,
             ESM::MagicEffect::BoundCuirass,
             ESM::MagicEffect::BoundHelm,
@@ -620,8 +602,8 @@ namespace MWMechanics
             ESM::MagicEffect::BoundGloves,
         };
 
-        if (std::ranges::find(boundWeapons, effect.mEffectID) != boundWeapons.end() ||
-            std::ranges::find(boundArmor, effect.mEffectID) != boundArmor.end())
+        if (std::ranges::find(boundWeapons, effect.mEffectID) != boundWeapons.end()
+            || std::ranges::find(boundArmor, effect.mEffectID) != boundArmor.end())
         {
             // Prefer casting bound items over other spells
             rating = 2.f;
@@ -633,7 +615,7 @@ namespace MWMechanics
             // summon an Axe instead)
             if (std::ranges::find(boundWeapons, effect.mEffectID) != boundWeapons.end())
             {
-                for (const auto& e : boundWeapons)
+                for (const auto e : boundWeapons)
                     if (actor.getClass().getCreatureStats(actor).getMagicEffects().getOrDefault(e).getMagnitude() > 0.f
                         && (e != ESM::MagicEffect::BoundLongbow || effect.mEffectID == e
                             || rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f))

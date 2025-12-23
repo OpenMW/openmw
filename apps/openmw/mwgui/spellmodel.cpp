@@ -52,7 +52,7 @@ namespace MWGui
 
             if (!effectId.empty())
             {
-                const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(effectId);
+                const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
                 const ESM::Attribute* attribute
                     = store.get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(effect.mData.mAttribute));
                 const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(effect.mData.mSkill));

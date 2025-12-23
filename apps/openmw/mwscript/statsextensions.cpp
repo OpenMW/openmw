@@ -580,7 +580,8 @@ namespace MWScript
                 runtime.pop();
 
                 if (ptr.getClass().isActor())
-                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(ptr, ESM::MagicEffect::indexToRefId(static_cast<int>(effectId)));
+                    ptr.getClass().getCreatureStats(ptr).getActiveSpells().purgeEffect(
+                        ptr, ESM::MagicEffect::indexToRefId(static_cast<int>(effectId)));
             }
         };
 
@@ -1392,7 +1393,7 @@ namespace MWScript
                 auto& effects = player.getClass().getCreatureStats(player).getMagicEffects();
                 float delta = std::clamp(arg * 100.f, 0.f, 100.f)
                     - effects.getOrDefault(ESM::MagicEffect::NightEye).getMagnitude();
-                effects.modifyBase(ESM::MagicEffect::NightEye, static_cast<int>(delta));
+                effects.modifyBase(MWMechanics::EffectKey(ESM::MagicEffect::NightEye), static_cast<int>(delta));
             }
         };
 
@@ -1409,7 +1410,7 @@ namespace MWScript
                 float newBase = std::clamp(nightEye.getMagnitude() + arg * 100.f, 0.f, 100.f);
                 newBase -= nightEye.getModifier();
                 float delta = std::clamp(newBase, 0.f, 100.f) - nightEye.getMagnitude();
-                effects.modifyBase(ESM::MagicEffect::NightEye, static_cast<int>(delta));
+                effects.modifyBase(MWMechanics::EffectKey(ESM::MagicEffect::NightEye), static_cast<int>(delta));
             }
         };
 

@@ -3,23 +3,58 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <format>
+
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/concepts.hpp>
 
 namespace ESM
 {
-    template <typename T>
-    constexpr bool loading = !std::is_const_v<std::remove_reference_t<T>>;
+    namespace
+    {
+        // ENAM format defined by Morrowind.esm
+        struct EsmENAMstruct
+        {
+            int16_t mEffectID;
+            signed char mSkill, mAttribute;
+            int32_t mRange, mArea, mDuration, mMagnMin, mMagnMax;
+        };
 
-    template <Misc::SameAsWithoutCvref<ENAMstruct> T>
+        void toBinary(const ENAMstruct& src, EsmENAMstruct& dst)
+        {
+            int16_t index = static_cast<int16_t>(ESM::MagicEffect::refIdToIndex(src.mEffectID));
+            if (index < 0 || index >= ESM::MagicEffect::Length)
+                throw std::runtime_error(std::format("Cannot serialize effect {}", src.mEffectID.toDebugString()));
+            dst.mEffectID = index;
+            dst.mSkill = src.mSkill;
+            dst.mAttribute = src.mAttribute;
+            dst.mRange = src.mRange;
+            dst.mArea = src.mArea;
+            dst.mDuration = src.mDuration;
+            dst.mMagnMin = src.mMagnMin;
+            dst.mMagnMax = src.mMagnMax;
+        }
+
+        void fromBinary(const EsmENAMstruct& src, ENAMstruct& dst)
+        {
+            int16_t index = src.mEffectID;
+            if (index < 0 || index >= ESM::MagicEffect::Length)
+                throw std::runtime_error(std::format("Cannot deserialize effect with index {}", index));
+            dst.mEffectID = ESM::MagicEffect::indexToRefId(index);
+            dst.mSkill = src.mSkill;
+            dst.mAttribute = src.mAttribute;
+            dst.mRange = src.mRange;
+            dst.mArea = src.mArea;
+            dst.mDuration = src.mDuration;
+            dst.mMagnMin = src.mMagnMin;
+            dst.mMagnMax = src.mMagnMax;
+        }
+    }
+
+    template <Misc::SameAsWithoutCvref<EsmENAMstruct> T>
     void decompose(T&& v, const auto& f)
     {
-        int16_t ioEffectID = static_cast<int16_t>(ESM::MagicEffect::refIdToIndex(v.mEffectID));
-        f(ioEffectID, v.mSkill, v.mAttribute, v.mRange, v.mArea, v.mDuration, v.mMagnMin, v.mMagnMax);
-        if constexpr (loading<T>)
-        {
-            v.mEffectID = ESM::MagicEffect::indexToRefId(ioEffectID);
-        }
+        f(v.mEffectID, v.mSkill, v.mAttribute, v.mRange, v.mArea, v.mDuration, v.mMagnMin, v.mMagnMax);
     }
 
     void EffectList::load(ESMReader& esm)
@@ -46,8 +81,11 @@ namespace ESM
 
     void EffectList::add(ESMReader& esm)
     {
+        EsmENAMstruct bin;
+        esm.getSubComposite(bin);
+
         ENAMstruct s;
-        esm.getSubComposite(s);
+        fromBinary(bin, s);
         mList.push_back({ s, static_cast<uint32_t>(mList.size()) });
     }
 
@@ -55,7 +93,9 @@ namespace ESM
     {
         for (const IndexedENAMstruct& enam : mList)
         {
-            esm.writeNamedComposite("ENAM", enam.mData);
+            EsmENAMstruct bin;
+            toBinary(enam.mData, bin);
+            esm.writeNamedComposite("ENAM", bin);
         }
     }
 

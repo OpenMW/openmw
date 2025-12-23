@@ -73,13 +73,6 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(const ESM::RefId& id, ESM::MagicEffect& record)
-    {
-        if (const auto* effectId = id.getIf<ESM::MagicEffectId>())
-            record.mId = *effectId;
-        throw std::runtime_error("Invalid magic effect id: " + id.toDebugString());
-    }
-
     inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
     {
         if (const auto* skillId = id.getIf<ESM::SkillId>())

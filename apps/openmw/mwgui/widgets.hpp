@@ -10,8 +10,8 @@
 #include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/effectlist.hpp>
-#include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace MyGUI
 {
@@ -41,7 +41,6 @@ namespace MWGui
                 , mIsConstant(false)
                 , mNoMagnitude(false)
                 , mKnown(true)
-                , mEffectID(ESM::RefId())
                 , mMagnMin(-1)
                 , mMagnMax(-1)
                 , mRange(-1)
@@ -71,15 +70,12 @@ namespace MWGui
                     return false;
 
                 bool involvesAttribute = (mEffectID == ESM::MagicEffect::RestoreAttribute
-                    || mEffectID == ESM::MagicEffect::AbsorbAttribute
-                    || mEffectID == ESM::MagicEffect::DrainAttribute
+                    || mEffectID == ESM::MagicEffect::AbsorbAttribute || mEffectID == ESM::MagicEffect::DrainAttribute
                     || mEffectID == ESM::MagicEffect::FortifyAttribute
                     || mEffectID == ESM::MagicEffect::DamageAttribute);
                 bool involvesSkill = (mEffectID == ESM::MagicEffect::RestoreSkill
-                    || mEffectID == ESM::MagicEffect::AbsorbSkill
-                    || mEffectID == ESM::MagicEffect::DrainSkill
-                    || mEffectID == ESM::MagicEffect::FortifySkill
-                    || mEffectID == ESM::MagicEffect::DamageSkill);
+                    || mEffectID == ESM::MagicEffect::AbsorbSkill || mEffectID == ESM::MagicEffect::DrainSkill
+                    || mEffectID == ESM::MagicEffect::FortifySkill || mEffectID == ESM::MagicEffect::DamageSkill);
                 return ((other.mSkill == mSkill) || !involvesSkill)
                     && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
             }

@@ -1,5 +1,6 @@
 #include "spellicons.hpp"
 
+#include <format>
 #include <iomanip>
 #include <sstream>
 
@@ -154,10 +155,8 @@ namespace MWGui
                         Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(effect->mIcon),
                             *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-                    const std::string& name = std::string(ESM::MagicEffect::refIdToGmstString(effectId));
-
                     ToolTipInfo tooltipInfo;
-                    tooltipInfo.caption = "#{" + name + "}";
+                    tooltipInfo.caption = std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effectId));
                     tooltipInfo.icon = effect->mIcon;
                     tooltipInfo.imageSize = 16;
                     tooltipInfo.wordWrap = false;

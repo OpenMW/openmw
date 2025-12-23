@@ -23,11 +23,11 @@
 namespace MWMechanics
 {
 
-    bool isSummoningEffect(const ESM::RefId& effectId)
+    bool isSummoningEffect(ESM::RefId effectId)
     {
         if (effectId.empty())
             return false;
-        static const std::array<ESM::MagicEffectId, 22> summonEffects{
+        static const std::array<ESM::RefId, 22> summonEffects{
             ESM::MagicEffect::SummonAncestralGhost,
             ESM::MagicEffect::SummonBonelord,
             ESM::MagicEffect::SummonBonewalker,
@@ -51,8 +51,7 @@ namespace MWMechanics
             ESM::MagicEffect::SummonCreature04,
             ESM::MagicEffect::SummonCreature05,
         };
-        return (std::find(summonEffects.begin(), summonEffects.end(), *effectId.getIf<ESM::MagicEffectId>())
-            != summonEffects.end());
+        return (std::find(summonEffects.begin(), summonEffects.end(), effectId) != summonEffects.end());
     }
 
     static const std::map<ESM::RefId, ESM::RefId>& getSummonMap()
@@ -62,7 +61,7 @@ namespace MWMechanics
         if (summonMap.size() > 0)
             return summonMap;
 
-        const std::map<ESM::MagicEffectId, std::string_view> summonMapToGameSetting{
+        const std::map<ESM::RefId, std::string_view> summonMapToGameSetting{
             { ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID" },
             { ESM::MagicEffect::SummonBonelord, "sMagicBonelordID" },
             { ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID" },
@@ -95,7 +94,7 @@ namespace MWMechanics
         return summonMap;
     }
 
-    ESM::RefId getSummonedCreature(const ESM::RefId& effectId)
+    ESM::RefId getSummonedCreature(ESM::RefId effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -106,7 +105,7 @@ namespace MWMechanics
         return ESM::RefId();
     }
 
-    ESM::RefNum summonCreature(const ESM::RefId& effectId, const MWWorld::Ptr& summoner)
+    ESM::RefNum summonCreature(ESM::RefId effectId, const MWWorld::Ptr& summoner)
     {
         const ESM::RefId& creatureID = getSummonedCreature(effectId);
         ESM::RefNum creature;

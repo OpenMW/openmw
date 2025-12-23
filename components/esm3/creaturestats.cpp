@@ -119,7 +119,8 @@ namespace ESM
                 esm.getHNOT(effectIndex, "EIND");
                 int32_t actorId;
                 esm.getHNT(actorId, "ACID");
-                mSummonedCreatureMap[SummonKey(ESM::MagicEffect::indexToRefId(magicEffect), source, effectIndex)] = actorId;
+                mSummonedCreatureMap[SummonKey(ESM::MagicEffect::indexToRefId(magicEffect), source, effectIndex)]
+                    = actorId;
                 mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(
                     magicEffect), RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 });
             }

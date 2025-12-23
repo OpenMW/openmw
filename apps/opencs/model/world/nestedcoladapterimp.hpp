@@ -324,22 +324,22 @@ namespace CSMWorld
                     return QString::fromStdString(effect.mEffectID.getRefIdString());
                 case 1:
                 {
-                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill ||
-                        effect.mEffectID == ESM::MagicEffect::DamageSkill ||
-                        effect.mEffectID == ESM::MagicEffect::RestoreSkill ||
-                        effect.mEffectID == ESM::MagicEffect::FortifySkill ||
-                        effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
+                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
+                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
+                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
                         return effect.mSkill;
                     else
                         return QVariant();
                 }
                 case 2:
                 {
-                    if (effect.mEffectID == ESM::MagicEffect::DrainAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::DamageAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::RestoreAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::FortifyAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                    if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
+                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
+                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
+                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
                         return effect.mAttribute;
                     else
                         return QVariant();
@@ -373,18 +373,18 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    effect.mEffectID = ESM::MagicEffectId(value.toString().toStdString());
-                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill ||
-                        effect.mEffectID == ESM::MagicEffect::DamageSkill ||
-                        effect.mEffectID == ESM::MagicEffect::RestoreSkill ||
-                        effect.mEffectID == ESM::MagicEffect::FortifySkill ||
-                        effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                    effect.mEffectID = ESM::RefId::deserializeText(value.toString().toStdString());
+                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
+                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
+                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
+                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
                         effect.mAttribute = -1;
-                    else if (effect.mEffectID == ESM::MagicEffect::DrainAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::DamageAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::RestoreAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::FortifyAttribute ||
-                        effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                    else if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
+                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
+                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
+                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
                         effect.mSkill = -1;
                     else
                     {

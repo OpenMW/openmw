@@ -8,21 +8,44 @@
 
 namespace ESM
 {
-    template <typename T>
-    constexpr bool loading = !std::is_const_v<std::remove_reference_t<T>>;
+    namespace
+    {
+        // IRDT format defined by Morrowind.esm
+        struct EsmIRDTstruct
+        {
+            float mWeight;
+            int32_t mValue, mEffectID[4], mSkills[4], mAttributes[4];
+        };
 
-    template <Misc::SameAsWithoutCvref<Ingredient::IRDTstruct> T>
+        void toBinary(const Ingredient::IRDTstruct& src, EsmIRDTstruct& dst)
+        {
+            dst.mWeight = src.mWeight;
+            dst.mValue = src.mValue;
+            for (int i = 0; i < 4; ++i)
+            {
+                dst.mEffectID[i] = ESM::MagicEffect::refIdToIndex(src.mEffectID[i]);
+                dst.mSkills[i] = src.mSkills[i];
+                dst.mAttributes[i] = src.mAttributes[i];
+            }
+        }
+
+        void fromBinary(const EsmIRDTstruct& src, Ingredient::IRDTstruct& dst)
+        {
+            dst.mWeight = src.mWeight;
+            dst.mValue = src.mValue;
+            for (int i = 0; i < 4; ++i)
+            {
+                dst.mEffectID[i] = ESM::MagicEffect::indexToRefId(src.mEffectID[i]);
+                dst.mSkills[i] = src.mSkills[i];
+                dst.mAttributes[i] = src.mAttributes[i];
+            }
+        }
+    }
+
+    template <Misc::SameAsWithoutCvref<EsmIRDTstruct> T>
     void decompose(T&& v, const auto& f)
     {
-        int32_t ioEffectID[4];
-        std::transform(
-            std::begin(v.mEffectID), std::end(v.mEffectID), std::begin(ioEffectID), ESM::MagicEffect::refIdToIndex);
-        f(v.mWeight, v.mValue, ioEffectID, v.mSkills, v.mAttributes);
-        if constexpr (loading<T>)
-        {
-            std::transform(
-                std::begin(ioEffectID), std::end(ioEffectID), std::begin(v.mEffectID), ESM::MagicEffect::indexToRefId);
-        }
+        f(v.mWeight, v.mValue, v.mEffectID, v.mSkills, v.mAttributes);
     }
 
     void Ingredient::load(ESMReader& esm, bool& isDeleted)
@@ -48,7 +71,9 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("IRDT"):
-                    esm.getSubComposite(mData);
+                    EsmIRDTstruct bin;
+                    esm.getSubComposite(bin);
+                    fromBinary(bin, mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -75,21 +100,21 @@ namespace ESM
         // horrible hack to fix broken data in records
         for (int i = 0; i < 4; ++i)
         {
-            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbAttribute &&
-                mData.mEffectID[i] != ESM::MagicEffect::DamageAttribute &&
-                mData.mEffectID[i] != ESM::MagicEffect::DrainAttribute &&
-                mData.mEffectID[i] != ESM::MagicEffect::FortifyAttribute &&
-                mData.mEffectID[i] != ESM::MagicEffect::RestoreAttribute)
+            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::DamageAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::DrainAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::FortifyAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::RestoreAttribute)
             {
                 mData.mAttributes[i] = -1;
             }
 
             // is this relevant in cycle from 0 to 4?
-            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbSkill &&
-                mData.mEffectID[i] != ESM::MagicEffect::DamageSkill &&
-                mData.mEffectID[i] != ESM::MagicEffect::DrainSkill &&
-                mData.mEffectID[i] != ESM::MagicEffect::FortifySkill &&
-                mData.mEffectID[i] != ESM::MagicEffect::RestoreSkill)
+            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::DamageSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::DrainSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::FortifySkill
+                && mData.mEffectID[i] != ESM::MagicEffect::RestoreSkill)
             {
                 mData.mSkills[i] = -1;
             }
@@ -108,7 +133,9 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeNamedComposite("IRDT", mData);
+        EsmIRDTstruct bin;
+        toBinary(mData, bin);
+        esm.writeNamedComposite("IRDT", bin);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }

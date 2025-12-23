@@ -25,153 +25,153 @@ namespace ESM
             0x1048, 0x1048, 0x1048, 0x1048 };
     }
 
-    const MagicEffectId MagicEffect::WaterBreathing("WaterBreathing");
-    const MagicEffectId MagicEffect::SwiftSwim("SwiftSwim");
-    const MagicEffectId MagicEffect::WaterWalking("WaterWalking");
-    const MagicEffectId MagicEffect::Shield("Shield");
-    const MagicEffectId MagicEffect::FireShield("FireShield");
-    const MagicEffectId MagicEffect::LightningShield("LightningShield");
-    const MagicEffectId MagicEffect::FrostShield("FrostShield");
-    const MagicEffectId MagicEffect::Burden("Burden");
-    const MagicEffectId MagicEffect::Feather("Feather");
-    const MagicEffectId MagicEffect::Jump("Jump");
-    const MagicEffectId MagicEffect::Levitate("Levitate");
-    const MagicEffectId MagicEffect::SlowFall("SlowFall");
-    const MagicEffectId MagicEffect::Lock("Lock");
-    const MagicEffectId MagicEffect::Open("Open");
-    const MagicEffectId MagicEffect::FireDamage("FireDamage");
-    const MagicEffectId MagicEffect::ShockDamage("ShockDamage");
-    const MagicEffectId MagicEffect::FrostDamage("FrostDamage");
-    const MagicEffectId MagicEffect::DrainAttribute("DrainAttribute");
-    const MagicEffectId MagicEffect::DrainHealth("DrainHealth");
-    const MagicEffectId MagicEffect::DrainMagicka("DrainMagicka");
-    const MagicEffectId MagicEffect::DrainFatigue("DrainFatigue");
-    const MagicEffectId MagicEffect::DrainSkill("DrainSkill");
-    const MagicEffectId MagicEffect::DamageAttribute("DamageAttribute");
-    const MagicEffectId MagicEffect::DamageHealth("DamageHealth");
-    const MagicEffectId MagicEffect::DamageMagicka("DamageMagicka");
-    const MagicEffectId MagicEffect::DamageFatigue("DamageFatigue");
-    const MagicEffectId MagicEffect::DamageSkill("DamageSkill");
-    const MagicEffectId MagicEffect::Poison("Poison");
-    const MagicEffectId MagicEffect::WeaknessToFire("WeaknessToFire");
-    const MagicEffectId MagicEffect::WeaknessToFrost("WeaknessToFrost");
-    const MagicEffectId MagicEffect::WeaknessToShock("WeaknessToShock");
-    const MagicEffectId MagicEffect::WeaknessToMagicka("WeaknessToMagicka");
-    const MagicEffectId MagicEffect::WeaknessToCommonDisease("WeaknessToCommonDisease");
-    const MagicEffectId MagicEffect::WeaknessToBlightDisease("WeaknessToBlightDisease");
-    const MagicEffectId MagicEffect::WeaknessToCorprusDisease("WeaknessToCorprusDisease");
-    const MagicEffectId MagicEffect::WeaknessToPoison("WeaknessToPoison");
-    const MagicEffectId MagicEffect::WeaknessToNormalWeapons("WeaknessToNormalWeapons");
-    const MagicEffectId MagicEffect::DisintegrateWeapon("DisintegrateWeapon");
-    const MagicEffectId MagicEffect::DisintegrateArmor("DisintegrateArmor");
-    const MagicEffectId MagicEffect::Invisibility("Invisibility");
-    const MagicEffectId MagicEffect::Chameleon("Chameleon");
-    const MagicEffectId MagicEffect::Light("Light");
-    const MagicEffectId MagicEffect::Sanctuary("Sanctuary");
-    const MagicEffectId MagicEffect::NightEye("NightEye");
-    const MagicEffectId MagicEffect::Charm("Charm");
-    const MagicEffectId MagicEffect::Paralyze("Paralyze");
-    const MagicEffectId MagicEffect::Silence("Silence");
-    const MagicEffectId MagicEffect::Blind("Blind");
-    const MagicEffectId MagicEffect::Sound("Sound");
-    const MagicEffectId MagicEffect::CalmHumanoid("CalmHumanoid");
-    const MagicEffectId MagicEffect::CalmCreature("CalmCreature");
-    const MagicEffectId MagicEffect::FrenzyHumanoid("FrenzyHumanoid");
-    const MagicEffectId MagicEffect::FrenzyCreature("FrenzyCreature");
-    const MagicEffectId MagicEffect::DemoralizeHumanoid("DemoralizeHumanoid");
-    const MagicEffectId MagicEffect::DemoralizeCreature("DemoralizeCreature");
-    const MagicEffectId MagicEffect::RallyHumanoid("RallyHumanoid");
-    const MagicEffectId MagicEffect::RallyCreature("RallyCreature");
-    const MagicEffectId MagicEffect::Dispel("Dispel");
-    const MagicEffectId MagicEffect::Soultrap("Soultrap");
-    const MagicEffectId MagicEffect::Telekinesis("Telekinesis");
-    const MagicEffectId MagicEffect::Mark("Mark");
-    const MagicEffectId MagicEffect::Recall("Recall");
-    const MagicEffectId MagicEffect::DivineIntervention("DivineIntervention");
-    const MagicEffectId MagicEffect::AlmsiviIntervention("AlmsiviIntervention");
-    const MagicEffectId MagicEffect::DetectAnimal("DetectAnimal");
-    const MagicEffectId MagicEffect::DetectEnchantment("DetectEnchantment");
-    const MagicEffectId MagicEffect::DetectKey("DetectKey");
-    const MagicEffectId MagicEffect::SpellAbsorption("SpellAbsorption");
-    const MagicEffectId MagicEffect::Reflect("Reflect");
-    const MagicEffectId MagicEffect::CureCommonDisease("CureCommonDisease");
-    const MagicEffectId MagicEffect::CureBlightDisease("CureBlightDisease");
-    const MagicEffectId MagicEffect::CureCorprusDisease("CureCorprusDisease");
-    const MagicEffectId MagicEffect::CurePoison("CurePoison");
-    const MagicEffectId MagicEffect::CureParalyzation("CureParalyzation");
-    const MagicEffectId MagicEffect::RestoreAttribute("RestoreAttribute");
-    const MagicEffectId MagicEffect::RestoreHealth("RestoreHealth");
-    const MagicEffectId MagicEffect::RestoreMagicka("RestoreMagicka");
-    const MagicEffectId MagicEffect::RestoreFatigue("RestoreFatigue");
-    const MagicEffectId MagicEffect::RestoreSkill("RestoreSkill");
-    const MagicEffectId MagicEffect::FortifyAttribute("FortifyAttribute");
-    const MagicEffectId MagicEffect::FortifyHealth("FortifyHealth");
-    const MagicEffectId MagicEffect::FortifyMagicka("FortifyMagicka");
-    const MagicEffectId MagicEffect::FortifyFatigue("FortifyFatigue");
-    const MagicEffectId MagicEffect::FortifySkill("FortifySkill");
-    const MagicEffectId MagicEffect::FortifyMaximumMagicka("FortifyMaximumMagicka");
-    const MagicEffectId MagicEffect::AbsorbAttribute("AbsorbAttribute");
-    const MagicEffectId MagicEffect::AbsorbHealth("AbsorbHealth");
-    const MagicEffectId MagicEffect::AbsorbMagicka("AbsorbMagicka");
-    const MagicEffectId MagicEffect::AbsorbFatigue("AbsorbFatigue");
-    const MagicEffectId MagicEffect::AbsorbSkill("AbsorbSkill");
-    const MagicEffectId MagicEffect::ResistFire("ResistFire");
-    const MagicEffectId MagicEffect::ResistFrost("ResistFrost");
-    const MagicEffectId MagicEffect::ResistShock("ResistShock");
-    const MagicEffectId MagicEffect::ResistMagicka("ResistMagicka");
-    const MagicEffectId MagicEffect::ResistCommonDisease("ResistCommonDisease");
-    const MagicEffectId MagicEffect::ResistBlightDisease("ResistBlightDisease");
-    const MagicEffectId MagicEffect::ResistCorprusDisease("ResistCorprusDisease");
-    const MagicEffectId MagicEffect::ResistPoison("ResistPoison");
-    const MagicEffectId MagicEffect::ResistNormalWeapons("ResistNormalWeapons");
-    const MagicEffectId MagicEffect::ResistParalysis("ResistParalysis");
-    const MagicEffectId MagicEffect::RemoveCurse("RemoveCurse");
-    const MagicEffectId MagicEffect::TurnUndead("TurnUndead");
-    const MagicEffectId MagicEffect::SummonScamp("SummonScamp");
-    const MagicEffectId MagicEffect::SummonClannfear("SummonClannfear");
-    const MagicEffectId MagicEffect::SummonDaedroth("SummonDaedroth");
-    const MagicEffectId MagicEffect::SummonDremora("SummonDremora");
-    const MagicEffectId MagicEffect::SummonAncestralGhost("SummonAncestralGhost");
-    const MagicEffectId MagicEffect::SummonSkeletalMinion("SummonSkeletalMinion");
-    const MagicEffectId MagicEffect::SummonBonewalker("SummonBonewalker");
-    const MagicEffectId MagicEffect::SummonGreaterBonewalker("SummonGreaterBonewalker");
-    const MagicEffectId MagicEffect::SummonBonelord("SummonBonelord");
-    const MagicEffectId MagicEffect::SummonWingedTwilight("SummonWingedTwilight");
-    const MagicEffectId MagicEffect::SummonHunger("SummonHunger");
-    const MagicEffectId MagicEffect::SummonGoldenSaint("SummonGoldenSaint");
-    const MagicEffectId MagicEffect::SummonFlameAtronach("SummonFlameAtronach");
-    const MagicEffectId MagicEffect::SummonFrostAtronach("SummonFrostAtronach");
-    const MagicEffectId MagicEffect::SummonStormAtronach("SummonStormAtronach");
-    const MagicEffectId MagicEffect::FortifyAttack("FortifyAttack");
-    const MagicEffectId MagicEffect::CommandCreature("CommandCreature");
-    const MagicEffectId MagicEffect::CommandHumanoid("CommandHumanoid");
-    const MagicEffectId MagicEffect::BoundDagger("BoundDagger");
-    const MagicEffectId MagicEffect::BoundLongsword("BoundLongsword");
-    const MagicEffectId MagicEffect::BoundMace("BoundMace");
-    const MagicEffectId MagicEffect::BoundBattleAxe("BoundBattleAxe");
-    const MagicEffectId MagicEffect::BoundSpear("BoundSpear");
-    const MagicEffectId MagicEffect::BoundLongbow("BoundLongbow");
-    const MagicEffectId MagicEffect::ExtraSpell("ExtraSpell");
-    const MagicEffectId MagicEffect::BoundCuirass("BoundCuirass");
-    const MagicEffectId MagicEffect::BoundHelm("BoundHelm");
-    const MagicEffectId MagicEffect::BoundBoots("BoundBoots");
-    const MagicEffectId MagicEffect::BoundShield("BoundShield");
-    const MagicEffectId MagicEffect::BoundGloves("BoundGloves");
-    const MagicEffectId MagicEffect::Corprus("Corprus");
-    const MagicEffectId MagicEffect::Vampirism("Vampirism");
-    const MagicEffectId MagicEffect::SummonCenturionSphere("SummonCenturionSphere");
-    const MagicEffectId MagicEffect::SunDamage("SunDamage");
-    const MagicEffectId MagicEffect::StuntedMagicka("StuntedMagicka");
+    const StringRefId MagicEffect::WaterBreathing("WaterBreathing");
+    const StringRefId MagicEffect::SwiftSwim("SwiftSwim");
+    const StringRefId MagicEffect::WaterWalking("WaterWalking");
+    const StringRefId MagicEffect::Shield("Shield");
+    const StringRefId MagicEffect::FireShield("FireShield");
+    const StringRefId MagicEffect::LightningShield("LightningShield");
+    const StringRefId MagicEffect::FrostShield("FrostShield");
+    const StringRefId MagicEffect::Burden("Burden");
+    const StringRefId MagicEffect::Feather("Feather");
+    const StringRefId MagicEffect::Jump("Jump");
+    const StringRefId MagicEffect::Levitate("Levitate");
+    const StringRefId MagicEffect::SlowFall("SlowFall");
+    const StringRefId MagicEffect::Lock("Lock");
+    const StringRefId MagicEffect::Open("Open");
+    const StringRefId MagicEffect::FireDamage("FireDamage");
+    const StringRefId MagicEffect::ShockDamage("ShockDamage");
+    const StringRefId MagicEffect::FrostDamage("FrostDamage");
+    const StringRefId MagicEffect::DrainAttribute("DrainAttribute");
+    const StringRefId MagicEffect::DrainHealth("DrainHealth");
+    const StringRefId MagicEffect::DrainMagicka("DrainMagicka");
+    const StringRefId MagicEffect::DrainFatigue("DrainFatigue");
+    const StringRefId MagicEffect::DrainSkill("DrainSkill");
+    const StringRefId MagicEffect::DamageAttribute("DamageAttribute");
+    const StringRefId MagicEffect::DamageHealth("DamageHealth");
+    const StringRefId MagicEffect::DamageMagicka("DamageMagicka");
+    const StringRefId MagicEffect::DamageFatigue("DamageFatigue");
+    const StringRefId MagicEffect::DamageSkill("DamageSkill");
+    const StringRefId MagicEffect::Poison("Poison");
+    const StringRefId MagicEffect::WeaknessToFire("WeaknessToFire");
+    const StringRefId MagicEffect::WeaknessToFrost("WeaknessToFrost");
+    const StringRefId MagicEffect::WeaknessToShock("WeaknessToShock");
+    const StringRefId MagicEffect::WeaknessToMagicka("WeaknessToMagicka");
+    const StringRefId MagicEffect::WeaknessToCommonDisease("WeaknessToCommonDisease");
+    const StringRefId MagicEffect::WeaknessToBlightDisease("WeaknessToBlightDisease");
+    const StringRefId MagicEffect::WeaknessToCorprusDisease("WeaknessToCorprusDisease");
+    const StringRefId MagicEffect::WeaknessToPoison("WeaknessToPoison");
+    const StringRefId MagicEffect::WeaknessToNormalWeapons("WeaknessToNormalWeapons");
+    const StringRefId MagicEffect::DisintegrateWeapon("DisintegrateWeapon");
+    const StringRefId MagicEffect::DisintegrateArmor("DisintegrateArmor");
+    const StringRefId MagicEffect::Invisibility("Invisibility");
+    const StringRefId MagicEffect::Chameleon("Chameleon");
+    const StringRefId MagicEffect::Light("Light");
+    const StringRefId MagicEffect::Sanctuary("Sanctuary");
+    const StringRefId MagicEffect::NightEye("NightEye");
+    const StringRefId MagicEffect::Charm("Charm");
+    const StringRefId MagicEffect::Paralyze("Paralyze");
+    const StringRefId MagicEffect::Silence("Silence");
+    const StringRefId MagicEffect::Blind("Blind");
+    const StringRefId MagicEffect::Sound("Sound");
+    const StringRefId MagicEffect::CalmHumanoid("CalmHumanoid");
+    const StringRefId MagicEffect::CalmCreature("CalmCreature");
+    const StringRefId MagicEffect::FrenzyHumanoid("FrenzyHumanoid");
+    const StringRefId MagicEffect::FrenzyCreature("FrenzyCreature");
+    const StringRefId MagicEffect::DemoralizeHumanoid("DemoralizeHumanoid");
+    const StringRefId MagicEffect::DemoralizeCreature("DemoralizeCreature");
+    const StringRefId MagicEffect::RallyHumanoid("RallyHumanoid");
+    const StringRefId MagicEffect::RallyCreature("RallyCreature");
+    const StringRefId MagicEffect::Dispel("Dispel");
+    const StringRefId MagicEffect::Soultrap("Soultrap");
+    const StringRefId MagicEffect::Telekinesis("Telekinesis");
+    const StringRefId MagicEffect::Mark("Mark");
+    const StringRefId MagicEffect::Recall("Recall");
+    const StringRefId MagicEffect::DivineIntervention("DivineIntervention");
+    const StringRefId MagicEffect::AlmsiviIntervention("AlmsiviIntervention");
+    const StringRefId MagicEffect::DetectAnimal("DetectAnimal");
+    const StringRefId MagicEffect::DetectEnchantment("DetectEnchantment");
+    const StringRefId MagicEffect::DetectKey("DetectKey");
+    const StringRefId MagicEffect::SpellAbsorption("SpellAbsorption");
+    const StringRefId MagicEffect::Reflect("Reflect");
+    const StringRefId MagicEffect::CureCommonDisease("CureCommonDisease");
+    const StringRefId MagicEffect::CureBlightDisease("CureBlightDisease");
+    const StringRefId MagicEffect::CureCorprusDisease("CureCorprusDisease");
+    const StringRefId MagicEffect::CurePoison("CurePoison");
+    const StringRefId MagicEffect::CureParalyzation("CureParalyzation");
+    const StringRefId MagicEffect::RestoreAttribute("RestoreAttribute");
+    const StringRefId MagicEffect::RestoreHealth("RestoreHealth");
+    const StringRefId MagicEffect::RestoreMagicka("RestoreMagicka");
+    const StringRefId MagicEffect::RestoreFatigue("RestoreFatigue");
+    const StringRefId MagicEffect::RestoreSkill("RestoreSkill");
+    const StringRefId MagicEffect::FortifyAttribute("FortifyAttribute");
+    const StringRefId MagicEffect::FortifyHealth("FortifyHealth");
+    const StringRefId MagicEffect::FortifyMagicka("FortifyMagicka");
+    const StringRefId MagicEffect::FortifyFatigue("FortifyFatigue");
+    const StringRefId MagicEffect::FortifySkill("FortifySkill");
+    const StringRefId MagicEffect::FortifyMaximumMagicka("FortifyMaximumMagicka");
+    const StringRefId MagicEffect::AbsorbAttribute("AbsorbAttribute");
+    const StringRefId MagicEffect::AbsorbHealth("AbsorbHealth");
+    const StringRefId MagicEffect::AbsorbMagicka("AbsorbMagicka");
+    const StringRefId MagicEffect::AbsorbFatigue("AbsorbFatigue");
+    const StringRefId MagicEffect::AbsorbSkill("AbsorbSkill");
+    const StringRefId MagicEffect::ResistFire("ResistFire");
+    const StringRefId MagicEffect::ResistFrost("ResistFrost");
+    const StringRefId MagicEffect::ResistShock("ResistShock");
+    const StringRefId MagicEffect::ResistMagicka("ResistMagicka");
+    const StringRefId MagicEffect::ResistCommonDisease("ResistCommonDisease");
+    const StringRefId MagicEffect::ResistBlightDisease("ResistBlightDisease");
+    const StringRefId MagicEffect::ResistCorprusDisease("ResistCorprusDisease");
+    const StringRefId MagicEffect::ResistPoison("ResistPoison");
+    const StringRefId MagicEffect::ResistNormalWeapons("ResistNormalWeapons");
+    const StringRefId MagicEffect::ResistParalysis("ResistParalysis");
+    const StringRefId MagicEffect::RemoveCurse("RemoveCurse");
+    const StringRefId MagicEffect::TurnUndead("TurnUndead");
+    const StringRefId MagicEffect::SummonScamp("SummonScamp");
+    const StringRefId MagicEffect::SummonClannfear("SummonClannfear");
+    const StringRefId MagicEffect::SummonDaedroth("SummonDaedroth");
+    const StringRefId MagicEffect::SummonDremora("SummonDremora");
+    const StringRefId MagicEffect::SummonAncestralGhost("SummonAncestralGhost");
+    const StringRefId MagicEffect::SummonSkeletalMinion("SummonSkeletalMinion");
+    const StringRefId MagicEffect::SummonBonewalker("SummonBonewalker");
+    const StringRefId MagicEffect::SummonGreaterBonewalker("SummonGreaterBonewalker");
+    const StringRefId MagicEffect::SummonBonelord("SummonBonelord");
+    const StringRefId MagicEffect::SummonWingedTwilight("SummonWingedTwilight");
+    const StringRefId MagicEffect::SummonHunger("SummonHunger");
+    const StringRefId MagicEffect::SummonGoldenSaint("SummonGoldenSaint");
+    const StringRefId MagicEffect::SummonFlameAtronach("SummonFlameAtronach");
+    const StringRefId MagicEffect::SummonFrostAtronach("SummonFrostAtronach");
+    const StringRefId MagicEffect::SummonStormAtronach("SummonStormAtronach");
+    const StringRefId MagicEffect::FortifyAttack("FortifyAttack");
+    const StringRefId MagicEffect::CommandCreature("CommandCreature");
+    const StringRefId MagicEffect::CommandHumanoid("CommandHumanoid");
+    const StringRefId MagicEffect::BoundDagger("BoundDagger");
+    const StringRefId MagicEffect::BoundLongsword("BoundLongsword");
+    const StringRefId MagicEffect::BoundMace("BoundMace");
+    const StringRefId MagicEffect::BoundBattleAxe("BoundBattleAxe");
+    const StringRefId MagicEffect::BoundSpear("BoundSpear");
+    const StringRefId MagicEffect::BoundLongbow("BoundLongbow");
+    const StringRefId MagicEffect::ExtraSpell("ExtraSpell");
+    const StringRefId MagicEffect::BoundCuirass("BoundCuirass");
+    const StringRefId MagicEffect::BoundHelm("BoundHelm");
+    const StringRefId MagicEffect::BoundBoots("BoundBoots");
+    const StringRefId MagicEffect::BoundShield("BoundShield");
+    const StringRefId MagicEffect::BoundGloves("BoundGloves");
+    const StringRefId MagicEffect::Corprus("Corprus");
+    const StringRefId MagicEffect::Vampirism("Vampirism");
+    const StringRefId MagicEffect::SummonCenturionSphere("SummonCenturionSphere");
+    const StringRefId MagicEffect::SunDamage("SunDamage");
+    const StringRefId MagicEffect::StuntedMagicka("StuntedMagicka");
 
     // Tribunal only
-    const MagicEffectId MagicEffect::SummonFabricant("SummonFabricant");
+    const StringRefId MagicEffect::SummonFabricant("SummonFabricant");
 
     // Bloodmoon only
-    const MagicEffectId MagicEffect::SummonWolf("SummonWolf");
-    const MagicEffectId MagicEffect::SummonBear("SummonBear");
-    const MagicEffectId MagicEffect::SummonBonewolf("SummonBonewolf");
-    const MagicEffectId MagicEffect::SummonCreature04("SummonCreature04");
-    const MagicEffectId MagicEffect::SummonCreature05("SummonCreature05");
+    const StringRefId MagicEffect::SummonWolf("SummonWolf");
+    const StringRefId MagicEffect::SummonBear("SummonBear");
+    const StringRefId MagicEffect::SummonBonewolf("SummonBonewolf");
+    const StringRefId MagicEffect::SummonCreature04("SummonCreature04");
+    const StringRefId MagicEffect::SummonCreature05("SummonCreature05");
 
     void MagicEffect::load(ESMReader& esm, bool& isDeleted)
     {
@@ -183,7 +183,7 @@ namespace ESM
         if (index < 0 || index >= Length)
             esm.fail("Invalid Index!");
 
-        mId = *indexToRefId(index).getIf<MagicEffectId>();
+        mId = indexToRefId(index);
 
         esm.getSubNameIs("MEDT");
         esm.getSubHeader();
@@ -285,75 +285,74 @@ namespace ESM
 
     namespace
     {
-        std::map<MagicEffectId, MagicEffectId> makeResistancesMap()
+        std::unordered_map<RefId, RefId> makeResistancesMap()
         {
-            std::map<MagicEffectId, MagicEffectId> effects;
+            std::unordered_map<RefId, RefId> effects{
+                { MagicEffect::DisintegrateArmor, MagicEffect::Sanctuary },
+                { MagicEffect::DisintegrateWeapon, MagicEffect::Sanctuary },
 
-            effects[MagicEffect::DisintegrateArmor] = MagicEffect::Sanctuary;
-            effects[MagicEffect::DisintegrateWeapon] = MagicEffect::Sanctuary;
+                { MagicEffect::DrainAttribute, MagicEffect::ResistMagicka },
+                { MagicEffect::DrainHealth, MagicEffect::ResistMagicka },
+                { MagicEffect::DrainMagicka, MagicEffect::ResistMagicka },
+                { MagicEffect::DrainFatigue, MagicEffect::ResistMagicka },
+                { MagicEffect::DrainSkill, MagicEffect::ResistMagicka },
+                { MagicEffect::DamageAttribute, MagicEffect::ResistMagicka },
+                { MagicEffect::DamageHealth, MagicEffect::ResistMagicka },
+                { MagicEffect::DamageMagicka, MagicEffect::ResistMagicka },
+                { MagicEffect::DamageFatigue, MagicEffect::ResistMagicka },
+                { MagicEffect::DamageSkill, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::DrainAttribute] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DrainHealth] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DrainMagicka] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DrainFatigue] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DrainSkill] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DamageAttribute] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DamageHealth] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DamageMagicka] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DamageFatigue] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DamageSkill] = MagicEffect::ResistMagicka;
+                { MagicEffect::AbsorbAttribute, MagicEffect::ResistMagicka },
+                { MagicEffect::AbsorbHealth, MagicEffect::ResistMagicka },
+                { MagicEffect::AbsorbMagicka, MagicEffect::ResistMagicka },
+                { MagicEffect::AbsorbFatigue, MagicEffect::ResistMagicka },
+                { MagicEffect::AbsorbSkill, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::AbsorbAttribute] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::AbsorbHealth] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::AbsorbMagicka] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::AbsorbFatigue] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::AbsorbSkill] = MagicEffect::ResistMagicka;
+                { MagicEffect::WeaknessToFire, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToFrost, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToShock, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToMagicka, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToCommonDisease, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToBlightDisease, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToCorprusDisease, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToPoison, MagicEffect::ResistMagicka },
+                { MagicEffect::WeaknessToNormalWeapons, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::WeaknessToFire] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToFrost] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToShock] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToMagicka] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToCommonDisease] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToBlightDisease] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToCorprusDisease] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToPoison] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::WeaknessToNormalWeapons] = MagicEffect::ResistMagicka;
+                { MagicEffect::Burden, MagicEffect::ResistMagicka },
+                { MagicEffect::Charm, MagicEffect::ResistMagicka },
+                { MagicEffect::Silence, MagicEffect::ResistMagicka },
+                { MagicEffect::Blind, MagicEffect::ResistMagicka },
+                { MagicEffect::Sound, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::Burden] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::Charm] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::Silence] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::Blind] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::Sound] = MagicEffect::ResistMagicka;
+                { MagicEffect::CalmHumanoid, MagicEffect::ResistMagicka },
+                { MagicEffect::CalmCreature, MagicEffect::ResistMagicka },
+                { MagicEffect::FrenzyHumanoid, MagicEffect::ResistMagicka },
+                { MagicEffect::FrenzyCreature, MagicEffect::ResistMagicka },
+                { MagicEffect::DemoralizeHumanoid, MagicEffect::ResistMagicka },
+                { MagicEffect::DemoralizeCreature, MagicEffect::ResistMagicka },
+                { MagicEffect::RallyHumanoid, MagicEffect::ResistMagicka },
+                { MagicEffect::RallyCreature, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::CalmHumanoid] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::CalmCreature] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::FrenzyHumanoid] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::FrenzyCreature] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DemoralizeHumanoid] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::DemoralizeCreature] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::RallyHumanoid] = MagicEffect::ResistMagicka;
-            effects[MagicEffect::RallyCreature] = MagicEffect::ResistMagicka;
+                { MagicEffect::TurnUndead, MagicEffect::ResistMagicka },
 
-            effects[MagicEffect::TurnUndead] = MagicEffect::ResistMagicka;
-
-            effects[MagicEffect::FireDamage] = MagicEffect::ResistFire;
-            effects[MagicEffect::FrostDamage] = MagicEffect::ResistFrost;
-            effects[MagicEffect::ShockDamage] = MagicEffect::ResistShock;
-            effects[MagicEffect::Vampirism] = MagicEffect::ResistCommonDisease;
-            effects[MagicEffect::Corprus] = MagicEffect::ResistCorprusDisease;
-            effects[MagicEffect::Poison] = MagicEffect::ResistPoison;
-            effects[MagicEffect::Paralyze] = MagicEffect::ResistParalysis;
-
+                { MagicEffect::FireDamage, MagicEffect::ResistFire },
+                { MagicEffect::FrostDamage, MagicEffect::ResistFrost },
+                { MagicEffect::ShockDamage, MagicEffect::ResistShock },
+                { MagicEffect::Vampirism, MagicEffect::ResistCommonDisease },
+                { MagicEffect::Corprus, MagicEffect::ResistCorprusDisease },
+                { MagicEffect::Poison, MagicEffect::ResistPoison },
+                { MagicEffect::Paralyze, MagicEffect::ResistParalysis },
+            };
             return effects;
         }
     }
 
-    RefId MagicEffect::getResistanceEffect(const MagicEffectId& effectId)
+    RefId MagicEffect::getResistanceEffect(RefId effectId)
     {
         // Source https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attribute
 
         // <Effect, Effect providing resistance against first effect>
-        static const std::map<MagicEffectId, MagicEffectId> effects = makeResistancesMap();
+        static const std::unordered_map<RefId, RefId> effects = makeResistancesMap();
 
         if (const auto it = effects.find(effectId); it != effects.end())
             return it->second;
@@ -363,68 +362,67 @@ namespace ESM
 
     namespace
     {
-        std::map<MagicEffectId, MagicEffectId> makeWeaknessesMap()
+        std::unordered_map<RefId, RefId> makeWeaknessesMap()
         {
-            static std::map<MagicEffectId, MagicEffectId> effects;
+            std::unordered_map<RefId, RefId> effects{
+                { MagicEffect::DrainAttribute, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DrainHealth, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DrainMagicka, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DrainFatigue, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DrainSkill, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DamageAttribute, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DamageHealth, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DamageMagicka, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DamageFatigue, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DamageSkill, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::DrainAttribute] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DrainHealth] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DrainMagicka] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DrainFatigue] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DrainSkill] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DamageAttribute] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DamageHealth] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DamageMagicka] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DamageFatigue] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DamageSkill] = MagicEffect::WeaknessToMagicka;
+                { MagicEffect::AbsorbAttribute, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::AbsorbHealth, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::AbsorbMagicka, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::AbsorbFatigue, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::AbsorbSkill, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::AbsorbAttribute] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::AbsorbHealth] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::AbsorbMagicka] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::AbsorbFatigue] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::AbsorbSkill] = MagicEffect::WeaknessToMagicka;
+                { MagicEffect::WeaknessToFire, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToFrost, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToShock, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToMagicka, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToCommonDisease, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToBlightDisease, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToCorprusDisease, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToPoison, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::WeaknessToNormalWeapons, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::WeaknessToFire] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToFrost] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToShock] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToMagicka] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToCommonDisease] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToBlightDisease] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToCorprusDisease] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToPoison] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::WeaknessToNormalWeapons] = MagicEffect::WeaknessToMagicka;
+                { MagicEffect::Burden, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::Charm, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::Silence, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::Blind, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::Sound, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::Burden] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::Charm] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::Silence] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::Blind] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::Sound] = MagicEffect::WeaknessToMagicka;
+                { MagicEffect::CalmHumanoid, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::CalmCreature, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::FrenzyHumanoid, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::FrenzyCreature, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DemoralizeHumanoid, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::DemoralizeCreature, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::RallyHumanoid, MagicEffect::WeaknessToMagicka },
+                { MagicEffect::RallyCreature, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::CalmHumanoid] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::CalmCreature] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::FrenzyHumanoid] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::FrenzyCreature] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DemoralizeHumanoid] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::DemoralizeCreature] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::RallyHumanoid] = MagicEffect::WeaknessToMagicka;
-            effects[MagicEffect::RallyCreature] = MagicEffect::WeaknessToMagicka;
+                { MagicEffect::TurnUndead, MagicEffect::WeaknessToMagicka },
 
-            effects[MagicEffect::TurnUndead] = MagicEffect::WeaknessToMagicka;
-
-            effects[MagicEffect::FireDamage] = MagicEffect::WeaknessToFire;
-            effects[MagicEffect::FrostDamage] = MagicEffect::WeaknessToFrost;
-            effects[MagicEffect::ShockDamage] = MagicEffect::WeaknessToShock;
-            effects[MagicEffect::Vampirism] = MagicEffect::WeaknessToCommonDisease;
-            effects[MagicEffect::Corprus] = MagicEffect::WeaknessToCorprusDisease;
-            effects[MagicEffect::Poison] = MagicEffect::WeaknessToPoison;
-
+                { MagicEffect::FireDamage, MagicEffect::WeaknessToFire },
+                { MagicEffect::FrostDamage, MagicEffect::WeaknessToFrost },
+                { MagicEffect::ShockDamage, MagicEffect::WeaknessToShock },
+                { MagicEffect::Vampirism, MagicEffect::WeaknessToCommonDisease },
+                { MagicEffect::Corprus, MagicEffect::WeaknessToCorprusDisease },
+                { MagicEffect::Poison, MagicEffect::WeaknessToPoison },
+            };
             return effects;
         }
     }
 
-    RefId MagicEffect::getWeaknessEffect(const MagicEffectId& effectId)
+    RefId MagicEffect::getWeaknessEffect(RefId effectId)
     {
-        static const std::map<MagicEffectId, MagicEffectId> effects = makeWeaknessesMap();
+        static const std::unordered_map<RefId, RefId> effects = makeWeaknessesMap();
 
         if (const auto it = effects.find(effectId); it != effects.end())
             return it->second;
@@ -433,7 +431,7 @@ namespace ESM
     }
 
     // Map effect index to GMST name
-    const std::array<std::string_view, MagicEffect::Length> sGmstEffectIds = {
+    static constexpr std::array<std::string_view, MagicEffect::Length> sGmstEffectIds = {
         "sEffectWaterBreathing",
         "sEffectSwiftSwim",
         "sEffectWaterWalking",
@@ -583,158 +581,7 @@ namespace ESM
         "sEffectSummonCreature05",
     };
 
-    static const std::array<std::string_view, MagicEffect::Length> sMagicEffectNames{
-        "WaterBreathing",
-        "SwiftSwim",
-        "WaterWalking",
-        "Shield",
-        "FireShield",
-        "LightningShield",
-        "FrostShield",
-        "Burden",
-        "Feather",
-        "Jump",
-        "Levitate",
-        "SlowFall",
-        "Lock",
-        "Open",
-        "FireDamage",
-        "ShockDamage",
-        "FrostDamage",
-        "DrainAttribute",
-        "DrainHealth",
-        "DrainMagicka",
-        "DrainFatigue",
-        "DrainSkill",
-        "DamageAttribute",
-        "DamageHealth",
-        "DamageMagicka",
-        "DamageFatigue",
-        "DamageSkill",
-        "Poison",
-        "WeaknessToFire",
-        "WeaknessToFrost",
-        "WeaknessToShock",
-        "WeaknessToMagicka",
-        "WeaknessToCommonDisease",
-        "WeaknessToBlightDisease",
-        "WeaknessToCorprusDisease",
-        "WeaknessToPoison",
-        "WeaknessToNormalWeapons",
-        "DisintegrateWeapon",
-        "DisintegrateArmor",
-        "Invisibility",
-        "Chameleon",
-        "Light",
-        "Sanctuary",
-        "NightEye",
-        "Charm",
-        "Paralyze",
-        "Silence",
-        "Blind",
-        "Sound",
-        "CalmHumanoid",
-        "CalmCreature",
-        "FrenzyHumanoid",
-        "FrenzyCreature",
-        "DemoralizeHumanoid",
-        "DemoralizeCreature",
-        "RallyHumanoid",
-        "RallyCreature",
-        "Dispel",
-        "Soultrap",
-        "Telekinesis",
-        "Mark",
-        "Recall",
-        "DivineIntervention",
-        "AlmsiviIntervention",
-        "DetectAnimal",
-        "DetectEnchantment",
-        "DetectKey",
-        "SpellAbsorption",
-        "Reflect",
-        "CureCommonDisease",
-        "CureBlightDisease",
-        "CureCorprusDisease",
-        "CurePoison",
-        "CureParalyzation",
-        "RestoreAttribute",
-        "RestoreHealth",
-        "RestoreMagicka",
-        "RestoreFatigue",
-        "RestoreSkill",
-        "FortifyAttribute",
-        "FortifyHealth",
-        "FortifyMagicka",
-        "FortifyFatigue",
-        "FortifySkill",
-        "FortifyMaximumMagicka",
-        "AbsorbAttribute",
-        "AbsorbHealth",
-        "AbsorbMagicka",
-        "AbsorbFatigue",
-        "AbsorbSkill",
-        "ResistFire",
-        "ResistFrost",
-        "ResistShock",
-        "ResistMagicka",
-        "ResistCommonDisease",
-        "ResistBlightDisease",
-        "ResistCorprusDisease",
-        "ResistPoison",
-        "ResistNormalWeapons",
-        "ResistParalysis",
-        "RemoveCurse",
-        "TurnUndead",
-        "SummonScamp",
-        "SummonClannfear",
-        "SummonDaedroth",
-        "SummonDremora",
-        "SummonAncestralGhost",
-        "SummonSkeletalMinion",
-        "SummonBonewalker",
-        "SummonGreaterBonewalker",
-        "SummonBonelord",
-        "SummonWingedTwilight",
-        "SummonHunger",
-        "SummonGoldenSaint",
-        "SummonFlameAtronach",
-        "SummonFrostAtronach",
-        "SummonStormAtronach",
-        "FortifyAttack",
-        "CommandCreature",
-        "CommandHumanoid",
-        "BoundDagger",
-        "BoundLongsword",
-        "BoundMace",
-        "BoundBattleAxe",
-        "BoundSpear",
-        "BoundLongbow",
-        "ExtraSpell",
-        "BoundCuirass",
-        "BoundHelm",
-        "BoundBoots",
-        "BoundShield",
-        "BoundGloves",
-        "Corprus",
-        "Vampirism",
-        "SummonCenturionSphere",
-        "SunDamage",
-        "StuntedMagicka",
-
-        // Tribunal only
-        "SummonFabricant",
-
-        // Bloodmoon only
-        "SummonWolf",
-        "SummonBear",
-        "SummonBonewolf",
-        "SummonCreature04",
-        "SummonCreature05",
-    };
-
-    static const std::array<MagicEffectId, MagicEffect::Length> sMagicEffectIds
-    {
+    static const std::array<RefId, MagicEffect::Length> sMagicEffectIds{
         MagicEffect::WaterBreathing,
         MagicEffect::SwiftSwim,
         MagicEffect::WaterWalking,
@@ -884,21 +731,20 @@ namespace ESM
         MagicEffect::SummonCreature05,
     };
 
-    template <typename Collection>
-    static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
+    template <typename Collection, typename Comparator = std::less<typename Collection::value_type>>
+    static std::map<typename Collection::value_type, int, Comparator> initToIndexMap(
+        const Collection& data, Comparator comp = Comparator())
     {
-        std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
-        for (size_t i = 0; i < strings.size(); i++)
-            map[strings[i]] = static_cast<int>(i);
-
+        std::map<typename Collection::value_type, int, Comparator> map(comp);
+        for (size_t i = 0; i < data.size(); ++i)
+            map[data[i]] = static_cast<int>(i);
         return map;
     }
 
     const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap
-        = initStringToIntMap(sGmstEffectIds);
+        = initToIndexMap(sGmstEffectIds, Misc::StringUtils::CiComp());
 
-    const std::map<std::string_view, int, Misc::StringUtils::CiComp> sMagicEffectNamesToIndexMap
-        = initStringToIntMap(sMagicEffectNames);
+    const std::map<RefId, int> sMagicEffectIdToIndexMap = initToIndexMap(sMagicEffectIds);
 
     MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const
     {
@@ -911,8 +757,8 @@ namespace ESM
             return MDT_Feet;
         if (index == 118 || index == 119)
             return MDT_Level;
-        if ((index >= 28 && index <= 36) || (index >= 90 && index <= 99) || index == 40 || index == 47
-            || index == 57 || index == 68)
+        if ((index >= 28 && index <= 36) || (index >= 90 && index <= 99) || index == 40 || index == 47 || index == 57
+            || index == 68)
             return MDT_Percentage;
 
         return MDT_Points;
@@ -950,10 +796,8 @@ namespace ESM
         return color;
     }
 
-    std::string_view MagicEffect::refIdToGmstString(const RefId& effectId)
+    std::string_view MagicEffect::refIdToGmstString(RefId effectId)
     {
-        if (effectId.empty())
-            return {};
         int index = refIdToIndex(effectId);
         if (index < 0 || index >= Length)
             return {};
@@ -975,46 +819,18 @@ namespace ESM
         return sMagicEffectIds[index];
     }
 
-    int MagicEffect::refIdToIndex(const RefId& effectId)
+    int MagicEffect::refIdToIndex(RefId effectId)
     {
-        if (effectId.empty())
-            return -1;
-        for (size_t i = 0; i < sMagicEffectIds.size(); ++i)
-            if (sMagicEffectIds[i] == effectId)
-                return static_cast<int>(i);
+        const auto it = sMagicEffectIdToIndexMap.find(effectId);
+        if (it != sMagicEffectIdToIndexMap.end())
+            return it->second;
         return -1;
-    }
-
-    RefId MagicEffect::nameToRefId(std::string_view name)
-    {
-        auto it = sMagicEffectNamesToIndexMap.find(name);
-        if (it == sMagicEffectNamesToIndexMap.end())
-            return {};
-        return sMagicEffectIds[it->second];
-    }
-
-    std::string_view MagicEffect::refIdToName(const RefId& effectId)
-    {
-        if (effectId.empty())
-            return {};
-        auto it = sMagicEffectNamesToIndexMap.find(effectId.getRefIdString());
-        if (it == sMagicEffectNamesToIndexMap.end())
-            return {};
-        return sMagicEffectNames[it->second];
     }
 
     std::string_view MagicEffect::indexToName(int index)
     {
         if (index < 0 || index >= Length)
             return {};
-        return sMagicEffectNames[index];
-    }
-
-    int MagicEffect::indexNameToIndex(std::string_view name)
-    {
-        auto it = sMagicEffectNamesToIndexMap.find(name);
-        if (it == sMagicEffectNamesToIndexMap.end())
-            return -1;
-        return it->second;
+        return sMagicEffectIds[index].getRefIdString();
     }
 }

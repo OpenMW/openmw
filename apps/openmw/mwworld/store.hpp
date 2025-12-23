@@ -17,9 +17,9 @@
 #include <components/esm3/loadglob.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadskil.hpp>
-#include <components/esm3/loadmgef.hpp>
 #include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadland.hpp>
@@ -445,17 +445,6 @@ namespace MWWorld
     class Store<ESM::Skill> : public TypedDynamicStore<ESM::Skill>
     {
         using TypedDynamicStore<ESM::Skill>::setUp;
-
-    public:
-        Store() = default;
-
-        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
-    };
-
-    template <>
-    class Store<ESM::MagicEffect> : public TypedDynamicStore<ESM::MagicEffect>
-    {
-        using TypedDynamicStore<ESM::MagicEffect>::setUp;
 
     public:
         Store() = default;

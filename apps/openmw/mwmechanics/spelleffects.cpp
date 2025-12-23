@@ -54,7 +54,7 @@ namespace
     }
 
     ESM::ActiveEffect::Flags modifyAiSetting(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect,
-        const ESM::RefId& creatureEffect, MWMechanics::AiSetting setting, float magnitude)
+        ESM::RefId creatureEffect, MWMechanics::AiSetting setting, float magnitude)
     {
         if (target == MWMechanics::getPlayer() || (effect.mEffectId == creatureEffect) == target.getClass().isNpc())
             return ESM::ActiveEffect::Flag_Invalid;
@@ -298,8 +298,7 @@ namespace
         {
             const VFS::Path::Normalized absorbStaticModel
                 = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(absorbStatic->mModel));
-            animation->addEffect(
-                absorbStaticModel.value(), ESM::MagicEffect::refIdToName(ESM::MagicEffect::SpellAbsorption), false);
+            animation->addEffect(absorbStaticModel.value(), ESM::MagicEffect::SpellAbsorption.getValue(), false);
         }
 
         int spellCost = 0;
@@ -372,7 +371,8 @@ namespace
         {
             const ESM::Spell* spell
                 = spellParams.hasFlag(ESM::ActiveSpells::Flag_Temporary) ? spellParams.getSpell() : nullptr;
-            float magnitudeMult = MWMechanics::getEffectMultiplier(effect.mEffectId, target, caster, spell, &magnitudes);
+            float magnitudeMult
+                = MWMechanics::getEffectMultiplier(effect.mEffectId, target, caster, spell, &magnitudes);
             if (magnitudeMult == 0)
             {
                 // Fully resisted, show message
@@ -391,13 +391,13 @@ namespace
         return MWMechanics::MagicApplicationResult::Type::APPLIED;
     }
 
-    const std::map<ESM::RefId, std::string>& getBoundItemsMap() {
-        static const std::map<ESM::RefId, std::string> sBoundItemsMap{
+    const std::unordered_map<ESM::RefId, std::string_view>& getBoundItemsMap()
+    {
+        static const std::unordered_map<ESM::RefId, std::string_view> sBoundItemsMap{
             { ESM::MagicEffect::BoundBattleAxe, "sMagicBoundBattleAxeID" },
             { ESM::MagicEffect::BoundBoots, "sMagicBoundBootsID" },
             { ESM::MagicEffect::BoundCuirass, "sMagicBoundCuirassID" },
             { ESM::MagicEffect::BoundDagger, "sMagicBoundDaggerID" },
-            { ESM::MagicEffect::BoundGloves, "sMagicBoundLeftGauntletID" },
             { ESM::MagicEffect::BoundHelm, "sMagicBoundHelmID" },
             { ESM::MagicEffect::BoundLongbow, "sMagicBoundLongbowID" },
             { ESM::MagicEffect::BoundLongsword, "sMagicBoundLongswordID" },
@@ -442,11 +442,9 @@ namespace MWMechanics
         else if (effect.mEffectId == ESM::MagicEffect::RemoveCurse)
             purgePermanent(target, &Spells::purgeCurses, ESM::Spell::ST_Curse);
         else if (effect.mEffectId == ESM::MagicEffect::CureCorprusDisease)
-            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(
-                target, ESM::MagicEffect::Corprus);
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(target, ESM::MagicEffect::Corprus);
         else if (effect.mEffectId == ESM::MagicEffect::CurePoison)
-            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(
-                target, ESM::MagicEffect::Poison);
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(target, ESM::MagicEffect::Poison);
         else if (effect.mEffectId == ESM::MagicEffect::CureParalyzation)
             target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(
                 target, ESM::MagicEffect::Paralyze);
@@ -479,7 +477,7 @@ namespace MWMechanics
                 if (!caster.isEmpty())
                 {
                     MWRender::Animation* anim = world->getAnimation(caster);
-                    anim->removeEffect(ESM::MagicEffect::refIdToName(effect.mEffectId));
+                    anim->removeEffect(effect.mEffectId.getRefIdString());
                     const ESM::Static* fx
                         = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_end"));
                     if (fx != nullptr)
@@ -520,7 +518,7 @@ namespace MWMechanics
                     if (!caster.isEmpty())
                     {
                         MWRender::Animation* anim = world->getAnimation(caster);
-                        anim->removeEffect(ESM::MagicEffect::refIdToName(effect.mEffectId));
+                        anim->removeEffect(effect.mEffectId.getRefIdString());
                     }
                 }
             }
@@ -580,13 +578,15 @@ namespace MWMechanics
                 creatureStats.setAiSetting(AiSetting::Flee, stat);
             }
         }
-        else if (effect.mEffectId == ESM::MagicEffect::FrenzyCreature || effect.mEffectId == ESM::MagicEffect::FrenzyHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::FrenzyCreature
+            || effect.mEffectId == ESM::MagicEffect::FrenzyHumanoid)
             return modifyAiSetting(
                 target, effect, ESM::MagicEffect::FrenzyCreature, AiSetting::Fight, effect.mMagnitude);
-        else if (effect.mEffectId == ESM::MagicEffect::CalmCreature || effect.mEffectId == ESM::MagicEffect::CalmHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::CalmCreature
+            || effect.mEffectId == ESM::MagicEffect::CalmHumanoid)
         {
-            ESM::ActiveEffect::Flags applied = modifyAiSetting(
-                target, effect, ESM::MagicEffect::CalmCreature, AiSetting::Fight, -effect.mMagnitude);
+            ESM::ActiveEffect::Flags applied
+                = modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, AiSetting::Fight, -effect.mMagnitude);
             if (applied != ESM::ActiveEffect::Flag_Applied)
                 return applied;
             if (effect.mMagnitude > 0)
@@ -595,10 +595,12 @@ namespace MWMechanics
                 creatureStats.getAiSequence().stopCombat();
             }
         }
-        else if (effect.mEffectId == ESM::MagicEffect::DemoralizeCreature || effect.mEffectId == ESM::MagicEffect::DemoralizeHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::DemoralizeCreature
+            || effect.mEffectId == ESM::MagicEffect::DemoralizeHumanoid)
             return modifyAiSetting(
                 target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, effect.mMagnitude);
-        else if (effect.mEffectId == ESM::MagicEffect::RallyCreature || effect.mEffectId == ESM::MagicEffect::RallyHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::RallyCreature
+            || effect.mEffectId == ESM::MagicEffect::RallyHumanoid)
             return modifyAiSetting(
                 target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, -effect.mMagnitude);
         else if (effect.mEffectId == ESM::MagicEffect::Charm)
@@ -618,28 +620,26 @@ namespace MWMechanics
                     MWSound::PlayMode::LoopNoEnv);
             }
         }
-        else if (effect.mEffectId == ESM::MagicEffect::SummonScamp ||
-            effect.mEffectId == ESM::MagicEffect::SummonClannfear ||
-            effect.mEffectId == ESM::MagicEffect::SummonDaedroth ||
-            effect.mEffectId == ESM::MagicEffect::SummonDremora ||
-            effect.mEffectId == ESM::MagicEffect::SummonAncestralGhost ||
-            effect.mEffectId == ESM::MagicEffect::SummonSkeletalMinion ||
-            effect.mEffectId == ESM::MagicEffect::SummonBonewalker ||
-            effect.mEffectId == ESM::MagicEffect::SummonGreaterBonewalker ||
-            effect.mEffectId == ESM::MagicEffect::SummonBonelord ||
-            effect.mEffectId == ESM::MagicEffect::SummonWingedTwilight ||
-            effect.mEffectId == ESM::MagicEffect::SummonHunger ||
-            effect.mEffectId == ESM::MagicEffect::SummonGoldenSaint ||
-            effect.mEffectId == ESM::MagicEffect::SummonFlameAtronach ||
-            effect.mEffectId == ESM::MagicEffect::SummonFrostAtronach ||
-            effect.mEffectId == ESM::MagicEffect::SummonStormAtronach ||
-            effect.mEffectId == ESM::MagicEffect::SummonCenturionSphere ||
-            effect.mEffectId == ESM::MagicEffect::SummonFabricant ||
-            effect.mEffectId == ESM::MagicEffect::SummonWolf ||
-            effect.mEffectId == ESM::MagicEffect::SummonBear ||
-            effect.mEffectId == ESM::MagicEffect::SummonBonewolf ||
-            effect.mEffectId == ESM::MagicEffect::SummonCreature04 ||
-            effect.mEffectId == ESM::MagicEffect::SummonCreature05)
+        else if (effect.mEffectId == ESM::MagicEffect::SummonScamp
+            || effect.mEffectId == ESM::MagicEffect::SummonClannfear
+            || effect.mEffectId == ESM::MagicEffect::SummonDaedroth
+            || effect.mEffectId == ESM::MagicEffect::SummonDremora
+            || effect.mEffectId == ESM::MagicEffect::SummonAncestralGhost
+            || effect.mEffectId == ESM::MagicEffect::SummonSkeletalMinion
+            || effect.mEffectId == ESM::MagicEffect::SummonBonewalker
+            || effect.mEffectId == ESM::MagicEffect::SummonGreaterBonewalker
+            || effect.mEffectId == ESM::MagicEffect::SummonBonelord
+            || effect.mEffectId == ESM::MagicEffect::SummonWingedTwilight
+            || effect.mEffectId == ESM::MagicEffect::SummonHunger
+            || effect.mEffectId == ESM::MagicEffect::SummonGoldenSaint
+            || effect.mEffectId == ESM::MagicEffect::SummonFlameAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonFrostAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonStormAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonCenturionSphere
+            || effect.mEffectId == ESM::MagicEffect::SummonFabricant || effect.mEffectId == ESM::MagicEffect::SummonWolf
+            || effect.mEffectId == ESM::MagicEffect::SummonBear || effect.mEffectId == ESM::MagicEffect::SummonBonewolf
+            || effect.mEffectId == ESM::MagicEffect::SummonCreature04
+            || effect.mEffectId == ESM::MagicEffect::SummonCreature05)
         {
             if (!target.isInCell())
                 return ESM::ActiveEffect::Flag_Invalid;
@@ -658,20 +658,16 @@ namespace MWMechanics
                     world->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->mValue.getString()),
                 target);
         }
-        else if (effect.mEffectId == ESM::MagicEffect::BoundDagger ||
-        effect.mEffectId == ESM::MagicEffect::BoundLongsword ||
-        effect.mEffectId == ESM::MagicEffect::BoundMace ||
-        effect.mEffectId == ESM::MagicEffect::BoundBattleAxe ||
-        effect.mEffectId == ESM::MagicEffect::BoundSpear ||
-        effect.mEffectId == ESM::MagicEffect::BoundLongbow ||
-        effect.mEffectId == ESM::MagicEffect::BoundCuirass ||
-        effect.mEffectId == ESM::MagicEffect::BoundHelm ||
-        effect.mEffectId == ESM::MagicEffect::BoundBoots ||
-        effect.mEffectId == ESM::MagicEffect::BoundShield)
+        else if (effect.mEffectId == ESM::MagicEffect::BoundDagger
+            || effect.mEffectId == ESM::MagicEffect::BoundLongsword || effect.mEffectId == ESM::MagicEffect::BoundMace
+            || effect.mEffectId == ESM::MagicEffect::BoundBattleAxe || effect.mEffectId == ESM::MagicEffect::BoundSpear
+            || effect.mEffectId == ESM::MagicEffect::BoundLongbow || effect.mEffectId == ESM::MagicEffect::BoundCuirass
+            || effect.mEffectId == ESM::MagicEffect::BoundHelm || effect.mEffectId == ESM::MagicEffect::BoundBoots
+            || effect.mEffectId == ESM::MagicEffect::BoundShield)
         {
             if (!target.getClass().hasInventoryStore(target))
                 return ESM::ActiveEffect::Flag_Invalid;
-            const std::string& item = getBoundItemsMap().at(effect.mEffectId);
+            std::string_view item = getBoundItemsMap().at(effect.mEffectId);
             const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
             const ESM::RefId itemId = ESM::RefId::stringRefId(gmst.find(item)->mValue.getString());
             if (!addBoundItem(itemId, target))
@@ -684,19 +680,19 @@ namespace MWMechanics
         {
             if (!godmode)
             {
-                int index = 0;
+                auto targetStat = Stats::Health;
                 if (effect.mEffectId == ESM::MagicEffect::DamageMagicka)
-                    index = 1;
+                    targetStat = Stats::Magicka;
                 else if (effect.mEffectId == ESM::MagicEffect::DamageFatigue)
-                    index = 2;
+                    targetStat = Stats::Fatigue;
                 // Damage "Dynamic" abilities reduce the base value
                 if (spellParams.hasFlag(ESM::ActiveSpells::Flag_AffectsBaseValues))
-                    modDynamicStat(target, index, -effect.mMagnitude);
+                    modDynamicStat(target, targetStat, -effect.mMagnitude);
                 else
                 {
-                    adjustDynamicStat(
-                        target, index, -effect.mMagnitude, index == 2 && Settings::game().mUncappedDamageFatigue);
-                    if (index == 0)
+                    adjustDynamicStat(target, targetStat, -effect.mMagnitude,
+                        targetStat == Stats::Fatigue && Settings::game().mUncappedDamageFatigue);
+                    if (targetStat == Stats::Health)
                         receivedMagicDamage = affectedHealth = true;
                 }
             }
@@ -741,8 +737,8 @@ namespace MWMechanics
         else if (effect.mEffectId == ESM::MagicEffect::SunDamage)
         {
             //// isInCell shouldn't be needed, but updateActor called during game start
-            if (!godmode && target.isInCell() && target.getCell()->isExterior()
-                && !(target.getCell()->isQuasiExterior()))
+            if (!godmode && target.isInCell()
+                && (target.getCell()->isExterior() || target.getCell()->isQuasiExterior()))
             {
                 const float sunRisen = world->getSunPercentage();
                 static float fMagicSunBlockedMult
@@ -957,9 +953,9 @@ namespace MWMechanics
                 return true;
             }
         }
-        else if (effect.mEffectId == ESM::MagicEffect::DivineIntervention ||
-        effect.mEffectId == ESM::MagicEffect::Recall ||
-        effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention)
+        else if (effect.mEffectId == ESM::MagicEffect::DivineIntervention
+            || effect.mEffectId == ESM::MagicEffect::Recall
+            || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention)
         {
             return effect.mFlags & ESM::ActiveEffect::Flag_Applied;
         }
@@ -1150,7 +1146,7 @@ namespace MWMechanics
             effect.mTimeLeft = 0;
             auto anim = world->getAnimation(target);
             if (anim)
-                anim->removeEffect(ESM::MagicEffect::refIdToName(effect.mEffectId));
+                anim->removeEffect(effect.mEffectId.getRefIdString());
             // Note that we can't return REMOVED here because the effect still needs to be detectable
         }
         effect.mFlags |= applied;
@@ -1189,16 +1185,15 @@ namespace MWMechanics
             stat.setModifier(static_cast<int>(stat.getModifier() - effect.mMagnitude));
             creatureStats.setAiSetting(AiSetting::Flee, stat);
         }
-        else if (effect.mEffectId == ESM::MagicEffect::FrenzyCreature ||
-        effect.mEffectId == ESM::MagicEffect::FrenzyHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::FrenzyCreature
+            || effect.mEffectId == ESM::MagicEffect::FrenzyHumanoid)
             modifyAiSetting(target, effect, ESM::MagicEffect::FrenzyCreature, AiSetting::Fight, -effect.mMagnitude);
-        else if (effect.mEffectId == ESM::MagicEffect::CalmCreature ||
-        effect.mEffectId == ESM::MagicEffect::CalmHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::CalmCreature
+            || effect.mEffectId == ESM::MagicEffect::CalmHumanoid)
             modifyAiSetting(target, effect, ESM::MagicEffect::CalmCreature, AiSetting::Fight, effect.mMagnitude);
-        else if (effect.mEffectId == ESM::MagicEffect::DemoralizeCreature ||
-        effect.mEffectId == ESM::MagicEffect::DemoralizeHumanoid)
-            modifyAiSetting(
-                target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, -effect.mMagnitude);
+        else if (effect.mEffectId == ESM::MagicEffect::DemoralizeCreature
+            || effect.mEffectId == ESM::MagicEffect::DemoralizeHumanoid)
+            modifyAiSetting(target, effect, ESM::MagicEffect::DemoralizeCreature, AiSetting::Flee, -effect.mMagnitude);
         else if (effect.mEffectId == ESM::MagicEffect::NightEye)
         {
             const MWMechanics::EffectParam nightEye = magnitudes.getOrDefault(effect.mEffectId);
@@ -1213,8 +1208,8 @@ namespace MWMechanics
                 magnitudes.modifyBase(effect.mEffectId, static_cast<int>(delta));
             }
         }
-        else if (effect.mEffectId == ESM::MagicEffect::RallyCreature ||
-                effect.mEffectId == ESM::MagicEffect::RallyHumanoid)
+        else if (effect.mEffectId == ESM::MagicEffect::RallyCreature
+            || effect.mEffectId == ESM::MagicEffect::RallyHumanoid)
             modifyAiSetting(target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude);
         else if (effect.mEffectId == ESM::MagicEffect::Sound)
         {
@@ -1222,28 +1217,26 @@ namespace MWMechanics
                 MWBase::Environment::get().getSoundManager()->stopSound3D(
                     target, ESM::RefId::stringRefId("magic sound"));
         }
-        else if (effect.mEffectId == ESM::MagicEffect::SummonScamp ||
-        effect.mEffectId == ESM::MagicEffect::SummonClannfear ||
-        effect.mEffectId == ESM::MagicEffect::SummonDaedroth ||
-        effect.mEffectId == ESM::MagicEffect::SummonDremora ||
-        effect.mEffectId == ESM::MagicEffect::SummonAncestralGhost ||
-        effect.mEffectId == ESM::MagicEffect::SummonSkeletalMinion ||
-        effect.mEffectId == ESM::MagicEffect::SummonBonewalker ||
-        effect.mEffectId == ESM::MagicEffect::SummonGreaterBonewalker ||
-        effect.mEffectId == ESM::MagicEffect::SummonBonelord ||
-        effect.mEffectId == ESM::MagicEffect::SummonWingedTwilight ||
-        effect.mEffectId == ESM::MagicEffect::SummonHunger ||
-        effect.mEffectId == ESM::MagicEffect::SummonGoldenSaint ||
-        effect.mEffectId == ESM::MagicEffect::SummonFlameAtronach ||
-        effect.mEffectId == ESM::MagicEffect::SummonFrostAtronach ||
-        effect.mEffectId == ESM::MagicEffect::SummonStormAtronach ||
-        effect.mEffectId == ESM::MagicEffect::SummonCenturionSphere ||
-        effect.mEffectId == ESM::MagicEffect::SummonFabricant ||
-        effect.mEffectId == ESM::MagicEffect::SummonWolf ||
-        effect.mEffectId == ESM::MagicEffect::SummonBear ||
-        effect.mEffectId == ESM::MagicEffect::SummonBonewolf ||
-        effect.mEffectId == ESM::MagicEffect::SummonCreature04 ||
-        effect.mEffectId == ESM::MagicEffect::SummonCreature05)
+        else if (effect.mEffectId == ESM::MagicEffect::SummonScamp
+            || effect.mEffectId == ESM::MagicEffect::SummonClannfear
+            || effect.mEffectId == ESM::MagicEffect::SummonDaedroth
+            || effect.mEffectId == ESM::MagicEffect::SummonDremora
+            || effect.mEffectId == ESM::MagicEffect::SummonAncestralGhost
+            || effect.mEffectId == ESM::MagicEffect::SummonSkeletalMinion
+            || effect.mEffectId == ESM::MagicEffect::SummonBonewalker
+            || effect.mEffectId == ESM::MagicEffect::SummonGreaterBonewalker
+            || effect.mEffectId == ESM::MagicEffect::SummonBonelord
+            || effect.mEffectId == ESM::MagicEffect::SummonWingedTwilight
+            || effect.mEffectId == ESM::MagicEffect::SummonHunger
+            || effect.mEffectId == ESM::MagicEffect::SummonGoldenSaint
+            || effect.mEffectId == ESM::MagicEffect::SummonFlameAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonFrostAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonStormAtronach
+            || effect.mEffectId == ESM::MagicEffect::SummonCenturionSphere
+            || effect.mEffectId == ESM::MagicEffect::SummonFabricant || effect.mEffectId == ESM::MagicEffect::SummonWolf
+            || effect.mEffectId == ESM::MagicEffect::SummonBear || effect.mEffectId == ESM::MagicEffect::SummonBonewolf
+            || effect.mEffectId == ESM::MagicEffect::SummonCreature04
+            || effect.mEffectId == ESM::MagicEffect::SummonCreature05)
         {
             ESM::RefNum actor = effect.getActor();
             if (actor.isSet())
@@ -1270,18 +1263,14 @@ namespace MWMechanics
                     world->getStore().get<ESM::GameSetting>().find("sMagicBoundLeftGauntletID")->mValue.getString()),
                 target);
         }
-        else if (effect.mEffectId == ESM::MagicEffect::BoundDagger ||
-        effect.mEffectId == ESM::MagicEffect::BoundLongsword ||
-        effect.mEffectId == ESM::MagicEffect::BoundMace ||
-        effect.mEffectId == ESM::MagicEffect::BoundBattleAxe ||
-        effect.mEffectId == ESM::MagicEffect::BoundSpear ||
-        effect.mEffectId == ESM::MagicEffect::BoundLongbow ||
-        effect.mEffectId == ESM::MagicEffect::BoundCuirass ||
-        effect.mEffectId == ESM::MagicEffect::BoundHelm ||
-        effect.mEffectId == ESM::MagicEffect::BoundBoots ||
-        effect.mEffectId == ESM::MagicEffect::BoundShield)
+        else if (effect.mEffectId == ESM::MagicEffect::BoundDagger
+            || effect.mEffectId == ESM::MagicEffect::BoundLongsword || effect.mEffectId == ESM::MagicEffect::BoundMace
+            || effect.mEffectId == ESM::MagicEffect::BoundBattleAxe || effect.mEffectId == ESM::MagicEffect::BoundSpear
+            || effect.mEffectId == ESM::MagicEffect::BoundLongbow || effect.mEffectId == ESM::MagicEffect::BoundCuirass
+            || effect.mEffectId == ESM::MagicEffect::BoundHelm || effect.mEffectId == ESM::MagicEffect::BoundBoots
+            || effect.mEffectId == ESM::MagicEffect::BoundShield)
         {
-            const std::string& item = getBoundItemsMap().at(effect.mEffectId);
+            std::string_view item = getBoundItemsMap().at(effect.mEffectId);
             removeBoundItem(
                 ESM::RefId::stringRefId(world->getStore().get<ESM::GameSetting>().find(item)->mValue.getString()),
                 target);
@@ -1401,7 +1390,7 @@ namespace MWMechanics
         {
             auto anim = MWBase::Environment::get().getWorld()->getAnimation(target);
             if (anim)
-                anim->removeEffect(ESM::MagicEffect::refIdToName(effect.mEffectId));
+                anim->removeEffect(effect.mEffectId.getRefIdString());
         }
     }
 

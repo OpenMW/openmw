@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <format>
 #include <map>
 #include <stdexcept>
 
@@ -35,7 +36,7 @@ namespace
         ESM::RefId arg = ESM::Skill::indexToRefId(ingredient.mData.mSkills[i]);
         if (arg.empty())
             arg = ESM::Attribute::indexToRefId(ingredient.mData.mAttributes[i]);
-        return MWMechanics::EffectKey(*ingredient.mData.mEffectID[i].getIf<ESM::MagicEffectId>(), arg);
+        return MWMechanics::EffectKey(ingredient.mData.mEffectID[i], arg);
     }
 
     bool containsEffect(const ESM::Ingredient& ingredient, const MWMechanics::EffectKey& effect)
@@ -172,11 +173,11 @@ void MWMechanics::Alchemy::updateEffects()
     for (const auto& effectKey : effects)
     {
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(effectKey.mId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectKey.mId);
 
         if (magicEffect->mData.mBaseCost <= 0)
         {
-            const std::string os = "invalid base cost for magic effect " + std::string(ESM::MagicEffect::refIdToName(effectKey.mId));
+            const std::string os = std::format("invalid base cost for magic effect {}", effectKey.mId.getRefIdString());
             throw std::runtime_error(os);
         }
 

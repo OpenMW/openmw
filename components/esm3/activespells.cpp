@@ -13,7 +13,7 @@ namespace ESM
 {
     namespace
     {
-        bool isSummon(const ESM::RefId& effectId)
+        bool isSummon(ESM::RefId effectId)
         {
             static const std::array summonEffects{
                 MagicEffect::SummonScamp,
@@ -41,7 +41,7 @@ namespace ESM
             };
             return std::find(summonEffects.begin(), summonEffects.end(), effectId) != summonEffects.end();
         }
-        bool affectsAttribute(const ESM::RefId& effectId)
+        bool affectsAttribute(ESM::RefId effectId)
         {
             static const std::array affectsAttributeEffects{
                 MagicEffect::DrainAttribute,
@@ -53,7 +53,7 @@ namespace ESM
             return std::find(affectsAttributeEffects.begin(), affectsAttributeEffects.end(), effectId)
                 != affectsAttributeEffects.end();
         }
-        bool affectsSkill(const ESM::RefId& effectId)
+        bool affectsSkill(ESM::RefId effectId)
         {
             static const std::array affectsSkillEffects{
                 MagicEffect::DrainSkill,

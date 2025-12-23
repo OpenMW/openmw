@@ -155,8 +155,8 @@ namespace
         {
             int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
             if (effectIdx != -1)
-                std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " ("
-                          << effectIdx << ")" << std::endl;
+                std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
+                          << std::endl;
             if (effect.mData.mSkill != -1)
                 std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
                           << std::endl;
@@ -850,8 +850,7 @@ namespace EsmTool
                 continue;
 
             int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
-            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx
-                      << ")" << std::endl;
+            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
             std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i]) << " (" << mData.mData.mSkills[i] << ")"
                       << std::endl;
             std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i]) << " ("

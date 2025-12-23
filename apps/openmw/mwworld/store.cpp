@@ -377,9 +377,6 @@ namespace MWWorld
         }
     }
 
-    // Need to instantiate these before they're used
-    template class TypedDynamicStore<ESM::MagicEffect>;
-
     // LandTexture
     //=========================================================================
     Store<ESM::LandTexture>::Store() = default;
@@ -976,13 +973,6 @@ namespace MWWorld
         TypedDynamicStore<ESM::GameSetting>::setUp();
     }
 
-    // Magic effect
-    //=========================================================================
-    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
-    {
-        // MGEF record is complete. No further instantiation of fields is required.
-    }
-
     // Attribute
     //=========================================================================
 
@@ -1263,7 +1253,7 @@ template class MWWorld::TypedDynamicStore<ESM::ItemLevList>;
 // template class MWWorld::Store<ESM::LandTexture>;
 template class MWWorld::TypedDynamicStore<ESM::Light>;
 template class MWWorld::TypedDynamicStore<ESM::Lockpick>;
-// template class MWWorld::Store<ESM::MagicEffect>;
+template class MWWorld::TypedDynamicStore<ESM::MagicEffect>;
 template class MWWorld::TypedDynamicStore<ESM::Miscellaneous>;
 template class MWWorld::TypedDynamicStore<ESM::NPC>;
 // template class MWWorld::Store<ESM::Pathgrid>;

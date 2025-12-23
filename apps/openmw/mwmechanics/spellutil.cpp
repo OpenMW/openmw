@@ -176,9 +176,7 @@ namespace MWMechanics
             return std::nullopt;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        const auto magicEffect = store.get<ESM::MagicEffect>().search(effect.mEffectID);
-        if (!magicEffect)
-            return std::nullopt;
+        const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
         const MWMechanics::CreatureStats& creatureStats = caster.getClass().getCreatureStats(caster);
 
         float x = (caster.getClass().getSkill(caster, ESM::Skill::Alchemy)

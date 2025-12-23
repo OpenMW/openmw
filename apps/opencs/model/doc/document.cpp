@@ -128,7 +128,7 @@ void CSMDoc::Document::addOptionalGlobals()
 
 void CSMDoc::Document::addOptionalMagicEffects()
 {
-    static const std::array<ESM::MagicEffectId, 6> optionalMagicEffects{
+    static const std::array<ESM::RefId, 6> optionalMagicEffects{
         ESM::MagicEffect::SummonFabricant,
         ESM::MagicEffect::SummonWolf,
         ESM::MagicEffect::SummonBear,
@@ -136,7 +136,7 @@ void CSMDoc::Document::addOptionalMagicEffects()
         ESM::MagicEffect::SummonCreature04,
         ESM::MagicEffect::SummonCreature05,
     };
-    for (const auto& effectId : optionalMagicEffects)
+    for (const auto effectId : optionalMagicEffects)
     {
         ESM::MagicEffect effect;
         effect.mId = effectId;
@@ -289,7 +289,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; i < ESM::MagicEffect::Length; ++i)
     {
         ESM::MagicEffect record;
-        record.mId = *ESM::MagicEffect::indexToRefId(i).getIf<ESM::MagicEffectId>();
+        record.mId = ESM::MagicEffect::indexToRefId(i);
         record.blank();
 
         getData().getMagicEffects().add(record);

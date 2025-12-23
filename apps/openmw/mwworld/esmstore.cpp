@@ -185,8 +185,8 @@ namespace
                 {
                     iter->mData.mAttribute = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping unexpected attribute argument of "
-                                        << ESM::MagicEffect::refIdToName(iter->mData.mEffectID) << " effect";
+                                        << ": dropping unexpected attribute argument of " << iter->mData.mEffectID
+                                        << " effect";
                     changed = true;
                 }
 
@@ -194,8 +194,8 @@ namespace
                 {
                     iter->mData.mSkill = -1;
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping unexpected skill argument of "
-                                        << ESM::MagicEffect::refIdToName(iter->mData.mEffectID) << " effect";
+                                        << ": dropping unexpected skill argument of " << iter->mData.mEffectID
+                                        << " effect";
                     changed = true;
                 }
 
@@ -525,7 +525,7 @@ namespace MWWorld
             store->setUp();
 
         getWritable<ESM::Skill>().setUp(get<ESM::GameSetting>());
-        getWritable<ESM::MagicEffect>().setUp(get<ESM::GameSetting>());
+        getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp(get<ESM::GameSetting>());
         getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());

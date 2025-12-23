@@ -18,13 +18,13 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    bool isSummoningEffect(const ESM::RefId& effectId);
+    bool isSummoningEffect(ESM::RefId effectId);
 
-    ESM::RefId getSummonedCreature(const ESM::RefId& effectId);
+    ESM::RefId getSummonedCreature(ESM::RefId effectId);
 
     void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::RefId, ESM::RefNum>& summon);
 
-    ESM::RefNum summonCreature(const ESM::RefId& effectId, const MWWorld::Ptr& summoner);
+    ESM::RefNum summonCreature(ESM::RefId effectId, const MWWorld::Ptr& summoner);
 
     void updateSummons(const MWWorld::Ptr& summoner, bool cleanup);
 }

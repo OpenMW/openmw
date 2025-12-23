@@ -613,20 +613,20 @@ namespace MWScript
                     return;
                 }
 
-                long key;
+                ESM::RefId key;
 
                 if (const auto k = ::Misc::StringUtils::toNumeric<long>(effectName);
                     k.has_value() && *k >= 0 && *k <= 32767)
-                    key = *k;
+                    key = ESM::MagicEffect::indexToRefId(*k);
                 else
-                    key = ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::effectGmstIdToRefId(effectName));
+                    key = ESM::MagicEffect::effectGmstIdToRefId(effectName);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                 for (const auto& spell : stats.getActiveSpells())
                 {
                     for (const auto& effect : spell.getEffects())
                     {
-                        if (effect.mFlags & ESM::ActiveEffect::Flag_Remove && ESM::MagicEffect::refIdToIndex(effect.mEffectId) == key)
+                        if (effect.mFlags & ESM::ActiveEffect::Flag_Remove && effect.mEffectId == key)
                         {
                             runtime.push(1);
                             return;
