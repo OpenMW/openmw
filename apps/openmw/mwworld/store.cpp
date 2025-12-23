@@ -597,9 +597,10 @@ namespace MWWorld
         newCell.mAmbi.mFogDensity = 0;
         newCell.updateId();
 
-        ESM::Cell* newCellInserted = &mCells.insert(std::make_pair(newCell.mId, newCell)).first->second;
-
-        return mExt.insert(std::make_pair(key, newCellInserted)).first->second;
+        ESM::Cell* newCellInserted = &mCells.emplace(newCell.mId, newCell).first->second;
+        mExt.emplace(key, newCellInserted);
+        mSharedExt.emplace_back(newCellInserted);
+        return newCellInserted;
     }
     const ESM::Cell* Store<ESM::Cell>::find(const ESM::RefId& id) const
     {
