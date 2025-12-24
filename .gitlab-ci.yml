@@ -657,7 +657,7 @@ macOS15_Xcode16_arm64:
     GIT_STRATEGY: none
   script:
     - apt-get update
-    - apt-get install -y curl unzip zip
+    - apt-get install -y curl dos2unix unzip zip
     - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip" -o awscli-exe-linux-x86_64.zip
     - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
     - pushd awscli-exe-linux-x86_64
@@ -670,11 +670,11 @@ macOS15_Xcode16_arm64:
     - |
       # todo: this will get upset by certain characters
       for merge_list in *_to-be-merged.txt; do
-        while IFS=: read -r partial destination; do
+        dos2unix < $merge_list | while IFS=: read -r partial destination; do
           destinations+=("$destination")
           echo "Unzipping '$partial' to '$destination'"
-          unzip -d "$destination" "incoming_artifacts/$partial"
-        done < $merge_list
+          unzip -n -d "$destination" "incoming_artifacts/$partial"
+        done
       done
     - |
       for destination in ${destinations[@]}; do
