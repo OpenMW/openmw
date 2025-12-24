@@ -1,21 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+set_directory_properties(PROPERTIES EXCLUDE_FROM_ALL on)
 set(CMAKE_CXX_CLANG_TIDY "")
-
-# Like `FetchContent_MakeAvailable` but passes EXCLUDE_FROM_ALL to `add_subdirectory`.
-macro(FetchContent_MakeAvailableExcludeFromAll)
-    foreach(contentName IN ITEMS ${ARGV})
-        string(TOLOWER ${contentName} contentNameLower)
-        FetchContent_GetProperties(${contentName})
-        if(NOT ${contentNameLower}_POPULATED)
-            FetchContent_Populate(${contentName})
-            if(EXISTS ${${contentNameLower}_SOURCE_DIR}/CMakeLists.txt)
-                add_subdirectory(${${contentNameLower}_SOURCE_DIR}
-                    ${${contentNameLower}_BINARY_DIR} EXCLUDE_FROM_ALL)
-            endif()
-        endif()
-    endforeach()
-endmacro()
 
 if(NOT OPENMW_USE_SYSTEM_BULLET)
 
@@ -52,7 +38,7 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
         URL_HASH SHA512=a5105bf5f1dd365a64a350755c7d2c97942f74897a18dcdb3651e6732fd55cc1030a096f5808cf50575281f05e3ac09aa50a48d271a47b94cd61f5167a72b7cc
         SOURCE_DIR fetched/bullet
     )
-    FetchContent_MakeAvailableExcludeFromAll(bullet)
+    FetchContent_MakeAvailable(bullet)
 
     set(BULLET_INCLUDE_DIRS ${bullet_SOURCE_DIR}/src PARENT_SCOPE)
 
@@ -82,7 +68,7 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
         URL_HASH SHA512=c804ef665e786076582367f171082cd2181fdbd214300ddcca4a4245c5a0f45e62e72778ee2d96ec46b393e22477dd729f9bb3006e6eecbf536674e34a057721
         SOURCE_DIR fetched/mygui
     )
-    FetchContent_MakeAvailableExcludeFromAll(mygui)
+    FetchContent_MakeAvailable(mygui)
 
     set(MyGUI_INCLUDE_DIRS ${mygui_SOURCE_DIR}/MyGUIEngine/include PARENT_SCOPE)
     set(MyGUI_LIBRARIES MyGUIEngine PARENT_SCOPE)
@@ -148,7 +134,7 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
         URL_HASH SHA512=9b0a94c1c1d99c767f1857629d43c7a53bfcb74ef760993a121567831e168a1ebbfc10b0c67d7f2241c7b6c6dab2d0e6b876d9f17aca0fabe1a8c86b2279f956
         SOURCE_DIR fetched/osg
     )
-    FetchContent_MakeAvailableExcludeFromAll(osg)
+    FetchContent_MakeAvailable(osg)
 
     set(OPENSCENEGRAPH_INCLUDE_DIRS ${osg_SOURCE_DIR}/include ${osg_BINARY_DIR}/include PARENT_SCOPE)
     set(OSG_LIBRARIES OpenThreads osg PARENT_SCOPE)
@@ -179,7 +165,7 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
         URL_HASH SHA512=48f20cee7a70c2f20f4c68bb74d5af11a1434be85294e37f5fe7b7aae820fbcdff4f35d3be286eaf6f9cbce0aed4201fcc090df409a5bd04aec5fd7c29b3ad94
         SOURCE_DIR fetched/recastnavigation
     )
-    FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
+    FetchContent_MakeAvailable(recastnavigation)
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
@@ -189,7 +175,7 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
         URL_HASH SHA512=7de291709e88fffc693cf24ac675950cfc35c1bf7631cfea95167105720a05cf37fb943c57c5c985db2eeaa57b31894b3c0df98a7bd2939b5746fc5a24b5ae87
         SOURCE_DIR fetched/sqlite3
     )
-    FetchContent_MakeAvailableExcludeFromAll(sqlite3)
+    FetchContent_MakeAvailable(sqlite3)
 
     add_library(sqlite3 STATIC ${sqlite3_SOURCE_DIR}/sqlite3.c)
     target_include_directories(sqlite3 INTERFACE ${sqlite3_SOURCE_DIR}/)
@@ -217,7 +203,7 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
         URL_HASH SHA512=d73587ad9c49338749e1d117a6f8c7ff9c603a91a2ffa91a7355c7df7dea82710b9a810d34ddfef20973ecdc77092ec10fb2b4e4cc8d2e7810cbed79617b3828
         SOURCE_DIR fetched/benchmark
     )
-    FetchContent_MakeAvailableExcludeFromAll(benchmark)
+    FetchContent_MakeAvailable(benchmark)
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
@@ -233,7 +219,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
         URL_HASH MD5=1e8ca0d6ccf99f3ed9506c1f6937d0ec
         SOURCE_DIR fetched/yaml-cpp
     )
-    FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
+    FetchContent_MakeAvailable(yaml-cpp)
 
     if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         target_precompile_headers(yaml-cpp PRIVATE <algorithm>)
@@ -306,7 +292,7 @@ if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND NOT
     if (MSVC)
         set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     endif()
-    FetchContent_MakeAvailableExcludeFromAll(googletest)
+    FetchContent_MakeAvailable(googletest)
 
     add_library(GTest::GTest ALIAS gtest)
     add_library(GMock::GMock ALIAS gmock)
