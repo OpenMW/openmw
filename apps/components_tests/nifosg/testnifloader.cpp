@@ -100,7 +100,7 @@ osg::Group {
           UDC_UserObjects 1 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
           }
@@ -140,7 +140,7 @@ osg::Group {
           UDC_UserObjects 3 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
             osg::StringValueObject {
@@ -197,7 +197,7 @@ osg::Group {
           UDC_UserObjects 3 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
             osg::StringValueObject {
