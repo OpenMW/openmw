@@ -666,18 +666,18 @@ macOS15_Xcode16_arm64:
     - aws --version
     - mkdir -p incoming_artifacts
     - mv *.zip incoming_artifacts/
-    - destinations=()
+    - declare -A destinations
     - |
       # todo: this will get upset by certain characters
       for merge_list in *_to-be-merged.txt; do
-        dos2unix < $merge_list | while IFS=: read -r partial destination; do
-          destinations+=("$destination")
+         while IFS=: read -r partial destination; do
+          destinations["$destination"]=""
           echo "Unzipping '$partial' to '$destination'"
           unzip -n -d "$destination" "incoming_artifacts/$partial"
-        done
+        done < <(dos2unix < $merge_list)
       done
     - |
-      for destination in ${destinations[@]}; do
+      for destination in ${!destinations[@]}; do
         pushd "$destination"
         for ci_id in CI-ID_*.txt; do
           cat "$ci_id" >> CI-ID.txt
