@@ -83,6 +83,7 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mapextractor.hpp"
 #include "profile.hpp"
 
 namespace
@@ -374,6 +375,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mExportFonts(false)
     , mRandomSeed(0)
     , mNewGame(false)
+    , mExtractMaps(false)
     , mCfgMgr(configurationManager)
     , mGlMaxTextureImageUnits(0)
 {
@@ -958,11 +960,25 @@ void OMW::Engine::go()
 
     prepareEngine();
 
-#ifdef _WIN32
+    if (mExtractMaps)
+    {
+        Log(Debug::Info) << "Starting map extraction mode...";
+
+        mStateManager->newGame(true);
+
+        MapExtractor extractor(*mWorld, mWorldMapOutput, mLocalMapOutput);
+        extractor.extractWorldMap();
+        extractor.extractLocalMaps();
+
+        Log(Debug::Info) << "Map extraction complete. Exiting...";
+        return;
+    }
+
+    #ifdef _WIN32
     const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
-#else
+    #else
     const auto* statsFile = std::getenv("OPENMW_OSG_STATS_FILE");
-#endif
+    #endif
 
     std::filesystem::path path;
     if (statsFile != nullptr)
@@ -1127,4 +1143,19 @@ void OMW::Engine::setSaveGameFile(const std::filesystem::path& savegame)
 void OMW::Engine::setRandomSeed(unsigned int seed)
 {
     mRandomSeed = seed;
+}
+
+void OMW::Engine::setWorldMapOutput(const std::string& path)
+{
+    mWorldMapOutput = path;
+}
+
+void OMW::Engine::setLocalMapOutput(const std::string& path)
+{
+    mLocalMapOutput = path;
+}
+
+void OMW::Engine::setExtractMaps(bool extract)
+{
+    mExtractMaps = extract;
 }

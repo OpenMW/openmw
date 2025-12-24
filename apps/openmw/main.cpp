@@ -2,6 +2,7 @@
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 #include <components/misc/osgpluginchecker.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
@@ -157,6 +158,20 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
+
+    std::string worldMapOutput = variables["world-map-output"].as<std::string>();
+    std::string localMapOutput = variables["local-map-output"].as<std::string>();
+    bool extractMaps = variables["extract-maps"].as<bool>();
+
+    if (worldMapOutput.empty() && extractMaps)
+        worldMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "custom");
+
+    if (localMapOutput.empty() && extractMaps)
+        localMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "local");
+
+    engine.setWorldMapOutput(worldMapOutput);
+    engine.setLocalMapOutput(localMapOutput);
+    engine.setExtractMaps(extractMaps);
 
     return true;
 }
