@@ -1146,7 +1146,7 @@ namespace MWRender
     void RainShooter::shoot(osgParticle::Particle* particle) const
     {
         particle->setVelocity(mVelocity);
-        particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PIf));
+        particle->setAngle(osg::Vec3f(-mAngle, 0.f, 0.f));
     }
 
     void RainShooter::setVelocity(const osg::Vec3f& velocity)
