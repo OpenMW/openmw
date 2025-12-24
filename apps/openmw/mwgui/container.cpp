@@ -190,8 +190,6 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         setTitle(container.getClass().getName(container));
-
-        mPtr.getClass().getContainerStore(mPtr).setContListener(this);
     }
 
     void ContainerWindow::resetReference()
@@ -410,13 +408,9 @@ namespace MWGui
         }
     }
 
-    void ContainerWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    void ContainerWindow::onInventoryUpdate(const MWWorld::Ptr& ptr)
     {
-        mUpdateNextFrame = true;
-    }
-
-    void ContainerWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
-    {
-        mUpdateNextFrame = true;
+        if (ptr == mPtr)
+            mUpdateNextFrame = true;
     }
 }

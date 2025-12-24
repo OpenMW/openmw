@@ -73,7 +73,9 @@ namespace MWGui
 
         virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) {}
 
-        virtual std::string_view getWindowIdForLua() const { return ""; }
+        virtual void onInventoryUpdate(const MWWorld::Ptr& ptr) {}
+
+        virtual std::string_view getWindowIdForLua() const { return {}; }
         void setDisabledByLua(bool disabled) { mDisabledByLua = disabled; }
 
         static void clampWindowCoordinates(MyGUI::Window* window);
