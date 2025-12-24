@@ -625,7 +625,7 @@ macOS15_Xcode16_arm64:
     - ./aws/install
     - popd
     - aws --version
-    - unzip -d sym_store '*sym_store.zip'
+    - unzip -n -d sym_store '*sym_store.zip'
     - shopt -s globstar
     - |
       for file in sym_store/**/*.exe; do
