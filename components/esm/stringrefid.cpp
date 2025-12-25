@@ -142,4 +142,9 @@ namespace ESM
         id.mValue = &*it;
         return id;
     }
+
+    std::size_t StringRefId::totalCount()
+    {
+        return getRefIds().lock()->size();
+    }
 }

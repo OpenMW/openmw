@@ -333,6 +333,8 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         mMechanicsManager->reportStats(frameNumber, *stats);
         mWorld->reportStats(frameNumber, *stats);
         mLuaManager->reportStats(frameNumber, *stats);
+
+        stats->setAttribute(frameNumber, "StringRefId Count", static_cast<double>(ESM::StringRefId::totalCount()));
     }
 
     mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
