@@ -4,11 +4,8 @@
 
 #include "components/misc/strings/lower.hpp"
 
-#include <charconv>
-#include <ostream>
 #include <sstream>
 #include <stdexcept>
-#include <system_error>
 #include <variant>
 
 namespace ESM

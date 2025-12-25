@@ -6,7 +6,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <variant>
 
 #include <components/misc/notnullptr.hpp>
 
