@@ -245,7 +245,7 @@ namespace NavMeshTool
 
     WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, ESM::ReadersCache& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        bool processInteriorCells, bool writeBinaryLog)
+        bool processInteriorCells, bool writeBinaryLog, const std::regex& worldspaceFilter)
     {
         Log(Debug::Info) << "Processing " << esmData.mCells.size() << " cells...";
 
@@ -272,12 +272,23 @@ namespace NavMeshTool
                 continue;
             }
 
+            const ESM::RefId cellWorldspace = cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId;
+
+            if (!std::regex_match(cellWorldspace.toString(), worldspaceFilter))
+            {
+                Log(Debug::Info) << "Skipped filtered out"
+                                 << " cell (" << (i + 1) << "/" << esmData.mCells.size() << ") \""
+                                 << cell.getDescription() << "\" from " << cellWorldspace << " worldspace";
+                continue;
+            }
+
             Log(Debug::Debug) << "Processing " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
-                              << esmData.mCells.size() << ") \"" << cell.getDescription() << "\"";
+                              << esmData.mCells.size() << ") \"" << cell.getDescription() << "\" from "
+                              << cellWorldspace << " worldspace";
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
-            const ESM::RefId cellWorldspace = cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId;
+
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
                 auto it = navMeshInputs.find(cellWorldspace);
                 if (it == navMeshInputs.end())
@@ -354,8 +365,8 @@ namespace NavMeshTool
                 serializeToStderr(ProcessedCells{ static_cast<std::uint64_t>(i + 1) });
 
             Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
-                             << esmData.mCells.size() << ") " << cellDescription << " with "
-                             << (data.mObjects.size() - cellObjectsBegin) << " objects";
+                             << esmData.mCells.size() << ") " << cellDescription << " from " << cellWorldspace
+                             << " worldspace with " << (data.mObjects.size() - cellObjectsBegin) << " objects";
         }
 
         data.mNavMeshInputs.reserve(navMeshInputs.size());

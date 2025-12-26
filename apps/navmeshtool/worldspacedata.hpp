@@ -12,7 +12,7 @@
 #include <LinearMath/btVector3.h>
 
 #include <memory>
-#include <string>
+#include <regex>
 #include <vector>
 
 namespace ESM
@@ -90,7 +90,7 @@ namespace NavMeshTool
 
     WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, ESM::ReadersCache& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        bool processInteriorCells, bool writeBinaryLog);
+        bool processInteriorCells, bool writeBinaryLog, const std::regex& worldspaceFilter);
 }
 
 #endif
