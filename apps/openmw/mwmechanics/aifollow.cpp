@@ -39,6 +39,7 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
+        , mCellId(cellId)
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {

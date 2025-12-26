@@ -125,7 +125,7 @@ namespace ESM
                 if (format <= MaxActorIdSaveGameFormatVersion)
                     esm.getHNT(params.mCaster.mIndex, "CAST");
                 else
-                    params.mCaster = esm.getFormId("CAST");
+                    params.mCaster = esm.getFormId(true, "CAST");
                 params.mDisplayName = esm.getHNString("DISP");
                 if (format <= MaxClearModifiersFormatVersion)
                     params.mFlags = Compatibility::ActiveSpells::Type_Temporary_Flags;
@@ -194,7 +194,7 @@ namespace ESM
                     else if (esm.peekNextSub("ARG_"))
                         effect.mArg = esm.getHNRefId("ARG_");
                     else if (esm.peekNextSub("SUM_"))
-                        effect.mArg = esm.getFormId("SUM_");
+                        effect.mArg = esm.getFormId(true, "SUM_");
                     esm.getHNT(effect.mMagnitude, "MAGN");
                     if (format <= MaxClearModifiersFormatVersion)
                     {

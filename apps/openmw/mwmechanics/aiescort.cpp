@@ -26,6 +26,7 @@ namespace MWMechanics
 {
     AiEscort::AiEscort(ESM::RefNum actor, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
+        , mCellId(cellId)
         , mX(x)
         , mY(y)
         , mZ(z)
