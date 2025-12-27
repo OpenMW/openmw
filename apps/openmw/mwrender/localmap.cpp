@@ -774,6 +774,29 @@ namespace MWRender
 
         camera->addChild(lightSource);
         camera->addChild(mSceneRoot);
+        
+        // CRITICAL FIX: Setup both texture and image for CPU-side access (needed by mapextractor)
+        // First attach texture for normal rendering (GPU-side)
+        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D();
+        texture->setTextureSize(camera->getViewport()->width(), camera->getViewport()->height());
+        texture->setInternalFormat(GL_RGB);
+        texture->setSourceFormat(GL_RGB);
+        texture->setSourceType(GL_UNSIGNED_BYTE);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        camera->attach(osg::Camera::COLOR_BUFFER, texture.get());
+        
+        // Then attach Image for CPU-side readback
+        // OSG will automatically copy rendered pixels to this Image
+        osg::ref_ptr<osg::Image> image = new osg::Image();
+        image->setPixelFormat(GL_RGB);
+        image->setDataType(GL_UNSIGNED_BYTE);
+        camera->attach(osg::Camera::COLOR_BUFFER, image.get());
+        
+        // Also set the Image on the texture so mapextractor can retrieve it via texture->getImage()
+        texture->setImage(image.get());
     }
 
     void CameraLocalUpdateCallback::operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv)

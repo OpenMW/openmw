@@ -960,20 +960,6 @@ void OMW::Engine::go()
 
     prepareEngine();
 
-    if (mExtractMaps)
-    {
-        Log(Debug::Info) << "Starting map extraction mode...";
-
-        mStateManager->newGame(true);
-
-        MapExtractor extractor(*mWorld, mWorldMapOutput, mLocalMapOutput);
-        extractor.extractWorldMap();
-        extractor.extractLocalMaps();
-
-        Log(Debug::Info) << "Map extraction complete. Exiting...";
-        return;
-    }
-
     #ifdef _WIN32
     const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
     #else
@@ -1007,6 +993,25 @@ void OMW::Engine::go()
 
     if (stats.is_open())
         Resource::collectStatistics(*mViewer);
+
+
+    // Map extractor
+    if (mExtractMaps)
+    {
+        Log(Debug::Info) << "Starting map extraction mode...";
+
+        mStateManager->newGame(true);
+
+        Log(Debug::Info) << "Starting map extraction...";
+
+        MapExtractor extractor(*mWorld, mViewer.get(), mWorldMapOutput, mLocalMapOutput);
+        extractor.extractWorldMap();
+        extractor.extractLocalMaps();
+
+        Log(Debug::Info) << "Map extraction complete. Exiting...";
+        return;
+    }
+
 
     // Start the game
     if (!mSaveGameFile.empty())

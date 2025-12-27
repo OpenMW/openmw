@@ -5,9 +5,16 @@
 #include <memory>
 #include <string>
 
+#include <components/esm/refid.hpp>
+
 namespace osg
 {
     class Group;
+}
+
+namespace osgViewer
+{
+    class Viewer;
 }
 
 namespace SceneUtil
@@ -31,7 +38,8 @@ namespace OMW
     class MapExtractor
     {
     public:
-        MapExtractor(MWWorld::World& world, const std::string& worldMapOutput, const std::string& localMapOutput);
+        MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer, const std::string& worldMapOutput, 
+                     const std::string& localMapOutput);
         ~MapExtractor();
 
         void extractWorldMap();
@@ -39,6 +47,7 @@ namespace OMW
 
     private:
         MWWorld::World& mWorld;
+        osgViewer::Viewer* mViewer;
         std::filesystem::path mWorldMapOutputDir;
         std::filesystem::path mLocalMapOutputDir;
 
@@ -47,7 +56,16 @@ namespace OMW
 
         void saveWorldMapTexture();
         void saveWorldMapInfo();
-        void saveLocalMapTextures();
+        
+        void setupExtractionMode();
+        void restoreNormalMode();
+        void extractExteriorLocalMaps();
+        void extractInteriorLocalMaps();
+        void loadCellAndWait(int x, int y);
+        void loadInteriorCellAndWait(const std::string& cellName);
+        void saveInteriorCellTextures(const ESM::RefId& cellId, const std::string& cellName);
+        void saveInteriorMapInfo(const ESM::RefId& cellId, const std::string& lowerCaseId, 
+                                 int segmentsX, int segmentsY);
     };
 }
 
