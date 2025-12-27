@@ -7,8 +7,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwlua/localscripts.hpp"
-
 #include "../mwworld/class.hpp"
 
 #include "actorutil.hpp"
@@ -38,16 +36,9 @@ namespace MWMechanics
         const MWWorld::Ptr target = getTarget(); // The target to follow
 
         // Stop if the target doesn't exist
-        if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled())
+        if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled()
+            || !target.getRefData().getBaseNode())
             return true;
-
-        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a
-        // script
-        if (const MWLua::LocalScripts* scripts = target.getRefData().getLuaScripts())
-        {
-            if (!scripts->isActive())
-                return true;
-        }
 
         if (isTargetMagicallyHidden(target)
             && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor, false))

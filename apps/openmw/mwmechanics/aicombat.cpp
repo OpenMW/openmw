@@ -18,8 +18,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwlua/localscripts.hpp"
-
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
 #include "character.hpp"
@@ -121,16 +119,8 @@ namespace MWMechanics
 
         // Stop if the target doesn't exist
         if (target.isEmpty() || !target.getCellRef().getCount() || !target.getRefData().isEnabled()
-            || target.getClass().getCreatureStats(target).isDead())
+            || target.getClass().getCreatureStats(target).isDead() || !target.getRefData().getBaseNode())
             return true;
-
-        // This is equivalent to checking if the actor is registered with the mechanics manager since every actor has a
-        // script
-        if (const MWLua::LocalScripts* scripts = target.getRefData().getLuaScripts())
-        {
-            if (!scripts->isActive())
-                return true;
-        }
 
         if (actor == target) // This should never happen.
             return true;
