@@ -74,7 +74,7 @@ namespace Resource
                 "",
                 "Lua UsedMemory",
                 "",
-                "",
+                "StringRefId Count",
                 "",
             };
 
