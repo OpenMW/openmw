@@ -1081,7 +1081,7 @@
 -- local bb = core.dialogue.voice.records['flee'].infos[149].sound
 
 ---
--- Quest stage (same as in @{openmw_types#PlayerQuest.stage}) this info entry is associated with.
+-- Quest stage (same as in @{openmw_types#PLAYERQuest.stage}) this info entry is associated with.
 -- Non-nil only for journal records.
 -- @field [parent=#DialogueRecordInfo] #number questStage
 
