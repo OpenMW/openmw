@@ -24,6 +24,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/workqueue.hpp>
 #include <components/settings/values.hpp>
 #include <components/toutf8/toutf8.hpp>
 #include <components/version/version.hpp>
@@ -42,7 +43,6 @@
 #include <regex>
 #include <string>
 #include <thread>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -236,11 +236,42 @@ namespace NavMeshTool
             navigatorSettings.mRecast.mSwimHeightScale
                 = EsmLoader::getGameSetting(esmData.mGameSettings, "fSwimHeightScale").getFloat();
 
-            WorldspaceData cellsData = gatherWorldspaceData(navigatorSettings, readers, vfs, bulletShapeManager,
-                esmData, processInteriorCells, writeBinaryLog, worldspaceFilter);
+            const std::unordered_map<ESM::RefId, std::vector<std::size_t>> worldspaceCells
+                = collectWorldspaceCells(esmData, processInteriorCells, worldspaceFilter);
 
-            const Status status = generateAllNavMeshTiles(agentBounds, navigatorSettings, threadsNumber,
-                removeUnusedTiles, writeBinaryLog, cellsData, std::move(db));
+            Status status = Status::Ok;
+            bool needVacuum = false;
+            std::size_t count = 0;
+
+            SceneUtil::WorkQueue workQueue(threadsNumber);
+
+            Log(Debug::Info) << "Using " << threadsNumber << " parallel workers...";
+
+            for (const auto& [worldspace, cells] : worldspaceCells)
+            {
+                const WorldspaceData worldspaceData = gatherWorldspaceData(
+                    navigatorSettings, readers, vfs, bulletShapeManager, esmData, writeBinaryLog, worldspace, cells);
+
+                const Result result = generateAllNavMeshTiles(
+                    agentBounds, navigatorSettings, removeUnusedTiles, writeBinaryLog, worldspaceData, db, workQueue);
+
+                ++count;
+
+                Log(Debug::Info) << "Processed worldspace (" << count << "/" << worldspaceCells.size() << ") "
+                                 << worldspace;
+
+                status = result.mStatus;
+                needVacuum = needVacuum || result.mNeedVacuum;
+
+                if (status != Status::Ok)
+                    break;
+            }
+
+            if (status == Status::Ok && needVacuum)
+            {
+                Log(Debug::Info) << "Vacuuming the database...";
+                db.vacuum();
+            }
 
             switch (status)
             {

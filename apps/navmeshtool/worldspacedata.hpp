@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <regex>
+#include <span>
 #include <vector>
 
 namespace ESM
@@ -46,16 +47,6 @@ namespace NavMeshTool
     using DetourNavigator::ObjectTransform;
     using DetourNavigator::TileCachedRecastMeshManager;
 
-    struct WorldspaceNavMeshInput
-    {
-        ESM::RefId mWorldspace;
-        TileCachedRecastMeshManager mTileCachedRecastMeshManager;
-        btAABB mAabb;
-        bool mAabbInitialized = false;
-
-        explicit WorldspaceNavMeshInput(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings);
-    };
-
     class BulletObject
     {
     public:
@@ -82,15 +73,23 @@ namespace NavMeshTool
 
     struct WorldspaceData
     {
-        std::vector<std::unique_ptr<WorldspaceNavMeshInput>> mNavMeshInputs;
+        ESM::RefId mWorldspace;
+        std::unique_ptr<TileCachedRecastMeshManager> mTileCachedRecastMeshManager;
+        btAABB mAabb;
+        bool mAabbInitialized = false;
         std::vector<BulletObject> mObjects;
         std::vector<std::unique_ptr<ESM::Land::LandData>> mLandData;
         std::vector<std::vector<float>> mHeightfields;
+
+        WorldspaceData(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings);
     };
+
+    std::unordered_map<ESM::RefId, std::vector<std::size_t>> collectWorldspaceCells(
+        const EsmLoader::EsmData& esmData, bool processInteriorCells, const std::regex& worldspaceFilter);
 
     WorldspaceData gatherWorldspaceData(const DetourNavigator::Settings& settings, ESM::ReadersCache& readers,
         const VFS::Manager& vfs, Resource::BulletShapeManager& bulletShapeManager, const EsmLoader::EsmData& esmData,
-        bool processInteriorCells, bool writeBinaryLog, const std::regex& worldspaceFilter);
+        bool writeBinaryLog, ESM::RefId worldspace, std::span<const std::size_t> cells);
 }
 
 #endif

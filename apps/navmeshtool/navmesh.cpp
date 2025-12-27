@@ -26,7 +26,6 @@
 #include <cstddef>
 #include <random>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 namespace NavMeshTool
@@ -78,8 +77,8 @@ namespace NavMeshTool
         public:
             std::atomic_size_t mExpected{ 0 };
 
-            explicit NavMeshTileConsumer(NavMeshDb&& db, bool removeUnusedTiles, bool writeBinaryLog)
-                : mDb(std::move(db))
+            explicit NavMeshTileConsumer(NavMeshDb& db, bool removeUnusedTiles, bool writeBinaryLog)
+                : mDb(db)
                 , mRemoveUnusedTiles(removeUnusedTiles)
                 , mWriteBinaryLog(writeBinaryLog)
                 , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
@@ -211,12 +210,6 @@ namespace NavMeshTool
                 mTransaction.commit();
             }
 
-            void vacuum()
-            {
-                const std::lock_guard lock(mMutex);
-                mDb.vacuum();
-            }
-
             void removeTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range)
             {
                 const std::lock_guard lock(mMutex);
@@ -233,7 +226,7 @@ namespace NavMeshTool
             std::size_t mDeleted = 0;
             Status mStatus = Status::Ok;
             mutable std::mutex mMutex;
-            NavMeshDb mDb;
+            NavMeshDb& mDb;
             const bool mRemoveUnusedTiles;
             const bool mWriteBinaryLog;
             Transaction mTransaction;
@@ -254,44 +247,41 @@ namespace NavMeshTool
         };
     }
 
-    Status generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings, std::size_t threadsNumber,
-        bool removeUnusedTiles, bool writeBinaryLog, WorldspaceData& data, NavMeshDb&& db)
+    Result generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings, bool removeUnusedTiles,
+        bool writeBinaryLog, const WorldspaceData& data, NavMeshDb& db, SceneUtil::WorkQueue& workQueue)
     {
-        Log(Debug::Info) << "Generating navmesh tiles by " << threadsNumber << " parallel workers...";
+        Log(Debug::Info) << "Generating navmesh tiles for " << data.mWorldspace << " worldspace...";
 
-        SceneUtil::WorkQueue workQueue(threadsNumber);
-        auto navMeshTileConsumer
-            = std::make_shared<NavMeshTileConsumer>(std::move(db), removeUnusedTiles, writeBinaryLog);
-        std::size_t tiles = 0;
-        std::mt19937_64 random;
+        auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(db, removeUnusedTiles, writeBinaryLog);
 
-        for (const std::unique_ptr<WorldspaceNavMeshInput>& input : data.mNavMeshInputs)
+        const auto range = DetourNavigator::makeTilesPositionsRange(
+            Misc::Convert::toOsgXY(data.mAabb.m_min), Misc::Convert::toOsgXY(data.mAabb.m_max), settings.mRecast);
+
+        if (removeUnusedTiles)
+            navMeshTileConsumer->removeTilesOutsideRange(data.mWorldspace, range);
+
+        std::vector<TilePosition> worldspaceTiles;
+
+        DetourNavigator::getTilesPositions(
+            range, [&](const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
+
         {
-            const auto range = DetourNavigator::makeTilesPositionsRange(Misc::Convert::toOsgXY(input->mAabb.m_min),
-                Misc::Convert::toOsgXY(input->mAabb.m_max), settings.mRecast);
-
-            if (removeUnusedTiles)
-                navMeshTileConsumer->removeTilesOutsideRange(input->mWorldspace, range);
-
-            std::vector<TilePosition> worldspaceTiles;
-
-            DetourNavigator::getTilesPositions(
-                range, [&](const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
-
-            tiles += worldspaceTiles.size();
+            const std::size_t tiles = worldspaceTiles.size();
 
             if (writeBinaryLog)
                 serializeToStderr(ExpectedTiles{ static_cast<std::uint64_t>(tiles) });
 
             navMeshTileConsumer->mExpected = tiles;
-
-            std::shuffle(worldspaceTiles.begin(), worldspaceTiles.end(), random);
-
-            for (const TilePosition& tilePosition : worldspaceTiles)
-                workQueue.addWorkItem(new GenerateNavMeshTile(input->mWorldspace, tilePosition,
-                    RecastMeshProvider(input->mTileCachedRecastMeshManager), agentBounds, settings,
-                    navMeshTileConsumer));
         }
+
+        {
+            std::mt19937_64 random;
+            std::shuffle(worldspaceTiles.begin(), worldspaceTiles.end(), random);
+        }
+
+        for (const TilePosition& tilePosition : worldspaceTiles)
+            workQueue.addWorkItem(new GenerateNavMeshTile(data.mWorldspace, tilePosition,
+                RecastMeshProvider(*data.mTileCachedRecastMeshManager), agentBounds, settings, navMeshTileConsumer));
 
         const Status status = navMeshTileConsumer->wait();
         if (status == Status::Ok)
@@ -304,12 +294,9 @@ namespace NavMeshTool
         Log(Debug::Info) << "Generated navmesh for " << navMeshTileConsumer->getProvided() << " tiles, " << inserted
                          << " are inserted, " << updated << " updated and " << deleted << " deleted";
 
-        if (inserted + updated + deleted > 0)
-        {
-            Log(Debug::Info) << "Vacuuming the database...";
-            navMeshTileConsumer->vacuum();
-        }
-
-        return status;
+        return Result{
+            .mStatus = status,
+            .mNeedVacuum = inserted + updated + deleted > 0,
+        };
     }
 }
