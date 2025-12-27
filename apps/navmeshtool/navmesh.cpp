@@ -260,10 +260,7 @@ namespace NavMeshTool
         if (removeUnusedTiles)
             navMeshTileConsumer->removeTilesOutsideRange(data.mWorldspace, range);
 
-        std::vector<TilePosition> worldspaceTiles;
-
-        DetourNavigator::getTilesPositions(
-            range, [&](const TilePosition& tilePosition) { worldspaceTiles.push_back(tilePosition); });
+        std::vector<TilePosition> worldspaceTiles = data.mTiles;
 
         {
             const std::size_t tiles = worldspaceTiles.size();

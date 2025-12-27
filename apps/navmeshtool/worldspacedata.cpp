@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -370,6 +371,10 @@ namespace NavMeshTool
                              << cells.size() << ") " << cell.getDescription() << " with "
                              << (data.mObjects.size() - cellObjectsBegin) << " objects";
         }
+
+        const std::map<osg::Vec2i, DetourNavigator::ChangeType> changedTiles = manager.takeChangedTiles(guard.get());
+        data.mTiles.reserve(changedTiles.size());
+        std::ranges::transform(changedTiles, std::back_inserter(data.mTiles), [](const auto& v) { return v.first; });
 
         Log(Debug::Info) << "Processed " << cells.size() << " cells, added " << data.mObjects.size() << " objects and "
                          << data.mHeightfields.size() << " height fields";

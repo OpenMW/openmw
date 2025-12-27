@@ -77,6 +77,7 @@ namespace NavMeshTool
         std::unique_ptr<TileCachedRecastMeshManager> mTileCachedRecastMeshManager;
         btAABB mAabb;
         bool mAabbInitialized = false;
+        std::vector<DetourNavigator::TilePosition> mTiles;
         std::vector<BulletObject> mObjects;
         std::vector<std::unique_ptr<ESM::Land::LandData>> mLandData;
         std::vector<std::vector<float>> mHeightfields;
