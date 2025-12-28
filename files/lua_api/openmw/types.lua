@@ -1333,7 +1333,7 @@
 -- @field [parent=#PlayerJournalTextEntry] #string id
 
 ---
--- @type PlayerQuest
+-- @type PLAYERQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
 -- @field #boolean started Whether the quest is started.
