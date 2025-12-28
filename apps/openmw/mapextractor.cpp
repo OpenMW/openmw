@@ -4,6 +4,7 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
+#include <map>
 #include <thread>
 
 #include <osg/ComputeBoundsVisitor>
@@ -225,20 +226,6 @@ namespace OMW
             return;
         }
 
-        extractExteriorLocalMaps(forceOverwrite);
-        extractInteriorLocalMaps(forceOverwrite);
-
-        Log(Debug::Info) << "Extraction of active local maps complete";
-    }
-
-    void MapExtractor::extractExteriorLocalMaps(bool forceOverwrite)
-    {
-        if (!mLocalMap)
-        {
-            Log(Debug::Error) << "Local map not initialized";
-            throw std::runtime_error("Local map not initialized");
-        }
-
         // Get currently active cells
         MWWorld::Scene* scene = &mWorld.getWorldScene();
         if (!scene)
@@ -250,159 +237,143 @@ namespace OMW
         const auto& activeCells = scene->getActiveCells();
         Log(Debug::Info) << "Processing " << activeCells.size() << " currently active cells...";
 
-        int count = 0;
-        int skipped = 0;
-
-        for (const MWWorld::CellStore* cellStore : activeCells)
-        {
-            if (!cellStore->getCell()->isExterior())
-                continue;
-
-            int x = cellStore->getCell()->getGridX();
-            int y = cellStore->getCell()->getGridY();
-
-            // Check if file already exists
-            std::ostringstream filename;
-            filename << "(" << x << "," << y << ").png";
-            std::filesystem::path outputPath = mLocalMapOutputDir / filename.str();
-
-            if (!forceOverwrite && std::filesystem::exists(outputPath))
-            {
-                Log(Debug::Info) << "Skipping cell (" << x << "," << y << ") - file already exists";
-                skipped++;
-                continue;
-            }
-
-            Log(Debug::Info) << "Processing active cell (" << x << "," << y << ")";
-
-            // Request map generation for this cell
-            Log(Debug::Verbose) << "Requesting map for cell (" << x << "," << y << ")";
-            mLocalMap->requestMap(const_cast<MWWorld::CellStore*>(cellStore));
-            Log(Debug::Verbose) << "Map requested for cell (" << x << "," << y << ")";
-
-            // Now try to get the texture
-            Log(Debug::Verbose) << "Getting texture for cell (" << x << "," << y << ")";
-            osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
-            
-            if (!texture)
-            {
-                Log(Debug::Warning) << "No texture for cell (" << x << "," << y << ")";
-                skipped++;
-                continue;
-            }
-            
-            // Get the image from the texture (should be set by LocalMapRenderToTexture)
-            osg::Image* image = texture->getImage();
-            
-            if (!image)
-            {
-                Log(Debug::Warning) << "Texture for cell (" << x << "," << y << ") has no image data attached";
-                skipped++;
-                continue;
-            }
-
-            if (image->s() == 0 || image->t() == 0)
-            {
-                Log(Debug::Warning) << "Empty image for cell (" << x << "," << y << ")";
-                skipped++;
-                continue;
-            }
-
-            Log(Debug::Info) << "Got image size: " << image->s() << "x" << image->t() 
-                               << " for cell (" << x << "," << y << ")";
-
-            osg::ref_ptr<osg::Image> outputImage = new osg::Image(*image, osg::CopyOp::DEEP_COPY_ALL);
-            
-            if (outputImage->s() != 256 || outputImage->t() != 256)
-            {
-                osg::ref_ptr<osg::Image> resized = new osg::Image;
-                resized->allocateImage(256, 256, 1, outputImage->getPixelFormat(), outputImage->getDataType());
-                outputImage->scaleImage(256, 256, 1);
-                outputImage = resized;
-            }
-
-            if (osgDB::writeImageFile(*outputImage, outputPath.string()))
-            {
-                count++;
-                Log(Debug::Info) << "Saved local map texture for cell (" << x << "," << y << ")";
-            }
-            else
-            {
-                Log(Debug::Warning) << "Failed to write texture for cell (" << x << "," << y << ")";
-                skipped++;
-            }
-        }
-
-        Log(Debug::Info) << "Saved " << count << " exterior local map textures";
-        if (skipped > 0)
-            Log(Debug::Warning) << "Skipped " << skipped << " cells (already exist or without valid textures)";
-    }
-
-    void MapExtractor::extractInteriorLocalMaps(bool forceOverwrite)
-    {
-        if (!mLocalMap)
-        {
-            Log(Debug::Error) << "Local map not initialized";
-            throw std::runtime_error("Local map not initialized");
-        }
-
-        // Get currently active cells
-        MWWorld::Scene* scene = &mWorld.getWorldScene();
-        if (!scene)
-        {
-            Log(Debug::Error) << "Scene not available";
-            throw std::runtime_error("Scene not available");
-        }
-
-        const auto& activeCells = scene->getActiveCells();
-        Log(Debug::Info) << "Processing active interior cells...";
-
-        int count = 0;
+        int exteriorCount = 0;
+        int interiorCount = 0;
         int skipped = 0;
 
         for (const MWWorld::CellStore* cellStore : activeCells)
         {
             if (cellStore->getCell()->isExterior())
-                continue;
-
-            ESM::RefId cellId = cellStore->getCell()->getId();
-            std::string cellName(cellStore->getCell()->getNameId());
-
-            // Prepare lowercase ID for file naming
-            std::string lowerCaseId = cellId.toDebugString();
-            std::transform(lowerCaseId.begin(), lowerCaseId.end(), lowerCaseId.begin(), ::tolower);
-
-            const std::string invalidChars = "/\\:*?\"<>|";
-            lowerCaseId.erase(std::remove_if(lowerCaseId.begin(), lowerCaseId.end(),
-                [&invalidChars](char c) { return invalidChars.find(c) != std::string::npos; }),
-                lowerCaseId.end()
-            );
-
-            if (lowerCaseId.empty())
             {
-                lowerCaseId = "_unnamed_cell_";
+                if (extractExteriorCell(cellStore, forceOverwrite))
+                    exteriorCount++;
+                else
+                    skipped++;
             }
-
-            // Check if both files exist
-            std::filesystem::path texturePath = mLocalMapOutputDir / (lowerCaseId + ".png");
-            std::filesystem::path yamlPath = mLocalMapOutputDir / (lowerCaseId + ".yaml");
-
-            if (!forceOverwrite && std::filesystem::exists(texturePath) && std::filesystem::exists(yamlPath))
+            else
             {
-                Log(Debug::Info) << "Skipping interior cell: " << cellName << " - files already exist";
-                skipped++;
-                continue;
+                if (extractInteriorCell(cellStore, forceOverwrite))
+                    interiorCount++;
+                else
+                    skipped++;
             }
-
-            Log(Debug::Info) << "Processing active interior cell: " << cellName;
-
-            saveInteriorCellTextures(cellId, cellName);
-            count++;
         }
 
-        Log(Debug::Info) << "Saved " << count << " interior local map textures";
+        Log(Debug::Info) << "Saved " << exteriorCount << " exterior local map textures";
+        Log(Debug::Info) << "Saved " << interiorCount << " interior local map textures";
         if (skipped > 0)
-            Log(Debug::Info) << "Skipped " << skipped << " interior cells (files already exist)";
+            Log(Debug::Info) << "Skipped " << skipped << " cells (files already exist or without valid textures)";
+
+        Log(Debug::Info) << "Extraction of active local maps complete";
+    }
+
+    bool MapExtractor::extractExteriorCell(const MWWorld::CellStore* cellStore, bool forceOverwrite)
+    {
+        int x = cellStore->getCell()->getGridX();
+        int y = cellStore->getCell()->getGridY();
+
+        // Check if file already exists
+        std::ostringstream filename;
+        filename << "(" << x << "," << y << ").png";
+        std::filesystem::path outputPath = mLocalMapOutputDir / filename.str();
+
+        if (!forceOverwrite && std::filesystem::exists(outputPath))
+        {
+            Log(Debug::Info) << "Skipping cell (" << x << "," << y << ") - file already exists";
+            return false;
+        }
+
+        Log(Debug::Info) << "Processing active cell (" << x << "," << y << ")";
+
+        // Request map generation for this cell
+        Log(Debug::Verbose) << "Requesting map for cell (" << x << "," << y << ")";
+        mLocalMap->requestMap(const_cast<MWWorld::CellStore*>(cellStore));
+        Log(Debug::Verbose) << "Map requested for cell (" << x << "," << y << ")";
+
+        // Now try to get the texture
+        Log(Debug::Verbose) << "Getting texture for cell (" << x << "," << y << ")";
+        osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
+        
+        if (!texture)
+        {
+            Log(Debug::Warning) << "No texture for cell (" << x << "," << y << ")";
+            return false;
+        }
+        
+        // Get the image from the texture (should be set by LocalMapRenderToTexture)
+        osg::Image* image = texture->getImage();
+        
+        if (!image)
+        {
+            Log(Debug::Warning) << "Texture for cell (" << x << "," << y << ") has no image data attached";
+            return false;
+        }
+
+        if (image->s() == 0 || image->t() == 0)
+        {
+            Log(Debug::Warning) << "Empty image for cell (" << x << "," << y << ")";
+            return false;
+        }
+
+        Log(Debug::Info) << "Got image size: " << image->s() << "x" << image->t() 
+                           << " for cell (" << x << "," << y << ")";
+
+        osg::ref_ptr<osg::Image> outputImage = new osg::Image(*image, osg::CopyOp::DEEP_COPY_ALL);
+        
+        if (outputImage->s() != 256 || outputImage->t() != 256)
+        {
+            osg::ref_ptr<osg::Image> resized = new osg::Image;
+            resized->allocateImage(256, 256, 1, outputImage->getPixelFormat(), outputImage->getDataType());
+            outputImage->scaleImage(256, 256, 1);
+            outputImage = resized;
+        }
+
+        if (osgDB::writeImageFile(*outputImage, outputPath.string()))
+        {
+            Log(Debug::Info) << "Saved local map texture for cell (" << x << "," << y << ")";
+            return true;
+        }
+        else
+        {
+            Log(Debug::Warning) << "Failed to write texture for cell (" << x << "," << y << ")";
+            return false;
+        }
+    }
+
+    bool MapExtractor::extractInteriorCell(const MWWorld::CellStore* cellStore, bool forceOverwrite)
+    {
+        ESM::RefId cellId = cellStore->getCell()->getId();
+        std::string cellName(cellStore->getCell()->getNameId());
+
+        // Prepare lowercase ID for file naming
+        std::string lowerCaseId = cellId.toDebugString();
+        std::transform(lowerCaseId.begin(), lowerCaseId.end(), lowerCaseId.begin(), ::tolower);
+
+        const std::string invalidChars = "/\\:*?\"<>|";
+        lowerCaseId.erase(std::remove_if(lowerCaseId.begin(), lowerCaseId.end(),
+            [&invalidChars](char c) { return invalidChars.find(c) != std::string::npos; }),
+            lowerCaseId.end()
+        );
+
+        if (lowerCaseId.empty())
+        {
+            lowerCaseId = "_unnamed_cell_";
+        }
+
+        // Check if both files exist
+        std::filesystem::path texturePath = mLocalMapOutputDir / (lowerCaseId + ".png");
+        std::filesystem::path yamlPath = mLocalMapOutputDir / (lowerCaseId + ".yaml");
+
+        if (!forceOverwrite && std::filesystem::exists(texturePath) && std::filesystem::exists(yamlPath))
+        {
+            Log(Debug::Info) << "Skipping interior cell: " << cellName << " - files already exist";
+            return false;
+        }
+
+        Log(Debug::Info) << "Processing active interior cell: " << cellName;
+
+        saveInteriorCellTextures(cellId, cellName);
+        return true;
     }
 
     void MapExtractor::saveInteriorCellTextures(const ESM::RefId& cellId, const std::string& cellName)
@@ -429,6 +400,9 @@ namespace OMW
         int minY = grid.bottom;
         int maxY = grid.top;
         
+        // Cache textures and find bounds
+        std::map<std::pair<int, int>, osg::ref_ptr<osg::Texture2D>> textureCache;
+        
         for (int x = grid.left; x < grid.right; ++x)
         {
             for (int y = grid.top; y < grid.bottom; ++y)
@@ -436,6 +410,7 @@ namespace OMW
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
                 if (texture && texture->getImage())
                 {
+                    textureCache[{x, y}] = texture;
                     minX = std::min(minX, x);
                     maxX = std::max(maxX, x);
                     minY = std::min(minY, y);
@@ -466,10 +441,11 @@ namespace OMW
         {
             for (int y = minY; y <= maxY; ++y)
             {
-                osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
-                if (!texture || !texture->getImage())
+                auto it = textureCache.find({x, y});
+                if (it == textureCache.end())
                     continue;
 
+                osg::ref_ptr<osg::Texture2D> texture = it->second;
                 osg::Image* segmentImage = texture->getImage();
                 int segWidth = segmentImage->s();
                 int segHeight = segmentImage->t();
