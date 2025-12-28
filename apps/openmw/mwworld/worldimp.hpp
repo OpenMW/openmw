@@ -681,7 +681,11 @@ namespace MWWorld
 
         void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
 
-        void extractLocalMaps(const std::string& worldMapOutput, const std::string& localMapOutput) override;
+        std::string getWorldMapOutputPath() const override;
+        std::string getLocalMapOutputPath() const override;
+
+        void extractWorldMap(const std::string& worldMapOutput) override;
+        void extractLocalMaps(const std::string& localMapOutput) override;
     };
 }
 

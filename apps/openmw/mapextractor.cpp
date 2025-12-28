@@ -44,8 +44,11 @@ namespace OMW
         , mLocalMapOutputDir(localMapOutput)
         , mLocalMap(nullptr)
     {
-        std::filesystem::create_directories(mWorldMapOutputDir);
-        std::filesystem::create_directories(mLocalMapOutputDir);
+        // Only create directories if paths are not empty
+        if (!mWorldMapOutputDir.empty())
+            std::filesystem::create_directories(mWorldMapOutputDir);
+        if (!mLocalMapOutputDir.empty())
+            std::filesystem::create_directories(mLocalMapOutputDir);
 
         // Create GlobalMap instance
         MWRender::RenderingManager* renderingManager = mWorld.getRenderingManager();
@@ -95,6 +98,15 @@ namespace OMW
     void MapExtractor::extractWorldMap()
     {
         Log(Debug::Info) << "Extracting world map...";
+
+        if (mWorldMapOutputDir.empty())
+        {
+            Log(Debug::Warning) << "World map output directory is not set, skipping world map extraction";
+            return;
+        }
+
+        // Create output directory if it doesn't exist
+        std::filesystem::create_directories(mWorldMapOutputDir);
 
         if (!mGlobalMap)
         {
@@ -191,6 +203,15 @@ namespace OMW
     void MapExtractor::extractLocalMaps(bool forceOverwrite)
     {
         Log(Debug::Info) << "Extracting active local maps...";
+
+        if (mLocalMapOutputDir.empty())
+        {
+            Log(Debug::Warning) << "Local map output directory is not set, skipping local map extraction";
+            return;
+        }
+
+        // Create output directory if it doesn't exist
+        std::filesystem::create_directories(mLocalMapOutputDir);
 
         // Get LocalMap from WindowManager now that UI is initialized
         if (mWindowManager)

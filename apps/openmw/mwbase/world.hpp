@@ -607,8 +607,17 @@ namespace MWBase
 
         virtual void setActorActive(const MWWorld::Ptr& ptr, bool value) = 0;
 
-        virtual void extractLocalMaps(const std::string& worldMapOutput, const std::string& localMapOutput) = 0;
-        ///< Extract local and world maps to the specified directories
+        virtual std::string getWorldMapOutputPath() const = 0;
+        ///< Get the world map output path from options or default
+
+        virtual std::string getLocalMapOutputPath() const = 0;
+        ///< Get the local map output path from options or default
+
+        virtual void extractWorldMap(const std::string& worldMapOutput) = 0;
+        ///< Extract world map to the specified directory
+
+        virtual void extractLocalMaps(const std::string& localMapOutput) = 0;
+        ///< Extract local maps to the specified directory
     };
 }
 

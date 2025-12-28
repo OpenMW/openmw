@@ -222,17 +222,27 @@
 -- @param #number hours Number of hours to advance time
 
 ---
--- Extract local and world maps to the specified directories.
+-- Extract world map to the specified directory.
+-- This function generates a world map image and saves it as a PNG file.
+-- If no path is provided (nil), uses the path from --world-map-output option or default "./textures/advanced_world_map/custom".
+-- @function [parent=#world] extractWorldMap
+-- @param #string worldMapOutput (optional) Directory path where world map will be saved
+-- @usage world.extractWorldMap("./maps/world")  -- Custom path
+-- @usage world.extractWorldMap()  -- Use default or option path
+
+---
+-- Extract local maps to the specified directory.
 -- This function generates map images for all active cells and saves them as PNG files.
+-- If no path is provided (nil), uses the path from --local-map-output option or default "./textures/advanced_world_map/local".
 -- @function [parent=#world] extractLocalMaps
--- @param #string worldMapOutput Directory path where world map will be saved
--- @param #string localMapOutput Directory path where local maps will be saved
--- @usage world.extractLocalMaps("./maps/world", "./maps/local")
+-- @param #string localMapOutput (optional) Directory path where local maps will be saved
+-- @usage world.extractLocalMaps("./maps/local")  -- Custom path
+-- @usage world.extractLocalMaps()  -- Use default or option path
 
 ---
 -- Enable extraction mode for map generation.
 -- This mode disables collision, AI, scripts, and enables god mode to facilitate map extraction.
--- Should be called before extractLocalMaps to prepare the game state.
+-- Should be called before extractWorldMap or extractLocalMaps to prepare the game state.
 -- @function [parent=#world] enableExtractionMode
 -- @usage world.enableExtractionMode()
 

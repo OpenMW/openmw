@@ -247,12 +247,22 @@ namespace MWLua
 
         api["vfx"] = initWorldVfxBindings(context);
 
-        api["extractLocalMaps"] = [context, lua = context.mLua](
-                                       const std::string& worldMapOutput, const std::string& localMapOutput) {
+        api["extractWorldMap"] = [context, lua = context.mLua](sol::optional<std::string> worldMapOutput) {
             checkGameInitialized(lua);
             context.mLuaManager->addAction(
-                [worldMapOutput, localMapOutput] {
-                    MWBase::Environment::get().getWorld()->extractLocalMaps(worldMapOutput, localMapOutput);
+                [worldMapOutput] {
+                    std::string path = worldMapOutput.value_or("");
+                    MWBase::Environment::get().getWorld()->extractWorldMap(path);
+                },
+                "extractWorldMapAction");
+        };
+
+        api["extractLocalMaps"] = [context, lua = context.mLua](sol::optional<std::string> localMapOutput) {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [localMapOutput] {
+                    std::string path = localMapOutput.value_or("");
+                    MWBase::Environment::get().getWorld()->extractLocalMaps(path);
                 },
                 "extractLocalMapsAction");
         };
