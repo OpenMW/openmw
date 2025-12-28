@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -52,6 +51,7 @@ namespace NavMeshTool
         using DetourNavigator::HeightfieldSurface;
         using DetourNavigator::ObjectId;
         using DetourNavigator::ObjectTransform;
+        using DetourNavigator::TilesPositionsRange;
 
         struct CellRef
         {
@@ -69,6 +69,25 @@ namespace NavMeshTool
                 , mScale(scale)
                 , mPos(pos)
             {
+            }
+        };
+
+        struct AddedCellRef
+        {
+            std::string mCell;
+            CellRef mCellRef;
+            TilesPositionsRange mRange;
+        };
+
+        struct WriteArray
+        {
+            const float (&mValue)[3];
+
+            friend inline std::ostream& operator<<(std::ostream& stream, const WriteArray& value)
+            {
+                for (std::size_t i = 0; i < 2; ++i)
+                    stream << value.mValue[i] << ", ";
+                return stream << value.mValue[2];
             }
         };
 
@@ -120,7 +139,7 @@ namespace NavMeshTool
 
             Log(Debug::Debug) << "Prepared " << cellRefs.size() << " unique cell refs";
 
-            for (CellRef& cellRef : cellRefs)
+            for (const CellRef& cellRef : cellRefs)
             {
                 VFS::Path::Normalized model(getModel(esmData, cellRef.mRefId, cellRef.mType));
                 if (model.empty())
@@ -154,7 +173,7 @@ namespace NavMeshTool
                     case ESM::REC_CONT:
                     case ESM::REC_DOOR:
                     case ESM::REC_STAT:
-                        f(BulletObject(std::move(shapeInstance), cellRef.mPos, cellRef.mScale));
+                        f(BulletObject(std::move(shapeInstance), cellRef.mPos, cellRef.mScale), cellRef);
                         break;
                     default:
                         break;
@@ -233,6 +252,88 @@ namespace NavMeshTool
                    << " fileHash=" << Misc::StringUtils::toHex(shape.getInstance()->mFileHash);
             return stream.str();
         }
+
+        void detectDisconnectedTileGroups(ESM::RefId worldspace,
+            const std::map<osg::Vec2i, DetourNavigator::ChangeType>& changedTiles,
+            std::span<const AddedCellRef> cellRefs)
+        {
+            if (changedTiles.empty())
+                return;
+
+            std::deque<osg::Vec2i> queue;
+            std::map<osg::Vec2i, std::size_t> positionToComponent;
+            std::size_t componentIndex = 0;
+
+            for (const auto& [initial, changeType] : changedTiles)
+            {
+                if (positionToComponent.contains(initial))
+                    continue;
+
+                queue.push_back(initial);
+                positionToComponent.emplace(initial, componentIndex);
+
+                while (!queue.empty())
+                {
+                    const osg::Vec2i position = queue.front();
+                    queue.pop_front();
+
+                    for (int x = position.x() - 1; x <= position.x() + 1; ++x)
+                    {
+                        for (int y = position.y() - 1; y <= position.y() + 1; ++y)
+                        {
+                            const osg::Vec2i candidate(x, y);
+
+                            if (candidate == position)
+                                continue;
+
+                            if (!changedTiles.contains(candidate))
+                                continue;
+
+                            const auto it = positionToComponent.find(candidate);
+
+                            if (it != positionToComponent.end())
+                                continue;
+
+                            queue.push_back(candidate);
+                            positionToComponent.emplace_hint(it, candidate, componentIndex);
+                        }
+                    }
+                }
+
+                ++componentIndex;
+            }
+
+            if (componentIndex <= 1)
+                return;
+
+            Log(Debug::Warning) << "Found " << componentIndex << " disconnected tile groups";
+
+            std::vector<std::size_t> cellRefsPerComponent(componentIndex);
+
+            for (const AddedCellRef& v : cellRefs)
+                ++cellRefsPerComponent[positionToComponent.at(v.mRange.mBegin)];
+
+            const std::size_t largestComponent
+                = std::max_element(cellRefsPerComponent.begin(), cellRefsPerComponent.end())
+                - cellRefsPerComponent.begin();
+
+            for (const AddedCellRef& v : cellRefs)
+            {
+                const std::size_t component = positionToComponent.at(v.mRange.mBegin);
+
+                if (component == largestComponent)
+                    continue;
+
+                Log(Debug::Warning) << "CellRef belongs to not largest disconnected tile group:"
+                                    << " worldspace=" << worldspace << " cell=\"" << v.mCell << "\""
+                                    << " ref_num=" << v.mCellRef.mRefNum << " ref_id=" << v.mCellRef.mRefId
+                                    << " scale=" << v.mCellRef.mScale << " pos=" << WriteArray{ v.mCellRef.mPos.pos }
+                                    << " rot=" << WriteArray{ v.mCellRef.mPos.rot }
+                                    << " begin_tile=" << v.mRange.mBegin.x() << ", " << v.mRange.mBegin.y()
+                                    << " end_tile=" << v.mRange.mEnd.x() << ", " << v.mRange.mEnd.y()
+                                    << " component=" << component;
+            }
+        }
     }
 
     WorldspaceData::WorldspaceData(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings)
@@ -301,6 +402,7 @@ namespace NavMeshTool
         manager.setWorldspace(worldspace, guard.get());
 
         std::size_t objectsCounter = 0;
+        std::vector<AddedCellRef> addedCellRefs;
 
         for (std::size_t i = 0; i < cells.size(); ++i)
         {
@@ -333,36 +435,44 @@ namespace NavMeshTool
                     manager.addWater(cellPosition, std::numeric_limits<int>::max(), cell.mWater, guard.get());
             }
 
-            forEachObject(cell, esmData, vfs, bulletShapeManager, readers, [&](BulletObject object) {
-                if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
-                    return;
+            forEachObject(
+                cell, esmData, vfs, bulletShapeManager, readers, [&](BulletObject object, const CellRef& cellRef) {
+                    if (object.getShapeInstance()->mVisualCollisionType != Resource::VisualCollisionType::None)
+                        return;
 
-                const btTransform& transform = object.getCollisionObject().getWorldTransform();
-                const btAABB aabb = BulletHelpers::getAabb(*object.getCollisionObject().getCollisionShape(), transform);
-                mergeOrAssign(aabb, data.mAabb, data.mAabbInitialized);
-                if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
-                    data.mAabb.merge(BulletHelpers::getAabb(*avoid, transform));
+                    const btTransform& transform = object.getCollisionObject().getWorldTransform();
+                    const btAABB aabb
+                        = BulletHelpers::getAabb(*object.getCollisionObject().getCollisionShape(), transform);
+                    mergeOrAssign(aabb, data.mAabb, data.mAabbInitialized);
+                    if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
+                        data.mAabb.merge(BulletHelpers::getAabb(*avoid, transform));
 
-                const ObjectId objectId(++objectsCounter);
-                const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(),
-                    object.getObjectTransform());
+                    const ObjectId objectId(++objectsCounter);
+                    const CollisionShape shape(object.getShapeInstance(),
+                        *object.getCollisionObject().getCollisionShape(), object.getObjectTransform());
 
-                if (!manager.addObject(objectId, shape, transform, DetourNavigator::AreaType_ground, guard.get()))
-                    throw std::logic_error(
-                        makeAddObjectErrorMessage(objectId, DetourNavigator::AreaType_ground, shape));
-
-                if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
-                {
-                    const ObjectId avoidObjectId(++objectsCounter);
-                    const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
-                    if (!manager.addObject(
-                            avoidObjectId, avoidShape, transform, DetourNavigator::AreaType_null, guard.get()))
+                    if (!manager.addObject(objectId, shape, transform, DetourNavigator::AreaType_ground, guard.get()))
                         throw std::logic_error(
-                            makeAddObjectErrorMessage(avoidObjectId, DetourNavigator::AreaType_null, avoidShape));
-                }
+                            makeAddObjectErrorMessage(objectId, DetourNavigator::AreaType_ground, shape));
 
-                data.mObjects.emplace_back(std::move(object));
-            });
+                    addedCellRefs.push_back(AddedCellRef{
+                        .mCell = cell.getDescription(),
+                        .mCellRef = cellRef,
+                        .mRange = makeTilesPositionsRange(shape.getShape(), transform, settings.mRecast),
+                    });
+
+                    if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
+                    {
+                        const ObjectId avoidObjectId(++objectsCounter);
+                        const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
+                        if (!manager.addObject(
+                                avoidObjectId, avoidShape, transform, DetourNavigator::AreaType_null, guard.get()))
+                            throw std::logic_error(
+                                makeAddObjectErrorMessage(avoidObjectId, DetourNavigator::AreaType_null, avoidShape));
+                    }
+
+                    data.mObjects.emplace_back(std::move(object));
+                });
 
             if (writeBinaryLog)
                 serializeToStderr(ProcessedCells{ static_cast<std::uint64_t>(i + 1) });
@@ -373,6 +483,10 @@ namespace NavMeshTool
         }
 
         const std::map<osg::Vec2i, DetourNavigator::ChangeType> changedTiles = manager.takeChangedTiles(guard.get());
+
+        if (worldspace != ESM::Cell::sDefaultWorldspaceId)
+            detectDisconnectedTileGroups(worldspace, changedTiles, addedCellRefs);
+
         data.mTiles.reserve(changedTiles.size());
         std::ranges::transform(changedTiles, std::back_inserter(data.mTiles), [](const auto& v) { return v.first; });
 
