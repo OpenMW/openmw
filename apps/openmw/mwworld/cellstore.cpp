@@ -257,9 +257,9 @@ namespace
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
         }
-        if (reader.getActorIdConverter())
+        if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
         {
-            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+            if (reader.getActorIdConverter() && state.mHasCustomState)
             {
                 MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(state.mRef);
                 reader.getActorIdConverter()->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
