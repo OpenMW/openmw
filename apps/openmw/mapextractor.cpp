@@ -22,6 +22,7 @@
 
 #include "mwbase/environment.hpp"
 #include "mwbase/mechanicsmanager.hpp"
+#include "mwbase/windowmanager.hpp"
 #include "mwbase/world.hpp"
 #include "mwrender/globalmap.hpp"
 #include "mwrender/localmap.hpp"
@@ -35,16 +36,18 @@
 namespace OMW
 {
     MapExtractor::MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer,
-        const std::string& worldMapOutput, const std::string& localMapOutput)
+        MWBase::WindowManager* windowManager, const std::string& worldMapOutput, const std::string& localMapOutput)
         : mWorld(world)
         , mViewer(viewer)
+        , mWindowManager(windowManager)
         , mWorldMapOutputDir(worldMapOutput)
         , mLocalMapOutputDir(localMapOutput)
+        , mLocalMap(nullptr)
     {
         std::filesystem::create_directories(mWorldMapOutputDir);
         std::filesystem::create_directories(mLocalMapOutputDir);
 
-        // Create GlobalMap and LocalMap instances
+        // Create GlobalMap instance
         MWRender::RenderingManager* renderingManager = mWorld.getRenderingManager();
         if (!renderingManager)
         {
@@ -76,7 +79,9 @@ namespace OMW
         try
         {
             mGlobalMap = std::make_unique<MWRender::GlobalMap>(root, workQueue);
-            mLocalMap = std::make_unique<MWRender::LocalMap>(root);
+            // Get LocalMap from WindowManager - it will be set after initUI is called
+            // For now just set to nullptr
+            mLocalMap = nullptr;
         }
         catch (const std::exception& e)
         {
@@ -185,32 +190,24 @@ namespace OMW
 
     void MapExtractor::extractLocalMaps()
     {
-        Log(Debug::Info) << "Extracting local maps...";
+        Log(Debug::Info) << "Extracting active local maps...";
 
-        setupExtractionMode();
+        // Get LocalMap from WindowManager now that UI is initialized
+        if (mWindowManager)
+        {
+            mLocalMap = mWindowManager->getLocalMapRender();
+        }
+
+        if (!mLocalMap)
+        {
+            Log(Debug::Error) << "Local map not initialized - cannot extract local maps";
+            return;
+        }
+
         extractExteriorLocalMaps();
         extractInteriorLocalMaps();
-        restoreNormalMode();
 
-        Log(Debug::Info) << "Local map extraction complete";
-    }
-
-    void MapExtractor::setupExtractionMode()
-    {
-        mWorld.toggleCollisionMode();
-        MWBase::Environment::get().getMechanicsManager()->toggleAI();
-        mWorld.toggleScripts();
-        mWorld.toggleGodMode();
-    }
-
-    void MapExtractor::restoreNormalMode()
-    {
-        if (!mWorld.getGodModeState())
-            mWorld.toggleGodMode();
-        if (!mWorld.getScriptsEnabled())
-            mWorld.toggleScripts();
-        if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
-            MWBase::Environment::get().getMechanicsManager()->toggleAI();
+        Log(Debug::Info) << "Extraction of active local maps complete";
     }
 
     void MapExtractor::extractExteriorLocalMaps()
@@ -249,50 +246,6 @@ namespace OMW
             Log(Debug::Verbose) << "Requesting map for cell (" << x << "," << y << ")";
             mLocalMap->requestMap(const_cast<MWWorld::CellStore*>(cellStore));
             Log(Debug::Verbose) << "Map requested for cell (" << x << "," << y << ")";
-
-            // CRITICAL: LocalMap::requestMap() creates RTT cameras that render asynchronously.
-            // We must run the render loop to actually execute the RTT rendering before we can
-            // access the resulting textures.
-            
-            MWRender::RenderingManager* renderingManager = mWorld.getRenderingManager();
-            if (renderingManager && mViewer)
-            {
-                Log(Debug::Verbose) << "Starting render loop for cell (" << x << "," << y << ")";
-                
-                // Phase 1: Setup (let RTT cameras initialize)
-                for (int i = 0; i < 5; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                // Phase 2: Main rendering (RTT cameras execute)
-                for (int i = 0; i < 60; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                // Phase 3: Finalization (ensure GPU->CPU transfer completes)
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                
-                for (int i = 0; i < 10; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                Log(Debug::Verbose) << "Render loop completed for cell (" << x << "," << y << ")";
-            }
-
-            // Clean up RTT cameras before trying to access textures
-            mLocalMap->cleanupCameras();
 
             // Now try to get the texture
             Log(Debug::Verbose) << "Getting texture for cell (" << x << "," << y << ")";
@@ -387,53 +340,6 @@ namespace OMW
 
             Log(Debug::Info) << "Processing active interior cell: " << cellName;
 
-            // Request map generation for this cell
-            mLocalMap->requestMap(const_cast<MWWorld::CellStore*>(cellStore));
-
-            // CRITICAL: LocalMap::requestMap() creates RTT cameras that render asynchronously.
-            // We must run the render loop to actually execute the RTT rendering before we can
-            // access the resulting textures.
-            
-            MWRender::RenderingManager* renderingManager = mWorld.getRenderingManager();
-            if (renderingManager && mViewer)
-            {
-                Log(Debug::Verbose) << "Starting render loop for interior: " << cellName;
-                
-                // Phase 1: Setup (let RTT cameras initialize)
-                for (int i = 0; i < 5; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                // Phase 2: Main rendering (RTT cameras execute)
-                for (int i = 0; i < 60; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                // Phase 3: Finalization (ensure GPU->CPU transfer completes)
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-                
-                for (int i = 0; i < 10; ++i)
-                {
-                    mViewer->eventTraversal();
-                    mViewer->updateTraversal();
-                    renderingManager->update(0.016f, false);
-                    mViewer->renderingTraversals();
-                }
-                
-                Log(Debug::Verbose) << "Render loop completed for interior: " << cellName;
-            }
-
-            // Clean up RTT cameras before trying to access textures
-            mLocalMap->cleanupCameras();
-
             saveInteriorCellTextures(cellId, cellName);
             count++;
         }
@@ -448,8 +354,43 @@ namespace OMW
         std::string lowerCaseId = cellId.toDebugString();
         std::transform(lowerCaseId.begin(), lowerCaseId.end(), lowerCaseId.begin(), ::tolower);
 
-        int segmentsX = grid.width() + 1;
-        int segmentsY = grid.height() + 1;
+        const std::string invalidChars = "/\\:*?\"<>|";
+        lowerCaseId.erase(std::remove_if(lowerCaseId.begin(), lowerCaseId.end(),
+            [&invalidChars](char c) { return invalidChars.find(c) != std::string::npos; }),
+            lowerCaseId.end()
+        );
+
+        if (lowerCaseId.empty())
+        {
+            lowerCaseId = "_unnamed_cell_";
+        }
+
+
+        int minX = grid.right;
+        int maxX = grid.left;
+        int minY = grid.bottom;
+        int maxY = grid.top;
+        
+        for (int x = grid.left; x < grid.right; ++x)
+        {
+            for (int y = grid.top; y < grid.bottom; ++y)
+            {
+                osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
+                if (texture && texture->getImage())
+                {
+                    minX = std::min(minX, x);
+                    maxX = std::max(maxX, x);
+                    minY = std::min(minY, y);
+                    maxY = std::max(maxY, y);
+                }
+            }
+        }
+        
+        if (minX > maxX || minY > maxY)
+            return;
+        
+        int segmentsX = maxX - minX + 1;
+        int segmentsY = maxY - minY + 1;
         
         if (segmentsX <= 0 || segmentsY <= 0)
             return;
@@ -463,9 +404,9 @@ namespace OMW
         unsigned char* data = combinedImage->data();
         memset(data, 0, totalWidth * totalHeight * 3);
 
-        for (int x = grid.left; x < grid.right; ++x)
+        for (int x = minX; x <= maxX; ++x)
         {
-            for (int y = grid.top; y < grid.bottom; ++y)
+            for (int y = minY; y <= maxY; ++y)
             {
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMap->getMapTexture(x, y);
                 if (!texture || !texture->getImage())
@@ -475,8 +416,8 @@ namespace OMW
                 int segWidth = segmentImage->s();
                 int segHeight = segmentImage->t();
                 
-                int destX = (x - grid.left) * 256;
-                int destY = (y - grid.top) * 256;
+                int destX = (x - minX) * 256;
+                int destY = (y - minY) * 256;
 
                 for (int sy = 0; sy < std::min(segHeight, 256); ++sy)
                 {
@@ -555,6 +496,8 @@ namespace OMW
         file << "nA: " << nA << "\n";
         file << "mX: " << mX << "\n";
         file << "mY: " << mY << "\n";
+        file << "width: " << segmentsX << "\n";
+        file << "height: " << segmentsY << "\n";
 
         file.close();
     }

@@ -680,6 +680,8 @@ namespace MWWorld
         DateTimeManager* getTimeManager() override { return mTimeManager.get(); }
 
         void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
+
+        void extractLocalMaps(const std::string& worldMapOutput, const std::string& localMapOutput) override;
     };
 }
 

@@ -221,4 +221,26 @@
 -- @function [parent=#world] advanceTime
 -- @param #number hours Number of hours to advance time
 
+---
+-- Extract local and world maps to the specified directories.
+-- This function generates map images for all active cells and saves them as PNG files.
+-- @function [parent=#world] extractLocalMaps
+-- @param #string worldMapOutput Directory path where world map will be saved
+-- @param #string localMapOutput Directory path where local maps will be saved
+-- @usage world.extractLocalMaps("./maps/world", "./maps/local")
+
+---
+-- Enable extraction mode for map generation.
+-- This mode disables collision, AI, scripts, and enables god mode to facilitate map extraction.
+-- Should be called before extractLocalMaps to prepare the game state.
+-- @function [parent=#world] enableExtractionMode
+-- @usage world.enableExtractionMode()
+
+---
+-- Disable extraction mode and restore normal game behavior.
+-- Restores god mode, scripts, and AI to their normal state.
+-- Should be called after map extraction is complete.
+-- @function [parent=#world] disableExtractionMode
+-- @usage world.disableExtractionMode()
+
 return nil

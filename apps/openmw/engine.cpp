@@ -1004,12 +1004,12 @@ void OMW::Engine::go()
 
         Log(Debug::Info) << "Starting map extraction...";
 
-        MapExtractor extractor(*mWorld, mViewer.get(), mWorldMapOutput, mLocalMapOutput);
+        MapExtractor extractor(*mWorld, mViewer.get(), mWindowManager.get(), mWorldMapOutput, mLocalMapOutput);
         extractor.extractWorldMap();
-        extractor.extractLocalMaps();
+        //extractor.extractLocalMaps();
 
         Log(Debug::Info) << "Map extraction complete. Exiting...";
-        return;
+        //return;
     }
 
 

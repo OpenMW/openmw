@@ -93,6 +93,8 @@
 
 #include "../mwsound/constants.hpp"
 
+#include "../mapextractor.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -3898,5 +3900,27 @@ namespace MWWorld
     {
         if (MWPhysics::Actor* const actor = mPhysics->getActor(ptr))
             actor->setActive(value);
+    }
+
+    void World::extractLocalMaps(const std::string& worldMapOutput, const std::string& localMapOutput)
+    {
+        if (!mRendering)
+        {
+            throw std::runtime_error("Rendering manager is not initialized");
+        }
+
+        osgViewer::Viewer* viewer = mRendering->getViewer();
+        if (!viewer)
+        {
+            throw std::runtime_error("Viewer is not initialized");
+        }
+
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        OMW::MapExtractor extractor(*this, viewer, windowManager, worldMapOutput, localMapOutput);
+        
+        Log(Debug::Info) << "Starting map extraction...";
+        extractor.extractWorldMap();
+        extractor.extractLocalMaps();
+        Log(Debug::Info) << "Map extraction complete";
     }
 }

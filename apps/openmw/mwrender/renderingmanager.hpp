@@ -237,6 +237,7 @@ namespace MWRender
 
         // camera stuff
         Camera* getCamera() { return mCamera.get(); }
+        osgViewer::Viewer* getViewer() { return mViewer.get(); }
 
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);

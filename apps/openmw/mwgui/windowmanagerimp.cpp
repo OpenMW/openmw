@@ -2697,4 +2697,9 @@ namespace MWGui
         else
             mInventoryTabsOverlay->setVisible(false);
     }
+
+    MWRender::LocalMap* WindowManager::getLocalMapRender()
+    {
+        return mLocalMapRender.get();
+    }
 }

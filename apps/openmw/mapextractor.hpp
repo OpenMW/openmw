@@ -33,13 +33,18 @@ namespace MWWorld
     class World;
 }
 
+namespace MWBase
+{
+    class WindowManager;
+}
+
 namespace OMW
 {
     class MapExtractor
     {
     public:
-        MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer, const std::string& worldMapOutput, 
-                     const std::string& localMapOutput);
+        MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer, MWBase::WindowManager* windowManager,
+                     const std::string& worldMapOutput, const std::string& localMapOutput);
         ~MapExtractor();
 
         void extractWorldMap();
@@ -48,21 +53,18 @@ namespace OMW
     private:
         MWWorld::World& mWorld;
         osgViewer::Viewer* mViewer;
+        MWBase::WindowManager* mWindowManager;
         std::filesystem::path mWorldMapOutputDir;
         std::filesystem::path mLocalMapOutputDir;
 
         std::unique_ptr<MWRender::GlobalMap> mGlobalMap;
-        std::unique_ptr<MWRender::LocalMap> mLocalMap;
+        MWRender::LocalMap* mLocalMap;
 
         void saveWorldMapTexture();
         void saveWorldMapInfo();
         
-        void setupExtractionMode();
-        void restoreNormalMode();
         void extractExteriorLocalMaps();
         void extractInteriorLocalMaps();
-        void loadCellAndWait(int x, int y);
-        void loadInteriorCellAndWait(const std::string& cellName);
         void saveInteriorCellTextures(const ESM::RefId& cellId, const std::string& cellName);
         void saveInteriorMapInfo(const ESM::RefId& cellId, const std::string& lowerCaseId, 
                                  int segmentsX, int segmentsY);

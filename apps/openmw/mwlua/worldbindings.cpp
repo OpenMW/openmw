@@ -247,6 +247,47 @@ namespace MWLua
 
         api["vfx"] = initWorldVfxBindings(context);
 
+        api["extractLocalMaps"] = [context, lua = context.mLua](
+                                       const std::string& worldMapOutput, const std::string& localMapOutput) {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [worldMapOutput, localMapOutput] {
+                    MWBase::Environment::get().getWorld()->extractLocalMaps(worldMapOutput, localMapOutput);
+                },
+                "extractLocalMapsAction");
+        };
+
+        api["enableExtractionMode"] = [context, lua = context.mLua]() {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [] {
+                    auto world = MWBase::Environment::get().getWorld();
+                    world->toggleCollisionMode();
+                    MWBase::Environment::get().getMechanicsManager()->toggleAI();
+                    world->toggleScripts();
+                    world->toggleGodMode();
+                    world->toggleVanityMode(false);
+                },
+                "enableExtractionModeAction");
+        };
+
+        api["disableExtractionMode"] = [context, lua = context.mLua]() {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [] {
+                    auto world = MWBase::Environment::get().getWorld();
+                    if (!world->getGodModeState())
+                        world->toggleGodMode();
+                    if (!world->getScriptsEnabled())
+                        world->toggleScripts();
+                    if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
+                        MWBase::Environment::get().getMechanicsManager()->toggleAI();
+                    world->toggleCollisionMode();
+                    world->toggleVanityMode(false);
+                },
+                "disableExtractionModeAction");
+        };
+
         return LuaUtil::makeReadOnly(api);
     }
 }
