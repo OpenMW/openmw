@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <vector>
+#include <functional>
 
 #include <components/esm/refid.hpp>
 
@@ -50,8 +52,23 @@ namespace OMW
 
         void extractWorldMap();
         void extractLocalMaps(bool forceOverwrite = false);
+        
+        // Called every frame to process pending extractions
+        void update();
+        
+        // Check if extraction is complete
+        bool isExtractionComplete() const;
 
     private:
+        struct PendingExtraction
+        {
+            const MWWorld::CellStore* cellStore;
+            bool isExterior;
+            std::filesystem::path outputPath;
+            int framesWaited;
+            std::function<void()> completionCallback;
+        };
+
         MWWorld::World& mWorld;
         osgViewer::Viewer* mViewer;
         MWBase::WindowManager* mWindowManager;
@@ -60,9 +77,17 @@ namespace OMW
 
         std::unique_ptr<MWRender::GlobalMap> mGlobalMap;
         MWRender::LocalMap* mLocalMap;
+        
+        std::vector<PendingExtraction> mPendingExtractions;
+        int mFramesToWait;
+        bool mForceOverwrite;
 
         void saveWorldMapTexture();
         void saveWorldMapInfo();
+        
+        void startExtraction(bool forceOverwrite);
+        void processNextCell();
+        bool savePendingExtraction(const PendingExtraction& extraction);
         
         bool extractExteriorCell(const MWWorld::CellStore* cellStore, bool forceOverwrite);
         bool extractInteriorCell(const MWWorld::CellStore* cellStore, bool forceOverwrite);

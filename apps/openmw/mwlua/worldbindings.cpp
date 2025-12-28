@@ -298,6 +298,11 @@ namespace MWLua
                 "disableExtractionModeAction");
         };
 
+        api["isMapExtractionActive"] = [lua = context.mLua]() -> bool {
+            checkGameInitialized(lua);
+            return MWBase::Environment::get().getWorld()->isMapExtractionActive();
+        };
+
         return LuaUtil::makeReadOnly(api);
     }
 }

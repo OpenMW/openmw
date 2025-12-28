@@ -1041,7 +1041,7 @@ namespace MWGui
         mToolTips->onFrame(frameDuration);
 
         if (mLocalMapRender)
-            mLocalMapRender->cleanupCameras();
+            //mLocalMapRender->cleanupCameras();
 
         mDebugWindow->onFrame(frameDuration);
 

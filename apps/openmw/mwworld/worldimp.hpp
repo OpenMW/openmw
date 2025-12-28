@@ -12,6 +12,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "../mapextractor.hpp"
+
 #include "contentloader.hpp"
 #include "esmstore.hpp"
 #include "globals.hpp"
@@ -102,10 +104,11 @@ namespace MWWorld
         std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
         std::unique_ptr<DetourNavigator::Navigator> mNavigator;
         std::unique_ptr<MWRender::RenderingManager> mRendering;
-        std::unique_ptr<MWWorld::Scene> mWorldScene;
-        std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
-        std::unique_ptr<MWWorld::DateTimeManager> mTimeManager;
-        std::unique_ptr<ProjectileManager> mProjectileManager;
+    std::unique_ptr<MWWorld::Scene> mWorldScene;
+    std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
+    std::unique_ptr<MWWorld::DateTimeManager> mTimeManager;
+    std::unique_ptr<ProjectileManager> mProjectileManager;
+    std::unique_ptr<OMW::MapExtractor> mMapExtractor;
 
         bool mSky;
         bool mGodMode;
@@ -686,6 +689,7 @@ namespace MWWorld
 
         void extractWorldMap(const std::string& worldMapOutput) override;
         void extractLocalMaps(const std::string& localMapOutput) override;
+        bool isMapExtractionActive() const override;
     };
 }
 

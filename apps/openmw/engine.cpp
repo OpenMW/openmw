@@ -996,6 +996,7 @@ void OMW::Engine::go()
 
 
     // Map extractor
+    std::unique_ptr<MapExtractor> mapExtractor;
     if (mExtractMaps)
     {
         Log(Debug::Info) << "Starting map extraction mode...";
@@ -1004,12 +1005,11 @@ void OMW::Engine::go()
 
         Log(Debug::Info) << "Starting map extraction...";
 
-        MapExtractor extractor(*mWorld, mViewer.get(), mWindowManager.get(), mWorldMapOutput, mLocalMapOutput);
-        extractor.extractWorldMap();
-        //extractor.extractLocalMaps();
+        //mapExtractor = std::make_unique<MapExtractor>(*mWorld, mViewer.get(), mWindowManager.get(), mWorldMapOutput, mLocalMapOutput);
+        //mapExtractor->extractWorldMap();
+        //mapExtractor->extractLocalMaps(false);
 
-        Log(Debug::Info) << "Map extraction complete. Exiting...";
-        //return;
+        Log(Debug::Info) << "Local map extraction started, will complete during gameplay...";
     }
 
 
@@ -1062,6 +1062,18 @@ void OMW::Engine::go()
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
+        
+        // Update map extraction if active
+        if (mapExtractor)
+        {
+            mapExtractor->update();
+            if (mapExtractor->isExtractionComplete())
+            {
+                Log(Debug::Info) << "Map extraction complete.";
+                mapExtractor.reset();
+            }
+        }
+        
         timeManager.updateIsPaused();
         if (!timeManager.isPaused())
         {

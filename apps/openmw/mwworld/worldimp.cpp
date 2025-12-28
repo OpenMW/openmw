@@ -1660,6 +1660,17 @@ namespace MWWorld
         if (mGoToJail && !paused)
             goToJail();
 
+        // Update map extraction if active
+        if (mMapExtractor)
+        {
+            mMapExtractor->update();
+            if (mMapExtractor->isExtractionComplete())
+            {
+                Log(Debug::Info) << "Map extraction complete.";
+                mMapExtractor.reset();
+            }
+        }
+
         // Reset "traveling" flag - there was a frame to detect traveling.
         mPlayerTraveling = false;
 
@@ -3931,14 +3942,20 @@ namespace MWWorld
             throw std::runtime_error("Viewer is not initialized");
         }
 
+        // If extraction is already in progress, ignore the request
+        if (mMapExtractor)
+        {
+            Log(Debug::Warning) << "Map extraction is already in progress";
+            return;
+        }
+
         std::string outputPath = worldMapOutput.empty() ? getWorldMapOutputPath() : worldMapOutput;
 
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-        OMW::MapExtractor extractor(*this, viewer, windowManager, outputPath, "");
+        mMapExtractor = std::make_unique<OMW::MapExtractor>(*this, viewer, windowManager, outputPath, "");
         
         Log(Debug::Info) << "Starting world map extraction to: " << outputPath;
-        extractor.extractWorldMap();
-        Log(Debug::Info) << "World map extraction complete";
+        mMapExtractor->extractWorldMap();
     }
 
     void World::extractLocalMaps(const std::string& localMapOutput)
@@ -3954,13 +3971,25 @@ namespace MWWorld
             throw std::runtime_error("Viewer is not initialized");
         }
 
+        // If extraction is already in progress, ignore the request
+        if (mMapExtractor)
+        {
+            Log(Debug::Warning) << "Map extraction is already in progress";
+            return;
+        }
+
         std::string outputPath = localMapOutput.empty() ? getLocalMapOutputPath() : localMapOutput;
 
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-        OMW::MapExtractor extractor(*this, viewer, windowManager, "", outputPath);
+        mMapExtractor = std::make_unique<OMW::MapExtractor>(*this, viewer, windowManager, "", outputPath);
         
         Log(Debug::Info) << "Starting local maps extraction to: " << outputPath;
-        extractor.extractLocalMaps();
-        Log(Debug::Info) << "Local maps extraction complete";
+        mMapExtractor->extractLocalMaps(false);
+        Log(Debug::Info) << "Local maps extraction started, will complete during gameplay...";
+    }
+
+    bool World::isMapExtractionActive() const
+    {
+        return mMapExtractor != nullptr;
     }
 }

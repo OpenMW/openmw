@@ -253,4 +253,18 @@
 -- @function [parent=#world] disableExtractionMode
 -- @usage world.disableExtractionMode()
 
+---
+-- Check if map extraction is currently in progress.
+-- Returns true if world map or local map extraction is active, false otherwise.
+-- Use this to avoid starting multiple extractions simultaneously.
+-- @function [parent=#world] isMapExtractionActive
+-- @return #boolean true if map extraction is active, false otherwise
+-- @usage
+-- if not world.isMapExtractionActive() then
+--   world.extractWorldMap("path/to/output")
+-- else
+--   print("Map extraction already in progress")
+-- end
+
 return nil
+

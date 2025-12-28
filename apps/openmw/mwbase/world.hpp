@@ -618,6 +618,9 @@ namespace MWBase
 
         virtual void extractLocalMaps(const std::string& localMapOutput) = 0;
         ///< Extract local maps to the specified directory
+
+        virtual bool isMapExtractionActive() const = 0;
+        ///< Check if map extraction is currently in progress
     };
 }
 
