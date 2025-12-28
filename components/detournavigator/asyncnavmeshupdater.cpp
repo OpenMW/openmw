@@ -348,6 +348,10 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::wait(WaitConditionType waitConditionType, Loading::Listener* listener)
     {
+        // If there are no worker threads, jobs will never be processed, so don't wait
+        if (mThreads.empty())
+            return;
+            
         switch (waitConditionType)
         {
             case WaitConditionType::requiredTilesPresent:
