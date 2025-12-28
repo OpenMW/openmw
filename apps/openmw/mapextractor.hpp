@@ -48,7 +48,7 @@ namespace OMW
         ~MapExtractor();
 
         void extractWorldMap();
-        void extractLocalMaps();
+        void extractLocalMaps(bool forceOverwrite = false);
 
     private:
         MWWorld::World& mWorld;
@@ -63,8 +63,8 @@ namespace OMW
         void saveWorldMapTexture();
         void saveWorldMapInfo();
         
-        void extractExteriorLocalMaps();
-        void extractInteriorLocalMaps();
+        void extractExteriorLocalMaps(bool forceOverwrite = false);
+        void extractInteriorLocalMaps(bool forceOverwrite = false);
         void saveInteriorCellTextures(const ESM::RefId& cellId, const std::string& cellName);
         void saveInteriorMapInfo(const ESM::RefId& cellId, const std::string& lowerCaseId, 
                                  int segmentsX, int segmentsY);
