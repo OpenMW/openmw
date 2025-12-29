@@ -364,14 +364,14 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mSelectDepthFormatOperation(new SceneUtil::SelectDepthFormatOperation())
     , mSelectColorFormatOperation(new SceneUtil::Color::SelectColorFormatOperation())
     , mStereoManager(nullptr)
-    , mSkipMenu(false)
-    , mUseSound(true)
+    , mSkipMenu(true)
+    , mUseSound(false)
     , mCompileAll(false)
     , mCompileAllDialogue(false)
     , mWarningsMode(1)
     , mScriptConsoleMode(false)
     , mActivationDistanceOverride(-1)
-    , mGrab(true)
+    , mGrab(false)
     , mExportFonts(false)
     , mRandomSeed(0)
     , mNewGame(false)
@@ -483,8 +483,8 @@ void OMW::Engine::addGroundcoverFile(const std::string& file)
 
 void OMW::Engine::setSkipMenu(bool skipMenu, bool newGame)
 {
-    mSkipMenu = skipMenu;
-    mNewGame = newGame;
+    mSkipMenu = true;
+    mNewGame = false;
 }
 
 void OMW::Engine::createWindow()
@@ -997,20 +997,6 @@ void OMW::Engine::go()
 
     // Map extractor
     std::unique_ptr<MapExtractor> mapExtractor;
-    if (mExtractMaps)
-    {
-        Log(Debug::Info) << "Starting map extraction mode...";
-
-        mStateManager->newGame(true);
-
-        Log(Debug::Info) << "Starting map extraction...";
-
-        //mapExtractor = std::make_unique<MapExtractor>(*mWorld, mViewer.get(), mWindowManager.get(), mWorldMapOutput, mLocalMapOutput);
-        //mapExtractor->extractWorldMap();
-        //mapExtractor->extractLocalMaps(false);
-
-        Log(Debug::Info) << "Local map extraction started, will complete during gameplay...";
-    }
 
 
     // Start the game
@@ -1069,7 +1055,7 @@ void OMW::Engine::go()
             mapExtractor->update();
             if (mapExtractor->isExtractionComplete())
             {
-                Log(Debug::Info) << "Map extraction complete.";
+                Log(Debug::Info) << "Extraction process completed.";
                 mapExtractor.reset();
             }
         }
