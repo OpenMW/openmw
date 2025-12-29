@@ -325,6 +325,12 @@ namespace OMW
         else
         {
             Log(Debug::Info) << "No cells to extract";
+            // Clean up any cameras that may have been created
+            if (mLocalMap)
+            {
+                mLocalMap->cleanupCameras();
+                mLocalMap->setExtractionMode(false);
+            }
         }
     }
     
@@ -388,14 +394,17 @@ namespace OMW
                 
                 mPendingExtractions.erase(mPendingExtractions.begin());
                 
+                // Clean up the camera for the current cell immediately after saving
+                // This prevents memory buildup when processing many cells
+                if (mLocalMap)
+                    mLocalMap->cleanupCameras();
+                
                 if (!mPendingExtractions.empty())
                 {
                     processNextCell();
                 }
                 else
                 {
-                    // Clean up cameras only after ALL extractions are complete
-                    mLocalMap->cleanupCameras();
                     // Disable extraction mode
                     mLocalMap->setExtractionMode(false);
                     Log(Debug::Info) << "Extraction of active local maps complete";
@@ -418,14 +427,16 @@ namespace OMW
                 
                 mPendingExtractions.erase(mPendingExtractions.begin());
                 
+                // Clean up cameras even after timeout
+                if (mLocalMap)
+                    mLocalMap->cleanupCameras();
+                
                 if (!mPendingExtractions.empty())
                 {
                     processNextCell();
                 }
                 else
                 {
-                    // Clean up cameras even if we timed out
-                    mLocalMap->cleanupCameras();
                     // Disable extraction mode
                     mLocalMap->setExtractionMode(false);
                     Log(Debug::Info) << "Extraction of active local maps complete";
