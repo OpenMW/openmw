@@ -123,14 +123,20 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     for (auto& file : content)
     {
+        if (file.ends_with(".omwscripts"))
+        {
+            Log(Debug::Warning) << "Skipping omwscripts file in content list: " << file;
+            continue;
+        }
         engine.addContentFile(file);
     }
 
-    StringsVector groundcover = variables["groundcover"].as<StringsVector>();
-    for (auto& file : groundcover)
-    {
-        engine.addGroundcoverFile(file);
-    }
+    Log(Debug::Warning) << "Skipping groundcover files.";
+    //StringsVector groundcover = variables["groundcover"].as<StringsVector>();
+    //for (auto& file : groundcover)
+    //{
+    //    engine.addGroundcoverFile(file);
+    //}
 
     if (variables.count("lua-scripts"))
     {
