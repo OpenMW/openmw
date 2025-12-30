@@ -265,5 +265,47 @@
 --   print("Map extraction already in progress")
 -- end
 
+---
+-- Get the overwrite maps flag from command line options.
+-- Returns true if the --overwrite-maps option was specified, false otherwise.
+-- This flag determines whether existing map files should be overwritten during extraction.
+-- @function [parent=#world] getOverwriteFlag
+-- @return #boolean true if overwrite is enabled, false otherwise
+-- @usage
+-- if world.getOverwriteFlag() then
+--   print("Will overwrite existing maps")
+-- else
+--   print("Will skip existing maps")
+-- end
+
+---
+-- Get list of existing local map IDs (filenames without extension).
+-- Returns a table containing unique names of all files in the local map output directory
+-- with .yaml, .png, or .tga extensions, without the extension itself.
+-- Each filename corresponds to a cell ID that has been extracted.
+-- This can be used to check which maps have already been generated.
+-- The list contains unique names - if a cell has multiple file types (e.g., both .yaml and .png),
+-- the name will appear only once in the list.
+-- @function [parent=#world] getExistingLocalMapIds
+-- @return #table Array of strings containing unique local map IDs (cell names without extension)
+-- @usage
+-- local existingMaps = world.getExistingLocalMapIds()
+-- for _, mapId in ipairs(existingMaps) do
+--   print("Found existing map: " .. mapId)
+-- end
+-- 
+-- -- Check if a specific map exists
+-- local targetCell = "Balmora"
+-- local exists = false
+-- for _, mapId in ipairs(existingMaps) do
+--   if mapId == targetCell then
+--     exists = true
+--     break
+--   end
+-- end
+-- if not exists then
+--   print("Map for " .. targetCell .. " not found, need to extract")
+-- end
+
 return nil
 

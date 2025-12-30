@@ -613,6 +613,9 @@ namespace MWBase
         virtual std::string getLocalMapOutputPath() const = 0;
         ///< Get the local map output path from options or default
 
+        virtual bool getOverwriteMaps() const = 0;
+        ///< Get the overwrite maps flag
+
         virtual void extractWorldMap() = 0;
         ///< Extract world map using path from options or default
 

@@ -689,7 +689,7 @@ namespace MWWorld
 
         std::string getWorldMapOutputPath() const override { return mWorldMapOutputPath; }
         std::string getLocalMapOutputPath() const override { return mLocalMapOutputPath; }
-        bool getOverwriteMaps() const { return mOverwriteMaps; }
+        bool getOverwriteMaps() const override { return mOverwriteMaps; }
 
         void extractWorldMap() override;
         void extractLocalMaps() override;

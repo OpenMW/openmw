@@ -1,5 +1,7 @@
 #include "worldbindings.hpp"
 
+#include <set>
+
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
@@ -299,6 +301,49 @@ namespace MWLua
         api["isMapExtractionActive"] = [lua = context.mLua]() -> bool {
             checkGameInitialized(lua);
             return MWBase::Environment::get().getWorld()->isMapExtractionActive();
+        };
+
+        api["getOverwriteFlag"] = [lua = context.mLua]() -> bool {
+            checkGameInitialized(lua);
+            return MWBase::Environment::get().getWorld()->getOverwriteMaps();
+        };
+
+        api["getExistingLocalMapIds"] = [lua = context.mLua](sol::this_state luaState) -> sol::table {
+            checkGameInitialized(lua);
+            sol::state_view state(luaState);
+            sol::table result = state.create_table();
+            
+            std::string localMapPath = MWBase::Environment::get().getWorld()->getLocalMapOutputPath();
+            std::filesystem::path dir(localMapPath);
+            
+            if (!std::filesystem::exists(dir) || !std::filesystem::is_directory(dir))
+                return result;
+            
+            // Use set to store unique filenames (without extension)
+            std::set<std::string> uniqueNames;
+            
+            for (const auto& entry : std::filesystem::directory_iterator(dir))
+            {
+                if (entry.is_regular_file())
+                {
+                    std::string ext = entry.path().extension().string();
+                    // Check for .yaml, .png, or .tga extensions
+                    if (ext == ".yaml" || ext == ".png" || ext == ".tga")
+                    {
+                        std::string filename = entry.path().stem().string();
+                        uniqueNames.insert(filename);
+                    }
+                }
+            }
+            
+            // Convert set to lua table
+            int index = 1;
+            for (const auto& name : uniqueNames)
+            {
+                result[index++] = name;
+            }
+            
+            return result;
         };
 
         return LuaUtil::makeReadOnly(api);
