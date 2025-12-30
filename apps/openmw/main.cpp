@@ -186,12 +186,27 @@ namespace
 {
     class OSGLogHandler : public osg::NotifyHandler
     {
+        int ignoreNext = 0;
+
         void notify(osg::NotifySeverity severity, const char* msg) override
         {
+            if (ignoreNext > 0)
+            {
+                --ignoreNext;
+                return;
+            }
+
             // Copy, because osg logging is not thread safe.
             std::string msgCopy(msg);
             if (msgCopy.empty())
                 return;
+
+            // Ignore because I don't know how to fix it
+            if (msgCopy.find("CullVisitor::apply(Geode&) detected NaN") != std::string::npos)
+            {
+                ignoreNext = 8;
+                return;
+            }
 
             Debug::Level level;
             switch (severity)
