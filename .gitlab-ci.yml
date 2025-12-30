@@ -668,7 +668,6 @@ macOS15_Xcode16_arm64:
     - mv *.zip incoming_artifacts/
     - declare -A destinations
     - |
-      # todo: this will get upset by certain characters
       for merge_list in *_to-be-merged.txt; do
          while IFS=: read -r partial destination; do
           destinations["$destination"]=""
