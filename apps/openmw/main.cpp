@@ -167,17 +167,26 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     std::string worldMapOutput = variables["world-map-output"].as<std::string>();
     std::string localMapOutput = variables["local-map-output"].as<std::string>();
-    bool extractMaps = variables["extract-maps"].as<bool>();
 
-    if (worldMapOutput.empty() && extractMaps)
+    auto removeQuotes = [](std::string& str) {
+        if (str.size() >= 2 && ((str.front() == '"' && str.back() == '"') || (str.front() == '\'' && str.back() == '\'')))
+        {
+            str = str.substr(1, str.size() - 2);
+        }
+    };
+
+    removeQuotes(worldMapOutput);
+    removeQuotes(localMapOutput);
+
+    if (worldMapOutput.empty())
         worldMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "custom");
 
-    if (localMapOutput.empty() && extractMaps)
+    if (localMapOutput.empty())
         localMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "local");
 
     engine.setWorldMapOutput(worldMapOutput);
     engine.setLocalMapOutput(localMapOutput);
-    engine.setExtractMaps(extractMaps);
+    engine.setOverwriteMaps(variables["overwrite-maps"].as<bool>());
 
     return true;
 }

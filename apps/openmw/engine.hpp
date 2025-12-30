@@ -185,7 +185,7 @@ namespace OMW
 
         std::string mWorldMapOutput;
         std::string mLocalMapOutput;
-        bool mExtractMaps;
+        bool mOverwriteMaps;
 
         Files::ConfigurationManager& mCfgMgr;
         int mGlMaxTextureImageUnits;
@@ -271,6 +271,8 @@ namespace OMW
         void setWorldMapOutput(const std::string& path);
 
         void setLocalMapOutput(const std::string& path);
+
+        void setOverwriteMaps(bool overwrite);
 
         void setExtractMaps(bool extract);
 

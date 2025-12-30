@@ -121,6 +121,9 @@ namespace MWWorld
         int mActivationDistanceOverride;
 
         std::string mStartCell;
+        std::string mWorldMapOutputPath;
+        std::string mLocalMapOutputPath;
+        bool mOverwriteMaps;
 
         float mSwimHeightScale;
 
@@ -198,7 +201,7 @@ namespace MWWorld
         void removeContainerScripts(const Ptr& reference) override;
 
         World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-            const std::filesystem::path& userDataPath);
+            const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps);
 
         void loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
             const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
@@ -684,11 +687,12 @@ namespace MWWorld
 
         void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
 
-        std::string getWorldMapOutputPath() const override;
-        std::string getLocalMapOutputPath() const override;
+        std::string getWorldMapOutputPath() const override { return mWorldMapOutputPath; }
+        std::string getLocalMapOutputPath() const override { return mLocalMapOutputPath; }
+        bool getOverwriteMaps() const { return mOverwriteMaps; }
 
-        void extractWorldMap(const std::string& worldMapOutput) override;
-        void extractLocalMaps(const std::string& localMapOutput) override;
+        void extractWorldMap() override;
+        void extractLocalMaps() override;
         bool isMapExtractionActive() const override;
     };
 }

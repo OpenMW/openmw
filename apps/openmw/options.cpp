@@ -101,8 +101,8 @@ namespace OpenMW
         addOption("local-map-output", bpo::value<std::string>()->default_value(""),
             "directory to save local map textures (default: textures/advanced_world_map/local)");
 
-        addOption("extract-maps", bpo::value<bool>()->implicit_value(true)->default_value(true),
-            "extract world and local map textures and exit");
+        addOption("overwrite-maps", bpo::value<bool>()->implicit_value(true)->default_value(false),
+            "overwrite existing map files during extraction");
 
         return desc;
     }

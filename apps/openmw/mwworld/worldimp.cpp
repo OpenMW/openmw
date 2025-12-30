@@ -251,7 +251,7 @@ namespace MWWorld
     }
 
     World::World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-        const std::filesystem::path& userDataPath)
+        const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
@@ -263,6 +263,9 @@ namespace MWWorld
         , mUserDataPath(userDataPath)
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
+        , mWorldMapOutputPath(worldMapOutputPath)
+        , mLocalMapOutputPath(localMapOutputPath)
+        , mOverwriteMaps(overwriteMaps)
         , mSwimHeightScale(0.f)
         , mDistanceToFocusObject(-1.f)
         , mTeleportEnabled(true)
@@ -3913,83 +3916,35 @@ namespace MWWorld
             actor->setActive(value);
     }
 
-    std::string World::getWorldMapOutputPath() const
+    void World::extractWorldMap()
     {
-        // Try to get from Engine via environment, fallback to default
-        // Since we can't directly access Engine from World, we'll use a default path
-        // The actual path from options will be passed through the Lua API
-        return "./textures/advanced_world_map/custom";
-    }
-
-    std::string World::getLocalMapOutputPath() const
-    {
-        // Try to get from Engine via environment, fallback to default
-        // Since we can't directly access Engine from World, we'll use a default path
-        // The actual path from options will be passed through the Lua API
-        return "./textures/advanced_world_map/local";
-    }
-
-    void World::extractWorldMap(const std::string& worldMapOutput)
-    {
-        if (!mRendering)
+        if (!mMapExtractor)
         {
-            throw std::runtime_error("Rendering manager is not initialized");
+            mMapExtractor = std::make_unique<OMW::MapExtractor>(
+                mWorldMapOutputPath, mLocalMapOutputPath, mOverwriteMaps, mRendering.get(), &mStore);
         }
-
-        osgViewer::Viewer* viewer = mRendering->getViewer();
-        if (!viewer)
-        {
-            throw std::runtime_error("Viewer is not initialized");
-        }
-
-        // If extraction is already in progress, ignore the request
-        if (mMapExtractor)
-        {
-            Log(Debug::Warning) << "Map extraction is already in progress";
-            return;
-        }
-
-        std::string outputPath = worldMapOutput.empty() ? getWorldMapOutputPath() : worldMapOutput;
-
-        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-        mMapExtractor = std::make_unique<OMW::MapExtractor>(*this, viewer, windowManager, outputPath, "");
-        
-        Log(Debug::Info) << "Starting world map extraction to: " << outputPath;
         mMapExtractor->extractWorldMap();
     }
 
-    void World::extractLocalMaps(const std::string& localMapOutput)
+    void World::extractLocalMaps()
     {
-        if (!mRendering)
+        if (!mMapExtractor)
         {
-            throw std::runtime_error("Rendering manager is not initialized");
+            mMapExtractor = std::make_unique<OMW::MapExtractor>(
+                mWorldMapOutputPath, mLocalMapOutputPath, mOverwriteMaps, mRendering.get(), &mStore);
         }
-
-        osgViewer::Viewer* viewer = mRendering->getViewer();
-        if (!viewer)
+        // Set LocalMap from WindowManager
+        if (auto* localMap = MWBase::Environment::get().getWindowManager()->getLocalMapRender())
         {
-            throw std::runtime_error("Viewer is not initialized");
+            mMapExtractor->setLocalMap(localMap);
         }
-
-        // If extraction is already in progress, ignore the request
-        if (mMapExtractor)
-        {
-            Log(Debug::Warning) << "Map extraction is already in progress";
-            return;
-        }
-
-        std::string outputPath = localMapOutput.empty() ? getLocalMapOutputPath() : localMapOutput;
-
-        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-        mMapExtractor = std::make_unique<OMW::MapExtractor>(*this, viewer, windowManager, "", outputPath);
-        
-        Log(Debug::Info) << "Starting local maps extraction to: " << outputPath;
-        mMapExtractor->extractLocalMaps(false);
-        Log(Debug::Info) << "Local maps extraction started, will complete during gameplay...";
+        const auto& activeCells = mWorldScene->getActiveCells();
+        std::vector<const MWWorld::CellStore*> cells(activeCells.begin(), activeCells.end());
+        mMapExtractor->extractLocalMaps(cells);
     }
 
     bool World::isMapExtractionActive() const
     {
-        return mMapExtractor != nullptr;
+        return mMapExtractor && !mMapExtractor->isExtractionComplete();
     }
 }

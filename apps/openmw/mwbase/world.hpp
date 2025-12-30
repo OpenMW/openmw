@@ -613,11 +613,11 @@ namespace MWBase
         virtual std::string getLocalMapOutputPath() const = 0;
         ///< Get the local map output path from options or default
 
-        virtual void extractWorldMap(const std::string& worldMapOutput) = 0;
-        ///< Extract world map to the specified directory
+        virtual void extractWorldMap() = 0;
+        ///< Extract world map using path from options or default
 
-        virtual void extractLocalMaps(const std::string& localMapOutput) = 0;
-        ///< Extract local maps to the specified directory
+        virtual void extractLocalMaps() = 0;
+        ///< Extract local maps using path from options or default
 
         virtual bool isMapExtractionActive() const = 0;
         ///< Check if map extraction is currently in progress

@@ -28,12 +28,14 @@ namespace MWRender
 {
     class GlobalMap;
     class LocalMap;
+    class RenderingManager;
 }
 
 namespace MWWorld
 {
     class World;
     class CellStore;
+    class ESMStore;
 }
 
 namespace MWBase
@@ -46,12 +48,14 @@ namespace OMW
     class MapExtractor
     {
     public:
-        MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer, MWBase::WindowManager* windowManager,
-                     const std::string& worldMapOutput, const std::string& localMapOutput);
+        MapExtractor(const std::string& worldMapOutput, const std::string& localMapOutput, bool forceOverwrite,
+                     MWRender::RenderingManager* renderingManager, const MWWorld::ESMStore* store);
         ~MapExtractor();
 
+        void setLocalMap(MWRender::LocalMap* localMap) { mLocalMap = localMap; }
+
         void extractWorldMap();
-        void extractLocalMaps(bool forceOverwrite = false);
+        void extractLocalMaps(const std::vector<const MWWorld::CellStore*>& activeCells);
         
         // Called every frame to process pending extractions
         void update();
@@ -69,11 +73,10 @@ namespace OMW
             std::function<void()> completionCallback;
         };
 
-        MWWorld::World& mWorld;
-        osgViewer::Viewer* mViewer;
-        MWBase::WindowManager* mWindowManager;
         std::filesystem::path mWorldMapOutputDir;
         std::filesystem::path mLocalMapOutputDir;
+        MWRender::RenderingManager* mRenderingManager;
+        const MWWorld::ESMStore* mStore;
 
         std::unique_ptr<MWRender::GlobalMap> mGlobalMap;
         MWRender::LocalMap* mLocalMap;
@@ -85,7 +88,7 @@ namespace OMW
         void saveWorldMapTexture();
         void saveWorldMapInfo();
         
-        void startExtraction(bool forceOverwrite);
+        void startExtraction(const std::vector<const MWWorld::CellStore*>& activeCells);
         void processNextCell();
         bool savePendingExtraction(const PendingExtraction& extraction);
         

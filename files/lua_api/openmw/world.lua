@@ -222,22 +222,21 @@
 -- @param #number hours Number of hours to advance time
 
 ---
--- Extract world map to the specified directory.
+-- Extract world map using path from --world-map-output option or default path.
 -- This function generates a world map image and saves it as a PNG file.
--- If no path is provided (nil), uses the path from --world-map-output option or default "./textures/advanced_world_map/custom".
+-- The output directory is determined by --world-map-output command line option,
+-- or defaults to "./textures/advanced_world_map/custom" if not specified.
 -- @function [parent=#world] extractWorldMap
--- @param #string worldMapOutput (optional) Directory path where world map will be saved
--- @usage world.extractWorldMap("./maps/world")  -- Custom path
--- @usage world.extractWorldMap()  -- Use default or option path
+-- @usage world.extractWorldMap()  -- Use path from option or default
 
 ---
--- Extract local maps to the specified directory.
+-- Extract local maps using path from --local-map-output option or default path.
 -- This function generates map images for all active cells and saves them as PNG files.
--- If no path is provided (nil), uses the path from --local-map-output option or default "./textures/advanced_world_map/local".
+-- The output directory is determined by --local-map-output command line option,
+-- or defaults to "./textures/advanced_world_map/local" if not specified.
+-- By default, existing maps are not overwritten. Use --overwrite-maps option to force overwriting.
 -- @function [parent=#world] extractLocalMaps
--- @param #string localMapOutput (optional) Directory path where local maps will be saved
--- @usage world.extractLocalMaps("./maps/local")  -- Custom path
--- @usage world.extractLocalMaps()  -- Use default or option path
+-- @usage world.extractLocalMaps()  -- Use path from option or default
 
 ---
 -- Enable extraction mode for map generation.

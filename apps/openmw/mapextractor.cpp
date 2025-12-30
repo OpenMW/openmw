@@ -36,14 +36,14 @@
 
 namespace OMW
 {
-    MapExtractor::MapExtractor(MWWorld::World& world, osgViewer::Viewer* viewer,
-        MWBase::WindowManager* windowManager, const std::string& worldMapOutput, const std::string& localMapOutput)
-        : mWorld(world)
-        , mViewer(viewer)
-        , mWindowManager(windowManager)
-        , mWorldMapOutputDir(worldMapOutput)
+    MapExtractor::MapExtractor(const std::string& worldMapOutput, const std::string& localMapOutput,
+        bool forceOverwrite, MWRender::RenderingManager* renderingManager, const MWWorld::ESMStore* store)
+        : mWorldMapOutputDir(worldMapOutput)
         , mLocalMapOutputDir(localMapOutput)
+        , mRenderingManager(renderingManager)
+        , mStore(store)
         , mLocalMap(nullptr)
+        , mForceOverwrite(forceOverwrite)
     {
         // Only create directories if paths are not empty
         if (!mWorldMapOutputDir.empty())
@@ -52,14 +52,13 @@ namespace OMW
             std::filesystem::create_directories(mLocalMapOutputDir);
 
         // Create GlobalMap instance
-        MWRender::RenderingManager* renderingManager = mWorld.getRenderingManager();
-        if (!renderingManager)
+        if (!mRenderingManager)
         {
             Log(Debug::Error) << "RenderingManager is null in MapExtractor constructor";
             throw std::runtime_error("RenderingManager is null");
         }
 
-        osg::Group* lightRoot = renderingManager->getLightRoot();
+        osg::Group* lightRoot = mRenderingManager->getLightRoot();
         if (!lightRoot)
         {
             Log(Debug::Error) << "LightRoot is null in MapExtractor constructor";
@@ -73,7 +72,7 @@ namespace OMW
             throw std::runtime_error("Root node is null");
         }
 
-        SceneUtil::WorkQueue* workQueue = renderingManager->getWorkQueue();
+        SceneUtil::WorkQueue* workQueue = mRenderingManager->getWorkQueue();
         if (!workQueue)
         {
             Log(Debug::Error) << "WorkQueue is null in MapExtractor constructor";
@@ -83,8 +82,7 @@ namespace OMW
         try
         {
             mGlobalMap = std::make_unique<MWRender::GlobalMap>(root, workQueue);
-            // Get LocalMap from WindowManager - it will be set after initUI is called
-            // For now just set to nullptr
+            // LocalMap will be set later via setLocalMap() method
             mLocalMap = nullptr;
         }
         catch (const std::exception& e)
@@ -157,14 +155,13 @@ namespace OMW
         int width = mGlobalMap->getWidth();
         int height = mGlobalMap->getHeight();
 
-        const MWWorld::ESMStore& store = mWorld.getStore();
         int minX = std::numeric_limits<int>::max();
         int maxX = std::numeric_limits<int>::min();
         int minY = std::numeric_limits<int>::max();
         int maxY = std::numeric_limits<int>::min();
 
-        MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
-        for (; it != store.get<ESM::Cell>().extEnd(); ++it)
+        MWWorld::Store<ESM::Cell>::iterator it = mStore->get<ESM::Cell>().extBegin();
+        for (; it != mStore->get<ESM::Cell>().extEnd(); ++it)
         {
             if (it->getGridX() < minX)
                 minX = it->getGridX();
@@ -201,7 +198,7 @@ namespace OMW
         Log(Debug::Info) << "Saved world map info: " << infoPath;
     }
 
-    void MapExtractor::extractLocalMaps(bool forceOverwrite)
+    void MapExtractor::extractLocalMaps(const std::vector<const MWWorld::CellStore*>& activeCells)
     {
         Log(Debug::Info) << "Extracting active local maps...";
 
@@ -214,28 +211,20 @@ namespace OMW
         // Create output directory if it doesn't exist
         std::filesystem::create_directories(mLocalMapOutputDir);
 
-        // Get LocalMap from WindowManager now that UI is initialized
-        if (mWindowManager)
-        {
-            mLocalMap = mWindowManager->getLocalMapRender();
-        }
-
         if (!mLocalMap)
         {
             Log(Debug::Error) << "Local map not initialized - cannot extract local maps";
-            Log(Debug::Error) << "Make sure the game is fully loaded before calling extractLocalMaps";
             return;
         }
 
         Log(Debug::Info) << "LocalMap instance is available, starting extraction";
         
-        mForceOverwrite = forceOverwrite;
         mFramesToWait = 10; // Wait 10 frames before checking (increased from 3)
         
-        startExtraction(forceOverwrite);
+        startExtraction(activeCells);
     }
     
-    void MapExtractor::startExtraction(bool forceOverwrite)
+    void MapExtractor::startExtraction(const std::vector<const MWWorld::CellStore*>& activeCells)
     {
         // Enable extraction mode to prevent automatic camera cleanup
         if (mLocalMap)
@@ -243,15 +232,6 @@ namespace OMW
             mLocalMap->setExtractionMode(true);
         }
         
-        // Get currently active cells
-        MWWorld::Scene* scene = &mWorld.getWorldScene();
-        if (!scene)
-        {
-            Log(Debug::Error) << "Scene not available";
-            throw std::runtime_error("Scene not available");
-        }
-
-        const auto& activeCells = scene->getActiveCells();
         Log(Debug::Info) << "Processing " << activeCells.size() << " currently active cells...";
 
         mPendingExtractions.clear();
@@ -267,7 +247,7 @@ namespace OMW
                 filename << "(" << x << "," << y << ").png";
                 std::filesystem::path outputPath = mLocalMapOutputDir / filename.str();
 
-                if (!forceOverwrite && std::filesystem::exists(outputPath))
+                if (!mForceOverwrite && std::filesystem::exists(outputPath))
                 {
                     Log(Debug::Info) << "Skipping cell (" << x << "," << y << ") - file already exists";
                     continue;
@@ -302,7 +282,7 @@ namespace OMW
                 std::filesystem::path texturePath = mLocalMapOutputDir / (lowerCaseId + ".png");
                 std::filesystem::path yamlPath = mLocalMapOutputDir / (lowerCaseId + ".yaml");
 
-                if (!forceOverwrite && std::filesystem::exists(texturePath) && std::filesystem::exists(yamlPath))
+                if (!mForceOverwrite && std::filesystem::exists(yamlPath))
                 {
                     Log(Debug::Info) << "Skipping interior cell: " << cellName << " - files already exist";
                     continue;
@@ -656,10 +636,6 @@ namespace OMW
     void MapExtractor::saveInteriorMapInfo(const ESM::RefId& cellId, const std::string& lowerCaseId,
                                            int segmentsX, int segmentsY)
     {
-        MWWorld::CellStore* cell = mWorld.getWorldModel().findCell(cellId);
-        if (!cell)
-            return;
-
         // Get the bounds, center and angle that LocalMap actually used for rendering
         const osg::BoundingBox& bounds = mLocalMap->getInteriorBounds();
         const osg::Vec2f& center = mLocalMap->getInteriorCenter();
