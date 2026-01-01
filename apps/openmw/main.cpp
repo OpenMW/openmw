@@ -73,7 +73,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     MWGui::DebugWindow::startLogRecording();
 
-    engine.setGrabMouse(!variables["no-grab"].as<bool>());
+    engine.setGrabMouse(false);
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
@@ -146,9 +146,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setSkipMenu(variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
-    if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
+    engine.setSkipMenu(true, false);
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
@@ -160,7 +158,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
-    engine.setSoundUsage(!variables["no-sound"].as<bool>());
+    engine.setSoundUsage(false);
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());

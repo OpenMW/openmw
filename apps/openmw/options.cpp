@@ -44,7 +44,7 @@ namespace OpenMW
             bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
             "groundcover content file(s): esm/esp, or omwgame/omwaddon");
 
-        addOption("no-sound", bpo::value<bool>()->implicit_value(true)->default_value(true), "disable all sounds");
+        addOption("no-sound", bpo::value<bool>()->implicit_value(true)->default_value(false), "disable all sounds");
 
         addOption("script-all", bpo::value<bool>()->implicit_value(true)->default_value(false),
             "compile all scripts (excluding dialogue scripts) at startup");
@@ -68,7 +68,7 @@ namespace OpenMW
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current "
             "working directory)");
 
-        addOption("skip-menu", bpo::value<bool>()->implicit_value(true)->default_value(true),
+        addOption("skip-menu", bpo::value<bool>()->implicit_value(true)->default_value(false),
             "skip main menu on game startup");
 
         addOption("new-game", bpo::value<bool>()->implicit_value(true)->default_value(false),
@@ -85,7 +85,7 @@ namespace OpenMW
             bpo::value<Fallback::FallbackMap>()->default_value(Fallback::FallbackMap(), "")->multitoken()->composing(),
             "fallback values");
 
-        addOption("no-grab", bpo::value<bool>()->implicit_value(true)->default_value(true), "Don't grab mouse cursor");
+        addOption("no-grab", bpo::value<bool>()->implicit_value(true)->default_value(false), "Don't grab mouse cursor");
 
         addOption("export-fonts", bpo::value<bool>()->implicit_value(true)->default_value(false),
             "Export Morrowind .fnt fonts to PNG image and XML file in current directory");

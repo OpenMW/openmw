@@ -483,8 +483,8 @@ void OMW::Engine::addGroundcoverFile(const std::string& file)
 
 void OMW::Engine::setSkipMenu(bool skipMenu, bool newGame)
 {
-    mSkipMenu = true;
-    mNewGame = false;
+    mSkipMenu = skipMenu;
+    mNewGame = newGame;
 }
 
 void OMW::Engine::createWindow()
