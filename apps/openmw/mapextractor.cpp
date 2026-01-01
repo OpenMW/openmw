@@ -655,8 +655,6 @@ namespace OMW
         float oY = (rotatedY - min.y()) / mapWorldSize * 256.0f;
         
         float totalHeight = segmentsY * 256.0f;
-        float mX = oX * 2.0f;
-        float mY = (oY - totalHeight) * 2.0f;
 
         std::filesystem::path yamlPath = mLocalMapOutputDir / (lowerCaseId + ".yaml");
         std::ofstream file(yamlPath);
@@ -667,13 +665,20 @@ namespace OMW
             return;
         }
 
+        // TODO: Replace hardcoded padding with a constant from LocalMap
+        // Padding value taken from the implementation in localmap.cpp.
+        // Used to shrink the bounds to match the one used during cell rendering.
+        const float padding = 500.0f;
+
+        file << "v: 2\n";
         file << "nA: " << nA << "\n";
-        file << "mX: " << mX << "\n";
-        file << "mY: " << mY << "\n";
         file << "oX: " << oX << "\n";
         file << "oY: " << oY << "\n";
-        file << "width: " << segmentsX << "\n";
-        file << "height: " << segmentsY << "\n";
+        file << "wT: " << segmentsX << "\n";
+        file << "hT: " << segmentsY << "\n";
+        file << "mBnds:\n";
+        file << "  min: [" << bounds.xMin() + padding << ", " << bounds.yMin() + padding << ", " << bounds.zMin() << "]\n";
+        file << "  max: [" << bounds.xMax() - padding << ", " << bounds.yMax() - padding << ", " << bounds.zMax() << "]\n";
 
         file.close();
     }
