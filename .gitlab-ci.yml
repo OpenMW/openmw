@@ -625,7 +625,7 @@ macOS15_Xcode16_arm64:
     - ./aws/install
     - popd
     - aws --version
-    - unzip -d sym_store *sym_store.zip
+    - unzip -n -d sym_store '*sym_store.zip'
     - shopt -s globstar
     - |
       for file in sym_store/**/*.exe; do
@@ -650,6 +650,60 @@ macOS15_Xcode16_arm64:
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp --recursive --exclude '*' --include '*.ex_' --include '*.dl_' --include '*.pd_' sym_store s3://openmw-sym
       fi
 
+.Merge_Artifacts_Base:
+  extends: .Ubuntu_Image
+  stage: build
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - apt-get update
+    - apt-get install -y curl dos2unix unzip zip
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.22.35.zip" -o awscli-exe-linux-x86_64.zip
+    - unzip -d awscli-exe-linux-x86_64 awscli-exe-linux-x86_64.zip
+    - pushd awscli-exe-linux-x86_64
+    - ./aws/install
+    - popd
+    - aws --version
+    - mkdir -p incoming_artifacts
+    - mv *.zip incoming_artifacts/
+    - declare -A destinations
+    - |
+      for merge_list in *_to-be-merged.txt; do
+         while IFS=: read -r partial destination; do
+          destinations["$destination"]=""
+          echo "Unzipping '$partial' to '$destination'"
+          unzip -n -d "$destination" "incoming_artifacts/$partial"
+        done < <(dos2unix < $merge_list)
+      done
+    - |
+      for destination in ${!destinations[@]}; do
+        pushd "$destination"
+        for ci_id in CI-ID_*.txt; do
+          cat "$ci_id" >> CI-ID.txt
+          rm "$ci_id"
+        done
+        echo "Creating $destination.zip"
+        zip -r "../$destination.zip" .
+        popd
+      done
+    - |
+      if [[ -v AWS_ACCESS_KEY_ID ]]; then
+          artifactDirectory="$CI_PROJECT_NAMESPACE/$CI_COMMIT_REF_NAME/$CI_COMMIT_SHORT_SHA-$CI_JOB_ID/"
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp *.zip s3://openmw-artifacts/$artifactDirectory
+      fi
+  artifacts:
+    when: always
+    paths:
+    - "*.zip"
+
+.variables-for-split-jobs: &target-group-one
+  targets: "openmw openmw-tests"
+  group_name: "group-one"
+
+.variables-for-split-jobs: &target-group-two
+  targets: "bsatool components-tests esmtool niftest openmw-cs openmw-cs-tests openmw_detournavigator_navmeshtilescache_benchmark openmw_esm_refid_benchmark openmw_settings_access_benchmark openmw-bulletobjecttool openmw-essimporter openmw-iniimporter openmw-launcher openmw-navmeshtool openmw-wizard"
+  group_name: "group-two"
+
 .Windows_Ninja_Base:
   tags:
     - saas-windows-medium-amd64
@@ -657,6 +711,7 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
+  - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
@@ -691,38 +746,40 @@ macOS15_Xcode16_arm64:
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
-    - Get-Volume
     - cd MSVC2022_64_Ninja
+    - Get-Volume
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target $targets
+    - cmake --build . --config $config --target ($targets.Split(' '))
     - ccache --show-stats -v
     - cd $config
-    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
+    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
           if(!$?) { Exit $LASTEXITCODE }
         }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
-        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - Rename-Item CI-ID.txt CI-ID_${group_name}.txt
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
-        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
         if(!$?) { Exit $LASTEXITCODE }
       }
+    - echo "$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip")):$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}"))" | Out-File -Encoding UTF8 "..\..\${group_name}_to-be-merged.txt"
     - |
       if ($executables) {
         foreach ($exe in $executables.Split(',')) {
@@ -746,6 +803,7 @@ macOS15_Xcode16_arm64:
     - "*.log"
     - MSVC2022_64_Ninja/*.log
     - MSVC2022_64_Ninja/**/*.log
+    - "*_to-be-merged.txt"
   variables:
     targets: all
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
@@ -800,11 +858,34 @@ macOS15_Xcode16_arm64:
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
 
+.Windows_Ninja_RelWithDebInfo_GroupOne:
+  extends:
+    - .Windows_Ninja_RelWithDebInfo
+  variables:
+    <<: *target-group-one
+
+.Windows_Ninja_RelWithDebInfo_GroupTwo:
+  extends:
+    - .Windows_Ninja_RelWithDebInfo
+  variables:
+    <<: *target-group-two
+
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
     - .Compress_And_Upload_Symbols_Base
   needs:
-    - job: "Windows_Ninja_RelWithDebInfo"
+    - job: "Windows_Ninja_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
+      artifacts: true
+
+.Windows_Merge_Artifacts_Ninja_RelWithDebInfo:
+  extends:
+    - .Merge_Artifacts_Base
+  needs:
+    - job: "Windows_Ninja_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
       artifacts: true
 
 .Windows_Ninja_CacheInit:
@@ -823,6 +904,7 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
+  - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
@@ -854,34 +936,36 @@ macOS15_Xcode16_arm64:
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
-    - cmake --build . --config $config --target $targets
+    - cmake --build . --config $config --target ($targets.Split(' '))
     - cd $config
-    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
+    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
+          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
           if(!$?) { Exit $LASTEXITCODE }
         }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
-        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
         Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
+    - Rename-Item CI-ID.txt CI-ID_${group_name}.txt
+    - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - |
       if (Test-Path env:AWS_ACCESS_KEY_ID) {
-        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
+        aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip"))" s3://openmw-artifacts/${artifactDirectory}
         if(!$?) { Exit $LASTEXITCODE }
       }
+    - echo "$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}.zip")):$(Make-SafeFileName("OpenMW_MSVC2022_64_${config}_${CI_COMMIT_REF_NAME}"))" | Out-File -Encoding UTF8 "..\..\${group_name}_to-be-merged.txt"
     - |
       if ($executables) {
         foreach ($exe in $executables.Split(',')) {
@@ -904,6 +988,7 @@ macOS15_Xcode16_arm64:
     - "*.log"
     - MSVC2022_64/*.log
     - MSVC2022_64/**/*.log
+    - "*_to-be-merged.txt"
   variables:
     targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
@@ -936,7 +1021,7 @@ macOS15_Xcode16_arm64:
     - job: "Windows_MSBuild_Debug"
       artifacts: true
 
-Windows_MSBuild_RelWithDebInfo:
+.Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -948,11 +1033,38 @@ Windows_MSBuild_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
+Windows_MSBuild_RelWithDebInfo_GroupOne:
+  extends:
+    - .Windows_MSBuild_RelWithDebInfo
+  variables:
+    <<: *target-group-one
+
+Windows_MSBuild_RelWithDebInfo_GroupTwo:
+  extends:
+    - .Windows_MSBuild_RelWithDebInfo
+  variables:
+    <<: *target-group-two
+
 Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
   extends:
     - .Compress_And_Upload_Symbols_Base
   needs:
-    - job: "Windows_MSBuild_RelWithDebInfo"
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
+      artifacts: true
+  # temporarily enabled while we're linking the above on the downloads page
+  rules:
+    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
+
+Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
+  extends:
+    - .Merge_Artifacts_Base
+  needs:
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupOne"
+      artifacts: true
+    - job: "Windows_MSBuild_RelWithDebInfo_GroupTwo"
       artifacts: true
   # temporarily enabled while we're linking the above on the downloads page
   rules:
