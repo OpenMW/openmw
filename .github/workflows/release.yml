@@ -1,9 +1,7 @@
 name: Release
 
 on:
-  push:
-      tags:
-        - openmw-**
+- workflow_dispatch
 
 jobs:
   Output-Envs:
