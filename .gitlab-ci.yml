@@ -801,7 +801,6 @@ macOS15_Xcode16_arm64:
   cache:
     key: ninja-2022-v13
     paths:
-    - ccache
     - deps
     - MSVC2022_64_Ninja/deps/Qt
   artifacts:
@@ -859,7 +858,7 @@ macOS15_Xcode16_arm64:
     - job: "Windows_Ninja_Debug"
       artifacts: true
 
-Windows_Ninja_RelWithDebInfo:
+.Windows_Ninja_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
@@ -871,17 +870,35 @@ Windows_Ninja_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
-.Windows_Ninja_RelWithDebInfo_GroupOne:
+Windows_Ninja_RelWithDebInfo_GroupOne:
   extends:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-one
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key: ninja-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+    - key: ninja-2022-RelWithDebInfo-GroupOne-v13
+      paths:
+      - ccache
 
-.Windows_Ninja_RelWithDebInfo_GroupTwo:
+Windows_Ninja_RelWithDebInfo_GroupTwo:
   extends:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-two
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key: ninja-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+    - key: ninja-2022-RelWithDebInfo-GroupTwo-v13
+      paths:
+      - ccache
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
@@ -1001,7 +1018,6 @@ Windows_Ninja_CacheInit:
   cache:
     key: msbuild-2022-v13
     paths:
-    - ccache
     - deps
     - MSVC2022_64/deps/Qt
   artifacts:
@@ -1045,7 +1061,7 @@ Windows_Ninja_CacheInit:
     - job: "Windows_MSBuild_Debug"
       artifacts: true
 
-Windows_MSBuild_RelWithDebInfo:
+.Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
@@ -1074,12 +1090,30 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-one
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key: msbuild-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+    - key: msbuild-2022-RelWithDebInfo-GroupOne-v13
+      paths:
+      - ccache
 
 Windows_MSBuild_RelWithDebInfo_GroupTwo:
   extends:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-two
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key: msbuild-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+    - key: msbuild-2022-RelWithDebInfo-GroupTwo-v13
+      paths:
+      - ccache
 
 Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
   extends:
