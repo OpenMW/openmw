@@ -20,19 +20,6 @@ set(BUILTIN_DATA_MW_FILES
 
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/gmst.yaml
-
-    # Game-specific settings for calendar.lua
-    openmw_aux/calendarconfig.lua
-
-    scripts/omw/cellhandlers.lua
-    scripts/omw/combat/common.lua
-    scripts/omw/combat/global.lua
-    scripts/omw/combat/local.lua
-    scripts/omw/combat/menu.lua
-    scripts/omw/music/helpers.lua
-    scripts/omw/music/music.lua
-    scripts/omw/music/settings.lua
-    scripts/omw/playerskillhandlers.lua
 )
 
 foreach (f ${BUILTIN_DATA_MW_FILES})

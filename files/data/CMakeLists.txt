@@ -122,47 +122,15 @@ set(BUILTIN_DATA_FILES
     openmw_aux/ui.lua
 
     builtin.omwscripts
+	
+	scripts/map_extractor/global.lua
+	scripts/map_extractor/menu.lua
+	scripts/map_extractor/player.lua
 
-    scripts/omw/activationhandlers.lua
-    scripts/omw/ai.lua
-    scripts/omw/camera/camera.lua
-    scripts/omw/camera/head_bobbing.lua
-    scripts/omw/camera/third_person.lua
-    scripts/omw/camera/settings.lua
-    scripts/omw/camera/move360.lua
-    scripts/omw/camera/first_person_auto_switch.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
     scripts/omw/console/menu.lua
-    scripts/omw/combat/interface.lua
-    scripts/omw/mechanics/actorcontroller.lua
-    scripts/omw/mechanics/animationcontroller.lua
-    scripts/omw/mechanics/globalcontroller.lua
-    scripts/omw/mechanics/playercontroller.lua
-    scripts/omw/settings/menu.lua
-    scripts/omw/music/actor.lua
-    scripts/omw/settings/player.lua
-    scripts/omw/settings/global.lua
-    scripts/omw/settings/common.lua
-    scripts/omw/settings/renderers.lua
-    scripts/omw/mwui/constants.lua
-    scripts/omw/mwui/borders.lua
-    scripts/omw/mwui/filters.lua
-    scripts/omw/mwui/text.lua
-    scripts/omw/mwui/textEdit.lua
-    scripts/omw/mwui/space.lua
-    scripts/omw/mwui/init.lua
-    scripts/omw/skillhandlers.lua
-    scripts/omw/crimes.lua
-    scripts/omw/ui.lua
-    scripts/omw/usehandlers.lua
-    scripts/omw/worldeventhandlers.lua
-    scripts/omw/input/settings.lua
-    scripts/omw/input/playercontrols.lua
-    scripts/omw/input/actionbindings.lua
-    scripts/omw/input/smoothmovement.lua
-    scripts/omw/input/gamepadcontrols.lua
     
     shaders/adjustments.omwfx
     shaders/bloomlinear.omwfx
