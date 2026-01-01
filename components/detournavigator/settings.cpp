@@ -94,7 +94,6 @@ namespace DetourNavigator
 
         result.mMaxTilesNumber = std::min(limits.mMaxTiles, ::Settings::navigator().mMaxTilesNumber.get());
         result.mWaitUntilMinDistanceToPlayer = ::Settings::navigator().mWaitUntilMinDistanceToPlayer;
-        result.mAsyncNavMeshUpdaterThreads = ::Settings::navigator().mAsyncNavMeshUpdaterThreads;
         result.mMaxNavMeshTilesCacheSize = ::Settings::navigator().mMaxNavMeshTilesCacheSize;
         result.mEnableWriteRecastMeshToFile = ::Settings::navigator().mEnableWriteRecastMeshToFile;
         result.mEnableWriteNavMeshToFile = ::Settings::navigator().mEnableWriteNavMeshToFile;
@@ -106,6 +105,9 @@ namespace DetourNavigator
         result.mEnableNavMeshDiskCache = ::Settings::navigator().mEnableNavMeshDiskCache;
         result.mWriteToNavMeshDb = ::Settings::navigator().mWriteToNavmeshdb;
         result.mMaxDbFileSize = ::Settings::navigator().mMaxNavmeshdbFileSize;
+        
+        // Force disable navmesh generation worker threads regardless of config file settings
+        result.mAsyncNavMeshUpdaterThreads = 0;
 
         return result;
     }

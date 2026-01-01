@@ -154,30 +154,59 @@ namespace MWRender
                 {
                     const ESM::Land* land = mLandStore.search(x, y);
 
-                    for (int cellY = 0; cellY < mCellSize; ++cellY)
+                    if (land != nullptr && (land->mDataTypes & ESM::Land::DATA_VHGT))
                     {
-                        for (int cellX = 0; cellX < mCellSize; ++cellX)
+                        land->loadData(ESM::Land::DATA_VHGT);
+                        const ESM::Land::LandData* data = land->getLandData(ESM::Land::DATA_VHGT);
+
+                        if (data)
                         {
-                            int vertexX = (cellX * 9) / mCellSize; // 0..8
-                            int vertexY = (cellY * 9) / mCellSize; // 0..8
+                            const int vhgtSize = 65;
 
-                            int texelX = (x - mMinX) * mCellSize + cellX;
-                            int texelY = (y - mMinY) * mCellSize + cellY;
+                            for (int cellY = 0; cellY < mCellSize; ++cellY)
+                            {
+                                for (int cellX = 0; cellX < mCellSize; ++cellX)
+                                {
+                                    int vx = (cellX * (vhgtSize - 1)) / mCellSize;
+                                    int vy = (cellY * (vhgtSize - 1)) / mCellSize;
 
-                            int lutIndex = 0;
-                            // Converting [-128; 127] WNAM range to [0; 255] index
-                            if (land != nullptr && (land->mDataTypes & ESM::Land::DATA_WNAM))
-                                lutIndex = static_cast<int>(land->mWnam[vertexY * 9 + vertexX]) + 128;
+                                    float height = data->mHeights[vy * vhgtSize + vx] / 128.0f;
 
-                            // Use getColor to handle all pixel format conversions automatically
-                            osg::Vec4 color = mColorLut->getColor(lutIndex, 0);
+                                    // Convert height to LUT index using the same method as WNAM generation
+                                    // Normalize height: positive heights divided by 128, negative by 16
+                                    float normalizedHeight = height / (height > 0.0f ? 128.0f : 16.0f);
+                                    // Clamp to [-1, 1] range and convert to [0, 255] index
+                                    int lutIndex = static_cast<int>(std::clamp(normalizedHeight, -1.0f, 1.0f) * 127.0f) + 128;
 
-                            // Use setColor to write to output images
-                            image->setColor(color, texelX, texelY);
+                                    int texelX = (x - mMinX) * mCellSize + cellX;
+                                    int texelY = (y - mMinY) * mCellSize + cellY;
 
-                            // Set alpha based on lutIndex threshold
-                            osg::Vec4 alpha(0.0f, 0.0f, 0.0f, lutIndex < 128 ? 0.0f : 1.0f);
-                            alphaImage->setColor(alpha, texelX, texelY);
+                                    osg::Vec4 color = mColorLut->getColor(lutIndex, 0);
+                                    image->setColor(color, texelX, texelY);
+
+                                    osg::Vec4 alpha(0.0f, 0.0f, 0.0f, lutIndex < 128 ? 0.0f : 1.0f);
+                                    alphaImage->setColor(alpha, texelX, texelY);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int cellY = 0; cellY < mCellSize; ++cellY)
+                        {
+                            for (int cellX = 0; cellX < mCellSize; ++cellX)
+                            {
+                                int texelX = (x - mMinX) * mCellSize + cellX;
+                                int texelY = (y - mMinY) * mCellSize + cellY;
+
+                                int lutIndex = 0;
+                                osg::Vec4 color = mColorLut->getColor(lutIndex, 0);
+                                image->setColor(color, texelX, texelY);
+
+                                // Set alpha based on lutIndex threshold
+                                osg::Vec4 alpha(0.0f, 0.0f, 0.0f, lutIndex < 128 ? 0.0f : 1.0f);
+                                alphaImage->setColor(alpha, texelX, texelY);
+                            }
                         }
                     }
                 }

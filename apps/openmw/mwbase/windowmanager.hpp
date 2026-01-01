@@ -91,6 +91,11 @@ namespace MWGui
     struct TextColours;
 }
 
+namespace MWRender
+{
+    class LocalMap;
+}
+
 namespace SFO
 {
     class CursorManager;
@@ -406,6 +411,9 @@ namespace MWBase
         virtual bool isWindowVisible(std::string_view windowId) const = 0;
         virtual std::vector<std::string_view> getAllWindowIds() const = 0;
         virtual std::vector<std::string_view> getAllowedWindowIds(MWGui::GuiMode mode) const = 0;
+
+        // For map extraction
+        virtual MWRender::LocalMap* getLocalMapRender() = 0;
     };
 }
 

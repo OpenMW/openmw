@@ -1159,7 +1159,9 @@ namespace MWGui
 
     void MapWindow::cellExplored(int x, int y)
     {
-        mGlobalMapRender->cleanupCameras();
+        // Note: Don't cleanup cameras here! This is called frequently during gameplay
+        // and would interfere with map extraction which batches multiple camera renders
+        // mGlobalMapRender->cleanupCameras();
         mGlobalMapRender->exploreCell(x, y, mLocalMapRender->getMapTexture(x, y));
     }
 
@@ -1167,6 +1169,10 @@ namespace MWGui
     {
         LocalMapBase::onFrame(dt);
         NoDrop::onFrame(dt);
+        
+        // Note: Don't cleanup cameras here during normal gameplay
+        // Cameras are cleaned up only when explicitly requested (e.g., after map extraction)
+        // For global map overlay updates, cleanup happens in cellExplored() when needed
     }
 
     void MapWindow::setGlobalMapMarkerTooltip(MyGUI::Widget* markerWidget, int x, int y)

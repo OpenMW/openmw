@@ -169,14 +169,15 @@ namespace MWRender
     void LocalMap::setupRenderToTexture(
         int segmentX, int segmentY, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
     {
-        mLocalMapRTTs.emplace_back(
-            new LocalMapRenderToTexture(mSceneRoot, mMapResolution, mMapWorldSize, left, top, upVector, zmin, zmax));
+        auto rttNode = new LocalMapRenderToTexture(mSceneRoot, mMapResolution, mMapWorldSize, left, top, upVector, zmin, zmax);
+        mLocalMapRTTs.emplace_back(rttNode);
 
         mRoot->addChild(mLocalMapRTTs.back());
 
         MapSegment& segment = mInterior ? mInteriorSegments[std::make_pair(segmentX, segmentY)]
                                         : mExteriorSegments[std::make_pair(segmentX, segmentY)];
         segment.mMapTexture = static_cast<osg::Texture2D*>(mLocalMapRTTs.back()->getColorTexture(nullptr));
+        segment.mRTT = rttNode; // Store reference to RTT node
     }
 
     void LocalMap::requestMap(const MWWorld::CellStore* cell)
@@ -237,6 +238,36 @@ namespace MWRender
             return osg::ref_ptr<osg::Texture2D>();
         else
             return found->second.mFogOfWarTexture;
+    }
+
+    osg::ref_ptr<osg::Image> LocalMap::getMapImage(int x, int y)
+    {
+        auto& segments(mInterior ? mInteriorSegments : mExteriorSegments);
+        SegmentMap::iterator found = segments.find(std::make_pair(x, y));
+        if (found == segments.end())
+            return osg::ref_ptr<osg::Image>();
+        
+        MapSegment& segment = found->second;
+        
+        if (!segment.mRTT)
+            return osg::ref_ptr<osg::Image>();
+        
+        osg::Camera* camera = segment.mRTT->getCamera(nullptr);
+        if (!camera)
+            return osg::ref_ptr<osg::Image>();
+        
+        const osg::Camera::BufferAttachmentMap& attachments = camera->getBufferAttachmentMap();
+        auto it = attachments.find(osg::Camera::COLOR_BUFFER);
+        if (it != attachments.end())
+        {
+            osg::Image* img = it->second._image.get();
+            if (img && img->s() > 0 && img->t() > 0 && img->data() != nullptr)
+            {
+                return img;
+            }
+        }
+        
+        return osg::ref_ptr<osg::Image>();
     }
 
     void LocalMap::cleanupCameras()
@@ -473,6 +504,21 @@ namespace MWRender
     osg::Group* LocalMap::getRoot()
     {
         return mRoot;
+    }
+
+    void LocalMap::setExtractionMode(bool enabled)
+    {
+        mExtractionMode = enabled;
+    }
+
+    void LocalMap::clearCellCache(int x, int y)
+    {
+        auto it = mExteriorSegments.find(std::make_pair(x, y));
+        if (it != mExteriorSegments.end())
+        {
+            // Reset the render flags to force re-rendering
+            it->second.mLastRenderNeighbourFlags = 0;
+        }
     }
 
     void LocalMap::updatePlayer(const osg::Vec3f& position, const osg::Quat& orientation, float& u, float& v, int& x,
@@ -774,6 +820,21 @@ namespace MWRender
 
         camera->addChild(lightSource);
         camera->addChild(mSceneRoot);
+        
+        // CRITICAL: Attach an Image to COLOR_BUFFER to enable pixel readback from FBO
+        // This is required for map extraction functionality
+        // The image MUST be pre-allocated before attaching to the camera
+        osg::ref_ptr<osg::Image> image = new osg::Image;
+        
+        // Get the texture size from the camera's viewport
+        const osg::Viewport* vp = camera->getViewport();
+        int width = vp ? vp->width() : 512;
+        int height = vp ? vp->height() : 512;
+        
+        // Allocate the image with the same format as the color buffer
+        image->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
+        
+        camera->attach(osg::Camera::COLOR_BUFFER, image);
     }
 
     void CameraLocalUpdateCallback::operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv)

@@ -1,6 +1,7 @@
 set(OPENMW_SOURCES
     engine.cpp
     options.cpp
+    mapextractor.cpp
 )
 
 set(OPENMW_RESOURCES

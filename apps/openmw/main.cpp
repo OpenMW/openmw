@@ -2,6 +2,7 @@
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/files/conversion.hpp>
 #include <components/misc/osgpluginchecker.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
@@ -72,7 +73,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     MWGui::DebugWindow::startLogRecording();
 
-    engine.setGrabMouse(!variables["no-grab"].as<bool>());
+    engine.setGrabMouse(false);
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
@@ -122,14 +123,20 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     for (auto& file : content)
     {
+        if (file.ends_with(".omwscripts"))
+        {
+            Log(Debug::Warning) << "Skipping omwscripts file in content list: " << file;
+            continue;
+        }
         engine.addContentFile(file);
     }
 
-    StringsVector groundcover = variables["groundcover"].as<StringsVector>();
-    for (auto& file : groundcover)
-    {
-        engine.addGroundcoverFile(file);
-    }
+    Log(Debug::Warning) << "Skipping groundcover files.";
+    //StringsVector groundcover = variables["groundcover"].as<StringsVector>();
+    //for (auto& file : groundcover)
+    //{
+    //    engine.addGroundcoverFile(file);
+    //}
 
     if (variables.count("lua-scripts"))
     {
@@ -139,9 +146,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     // startup-settings
     engine.setCell(variables["start"].as<std::string>());
-    engine.setSkipMenu(variables["skip-menu"].as<bool>(), variables["new-game"].as<bool>());
-    if (!variables["skip-menu"].as<bool>() && variables["new-game"].as<bool>())
-        Log(Debug::Warning) << "Warning: new-game used without skip-menu -> ignoring it";
+    engine.setSkipMenu(true, false);
 
     // scripts
     engine.setCompileAll(variables["script-all"].as<bool>());
@@ -153,10 +158,33 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
-    engine.setSoundUsage(!variables["no-sound"].as<bool>());
+    engine.setSoundUsage(false);
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
+
+    std::string worldMapOutput = variables["world-map-output"].as<std::string>();
+    std::string localMapOutput = variables["local-map-output"].as<std::string>();
+
+    auto removeQuotes = [](std::string& str) {
+        if (str.size() >= 2 && ((str.front() == '"' && str.back() == '"') || (str.front() == '\'' && str.back() == '\'')))
+        {
+            str = str.substr(1, str.size() - 2);
+        }
+    };
+
+    removeQuotes(worldMapOutput);
+    removeQuotes(localMapOutput);
+
+    if (worldMapOutput.empty())
+        worldMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "custom");
+
+    if (localMapOutput.empty())
+        localMapOutput = Files::pathToUnicodeString(std::filesystem::current_path() / "textures" / "advanced_world_map" / "local");
+
+    engine.setWorldMapOutput(worldMapOutput);
+    engine.setLocalMapOutput(localMapOutput);
+    engine.setOverwriteMaps(variables["overwrite-maps"].as<bool>());
 
     return true;
 }
@@ -165,12 +193,27 @@ namespace
 {
     class OSGLogHandler : public osg::NotifyHandler
     {
+        int ignoreNext = 0;
+
         void notify(osg::NotifySeverity severity, const char* msg) override
         {
+            if (ignoreNext > 0)
+            {
+                --ignoreNext;
+                return;
+            }
+
             // Copy, because osg logging is not thread safe.
             std::string msgCopy(msg);
             if (msgCopy.empty())
                 return;
+
+            // Ignore because I don't know how to fix it
+            if (msgCopy.find("CullVisitor::apply(Geode&) detected NaN") != std::string::npos)
+            {
+                ignoreNext = 8;
+                return;
+            }
 
             Debug::Level level;
             switch (severity)

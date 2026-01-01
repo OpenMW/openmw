@@ -409,6 +409,9 @@ namespace MWGui
         std::vector<std::string_view> getAllWindowIds() const override;
         std::vector<std::string_view> getAllowedWindowIds(GuiMode mode) const override;
 
+        // For map extraction
+        MWRender::LocalMap* getLocalMapRender() override;
+
     private:
         unsigned int mOldUpdateMask;
         unsigned int mOldCullMask;

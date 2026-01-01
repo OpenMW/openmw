@@ -183,6 +183,10 @@ namespace OMW
         Translation::Storage mTranslationDataStorage;
         bool mNewGame;
 
+        std::string mWorldMapOutput;
+        std::string mLocalMapOutput;
+        bool mOverwriteMaps;
+
         Files::ConfigurationManager& mCfgMgr;
         int mGlMaxTextureImageUnits;
 
@@ -263,6 +267,14 @@ namespace OMW
         void setSaveGameFile(const std::filesystem::path& savegame);
 
         void setRandomSeed(unsigned int seed);
+
+        void setWorldMapOutput(const std::string& path);
+
+        void setLocalMapOutput(const std::string& path);
+
+        void setOverwriteMaps(bool overwrite);
+
+        void setExtractMaps(bool extract);
 
         void setRecastMaxLogLevel(Debug::Level value) { mMaxRecastLogLevel = value; }
     };

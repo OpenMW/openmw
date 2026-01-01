@@ -95,6 +95,15 @@ namespace OpenMW
         addOption("random-seed", bpo::value<unsigned int>()->default_value(Misc::Rng::generateDefaultSeed()),
             "seed value for random number generator");
 
+        addOption("world-map-output", bpo::value<std::string>()->default_value(""),
+            "directory to save world map texture (default: textures/advanced_world_map/custom)");
+
+        addOption("local-map-output", bpo::value<std::string>()->default_value(""),
+            "directory to save local map textures (default: textures/advanced_world_map/local)");
+
+        addOption("overwrite-maps", bpo::value<bool>()->implicit_value(true)->default_value(false),
+            "overwrite existing map files during extraction");
+
         return desc;
     }
 }

@@ -12,6 +12,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "../mapextractor.hpp"
+
 #include "contentloader.hpp"
 #include "esmstore.hpp"
 #include "globals.hpp"
@@ -102,10 +104,11 @@ namespace MWWorld
         std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
         std::unique_ptr<DetourNavigator::Navigator> mNavigator;
         std::unique_ptr<MWRender::RenderingManager> mRendering;
-        std::unique_ptr<MWWorld::Scene> mWorldScene;
-        std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
-        std::unique_ptr<MWWorld::DateTimeManager> mTimeManager;
-        std::unique_ptr<ProjectileManager> mProjectileManager;
+    std::unique_ptr<MWWorld::Scene> mWorldScene;
+    std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
+    std::unique_ptr<MWWorld::DateTimeManager> mTimeManager;
+    std::unique_ptr<ProjectileManager> mProjectileManager;
+    std::unique_ptr<OMW::MapExtractor> mMapExtractor;
 
         bool mSky;
         bool mGodMode;
@@ -118,6 +121,9 @@ namespace MWWorld
         int mActivationDistanceOverride;
 
         std::string mStartCell;
+        std::string mWorldMapOutputPath;
+        std::string mLocalMapOutputPath;
+        bool mOverwriteMaps;
 
         float mSwimHeightScale;
 
@@ -195,7 +201,7 @@ namespace MWWorld
         void removeContainerScripts(const Ptr& reference) override;
 
         World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-            const std::filesystem::path& userDataPath);
+            const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps);
 
         void loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
             const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
@@ -680,6 +686,14 @@ namespace MWWorld
         DateTimeManager* getTimeManager() override { return mTimeManager.get(); }
 
         void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
+
+        std::string getWorldMapOutputPath() const override { return mWorldMapOutputPath; }
+        std::string getLocalMapOutputPath() const override { return mLocalMapOutputPath; }
+        bool getOverwriteMaps() const override { return mOverwriteMaps; }
+
+        void extractWorldMap() override;
+        void extractLocalMaps() override;
+        bool isMapExtractionActive() const override;
     };
 }
 

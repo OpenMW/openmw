@@ -93,6 +93,8 @@
 
 #include "../mwsound/constants.hpp"
 
+#include "../mapextractor.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -249,7 +251,7 @@ namespace MWWorld
     }
 
     World::World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-        const std::filesystem::path& userDataPath)
+        const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
@@ -261,6 +263,9 @@ namespace MWWorld
         , mUserDataPath(userDataPath)
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
+        , mWorldMapOutputPath(worldMapOutputPath)
+        , mLocalMapOutputPath(localMapOutputPath)
+        , mOverwriteMaps(overwriteMaps)
         , mSwimHeightScale(0.f)
         , mDistanceToFocusObject(-1.f)
         , mTeleportEnabled(true)
@@ -1657,6 +1662,16 @@ namespace MWWorld
     {
         if (mGoToJail && !paused)
             goToJail();
+
+        // Update map extraction if active
+        if (mMapExtractor)
+        {
+            mMapExtractor->update();
+            if (mMapExtractor->isExtractionComplete())
+            {
+                mMapExtractor.reset();
+            }
+        }
 
         // Reset "traveling" flag - there was a frame to detect traveling.
         mPlayerTraveling = false;
@@ -3898,5 +3913,37 @@ namespace MWWorld
     {
         if (MWPhysics::Actor* const actor = mPhysics->getActor(ptr))
             actor->setActive(value);
+    }
+
+    void World::extractWorldMap()
+    {
+        if (!mMapExtractor)
+        {
+            mMapExtractor = std::make_unique<OMW::MapExtractor>(
+                mWorldMapOutputPath, mLocalMapOutputPath, mOverwriteMaps, mRendering.get(), &mStore);
+        }
+        mMapExtractor->extractWorldMap();
+    }
+
+    void World::extractLocalMaps()
+    {
+        if (!mMapExtractor)
+        {
+            mMapExtractor = std::make_unique<OMW::MapExtractor>(
+                mWorldMapOutputPath, mLocalMapOutputPath, mOverwriteMaps, mRendering.get(), &mStore);
+        }
+        // Set LocalMap from WindowManager
+        if (auto* localMap = MWBase::Environment::get().getWindowManager()->getLocalMapRender())
+        {
+            mMapExtractor->setLocalMap(localMap);
+        }
+        const auto& activeCells = mWorldScene->getActiveCells();
+        std::vector<const MWWorld::CellStore*> cells(activeCells.begin(), activeCells.end());
+        mMapExtractor->extractLocalMaps(cells);
+    }
+
+    bool World::isMapExtractionActive() const
+    {
+        return mMapExtractor && !mMapExtractor->isExtractionComplete();
     }
 }

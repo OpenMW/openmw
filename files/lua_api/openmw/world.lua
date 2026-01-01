@@ -221,4 +221,91 @@
 -- @function [parent=#world] advanceTime
 -- @param #number hours Number of hours to advance time
 
+---
+-- Extract world map using path from --world-map-output option or default path.
+-- This function generates a world map image and saves it as a PNG file.
+-- The output directory is determined by --world-map-output command line option,
+-- or defaults to "./textures/advanced_world_map/custom" if not specified.
+-- @function [parent=#world] extractWorldMap
+-- @usage world.extractWorldMap()  -- Use path from option or default
+
+---
+-- Extract local maps using path from --local-map-output option or default path.
+-- This function generates map images for all active cells and saves them as PNG files.
+-- The output directory is determined by --local-map-output command line option,
+-- or defaults to "./textures/advanced_world_map/local" if not specified.
+-- By default, existing maps are not overwritten. Use --overwrite-maps option to force overwriting.
+-- @function [parent=#world] extractLocalMaps
+-- @usage world.extractLocalMaps()  -- Use path from option or default
+
+---
+-- Enable extraction mode for map generation.
+-- This mode disables collision, AI, scripts, and enables god mode to facilitate map extraction.
+-- Should be called before extractWorldMap or extractLocalMaps to prepare the game state.
+-- @function [parent=#world] enableExtractionMode
+-- @usage world.enableExtractionMode()
+
+---
+-- Disable extraction mode and restore normal game behavior.
+-- Restores god mode, scripts, and AI to their normal state.
+-- Should be called after map extraction is complete.
+-- @function [parent=#world] disableExtractionMode
+-- @usage world.disableExtractionMode()
+
+---
+-- Check if map extraction is currently in progress.
+-- Returns true if world map or local map extraction is active, false otherwise.
+-- Use this to avoid starting multiple extractions simultaneously.
+-- @function [parent=#world] isMapExtractionActive
+-- @return #boolean true if map extraction is active, false otherwise
+-- @usage
+-- if not world.isMapExtractionActive() then
+--   world.extractWorldMap("path/to/output")
+-- else
+--   print("Map extraction already in progress")
+-- end
+
+---
+-- Get the overwrite maps flag from command line options.
+-- Returns true if the --overwrite-maps option was specified, false otherwise.
+-- This flag determines whether existing map files should be overwritten during extraction.
+-- @function [parent=#world] getOverwriteFlag
+-- @return #boolean true if overwrite is enabled, false otherwise
+-- @usage
+-- if world.getOverwriteFlag() then
+--   print("Will overwrite existing maps")
+-- else
+--   print("Will skip existing maps")
+-- end
+
+---
+-- Get list of existing local map IDs (filenames without extension).
+-- Returns a table containing unique names of all files in the local map output directory
+-- with .yaml, .png, or .tga extensions, without the extension itself.
+-- Each filename corresponds to a cell ID that has been extracted.
+-- This can be used to check which maps have already been generated.
+-- The list contains unique names - if a cell has multiple file types (e.g., both .yaml and .png),
+-- the name will appear only once in the list.
+-- @function [parent=#world] getExistingLocalMapIds
+-- @return #table Array of strings containing unique local map IDs (cell names without extension)
+-- @usage
+-- local existingMaps = world.getExistingLocalMapIds()
+-- for _, mapId in ipairs(existingMaps) do
+--   print("Found existing map: " .. mapId)
+-- end
+-- 
+-- -- Check if a specific map exists
+-- local targetCell = "Balmora"
+-- local exists = false
+-- for _, mapId in ipairs(existingMaps) do
+--   if mapId == targetCell then
+--     exists = true
+--     break
+--   end
+-- end
+-- if not exists then
+--   print("Map for " .. targetCell .. " not found, need to extract")
+-- end
+
 return nil
+

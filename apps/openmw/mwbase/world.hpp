@@ -606,6 +606,24 @@ namespace MWBase
         virtual MWWorld::DateTimeManager* getTimeManager() = 0;
 
         virtual void setActorActive(const MWWorld::Ptr& ptr, bool value) = 0;
+
+        virtual std::string getWorldMapOutputPath() const = 0;
+        ///< Get the world map output path from options or default
+
+        virtual std::string getLocalMapOutputPath() const = 0;
+        ///< Get the local map output path from options or default
+
+        virtual bool getOverwriteMaps() const = 0;
+        ///< Get the overwrite maps flag
+
+        virtual void extractWorldMap() = 0;
+        ///< Extract world map using path from options or default
+
+        virtual void extractLocalMaps() = 0;
+        ///< Extract local maps using path from options or default
+
+        virtual bool isMapExtractionActive() const = 0;
+        ///< Check if map extraction is currently in progress
     };
 }
 

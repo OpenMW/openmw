@@ -83,6 +83,7 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mapextractor.hpp"
 #include "profile.hpp"
 
 namespace
@@ -365,19 +366,20 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mSelectDepthFormatOperation(new SceneUtil::SelectDepthFormatOperation())
     , mSelectColorFormatOperation(new SceneUtil::Color::SelectColorFormatOperation())
     , mStereoManager(nullptr)
-    , mSkipMenu(false)
-    , mUseSound(true)
+    , mSkipMenu(true)
+    , mUseSound(false)
     , mCompileAll(false)
     , mCompileAllDialogue(false)
     , mWarningsMode(1)
     , mScriptConsoleMode(false)
     , mActivationDistanceOverride(-1)
-    , mGrab(true)
+    , mGrab(false)
     , mExportFonts(false)
     , mRandomSeed(0)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
     , mGlMaxTextureImageUnits(0)
+    , mOverwriteMaps(false)
 {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
     SDL_SetHint(SDL_HINT_MAC_OPENGL_ASYNC_DISPATCH, "1");
@@ -836,7 +838,8 @@ void OMW::Engine::prepareEngine()
 
     // Create the world
     mWorld = std::make_unique<MWWorld::World>(
-        mResourceSystem.get(), mActivationDistanceOverride, mCellName, mCfgMgr.getUserDataPath());
+        mResourceSystem.get(), mActivationDistanceOverride, mCellName, mCfgMgr.getUserDataPath(),
+        mWorldMapOutput, mLocalMapOutput, mOverwriteMaps);
     mEnvironment.setWorld(*mWorld);
     mEnvironment.setWorldModel(mWorld->getWorldModel());
     mEnvironment.setESMStore(mWorld->getStore());
@@ -960,11 +963,11 @@ void OMW::Engine::go()
 
     prepareEngine();
 
-#ifdef _WIN32
+    #ifdef _WIN32
     const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
-#else
+    #else
     const auto* statsFile = std::getenv("OPENMW_OSG_STATS_FILE");
-#endif
+    #endif
 
     std::filesystem::path path;
     if (statsFile != nullptr)
@@ -993,6 +996,11 @@ void OMW::Engine::go()
 
     if (stats.is_open())
         Resource::collectStatistics(*mViewer);
+
+
+    // Map extractor
+    std::unique_ptr<MapExtractor> mapExtractor;
+
 
     // Start the game
     if (!mSaveGameFile.empty())
@@ -1043,6 +1051,18 @@ void OMW::Engine::go()
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
+        
+        // Update map extraction if active
+        if (mapExtractor)
+        {
+            mapExtractor->update();
+            if (mapExtractor->isExtractionComplete())
+            {
+                Log(Debug::Info) << "Extraction process completed.";
+                mapExtractor.reset();
+            }
+        }
+        
         timeManager.updateIsPaused();
         if (!timeManager.isPaused())
         {
@@ -1129,4 +1149,19 @@ void OMW::Engine::setSaveGameFile(const std::filesystem::path& savegame)
 void OMW::Engine::setRandomSeed(unsigned int seed)
 {
     mRandomSeed = seed;
+}
+
+void OMW::Engine::setWorldMapOutput(const std::string& path)
+{
+    mWorldMapOutput = path;
+}
+
+void OMW::Engine::setLocalMapOutput(const std::string& path)
+{
+    mLocalMapOutput = path;
+}
+
+void OMW::Engine::setOverwriteMaps(bool overwrite)
+{
+    mOverwriteMaps = overwrite;
 }
