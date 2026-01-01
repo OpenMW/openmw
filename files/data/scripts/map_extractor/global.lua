@@ -1,11 +1,15 @@
 local util = require("openmw.util")
 local world = require("openmw.world")
 local async = require("openmw.async")
+local core = require("openmw.core")
+local types = require("openmw.types")
 
 local visitedCells = {}
 
 local cellCount = #world.cells
 local i = cellCount
+local lastTimestamp = core.getRealTime() - 100
+local timeFromLast = 100
 
 
 local function getExCellId(gridX, gridY)
@@ -41,6 +45,12 @@ local function processAndTeleport(skipExtraction)
         end
 
         repeat
+            if i % 50 == 0 then
+                local currentTime = core.getRealTime()
+                timeFromLast = (timeFromLast + currentTime - lastTimestamp) / 2
+                lastTimestamp = currentTime
+            end
+
             local res, cell = pcall(function ()
                 return world.cells[i]
             end)
@@ -68,10 +78,18 @@ local function processAndTeleport(skipExtraction)
             end
 
             do
-                pl:teleport(cell, pos)
+                local estimatedTimeLeft = math.max(timeFromLast, 1) / 50 * i
+                local hours = math.floor(estimatedTimeLeft / 3600)
+                estimatedTimeLeft = estimatedTimeLeft % 3600
+                local minutes = math.floor(estimatedTimeLeft / 60)
+                local seconds = estimatedTimeLeft % 60
                 pl:sendEvent("builtin:map_extractor:updateMenu", {
                     line2 = string.format("Processed %d / %d cells", cellCount - i, cellCount),
+                    line3 = string.format("Estimated time left: %d:%02d:%02.0f", hours, minutes, seconds),
                 })
+
+                pl:teleport(cell, pos)
+
                 break
             end
 
@@ -82,6 +100,7 @@ local function processAndTeleport(skipExtraction)
             pl:sendEvent("builtin:map_extractor:updateMenu", {
                 line1 = "Map extraction complete.",
                 line2 = "",
+                line3 = "",
             })
         end
     end
@@ -91,17 +110,28 @@ end
 
 
 async:newUnsavableSimulationTimer(0.1, function ()
-    world.players[1]:sendEvent("builtin:map_extractor:updateMenu", {line1 = "Generating world map..."})
+    local pl = world.players[1]
+    pl:sendEvent("builtin:map_extractor:updateMenu", {line1 = "Generating world map..."})
     world.enableExtractionMode()
-    world.extractWorldMap()
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.Controls, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.Fighting, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.Jumping, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.Looking, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.Magic, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.VanityMode, false)
+    types.Player.setControlSwitch(pl, types.Player.CONTROL_SWITCH.ViewMode, false)
 
-    if not world.getOverwriteFlag() then
-        for _, cellId in pairs(world.getExistingLocalMapIds() or {}) do
-            visitedCells[cellId] = true
+    async:newUnsavableSimulationTimer(0.1, function ()
+        world.extractWorldMap()
+
+        if not world.getOverwriteFlag() then
+            for _, cellId in pairs(world.getExistingLocalMapIds() or {}) do
+                visitedCells[cellId] = true
+            end
         end
-    end
 
-    processAndTeleport(true)
+        processAndTeleport(true)
+    end)
 end)
 
 
