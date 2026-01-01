@@ -1669,7 +1669,6 @@ namespace MWWorld
             mMapExtractor->update();
             if (mMapExtractor->isExtractionComplete())
             {
-                Log(Debug::Info) << "Map extraction complete.";
                 mMapExtractor.reset();
             }
         }
