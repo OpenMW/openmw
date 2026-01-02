@@ -715,7 +715,7 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
-  - docker system prune -a --volumes
+  - docker system prune --all --volumes --force
   - Get-Volume
   - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -951,7 +951,7 @@ Windows_Ninja_CacheInit:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
-  - docker system prune -a --volumes
+  - docker system prune --all --volumes --force
   - Get-Volume
   - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
