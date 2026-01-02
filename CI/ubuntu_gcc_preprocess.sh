@@ -51,33 +51,15 @@ git remote add target "${CI_MERGE_REQUEST_PROJECT_URL:-https://gitlab.com/OpenMW
 TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-master}"
 
 # Use unshallow to prevent error with git-merge-base: https://stackoverflow.com/a/78596539/22975246
-if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
-    REPO_IS_SHALLOW=true 
-    git fetch --unshallow target "${TARGET_BRANCH:?}"
-else
-    REPO_IS_SHALLOW=false
-    git fetch target "${TARGET_BRANCH:?}"
-fi
+git fetch --unshallow target "${TARGET_BRANCH:?}" || git fetch target "${TARGET_BRANCH:?}"
 
 if [[ "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]]; then
     git remote add source "${CI_MERGE_REQUEST_SOURCE_PROJECT_URL}"
-    if $REPO_IS_SHALLOW; then
-        git fetch --unshallow source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    else
-        git fetch source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
-    fi
+    git fetch --unshallow source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ||  git fetch source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
 elif [[ "${CI_COMMIT_BRANCH}" ]]; then
-    if $REPO_IS_SHALLOW; then
-        git fetch --unshallow origin "${CI_COMMIT_BRANCH:?}"
-    else
-        git fetch origin "${CI_COMMIT_BRANCH:?}"
-    fi
+    git fetch --unshallow origin "${CI_COMMIT_BRANCH:?}" || git fetch origin "${CI_COMMIT_BRANCH:?}"
 else
-    if $REPO_IS_SHALLOW; then
-        git fetch --unshallow origin
-    else
-        git fetch origin
-    fi
+    git fetch --unshallow origin || git fetch origin
 fi
 
 BASE_VERSION=$(git merge-base "target/${TARGET_BRANCH:?}" "${VERSION:?}")
