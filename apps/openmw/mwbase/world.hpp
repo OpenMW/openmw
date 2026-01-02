@@ -624,6 +624,9 @@ namespace MWBase
 
         virtual bool isMapExtractionActive() const = 0;
         ///< Check if map extraction is currently in progress
+
+        virtual void saveToLocalMapDir(std::string_view filename, std::string_view stringData) = 0;
+        ///< Save string data to a file in the local map output directory
     };
 }
 

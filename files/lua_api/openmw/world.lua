@@ -307,5 +307,24 @@
 --   print("Map for " .. targetCell .. " not found, need to extract")
 -- end
 
+---
+-- Save text data to a file in the local map output directory.
+-- The file is created in the directory specified by --local-map-output option
+-- or the default local map directory. The directory will be created if it doesn't exist.
+-- @function [parent=#world] saveToLocalMapDir
+-- @param #string filename Name of the file with extension (e.g., "data.txt", "config.yaml")
+-- @param #string stringData Text content to write to the file
+-- @usage
+-- -- Save a simple text file
+-- world.saveToLocalMapDir("celldata.txt", "Cell information here")
+-- 
+-- -- Save YAML configuration
+-- local yamlData = "setting1: value1\nsetting2: value2\n"
+-- world.saveToLocalMapDir("settings.yaml", yamlData)
+-- 
+-- -- Save JSON data
+-- local jsonData = '{"name": "Balmora", "type": "city"}'
+-- world.saveToLocalMapDir("Balmora.json", jsonData)
+
 return nil
 
