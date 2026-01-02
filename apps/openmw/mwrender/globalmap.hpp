@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <osg/ref_ptr>
+#include <osg/Vec3f>
 
 namespace osg
 {
