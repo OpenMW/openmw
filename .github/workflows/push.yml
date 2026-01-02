@@ -34,7 +34,7 @@ jobs:
         -D BUILD_COMPONENTS_TESTS=ON
         -D BUILD_OPENMW_TESTS=ON
         -D BUILD_OPENCS_TESTS=ON
-        -D CMAKE_INSTALL_PREFIX=install
+        -D CMAKE_INSTALL_PREFIX=.
 
     - name: Build
       run: cmake --build . -- -j$(nproc)
@@ -48,22 +48,38 @@ jobs:
     - name: Run OpenMW-CS tests
       run: ./openmw-cs-tests
 
-    - name: Install
+    - name: Prepare portable package
       shell: bash
-      run: cmake --install .
+      run: |
+        mkdir -p openmw-linux
+        cp -r resources openmw-linux/
+        cp defaults.bin openmw-linux/
+        cp gamecontrollerdb.txt openmw-linux/
+        cp openmw.cfg openmw-linux/
+        cp openmw openmw-linux/
+        cp openmw-launcher openmw-linux/
+        cp openmw-cs openmw-linux/
+        cp openmw-wizard openmw-linux/
+        cp openmw-iniimporter openmw-linux/
+        cp openmw-essimporter openmw-linux/
+        cp bsatool openmw-linux/
+        cp esmtool openmw-linux/
+        cp openmw-navmeshtool openmw-linux/ || true
+        cp openmw-bulletobjecttool openmw-linux/ || true
+        cp README.md openmw-linux/
+        cp LICENSE openmw-linux/
+        cp AUTHORS.md openmw-linux/
+        cp CHANGELOG.md openmw-linux/
 
     - name: Create Artifact
       shell: bash
-      working-directory: install
-      run: |
-        ls -laR
-        tar -czf ../openmw-ubuntu-${{ github.sha }}.tar.gz .
+      run: tar -czf openmw-linux-${{ github.sha }}.tar.gz openmw-linux
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        path: ./openmw-ubuntu-${{ github.sha }}.tar.gz
-        name: openmw-ubuntu-build
+        path: ./openmw-linux-${{ github.sha }}.tar.gz
+        name: openmw-linux-build
 
   MacOS:
     runs-on: macos-latest
