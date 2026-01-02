@@ -730,7 +730,9 @@ echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."
-add_cmake_opts -DOPENMW_MP_BUILD=on
+if [[ -z "$USE_CCACHE" ]]; then
+	add_cmake_opts -DOPENMW_MP_BUILD=on
+fi
 add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
 add_cmake_opts -DOPENMW_USE_SYSTEM_SQLITE3=OFF
 add_cmake_opts -DOPENMW_USE_SYSTEM_YAML_CPP=OFF
