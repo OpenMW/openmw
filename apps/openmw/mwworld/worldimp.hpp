@@ -696,7 +696,10 @@ namespace MWWorld
         bool isMapExtractionActive() const override;
 
         void saveToLocalMapDir(std::string_view filename, std::string_view stringData) override;
-        void generateTileWorldMap() override;
+        void generateTileWorldMap(const osg::Vec3f& backgroundColor) override;
+
+    private:
+        bool mGeneratingTileWorldMap = false;
     };
 }
 

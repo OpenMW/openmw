@@ -3948,7 +3948,7 @@ namespace MWWorld
 
     bool World::isMapExtractionActive() const
     {
-        return mMapExtractor && !mMapExtractor->isExtractionComplete();
+        return (mMapExtractor && !mMapExtractor->isExtractionComplete()) || mGeneratingTileWorldMap;
     }
 
     void World::saveToLocalMapDir(std::string_view filename, std::string_view stringData)
@@ -3978,14 +3978,17 @@ namespace MWWorld
         }
     }
 
-    void World::generateTileWorldMap()
+    void World::generateTileWorldMap(const osg::Vec3f& backgroundColor)
     {
+        mGeneratingTileWorldMap = true;
+        
         std::filesystem::path localMapPath(mLocalMapOutputPath);
         std::filesystem::path worldMapPath(mWorldMapOutputPath);
 
         if (!std::filesystem::exists(localMapPath) || !std::filesystem::is_directory(localMapPath))
         {
             Log(Debug::Error) << "Local map directory does not exist: " << localMapPath;
+            mGeneratingTileWorldMap = false;
             return;
         }
 
@@ -4036,6 +4039,7 @@ namespace MWWorld
         if (tileFiles.empty())
         {
             Log(Debug::Warning) << "No local map tiles found in: " << localMapPath;
+            mGeneratingTileWorldMap = false;
             return;
         }
 
@@ -4049,13 +4053,17 @@ namespace MWWorld
         osg::ref_ptr<osg::Image> tilemapImage = new osg::Image;
         tilemapImage->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
 
-        // Fill with default color (0x2c2d28)
+        // Fill with background color (convert from 0-1 range to 0-255)
         unsigned char* data = tilemapImage->data();
+        unsigned char bgR = static_cast<unsigned char>(backgroundColor.x() * 255.0f);
+        unsigned char bgG = static_cast<unsigned char>(backgroundColor.y() * 255.0f);
+        unsigned char bgB = static_cast<unsigned char>(backgroundColor.z() * 255.0f);
+        
         for (int i = 0; i < width * height; ++i)
         {
-            data[i * 3 + 0] = 0x2c;
-            data[i * 3 + 1] = 0x2d;
-            data[i * 3 + 2] = 0x28;
+            data[i * 3 + 0] = bgR;
+            data[i * 3 + 1] = bgG;
+            data[i * 3 + 2] = bgB;
         }
 
         // Step 3: Load each tile, downscale and place in output
@@ -4121,6 +4129,7 @@ namespace MWWorld
         else
         {
             Log(Debug::Error) << "Failed to write tilemap to: " << tilemapPath;
+            mGeneratingTileWorldMap = false;
             return;
         }
 
@@ -4131,12 +4140,15 @@ namespace MWWorld
         if (!infoFile)
         {
             Log(Debug::Error) << "Failed to create tilemapInfo.yaml: " << infoPath;
+            mGeneratingTileWorldMap = false;
             return;
         }
 
+        const int pixelsPerCell = 256 / 8; // Тайлы 32x32 при downscale factor = 8
+
         infoFile << "width: " << width << "\n";
         infoFile << "height: " << height << "\n";
-        infoFile << "pixelsPerCell: 32\n";
+        infoFile << "pixelsPerCell: " << pixelsPerCell << "\n";
         infoFile << "gridX:\n";
         infoFile << "  min: " << minX << "\n";
         infoFile << "  max: " << maxX << "\n";
@@ -4148,5 +4160,7 @@ namespace MWWorld
         infoFile.close();
 
         Log(Debug::Info) << "Successfully saved tilemapInfo.yaml to: " << infoPath;
+        
+        mGeneratingTileWorldMap = false;
     }
 }
