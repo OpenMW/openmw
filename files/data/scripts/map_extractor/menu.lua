@@ -37,9 +37,8 @@ local content = ui.content{
 }
 
 
-local layout = {
+local textLayout = {
     type = ui.TYPE.Container,
-    layer = "builtin:map_extractor",
     props = {
         anchor = util.vector2(0.5, 0.5),
         relativePosition = util.vector2(0.5, 0.5),
@@ -53,6 +52,29 @@ local layout = {
             },
             content = content,
         }
+    },
+}
+
+
+local layout = {
+    type = ui.TYPE.Widget,
+    layer = "builtin:map_extractor",
+    props = {
+        anchor = util.vector2(0.5, 0.5),
+        relativePosition = util.vector2(0.5, 0.5),
+        size = screenSize,
+    },
+    content = ui.content{
+        {
+            type = ui.TYPE.Image,
+            props = {
+                resource = ui.texture{ path = "white" },
+                relativeSize = util.vector2(1, 1),
+                color = util.color.rgb(0, 0, 0),
+                alpha = 0.9,
+            }
+        },
+        textLayout,
     },
 }
 

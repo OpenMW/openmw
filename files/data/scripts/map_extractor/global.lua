@@ -88,6 +88,7 @@ local function processAndTeleport(skipExtraction)
                     line3 = string.format("Estimated time left: %d:%02d:%02.0f", hours, minutes, seconds),
                 })
 
+                print(string.format('Teleporting to cell #%d: "%s"', i, customCellId))
                 pl:teleport(cell, pos)
 
                 break
