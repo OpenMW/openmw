@@ -27,6 +27,41 @@ local function getCellId(cell)
 end
 
 
+local function showCompletionMessage()
+    if world.isMapExtractionActive() then
+        async:newUnsavableSimulationTimer(0.1, showCompletionMessage)
+        return
+    end
+
+    local pl = world.players[1]
+    pl:sendEvent("builtin:map_extractor:updateMenu", {
+        line1 = "Map extraction complete.",
+        line2 = "",
+        line3 = "",
+    })
+end
+
+
+local function generateTilemap()
+    if world.isMapExtractionActive() then
+        async:newUnsavableSimulationTimer(0.1, generateTilemap)
+        return
+    end
+
+    local pl = world.players[1]
+    pl:sendEvent("builtin:map_extractor:updateMenu", {
+        line1 = "Generating tile world map...",
+        line2 = "The game may freeze for a short time.",
+        line3 = "",
+    })
+
+    async:newUnsavableSimulationTimer(0.2, function ()
+        world.generateTileWorldMap(util.color.rgb(0.255, 0.224, 0.180))
+        showCompletionMessage()
+    end)
+end
+
+
 local function processAndTeleport(skipExtraction)
     local pl = world.players[1]
 
@@ -98,11 +133,7 @@ local function processAndTeleport(skipExtraction)
         until i <= 0
 
         if i <= 0 then
-            pl:sendEvent("builtin:map_extractor:updateMenu", {
-                line1 = "Map extraction complete.",
-                line2 = "",
-                line3 = "",
-            })
+            generateTilemap()
         end
     end
 
