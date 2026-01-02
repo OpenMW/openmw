@@ -175,7 +175,7 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
         if (NOT IS_ABSOLUTE OPENMW_MSBUILD_COMPILER_OVERRIDE)
             find_program(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH "${OPENMW_MSBUILD_COMPILER_OVERRIDE}")
         else()
-            set(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH OPENMW_MSBUILD_COMPILER_OVERRIDE)
+            set(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH "${OPENMW_MSBUILD_COMPILER_OVERRIDE}")
         endif()
         if (DEFINED ENV{ChocolateyInstall})
             # if Chocolatey's installed, it's relatively likely that the command's a shim and won't work if copied
