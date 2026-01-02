@@ -4159,6 +4159,8 @@ namespace MWWorld
         infoFile << "  min: " << minY << "\n";
         infoFile << "  max: " << maxY << "\n";
         infoFile << "file: \"tilemap.png\"\n";
+        infoFile << "bColor: [" << backgroundColor.x() << ", " << backgroundColor.y() << ", " << backgroundColor.z()
+                 << "]\n";
 
         infoFile.close();
 

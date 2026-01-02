@@ -199,12 +199,11 @@ namespace MWRender
                                 int texelX = (x - mMinX) * mCellSize + cellX;
                                 int texelY = (y - mMinY) * mCellSize + cellY;
 
-                                int lutIndex = 0;
-                                osg::Vec4 color = mColorLut->getColor(lutIndex, 0);
+                                osg::Vec4 color = mColorLut->getColor(0, 0);
                                 image->setColor(color, texelX, texelY);
 
                                 // Set alpha based on lutIndex threshold
-                                osg::Vec4 alpha(0.0f, 0.0f, 0.0f, lutIndex < 128 ? 0.0f : 1.0f);
+                                osg::Vec4 alpha(0.0f, 0.0f, 0.0f, 0.0f);
                                 alphaImage->setColor(alpha, texelX, texelY);
                             }
                         }
@@ -319,17 +318,17 @@ namespace MWRender
         // Load color LUT texture
         constexpr VFS::Path::NormalizedView colorLutPath("textures/omw_map_color_palette.dds");
         auto resourceSystem = MWBase::Environment::get().getResourceSystem();
-        osg::ref_ptr<osg::Image> colorLut = resourceSystem->getImageManager()->getImage(colorLutPath);
+        mColorLut = resourceSystem->getImageManager()->getImage(colorLutPath);
 
         // Validate LUT dimensions
-        if (!colorLut || colorLut->s() != 256 || colorLut->t() != 1)
+        if (!mColorLut || mColorLut->s() != 256 || mColorLut->t() != 1)
         {
             throw std::runtime_error("Global map color LUT must be 256x1 pixels, got "
-                + std::to_string(colorLut ? colorLut->s() : 0) + "x" + std::to_string(colorLut ? colorLut->t() : 0));
+                + std::to_string(mColorLut ? mColorLut->s() : 0) + "x" + std::to_string(mColorLut ? mColorLut->t() : 0));
         }
 
         mWorkItem = new CreateMapWorkItem(
-            mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, cellSize, esmStore.get<ESM::Land>(), colorLut);
+            mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, cellSize, esmStore.get<ESM::Land>(), mColorLut);
         mWorkQueue->addWorkItem(mWorkItem);
     }
 
@@ -673,5 +672,15 @@ namespace MWRender
         // Use deep copy to avoid any sychronization
         mWritePng = new WritePng(new osg::Image(*mOverlayImage, osg::CopyOp::DEEP_COPY_ALL));
         mWorkQueue->addWorkItem(mWritePng, /*front=*/true);
+    }
+
+    osg::Vec3f GlobalMap::getBackgroundColor() const
+    {
+        if (mColorLut)
+        {
+            osg::Vec4 color = mColorLut->getColor(0, 0);
+            return osg::Vec3f(color.r(), color.g(), color.b());
+        }
+        return osg::Vec3f(0.0f, 0.0f, 0.0f);
     }
 }
