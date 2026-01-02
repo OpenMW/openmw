@@ -182,6 +182,8 @@ namespace OMW
             return;
         }
 
+        osg::Vec3f bgColor = mGlobalMap->getBackgroundColor();
+
         file << "width: " << width << "\n";
         file << "height: " << height << "\n";
         file << "pixelsPerCell: 32\n";
@@ -192,6 +194,7 @@ namespace OMW
         file << "  min: " << minY << "\n";
         file << "  max: " << maxY << "\n";
         file << "file: \"map.png\"\n";
+        file << "bColor: [" << bgColor.x() << ", " << bgColor.y() << ", " << bgColor.z() << "]\n";
 
         file.close();
 

@@ -74,6 +74,8 @@ namespace MWRender
 
         void asyncWritePng();
 
+        osg::Vec3f getBackgroundColor() const;
+
     private:
         struct WritePng;
 
@@ -120,6 +122,8 @@ namespace MWRender
 
         // CPU copy of overlay
         osg::ref_ptr<osg::Image> mOverlayImage;
+
+        osg::ref_ptr<osg::Image> mColorLut;
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         osg::ref_ptr<CreateMapWorkItem> mWorkItem;
