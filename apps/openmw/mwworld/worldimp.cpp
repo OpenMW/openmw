@@ -1,6 +1,7 @@
 #include "worldimp.hpp"
 
 #include <charconv>
+#include <fstream>
 #include <vector>
 
 #include <osg/ComputeBoundsVisitor>
@@ -3945,5 +3946,32 @@ namespace MWWorld
     bool World::isMapExtractionActive() const
     {
         return mMapExtractor && !mMapExtractor->isExtractionComplete();
+    }
+
+    void World::saveToLocalMapDir(std::string_view filename, std::string_view stringData)
+    {
+        std::filesystem::path outputPath = mLocalMapOutputPath;
+        
+        // Create directory if it doesn't exist
+        if (!std::filesystem::exists(outputPath))
+        {
+            std::filesystem::create_directories(outputPath);
+        }
+        
+        std::filesystem::path filePath = outputPath / std::filesystem::path(filename);
+        
+        std::ofstream outFile(filePath, std::ios::out | std::ios::trunc);
+        if (!outFile)
+        {
+            throw std::runtime_error("Failed to open file for writing: " + filePath.string());
+        }
+        
+        outFile << stringData;
+        outFile.close();
+        
+        if (!outFile)
+        {
+            throw std::runtime_error("Failed to write to file: " + filePath.string());
+        }
     }
 }

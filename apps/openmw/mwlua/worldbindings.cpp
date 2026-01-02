@@ -346,6 +346,15 @@ namespace MWLua
             return result;
         };
 
+        api["saveToLocalMapDir"] = [context, lua = context.mLua](std::string_view filename, std::string_view stringData) {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [filename = std::string(filename), stringData = std::string(stringData)] {
+                    MWBase::Environment::get().getWorld()->saveToLocalMapDir(filename, stringData);
+                },
+                "saveToLocalMapDirAction");
+        };
+
         return LuaUtil::makeReadOnly(api);
     }
 }
