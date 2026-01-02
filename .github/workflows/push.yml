@@ -48,22 +48,71 @@ jobs:
     - name: Run OpenMW-CS tests
       run: ./openmw-cs-tests
 
-    # - name: Install
-    #   shell: bash
-    #   run: cmake --install .
+    - name: Install
+      shell: bash
+      run: cmake --install .
 
-    # - name: Create Artifact
-    #   shell: bash
-    #   working-directory: install
-    #   run: |
-    #     ls -laR
-    #     7z a ../build_artifact.7z .
+    - name: Create Artifact
+      shell: bash
+      working-directory: install
+      run: |
+        ls -laR
+        tar -czf ../openmw-ubuntu-${{ github.sha }}.tar.gz .
 
-    # - name: Upload Artifact
-    #   uses: actions/upload-artifact@v1
-    #   with:
-    #     path: ./build_artifact.7z
-    #     name: build_artifact.7z
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./openmw-ubuntu-${{ github.sha }}.tar.gz
+        name: openmw-ubuntu-build
+
+  Debian:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add OpenMW PPA Dependencies
+      run: |
+        sudo add-apt-repository ppa:openmw/openmw
+        sudo apt-get update
+
+    - name: Install Building Dependencies
+      run: |
+        sudo apt-get install git build-essential cmake \
+        libopenal-dev libopenscenegraph-dev libbullet-dev libsdl2-dev \
+        libmygui-dev libunshield-dev liblz4-dev libtinyxml-dev libqt6opengl6-dev \
+        libqt6svg6-dev libboost-filesystem-dev libboost-program-options-dev \
+        libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev \
+        libswscale-dev libswresample-dev librecast-dev libluajit-5.1-dev \
+        libsqlite3-dev libyaml-cpp-dev libcollada-dom-dev \
+        qt6-l10n-tools qt6-tools-dev qt6-tools-dev-tools
+
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: debian-${{ env.BUILD_TYPE }}
+        max-size: 1000M
+
+    - name: Configure
+      run: >
+        cmake .
+        -D CMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -D OPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
+        -D USE_SYSTEM_TINYXML=ON
+        -D CMAKE_INSTALL_PREFIX=/usr
+        -D CPACK_GENERATOR="DEB"
+
+    - name: Build
+      run: cmake --build . -- -j$(nproc)
+
+    - name: Package
+      run: cpack
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: ./*.deb
+        name: openmw-debian-build
 
   MacOS:
     runs-on: macos-latest
@@ -82,8 +131,19 @@ jobs:
 
     - name: Configure
       run: CI/before_script.macos.sh -C
+    
     - name: Build
       run: CI/macos/build.sh
+
+    - name: Package
+      working-directory: build
+      run: make -j $(sysctl -n hw.logicalcpu) package
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: build/*.dmg
+        name: openmw-macos-build
 
   Output-Envs:
     name: Read .env file and expose it as output
