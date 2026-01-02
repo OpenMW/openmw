@@ -715,6 +715,8 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
+  - docker system prune -a --volumes
+  - Get-Volume
   - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -948,6 +950,8 @@ Windows_Ninja_CacheInit:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
+  - Get-Volume
+  - docker system prune -a --volumes
   - Get-Volume
   - Stop-Service docker
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
