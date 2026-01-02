@@ -12,6 +12,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/color.hpp>
 #include <components/misc/finitevalues.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -353,6 +354,20 @@ namespace MWLua
                     MWBase::Environment::get().getWorld()->saveToLocalMapDir(filename, stringData);
                 },
                 "saveToLocalMapDirAction");
+        };
+
+        api["generateTileWorldMap"] = [context, lua = context.mLua](sol::optional<Misc::Color> backgroundColor) {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [backgroundColor]() {
+                    osg::Vec3f bgColor(0.255f, 0.224f, 0.180f);
+                    if (backgroundColor.has_value())
+                    {
+                        bgColor = osg::Vec3f(backgroundColor->r(), backgroundColor->g(), backgroundColor->b());
+                    }
+                    MWBase::Environment::get().getWorld()->generateTileWorldMap(bgColor);
+                },
+                "generateTileWorldMapAction");
         };
 
         return LuaUtil::makeReadOnly(api);

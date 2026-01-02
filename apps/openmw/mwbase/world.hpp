@@ -627,6 +627,9 @@ namespace MWBase
 
         virtual void saveToLocalMapDir(std::string_view filename, std::string_view stringData) = 0;
         ///< Save string data to a file in the local map output directory
+
+        virtual void generateTileWorldMap(const osg::Vec3f& backgroundColor) = 0;
+        ///< Generate a tiled world map from local map tiles with the specified background color
     };
 }
 

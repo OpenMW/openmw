@@ -326,5 +326,31 @@
 -- local jsonData = '{"name": "Balmora", "type": "city"}'
 -- world.saveToLocalMapDir("Balmora.json", jsonData)
 
+---
+-- Generate a tiled world map from local map tiles.
+-- This function scans the local map directory for PNG files with the format "(gridX,gridY).png",
+-- downscales each tile from 256x256 to 32x32 pixels, and composites them into a single world map image.
+-- Areas without local maps are filled with the specified background color (default: #2c2d28).
+-- The result is saved as "tilemap.png" and "tilemapInfo.yaml" in the world map output directory.
+-- While this function is executing, @{#world.isMapExtractionActive} will return true.
+-- @function [parent=#world] generateTileWorldMap
+-- @param openmw.util#Color backgroundColor (optional) Background color for areas without local maps.
+--   If nil, uses default color #2c2d28. Use util.color.rgb() or util.color.hex() to create colors.
+-- @usage
+-- -- Generate tilemap with default background color
+-- world.generateTileWorldMap()
+-- 
+-- -- Generate tilemap with custom background color (dark blue)
+-- local util = require('openmw.util')
+-- world.generateTileWorldMap(util.color.rgb(0.1, 0.1, 0.3))
+-- 
+-- -- Generate tilemap with custom hex color
+-- local util = require('openmw.util')
+-- world.generateTileWorldMap(util.color.hex('1a1a4d'))
+-- 
+-- -- This will create:
+-- -- - tilemap.png: The composite world map image
+-- -- - tilemapInfo.yaml: Metadata including dimensions, grid bounds, and pixels per cell
+
 return nil
 
