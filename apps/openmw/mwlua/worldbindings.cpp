@@ -355,6 +355,15 @@ namespace MWLua
                 "saveToLocalMapDirAction");
         };
 
+        api["generateTileWorldMap"] = [context, lua = context.mLua]() {
+            checkGameInitialized(lua);
+            context.mLuaManager->addAction(
+                [] {
+                    MWBase::Environment::get().getWorld()->generateTileWorldMap();
+                },
+                "generateTileWorldMapAction");
+        };
+
         return LuaUtil::makeReadOnly(api);
     }
 }

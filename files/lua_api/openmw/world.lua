@@ -326,5 +326,19 @@
 -- local jsonData = '{"name": "Balmora", "type": "city"}'
 -- world.saveToLocalMapDir("Balmora.json", jsonData)
 
+---
+-- Generate a tiled world map from local map tiles.
+-- This function scans the local map directory for PNG files with the format "(gridX,gridY).png",
+-- downscales each tile from 256x256 to 32x32 pixels, and composites them into a single world map image.
+-- Areas without local maps are filled with color #2c2d28.
+-- The result is saved as "tilemap.png" and "tilemapInfo.yaml" in the world map output directory.
+-- @function [parent=#world] generateTileWorldMap
+-- @usage
+-- -- Generate tilemap from all local map tiles
+-- world.generateTileWorldMap()
+-- -- This will create:
+-- -- - tilemap.png: The composite world map image
+-- -- - tilemapInfo.yaml: Metadata including dimensions, grid bounds, and pixels per cell
+
 return nil
 

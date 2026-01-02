@@ -6,7 +6,10 @@
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
+#include <osg/Image>
 #include <osg/Timer>
+#include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 
 #include <MyGUI_TextIterator.h>
 
@@ -3973,5 +3976,177 @@ namespace MWWorld
         {
             throw std::runtime_error("Failed to write to file: " + filePath.string());
         }
+    }
+
+    void World::generateTileWorldMap()
+    {
+        std::filesystem::path localMapPath(mLocalMapOutputPath);
+        std::filesystem::path worldMapPath(mWorldMapOutputPath);
+
+        if (!std::filesystem::exists(localMapPath) || !std::filesystem::is_directory(localMapPath))
+        {
+            Log(Debug::Error) << "Local map directory does not exist: " << localMapPath;
+            return;
+        }
+
+        // Create world map output directory
+        std::filesystem::create_directories(worldMapPath);
+
+        // Step 1: Scan for all local map tiles and determine bounds
+        int minX = std::numeric_limits<int>::max();
+        int maxX = std::numeric_limits<int>::min();
+        int minY = std::numeric_limits<int>::max();
+        int maxY = std::numeric_limits<int>::min();
+
+        std::map<std::pair<int, int>, std::filesystem::path> tileFiles;
+
+        for (const auto& entry : std::filesystem::directory_iterator(localMapPath))
+        {
+            if (!entry.is_regular_file())
+                continue;
+
+            std::string filename = entry.path().filename().string();
+            if (filename.size() < 7 || filename.front() != '(' || filename.substr(filename.size() - 4) != ".png")
+                continue;
+
+            // Parse (x,y).png format
+            size_t commaPos = filename.find(',');
+            if (commaPos == std::string::npos)
+                continue;
+
+            try
+            {
+                int x = std::stoi(filename.substr(1, commaPos - 1));
+                int y = std::stoi(filename.substr(commaPos + 1, filename.size() - commaPos - 6));
+
+                minX = std::min(minX, x);
+                maxX = std::max(maxX, x);
+                minY = std::min(minY, y);
+                maxY = std::max(maxY, y);
+
+                tileFiles[{x, y}] = entry.path();
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to parse filename: " << filename << " - " << e.what();
+                continue;
+            }
+        }
+
+        if (tileFiles.empty())
+        {
+            Log(Debug::Warning) << "No local map tiles found in: " << localMapPath;
+            return;
+        }
+
+        Log(Debug::Info) << "Found " << tileFiles.size() << " local map tiles";
+        Log(Debug::Info) << "Bounds: X=[" << minX << ", " << maxX << "], Y=[" << minY << ", " << maxY << "]";
+
+        // Step 2: Create the output image
+        const int width = (maxX - minX + 1) * 32;
+        const int height = (maxY - minY + 1) * 32;
+
+        osg::ref_ptr<osg::Image> tilemapImage = new osg::Image;
+        tilemapImage->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
+
+        // Fill with default color (0x2c2d28)
+        unsigned char* data = tilemapImage->data();
+        for (int i = 0; i < width * height; ++i)
+        {
+            data[i * 3 + 0] = 0x2c;
+            data[i * 3 + 1] = 0x2d;
+            data[i * 3 + 2] = 0x28;
+        }
+
+        // Step 3: Load each tile, downscale and place in output
+        for (const auto& [coords, filepath] : tileFiles)
+        {
+            int gridX = coords.first;
+            int gridY = coords.second;
+
+            osg::ref_ptr<osg::Image> tileImage = osgDB::readImageFile(filepath.string());
+            if (!tileImage || tileImage->s() == 0 || tileImage->t() == 0)
+            {
+                Log(Debug::Warning) << "Failed to load tile image: " << filepath;
+                continue;
+            }
+
+            // Downscale from 256x256 to 32x32
+            osg::ref_ptr<osg::Image> scaledTile = new osg::Image;
+            scaledTile->allocateImage(32, 32, 1, tileImage->getPixelFormat(), tileImage->getDataType());
+            
+            // Simple nearest-neighbor downscaling
+            for (int y = 0; y < 32; ++y)
+            {
+                for (int x = 0; x < 32; ++x)
+                {
+                    int srcX = (x * tileImage->s()) / 32;
+                    int srcY = (y * tileImage->t()) / 32;
+                    
+                    unsigned char* srcPixel = tileImage->data(srcX, srcY);
+                    unsigned char* dstPixel = scaledTile->data(x, y);
+                    
+                    int numComponents = osg::Image::computeNumComponents(tileImage->getPixelFormat());
+                    for (int c = 0; c < numComponents && c < 3; ++c)
+                    {
+                        dstPixel[c] = srcPixel[c];
+                    }
+                }
+            }
+
+            // Place scaled tile in output image
+            int destX = (gridX - minX) * 32;
+            int destY = (gridY - minY) * 32;
+
+            for (int y = 0; y < 32; ++y)
+            {
+                for (int x = 0; x < 32; ++x)
+                {
+                    unsigned char* srcPixel = scaledTile->data(x, y);
+                    unsigned char* dstPixel = tilemapImage->data(destX + x, destY + y);
+                    
+                    dstPixel[0] = srcPixel[0];
+                    dstPixel[1] = srcPixel[1];
+                    dstPixel[2] = srcPixel[2];
+                }
+            }
+        }
+
+        // Step 4: Save tilemap.png
+        std::filesystem::path tilemapPath = worldMapPath / "tilemap.png";
+        if (osgDB::writeImageFile(*tilemapImage, tilemapPath.string()))
+        {
+            Log(Debug::Info) << "Successfully saved tilemap to: " << tilemapPath;
+        }
+        else
+        {
+            Log(Debug::Error) << "Failed to write tilemap to: " << tilemapPath;
+            return;
+        }
+
+        // Step 5: Save tilemapInfo.yaml
+        std::filesystem::path infoPath = worldMapPath / "tilemapInfo.yaml";
+        std::ofstream infoFile(infoPath);
+
+        if (!infoFile)
+        {
+            Log(Debug::Error) << "Failed to create tilemapInfo.yaml: " << infoPath;
+            return;
+        }
+
+        infoFile << "width: " << width << "\n";
+        infoFile << "height: " << height << "\n";
+        infoFile << "pixelsPerCell: 32\n";
+        infoFile << "gridX:\n";
+        infoFile << "  min: " << minX << "\n";
+        infoFile << "  max: " << maxX << "\n";
+        infoFile << "gridY:\n";
+        infoFile << "  min: " << minY << "\n";
+        infoFile << "  max: " << maxY << "\n";
+        infoFile << "file: \"tilemap.png\"\n";
+
+        infoFile.close();
+
+        Log(Debug::Info) << "Successfully saved tilemapInfo.yaml to: " << infoPath;
     }
 }
