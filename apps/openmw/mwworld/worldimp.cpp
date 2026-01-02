@@ -255,7 +255,7 @@ namespace MWWorld
     }
 
     World::World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-        const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps)
+        const std::filesystem::path& userDataPath, const std::string& worldMapOutputPath, const std::string& localMapOutputPath, bool overwriteMaps, int tilemapDownscaleFactor)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
@@ -270,6 +270,7 @@ namespace MWWorld
         , mWorldMapOutputPath(worldMapOutputPath)
         , mLocalMapOutputPath(localMapOutputPath)
         , mOverwriteMaps(overwriteMaps)
+        , mTilemapDownscaleFactor(tilemapDownscaleFactor)
         , mSwimHeightScale(0.f)
         , mDistanceToFocusObject(-1.f)
         , mTeleportEnabled(true)
@@ -4047,8 +4048,9 @@ namespace MWWorld
         Log(Debug::Info) << "Bounds: X=[" << minX << ", " << maxX << "], Y=[" << minY << ", " << maxY << "]";
 
         // Step 2: Create the output image
-        const int width = (maxX - minX + 1) * 32;
-        const int height = (maxY - minY + 1) * 32;
+        const int targetSize = 256 / mTilemapDownscaleFactor;
+        const int width = (maxX - minX + 1) * targetSize;
+        const int height = (maxY - minY + 1) * targetSize;
 
         osg::ref_ptr<osg::Image> tilemapImage = new osg::Image;
         tilemapImage->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
@@ -4079,17 +4081,18 @@ namespace MWWorld
                 continue;
             }
 
-            // Downscale from 256x256 to 32x32
+            // Downscale from 256x256 to target size based on downscale factor
+            const int targetSize = 256 / mTilemapDownscaleFactor;
             osg::ref_ptr<osg::Image> scaledTile = new osg::Image;
-            scaledTile->allocateImage(32, 32, 1, tileImage->getPixelFormat(), tileImage->getDataType());
+            scaledTile->allocateImage(targetSize, targetSize, 1, tileImage->getPixelFormat(), tileImage->getDataType());
             
             // Simple nearest-neighbor downscaling
-            for (int y = 0; y < 32; ++y)
+            for (int y = 0; y < targetSize; ++y)
             {
-                for (int x = 0; x < 32; ++x)
+                for (int x = 0; x < targetSize; ++x)
                 {
-                    int srcX = (x * tileImage->s()) / 32;
-                    int srcY = (y * tileImage->t()) / 32;
+                    int srcX = (x * tileImage->s()) / targetSize;
+                    int srcY = (y * tileImage->t()) / targetSize;
                     
                     unsigned char* srcPixel = tileImage->data(srcX, srcY);
                     unsigned char* dstPixel = scaledTile->data(x, y);
@@ -4103,12 +4106,12 @@ namespace MWWorld
             }
 
             // Place scaled tile in output image
-            int destX = (gridX - minX) * 32;
-            int destY = (gridY - minY) * 32;
+            int destX = (gridX - minX) * targetSize;
+            int destY = (gridY - minY) * targetSize;
 
-            for (int y = 0; y < 32; ++y)
+            for (int y = 0; y < targetSize; ++y)
             {
-                for (int x = 0; x < 32; ++x)
+                for (int x = 0; x < targetSize; ++x)
                 {
                     unsigned char* srcPixel = scaledTile->data(x, y);
                     unsigned char* dstPixel = tilemapImage->data(destX + x, destY + y);
@@ -4144,7 +4147,7 @@ namespace MWWorld
             return;
         }
 
-        const int pixelsPerCell = 256 / 8; // Тайлы 32x32 при downscale factor = 8
+        const int pixelsPerCell = 256 / mTilemapDownscaleFactor;
 
         infoFile << "width: " << width << "\n";
         infoFile << "height: " << height << "\n";

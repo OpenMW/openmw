@@ -104,6 +104,9 @@ namespace OpenMW
         addOption("overwrite-maps", bpo::value<bool>()->implicit_value(true)->default_value(false),
             "overwrite existing map files during extraction");
 
+        addOption("tilemap-downscale-factor", bpo::value<int>()->default_value(4),
+            "downscale factor for tilemap generation (must be power of 2, default: 4)");
+
         return desc;
     }
 }
