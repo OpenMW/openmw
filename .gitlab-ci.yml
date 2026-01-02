@@ -888,6 +888,7 @@ Windows_Ninja_RelWithDebInfo_GroupOne:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-one
+    CCACHE_SIZE: 1G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
     - key: ninja-2022-v13
@@ -903,6 +904,7 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-two
+    CCACHE_SIZE: 2G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
     - key: ninja-2022-v13
@@ -1091,6 +1093,7 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-one
+    CCACHE_SIZE: 1.5G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
     - key: msbuild-2022-v13
@@ -1106,6 +1109,7 @@ Windows_MSBuild_RelWithDebInfo_GroupTwo:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-two
+    CCACHE_SIZE: 2.5G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
     - key: msbuild-2022-v13
