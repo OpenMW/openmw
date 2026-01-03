@@ -10,7 +10,7 @@ local cellCount = #world.cells
 local i = cellCount
 local lastTimestamp = core.getRealTime() - 50
 local timeFromLast = 50
-local onlyPlayerCell = false
+local onlyPlayerCell = true
 
 
 local function getExCellId(gridX, gridY)
