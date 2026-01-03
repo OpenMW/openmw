@@ -8,8 +8,9 @@ local visitedCells = {}
 
 local cellCount = #world.cells
 local i = cellCount
-local lastTimestamp = core.getRealTime() - 100
-local timeFromLast = 100
+local lastTimestamp = core.getRealTime() - 50
+local timeFromLast = 50
+local onlyPlayerCell = false
 
 
 local function getExCellId(gridX, gridY)
@@ -56,7 +57,7 @@ local function generateTilemap()
     })
 
     async:newUnsavableSimulationTimer(0.2, function ()
-        world.generateTileWorldMap(util.color.rgb(0.255, 0.224, 0.180))
+        world.generateTileWorldMap(util.color.rgb(0.239, 0.224, 0.192))
         showCompletionMessage()
     end)
 end
@@ -66,7 +67,7 @@ local function processAndTeleport(skipExtraction)
     local pl = world.players[1]
 
     if not skipExtraction then
-        world.extractLocalMaps()
+        world.extractLocalMaps(onlyPlayerCell)
     end
 
     local function func()
@@ -98,7 +99,7 @@ local function processAndTeleport(skipExtraction)
             if not cell or not customCellId or visitedCells[customCellId] then goto continue end
 
             visitedCells[customCellId] = true
-            if cell.isExterior then
+            if not onlyPlayerCell and cell.isExterior then
                 for j = cell.gridX - 1, cell.gridX + 1 do
                     for k = cell.gridY - 1, cell.gridY + 1 do
                         visitedCells[getExCellId(j, k)] = true

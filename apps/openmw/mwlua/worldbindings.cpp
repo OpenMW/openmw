@@ -259,11 +259,12 @@ namespace MWLua
                 "extractWorldMapAction");
         };
 
-        api["extractLocalMaps"] = [context, lua = context.mLua]() {
+        api["extractLocalMaps"] = [context, lua = context.mLua](sol::optional<bool> playerCellOnly) {
             checkGameInitialized(lua);
+            bool onlyPlayerCell = playerCellOnly.value_or(false);
             context.mLuaManager->addAction(
-                [] {
-                    MWBase::Environment::get().getWorld()->extractLocalMaps();
+                [onlyPlayerCell] {
+                    MWBase::Environment::get().getWorld()->extractLocalMaps(onlyPlayerCell);
                 },
                 "extractLocalMapsAction");
         };

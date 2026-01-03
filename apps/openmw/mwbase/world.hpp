@@ -619,7 +619,7 @@ namespace MWBase
         virtual void extractWorldMap() = 0;
         ///< Extract world map using path from options or default
 
-        virtual void extractLocalMaps() = 0;
+        virtual void extractLocalMaps(bool playerCellOnly = false) = 0;
         ///< Extract local maps using path from options or default
 
         virtual bool isMapExtractionActive() const = 0;

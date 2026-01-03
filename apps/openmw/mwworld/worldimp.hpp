@@ -693,7 +693,7 @@ namespace MWWorld
         bool getOverwriteMaps() const override { return mOverwriteMaps; }
 
         void extractWorldMap() override;
-        void extractLocalMaps() override;
+        void extractLocalMaps(bool playerCellOnly = false) override;
         bool isMapExtractionActive() const override;
 
         void saveToLocalMapDir(std::string_view filename, std::string_view stringData) override;

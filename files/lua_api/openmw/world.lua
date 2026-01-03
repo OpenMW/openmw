@@ -236,7 +236,12 @@
 -- or defaults to "./textures/advanced_world_map/local" if not specified.
 -- By default, existing maps are not overwritten. Use --overwrite-maps option to force overwriting.
 -- @function [parent=#world] extractLocalMaps
--- @usage world.extractLocalMaps()  -- Use path from option or default
+-- @param #boolean playerCellOnly (optional, false by default) If true, extracts only the player's current cell.
+--   For exterior cells, this extracts only the player's cell instead of all 9 loaded cells.
+--   For interior cells, this has no effect as only one cell is loaded anyway.
+-- @usage world.extractLocalMaps()  -- Extract all active cells (default)
+-- @usage world.extractLocalMaps(false)  -- Same as above, extract all active cells
+-- @usage world.extractLocalMaps(true)  -- Extract only player's current cell (exterior only)
 
 ---
 -- Enable extraction mode for map generation.

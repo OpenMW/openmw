@@ -3930,7 +3930,7 @@ namespace MWWorld
         mMapExtractor->extractWorldMap();
     }
 
-    void World::extractLocalMaps()
+    void World::extractLocalMaps(bool playerCellOnly)
     {
         if (!mMapExtractor)
         {
@@ -3942,9 +3942,39 @@ namespace MWWorld
         {
             mMapExtractor->setLocalMap(localMap);
         }
+        
         const auto& activeCells = mWorldScene->getActiveCells();
-        std::vector<const MWWorld::CellStore*> cells(activeCells.begin(), activeCells.end());
-        mMapExtractor->extractLocalMaps(cells);
+        std::vector<const MWWorld::CellStore*> cells;
+        
+        if (playerCellOnly)
+        {
+            MWWorld::Ptr player = getPlayerPtr();
+            if (!player.isEmpty() && player.isInCell())
+            {
+                MWWorld::CellStore* playerCell = player.getCell();
+                
+                // Only extract for exterior cells
+                // Interior cells are always single, so no filtering needed
+                if (playerCell && playerCell->isExterior())
+                {
+                    cells.push_back(playerCell);
+                }
+                else
+                {
+                    cells.assign(activeCells.begin(), activeCells.end());
+                }
+            }
+        }
+        else
+        {
+            // Extract all active cells
+            cells.assign(activeCells.begin(), activeCells.end());
+        }
+        
+        if (!cells.empty())
+        {
+            mMapExtractor->extractLocalMaps(cells);
+        }
     }
 
     bool World::isMapExtractionActive() const
