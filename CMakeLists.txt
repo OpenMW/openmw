@@ -188,7 +188,6 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
         list(APPEND CMAKE_VS_GLOBALS
             "CLToolPath=${CMAKE_BINARY_DIR}"
             "UseMultiToolTask=true"
-            "TrackFileAccess=false"
         )
     endif()
 endif()
