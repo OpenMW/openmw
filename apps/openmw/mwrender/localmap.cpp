@@ -765,9 +765,10 @@ namespace MWRender
         camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-        camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
-        camera->setCullMaskLeft(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
-        camera->setCullMaskRight(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+        // Add Mask_Water to fix missing water in some exterior local maps
+        camera->setCullMask(Mask_Scene | Mask_Water | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+        camera->setCullMaskLeft(Mask_Scene | Mask_Water | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+        camera->setCullMaskRight(Mask_Scene | Mask_Water | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
         camera->setNodeMask(Mask_RenderToTexture);
         camera->setProjectionMatrix(mProjectionMatrix);
         camera->setViewMatrix(mViewMatrix);

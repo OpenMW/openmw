@@ -219,7 +219,7 @@ namespace OMW
 
         Log(Debug::Info) << "LocalMap instance is available, starting extraction";
         
-        mFramesToWait = 10; // Wait 10 frames before checking (increased from 3)
+        mFramesToWait = 5;
         
         startExtraction(activeCells);
     }
