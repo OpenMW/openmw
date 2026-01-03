@@ -9,12 +9,13 @@ Font Licenses:
 * DemonicLetters.ttf: SIL Open Font License (see [files/data/fonts/DemonicLettersFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DemonicLettersFontLicense.txt) for more information)
 * MysticCards.ttf: SIL Open Font License (see [files/data/fonts/MysticCardsFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/MysticCardsFontLicense.txt) for more information)
 
+
 About this fork
 ----------------
 
 This is a fork of OpenMW 0.51 designed for extracting map images from Morrowind.
-
 The tool generates a world height map at a resolution of 32x32 pixels per cell, local map tiles at 256x256 pixels per cell, and a world map composed of these tiles.
+
 
 Usage
 -----
@@ -27,18 +28,21 @@ When extraction finishes, the message "Map extraction complete." will be shown; 
 
 By default textures are written to `./textures/advanced_world_map/` inside the application directory.
 
+
 Note about scripts
 ------------------
 
 Files with the `.omwscripts` extension are not loaded by this build. If a mod packages `.omwscripts` into other formats, those scripts may not work correctly because many standard API calls are removed.
 
+
 Command-line options (fork-specific)
 -----------------------------------
-
---world-map-output=""     Directory to save the world map texture. Default: `./textures/advanced_world_map/custom/`
---local-map-output=""     Directory to save local map textures. Default: `./textures/advanced_world_map/local/`
---overwrite-maps           Allow overwriting existing local map files. By default local maps are not overwritten.
+```
+--world-map-output=""          Directory to save the world map texture. Default: `./textures/advanced_world_map/custom/`
+--local-map-output=""          Directory to save local map textures. Default: `./textures/advanced_world_map/local/`
+--overwrite-maps               Allow overwriting existing local map files. By default local maps are not overwritten.
 --tilemap-downscale-factor=4   Downscale factor for tilemap generation (must be power of 2). Default: 4.
+```
 
 Notes
 -----
