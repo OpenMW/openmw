@@ -57,7 +57,7 @@ local function generateTilemap()
     })
 
     async:newUnsavableSimulationTimer(0.2, function ()
-        world.generateTileWorldMap(util.color.rgb(0.255, 0.224, 0.180))
+        world.generateTileWorldMap(util.color.rgb(0.239, 0.224, 0.192))
         showCompletionMessage()
     end)
 end
