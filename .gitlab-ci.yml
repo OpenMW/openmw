@@ -995,7 +995,7 @@ Windows_Ninja_CacheInit:
     - cd MSVC2022_64
     - Get-Volume
     - $env:CCACHE_IGNOREHEADERS = "$(Get-Location)\deps"
-    - cmake --build . --config $config --target ($targets.Split(' '))
+    - cmake --build . --config $config --target ($targets.Split(' ')) -- /bl
     - ccache --show-stats -vv
     - cd $config
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
@@ -1048,6 +1048,7 @@ Windows_Ninja_CacheInit:
     - "*.log"
     - MSVC2022_64/*.log
     - MSVC2022_64/**/*.log
+    - MSVC2022_64/*.binlog
     - "*_to-be-merged.txt"
   variables:
     CCACHE_SIZE: 2.5G
