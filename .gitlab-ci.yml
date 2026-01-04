@@ -717,7 +717,7 @@ macOS15_Xcode16_arm64:
   - Get-Volume
   # - docker system prune --all --volumes --force
   - Stop-Service docker
-  - '[System.IO.Directory]::Delete("C:\ProgramData\Application Data\docker", $true)'
+  - cmd /c rd /s /q "C:\ProgramData\Application Data\docker"
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -954,7 +954,7 @@ Windows_Ninja_CacheInit:
   - Get-Volume
   # - docker system prune --all --volumes --force
   - Stop-Service docker
-  - '[System.IO.Directory]::Delete("C:\ProgramData\Application Data\docker", $true)'
+  - cmd /c rd /s /q "C:\ProgramData\Application Data\docker"
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
