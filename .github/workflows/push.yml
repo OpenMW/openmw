@@ -4,7 +4,8 @@ on:
 - workflow_dispatch
 
 env:
-  BUILD_TYPE: RelWithDebInfo
+  BUILD_TYPE: Release
+  VCPKG_FEATURE_FLAGS: manifests,registries
 
 jobs:
   Ubuntu:
