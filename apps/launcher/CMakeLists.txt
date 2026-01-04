@@ -13,9 +13,15 @@ set(LAUNCHER
     utils/textinputdialog.cpp
     utils/lineedit.cpp
     utils/openalutil.cpp
-
-    ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
 )
+
+if(WIN32 AND MSVC)
+    # Use generated .rc file with absolute path to manifest
+    list(APPEND LAUNCHER ${LAUNCHER_RC_FILE})
+else()
+    # For other platforms, use original .rc file
+    list(APPEND LAUNCHER ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc)
+endif()
 
 set(LAUNCHER_HEADER
     datafilespage.hpp

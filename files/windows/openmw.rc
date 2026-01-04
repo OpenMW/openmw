@@ -1,2 +1,3 @@
 IDI_ICON1               ICON    DISCARDABLE     "openmw.ico"
-CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "openmw.exe.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "../../build/windows-manifest.xml"
+

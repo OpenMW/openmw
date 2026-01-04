@@ -116,6 +116,22 @@ jobs:
     - name: Build OpenMW
       run: cmake --build ${{ github.workspace }}/build
 
+    - name: Verify embedded manifest
+      shell: pwsh
+      run: |
+        Write-Host "Checking if manifest is embedded in openmw.exe..."
+        $exePath = "${{ github.workspace }}/build/openmw.exe"
+        if (Test-Path $exePath) {
+          # Extract manifest to verify it exists
+          mt.exe -inputresource:$exePath`;#1 -out:${{ github.workspace }}/build/extracted-manifest.xml
+          if (Test-Path "${{ github.workspace }}/build/extracted-manifest.xml") {
+            Write-Host "Manifest successfully embedded in openmw.exe"
+            Get-Content "${{ github.workspace }}/build/extracted-manifest.xml" | Select-Object -First 10
+          } else {
+            Write-Warning "Manifest not found in openmw.exe"
+          }
+        }
+
     - name: Copy missing DLLs
       run: |
         cp ${{ github.workspace }}/deps/vcpkg-x64-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/build

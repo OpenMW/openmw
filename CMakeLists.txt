@@ -85,6 +85,9 @@ set(OPENMW_VERSION_RELEASE 0)
 set(OPENMW_LUA_API_REVISION 110)
 set(OPENMW_POSTPROCESSING_API_REVISION 4)
 
+# MapExtractor fork version
+set(MAPEXTRACTOR_VERSION_BUILD 0)  # Build number for MapExtractor fork
+
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
 set(OPENMW_VERSION_COMMITDATE "")
@@ -380,6 +383,33 @@ if (WIN32)
         -DNOMB # name conflict with MWGui::MessageBox
         -DNOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
     )
+    
+    # Embed Windows manifest
+    if(MSVC)
+        # Generate manifest from template with current version
+        configure_file(
+            "${CMAKE_SOURCE_DIR}/CI/windows-manifest.xml.in"
+            "${CMAKE_BINARY_DIR}/windows-manifest.xml"
+            @ONLY
+        )
+        set(OPENMW_MANIFEST_FILE "${CMAKE_BINARY_DIR}/windows-manifest.xml")
+        message(STATUS "Generated Windows manifest v${OPENMW_VERSION}: ${OPENMW_MANIFEST_FILE}")
+        
+        # Generate .rc files with absolute path to manifest
+        configure_file(
+            "${CMAKE_SOURCE_DIR}/files/windows/openmw.rc.in"
+            "${CMAKE_BINARY_DIR}/openmw.rc"
+            @ONLY
+        )
+        configure_file(
+            "${CMAKE_SOURCE_DIR}/files/windows/launcher.rc.in"
+            "${CMAKE_BINARY_DIR}/launcher.rc"
+            @ONLY
+        )
+        
+        set(OPENMW_RC_FILE "${CMAKE_BINARY_DIR}/openmw.rc")
+        set(LAUNCHER_RC_FILE "${CMAKE_BINARY_DIR}/launcher.rc")
+    endif()
 endif()
 
 if(OPENMW_USE_SYSTEM_BULLET)
