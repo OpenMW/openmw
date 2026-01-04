@@ -77,14 +77,6 @@ namespace VFS::Path
         return out;
     }
 
-    inline bool pathEqual(std::string_view x, std::string_view y)
-    {
-        if (std::size(x) != std::size(y))
-            return false;
-        return std::equal(
-            std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return normalize(l) == normalize(r); });
-    }
-
     inline constexpr auto findSeparatorOrExtensionSeparator(auto begin, auto end)
     {
         return std::find_if(begin, end, [](char v) { return v == extensionSeparator || v == separator; });
