@@ -24,6 +24,10 @@ on:
       release:
         default: false
         type: boolean
+      artifact-suffix:
+        description: Suffix to add to artifact names
+        default: ""
+        type: string
 
 jobs:
   Windows:
@@ -200,19 +204,19 @@ jobs:
     - name: Store OpenMW archived pdb files
       uses: actions/upload-artifact@v4
       with:
-        name: openmw-windows-${{ inputs.msvc }}-pdb-${{ github.sha }}
+        name: openmw-windows-${{ inputs.msvc }}-pdb${{ inputs.artifact-suffix }}-${{ github.sha }}
         path: ${{ github.workspace }}/pdb/*
 
     - name: Store OpenMW build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: openmw-windows-${{ inputs.msvc }}-${{ github.sha }}
+        name: openmw-windows-${{ inputs.msvc }}${{ inputs.artifact-suffix }}-${{ github.sha }}
         path: ${{ github.workspace }}/install/*
 
     - name: Store symbol server artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: openmw-windows-${{ inputs.msvc }}-sym-store-${{ github.sha }}
+        name: openmw-windows-${{ inputs.msvc }}-sym-store${{ inputs.artifact-suffix }}-${{ github.sha }}
         path: ${{ github.workspace }}/SymStore/*
 
     - name: Upload to symbol server

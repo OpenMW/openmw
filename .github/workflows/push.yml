@@ -156,3 +156,4 @@ jobs:
       vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
       build-type: ${{ needs.Output-Envs.outputs.BUILD_TYPE }}
       package: true
+      artifact-suffix: "-installer"
