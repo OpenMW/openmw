@@ -1039,7 +1039,7 @@ Windows_Ninja_CacheInit:
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
-    - Move-Item $env:CCACHE_DIR .
+    - Move-Item "$env:TEMP\ccache" .
   cache:
     key: msbuild-2022-v13
     paths:
