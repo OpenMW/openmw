@@ -806,7 +806,7 @@
 
 ---
 -- @type ItemData
--- @field #number condition The item's current condition. Time remaining for lights. Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
+-- @field #number condition The item's current condition. Time remaining for lights (setting this to `-1` will make it last forever). Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
 -- @field #number enchantmentCharge The item's current enchantment charge. Unenchanted items will always return a value of `nil`. Setting this to `nil` will reset the charge of the item.
 -- @field #string soul The recordId of the item's current soul. Items without soul will always return a value of `nil`. Setting this to `nil` will remove the soul from the item.
 
