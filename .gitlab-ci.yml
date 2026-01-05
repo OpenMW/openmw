@@ -991,7 +991,7 @@ Windows_Ninja_CacheInit:
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     # MSBuild gets confused by writes happening outside APPDATA and TEMP with TrackFileAccess enabled
     - Move-Item $env:CCACHE_DIR $env:TEMP
-    - $env::CCACHE_DIR = "$env:TEMP\ccache"
+    - $env:CCACHE_DIR = "$env:TEMP\ccache"
     - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
