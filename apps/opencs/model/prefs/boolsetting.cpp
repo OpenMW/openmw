@@ -34,7 +34,7 @@ CSMPrefs::SettingWidgets CSMPrefs::BoolSetting::makeWidgets(QWidget* parent)
         mWidget->setToolTip(tooltip);
     }
 
-    connect(mWidget, &QCheckBox::stateChanged, this, &BoolSetting::valueChanged);
+    connect(mWidget, &QCheckBox::checkStateChanged, this, &BoolSetting::valueChanged);
 
     return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget };
 }

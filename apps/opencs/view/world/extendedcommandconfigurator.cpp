@@ -130,7 +130,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
         for (int i = numTypes - numCheckBoxes; i > 0; --i)
         {
             QCheckBox* checkBox = new QCheckBox(mTypeGroup);
-            connect(checkBox, &QCheckBox::stateChanged, this, &ExtendedCommandConfigurator::checkBoxStateChanged);
+            connect(checkBox, &QCheckBox::checkStateChanged, this, &ExtendedCommandConfigurator::checkBoxStateChanged);
             mTypeCheckBoxes.insert(std::make_pair(checkBox, CSMWorld::UniversalId::Type_None));
         }
     }

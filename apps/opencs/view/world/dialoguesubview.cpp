@@ -298,7 +298,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(
         }
         else if (qobject_cast<QCheckBox*>(editor))
         {
-            connect(static_cast<QCheckBox*>(editor), &QCheckBox::stateChanged, proxy,
+            connect(static_cast<QCheckBox*>(editor), &QCheckBox::checkStateChanged, proxy,
                 qOverload<>(&DialogueDelegateDispatcherProxy::editorDataCommited));
         }
         else if (qobject_cast<QPlainTextEdit*>(editor))

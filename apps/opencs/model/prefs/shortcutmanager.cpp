@@ -431,7 +431,7 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_twosuperior, "twosuperior"),
         std::make_pair((int)Qt::Key_threesuperior, "threesuperior"),
         std::make_pair((int)Qt::Key_acute, "acute"),
-        std::make_pair((int)Qt::Key_mu, "mu"),
+        std::make_pair((int)Qt::Key_micro, "mu"),
         std::make_pair((int)Qt::Key_paragraph, "paragraph"),
         std::make_pair((int)Qt::Key_periodcentered, "periodcentered"),
         std::make_pair((int)Qt::Key_cedilla, "cedilla"),

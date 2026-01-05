@@ -55,7 +55,7 @@ CSVWorld::TableSubView::TableSubView(
         "\nCan be useful in finding the moved or modified"
         "\nobject instance while 3D editing.");
     autoJump->setCheckState(Qt::Unchecked);
-    connect(autoJump, &QCheckBox::stateChanged, mTable, &Table::jumpAfterModChanged);
+    connect(autoJump, &QCheckBox::checkStateChanged, mTable, &Table::jumpAfterModChanged);
     optHLayout->insertWidget(0, autoJump);
     optHLayout->setContentsMargins(QMargins(0, 3, 0, 0));
     mOptions->setLayout(optHLayout);
