@@ -873,6 +873,7 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         paths:
+          - .gitlab-ci.yml
           - CMakeLists.txt
           - "**/CMakeLists.txt"
           - "**/*.cmake"
