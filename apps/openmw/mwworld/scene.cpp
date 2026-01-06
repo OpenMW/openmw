@@ -457,7 +457,7 @@ namespace MWWorld
                 mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
                     ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
-            if ([[maybe_unused]] const auto heightField = mPhysics->getHeightField(cellX, cellY))
+            if (mPhysics->getHeightField(cellX, cellY) != nullptr)
             {
                 const osg::Vec2i cellPosition(cellX, cellY);
                 const HeightfieldShape shape = [&]() -> HeightfieldShape {
