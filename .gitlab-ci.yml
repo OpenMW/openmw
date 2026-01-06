@@ -1104,7 +1104,7 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-one
-    CCACHE_SIZE: 1.5G
+    CCACHE_SIZE: 1G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
     - key: msbuild-2022-v13
