@@ -1000,7 +1000,7 @@ Windows_Ninja_CacheInit:
     - cd MSVC2022_64
     - Get-Volume
     - $env:CCACHE_IGNOREHEADERS = "$(Get-Location)\deps"
-    - cmake --build . --config $config --target ($targets.Split(' ')) -- /bl
+    - cmake --build . --config $config --target ($targets.Split(' ')) -- /bl:`{`}.binlog
     - ccache --show-stats -vv
     - cd $config
     - Copy-Item ..\..\LICENSE license.txt
