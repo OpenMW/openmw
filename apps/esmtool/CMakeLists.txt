@@ -20,6 +20,10 @@ target_link_libraries(esmtool
     components
 )
 
+if (WIN32)
+    target_sources(esmtool PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(esmtool PRIVATE --coverage)
     target_link_libraries(esmtool gcov)

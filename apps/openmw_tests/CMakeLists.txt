@@ -35,6 +35,10 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(openmw-tests ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+if (WIN32)
+    target_sources(openmw-tests PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-tests PRIVATE --coverage)
     target_link_libraries(openmw-tests gcov)

@@ -275,9 +275,6 @@ namespace Crash
                 return;
             }
 
-            if (utf16Path.length() > MAX_PATH)
-                utf16Path = LR"(\\?\)" + utf16Path;
-
             HANDLE hCrashLog = CreateFileW(utf16Path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
                 FILE_ATTRIBUTE_NORMAL, nullptr);
             if (hCrashLog == NULL || hCrashLog == INVALID_HANDLE_VALUE)

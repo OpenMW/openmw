@@ -10,8 +10,9 @@
         </security>
     </trustInfo>
     <application xmlns="urn:schemas-microsoft-com:asm.v3">
-        <windowsSettings xmlns:ws="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
-            <ws:dpiAware>True</ws:dpiAware>
+        <windowsSettings xmlns:ws="http://schemas.microsoft.com/SMI/2005/WindowsSettings" xmlns:ws2="http://schemas.microsoft.com/SMI/2016/WindowsSettings">
+            <ws:dpiAware>true</ws:dpiAware>
+            <ws2:longPathAware>true</ws2:longPathAware>
         </windowsSettings>
     </application>
 </assembly>

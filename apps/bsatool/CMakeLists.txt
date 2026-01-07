@@ -13,6 +13,10 @@ target_link_libraries(bsatool
     components
 )
 
+if (WIN32)
+    target_sources(bsatool PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(bsatool PRIVATE --coverage)
     target_link_libraries(bsatool gcov)

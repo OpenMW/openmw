@@ -13,3 +13,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw_esm_refid_benchmark PRIVATE --coverage)
     target_link_libraries(openmw_esm_refid_benchmark gcov)
 endif()
+
+if (WIN32)
+    target_sources(openmw_esm_refid_benchmark PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
