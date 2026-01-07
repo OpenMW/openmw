@@ -71,11 +71,9 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     setupInstallations();
     setupPages();
 
-    const std::filesystem::path& installationPath = mCfgMgr.getInstallPath();
-    if (!installationPath.empty())
+    for (const std::filesystem::path& installationPath : mCfgMgr.getInstallPaths())
     {
-        const std::filesystem::path& dataPath = installationPath / "Data Files";
-        addInstallation(Files::pathToQString(dataPath));
+        addInstallation(Files::pathToQString(installationPath / "Data Files"));
     }
 }
 

@@ -22,6 +22,50 @@
  */
 namespace Files
 {
+    namespace
+    {
+        struct RegistryKey
+        {
+            HKEY mKey = nullptr;
+
+            ~RegistryKey()
+            {
+                if (mKey)
+                    RegCloseKey(mKey);
+            }
+        };
+
+        std::filesystem::path getRegistryPath(LPCWSTR subKey, LPCWSTR valueName, bool use32)
+        {
+            RegistryKey key;
+            REGSAM flags = KEY_READ;
+            if (use32)
+                flags |= KEY_WOW64_32KEY;
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, flags, &key.mKey) == ERROR_SUCCESS)
+            {
+                // Key existed, let's try to read the install dir
+                std::wstring buffer;
+                buffer.reserve(MAX_PATH);
+                DWORD len = static_cast<DWORD>(MAX_PATH * sizeof(wchar_t));
+
+                auto result = RegQueryValueExW(
+                    key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                if (result == ERROR_MORE_DATA)
+                {
+                    buffer.reserve(len / sizeof(wchar_t));
+                    result = RegQueryValueExW(
+                        key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                }
+                if (result == ERROR_SUCCESS)
+                {
+                    // This should always be true. Note that we don't need to care above because of the trailing \0
+                    if (len % sizeof(wchar_t) == 0)
+                        return std::filesystem::path(buffer.data(), buffer.data() + len / sizeof(wchar_t));
+                }
+            }
+            return {};
+        }
+    }
 
     WindowsPath::WindowsPath(const std::string& application_name)
         : mName(application_name)
@@ -61,11 +105,17 @@ namespace Files
     {
         std::filesystem::path localPath = std::filesystem::current_path() / "";
 
-        WCHAR path[MAX_PATH + 1] = {};
-
-        if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
+        std::wstring executablePath;
+        DWORD copied = 0;
+        do
         {
-            localPath = std::filesystem::path(path).parent_path() / "";
+            executablePath.resize(executablePath.size() + MAX_PATH);
+            copied = GetModuleFileNameW(nullptr, executablePath.data(), static_cast<DWORD>(executablePath.size()));
+        } while (GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+
+        if (copied > 0)
+        {
+            localPath = std::filesystem::path(executablePath).parent_path() / "";
         }
 
         // lookup exe path
@@ -82,27 +132,22 @@ namespace Files
         return getUserConfigPath() / "cache";
     }
 
-    std::filesystem::path WindowsPath::getInstallPath() const
+    std::vector<std::filesystem::path> WindowsPath::getInstallPaths() const
     {
-        std::filesystem::path installPath{};
-
-        if (HKEY hKey; RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Bethesda Softworks\\Morrowind", 0,
-                           KEY_READ | KEY_WOW64_32KEY, &hKey)
-            == ERROR_SUCCESS)
+        std::vector<std::filesystem::path> paths;
         {
-            // Key existed, let's try to read the install dir
-            std::array<wchar_t, 512> buf{};
-            DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
-
-            if (RegQueryValueExW(hKey, L"Installed Path", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
-                == ERROR_SUCCESS)
-            {
-                installPath = std::filesystem::path(buf.data());
-            }
-            RegCloseKey(hKey);
+            std::filesystem::path disk
+                = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path", true);
+            if (!disk.empty() && std::filesystem::is_directory(disk))
+                paths.emplace_back(std::move(disk));
         }
-
-        return installPath;
+        {
+            std::filesystem::path steam = getRegistryPath(
+                L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 22320", L"InstallLocation", false);
+            if (!steam.empty() && std::filesystem::is_directory(steam))
+                paths.emplace_back(std::move(steam));
+        }
+        return paths;
     }
 
 } /* namespace Files */
