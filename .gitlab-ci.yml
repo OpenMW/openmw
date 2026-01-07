@@ -764,7 +764,7 @@ macOS15_Xcode16_arm64:
     - cmake --build . --config $config --target ($targets.Split(' '))
     - ccache --show-stats -vv
     - cd $config
-    - Copy-Item ..\LICENSE license.txt
+    - Copy-Item ..\..\LICENSE license.txt
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
@@ -1003,7 +1003,7 @@ Windows_Ninja_CacheInit:
     - cmake --build . --config $config --target ($targets.Split(' ')) -- /bl
     - ccache --show-stats -vv
     - cd $config
-    - Copy-Item ..\LICENSE license.txt
+    - Copy-Item ..\..\LICENSE license.txt
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
