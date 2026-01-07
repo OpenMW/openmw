@@ -734,7 +734,6 @@ endif()
 
 if (APPLE)
     target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
-    target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
     target_compile_definitions(openmw-lib PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
 
