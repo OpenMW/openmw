@@ -149,7 +149,7 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
     switch (subColIndex)
     {
         case 0:
-            return effectId.empty() ? QVariant() : QString::fromStdString(effectId.getRefIdString());
+            return ESM::MagicEffect::refIdToIndex(effectId);
         case 1:
         {
             if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
@@ -183,8 +183,7 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
     if (subRowIndex < 0 || subRowIndex >= 4)
         throw std::runtime_error("index out of range");
 
-    ESM::RefId effectId
-        = value.toString().isEmpty() ? ESM::RefId() : ESM::RefId::deserializeText(value.toString().toStdString());
+    ESM::RefId effectId = ESM::MagicEffect::indexToRefId(value.toInt());
 
     switch (subColIndex)
     {

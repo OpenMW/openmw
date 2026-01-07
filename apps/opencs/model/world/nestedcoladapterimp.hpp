@@ -319,9 +319,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    if (effect.mEffectID.empty())
-                        return QVariant();
-                    return QString::fromStdString(effect.mEffectID.getRefIdString());
+                    return ESM::MagicEffect::refIdToIndex(effect.mEffectID);
                 case 1:
                 {
                     if (effect.mEffectID == ESM::MagicEffect::DrainSkill
@@ -373,7 +371,7 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    effect.mEffectID = ESM::RefId::deserializeText(value.toString().toStdString());
+                    effect.mEffectID = ESM::MagicEffect::indexToRefId(value.toInt());
                     if (effect.mEffectID == ESM::MagicEffect::DrainSkill
                         || effect.mEffectID == ESM::MagicEffect::DamageSkill
                         || effect.mEffectID == ESM::MagicEffect::RestoreSkill

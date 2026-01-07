@@ -9,7 +9,6 @@
 namespace ESM
 {
     class RefId;
-    class StringRefId;
 }
 namespace MWWorld
 {

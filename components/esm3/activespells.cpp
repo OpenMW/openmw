@@ -62,12 +62,8 @@ namespace ESM
                 MagicEffect::FortifySkill,
                 MagicEffect::AbsorbSkill,
             };
-            if (effectId.empty())
-                return false;
-            for (size_t i = 0; i < affectsSkillEffects.size(); ++i)
-                if (affectsSkillEffects[i] == effectId)
-                    return true;
-            return false;
+            return std::find(affectsSkillEffects.begin(), affectsSkillEffects.end(), effectId)
+                != affectsSkillEffects.end();
         }
 
         void saveImpl(ESMWriter& esm, const std::vector<ActiveSpells::ActiveSpellParams>& spells, NAME tag)
@@ -90,7 +86,7 @@ namespace ESM
 
                 for (auto& effect : params.mEffects)
                 {
-                    esm.writeHNT("MGEF", effect.mEffectId);
+                    esm.writeHNT("MGEF", ESM::MagicEffect::refIdToIndex(effect.mEffectId));
                     if (const ESM::RefId* id = std::get_if<ESM::RefId>(&effect.mArg))
                     {
                         if (!id->empty())
@@ -175,8 +171,10 @@ namespace ESM
 
                 while (esm.isNextSub("MGEF"))
                 {
+                    int32_t effectId;
                     ActiveEffect effect;
-                    esm.getHT(effect.mEffectId);
+                    esm.getHT(effectId);
+                    effect.mEffectId = ESM::MagicEffect::indexToRefId(effectId);
                     if (format <= MaxActorIdSaveGameFormatVersion)
                     {
                         int32_t arg = -1;

@@ -121,8 +121,8 @@ namespace ESM
                 esm.getHNT(actorId, "ACID");
                 mSummonedCreatureMap[SummonKey(ESM::MagicEffect::indexToRefId(magicEffect), source, effectIndex)]
                     = actorId;
-                mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(
-                    magicEffect), RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 });
+                mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(magicEffect),
+                    RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 });
             }
         }
         else
