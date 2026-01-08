@@ -3,6 +3,9 @@
 
 #include <string_view>
 #include <utility>
+
+#include <components/esm3/refnum.hpp>
+
 namespace ESM
 {
     class RefId;
@@ -18,9 +21,9 @@ namespace MWMechanics
 
     ESM::RefId getSummonedCreature(int effectId);
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon);
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, ESM::RefNum>& summon);
 
-    int summonCreature(int effectId, const MWWorld::Ptr& summoner);
+    ESM::RefNum summonCreature(int effectId, const MWWorld::Ptr& summoner);
 
     void updateSummons(const MWWorld::Ptr& summoner, bool cleanup);
 }

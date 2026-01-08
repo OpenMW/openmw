@@ -37,7 +37,7 @@ namespace MWMechanics
             ESM::RefId mSourceSpellId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
-            int mCasterActorId;
+            ESM::RefNum mCaster;
             ESM::RefNum mItem;
             ESM::ActiveSpells::Flags mFlags;
             int mWorsenings;
@@ -69,7 +69,7 @@ namespace MWMechanics
             const std::vector<ActiveEffect>& getEffects() const { return mEffects; }
             std::vector<ActiveEffect>& getEffects() { return mEffects; }
 
-            int getCasterActorId() const { return mCasterActorId; }
+            ESM::RefNum getCaster() const { return mCaster; }
 
             int getWorsenings() const { return mWorsenings; }
 
@@ -157,8 +157,8 @@ namespace MWMechanics
         void purge(EffectPredicate predicate, const MWWorld::Ptr& ptr);
         void purge(ParamsPredicate predicate, const MWWorld::Ptr& ptr);
 
-        /// Remove all effects that were cast by \a casterActorId
-        void purge(const MWWorld::Ptr& ptr, int casterActorId);
+        /// Remove all effects that were cast by \a actor
+        void purge(const MWWorld::Ptr& ptr, ESM::RefNum actor);
 
         /// Remove all spells
         void clear(const MWWorld::Ptr& ptr);

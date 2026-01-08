@@ -33,6 +33,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace
 {
@@ -1106,6 +1107,7 @@ namespace MWMechanics
         const MWWorld::Ptr& target, ActiveSpells::ActiveSpellParams& spellParams, const ESM::ActiveEffect& effect)
     {
         const auto world = MWBase::Environment::get().getWorld();
+        const auto worldModel = MWBase::Environment::get().getWorldModel();
         auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
         switch (effect.mEffectId)
         {
@@ -1192,14 +1194,14 @@ namespace MWMechanics
             case ESM::MagicEffect::SummonCreature04:
             case ESM::MagicEffect::SummonCreature05:
             {
-                int actorId = effect.getActorId();
-                if (actorId != -1)
-                    MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, actorId);
+                ESM::RefNum actor = effect.getActor();
+                if (actor.isSet())
+                    MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(actor);
                 auto& summons = target.getClass().getCreatureStats(target).getSummonedCreatureMap();
                 auto [begin, end] = summons.equal_range(effect.mEffectId);
                 for (auto it = begin; it != end; ++it)
                 {
-                    if (it->second == actorId)
+                    if (it->second == actor)
                     {
                         summons.erase(it);
                         break;
@@ -1284,7 +1286,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::AbsorbAttribute:
             {
-                const auto caster = world->searchPtrViaActorId(spellParams.getCasterActorId());
+                const auto caster = worldModel->getPtr(spellParams.getCaster());
                 restoreAttribute(target, effect, effect.mMagnitude);
                 if (!caster.isEmpty())
                     fortifyAttribute(caster, effect, -effect.mMagnitude);
@@ -1294,7 +1296,7 @@ namespace MWMechanics
             {
                 if (target.getClass().isNpc())
                     restoreSkill(target, effect, effect.mMagnitude);
-                const auto caster = world->searchPtrViaActorId(spellParams.getCasterActorId());
+                const auto caster = worldModel->getPtr(spellParams.getCaster());
                 if (!caster.isEmpty() && caster.getClass().isNpc())
                     fortifySkill(caster, effect, -effect.mMagnitude);
             }

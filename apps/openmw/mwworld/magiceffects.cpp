@@ -61,7 +61,7 @@ namespace MWWorld
             ESM::ActiveSpells::ActiveSpellParams params;
             params.mSourceSpellId = id;
             params.mDisplayName = spell->mName;
-            params.mCasterActorId = creatureStats.mActorId;
+            params.mCaster.mIndex = creatureStats.mActorId;
             if (spell->mData.mType == ESM::Spell::ST_Ability)
                 params.mFlags = ESM::Compatibility::ActiveSpells::Type_Ability_Flags;
             else
@@ -137,7 +137,7 @@ namespace MWWorld
             ESM::ActiveSpells::ActiveSpellParams params;
             params.mSourceSpellId = id;
             params.mDisplayName = std::move(name);
-            params.mCasterActorId = creatureStats.mActorId;
+            params.mCaster.mIndex = creatureStats.mActorId;
             params.mFlags = ESM::Compatibility::ActiveSpells::Type_Enchantment_Flags;
             params.mWorsenings = -1;
             params.mNextWorsening = ESM::TimeStamp();
@@ -196,7 +196,7 @@ namespace MWWorld
                     {
                         if (effect.mEffectId == key.mEffectId && effect.mEffectIndex == key.mEffectIndex)
                         {
-                            effect.mArg = actorId;
+                            effect.mArg = ESM::RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 };
                             effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                             found = true;
                             break;

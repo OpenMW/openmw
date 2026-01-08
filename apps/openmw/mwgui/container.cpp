@@ -312,7 +312,7 @@ namespace MWGui
                     // Clean up summoned creatures as well
                     auto& creatureMap = creatureStats.getSummonedCreatureMap();
                     for (const auto& creature : creatureMap)
-                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(ptr, creature.second);
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(creature.second);
                     creatureMap.clear();
 
                     // Check if we are a summon and inform our master we've bit the dust
@@ -323,7 +323,7 @@ namespace MWGui
                             const auto& summoner = package->getTarget();
                             auto& summons = summoner.getClass().getCreatureStats(summoner).getSummonedCreatureMap();
                             auto it = std::find_if(summons.begin(), summons.end(),
-                                [&](const auto& entry) { return entry.second == creatureStats.getActorId(); });
+                                [&](const auto& entry) { return entry.second == ptr.getCellRef().getRefNum(); });
                             if (it != summons.end())
                             {
                                 auto summon = *it;

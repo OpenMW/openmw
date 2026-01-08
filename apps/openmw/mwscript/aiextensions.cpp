@@ -124,7 +124,7 @@ namespace MWScript
                 if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                     return;
 
-                MWMechanics::AiEscort escortPackage(actorID, static_cast<int>(duration), x, y, z, repeat);
+                MWMechanics::AiEscort escortPackage(actorID, {}, static_cast<int>(duration), x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(escortPackage, ptr);
 
                 Log(Debug::Info) << "AiEscort: " << x << ", " << y << ", " << z << ", " << duration;
@@ -353,7 +353,7 @@ namespace MWScript
                 if (!ptr.getClass().isActor() || ptr == MWMechanics::getPlayer())
                     return;
 
-                MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
+                MWMechanics::AiFollow followPackage(actorID, {}, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
 
                 Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;

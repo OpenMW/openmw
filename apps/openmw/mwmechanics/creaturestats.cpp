@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/creaturestats.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -17,8 +18,6 @@
 
 namespace MWMechanics
 {
-    int CreatureStats::sActorId = 0;
-
     CreatureStats::CreatureStats()
     {
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
@@ -365,14 +364,14 @@ namespace MWMechanics
         return mLastHitAttemptObject;
     }
 
-    void CreatureStats::setHitAttemptActorId(int actorId)
+    void CreatureStats::setHitAttemptActor(ESM::RefNum actor)
     {
-        mHitAttemptActorId = actorId;
+        mHitAttemptActor = actor;
     }
 
-    int CreatureStats::getHitAttemptActorId() const
+    ESM::RefNum CreatureStats::getHitAttemptActor() const
     {
-        return mHitAttemptActorId;
+        return mHitAttemptActor;
     }
 
     void CreatureStats::addToFallHeight(float height)
@@ -539,7 +538,6 @@ namespace MWMechanics
         state.mRecalcDynamicStats = false;
         state.mDrawState = static_cast<int>(mDrawState);
         state.mLevel = mLevel;
-        state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
         state.mTimeOfDeath = mTimeOfDeath.toEsm();
         // state.mHitAttemptActorId = mHitAttemptActorId;
@@ -550,7 +548,6 @@ namespace MWMechanics
         mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatures = mSummonedCreatures;
-        state.mSummonGraveyard = mSummonGraveyard;
 
         state.mHasAiSettings = true;
         for (size_t i = 0; i < state.mAiSettings.size(); ++i)
@@ -593,10 +590,9 @@ namespace MWMechanics
         mLastHitAttemptObject = state.mLastHitAttemptObject;
         mDrawState = DrawState(state.mDrawState);
         mLevel = state.mLevel;
-        mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
-        // mHitAttemptActorId = state.mHitAttemptActorId;
+        // mHitAttemptActor = state.mHitAttemptActor;
 
         mSpells.readState(state.mSpells, this);
         mActiveSpells.readState(state.mActiveSpells);
@@ -604,13 +600,19 @@ namespace MWMechanics
         mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatures;
-        mSummonGraveyard = state.mSummonGraveyard;
 
         if (state.mHasAiSettings)
             for (size_t i = 0; i < state.mAiSettings.size(); ++i)
                 mAiSettings[i].readState(state.mAiSettings[i]);
         if (state.mRecalcDynamicStats)
             recalculateMagicka();
+        if (state.mAiSequence.mActorIdConverter)
+        {
+            for (auto& [_, refNum] : mSummonedCreatures)
+                state.mAiSequence.mActorIdConverter->convert(refNum, refNum.mIndex);
+            auto& graveyard = state.mAiSequence.mActorIdConverter->mGraveyard;
+            graveyard.insert(graveyard.end(), state.mSummonGraveyard.begin(), state.mSummonGraveyard.end());
+        }
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -632,36 +634,6 @@ namespace MWMechanics
         return mGoldPool;
     }
 
-    int CreatureStats::getActorId()
-    {
-        if (mActorId == -1)
-            mActorId = sActorId++;
-
-        return mActorId;
-    }
-
-    bool CreatureStats::matchesActorId(int id) const
-    {
-        return mActorId != -1 && id == mActorId;
-    }
-
-    void CreatureStats::cleanup()
-    {
-        sActorId = 0;
-    }
-
-    void CreatureStats::writeActorIdCounter(ESM::ESMWriter& esm)
-    {
-        esm.startRecord(ESM::REC_ACTC);
-        esm.writeHNT("COUN", sActorId);
-        esm.endRecord(ESM::REC_ACTC);
-    }
-
-    void CreatureStats::readActorIdCounter(ESM::ESMReader& esm)
-    {
-        esm.getHNT(sActorId, "COUN");
-    }
-
     signed char CreatureStats::getDeathAnimation() const
     {
         return mDeathAnimation;
@@ -677,14 +649,9 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::multimap<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::multimap<int, ESM::RefNum>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
-    }
-
-    std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
-    {
-        return mSummonGraveyard;
     }
 
     void CreatureStats::updateAwareness(float duration)

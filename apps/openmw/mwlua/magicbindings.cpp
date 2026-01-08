@@ -546,8 +546,7 @@ namespace MWLua
               });
         activeSpellT["caster"]
             = sol::readonly_property([lua = state.lua_state()](const ActiveSpell& activeSpell) -> sol::object {
-                  auto caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(
-                      activeSpell.mParams.getCasterActorId());
+                  auto caster = MWBase::Environment::get().getWorldModel()->getPtr(activeSpell.mParams.getCaster());
                   if (caster.isEmpty())
                       return sol::nil;
                   else

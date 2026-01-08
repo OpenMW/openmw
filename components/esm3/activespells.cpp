@@ -70,25 +70,6 @@ namespace ESM
             return false;
         }
 
-        struct ToInt
-        {
-            int effectId;
-
-            int operator()(const ESM::RefId& id) const
-            {
-                if (!id.empty())
-                {
-                    if (affectsAttribute(effectId))
-                        return ESM::Attribute::refIdToIndex(id);
-                    else if (affectsSkill(effectId))
-                        return ESM::Skill::refIdToIndex(id);
-                }
-                return -1;
-            }
-
-            int operator()(int actor) const { return actor; }
-        };
-
         void saveImpl(ESMWriter& esm, const std::vector<ActiveSpells::ActiveSpellParams>& spells, NAME tag)
         {
             for (const auto& params : spells)
@@ -96,7 +77,7 @@ namespace ESM
                 esm.writeHNRefId(tag, params.mSourceSpellId);
                 esm.writeHNRefId("SPID", params.mActiveSpellId);
 
-                esm.writeHNT("CAST", params.mCasterActorId);
+                esm.writeFormId(params.mCaster, true, "CAST");
                 esm.writeHNString("DISP", params.mDisplayName);
                 esm.writeHNT("FLAG", params.mFlags);
                 if (params.mItem.isSet())
@@ -110,9 +91,16 @@ namespace ESM
                 for (auto& effect : params.mEffects)
                 {
                     esm.writeHNT("MGEF", effect.mEffectId);
-                    int arg = std::visit(ToInt{ effect.mEffectId }, effect.mArg);
-                    if (arg != -1)
-                        esm.writeHNT("ARG_", arg);
+                    if (const ESM::RefId* id = std::get_if<ESM::RefId>(&effect.mArg))
+                    {
+                        if (!id->empty())
+                            esm.writeHNRefId("ARG_", *id);
+                    }
+                    else if (const ESM::RefNum* actor = std::get_if<ESM::RefNum>(&effect.mArg))
+                    {
+                        if (actor->isSet())
+                            esm.writeFormId(*actor, true, "SUM_");
+                    }
                     esm.writeHNT("MAGN", effect.mMagnitude);
                     esm.writeHNT("MAGN", effect.mMinMagnitude);
                     esm.writeHNT("MAGN", effect.mMaxMagnitude);
@@ -134,7 +122,10 @@ namespace ESM
                 params.mSourceSpellId = esm.getRefId();
                 if (format > MaxActiveSpellTypeVersion)
                     params.mActiveSpellId = esm.getHNRefId("SPID");
-                esm.getHNT(params.mCasterActorId, "CAST");
+                if (format <= MaxActorIdSaveGameFormatVersion)
+                    esm.getHNT(params.mCaster.mIndex, "CAST");
+                else
+                    params.mCaster = esm.getFormId(true, "CAST");
                 params.mDisplayName = esm.getHNString("DISP");
                 if (format <= MaxClearModifiersFormatVersion)
                     params.mFlags = Compatibility::ActiveSpells::Type_Temporary_Flags;
@@ -186,17 +177,24 @@ namespace ESM
                 {
                     ActiveEffect effect;
                     esm.getHT(effect.mEffectId);
-                    int32_t arg = -1;
-                    esm.getHNOT(arg, "ARG_");
-                    if (arg >= 0)
+                    if (format <= MaxActorIdSaveGameFormatVersion)
                     {
-                        if (isSummon(effect.mEffectId))
-                            effect.mArg = arg;
-                        else if (affectsAttribute(effect.mEffectId))
-                            effect.mArg = ESM::Attribute::indexToRefId(arg);
-                        else if (affectsSkill(effect.mEffectId))
-                            effect.mArg = ESM::Skill::indexToRefId(arg);
+                        int32_t arg = -1;
+                        esm.getHNOT(arg, "ARG_");
+                        if (arg >= 0)
+                        {
+                            if (isSummon(effect.mEffectId))
+                                effect.mArg = RefNum{ .mIndex = static_cast<uint32_t>(arg), .mContentFile = -1 };
+                            else if (affectsAttribute(effect.mEffectId))
+                                effect.mArg = ESM::Attribute::indexToRefId(arg);
+                            else if (affectsSkill(effect.mEffectId))
+                                effect.mArg = ESM::Skill::indexToRefId(arg);
+                        }
                     }
+                    else if (esm.peekNextSub("ARG_"))
+                        effect.mArg = esm.getHNRefId("ARG_");
+                    else if (esm.peekNextSub("SUM_"))
+                        effect.mArg = esm.getFormId(true, "SUM_");
                     esm.getHNT(effect.mMagnitude, "MAGN");
                     if (format <= MaxClearModifiersFormatVersion)
                     {
@@ -235,21 +233,22 @@ namespace ESM
 
     void ActiveSpells::load(ESMReader& esm)
     {
+        mActorIdConverter = esm.getActorIdConverter();
         loadImpl(esm, mSpells, "ID__");
         loadImpl(esm, mQueue, "QID_");
     }
 
     RefId ActiveEffect::getSkillOrAttribute() const
     {
-        if (const auto* id = std::get_if<ESM::RefId>(&mArg))
+        if (const ESM::RefId* id = std::get_if<ESM::RefId>(&mArg))
             return *id;
         return {};
     }
 
-    int ActiveEffect::getActorId() const
+    RefNum ActiveEffect::getActor() const
     {
-        if (const auto* id = std::get_if<int>(&mArg))
-            return *id;
-        return -1;
+        if (const ESM::RefNum* actor = std::get_if<ESM::RefNum>(&mArg))
+            return *actor;
+        return {};
     }
 }

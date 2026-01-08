@@ -524,7 +524,7 @@ namespace ESM
             record.mData.mY = 2;
             record.mData.mZ = 3;
             record.mData.mDuration = 4;
-            record.mTargetActorId = 5;
+            record.mTargetActor = RefNum{ .mIndex = 5, .mContentFile = -1 };
             record.mTargetId = generateRandomRefId(32);
             record.mCellId = generateRandomString(257);
             record.mRemainingDuration = 6;
@@ -540,7 +540,10 @@ namespace ESM
                 EXPECT_EQ(result.mData.mDuration, record.mRemainingDuration);
             else
                 EXPECT_EQ(result.mData.mDuration, record.mData.mDuration);
-            EXPECT_EQ(result.mTargetActorId, record.mTargetActorId);
+            if (GetParam() > MaxActorIdSaveGameFormatVersion)
+            {
+                EXPECT_EQ(result.mTargetActor, record.mTargetActor);
+            }
             EXPECT_EQ(result.mTargetId, record.mTargetId);
             EXPECT_EQ(result.mCellId, record.mCellId);
             EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);

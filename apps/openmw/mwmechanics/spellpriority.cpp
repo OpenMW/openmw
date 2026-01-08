@@ -82,10 +82,10 @@ namespace
 
     bool isSpellActive(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const ESM::RefId& id)
     {
-        int actorId = caster.getClass().getCreatureStats(caster).getActorId();
+        ESM::RefNum actor = caster.getCellRef().getRefNum();
         const auto& active = target.getClass().getCreatureStats(target).getActiveSpells();
         return std::find_if(active.begin(), active.end(), [&](const auto& spell) {
-            return spell.getCasterActorId() == actorId && spell.getSourceSpellId() == id;
+            return spell.getCaster() == actor && spell.getSourceSpellId() == id;
         }) != active.end();
     }
 

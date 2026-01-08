@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -142,25 +143,6 @@ namespace
     }
 
     template <typename T>
-    MWWorld::Ptr searchViaActorId(MWWorld::CellRefList<T>& actorList, int actorId, MWWorld::CellStore* cell,
-        const std::map<MWWorld::LiveCellRefBase*, MWWorld::CellStore*>& toIgnore)
-    {
-        for (typename MWWorld::CellRefList<T>::List::iterator iter(actorList.mList.begin());
-             iter != actorList.mList.end(); ++iter)
-        {
-            MWWorld::Ptr actor(&*iter, cell);
-
-            if (toIgnore.find(&*iter) != toIgnore.end())
-                continue;
-
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(actorId) && actor.getCellRef().getCount() > 0)
-                return actor;
-        }
-
-        return MWWorld::Ptr();
-    }
-
-    template <typename T>
     void writeReferenceCollection(ESM::ESMWriter& writer, const MWWorld::CellRefList<T>& collection)
     {
         // references
@@ -274,6 +256,14 @@ namespace
         {
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
                 MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
+        }
+        if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+        {
+            if (reader.getActorIdConverter() && state.mHasCustomState)
+            {
+                MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(state.mRef);
+                reader.getActorIdConverter()->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
+            }
         }
 
         if (state.mRef.mRefNum.hasContentFile())
@@ -683,26 +673,6 @@ namespace MWWorld
         SearchVisitor<MWWorld::ConstPtr> searchVisitor(id);
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
-    }
-
-    Ptr CellStore::searchViaActorId(int id)
-    {
-        if (Ptr ptr = ::searchViaActorId(get<ESM::NPC>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
-            return ptr;
-
-        if (Ptr ptr = ::searchViaActorId(get<ESM::Creature>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
-            return ptr;
-
-        for (const auto& [base, _] : mMovedHere)
-        {
-            MWWorld::Ptr actor(base, this);
-            if (!actor.getClass().isActor())
-                continue;
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(id) && actor.getCellRef().getCount() > 0)
-                return actor;
-        }
-
-        return Ptr();
     }
 
     class RefNumSearchVisitor
@@ -1360,20 +1330,6 @@ namespace MWWorld
             || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             mRechargingItems.emplace_back(
                 ptr.getBase(), static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment)));
-    }
-
-    Ptr MWWorld::CellStore::getMovedActor(int actorId) const
-    {
-        for (const auto& [cellRef, cell] : mMovedToAnotherCell)
-        {
-            if (cellRef->mClass->isActor() && cellRef->mData.getCustomData())
-            {
-                Ptr actor(cellRef, cell);
-                if (actor.getClass().getCreatureStats(actor).getActorId() == actorId)
-                    return actor;
-            }
-        }
-        return {};
     }
 
     CellStore* MWWorld::CellStore::getOriginCell(const Ptr& object) const
