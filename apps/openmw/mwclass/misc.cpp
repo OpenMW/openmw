@@ -195,7 +195,10 @@ namespace MWClass
     {
         MWWorld::Ptr newPtr;
         if (isGold(ptr))
+        {
             newPtr = createGold(cell, getValue(ptr) * count);
+            newPtr.getRefData() = ptr.getRefData();
+        }
         else
         {
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
