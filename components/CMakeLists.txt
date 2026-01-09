@@ -573,6 +573,10 @@ if (ANDROID)
     set_property(TARGET components PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
 
+if (APPLE)
+    target_compile_definitions(components PUBLIC GL_SILENCE_DEPRECATION=1)
+endif()
+
 target_link_libraries(components
     ${COLLADA_DOM_LIBRARIES}
 

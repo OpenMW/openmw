@@ -732,11 +732,6 @@ if (WIN32)
     #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
 
-if (APPLE)
-    target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
-    target_compile_definitions(openmw-lib PRIVATE GL_SILENCE_DEPRECATION=1)
-endif()
-
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     if (CMAKE_VERSION VERSION_LESS 3.19)
