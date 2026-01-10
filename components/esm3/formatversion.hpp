@@ -30,7 +30,8 @@ namespace ESM
     inline constexpr FormatVersion MaxPlayerBeforeCellDataFormatVersion = 32;
     inline constexpr FormatVersion MaxActorIdSaveGameFormatVersion = 34;
     inline constexpr FormatVersion MaxSerializeEffectRefIdFormatVersion = 35;
-    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 36;
+    inline constexpr FormatVersion MaxLuaScriptPathFormatVersion = 36;
+    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 37;
 
     inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 5;
     inline constexpr FormatVersion OpenMW0_49MinSaveGameFormatVersion = 5;

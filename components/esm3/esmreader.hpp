@@ -18,6 +18,11 @@
 
 #include "loadtes3.hpp"
 
+namespace LuaUtil
+{
+    class ScriptsConfiguration;
+}
+
 namespace ESM
 {
     template <class T>
@@ -125,6 +130,9 @@ namespace ESM
 
         void setActorIdConverter(ActorIdConverter* converter) { mActorIdConverter = converter; }
         ActorIdConverter* getActorIdConverter() const { return mActorIdConverter; }
+
+        void setScriptsConfiguration(const LuaUtil::ScriptsConfiguration* config) { mScriptsConfiguration = config; }
+        const LuaUtil::ScriptsConfiguration* getScriptsConfiguration() const { return mScriptsConfiguration; }
 
         /*************************************************************************
          *
@@ -391,6 +399,8 @@ namespace ESM
         const std::map<int, int>* mContentFileMapping = nullptr;
 
         ActorIdConverter* mActorIdConverter = nullptr;
+
+        const LuaUtil::ScriptsConfiguration* mScriptsConfiguration = nullptr;
     };
 }
 #endif

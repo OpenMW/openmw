@@ -3,6 +3,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
+#include <components/lua/configuration.hpp>
 #include <components/lua/luastateptr.hpp>
 #include <components/lua/serialization.hpp>
 
@@ -164,7 +165,15 @@ void ESM::LuaScripts::load(ESMReader& esm)
 {
     while (esm.isNextSub("LUAS"))
     {
-        VFS::Path::Normalized name(esm.getHString());
+        int32_t id = -1;
+        if (esm.getFormatVersion() <= ESM::MaxLuaScriptPathFormatVersion)
+        {
+            VFS::Path::Normalized name(esm.getHString());
+            if (const LuaUtil::ScriptsConfiguration* config = esm.getScriptsConfiguration())
+                id = config->findId(name).value_or(-1);
+        }
+        else
+            esm.getHT(id);
         std::string data = loadLuaBinaryData(esm);
         std::vector<LuaTimer> timers;
         while (esm.isNextSub("LUAT"))
@@ -177,7 +186,7 @@ void ESM::LuaScripts::load(ESMReader& esm)
             timer.mCallbackArgument = loadLuaBinaryData(esm);
             timers.push_back(std::move(timer));
         }
-        mScripts.push_back({ std::move(name), std::move(data), std::move(timers) });
+        mScripts.push_back({ id, std::move(data), std::move(timers) });
     }
 }
 
@@ -185,7 +194,7 @@ void ESM::LuaScripts::save(ESMWriter& esm) const
 {
     for (const LuaScript& script : mScripts)
     {
-        esm.writeHNString("LUAS", script.mScriptPath);
+        esm.writeHNT("LUAS", script.mScriptId);
         saveLuaBinaryData(esm, script.mData);
         for (const LuaTimer& timer : script.mTimers)
         {

@@ -225,7 +225,7 @@ CUSTOM, PLAYER: useInterface.lua
 CUSTOM: unload.lua
 CUSTOM: customdata.lua
 )X");
-            mCfg.init(std::move(cfg));
+            mCfg.init(std::move(cfg), false);
         }
 
         int getId(VFS::Path::NormalizedView path) const
