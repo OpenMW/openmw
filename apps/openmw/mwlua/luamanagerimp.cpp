@@ -55,6 +55,11 @@ namespace MWLua
 
             ~BoolScopeGuard() { mValue = false; }
         };
+
+        LocalScripts* asLocal(const LuaUtil::ScriptsContainerPtr& ptr)
+        {
+            return static_cast<LocalScripts*>(*ptr);
+        }
     }
 
     static LuaUtil::LuaStateSettings createLuaStateSettings()
@@ -222,16 +227,21 @@ namespace MWLua
 
         mObjectLists.update();
 
-        for (auto scripts : mQueuedAutoStartedScripts)
-            scripts->addAutoStartedScripts();
+        for (const LuaUtil::ScriptsContainerPtr& ptr : mQueuedAutoStartedScripts)
+        {
+            if (LocalScripts* scripts = asLocal(ptr))
+                scripts->addAutoStartedScripts();
+        }
         mQueuedAutoStartedScripts.clear();
 
-        std::erase_if(mActiveLocalScripts,
-            [](const LocalScripts* l) { return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted(); });
+        std::erase_if(mActiveLocalScripts, [](const LuaUtil::ScriptsContainerPtr& ptr) {
+            LocalScripts* l = asLocal(ptr);
+            return l == nullptr || l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted();
+        });
 
         mGlobalScripts.statsNextFrame();
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->statsNextFrame();
+        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+            asLocal(ptr)->statsNextFrame();
 
         mLuaEvents.finalizeEventBatch();
 
@@ -240,8 +250,8 @@ namespace MWLua
         {
             mMenuScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
-            for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
+            for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+                asLocal(ptr)->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
         }
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
@@ -258,8 +268,8 @@ namespace MWLua
             bool isPaused = timeManager.isPaused();
 
             float frameDuration = MWBase::Environment::get().getFrameDuration();
-            for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->update(isPaused ? 0 : frameDuration);
+            for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+                asLocal(ptr)->update(isPaused ? 0 : frameDuration);
             mGlobalScripts.update(isPaused ? 0 : frameDuration);
 
             mScriptTracker.unloadInactiveScripts(lua);
@@ -414,9 +424,9 @@ namespace MWLua
         if (!localScripts)
         {
             localScripts = createLocalScripts(ptr);
-            mQueuedAutoStartedScripts.push_back(localScripts);
+            mQueuedAutoStartedScripts.push_back(localScripts->getWeakPointer());
         }
-        mActiveLocalScripts.insert(localScripts);
+        mActiveLocalScripts.insert(localScripts->getWeakPointer());
         mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
     }
 
@@ -625,11 +635,11 @@ namespace MWLua
             if (!autoStartConf.empty())
             {
                 localScripts = createLocalScripts(ptr, std::move(autoStartConf));
-                mQueuedAutoStartedScripts.push_back(localScripts);
+                mQueuedAutoStartedScripts.push_back(localScripts->getWeakPointer());
             }
         }
         if (localScripts)
-            mActiveLocalScripts.insert(localScripts);
+            mActiveLocalScripts.insert(localScripts->getWeakPointer());
     }
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
@@ -638,7 +648,10 @@ namespace MWLua
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (localScripts)
         {
-            mActiveLocalScripts.erase(localScripts);
+            // TODO replace with mActiveLocalScripts.erase(localScripts) when we switch to C++23
+            auto it = mActiveLocalScripts.find(localScripts);
+            if (it != mActiveLocalScripts.end())
+                mActiveLocalScripts.erase(it);
             if (!MWBase::Environment::get().getWorldModel()->getPtr(getId(ptr)).isEmpty())
                 mEngineEvents.addToQueue(EngineEvents::OnInactive{ getId(ptr) });
         }
@@ -672,7 +685,7 @@ namespace MWLua
             if (ptr.isInCell() && MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell()))
             {
                 localScripts->setActive(true, false);
-                mActiveLocalScripts.insert(localScripts);
+                mActiveLocalScripts.insert(localScripts->getWeakPointer());
             }
         }
         localScripts->addCustomScript(scriptId, initData);
@@ -831,8 +844,11 @@ namespace MWLua
             scripts->load(localData[id]);
         }
 
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->setActive(true);
+        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+        {
+            if (LocalScripts* scripts = asLocal(ptr))
+                scripts->setActive(true);
+        }
 
         if (mGlobalScriptsStarted)
         {
@@ -946,8 +962,11 @@ namespace MWLua
 
         std::vector<Stats> activeStats;
         mGlobalScripts.collectStats(activeStats);
-        for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->collectStats(activeStats);
+        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+        {
+            if (LocalScripts* scripts = asLocal(ptr))
+                scripts->collectStats(activeStats);
+        }
 
         std::vector<Stats> selectedStats;
         MWWorld::Ptr selectedPtr = MWBase::Environment::get().getWindowManager()->getConsoleSelectedObject();
