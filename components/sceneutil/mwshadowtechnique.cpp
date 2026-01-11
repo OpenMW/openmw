@@ -1374,6 +1374,11 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 pos_x += static_cast<unsigned int>(camera->getViewport()->width()) + 40;
             }
 
+            if (_useFrontFaceCulling)
+                camera->setCullingMode(camera->getCullingMode() | osg::CullSettings::CLUSTER_CULLING);
+            else
+                camera->setCullingMode(camera->getCullingMode() & ~osg::CullSettings::CLUSTER_CULLING);
+
             // transform polytope in model coords into light spaces eye coords.
             osg::Matrixd invertModelView;
             invertModelView.invert(camera->getViewMatrix());
