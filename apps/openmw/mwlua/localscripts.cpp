@@ -16,6 +16,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "context.hpp"
+#include "luamanagerimp.hpp"
 
 namespace sol
 {
@@ -31,6 +32,20 @@ namespace sol
 
 namespace MWLua
 {
+    void SelfObject::cacheStat(LuaManager& manager, SelfObject::CachedStat key, sol::main_object value)
+    {
+        if (mStatsCache.empty())
+        {
+            manager.addAction(
+                [obj = Object(*this)] {
+                    LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+                    if (scripts)
+                        scripts->applyStatsCache();
+                },
+                "StatUpdateAction");
+        }
+        mStatsCache[std::move(key)] = std::move(value);
+    }
 
     void LocalScripts::initializeSelfPackage(const Context& context)
     {

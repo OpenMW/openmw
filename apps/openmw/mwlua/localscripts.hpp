@@ -15,6 +15,8 @@
 namespace MWLua
 {
     struct Context;
+    class LocalScripts;
+    class LuaManager;
 
     struct SelfObject : public LObject
     {
@@ -52,9 +54,22 @@ namespace MWLua
             , mIsActive(false)
         {
         }
+
+        const sol::main_object* getCachedStat(const CachedStat& key) const
+        {
+            auto it = mStatsCache.find(key);
+            if (it != mStatsCache.end())
+                return &it->second;
+            return nullptr;
+        }
+        void cacheStat(LuaManager&, CachedStat, sol::main_object);
+
         MWBase::LuaManager::ActorControls mControls;
-        std::map<CachedStat, sol::main_object> mStatsCache;
         bool mIsActive;
+
+    private:
+        friend class LocalScripts;
+        std::map<CachedStat, sol::main_object> mStatsCache;
     };
 
     class LocalScripts : public LuaUtil::ScriptsContainer
