@@ -158,7 +158,7 @@ MatchSunlightToSunTooltip: |-
 
     Detta alternativ gör att solljuskällans position matchar solens synliga position.
 MaxLights: "Max antal ljuskällor"
-MaxLightsValue: "Max antal ljuskällor ({value, number, ::.00})"
+MaxLightsValue: "Max antal ljuskällor ({value, number, :: group-off})"
 MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"

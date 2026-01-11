@@ -157,7 +157,7 @@ MatchSunlightToSunTooltip: |-
 
     Cette option aligne la source lumineuse du soleil sur la position réelle du soleil.
 MaxLights: "Maximum de sources lumineuses"
-MaxLightsValue: "Maximum de sources lumineuses ({value, number, ::.00})"
+MaxLightsValue: "Maximum de sources lumineuses ({value, number, :: group-off})"
 MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"

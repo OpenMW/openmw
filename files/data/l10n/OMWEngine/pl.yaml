@@ -157,7 +157,7 @@ MatchSunlightToSunTooltip: |-
 
     Ta opcja sprawia, że źródło światła słonecznego zgadza się z faktyczną pozycją słońca.
 MaxLights: "Maksymalna liczba świateł"
-MaxLightsValue: "Maksymalna liczba świateł ({value, number, ::.00})"
+MaxLightsValue: "Maksymalna liczba świateł ({value, number, :: group-off})"
 MaxLightsTooltip: "Domyślnie: 8\nMaksymalna liczba świateł na obiekt.\n\nNiska wartość = efekt 'wyskakiwania' świateł, jak w klasycznym trybie."
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"

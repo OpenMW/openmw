@@ -157,7 +157,7 @@ MatchSunlightToSunTooltip: |-
 
     Diese Option passt die Position der Sonnenlichtquelle an die sichtbare Position der Sonne an.
 MaxLights: "Maximale Anzahl von Lichtquellen pro Objekt"
-MaxLightsValue: "Maximale Anzahl von Lichtquellen pro Objekt ({value, number, ::.00})"
+MaxLightsValue: "Maximale Anzahl von Lichtquellen pro Objekt ({value, number, :: group-off})"
 MaxLightsTooltip: "Standard: 8\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"
 MenuTransparency: "Menü-Transparenz"

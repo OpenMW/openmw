@@ -157,7 +157,7 @@ MatchSunlightToSunTooltip: |-
 
     This option makes the sun light source's position match the sun's position.
 MaxLights: "Max Lights"
-MaxLightsValue: "Max Lights ({value, number, ::.00})"
+MaxLightsValue: "Max Lights ({value, number, :: group-off})"
 MaxLightsTooltip: "Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."
 MenuHelpDelay: "Menu Help Delay"
 MenuTransparency: "Menu Transparency"
