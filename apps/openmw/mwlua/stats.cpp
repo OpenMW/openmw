@@ -52,9 +52,8 @@ namespace
         if (obj.isSelfObject())
         {
             SelfObject* self = obj.asSelfObject();
-            auto it = self->mStatsCache.find({ setter, index, prop });
-            if (it != self->mStatsCache.end())
-                return it->second;
+            if (auto value = self->getCachedStat({ setter, index, prop }))
+                return *value;
         }
         return sol::make_object(context.mLua->unsafeState(), getter(obj.ptr()));
     }
@@ -64,19 +63,6 @@ namespace MWLua
 {
     namespace
     {
-        static void addStatUpdateAction(MWLua::LuaManager* manager, const SelfObject& obj)
-        {
-            if (!obj.mStatsCache.empty())
-                return; // was already added before
-            manager->addAction(
-                [obj = Object(obj)] {
-                    LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
-                    if (scripts)
-                        scripts->applyStatsCache();
-                },
-                "StatUpdateAction");
-        }
-
         static void setCreatureValue(Index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
@@ -125,9 +111,8 @@ namespace MWLua
                     return;
 
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &setNpcValue, attributeId, "skillIncreasesForAttribute" }]
-                    = sol::main_object(value);
+                obj->cacheStat(*context.mLuaManager,
+                    SelfObject::CachedStat{ &setNpcValue, attributeId, "skillIncreasesForAttribute" }, value);
             }
         };
 
@@ -160,10 +145,8 @@ namespace MWLua
                     return;
 
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{
-                    &setNpcValue, specialization, "skillIncreasesForSpecialization" }]
-                    = sol::main_object(value);
+                obj->cacheStat(*context.mLuaManager,
+                    SelfObject::CachedStat{ &setNpcValue, specialization, "skillIncreasesForSpecialization" }, value);
             }
         };
 
@@ -186,9 +169,8 @@ namespace MWLua
             void setCurrent(const Context& context, const sol::object& value) const
             {
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &setCreatureValue, std::monostate{}, "current" }]
-                    = sol::main_object(value);
+                obj->cacheStat(*context.mLuaManager,
+                    SelfObject::CachedStat{ &setCreatureValue, std::monostate{}, "current" }, value);
             }
 
             sol::object getProgress(const Context& context) const
@@ -207,9 +189,8 @@ namespace MWLua
                     return;
 
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &setNpcValue, std::monostate{}, "progress" }]
-                    = sol::main_object(value);
+                obj->cacheStat(
+                    *context.mLuaManager, SelfObject::CachedStat{ &setNpcValue, std::monostate{}, "progress" }, value);
             }
 
             SkillIncreasesForAttributeStats getSkillIncreasesForAttributeStats() const
@@ -262,9 +243,8 @@ namespace MWLua
             void cache(const Context& context, std::string_view prop, const sol::object& value) const
             {
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }]
-                    = sol::main_object(value);
+                obj->cacheStat(
+                    *context.mLuaManager, SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }, value);
             }
 
             static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
@@ -324,9 +304,8 @@ namespace MWLua
             void cache(const Context& context, std::string_view prop, const sol::object& value) const
             {
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mId, prop }]
-                    = sol::main_object(value);
+                obj->cacheStat(
+                    *context.mLuaManager, SelfObject::CachedStat{ &AttributeStat::setValue, mId, prop }, value);
             }
 
             static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
@@ -411,8 +390,7 @@ namespace MWLua
             void cache(const Context& context, std::string_view prop, const sol::object& value) const
             {
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mId, prop }] = sol::main_object(value);
+                obj->cacheStat(*context.mLuaManager, SelfObject::CachedStat{ &SkillStat::setValue, mId, prop }, value);
             }
 
             static void setValue(Index index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
@@ -474,9 +452,8 @@ namespace MWLua
             void cache(const Context& context, std::string_view prop, const sol::object& value) const
             {
                 SelfObject* obj = mObject.asSelfObject();
-                addStatUpdateAction(context.mLuaManager, *obj);
-                obj->mStatsCache[SelfObject::CachedStat{ &AIStat::setValue, static_cast<int>(mIndex), prop }]
-                    = sol::main_object(value);
+                obj->cacheStat(*context.mLuaManager,
+                    SelfObject::CachedStat{ &AIStat::setValue, static_cast<int>(mIndex), prop }, value);
             }
 
             static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
