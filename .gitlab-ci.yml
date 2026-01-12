@@ -99,6 +99,7 @@ Ubuntu_GCC_preprocess:
   artifacts:
     paths:
       - build/install/
+      - "**/CMakeCache.txt"
 
 Coverity:
   tags:
@@ -591,6 +592,7 @@ Ubuntu_GCC_integration_tests_asan:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+      - "**/CMakeCache.txt"
 
 macOS15_Xcode16_amd64:
   extends: .MacOS
@@ -818,6 +820,7 @@ macOS15_Xcode16_arm64:
     - MSVC2022_64_Ninja/*.ninja_log
     - MSVC2022_64_Ninja/**/*.ninja_log
     - "*_to-be-merged.txt"
+    - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
@@ -1059,6 +1062,7 @@ Windows_Ninja_CacheInit:
     - MSVC2022_64/**/*.log
     - MSVC2022_64/*.binlog
     - "*_to-be-merged.txt"
+    - "**/CMakeCache.txt"
   variables:
     CCACHE_SIZE: 2.5G
     targets: ALL_BUILD
@@ -1211,6 +1215,7 @@ Windows_MSBuild_CacheInit:
   artifacts:
     paths:
       - build/install/
+      - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
 
@@ -1246,6 +1251,7 @@ Windows_MSBuild_CacheInit:
       untracked: false
       paths:
         - "openmw.flatpak"
+        - "**/CMakeCache.txt"
     # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
     # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
     timeout: 4h
