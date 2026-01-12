@@ -12,6 +12,7 @@
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadmgef.hpp> // for converting magic effect id to string & back
 
+#include "idcollection.hpp"
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
 
@@ -248,8 +249,12 @@ namespace CSMWorld
     template <typename ESXRecordT>
     class EffectsListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
+        const IdCollection<ESM::MagicEffect>* mMagicEffects = nullptr;
+
     public:
         EffectsListAdapter() = default;
+
+        void setMagicEffects(const IdCollection<ESM::MagicEffect>* magicEffects) { mMagicEffects = magicEffects; }
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {

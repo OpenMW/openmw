@@ -58,6 +58,29 @@ const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter(UniversalId
     return *iter->second;
 }
 
+void CSMWorld::RefIdCollection::setMagicEffects(const IdCollection<ESM::MagicEffect>* magicEffects)
+{
+    for (auto& nestedPair : mNestedAdapters)
+    {
+        if (nestedPair.first->mColumnId == Columns::ColumnId_EffectList)
+        {
+            auto itPotion = nestedPair.second.find(UniversalId::Type_Potion);
+            if (itPotion != nestedPair.second.end())
+            {
+                auto adapter = static_cast<EffectsRefIdAdapter<ESM::Potion>*>(itPotion->second);
+                adapter->setMagicEffects(magicEffects);
+            }
+
+            auto itIngred = nestedPair.second.find(UniversalId::Type_Ingredient);
+            if (itIngred != nestedPair.second.end())
+            {
+                auto adapter = static_cast<IngredEffectRefIdAdapter*>(itIngred->second);
+                adapter->setMagicEffects(magicEffects);
+            }
+        }
+    }
+}
+
 CSMWorld::RefIdCollection::RefIdCollection()
 {
     BaseColumns baseColumns;

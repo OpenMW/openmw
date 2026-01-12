@@ -22,6 +22,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    struct MagicEffect;
 }
 
 namespace CSMWorld
@@ -30,6 +31,9 @@ namespace CSMWorld
     struct RecordBase;
     struct NestedTableWrapperBase;
     class NestedRefIdAdapterBase;
+
+    template <typename ESXRecordT>
+    class IdCollection;
 
     class RefIdColumn : public NestableColumn
     {
@@ -145,6 +149,9 @@ namespace CSMWorld
 
         const RefIdData& getDataSet() const; // I can't figure out a better name for this one :(
         void copyTo(int index, RefIdCollection& target) const;
+
+        void setMagicEffects(const IdCollection<ESM::MagicEffect>* magicEffects);
+        /// Attaches MGEF context to adapters that involve magic effects (potions and ingredients)
     };
 }
 
