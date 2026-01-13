@@ -13,6 +13,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadskil.hpp>
 
+#include "idcollection.hpp"
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionColumns::PotionColumns(const InventoryColumns& columns)
@@ -145,6 +146,17 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
         throw std::runtime_error("index out of range");
 
     ESM::RefId effectId = record.get().mData.mEffectID[subRowIndex];
+    bool targetSkill = false, targetAttribute = false;
+    if (!effectId.empty() && mMagicEffects)
+    {
+        int recordIndex = mMagicEffects->searchId(effectId);
+        if (recordIndex != -1)
+        {
+            const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+            targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+            targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
+        }
+    }
 
     switch (subColIndex)
     {
@@ -152,18 +164,14 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
             return ESM::MagicEffect::refIdToIndex(effectId);
         case 1:
         {
-            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
-                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
-                || effectId == ESM::MagicEffect::AbsorbSkill)
+            if (targetSkill)
                 return record.get().mData.mSkills[subRowIndex];
             else
                 return QVariant();
         }
         case 2:
         {
-            if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
-                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
-                || effectId == ESM::MagicEffect::AbsorbAttribute)
+            if (targetAttribute)
                 return record.get().mData.mAttributes[subRowIndex];
             else
                 return QVariant();
@@ -184,18 +192,26 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
         throw std::runtime_error("index out of range");
 
     ESM::RefId effectId = ESM::MagicEffect::indexToRefId(value.toInt());
+    bool targetSkill = false, targetAttribute = false;
 
     switch (subColIndex)
     {
         case 0:
             ingredient.mData.mEffectID[subRowIndex] = effectId;
-            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
-                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
-                || effectId == ESM::MagicEffect::AbsorbSkill)
+            if (!effectId.empty() && mMagicEffects)
+            {
+                int recordIndex = mMagicEffects->searchId(effectId);
+                if (recordIndex != -1)
+                {
+                    const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+                    targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+                    targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
+                }
+            }
+
+            if (targetSkill)
                 ingredient.mData.mAttributes[subRowIndex] = -1;
-            else if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
-                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
-                || effectId == ESM::MagicEffect::AbsorbAttribute)
+            else if (targetAttribute)
                 ingredient.mData.mSkills[subRowIndex] = -1;
             else
             {

@@ -321,28 +321,32 @@ namespace CSMWorld
                 throw std::runtime_error("index out of range");
 
             ESM::ENAMstruct effect = effectsList[subRowIndex].mData;
+            bool targetSkill = false, targetAttribute = false;
+            if (mMagicEffects)
+            {
+                int recordIndex = mMagicEffects->searchId(effect.mEffectID);
+                if (recordIndex != -1)
+                {
+                    const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+                    targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+                    targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
+                }
+            }
+
             switch (subColIndex)
             {
                 case 0:
                     return ESM::MagicEffect::refIdToIndex(effect.mEffectID);
                 case 1:
                 {
-                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
-                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
-                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
-                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
-                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                    if (targetSkill)
                         return effect.mSkill;
                     else
                         return QVariant();
                 }
                 case 2:
                 {
-                    if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
-                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
-                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
-                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
-                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                    if (targetAttribute)
                         return effect.mAttribute;
                     else
                         return QVariant();
@@ -372,22 +376,26 @@ namespace CSMWorld
                 throw std::runtime_error("index out of range");
 
             ESM::ENAMstruct effect = effectsList[subRowIndex].mData;
+            bool targetSkill = false, targetAttribute = false;
+
             switch (subColIndex)
             {
                 case 0:
                 {
                     effect.mEffectID = ESM::MagicEffect::indexToRefId(value.toInt());
-                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
-                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
-                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
-                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
-                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                    if (mMagicEffects)
+                    {
+                        int recordIndex = mMagicEffects->searchId(effect.mEffectID);
+                        if (recordIndex != -1)
+                        {
+                            const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+                            targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+                            targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
+                        }
+                    }
+                    if (targetSkill)
                         effect.mAttribute = -1;
-                    else if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
-                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
-                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
-                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
-                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                    else if (targetAttribute)
                         effect.mSkill = -1;
                     else
                     {
