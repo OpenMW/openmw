@@ -22,6 +22,9 @@
     Bug #8840: Lua UI elements accept table-like objects as properties, causing crashes
     Bug #8842: Loading game with --load-savegame may not detect the original character profile
     Bug #8847: Physics shape "is actor?" test should be based on ratio, not abs diff
+    Bug #8864: Heavy snowfall and rainfall are broken
+    Bug #8884: Object paging LOD level selection is unreliable
+    Bug #8917: Lua: Spawned gold stacks don't pick a model
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
     Feature #7830: Preserve global script targets not created by content files
@@ -36,6 +39,8 @@
     Feature #8816: Werewolf transformation binding
     Feature #8826: OMWFX: Expose the sunlight direction
     Feature #8841: Time advancement binding
+    Feature #8874: esmtool dump should output cell reference rotation and door destination rotation
+    Feature #8911: Custom creature and container records
     Task #8718: Lua: Cell fields can still return empty strings instead of nil values
 
 0.50.0
