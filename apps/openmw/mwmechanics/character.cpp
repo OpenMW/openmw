@@ -1256,11 +1256,14 @@ namespace MWMechanics
         if (mAttackStrength == -1.f)
             mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
-        if (weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+        if (weapclass != ESM::WeaponType::Ranged)
         {
-            mAttackSuccess = mPtr.getClass().evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
-            if (!mAttackSuccess)
-                mAttackStrength = 0.f;
+            if (weapclass != ESM::WeaponType::Thrown)
+            {
+                mAttackSuccess = mPtr.getClass().evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
+                if (!mAttackSuccess)
+                    mAttackStrength = 0.f;
+            }
             playSwishSound();
         }
 
