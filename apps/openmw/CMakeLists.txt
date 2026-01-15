@@ -214,8 +214,6 @@ if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
     )
 endif()
 
-add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
-
 if (ANDROID)
     target_link_libraries(openmw-lib EGL android log z)
 endif (ANDROID)

@@ -313,7 +313,6 @@ add_component_dir (debug
     debugging debuglog gldebug debugdraw writeflags
     )
 
-add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
@@ -660,8 +659,10 @@ endif()
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
 
-target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
-target_compile_definitions(components PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
+target_compile_definitions(components PUBLIC
+    BT_USE_DOUBLE_PRECISION
+    MYGUI_DONT_USE_OBSOLETE=ON
+)
 
 if(OSG_STATIC)
     unset(_osg_plugins_static_files)
