@@ -121,6 +121,7 @@ ForcePerPixelLightingTooltip: |-
     Обратите внимание, что шейдеры растительности и системы частиц игнорируют эту настройку.
 FrameRateHint: "Подсказка: нажмите F3, чтобы показать\nтекущую частоту смены кадров."
 GammaCorrection: "Гамма-коррекция"
+GammaCorrectionValue: "Гамма-коррекция ({value, number, ::.00})"
 GammaDark: "Темно"
 GammaLight: "Светло"
 GmstOverridesL10n: "Строки из ESM-файлов имеют максимальный приоритет"

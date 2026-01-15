@@ -121,6 +121,7 @@ ForcePerPixelLightingTooltip: |-
     Les shaders de végétation au sol et les particules ignorent cette option.
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
 GammaCorrection: "Correction Gamma"
+GammaCorrectionValue: "Correction Gamma ({value, number, ::.00})"
 GammaDark: "Sombre"
 GammaLight: "Clair"
 GmstOverridesL10n: "Les chaînes de caractères des fichiers ESM sont prioritaires"

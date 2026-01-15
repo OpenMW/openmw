@@ -350,7 +350,6 @@
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="0 308 352 18" align="Left Top" name="GammaText">
-                            <Property key="Caption" value="#{OMWEngine:GammaCorrection}"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 332 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
@@ -361,6 +360,8 @@
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="0.1"/>
                             <UserString key="SettingMax" value="3.0"/>
+                            <UserString key="SettingLabelWidget" value="GammaText"/>
+                            <UserString key="SettingLabelCaption" value="GammaCorrectionValue"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 356 352 18" align="Left Top" name="GammaTextDark">
                             <Property key="Caption" value="#{OMWEngine:GammaDark}"/>
