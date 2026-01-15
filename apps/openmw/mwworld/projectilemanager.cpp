@@ -49,7 +49,6 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
-#include "../mwmechanics/weapontype.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -151,6 +150,29 @@ namespace
         lightDiffuseColor /= static_cast<float>(numberOfEffects);
 
         return lightDiffuseColor;
+    }
+
+    osg::Quat lookAt(const osg::Vec3f& pos)
+    {
+        // Rotate the forward vector towards the position (used for gravity-affected projectiles)
+        // Can't use Quat::makeRotate as the shortest angle contains undesirable local roll
+        const float dist = pos.length();
+        if (dist < 1e-4f)
+            return {};
+
+        const osg::Vec3f dir = pos / dist;
+        osg::Vec3f right = dir ^ osg::Z_AXIS;
+        if (right.normalize() < 1e-4f)
+            right = osg::X_AXIS;
+
+        const osg::Vec3f up = right ^ dir;
+
+        osg::Matrixf mat(right.x(), right.y(), right.z(), 0.f, dir.x(), dir.y(), dir.z(), 0.f, up.x(), up.y(), up.z(),
+            0.f, 0.f, 0.f, 0.f, 1.f);
+
+        osg::Quat orient;
+        orient.set(mat);
+        return orient;
     }
 }
 
@@ -349,8 +371,6 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
-        int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
-        state.mThrown = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown;
 
         MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -493,14 +513,7 @@ namespace MWWorld
 
             projectile->setVelocity(projectileState.mVelocity);
 
-            // rotation does not work well for throwing projectiles - their roll angle will depend on shooting
-            // direction.
-            if (!projectileState.mThrown)
-            {
-                osg::Quat orient;
-                orient.makeRotate(osg::Vec3f(0, 1, 0), projectileState.mVelocity);
-                projectileState.mNode->setAttitude(orient);
-            }
+            projectileState.mNode->setAttitude(lookAt(projectileState.mVelocity));
 
             update(projectileState, duration);
 
@@ -710,8 +723,6 @@ namespace MWWorld
                 MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getCorrectedModel(ptr);
-                int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
-                state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
                 state.mProjectileId
                     = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, false);
