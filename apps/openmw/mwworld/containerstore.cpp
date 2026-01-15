@@ -404,12 +404,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& i
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
-    const Ptr& itemPtr, int count, bool /*allowAutoEquip*/, bool resolve)
+    const ConstPtr& itemPtr, int count, bool /*allowAutoEquip*/, bool resolve)
 {
     Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
     MWWorld::ContainerStoreIterator it = addImp(itemPtr, count, resolve);
-    itemPtr.getRefData().setLuaScripts(nullptr); // clear Lua scripts on the original (removed) item.
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
@@ -468,7 +467,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, int count, bool markModified)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const ConstPtr& ptr, int count, bool markModified)
 {
     if (markModified)
         resolve();
