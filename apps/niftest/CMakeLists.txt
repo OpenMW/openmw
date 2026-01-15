@@ -22,5 +22,5 @@ if (WIN32)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(niftest PRIVATE <filesystem>)
+    target_precompile_headers(niftest REUSE_FROM components)
 endif()

@@ -6,7 +6,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw_esm_refid_benchmark PRIVATE <algorithm>)
+    target_precompile_headers(openmw_esm_refid_benchmark REUSE_FROM components)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)

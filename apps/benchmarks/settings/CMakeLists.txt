@@ -9,7 +9,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw_settings_access_benchmark PRIVATE <algorithm>)
+    target_precompile_headers(openmw_settings_access_benchmark REUSE_FROM components)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)

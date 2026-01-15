@@ -30,10 +30,5 @@ if (WIN32)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw-navmeshtool PRIVATE
-        <algorithm>
-        <memory>
-        <string>
-        <vector>
-    )
+    target_precompile_headers(openmw-navmeshtool REUSE_FROM components)
 endif()

@@ -23,9 +23,5 @@ if (WIN32)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(bsatool PRIVATE
-        <filesystem>
-        <fstream>
-        <vector>
-    )
+    target_precompile_headers(bsatool  REUSE_FROM components)
 endif()
