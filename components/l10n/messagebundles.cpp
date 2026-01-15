@@ -263,7 +263,10 @@ namespace L10n
         YAML::Node data = YAML::Load(input);
         std::string localeName = lang.getName();
         if (localeName == "gmst")
+        {
             loadGmstYaml(data, mGmsts);
+            mGmstsLoaded = true;
+        }
         else
             loadLocaleYaml(data, lang, mBundles[localeName]);
     }
