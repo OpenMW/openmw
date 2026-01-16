@@ -112,7 +112,7 @@ namespace MWBase
 
         WindowManager() {}
 
-        virtual ~WindowManager() {}
+        virtual ~WindowManager() = default;
 
         /// @note This method will block until the video finishes playing
         /// (and will continually update the window while doing so)
@@ -384,6 +384,8 @@ namespace MWBase
 
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
+
+        virtual void inventoryUpdated(const MWWorld::Ptr& ptr) const = 0;
 
         /// Return the window that should receive controller events
         virtual MWGui::WindowBase* getActiveControllerWindow() = 0;

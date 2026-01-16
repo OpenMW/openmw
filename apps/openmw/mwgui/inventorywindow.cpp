@@ -172,8 +172,6 @@ namespace MWGui
         auto tradeModel = std::make_unique<TradeItemModel>(std::make_unique<InventoryItemModel>(mPtr), MWWorld::Ptr());
         mTradeModel = tradeModel.get();
 
-        mPtr.getClass().getInventoryStore(mPtr).setContListener(this);
-
         if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
             mSortModel->setSourceModel(std::move(tradeModel));
         else
@@ -932,14 +930,10 @@ namespace MWGui
         mPreview->rebuild();
     }
 
-    void InventoryWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    void InventoryWindow::onInventoryUpdate(const MWWorld::Ptr& ptr)
     {
-        mUpdateNextFrame = true;
-    }
-
-    void InventoryWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
-    {
-        mUpdateNextFrame = true;
+        if (ptr == mPtr)
+            mUpdateNextFrame = true;
     }
 
     MyGUI::IntSize InventoryWindow::getPreviewViewportSize() const

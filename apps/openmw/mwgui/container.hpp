@@ -7,8 +7,6 @@
 
 #include <components/misc/notnullptr.hpp>
 
-#include "../mwworld/containerstore.hpp"
-
 namespace MyGUI
 {
     class Gui;
@@ -22,7 +20,7 @@ namespace MWGui
     class SortFilterItemModel;
     class ItemTransfer;
 
-    class ContainerWindow : public WindowBase, public ReferenceInterface, public MWWorld::ContainerStoreListener
+    class ContainerWindow : public WindowBase, public ReferenceInterface
     {
     public:
         explicit ContainerWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer);
@@ -43,8 +41,7 @@ namespace MWGui
 
         void treatNextOpenAsLoot() { mTreatNextOpenAsLoot = true; }
 
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
+        void onInventoryUpdate(const MWWorld::Ptr& ptr) override;
 
         std::string_view getWindowIdForLua() const override { return "Container"; }
 
