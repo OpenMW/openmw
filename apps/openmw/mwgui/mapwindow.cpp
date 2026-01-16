@@ -1397,7 +1397,7 @@ namespace MWGui
         NoDrop::setAlpha(alpha);
         // can't allow showing map with partial transparency, as the fog of war will also go transparent
         // and reveal parts of the map you shouldn't be able to see
-        mLocalMap->setVisible(alpha == 1);
+        mLocalMap->setVisible(!mGlobalMap->getVisible() && alpha == 1);
     }
 
     void MapWindow::customMarkerCreated(MyGUI::Widget* marker)
