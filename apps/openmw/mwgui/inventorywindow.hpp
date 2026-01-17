@@ -142,6 +142,7 @@ namespace MWGui
         void dragItem(MyGUI::Widget* sender, std::size_t count);
         void transferItem(MyGUI::Widget* sender, std::size_t count);
         void dropItem(MyGUI::Widget* sender, std::size_t count);
+        void equipItem(std::size_t count);
 
         void onWindowResize(MyGUI::Window* sender);
         void onFilterChanged(MyGUI::Widget* sender);
