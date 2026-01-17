@@ -408,6 +408,13 @@ if (WIN32)
         -DNOMB # name conflict with MWGui::MessageBox
         -DNOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
     )
+
+    # Put Win32 API into UTF-16 mode
+    # We really don't care, but targets linking with Qt 6 (not 5 and earlier) inherit this, and mixing and matching stops us reusing precompiled headers
+    add_compile_definitions(
+        _UNICODE
+        UNICODE
+    )
 endif()
 
 if(OPENMW_USE_SYSTEM_BULLET)
