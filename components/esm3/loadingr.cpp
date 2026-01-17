@@ -3,11 +3,46 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/loadmgef.hpp>
 #include <components/misc/concepts.hpp>
 
 namespace ESM
 {
-    template <Misc::SameAsWithoutCvref<Ingredient::IRDTstruct> T>
+    namespace
+    {
+        // IRDT format defined by Morrowind.esm
+        struct EsmIRDTstruct
+        {
+            float mWeight;
+            int32_t mValue, mEffectID[4], mSkills[4], mAttributes[4];
+        };
+
+        void toBinary(const Ingredient::IRDTstruct& src, EsmIRDTstruct& dst)
+        {
+            dst.mWeight = src.mWeight;
+            dst.mValue = src.mValue;
+            for (int i = 0; i < 4; ++i)
+            {
+                dst.mEffectID[i] = ESM::MagicEffect::refIdToIndex(src.mEffectID[i]);
+                dst.mSkills[i] = src.mSkills[i];
+                dst.mAttributes[i] = src.mAttributes[i];
+            }
+        }
+
+        void fromBinary(const EsmIRDTstruct& src, Ingredient::IRDTstruct& dst)
+        {
+            dst.mWeight = src.mWeight;
+            dst.mValue = src.mValue;
+            for (int i = 0; i < 4; ++i)
+            {
+                dst.mEffectID[i] = ESM::MagicEffect::indexToRefId(src.mEffectID[i]);
+                dst.mSkills[i] = src.mSkills[i];
+                dst.mAttributes[i] = src.mAttributes[i];
+            }
+        }
+    }
+
+    template <Misc::SameAsWithoutCvref<EsmIRDTstruct> T>
     void decompose(T&& v, const auto& f)
     {
         f(v.mWeight, v.mValue, v.mEffectID, v.mSkills, v.mAttributes);
@@ -36,7 +71,9 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("IRDT"):
-                    esm.getSubComposite(mData);
+                    EsmIRDTstruct bin;
+                    esm.getSubComposite(bin);
+                    fromBinary(bin, mData);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
@@ -63,15 +100,21 @@ namespace ESM
         // horrible hack to fix broken data in records
         for (int i = 0; i < 4; ++i)
         {
-            if (mData.mEffectID[i] != 85 && mData.mEffectID[i] != 22 && mData.mEffectID[i] != 17
-                && mData.mEffectID[i] != 79 && mData.mEffectID[i] != 74)
+            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::DamageAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::DrainAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::FortifyAttribute
+                && mData.mEffectID[i] != ESM::MagicEffect::RestoreAttribute)
             {
                 mData.mAttributes[i] = -1;
             }
 
             // is this relevant in cycle from 0 to 4?
-            if (mData.mEffectID[i] != 89 && mData.mEffectID[i] != 26 && mData.mEffectID[i] != 21
-                && mData.mEffectID[i] != 83 && mData.mEffectID[i] != 78)
+            if (mData.mEffectID[i] != ESM::MagicEffect::AbsorbSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::DamageSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::DrainSkill
+                && mData.mEffectID[i] != ESM::MagicEffect::FortifySkill
+                && mData.mEffectID[i] != ESM::MagicEffect::RestoreSkill)
             {
                 mData.mSkills[i] = -1;
             }
@@ -90,7 +133,9 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeNamedComposite("IRDT", mData);
+        EsmIRDTstruct bin;
+        toBinary(mData, bin);
+        esm.writeNamedComposite("IRDT", bin);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }
@@ -102,7 +147,7 @@ namespace ESM
         mData.mValue = 0;
         for (int i = 0; i < 4; ++i)
         {
-            mData.mEffectID[i] = 0;
+            mData.mEffectID[i] = ESM::MagicEffect::WaterBreathing;
             mData.mSkills[i] = 0;
             mData.mAttributes[i] = 0;
         }

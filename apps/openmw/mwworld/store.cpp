@@ -110,9 +110,6 @@ namespace MWWorld
         return ptr;
     }
 
-    // Need to instantiate these before they're used
-    template class IndexedStore<ESM::MagicEffect>;
-
     template <class T, class Id>
     TypedDynamicStore<T, Id>::TypedDynamicStore()
     {
@@ -976,10 +973,6 @@ namespace MWWorld
         TypedDynamicStore<ESM::GameSetting>::setUp();
     }
 
-    // Magic effect
-    //=========================================================================
-    Store<ESM::MagicEffect>::Store() {}
-
     // Attribute
     //=========================================================================
 
@@ -1260,7 +1253,7 @@ template class MWWorld::TypedDynamicStore<ESM::ItemLevList>;
 // template class MWWorld::Store<ESM::LandTexture>;
 template class MWWorld::TypedDynamicStore<ESM::Light>;
 template class MWWorld::TypedDynamicStore<ESM::Lockpick>;
-// template class MWWorld::Store<ESM::MagicEffect>;
+template class MWWorld::TypedDynamicStore<ESM::MagicEffect>;
 template class MWWorld::TypedDynamicStore<ESM::Miscellaneous>;
 template class MWWorld::TypedDynamicStore<ESM::NPC>;
 // template class MWWorld::Store<ESM::Pathgrid>;

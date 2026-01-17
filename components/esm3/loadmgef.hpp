@@ -83,10 +83,10 @@ namespace ESM
             float mUnknown2; // Called "Size Cap" in CS
         }; // 36 bytes
 
-        /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
-        static short getResistanceEffect(short effect);
-        /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
-        static short getWeaknessEffect(short effect);
+        /// Returns the effect that provides resistance against \a effect (or empty RefId if there's none)
+        static RefId getResistanceEffect(RefId effect);
+        /// Returns the effect that induces weakness against \a effect (or empty RefId if there's none)
+        static RefId getWeaknessEffect(RefId effect);
 
         MagnitudeDisplayType getMagnitudeDisplayType() const;
 
@@ -98,17 +98,6 @@ namespace ESM
         ESM::RefId mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
         std::string mDescription;
 
-        // Index of this magical effect. Corresponds to one of the
-        // hard-coded effects in the original engine:
-        // 0-136 in Morrowind
-        // 137 in Tribunal
-        // 138-140 in Bloodmoon (also changes 64?)
-        // 141-142 are summon effects introduced in bloodmoon, but not used
-        // there. They can be redefined in mods by setting the name in GMST
-        // sEffectSummonCreature04/05 creature id in
-        // sMagicCreature04ID/05ID.
-        int32_t mIndex;
-
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 
@@ -117,170 +106,163 @@ namespace ESM
 
         osg::Vec4f getColor() const;
 
-        enum Effects : short
-        {
-            WaterBreathing = 0,
-            SwiftSwim = 1,
-            WaterWalking = 2,
-            Shield = 3,
-            FireShield = 4,
-            LightningShield = 5,
-            FrostShield = 6,
-            Burden = 7,
-            Feather = 8,
-            Jump = 9,
-            Levitate = 10,
-            SlowFall = 11,
-            Lock = 12,
-            Open = 13,
-            FireDamage = 14,
-            ShockDamage = 15,
-            FrostDamage = 16,
-            DrainAttribute = 17,
-            DrainHealth = 18,
-            DrainMagicka = 19,
-            DrainFatigue = 20,
-            DrainSkill = 21,
-            DamageAttribute = 22,
-            DamageHealth = 23,
-            DamageMagicka = 24,
-            DamageFatigue = 25,
-            DamageSkill = 26,
-            Poison = 27,
-            WeaknessToFire = 28,
-            WeaknessToFrost = 29,
-            WeaknessToShock = 30,
-            WeaknessToMagicka = 31,
-            WeaknessToCommonDisease = 32,
-            WeaknessToBlightDisease = 33,
-            WeaknessToCorprusDisease = 34,
-            WeaknessToPoison = 35,
-            WeaknessToNormalWeapons = 36,
-            DisintegrateWeapon = 37,
-            DisintegrateArmor = 38,
-            Invisibility = 39,
-            Chameleon = 40,
-            Light = 41,
-            Sanctuary = 42,
-            NightEye = 43,
-            Charm = 44,
-            Paralyze = 45,
-            Silence = 46,
-            Blind = 47,
-            Sound = 48,
-            CalmHumanoid = 49,
-            CalmCreature = 50,
-            FrenzyHumanoid = 51,
-            FrenzyCreature = 52,
-            DemoralizeHumanoid = 53,
-            DemoralizeCreature = 54,
-            RallyHumanoid = 55,
-            RallyCreature = 56,
-            Dispel = 57,
-            Soultrap = 58,
-            Telekinesis = 59,
-            Mark = 60,
-            Recall = 61,
-            DivineIntervention = 62,
-            AlmsiviIntervention = 63,
-            DetectAnimal = 64,
-            DetectEnchantment = 65,
-            DetectKey = 66,
-            SpellAbsorption = 67,
-            Reflect = 68,
-            CureCommonDisease = 69,
-            CureBlightDisease = 70,
-            CureCorprusDisease = 71,
-            CurePoison = 72,
-            CureParalyzation = 73,
-            RestoreAttribute = 74,
-            RestoreHealth = 75,
-            RestoreMagicka = 76,
-            RestoreFatigue = 77,
-            RestoreSkill = 78,
-            FortifyAttribute = 79,
-            FortifyHealth = 80,
-            FortifyMagicka = 81,
-            FortifyFatigue = 82,
-            FortifySkill = 83,
-            FortifyMaximumMagicka = 84,
-            AbsorbAttribute = 85,
-            AbsorbHealth = 86,
-            AbsorbMagicka = 87,
-            AbsorbFatigue = 88,
-            AbsorbSkill = 89,
-            ResistFire = 90,
-            ResistFrost = 91,
-            ResistShock = 92,
-            ResistMagicka = 93,
-            ResistCommonDisease = 94,
-            ResistBlightDisease = 95,
-            ResistCorprusDisease = 96,
-            ResistPoison = 97,
-            ResistNormalWeapons = 98,
-            ResistParalysis = 99,
-            RemoveCurse = 100,
-            TurnUndead = 101,
-            SummonScamp = 102,
-            SummonClannfear = 103,
-            SummonDaedroth = 104,
-            SummonDremora = 105,
-            SummonAncestralGhost = 106,
-            SummonSkeletalMinion = 107,
-            SummonBonewalker = 108,
-            SummonGreaterBonewalker = 109,
-            SummonBonelord = 110,
-            SummonWingedTwilight = 111,
-            SummonHunger = 112,
-            SummonGoldenSaint = 113,
-            SummonFlameAtronach = 114,
-            SummonFrostAtronach = 115,
-            SummonStormAtronach = 116,
-            FortifyAttack = 117,
-            CommandCreature = 118,
-            CommandHumanoid = 119,
-            BoundDagger = 120,
-            BoundLongsword = 121,
-            BoundMace = 122,
-            BoundBattleAxe = 123,
-            BoundSpear = 124,
-            BoundLongbow = 125,
-            ExtraSpell = 126,
-            BoundCuirass = 127,
-            BoundHelm = 128,
-            BoundBoots = 129,
-            BoundShield = 130,
-            BoundGloves = 131,
-            Corprus = 132,
-            Vampirism = 133,
-            SummonCenturionSphere = 134,
-            SunDamage = 135,
-            StuntedMagicka = 136,
+        static const StringRefId WaterBreathing;
+        static const StringRefId SwiftSwim;
+        static const StringRefId WaterWalking;
+        static const StringRefId Shield;
+        static const StringRefId FireShield;
+        static const StringRefId LightningShield;
+        static const StringRefId FrostShield;
+        static const StringRefId Burden;
+        static const StringRefId Feather;
+        static const StringRefId Jump;
+        static const StringRefId Levitate;
+        static const StringRefId SlowFall;
+        static const StringRefId Lock;
+        static const StringRefId Open;
+        static const StringRefId FireDamage;
+        static const StringRefId ShockDamage;
+        static const StringRefId FrostDamage;
+        static const StringRefId DrainAttribute;
+        static const StringRefId DrainHealth;
+        static const StringRefId DrainMagicka;
+        static const StringRefId DrainFatigue;
+        static const StringRefId DrainSkill;
+        static const StringRefId DamageAttribute;
+        static const StringRefId DamageHealth;
+        static const StringRefId DamageMagicka;
+        static const StringRefId DamageFatigue;
+        static const StringRefId DamageSkill;
+        static const StringRefId Poison;
+        static const StringRefId WeaknessToFire;
+        static const StringRefId WeaknessToFrost;
+        static const StringRefId WeaknessToShock;
+        static const StringRefId WeaknessToMagicka;
+        static const StringRefId WeaknessToCommonDisease;
+        static const StringRefId WeaknessToBlightDisease;
+        static const StringRefId WeaknessToCorprusDisease;
+        static const StringRefId WeaknessToPoison;
+        static const StringRefId WeaknessToNormalWeapons;
+        static const StringRefId DisintegrateWeapon;
+        static const StringRefId DisintegrateArmor;
+        static const StringRefId Invisibility;
+        static const StringRefId Chameleon;
+        static const StringRefId Light;
+        static const StringRefId Sanctuary;
+        static const StringRefId NightEye;
+        static const StringRefId Charm;
+        static const StringRefId Paralyze;
+        static const StringRefId Silence;
+        static const StringRefId Blind;
+        static const StringRefId Sound;
+        static const StringRefId CalmHumanoid;
+        static const StringRefId CalmCreature;
+        static const StringRefId FrenzyHumanoid;
+        static const StringRefId FrenzyCreature;
+        static const StringRefId DemoralizeHumanoid;
+        static const StringRefId DemoralizeCreature;
+        static const StringRefId RallyHumanoid;
+        static const StringRefId RallyCreature;
+        static const StringRefId Dispel;
+        static const StringRefId Soultrap;
+        static const StringRefId Telekinesis;
+        static const StringRefId Mark;
+        static const StringRefId Recall;
+        static const StringRefId DivineIntervention;
+        static const StringRefId AlmsiviIntervention;
+        static const StringRefId DetectAnimal;
+        static const StringRefId DetectEnchantment;
+        static const StringRefId DetectKey;
+        static const StringRefId SpellAbsorption;
+        static const StringRefId Reflect;
+        static const StringRefId CureCommonDisease;
+        static const StringRefId CureBlightDisease;
+        static const StringRefId CureCorprusDisease;
+        static const StringRefId CurePoison;
+        static const StringRefId CureParalyzation;
+        static const StringRefId RestoreAttribute;
+        static const StringRefId RestoreHealth;
+        static const StringRefId RestoreMagicka;
+        static const StringRefId RestoreFatigue;
+        static const StringRefId RestoreSkill;
+        static const StringRefId FortifyAttribute;
+        static const StringRefId FortifyHealth;
+        static const StringRefId FortifyMagicka;
+        static const StringRefId FortifyFatigue;
+        static const StringRefId FortifySkill;
+        static const StringRefId FortifyMaximumMagicka;
+        static const StringRefId AbsorbAttribute;
+        static const StringRefId AbsorbHealth;
+        static const StringRefId AbsorbMagicka;
+        static const StringRefId AbsorbFatigue;
+        static const StringRefId AbsorbSkill;
+        static const StringRefId ResistFire;
+        static const StringRefId ResistFrost;
+        static const StringRefId ResistShock;
+        static const StringRefId ResistMagicka;
+        static const StringRefId ResistCommonDisease;
+        static const StringRefId ResistBlightDisease;
+        static const StringRefId ResistCorprusDisease;
+        static const StringRefId ResistPoison;
+        static const StringRefId ResistNormalWeapons;
+        static const StringRefId ResistParalysis;
+        static const StringRefId RemoveCurse;
+        static const StringRefId TurnUndead;
+        static const StringRefId SummonScamp;
+        static const StringRefId SummonClannfear;
+        static const StringRefId SummonDaedroth;
+        static const StringRefId SummonDremora;
+        static const StringRefId SummonAncestralGhost;
+        static const StringRefId SummonSkeletalMinion;
+        static const StringRefId SummonBonewalker;
+        static const StringRefId SummonGreaterBonewalker;
+        static const StringRefId SummonBonelord;
+        static const StringRefId SummonWingedTwilight;
+        static const StringRefId SummonHunger;
+        static const StringRefId SummonGoldenSaint;
+        static const StringRefId SummonFlameAtronach;
+        static const StringRefId SummonFrostAtronach;
+        static const StringRefId SummonStormAtronach;
+        static const StringRefId FortifyAttack;
+        static const StringRefId CommandCreature;
+        static const StringRefId CommandHumanoid;
+        static const StringRefId BoundDagger;
+        static const StringRefId BoundLongsword;
+        static const StringRefId BoundMace;
+        static const StringRefId BoundBattleAxe;
+        static const StringRefId BoundSpear;
+        static const StringRefId BoundLongbow;
+        static const StringRefId ExtraSpell;
+        static const StringRefId BoundCuirass;
+        static const StringRefId BoundHelm;
+        static const StringRefId BoundBoots;
+        static const StringRefId BoundShield;
+        static const StringRefId BoundGloves;
+        static const StringRefId Corprus;
+        static const StringRefId Vampirism;
+        static const StringRefId SummonCenturionSphere;
+        static const StringRefId SunDamage;
+        static const StringRefId StuntedMagicka;
 
-            // Tribunal only
-            SummonFabricant = 137,
+        // Tribunal only
+        static const StringRefId SummonFabricant;
 
-            // Bloodmoon only
-            SummonWolf = 138,
-            SummonBear = 139,
-            SummonBonewolf = 140,
-            SummonCreature04 = 141,
-            SummonCreature05 = 142,
+        // Bloodmoon only
+        static const StringRefId SummonWolf;
+        static const StringRefId SummonBear;
+        static const StringRefId SummonBonewolf;
+        static const StringRefId SummonCreature04;
+        static const StringRefId SummonCreature05;
 
-            Length
-        };
+        static constexpr int Length = 143;
 
-        static const std::array<std::string, Length> sGmstEffectIds;
-        static const std::array<std::string_view, Length> sIndexNames;
-        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap;
-        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sIndexNameToIndexMap;
-
-        static const std::string& indexToGmstString(int effectID);
-        static std::string_view indexToName(int effectID);
-        static int indexNameToIndex(std::string_view effect);
-        static int effectGmstIdToIndex(std::string_view gmstId);
+        static std::string_view refIdToGmstString(RefId effectId);
+        static RefId effectGmstIdToRefId(std::string_view gmstId);
 
         static RefId indexToRefId(int index);
+        static int refIdToIndex(RefId effectId);
+
+        static std::string_view indexToName(int index);
     };
 }
 #endif

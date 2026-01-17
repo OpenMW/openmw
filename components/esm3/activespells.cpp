@@ -13,61 +13,57 @@ namespace ESM
 {
     namespace
     {
-        bool isSummon(int effectId)
+        bool isSummon(ESM::RefId effectId)
         {
-            switch (effectId)
-            {
-                case MagicEffect::SummonScamp:
-                case MagicEffect::SummonClannfear:
-                case MagicEffect::SummonDaedroth:
-                case MagicEffect::SummonDremora:
-                case MagicEffect::SummonAncestralGhost:
-                case MagicEffect::SummonSkeletalMinion:
-                case MagicEffect::SummonBonewalker:
-                case MagicEffect::SummonGreaterBonewalker:
-                case MagicEffect::SummonBonelord:
-                case MagicEffect::SummonWingedTwilight:
-                case MagicEffect::SummonHunger:
-                case MagicEffect::SummonGoldenSaint:
-                case MagicEffect::SummonFlameAtronach:
-                case MagicEffect::SummonFrostAtronach:
-                case MagicEffect::SummonStormAtronach:
-                case MagicEffect::SummonCenturionSphere:
-                case MagicEffect::SummonFabricant:
-                case MagicEffect::SummonWolf:
-                case MagicEffect::SummonBear:
-                case MagicEffect::SummonBonewolf:
-                case MagicEffect::SummonCreature04:
-                case MagicEffect::SummonCreature05:
-                    return true;
-            }
-            return false;
+            static const std::array summonEffects{
+                MagicEffect::SummonScamp,
+                MagicEffect::SummonClannfear,
+                MagicEffect::SummonDaedroth,
+                MagicEffect::SummonDremora,
+                MagicEffect::SummonAncestralGhost,
+                MagicEffect::SummonSkeletalMinion,
+                MagicEffect::SummonBonewalker,
+                MagicEffect::SummonGreaterBonewalker,
+                MagicEffect::SummonBonelord,
+                MagicEffect::SummonWingedTwilight,
+                MagicEffect::SummonHunger,
+                MagicEffect::SummonGoldenSaint,
+                MagicEffect::SummonFlameAtronach,
+                MagicEffect::SummonFrostAtronach,
+                MagicEffect::SummonStormAtronach,
+                MagicEffect::SummonCenturionSphere,
+                MagicEffect::SummonFabricant,
+                MagicEffect::SummonWolf,
+                MagicEffect::SummonBear,
+                MagicEffect::SummonBonewolf,
+                MagicEffect::SummonCreature04,
+                MagicEffect::SummonCreature05,
+            };
+            return std::find(summonEffects.begin(), summonEffects.end(), effectId) != summonEffects.end();
         }
-        bool affectsAttribute(int effectId)
+        bool affectsAttribute(ESM::RefId effectId)
         {
-            switch (effectId)
-            {
-                case MagicEffect::DrainAttribute:
-                case MagicEffect::DamageAttribute:
-                case MagicEffect::RestoreAttribute:
-                case MagicEffect::FortifyAttribute:
-                case MagicEffect::AbsorbAttribute:
-                    return true;
-            }
-            return false;
+            static const std::array affectsAttributeEffects{
+                MagicEffect::DrainAttribute,
+                MagicEffect::DamageAttribute,
+                MagicEffect::RestoreAttribute,
+                MagicEffect::FortifyAttribute,
+                MagicEffect::AbsorbAttribute,
+            };
+            return std::find(affectsAttributeEffects.begin(), affectsAttributeEffects.end(), effectId)
+                != affectsAttributeEffects.end();
         }
-        bool affectsSkill(int effectId)
+        bool affectsSkill(ESM::RefId effectId)
         {
-            switch (effectId)
-            {
-                case MagicEffect::DrainSkill:
-                case MagicEffect::DamageSkill:
-                case MagicEffect::RestoreSkill:
-                case MagicEffect::FortifySkill:
-                case MagicEffect::AbsorbSkill:
-                    return true;
-            }
-            return false;
+            static const std::array affectsSkillEffects{
+                MagicEffect::DrainSkill,
+                MagicEffect::DamageSkill,
+                MagicEffect::RestoreSkill,
+                MagicEffect::FortifySkill,
+                MagicEffect::AbsorbSkill,
+            };
+            return std::find(affectsSkillEffects.begin(), affectsSkillEffects.end(), effectId)
+                != affectsSkillEffects.end();
         }
 
         void saveImpl(ESMWriter& esm, const std::vector<ActiveSpells::ActiveSpellParams>& spells, NAME tag)
@@ -90,7 +86,7 @@ namespace ESM
 
                 for (auto& effect : params.mEffects)
                 {
-                    esm.writeHNT("MGEF", effect.mEffectId);
+                    esm.writeHNT("MGEF", ESM::MagicEffect::refIdToIndex(effect.mEffectId));
                     if (const ESM::RefId* id = std::get_if<ESM::RefId>(&effect.mArg))
                     {
                         if (!id->empty())
@@ -175,8 +171,10 @@ namespace ESM
 
                 while (esm.isNextSub("MGEF"))
                 {
+                    int32_t effectId;
                     ActiveEffect effect;
-                    esm.getHT(effect.mEffectId);
+                    esm.getHT(effectId);
+                    effect.mEffectId = ESM::MagicEffect::indexToRefId(effectId);
                     if (format <= MaxActorIdSaveGameFormatVersion)
                     {
                         int32_t arg = -1;

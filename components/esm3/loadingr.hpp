@@ -27,7 +27,7 @@ namespace ESM
         {
             float mWeight;
             int32_t mValue;
-            int32_t mEffectID[4]; // Effect, -1 means none
+            RefId mEffectID[4]; // Effect, EmptyRefId means none
             int32_t mSkills[4]; // SkillEnum related to effect
             int32_t mAttributes[4]; // Attribute related to effect
         };

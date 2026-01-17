@@ -1,5 +1,7 @@
 #include "magicbindings.hpp"
 
+#include <format>
+
 #include <components/esm3/activespells.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
@@ -245,9 +247,10 @@ namespace MWLua
 
         sol::table effect(state, sol::create);
         magicApi["EFFECT_TYPE"] = LuaUtil::makeStrictReadOnly(effect);
-        for (const auto& name : ESM::MagicEffect::sIndexNames)
+        for (int i = 0; i < ESM::MagicEffect::Length; ++i)
         {
-            effect[name] = Misc::StringUtils::lowerCase(name);
+            std::string_view name = ESM::MagicEffect::indexToName(i);
+            effect[name] = ESM::MagicEffect::indexToRefId(i).serializeText();
         }
 
         // Spell store
@@ -262,43 +265,9 @@ namespace MWLua
 
         // MagicEffect store
         sol::table magicEffects(state, sol::create);
+        addRecordFunctionBinding<ESM::MagicEffect>(magicEffects, context);
         magicApi["effects"] = LuaUtil::makeReadOnly(magicEffects);
-        using MagicEffectStore = MWWorld::Store<ESM::MagicEffect>;
-        const MagicEffectStore* magicEffectStore
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
-        auto magicEffectStoreT = state.new_usertype<MagicEffectStore>("ESM3_MagicEffectStore");
-        magicEffectStoreT[sol::meta_function::to_string] = [](const MagicEffectStore& store) {
-            return "ESM3_MagicEffectStore{" + std::to_string(store.getSize()) + " effects}";
-        };
-        magicEffectStoreT[sol::meta_function::index] = sol::overload(
-            [](const MagicEffectStore& store, int id) -> const ESM::MagicEffect* { return store.search(id); },
-            [](const MagicEffectStore& store, std::string_view id) -> const ESM::MagicEffect* {
-                int index = ESM::MagicEffect::indexNameToIndex(id);
-                return store.search(index);
-            });
-        auto magicEffectsIter = [magicEffectStore](sol::this_state thisState, const sol::object& /*store*/,
-                                    sol::optional<int> id) -> std::tuple<sol::object, sol::object> {
-            MagicEffectStore::iterator iter;
-            if (id.has_value())
-            {
-                iter = magicEffectStore->findIter(*id);
-                if (iter != magicEffectStore->end())
-                    iter++;
-            }
-            else
-                iter = magicEffectStore->begin();
-            if (iter != magicEffectStore->end())
-                return std::make_tuple(
-                    sol::make_object(thisState, iter->first), sol::make_object(thisState, &iter->second));
-            else
-                return std::make_tuple(sol::nil, sol::nil);
-        };
-        magicEffectStoreT[sol::meta_function::pairs]
-            = [iter = sol::make_object(state, magicEffectsIter)] { return iter; };
-        magicEffectStoreT[sol::meta_function::ipairs]
-            = [iter = sol::make_object(state, magicEffectsIter)] { return iter; };
-
-        magicEffects["records"] = magicEffectStore;
+        const auto* magicEffectStore = &MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
 
         // Spell record
         auto spellT = state.new_usertype<ESM::Spell>("ESM3_Spell");
@@ -345,16 +314,14 @@ namespace MWLua
         auto effectParamsT = state.new_usertype<ESM::IndexedENAMstruct>("ESM3_EffectParams");
         effectParamsT[sol::meta_function::to_string] = [magicEffectStore](const ESM::IndexedENAMstruct& params) {
             const ESM::MagicEffect* const rec = magicEffectStore->find(params.mData.mEffectID);
-            return "ESM3_EffectParams[" + ESM::MagicEffect::indexToGmstString(rec->mIndex) + "]";
+            return std::format("ESM3_EffectParams[{}]", ESM::MagicEffect::refIdToGmstString(rec->mId));
         };
         effectParamsT["effect"] = sol::readonly_property(
             [magicEffectStore](const ESM::IndexedENAMstruct& params) -> const ESM::MagicEffect* {
                 return magicEffectStore->find(params.mData.mEffectID);
             });
-        effectParamsT["id"] = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> std::string {
-            auto name = ESM::MagicEffect::indexToName(params.mData.mEffectID);
-            return Misc::StringUtils::lowerCase(name);
-        });
+        effectParamsT["id"] = sol::readonly_property(
+            [](const ESM::IndexedENAMstruct& params) -> ESM::RefId { return params.mData.mEffectID; });
         effectParamsT["affectedSkill"]
             = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> sol::optional<std::string> {
                   ESM::RefId id = ESM::Skill::indexToRefId(params.mData.mSkill);
@@ -386,12 +353,9 @@ namespace MWLua
         auto magicEffectT = state.new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");
 
         magicEffectT[sol::meta_function::to_string] = [](const ESM::MagicEffect& rec) {
-            return "ESM3_MagicEffect[" + ESM::MagicEffect::indexToGmstString(rec.mIndex) + "]";
+            return std::format("ESM3_MagicEffect[{}]", ESM::MagicEffect::refIdToGmstString(rec.mId));
         };
-        magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
-            auto name = ESM::MagicEffect::indexToName(rec.mIndex);
-            return Misc::StringUtils::lowerCase(name);
-        });
+        magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> ESM::RefId { return rec.mId; });
         magicEffectT["icon"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
             auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
@@ -422,7 +386,7 @@ namespace MWLua
                 .getWorld()
                 ->getStore()
                 .get<ESM::GameSetting>()
-                .find(ESM::MagicEffect::indexToGmstString(rec.mIndex))
+                .find(ESM::MagicEffect::refIdToGmstString(rec.mId))
                 ->mValue.getString();
         });
         magicEffectT["school"] = sol::readonly_property(
@@ -453,12 +417,10 @@ namespace MWLua
 
         auto activeSpellEffectT = state.new_usertype<ESM::ActiveEffect>("ActiveSpellEffect");
         activeSpellEffectT[sol::meta_function::to_string] = [](const ESM::ActiveEffect& self) {
-            return "ActiveSpellEffect[" + ESM::MagicEffect::indexToGmstString(self.mEffectId) + "]";
+            return std::format("ActiveSpellEffect[{}]", ESM::MagicEffect::refIdToGmstString(self.mEffectId));
         };
-        activeSpellEffectT["id"] = sol::readonly_property([](const ESM::ActiveEffect& self) -> std::string {
-            auto name = ESM::MagicEffect::indexToName(self.mEffectId);
-            return Misc::StringUtils::lowerCase(name);
-        });
+        activeSpellEffectT["id"]
+            = sol::readonly_property([](const ESM::ActiveEffect& self) -> ESM::RefId { return self.mEffectId; });
         activeSpellEffectT["index"]
             = sol::readonly_property([](const ESM::ActiveEffect& self) -> int { return self.mEffectIndex; });
         activeSpellEffectT["name"] = sol::readonly_property([](const ESM::ActiveEffect& self) -> std::string {
@@ -588,12 +550,10 @@ namespace MWLua
         auto activeEffectT = state.new_usertype<ActiveEffect>("ActiveEffect");
 
         activeEffectT[sol::meta_function::to_string] = [](const ActiveEffect& self) {
-            return "ActiveEffect[" + ESM::MagicEffect::indexToGmstString(self.key.mId) + "]";
+            return std::format("ActiveEffect[{}]", ESM::MagicEffect::refIdToGmstString(self.key.mId));
         };
-        activeEffectT["id"] = sol::readonly_property([](const ActiveEffect& self) -> std::string {
-            auto name = ESM::MagicEffect::indexToName(self.key.mId);
-            return Misc::StringUtils::lowerCase(name);
-        });
+        activeEffectT["id"]
+            = sol::readonly_property([](const ActiveEffect& self) -> ESM::RefId { return self.key.mId; });
         activeEffectT["name"]
             = sol::readonly_property([](const ActiveEffect& self) -> std::string { return self.key.toString(); });
 
@@ -1024,7 +984,7 @@ namespace MWLua
 
         auto getEffectKey
             = [](std::string_view idStr, sol::optional<std::string_view> argStr) -> MWMechanics::EffectKey {
-            auto id = ESM::MagicEffect::indexNameToIndex(idStr);
+            auto id = ESM::RefId::deserializeText(idStr);
             auto* rec = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(id);
 
             MWMechanics::EffectKey key = MWMechanics::EffectKey(id);

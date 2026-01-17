@@ -796,7 +796,7 @@ namespace MWMechanics
                     continue;
                 for (const auto& effect : spell.getEffects())
                 {
-                    static const std::array<int, 7> damageEffects{
+                    static const std::array<ESM::RefId, 7> damageEffects{
                         ESM::MagicEffect::FireDamage,
                         ESM::MagicEffect::ShockDamage,
                         ESM::MagicEffect::FrostDamage,
@@ -1817,7 +1817,7 @@ namespace MWMechanics
                 // Make sure spell effects are removed
                 purgeSpellEffects(actor.getPtr().getCellRef().getRefNum());
 
-                stats.getMagicEffects().add(ESM::MagicEffect::Vampirism, vampirism);
+                stats.getMagicEffects().add(EffectKey(ESM::MagicEffect::Vampirism), vampirism);
 
                 if (isPlayer)
                 {

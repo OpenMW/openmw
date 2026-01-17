@@ -46,10 +46,10 @@ namespace MWLua
             sol::table res(lua, sol::create);
             for (uint32_t i = 0; i < 4; ++i)
             {
-                if (rec.mData.mEffectID[i] < 0)
+                if (rec.mData.mEffectID[i].empty())
                     continue;
                 ESM::IndexedENAMstruct effect;
-                effect.mData.mEffectID = static_cast<int16_t>(rec.mData.mEffectID[i]);
+                effect.mData.mEffectID = rec.mData.mEffectID[i];
                 effect.mData.mSkill = static_cast<signed char>(rec.mData.mSkills[i]);
                 effect.mData.mAttribute = static_cast<signed char>(rec.mData.mAttributes[i]);
                 effect.mData.mRange = ESM::RT_Self;

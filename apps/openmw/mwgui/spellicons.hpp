@@ -44,7 +44,7 @@ namespace MWGui
         void updateWidgets(MyGUI::Widget* parent, bool adjustSize);
 
     private:
-        std::map<int, MyGUI::ImageBox*> mWidgetMap;
+        std::map<ESM::RefId, MyGUI::ImageBox*> mWidgetMap;
     };
 
 }

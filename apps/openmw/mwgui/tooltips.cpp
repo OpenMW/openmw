@@ -954,11 +954,10 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "ClassToolTip");
     }
 
-    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
+    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, ESM::RefId effectId)
     {
         const auto& store = MWBase::Environment::get().getESMStore();
-        const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(id);
-        const std::string& name = ESM::MagicEffect::indexToGmstString(id);
+        const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
         std::string icon = effect->mIcon;
         icon.insert(icon.rfind('\\') + 1, "b_");
@@ -967,7 +966,8 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
-        widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
+        widget->setUserString(
+            "Caption_MagicEffectName", std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effectId)));
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
         widget->setUserString("Caption_MagicEffectSchool",
             "#{sSchool}: "

@@ -144,37 +144,29 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
     if (subRowIndex < 0 || subRowIndex >= 4)
         throw std::runtime_error("index out of range");
 
+    ESM::RefId effectId = record.get().mData.mEffectID[subRowIndex];
+
     switch (subColIndex)
     {
         case 0:
-            return record.get().mData.mEffectID[subRowIndex];
+            return ESM::MagicEffect::refIdToIndex(effectId);
         case 1:
         {
-            switch (record.get().mData.mEffectID[subRowIndex])
-            {
-                case ESM::MagicEffect::DrainSkill:
-                case ESM::MagicEffect::DamageSkill:
-                case ESM::MagicEffect::RestoreSkill:
-                case ESM::MagicEffect::FortifySkill:
-                case ESM::MagicEffect::AbsorbSkill:
-                    return record.get().mData.mSkills[subRowIndex];
-                default:
-                    return QVariant();
-            }
+            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
+                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
+                || effectId == ESM::MagicEffect::AbsorbSkill)
+                return record.get().mData.mSkills[subRowIndex];
+            else
+                return QVariant();
         }
         case 2:
         {
-            switch (record.get().mData.mEffectID[subRowIndex])
-            {
-                case ESM::MagicEffect::DrainAttribute:
-                case ESM::MagicEffect::DamageAttribute:
-                case ESM::MagicEffect::RestoreAttribute:
-                case ESM::MagicEffect::FortifyAttribute:
-                case ESM::MagicEffect::AbsorbAttribute:
-                    return record.get().mData.mAttributes[subRowIndex];
-                default:
-                    return QVariant();
-            }
+            if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
+                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
+                || effectId == ESM::MagicEffect::AbsorbAttribute)
+                return record.get().mData.mAttributes[subRowIndex];
+            else
+                return QVariant();
         }
         default:
             throw std::runtime_error("Trying to access non-existing column in the nested table!");
@@ -191,29 +183,24 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
     if (subRowIndex < 0 || subRowIndex >= 4)
         throw std::runtime_error("index out of range");
 
+    ESM::RefId effectId = ESM::MagicEffect::indexToRefId(value.toInt());
+
     switch (subColIndex)
     {
         case 0:
-            ingredient.mData.mEffectID[subRowIndex] = value.toInt();
-            switch (ingredient.mData.mEffectID[subRowIndex])
+            ingredient.mData.mEffectID[subRowIndex] = effectId;
+            if (effectId == ESM::MagicEffect::DrainSkill || effectId == ESM::MagicEffect::DamageSkill
+                || effectId == ESM::MagicEffect::RestoreSkill || effectId == ESM::MagicEffect::FortifySkill
+                || effectId == ESM::MagicEffect::AbsorbSkill)
+                ingredient.mData.mAttributes[subRowIndex] = -1;
+            else if (effectId == ESM::MagicEffect::DrainAttribute || effectId == ESM::MagicEffect::DamageAttribute
+                || effectId == ESM::MagicEffect::RestoreAttribute || effectId == ESM::MagicEffect::FortifyAttribute
+                || effectId == ESM::MagicEffect::AbsorbAttribute)
+                ingredient.mData.mSkills[subRowIndex] = -1;
+            else
             {
-                case ESM::MagicEffect::DrainSkill:
-                case ESM::MagicEffect::DamageSkill:
-                case ESM::MagicEffect::RestoreSkill:
-                case ESM::MagicEffect::FortifySkill:
-                case ESM::MagicEffect::AbsorbSkill:
-                    ingredient.mData.mAttributes[subRowIndex] = -1;
-                    break;
-                case ESM::MagicEffect::DrainAttribute:
-                case ESM::MagicEffect::DamageAttribute:
-                case ESM::MagicEffect::RestoreAttribute:
-                case ESM::MagicEffect::FortifyAttribute:
-                case ESM::MagicEffect::AbsorbAttribute:
-                    ingredient.mData.mSkills[subRowIndex] = -1;
-                    break;
-                default:
-                    ingredient.mData.mSkills[subRowIndex] = -1;
-                    ingredient.mData.mAttributes[subRowIndex] = -1;
+                ingredient.mData.mSkills[subRowIndex] = -1;
+                ingredient.mData.mAttributes[subRowIndex] = -1;
             }
             break;
         case 1:

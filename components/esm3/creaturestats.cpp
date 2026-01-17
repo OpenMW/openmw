@@ -2,6 +2,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/loadmgef.hpp>
+
 #include <limits>
 
 namespace ESM
@@ -117,9 +119,10 @@ namespace ESM
                 esm.getHNOT(effectIndex, "EIND");
                 int32_t actorId;
                 esm.getHNT(actorId, "ACID");
-                mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
-                mSummonedCreatures.emplace(
-                    magicEffect, RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 });
+                mSummonedCreatureMap[SummonKey(ESM::MagicEffect::indexToRefId(magicEffect), source, effectIndex)]
+                    = actorId;
+                mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(magicEffect),
+                    RefNum{ .mIndex = static_cast<uint32_t>(actorId), .mContentFile = -1 });
             }
         }
         else
@@ -133,7 +136,7 @@ namespace ESM
                     esm.getHNT(actor.mIndex, "ACID");
                 else
                     actor = esm.getFormId(true, "ACID");
-                mSummonedCreatures.emplace(magicEffect, actor);
+                mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(magicEffect), actor);
             }
         }
 
@@ -248,7 +251,7 @@ namespace ESM
 
         for (const auto& [effectId, actor] : mSummonedCreatures)
         {
-            esm.writeHNT("SUMM", effectId);
+            esm.writeHNT("SUMM", ESM::MagicEffect::refIdToIndex(effectId));
             esm.writeFormId(actor, true, "ACID");
         }
 

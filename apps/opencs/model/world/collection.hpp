@@ -73,17 +73,6 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline ESM::RefId getRecordId(const ESM::MagicEffect& record)
-    {
-        return ESM::RefId::stringRefId(CSMWorld::getStringId(record.mId));
-    }
-
-    inline void setRecordId(const ESM::RefId& id, ESM::MagicEffect& record)
-    {
-        int index = ESM::MagicEffect::indexNameToIndex(id.getRefIdString());
-        record.mId = ESM::RefId::index(ESM::REC_MGEF, static_cast<std::uint32_t>(index));
-    }
-
     inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
     {
         if (const auto* skillId = id.getIf<ESM::SkillId>())

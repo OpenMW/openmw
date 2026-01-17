@@ -613,13 +613,13 @@ namespace MWScript
                     return;
                 }
 
-                long key;
+                ESM::RefId key;
 
                 if (const auto k = ::Misc::StringUtils::toNumeric<long>(effectName);
                     k.has_value() && *k >= 0 && *k <= 32767)
-                    key = *k;
+                    key = ESM::MagicEffect::indexToRefId(*k);
                 else
-                    key = ESM::MagicEffect::effectGmstIdToIndex(effectName);
+                    key = ESM::MagicEffect::effectGmstIdToRefId(effectName);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                 for (const auto& spell : stats.getActiveSpells())

@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm3/loadmgef.hpp>
+
 namespace ESM
 {
 
@@ -10,7 +12,7 @@ namespace ESM
     {
         for (const auto& [key, params] : mEffects)
         {
-            esm.writeHNT("EFID", key);
+            esm.writeHNT("EFID", ESM::MagicEffect::refIdToIndex(key));
             esm.writeHNT("BASE", params.first);
             esm.writeHNT("MODI", params.second);
         }
@@ -28,7 +30,7 @@ namespace ESM
                 params.second = 0.f;
             else
                 esm.getHNT(params.second, "MODI");
-            mEffects.emplace(id, params);
+            mEffects.emplace(ESM::MagicEffect::indexToRefId(id), params);
         }
     }
 

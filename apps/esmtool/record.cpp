@@ -153,8 +153,10 @@ namespace
         int i = 0;
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
-                      << effect.mData.mEffectID << ")" << std::endl;
+            int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            if (effectIdx != -1)
+                std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
+                          << std::endl;
             if (effect.mData.mSkill != -1)
                 std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
                           << std::endl;
@@ -843,11 +845,12 @@ namespace EsmTool
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
         for (int i = 0; i != 4; i++)
         {
-            // A value of -1 means no effect
-            if (mData.mData.mEffectID[i] == -1)
+            // A value of EmptyRefId means no effect
+            if (mData.mData.mEffectID[i].empty())
                 continue;
-            std::cout << "  Effect: " << magicEffectLabel(mData.mData.mEffectID[i]) << " (" << mData.mData.mEffectID[i]
-                      << ")" << std::endl;
+
+            int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
+            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
             std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i]) << " (" << mData.mData.mSkills[i] << ")"
                       << std::endl;
             std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i]) << " ("
@@ -973,7 +976,8 @@ namespace EsmTool
     template <>
     void Record<ESM::MagicEffect>::print()
     {
-        std::cout << "  Index: " << magicEffectLabel(mData.mIndex) << " (" << mData.mIndex << ")" << std::endl;
+        int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mId);
+        std::cout << "  Index: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;

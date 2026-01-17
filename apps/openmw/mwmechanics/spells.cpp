@@ -257,7 +257,7 @@ namespace MWMechanics
             for (const ESM::SpellState::PermanentSpellEffectInfo& info : it->second)
             {
                 // Applied corprus effects are already in loaded stats modifiers
-                if (info.mId == ESM::MagicEffect::FortifyAttribute)
+                if (info.mId == ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::FortifyAttribute))
                 {
                     auto id = ESM::Attribute::indexToRefId(info.mArg);
                     AttributeValue attr = creatureStats->getAttribute(id);
@@ -265,7 +265,7 @@ namespace MWMechanics
                     attr.damage(-info.mMagnitude);
                     creatureStats->setAttribute(id, attr);
                 }
-                else if (info.mId == ESM::MagicEffect::DrainAttribute)
+                else if (info.mId == ESM::MagicEffect::refIdToIndex(ESM::MagicEffect::DrainAttribute))
                 {
                     auto id = ESM::Attribute::indexToRefId(info.mArg);
                     AttributeValue attr = creatureStats->getAttribute(id);

@@ -25,18 +25,7 @@ namespace CSMWorld
 
             std::string operator()(ESM::FormId value) const { return value.toString("FormId:"); }
 
-            std::string operator()(ESM::IndexRefId value) const
-            {
-                switch (value.getRecordType())
-                {
-                    case ESM::REC_MGEF:
-                        return std::string(ESM::MagicEffect::sIndexNames[value.getValue()]);
-                    default:
-                        break;
-                }
-
-                return value.toDebugString();
-            }
+            std::string operator()(ESM::IndexRefId value) const { return value.toDebugString(); }
 
             template <class T>
             std::string operator()(const T& value) const

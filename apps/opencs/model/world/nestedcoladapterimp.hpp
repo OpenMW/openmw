@@ -260,7 +260,7 @@ namespace CSMWorld
             // blank row
             ESM::IndexedENAMstruct effect;
             effect.mIndex = position;
-            effect.mData.mEffectID = 0;
+            effect.mData.mEffectID = ESM::MagicEffect::WaterBreathing;
             effect.mData.mSkill = -1;
             effect.mData.mAttribute = -1;
             effect.mData.mRange = 0;
@@ -319,34 +319,28 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    return effect.mEffectID;
+                    return ESM::MagicEffect::refIdToIndex(effect.mEffectID);
                 case 1:
                 {
-                    switch (effect.mEffectID)
-                    {
-                        case ESM::MagicEffect::DrainSkill:
-                        case ESM::MagicEffect::DamageSkill:
-                        case ESM::MagicEffect::RestoreSkill:
-                        case ESM::MagicEffect::FortifySkill:
-                        case ESM::MagicEffect::AbsorbSkill:
-                            return effect.mSkill;
-                        default:
-                            return QVariant();
-                    }
+                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
+                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
+                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
+                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                        return effect.mSkill;
+                    else
+                        return QVariant();
                 }
                 case 2:
                 {
-                    switch (effect.mEffectID)
-                    {
-                        case ESM::MagicEffect::DrainAttribute:
-                        case ESM::MagicEffect::DamageAttribute:
-                        case ESM::MagicEffect::RestoreAttribute:
-                        case ESM::MagicEffect::FortifyAttribute:
-                        case ESM::MagicEffect::AbsorbAttribute:
-                            return effect.mAttribute;
-                        default:
-                            return QVariant();
-                    }
+                    if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
+                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
+                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
+                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                        return effect.mAttribute;
+                    else
+                        return QVariant();
                 }
                 case 3:
                     return effect.mRange;
@@ -377,26 +371,23 @@ namespace CSMWorld
             {
                 case 0:
                 {
-                    effect.mEffectID = static_cast<short>(value.toInt());
-                    switch (effect.mEffectID)
+                    effect.mEffectID = ESM::MagicEffect::indexToRefId(value.toInt());
+                    if (effect.mEffectID == ESM::MagicEffect::DrainSkill
+                        || effect.mEffectID == ESM::MagicEffect::DamageSkill
+                        || effect.mEffectID == ESM::MagicEffect::RestoreSkill
+                        || effect.mEffectID == ESM::MagicEffect::FortifySkill
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbSkill)
+                        effect.mAttribute = -1;
+                    else if (effect.mEffectID == ESM::MagicEffect::DrainAttribute
+                        || effect.mEffectID == ESM::MagicEffect::DamageAttribute
+                        || effect.mEffectID == ESM::MagicEffect::RestoreAttribute
+                        || effect.mEffectID == ESM::MagicEffect::FortifyAttribute
+                        || effect.mEffectID == ESM::MagicEffect::AbsorbAttribute)
+                        effect.mSkill = -1;
+                    else
                     {
-                        case ESM::MagicEffect::DrainSkill:
-                        case ESM::MagicEffect::DamageSkill:
-                        case ESM::MagicEffect::RestoreSkill:
-                        case ESM::MagicEffect::FortifySkill:
-                        case ESM::MagicEffect::AbsorbSkill:
-                            effect.mAttribute = -1;
-                            break;
-                        case ESM::MagicEffect::DrainAttribute:
-                        case ESM::MagicEffect::DamageAttribute:
-                        case ESM::MagicEffect::RestoreAttribute:
-                        case ESM::MagicEffect::FortifyAttribute:
-                        case ESM::MagicEffect::AbsorbAttribute:
-                            effect.mSkill = -1;
-                            break;
-                        default:
-                            effect.mSkill = -1;
-                            effect.mAttribute = -1;
+                        effect.mSkill = -1;
+                        effect.mAttribute = -1;
                     }
                     break;
                 }
