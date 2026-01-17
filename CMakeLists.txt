@@ -16,7 +16,7 @@ include(GNUInstallDirs)
 
 option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
 if(OPENMW_GL4ES_MANUAL_INIT)
-    add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
+    add_compile_definitions(OPENMW_GL4ES_MANUAL_INIT)
 endif()
 
 if (APPLE OR WIN32)
@@ -386,27 +386,27 @@ if(WIN32)
 endif()
 
 # Required for building the FFmpeg headers
-add_definitions(-D__STDC_CONSTANT_MACROS)
+add_compile_definitions(__STDC_CONSTANT_MACROS)
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if (USE_SYSTEM_TINYXML)
     find_package(TinyXML REQUIRED)
-    add_definitions (-DTIXML_USE_STL)
+    add_compile_definitions(TIXML_USE_STL)
     include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 endif()
 
 # Platform specific
 if (WIN32)
     # Suppress WinMain(), provided by SDL
-    add_definitions(-DSDL_MAIN_HANDLED)
+    add_compile_definitions(SDL_MAIN_HANDLED)
 
     # Get rid of useless crud from windows.h
-    add_definitions(
-        -DNOMINMAX # name conflict with std::min, std::max
-        -DWIN32_LEAN_AND_MEAN
-        -DNOMB # name conflict with MWGui::MessageBox
-        -DNOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
+    add_compile_definitions(
+        NOMINMAX # name conflict with std::min, std::max
+        WIN32_LEAN_AND_MEAN
+        NOMB # name conflict with MWGui::MessageBox
+        NOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
     )
 
     # Put Win32 API into UTF-16 mode
@@ -479,12 +479,12 @@ endif()
 include_directories(BEFORE SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 if(OSG_STATIC)
-    add_definitions(-DOSG_LIBRARY_STATIC)
+    add_compile_definitions(OSG_LIBRARY_STATIC)
 endif()
 
 include(cmake/CheckOsgMultiview.cmake)
 if(HAVE_MULTIVIEW)
-    add_definitions(-DOSG_HAS_MULTIVIEW)
+    add_compile_definitions(OSG_HAS_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
 set(BOOST_COMPONENTS iostreams program_options)
@@ -531,7 +531,7 @@ include_directories(".")
 link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
-    add_definitions(-DMYGUI_STATIC)
+    add_compile_definitions(MYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)

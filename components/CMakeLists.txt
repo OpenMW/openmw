@@ -314,8 +314,8 @@ add_component_dir (debug
     )
 
 IF(NOT WIN32 AND NOT APPLE)
-    add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
-    add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
+    add_compile_definitions(GLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
+    add_compile_definitions(GLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
