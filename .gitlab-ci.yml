@@ -564,6 +564,8 @@ Ubuntu_GCC_integration_tests_asan:
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
+    - mkdir -p build/.cmake/api/v1/query
+    - touch build/.cmake/api/v1/query/codemodel-v2
     - CI/before_script.macos.sh -C
     - CI/macos/build.sh
     - cd build
