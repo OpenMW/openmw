@@ -587,6 +587,8 @@ Ubuntu_GCC_integration_tests_asan:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+      - "**/CMakeCache.txt"
+      - build/.cmake/**.json
 
 macOS15_Xcode16_amd64:
   extends: .MacOS
