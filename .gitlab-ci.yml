@@ -937,13 +937,28 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
     - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
       artifacts: true
 
-Windows_Ninja_CacheInit:
-  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+Windows_Ninja_CacheInit_RelWithDebInfo:
+  # build components only, so this can be shared with both groups
   extends:
     - .Windows_Ninja_Base
   variables:
     config: "RelWithDebInfo"
-    targets: "get-version"
+    targets: "components"
+    group_name: "cache-init"
+  cache:
+    - key: ninja-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+      policy: push
+    - key: ninja-2022-RelWithDebInfo-GroupOne-v13
+      paths:
+      - ccache
+      policy: push
+    - key: ninja-2022-RelWithDebInfo-GroupTwo-v13
+      paths:
+      - ccache
+      policy: push
   when: manual
 
 .Windows_MSBuild_Base:
@@ -1154,13 +1169,28 @@ Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
-Windows_MSBuild_CacheInit:
-  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+Windows_MSBuild_CacheInit_RelWithDebInfo:
+  # build components only, so this can be shared with both groups
   extends:
     - .Windows_MSBuild_Base
   variables:
     config: "RelWithDebInfo"
-    targets: "get-version"
+    targets: "components"
+    group_name: "cache-init"
+  cache:
+    - key: msbuild-2022-v13
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+      policy: push
+    - key: msbuild-2022-RelWithDebInfo-GroupOne-v13
+      paths:
+      - ccache
+      policy: push
+    - key: msbuild-2022-RelWithDebInfo-GroupTwo-v13
+      paths:
+      - ccache
+      policy: push
   when: manual
 
 .Ubuntu_AndroidNDK_arm64-v8a:
