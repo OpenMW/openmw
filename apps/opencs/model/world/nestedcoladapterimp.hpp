@@ -249,12 +249,13 @@ namespace CSMWorld
     template <typename ESXRecordT>
     class EffectsListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
-        const IdCollection<ESM::MagicEffect>* mMagicEffects = nullptr;
+        const IdCollection<ESM::MagicEffect>& mMagicEffects;
 
     public:
-        EffectsListAdapter() = default;
-
-        void setMagicEffects(const IdCollection<ESM::MagicEffect>* magicEffects) { mMagicEffects = magicEffects; }
+        EffectsListAdapter(const IdCollection<ESM::MagicEffect>& magicEffects)
+            : mMagicEffects(magicEffects)
+        {
+        }
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {
@@ -322,15 +323,13 @@ namespace CSMWorld
 
             ESM::ENAMstruct effect = effectsList[subRowIndex].mData;
             bool targetSkill = false, targetAttribute = false;
-            if (mMagicEffects)
+
+            int recordIndex = mMagicEffects.searchId(effect.mEffectID);
+            if (recordIndex != -1)
             {
-                int recordIndex = mMagicEffects->searchId(effect.mEffectID);
-                if (recordIndex != -1)
-                {
-                    const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
-                    targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
-                    targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
-                }
+                const ESM::MagicEffect& mgef = mMagicEffects.getRecord(recordIndex).get();
+                targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+                targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
             }
 
             switch (subColIndex)
@@ -383,15 +382,12 @@ namespace CSMWorld
                 case 0:
                 {
                     effect.mEffectID = ESM::MagicEffect::indexToRefId(value.toInt());
-                    if (mMagicEffects)
+                    int recordIndex = mMagicEffects.searchId(effect.mEffectID);
+                    if (recordIndex != -1)
                     {
-                        int recordIndex = mMagicEffects->searchId(effect.mEffectID);
-                        if (recordIndex != -1)
-                        {
-                            const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
-                            targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
-                            targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
-                        }
+                        const ESM::MagicEffect& mgef = mMagicEffects.getRecord(recordIndex).get();
+                        targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
+                        targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
                     }
                     if (targetSkill)
                         effect.mAttribute = -1;

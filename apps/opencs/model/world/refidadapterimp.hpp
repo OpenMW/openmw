@@ -438,15 +438,17 @@ namespace CSMWorld
     class IngredEffectRefIdAdapter : public NestedRefIdAdapterBase
     {
         UniversalId::Type mType;
-        const IdCollection<ESM::MagicEffect>* mMagicEffects = nullptr;
+        const IdCollection<ESM::MagicEffect>& mMagicEffects;
 
     public:
-        IngredEffectRefIdAdapter();
+        IngredEffectRefIdAdapter(const IdCollection<ESM::MagicEffect>& magicEffects)
+            : mType(UniversalId::Type_Ingredient)
+            , mMagicEffects(magicEffects)
+        {
+        }
         IngredEffectRefIdAdapter(const IngredEffectRefIdAdapter&) = delete;
         IngredEffectRefIdAdapter& operator=(const IngredEffectRefIdAdapter&) = delete;
         ~IngredEffectRefIdAdapter() override = default;
-
-        void setMagicEffects(const IdCollection<ESM::MagicEffect>* magicEffects) { mMagicEffects = magicEffects; }
 
         void addNestedRow(const RefIdColumn* column, RefIdData& data, int index, int position) const override;
 
@@ -1116,8 +1118,9 @@ namespace CSMWorld
         EffectsRefIdAdapter& operator=(const EffectsRefIdAdapter&);
 
     public:
-        EffectsRefIdAdapter(UniversalId::Type type)
-            : mType(type)
+        EffectsRefIdAdapter(UniversalId::Type type, const IdCollection<ESM::MagicEffect>& magicEffects)
+            : EffectsListAdapter<ESXRecordT>(magicEffects)
+            , mType(type)
         {
         }
 

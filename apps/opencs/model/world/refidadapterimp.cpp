@@ -92,11 +92,6 @@ void CSMWorld::IngredientRefIdAdapter::setData(
     return;
 }
 
-CSMWorld::IngredEffectRefIdAdapter::IngredEffectRefIdAdapter()
-    : mType(UniversalId::Type_Ingredient)
-{
-}
-
 void CSMWorld::IngredEffectRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -147,12 +142,12 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
 
     ESM::RefId effectId = record.get().mData.mEffectID[subRowIndex];
     bool targetSkill = false, targetAttribute = false;
-    if (!effectId.empty() && mMagicEffects)
+    if (!effectId.empty())
     {
-        int recordIndex = mMagicEffects->searchId(effectId);
+        int recordIndex = mMagicEffects.searchId(effectId);
         if (recordIndex != -1)
         {
-            const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+            const ESM::MagicEffect& mgef = mMagicEffects.getRecord(recordIndex).get();
             targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
             targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
         }
@@ -198,12 +193,12 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
     {
         case 0:
             ingredient.mData.mEffectID[subRowIndex] = effectId;
-            if (!effectId.empty() && mMagicEffects)
+            if (!effectId.empty())
             {
-                int recordIndex = mMagicEffects->searchId(effectId);
+                int recordIndex = mMagicEffects.searchId(effectId);
                 if (recordIndex != -1)
                 {
-                    const ESM::MagicEffect& mgef = mMagicEffects->getRecord(recordIndex).get();
+                    const ESM::MagicEffect& mgef = mMagicEffects.getRecord(recordIndex).get();
                     targetSkill = mgef.mData.mFlags & ESM::MagicEffect::TargetSkill;
                     targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
                 }
