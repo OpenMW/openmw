@@ -803,7 +803,7 @@ macOS15_Xcode16_arm64:
     key:
       prefix: ninja-2022
       files:
-        CI/deps_versions.msvc.sh
+        - CI/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64_Ninja/deps/Qt
@@ -901,14 +901,14 @@ Windows_Ninja_RelWithDebInfo_GroupOne:
     - key:
         prefix: ninja-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupOne
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -923,14 +923,14 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
     - key:
         prefix: ninja-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
       key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -964,7 +964,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - key:
         prefix: ninja-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
@@ -972,14 +972,14 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupOne
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
@@ -1079,7 +1079,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     key:
         prefix: msbuild-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -1149,14 +1149,14 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - key:
         prefix: msbuild-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupOne
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1171,14 +1171,14 @@ Windows_MSBuild_RelWithDebInfo_GroupTwo:
     - key:
         prefix: msbuild-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupTwo
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1220,7 +1220,7 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
     - key:
         prefix: msbuild-2022
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
@@ -1228,14 +1228,14 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupOne
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupTwo
         files:
-          CI/deps_versions.msvc.sh
+          - CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
