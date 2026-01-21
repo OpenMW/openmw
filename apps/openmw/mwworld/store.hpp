@@ -464,6 +464,17 @@ namespace MWWorld
     };
 
     template <>
+    class Store<ESM::MagicEffect> : public TypedDynamicStore<ESM::MagicEffect>
+    {
+        using TypedDynamicStore<ESM::MagicEffect>::setUp;
+
+    public:
+        Store() = default;
+
+        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
+    };
+
+    template <>
     class Store<ESM::WeaponType> : public DynamicStore
     {
         std::map<int, ESM::WeaponType> mStatic;

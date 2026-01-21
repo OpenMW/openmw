@@ -98,6 +98,9 @@ namespace ESM
         ESM::RefId mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
         std::string mDescription;
 
+        /// Effect GMST (not part of the MGEF definition)
+        std::string mName;
+
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 
@@ -255,6 +258,7 @@ namespace ESM
         static const StringRefId SummonCreature05;
 
         static constexpr int Length = 143;
+        static constexpr std::array<std::string_view, MagicEffect::Length> sGmstEffectIds;
 
         static std::string_view refIdToGmstString(RefId effectId);
         static RefId effectGmstIdToRefId(std::string_view gmstId);

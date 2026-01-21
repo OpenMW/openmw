@@ -1021,6 +1021,21 @@ namespace MWWorld
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
 
+    // Magic Effect
+    //=========================================================================
+
+    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
+    {
+        for (ESM::MagicEffect* mgef : mShared)
+        {
+            int index = ESM::MagicEffect::refIdToIndex(mgef->mId);
+            if (index >= 0)
+            {
+                mgef->mName = getGMSTString(settings, ESM::MagicEffect::sGmstEffectIds[index]);
+            }
+        }
+    }
+
     // Dialogue
     //=========================================================================
 
