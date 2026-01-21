@@ -562,6 +562,19 @@ if (USE_QT)
 
 endif()
 
+if (MSVC)
+    # these TUs take a lot of memory for codegen
+    # in CI, they often go over the 8GB memory limit if another cl.exe is running at the same time
+    # this option (make sure you're not looking at the docs for the identically-named linker option) stops four codegen threads being spun off
+    # it hurts build time ~33% to enable this unnecessarily, though, so target it to the hungriest boys
+    set_source_files_properties(
+        detournavigator/tilecachedrecastmeshmanager.cpp
+        lua/utilpackage.cpp
+        PROPERTIES
+        COMPILE_OPTIONS /cgthreads1
+    )
+endif()
+
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(SQLite3 REQUIRED)
