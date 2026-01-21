@@ -25,24 +25,6 @@
 
 namespace MWGui::Widgets
 {
-    /* SpellEffectParams */
-
-    bool SpellEffectParams::operator==(const SpellEffectParams& other) const
-    {
-        if (mEffectID != other.mEffectID)
-            return false;
-        if (mEffectID.empty())
-            return true;
-
-        const ESM::MagicEffect* mgef
-            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(mEffectID);
-        bool involvesSkill = mgef->mData.mFlags & ESM::MagicEffect::TargetSkill;
-        bool involvesAttribute = mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute;
-
-        return ((other.mSkill == mSkill) || !involvesSkill) && ((other.mAttribute == mAttribute) && !involvesAttribute)
-            && (other.mArea == mArea);
-    }
-
     /* MWSkill */
 
     MWSkill::MWSkill()

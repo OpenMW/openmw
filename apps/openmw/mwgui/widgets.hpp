@@ -63,8 +63,6 @@ namespace MWGui
 
             // value of 0 -> no area effect
             int mArea;
-
-            bool operator==(const SpellEffectParams& other) const;
         };
 
         typedef std::vector<SpellEffectParams> SpellEffectList;

@@ -204,15 +204,10 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
                 }
             }
 
-            if (targetSkill)
-                ingredient.mData.mAttributes[subRowIndex] = -1;
-            else if (targetAttribute)
+            if (!targetSkill)
                 ingredient.mData.mSkills[subRowIndex] = -1;
-            else
-            {
-                ingredient.mData.mSkills[subRowIndex] = -1;
+            if (!targetAttribute)
                 ingredient.mData.mAttributes[subRowIndex] = -1;
-            }
             break;
         case 1:
             ingredient.mData.mSkills[subRowIndex] = value.toInt();
