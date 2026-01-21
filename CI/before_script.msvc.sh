@@ -547,10 +547,12 @@ if [[ -n "$USE_CLANG_TIDY" ]]; then
   add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
-QT_VER='6.6.3'
+# these are defined in a separate file so its hash can be used as a CI cache key
+source "$(dirname -- "${BASH_SOURCE[0]}")/deps_versions.msvc.sh"
+
+# versions that don't affect the CI cache can go here
 AQT_VERSION='v3.1.15'
 
-VCPKG_TAG="2025-07-23"
 VCPKG_PATH="vcpkg-x64-${VS_VERSION:?}-${VCPKG_TAG:?}"
 VCPKG_PDB_PATH="vcpkg-x64-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
 VCPKG_MANIFEST="${VCPKG_PATH:?}.txt"

@@ -800,7 +800,10 @@ macOS15_Xcode16_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v13
+    key:
+      prefix: ninja-2022
+      files:
+        CI/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64_Ninja/deps/Qt
@@ -895,11 +898,17 @@ Windows_Ninja_RelWithDebInfo_GroupOne:
     CCACHE_SIZE: 1G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
-    - key: ninja-2022-v13
+    - key:
+        prefix: ninja-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
-    - key: ninja-2022-RelWithDebInfo-GroupOne-v13
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -911,11 +920,17 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
     CCACHE_SIZE: 1.5G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
-    - key: ninja-2022-v13
+    - key:
+        prefix: ninja-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
-    - key: ninja-2022-RelWithDebInfo-GroupTwo-v13
+      key:
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -946,16 +961,25 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     targets: "components"
     group_name: "cache-init"
   cache:
-    - key: ninja-2022-v13
+    - key:
+        prefix: ninja-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
       policy: push
-    - key: ninja-2022-RelWithDebInfo-GroupOne-v13
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
-    - key: ninja-2022-RelWithDebInfo-GroupTwo-v13
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
@@ -1052,7 +1076,10 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
     - Move-Item "$env:TEMP\ccache" .
   cache:
-    key: msbuild-2022-v13
+    key:
+        prefix: msbuild-2022
+        files:
+          CI/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -1119,11 +1146,17 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     CCACHE_SIZE: 1G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
-    - key: msbuild-2022-v13
+    - key:
+        prefix: msbuild-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
-    - key: msbuild-2022-RelWithDebInfo-GroupOne-v13
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1135,11 +1168,17 @@ Windows_MSBuild_RelWithDebInfo_GroupTwo:
     CCACHE_SIZE: 1.5G
   # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
   cache:
-    - key: msbuild-2022-v13
+    - key:
+        prefix: msbuild-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
-    - key: msbuild-2022-RelWithDebInfo-GroupTwo-v13
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1178,16 +1217,25 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
     targets: "components"
     group_name: "cache-init"
   cache:
-    - key: msbuild-2022-v13
+    - key:
+        prefix: msbuild-2022
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
       policy: push
-    - key: msbuild-2022-RelWithDebInfo-GroupOne-v13
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
-    - key: msbuild-2022-RelWithDebInfo-GroupTwo-v13
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        files:
+          CI/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
