@@ -17,12 +17,20 @@ void CSVTools::SearchBox::updateSearchButton()
         switch (mMode.currentIndex())
         {
             case 0:
-            case 1:
             case 2:
-            case 3:
 
                 mSearch.setEnabled(!mText.text().isEmpty());
                 break;
+
+            case 1:
+            case 3:
+            {
+                if (mText.text().isEmpty())
+                    mSearch.setEnabled(false);
+                else
+                    mSearch.setEnabled(QRegularExpression(mText.text()).isValid());
+                break;
+            }
 
             case 4:
 
