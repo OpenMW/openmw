@@ -1864,6 +1864,10 @@ namespace MWMechanics
 
     bool MechanicsManager::isAggressive(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target)
     {
+        // If already in combat with target, consider aggressive
+        if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
+            return true;
+
         // Don't become aggressive if a calm effect is active, since it would cause combat to cycle on/off as
         // combat is activated here and then canceled by the calm effect
         if ((ptr.getClass().isNpc()
