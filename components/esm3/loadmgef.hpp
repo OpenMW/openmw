@@ -258,7 +258,6 @@ namespace ESM
         static const StringRefId SummonCreature05;
 
         static constexpr int Length = 143;
-        static constexpr std::array<std::string_view, MagicEffect::Length> sGmstEffectIds;
 
         static std::string_view refIdToGmstString(RefId effectId);
         static RefId effectGmstIdToRefId(std::string_view gmstId);

@@ -156,7 +156,7 @@ namespace MWGui
                             *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
                     ToolTipInfo tooltipInfo;
-                    tooltipInfo.caption = std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effectId));
+                    tooltipInfo.caption = effect->mName;
                     tooltipInfo.icon = effect->mIcon;
                     tooltipInfo.imageSize = 16;
                     tooltipInfo.wordWrap = false;

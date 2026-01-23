@@ -201,10 +201,7 @@ namespace MWMechanics
         }
 
         if (spellLine.empty())
-        {
-            auto effectIDStr = ESM::MagicEffect::refIdToGmstString(effect.mId);
-            spellLine = windowManager->getGameSettingString(effectIDStr, {});
-        }
+            spellLine = effect.mName;
 
         if (targetsSkill)
         {

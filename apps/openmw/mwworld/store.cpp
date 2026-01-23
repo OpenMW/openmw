@@ -1028,11 +1028,9 @@ namespace MWWorld
     {
         for (ESM::MagicEffect* mgef : mShared)
         {
-            int index = ESM::MagicEffect::refIdToIndex(mgef->mId);
-            if (index >= 0)
-            {
-                mgef->mName = getGMSTString(settings, ESM::MagicEffect::sGmstEffectIds[index]);
-            }
+            std::string_view gmst = ESM::MagicEffect::refIdToGmstString(mgef->mId);
+            if (!gmst.empty())
+                mgef->mName = getGMSTString(settings, gmst);
         }
     }
 

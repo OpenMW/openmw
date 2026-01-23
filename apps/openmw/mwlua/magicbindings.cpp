@@ -381,14 +381,8 @@ namespace MWLua
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mCasting.serializeText(); });
         magicEffectT["hitStatic"] = sol::readonly_property(
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mHit.serializeText(); });
-        magicEffectT["name"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view {
-            return MWBase::Environment::get()
-                .getWorld()
-                ->getStore()
-                .get<ESM::GameSetting>()
-                .find(ESM::MagicEffect::refIdToGmstString(rec.mId))
-                ->mValue.getString();
-        });
+        magicEffectT["name"]
+            = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mName; });
         magicEffectT["school"] = sol::readonly_property(
             [](const ESM::MagicEffect& rec) -> std::string { return rec.mData.mSchool.serializeText(); });
         magicEffectT["baseCost"]
