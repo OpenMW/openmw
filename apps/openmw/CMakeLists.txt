@@ -129,8 +129,11 @@ if (MSVC)
     # this option (make sure you're not looking at the docs for the identically-named linker option) stops four codegen threads being spun off
     # it hurts build time ~33% to enable this unnecessarily, though, so target it to the hungriest boys
     set_source_files_properties(
-        options.cpp
+        mwlua/dialoguebindings.cpp
+        mwlua/magicbindings.cpp
+        mwlua/objectbindings
         mwlua/stats.cpp
+        mwworld/esmstore.cpp
         PROPERTIES
         COMPILE_OPTIONS /cgthreads1
     )
@@ -213,8 +216,6 @@ if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         <vector>
     )
 endif()
-
-add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 
 if (ANDROID)
     target_link_libraries(openmw-lib EGL android log z)

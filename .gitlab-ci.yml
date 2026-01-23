@@ -15,6 +15,10 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_REF_PROTECTED == 'true'
+      # continue running master and release branch pipelines when we do back-to-back merges in case one introduces a regression
+      auto_cancel:
+        on_new_commit: none
     - if: $CI_COMMIT_BRANCH
 
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
@@ -95,6 +99,7 @@ Ubuntu_GCC_preprocess:
   artifacts:
     paths:
       - build/install/
+      - "**/CMakeCache.txt"
 
 Coverity:
   tags:
@@ -587,6 +592,7 @@ Ubuntu_GCC_integration_tests_asan:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+      - "**/CMakeCache.txt"
 
 macOS15_Xcode16_amd64:
   extends: .MacOS
@@ -711,7 +717,10 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
+  # - docker system prune --all --volumes --force
   - Stop-Service docker
+  - cmd /c rd /s /q "C:\ProgramData\Application Data\docker"
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
@@ -741,29 +750,29 @@ macOS15_Xcode16_arm64:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - $env:CCACHE_DEPEND = "true"
+    - $env:CCACHE_INODECACHE = "true"
+    - $env:CCACHE_SLOPPINESS = "pch_defines, time_macros"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
     - cd MSVC2022_64_Ninja
     - Get-Volume
     - .\ActivateMSVC.ps1
+    - $env:CCACHE_IGNOREHEADERS = "$env:INCLUDE;$(Get-Location)\deps"
+    - '$env:NINJA_STATUS = "[%s/%t %p :: %e] "'
     - cmake --build . --config $config --target ($targets.Split(' '))
-    - ccache --show-stats -v
+    - ccache --show-stats -vv
     - cd $config
+    - Copy-Item ..\..\LICENSE license.txt
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
-        if(!$?) { Exit $LASTEXITCODE }
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
-          if(!$?) { Exit $LASTEXITCODE }
-        }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
@@ -791,9 +800,11 @@ macOS15_Xcode16_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-2022-v13
+    key:
+      prefix: ninja-2022
+      files:
+        - CI/deps_versions.msvc.sh
     paths:
-    - ccache
     - deps
     - MSVC2022_64_Ninja/deps/Qt
   artifacts:
@@ -803,12 +814,16 @@ macOS15_Xcode16_arm64:
     - "*.log"
     - MSVC2022_64_Ninja/*.log
     - MSVC2022_64_Ninja/**/*.log
+    - MSVC2022_64_Ninja/*.ninja_log
+    - MSVC2022_64_Ninja/**/*.ninja_log
     - "*_to-be-merged.txt"
-  variables:
-    targets: all
+    - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
+  variables:
+    CCACHE_SIZE: 2.5G
+    targets: all
 
 .Windows_Ninja_Release:
   extends:
@@ -857,18 +872,67 @@ macOS15_Xcode16_arm64:
     config: "RelWithDebInfo"
     # Gitlab can't successfully execute following binaries due to unknown reason
     # executables: "components-tests.exe,openmw-tests.exe,openmw-cs-tests.exe,openmw_detournavigator_navmeshtilescache_benchmark.exe"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - .gitlab-ci.yml
+          - CMakeLists.txt
+          - "**/CMakeLists.txt"
+          - "**/*.cmake"
+          - "CI/*msvc*"
+    - if: $CI_PIPELINE_SOURCE == "push"
+      #changes:
+      #  paths:
+      #    - CMakeLists.txt
+      #    - "**/CMakeLists.txt"
+      #    - "**/*.cmake"
+      #    - "CI/*msvc*"
+      #  compare_to: the last time this job worked for a parent commit
 
-.Windows_Ninja_RelWithDebInfo_GroupOne:
+Windows_Ninja_RelWithDebInfo_GroupOne:
   extends:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-one
+    CCACHE_SIZE: 1G
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key:
+        prefix: ninja-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
 
-.Windows_Ninja_RelWithDebInfo_GroupTwo:
+Windows_Ninja_RelWithDebInfo_GroupTwo:
   extends:
     - .Windows_Ninja_RelWithDebInfo
   variables:
     <<: *target-group-two
+    CCACHE_SIZE: 1.5G
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key:
+        prefix: ninja-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+      key:
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
 
 .Windows_Compress_And_Upload_Symbols_Ninja_RelWithDebInfo:
   extends:
@@ -888,13 +952,37 @@ macOS15_Xcode16_arm64:
     - job: "Windows_Ninja_RelWithDebInfo_GroupTwo"
       artifacts: true
 
-.Windows_Ninja_CacheInit:
-  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+Windows_Ninja_CacheInit_RelWithDebInfo:
+  # build components only, so this can be shared with both groups
   extends:
     - .Windows_Ninja_Base
   variables:
     config: "RelWithDebInfo"
-    targets: "get-version"
+    targets: "components"
+    group_name: "cache-init"
+  cache:
+    - key:
+        prefix: ninja-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64_Ninja/deps/Qt
+      policy: push
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupOne
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
+      policy: push
+    - key:
+        prefix: ninja-2022-RelWithDebInfo-GroupTwo
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
+      policy: push
   when: manual
 
 .Windows_MSBuild_Base:
@@ -904,12 +992,16 @@ macOS15_Xcode16_arm64:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
+  # - docker system prune --all --volumes --force
   - Stop-Service docker
+  - cmd /c rd /s /q "C:\ProgramData\Application Data\docker"
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
+  - choco install ccache -y
   - choco install vswhere -y
   - choco install python -y
   - choco install awscli -y --version=2.22.35
@@ -932,24 +1024,30 @@ macOS15_Xcode16_arm64:
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
+    - $env:CCACHE_DIR = "$(Get-Location)\ccache"
+    - $env:CCACHE_DEPEND = "true"
+    - $env:CCACHE_INODECACHE = "true"
+    - $env:CCACHE_SLOPPINESS = "pch_defines, time_macros"
+    - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    # MSBuild gets confused by writes happening outside APPDATA and TEMP with TrackFileAccess enabled
+    - Move-Item $env:CCACHE_DIR $env:TEMP
+    - $env:CCACHE_DIR = "$env:TEMP\ccache"
+    - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
-    - cmake --build . --config $config --target ($targets.Split(' '))
+    - $env:CCACHE_IGNOREHEADERS = "$(Get-Location)\deps"
+    - cmake --build . --config $config --target ($targets.Split(' ')) -- /bl:`{`}.binlog
+    - ccache --show-stats -vv
     - cd $config
+    - Copy-Item ..\..\LICENSE license.txt
     - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`r`nCI_JOB_ID ${CI_JOB_ID}`r`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - $artifactDirectory = "$(Make-SafeFileName("${CI_PROJECT_NAMESPACE}"))/$(Make-SafeFileName("${CI_COMMIT_REF_NAME}"))/$(Make-SafeFileName("${CI_COMMIT_SHORT_SHA}-${CI_JOB_ID}"))/"
     - Get-ChildItem -Recurse *.ilk | Remove-Item
     - aws --version
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
-        if(!$?) { Exit $LASTEXITCODE }
-        if (Test-Path env:AWS_ACCESS_KEY_ID) {
-          aws --endpoint-url https://rgw.ctrl-c.liu.se s3 cp "..\..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" s3://openmw-artifacts/${artifactDirectory}
-          if(!$?) { Exit $LASTEXITCODE }
-        }
         Push-Location ..
         ..\CI\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
@@ -976,8 +1074,12 @@ macOS15_Xcode16_arm64:
   after_script:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
+    - Move-Item "$env:TEMP\ccache" .
   cache:
-    key: msbuild-2022-v13
+    key:
+        prefix: msbuild-2022
+        files:
+          - CI/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -988,8 +1090,11 @@ macOS15_Xcode16_arm64:
     - "*.log"
     - MSVC2022_64/*.log
     - MSVC2022_64/**/*.log
+    - MSVC2022_64/*.binlog
     - "*_to-be-merged.txt"
+    - "**/CMakeCache.txt"
   variables:
+    CCACHE_SIZE: 2.5G
     targets: ALL_BUILD
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   # This is capped at 2h by GitLab for Windows Shared Runners
@@ -1038,12 +1143,44 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-one
+    CCACHE_SIZE: 1G
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key:
+        prefix: msbuild-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
 
 Windows_MSBuild_RelWithDebInfo_GroupTwo:
   extends:
     - .Windows_MSBuild_RelWithDebInfo
   variables:
     <<: *target-group-two
+    CCACHE_SIZE: 1.5G
+  # GitLab won't let us use non-predefined variables in cache keys, so we've got to repeat this block
+  cache:
+    - key:
+        prefix: msbuild-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
 
 Windows_Compress_And_Upload_Symbols_MSBuild_RelWithDebInfo:
   extends:
@@ -1071,13 +1208,37 @@ Windows_Merge_Artifacts_MSBuild_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
-Windows_MSBuild_CacheInit:
-  # currently, Windows jobs for all configs share the same cache key as we only cache the dependencies
+Windows_MSBuild_CacheInit_RelWithDebInfo:
+  # build components only, so this can be shared with both groups
   extends:
     - .Windows_MSBuild_Base
   variables:
     config: "RelWithDebInfo"
-    targets: "get-version"
+    targets: "components"
+    group_name: "cache-init"
+  cache:
+    - key:
+        prefix: msbuild-2022
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - deps
+      - MSVC2022_64/deps/Qt
+      policy: push
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupOne
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
+      policy: push
+    - key:
+        prefix: msbuild-2022-RelWithDebInfo-GroupTwo
+        files:
+          - CI/deps_versions.msvc.sh
+      paths:
+      - ccache
+      policy: push
   when: manual
 
 .Ubuntu_AndroidNDK_arm64-v8a:
@@ -1120,6 +1281,7 @@ Windows_MSBuild_CacheInit:
   artifacts:
     paths:
       - build/install/
+      - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
 
@@ -1155,6 +1317,7 @@ Windows_MSBuild_CacheInit:
       untracked: false
       paths:
         - "openmw.flatpak"
+        - "**/CMakeCache.txt"
     # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
     # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
     timeout: 4h

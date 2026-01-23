@@ -36,8 +36,5 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw-iniimporter PRIVATE
-        <string>
-        <vector>
-    )
+    target_precompile_headers(openmw-iniimporter REUSE_FROM components)
 endif()

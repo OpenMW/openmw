@@ -530,9 +530,9 @@ fi
 
 if [ -n "$USE_CCACHE" ]; then
 	if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
-		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPRECOMPILE_HEADERS_WITH_MSVC=OFF"
+		add_cmake_opts "-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
 	else
-		echo "Ignoring -C (CCache) as it is incompatible with Visual Studio CMake generators"
+		add_cmake_opts "-DOPENMW_MSBUILD_COMPILER_OVERRIDE=ccache"
 	fi
 fi
 
@@ -547,10 +547,12 @@ if [[ -n "$USE_CLANG_TIDY" ]]; then
   add_cmake_opts "-DCMAKE_CXX_CLANG_TIDY=\"clang-tidy --warnings-as-errors=*\""
 fi
 
-QT_VER='6.6.3'
+# these are defined in a separate file so its hash can be used as a CI cache key
+source "$(dirname -- "${BASH_SOURCE[0]}")/deps_versions.msvc.sh"
+
+# versions that don't affect the CI cache can go here
 AQT_VERSION='v3.1.15'
 
-VCPKG_TAG="2025-07-23"
 VCPKG_PATH="vcpkg-x64-${VS_VERSION:?}-${VCPKG_TAG:?}"
 VCPKG_PDB_PATH="vcpkg-x64-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
 VCPKG_MANIFEST="${VCPKG_PATH:?}.txt"
@@ -730,7 +732,9 @@ echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."
-add_cmake_opts -DOPENMW_MP_BUILD=on
+if [[ -z "$USE_CCACHE" ]]; then
+	add_cmake_opts -DOPENMW_MP_BUILD=on
+fi
 add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
 add_cmake_opts -DOPENMW_USE_SYSTEM_SQLITE3=OFF
 add_cmake_opts -DOPENMW_USE_SYSTEM_YAML_CPP=OFF

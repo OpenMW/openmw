@@ -36,7 +36,7 @@ set(WIZARD_HEADER
 if (OPENMW_USE_UNSHIELD)
     set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
     set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
-    add_definitions(-DOPENMW_USE_UNSHIELD)
+    add_compile_definitions(OPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
 
 
