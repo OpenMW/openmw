@@ -36,7 +36,7 @@ namespace CSVTools
         QPushButton mReplace;
 
     private:
-        void updateSearchButton();
+        void updateSearchButtons();
 
     public:
         SearchBox(QWidget* parent = nullptr);
@@ -48,6 +48,9 @@ namespace CSVTools
         std::string getReplaceText() const;
 
         void setEditLock(bool locked);
+        void setSearchLock(bool locked);
+
+        bool hasInvalidText();
 
         void focus();
 

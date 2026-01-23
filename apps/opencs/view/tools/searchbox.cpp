@@ -8,33 +8,53 @@
 
 #include "../../model/tools/search.hpp"
 
-void CSVTools::SearchBox::updateSearchButton()
+void CSVTools::SearchBox::updateSearchButtons()
 {
     if (!mSearchEnabled)
-        mSearch.setEnabled(false);
+    {
+        setSearchLock(true);
+        setEditLock(true);
+    }
     else
     {
+        constexpr const char* redLineEditStyle = "QLineEdit { color: red; }";
+        bool isInvalidText = hasInvalidText();
+
         switch (mMode.currentIndex())
         {
             case 0:
             case 2:
-
-                mSearch.setEnabled(!mText.text().isEmpty());
+                // Text modes
+                mText.setStyleSheet(QString());
+                mReplaceText.setStyleSheet(isInvalidText ? redLineEditStyle : QString());
+                setSearchLock(isInvalidText);
+                setEditLock(isInvalidText);
                 break;
 
             case 1:
             case 3:
-            {
-                if (mText.text().isEmpty())
-                    mSearch.setEnabled(false);
+                // Regex modes
+                if (isInvalidText)
+                {
+                    mText.setStyleSheet(QString());
+                    mReplaceText.setStyleSheet(isInvalidText ? redLineEditStyle : QString());
+                    setSearchLock(true);
+                    setEditLock(true);
+                }
                 else
-                    mSearch.setEnabled(QRegularExpression(mText.text()).isValid());
+                {
+                    bool isInvalidRegex = !QRegularExpression(mText.text()).isValid();
+                    mText.setStyleSheet(isInvalidRegex ? redLineEditStyle : QString());
+                    mReplaceText.setStyleSheet(isInvalidRegex ? redLineEditStyle : QString());
+                    setSearchLock(isInvalidRegex);
+                    setEditLock(isInvalidRegex);
+                }
                 break;
-            }
 
             case 4:
-
-                mSearch.setEnabled(true);
+                // Record state mode
+                setSearchLock(false);
+                setEditLock(true);
                 break;
         }
     }
@@ -96,13 +116,13 @@ CSVTools::SearchBox::SearchBox(QWidget* parent)
     // update
     modeSelected(0);
 
-    updateSearchButton();
+    updateSearchButtons();
 }
 
 void CSVTools::SearchBox::setSearchMode(bool enabled)
 {
     mSearchEnabled = enabled;
-    updateSearchButton();
+    updateSearchButtons();
 }
 
 CSMTools::Search CSVTools::SearchBox::getSearch() const
@@ -159,6 +179,16 @@ void CSVTools::SearchBox::setEditLock(bool locked)
     mReplace.setEnabled(!locked);
 }
 
+void CSVTools::SearchBox::setSearchLock(bool locked)
+{
+    mSearch.setEnabled(!locked);
+}
+
+bool CSVTools::SearchBox::hasInvalidText()
+{
+    return mText.text().isEmpty();
+}
+
 void CSVTools::SearchBox::focus()
 {
     mInput.currentWidget()->setFocus();
@@ -185,12 +215,12 @@ void CSVTools::SearchBox::modeSelected(int index)
 
     mInput.currentWidget()->setFocus();
 
-    updateSearchButton();
+    updateSearchButtons();
 }
 
 void CSVTools::SearchBox::textChanged(const QString& text)
 {
-    updateSearchButton();
+    updateSearchButtons();
 }
 
 void CSVTools::SearchBox::startSearch(bool checked)
