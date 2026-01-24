@@ -26,7 +26,6 @@ void CSVTools::SearchBox::updateSearchButtons()
             case 2:
                 // Text modes
                 mText.setStyleSheet(QString());
-                mReplaceText.setStyleSheet(isInvalidText ? redLineEditStyle : QString());
                 setSearchLock(isInvalidText);
                 setEditLock(isInvalidText);
                 break;
@@ -37,7 +36,6 @@ void CSVTools::SearchBox::updateSearchButtons()
                 if (isInvalidText)
                 {
                     mText.setStyleSheet(QString());
-                    mReplaceText.setStyleSheet(isInvalidText ? redLineEditStyle : QString());
                     setSearchLock(true);
                     setEditLock(true);
                 }
@@ -45,7 +43,6 @@ void CSVTools::SearchBox::updateSearchButtons()
                 {
                     bool isInvalidRegex = !QRegularExpression(mText.text()).isValid();
                     mText.setStyleSheet(isInvalidRegex ? redLineEditStyle : QString());
-                    mReplaceText.setStyleSheet(isInvalidRegex ? redLineEditStyle : QString());
                     setSearchLock(isInvalidRegex);
                     setEditLock(isInvalidRegex);
                 }
