@@ -63,22 +63,6 @@ namespace MWGui
 
             // value of 0 -> no area effect
             int mArea;
-
-            bool operator==(const SpellEffectParams& other) const
-            {
-                if (mEffectID != other.mEffectID)
-                    return false;
-
-                bool involvesAttribute = (mEffectID == ESM::MagicEffect::RestoreAttribute
-                    || mEffectID == ESM::MagicEffect::AbsorbAttribute || mEffectID == ESM::MagicEffect::DrainAttribute
-                    || mEffectID == ESM::MagicEffect::FortifyAttribute
-                    || mEffectID == ESM::MagicEffect::DamageAttribute);
-                bool involvesSkill = (mEffectID == ESM::MagicEffect::RestoreSkill
-                    || mEffectID == ESM::MagicEffect::AbsorbSkill || mEffectID == ESM::MagicEffect::DrainSkill
-                    || mEffectID == ESM::MagicEffect::FortifySkill || mEffectID == ESM::MagicEffect::DamageSkill);
-                return ((other.mSkill == mSkill) || !involvesSkill)
-                    && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
-            }
         };
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
