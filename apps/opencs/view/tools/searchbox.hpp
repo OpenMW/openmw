@@ -28,6 +28,7 @@ namespace CSVTools
         QCheckBox mCaseSensitive;
         QPushButton mSearch;
         QGridLayout* mLayout;
+        bool mLocked;
         QComboBox mMode;
         bool mSearchEnabled;
         QStackedWidget mReplaceInput;
@@ -37,6 +38,14 @@ namespace CSVTools
 
     private:
         void updateSearchButtons();
+
+        bool canReplace();
+        bool canReplaceRegex();
+        bool canSearch();
+        bool canSearchRegex();
+
+        bool hasInvalidSearchText();
+        bool hasInvalidSearchRegex();
 
     public:
         SearchBox(QWidget* parent = nullptr);
@@ -48,9 +57,6 @@ namespace CSVTools
         std::string getReplaceText() const;
 
         void setEditLock(bool locked);
-        void setSearchLock(bool locked);
-
-        bool hasInvalidText();
 
         void focus();
 

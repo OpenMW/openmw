@@ -113,7 +113,7 @@ CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::
 void CSVTools::SearchSubView::setEditLock(bool locked)
 {
     mLocked = locked;
-    mSearchBox.setEditLock(locked || mSearchBox.hasInvalidText());
+    mSearchBox.setEditLock(locked);
 }
 
 void CSVTools::SearchSubView::setStatusBar(bool show)
