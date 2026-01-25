@@ -40,8 +40,9 @@ namespace MWLua
         LuaManager(LuaManager&&) = delete;
         ~LuaManager();
 
+        void initPreLoad();
         // Called by engine.cpp when the environment is fully initialized.
-        void init();
+        void initPostLoad();
 
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
         void savePermanentStorage(const std::filesystem::path& userConfigPath) override;
