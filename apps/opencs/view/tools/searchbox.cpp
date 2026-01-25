@@ -102,6 +102,12 @@ CSVTools::SearchBox::SearchBox(QWidget* parent)
     updateSearchButtons();
 }
 
+void CSVTools::SearchBox::setEditLock(bool locked)
+{
+    mAllowReplace = !locked;
+    updateSearchButtons();
+}
+
 void CSVTools::SearchBox::setSearchMode(bool enabled)
 {
     mSearchEnabled = enabled;
@@ -155,12 +161,6 @@ std::string CSVTools::SearchBox::getReplaceText() const
 
             throw std::logic_error("Invalid search mode for replace");
     }
-}
-
-void CSVTools::SearchBox::setEditLock(bool locked)
-{
-    mAllowReplace = !locked;
-    updateSearchButtons();
 }
 
 void CSVTools::SearchBox::focus()

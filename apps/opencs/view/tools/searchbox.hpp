@@ -42,13 +42,13 @@ namespace CSVTools
     public:
         SearchBox(QWidget* parent = nullptr);
 
+        void setEditLock(bool locked);
+
         void setSearchMode(bool enabled);
 
         CSMTools::Search getSearch() const;
 
         std::string getReplaceText() const;
-
-        void setEditLock(bool locked);
 
         void focus();
 
