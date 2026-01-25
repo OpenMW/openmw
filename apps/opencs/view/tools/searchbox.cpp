@@ -10,69 +10,36 @@
 
 void CSVTools::SearchBox::updateSearchButtons()
 {
+    mReplace.setEnabled(false);
     if (!mSearchEnabled)
     {
         mSearch.setEnabled(false);
-        mReplace.setEnabled(false);
+        return;
     }
-    else
+
+    const CSMTools::Search::Type type = static_cast<CSMTools::Search::Type>(mMode.currentIndex());
+    if (type == CSMTools::Search::Type_RecordState)
     {
-        constexpr const char* redLineEditStyle = "QLineEdit { color: red; }";
-        switch (mMode.currentIndex())
+        mSearch.setEnabled(true);
+        return;
+    }
+
+    bool canSearch = false;
+    QString style;
+    if (!mText.text().isEmpty())
+    {
+        canSearch = true;
+        if (type == CSMTools::Search::Type_TextRegEx || type == CSMTools::Search::Type_IdRegEx)
         {
-            case 0:
-            case 2:
-                // Text modes
-                mText.setStyleSheet(QString());
-                mSearch.setEnabled(canSearch());
-                mReplace.setEnabled(canReplace());
-                break;
-
-            case 1:
-            case 3:
-                // Regex modes
-                mText.setStyleSheet(canSearchRegex() ? QString() : redLineEditStyle);
-                mSearch.setEnabled(canSearchRegex());
-                mReplace.setEnabled(canReplaceRegex());
-                break;
-
-            case 4:
-                // Record state mode
-                mSearch.setEnabled(true);
-                mReplace.setEnabled(false);
-                break;
+            canSearch = QRegularExpression(mText.text()).isValid();
+            if (!canSearch)
+                style = "QLineEdit { color: red; }";
         }
     }
-}
 
-bool CSVTools::SearchBox::canReplace()
-{
-    return !mLocked && hasValidSearchText();
-}
-
-bool CSVTools::SearchBox::canReplaceRegex()
-{
-    return canReplace() && hasValidSearchRegex();
-}
-
-bool CSVTools::SearchBox::canSearch()
-{
-    return hasValidSearchText();
-}
-
-bool CSVTools::SearchBox::canSearchRegex()
-{
-    return canSearch() && hasValidSearchRegex();
-}
-
-bool CSVTools::SearchBox::hasValidSearchText()
-{
-    return !mText.text().isEmpty();
-}
-
-bool CSVTools::SearchBox::hasValidSearchRegex()
-{
-    return QRegularExpression(mText.text()).isValid();
+    mText.setStyleSheet(style);
+    mSearch.setEnabled(canSearch);
+    mReplace.setEnabled(mAllowReplace);
 }
 
 CSVTools::SearchBox::SearchBox(QWidget* parent)
@@ -80,7 +47,6 @@ CSVTools::SearchBox::SearchBox(QWidget* parent)
     , mSearch(tr("Search"))
     , mSearchEnabled(false)
     , mReplace(tr("Replace All"))
-    , mLocked(false)
 {
     mLayout = new QGridLayout(this);
 
@@ -193,7 +159,7 @@ std::string CSVTools::SearchBox::getReplaceText() const
 
 void CSVTools::SearchBox::setEditLock(bool locked)
 {
-    mLocked = locked;
+    mAllowReplace = !locked;
     updateSearchButtons();
 }
 

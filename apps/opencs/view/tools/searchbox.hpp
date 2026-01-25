@@ -28,9 +28,9 @@ namespace CSVTools
         QCheckBox mCaseSensitive;
         QPushButton mSearch;
         QGridLayout* mLayout;
-        bool mLocked;
         QComboBox mMode;
         bool mSearchEnabled;
+        bool mAllowReplace{ false };
         QStackedWidget mReplaceInput;
         QLineEdit mReplaceText;
         QLabel mReplacePlaceholder;
@@ -38,14 +38,6 @@ namespace CSVTools
 
     private:
         void updateSearchButtons();
-
-        bool canReplace();
-        bool canReplaceRegex();
-        bool canSearch();
-        bool canSearchRegex();
-
-        bool hasValidSearchText();
-        bool hasValidSearchRegex();
 
     public:
         SearchBox(QWidget* parent = nullptr);
