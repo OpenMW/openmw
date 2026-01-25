@@ -22,10 +22,12 @@
 
 void CSVTools::SearchSubView::replace(bool selection)
 {
-    if (mLocked)
+    if (!mAllowReplace)
         return;
 
     std::vector<int> indices = mTable->getReplaceIndices(selection);
+    if (indices.empty())
+        return;
 
     std::string replace = mSearchBox.getReplaceText();
 
@@ -74,7 +76,6 @@ void CSVTools::SearchSubView::showEvent(QShowEvent* event)
 CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     : CSVDoc::SubView(id)
     , mDocument(document)
-    , mLocked(false)
 {
     QVBoxLayout* layout = new QVBoxLayout;
 
@@ -112,8 +113,9 @@ CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::
 
 void CSVTools::SearchSubView::setEditLock(bool locked)
 {
-    mLocked = locked;
-    mSearchBox.setEditLock(locked);
+    int reportSize = mDocument.getReport(getUniversalId())->rowCount();
+    mAllowReplace = !(locked || reportSize == 0);
+    mSearchBox.setEditLock(locked || reportSize == 0);
 }
 
 void CSVTools::SearchSubView::setStatusBar(bool show)
