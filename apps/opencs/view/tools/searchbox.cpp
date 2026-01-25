@@ -194,8 +194,7 @@ std::string CSVTools::SearchBox::getReplaceText() const
 void CSVTools::SearchBox::setEditLock(bool locked)
 {
     mLocked = locked;
-    if (mLocked)
-        mReplace.setEnabled(false);
+    updateSearchButtons();
 }
 
 void CSVTools::SearchBox::focus()
