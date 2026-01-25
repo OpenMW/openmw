@@ -47,32 +47,32 @@ void CSVTools::SearchBox::updateSearchButtons()
 
 bool CSVTools::SearchBox::canReplace()
 {
-    return !mLocked && !hasInvalidSearchText();
+    return !mLocked && hasValidSearchText();
 }
 
 bool CSVTools::SearchBox::canReplaceRegex()
 {
-    return canReplace() && !hasInvalidSearchRegex();
+    return canReplace() && hasValidSearchRegex();
 }
 
 bool CSVTools::SearchBox::canSearch()
 {
-    return !hasInvalidSearchText();
+    return hasValidSearchText();
 }
 
 bool CSVTools::SearchBox::canSearchRegex()
 {
-    return canSearch() && !hasInvalidSearchRegex();
+    return canSearch() && hasValidSearchRegex();
 }
 
-bool CSVTools::SearchBox::hasInvalidSearchText()
+bool CSVTools::SearchBox::hasValidSearchText()
 {
-    return mText.text().isEmpty();
+    return !mText.text().isEmpty();
 }
 
-bool CSVTools::SearchBox::hasInvalidSearchRegex()
+bool CSVTools::SearchBox::hasValidSearchRegex()
 {
-    return !QRegularExpression(mText.text()).isValid();
+    return QRegularExpression(mText.text()).isValid();
 }
 
 CSVTools::SearchBox::SearchBox(QWidget* parent)

@@ -44,8 +44,8 @@ namespace CSVTools
         bool canSearch();
         bool canSearchRegex();
 
-        bool hasInvalidSearchText();
-        bool hasInvalidSearchRegex();
+        bool hasValidSearchText();
+        bool hasValidSearchRegex();
 
     public:
         SearchBox(QWidget* parent = nullptr);
