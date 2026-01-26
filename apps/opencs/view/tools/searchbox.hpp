@@ -37,6 +37,8 @@ namespace CSVTools
         QPushButton mReplace;
 
     private:
+        int mSearchResultCount = 0;
+
         void updateSearchButtons();
 
     public:
@@ -45,6 +47,8 @@ namespace CSVTools
         void setEditLock(bool locked);
 
         void setSearchMode(bool enabled);
+
+        void setSearchResultCount(int resultCount);
 
         CSMTools::Search getSearch() const;
 

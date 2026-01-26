@@ -39,7 +39,7 @@ void CSVTools::SearchBox::updateSearchButtons()
 
     mText.setStyleSheet(style);
     mSearch.setEnabled(canSearch);
-    mReplace.setEnabled(mAllowReplace);
+    mReplace.setEnabled(mAllowReplace && mSearchResultCount > 0);
 }
 
 CSVTools::SearchBox::SearchBox(QWidget* parent)
@@ -111,6 +111,12 @@ void CSVTools::SearchBox::setEditLock(bool locked)
 void CSVTools::SearchBox::setSearchMode(bool enabled)
 {
     mSearchEnabled = enabled;
+    updateSearchButtons();
+}
+
+void CSVTools::SearchBox::setSearchResultCount(int resultCount)
+{
+    mSearchResultCount = resultCount;
     updateSearchButtons();
 }
 

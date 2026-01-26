@@ -113,9 +113,8 @@ CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::
 
 void CSVTools::SearchSubView::setEditLock(bool locked)
 {
-    int reportSize = mDocument.getReport(getUniversalId())->rowCount();
-    mAllowReplace = !(locked || reportSize == 0);
-    mSearchBox.setEditLock(locked || reportSize == 0);
+    mAllowReplace = !locked;
+    mSearchBox.setEditLock(locked);
 }
 
 void CSVTools::SearchSubView::setStatusBar(bool show)
@@ -156,8 +155,11 @@ void CSVTools::SearchSubView::tableSizeUpdate()
 
 void CSVTools::SearchSubView::operationDone(int type, bool failed)
 {
-    if (type == CSMDoc::State_Searching && !failed && !mDocument.getReport(getUniversalId())->rowCount())
+    if (type == CSMDoc::State_Searching)
     {
-        mBottom->setStatusMessage("No Results");
+        int resultCount = mDocument.getReport(getUniversalId())->rowCount();
+        if (!failed && !resultCount)
+            mBottom->setStatusMessage("No Results");
+        mSearchBox.setSearchResultCount(resultCount);
     }
 }
