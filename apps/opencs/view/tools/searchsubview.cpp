@@ -65,6 +65,8 @@ void CSVTools::SearchSubView::replace(bool selection)
                 mTable->model()->removeRows(*iter, 1);
         }
     }
+
+    mSearchBox.setSearchResultCount(mTable->model()->rowCount());
 }
 
 void CSVTools::SearchSubView::showEvent(QShowEvent* event)
