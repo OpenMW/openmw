@@ -65,8 +65,6 @@ void CSVTools::SearchSubView::replace(bool selection)
                 mTable->model()->removeRows(*iter, 1);
         }
     }
-
-    mSearchBox.setSearchResultCount(mTable->model()->rowCount());
 }
 
 void CSVTools::SearchSubView::showEvent(QShowEvent* event)
@@ -152,16 +150,15 @@ void CSVTools::SearchSubView::replaceAllRequest()
 
 void CSVTools::SearchSubView::tableSizeUpdate()
 {
-    mBottom->tableSizeChanged(mDocument.getReport(getUniversalId())->rowCount(), 0, 0);
+    int resultCount = mDocument.getReport(getUniversalId())->rowCount();
+    mBottom->tableSizeChanged(resultCount, 0, 0);
+    mSearchBox.setSearchResultCount(resultCount);
 }
 
 void CSVTools::SearchSubView::operationDone(int type, bool failed)
 {
-    if (type == CSMDoc::State_Searching)
+    if (type == CSMDoc::State_Searching && !failed && !mDocument.getReport(getUniversalId())->rowCount())
     {
-        int resultCount = mDocument.getReport(getUniversalId())->rowCount();
-        if (!failed && !resultCount)
-            mBottom->setStatusMessage("No Results");
-        mSearchBox.setSearchResultCount(resultCount);
+        mBottom->setStatusMessage("No Results");
     }
 }

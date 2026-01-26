@@ -116,8 +116,12 @@ void CSVTools::SearchBox::setSearchMode(bool enabled)
 
 void CSVTools::SearchBox::setSearchResultCount(int resultCount)
 {
+    int priorResultCount = mSearchResultCount;
     mSearchResultCount = resultCount;
-    updateSearchButtons();
+
+    // Update search buttons only if we're changing between zero and non-zero
+    if ((priorResultCount == 0) != (mSearchResultCount == 0))
+        updateSearchButtons();
 }
 
 CSMTools::Search CSVTools::SearchBox::getSearch() const
