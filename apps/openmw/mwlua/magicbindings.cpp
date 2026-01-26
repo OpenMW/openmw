@@ -312,9 +312,8 @@ namespace MWLua
 
         // Effect params
         auto effectParamsT = state.new_usertype<ESM::IndexedENAMstruct>("ESM3_EffectParams");
-        effectParamsT[sol::meta_function::to_string] = [magicEffectStore](const ESM::IndexedENAMstruct& params) {
-            const ESM::MagicEffect* const rec = magicEffectStore->find(params.mData.mEffectID);
-            return std::format("ESM3_EffectParams[{}]", ESM::MagicEffect::refIdToGmstString(rec->mId));
+        effectParamsT[sol::meta_function::to_string] = [](const ESM::IndexedENAMstruct& params) {
+            return std::format("ESM3_EffectParams[{}]", params.mData.mEffectID.toDebugString());
         };
         effectParamsT["effect"] = sol::readonly_property(
             [magicEffectStore](const ESM::IndexedENAMstruct& params) -> const ESM::MagicEffect* {
@@ -352,9 +351,8 @@ namespace MWLua
         // MagicEffect record
         auto magicEffectT = state.new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");
 
-        magicEffectT[sol::meta_function::to_string] = [](const ESM::MagicEffect& rec) {
-            return std::format("ESM3_MagicEffect[{}]", ESM::MagicEffect::refIdToGmstString(rec.mId));
-        };
+        magicEffectT[sol::meta_function::to_string]
+            = [](const ESM::MagicEffect& rec) { return std::format("ESM3_MagicEffect[{}]", rec.mId.toDebugString()); };
         magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> ESM::RefId { return rec.mId; });
         magicEffectT["icon"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
             auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -411,7 +409,7 @@ namespace MWLua
 
         auto activeSpellEffectT = state.new_usertype<ESM::ActiveEffect>("ActiveSpellEffect");
         activeSpellEffectT[sol::meta_function::to_string] = [](const ESM::ActiveEffect& self) {
-            return std::format("ActiveSpellEffect[{}]", ESM::MagicEffect::refIdToGmstString(self.mEffectId));
+            return std::format("ActiveSpellEffect[{}]", self.mEffectId.toDebugString());
         };
         activeSpellEffectT["id"]
             = sol::readonly_property([](const ESM::ActiveEffect& self) -> ESM::RefId { return self.mEffectId; });
@@ -543,9 +541,8 @@ namespace MWLua
 
         auto activeEffectT = state.new_usertype<ActiveEffect>("ActiveEffect");
 
-        activeEffectT[sol::meta_function::to_string] = [](const ActiveEffect& self) {
-            return std::format("ActiveEffect[{}]", ESM::MagicEffect::refIdToGmstString(self.key.mId));
-        };
+        activeEffectT[sol::meta_function::to_string]
+            = [](const ActiveEffect& self) { return std::format("ActiveEffect[{}]", self.key.mId.toDebugString()); };
         activeEffectT["id"]
             = sol::readonly_property([](const ActiveEffect& self) -> ESM::RefId { return self.key.mId; });
         activeEffectT["name"]
