@@ -87,4 +87,11 @@ namespace MWLua
             { "openmw.input", initInputPackage(context) },
         };
     }
+
+    std::map<std::string, sol::object> initLoadPackages(const Context& context)
+    {
+        return {
+            { "openmw.core", initCorePackage(context) },
+        };
+    }
 }

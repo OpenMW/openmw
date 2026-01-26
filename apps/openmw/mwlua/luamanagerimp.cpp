@@ -100,18 +100,28 @@ namespace MWLua
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
             Context context;
-            context.mType = Context::Global;
+            context.mType = Context::Load;
             context.mLuaManager = this;
             context.mLua = &mLua;
-            context.mObjectLists = nullptr;
-            context.mLuaEvents = nullptr;
-            context.mSerializer = nullptr;
 
             for (const auto& [name, package] : initCommonPackages(context))
                 mLua.addCommonPackage(name, package);
 
+            for (const auto& [name, package] : initLoadPackages(context))
+                mLoadScripts.addPackage(name, package);
+
+            mLoadScripts.addPackage(
+                "openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mGlobalStorage, &mPlayerStorage));
+
             LuaUtil::LuaStorage::initLuaBindings(view);
         });
+    }
+
+    void LuaManager::contentFilesLoaded()
+    {
+        initConfiguration(false);
+        mLoadScripts.setAutoStartConf(mConfiguration.getLoadConf());
+        mLoadScripts.contentFilesLoaded();
     }
 
     void LuaManager::initPostLoad()
@@ -152,7 +162,6 @@ namespace MWLua
             mPlayerStorage.setActive(true);
             mGlobalStorage.setActive(false);
 
-            initConfiguration(false);
             mInitialized = true;
             mMenuScripts.addAutoStartedScripts();
         });

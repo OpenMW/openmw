@@ -19,6 +19,7 @@
 
 #include "engineevents.hpp"
 #include "globalscripts.hpp"
+#include "loadscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
 #include "menuscripts.hpp"
@@ -40,8 +41,9 @@ namespace MWLua
         LuaManager(LuaManager&&) = delete;
         ~LuaManager();
 
+        // Called by engine.cpp as part of content file loading
         void initPreLoad();
-        // Called by engine.cpp when the environment is fully initialized.
+        void contentFilesLoaded() override;
         void initPostLoad();
 
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
@@ -201,6 +203,7 @@ namespace MWLua
         std::map<std::string, sol::object> mLocalPackages;
         std::map<std::string, sol::object> mPlayerPackages;
 
+        LoadScripts mLoadScripts{ &mLua };
         MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
