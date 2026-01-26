@@ -22,14 +22,16 @@
 
 void CSVTools::SearchSubView::replace(bool selection)
 {
-    if (mLocked)
+    if (!mAllowReplace)
         return;
 
     std::vector<int> indices = mTable->getReplaceIndices(selection);
+    if (indices.empty())
+        return;
 
     std::string replace = mSearchBox.getReplaceText();
 
-    const CSMTools::ReportModel& model = dynamic_cast<const CSMTools::ReportModel&>(*mTable->model());
+    const CSMTools::ReportModel* model = mTable->getReportModel();
 
     bool autoDelete = CSMPrefs::get()["Search & Replace"]["auto-delete"].isTrue();
 
@@ -40,7 +42,7 @@ void CSVTools::SearchSubView::replace(bool selection)
     // in a single string.
     for (std::vector<int>::const_reverse_iterator iter(indices.rbegin()); iter != indices.rend(); ++iter)
     {
-        const CSMWorld::UniversalId& id = model.getUniversalId(*iter);
+        const CSMWorld::UniversalId& id = model->getUniversalId(*iter);
 
         CSMWorld::UniversalId::Type type = CSMWorld::UniversalId::getParentType(id.getType());
 
@@ -52,7 +54,7 @@ void CSVTools::SearchSubView::replace(bool selection)
             currentTable = table;
         }
 
-        std::string hint = model.getHint(*iter);
+        std::string hint = model->getHint(*iter);
 
         if (search.verify(mDocument, table, id, hint))
         {
@@ -74,7 +76,6 @@ void CSVTools::SearchSubView::showEvent(QShowEvent* event)
 CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     : CSVDoc::SubView(id)
     , mDocument(document)
-    , mLocked(false)
 {
     QVBoxLayout* layout = new QVBoxLayout;
 
@@ -112,7 +113,7 @@ CSVTools::SearchSubView::SearchSubView(const CSMWorld::UniversalId& id, CSMDoc::
 
 void CSVTools::SearchSubView::setEditLock(bool locked)
 {
-    mLocked = locked;
+    mAllowReplace = !locked;
     mSearchBox.setEditLock(locked);
 }
 
@@ -149,7 +150,9 @@ void CSVTools::SearchSubView::replaceAllRequest()
 
 void CSVTools::SearchSubView::tableSizeUpdate()
 {
-    mBottom->tableSizeChanged(mDocument.getReport(getUniversalId())->rowCount(), 0, 0);
+    int resultCount = mDocument.getReport(getUniversalId())->rowCount();
+    mBottom->tableSizeChanged(resultCount, 0, 0);
+    mSearchBox.setSearchResultCount(resultCount);
 }
 
 void CSVTools::SearchSubView::operationDone(int type, bool failed)
