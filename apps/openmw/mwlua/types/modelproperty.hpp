@@ -7,14 +7,34 @@
 #include <sol/property.hpp>
 #include <sol/usertype.hpp>
 
+#include "../contentbindings.hpp"
+
 namespace MWLua
 {
+    namespace
+    {
+        template <class T>
+        std::string getMeshPath(const T& recordValue)
+        {
+            return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(recordValue.mModel)).value();
+        }
+    }
+
     template <class T>
     void addModelProperty(sol::usertype<T>& recordType)
     {
-        recordType["model"] = sol::readonly_property([](const T& recordValue) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(recordValue.mModel)).value();
-        });
+        recordType["model"] = sol::readonly_property(&getMeshPath<T>);
+    }
+
+    template <class T>
+    void addMutableModelProperty(sol::usertype<MutableRecord<T>>& recordType)
+    {
+        recordType["model"]
+            = sol::property([](const MutableRecord<T>& mutRec) -> std::string { return getMeshPath(mutRec.find()); },
+                [](MutableRecord<T>& mutRec, std::string_view path) {
+                    T& recordValue = mutRec.find();
+                    recordValue.mModel = Misc::ResourceHelpers::meshPathForESM3(path);
+                });
     }
 }
 
