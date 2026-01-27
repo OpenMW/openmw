@@ -110,8 +110,7 @@ namespace MWLua
             for (const auto& [name, package] : initLoadPackages(context))
                 mLoadScripts.addPackage(name, package);
 
-            mLoadScripts.addPackage(
-                "openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mGlobalStorage, &mPlayerStorage));
+            mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
 
             LuaUtil::LuaStorage::initLuaBindings(view);
         });
@@ -121,7 +120,9 @@ namespace MWLua
     {
         initConfiguration(false);
         mLoadScripts.setAutoStartConf(mConfiguration.getLoadConf());
+        mLoadScripts.addAutoStartedScripts();
         mLoadScripts.contentFilesLoaded();
+        mLoadScripts.removeAllScripts();
     }
 
     void LuaManager::initPostLoad()

@@ -18,8 +18,6 @@
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/luamanager.hpp"
 #include "../mwmechanics/spelllist.hpp"
 
 namespace
@@ -534,7 +532,6 @@ namespace MWWorld
         getWritable<ESM4::ActorCharacter>().preprocessReferences(get<ESM4::Cell>());
         getWritable<ESM4::ActorCreature>().preprocessReferences(get<ESM4::Cell>());
 
-        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
         rebuildIdsIndex();
         mStoreImp->mStaticIds = mStoreImp->mIds;
     }

@@ -171,12 +171,6 @@ namespace MWWorld
 
         mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>> mSpellListCache;
 
-        template <class T>
-        Store<T>& getWritable()
-        {
-            return static_cast<Store<T>&>(*mStores[getTypeIndex<T>()]);
-        }
-
         /// Validate entries in store after setup
         void validate();
 
@@ -228,6 +222,12 @@ namespace MWWorld
         const Store<T>& get() const
         {
             return static_cast<const Store<T>&>(*mStores[getTypeIndex<T>()]);
+        }
+
+        template <class T>
+        Store<T>& getWritable()
+        {
+            return static_cast<Store<T>&>(*mStores[getTypeIndex<T>()]);
         }
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)

@@ -281,6 +281,7 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
 
         fillGlobalVariables();
 
