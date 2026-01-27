@@ -966,8 +966,7 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
-        widget->setUserString(
-            "Caption_MagicEffectName", std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effectId)));
+        widget->setUserString("Caption_MagicEffectName", effect->mName);
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
         widget->setUserString("Caption_MagicEffectSchool",
             "#{sSchool}: "

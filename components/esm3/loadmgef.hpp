@@ -98,6 +98,9 @@ namespace ESM
         ESM::RefId mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
         std::string mDescription;
 
+        /// Effect GMST (not part of the MGEF definition)
+        std::string mName;
+
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 

@@ -35,13 +35,9 @@
 namespace
 {
 
-    bool sortMagicEffects(ESM::RefId id1, ESM::RefId id2)
+    bool sortMagicEffects(const ESM::MagicEffect* effect1, const ESM::MagicEffect* effect2)
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-        return gmst.find(ESM::MagicEffect::refIdToGmstString(id1))->mValue.getString()
-            < gmst.find(ESM::MagicEffect::refIdToGmstString(id2))->mValue.getString();
+        return effect1->mName < effect2->mName;
     }
 
     void init(ESM::ENAMstruct& effect)
@@ -224,7 +220,7 @@ namespace MWGui
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
             VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing(std::format("#{{{}}}", ESM::MagicEffect::refIdToGmstString(effect->mId)));
+        mEffectName->setCaption(effect->mName);
 
         mEffect.mEffectID = effect->mId;
 
@@ -784,7 +780,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
-        std::vector<ESM::RefId> knownEffects;
+        std::vector<const ESM::MagicEffect*> knownEffects;
 
         for (const ESM::Spell* spell : spells)
         {
@@ -794,9 +790,8 @@ namespace MWGui
 
             for (const ESM::IndexedENAMstruct& effectInfo : spell->mEffects.mList)
             {
-                ESM::RefId effectId = effectInfo.mData.mEffectID;
-                const ESM::MagicEffect* effect
-                    = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
+                const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
+                    effectInfo.mData.mEffectID);
 
                 // skip effects that do not allow spellmaking/enchanting
                 int requiredFlags
@@ -804,8 +799,8 @@ namespace MWGui
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
 
-                if (std::find(knownEffects.begin(), knownEffects.end(), effectId) == knownEffects.end())
-                    knownEffects.push_back(effectId);
+                if (std::find(knownEffects.begin(), knownEffects.end(), effect) == knownEffects.end())
+                    knownEffects.push_back(effect);
             }
         }
 
@@ -814,31 +809,22 @@ namespace MWGui
         mAvailableEffectsList->clear();
 
         int i = 0;
-        for (const auto effectId : knownEffects)
+        for (const auto effect : knownEffects)
         {
-            mAvailableEffectsList->addItem(MWBase::Environment::get()
-                                               .getESMStore()
-                                               ->get<ESM::GameSetting>()
-                                               .find(ESM::MagicEffect::refIdToGmstString(effectId))
-                                               ->mValue.getString());
-            mButtonMapping[i] = effectId;
+            mAvailableEffectsList->addItem(effect->mName);
+            mButtonMapping[i] = effect->mId;
             ++i;
         }
         mAvailableEffectsList->adjustSize();
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const auto effectId : knownEffects)
+        for (const auto effect : knownEffects)
         {
-            const std::string& name = MWBase::Environment::get()
-                                          .getESMStore()
-                                          ->get<ESM::GameSetting>()
-                                          .find(ESM::MagicEffect::refIdToGmstString(effectId))
-                                          ->mValue.getString();
-            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(name);
+            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(effect->mName);
             mAvailableButtons.emplace_back(w);
 
-            ToolTips::createMagicEffectToolTip(w, effectId);
+            ToolTips::createMagicEffectToolTip(w, effect->mId);
         }
 
         mEffects.clear();
