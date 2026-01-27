@@ -5,11 +5,7 @@
 
 #include <components/esm/refid.hpp>
 
-namespace MWWorld
-{
-    template <class T>
-    class Store;
-}
+#include "../mwworld/store.hpp"
 
 namespace MWLua
 {
@@ -21,19 +17,11 @@ namespace MWLua
         MWWorld::Store<T>& mStore;
         ESM::RefId mId;
 
-        const T& find() const;
-        T& find();
+        const T& find() const { return *mStore.find(mId); }
+        T& find() { return *const_cast<T*>(mStore.find(mId)); }
     };
 
     sol::table initContentPackage(const Context& context);
-}
-
-namespace sol
-{
-    template <class T>
-    struct is_automagical<MWLua::MutableRecord<T>> : std::false_type
-    {
-    };
 }
 
 #endif // MWLUA_CONTENTBINDINGS_H

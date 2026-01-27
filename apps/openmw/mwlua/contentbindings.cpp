@@ -41,6 +41,11 @@ namespace sol
     struct is_automagical<MutableStore<T>> : std::false_type
     {
     };
+
+    template <class T>
+    struct is_automagical<MWLua::MutableRecord<T>> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -147,18 +152,6 @@ namespace MWLua
             addMutableModelProperty(record);
             return MutableStore<ESM::Static>{ store };
         }
-    }
-
-    template <class T>
-    const T& MutableRecord<T>::find() const
-    {
-        return *mStore.find(mId);
-    }
-
-    template <class T>
-    T& MutableRecord<T>::find()
-    {
-        return *const_cast<T*>(mStore.find(mId));
     }
 
     sol::table initContentPackage(const Context& context)
