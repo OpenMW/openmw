@@ -432,6 +432,7 @@ namespace Debug
     {
 #if defined _WIN32
         (void)attachParentConsole();
+        SetConsoleOutputCP(CP_UTF8);
 #endif
         rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
         rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
