@@ -185,10 +185,16 @@ namespace Debug
         public:
             std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
             {
-                // Make a copy for null termination
-                std::string tmp(str, static_cast<unsigned int>(size));
+                if (size > std::numeric_limits<int>::max())
+                    OutputDebugStringW(L"Next line truncated...");
+                auto wideSize = MultiByteToWideChar(CP_UTF8, 0, str,
+                    static_cast<int>(std::min<std::streamsize>(size, std::numeric_limits<int>::max())), nullptr, 0);
+                std::wstring wide(wideSize, L'\0');
+                MultiByteToWideChar(CP_UTF8, 0, str,
+                    static_cast<int>(std::min<std::streamsize>(size, std::numeric_limits<int>::max())), wide.data(),
+                    wideSize);
                 // Write string to Visual Studio Debug output
-                OutputDebugString(tmp.c_str());
+                OutputDebugStringW(wide.c_str());
                 return size;
             }
 
@@ -426,6 +432,7 @@ namespace Debug
     {
 #if defined _WIN32
         (void)attachParentConsole();
+        SetConsoleOutputCP(CP_UTF8);
 #endif
         rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
         rawStderr = std::make_unique<std::ostream>(std::cerr.rdbuf());
