@@ -25,6 +25,7 @@ set(BUILTIN_DATA_MW_FILES
     openmw_aux/calendarconfig.lua
 
     scripts/omw/cellhandlers.lua
+    scripts/omw/esmfallbacks.lua
     scripts/omw/combat/common.lua
     scripts/omw/combat/global.lua
     scripts/omw/combat/local.lua
