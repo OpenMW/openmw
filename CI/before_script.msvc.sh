@@ -161,7 +161,7 @@ Options:
 		Build unit tests / Google test
 	-u
 		Configure for unity builds.
-	-v <2019/2022>
+	-v <2022/2026>
 		Choose the Visual Studio version to use.
 	-n
 		Produce NMake makefiles instead of a Visual Studio solution. Cannot be used with -N.
@@ -366,30 +366,34 @@ if [ -z $PLATFORM ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2019"
+	VS_VERSION="2022"
 fi
 
 case $VS_VERSION in
+	18|18.0|2026 )
+		GENERATOR="Visual Studio 18 2026"
+		MSVC_REAL_VER="18"
+		MSVC_DISPLAY_YEAR="2026"
+
+		DEPS_MSVC_YEAR="2022"
+		QT_MSVC_YEAR="2019"
+
+		VCPKG_TRIPLET="x64-windows"
+		;;
 	17|17.0|2022 )
 		GENERATOR="Visual Studio 17 2022"
-		MSVC_TOOLSET="vc143"
 		MSVC_REAL_VER="17"
 		MSVC_DISPLAY_YEAR="2022"
 
+		DEPS_MSVC_YEAR="2022"
 		QT_MSVC_YEAR="2019"
 
 		VCPKG_TRIPLET="x64-windows"
 		;;
 
 	16|16.0|2019 )
-		GENERATOR="Visual Studio 16 2019"
-		MSVC_TOOLSET="vc142"
-		MSVC_REAL_VER="16"
-		MSVC_DISPLAY_YEAR="2019"
-
-		QT_MSVC_YEAR="2019"
-
-		VCPKG_TRIPLET="x64-windows-2019"
+		echo "Visual Studio 2019 is no longer supported"
+		wrappedExit 1
 		;;
 
 	15|15.0|2017 )
@@ -553,8 +557,8 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/deps_versions.msvc.sh"
 # versions that don't affect the CI cache can go here
 AQT_VERSION='v3.1.15'
 
-VCPKG_PATH="vcpkg-x64-windows-${VS_VERSION:?}-${VCPKG_TAG:?}"
-VCPKG_PDB_PATH="vcpkg-x64-windows-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
+VCPKG_PATH="vcpkg-x64-windows-${DEPS_MSVC_YEAR:?}-${VCPKG_TAG:?}"
+VCPKG_PDB_PATH="vcpkg-x64-windows-${DEPS_MSVC_YEAR:?}-pdb-${VCPKG_TAG:?}"
 VCPKG_MANIFEST="${VCPKG_PATH:?}-manifest.txt"
 VCPKG_PDB_MANIFEST="${VCPKG_PDB_PATH:?}-manifest.txt"
 
@@ -915,7 +919,7 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 			inheritEnvironments=msvc_x86
 		fi
 	fi
-	echo "In Visual Studio 15.3 (2017 Update 3) or later, try setting '\"inheritEnvironments\": [ \"$inheritEnvironments\" ]' in CMakeSettings.json to build in the IDE."
+	echo "In Visual Studio, try setting '\"inheritEnvironments\": [ \"$inheritEnvironments\" ]' in CMakeSettings.json to build in the IDE."
 fi
 
 wrappedExit $RET
