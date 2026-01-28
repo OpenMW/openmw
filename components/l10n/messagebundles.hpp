@@ -55,7 +55,10 @@ namespace L10n
         void load(std::istream& input, const icu::Locale& lang);
         bool isLoaded(const icu::Locale& loc) const
         {
-            return mBundles.find(std::string_view(loc.getName())) != mBundles.end();
+            std::string_view localeName = loc.getName();
+            if (localeName == "gmst")
+                return mGmstsLoaded;
+            return mBundles.find(localeName) != mBundles.end();
         }
         const icu::Locale& getFallbackLocale() const { return mFallbackLocale; }
         void setGmstLoader(GmstLoader fn) { mGmstLoader = std::move(fn); }
@@ -66,6 +69,7 @@ namespace L10n
         // icu::Locale isn't hashable (or comparable), so we use the string form instead, which is canonicalized
         mutable StringMap<StringMap<icu::MessageFormat>> mBundles;
         mutable StringMap<GmstMessageFormat> mGmsts;
+        bool mGmstsLoaded{ false };
         mutable std::shared_mutex mMutex;
         const icu::Locale mFallbackLocale;
         std::vector<std::string> mPreferredLocaleStrings;
