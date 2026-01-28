@@ -1175,8 +1175,8 @@
 -- @field #string class ID of the NPC's class (e.g. acrobat)
 -- @field #string model Path to the model associated with this NPC, used for animations.
 -- @field #string mwscript MWScript on this NPC (can be nil)
--- @field #string hair Path to the hair body part model
--- @field #string head Path to the head body part model
+-- @field #string hair ID of the hair body part
+-- @field #string head ID of the head body part
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #boolean isMale The gender setting of the NPC
