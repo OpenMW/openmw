@@ -330,12 +330,6 @@
 -- @return true if spell is active, false otherwise
 
 ---
--- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
--- @function [parent=#ActorActiveSpells] canUsePower
--- @param self
--- @param #any spellOrId A @{openmw.core#Spell} or string record id.
-
----
 -- Remove an active spell based on active spell ID (see @{openmw_core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw_core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
@@ -384,7 +378,7 @@
 -- @param openmw.core#GameObject actor
 -- @return #ActorSpells
 
---- List of spells with additional functions add/remove/clear (modification are allowed only in global scripts or on self).
+--- List of spells (modifications are only allowed in global scripts or on self).
 -- @type ActorSpells
 -- @usage -- print available spells
 -- local mySpells = types.Actor.spells(self)
@@ -421,6 +415,12 @@
 -- Remove all spells (only in global scripts or on self).
 -- @function [parent=#ActorSpells] clear
 -- @param self
+
+---
+-- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
+-- @function [parent=#ActorSpells] canUsePower
+-- @param self
+-- @param #any spellOrId A @{openmw.core#Spell} or string record ID.
 
 --- Values affect how much each attribute can be increased at level up, and are all reset to 0 upon level up.
 -- @type SkillIncreasesForAttributeStats
