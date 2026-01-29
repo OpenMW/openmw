@@ -228,6 +228,7 @@ namespace MWGui
             mMagicSelectionDialog = std::make_unique<MagicSelectionDialog>(this);
         }
         mMagicSelectionDialog->setVisible(true);
+        mMagicSelectionDialog->setActiveControllerWindow(true);
 
         mAssignDialog->setVisible(false);
     }
@@ -724,7 +725,6 @@ namespace MWGui
         WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
-        mMagicList->resetScrollbars();
     }
 
     void MagicSelectionDialog::onModelIndexSelected(SpellModel::ModelIndex index)
@@ -744,5 +744,14 @@ namespace MWGui
             mMagicList->onControllerButton(arg.button);
 
         return true;
+    }
+
+    void MagicSelectionDialog::setActiveControllerWindow(bool active)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mMagicList->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 }
