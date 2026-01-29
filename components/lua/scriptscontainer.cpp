@@ -831,9 +831,9 @@ namespace LuaUtil
             stats[id].mMemoryUsage += mem;
     }
 
-    ScriptsContainerPtr ScriptsContainer::getWeakPointer() const
+    ScriptsContainerWeakPtr ScriptsContainer::getWeakPointer() const
     {
-        return ScriptsContainerPtr(mThis);
+        return ScriptsContainerWeakPtr(mThis);
     }
 
     ScriptsContainer::Script::~Script()

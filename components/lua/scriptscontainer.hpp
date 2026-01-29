@@ -16,17 +16,18 @@ namespace LuaUtil
 {
     class ScriptTracker;
     class ScriptsContainer;
-    using ScriptsContainerWeakPtr = std::shared_ptr<ScriptsContainer*>;
-    // Immutable ScriptsContainerWeakPtr
-    class ScriptsContainerPtr
+    using ScriptsContainerLifetime = std::shared_ptr<ScriptsContainer*>;
+
+    // Immutable ScriptsContainerLifetime
+    class ScriptsContainerWeakPtr
     {
-        ScriptsContainerWeakPtr mWeakPtr;
+        ScriptsContainerLifetime mWeakPtr;
 
     public:
-        ScriptsContainerPtr(const ScriptsContainerPtr&) = default;
-        ScriptsContainerPtr(ScriptsContainerPtr&&) = default;
+        ScriptsContainerWeakPtr(const ScriptsContainerWeakPtr&) = default;
+        ScriptsContainerWeakPtr(ScriptsContainerWeakPtr&&) = default;
 
-        explicit ScriptsContainerPtr(ScriptsContainerWeakPtr ptr)
+        explicit ScriptsContainerWeakPtr(ScriptsContainerLifetime ptr)
             : mWeakPtr(std::move(ptr))
         {
         }
@@ -34,12 +35,12 @@ namespace LuaUtil
         ScriptsContainer* operator*() const noexcept { return *mWeakPtr.get(); }
     };
 
-    inline auto operator<=>(const ScriptsContainerPtr& lhs, const ScriptsContainerPtr& rhs)
+    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, const ScriptsContainerWeakPtr& rhs)
     {
         return *lhs <=> *rhs;
     }
 
-    inline auto operator<=>(const ScriptsContainerPtr& lhs, ScriptsContainer* rhs)
+    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, ScriptsContainer* rhs)
     {
         return *lhs <=> rhs;
     }
@@ -192,7 +193,7 @@ namespace LuaUtil
 
         virtual bool isActive() const { return false; }
 
-        ScriptsContainerPtr getWeakPointer() const;
+        ScriptsContainerWeakPtr getWeakPointer() const;
 
     protected:
         // Call a function on an interface.
@@ -348,7 +349,7 @@ namespace LuaUtil
         int64_t mTemporaryCallbackCounter = 0;
 
         std::map<int, int64_t> mRemovedScriptsMemoryUsage;
-        ScriptsContainerWeakPtr mThis; // used by LuaState to track ownership of memory allocations
+        ScriptsContainerLifetime mThis; // used by LuaState to track ownership of memory allocations
 
         ScriptTracker* mTracker;
         bool mRequiredLoading = false;

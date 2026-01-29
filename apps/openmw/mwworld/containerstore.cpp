@@ -521,6 +521,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const ConstPtr& 
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack(const ConstPtr& ptr, int count)
 {
+    // As with MWWorld::CellStore::insert, the caller is expected to deal with LiveCellRefBase's copy constructor
+    // copying RefData and CellRef, thereby creating another instance with the same ESM::RefNum and MWLua::LocalScripts.
+    // In practice this means the caller MUST ensure the object that gets copied into this inventory is removed from the
+    // world.
     ContainerStoreIterator it = begin();
 
     switch (getType(ptr))

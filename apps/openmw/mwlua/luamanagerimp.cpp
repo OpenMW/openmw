@@ -56,7 +56,7 @@ namespace MWLua
             ~BoolScopeGuard() { mValue = false; }
         };
 
-        LocalScripts* asLocal(const LuaUtil::ScriptsContainerPtr& ptr)
+        LocalScripts* asLocal(const LuaUtil::ScriptsContainerWeakPtr& ptr)
         {
             return static_cast<LocalScripts*>(*ptr);
         }
@@ -227,20 +227,20 @@ namespace MWLua
 
         mObjectLists.update();
 
-        for (const LuaUtil::ScriptsContainerPtr& ptr : mQueuedAutoStartedScripts)
+        for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mQueuedAutoStartedScripts)
         {
             if (LocalScripts* scripts = asLocal(ptr))
                 scripts->addAutoStartedScripts();
         }
         mQueuedAutoStartedScripts.clear();
 
-        std::erase_if(mActiveLocalScripts, [](const LuaUtil::ScriptsContainerPtr& ptr) {
+        std::erase_if(mActiveLocalScripts, [](const LuaUtil::ScriptsContainerWeakPtr& ptr) {
             LocalScripts* l = asLocal(ptr);
             return l == nullptr || l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted();
         });
 
         mGlobalScripts.statsNextFrame();
-        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+        for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mActiveLocalScripts)
             asLocal(ptr)->statsNextFrame();
 
         mLuaEvents.finalizeEventBatch();
@@ -250,7 +250,7 @@ namespace MWLua
         {
             mMenuScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
-            for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+            for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mActiveLocalScripts)
                 asLocal(ptr)->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
         }
 
@@ -268,7 +268,7 @@ namespace MWLua
             bool isPaused = timeManager.isPaused();
 
             float frameDuration = MWBase::Environment::get().getFrameDuration();
-            for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+            for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mActiveLocalScripts)
                 asLocal(ptr)->update(isPaused ? 0 : frameDuration);
             mGlobalScripts.update(isPaused ? 0 : frameDuration);
 
@@ -844,7 +844,7 @@ namespace MWLua
             scripts->load(localData[id]);
         }
 
-        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+        for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mActiveLocalScripts)
         {
             if (LocalScripts* scripts = asLocal(ptr))
                 scripts->setActive(true);
@@ -962,7 +962,7 @@ namespace MWLua
 
         std::vector<Stats> activeStats;
         mGlobalScripts.collectStats(activeStats);
-        for (const LuaUtil::ScriptsContainerPtr& ptr : mActiveLocalScripts)
+        for (const LuaUtil::ScriptsContainerWeakPtr& ptr : mActiveLocalScripts)
         {
             if (LocalScripts* scripts = asLocal(ptr))
                 scripts->collectStats(activeStats);
