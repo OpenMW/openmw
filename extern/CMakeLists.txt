@@ -214,9 +214,10 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
     endif()
 
     include(FetchContent)
+    # One commit after the 0.8.0 tag for CMake 4.x compatibility
     FetchContent_Declare(yaml-cpp
-        URL https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip
-        URL_HASH MD5=1e8ca0d6ccf99f3ed9506c1f6937d0ec
+        URL https://github.com/jbeder/yaml-cpp/archive/c2680200486572baf8221ba052ef50b58ecd816e.zip
+        URL_HASH SHA512=9eb328e37ff547e7f681d64e3a8f268a8a5645cb1c258106d1d9f959eec498dfc7c466690c56f210ad7d5fb95b806a30c87ccbb019cccf5c3c6135cfc3c13fe1
         SOURCE_DIR fetched/yaml-cpp
     )
     FetchContent_MakeAvailable(yaml-cpp)
