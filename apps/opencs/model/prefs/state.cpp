@@ -59,6 +59,8 @@ void CSMPrefs::State::declare()
         .setTooltip("Minimum width of subviews.")
         .setRange(50, 10000);
     declareEnum(mValues->mWindows.mMainwindowScrollbar, "Main Window Horizontal Scrollbar Mode");
+    declareEnum(mValues->mWindows.mSubviewOpenDirection, "Subview Open Direction")
+        .setTooltip("Controls whether new subviews open to the right or left of existing ones.");
 
     declareCategory("Records");
     declareEnum(mValues->mRecords.mStatusFormat, "Modification Status Display Format");
