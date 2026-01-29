@@ -81,6 +81,11 @@ namespace CSMPrefs
                 "Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further." },
         };
 
+        static constexpr std::array<EnumValueView, 2> sSubviewOpenDirectionValues{
+            EnumValueView{ "Open Right", "New subviews open to the right of existing ones." },
+            EnumValueView{ "Open Left", "New subviews open to the left of existing ones." },
+        };
+
         Settings::SettingValue<int> mDefaultWidth{ mIndex, sName, "default-width", 800 };
         Settings::SettingValue<int> mDefaultHeight{ mIndex, sName, "default-height", 600 };
         Settings::SettingValue<bool> mShowStatusbar{ mIndex, sName, "show-statusbar", true };
@@ -90,6 +95,8 @@ namespace CSMPrefs
         Settings::SettingValue<int> mMinimumWidth{ mIndex, sName, "minimum-width", 325 };
         EnumSettingValue mMainwindowScrollbar{ mIndex, sName, "mainwindow-scrollbar", sMainwindowScrollbarValues, 0 };
         Settings::SettingValue<bool> mGrowLimit{ mIndex, sName, "grow-limit", false };
+        EnumSettingValue mSubviewOpenDirection{ mIndex, sName, "subview-open-direction", sSubviewOpenDirectionValues,
+            0 };
     };
 
     struct RecordsCategory : Settings::WithIndex
