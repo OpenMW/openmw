@@ -122,6 +122,7 @@ ForcePerPixelLightingTooltip: |-
     Notera att shaders för marktäckare och partikeleffekter ignorerar denna inställning.
 FrameRateHint: "Tips: tryck på F3 för att visa\naktuell bilduppdateringsfrekvens."
 GammaCorrection: "Gammakorrigering"
+GammaCorrectionValue: "Gammakorrigering ({value, number, ::.00})"
 GammaDark: "Mörkt"
 GammaLight: "Ljust"
 GmstOverridesL10n: "Strängar från ESM-filer har prioritet"

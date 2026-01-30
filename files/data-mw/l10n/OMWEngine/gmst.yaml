@@ -32,6 +32,8 @@ EnableController: "sEnableJoystick"
 FieldOfViewHigh: "sHigh"
 FieldOfViewLow: "sLow"
 GammaCorrection: "sGamma_Correction"
+GammaCorrectionValue:
+  pattern: "{gmst:sGamma_Correction} ({value, number, ::.00})"
 GammaDark: "sDark_Gamma"
 GammaLight: "sLight_Gamma"
 Health: "sHealth"

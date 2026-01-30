@@ -121,6 +121,7 @@ ForcePerPixelLightingTooltip: |-
     Shadery trawy i efekty cząsteczkowe ignorują to ustawienie.
 FrameRateHint: "Podpowiedź: naciśnij F3,\naby zobaczyć liczbę klatek na sekundę."
 GammaCorrection: "Korekcja gamma"
+GammaCorrectionValue: "Korekcja gamma ({value, number, ::.00})"
 GammaDark: "Ciemno"
 GammaLight: "Jasno"
 GmstOverridesL10n: "Teksty z plików ESM mają pierwszeństwo"

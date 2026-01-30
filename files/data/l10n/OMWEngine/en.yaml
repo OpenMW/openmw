@@ -121,6 +121,7 @@ ForcePerPixelLightingTooltip: |-
     Note that groundcover shaders and particle effects ignore this setting.
 FrameRateHint: "Hint: press F3 to show\nthe current frame rate."
 GammaCorrection: "Gamma Correction"
+GammaCorrectionValue: "Gamma Correction ({value, number, ::.00})"
 GammaDark: "Dark"
 GammaLight: "Light"
 GmstOverridesL10n: "Strings From ESM Files Have Priority"

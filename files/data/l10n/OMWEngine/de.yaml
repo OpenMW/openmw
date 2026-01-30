@@ -121,6 +121,7 @@ ForcePerPixelLightingTooltip: |-
     Beachten Sie, dass Bodendecker-Shader und Partikeleffekte diese Einstellung ignorieren.
 FrameRateHint: "Hinweis: Drücken Sie F3,\num die aktuelle Bildrate anzuzeigen."
 GammaCorrection: "Gamma-Korrektur"
+GammaCorrectionValue: "Gamma-Korrektur ({value, number, ::.00})"
 GammaDark: "Dunkel"
 GammaLight: "Hell"
 GmstOverridesL10n: "Texte aus ESM-Dateien haben Vorrang"
