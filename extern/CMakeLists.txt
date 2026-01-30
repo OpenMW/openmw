@@ -161,8 +161,8 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
 
     include(FetchContent)
     FetchContent_Declare(recastnavigation
-        URL https://github.com/OpenMW/recastnavigation/archive/4cdcda7867fa5c65cf3d5808f92f0441e134d849.zip
-        URL_HASH SHA512=740fe8ae4205d88b96f6cfa50b553633e8d59ca5b5df0be90b0c3faf555d035f11b20633295ac49ba4dfae1fd07cb9b6353bb83aa61d2e0dfcb5827effc0e212
+        URL https://github.com/OpenMW/recastnavigation/archive/03259f3287ff8330f0d66fcd98d022edddffaa97.zip
+        URL_HASH SHA512=63db2ac90904764d7f1466d3c95994ec51d777cddd870b70f8ef674c09ed166b3d16ffc4ac1d18d0eab865fda4bf51b6ea17049025b66a338d3cadd0f48dc712
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailable(recastnavigation)
