@@ -381,7 +381,8 @@ namespace MWMechanics
         std::optional<ActiveSpellParams> reflected;
         for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
         {
-            if (it->mFlags & ESM::ActiveEffect::Flag_Remove && it->mTimeLeft <= 0.f)
+            if (it->mFlags & ESM::ActiveEffect::Flag_Remove && it->mTimeLeft <= 0.f
+                && spellIt->hasFlag(ESM::ActiveSpells::Flag_Temporary))
             {
                 ++it;
                 continue;
