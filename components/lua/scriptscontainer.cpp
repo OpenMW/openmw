@@ -492,6 +492,7 @@ namespace LuaUtil
                 if (scriptInfo.mSavedData == nullptr)
                     continue;
                 ESM::LuaScript& script = container.mScripts.emplace_back(*scriptInfo.mSavedData);
+                script.mScriptId = scriptId;
                 if (!script.mData.empty())
                 {
                     try
