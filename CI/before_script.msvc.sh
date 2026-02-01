@@ -248,7 +248,7 @@ download() {
 		shift
 
 		if ! [ -f $FILE ]; then
-			printf "  Downloading $FILE... "
+			printf "  Downloading $FILE from $URL... "
 
 			if [ -z $VERBOSE ]; then
 				RET=0
@@ -553,10 +553,10 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/deps_versions.msvc.sh"
 # versions that don't affect the CI cache can go here
 AQT_VERSION='v3.1.15'
 
-VCPKG_PATH="vcpkg-x64-${VS_VERSION:?}-${VCPKG_TAG:?}"
-VCPKG_PDB_PATH="vcpkg-x64-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
-VCPKG_MANIFEST="${VCPKG_PATH:?}.txt"
-VCPKG_PDB_MANIFEST="${VCPKG_PDB_PATH:?}.txt"
+VCPKG_PATH="vcpkg-x64-windows-${VS_VERSION:?}-${VCPKG_TAG:?}"
+VCPKG_PDB_PATH="vcpkg-x64-windows-${VS_VERSION:?}-pdb-${VCPKG_TAG:?}"
+VCPKG_MANIFEST="${VCPKG_PATH:?}-manifest.txt"
+VCPKG_PDB_MANIFEST="${VCPKG_PDB_PATH:?}-manifest.txt"
 
 echo
 echo "==================================="
@@ -856,13 +856,13 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 		echo "vswhere was unable to find MSVC $MSVC_DISPLAY_YEAR"
 		wrappedExit 1
 	fi
-	
+
 	echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
-	
+
 	cp "../CI/activate_msvc.sh" .
 	sed -i "s/\$MSVC_DISPLAY_YEAR/$MSVC_DISPLAY_YEAR/g" activate_msvc.sh
 	source ./activate_msvc.sh
-	
+
 	cp "../CI/ActivateMSVC.ps1" .
 	sed -i "s/\$MSVC_DISPLAY_YEAR/$MSVC_DISPLAY_YEAR/g" ActivateMSVC.ps1
 
