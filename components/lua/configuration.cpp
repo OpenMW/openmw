@@ -102,6 +102,9 @@ namespace LuaUtil
 
         // Initialize mappings
         mPathToIndex.clear();
+        mScriptsPerType.clear();
+        mScriptsPerRecordId.clear();
+        mScriptsPerRefNum.clear();
         for (int i = 0; i < static_cast<int>(mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& s = mScripts[i];
