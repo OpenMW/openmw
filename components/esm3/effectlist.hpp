@@ -21,7 +21,7 @@ namespace ESM
 
         // Which skills/attributes are affected (for restore/drain spells
         // etc.)
-        signed char mSkill, mAttribute; // -1 if N/A
+        ESM::RefId mSkill, mAttribute; // EmptyRefId if N/A
 
         // Other spell parameters
         int32_t mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)

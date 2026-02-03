@@ -34,8 +34,8 @@ namespace ESM
             if (index < 0 || index >= ESM::MagicEffect::Length)
                 throw std::runtime_error(std::format("Cannot serialize effect {}", src.mEffectID.toDebugString()));
             dst.mEffectID = index;
-            dst.mSkill = src.mSkill;
-            dst.mAttribute = src.mAttribute;
+            dst.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(src.mSkill));
+            dst.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(src.mAttribute));
             dst.mRange = src.mRange;
             dst.mArea = src.mArea;
             dst.mDuration = src.mDuration;
@@ -49,8 +49,8 @@ namespace ESM
             if (index < 0 || index >= ESM::MagicEffect::Length)
                 throw std::runtime_error(std::format("Cannot deserialize effect into ENAM with index {}.", index));
             dst.mEffectID = ESM::MagicEffect::indexToRefId(index);
-            dst.mSkill = src.mSkill;
-            dst.mAttribute = src.mAttribute;
+            dst.mSkill = ESM::Skill::indexToRefId(src.mSkill);
+            dst.mAttribute = ESM::Attribute::indexToRefId(src.mAttribute);
             dst.mRange = src.mRange;
             dst.mArea = src.mArea;
             dst.mDuration = src.mDuration;
@@ -118,8 +118,8 @@ namespace ESM
             esm.getSubComposite(p);
             setEffectParams(p, s);
             s.mEffectID = esm.getHNRefId("ENID");
-            s.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(esm.getHNORefId("ENSK")));
-            s.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(esm.getHNORefId("ENAT")));
+            s.mSkill = esm.getHNORefId("ENSK");
+            s.mAttribute = esm.getHNORefId("ENAT");
         }
         mList.push_back({ s, static_cast<uint32_t>(mList.size()) });
     }
@@ -142,8 +142,8 @@ namespace ESM
                 setEffectParams(enam.mData, p);
                 esm.writeNamedComposite("ENAM", p);
                 esm.writeHNRefId("ENID", enam.mData.mEffectID);
-                esm.writeHNORefId("ENSK", ESM::Skill::indexToRefId(enam.mData.mSkill));
-                esm.writeHNORefId("ENAT", ESM::Attribute::indexToRefId(enam.mData.mAttribute));
+                esm.writeHNORefId("ENSK", enam.mData.mSkill);
+                esm.writeHNORefId("ENAT", enam.mData.mAttribute);
             }
         }
     }

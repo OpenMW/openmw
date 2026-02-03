@@ -216,8 +216,8 @@ namespace MWGui::Widgets
                 = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
             SpellEffectParams params;
             params.mEffectID = effectInfo.mData.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mSkill = effectInfo.mData.mSkill;
+            params.mAttribute = effectInfo.mData.mAttribute;
             params.mDuration = effectInfo.mData.mDuration;
             params.mMagnMin = effectInfo.mData.mMagnMin;
             params.mMagnMax = effectInfo.mData.mMagnMax;
@@ -333,8 +333,8 @@ namespace MWGui::Widgets
         {
             SpellEffectParams params;
             params.mEffectID = effectInfo.mData.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mSkill = effectInfo.mData.mSkill;
+            params.mAttribute = effectInfo.mData.mAttribute;
             params.mDuration = effectInfo.mData.mDuration;
             params.mMagnMin = effectInfo.mData.mMagnMin;
             params.mMagnMax = effectInfo.mData.mMagnMax;

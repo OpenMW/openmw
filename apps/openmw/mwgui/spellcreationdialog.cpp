@@ -48,8 +48,8 @@ namespace
         effect.mMagnMax = 0;
         effect.mMagnMin = 0;
         effect.mRange = 0;
-        effect.mSkill = -1;
-        effect.mAttribute = -1;
+        effect.mSkill = ESM::RefId();
+        effect.mAttribute = ESM::RefId();
     }
 }
 
@@ -143,8 +143,8 @@ namespace MWGui
         mEffect.mMagnMax = 1;
         mEffect.mDuration = 1;
         mEffect.mArea = 0;
-        mEffect.mSkill = -1;
-        mEffect.mAttribute = -1;
+        mEffect.mSkill = ESM::RefId();
+        mEffect.mAttribute = ESM::RefId();
         eventEffectAdded(mEffect);
 
         onRangeButtonClicked(mRangeButton);
@@ -331,13 +331,13 @@ namespace MWGui
 
     void EditEffectDialog::setSkill(ESM::RefId skill)
     {
-        mEffect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(skill));
+        mEffect.mSkill = skill;
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::setAttribute(ESM::RefId attribute)
     {
-        mEffect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(attribute));
+        mEffect.mAttribute = attribute;
         eventEffectModified(mEffect);
     }
 
@@ -961,8 +961,8 @@ namespace MWGui
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
+            params.mSkill = effectInfo.mSkill;
+            params.mAttribute = effectInfo.mAttribute;
             params.mDuration = effectInfo.mDuration;
             params.mMagnMin = effectInfo.mMagnMin;
             params.mMagnMax = effectInfo.mMagnMax;

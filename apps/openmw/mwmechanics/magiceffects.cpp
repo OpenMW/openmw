@@ -33,15 +33,14 @@ namespace MWMechanics
     EffectKey::EffectKey(const ESM::ENAMstruct& effect)
     {
         mId = effect.mEffectID;
-        mArg = ESM::Skill::indexToRefId(effect.mSkill);
+        mArg = effect.mSkill;
 
-        ESM::RefId attribute = ESM::Attribute::indexToRefId(effect.mAttribute);
-        if (!attribute.empty())
+        if (!effect.mAttribute.empty())
         {
             if (!mArg.empty())
                 throw std::runtime_error("magic effect can't have both a skill and an attribute argument");
 
-            mArg = attribute;
+            mArg = effect.mAttribute;
         }
     }
 

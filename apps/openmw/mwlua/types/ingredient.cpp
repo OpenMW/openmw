@@ -50,8 +50,8 @@ namespace MWLua
                     continue;
                 ESM::IndexedENAMstruct effect;
                 effect.mData.mEffectID = rec.mData.mEffectID[i];
-                effect.mData.mSkill = static_cast<signed char>(rec.mData.mSkills[i]);
-                effect.mData.mAttribute = static_cast<signed char>(rec.mData.mAttributes[i]);
+                effect.mData.mSkill = ESM::Skill::indexToRefId(rec.mData.mSkills[i]);
+                effect.mData.mAttribute = ESM::Attribute::indexToRefId(rec.mData.mAttributes[i]);
                 effect.mData.mRange = ESM::RT_Self;
                 effect.mData.mArea = 0;
                 effect.mData.mDuration = 0;

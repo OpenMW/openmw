@@ -220,13 +220,13 @@ void MWMechanics::Alchemy::updateEffects()
             ESM::ENAMstruct effect;
             effect.mEffectID = effectKey.mId;
 
-            effect.mAttribute = -1;
-            effect.mSkill = -1;
+            effect.mAttribute = ESM::RefId();
+            effect.mSkill = ESM::RefId();
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(effectKey.mArg));
+                effect.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(effectKey.mArg));
+                effect.mAttribute = effectKey.mArg;
 
             effect.mRange = 0;
             effect.mArea = 0;

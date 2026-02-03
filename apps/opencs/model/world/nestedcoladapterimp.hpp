@@ -9,8 +9,10 @@
 #include <string>
 #include <vector>
 
+#include <components/esm/attr.hpp>
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadmgef.hpp> // for converting magic effect id to string & back
+#include <components/esm3/loadskil.hpp>
 
 #include "idcollection.hpp"
 #include "nestedcolumnadapter.hpp"
@@ -267,8 +269,8 @@ namespace CSMWorld
             ESM::IndexedENAMstruct effect;
             effect.mIndex = position;
             effect.mData.mEffectID = ESM::MagicEffect::WaterBreathing;
-            effect.mData.mSkill = -1;
-            effect.mData.mAttribute = -1;
+            effect.mData.mSkill = ESM::RefId();
+            effect.mData.mAttribute = ESM::RefId();
             effect.mData.mRange = 0;
             effect.mData.mArea = 0;
             effect.mData.mDuration = 0;
@@ -339,14 +341,14 @@ namespace CSMWorld
                 case 1:
                 {
                     if (targetSkill)
-                        return effect.mSkill;
+                        return ESM::Skill::refIdToIndex(effect.mSkill);
                     else
                         return QVariant();
                 }
                 case 2:
                 {
                     if (targetAttribute)
-                        return effect.mAttribute;
+                        return ESM::Attribute::refIdToIndex(effect.mAttribute);
                     else
                         return QVariant();
                 }
@@ -389,19 +391,19 @@ namespace CSMWorld
                         targetAttribute = mgef.mData.mFlags & ESM::MagicEffect::TargetAttribute;
                     }
                     if (!targetSkill)
-                        effect.mSkill = -1;
+                        effect.mSkill = ESM::RefId();
                     if (!targetAttribute)
-                        effect.mAttribute = -1;
+                        effect.mAttribute = ESM::RefId();
                     break;
                 }
                 case 1:
                 {
-                    effect.mSkill = static_cast<signed char>(value.toInt());
+                    effect.mSkill = ESM::Skill::indexToRefId(value.toInt());
                     break;
                 }
                 case 2:
                 {
-                    effect.mAttribute = static_cast<signed char>(value.toInt());
+                    effect.mAttribute = ESM::Attribute::indexToRefId(value.toInt());
                     break;
                 }
                 case 3:

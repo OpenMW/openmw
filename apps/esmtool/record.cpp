@@ -154,15 +154,16 @@ namespace
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
             int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            int skillIdx = ESM::Skill::refIdToIndex(effect.mData.mSkill);
+            int attributeIdx = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
             if (effectIdx != -1)
                 std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
                           << std::endl;
-            if (effect.mData.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
+            if (skillIdx != -1)
+                std::cout << "    Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            if (attributeIdx != -1)
+                std::cout << "    Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")"
                           << std::endl;
-            if (effect.mData.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
-                          << (int)effect.mData.mAttribute << ")" << std::endl;
             std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
                       << std::endl;
             // Area is always zero if range type is "Self"

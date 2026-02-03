@@ -48,7 +48,7 @@ namespace MWWorld
             for (auto& effect : spell->mEffects.mList)
             {
                 if (effect.mData.mEffectID == ESM::MagicEffect::DrainAttribute)
-                    stats.mWorsenings[effect.mData.mAttribute] = oldStats.mWorsenings;
+                    stats.mWorsenings[ESM::Attribute::refIdToIndex(effect.mData.mAttribute)] = oldStats.mWorsenings;
             }
             creatureStats.mCorprusSpells[id] = stats;
         }

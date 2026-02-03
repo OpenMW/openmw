@@ -228,8 +228,8 @@ namespace MWGui
                     {
                         Widgets::SpellEffectParams params;
                         params.mEffectID = spellEffect.mData.mEffectID;
-                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
-                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
+                        params.mSkill = spellEffect.mData.mSkill;
+                        params.mAttribute = spellEffect.mData.mAttribute;
                         params.mDuration = spellEffect.mData.mDuration;
                         params.mMagnMin = spellEffect.mData.mMagnMin;
                         params.mMagnMax = spellEffect.mData.mMagnMax;
