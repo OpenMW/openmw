@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       msvc:
-        description: MSVC version (2019/2022)
+        description: MSVC version (2022/2026)
         default: "2022"
         type: string
       vcpkg-deps-tag:
