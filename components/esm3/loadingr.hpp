@@ -28,8 +28,8 @@ namespace ESM
             float mWeight;
             int32_t mValue;
             RefId mEffectID[4]; // Effect, EmptyRefId means none
-            int32_t mSkills[4]; // SkillEnum related to effect
-            int32_t mAttributes[4]; // Attribute related to effect
+            RefId mSkills[4]; // SkillEnum related to effect
+            RefId mAttributes[4]; // Attribute related to effect
         };
 
         IRDTstruct mData;

@@ -269,8 +269,6 @@ namespace CSMWorld
             ESM::IndexedENAMstruct effect;
             effect.mIndex = position;
             effect.mData.mEffectID = ESM::MagicEffect::WaterBreathing;
-            effect.mData.mSkill = ESM::RefId();
-            effect.mData.mAttribute = ESM::RefId();
             effect.mData.mRange = 0;
             effect.mData.mArea = 0;
             effect.mData.mDuration = 0;

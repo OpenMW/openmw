@@ -160,14 +160,14 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData(
         case 1:
         {
             if (targetSkill)
-                return record.get().mData.mSkills[subRowIndex];
+                return ESM::Skill::refIdToIndex(record.get().mData.mSkills[subRowIndex]);
             else
                 return QVariant();
         }
         case 2:
         {
             if (targetAttribute)
-                return record.get().mData.mAttributes[subRowIndex];
+                return ESM::Attribute::refIdToIndex(record.get().mData.mAttributes[subRowIndex]);
             else
                 return QVariant();
         }
@@ -205,15 +205,15 @@ void CSMWorld::IngredEffectRefIdAdapter::setNestedData(
             }
 
             if (!targetSkill)
-                ingredient.mData.mSkills[subRowIndex] = -1;
+                ingredient.mData.mSkills[subRowIndex] = ESM::RefId();
             if (!targetAttribute)
-                ingredient.mData.mAttributes[subRowIndex] = -1;
+                ingredient.mData.mAttributes[subRowIndex] = ESM::RefId();
             break;
         case 1:
-            ingredient.mData.mSkills[subRowIndex] = value.toInt();
+            ingredient.mData.mSkills[subRowIndex] = ESM::Skill::indexToRefId(value.toInt());
             break;
         case 2:
-            ingredient.mData.mAttributes[subRowIndex] = value.toInt();
+            ingredient.mData.mAttributes[subRowIndex] = ESM::Attribute::indexToRefId(value.toInt());
             break;
         default:
             throw std::runtime_error("Trying to access non-existing column in the nested table!");

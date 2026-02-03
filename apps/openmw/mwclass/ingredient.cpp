@@ -135,8 +135,8 @@ namespace MWClass
                 continue;
             MWGui::Widgets::SpellEffectParams params;
             params.mEffectID = ref->mBase->mData.mEffectID[i];
-            params.mAttribute = ESM::Attribute::indexToRefId(ref->mBase->mData.mAttributes[i]);
-            params.mSkill = ESM::Skill::indexToRefId(ref->mBase->mData.mSkills[i]);
+            params.mAttribute = ref->mBase->mData.mAttributes[i];
+            params.mSkill = ref->mBase->mData.mSkills[i];
             params.mKnown = alchemySkill >= fWortChanceValue * (i + 1);
 
             list.push_back(params);

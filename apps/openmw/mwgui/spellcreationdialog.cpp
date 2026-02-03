@@ -48,8 +48,6 @@ namespace
         effect.mMagnMax = 0;
         effect.mMagnMin = 0;
         effect.mRange = 0;
-        effect.mSkill = ESM::RefId();
-        effect.mAttribute = ESM::RefId();
     }
 }
 

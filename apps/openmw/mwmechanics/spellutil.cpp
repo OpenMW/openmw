@@ -167,8 +167,8 @@ namespace MWMechanics
 
         ESM::ENAMstruct effect;
         effect.mEffectID = ingredient->mData.mEffectID[index];
-        effect.mSkill = ESM::Skill::indexToRefId(ingredient->mData.mSkills[index]);
-        effect.mAttribute = ESM::Attribute::indexToRefId(ingredient->mData.mAttributes[index]);
+        effect.mSkill = ingredient->mData.mSkills[index];
+        effect.mAttribute = ingredient->mData.mAttributes[index];
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 
