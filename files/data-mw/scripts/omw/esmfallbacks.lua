@@ -10,8 +10,8 @@ function generateDefaultStatics()
         travelmarker = 'meshes/marker_travel.nif',
     }
     for id, model in pairs(statics) do
-        if content.statics[id] == nil then
-            content.statics[id] = { model = model }
+        if content.statics.records[id] == nil then
+            content.statics.records[id] = { model = model }
         end
     end
 end

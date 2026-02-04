@@ -52,7 +52,7 @@ namespace MWLua
 {
     namespace
     {
-        MutableStore<ESM::Global> initGlobalBindings(sol::state_view& lua, MWWorld::Store<ESM::Global>& store)
+        sol::table initGlobalBindings(sol::state_view& lua, MWWorld::Store<ESM::Global>& store)
         {
             using Store = MutableStore<ESM::Global>;
             sol::usertype<Store> storeT = lua.new_usertype<Store>("GlobalsContentStore");
@@ -100,7 +100,9 @@ namespace MWLua
             };
             storeT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
             storeT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-            return Store{ store };
+            sol::table api(lua, sol::create);
+            api["records"] = Store{ store };
+            return LuaUtil::makeReadOnly(api);
         }
 
         template <class T>
@@ -141,7 +143,7 @@ namespace MWLua
                 });
         }
 
-        MutableStore<ESM::Static> initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
+        sol::table initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
         {
             addRecordStoreBindings<ESM::Static>(lua, &MWLua::tableToStatic);
             using MT = MutableRecord<ESM::Static>;
@@ -150,7 +152,9 @@ namespace MWLua
                 = [](const MT& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
             record["id"] = sol::readonly_property([](const MT& rec) -> std::string { return rec.mId.serializeText(); });
             addMutableModelProperty(record);
-            return MutableStore<ESM::Static>{ store };
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Static>{ store };
+            return LuaUtil::makeReadOnly(api);
         }
     }
 
