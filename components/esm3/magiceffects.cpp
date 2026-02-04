@@ -12,7 +12,7 @@ namespace ESM
     {
         for (const auto& [key, params] : mEffects)
         {
-            esm.writeHNT("EFID", ESM::MagicEffect::refIdToIndex(key));
+            esm.writeHNRefId("EFID", key);
             esm.writeHNT("BASE", params.first);
             esm.writeHNT("MODI", params.second);
         }
@@ -22,15 +22,22 @@ namespace ESM
     {
         while (esm.isNextSub("EFID"))
         {
-            int32_t id;
+            RefId effectId;
+            if (esm.getFormatVersion() <= MaxSerializeEffectRefIdFormatVersion)
+            {
+                int32_t id;
+                esm.getHT(id);
+                effectId = ESM::MagicEffect::indexToRefId(id);
+            }
+            else
+                effectId = esm.getRefId();
             std::pair<int32_t, float> params;
-            esm.getHT(id);
             esm.getHNT(params.first, "BASE");
             if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
                 params.second = 0.f;
             else
                 esm.getHNT(params.second, "MODI");
-            mEffects.emplace(ESM::MagicEffect::indexToRefId(id), params);
+            mEffects.emplace(effectId, params);
         }
     }
 

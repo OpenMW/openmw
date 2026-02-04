@@ -129,14 +129,21 @@ namespace ESM
         {
             while (esm.isNextSub("SUMM"))
             {
-                int32_t magicEffect;
-                esm.getHT(magicEffect);
+                RefId effectId;
+                if (esm.getFormatVersion() <= MaxSerializeEffectRefIdFormatVersion)
+                {
+                    int32_t magicEffect;
+                    esm.getHT(magicEffect);
+                    effectId = ESM::MagicEffect::indexToRefId(magicEffect);
+                }
+                else
+                    effectId = esm.getRefId();
                 RefNum actor;
                 if (esm.getFormatVersion() <= MaxActorIdSaveGameFormatVersion)
                     esm.getHNT(actor.mIndex, "ACID");
                 else
                     actor = esm.getFormId(true, "ACID");
-                mSummonedCreatures.emplace(ESM::MagicEffect::indexToRefId(magicEffect), actor);
+                mSummonedCreatures.emplace(effectId, actor);
             }
         }
 
@@ -251,7 +258,7 @@ namespace ESM
 
         for (const auto& [effectId, actor] : mSummonedCreatures)
         {
-            esm.writeHNT("SUMM", ESM::MagicEffect::refIdToIndex(effectId));
+            esm.writeHNRefId("SUMM", effectId);
             esm.writeFormId(actor, true, "ACID");
         }
 

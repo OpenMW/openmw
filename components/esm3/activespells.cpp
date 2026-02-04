@@ -86,7 +86,7 @@ namespace ESM
 
                 for (auto& effect : params.mEffects)
                 {
-                    esm.writeHNT("MGEF", ESM::MagicEffect::refIdToIndex(effect.mEffectId));
+                    esm.writeHNRefId("MGEF", effect.mEffectId);
                     if (const ESM::RefId* id = std::get_if<ESM::RefId>(&effect.mArg))
                     {
                         if (!id->empty())
@@ -171,10 +171,15 @@ namespace ESM
 
                 while (esm.isNextSub("MGEF"))
                 {
-                    int32_t effectId;
                     ActiveEffect effect;
-                    esm.getHT(effectId);
-                    effect.mEffectId = ESM::MagicEffect::indexToRefId(effectId);
+                    if (format <= MaxSerializeEffectRefIdFormatVersion)
+                    {
+                        int32_t effectId;
+                        esm.getHT(effectId);
+                        effect.mEffectId = ESM::MagicEffect::indexToRefId(effectId);
+                    }
+                    else
+                        effect.mEffectId = esm.getRefId();
                     if (format <= MaxActorIdSaveGameFormatVersion)
                     {
                         int32_t arg = -1;
