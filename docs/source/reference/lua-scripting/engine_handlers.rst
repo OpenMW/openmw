@@ -172,3 +172,13 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onStateChanged()
     - | Called whenever the current game changes
       | (i. e. the result of `getState <openmw_menu.html##(menu).getState>`_ changes)
+
+**Only for load scripts**
+
+|bdg-ctx-load|
+
+.. list-table::
+  :widths: 20 80
+
+  * - onContentFilesLoaded()
+    - | Called after all content files have been parsed, but before the main menu.

@@ -13,6 +13,7 @@ set(LUA_API_FILES
     openmw/animation.lua
     openmw/async.lua
     openmw/camera.lua
+    openmw/content.lua
     openmw/core.lua
     openmw/debug.lua
     openmw/input.lua
