@@ -1,5 +1,5 @@
 Package openmw.content
-===================
+======================
 
 .. include:: version.rst
 
