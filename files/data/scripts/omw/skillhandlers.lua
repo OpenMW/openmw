@@ -87,7 +87,7 @@ return {
     ---
     -- Allows to extend or override built-in skill progression mechanics.
     -- @module SkillProgression
-    -- @context local
+    -- @context player
     -- @usage local I = require('openmw.interfaces')
     --
     -- -- Make jail time hurt sneak skill instead of benefitting it

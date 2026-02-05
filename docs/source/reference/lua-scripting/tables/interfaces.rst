@@ -39,7 +39,7 @@
     - |bdg-ctx-global| |bdg-ctx-menu| |bdg-ctx-player| 
     - Save, display and track changes of setting values.
   * - :doc:`SkillProgression </reference/lua-scripting/interface_skill_progression>`
-    - |bdg-ctx-local|
+    - |bdg-ctx-player|
     - Control, extend, and override skill progression of the player.
   * - :doc:`UI </reference/lua-scripting/interface_ui>`
     - |bdg-ctx-player|
