@@ -541,14 +541,11 @@ namespace MWMechanics
             || effect.mEffectID == ESM::MagicEffect::DrainAttribute)
         {
             if (!enemy.isEmpty()
-                && enemy.getClass()
-                        .getCreatureStats(enemy)
-                        .getAttribute(ESM::Attribute::indexToRefId(effect.mAttribute))
-                        .getModified()
-                    <= 0)
+                && enemy.getClass().getCreatureStats(enemy).getAttribute(effect.mAttribute).getModified() <= 0)
                 return 0.f;
             {
-                if (effect.mAttribute >= 0 && effect.mAttribute < ESM::Attribute::Length)
+                int attributeIdx = ESM::Attribute::refIdToIndex(effect.mAttribute);
+                if (attributeIdx >= 0 && attributeIdx < ESM::Attribute::Length)
                 {
                     const float attributePriorities[ESM::Attribute::Length] = {
                         1.0f, // Strength
@@ -560,7 +557,7 @@ namespace MWMechanics
                         0.7f, // Personality
                         0.3f // Luck
                     };
-                    rating *= attributePriorities[effect.mAttribute];
+                    rating *= attributePriorities[attributeIdx];
                 }
             }
         }
@@ -569,7 +566,7 @@ namespace MWMechanics
         {
             if (enemy.isEmpty() || !enemy.getClass().isNpc())
                 return 0.f;
-            if (enemy.getClass().getSkill(enemy, ESM::Skill::indexToRefId(effect.mSkill)) <= 0)
+            if (enemy.getClass().getSkill(enemy, effect.mSkill) <= 0)
                 return 0.f;
         }
 

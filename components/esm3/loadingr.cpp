@@ -3,7 +3,9 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/attr.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/misc/concepts.hpp>
 
 namespace ESM
@@ -24,8 +26,8 @@ namespace ESM
             for (int i = 0; i < 4; ++i)
             {
                 dst.mEffectID[i] = ESM::MagicEffect::refIdToIndex(src.mEffectID[i]);
-                dst.mSkills[i] = src.mSkills[i];
-                dst.mAttributes[i] = src.mAttributes[i];
+                dst.mSkills[i] = ESM::Skill::refIdToIndex(src.mSkills[i]);
+                dst.mAttributes[i] = ESM::Attribute::refIdToIndex(src.mAttributes[i]);
             }
         }
 
@@ -36,8 +38,8 @@ namespace ESM
             for (int i = 0; i < 4; ++i)
             {
                 dst.mEffectID[i] = ESM::MagicEffect::indexToRefId(src.mEffectID[i]);
-                dst.mSkills[i] = src.mSkills[i];
-                dst.mAttributes[i] = src.mAttributes[i];
+                dst.mSkills[i] = ESM::Skill::indexToRefId(src.mSkills[i]);
+                dst.mAttributes[i] = ESM::Attribute::indexToRefId(src.mAttributes[i]);
             }
         }
     }
@@ -106,7 +108,7 @@ namespace ESM
                 && mData.mEffectID[i] != ESM::MagicEffect::FortifyAttribute
                 && mData.mEffectID[i] != ESM::MagicEffect::RestoreAttribute)
             {
-                mData.mAttributes[i] = -1;
+                mData.mAttributes[i] = ESM::RefId();
             }
 
             // is this relevant in cycle from 0 to 4?
@@ -116,7 +118,7 @@ namespace ESM
                 && mData.mEffectID[i] != ESM::MagicEffect::FortifySkill
                 && mData.mEffectID[i] != ESM::MagicEffect::RestoreSkill)
             {
-                mData.mSkills[i] = -1;
+                mData.mSkills[i] = ESM::RefId();
             }
         }
     }
@@ -148,8 +150,8 @@ namespace ESM
         for (int i = 0; i < 4; ++i)
         {
             mData.mEffectID[i] = ESM::MagicEffect::WaterBreathing;
-            mData.mSkills[i] = 0;
-            mData.mAttributes[i] = 0;
+            mData.mSkills[i] = ESM::RefId();
+            mData.mAttributes[i] = ESM::RefId();
         }
 
         mName.clear();

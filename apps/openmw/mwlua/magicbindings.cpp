@@ -323,16 +323,14 @@ namespace MWLua
             [](const ESM::IndexedENAMstruct& params) -> ESM::RefId { return params.mData.mEffectID; });
         effectParamsT["affectedSkill"]
             = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> sol::optional<std::string> {
-                  ESM::RefId id = ESM::Skill::indexToRefId(params.mData.mSkill);
-                  if (!id.empty())
-                      return id.serializeText();
+                  if (!params.mData.mSkill.empty())
+                      return params.mData.mSkill.serializeText();
                   return sol::nullopt;
               });
         effectParamsT["affectedAttribute"]
             = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> sol::optional<std::string> {
-                  ESM::RefId id = ESM::Attribute::indexToRefId(params.mData.mAttribute);
-                  if (!id.empty())
-                      return id.serializeText();
+                  if (!params.mData.mAttribute.empty())
+                      return params.mData.mAttribute.serializeText();
                   return sol::nullopt;
               });
         effectParamsT["range"]

@@ -576,8 +576,8 @@ namespace ESM
             EffectList record;
             record.mList.emplace_back(IndexedENAMstruct{ {
                                                              .mEffectID = ESM::MagicEffect::SwiftSwim,
-                                                             .mSkill = 2,
-                                                             .mAttribute = 3,
+                                                             .mSkill = ESM::Skill::MediumArmor,
+                                                             .mAttribute = ESM::Attribute::Agility,
                                                              .mRange = 4,
                                                              .mArea = 5,
                                                              .mDuration = 6,

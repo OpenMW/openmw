@@ -167,8 +167,8 @@ namespace MWMechanics
 
         ESM::ENAMstruct effect;
         effect.mEffectID = ingredient->mData.mEffectID[index];
-        effect.mSkill = static_cast<signed char>(ingredient->mData.mSkills[index]);
-        effect.mAttribute = static_cast<signed char>(ingredient->mData.mAttributes[index]);
+        effect.mSkill = ingredient->mData.mSkills[index];
+        effect.mAttribute = ingredient->mData.mAttributes[index];
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 

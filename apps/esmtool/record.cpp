@@ -154,15 +154,16 @@ namespace
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
             int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            int skillIdx = ESM::Skill::refIdToIndex(effect.mData.mSkill);
+            int attributeIdx = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
             if (effectIdx != -1)
                 std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
                           << std::endl;
-            if (effect.mData.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
+            if (skillIdx != -1)
+                std::cout << "    Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            if (attributeIdx != -1)
+                std::cout << "    Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")"
                           << std::endl;
-            if (effect.mData.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
-                          << (int)effect.mData.mAttribute << ")" << std::endl;
             std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
                       << std::endl;
             // Area is always zero if range type is "Self"
@@ -850,11 +851,11 @@ namespace EsmTool
                 continue;
 
             int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
+            int skillIdx = ESM::Skill::refIdToIndex(mData.mData.mSkills[i]);
+            int attributeIdx = ESM::Attribute::refIdToIndex(mData.mData.mAttributes[i]);
             std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
-            std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i]) << " (" << mData.mData.mSkills[i] << ")"
-                      << std::endl;
-            std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i]) << " ("
-                      << mData.mData.mAttributes[i] << ")" << std::endl;
+            std::cout << "  Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            std::cout << "  Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")" << std::endl;
         }
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }

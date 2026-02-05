@@ -33,9 +33,9 @@ namespace
     {
         if (ingredient.mData.mEffectID[i].empty())
             return {};
-        ESM::RefId arg = ESM::Skill::indexToRefId(ingredient.mData.mSkills[i]);
+        ESM::RefId arg = ingredient.mData.mSkills[i];
         if (arg.empty())
-            arg = ESM::Attribute::indexToRefId(ingredient.mData.mAttributes[i]);
+            arg = ingredient.mData.mAttributes[i];
         return MWMechanics::EffectKey(ingredient.mData.mEffectID[i], arg);
     }
 
@@ -220,13 +220,10 @@ void MWMechanics::Alchemy::updateEffects()
             ESM::ENAMstruct effect;
             effect.mEffectID = effectKey.mId;
 
-            effect.mAttribute = -1;
-            effect.mSkill = -1;
-
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(effectKey.mArg));
+                effect.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(effectKey.mArg));
+                effect.mAttribute = effectKey.mArg;
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -624,9 +621,8 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(
 
         if (!effectID.empty())
         {
-            const ESM::Attribute* attribute
-                = store->get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(data.mAttributes[i]));
-            const ESM::Skill* skill = store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(data.mSkills[i]));
+            const ESM::Attribute* attribute = store->get<ESM::Attribute>().search(data.mAttributes[i]);
+            const ESM::Skill* skill = store->get<ESM::Skill>().search(data.mSkills[i]);
             std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skill);
 
             effects.push_back(std::move(effect));

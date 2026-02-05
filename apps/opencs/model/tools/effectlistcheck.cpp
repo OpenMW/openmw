@@ -27,11 +27,13 @@ namespace CSMTools
 
             // At the time of writing this effects, attributes and skills are mostly hardcoded
             int effectIndex = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            int skillIndex = ESM::Skill::refIdToIndex(effect.mData.mSkill);
+            int attributeIndex = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
             if (effectIndex < -1 || effectIndex >= ESM::MagicEffect::Length)
                 messages.add(id, "Effect #" + number + ": invalid effect ID", "", CSMDoc::Message::Severity_Error);
-            if (effect.mData.mSkill < -1 || effect.mData.mSkill >= ESM::Skill::Length)
+            if (skillIndex < -1 || skillIndex >= ESM::Skill::Length)
                 messages.add(id, "Effect #" + number + ": invalid skill", "", CSMDoc::Message::Severity_Error);
-            if (effect.mData.mAttribute < -1 || effect.mData.mAttribute >= ESM::Attribute::Length)
+            if (attributeIndex < -1 || attributeIndex >= ESM::Attribute::Length)
                 messages.add(id, "Effect #" + number + ": invalid attribute", "", CSMDoc::Message::Severity_Error);
 
             if (effect.mData.mRange < ESM::RT_Self || effect.mData.mRange > ESM::RT_Target)
@@ -74,13 +76,15 @@ namespace CSMTools
 
             hasEffects = true;
             int effectIndex = ESM::MagicEffect::refIdToIndex(ingredient.mData.mEffectID[i]);
+            int skillIndex = ESM::Skill::refIdToIndex(ingredient.mData.mSkills[i]);
+            int attributeIndex = ESM::Attribute::refIdToIndex(ingredient.mData.mAttributes[i]);
 
             const std::string number = std::to_string(i + 1);
             if (effectIndex < -1 || effectIndex >= ESM::MagicEffect::Length)
                 messages.add(id, "Effect #" + number + ": invalid effect ID", "", CSMDoc::Message::Severity_Error);
-            if (ingredient.mData.mSkills[i] < -1 || ingredient.mData.mSkills[i] >= ESM::Skill::Length)
+            if (skillIndex < -1 || skillIndex >= ESM::Skill::Length)
                 messages.add(id, "Effect #" + number + ": invalid skill", "", CSMDoc::Message::Severity_Error);
-            if (ingredient.mData.mAttributes[i] < -1 || ingredient.mData.mAttributes[i] >= ESM::Attribute::Length)
+            if (attributeIndex < -1 || attributeIndex >= ESM::Attribute::Length)
                 messages.add(id, "Effect #" + number + ": invalid attribute", "", CSMDoc::Message::Severity_Error);
         }
 

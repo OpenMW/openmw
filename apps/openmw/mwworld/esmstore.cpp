@@ -181,18 +181,18 @@ namespace
                     continue;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mData.mAttribute != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && !iter->mData.mAttribute.empty())
                 {
-                    iter->mData.mAttribute = -1;
+                    iter->mData.mAttribute = ESM::RefId();
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected attribute argument of " << iter->mData.mEffectID
                                         << " effect";
                     changed = true;
                 }
 
-                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mData.mSkill != -1)
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && !iter->mData.mSkill.empty())
                 {
-                    iter->mData.mSkill = -1;
+                    iter->mData.mSkill = ESM::RefId();
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
                                         << ": dropping unexpected skill argument of " << iter->mData.mEffectID
                                         << " effect";
