@@ -345,8 +345,9 @@ namespace MWWorld
             MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(mPlayer);
             mPlayer.load(player.mObject);
             MWBase::Environment::get().getWorldModel()->registerPtr(getPlayer());
-            if (ESM::ActorIdConverter* converter = reader.getActorIdConverter())
-                converter->mMappings.emplace(player.mObject.mCreatureStats.mActorId, mPlayer.mRef.getRefNum());
+            if (reader.mActorIdConverter)
+                reader.mActorIdConverter->mMappings.emplace(
+                    player.mObject.mCreatureStats.mActorId, mPlayer.mRef.getRefNum());
 
             for (size_t i = 0; i < mSaveAttributes.size(); ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];

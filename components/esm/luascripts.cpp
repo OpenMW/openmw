@@ -169,8 +169,8 @@ void ESM::LuaScripts::load(ESMReader& esm)
         if (esm.getFormatVersion() <= ESM::MaxLuaScriptPathFormatVersion)
         {
             VFS::Path::Normalized name(esm.getHString());
-            if (const LuaUtil::ScriptsConfiguration* config = esm.getScriptsConfiguration())
-                id = config->findId(name).value_or(-1);
+            if (esm.mScriptsConfiguration)
+                id = esm.mScriptsConfiguration->findId(name).value_or(-1);
         }
         else
             esm.getHT(id);

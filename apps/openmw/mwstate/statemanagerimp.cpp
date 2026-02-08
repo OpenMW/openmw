@@ -471,7 +471,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         ESM::ActorIdConverter actorIdConverter;
         if (version <= ESM::MaxActorIdSaveGameFormatVersion)
-            reader.setActorIdConverter(&actorIdConverter);
+            reader.mActorIdConverter = &actorIdConverter;
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 

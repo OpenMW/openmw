@@ -192,7 +192,7 @@ namespace LuaUtil
 
     void ScriptsConfiguration::read(ESM::ESMReader& reader)
     {
-        reader.setScriptsConfiguration(this);
+        reader.mScriptsConfiguration = this;
         mScriptIdMapping.clear();
         int index = 0;
         while (reader.isNextSub("LUAP"))

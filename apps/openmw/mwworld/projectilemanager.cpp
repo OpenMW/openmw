@@ -802,12 +802,12 @@ namespace MWWorld
     void ProjectileManager::saveLoaded(const ESM::ESMReader& reader)
     {
         // Can't do this in readRecord because the vectors might get reallocated as they grow
-        if (reader.getActorIdConverter())
+        if (reader.mActorIdConverter)
         {
             for (ProjectileState& projectile : mProjectiles)
-                reader.getActorIdConverter()->convert(projectile.mCaster, projectile.mCaster.mIndex);
+                reader.mActorIdConverter->convert(projectile.mCaster, projectile.mCaster.mIndex);
             for (MagicBoltState& bolt : mMagicBolts)
-                reader.getActorIdConverter()->convert(bolt.mCaster, bolt.mCaster.mIndex);
+                reader.mActorIdConverter->convert(bolt.mCaster, bolt.mCaster.mIndex);
         }
     }
 
