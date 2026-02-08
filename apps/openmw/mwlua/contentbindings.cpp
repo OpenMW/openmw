@@ -52,7 +52,7 @@ namespace MWLua
 {
     namespace
     {
-        sol::table initGlobalBindings(sol::state_view& lua, MWWorld::Store<ESM::Global>& store)
+        sol::table initGlobalVariableBindings(sol::state_view& lua, MWWorld::Store<ESM::Global>& store)
         {
             using Store = MutableStore<ESM::Global>;
             sol::usertype<Store> storeT = lua.new_usertype<Store>("GlobalsContentStore");
@@ -163,7 +163,7 @@ namespace MWLua
         auto lua = context.sol();
         sol::table api(lua, sol::create);
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
-        api["globals"] = initGlobalBindings(lua, esmStore.getWritable<ESM::Global>());
+        api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         return LuaUtil::makeReadOnly(api);
     }
