@@ -913,7 +913,7 @@
 ---
 -- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) of #NpcRecord.
--- @field [parent=#NPC] #map<#NpcRecord> records
+-- @field [parent=#NPC] #list<#NpcRecord> records
 -- @usage local npc = types.NPC.records['npc id']  -- get by id
 -- @usage local npc = types.NPC.records[1]  -- get by index
 
