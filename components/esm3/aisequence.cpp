@@ -230,7 +230,7 @@ namespace ESM
 
         void AiSequence::load(ESMReader& esm)
         {
-            mActorIdConverter = esm.getActorIdConverter();
+            mActorIdConverter = esm.mActorIdConverter;
             int count = 0;
             while (esm.isNextSub("AIPK"))
             {

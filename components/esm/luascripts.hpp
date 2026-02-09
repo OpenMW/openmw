@@ -87,7 +87,7 @@ namespace ESM
 
     struct LuaScript
     {
-        VFS::Path::Normalized mScriptPath;
+        int32_t mScriptId;
         std::string mData; // Serialized Lua table. It is a binary data. Can contain '\0'.
         std::vector<LuaTimer> mTimers;
     };

@@ -18,6 +18,11 @@
 
 #include "loadtes3.hpp"
 
+namespace LuaUtil
+{
+    class ScriptsConfiguration;
+}
+
 namespace ESM
 {
     template <class T>
@@ -122,9 +127,6 @@ namespace ESM
 
         // Returns false if content file not found.
         bool applyContentFileMapping(FormId& id);
-
-        void setActorIdConverter(ActorIdConverter* converter) { mActorIdConverter = converter; }
-        ActorIdConverter* getActorIdConverter() const { return mActorIdConverter; }
 
         /*************************************************************************
          *
@@ -377,8 +379,6 @@ namespace ESM
 
         uint32_t mRecordFlags;
 
-        // Special file signifier (see SpecialFile enum above)
-
         // Buffer for ESM strings
         std::vector<char> mBuffer;
 
@@ -390,7 +390,10 @@ namespace ESM
 
         const std::map<int, int>* mContentFileMapping = nullptr;
 
+    public:
         ActorIdConverter* mActorIdConverter = nullptr;
+
+        const LuaUtil::ScriptsConfiguration* mScriptsConfiguration = nullptr;
     };
 }
 #endif

@@ -259,10 +259,10 @@ namespace
         }
         if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
         {
-            if (reader.getActorIdConverter() && state.mHasCustomState)
+            if (reader.mActorIdConverter && state.mHasCustomState)
             {
                 MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(state.mRef);
-                reader.getActorIdConverter()->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
+                reader.mActorIdConverter->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
             }
         }
 

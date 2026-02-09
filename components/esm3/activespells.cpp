@@ -236,7 +236,7 @@ namespace ESM
 
     void ActiveSpells::load(ESMReader& esm)
     {
-        mActorIdConverter = esm.getActorIdConverter();
+        mActorIdConverter = esm.mActorIdConverter;
         loadImpl(esm, mSpells, "ID__");
         loadImpl(esm, mQueue, "QID_");
     }
