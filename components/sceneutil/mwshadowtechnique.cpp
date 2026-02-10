@@ -645,6 +645,8 @@ MWShadowTechnique::Frustum::Frustum(osgUtil::CullVisitor* cv, double minZNear, d
     {
         osg::Matrix::value_type zNear = osg::maximum<osg::Matrix::value_type>(cv->getCalculatedNearPlane(),minZNear);
         osg::Matrix::value_type zFar = osg::minimum<osg::Matrix::value_type>(cv->getCalculatedFarPlane(),maxZFar);
+        if (zFar < 0)
+            zFar = minZNear;
         zNear = std::min(zNear, zFar);
 
         cv->clampProjectionMatrix(projectionMatrix, zNear, zFar);
