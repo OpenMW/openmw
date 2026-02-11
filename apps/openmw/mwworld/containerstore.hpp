@@ -113,7 +113,7 @@ namespace MWWorld
         }
 
     protected:
-        ContainerStoreListener* mListener;
+        ContainerStoreListener* mListener = nullptr;
 
         // Used in clone() to unset refnums of copies.
         // (RefNum should be unique, copy can not have the same RefNum).
@@ -122,8 +122,6 @@ namespace MWWorld
         // (item, max charge)
         typedef std::vector<std::pair<ContainerStoreIterator, float>> TRechargingItems;
         TRechargingItems mRechargingItems;
-
-        bool mRechargingItemsUpToDate;
 
     private:
         MWWorld::CellRefList<ESM::Potion> potions;
@@ -139,15 +137,19 @@ namespace MWWorld
         MWWorld::CellRefList<ESM::Repair> repairs;
         MWWorld::CellRefList<ESM::Weapon> weapons;
 
-        mutable float mCachedWeight;
-        mutable bool mWeightUpToDate;
-
-        bool mModified;
-        bool mResolved;
-        unsigned int mSeed;
+        mutable float mCachedWeight = 0;
+        unsigned int mSeed = 0;
         MWWorld::SafePtr mPtr; // Container or actor that holds this store.
         std::weak_ptr<ResolutionListener> mResolutionListener;
 
+        mutable bool mWeightUpToDate = false;
+        bool mModified = false;
+        bool mResolved = false;
+
+    protected:
+        bool mRechargingItemsUpToDate = false;
+
+    private:
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
         void addInitialItem(
             const ESM::RefId& id, const ESM::RefId& owner, int count, Misc::Rng::Generator* prng, bool topLevel = true);
@@ -173,8 +175,6 @@ namespace MWWorld
             const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
 
     public:
-        ContainerStore();
-
         virtual ~ContainerStore() = default;
 
         virtual std::unique_ptr<ContainerStore> clone()

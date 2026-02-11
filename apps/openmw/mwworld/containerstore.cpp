@@ -146,18 +146,6 @@ void MWWorld::ContainerStore::storeStates(
 
 const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::RefId::stringRefId("gold_001");
 
-MWWorld::ContainerStore::ContainerStore()
-    : mListener(nullptr)
-    , mRechargingItemsUpToDate(false)
-    , mCachedWeight(0)
-    , mWeightUpToDate(false)
-    , mModified(false)
-    , mResolved(false)
-    , mSeed()
-    , mPtr()
-{
-}
-
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin(int mask) const
 {
     return ConstContainerStoreIterator(mask, this);
