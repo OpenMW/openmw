@@ -19,10 +19,10 @@ void MWWorld::InventoryStore::copySlots(const InventoryStore& store)
 {
     // some const-trickery, required because of a flaw in the handling of MW-references and the
     // resulting workarounds
-    for (std::vector<ContainerStoreIterator>::const_iterator iter(const_cast<InventoryStore&>(store).mSlots.begin());
-         iter != const_cast<InventoryStore&>(store).mSlots.end(); ++iter)
+    InventoryStore& mutStore = const_cast<InventoryStore&>(store);
+    for (const MWWorld::ContainerStoreIterator& it : mutStore.mSlots)
     {
-        std::size_t distance = std::distance(const_cast<InventoryStore&>(store).begin(), *iter);
+        std::ptrdiff_t distance = std::distance(mutStore.begin(), it);
 
         ContainerStoreIterator slot = begin();
 
@@ -30,18 +30,11 @@ void MWWorld::InventoryStore::copySlots(const InventoryStore& store)
 
         mSlots.push_back(slot);
     }
-
-    // some const-trickery, required because of a flaw in the handling of MW-references and the
-    // resulting workarounds
-    std::size_t distance = std::distance(
-        const_cast<InventoryStore&>(store).begin(), const_cast<InventoryStore&>(store).mSelectedEnchantItem);
-    ContainerStoreIterator slot = begin();
-    std::advance(slot, distance);
-    mSelectedEnchantItem = slot;
 }
 
 void MWWorld::InventoryStore::initSlots(TSlots& slots)
 {
+    slots.reserve(Slots);
     for (int i = 0; i < Slots; ++i)
         slots.push_back(end());
 }
@@ -93,35 +86,43 @@ void MWWorld::InventoryStore::readEquipmentState(
 }
 
 MWWorld::InventoryStore::InventoryStore()
-    : ContainerStore()
-    , mInventoryListener(nullptr)
-    , mUpdatesEnabled(true)
-    , mFirstAutoEquip(true)
-    , mSelectedEnchantItem(end())
 {
     initSlots(mSlots);
 }
 
-MWWorld::InventoryStore::InventoryStore(const InventoryStore& store)
+MWWorld::InventoryStore::InventoryStore(const MWWorld::InventoryStore& store)
     : ContainerStore(store)
     , mInventoryListener(store.mInventoryListener)
     , mUpdatesEnabled(store.mUpdatesEnabled)
     , mFirstAutoEquip(store.mFirstAutoEquip)
-    , mSelectedEnchantItem(end())
+{
+    copySlots(store);
+}
+
+MWWorld::InventoryStore::InventoryStore(MWWorld::InventoryStore&& store)
+    : ContainerStore(store)
+    , mInventoryListener(store.mInventoryListener)
+    , mUpdatesEnabled(store.mUpdatesEnabled)
+    , mFirstAutoEquip(store.mFirstAutoEquip)
 {
     copySlots(store);
 }
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(const InventoryStore& store)
 {
-    if (this == &store)
-        return *this;
-
-    mListener = store.mListener;
+    ContainerStore::operator=(store);
     mInventoryListener = store.mInventoryListener;
     mFirstAutoEquip = store.mFirstAutoEquip;
-    mRechargingItemsUpToDate = false;
-    ContainerStore::operator=(store);
+    mSlots.clear();
+    copySlots(store);
+    return *this;
+}
+
+MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(InventoryStore&& store)
+{
+    ContainerStore::operator=(std::move(store));
+    mInventoryListener = store.mInventoryListener;
+    mFirstAutoEquip = store.mFirstAutoEquip;
     mSlots.clear();
     copySlots(store);
     return *this;
@@ -553,16 +554,6 @@ bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     }
 
     return true;
-}
-
-void MWWorld::InventoryStore::setSelectedEnchantItem(const ContainerStoreIterator& iterator)
-{
-    mSelectedEnchantItem = iterator;
-}
-
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem()
-{
-    return mSelectedEnchantItem;
 }
 
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, bool equipReplacement, bool resolve)
