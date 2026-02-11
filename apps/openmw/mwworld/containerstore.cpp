@@ -114,11 +114,15 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
 void MWWorld::ContainerStore::storeEquipmentState(
     const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
+    if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
+        inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
 
 void MWWorld::ContainerStore::readEquipmentState(
     const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
+    if (index == inventory.mSelectedEnchantItem)
+        mSelectedEnchantItem = iter;
 }
 
 template <typename T>
@@ -647,6 +651,9 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplac
     {
         toRemove -= itemRef.getCount();
         itemRef.setCount(0);
+
+        if (mSelectedEnchantItem != end() && *mSelectedEnchantItem == item)
+            mSelectedEnchantItem = end();
     }
     else
     {

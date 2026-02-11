@@ -42,21 +42,19 @@ void MWWorld::InventoryStore::initSlots(TSlots& slots)
 void MWWorld::InventoryStore::storeEquipmentState(
     const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
+    MWWorld::ContainerStore::storeEquipmentState(ref, index, inventory);
+
     for (int32_t i = 0; i < MWWorld::InventoryStore::Slots; ++i)
     {
         if (mSlots[i].getType() != -1 && mSlots[i]->getBase() == &ref)
             inventory.mEquipmentSlots[static_cast<uint32_t>(index)] = i;
     }
-
-    if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
-        inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
 
 void MWWorld::InventoryStore::readEquipmentState(
     const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
-    if (index == inventory.mSelectedEnchantItem)
-        mSelectedEnchantItem = iter;
+    MWWorld::ContainerStore::readEquipmentState(iter, index, inventory);
 
     auto found = inventory.mEquipmentSlots.find(static_cast<uint32_t>(index));
     if (found != inventory.mEquipmentSlots.end())
@@ -587,11 +585,6 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, bool equipReplac
         auto type = item.getType();
         if (type == ESM::Armor::sRecordId || type == ESM::Clothing::sRecordId)
             autoEquip();
-    }
-
-    if (item.getCellRef().getCount() == 0 && mSelectedEnchantItem != end() && *mSelectedEnchantItem == item)
-    {
-        mSelectedEnchantItem = end();
     }
 
     if (mListener)

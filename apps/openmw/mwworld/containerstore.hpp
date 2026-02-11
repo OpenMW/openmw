@@ -291,6 +291,12 @@ namespace MWWorld
     protected:
         bool mRechargingItemsUpToDate = false;
 
+        virtual void storeEquipmentState(
+            const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const;
+
+        virtual void readEquipmentState(
+            const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
+
     private:
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
         void addInitialItem(
@@ -309,12 +315,6 @@ namespace MWWorld
             bool equipable = false) const;
 
         void updateRechargingItems();
-
-        virtual void storeEquipmentState(
-            const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const;
-
-        virtual void readEquipmentState(
-            const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
 
     public:
         ContainerStore();
