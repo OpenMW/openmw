@@ -215,18 +215,18 @@ namespace MWWorld
     {
         struct Lists
         {
-            MWWorld::CellRefList<ESM::Potion> potions;
-            MWWorld::CellRefList<ESM::Apparatus> appas;
-            MWWorld::CellRefList<ESM::Armor> armors;
-            MWWorld::CellRefList<ESM::Book> books;
-            MWWorld::CellRefList<ESM::Clothing> clothes;
-            MWWorld::CellRefList<ESM::Ingredient> ingreds;
-            MWWorld::CellRefList<ESM::Light> lights;
-            MWWorld::CellRefList<ESM::Lockpick> lockpicks;
-            MWWorld::CellRefList<ESM::Miscellaneous> miscItems;
-            MWWorld::CellRefList<ESM::Probe> probes;
-            MWWorld::CellRefList<ESM::Repair> repairs;
-            MWWorld::CellRefList<ESM::Weapon> weapons;
+            MWWorld::CellRefList<ESM::Potion> mPotions;
+            MWWorld::CellRefList<ESM::Apparatus> mAppas;
+            MWWorld::CellRefList<ESM::Armor> mArmors;
+            MWWorld::CellRefList<ESM::Book> mBooks;
+            MWWorld::CellRefList<ESM::Clothing> mClothes;
+            MWWorld::CellRefList<ESM::Ingredient> mIngreds;
+            MWWorld::CellRefList<ESM::Light> mLights;
+            MWWorld::CellRefList<ESM::Lockpick> mLockpicks;
+            MWWorld::CellRefList<ESM::Miscellaneous> mMiscItems;
+            MWWorld::CellRefList<ESM::Probe> mProbes;
+            MWWorld::CellRefList<ESM::Repair> mRepairs;
+            MWWorld::CellRefList<ESM::Weapon> mWeapons;
         };
 
     public:
