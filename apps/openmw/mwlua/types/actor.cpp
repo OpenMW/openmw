@@ -30,10 +30,10 @@ namespace MWLua
     static constexpr int sAnySlot = -1;
 
     static std::pair<MWWorld::ContainerStoreIterator, bool> findInInventory(
-        MWWorld::ContainerStore& store, const EquipmentItem& item, int slot = sAnySlot)
+        MWWorld::ContainerStore& store, const EquipmentItem& item, int slot, bool isInventoryStore)
     {
-        auto* inventory = dynamic_cast<MWWorld::InventoryStore*>(&store);
-        auto oldIt = slot != sAnySlot && inventory ? inventory->getSlot(slot) : store.end();
+        auto oldIt = slot != sAnySlot && isInventoryStore ? static_cast<MWWorld::InventoryStore&>(store).getSlot(slot)
+                                                          : store.end();
         MWWorld::Ptr itemPtr;
 
         if (std::holds_alternative<ObjectId>(item))
@@ -77,7 +77,7 @@ namespace MWLua
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
         auto tryEquipToSlot = [&store, &usedSlots, isPlayer](int slot, const EquipmentItem& item) -> bool {
-            auto [it, alreadyEquipped] = findInInventory(store, item, slot);
+            auto [it, alreadyEquipped] = findInInventory(store, item, slot, true);
             if (alreadyEquipped)
                 return true;
             if (it == store.end())
@@ -140,7 +140,7 @@ namespace MWLua
     {
         MWWorld::ContainerStore& contStore = actor.getClass().getContainerStore(actor);
         // We're not passing in a specific slot, so ignore the already equipped return value
-        auto [it, _] = findInInventory(contStore, item, sAnySlot);
+        auto [it, _] = findInInventory(contStore, item, sAnySlot, actor.getClass().hasInventoryStore(actor));
         if (it == contStore.end())
             return;
         if (!actor.getClass().hasInventoryStore(actor))
