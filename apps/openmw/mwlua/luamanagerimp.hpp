@@ -105,6 +105,8 @@ namespace MWLua
         void questUpdated(const ESM::RefId& questId, int stage) override;
         void uiModeChanged(const MWWorld::Ptr& arg) override;
         void actorDied(const MWWorld::Ptr& actor) override;
+        void onDialogueResponse(
+            const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 

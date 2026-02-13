@@ -30,6 +30,8 @@ namespace ESM
     class ESMWriter;
     class RefId;
     struct LuaScripts;
+    struct DialInfo;
+    struct Dialogue;
 }
 
 namespace LuaUtil
@@ -84,6 +86,9 @@ namespace MWBase
             = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void actorDied(const MWWorld::Ptr& actor) = 0;
+        virtual void onDialogueResponse(
+            const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record)
+            = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
