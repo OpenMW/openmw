@@ -448,6 +448,28 @@ namespace MWLua
         mLuaEvents.addLocalEvent({ getId(actor), "Died", {} });
     }
 
+    void LuaManager::onDialogueResponse(
+        const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record)
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table data = view.newTable();
+            data["actor"] = LObject(actor);
+            if (record.mType == ESM::Dialogue::Type::Greeting)
+                data["type"] = "greeting";
+            else if (record.mType == ESM::Dialogue::Type::Journal)
+                data["type"] = "journal";
+            else if (record.mType == ESM::Dialogue::Type::Persuasion)
+                data["type"] = "persuasion";
+            else if (record.mType == ESM::Dialogue::Type::Topic)
+                data["type"] = "topic";
+            else if (record.mType == ESM::Dialogue::Type::Voice)
+                data["type"] = "voice";
+            data["infoId"] = info.mId.serializeText();
+            data["recordId"] = record.mId.serializeText();
+            sendLocalEvent(mPlayer, "DialogueResponse", data);
+        });
+    }
+
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
