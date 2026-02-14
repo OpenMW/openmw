@@ -176,7 +176,7 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
     if (!vfs->exists(kfname))
         return VFS::Path::Normalized(resPath);
 
-    return mdlname;
+    return VFS::Path::Normalized(std::move(mdlname));
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::correctMaterialPath(
