@@ -667,17 +667,19 @@ namespace MWRender
     }
 
     std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
-        const std::string& kfname, const std::string& baseModel)
+        VFS::Path::NormalizedView kfname, const std::string& baseModel)
     {
         if (!mResourceSystem->getVFS()->exists(kfname))
             return nullptr;
 
-        auto animsrc = std::make_shared<AnimSource>();
-        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(VFS::Path::toNormalized(kfname));
+        osg::ref_ptr<const SceneUtil::KeyframeHolder> keyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
-        if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty()
-            || animsrc->mKeyframes->mKeyframeControllers.empty())
+        if (keyframes == nullptr || keyframes->mTextKeys.empty() || keyframes->mKeyframeControllers.empty())
             return nullptr;
+
+        std::shared_ptr<AnimSource> animsrc = std::make_shared<AnimSource>();
+
+        animsrc->mKeyframes = std::move(keyframes);
 
         const NodeMap& nodeMap = getNodeMap();
         const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
