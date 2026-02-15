@@ -741,10 +741,13 @@ namespace ESMTerrain
         Terrain::LayerInfo info;
 
         assert(!txst.mDiffuse.empty() && "getlayerInfo: empty diffuse map");
-        info.mDiffuseMap = "textures/" + txst.mDiffuse;
+
+        constexpr VFS::Path::NormalizedView textures("textures");
+
+        info.mDiffuseMap = VFS::Path::join(textures, txst.mDiffuse);
 
         if (!txst.mNormalMap.empty())
-            info.mNormalMap = "textures/" + txst.mNormalMap;
+            info.mNormalMap = VFS::Path::join(textures, txst.mNormalMap);
 
         // FIXME: this flag indicates height info in alpha channel of normal map
         //        but the normal map alpha channel has specular info instead
