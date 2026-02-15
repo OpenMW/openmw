@@ -370,7 +370,7 @@ namespace ESMTerrain
             std::fill(positions.begin(), positions.end(), osg::Vec3f());
     }
 
-    std::string Storage::getTextureName(UniqueTextureId id)
+    VFS::Path::Normalized Storage::getTextureName(UniqueTextureId id)
     {
         std::string_view texture = "_land_default.dds";
         if (id.first != 0)
@@ -666,14 +666,14 @@ namespace ESMTerrain
         return 0;
     }
 
-    Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
+    Terrain::LayerInfo Storage::getLayerInfo(VFS::Path::NormalizedView texture)
     {
         std::lock_guard<std::mutex> lock(mLayerInfoMutex);
 
         // Already have this cached?
-        std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
-        if (found != mLayerInfoMap.end())
-            return found->second;
+        const auto it = mLayerInfoMap.find(texture);
+        if (it != mLayerInfoMap.end())
+            return it->second;
 
         Terrain::LayerInfo info;
         info.mParallax = false;
@@ -682,34 +682,37 @@ namespace ESMTerrain
 
         if (mAutoUseNormalMaps)
         {
-            std::string normalMapTexture = texture;
-            Misc::StringUtils::replaceLast(normalMapTexture, ".", mNormalHeightMapPattern + ".");
-            if (mVFS->exists(normalMapTexture))
+            std::string normalHeightMapValue(texture.value());
+            Misc::StringUtils::replaceLast(normalHeightMapValue, ".", mNormalHeightMapPattern + ".");
+            VFS::Path::Normalized normalHeightMap(std::move(normalHeightMapValue));
+            if (mVFS->exists(normalHeightMap))
             {
-                info.mNormalMap = std::move(normalMapTexture);
+                info.mNormalMap = std::move(normalHeightMap);
                 info.mParallax = true;
             }
             else
             {
-                normalMapTexture = texture;
-                Misc::StringUtils::replaceLast(normalMapTexture, ".", mNormalMapPattern + ".");
-                if (mVFS->exists(normalMapTexture))
-                    info.mNormalMap = std::move(normalMapTexture);
+                std::string normalMapValue(texture.value());
+                Misc::StringUtils::replaceLast(normalMapValue, ".", mNormalMapPattern + ".");
+                VFS::Path::Normalized normalMap(std::move(normalMapValue));
+                if (mVFS->exists(normalMap))
+                    info.mNormalMap = std::move(normalMap);
             }
         }
 
         if (mAutoUseSpecularMaps)
         {
-            std::string specularMapTexture = texture;
-            Misc::StringUtils::replaceLast(specularMapTexture, ".", mSpecularMapPattern + ".");
-            if (mVFS->exists(specularMapTexture))
+            std::string specularMapValue(texture.value());
+            Misc::StringUtils::replaceLast(specularMapValue, ".", mSpecularMapPattern + ".");
+            VFS::Path::Normalized specularMap(std::move(specularMapValue));
+            if (mVFS->exists(specularMap))
             {
-                info.mDiffuseMap = std::move(specularMapTexture);
+                info.mDiffuseMap = std::move(specularMap);
                 info.mSpecular = true;
             }
         }
 
-        mLayerInfoMap[texture] = info;
+        mLayerInfoMap.emplace_hint(it, texture, info);
 
         return info;
     }
@@ -719,7 +722,10 @@ namespace ESMTerrain
         if (const ESM4::LandTexture* ltex = getEsm4LandTexture(id))
         {
             if (!ltex->mTextureFile.empty())
-                return getLayerInfo("textures/landscape/" + ltex->mTextureFile); // TES4
+            {
+                constexpr VFS::Path::NormalizedView landscape("textures/landscape");
+                return getLayerInfo(VFS::Path::join(landscape, ltex->mTextureFile)); // TES4
+            }
             if (const ESM4::TextureSet* txst = getEsm4TextureSet(ltex->mTexture))
                 return getTextureSetLayerInfo(*txst); // TES5
             else
@@ -727,7 +733,7 @@ namespace ESMTerrain
         }
         else
             Log(Debug::Warning) << "LandTexture not found: " << id.toString();
-        return getLayerInfo("");
+        return getLayerInfo(VFS::Path::NormalizedView());
     }
 
     Terrain::LayerInfo Storage::getTextureSetLayerInfo(const ESM4::TextureSet& txst)
