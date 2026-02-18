@@ -4,6 +4,7 @@
 #include <components/misc/strings/lower.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -77,14 +78,6 @@ namespace VFS::Path
         return out;
     }
 
-    inline bool pathEqual(std::string_view x, std::string_view y)
-    {
-        if (std::size(x) != std::size(y))
-            return false;
-        return std::equal(
-            std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return normalize(l) == normalize(r); });
-    }
-
     inline constexpr auto findSeparatorOrExtensionSeparator(auto begin, auto end)
     {
         return std::find_if(begin, end, [](char v) { return v == extensionSeparator || v == separator; });
@@ -113,6 +106,8 @@ namespace VFS::Path
         constexpr std::string_view value() const noexcept { return mValue; }
 
         constexpr bool empty() const noexcept { return mValue.empty(); }
+
+        constexpr std::size_t size() const { return mValue.size(); }
 
         friend constexpr bool operator==(const ExtensionView& lhs, const ExtensionView& rhs) = default;
 
@@ -174,6 +169,8 @@ namespace VFS::Path
         constexpr std::string_view value() const noexcept { return mValue; }
 
         constexpr bool empty() const noexcept { return mValue.empty(); }
+
+        constexpr std::size_t size() const { return mValue.size(); }
 
         friend constexpr bool operator==(const NormalizedView& lhs, const NormalizedView& rhs) = default;
 
@@ -283,6 +280,8 @@ namespace VFS::Path
 
         bool empty() const { return mValue.empty(); }
 
+        constexpr std::size_t size() const { return mValue.size(); }
+
         operator std::string_view() const { return mValue; }
 
         operator const std::string&() const { return mValue; }
@@ -299,6 +298,49 @@ namespace VFS::Path
 
         void clear() { mValue.clear(); }
 
+        void reserve(std::size_t capacity) { mValue.reserve(capacity); }
+
+        void append(NormalizedView value)
+        {
+            const bool isEmpty = mValue.empty();
+            mValue.reserve(mValue.size() + static_cast<std::size_t>(!isEmpty) + value.value().size());
+            if (!isEmpty)
+                mValue += separator;
+            mValue += value.value();
+        }
+
+        void append(const Normalized& value) { append(NormalizedView(value)); }
+
+        void append(std::string_view value)
+        {
+            const bool isEmpty = mValue.empty();
+            mValue.reserve(mValue.size() + static_cast<std::size_t>(!isEmpty) + value.size());
+            if (!isEmpty)
+                mValue += separator;
+            const std::size_t offset = mValue.size();
+            mValue += value;
+            const auto [begin, end] = normalizeFilenameInPlace(mValue.begin() + offset, mValue.end());
+            std::copy(begin, end, mValue.begin() + offset);
+            mValue.resize(offset + (end - begin));
+        }
+
+        void append(const std::string& value) { append(std::string_view(value)); }
+
+        template <std::size_t size>
+        void append(const char (&value)[size])
+        {
+            append(std::string_view(value));
+        }
+
+        void append(const char* value) { append(std::string_view(value)); }
+
+        void append(ExtensionView extension)
+        {
+            mValue.reserve(mValue.size() + 1 + extension.size());
+            mValue += extensionSeparator;
+            mValue += extension.value();
+        }
+
         Normalized& operator=(NormalizedView value)
         {
             mValue = value.value();
@@ -307,21 +349,13 @@ namespace VFS::Path
 
         Normalized& operator/=(NormalizedView value)
         {
-            mValue.reserve(mValue.size() + value.value().size() + 1);
-            mValue += separator;
-            mValue += value.value();
+            append(value);
             return *this;
         }
 
         Normalized& operator/=(std::string_view value)
         {
-            mValue.reserve(mValue.size() + value.size() + 1);
-            mValue += separator;
-            const std::size_t offset = mValue.size();
-            mValue += value;
-            const auto [begin, end] = normalizeFilenameInPlace(mValue.begin() + offset, mValue.end());
-            std::copy(begin, end, mValue.begin() + offset);
-            mValue.resize(offset + (end - begin));
+            append(value);
             return *this;
         }
 
@@ -433,6 +467,42 @@ namespace VFS::Path
     Normalized toNormalized(NormalizedView value) = delete;
 
     Normalized toNormalized(Normalized value) = delete;
+
+    constexpr std::size_t singleCapacity(const auto& value)
+    {
+        return std::size(value);
+    }
+
+    constexpr std::size_t singleCapacity(const char* value)
+    {
+        return std::string_view(value).size();
+    }
+
+    constexpr std::size_t joinedCapacity(const auto& value)
+    {
+        return singleCapacity(value);
+    }
+
+    constexpr std::size_t joinedCapacity(ExtensionView value)
+    {
+        return 1 + value.size();
+    }
+
+    constexpr std::size_t joinedCapacity(const auto& head, const auto&... tail)
+    {
+        return joinedCapacity(head) + (singleCapacity(tail) + ...) + sizeof...(tail);
+    }
+
+    template <class... Args>
+    Normalized join(Args&&... args)
+    {
+        const std::size_t size = joinedCapacity(args...);
+        VFS::Path::Normalized result;
+        result.reserve(size);
+        (result.append(args), ...);
+        assert(result.size() <= size);
+        return result;
+    }
 }
 
 #endif

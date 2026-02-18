@@ -3,8 +3,9 @@
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_UString.h>
 
-#include <cassert>
+#include <format>
 #include <memory>
+#include <stdexcept>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -436,14 +437,18 @@ namespace MWClass
     std::string_view Npc::getModel(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-        std::string_view model = Settings::models().mBaseanim.get();
-        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
-        if (race->mData.mFlags & ESM::Race::Beast)
-            model = Settings::models().mBaseanimkna.get();
+        const VFS::Path::NormalizedView model = [&]() -> VFS::Path::NormalizedView {
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
+            if (race->mData.mFlags & ESM::Race::Beast)
+                return Settings::models().mBaseanimkna.get();
+            return Settings::models().mBaseanim.get();
+        }();
         // Base animations should be in the meshes dir
-        constexpr std::string_view prefix = "meshes/";
-        assert(VFS::Path::pathEqual(prefix, model.substr(0, prefix.size())));
-        return model.substr(prefix.size());
+        constexpr VFS::Path::NormalizedView prefix("meshes/");
+        if (!model.value().starts_with(prefix.value()))
+            throw std::runtime_error(std::format("NPC {} model path does not start with \"{}\": {}",
+                ref->mRef.getRefId().toDebugString(), prefix.value(), model.value()));
+        return model.value().substr(prefix.value().size());
     }
 
     VFS::Path::Normalized Npc::getCorrectedModel(const MWWorld::ConstPtr& ptr) const

@@ -210,6 +210,20 @@ namespace VFS::Path
             EXPECT_EQ(value.value(), "foo/bar/a/b");
         }
 
+        TEST(VFSPathNormalizedTest, operatorDivForNormalizedViewShouldNotPrependSeparatorToEmpty)
+        {
+            Normalized value;
+            value /= NormalizedView("a");
+            EXPECT_EQ(value.value(), "a");
+        }
+
+        TEST(VFSPathNormalizedTest, operatorDivForStringViewShouldNotPrependSeparatorToEmpty)
+        {
+            Normalized value;
+            value /= std::string_view("a");
+            EXPECT_EQ(value.value(), "a");
+        }
+
         TEST(VFSPathNormalizedTest, changeExtensionShouldReplaceAfterLastDot)
         {
             Normalized value("foo/ba.r.a");
@@ -252,6 +266,20 @@ namespace VFS::Path
         {
             const Normalized value("foo");
             EXPECT_EQ(value.filename(), "foo");
+        }
+
+        TEST(VFSPathNormalizedTest, appendShouldAddExtensionWithSeparator)
+        {
+            Normalized value("foo");
+            value.append(ExtensionView("ext"));
+            EXPECT_EQ(value.value(), "foo.ext");
+        }
+
+        TEST(VFSPathNormalizedTest, appendForEmptyShouldAddExtensionWithSeparator)
+        {
+            Normalized value;
+            value.append(ExtensionView("ext"));
+            EXPECT_EQ(value.value(), ".ext");
         }
 
         template <class T>
@@ -355,6 +383,88 @@ namespace VFS::Path
         {
             const NormalizedView value("last voyage of the u.s.s. constitution.swf");
             EXPECT_EQ(value.stem(), "last voyage of the u.s.s. constitution");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleValue)
+        {
+            EXPECT_EQ(join(Normalized("foo")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleView)
+        {
+            EXPECT_EQ(join(NormalizedView("foo")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleString)
+        {
+            EXPECT_EQ(join(std::string("FOO")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleStringView)
+        {
+            EXPECT_EQ(join(std::string_view("FOO")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleConstCharArray)
+        {
+            EXPECT_EQ(join("FOO"), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleConstCharPtr)
+        {
+            const char* const ptr = "FOO";
+            EXPECT_EQ(join(ptr), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleExtension)
+        {
+            constexpr ExtensionView extension("foo");
+            EXPECT_EQ(join(extension), ".foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTwoPathComponents)
+        {
+            EXPECT_EQ(join(NormalizedView("foo"), std::string_view("BAR")), "foo/bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinComponentAndExtension)
+        {
+            EXPECT_EQ(join(NormalizedView("foo"), ExtensionView("bar")), "foo.bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTwoExtensions)
+        {
+            EXPECT_EQ(join(ExtensionView("foo"), ExtensionView("bar")), ".foo.bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTreePathComponents)
+        {
+            EXPECT_EQ(join(NormalizedView("a"), std::string_view("B"), Normalized("c")), "a/b/c");
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forNormalizedShouldReturnSizeOnly)
+        {
+            EXPECT_EQ(joinedCapacity(Normalized("a")), 1);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forConstCharPtrShouldReturnSizeOnly)
+        {
+            EXPECT_EQ(joinedCapacity("a"), 1);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forExtensionViewShouldReturnSizePlusSeparator)
+        {
+            EXPECT_EQ(joinedCapacity(ExtensionView("a")), 2);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, shouldReturnSumOfSizesPlusNumberOfSeparators)
+        {
+            constexpr NormalizedView b("b");
+            const Normalized c("c");
+            constexpr std::string_view d("d");
+            const std::string e("e");
+            constexpr ExtensionView f("f");
+            EXPECT_EQ(joinedCapacity("a", b, c, d, e, f), 11);
         }
     }
 }
