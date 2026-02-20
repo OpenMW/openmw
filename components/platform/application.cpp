@@ -1,5 +1,9 @@
 #include "application.hpp"
 
+#include <format>
+#include <string>
+#include <string_view>
+
 #include <QFile>
 #include <QOperatingSystemVersion>
 #include <QStyle>
@@ -10,7 +14,7 @@
 
 namespace Platform
 {
-    static void qtMessageHandler(QtMsgType type, const QMessageLogContext&, const QString& msg)
+    static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg)
     {
         Debug::Level level;
         switch (type)
@@ -32,7 +36,25 @@ namespace Platform
                 break;
         }
 
-        Log(level) << msg.toUtf8().constData();
+        const bool nonDefaultCategory = context.category && std::string_view(context.category) != "default";
+        // context.file and context.function are only populated in debug builds
+        // Qt strips them to nullptr in release
+        const bool hasLocation = context.file != nullptr;
+
+        std::string formatted;
+        if (nonDefaultCategory)
+        {
+            // Show non-default categories
+            formatted += '[';
+            formatted += context.category;
+            formatted += "] ";
+        }
+        // += could null terminate, so use append with explicit size
+        const QByteArray utf8msg = msg.toUtf8();
+        formatted.append(utf8msg.constData(), static_cast<size_t>(utf8msg.size()));
+        if (hasLocation)
+            formatted += std::format(" ({}:{}, {})", context.file, context.line, context.function);
+        Log(level) << formatted;
     }
 
     Application::Application(int& argc, char* argv[])
