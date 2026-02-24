@@ -30,7 +30,7 @@ namespace
         // Check if this ID would be interpreted as something other than a StringRefId
         ESM::RefId id = ESM::RefId::deserializeText(value);
         if (!id.empty())
-            throw std::runtime_error("ID not allowed");
+            throw std::runtime_error("Non-string ID not allowed");
         return ESM::RefId::stringRefId(value);
     }
 }

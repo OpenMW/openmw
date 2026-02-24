@@ -11,7 +11,7 @@
 
 namespace MWLua
 {
-    namespace
+    namespace ModelPropertyImpl
     {
         template <class T>
         std::string getMeshPath(const T& recordValue)
@@ -23,18 +23,18 @@ namespace MWLua
     template <class T>
     void addModelProperty(sol::usertype<T>& recordType)
     {
-        recordType["model"] = sol::readonly_property(&getMeshPath<T>);
+        recordType["model"] = sol::readonly_property(&ModelPropertyImpl::getMeshPath<T>);
     }
 
     template <class T>
     void addMutableModelProperty(sol::usertype<MutableRecord<T>>& recordType)
     {
-        recordType["model"]
-            = sol::property([](const MutableRecord<T>& mutRec) -> std::string { return getMeshPath(mutRec.find()); },
-                [](MutableRecord<T>& mutRec, std::string_view path) {
-                    T& recordValue = mutRec.find();
-                    recordValue.mModel = Misc::ResourceHelpers::meshPathForESM3(path);
-                });
+        recordType["model"] = sol::property(
+            [](const MutableRecord<T>& mutRec) -> std::string { return ModelPropertyImpl::getMeshPath(mutRec.find()); },
+            [](MutableRecord<T>& mutRec, std::string_view path) {
+                T& recordValue = mutRec.find();
+                recordValue.mModel = Misc::ResourceHelpers::meshPathForESM3(path);
+            });
     }
 }
 

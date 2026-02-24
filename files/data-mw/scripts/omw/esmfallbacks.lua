@@ -1,6 +1,6 @@
 local content = require('openmw.content')
 
-function generateDefaultStatics()
+local function generateDefaultStatics()
     local statics = {
         -- Total conversions from SureAI lack marker records
         divinemarker = 'meshes/marker_divine.nif',
