@@ -1282,8 +1282,8 @@
 -- @field #number NotCell The player's cell name should not start with @{#DialogueInfoCondition.cellName}
 -- @field #number NotLocal A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
 
---- @{#Regions}: Regions
--- @field [parent=#core] #Regions regions. Not available in load scripts.
+--- @{#Regions}: Regions. Not available in load scripts.
+-- @field [parent=#core] #Regions regions
 
 ---
 -- A read-only list of all @{#RegionRecord}s in the world database.
@@ -1310,8 +1310,8 @@
 -- @field #string soundId Sound record ID
 -- @field #number chance Multiplicative percentage used to determine whether to play the sound
 
---- @{#Factions}: Factions
--- @field [parent=#core] #Factions factions. Not available in load scripts.
+--- @{#Factions}: Factions. Not available in load scripts.
+-- @field [parent=#core] #Factions factions
 
 ---
 -- A read-only list of all @{#FactionRecord}s in the world database.
@@ -1340,8 +1340,8 @@
 -- @field #number factionReputation Required amount of faction reputation to reach this rank.
 -- @field #number factionReaction (DEPRECATED) Returns the same as factionReputation.
 
---- @{#MWScripts}: MWScripts
--- @field [parent=#core] #MWScript mwscripts. Not available in load scripts.
+--- @{#MWScripts}: MWScripts. Not available in load scripts.
+-- @field [parent=#core] #MWScript mwscripts
 
 ---
 -- A read-only list of all @{#MWScriptRecord}s in the world database.
@@ -1356,8 +1356,8 @@
 -- @field #string text MWScript content
 
 
---- @{#Weather}: Weather
--- @field [parent=#core] #Weather weather. Not available in load scripts.
+--- @{#Weather}: Weather. Not available in load scripts.
+-- @field [parent=#core] #Weather weather
 
 --- List of all @{#WeatherRecord}s.
 -- @field [parent=#Weather] #list<#WeatherRecord> records A read-only list of all @{#WeatherRecord}s in the world database, may be indexed by recordId.
