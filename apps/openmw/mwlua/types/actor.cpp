@@ -236,7 +236,7 @@ namespace MWLua
                     hasSelectedSpell = !stats.getSpells().getSelectedSpell().empty();
                 if (!hasSelectedSpell)
                 {
-                    MWWorld::ContainerStore& store = cls.getContainerStore(self.ptr());
+                    const MWWorld::ContainerStore& store = cls.getContainerStore(self.ptr());
                     if (store.getSelectedEnchantItem() == store.end())
                         return; // No selected spell and no selected enchanted item; can't use magic stance.
                 }

@@ -297,6 +297,8 @@ namespace MWWorld
         virtual void readEquipmentState(
             const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory);
 
+        std::ptrdiff_t index(const ContainerStoreIterator& iter) const;
+
     private:
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
         void addInitialItem(
@@ -377,6 +379,7 @@ namespace MWWorld
         /// \note to unset the selected item, call this method with end() iterator
 
         ContainerStoreIterator getSelectedEnchantItem();
+        ConstContainerStoreIterator getSelectedEnchantItem() const;
         ///< @return selected magic item (for using enchantments of type "Cast once" or "Cast when used")
         /// \note if no item selected, return end() iterator
 

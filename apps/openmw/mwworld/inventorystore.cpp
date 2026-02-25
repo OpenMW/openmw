@@ -17,17 +17,14 @@
 
 void MWWorld::InventoryStore::copySlots(const InventoryStore& store)
 {
-    // some const-trickery, required because of a flaw in the handling of MW-references and the
-    // resulting workarounds
-    InventoryStore& mutStore = const_cast<InventoryStore&>(store);
-    for (const MWWorld::ContainerStoreIterator& it : mutStore.mSlots)
+    for (const MWWorld::ContainerStoreIterator& it : store.mSlots)
     {
-        if (it == mutStore.end())
+        if (it == store.end())
         {
             mSlots.push_back(end());
             continue;
         }
-        const std::ptrdiff_t distance = std::distance(mutStore.begin(), it);
+        const std::ptrdiff_t distance = store.index(it);
         ContainerStoreIterator slot = begin();
         std::advance(slot, distance);
         mSlots.push_back(slot);
@@ -100,9 +97,6 @@ MWWorld::InventoryStore::InventoryStore(const MWWorld::InventoryStore& store)
 }
 
 MWWorld::InventoryStore::InventoryStore(MWWorld::InventoryStore&& store)
-    : mInventoryListener(store.mInventoryListener)
-    , mUpdatesEnabled(store.mUpdatesEnabled)
-    , mFirstAutoEquip(store.mFirstAutoEquip)
 {
     *this = std::move(store);
 }
@@ -113,6 +107,7 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(const InventoryStore
         return *this;
     ContainerStore::operator=(store);
     mInventoryListener = store.mInventoryListener;
+    mUpdatesEnabled = store.mUpdatesEnabled;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mSlots.clear();
     copySlots(store);
@@ -122,16 +117,13 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(const InventoryStore
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(InventoryStore&& store)
 {
     mInventoryListener = store.mInventoryListener;
+    mUpdatesEnabled = store.mUpdatesEnabled;
     mFirstAutoEquip = store.mFirstAutoEquip;
     mSlots.clear();
     std::array<std::ptrdiff_t, Slots> distances;
     for (int i = 0; i < Slots; ++i)
     {
-        const MWWorld::ContainerStoreIterator& it = store.mSlots[i];
-        if (it == store.end())
-            distances[i] = -1;
-        else
-            distances[i] = std::distance(store.begin(), it);
+        distances[i] = store.index(store.mSlots[i]);
     }
     ContainerStore::operator=(std::move(store));
     for (int i = 0; i < Slots; ++i)

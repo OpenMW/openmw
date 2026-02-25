@@ -125,6 +125,13 @@ void MWWorld::ContainerStore::readEquipmentState(
         mSelectedEnchantItem = iter;
 }
 
+std::ptrdiff_t MWWorld::ContainerStore::index(const ContainerStoreIterator& iter) const
+{
+    if (iter.getType() == -1)
+        return -1;
+    return std::distance(cbegin(), ConstContainerStoreIterator(iter));
+}
+
 template <typename T>
 void MWWorld::ContainerStore::storeState(const LiveCellRef<T>& ref, ESM::ObjectState& state) const
 {
@@ -171,8 +178,7 @@ MWWorld::ContainerStore::ContainerStore(const MWWorld::ContainerStore& store)
     if (store.mSelectedEnchantItem != store.end())
     {
         mSelectedEnchantItem = begin();
-        std::advance(mSelectedEnchantItem,
-            std::distance(const_cast<ContainerStore&>(store).begin(), store.mSelectedEnchantItem));
+        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
     }
 }
 
@@ -188,10 +194,9 @@ MWWorld::ContainerStore::ContainerStore(MWWorld::ContainerStore&& store)
     , mResolved(store.mResolved)
     , mRechargingItemsUpToDate(false)
 {
-    const bool hasSelectedItem = store.mSelectedEnchantItem != store.end();
-    const std::ptrdiff_t distance = hasSelectedItem ? std::distance(store.begin(), store.mSelectedEnchantItem) : -1;
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
     mLists = std::move(store.mLists);
-    if (hasSelectedItem)
+    if (distance != -1)
     {
         mSelectedEnchantItem = begin();
         std::advance(mSelectedEnchantItem, distance);
@@ -215,8 +220,7 @@ MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(const ContainerStore
     if (store.mSelectedEnchantItem != store.end())
     {
         mSelectedEnchantItem = begin();
-        std::advance(mSelectedEnchantItem,
-            std::distance(const_cast<ContainerStore&>(store).begin(), store.mSelectedEnchantItem));
+        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
     }
     else
         mSelectedEnchantItem = end();
@@ -225,8 +229,7 @@ MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(const ContainerStore
 
 MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(ContainerStore&& store)
 {
-    const bool hasSelectedItem = store.mSelectedEnchantItem != store.end();
-    const std::ptrdiff_t distance = hasSelectedItem ? std::distance(store.begin(), store.mSelectedEnchantItem) : -1;
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
     mListener = store.mListener;
     mLists = std::move(store.mLists);
     mCachedWeight = store.mCachedWeight;
@@ -237,7 +240,7 @@ MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(ContainerStore&& sto
     mModified = store.mModified;
     mResolved = store.mResolved;
     mRechargingItemsUpToDate = false;
-    if (hasSelectedItem)
+    if (distance != -1)
     {
         mSelectedEnchantItem = begin();
         std::advance(mSelectedEnchantItem, distance);
@@ -585,6 +588,11 @@ void MWWorld::ContainerStore::setSelectedEnchantItem(const ContainerStoreIterato
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getSelectedEnchantItem()
+{
+    return mSelectedEnchantItem;
+}
+
+MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::getSelectedEnchantItem() const
 {
     return mSelectedEnchantItem;
 }
