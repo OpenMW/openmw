@@ -58,7 +58,10 @@ namespace MWLua
 
         LocalScripts* asLocal(const LuaUtil::ScriptsContainerWeakPtr& ptr)
         {
-            return static_cast<LocalScripts*>(*ptr);
+            auto scripts = static_cast<LocalScripts*>(*ptr);
+            if (scripts == nullptr)
+                Log(Debug::Warning) << "Found local Lua script that outlived its object";
+            return scripts;
         }
     }
 
