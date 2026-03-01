@@ -1,6 +1,6 @@
 ---
--- Defines functions and types that are available in local, global and menu scripts.
--- @context global|menu|local|player
+-- Defines functions and types that are available in local, global, menu, and load scripts.
+-- @context global|menu|local|player|load
 -- @module core
 -- @usage local core = require('openmw.core')
 
@@ -11,53 +11,53 @@
 -- @field [parent=#core] #number API_REVISION
 
 ---
--- Terminates the game and quits to the OS. Should be used only for testing purposes.
+-- Terminates the game and quits to the OS. Should be used only for testing purposes. Not available in load scripts.
 -- @function [parent=#core] quit
 
 ---
--- Send an event to global scripts. Note: in menu scripts, errors if the game is not running (check @{openmw.menu#menu.getState})
+-- Send an event to global scripts. Note: in menu scripts, errors if the game is not running (check @{openmw.menu#menu.getState}.) Not available in load scripts.
 -- @function [parent=#core] sendGlobalEvent
 -- @param #string eventName
 -- @param eventData
 
 ---
 -- Simulation time in seconds.
--- The number of simulation seconds passed in the game world since starting a new game.
+-- The number of simulation seconds passed in the game world since starting a new game. Not available in load scripts.
 -- @function [parent=#core] getSimulationTime
 -- @return #number
 
 ---
--- The scale of simulation time relative to real time.
+-- The scale of simulation time relative to real time. Not available in load scripts.
 -- @function [parent=#core] getSimulationTimeScale
 -- @return #number
 
 ---
--- Game time in seconds.
+-- Game time in seconds. Not available in load scripts.
 -- @function [parent=#core] getGameTime
 -- @return #number
 
 ---
--- The scale of game time relative to simulation time.
+-- The scale of game time relative to simulation time. Not available in load scripts.
 -- @function [parent=#core] getGameTimeScale
 -- @return #number
 
 ---
--- Whether the world is paused.
+-- Whether the world is paused. Not available in load scripts.
 -- @function [parent=#core] isWorldPaused
 -- @return #boolean
 
 ---
--- Real time in seconds; starting point is not fixed (can be time since last reboot), use only for measuring intervals. For Unix time use `os.time()`.
+-- Real time in seconds; starting point is not fixed (can be time since last reboot), use only for measuring intervals. For Unix time use `os.time()`. Not available in load scripts.
 -- @function [parent=#core] getRealTime
 -- @return #number
 
 ---
--- Frame duration in seconds. Not available in global scripts.
+-- Frame duration in seconds. Not available in global or load scripts.
 -- @function [parent=#core] getRealFrameDuration
 -- @return #number
 
 ---
--- Get a game setting with given name (from GMST ESM records or from openmw.cfg).
+-- Get a game setting with given name (from GMST ESM records or from openmw.cfg). Not available in load scripts.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
 -- @return #any
@@ -478,7 +478,7 @@
 -- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
 
 
---- @{#Land}: Functions for interacting with land data
+--- @{#Land}: Functions for interacting with land data. Not available in load scripts.
 -- @field [parent=#core] #Land land
 
 ---
@@ -500,7 +500,7 @@
 -- @return #nil, #string Plugin name or nil if failed to retrieve the texture
 
 
---- @{#Magic}: spells and spell effects
+--- @{#Magic}: spells and spell effects. Not available in load scripts.
 -- @field [parent=#core] #Magic magic
 
 
@@ -783,7 +783,7 @@
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
 
---- @{#Sound}: Sounds and Speech
+--- @{#Sound}: Sounds and Speech. Not available in load scripts.
 -- @field [parent=#core] #Sound sound
 
 ---
@@ -915,7 +915,7 @@
 --     print(sound.fileName)
 -- end
 
---- @{#Stats}: stats
+--- @{#Stats}: stats. Not available in load scripts.
 -- @field [parent=#core] #Stats stats
 
 
@@ -978,7 +978,7 @@
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
 
---- @{#Dialogue}: Dialogue
+--- @{#Dialogue}: Dialogue. Not available in load scripts.
 -- @field [parent=#core] #Dialogue dialogue
 
 ---
@@ -1282,7 +1282,7 @@
 -- @field #number NotCell The player's cell name should not start with @{#DialogueInfoCondition.cellName}
 -- @field #number NotLocal A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
 
---- @{#Regions}: Regions
+--- @{#Regions}: Regions. Not available in load scripts.
 -- @field [parent=#core] #Regions regions
 
 ---
@@ -1310,7 +1310,7 @@
 -- @field #string soundId Sound record ID
 -- @field #number chance Multiplicative percentage used to determine whether to play the sound
 
---- @{#Factions}: Factions
+--- @{#Factions}: Factions. Not available in load scripts.
 -- @field [parent=#core] #Factions factions
 
 ---
@@ -1340,7 +1340,7 @@
 -- @field #number factionReputation Required amount of faction reputation to reach this rank.
 -- @field #number factionReaction (DEPRECATED) Returns the same as factionReputation.
 
---- @{#MWScripts}: MWScripts
+--- @{#MWScripts}: MWScripts. Not available in load scripts.
 -- @field [parent=#core] #MWScript mwscripts
 
 ---
@@ -1356,7 +1356,7 @@
 -- @field #string text MWScript content
 
 
---- @{#Weather}: Weather
+--- @{#Weather}: Weather. Not available in load scripts.
 -- @field [parent=#core] #Weather weather
 
 --- List of all @{#WeatherRecord}s.

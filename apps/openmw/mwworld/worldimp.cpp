@@ -176,18 +176,6 @@ namespace MWWorld
             };
         }
 
-        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultStatics()
-        {
-            return {
-                // Total conversions from SureAI lack marker records
-                { "divinemarker", "marker_divine.nif" },
-                { "doormarker", "marker_arrow.nif" },
-                { "northmarker", "marker_north.nif" },
-                { "templemarker", "marker_temple.nif" },
-                { "travelmarker", "marker_travel.nif" },
-            };
-        }
-
         std::vector<std::pair<std::string_view, std::string_view>> generateDefaultDoors()
         {
             return { { "prisonmarker", "marker_prison.nif" } };
@@ -281,6 +269,7 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
 
         fillGlobalVariables();
 
@@ -557,18 +546,6 @@ namespace MWWorld
                 ESM::Global record;
                 record.mId = ESM::RefId::stringRefId(name.getValue());
                 record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
-        for (const auto& [id, model] : generateDefaultStatics())
-        {
-            if (mStore.get<ESM::Static>().search(ESM::RefId::stringRefId(id)) == nullptr)
-            {
-                ESM::Static record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }

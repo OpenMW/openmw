@@ -1,6 +1,6 @@
 ---
 -- Defines utility functions and classes like 3D vectors, that don't depend on the game world.
--- @context global|menu|local|player
+-- @context global|menu|local|player|load
 -- @module util
 -- @usage local util = require('openmw.util')
 

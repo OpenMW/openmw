@@ -10,13 +10,16 @@
      - Controls background sounds for given player.
    * - :doc:`animation </reference/lua-scripting/openmw_animation>`
      - |bdg-ctx-local|
-     - Animation controls
+     - Animation controls.
    * - :doc:`async </reference/lua-scripting/openmw_async>`
      - |bdg-ctx-all|
      - Timers and callbacks.
    * - :doc:`camera </reference/lua-scripting/openmw_camera>`
      - |bdg-ctx-player|
      - Controls camera.
+   * - :doc:`content </reference/lua-scripting/openmw_content>`
+     - |bdg-ctx-load|
+     - Content manipulation.
    * - :doc:`core </reference/lua-scripting/openmw_core>`
      - |bdg-ctx-all|
      - Functions that are common for both global and local scripts
@@ -48,7 +51,7 @@
      - |bdg-ctx-all|
      - Storage API. In particular can be used to store data between game sessions.
    * - :doc:`types </reference/lua-scripting/openmw_types>`
-     - |bdg-ctx-all|
+     - |bdg-ctx-non-load|
      - Functions for specific types of game objects.
    * - :doc:`ui </reference/lua-scripting/openmw_ui>`
      - |bdg-ctx-menu| |bdg-ctx-player|

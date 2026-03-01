@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include "../contentbindings.hpp"
 #include "modelproperty.hpp"
 
 #include <components/esm3/loadstat.hpp>
@@ -17,6 +18,25 @@ namespace sol
 
 namespace MWLua
 {
+    ESM::Static tableToStatic(const sol::table& rec)
+    {
+        ESM::Static stat;
+        if (rec["template"] != sol::nil)
+        {
+            if (rec["template"].is<MutableRecord<ESM::Static>>())
+                stat = rec["template"].get<MutableRecord<ESM::Static>>().find();
+            else
+                stat = LuaUtil::cast<ESM::Static>(rec["template"]);
+        }
+        else
+            stat.blank();
+
+        if (rec["model"] != sol::nil)
+            stat.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+
+        return stat;
+    }
+
     void addStaticBindings(sol::table stat, const Context& context)
     {
         addRecordFunctionBinding<ESM::Static>(stat, context);

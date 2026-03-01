@@ -26,6 +26,7 @@ namespace ESM
         static constexpr Flags sMerge = 1ull << 3;
 
         static constexpr Flags sMenu = 1ull << 4; // start as a menu script
+        static constexpr Flags sLoad = 1ull << 5; // content loading script
 
         VFS::Path::Normalized mScriptPath;
         std::string mInitializationData; // Serialized Lua table. It is a binary data. Can contain '\0'.

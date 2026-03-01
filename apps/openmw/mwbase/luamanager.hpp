@@ -62,6 +62,7 @@ namespace MWBase
     public:
         virtual ~LuaManager() = default;
 
+        virtual void contentFilesLoaded() = 0;
         virtual void newGameStarted() = 0;
         virtual void gameLoaded() = 0;
         virtual void gameEnded() = 0;
