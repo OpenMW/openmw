@@ -61,8 +61,12 @@ namespace MWGui
     protected:
         MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
         {
-            item.mBase.getCellRef().setCount(static_cast<int>(count));
-            return dropItemImpl(item, static_cast<int>(count), false);
+            const int prevCount = item.mBase.getCellRef().getCount(false);
+            const int intCount = static_cast<int>(count);
+            item.mBase.getCellRef().setCount(intCount);
+            MWWorld::Ptr ptr = dropItemImpl(item, intCount, false);
+            item.mBase.getCellRef().setCount(prevCount);
+            return ptr;
         }
 
         MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
