@@ -63,7 +63,7 @@ namespace osg
 CSVRender::TerrainVertexPaintMode::TerrainVertexPaintMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-vertex-paint" }, Mask_Terrain,
-        "Terrain vertex paint editing", parent)
+          "Terrain vertex paint editing", parent)
     , mParentNode(parentNode)
     , mVertexPaintEditToolColor(Qt::white)
 {
@@ -273,7 +273,8 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 
     std::string mCellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
 
-    if (!allowLandColourEditing(mCellId)) return;
+    if (!allowLandColourEditing(mCellId))
+        return;
 
     std::pair<CSMWorld::CellCoordinates, bool> cellCoordinates_pair = CSMWorld::CellCoordinates::fromId(mCellId);
 
@@ -294,7 +295,8 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
     }
 
     mCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-    if (!allowLandColourEditing(mCellId)) return;
+    if (!allowLandColourEditing(mCellId))
+        return;
 
     std::string iteratedCellId;
 
@@ -357,15 +359,15 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                                 int distanceY(0);
                                 if (i_cell < cellX)
                                     distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) - i;
+                                else if (i_cell > cellX)
+                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
+                                else
+                                    distanceX = abs(i - xHitInCell);
                                 if (j_cell < cellY)
                                     distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) - j;
-                                if (i_cell > cellX)
-                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
-                                if (j_cell > cellY)
+                                else if (j_cell > cellY)
                                     distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) + j;
-                                if (i_cell == cellX)
-                                    distanceX = abs(i - xHitInCell);
-                                if (j_cell == cellY)
+                                else
                                     distanceY = abs(j - yHitInCell);
                                 if (distanceX < r && distanceY < r)
                                     alterColour(newTerrain, i, j, 0.0f);
@@ -544,8 +546,7 @@ void CSVRender::TerrainVertexPaintMode::selectTerrainShapes(
     {
         handleSelection(vertexCoords.first, vertexCoords.second, &selections);
     }
-
-    if (mBrushShape == CSVWidget::BrushShape_Square)
+    else if (mBrushShape == CSVWidget::BrushShape_Square)
     {
         for (int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
         {
@@ -555,8 +556,7 @@ void CSVRender::TerrainVertexPaintMode::selectTerrainShapes(
             }
         }
     }
-
-    if (mBrushShape == CSVWidget::BrushShape_Circle)
+    else if (mBrushShape == CSVWidget::BrushShape_Circle)
     {
         for (int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
         {
