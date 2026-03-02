@@ -9,14 +9,9 @@
 #include <QDropEvent>
 #include <QEvent>
 #include <QIcon>
-#include <QWidget>
-
-#include <osg/Camera>
-#include <osg/Vec3f>
 
 #include <apps/opencs/model/doc/document.hpp>
-#include <apps/opencs/model/prefs/category.hpp>
-#include <apps/opencs/model/prefs/setting.hpp>
+#include <apps/opencs/model/prefs/state.hpp>
 #include <apps/opencs/model/world/cellselection.hpp>
 #include <apps/opencs/model/world/columnimp.hpp>
 #include <apps/opencs/model/world/columns.hpp>
@@ -24,7 +19,6 @@
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/idtable.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/widget/brushshapes.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
