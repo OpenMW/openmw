@@ -204,6 +204,10 @@ namespace MWInput
         if (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_LMASK)
             return;
 
+        // Don't warp if an emulated mouse press is occurring.
+        if (isGamepadGuiCursorEnabled() && isControllerButtonPressed(SDL_CONTROLLER_BUTTON_A))
+            return;
+
         MWBase::Environment::get().getWindowManager()->setCursorVisible(false);
         mMouseManager->warpMouseToWidget(widget);
         mMouseManager->injectMouseMove(1, 0, 0);
