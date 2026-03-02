@@ -17,10 +17,13 @@ namespace MWLua::Types
         return rec.find();
     }
 
+    template <class R, class T>
+    using Member = R T::*;
+
     template <class Record, class Type, class M>
     struct Getter
     {
-        auto operator()(M Record::* member) const
+        auto operator()(Member<M, Record> member) const
         {
             return [member](const Type& rec) -> const M& { return asRecord<Record>(rec).*member; };
         }
@@ -29,7 +32,7 @@ namespace MWLua::Types
     template <class Record, class M>
     struct Setter
     {
-        auto operator()(M Record::* member) const
+        auto operator()(Member<M, Record> member) const
         {
             return [member](MutableRecord<Record>& rec, const M& value) {
                 Record& record = rec.find();
@@ -41,7 +44,7 @@ namespace MWLua::Types
     template <class Record>
     struct Setter<Record, ESM::RefId>
     {
-        auto operator()(ESM::RefId Record::* member) const
+        auto operator()(Member<ESM::RefId, Record> member) const
         {
             return [member](MutableRecord<Record>& rec, std::string_view value) {
                 Record& record = rec.find();
@@ -51,7 +54,7 @@ namespace MWLua::Types
     };
 
     template <class Record, class Type, class M>
-    void addProperty(sol::usertype<Type>& type, std::string_view key, M Record::* member)
+    void addProperty(sol::usertype<Type>& type, std::string_view key, Member<M, Record> member)
     {
         constexpr bool isMutable = std::is_same_v<Type, MutableRecord<Record>>;
         if constexpr (isMutable)
