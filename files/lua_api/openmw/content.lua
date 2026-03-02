@@ -6,6 +6,16 @@
 -- @usage local content = require('openmw.content')
 
 
+--- @{#DoorContent}: Door manipulation.
+-- @field [parent=#content] #DoorContent doors
+
+---
+-- A mutable list of all @{openmw.types#DoorRecord}s.
+-- @field [parent=#DoorContent] #list<openmw.types#DoorRecord> records
+-- @usage
+-- content.doors.records.MyDoor = { template = content.doors.records['door_dwrv_double00'], mwscript = 'blockedDoor', name = 'Overly Heavy Dwemer Door' }
+
+
 --- @{#GlobalContent}: Global variable manipulation.
 -- @field [parent=#content] #GlobalContent globals
 
