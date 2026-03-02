@@ -10,6 +10,7 @@
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/finitevalues.hpp>
@@ -202,6 +203,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Potion& potion) -> const ESM::Potion* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(potion);
+            },
+            [lua = context.mLua](const ESM::Static& stat) -> const ESM::Static* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(stat);
             },
             [lua = context.mLua](const ESM::NPC& npc) -> const ESM::NPC* {
                 checkGameInitialized(lua);

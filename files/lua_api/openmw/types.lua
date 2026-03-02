@@ -1498,7 +1498,7 @@
 -- Creates an @{#ArmorRecord} without adding it to the world database, for the armor to appear correctly on the body, make sure to use a template as described below.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Armor] createRecordDraft
--- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord, with an additional field `template` that accepts a @{#ArmorRecord} as a base.
+-- @param #ArmorRecord armor A Lua table with the fields of an ArmorRecord, with an additional field `template` that accepts an @{#ArmorRecord} as a base.
 -- @return #ArmorRecord A strongly typed Armor record.
 -- @usage local armorTemplate = types.Armor.record('orcish_cuirass')
 -- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10}
@@ -2206,7 +2206,7 @@
 -- Creates an @{#ActivatorRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Activator] createRecordDraft
--- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord, with an optional field `template` that accepts a @{#ActivatorRecord} as a base.
+-- @param #ActivatorRecord activator A Lua table with the fields of an ActivatorRecord, with an optional field `template` that accepts an @{#ActivatorRecord} as a base.
 -- @return #ActivatorRecord A strongly typed Activator record.
 
 
@@ -2390,6 +2390,13 @@
 
 ---
 -- @type Static
+
+---
+-- Creates a @{#StaticRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Static] createRecordDraft
+-- @param #StaticRecord static A Lua table with the fields of a StaticRecord, with an optional field `template` that accepts a @{#StaticRecord} as a base.
+-- @return #StaticRecord A strongly typed Static record.
 
 ---
 -- A read-only list of all @{#StaticRecord}s in the world database.
