@@ -857,8 +857,3 @@ void CSVRender::TerrainVertexPaintMode::setVertexPaintColor(const QColor& color)
 {
     mVertexPaintEditToolColor = color;
 }
-
-CSVRender::PagedWorldspaceWidget& CSVRender::TerrainVertexPaintMode::getPagedWorldspaceWidget()
-{
-    return dynamic_cast<PagedWorldspaceWidget&>(getWorldspaceWidget());
-}

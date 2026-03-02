@@ -165,8 +165,6 @@ namespace CSVRender
         QColor mVertexPaintEditToolColor;
         int mTargetHeight = 0;
 
-        PagedWorldspaceWidget& getPagedWorldspaceWidget();
-
     public slots:
         void setBrushSize(int brushSize);
         void setBrushShape(CSVWidget::BrushShape brushShape);
