@@ -804,11 +804,11 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
             float oldY = newY - diffY; // diffY appears to already be flipped
 
             osg::Vec3f oldVec = osg::Vec3f(oldX, oldY, 0);
-            if (oldVec.length() != 0.0f)
+            if (oldVec.length2() != 0.0f)
                 oldVec.normalize();
 
             osg::Vec3f newVec = osg::Vec3f(newX, newY, 0);
-            if (newVec.length() != 0.0f)
+            if (newVec.length2() != 0.0f)
                 newVec.normalize();
 
             // Find angle and axis of rotation
@@ -861,27 +861,31 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
 
     // Multiselect rotation needs to be applied to transform matrixes, not angles,
     //  and we need them to have a collective center.
-    // FIXME: Talk to the gizmo to figure out where the widget is: it's a better rotation center.
-    // (This fixme is why this is a separate loop from the following one.)
-    osg::Vec3 center = osg::Vec3(0.0, 0.0, 0.0);
+    // For the sake of consistency we take the average of each origin in the selection.
+    // This is invariant under rotation and reselection, so it's predictable to the user.
+    osg::Vec3 center;
+    float num_centers = 0.0f;
     for (auto& item : selection)
     {
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
             ESM::Position position = objectTag->mObject->getPosition();
-            center.x() = position.pos[0];
-            center.y() = position.pos[1];
-            center.z() = position.pos[2];
+            center.x() += position.pos[0];
+            center.y() += position.pos[1];
+            center.z() += position.pos[2];
+            num_centers += 1.0f;
         }
     }
+    if (num_centers > 0.0f)
+        center /= num_centers;
 
-    // In order to not bloat the already-huge main application loop, let's calculate transform matrixes ahead of time.
+    // In order to not bloat the already-huge main apply loop, let's calculate center-relative transform matrixes ahead of time.
     // This isn't going to have a meaningful performance impact, it's fine.
     std::vector<osg::Matrixf> transforms;
     uint32_t trueXformCount = 0;
     for (auto& item : selection)
     {
-        osg::Matrix matrix = osg::Matrixf::identity();
+        osg::Matrix matrix = osg::Matrixf::xidentity();
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
             ESM::Position position = objectTag->mObject->getPosition();
