@@ -864,7 +864,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     // For the sake of consistency we take the average of each origin in the selection.
     // This is invariant under rotation and reselection, so it's predictable to the user.
     osg::Vec3 center;
-    float num_centers = 0.0f;
+    float numCenters = 0.0f;
     for (auto& item : selection)
     {
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
@@ -873,11 +873,11 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
             center.x() += position.pos[0];
             center.y() += position.pos[1];
             center.z() += position.pos[2];
-            num_centers += 1.0f;
+            numCenters += 1.0f;
         }
     }
-    if (num_centers > 0.0f)
-        center /= num_centers;
+    if (numCenters > 0.0f)
+        center /= numCenters;
 
     // In order to not bloat the already-huge main apply loop, let's calculate center-relative
     // transform matrixes ahead of time. This isn't going to have a meaningful performance impact, it's fine.
@@ -885,7 +885,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     uint32_t trueXformCount = 0;
     for (auto& item : selection)
     {
-        osg::Matrix matrix = osg::Matrixf::xidentity();
+        osg::Matrix matrix = osg::Matrixf::identity();
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
             ESM::Position position = objectTag->mObject->getPosition();
