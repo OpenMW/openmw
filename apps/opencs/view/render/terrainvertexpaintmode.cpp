@@ -425,15 +425,15 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                                 int distanceY(0);
                                 if (i_cell < cellX)
                                     distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) - i;
+                                else if (i_cell > cellX)
+                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
+                                else
+                                    distanceX = abs(i - xHitInCell);
                                 if (j_cell < cellY)
                                     distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) - j;
-                                if (i_cell > cellX)
-                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
-                                if (j_cell > cellY)
+                                else if (j_cell > cellY)
                                     distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) + j;
-                                if (i_cell == cellX)
-                                    distanceX = abs(i - xHitInCell);
-                                if (j_cell == cellY)
+                                else
                                     distanceY = abs(j - yHitInCell);
                                 float distance = std::round(sqrt(pow(distanceX, 2) + pow(distanceY, 2)));
                                 if (distance < r)
@@ -779,7 +779,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
             if (mode == "Discard")
                 return false;
 
-            if (mode == "Show cell and edit" && useTool)
+            if (useTool && mode == "Show cell and edit")
             {
                 selection.add(CSMWorld::CellCoordinates::fromId(cellId).first);
                 paged->setCellSelection(selection);
@@ -795,7 +795,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
         if (mode == "Discard")
             return false;
 
-        if (mode == "Create cell and land, then edit" && useTool)
+        if (useTool && mode == "Create cell and land, then edit")
         {
             document.getUndoStack().push(new CSMWorld::CreateCommand(landTable, cellId));
             createNewLandData(CSMWorld::CellCoordinates::fromId(cellId).first);
