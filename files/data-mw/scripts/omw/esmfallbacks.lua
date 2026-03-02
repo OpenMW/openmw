@@ -16,9 +16,21 @@ local function generateDefaultStatics()
     end
 end
 
+local function generateDefaultDoors()
+    local doors = {
+        prisonmarker = 'meshes/marker_prison.nif'
+    }
+    for id, model in pairs(doors) do
+        if content.doors.records[id] == nil then
+            content.doors.records[id] = { model = model }
+        end
+    end
+end
+
 return {
     engineHandlers = {
         onContentFilesLoaded = function()
+            generateDefaultDoors()
             generateDefaultStatics()
         end
     }

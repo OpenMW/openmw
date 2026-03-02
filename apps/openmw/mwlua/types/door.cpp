@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include "../localscripts.hpp"
 
@@ -30,6 +31,61 @@ namespace sol
 
 namespace MWLua
 {
+    namespace
+    {
+        void addPropertyFromTable(const sol::table& rec, std::string_view key, ESM::RefId& value)
+        {
+            if (rec[key] != sol::nil)
+            {
+                std::string_view id = rec[key].get<std::string_view>();
+                value = ESM::RefId::deserializeText(id);
+            }
+        }
+
+        template <class T, bool readOnly>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Door[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Door::mName);
+            if constexpr (readOnly)
+                addModelProperty(record);
+            else
+                addMutableModelProperty(record);
+            Types::addProperty(record, "mwscript", &ESM::Door::mScript);
+            Types::addProperty(record, "openSound", &ESM::Door::mOpenSound);
+            Types::addProperty(record, "closeSound", &ESM::Door::mCloseSound);
+        }
+    }
+
+    ESM::Door tableToDoor(const sol::table& rec)
+    {
+        ESM::Door door;
+        if (rec["template"] != sol::nil)
+        {
+            if (rec["template"].is<MutableRecord<ESM::Door>>())
+                door = rec["template"].get<MutableRecord<ESM::Door>>().find();
+            else
+                door = LuaUtil::cast<ESM::Door>(rec["template"]);
+        }
+        else
+            door.blank();
+
+        if (rec["name"] != sol::nil)
+            door.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            door.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        addPropertyFromTable(rec, "mwscript", door.mScript);
+        addPropertyFromTable(rec, "openSound", door.mOpenSound);
+        addPropertyFromTable(rec, "closeSound", door.mCloseSound);
+
+        return door;
+    }
+
     static const MWWorld::Ptr& doorPtr(const Object& o)
     {
         return verifyType(ESM::REC_DOOR, o.ptr());
@@ -38,6 +94,11 @@ namespace MWLua
     static const MWWorld::Ptr& door4Ptr(const Object& o)
     {
         return verifyType(ESM::REC_DOOR4, o.ptr());
+    }
+
+    void addMutableDoorType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Door>, false>(lua, "ESM3_MutableDoor");
     }
 
     void addDoorBindings(sol::table door, const Context& context)
@@ -102,18 +163,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Door>(door, context);
 
-        sol::usertype<ESM::Door> record = lua.new_usertype<ESM::Door>("ESM3_Door");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Door& rec) -> ESM::RefId { return rec.mScript; });
-        record["openSound"] = sol::readonly_property(
-            [](const ESM::Door& rec) -> std::string { return rec.mOpenSound.serializeText(); });
-        record["closeSound"] = sol::readonly_property(
-            [](const ESM::Door& rec) -> std::string { return rec.mCloseSound.serializeText(); });
+        addUserType<ESM::Door, true>(lua, "ESM3_Door");
     }
 
     void addESM4DoorBindings(sol::table door, const Context& context)
