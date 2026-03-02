@@ -194,6 +194,12 @@ namespace MWInput
         // This is currently used to simulate mouse movement when the gamepad UI is used.
         // Sometimes this is called in reaction to layout changes.
         // It's a bad idea to do this if the user triggered one with the actual mouse.
+
+        // Don't warp if a gamepad wasn't in use when this was triggered.
+        if (!joystickLastUsed())
+            return;
+
+        // Don't warp if the mouse button is actively being held.
         // TODO: this should be a method somewhere so that it can be reused in, e.g., Lua bindings
         if (SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON_LMASK)
             return;
