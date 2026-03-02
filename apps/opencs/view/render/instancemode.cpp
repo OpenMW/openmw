@@ -879,8 +879,8 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     if (num_centers > 0.0f)
         center /= num_centers;
 
-    // In order to not bloat the already-huge main apply loop, let's calculate center-relative transform matrixes ahead of time.
-    // This isn't going to have a meaningful performance impact, it's fine.
+    // In order to not bloat the already-huge main apply loop, let's calculate center-relative
+    // transform matrixes ahead of time. This isn't going to have a meaningful performance impact, it's fine.
     std::vector<osg::Matrixf> transforms;
     uint32_t trueXformCount = 0;
     for (auto& item : selection)
