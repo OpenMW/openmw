@@ -816,7 +816,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
 
     if (useTool && (noCell(cellId) || noLand(cellId) || noLandLoaded(cellId)))
     {
-        Log(Debug::Warning) << "Land creation failed at cell id: " << cellId;
+        Log(Debug::Warning) << "Land creation failed for cell " << cellId;
         return false;
     }
     return true;
