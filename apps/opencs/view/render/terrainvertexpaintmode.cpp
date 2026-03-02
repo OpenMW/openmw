@@ -272,9 +272,8 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
         = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
 
     std::string mCellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
-    if (allowLandColourEditing(mCellId))
-    {
-    }
+
+    if (!allowLandColourEditing(mCellId)) return;
 
     std::pair<CSMWorld::CellCoordinates, bool> cellCoordinates_pair = CSMWorld::CellCoordinates::fromId(mCellId);
 
@@ -295,9 +294,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
     }
 
     mCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-    if (allowLandColourEditing(mCellId))
-    {
-    }
+    if (!allowLandColourEditing(mCellId)) return;
 
     std::string iteratedCellId;
 
