@@ -52,6 +52,7 @@ namespace MWLua
     void addClothingBindings(sol::table clothing, const Context& context);
     void addStaticBindings(sol::table stat, const Context& context);
     ESM::Static tableToStatic(const sol::table& rec);
+    void addMutableStaticType(sol::state_view& lua);
     void addLightBindings(sol::table light, const Context& context);
     void addLevelledCreatureBindings(sol::table list, const Context& context);
 

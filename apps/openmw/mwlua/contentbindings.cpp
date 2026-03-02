@@ -156,12 +156,7 @@ namespace MWLua
         sol::table initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
         {
             addRecordStoreBindings<ESM::Static>(lua, &MWLua::tableToStatic);
-            using MT = MutableRecord<ESM::Static>;
-            sol::usertype<MT> record = lua.new_usertype<MT>("ESM3_MutableStatic");
-            record[sol::meta_function::to_string]
-                = [](const MT& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
-            record["id"] = sol::readonly_property([](const MT& rec) -> std::string { return rec.mId.serializeText(); });
-            addMutableModelProperty(record);
+            addMutableStaticType(lua);
             sol::table api(lua, sol::create);
             api["records"] = MutableStore<ESM::Static>{ store };
             return LuaUtil::makeReadOnly(api);
