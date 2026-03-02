@@ -343,10 +343,6 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <translation>&lt;p&gt;Próbuję zainstalować komponent %1.&lt;/p&gt;</translation>
     </message>
     <message>
-        <source>Attempting to install component %1.</source>
-        <translation>Próbuję zainstalować komponent %1.</translation>
-    </message>
-    <message>
         <source>%1 Installation</source>
         <translatorcomment>kinda didnt know how to translate it so I translated it literally
 -Igilq</translatorcomment>
@@ -363,10 +359,6 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>&lt;p&gt;Detected old version of component Morrowind.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Wykryto starą wersję komponentu Morrowind.&lt;/p&gt;</translation>
-    </message>
-    <message>
-        <source>Detected old version of component Morrowind.</source>
-        <translation>Wykryto starą wersję komponentu Morrowind.</translation>
     </message>
     <message>
         <source>Morrowind Installation</source>
@@ -472,10 +464,6 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Nie udało się otworzyć %1 do zapisu&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upewnij się, że masz odpowiednie uprawnienia, a następnie spróbuj ponownie.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Error opening Wizard log file</source>
-        <translation>Błąd podczas otwierania pliku dziennika kreatora</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for reading&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

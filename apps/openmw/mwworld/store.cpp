@@ -110,9 +110,6 @@ namespace MWWorld
         return ptr;
     }
 
-    // Need to instantiate these before they're used
-    template class IndexedStore<ESM::MagicEffect>;
-
     template <class T, class Id>
     TypedDynamicStore<T, Id>::TypedDynamicStore()
     {
@@ -597,9 +594,10 @@ namespace MWWorld
         newCell.mAmbi.mFogDensity = 0;
         newCell.updateId();
 
-        ESM::Cell* newCellInserted = &mCells.insert(std::make_pair(newCell.mId, newCell)).first->second;
-
-        return mExt.insert(std::make_pair(key, newCellInserted)).first->second;
+        ESM::Cell* newCellInserted = &mCells.emplace(newCell.mId, newCell).first->second;
+        mExt.emplace(key, newCellInserted);
+        mSharedExt.emplace_back(newCellInserted);
+        return newCellInserted;
     }
     const ESM::Cell* Store<ESM::Cell>::find(const ESM::RefId& id) const
     {
@@ -975,10 +973,6 @@ namespace MWWorld
         TypedDynamicStore<ESM::GameSetting>::setUp();
     }
 
-    // Magic effect
-    //=========================================================================
-    Store<ESM::MagicEffect>::Store() {}
-
     // Attribute
     //=========================================================================
 
@@ -1027,13 +1021,23 @@ namespace MWWorld
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
 
+    // Magic Effect
+    //=========================================================================
+
+    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
+    {
+        for (ESM::MagicEffect* mgef : mShared)
+        {
+            std::string_view gmst = ESM::MagicEffect::refIdToGmstString(mgef->mId);
+            if (!gmst.empty())
+                mgef->mName = getGMSTString(settings, gmst);
+        }
+    }
+
     // Dialogue
     //=========================================================================
 
-    Store<ESM::Dialogue>::Store()
-        : mKeywordSearchModFlag(true)
-    {
-    }
+    Store<ESM::Dialogue>::Store() {}
 
     void Store<ESM::Dialogue>::setUp()
     {
@@ -1130,19 +1134,9 @@ namespace MWWorld
             list.push_back(dialogue->mId);
     }
 
-    const MWDialogue::KeywordSearch<int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
+    bool Store<ESM::Dialogue>::getKeywordSearchModFlag() const
     {
-        if (mKeywordSearchModFlag)
-        {
-            mKeywordSearch.clear();
-
-            for (const ESM::Dialogue& topic : *this)
-                mKeywordSearch.seed(topic.mStringId, 0 /*unused*/);
-
-            mKeywordSearchModFlag = false;
-        }
-
-        return mKeywordSearch;
+        return std::exchange(mKeywordSearchModFlag, false);
     }
 
     // ESM4 Cell
@@ -1259,7 +1253,7 @@ template class MWWorld::TypedDynamicStore<ESM::ItemLevList>;
 // template class MWWorld::Store<ESM::LandTexture>;
 template class MWWorld::TypedDynamicStore<ESM::Light>;
 template class MWWorld::TypedDynamicStore<ESM::Lockpick>;
-// template class MWWorld::Store<ESM::MagicEffect>;
+template class MWWorld::TypedDynamicStore<ESM::MagicEffect>;
 template class MWWorld::TypedDynamicStore<ESM::Miscellaneous>;
 template class MWWorld::TypedDynamicStore<ESM::NPC>;
 // template class MWWorld::Store<ESM::Pathgrid>;

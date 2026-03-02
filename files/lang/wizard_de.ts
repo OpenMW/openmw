@@ -341,10 +341,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Attempting to install component %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1 Installation</source>
         <translation type="unfinished"></translation>
     </message>
@@ -358,10 +354,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;p&gt;Detected old version of component Morrowind.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Detected old version of component Morrowind.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -463,10 +455,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <name>Wizard::MainWizard</name>
     <message>
         <source>OpenMW Wizard</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error opening Wizard log file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

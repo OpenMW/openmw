@@ -11,6 +11,8 @@
 
 #include <boost/program_options.hpp>
 
+#include <osg/Math>
+
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -251,6 +253,9 @@ namespace
             std::cout << "    ID: " << ref.mRefID << '\n';
             std::cout << "    Position: (" << ref.mPos.pos[0] << ", " << ref.mPos.pos[1] << ", " << ref.mPos.pos[2]
                       << ")\n";
+            std::cout << "    Rotation: (" << osg::RadiansToDegrees(ref.mPos.rot[0]) << ", "
+                      << osg::RadiansToDegrees(ref.mPos.rot[1]) << ", " << osg::RadiansToDegrees(ref.mPos.rot[2])
+                      << ")\n";
             if (ref.mScale != 1.f)
                 std::cout << "    Scale: " << ref.mScale << '\n';
             if (!ref.mOwner.empty())
@@ -277,6 +282,9 @@ namespace
             {
                 std::cout << "    Destination position: (" << ref.mDoorDest.pos[0] << ", " << ref.mDoorDest.pos[1]
                           << ", " << ref.mDoorDest.pos[2] << ")\n";
+                std::cout << "    Destination rotation: (" << osg::RadiansToDegrees(ref.mDoorDest.rot[0]) << ", "
+                          << osg::RadiansToDegrees(ref.mDoorDest.rot[1]) << ", "
+                          << osg::RadiansToDegrees(ref.mDoorDest.rot[2]) << ")\n";
                 if (!ref.mDestCell.empty())
                     std::cout << "    Destination cell: " << ref.mDestCell << '\n';
             }

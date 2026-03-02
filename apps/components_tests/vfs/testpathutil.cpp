@@ -10,6 +10,13 @@ namespace VFS::Path
     {
         using namespace testing;
 
+        template <class T0, class T1>
+        struct TypePair
+        {
+            using Type0 = T0;
+            using Type1 = T1;
+        };
+
         struct VFSPathIsNormalizedTest : TestWithParam<std::pair<std::string_view, bool>>
         {
         };
@@ -52,6 +59,80 @@ namespace VFS::Path
             normalizeFilenameInPlace(value);
             EXPECT_EQ(value, "foo");
         }
+
+        TEST(VFSPathExtensionViewTest, shouldSupportDefaultConstructor)
+        {
+            constexpr ExtensionView extension;
+            EXPECT_TRUE(extension.empty());
+            EXPECT_EQ(extension.value(), "");
+        }
+
+        TEST(VFSPathExtensionViewTest, shouldSupportConstexprConstructorFromConstCharPtr)
+        {
+            constexpr ExtensionView extension("png");
+            EXPECT_FALSE(extension.empty());
+            EXPECT_EQ(extension.value(), "png");
+        }
+
+        TEST(VFSPathExtensionViewTest, constructorShouldThrowExceptionOnNotNormalizedValue)
+        {
+            EXPECT_THROW([] { ExtensionView("PNG"); }(), std::invalid_argument);
+        }
+
+        TEST(VFSPathExtensionViewTest, constructorShouldThrowExceptionIfValueContainsExtensionSeparator)
+        {
+            EXPECT_THROW([] { ExtensionView(".png"); }(), std::invalid_argument);
+        }
+
+        TEST(VFSPathExtensionViewTest, constructorShouldThrowExceptionIfValueContainsSeparator)
+        {
+            EXPECT_THROW([] { ExtensionView("/png"); }(), std::invalid_argument);
+        }
+
+        template <class T>
+        struct VFSPathExtensionViewOperatorsTest : Test
+        {
+        };
+
+        TYPED_TEST_SUITE_P(VFSPathExtensionViewOperatorsTest);
+
+        TYPED_TEST_P(VFSPathExtensionViewOperatorsTest, supportsEqual)
+        {
+            using Type0 = typename TypeParam::Type0;
+            using Type1 = typename TypeParam::Type1;
+            const Type0 extension{ "png" };
+            const Type1 otherEqual{ "png" };
+            const Type1 otherNotEqual{ "jpg" };
+            EXPECT_EQ(extension, otherEqual);
+            EXPECT_EQ(otherEqual, extension);
+            EXPECT_NE(extension, otherNotEqual);
+            EXPECT_NE(otherNotEqual, extension);
+        }
+
+        TYPED_TEST_P(VFSPathExtensionViewOperatorsTest, supportsLess)
+        {
+            using Type0 = typename TypeParam::Type0;
+            using Type1 = typename TypeParam::Type1;
+            const Type0 extension{ "png" };
+            const Type1 otherEqual{ "png" };
+            const Type1 otherLess{ "jpg" };
+            const Type1 otherGreater{ "tga" };
+            EXPECT_FALSE(extension < otherEqual);
+            EXPECT_FALSE(otherEqual < extension);
+            EXPECT_LT(otherLess, extension);
+            EXPECT_FALSE(extension < otherLess);
+            EXPECT_LT(extension, otherGreater);
+            EXPECT_FALSE(otherGreater < extension);
+        }
+
+        REGISTER_TYPED_TEST_SUITE_P(VFSPathExtensionViewOperatorsTest, supportsEqual, supportsLess);
+
+        using VFSPathExtensionViewOperatorsTypePairs
+            = Types<TypePair<ExtensionView, ExtensionView>, TypePair<ExtensionView, const char*>,
+                TypePair<ExtensionView, std::string>, TypePair<ExtensionView, std::string_view>>;
+
+        INSTANTIATE_TYPED_TEST_SUITE_P(
+            Typed, VFSPathExtensionViewOperatorsTest, VFSPathExtensionViewOperatorsTypePairs);
 
         TEST(VFSPathNormalizedTest, shouldSupportDefaultConstructor)
         {
@@ -129,43 +210,50 @@ namespace VFS::Path
             EXPECT_EQ(value.value(), "foo/bar/a/b");
         }
 
-        TEST(VFSPathNormalizedTest, changeExtensionShouldReplaceAfterLastDot)
+        TEST(VFSPathNormalizedTest, operatorDivForNormalizedViewShouldNotPrependSeparatorToEmpty)
         {
-            Normalized value("foo/bar.a");
-            ASSERT_TRUE(value.changeExtension("so"));
-            EXPECT_EQ(value.value(), "foo/bar.so");
+            Normalized value;
+            value /= NormalizedView("a");
+            EXPECT_EQ(value.value(), "a");
         }
 
-        TEST(VFSPathNormalizedTest, changeExtensionShouldThrowExceptionOnNotNormalizedExtension)
+        TEST(VFSPathNormalizedTest, operatorDivForStringViewShouldNotPrependSeparatorToEmpty)
         {
-            Normalized value("foo/bar.a");
-            EXPECT_THROW(value.changeExtension("\\SO"), std::invalid_argument);
+            Normalized value;
+            value /= std::string_view("a");
+            EXPECT_EQ(value.value(), "a");
+        }
+
+        TEST(VFSPathNormalizedTest, changeExtensionShouldReplaceAfterLastDot)
+        {
+            Normalized value("foo/ba.r.a");
+            constexpr ExtensionView extension("so");
+            ASSERT_TRUE(value.changeExtension(extension));
+            EXPECT_EQ(value.value(), "foo/ba.r.so");
         }
 
         TEST(VFSPathNormalizedTest, changeExtensionShouldIgnorePathWithoutADot)
         {
             Normalized value("foo/bar");
-            ASSERT_FALSE(value.changeExtension("so"));
+            constexpr ExtensionView extension("so");
+            ASSERT_FALSE(value.changeExtension(extension));
             EXPECT_EQ(value.value(), "foo/bar");
         }
 
         TEST(VFSPathNormalizedTest, changeExtensionShouldIgnorePathWithDotBeforeSeparator)
         {
             Normalized value("foo.bar/baz");
-            ASSERT_FALSE(value.changeExtension("so"));
+            constexpr ExtensionView extension("so");
+            ASSERT_FALSE(value.changeExtension(extension));
             EXPECT_EQ(value.value(), "foo.bar/baz");
         }
 
-        TEST(VFSPathNormalizedTest, changeExtensionShouldThrowExceptionOnExtensionWithDot)
+        TEST(VFSPathNormalizedTest, changeExtensionShouldReplaceWithShorterExtension)
         {
-            Normalized value("foo.a");
-            EXPECT_THROW(value.changeExtension(".so"), std::invalid_argument);
-        }
-
-        TEST(VFSPathNormalizedTest, changeExtensionShouldThrowExceptionOnExtensionWithSeparator)
-        {
-            Normalized value("foo.a");
-            EXPECT_THROW(value.changeExtension("so/"), std::invalid_argument);
+            Normalized value("foo/bar.nif");
+            constexpr ExtensionView extension("kf");
+            ASSERT_TRUE(value.changeExtension(extension));
+            EXPECT_EQ(value.value(), "foo/bar.kf");
         }
 
         TEST(VFSPathNormalizedTest, filenameShouldReturnLastComponentOfThePath)
@@ -178,6 +266,20 @@ namespace VFS::Path
         {
             const Normalized value("foo");
             EXPECT_EQ(value.filename(), "foo");
+        }
+
+        TEST(VFSPathNormalizedTest, appendShouldAddExtensionWithSeparator)
+        {
+            Normalized value("foo");
+            value.append(ExtensionView("ext"));
+            EXPECT_EQ(value.value(), "foo.ext");
+        }
+
+        TEST(VFSPathNormalizedTest, appendForEmptyShouldAddExtensionWithSeparator)
+        {
+            Normalized value;
+            value.append(ExtensionView("ext"));
+            EXPECT_EQ(value.value(), ".ext");
         }
 
         template <class T>
@@ -218,20 +320,14 @@ namespace VFS::Path
 
         REGISTER_TYPED_TEST_SUITE_P(VFSPathNormalizedOperatorsTest, supportsEqual, supportsLess);
 
-        template <class T0, class T1>
-        struct TypePair
-        {
-            using Type0 = T0;
-            using Type1 = T1;
-        };
+        using VFSPathNormalizedOperatorsTypePairs
+            = Types<TypePair<Normalized, Normalized>, TypePair<Normalized, const char*>,
+                TypePair<Normalized, std::string>, TypePair<Normalized, std::string_view>,
+                TypePair<Normalized, NormalizedView>, TypePair<NormalizedView, Normalized>,
+                TypePair<NormalizedView, const char*>, TypePair<NormalizedView, std::string>,
+                TypePair<NormalizedView, std::string_view>, TypePair<NormalizedView, NormalizedView>>;
 
-        using TypePairs = Types<TypePair<Normalized, Normalized>, TypePair<Normalized, const char*>,
-            TypePair<Normalized, std::string>, TypePair<Normalized, std::string_view>,
-            TypePair<Normalized, NormalizedView>, TypePair<NormalizedView, Normalized>,
-            TypePair<NormalizedView, const char*>, TypePair<NormalizedView, std::string>,
-            TypePair<NormalizedView, std::string_view>, TypePair<NormalizedView, NormalizedView>>;
-
-        INSTANTIATE_TYPED_TEST_SUITE_P(Typed, VFSPathNormalizedOperatorsTest, TypePairs);
+        INSTANTIATE_TYPED_TEST_SUITE_P(Typed, VFSPathNormalizedOperatorsTest, VFSPathNormalizedOperatorsTypePairs);
 
         TEST(VFSPathNormalizedViewTest, shouldSupportConstructorFromNormalized)
         {
@@ -269,6 +365,106 @@ namespace VFS::Path
         {
             const NormalizedView value("foo");
             EXPECT_EQ(value.filename(), "foo");
+        }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldOmitPathAndExtension)
+        {
+            const NormalizedView value("foo/bar.a");
+            EXPECT_EQ(value.stem(), "bar");
+        }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldReturnSameValueForPathWithSingleComponent)
+        {
+            const NormalizedView value("foo");
+            EXPECT_EQ(value.stem(), "foo");
+        }
+
+        TEST(VFSPathNormalizedViewTest, stemShouldIncludeDotsBeforeTheExtension)
+        {
+            const NormalizedView value("last voyage of the u.s.s. constitution.swf");
+            EXPECT_EQ(value.stem(), "last voyage of the u.s.s. constitution");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleValue)
+        {
+            EXPECT_EQ(join(Normalized("foo")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleView)
+        {
+            EXPECT_EQ(join(NormalizedView("foo")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleString)
+        {
+            EXPECT_EQ(join(std::string("FOO")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleStringView)
+        {
+            EXPECT_EQ(join(std::string_view("FOO")), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleConstCharArray)
+        {
+            EXPECT_EQ(join("FOO"), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleConstCharPtr)
+        {
+            const char* const ptr = "FOO";
+            EXPECT_EQ(join(ptr), "foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldHandleSingleExtension)
+        {
+            constexpr ExtensionView extension("foo");
+            EXPECT_EQ(join(extension), ".foo");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTwoPathComponents)
+        {
+            EXPECT_EQ(join(NormalizedView("foo"), std::string_view("BAR")), "foo/bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinComponentAndExtension)
+        {
+            EXPECT_EQ(join(NormalizedView("foo"), ExtensionView("bar")), "foo.bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTwoExtensions)
+        {
+            EXPECT_EQ(join(ExtensionView("foo"), ExtensionView("bar")), ".foo.bar");
+        }
+
+        TEST(VFSPathNormalizedJoinTest, shouldJoinTreePathComponents)
+        {
+            EXPECT_EQ(join(NormalizedView("a"), std::string_view("B"), Normalized("c")), "a/b/c");
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forNormalizedShouldReturnSizeOnly)
+        {
+            EXPECT_EQ(joinedCapacity(Normalized("a")), 1);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forConstCharPtrShouldReturnSizeOnly)
+        {
+            EXPECT_EQ(joinedCapacity("a"), 1);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, forExtensionViewShouldReturnSizePlusSeparator)
+        {
+            EXPECT_EQ(joinedCapacity(ExtensionView("a")), 2);
+        }
+
+        TEST(VFSPathNormalizedJoinedCapacityTest, shouldReturnSumOfSizesPlusNumberOfSeparators)
+        {
+            constexpr NormalizedView b("b");
+            const Normalized c("c");
+            constexpr std::string_view d("d");
+            const std::string e("e");
+            constexpr ExtensionView f("f");
+            EXPECT_EQ(joinedCapacity("a", b, c, d, e, f), 11);
         }
     }
 }

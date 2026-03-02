@@ -30,6 +30,8 @@ namespace ESM
     class ESMWriter;
     class RefId;
     struct LuaScripts;
+    struct DialInfo;
+    struct Dialogue;
 }
 
 namespace LuaUtil
@@ -60,6 +62,7 @@ namespace MWBase
     public:
         virtual ~LuaManager() = default;
 
+        virtual void contentFilesLoaded() = 0;
         virtual void newGameStarted() = 0;
         virtual void gameLoaded() = 0;
         virtual void gameEnded() = 0;
@@ -75,6 +78,9 @@ namespace MWBase
             const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
             std::string_view start, std::string_view stop, float startpoint, uint32_t loops, bool loopfallback)
             = 0;
+        virtual void animationEnded(const MWWorld::Ptr& actor, std::string_view groupname, float time, float completion,
+            std::string_view startKey, std::string_view stopKey)
+            = 0;
         virtual void jailTimeServed(const MWWorld::Ptr& actor, int days) = 0;
         virtual void skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source) = 0;
         virtual void skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale) = 0;
@@ -84,6 +90,9 @@ namespace MWBase
             = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void actorDied(const MWWorld::Ptr& actor) = 0;
+        virtual void onDialogueResponse(
+            const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record)
+            = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;

@@ -228,8 +228,8 @@ namespace MWGui
                     {
                         Widgets::SpellEffectParams params;
                         params.mEffectID = spellEffect.mData.mEffectID;
-                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
-                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
+                        params.mSkill = spellEffect.mData.mSkill;
+                        params.mAttribute = spellEffect.mData.mAttribute;
                         params.mDuration = spellEffect.mData.mDuration;
                         params.mMagnMin = spellEffect.mData.mMagnMin;
                         params.mMagnMax = spellEffect.mData.mMagnMax;
@@ -447,8 +447,8 @@ namespace MWGui
 
         const int maximumWidth = MyGUI::RenderManager::getInstance().getViewSize().width - imageCaptionHPadding * 2;
 
-        const std::string realImage
-            = Misc::ResourceHelpers::correctIconPath(image, MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized realImage = Misc::ResourceHelpers::correctIconPath(
+            VFS::Path::toNormalized(image), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         Gui::EditBox* captionWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>(
             "NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
@@ -887,8 +887,8 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        widget->setUserString(
-            "ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture, vfs));
+        widget->setUserString("ImageTexture_BirthSignImage",
+            Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(sign->mTexture), *vfs));
         widget->setUserString("Caption_BirthSignName", sign->mName);
         widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
@@ -954,24 +954,24 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "ClassToolTip");
     }
 
-    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
+    void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, ESM::RefId effectId)
     {
         const auto& store = MWBase::Environment::get().getESMStore();
-        const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(id);
-        const std::string& name = ESM::MagicEffect::indexToGmstString(id);
+        const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
         std::string icon = effect->mIcon;
         icon.insert(icon.rfind('\\') + 1, "b_");
-        icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
+            VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
-        widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
+        widget->setUserString("Caption_MagicEffectName", effect->mName);
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
         widget->setUserString("Caption_MagicEffectSchool",
             "#{sSchool}: "
                 + MyGUI::TextIterator::toTagsString(
                     store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName));
-        widget->setUserString("ImageTexture_MagicEffectImage", icon);
+        widget->setUserString("ImageTexture_MagicEffectImage", iconPath);
     }
 }

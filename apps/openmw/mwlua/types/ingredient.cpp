@@ -37,7 +37,7 @@ namespace MWLua
         record["mwscript"]
             = sol::readonly_property([](const ESM::Ingredient& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Ingredient& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         record["weight"]
             = sol::readonly_property([](const ESM::Ingredient& rec) -> float { return rec.mData.mWeight; });
@@ -46,12 +46,12 @@ namespace MWLua
             sol::table res(lua, sol::create);
             for (uint32_t i = 0; i < 4; ++i)
             {
-                if (rec.mData.mEffectID[i] < 0)
+                if (rec.mData.mEffectID[i].empty())
                     continue;
                 ESM::IndexedENAMstruct effect;
-                effect.mData.mEffectID = static_cast<int16_t>(rec.mData.mEffectID[i]);
-                effect.mData.mSkill = static_cast<signed char>(rec.mData.mSkills[i]);
-                effect.mData.mAttribute = static_cast<signed char>(rec.mData.mAttributes[i]);
+                effect.mData.mEffectID = rec.mData.mEffectID[i];
+                effect.mData.mSkill = rec.mData.mSkills[i];
+                effect.mData.mAttribute = rec.mData.mAttributes[i];
                 effect.mData.mRange = ESM::RT_Self;
                 effect.mData.mArea = 0;
                 effect.mData.mDuration = 0;

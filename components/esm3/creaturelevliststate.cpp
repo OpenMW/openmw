@@ -10,8 +10,13 @@ namespace ESM
     {
         ObjectState::load(esm);
 
-        mSpawnActorId = -1;
-        esm.getHNOT(mSpawnActorId, "SPAW");
+        if (esm.getFormatVersion() <= MaxActorIdSaveGameFormatVersion)
+        {
+            mSpawnedActor.mIndex = static_cast<uint32_t>(-1);
+            esm.getHNOT(mSpawnedActor.mIndex, "SPAW");
+        }
+        else if (esm.peekNextSub("SPAW"))
+            mSpawnedActor = esm.getFormId(true, "SPAW");
 
         mSpawn = false;
         esm.getHNOT(mSpawn, "RESP");
@@ -21,8 +26,8 @@ namespace ESM
     {
         ObjectState::save(esm, inInventory);
 
-        if (mSpawnActorId != -1)
-            esm.writeHNT("SPAW", mSpawnActorId);
+        if (mSpawnedActor.isSet())
+            esm.writeFormId(mSpawnedActor, true, "SPAW");
 
         if (mSpawn)
             esm.writeHNT("RESP", mSpawn);

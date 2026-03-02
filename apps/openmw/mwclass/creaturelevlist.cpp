@@ -1,5 +1,6 @@
 #include "creaturelevlist.hpp"
 
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/creaturelevliststate.hpp>
 #include <components/esm3/loadlevlist.hpp>
 
@@ -9,6 +10,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -20,9 +22,15 @@ namespace MWClass
     class CreatureLevListCustomData : public MWWorld::TypedCustomData<CreatureLevListCustomData>
     {
     public:
-        // actorId of the creature we spawned
-        int mSpawnActorId;
-        bool mSpawn; // Should a new creature be spawned?
+        ESM::RefNum mSpawnedActor;
+        bool mSpawn = true; // Should a new creature be spawned?
+
+        MWWorld::Ptr getSpawnedPtr() const
+        {
+            if (mSpawnedActor.isSet())
+                return MWBase::Environment::get().getWorldModel()->getPtr(mSpawnedActor);
+            return {};
+        }
 
         CreatureLevListCustomData& asCreatureLevListCustomData() override { return *this; }
         const CreatureLevListCustomData& asCreatureLevListCustomData() const override { return *this; }
@@ -46,9 +54,7 @@ namespace MWClass
             return;
 
         CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
-        MWWorld::Ptr creature = (customData.mSpawnActorId == -1)
-            ? MWWorld::Ptr()
-            : MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
+        MWWorld::Ptr creature = customData.getSpawnedPtr();
         if (!creature.isEmpty())
             MWBase::Environment::get().getWorld()->adjustPosition(creature, force);
     }
@@ -71,13 +77,7 @@ namespace MWClass
         if (customData.mSpawn)
             return;
 
-        MWWorld::Ptr creature;
-        if (customData.mSpawnActorId != -1)
-        {
-            creature = MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
-            if (creature.isEmpty())
-                creature = ptr.getCell()->getMovedActor(customData.mSpawnActorId);
-        }
+        MWWorld::Ptr creature = customData.getSpawnedPtr();
         if (!creature.isEmpty())
         {
             const MWMechanics::CreatureStats& creatureStats = creature.getClass().getCreatureStats(creature);
@@ -116,21 +116,17 @@ namespace MWClass
         if (!id.empty())
         {
             // Delete the previous creature
-            if (customData.mSpawnActorId != -1)
-            {
-                MWWorld::Ptr creature
-                    = MWBase::Environment::get().getWorld()->searchPtrViaActorId(customData.mSpawnActorId);
-                if (!creature.isEmpty())
-                    MWBase::Environment::get().getWorld()->deleteObject(creature);
-                customData.mSpawnActorId = -1;
-            }
+            MWWorld::Ptr previous = customData.getSpawnedPtr();
+            if (!previous.isEmpty())
+                MWBase::Environment::get().getWorld()->deleteObject(previous);
 
             MWWorld::ManualRef manualRef(store, id);
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
             manualRef.getPtr().getCellRef().setScale(ptr.getCellRef().getScale());
             MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(
                 manualRef.getPtr(), ptr.getCell(), ptr.getRefData().getPosition());
-            customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
+            MWBase::Environment::get().getWorldModel()->registerPtr(placed);
+            customData.mSpawnedActor = placed.getCellRef().getRefNum();
             customData.mSpawn = false;
         }
         else
@@ -141,11 +137,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<CreatureLevListCustomData> data = std::make_unique<CreatureLevListCustomData>();
-            data->mSpawnActorId = -1;
-            data->mSpawn = true;
-
-            ptr.getRefData().setCustomData(std::move(data));
+            ptr.getRefData().setCustomData(std::make_unique<CreatureLevListCustomData>());
         }
     }
 
@@ -157,8 +149,10 @@ namespace MWClass
         ensureCustomData(ptr);
         CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
         const ESM::CreatureLevListState& levListState = state.asCreatureLevListState();
-        customData.mSpawnActorId = levListState.mSpawnActorId;
+        customData.mSpawnedActor = levListState.mSpawnedActor;
         customData.mSpawn = levListState.mSpawn;
+        if (state.mActorIdConverter)
+            state.mActorIdConverter->convert(customData.mSpawnedActor, customData.mSpawnedActor.mIndex);
     }
 
     void CreatureLevList::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
@@ -171,7 +165,7 @@ namespace MWClass
 
         const CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
         ESM::CreatureLevListState& levListState = state.asCreatureLevListState();
-        levListState.mSpawnActorId = customData.mSpawnActorId;
+        levListState.mSpawnedActor = customData.mSpawnedActor;
         levListState.mSpawn = customData.mSpawn;
     }
 }

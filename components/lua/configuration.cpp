@@ -6,6 +6,8 @@
 #include <format>
 #include <sstream>
 
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 
@@ -14,14 +16,15 @@ namespace LuaUtil
 
     namespace
     {
-        const std::map<std::string, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
+        const std::map<std::string_view, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
             { "GLOBAL", ESM::LuaScriptCfg::sGlobal },
             { "CUSTOM", ESM::LuaScriptCfg::sCustom },
             { "PLAYER", ESM::LuaScriptCfg::sPlayer },
             { "MENU", ESM::LuaScriptCfg::sMenu },
+            { "LOAD", ESM::LuaScriptCfg::sLoad },
         };
 
-        const std::map<std::string, ESM::RecNameInts, std::less<>> typeTagsByName{
+        const std::map<std::string_view, ESM::RecNameInts, std::less<>> typeTagsByName{
             { "ACTIVATOR", ESM::REC_ACTI },
             { "ARMOR", ESM::REC_ARMO },
             { "BOOK", ESM::REC_BOOK },
@@ -47,8 +50,14 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg)
+    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, bool remap)
     {
+        std::vector<VFS::Path::Normalized> oldPaths;
+        if (remap)
+        {
+            for (ESM::LuaScriptCfg& script : mScripts)
+                oldPaths.emplace_back(std::move(script.mScriptPath));
+        }
         mScripts.clear();
         mPathToIndex.clear();
 
@@ -94,6 +103,9 @@ namespace LuaUtil
 
         // Initialize mappings
         mPathToIndex.clear();
+        mScriptsPerType.clear();
+        mScriptsPerRecordId.clear();
+        mScriptsPerRefNum.clear();
         for (int i = 0; i < static_cast<int>(mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& s = mScripts[i];
@@ -110,6 +122,16 @@ namespace LuaUtil
                 std::string_view data = r.mInitializationData.empty() ? s.mInitializationData : r.mInitializationData;
                 mScriptsPerRefNum[ESM::RefNum{ r.mRefnumIndex, r.mRefnumContentFile }].push_back(
                     DetailedConf{ i, r.mAttach, data });
+            }
+        }
+
+        if (remap)
+        {
+            mScriptIdMapping.clear();
+            for (size_t i = 0; i < oldPaths.size(); ++i)
+            {
+                if (std::optional<int> id = findId(oldPaths[i]))
+                    mScriptIdMapping[static_cast<int>(i)] = *id;
             }
         }
     }
@@ -167,6 +189,40 @@ namespace LuaUtil
                 res.erase(d.mScriptId);
         }
         return res;
+    }
+
+    void ScriptsConfiguration::read(ESM::ESMReader& reader)
+    {
+        reader.mScriptsConfiguration = this;
+        mScriptIdMapping.clear();
+        int index = 0;
+        while (reader.isNextSub("LUAP"))
+        {
+            VFS::Path::Normalized path(reader.getHString());
+            if (std::optional<int> id = findId(path))
+                mScriptIdMapping[index] = *id;
+            ++index;
+        }
+    }
+
+    void ScriptsConfiguration::write(ESM::ESMWriter& writer) const
+    {
+        for (const ESM::LuaScriptCfg& script : mScripts)
+            writer.writeHNString("LUAP", script.mScriptPath);
+    }
+
+    std::optional<int> ScriptsConfiguration::mapId(int savedId) const
+    {
+        if (mScriptIdMapping.empty())
+        {
+            if (savedId == -1)
+                return {};
+            return savedId;
+        }
+        auto it = mScriptIdMapping.find(savedId);
+        if (it == mScriptIdMapping.end())
+            return {};
+        return it->second;
     }
 
     void parseOMWScripts(ESM::LuaScriptsCfg& cfg, std::string_view data)

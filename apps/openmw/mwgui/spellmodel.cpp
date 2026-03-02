@@ -48,14 +48,13 @@ namespace MWGui
 
         for (const auto& effect : effects.mList)
         {
-            short effectId = effect.mData.mEffectID;
+            ESM::RefId effectId = effect.mData.mEffectID;
 
-            if (effectId != -1)
+            if (!effectId.empty())
             {
                 const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
-                const ESM::Attribute* attribute
-                    = store.get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(effect.mData.mAttribute));
-                const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(effect.mData.mSkill));
+                const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(effect.mData.mAttribute);
+                const ESM::Skill* skill = store.get<ESM::Skill>().search(effect.mData.mSkill);
 
                 std::string fullEffectName = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);

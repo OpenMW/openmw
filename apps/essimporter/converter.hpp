@@ -54,7 +54,7 @@ namespace ESSImport
     {
     public:
         /// @return the order for writing this converter's records to the output file, in relation to other converters
-        virtual int getStage() { return 1; }
+        virtual int getStage() const { return 1; }
 
         virtual ~Converter() = default;
 
@@ -66,7 +66,7 @@ namespace ESSImport
 
         /// Called after the input file has been read in completely, which may be necessary
         /// if the conversion process relies on information in other records
-        virtual void write(ESM::ESMWriter& esm) {}
+        virtual void write(ESM::ESMWriter& esm) const {}
 
     protected:
         Context* mContext;
@@ -77,7 +77,7 @@ namespace ESSImport
     class DefaultConverter : public Converter
     {
     public:
-        int getStage() override { return 0; }
+        int getStage() const override { return 0; }
 
         void read(ESM::ESMReader& esm) override
         {
@@ -88,7 +88,7 @@ namespace ESSImport
             mRecords[record.mId] = record;
         }
 
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             for (auto it = mRecords.begin(); it != mRecords.end(); ++it)
             {
@@ -257,7 +257,7 @@ namespace ESSImport
                 }
             }
         }
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             esm.startRecord(ESM::REC_ASPL);
             esm.writeHNRefId("ID__", mSelectedSpell);
@@ -286,7 +286,7 @@ namespace ESSImport
             convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam,
                 mTeleportingEnabled, mLevitationEnabled, mContext->mControlsState);
         }
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             esm.startRecord(ESM::REC_ENAB);
             esm.writeHNT("TELE", mTeleportingEnabled);
@@ -331,7 +331,7 @@ namespace ESSImport
     {
     public:
         void read(ESM::ESMReader& esm) override;
-        void write(ESM::ESMWriter& esm) override;
+        void write(ESM::ESMWriter& esm) const override;
 
     private:
         osg::ref_ptr<osg::Image> mGlobalMapImage;
@@ -341,7 +341,7 @@ namespace ESSImport
     {
     public:
         void read(ESM::ESMReader& esm) override;
-        void write(ESM::ESMWriter& esm) override;
+        void write(ESM::ESMWriter& esm) const override;
 
     private:
         struct Cell
@@ -356,7 +356,7 @@ namespace ESSImport
 
         std::vector<ESM::CustomMarker> mMarkers;
 
-        void writeCell(const Cell& cell, ESM::ESMWriter& esm);
+        void writeCell(const Cell& cell, ESM::ESMWriter& esm) const;
     };
 
     class ConvertKLST : public Converter
@@ -371,7 +371,7 @@ namespace ESSImport
             mContext->mPlayer.mObject.mNpcStats.mWerewolfKills = klst.mWerewolfKills;
         }
 
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             esm.startRecord(ESM::REC_DCOU);
             for (const auto& [id, count] : mKillCounter)
@@ -428,7 +428,7 @@ namespace ESSImport
                 }
             }
         }
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             ESM::StolenItems items;
             for (auto it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
@@ -486,7 +486,7 @@ namespace ESSImport
             if (dial.mIndex > 0)
                 mDials[id] = dial;
         }
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             for (auto it = mDials.begin(); it != mDials.end(); ++it)
             {
@@ -539,7 +539,7 @@ namespace ESSImport
             mHasGame = true;
         }
 
-        int validateWeatherID(int weatherID)
+        int validateWeatherID(int weatherID) const
         {
             if (weatherID >= -1 && weatherID < 10)
             {
@@ -551,7 +551,7 @@ namespace ESSImport
             }
         }
 
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             if (!mHasGame)
                 return;
@@ -586,7 +586,7 @@ namespace ESSImport
             convertSCPT(script, out);
             mScripts.push_back(std::move(out));
         }
-        void write(ESM::ESMWriter& esm) override
+        void write(ESM::ESMWriter& esm) const override
         {
             for (const auto& script : mScripts)
             {
@@ -604,12 +604,12 @@ namespace ESSImport
     class ConvertPROJ : public Converter
     {
     public:
-        int getStage() override { return 2; }
+        int getStage() const override { return 2; }
         void read(ESM::ESMReader& esm) override;
-        void write(ESM::ESMWriter& esm) override;
+        void write(ESM::ESMWriter& esm) const override;
 
     private:
-        void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam);
+        void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam) const;
         PROJ mProj;
     };
 
@@ -617,7 +617,7 @@ namespace ESSImport
     {
     public:
         void read(ESM::ESMReader& esm) override;
-        void write(ESM::ESMWriter& esm) override;
+        void write(ESM::ESMWriter& esm) const override;
 
     private:
         SPLM mSPLM;

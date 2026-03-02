@@ -222,6 +222,17 @@ namespace LuaUtil
         return LuaUtil::makeReadOnly(res);
     }
 
+    sol::table LuaStorage::initLoadPackage(LuaUtil::LuaView& view, LuaStorage* playerStorage)
+    {
+        sol::table res(view.sol(), sol::create);
+        registerLifeTime(view, res);
+
+        res["playerSection"] = [playerStorage](sol::this_state lua, std::string_view section) {
+            return playerStorage->getReadOnlySection(lua, section);
+        };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     void LuaStorage::clearTemporaryAndRemoveCallbacks()
     {
         auto it = mData.begin();

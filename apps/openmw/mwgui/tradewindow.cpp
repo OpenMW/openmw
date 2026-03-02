@@ -231,9 +231,6 @@ namespace MWGui
         // Cycle to the buy window if it's not active.
         if (Settings::gui().mControllerMenus && !mActiveControllerWindow)
             MWBase::Environment::get().getWindowManager()->cycleActiveControllerWindow(true);
-
-        for (const auto& source : itemSources)
-            source.getClass().getContainerStore(source).setContListener(this);
     }
 
     void TradeWindow::onFrame(float dt)
@@ -773,13 +770,9 @@ namespace MWGui
         mItemView->update();
     }
 
-    void TradeWindow::itemAdded(const MWWorld::ConstPtr& item, int count)
+    void TradeWindow::onInventoryUpdate(const MWWorld::Ptr& ptr)
     {
-        mUpdateNextFrame = true;
-    }
-
-    void TradeWindow::itemRemoved(const MWWorld::ConstPtr& item, int count)
-    {
-        mUpdateNextFrame = true;
+        if (mTradeModel && mTradeModel->usesContainer(ptr))
+            mUpdateNextFrame = true;
     }
 }

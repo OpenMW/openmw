@@ -66,34 +66,25 @@ fi
 mkdir -p build
 cd build
 
-DEPENDENCIES_ROOT="/tmp/openmw-deps"
+DEPENDENCIES_ROOT_PATH="/tmp/openmw-deps"
 
 if [[ "${MACOS_AMD64}" ]]; then
     QT_PATH=$(arch -x86_64 /bin/bash -c "qmake -v | sed -rn -e 's/Using Qt version [.0-9]+ in //p'")
-    ICU_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix icu4c)
-    OPENAL_PATH=$(arch -x86_64 /usr/local/bin/brew --prefix openal-soft)
 else
     QT_PATH=$(qmake -v | sed -rn -e "s/Using Qt version [.0-9]+ in //p")
-    ICU_PATH=$(brew --prefix icu4c)
-    OPENAL_PATH=$(brew --prefix openal-soft)
 fi
 
 if [[ -n $VERBOSE ]]; then
     echo "Using Qt path: ${QT_PATH}"
-    echo "Using ICU path: ${ICU_PATH}"
-    echo "Using OpenAL path: ${OPENAL_PATH}"
 fi
 
 declare -a CMAKE_CONF_OPTS=(
--D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH;$OPENAL_PATH"
+-D CMAKE_C_COMPILER_LAUNCHER="ccache"
+-D CMAKE_CXX_COMPILER_LAUNCHER="ccache"
 -D CMAKE_CXX_FLAGS="-stdlib=libc++"
 -D CMAKE_C_COMPILER="clang"
 -D CMAKE_CXX_COMPILER="clang++"
--D CMAKE_OSX_DEPLOYMENT_TARGET="13.6"
--D OPENMW_USE_SYSTEM_RECASTNAVIGATION=TRUE
--D Boost_INCLUDE_DIR="$DEPENDENCIES_ROOT/include"
--D OSGPlugins_LIB_DIR="$DEPENDENCIES_ROOT/lib/osgPlugins-3.6.5"
--D ICU_ROOT="$ICU_PATH"
+-DOPENMW_USE_SYSTEM_YAML_CPP=OFF
 -D OPENMW_OSX_DEPLOYMENT=TRUE
 )
 
@@ -110,10 +101,27 @@ declare -a BUILD_OPTS=(
 )
 
 if [[ "${MACOS_AMD64}" ]]; then
+    VCPKG_TARGET_TRIPLET="x64-osx-dynamic"
     CMAKE_CONF_OPTS+=(
         -D CMAKE_OSX_ARCHITECTURES="x86_64"
+        -D CMAKE_OSX_DEPLOYMENT_TARGET="13.7"
+    )
+else
+    VCPKG_TARGET_TRIPLET="arm64-osx-dynamic"
+    CMAKE_CONF_OPTS+=(
+        -D CMAKE_OSX_DEPLOYMENT_TARGET="14.8"
     )
 fi
+
+DEPENDENCIES_INSTALLED_PATH="$DEPENDENCIES_ROOT_PATH/installed/$VCPKG_TARGET_TRIPLET"
+
+CMAKE_CONF_OPTS+=(
+    -D CMAKE_PREFIX_PATH="$DEPENDENCIES_INSTALLED_PATH;$QT_PATH"
+    -D collada_dom_DIR="$DEPENDENCIES_INSTALLED_PATH/share/collada-dom"
+    -DVCPKG_HOST_TRIPLET="$VCPKG_TARGET_TRIPLET"
+    -DVCPKG_TARGET_TRIPLET="$VCPKG_TARGET_TRIPLET"
+    -DCMAKE_TOOLCHAIN_FILE="$DEPENDENCIES_ROOT_PATH/scripts/buildsystems/vcpkg.cmake"
+)
 
 if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     CMAKE_CONF_OPTS+=(

@@ -49,14 +49,6 @@ namespace LuaUi
             MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
         }
 
-        void destroyChild(WidgetExtension* ext)
-        {
-            if (!ext->isRoot())
-                destroyWidget(ext);
-            else
-                ext->detachFromParent();
-        }
-
         void detachElements(WidgetExtension* ext)
         {
             auto predicate = [](WidgetExtension* child) {
@@ -67,6 +59,17 @@ namespace LuaUi
             };
             ext->detachChildrenIf(predicate);
             ext->detachTemplateChildrenIf(predicate);
+        }
+
+        void destroyChild(WidgetExtension* ext)
+        {
+            if (!ext->isRoot())
+            {
+                detachElements(ext);
+                destroyWidget(ext);
+            }
+            else
+                ext->detachFromParent();
         }
 
         void destroyRoot(WidgetExtension* ext)

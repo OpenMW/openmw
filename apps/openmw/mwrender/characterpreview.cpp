@@ -401,7 +401,8 @@ namespace MWRender
 
         // NB Camera::setViewport has threading issues
         osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-        mViewport = new osg::Viewport(0, mSizeY - sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
+        // This expects Y-down convention; historically the origin was (0, mSizeY - sizeY)
+        mViewport = new osg::Viewport(0, 0, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
         stateset->setAttributeAndModes(mViewport);
         mRTTNode->setCameraStateset(stateset);
 

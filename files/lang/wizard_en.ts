@@ -341,10 +341,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation></translation>
     </message>
     <message>
-        <source>Attempting to install component %1.</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>%1 Installation</source>
         <translation></translation>
     </message>
@@ -358,10 +354,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;p&gt;Detected old version of component Morrowind.&lt;/p&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Detected old version of component Morrowind.</source>
         <translation></translation>
     </message>
     <message>
@@ -467,10 +459,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Error opening Wizard log file</source>
         <translation></translation>
     </message>
     <message>

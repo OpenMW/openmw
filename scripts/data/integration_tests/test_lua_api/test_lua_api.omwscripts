@@ -1,3 +1,4 @@
 MENU: menu.lua
 GLOBAL: global.lua
 PLAYER: player.lua
+LOAD: load.lua

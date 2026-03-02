@@ -174,6 +174,8 @@
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},
 -- * @{openmw.types#ClothingRecord},
+-- * @{openmw.types#ContainerRecord},
+-- * @{openmw.types#CreatureRecord},
 -- * @{openmw.types#LightRecord},
 -- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#NpcRecord},

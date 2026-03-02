@@ -166,7 +166,7 @@ namespace MWBase
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound(std::string_view fileName, float volume, float pitch, Type type = Type::Sfx,
+        virtual Sound* playSound(VFS::Path::NormalizedView fileName, float volume, float pitch, Type type = Type::Sfx,
             PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a sound, independently of 3D-position
@@ -179,7 +179,7 @@ namespace MWBase
         ///< Play_NoTrack is specified.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName, float volume,
+        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName, float volume,
             float pitch, Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
@@ -198,7 +198,7 @@ namespace MWBase
         virtual void stopSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) = 0;
         ///< Stop the given object from playing the given sound.
 
-        virtual void stopSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName) = 0;
+        virtual void stopSound3D(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName) = 0;
         ///< Stop the given object from playing the given sound.
 
         virtual void stopSound3D(const MWWorld::ConstPtr& reference) = 0;
@@ -217,7 +217,7 @@ namespace MWBase
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
-        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, std::string_view fileName) const = 0;
+        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName) const = 0;
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 

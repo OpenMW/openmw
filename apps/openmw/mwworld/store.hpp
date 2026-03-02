@@ -17,6 +17,7 @@
 #include <components/esm3/loadglob.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm4/loadachr.hpp>
@@ -26,12 +27,9 @@
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include "../mwdialogue/keywordsearch.hpp"
-
 namespace ESM
 {
     struct LandTexture;
-    struct MagicEffect;
     struct WeaponType;
     class ESMReader;
     class ESMWriter;
@@ -453,16 +451,20 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
-    {
-    public:
-        Store();
-    };
-
-    template <>
     class Store<ESM::Attribute> : public TypedDynamicStore<ESM::Attribute>
     {
         using TypedDynamicStore<ESM::Attribute>::setUp;
+
+    public:
+        Store() = default;
+
+        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
+    };
+
+    template <>
+    class Store<ESM::MagicEffect> : public TypedDynamicStore<ESM::MagicEffect>
+    {
+        using TypedDynamicStore<ESM::MagicEffect>::setUp;
 
     public:
         Store() = default;
@@ -507,8 +509,7 @@ namespace MWWorld
         /// @warning ESM::Dialogue Store currently implements a sorted order for unknown reasons.
         std::vector<ESM::Dialogue*> mShared;
 
-        mutable bool mKeywordSearchModFlag;
-        mutable MWDialogue::KeywordSearch<int /*unused*/> mKeywordSearch;
+        mutable bool mKeywordSearchModFlag{ true };
 
     public:
         Store();
@@ -531,7 +532,7 @@ namespace MWWorld
 
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
-        const MWDialogue::KeywordSearch<int>& getDialogIdKeywordSearch() const;
+        bool getKeywordSearchModFlag() const;
     };
 
     template <typename T>

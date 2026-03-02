@@ -48,7 +48,7 @@ add_openmw_dir (mwgui
     )
 
 add_openmw_dir (mwdialogue
-    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper hypertextparser keywordsearch scripttest
+    dialoguemanagerimp journalimp journalentry quest topic filter selectwrapper keywordsearch scripttest
     )
 
 add_openmw_dir (mwscript
@@ -59,7 +59,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwlua
-    luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant
+    luamanagerimp object objectlists userdataserializer luaevents engineevents objectvariant loadscripts contentbindings
     context menuscripts globalscripts localscripts playerscripts luabindings objectbindings cellbindings coremwscriptbindings
     mwscriptbindings camerabindings vfsbindings uibindings soundbindings inputbindings nearbybindings dialoguebindings
     postprocessingbindings stats recordstore debugbindings corebindings worldbindings worker landbindings magicbindings factionbindings
@@ -122,6 +122,22 @@ add_library(openmw-lib STATIC
     ${OPENMW_FILES}
     ${OPENMW_SOURCES}
 )
+
+if (MSVC)
+    # these TUs take a lot of memory for codegen
+    # in CI, they often go over the 8GB memory limit if another cl.exe is running at the same time
+    # this option (make sure you're not looking at the docs for the identically-named linker option) stops four codegen threads being spun off
+    # it hurts build time ~33% to enable this unnecessarily, though, so target it to the hungriest boys
+    set_source_files_properties(
+        mwlua/dialoguebindings.cpp
+        mwlua/magicbindings.cpp
+        mwlua/objectbindings
+        mwlua/stats.cpp
+        mwworld/esmstore.cpp
+        PROPERTIES
+        COMPILE_OPTIONS /cgthreads1
+    )
+endif()
 
 if(BUILD_OPENMW)
     if (ANDROID)
@@ -200,8 +216,6 @@ if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
         <vector>
     )
 endif()
-
-add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 
 if (ANDROID)
     target_link_libraries(openmw-lib EGL android log z)

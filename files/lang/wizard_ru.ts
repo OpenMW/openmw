@@ -343,10 +343,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;p&gt;Попытка установить компонент %1.&lt;/p&gt;</translation>
     </message>
     <message>
-        <source>Attempting to install component %1.</source>
-        <translation>Попытка установить компонент %1.</translation>
-    </message>
-    <message>
         <source>%1 Installation</source>
         <translation>Установка %1</translation>
     </message>
@@ -361,10 +357,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;p&gt;Detected old version of component Morrowind.&lt;/p&gt;</source>
         <translation>lt;p&gt;Обнаружена устаревшая версия компонента Morrowind.&lt;/p&gt;</translation>
-    </message>
-    <message>
-        <source>Detected old version of component Morrowind.</source>
-        <translation>Обнаружена устаревшая версия компонента Morrowind.</translation>
     </message>
     <message>
         <source>Morrowind Installation</source>
@@ -466,10 +458,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>OpenMW Wizard</source>
         <translation>Мастер OpenMW</translation>
-    </message>
-    <message>
-        <source>Error opening Wizard log file</source>
-        <translation>Не удалось открыть лог-файл Мастера</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;b&gt;Could not open %1 for writing&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Please make sure you have the right permissions and try again.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>

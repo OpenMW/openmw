@@ -1256,11 +1256,14 @@ namespace MWMechanics
         if (mAttackStrength == -1.f)
             mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
-        if (weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+        if (weapclass != ESM::WeaponType::Ranged)
         {
-            mAttackSuccess = mPtr.getClass().evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
-            if (!mAttackSuccess)
-                mAttackStrength = 0.f;
+            if (weapclass != ESM::WeaponType::Thrown)
+            {
+                mAttackSuccess = mPtr.getClass().evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
+                if (!mAttackSuccess)
+                    mAttackStrength = 0.f;
+            }
             playSwishSound();
         }
 
@@ -1325,14 +1328,7 @@ namespace MWMechanics
                     ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
                 // Cancel attack if we no longer have ammunition
                 if (!ammunition)
-                {
-                    if (mUpperBodyState == UpperBodyState::AttackWindUp)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mUpperBodyState = UpperBodyState::WeaponEquipped;
-                    }
                     setAttackingOrSpell(false);
-                }
             }
 
             MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -1367,6 +1363,8 @@ namespace MWMechanics
 
         // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound
         // spell expires), we should force actor to the "weapon equipped" state, interrupt attack and update animations.
+        // Morrowind does this at the end of the attack (see #4646 and PR 1972).
+        // If we decide to cope with the resulting problems, the thrown weapon->H2H case below should be extended.
         if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperBodyState::WeaponEquipped)
         {
             forcestateupdate = true;
@@ -1451,6 +1449,7 @@ namespace MWMechanics
                             mAnimation->showWeapons(false);
                             int equipMask = MWRender::BlendMask_All;
                             mUpperBodyState = UpperBodyState::Equipping;
+                            mResetIdleOnAttackEnd = true;
                             if (useShieldAnims && weaptype != ESM::Weapon::Spell)
                             {
                                 equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
@@ -1461,7 +1460,7 @@ namespace MWMechanics
 
                             if (weaptype != ESM::Weapon::Spell || cls.isBipedal(mPtr))
                             {
-                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start",
+                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, false, 1.0f, "equip start",
                                     "equip stop", 0.0f, 0);
                             }
 
@@ -1521,7 +1520,7 @@ namespace MWMechanics
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
         if (getAttackingOrSpell())
         {
-            bool resetIdle = true;
+            mResetIdleOnAttackEnd = true;
             if (mUpperBodyState == UpperBodyState::WeaponEquipped
                 && (mHitState == CharState_None || mHitState == CharState_Block))
             {
@@ -1575,10 +1574,11 @@ namespace MWMechanics
                         world->breakInvisibility(mPtr);
                         // Enchanted items by default do not use casting animations
                         world->castSpell(mPtr);
-                        resetIdle = false;
                         // Spellcasting animation needs to "play" for at least one frame to reset the aiming factor
                         animPlaying = true;
                         mUpperBodyState = UpperBodyState::Casting;
+                        // But idle should not be reset
+                        mResetIdleOnAttackEnd = false;
                     }
                     // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to
                     // insufficient magicka. Used up powers are exempt from this from some reason.
@@ -1660,10 +1660,6 @@ namespace MWMechanics
                             mUpperBodyState = UpperBodyState::Casting;
                         }
                     }
-                    else
-                    {
-                        resetIdle = false;
-                    }
                 }
                 else
                 {
@@ -1721,12 +1717,6 @@ namespace MWMechanics
                     playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
                         startKey, stopKey, 0.0f, 0);
                 }
-            }
-
-            // We should not break swim and sneak animations
-            if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            {
-                resetCurrentIdleState();
             }
         }
 
@@ -1843,6 +1833,25 @@ namespace MWMechanics
 
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
+
+                // Skip Thrown->H2H idle transition (e.g., if we've run out of ammo)
+                // In Morrowind this isn't actually specific to this transition
+                // See the weapon->weapon mid-attack skip logic above
+                if (mUpperBodyState == UpperBodyState::AttackEnd)
+                {
+                    if (weapclass == ESM::WeaponType::Thrown && weaptype == ESM::Weapon::HandToHand)
+                    {
+                        forcestateupdate = true;
+                        mWeaponType = weaptype;
+                        mCurrentWeapon = getWeaponAnimation(mWeaponType);
+                        mAnimation->showWeapons(false);
+                    }
+                }
+                // We should not break swim and sneak animations
+                if (mResetIdleOnAttackEnd && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+                {
+                    resetCurrentIdleState();
+                }
 
                 mUpperBodyState = UpperBodyState::WeaponEquipped;
             }
@@ -2803,19 +2812,19 @@ namespace MWMechanics
         // Stop any effects that are no longer active
         std::vector<std::string_view> effects = mAnimation->getLoopingEffects();
 
-        for (std::string_view effectId : effects)
+        for (std::string_view effectStr : effects)
         {
-            auto index = ESM::MagicEffect::indexNameToIndex(effectId);
+            auto effectId = ESM::RefId::deserializeText(effectStr);
 
-            if (index >= 0
+            if (MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(effectId)
                 && (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
                     || mPtr.getClass()
                             .getCreatureStats(mPtr)
                             .getMagicEffects()
-                            .getOrDefault(MWMechanics::EffectKey(index))
+                            .getOrDefault(MWMechanics::EffectKey(effectId))
                             .getMagnitude()
                         <= 0))
-                mAnimation->removeEffect(effectId);
+                mAnimation->removeEffect(effectStr);
         }
     }
 

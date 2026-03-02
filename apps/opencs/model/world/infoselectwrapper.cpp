@@ -42,7 +42,7 @@ const char* CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings[] = {
     "PC Light Armor",
     "PC Short Blade",
     "PC Marksman",
-    "PC Merchantile",
+    "PC Mercantile",
     "PC Speechcraft",
     "PC Hand to Hand",
     "PC Sex",
@@ -297,7 +297,7 @@ void CSMWorld::ConstInfoSelectWrapper::updateComparisonType()
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         case ESM::DialogueCondition::Function_PcGender:
@@ -485,7 +485,7 @@ std::pair<int, int> CSMWorld::ConstInfoSelectWrapper::getValidIntRange() const
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         case ESM::DialogueCondition::Function_PcClothingModifier:

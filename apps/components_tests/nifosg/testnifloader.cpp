@@ -100,7 +100,7 @@ osg::Group {
           UDC_UserObjects 1 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
           }
@@ -140,7 +140,7 @@ osg::Group {
           UDC_UserObjects 3 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
             osg::StringValueObject {
@@ -197,7 +197,7 @@ osg::Group {
           UDC_UserObjects 3 {
             osg::UIntValueObject {
               UniqueID 6
-              Name "recIndex"
+              Name "recordIndex"
               Value 4294967295
             }
             osg::StringValueObject {
@@ -257,7 +257,7 @@ osg::Group {
         Nif::NiAVObject node;
         init(node);
         Nif::BSShaderPPLightingProperty property;
-        property.recType = Nif::RC_BSShaderPPLightingProperty;
+        property.mRecordType = Nif::RC_BSShaderPPLightingProperty;
         property.mTextureSet = nullptr;
         property.mController = nullptr;
         property.mType = GetParam().mShaderType;
@@ -285,7 +285,7 @@ osg::Group {
         Nif::NiAVObject node;
         init(node);
         Nif::BSLightingShaderProperty property;
-        property.recType = Nif::RC_BSLightingShaderProperty;
+        property.mRecordType = Nif::RC_BSLightingShaderProperty;
         property.mTextureSet = nullptr;
         property.mController = nullptr;
         property.mType = GetParam().mShaderType;

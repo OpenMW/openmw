@@ -176,18 +176,6 @@ namespace MWWorld
             };
         }
 
-        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultStatics()
-        {
-            return {
-                // Total conversions from SureAI lack marker records
-                { "divinemarker", "marker_divine.nif" },
-                { "doormarker", "marker_arrow.nif" },
-                { "northmarker", "marker_north.nif" },
-                { "templemarker", "marker_temple.nif" },
-                { "travelmarker", "marker_travel.nif" },
-            };
-        }
-
         std::vector<std::pair<std::string_view, std::string_view>> generateDefaultDoors()
         {
             return { { "prisonmarker", "marker_prison.nif" } };
@@ -281,6 +269,7 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
 
         fillGlobalVariables();
 
@@ -449,7 +438,6 @@ namespace MWWorld
             + mGlobalVariables.countSavedGameRecords() + mProjectileManager->countSavedGameRecords()
             + 1 // player record
             + 1 // weather record
-            + 1 // actorId counter
             + 1 // levitation/teleport enabled state
             + 1 // camera
             + 1; // random state.
@@ -471,8 +459,6 @@ namespace MWWorld
         {
             MWBase::Environment::get().getWindowManager()->writeFog(cellstore);
         }
-
-        MWMechanics::CreatureStats::writeActorIdCounter(writer);
 
         mStore.write(writer, progress); // dynamic Store must be written (and read) before Cells, so that
                                         // references to custom made records will be recognized
@@ -497,7 +483,7 @@ namespace MWWorld
         switch (type)
         {
             case ESM::REC_ACTC:
-                MWMechanics::CreatureStats::readActorIdCounter(reader);
+                reader.skipRecord();
                 return;
             case ESM::REC_ENAB:
                 reader.getHNT(mTeleportEnabled, "TELE");
@@ -560,18 +546,6 @@ namespace MWWorld
                 ESM::Global record;
                 record.mId = ESM::RefId::stringRefId(name.getValue());
                 record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
-        for (const auto& [id, model] : generateDefaultStatics())
-        {
-            if (mStore.get<ESM::Static>().search(ESM::RefId::stringRefId(id)) == nullptr)
-            {
-                ESM::Static record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
@@ -748,15 +722,6 @@ namespace MWWorld
         if (activeOnly)
             error += " in active cells";
         throw std::runtime_error(error);
-    }
-
-    Ptr World::searchPtrViaActorId(int actorId)
-    {
-        // The player is not registered in any CellStore so must be checked manually
-        if (actorId == getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getActorId())
-            return getPlayerPtr();
-        // Now search cells
-        return mWorldScene->searchPtrViaActorId(actorId);
     }
 
     struct FindContainerVisitor
@@ -1002,25 +967,32 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFocusObject()
     {
-        MWWorld::Ptr focusObject;
-
         if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
-            return focusObject;
+            return {};
 
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            && MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            focusObject = getFocusObject(getMaxActivationDistance() * 50, false);
-        else
+        float maxDistance;
+        const bool inGui = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        if (inGui)
         {
-            float activationDistance = getActivationDistancePlusTelekinesis();
-
-            focusObject = getFocusObject(activationDistance, true);
-
-            if (!focusObject.isEmpty() && !focusObject.getClass().allowTelekinesis(focusObject)
-                && mDistanceToFocusObject > getMaxActivationDistance()
-                && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                return nullptr;
+            if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+                return getFocusObject(getMaxActivationDistance() * 50, false);
+            static const int iMaxInfoDist = mStore.get<ESM::GameSetting>().find("iMaxInfoDist")->mValue.getInteger();
+            maxDistance = static_cast<float>(iMaxInfoDist);
         }
+        else
+            maxDistance = getMaxActivationDistance();
+
+        const MWWorld::Ptr player = mPlayer->getPlayer();
+        const float telekinesisMagnitude = player.getClass()
+                                               .getCreatureStats(player)
+                                               .getMagicEffects()
+                                               .getOrDefault(ESM::MagicEffect::Telekinesis)
+                                               .getMagnitude();
+        MWWorld::Ptr focusObject = getFocusObject(maxDistance + feetToGameUnits(telekinesisMagnitude), true);
+
+        if (!focusObject.isEmpty() && mDistanceToFocusObject > maxDistance
+            && !focusObject.getClass().allowTelekinesis(focusObject) && !inGui)
+            return {};
         return focusObject;
     }
 
@@ -2307,11 +2279,12 @@ namespace MWWorld
         return true;
     }
 
-    void World::saveLoaded()
+    void World::saveLoaded(const ESM::ESMReader& reader)
     {
         mStore.rebuildIdsIndex();
         mStore.validateDynamic();
         mTimeManager->setup(mGlobalVariables);
+        mProjectileManager->saveLoaded(reader);
     }
 
     void World::setupPlayer()
@@ -3119,7 +3092,7 @@ namespace MWWorld
         const MWWorld::Class& cls = ptr.getClass();
         if (cls.isActor())
         {
-            std::set<int> playing;
+            std::set<ESM::RefId> playing;
             for (const auto& params : cls.getCreatureStats(ptr).getActiveSpells())
             {
                 for (const auto& effect : params.getEffects())
@@ -3532,21 +3505,6 @@ namespace MWWorld
         // Original engine rounds size upward
         static const float unitsPerFoot = std::ceil(Constants::UnitsPerFoot);
         return feet * unitsPerFoot;
-    }
-
-    float World::getActivationDistancePlusTelekinesis()
-    {
-        float telekinesisRangeBonus = mPlayer->getPlayer()
-                                          .getClass()
-                                          .getCreatureStats(mPlayer->getPlayer())
-                                          .getMagicEffects()
-                                          .getOrDefault(ESM::MagicEffect::Telekinesis)
-                                          .getMagnitude();
-        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
-
-        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-
-        return activationDistance;
     }
 
     MWWorld::Ptr World::getPlayerPtr()

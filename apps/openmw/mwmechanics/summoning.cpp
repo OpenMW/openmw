@@ -13,6 +13,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -22,21 +23,45 @@
 namespace MWMechanics
 {
 
-    bool isSummoningEffect(int effectId)
+    bool isSummoningEffect(ESM::RefId effectId)
     {
-        return ((effectId >= ESM::MagicEffect::SummonScamp && effectId <= ESM::MagicEffect::SummonStormAtronach)
-            || (effectId == ESM::MagicEffect::SummonCenturionSphere)
-            || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
+        if (effectId.empty())
+            return false;
+        static const std::array<ESM::RefId, 22> summonEffects{
+            ESM::MagicEffect::SummonAncestralGhost,
+            ESM::MagicEffect::SummonBonelord,
+            ESM::MagicEffect::SummonBonewalker,
+            ESM::MagicEffect::SummonCenturionSphere,
+            ESM::MagicEffect::SummonClannfear,
+            ESM::MagicEffect::SummonDaedroth,
+            ESM::MagicEffect::SummonDremora,
+            ESM::MagicEffect::SummonFabricant,
+            ESM::MagicEffect::SummonFlameAtronach,
+            ESM::MagicEffect::SummonFrostAtronach,
+            ESM::MagicEffect::SummonGoldenSaint,
+            ESM::MagicEffect::SummonGreaterBonewalker,
+            ESM::MagicEffect::SummonHunger,
+            ESM::MagicEffect::SummonScamp,
+            ESM::MagicEffect::SummonSkeletalMinion,
+            ESM::MagicEffect::SummonStormAtronach,
+            ESM::MagicEffect::SummonWingedTwilight,
+            ESM::MagicEffect::SummonWolf,
+            ESM::MagicEffect::SummonBear,
+            ESM::MagicEffect::SummonBonewolf,
+            ESM::MagicEffect::SummonCreature04,
+            ESM::MagicEffect::SummonCreature05,
+        };
+        return (std::find(summonEffects.begin(), summonEffects.end(), effectId) != summonEffects.end());
     }
 
-    static const std::map<int, ESM::RefId>& getSummonMap()
+    static const std::map<ESM::RefId, ESM::RefId>& getSummonMap()
     {
-        static std::map<int, ESM::RefId> summonMap;
+        static std::map<ESM::RefId, ESM::RefId> summonMap;
 
         if (summonMap.size() > 0)
             return summonMap;
 
-        const std::map<int, std::string_view> summonMapToGameSetting{
+        const std::map<ESM::RefId, std::string_view> summonMapToGameSetting{
             { ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID" },
             { ESM::MagicEffect::SummonBonelord, "sMagicBonelordID" },
             { ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID" },
@@ -69,7 +94,7 @@ namespace MWMechanics
         return summonMap;
     }
 
-    ESM::RefId getSummonedCreature(int effectId)
+    ESM::RefId getSummonedCreature(ESM::RefId effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -80,10 +105,10 @@ namespace MWMechanics
         return ESM::RefId();
     }
 
-    int summonCreature(int effectId, const MWWorld::Ptr& summoner)
+    ESM::RefNum summonCreature(ESM::RefId effectId, const MWWorld::Ptr& summoner)
     {
         const ESM::RefId& creatureID = getSummonedCreature(effectId);
-        int creatureActorId = -1;
+        ESM::RefNum creature;
         if (!creatureID.empty())
         {
             try
@@ -91,13 +116,12 @@ namespace MWMechanics
                 auto world = MWBase::Environment::get().getWorld();
                 MWWorld::ManualRef ref(world->getStore(), creatureID, 1);
                 MWWorld::Ptr placed = world->safePlaceObject(ref.getPtr(), summoner, summoner.getCell(), 0, 120.f);
-
-                MWMechanics::CreatureStats& summonedCreatureStats = placed.getClass().getCreatureStats(placed);
+                MWBase::Environment::get().getWorldModel()->registerPtr(placed);
+                creature = placed.getCellRef().getRefNum();
 
                 // Make the summoned creature follow its master and help in fights
                 AiFollow package(summoner);
-                summonedCreatureStats.getAiSequence().stack(package, placed);
-                creatureActorId = summonedCreatureStats.getActorId();
+                placed.getClass().getCreatureStats(placed).getAiSequence().stack(package, placed);
 
                 MWRender::Animation* anim = world->getAnimation(placed);
                 if (anim)
@@ -117,9 +141,9 @@ namespace MWMechanics
                 // log
             }
 
-            summoner.getClass().getCreatureStats(summoner).getSummonedCreatureMap().emplace(effectId, creatureActorId);
+            summoner.getClass().getCreatureStats(summoner).getSummonedCreatureMap().emplace(effectId, creature);
         }
-        return creatureActorId;
+        return creature;
     }
 
     void updateSummons(const MWWorld::Ptr& summoner, bool cleanup)
@@ -127,24 +151,18 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = summoner.getClass().getCreatureStats(summoner);
         auto& creatureMap = creatureStats.getSummonedCreatureMap();
 
-        std::vector<int> graveyard = creatureStats.getSummonedCreatureGraveyard();
-        creatureStats.getSummonedCreatureGraveyard().clear();
-
-        for (const int creature : graveyard)
-            MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(summoner, creature);
-
         if (!cleanup)
             return;
 
         for (auto it = creatureMap.begin(); it != creatureMap.end();)
         {
-            if (it->second == -1)
+            if (!it->second.isSet())
             {
                 // Keep the spell effect active if we failed to spawn anything
                 it++;
                 continue;
             }
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtr(it->second);
             if (!ptr.isEmpty() && ptr.getClass().getCreatureStats(ptr).isDead()
                 && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished())
             {
@@ -158,15 +176,15 @@ namespace MWMechanics
         }
     }
 
-    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<int, int>& summon)
+    void purgeSummonEffect(const MWWorld::Ptr& summoner, const std::pair<ESM::RefId, ESM::RefNum>& summon)
     {
         auto& creatureStats = summoner.getClass().getCreatureStats(summoner);
         creatureStats.getActiveSpells().purge(
             [summon](const auto& spell, const auto& effect) {
-                return effect.mEffectId == summon.first && effect.getActorId() == summon.second;
+                return effect.mEffectId == summon.first && effect.getActor() == summon.second;
             },
             summoner);
 
-        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(summoner, summon.second);
+        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(summon.second);
     }
 }

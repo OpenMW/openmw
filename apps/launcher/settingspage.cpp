@@ -5,11 +5,13 @@
 #include <string>
 
 #include <QCompleter>
+#include <QDesktopServices>
 #include <QFileDialog>
+#include <QMenu>
 #include <QString>
 
 #include <components/config/gamesettings.hpp>
-
+#include <components/files/qtconversion.hpp>
 #include <components/settings/values.hpp>
 
 #include "utils/openalutil.hpp"
@@ -69,10 +71,39 @@ namespace
         }
         return 0;
     }
+
+    enum FileTypeRoles
+    {
+        Role_ThisFile = Qt::ItemDataRole::UserRole,
+        Role_IsMainUserConfigDirectory,
+        Role_ConfigDirectory,
+        Role_LauncherLog,
+        Role_OpenMWCfg,
+        Role_OpenMWLog,
+        Role_OpenMWCSLog,
+        Role_SettingsCfg,
+    };
+
+    struct FileType
+    {
+        FileTypeRoles itemDataRole;
+        const char* name;
+        bool showInAllConfigDirectories;
+    };
+
+    const std::array configDirectoryFiles{
+        FileType{ Role_LauncherLog, "launcher.log", false },
+        FileType{ Role_OpenMWCfg, "openmw.cfg", true },
+        FileType{ Role_OpenMWLog, "openmw.log", false },
+        FileType{ Role_OpenMWCSLog, "openmw-cs.log", false },
+        FileType{ Role_SettingsCfg, "settings.cfg", true },
+    };
 }
 
-Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget* parent)
+Launcher::SettingsPage::SettingsPage(
+    const Files::ConfigurationManager& configurationManager, Config::GameSettings& gameSettings, QWidget* parent)
     : QWidget(parent)
+    , mCfgMgr(configurationManager)
     , mGameSettings(gameSettings)
 {
     setObjectName("SettingsPage");
@@ -91,6 +122,53 @@ Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget
 
     mCellNameCompleter.setModel(&mCellNameCompleterModel);
     startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
+
+    connect(configsList, &QTreeWidget::itemActivated, this, &SettingsPage::slotOpenFile);
+
+    auto actionOpenDir = new QAction(tr("Open Directory"), configsList);
+    connect(actionOpenDir, &QAction::triggered, [this]() {
+        QUrl configFolderUrl = configsList->currentItem()->data(0, Role_ConfigDirectory).toUrl();
+        QDesktopServices::openUrl(configFolderUrl);
+    });
+
+    QList<QAction*> openFileActions;
+    openFileActions.reserve(configDirectoryFiles.size());
+    for (const auto& fileType : configDirectoryFiles)
+    {
+        QAction* action = new QAction(tr("Open %1").arg(fileType.name), configsList);
+        connect(action, &QAction::triggered, [this, role = fileType.itemDataRole]() {
+            QVariant fileUrl = configsList->currentItem()->data(0, role);
+            if (fileUrl.isValid())
+                QDesktopServices::openUrl(fileUrl.toUrl());
+        });
+        openFileActions.push_back(action);
+    }
+
+    connect(configsList, &QTreeWidget::customContextMenuRequested, [=, this](const QPoint& pos) {
+        if (configsList->currentItem())
+        {
+            QMenu contextMenu;
+
+            contextMenu.addAction(actionOpenDir);
+
+            bool topLevel = !configsList->currentItem()->parent();
+
+            for (qsizetype i = 0; i < openFileActions.size(); ++i)
+            {
+                if (configsList->currentItem()->data(0, Role_IsMainUserConfigDirectory).toBool()
+                    || configDirectoryFiles[i].showInAllConfigDirectories)
+                {
+                    QVariant fileUrl = configsList->currentItem()->data(0, configDirectoryFiles[i].itemDataRole);
+                    bool fileExists = fileUrl.isValid();
+                    openFileActions[i]->setEnabled(fileExists);
+                    openFileActions[i]->setVisible(topLevel || fileExists);
+                    contextMenu.addAction(openFileActions[i]);
+                }
+            }
+
+            contextMenu.exec(configsList->mapToGlobal(pos));
+        }
+    });
 }
 
 void Launcher::SettingsPage::loadCellsForAutocomplete(QStringList cellNames)
@@ -331,6 +409,8 @@ bool Launcher::SettingsPage::loadSettings()
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
 
         loadSettingBool(Settings::general().mNotifyOnSavedScreenshot, *notifyOnSavedScreenshotCheckBox);
+
+        populateLoadedConfigs();
     }
 
     // Testing
@@ -349,6 +429,95 @@ bool Launcher::SettingsPage::loadSettings()
         runScriptAfterStartupField->setText(mGameSettings.value("script-run").value);
     }
     return true;
+}
+
+void Launcher::SettingsPage::populateLoadedConfigs()
+{
+    configsList->clear();
+
+    for (const auto& path : mCfgMgr.getActiveConfigPaths())
+    {
+        QString configPath = QDir(Files::pathToQString(path)).absolutePath();
+        QString toolTipText;
+
+        bool isMainUserConfig = path == mCfgMgr.getUserConfigPath();
+
+        if (path == mCfgMgr.getLocalPath())
+        {
+            if (isMainUserConfig)
+                toolTipText = tr(
+                    "Local config directory used because it contains an openmw.cfg.\n"
+                    "Logs and settings changed through the launcher and in-game will be saved here.");
+            else
+                toolTipText = tr("Local config directory used because it contains an openmw.cfg.");
+        }
+        else if (path == mCfgMgr.getGlobalPath())
+        {
+            if (isMainUserConfig)
+                toolTipText = tr(
+                    "Global config directory used because local directory did not contain an openmw.cfg.\n"
+                    "Logs and settings changed through the launcher and in-game will be saved here.\n"
+                    "This is typically a symptom of a broken OpenMW installation or bad package.");
+            else
+                toolTipText = tr("Global config directory used because local directory did not contain an openmw.cfg.");
+        }
+        else
+        {
+            Config::SettingValue configSetting;
+            for (const auto& v : mGameSettings.values(QString("config")))
+            {
+                if (Files::pathFromQString(v.value) == path)
+                {
+                    configSetting = v;
+                    break;
+                }
+            }
+
+            if (!configSetting.value.isEmpty())
+            {
+                const QFileInfo configPathInfo = QFileInfo(configSetting.context + "/openmw.cfg");
+                if (isMainUserConfig)
+                    toolTipText = tr(
+                        "User config directory used because %1 contains the line config=%2.\n"
+                        "Logs and settings changed through the launcher and in-game will be saved here.")
+                                      .arg(configPathInfo.absoluteFilePath(), configSetting.originalRepresentation);
+                else
+                    toolTipText = tr("User config directory used because %1 contains the line config=%2.")
+                                      .arg(configPathInfo.absoluteFilePath(), configSetting.originalRepresentation);
+            }
+            else if (isMainUserConfig)
+                toolTipText = tr("Logs and settings changed through the launcher and in-game will be saved here.");
+        }
+
+        QTreeWidgetItem* configItem = new QTreeWidgetItem(configsList);
+        configItem->setText(0, configPath);
+        configItem->setToolTip(0, toolTipText);
+        configItem->setExpanded(true);
+
+        QUrl directoryUrl = QUrl::fromLocalFile(configPath);
+        configItem->setData(0, Role_ThisFile, directoryUrl);
+        configItem->setData(0, Role_IsMainUserConfigDirectory, isMainUserConfig);
+        configItem->setData(0, Role_ConfigDirectory, directoryUrl);
+
+        for (const auto& fileType : configDirectoryFiles)
+        {
+            if ((isMainUserConfig || fileType.showInAllConfigDirectories)
+                && std::filesystem::exists(path / fileType.name))
+            {
+                QTreeWidgetItem* fileItem = new QTreeWidgetItem(configItem);
+                fileItem->setText(0, fileType.name);
+
+                QUrl url = QUrl::fromLocalFile(Files::pathToQString(path / fileType.name));
+
+                fileItem->setData(0, Role_ThisFile, url);
+                fileItem->setData(0, fileType.itemDataRole, url);
+                fileItem->setData(0, Role_IsMainUserConfigDirectory, isMainUserConfig);
+                fileItem->setData(0, Role_ConfigDirectory, directoryUrl);
+
+                configItem->setData(0, fileType.itemDataRole, url);
+            }
+        }
+    }
 }
 
 void Launcher::SettingsPage::saveSettings()
@@ -587,4 +756,10 @@ void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
 {
     activeGridObjectPagingCheckBox->setEnabled(checked);
     objectPagingMinSizeComboBox->setEnabled(checked);
+}
+
+void Launcher::SettingsPage::slotOpenFile(QTreeWidgetItem* item)
+{
+    QUrl configFolderUrl = item->data(0, Role_ThisFile).toUrl();
+    QDesktopServices::openUrl(configFolderUrl);
 }

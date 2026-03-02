@@ -36,7 +36,7 @@ set(WIZARD_HEADER
 if (OPENMW_USE_UNSHIELD)
     set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
     set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
-    add_definitions(-DOPENMW_USE_UNSHIELD)
+    add_compile_definitions(OPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
 
 
@@ -76,6 +76,10 @@ target_link_libraries(openmw-wizard Qt::Widgets Qt::Core Qt::Svg)
 
 if (OPENMW_USE_UNSHIELD)
     target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARIES})
+endif()
+
+if (WIN32)
+    target_sources(openmw-wizard PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
 endif()
 
 if(DPKG_PROGRAM)

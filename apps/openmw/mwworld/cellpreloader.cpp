@@ -122,10 +122,12 @@ namespace MWWorld
                     if (!vfs.exists(mesh))
                         continue;
 
-                    if (Misc::getFileName(mesh).starts_with('x') && Misc::getFileExtension(mesh) == "nif")
+                    constexpr VFS::Path::ExtensionView nif("nif");
+                    if (Misc::getFileName(mesh).starts_with('x') && mesh.extension() == nif)
                     {
                         kfname = mesh;
-                        kfname.changeExtension("kf");
+                        constexpr VFS::Path::ExtensionView kf("kf");
+                        kfname.changeExtension(kf);
                         if (vfs.exists(kfname))
                             mPreloadedObjects.insert(mKeyframeManager->get(kfname));
                     }

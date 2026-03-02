@@ -136,6 +136,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     const std::vector<std::string>& archives, const std::filesystem::path& resDir)
     : mEncoder(encoding)
     , mPathgrids(mCells)
+    , mReferenceables(mMagicEffects)
     , mRefs(mCells)
     , mDialogue(nullptr)
     , mReaderIndex(0)
@@ -340,7 +341,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     // Spell effects
     mSpells.addColumn(new NestedParentColumn<ESM::Spell>(Columns::ColumnId_EffectList));
     index = mSpells.getColumns() - 1;
-    mSpells.addAdapter(std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM::Spell>()));
+    mSpells.addAdapter(std::make_pair(&mSpells.getColumn(index), new EffectsListAdapter<ESM::Spell>(mMagicEffects)));
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mSpells.getNestableColumn(index)->addColumn(
@@ -456,7 +457,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mEnchantments.addColumn(new NestedParentColumn<ESM::Enchantment>(Columns::ColumnId_EffectList));
     index = mEnchantments.getColumns() - 1;
     mEnchantments.addAdapter(
-        std::make_pair(&mEnchantments.getColumn(index), new EffectsListAdapter<ESM::Enchantment>()));
+        std::make_pair(&mEnchantments.getColumn(index), new EffectsListAdapter<ESM::Enchantment>(mMagicEffects)));
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn(Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mEnchantments.getNestableColumn(index)->addColumn(

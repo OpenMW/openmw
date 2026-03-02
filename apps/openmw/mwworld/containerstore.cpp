@@ -13,6 +13,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/levelledlist.hpp"
@@ -341,9 +342,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     item.getCellRef().setFactionRank(-2);
 
     const ESM::RefId& script = item.getClass().getScript(item);
+    const Ptr& contPtr = getPtr();
     if (!script.empty())
     {
-        const Ptr& contPtr = getPtr();
         if (contPtr == player)
         {
             // Items in player's inventory have cell set to 0, so their scripts will never be removed
@@ -370,6 +371,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     // we should not fire event for InventoryStore yet - it has some custom logic
     if (mListener && typeid(*this) == typeid(ContainerStore))
         mListener->itemAdded(item, count);
+    MWBase::Environment::get().getWindowManager()->inventoryUpdated(contPtr);
 
     return it;
 }
@@ -582,6 +584,7 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplac
     // we should not fire event for InventoryStore yet - it has some custom logic
     if (mListener && typeid(*this) == typeid(ContainerStore))
         mListener->itemRemoved(item, count - toRemove);
+    MWBase::Environment::get().getWindowManager()->inventoryUpdated(getPtr());
 
     // number of removed items
     return count - toRemove;

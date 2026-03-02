@@ -711,7 +711,8 @@ namespace MWRender
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
 
-        mRendering.getSkyManager()->setSunglare(sunglare);
+        if (mUsePostProcessing)
+            mRendering.getSkyManager()->setSunglare(sunglare);
 
         if (dirtyAttachments)
             mCanvases[frameId]->setDirtyAttachments(attachmentsToDirty);

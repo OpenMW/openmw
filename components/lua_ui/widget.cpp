@@ -3,6 +3,15 @@
 #include <SDL_events.h>
 #include <components/sdlutil/sdlmappings.hpp>
 
+namespace
+{
+    // Arbitrary large number caps to prevent performance issues
+    constexpr int sExtCalcSizeWidthCap = 10000000;
+    constexpr int sExtCalcSizeHeightCap = 10000000;
+    constexpr int sExtCalcPositionLeftCap = 10000000;
+    constexpr int sExtCalcPositionTopCap = 10000000;
+}
+
 namespace LuaUi
 {
     WidgetExtension::WidgetExtension()
@@ -318,26 +327,35 @@ namespace LuaUi
 
     MyGUI::IntSize WidgetExtension::calculateSize() const
     {
-        if (mForceSize)
-            return mForcedCoord.size();
-
-        MyGUI::IntSize pSize = parentSize();
         MyGUI::IntSize newSize;
-        newSize = mAbsoluteCoord.size();
-        newSize.width += static_cast<int>(mRelativeCoord.width * pSize.width);
-        newSize.height += static_cast<int>(mRelativeCoord.height * pSize.height);
+        if (mForceSize)
+            newSize = mForcedCoord.size();
+        else
+        {
+            MyGUI::IntSize pSize = parentSize();
+            newSize = mAbsoluteCoord.size();
+            newSize.width += static_cast<int>(mRelativeCoord.width * pSize.width);
+            newSize.height += static_cast<int>(mRelativeCoord.height * pSize.height);
+        }
+        newSize.width = std::clamp(newSize.width, -sExtCalcSizeWidthCap, sExtCalcSizeWidthCap);
+        newSize.height = std::clamp(newSize.height, -sExtCalcSizeHeightCap, sExtCalcSizeHeightCap);
         return newSize;
     }
 
     MyGUI::IntPoint WidgetExtension::calculatePosition(const MyGUI::IntSize& size) const
     {
-        if (mForcePosition)
-            return mForcedCoord.point();
-        MyGUI::IntSize pSize = parentSize();
         MyGUI::IntPoint newPosition;
-        newPosition = mAbsoluteCoord.point();
-        newPosition.left += static_cast<int>(mRelativeCoord.left * pSize.width - mAnchor.width * size.width);
-        newPosition.top += static_cast<int>(mRelativeCoord.top * pSize.height - mAnchor.height * size.height);
+        if (mForcePosition)
+            newPosition = mForcedCoord.point();
+        else
+        {
+            MyGUI::IntSize pSize = parentSize();
+            newPosition = mAbsoluteCoord.point();
+            newPosition.left += static_cast<int>(mRelativeCoord.left * pSize.width - mAnchor.width * size.width);
+            newPosition.top += static_cast<int>(mRelativeCoord.top * pSize.height - mAnchor.height * size.height);
+        }
+        newPosition.left = std::clamp(newPosition.left, -sExtCalcPositionLeftCap, sExtCalcPositionLeftCap);
+        newPosition.top = std::clamp(newPosition.top, -sExtCalcPositionTopCap, sExtCalcPositionTopCap);
         return newPosition;
     }
 

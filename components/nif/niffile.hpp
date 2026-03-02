@@ -78,7 +78,7 @@ namespace Nif
         std::size_t numRoots() const { return mFile->mRoots.size(); }
 
         /// Get the name of the file
-        const std::string& getFilename() const { return mFile->mPath; }
+        const VFS::Path::Normalized& getFilename() const { return mFile->mPath; }
 
         const std::string& getHash() const { return mFile->mHash; }
 

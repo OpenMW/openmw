@@ -1454,7 +1454,7 @@ namespace MWMechanics
                     }
 
                     startCombat(actor, player, &playerFollowers);
-                    observerStats.setHitAttemptActorId(player.getClass().getCreatureStats(player).getActorId());
+                    observerStats.setHitAttemptActor(player.getCellRef().getRefNum());
 
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
@@ -1571,9 +1571,8 @@ namespace MWMechanics
         const MWWorld::Class& cls = target.getClass();
         const MWMechanics::CreatureStats& stats = cls.getCreatureStats(target);
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
-        return cls.isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker) && !isAggressive(target, attacker)
-            && !seq.isEngagedWithActor() && !stats.getAiSequence().isInPursuit()
-            && !cls.getNpcStats(target).isWerewolf()
+        return cls.isNpc() && !attacker.isEmpty() && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
+            && !stats.getAiSequence().isInPursuit() && !cls.getNpcStats(target).isWerewolf()
             && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Vampirism).getMagnitude() <= 0;
     }
 
@@ -1734,8 +1733,9 @@ namespace MWMechanics
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
+                const ESM::RefNum playerNum = target.getCellRef().getRefNum();
                 // Stops guard from ending combat if player is unreachable
-                stats.setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId());
+                stats.setHitAttemptActor(playerNum);
                 for (const Actor& actor : mActors)
                 {
                     if (actor.isInvalid())
@@ -1749,10 +1749,7 @@ namespace MWMechanics
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);
                             // Stops guard from ending combat if player is unreachable
-                            actor.getPtr()
-                                .getClass()
-                                .getCreatureStats(actor.getPtr())
-                                .setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId());
+                            actor.getPtr().getClass().getCreatureStats(actor.getPtr()).setHitAttemptActor(playerNum);
                         }
                     }
                 }
@@ -1866,6 +1863,10 @@ namespace MWMechanics
 
     bool MechanicsManager::isAggressive(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target)
     {
+        // If already in combat with target, consider aggressive
+        if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
+            return true;
+
         // Don't become aggressive if a calm effect is active, since it would cause combat to cycle on/off as
         // combat is activated here and then canceled by the calm effect
         if ((ptr.getClass().isNpc()
@@ -2038,12 +2039,13 @@ namespace MWMechanics
             = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(ESM::Skill::Acrobatics);
         MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
         auto& skill = stats.getSkill(acrobatics->mId);
-        skill.setModifier(acrobatics->mWerewolfValue - skill.getModified());
+        skill.setBase(skill.getBase(), true);
+        skill.setModifier(acrobatics->mWerewolfValue - skill.getBase());
     }
 
-    void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId)
+    void MechanicsManager::cleanupSummonedCreature(ESM::RefNum creature)
     {
-        mActors.cleanupSummonedCreature(caster.getClass().getCreatureStats(caster), creatureActorId);
+        mActors.cleanupSummonedCreature(creature);
     }
 
     void MechanicsManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
@@ -2065,11 +2067,6 @@ namespace MWMechanics
     GreetingState MechanicsManager::getGreetingState(const MWWorld::Ptr& ptr) const
     {
         return mActors.getGreetingState(ptr);
-    }
-
-    bool MechanicsManager::isTurningToPlayer(const MWWorld::Ptr& ptr) const
-    {
-        return mActors.isTurningToPlayer(ptr);
     }
 
     void MechanicsManager::fastForwardAi() const

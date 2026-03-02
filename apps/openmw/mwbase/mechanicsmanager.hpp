@@ -294,7 +294,7 @@ namespace MWBase
         /// It only applies to the current form the NPC is in.
         virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
 
-        virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
+        virtual void cleanupSummonedCreature(ESM::RefNum creature) = 0;
 
         virtual void confiscateStolenItemToOwner(
             const MWWorld::Ptr& player, const MWWorld::Ptr& item, const MWWorld::Ptr& victim, int count)
@@ -308,7 +308,6 @@ namespace MWBase
         virtual int getGreetingTimer(const MWWorld::Ptr& ptr) const = 0;
         virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const = 0;
         virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
-        virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
         virtual void fastForwardAi() const = 0;
     };
 }

@@ -167,7 +167,7 @@ namespace ESM4
 
         bool mIgnoreMissingLocalizedStrings = false;
 
-        void buildLStringIndex(LocalizedStringType stringType, const std::u8string& prefix);
+        void buildLStringIndex(LocalizedStringType stringType, std::string_view prefix);
 
         void buildLStringIndex(LocalizedStringType stringType, std::istream& stream);
 

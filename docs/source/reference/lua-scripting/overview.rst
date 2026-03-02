@@ -181,6 +181,7 @@ Possible flags are:
 - ``MENU`` - a menu script; always active, even before a game is loaded
 - ``CUSTOM`` - dynamic local script that can be started or stopped by a global script;
 - ``PLAYER`` - an auto started player script;
+- ``LOAD`` - a load script, active while content files are being loaded;
 - ``ACTIVATOR`` - a local script that will be automatically attached to any activator;
 - ``ARMOR`` - a local script that will be automatically attached to any armor;
 - ``BOOK`` - a local script that will be automatically attached to any book;
@@ -207,6 +208,7 @@ Hot reloading
 It is possible to modify a script without restarting OpenMW. To apply changes, open the in-game console and run the command: ``reloadlua``.
 This will restart all Lua scripts using the `onSave and onLoad`_ handlers the same way as if the game was saved or loaded.
 It reloads all ``.omwscripts`` files and ``.lua`` files that are not packed to any archives. ``.omwaddon`` files and scripts packed to BSA can not be changed without restarting the game.
+Load scripts will not run again until the game is restarted.
 
 Lua console
 ===========

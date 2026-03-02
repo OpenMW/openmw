@@ -181,7 +181,6 @@ namespace MWWorld
             Loading::Listener* listener);
 
         float feetToGameUnits(float feet);
-        float getActivationDistancePlusTelekinesis();
 
         MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, const ESM::RefId& id);
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, const ESM::RefId& id);
@@ -287,9 +286,6 @@ namespace MWWorld
         Ptr searchPtr(const ESM::RefId& name, bool activeOnly, bool searchInContainers = false) override;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do not search inactive cells.
-
-        Ptr searchPtrViaActorId(int actorId) override;
-        ///< Search is limited to the active cells.
 
         MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) override;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -467,7 +463,7 @@ namespace MWWorld
         void applyDeferredPreviewRotationToPlayer(float dt) override;
         void disableDeferredPreviewRotation() override;
 
-        void saveLoaded() override;
+        void saveLoaded(const ESM::ESMReader& reader) override;
 
         void setupPlayer() override;
         void renderPlayer() override;

@@ -228,6 +228,7 @@ namespace MWGui
             mMagicSelectionDialog = std::make_unique<MagicSelectionDialog>(this);
         }
         mMagicSelectionDialog->setVisible(true);
+        mMagicSelectionDialog->setActiveControllerWindow(true);
 
         mAssignDialog->setVisible(false);
     }
@@ -325,7 +326,8 @@ namespace MWGui
         std::string path = effect->mIcon;
         std::replace(path.begin(), path.end(), '/', '\\');
         path.insert(path.rfind('\\') + 1, "b_");
-        path = Misc::ResourceHelpers::correctIconPath(path, MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
+            VFS::Path::toNormalized(path), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         float scale = 1.f;
         MyGUI::ITexture* texture
@@ -335,7 +337,7 @@ namespace MWGui
 
         const int diameter = static_cast<int>(44 * scale);
         mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(0, 0, diameter, diameter));
-        mSelected->button->setIcon(path);
+        mSelected->button->setIcon(iconPath);
 
         if (mMagicSelectionDialog)
             mMagicSelectionDialog->setVisible(false);
@@ -723,7 +725,6 @@ namespace MWGui
         WindowModal::onOpen();
 
         mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
-        mMagicList->resetScrollbars();
     }
 
     void MagicSelectionDialog::onModelIndexSelected(SpellModel::ModelIndex index)
@@ -743,5 +744,14 @@ namespace MWGui
             mMagicList->onControllerButton(arg.button);
 
         return true;
+    }
+
+    void MagicSelectionDialog::setActiveControllerWindow(bool active)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mMagicList->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 }

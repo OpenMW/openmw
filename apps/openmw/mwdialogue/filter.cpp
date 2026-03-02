@@ -426,7 +426,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         {
@@ -708,7 +708,7 @@ bool MWDialogue::Filter::hasFactionRankReputationRequirements(
 
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
-    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReaction;
+    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReputation;
 }
 
 MWDialogue::Filter::Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)

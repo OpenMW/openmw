@@ -35,7 +35,7 @@ namespace MWLua
         addModelProperty(record);
         record["mwscript"] = sol::readonly_property([](const ESM::Lockpick& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Lockpick& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         record["maxCondition"]
             = sol::readonly_property([](const ESM::Lockpick& rec) -> int { return rec.mData.mUses; });

@@ -86,9 +86,9 @@ namespace MWLua
         LuaUi::clearSettings();
     }
 
-    void LuaManager::initConfiguration()
+    void LuaManager::initConfiguration(bool reload)
     {
-        mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg());
+        mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(), reload);
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);
@@ -96,7 +96,36 @@ namespace MWLua
         mGlobalScripts.setAutoStartConf(mConfiguration.getGlobalConf());
     }
 
-    void LuaManager::init()
+    void LuaManager::initPreLoad()
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            Context context;
+            context.mType = Context::Load;
+            context.mLuaManager = this;
+            context.mLua = &mLua;
+
+            for (const auto& [name, package] : initCommonPackages(context))
+                mLua.addCommonPackage(name, package);
+
+            for (const auto& [name, package] : initLoadPackages(context))
+                mLoadScripts.addPackage(name, package);
+
+            mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
+
+            LuaUtil::LuaStorage::initLuaBindings(view);
+        });
+    }
+
+    void LuaManager::contentFilesLoaded()
+    {
+        initConfiguration(false);
+        mLoadScripts.setAutoStartConf(mConfiguration.getLoadConf());
+        mLoadScripts.addAutoStartedScripts();
+        mLoadScripts.contentFilesLoaded();
+        mLoadScripts.removeAllScripts();
+    }
+
+    void LuaManager::initPostLoad()
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
             Context globalContext;
@@ -114,8 +143,6 @@ namespace MWLua
             Context menuContext = globalContext;
             menuContext.mType = Context::Menu;
 
-            for (const auto& [name, package] : initCommonPackages(globalContext))
-                mLua.addCommonPackage(name, package);
             for (const auto& [name, package] : initGlobalPackages(globalContext))
                 mGlobalScripts.addPackage(name, package);
             for (const auto& [name, package] : initMenuPackages(menuContext))
@@ -126,7 +153,6 @@ namespace MWLua
             mPlayerPackages = initPlayerPackages(localContext);
             mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
 
-            LuaUtil::LuaStorage::initLuaBindings(view);
             mGlobalScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(view, &mGlobalStorage));
             mMenuScripts.addPackage(
                 "openmw.storage", LuaUtil::LuaStorage::initMenuPackage(view, &mGlobalStorage, &mPlayerStorage));
@@ -137,7 +163,6 @@ namespace MWLua
             mPlayerStorage.setActive(true);
             mGlobalStorage.setActive(false);
 
-            initConfiguration();
             mInitialized = true;
             mMenuScripts.addAutoStartedScripts();
         });
@@ -448,6 +473,28 @@ namespace MWLua
         mLuaEvents.addLocalEvent({ getId(actor), "Died", {} });
     }
 
+    void LuaManager::onDialogueResponse(
+        const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record)
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table data = view.newTable();
+            data["actor"] = LObject(actor);
+            if (record.mType == ESM::Dialogue::Type::Greeting)
+                data["type"] = "greeting";
+            else if (record.mType == ESM::Dialogue::Type::Journal)
+                data["type"] = "journal";
+            else if (record.mType == ESM::Dialogue::Type::Persuasion)
+                data["type"] = "persuasion";
+            else if (record.mType == ESM::Dialogue::Type::Topic)
+                data["type"] = "topic";
+            else if (record.mType == ESM::Dialogue::Type::Voice)
+                data["type"] = "voice";
+            data["infoId"] = info.mId.serializeText();
+            data["recordId"] = record.mId.serializeText();
+            sendLocalEvent(mPlayer, "DialogueResponse", data);
+        });
+    }
+
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
@@ -497,6 +544,13 @@ namespace MWLua
             if (auto* scripts = actor.getRefData().getLuaScripts())
                 scripts->onPlayAnimation(groupname, options);
         });
+    }
+
+    void LuaManager::animationEnded(const MWWorld::Ptr& actor, std::string_view groupname, float time, float completion,
+        std::string_view startKey, std::string_view stopKey)
+    {
+        mEngineEvents.addToQueue(EngineEvents::OnAnimationEnded{
+            getId(actor), std::string(groupname), std::string(startKey), std::string(stopKey), time, completion });
     }
 
     void LuaManager::skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale)
@@ -661,6 +715,7 @@ namespace MWLua
 
         writer.writeHNT<double>("LUAW", MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime());
         writer.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
+        mConfiguration.write(writer);
         ESM::LuaScripts globalScripts;
         mGlobalScripts.save(globalScripts);
         globalScripts.save(writer);
@@ -681,6 +736,8 @@ namespace MWLua
         if (lastGenerated.hasContentFile())
             throw std::runtime_error("Last generated RefNum is invalid");
         MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
+
+        mConfiguration.read(reader);
 
         // TODO: don't execute scripts right away, it will be necessary in multiplayer where global storage requires
         // initialization. For now just set global storage as active slightly before it would be set by gameLoaded()
@@ -735,7 +792,6 @@ namespace MWLua
         mLua.dropScriptCache();
         mInputActions.clear(true);
         mInputTriggers.clear(true);
-        initConfiguration();
 
         ESM::LuaScripts globalData;
 
@@ -758,6 +814,8 @@ namespace MWLua
             scripts->save(data);
             localData[id] = std::move(data);
         }
+
+        initConfiguration(true);
 
         mMenuScripts.removeAllScripts();
 

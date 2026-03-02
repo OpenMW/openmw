@@ -3,10 +3,10 @@
 
 #include <algorithm>
 #include <deque>
-#include <string>
 #include <unordered_map>
 
 #include <components/esm/refid.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "soundoutput.hpp"
 
@@ -78,14 +78,14 @@ namespace MWSound
 
         /// Lookup a sound by file name for its sound data (resource name, local volume,
         /// minRange, and maxRange)
-        SoundBuffer* lookup(std::string_view fileName) const;
+        SoundBuffer* lookup(VFS::Path::NormalizedView fileName) const;
 
         /// Lookup a soundId for its sound data (resource name, local volume,
         /// minRange, and maxRange), and ensure it's ready for use.
         SoundBuffer* load(const ESM::RefId& soundId);
 
         // Lookup for a sound by file name, and ensure it's ready for use.
-        SoundBuffer* load(std::string_view fileName);
+        SoundBuffer* load(VFS::Path::NormalizedView fileName);
 
         void use(SoundBuffer& sfx)
         {
@@ -111,7 +111,7 @@ namespace MWSound
         SoundOutput* mOutput;
         std::deque<SoundBuffer> mSoundBuffers;
         std::unordered_map<ESM::RefId, SoundBuffer*> mBufferNameMap;
-        std::unordered_map<std::string, SoundBuffer*> mBufferFileNameMap;
+        std::unordered_map<VFS::Path::Normalized, SoundBuffer*, VFS::Path::Hash, std::equal_to<>> mBufferFileNameMap;
         std::size_t mBufferCacheMax;
         std::size_t mBufferCacheMin;
         std::size_t mBufferCacheSize = 0;
@@ -121,7 +121,7 @@ namespace MWSound
         SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM::Sound& sound);
         SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM4::Sound& sound);
         SoundBuffer* insertSound(const ESM::RefId& soundId, const ESM4::SoundReference& sound);
-        SoundBuffer* insertSound(std::string_view fileName);
+        SoundBuffer* insertSound(VFS::Path::NormalizedView fileName);
 
         inline void unloadUnused();
     };

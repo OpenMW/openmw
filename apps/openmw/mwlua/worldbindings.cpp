@@ -5,6 +5,8 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -208,6 +210,14 @@ namespace MWLua
                 ESM::NPC copy = npc;
                 copy.mId = {};
                 return MWBase::Environment::get().getESMStore()->insert(copy);
+            },
+            [lua = context.mLua](const ESM::Creature& crea) -> const ESM::Creature* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(crea);
+            },
+            [lua = context.mLua](const ESM::Container& cont) -> const ESM::Container* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(cont);
             },
             [lua = context.mLua](const ESM::Weapon& weapon) -> const ESM::Weapon* {
                 checkGameInitialized(lua);

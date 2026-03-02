@@ -10,6 +10,10 @@ target_link_libraries(openmw-bulletobjecttool
     components
 )
 
+if (WIN32)
+    target_sources(openmw-bulletobjecttool PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
+
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-bulletobjecttool PRIVATE --coverage)
     target_link_libraries(openmw-bulletobjecttool gcov)
@@ -20,8 +24,5 @@ if (WIN32)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(openmw-bulletobjecttool PRIVATE
-        <string>
-        <vector>
-    )
+    target_precompile_headers(openmw-bulletobjecttool REUSE_FROM components)
 endif()

@@ -386,6 +386,12 @@ testing.registerGlobalTest('mwscript magic interactions', function()
     testing.expectEqual(globals.OpenMW_Tests_Failed, 0, 'OpenMW_Tests should run without issue')
 end)
 
+testing.registerGlobalTest('load script generated static', function()
+    local record = types.Static.records.OMW_Generated_Static
+    testing.expectNotEqual(record, nil, 'OMW_Generated_Static should have been generated')
+    testing.expectEqual(record.model, 'meshes/generatedonload.nif')
+end)
+
 return {
     engineHandlers = {
         onUpdate = testing.updateGlobal,

@@ -130,7 +130,7 @@ int MWDialogue::SelectWrapper::getArgument() const
             return 22;
         case ESM::DialogueCondition::Function_PcMarksman:
             return 23;
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
             return 24;
         case ESM::DialogueCondition::Function_PcSpeechcraft:
             return 25;
@@ -193,7 +193,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         case ESM::DialogueCondition::Function_FriendHit:

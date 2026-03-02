@@ -64,11 +64,12 @@ namespace
 
         geom->setVertexArray(verts);
 
+        // This expects Y-down texture convention
         osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array;
-        texcoords->push_back(osg::Vec2f(0, 1));
         texcoords->push_back(osg::Vec2f(0, 0));
-        texcoords->push_back(osg::Vec2f(1, 0));
+        texcoords->push_back(osg::Vec2f(0, 1));
         texcoords->push_back(osg::Vec2f(1, 1));
+        texcoords->push_back(osg::Vec2f(1, 0));
 
         osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
         colors->push_back(osg::Vec4(1.f, 1.f, 1.f, 1.f));
@@ -1146,7 +1147,7 @@ namespace MWRender
     void RainShooter::shoot(osgParticle::Particle* particle) const
     {
         particle->setVelocity(mVelocity);
-        particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PIf));
+        particle->setAngle(osg::Vec3f(-mAngle, 0.f, 0.f));
     }
 
     void RainShooter::setVelocity(const osg::Vec3f& velocity)

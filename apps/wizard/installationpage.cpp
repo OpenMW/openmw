@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QThread>
 
+#include <components/debug/debugging.hpp>
+
 #include "mainwizard.hpp"
 
 Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings& gameSettings)
@@ -36,7 +38,9 @@ Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings
     connect(mUnshield.get(), &UnshieldWorker::textChanged, logTextEdit, &QPlainTextEdit::appendPlainText,
         Qt::QueuedConnection);
 
-    connect(mUnshield.get(), &UnshieldWorker::textChanged, mWizard, &MainWizard::addLogText, Qt::QueuedConnection);
+    connect(
+        mUnshield.get(), &UnshieldWorker::textChanged, this,
+        [](const QString& text) { Log(Debug::Info) << qUtf8Printable(text); }, Qt::QueuedConnection);
 
     connect(mUnshield.get(), &UnshieldWorker::progressChanged, installProgressBar, &QProgressBar::setValue,
         Qt::QueuedConnection);
@@ -144,34 +148,34 @@ void Wizard::InstallationPage::startInstallation()
 
 void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 {
-    QString name;
+    std::string_view name;
     switch (component)
     {
 
         case Wizard::Component_Morrowind:
-            name = QLatin1String("Morrowind");
+            name = "Morrowind";
             break;
         case Wizard::Component_Tribunal:
-            name = QLatin1String("Tribunal");
+            name = "Tribunal";
             break;
         case Wizard::Component_Bloodmoon:
-            name = QLatin1String("Bloodmoon");
+            name = "Bloodmoon";
             break;
     }
-    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name));
-    mWizard->addLogText(tr("Attempting to install component %1.").arg(name));
+    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(QLatin1String(name)));
+    Log(Debug::Info) << "Attempting to install component " << name << ".";
 
     QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("%1 Installation").arg(name));
+    msgBox.setWindowTitle(tr("%1 Installation").arg(QLatin1String(name)));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setText(
         QObject::tr("Select a valid %1 installation media.<br><b>Hint</b>: make sure that it contains at least one "
                     "<b>.cab</b> file.")
-            .arg(name));
+            .arg(QLatin1String(name)));
     msgBox.exec();
 
-    QString path
-        = QFileDialog::getExistingDirectory(this, tr("Select %1 installation media").arg(name), QDir::rootPath());
+    QString path = QFileDialog::getExistingDirectory(
+        this, tr("Select %1 installation media").arg(QLatin1String(name)), QDir::rootPath());
 
     if (path.isEmpty())
     {
@@ -179,7 +183,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
             tr("<p><br/><span style=\"color:red;\">"
                "<b>Error: The installation was aborted by the user</b></span></p>"));
 
-        mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
+        Log(Debug::Error) << "Error: The installation was aborted by the user";
         mWizard->mError = true;
 
         emit completeChanged();
@@ -192,7 +196,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 void Wizard::InstallationPage::showOldVersionDialog()
 {
     logTextEdit->appendHtml(tr("<p>Detected old version of component Morrowind.</p>"));
-    mWizard->addLogText(tr("Detected old version of component Morrowind."));
+    Log(Debug::Info) << "Detected old version of component Morrowind.";
 
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Morrowind Installation"));
@@ -209,7 +213,7 @@ void Wizard::InstallationPage::showOldVersionDialog()
             tr("<p><br/><span style=\"color:red;\">"
                "<b>Error: The installation was aborted by the user</b></span></p>"));
 
-        mWizard->addLogText(QLatin1String("Error: The installation was aborted by the user"));
+        Log(Debug::Error) << "Error: The installation was aborted by the user";
         mWizard->mError = true;
 
         emit completeChanged();
@@ -240,8 +244,8 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
     logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text));
     logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details));
 
-    mWizard->addLogText(QLatin1String("Error: ") + text);
-    mWizard->addLogText(details);
+    Log(Debug::Error) << "Error: " << qUtf8Printable(text);
+    Log(Debug::Error) << qUtf8Printable(details);
 
     mWizard->mError = true;
     QMessageBox msgBox;

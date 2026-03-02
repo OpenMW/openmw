@@ -76,11 +76,6 @@ namespace MWGui
         }
     }
 
-    void PickpocketItemModel::removeItem(const ItemStack& item, size_t count)
-    {
-        ProxyItemModel::removeItem(item, count);
-    }
-
     bool PickpocketItemModel::onDropItem(const MWWorld::Ptr& item, int count)
     {
         // don't allow "reverse pickpocket" (it will be handled by scripts after 1.0)

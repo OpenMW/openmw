@@ -161,7 +161,7 @@ Combat
    * - ``miss``
      - An attack misses
    * - ``weapon swish``
-     - Melee weapon attack. The sound is modulated based on attack strength.
+     - Melee or thrown weapon attack. The sound is modulated based on attack strength.
 
 
 UI

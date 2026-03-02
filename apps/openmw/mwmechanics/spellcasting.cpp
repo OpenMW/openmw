@@ -320,7 +320,7 @@ namespace MWMechanics
                     ESM::RefId school = ESM::Skill::Alteration;
                     if (!enchantment->mEffects.mList.empty())
                     {
-                        short effectId = enchantment->mEffects.mList.front().mData.mEffectID;
+                        ESM::RefId effectId = enchantment->mEffects.mList.front().mData.mEffectID;
                         const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().find(effectId);
                         school = magicEffect->mData.mSchool;
                     }
@@ -509,8 +509,8 @@ namespace MWMechanics
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect(castStaticModel.value(), ESM::MagicEffect::indexToName(effect->mIndex), false, {},
-                    effect->mParticle);
+                animation->addEffect(
+                    castStaticModel.value(), effect->mId.getRefIdString(), false, {}, effect->mParticle);
             }
             else
             {
@@ -585,8 +585,8 @@ namespace MWMechanics
             {
                 const VFS::Path::Normalized castStaticModel
                     = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
-                anim->addEffect(castStaticModel.value(), ESM::MagicEffect::indexToName(magicEffect.mIndex), loop, {},
-                    magicEffect.mParticle);
+                anim->addEffect(
+                    castStaticModel.value(), magicEffect.mId.getRefIdString(), loop, {}, magicEffect.mParticle);
             }
         }
     }

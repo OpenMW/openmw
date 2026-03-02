@@ -95,6 +95,16 @@ namespace MWLua
                 scripts->onAnimationTextKey(event.mGroupname, event.mKey);
         }
 
+        void operator()(const OnAnimationEnded& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onAnimationEnded(
+                    event.mGroupname, event.mStartKey, event.mStopKey, event.mTime, event.mCompletion);
+        }
+
         void operator()(const OnSkillUse& event) const
         {
             MWWorld::Ptr actor = getPtr(event.mActor);

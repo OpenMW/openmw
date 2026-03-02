@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <format>
 #include <map>
 #include <stdexcept>
 
@@ -30,11 +31,11 @@ namespace
 
     std::optional<MWMechanics::EffectKey> toKey(const ESM::Ingredient& ingredient, size_t i)
     {
-        if (ingredient.mData.mEffectID[i] < 0)
+        if (ingredient.mData.mEffectID[i].empty())
             return {};
-        ESM::RefId arg = ESM::Skill::indexToRefId(ingredient.mData.mSkills[i]);
+        ESM::RefId arg = ingredient.mData.mSkills[i];
         if (arg.empty())
-            arg = ESM::Attribute::indexToRefId(ingredient.mData.mAttributes[i]);
+            arg = ingredient.mData.mAttributes[i];
         return MWMechanics::EffectKey(ingredient.mData.mEffectID[i], arg);
     }
 
@@ -176,7 +177,7 @@ void MWMechanics::Alchemy::updateEffects()
 
         if (magicEffect->mData.mBaseCost <= 0)
         {
-            const std::string os = "invalid base cost for magic effect " + std::to_string(effectKey.mId);
+            const std::string os = std::format("invalid base cost for magic effect {}", effectKey.mId.getRefIdString());
             throw std::runtime_error(os);
         }
 
@@ -217,15 +218,12 @@ void MWMechanics::Alchemy::updateEffects()
         if (magnitude > 0 && duration > 0)
         {
             ESM::ENAMstruct effect;
-            effect.mEffectID = static_cast<int16_t>(effectKey.mId);
-
-            effect.mAttribute = -1;
-            effect.mSkill = -1;
+            effect.mEffectID = effectKey.mId;
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(effectKey.mArg));
+                effect.mSkill = effectKey.mArg;
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(effectKey.mArg));
+                effect.mAttribute = effectKey.mArg;
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -621,11 +619,10 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(
         if (alchemySkill < fWortChanceValue * static_cast<int>(i + 1))
             break;
 
-        if (effectID != -1)
+        if (!effectID.empty())
         {
-            const ESM::Attribute* attribute
-                = store->get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(data.mAttributes[i]));
-            const ESM::Skill* skill = store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(data.mSkills[i]));
+            const ESM::Attribute* attribute = store->get<ESM::Attribute>().search(data.mAttributes[i]);
+            const ESM::Skill* skill = store->get<ESM::Skill>().search(data.mSkills[i]);
             std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skill);
 
             effects.push_back(std::move(effect));

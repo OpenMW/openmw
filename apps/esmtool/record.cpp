@@ -6,6 +6,8 @@
 #include <numeric>
 #include <sstream>
 
+#include <osg/Math>
+
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -151,14 +153,17 @@ namespace
         int i = 0;
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
-                      << effect.mData.mEffectID << ")" << std::endl;
-            if (effect.mData.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
+            int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            int skillIdx = ESM::Skill::refIdToIndex(effect.mData.mSkill);
+            int attributeIdx = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
+            if (effectIdx != -1)
+                std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
                           << std::endl;
-            if (effect.mData.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
-                          << (int)effect.mData.mAttribute << ")" << std::endl;
+            if (skillIdx != -1)
+                std::cout << "    Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            if (attributeIdx != -1)
+                std::cout << "    Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")"
+                          << std::endl;
             std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
                       << std::endl;
             // Area is always zero if range type is "Self"
@@ -174,10 +179,11 @@ namespace
     {
         for (const ESM::Transport::Dest& dest : transport)
         {
-            std::cout << std::format("  Destination Position: ({:12.3f},{:12.3f},{:12.3f})\n", dest.mPos.pos[0],
+            std::cout << std::format("  Destination Position: ({:12.3f}, {:12.3f}, {:12.3f})\n", dest.mPos.pos[0],
                 dest.mPos.pos[1], dest.mPos.pos[2]);
-            std::cout << std::format("  Destination Rotation: ({:9.6f},{:9.6f},{:9.6f})\n", dest.mPos.rot[0],
-                dest.mPos.rot[1], dest.mPos.rot[2]);
+            std::cout << std::format("  Destination Rotation: ({:12.3f}, {:12.3f}, {:12.3f})\n",
+                osg::RadiansToDegrees(dest.mPos.rot[0]), osg::RadiansToDegrees(dest.mPos.rot[1]),
+                osg::RadiansToDegrees(dest.mPos.rot[2]));
             if (!dest.mCellName.empty())
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
@@ -750,7 +756,7 @@ namespace EsmTool
                 std::cout << "    Attribute2 Requirement: " << mData.mData.mRankData[i].mAttribute2 << std::endl;
                 std::cout << "    One Skill at Level: " << mData.mData.mRankData[i].mPrimarySkill << std::endl;
                 std::cout << "    Two Skills at Level: " << mData.mData.mRankData[i].mFavouredSkill << std::endl;
-                std::cout << "    Faction Reaction: " << mData.mData.mRankData[i].mFactReaction << std::endl;
+                std::cout << "    Faction Reputation: " << mData.mData.mRankData[i].mFactReputation << std::endl;
             }
         for (const auto& reaction : mData.mReactions)
             std::cout << "  Reaction: " << reaction.second << " = " << reaction.first << std::endl;
@@ -840,15 +846,16 @@ namespace EsmTool
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
         for (int i = 0; i != 4; i++)
         {
-            // A value of -1 means no effect
-            if (mData.mData.mEffectID[i] == -1)
+            // A value of EmptyRefId means no effect
+            if (mData.mData.mEffectID[i].empty())
                 continue;
-            std::cout << "  Effect: " << magicEffectLabel(mData.mData.mEffectID[i]) << " (" << mData.mData.mEffectID[i]
-                      << ")" << std::endl;
-            std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i]) << " (" << mData.mData.mSkills[i] << ")"
-                      << std::endl;
-            std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i]) << " ("
-                      << mData.mData.mAttributes[i] << ")" << std::endl;
+
+            int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
+            int skillIdx = ESM::Skill::refIdToIndex(mData.mData.mSkills[i]);
+            int attributeIdx = ESM::Attribute::refIdToIndex(mData.mData.mAttributes[i]);
+            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
+            std::cout << "  Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            std::cout << "  Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")" << std::endl;
         }
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -970,7 +977,8 @@ namespace EsmTool
     template <>
     void Record<ESM::MagicEffect>::print()
     {
-        std::cout << "  Index: " << magicEffectLabel(mData.mIndex) << " (" << mData.mIndex << ")" << std::endl;
+        int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mId);
+        std::cout << "  Index: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
@@ -1308,7 +1316,8 @@ namespace EsmTool
         std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
         if (mData.mCellState.mHasFogOfWar)
         {
-            std::cout << "  North Marker Angle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  North Marker Angle: " << osg::RadiansToDegrees(mData.mFogState.mNorthMarkerAngle)
+                      << std::endl;
             std::cout << "  Bounds:" << std::endl;
             std::cout << "    Min X: " << mData.mFogState.mBounds.mMinX << std::endl;
             std::cout << "    Min Y: " << mData.mFogState.mBounds.mMinY << std::endl;

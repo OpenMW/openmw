@@ -212,7 +212,7 @@ namespace MWGui
         const ESM::BirthSign* birth = store.get<ESM::BirthSign>().find(mCurrentBirthId);
 
         mBirthImage->setImageTexture(Misc::ResourceHelpers::correctTexturePath(
-            birth->mTexture, MWBase::Environment::get().getResourceSystem()->getVFS()));
+            VFS::Path::toNormalized(birth->mTexture), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
         std::vector<ESM::RefId> abilities, powers, spells;
 

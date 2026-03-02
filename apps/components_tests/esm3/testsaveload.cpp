@@ -8,6 +8,7 @@
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -524,7 +525,7 @@ namespace ESM
             record.mData.mY = 2;
             record.mData.mZ = 3;
             record.mData.mDuration = 4;
-            record.mTargetActorId = 5;
+            record.mTargetActor = RefNum{ .mIndex = 5, .mContentFile = -1 };
             record.mTargetId = generateRandomRefId(32);
             record.mCellId = generateRandomString(257);
             record.mRemainingDuration = 6;
@@ -540,7 +541,10 @@ namespace ESM
                 EXPECT_EQ(result.mData.mDuration, record.mRemainingDuration);
             else
                 EXPECT_EQ(result.mData.mDuration, record.mData.mDuration);
-            EXPECT_EQ(result.mTargetActorId, record.mTargetActorId);
+            if (GetParam() > MaxActorIdSaveGameFormatVersion)
+            {
+                EXPECT_EQ(result.mTargetActor, record.mTargetActor);
+            }
             EXPECT_EQ(result.mTargetId, record.mTargetId);
             EXPECT_EQ(result.mCellId, record.mCellId);
             EXPECT_EQ(result.mRemainingDuration, record.mRemainingDuration);
@@ -571,9 +575,9 @@ namespace ESM
         {
             EffectList record;
             record.mList.emplace_back(IndexedENAMstruct{ {
-                                                             .mEffectID = 1,
-                                                             .mSkill = 2,
-                                                             .mAttribute = 3,
+                                                             .mEffectID = ESM::MagicEffect::SwiftSwim,
+                                                             .mSkill = ESM::Skill::MediumArmor,
+                                                             .mAttribute = ESM::Attribute::Agility,
                                                              .mRange = 4,
                                                              .mArea = 5,
                                                              .mDuration = 6,

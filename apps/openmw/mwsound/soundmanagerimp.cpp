@@ -487,16 +487,15 @@ namespace MWSound
     }
 
     Sound* SoundManager::playSound(
-        std::string_view fileName, float volume, float pitch, Type type, PlayMode mode, float offset)
+        VFS::Path::NormalizedView fileName, float volume, float pitch, Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
             return nullptr;
 
-        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        if (!mVFS->exists(normalizedName))
+        if (!mVFS->exists(fileName))
             return nullptr;
 
-        SoundBuffer* sfx = mSoundBuffers.load(normalizedName);
+        SoundBuffer* const sfx = mSoundBuffers.load(fileName);
         if (!sfx)
             return nullptr;
 
@@ -584,18 +583,17 @@ namespace MWSound
         return playSound3D(ptr, sfx, volume, pitch, type, mode, offset);
     }
 
-    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, std::string_view fileName, float volume, float pitch,
-        Type type, PlayMode mode, float offset)
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView fileName, float volume,
+        float pitch, Type type, PlayMode mode, float offset)
     {
         if (remove3DSoundAtDistance(mode, ptr))
             return nullptr;
 
         // Look up the sound
-        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        if (!mVFS->exists(normalizedName))
+        if (!mVFS->exists(fileName))
             return nullptr;
 
-        SoundBuffer* sfx = mSoundBuffers.load(normalizedName);
+        SoundBuffer* const sfx = mSoundBuffers.load(fileName);
         if (!sfx)
             return nullptr;
 
@@ -668,13 +666,12 @@ namespace MWSound
         stopSound(sfx, ptr);
     }
 
-    void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, std::string_view fileName)
+    void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView fileName)
     {
         if (!mOutput->isInitialized())
             return;
 
-        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        SoundBuffer* sfx = mSoundBuffers.lookup(normalizedName);
+        SoundBuffer* const sfx = mSoundBuffers.lookup(fileName);
         if (!sfx)
             return;
 
@@ -737,14 +734,12 @@ namespace MWSound
         }
     }
 
-    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, std::string_view fileName) const
+    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, VFS::Path::NormalizedView fileName) const
     {
-        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr.mRef);
         if (snditer != mActiveSounds.end())
         {
-            SoundBuffer* sfx = mSoundBuffers.lookup(normalizedName);
+            SoundBuffer* const sfx = mSoundBuffers.lookup(fileName);
             if (!sfx)
                 return false;
 

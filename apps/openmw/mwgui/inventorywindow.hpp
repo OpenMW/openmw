@@ -5,7 +5,6 @@
 #include "windowpinnablebase.hpp"
 
 #include "../mwrender/characterpreview.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include <components/misc/notnullptr.hpp>
@@ -34,7 +33,7 @@ namespace MWGui
     class ItemModel;
     class ItemTransfer;
 
-    class InventoryWindow : public WindowPinnableBase, public MWWorld::ContainerStoreListener
+    class InventoryWindow : public WindowPinnableBase
     {
     public:
         explicit InventoryWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, osg::Group* parent,
@@ -69,8 +68,7 @@ namespace MWGui
 
         void setGuiMode(GuiMode mode);
 
-        void itemAdded(const MWWorld::ConstPtr& item, int count) override;
-        void itemRemoved(const MWWorld::ConstPtr& item, int count) override;
+        void onInventoryUpdate(const MWWorld::Ptr& ptr) override;
 
         /// Cycle to previous/next weapon
         void cycle(bool next);
@@ -144,6 +142,7 @@ namespace MWGui
         void dragItem(MyGUI::Widget* sender, std::size_t count);
         void transferItem(MyGUI::Widget* sender, std::size_t count);
         void dropItem(MyGUI::Widget* sender, std::size_t count);
+        void equipItem(std::size_t count);
 
         void onWindowResize(MyGUI::Window* sender);
         void onFilterChanged(MyGUI::Widget* sender);

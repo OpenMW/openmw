@@ -42,21 +42,6 @@ namespace MWGui
         {
         }
 
-        MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
-        {
-            return dropItemImpl(item, static_cast<int>(count), false);
-        }
-
-        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
-        {
-            return dropItemImpl(item, static_cast<int>(count), true);
-        }
-
-        void removeItem(const ItemStack& /*item*/, size_t /*count*/) override
-        {
-            throw std::runtime_error("WorldItemModel::removeItem is not implemented");
-        }
-
         ModelIndex getIndex(const ItemStack& /*item*/) override
         {
             throw std::runtime_error("WorldItemModel::getIndex is not implemented");
@@ -72,6 +57,27 @@ namespace MWGui
         }
 
         bool usesContainer(const MWWorld::Ptr&) override { return false; }
+
+    protected:
+        MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
+        {
+            const int prevCount = item.mBase.getCellRef().getCount(false);
+            const int intCount = static_cast<int>(count);
+            item.mBase.getCellRef().setCount(intCount);
+            MWWorld::Ptr ptr = dropItemImpl(item, intCount, false);
+            item.mBase.getCellRef().setCount(prevCount);
+            return ptr;
+        }
+
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
+        {
+            return dropItemImpl(item, static_cast<int>(count), true);
+        }
+
+        void removeItem(const ItemStack& /*item*/, size_t /*count*/) override
+        {
+            throw std::runtime_error("WorldItemModel::removeItem is not implemented");
+        }
 
     private:
         float mCursorX;

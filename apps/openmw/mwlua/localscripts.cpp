@@ -16,6 +16,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include "context.hpp"
+#include "luamanagerimp.hpp"
 
 namespace sol
 {
@@ -31,6 +32,20 @@ namespace sol
 
 namespace MWLua
 {
+    void SelfObject::cacheStat(LuaManager& manager, SelfObject::CachedStat key, sol::main_object value)
+    {
+        if (mStatsCache.empty())
+        {
+            manager.addAction(
+                [obj = Object(*this)] {
+                    LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+                    if (scripts)
+                        scripts->applyStatsCache();
+                },
+                "StatUpdateAction");
+        }
+        mStatsCache[std::move(key)] = std::move(value);
+    }
 
     void LocalScripts::initializeSelfPackage(const Context& context)
     {
@@ -170,34 +185,25 @@ namespace MWLua
                                         float duration, const osg::Vec3f& dest, bool repeat, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            std::string_view cellNameId;
             if (cell)
-            {
-                ai.stack(MWMechanics::AiFollow(target.ptr().getCellRef().getRefId(),
-                             cell->mStore->getCell()->getNameId(), duration, dest.x(), dest.y(), dest.z(), repeat),
-                    ptr, cancelOther);
-            }
-            else
-            {
-                ai.stack(MWMechanics::AiFollow(
-                             target.ptr().getCellRef().getRefId(), duration, dest.x(), dest.y(), dest.z(), repeat),
-                    ptr, cancelOther);
-            }
+                cellNameId = cell->mStore->getCell()->getNameId();
+            ai.stack(
+                MWMechanics::AiFollow(getId(target.ptr()), cellNameId, duration, dest.x(), dest.y(), dest.z(), repeat),
+                ptr, cancelOther);
         };
         selfAPI["_startAiEscort"] = [](SelfObject& self, const LObject& target, LCell cell, float duration,
                                         const osg::Vec3f& dest, bool repeat, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
-            const ESM::RefId& refId = target.ptr().getCellRef().getRefId();
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
             auto* esmCell = cell.mStore->getCell();
-            if (esmCell->isExterior())
-                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), repeat), ptr,
-                    cancelOther);
-            else
-                ai.stack(MWMechanics::AiEscort(
-                             refId, esmCell->getNameId(), gameHoursDuration, dest.x(), dest.y(), dest.z(), repeat),
-                    ptr, cancelOther);
+            std::string_view cellNameId;
+            if (!esmCell->isExterior())
+                cellNameId = esmCell->getNameId();
+            ai.stack(MWMechanics::AiEscort(
+                         getId(target.ptr()), cellNameId, gameHoursDuration, dest.x(), dest.y(), dest.z(), repeat),
+                ptr, cancelOther);
         };
         selfAPI["_startAiWander"]
             = [](SelfObject& self, int distance, int duration, sol::table luaIdle, bool repeat, bool cancelOther) {
@@ -227,8 +233,8 @@ namespace MWLua
         lua->protectedCall(
             [&](LuaUtil::LuaView& view) { addPackage("openmw.self", sol::make_object(view.sol(), &mData)); });
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
-            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse,
-            &mOnSkillLevelUp, &mOnJailTimeServed });
+            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnAnimationEndedHandlers,
+            &mOnSkillUse, &mOnSkillLevelUp, &mOnJailTimeServed });
     }
 
     void LocalScripts::setActive(bool active, bool callHandlers)

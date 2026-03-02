@@ -897,9 +897,7 @@ namespace MWRender
 
         mResourceSystem->getSceneManager()->getShaderManager().update(*mViewer);
 
-        float rainIntensity = mSky->getPrecipitationAlpha();
-        mWater->setRainIntensity(rainIntensity);
-        mWater->setRainRipplesEnabled(mSky->getRainRipplesEnabled());
+        mWater->setRainIntensity(mSky->getRainRipplesEnabled() ? mSky->getPrecipitationAlpha() : 0.f);
 
         mWater->update(dt, paused);
         if (!paused)

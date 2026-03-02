@@ -6,6 +6,7 @@
 #include <components/esm3/inventorystate.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -144,6 +145,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(
 
     if (mListener)
         mListener->itemAdded(*retVal, count);
+    MWBase::Environment::get().getWindowManager()->inventoryUpdated(actor);
 
     return retVal;
 }
@@ -603,6 +605,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, bool equipReplac
 
     if (mListener)
         mListener->itemRemoved(item, retCount);
+    MWBase::Environment::get().getWindowManager()->inventoryUpdated(actor);
 
     return retCount;
 }

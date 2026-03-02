@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__OpenBSD__)
 #ifndef ANDROID
@@ -66,7 +67,6 @@ namespace Files
             , mLocalPath(mPath.getLocalPath())
             , mGlobalDataPath(mPath.getGlobalDataPath())
             , mCachePath(mPath.getCachePath())
-            , mInstallPath(mPath.getInstallPath())
         {
         }
 
@@ -87,7 +87,7 @@ namespace Files
          */
         const std::filesystem::path& getLocalPath() const { return mLocalPath; }
 
-        const std::filesystem::path& getInstallPath() const { return mInstallPath; }
+        std::vector<std::filesystem::path> getInstallPaths() const { return mPath.getInstallPaths(); }
 
         const std::filesystem::path& getGlobalDataPath() const { return mGlobalDataPath; }
 
@@ -104,8 +104,6 @@ namespace Files
         std::filesystem::path mGlobalDataPath; /**< Global application data path */
 
         std::filesystem::path mCachePath;
-
-        std::filesystem::path mInstallPath;
     };
 
 } /* namespace Files */

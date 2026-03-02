@@ -211,10 +211,9 @@ namespace Nif
             nif->read(mSpawnMultiplier);
             nif->read(mSpawnSpeedChaos);
             nif->read(mSpawnDirChaos);
-            mParticles.resize(nif->get<uint16_t>());
+            const uint16_t numParticles = nif->get<uint16_t>();
             nif->read(mNumValid);
-            for (NiParticleInfo& particle : mParticles)
-                particle.read(nif);
+            nif->readVectorOfRecords(numParticles, mParticles);
             nif->skip(4); // NiEmitterModifier link
         }
         mModifier.read(nif);
@@ -347,9 +346,7 @@ namespace Nif
     {
         NiInterpController::read(nif);
 
-        mExtraTargets.resize(nif->get<uint16_t>());
-        for (NiAVObjectPtr& extraTarget : mExtraTargets)
-            extraTarget.read(nif);
+        nif->readVectorOfRecords<uint16_t>(mExtraTargets);
     }
 
     void NiMultiTargetTransformController::post(Reader& nif)
@@ -413,12 +410,13 @@ namespace Nif
             return;
         }
 
-        mInterpolators.resize(nif->get<uint32_t>());
-        mWeights.resize(mInterpolators.size());
-        for (size_t i = 0; i < mInterpolators.size(); i++)
+        const uint32_t numInterpolators = nif->get<uint32_t>();
+        mInterpolators.reserve(numInterpolators);
+        mWeights.reserve(numInterpolators);
+        for (size_t i = 0; i < numInterpolators; ++i)
         {
-            mInterpolators[i].read(nif);
-            nif->read(mWeights[i]);
+            mInterpolators.emplace_back().read(nif);
+            nif->read(mWeights.emplace_back());
         }
     }
 
@@ -534,7 +532,7 @@ namespace Nif
         // Is this possible?
         if (numKeys != 0)
             throw Nif::Exception(
-                "Unsupported keys in bhkBlendController " + std::to_string(recIndex), nif->getFile().getFilename());
+                "Unsupported keys in bhkBlendController " + std::to_string(mRecordIndex), nif->getFile().getFilename());
     }
 
     void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
@@ -733,7 +731,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
         {
             nif->read(mFlags);
-            mItems.resize(nif->get<uint8_t>());
+            const uint8_t numItems = nif->get<uint8_t>();
             nif->read(mWeightThreshold);
             if (!(mFlags & Flag_ManagerControlled))
             {
@@ -745,17 +743,14 @@ namespace Nif
                 nif->read(mHighWeightsSum);
                 nif->read(mNextHighWeightsSum);
                 nif->read(mHighEaseSpinner);
-                for (Item& item : mItems)
-                    item.read(nif);
+                nif->readVectorOfRecords(numItems, mItems);
             }
             return;
         }
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 110))
         {
-            mItems.resize(nif->get<uint8_t>());
-            for (Item& item : mItems)
-                item.read(nif);
+            nif->readVectorOfRecords<uint8_t>(mItems);
             if (nif->get<bool>())
                 mFlags |= Flag_ManagerControlled;
             nif->read(mWeightThreshold);
@@ -770,10 +765,9 @@ namespace Nif
             return;
         }
 
-        mItems.resize(nif->get<uint16_t>());
+        const uint16_t numItems = nif->get<uint16_t>();
         nif->read(mArrayGrowBy);
-        for (Item& item : mItems)
-            item.read(nif);
+        nif->readVectorOfRecords(numItems, mItems);
         if (nif->get<bool>())
             mFlags |= Flag_ManagerControlled;
         nif->read(mWeightThreshold);

@@ -484,7 +484,8 @@ namespace MWGui
         // Reset the image for the case we're unable to recover a screenshot
         mScreenshotTexture.reset();
         mScreenshot->setRenderItemTexture(nullptr);
-        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        // The widget is Y-down, the screenshot is Y-up, so this UV is inverted
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
         // Decode screenshot
         const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;

@@ -577,6 +577,50 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>Text file (*.txt)</source>
         <translation>Textfil (*.txt)</translation>
     </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Öppna katalog</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Öppna %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Lokal konfigurationskatalog används eftersom den innehåller en openmw.cfg.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Lokal konfigurationskatalog används eftersom den innehåller en openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Global konfigurationskatalog används eftersom den lokala konfigurationskatalogen inte innehöll en openmw.cfg.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.
+Det här är oftast ett symtom på en trasig OpenMW-installation eller ett dåligt paket.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Global konfigurationskatalog används eftersom den lokala konfigurationskatalogen inte innehöll en openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Användarens konfigurationskatalog används eftersom %1 innehåller raden config=%2.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Användarens konfigurationskatalog används eftersom %1 innehåller raden config=%2.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -1493,6 +1537,10 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kontrollerar styrkan på dopplereffekten. Noll innebär helt inaktiverat.&lt;/p&gt;&lt;p&gt;Dopplereffekten höjer eller sänker tonhöjden på ljud i förhållande till ljudkällans hastighet och lyssnaren.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Aktiva konfigurationskataloger</translation>
     </message>
 </context>
 </TS>

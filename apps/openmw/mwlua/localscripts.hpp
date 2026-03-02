@@ -15,6 +15,8 @@
 namespace MWLua
 {
     struct Context;
+    class LocalScripts;
+    class LuaManager;
 
     struct SelfObject : public LObject
     {
@@ -52,9 +54,22 @@ namespace MWLua
             , mIsActive(false)
         {
         }
+
+        const sol::main_object* getCachedStat(const CachedStat& key) const
+        {
+            auto it = mStatsCache.find(key);
+            if (it != mStatsCache.end())
+                return &it->second;
+            return nullptr;
+        }
+        void cacheStat(LuaManager&, CachedStat, sol::main_object);
+
         MWBase::LuaManager::ActorControls mControls;
-        std::map<CachedStat, sol::main_object> mStatsCache;
         bool mIsActive;
+
+    private:
+        friend class LocalScripts;
+        std::map<CachedStat, sol::main_object> mStatsCache;
     };
 
     class LocalScripts : public LuaUtil::ScriptsContainer
@@ -78,6 +93,11 @@ namespace MWLua
         void onPlayAnimation(std::string_view groupname, const sol::table& options)
         {
             callEngineHandlers(mOnPlayAnimationHandlers, groupname, options);
+        }
+        void onAnimationEnded(std::string_view groupname, std::string_view startKey, std::string_view stopKey,
+            float time, float completion)
+        {
+            callEngineHandlers(mOnAnimationEndedHandlers, groupname, startKey, stopKey, time, completion);
         }
         void onSkillUse(std::string_view skillId, int useType, float scale)
         {
@@ -115,6 +135,7 @@ namespace MWLua
         EngineHandlerList mOnTeleportedHandlers{ "onTeleported" };
         EngineHandlerList mOnAnimationTextKeyHandlers{ "_onAnimationTextKey" };
         EngineHandlerList mOnPlayAnimationHandlers{ "_onPlayAnimation" };
+        EngineHandlerList mOnAnimationEndedHandlers{ "_onAnimationEnded" };
         EngineHandlerList mOnSkillUse{ "_onSkillUse" };
         EngineHandlerList mOnSkillLevelUp{ "_onSkillLevelUp" };
         EngineHandlerList mOnJailTimeServed{ "_onJailTimeServed" };

@@ -63,6 +63,8 @@ namespace MWMechanics
         float mCheckIdlePositionTimer;
         int mStuckCount;
 
+        bool mGreeting{ false };
+
         AiWanderStorage();
 
         void setState(const WanderState wanderState, const bool isManualWander = false)

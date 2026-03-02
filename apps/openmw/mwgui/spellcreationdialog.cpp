@@ -1,5 +1,7 @@
 #include "spellcreationdialog.hpp"
 
+#include <format>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
@@ -33,25 +35,19 @@
 namespace
 {
 
-    bool sortMagicEffects(short id1, short id2)
+    bool sortMagicEffects(const ESM::MagicEffect* effect1, const ESM::MagicEffect* effect2)
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-        return gmst.find(ESM::MagicEffect::indexToGmstString(id1))->mValue.getString()
-            < gmst.find(ESM::MagicEffect::indexToGmstString(id2))->mValue.getString();
+        return effect1->mName < effect2->mName;
     }
 
     void init(ESM::ENAMstruct& effect)
     {
         effect.mArea = 0;
         effect.mDuration = 0;
-        effect.mEffectID = -1;
+        effect.mEffectID = ESM::RefId();
         effect.mMagnMax = 0;
         effect.mMagnMin = 0;
         effect.mRange = 0;
-        effect.mSkill = -1;
-        effect.mAttribute = -1;
     }
 }
 
@@ -145,8 +141,8 @@ namespace MWGui
         mEffect.mMagnMax = 1;
         mEffect.mDuration = 1;
         mEffect.mArea = 0;
-        mEffect.mSkill = -1;
-        mEffect.mAttribute = -1;
+        mEffect.mSkill = ESM::RefId();
+        mEffect.mAttribute = ESM::RefId();
         eventEffectAdded(mEffect);
 
         onRangeButtonClicked(mRangeButton);
@@ -220,11 +216,11 @@ namespace MWGui
     void EditEffectDialog::setMagicEffect(const ESM::MagicEffect* effect)
     {
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-            effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
+            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::indexToGmstString(effect->mIndex) + "}");
+        mEffectName->setCaption(effect->mName);
 
-        mEffect.mEffectID = static_cast<int16_t>(effect->mIndex);
+        mEffect.mEffectID = effect->mId;
 
         mMagicEffect = effect;
 
@@ -333,13 +329,13 @@ namespace MWGui
 
     void EditEffectDialog::setSkill(ESM::RefId skill)
     {
-        mEffect.mSkill = static_cast<signed char>(ESM::Skill::refIdToIndex(skill));
+        mEffect.mSkill = skill;
         eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::setAttribute(ESM::RefId attribute)
     {
-        mEffect.mAttribute = static_cast<signed char>(ESM::Attribute::refIdToIndex(attribute));
+        mEffect.mAttribute = attribute;
         eventEffectModified(mEffect);
     }
 
@@ -761,7 +757,7 @@ namespace MWGui
         , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
         , mSelectedEffect(0)
-        , mSelectedKnownEffectId(0)
+        , mSelectedKnownEffectId(ESM::RefId())
         , mConstantEffect(false)
         , mType(type)
     {
@@ -782,7 +778,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
-        std::vector<short> knownEffects;
+        std::vector<const ESM::MagicEffect*> knownEffects;
 
         for (const ESM::Spell* spell : spells)
         {
@@ -792,9 +788,8 @@ namespace MWGui
 
             for (const ESM::IndexedENAMstruct& effectInfo : spell->mEffects.mList)
             {
-                int16_t effectId = effectInfo.mData.mEffectID;
-                const ESM::MagicEffect* effect
-                    = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
+                const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
+                    effectInfo.mData.mEffectID);
 
                 // skip effects that do not allow spellmaking/enchanting
                 int requiredFlags
@@ -802,8 +797,8 @@ namespace MWGui
                 if (!(effect->mData.mFlags & requiredFlags))
                     continue;
 
-                if (std::find(knownEffects.begin(), knownEffects.end(), effectId) == knownEffects.end())
-                    knownEffects.push_back(effectId);
+                if (std::find(knownEffects.begin(), knownEffects.end(), effect) == knownEffects.end())
+                    knownEffects.push_back(effect);
             }
         }
 
@@ -812,31 +807,22 @@ namespace MWGui
         mAvailableEffectsList->clear();
 
         int i = 0;
-        for (const short effectId : knownEffects)
+        for (const auto effect : knownEffects)
         {
-            mAvailableEffectsList->addItem(MWBase::Environment::get()
-                                               .getESMStore()
-                                               ->get<ESM::GameSetting>()
-                                               .find(ESM::MagicEffect::indexToGmstString(effectId))
-                                               ->mValue.getString());
-            mButtonMapping[i] = effectId;
+            mAvailableEffectsList->addItem(effect->mName);
+            mButtonMapping[i] = effect->mId;
             ++i;
         }
         mAvailableEffectsList->adjustSize();
         mAvailableEffectsList->scrollToTop();
 
         mAvailableButtons.clear();
-        for (const short effectId : knownEffects)
+        for (const auto effect : knownEffects)
         {
-            const std::string& name = MWBase::Environment::get()
-                                          .getESMStore()
-                                          ->get<ESM::GameSetting>()
-                                          .find(ESM::MagicEffect::indexToGmstString(effectId))
-                                          ->mValue.getString();
-            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(name);
+            MyGUI::Button* w = mAvailableEffectsList->getItemWidget(effect->mName);
             mAvailableButtons.emplace_back(w);
 
-            ToolTips::createMagicEffectToolTip(w, effectId);
+            ToolTips::createMagicEffectToolTip(w, effect->mId);
         }
 
         mEffects.clear();
@@ -973,8 +959,8 @@ namespace MWGui
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
+            params.mSkill = effectInfo.mSkill;
+            params.mAttribute = effectInfo.mAttribute;
             params.mDuration = effectInfo.mDuration;
             params.mMagnMin = effectInfo.mMagnMin;
             params.mMagnMax = effectInfo.mMagnMax;

@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QProcess>
 
+#include <components/debug/debugging.hpp>
 #include <components/files/qtconfigpath.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/utf8qtextstream.hpp>
@@ -57,86 +58,26 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     connect(mImporterInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &MainWizard::importerFinished);
 
-    mLogError = tr(
-        "<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-        "<p>Please make sure you have the right permissions "
-        "and try again.</p></body></html>");
-
     std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
 
-    setupLog();
+    // Added the initial log message in place of the old setupLog() call
+    // since the log file is now created in the entrypoint
+    Log(Debug::Info) << "Started OpenMW Wizard on " << QDateTime::currentDateTime().toString().toUtf8().constData();
     setupGameSettings();
     setupLauncherSettings();
     setupInstallations();
     setupPages();
 
-    const std::filesystem::path& installationPath = mCfgMgr.getInstallPath();
-    if (!installationPath.empty())
+    for (const std::filesystem::path& installationPath : mCfgMgr.getInstallPaths())
     {
-        const std::filesystem::path& dataPath = installationPath / "Data Files";
-        addInstallation(Files::pathToQString(dataPath));
+        addInstallation(Files::pathToQString(installationPath / "Data Files"));
     }
 }
 
 Wizard::MainWizard::~MainWizard()
 {
     delete mImporterInvoker;
-}
-
-void Wizard::MainWizard::setupLog()
-{
-    QString logPath(Files::pathToQString(mCfgMgr.getLogPath()));
-    logPath.append(QLatin1String("wizard.log"));
-
-    QFile file(logPath);
-
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(mLogError.arg(file.fileName()));
-        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-        msgBox.exec();
-        return;
-    }
-
-    addLogText(QString("Started OpenMW Wizard on %1").arg(QDateTime::currentDateTime().toString()));
-
-    qDebug() << logPath;
-}
-
-void Wizard::MainWizard::addLogText(const QString& text)
-{
-    QString logPath(Files::pathToQString(mCfgMgr.getLogPath()));
-    logPath.append(QLatin1String("wizard.log"));
-
-    QFile file(logPath);
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(mLogError.arg(file.fileName()));
-        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-        msgBox.exec();
-        return;
-    }
-
-    if (!file.isSequential())
-        file.seek(file.size());
-
-    QTextStream out(&file);
-
-    if (!text.isEmpty())
-    {
-        out << text << "\n";
-        out.flush();
-    }
 }
 
 void Wizard::MainWizard::setupGameSettings()

@@ -120,8 +120,16 @@ namespace LuaUi
                 auto it = w->mCallbacks.find(name);
                 if (it != w->mCallbacks.end())
                 {
-                    sol::object res = it->second.call(argumentFactory(w), w->mLayout);
-                    shouldPropagate = res.is<bool>() && res.as<bool>();
+                    try
+                    {
+                        sol::object res = it->second.call(argumentFactory(w), w->mLayout);
+                        shouldPropagate = res.is<bool>() && res.as<bool>();
+                    }
+                    catch (const std::exception& e)
+                    {
+                        Log(Debug::Warning) << name << " event propagation has failed: " << e.what();
+                        shouldPropagate = false;
+                    }
                 }
                 if (w->mParent && w->mPropagateEvents && shouldPropagate)
                     w = w->mParent;

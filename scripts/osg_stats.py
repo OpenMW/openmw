@@ -72,12 +72,14 @@ import termtables
               help='Threshold for hist_over.')
 @click.option('--show_common_path_prefix', is_flag=True,
               help='Show common path prefix when applied to multiple files.')
+@click.option('--moving_average_window', type=click.IntRange(min=1),
+              help='Transform timeseries values to moving average with window of given number of points.')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          cumulative_timeseries, cumulative_timeseries_sum, frame_number_name,
          hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by,
-         timeseries_delta, timeseries_delta_sum, stats_table_format):
+         timeseries_delta, timeseries_delta_sum, stats_table_format, moving_average_window):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     if not show_common_path_prefix and len(sources) > 1:
         longest_common_prefix = os.path.commonprefix(list(sources.keys()))
@@ -94,15 +96,19 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
         if regexp_match:
             return [key for pattern in patterns for key in keys if re.search(pattern, key)]
         return patterns
+    convolve = None
+    if moving_average_window is not None:
+        convolve = numpy.ones(moving_average_window) / float(moving_average_window)
     if timeseries:
-        draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum,
+        draw_timeseries(sources=frames, keys=matching_keys(timeseries), add_sum=timeseries_sum, convolve=convolve,
                         begin_frame=begin_frame, end_frame=end_frame)
     if cumulative_timeseries:
-        draw_cumulative_timeseries(sources=frames, keys=matching_keys(cumulative_timeseries), add_sum=cumulative_timeseries_sum,
-                                    begin_frame=begin_frame, end_frame=end_frame)
+        draw_cumulative_timeseries(sources=frames, keys=matching_keys(cumulative_timeseries),
+                                   add_sum=cumulative_timeseries_sum, convolve=convolve, begin_frame=begin_frame,
+                                   end_frame=end_frame)
     if timeseries_delta:
         draw_timeseries_delta(sources=frames, keys=matching_keys(timeseries_delta), add_sum=timeseries_delta_sum,
-                              begin_frame=begin_frame, end_frame=end_frame)
+                              convolve=convolve, begin_frame=begin_frame, end_frame=end_frame)
     if hist:
         draw_hists(sources=frames, keys=matching_keys(hist))
     if hist_ratio:
@@ -173,45 +179,45 @@ def collect_unique_keys(sources):
     return sorted(result)
 
 
-def draw_timeseries(sources, keys, add_sum, begin_frame, end_frame):
+def draw_timeseries(sources, keys, add_sum, convolve, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            y = frames[key]
+            y = maybe_convolve(frames[key], convolve)
             ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = sum_arrays_with_none([frames[k] for k in keys])
+            y = sum_arrays_with_none([maybe_convolve(frames[k], convolve) for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('timeseries')
 
 
-def draw_cumulative_timeseries(sources, keys, add_sum, begin_frame, end_frame):
+def draw_cumulative_timeseries(sources, keys, add_sum, convolve, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            y = cumsum_with_none(frames[key])
+            y = cumsum_with_none(maybe_convolve(frames[key], convolve))
             ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = sum_arrays_with_none([cumsum_with_none(frames[k]) for k in keys])
+            y = sum_arrays_with_none([cumsum_with_none(maybe_convolve(frames[k], convolve)) for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
     fig.canvas.manager.set_window_title('cumulative_timeseries')
 
 
-def draw_timeseries_delta(sources, keys, add_sum, begin_frame, end_frame):
+def draw_timeseries_delta(sources, keys, add_sum, convolve, begin_frame, end_frame):
     fig, ax = matplotlib.pyplot.subplots()
     x = numpy.array(range(begin_frame + 1, end_frame))
     for name, frames in sources.items():
         for key in keys:
-            y = diff_with_none(frames[key])
+            y = diff_with_none(maybe_convolve(frames[key], convolve))
             ax.plot(x[:len(y)], y, label=f'{key}:{name}')
         if add_sum:
-            y = sum_arrays_with_none([diff_with_none(frames[k]) for k in keys])
+            y = sum_arrays_with_none([diff_with_none(maybe_convolve(frames[k], convolve)) for k in keys])
             ax.plot(x[:len(y)], y, label=f'sum:{name}', linestyle='--')
     ax.grid(True)
     ax.legend()
@@ -420,6 +426,12 @@ def sum_arrays_with_none(arrays):
         else:
             result.append(None)
     return numpy.array(result)
+
+
+def maybe_convolve(values, convolve):
+    if convolve is None:
+        return values
+    return numpy.convolve([v or 0 for v in values], convolve, 'valid')
 
 
 if __name__ == '__main__':

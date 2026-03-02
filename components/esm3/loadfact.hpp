@@ -29,7 +29,7 @@ namespace ESM
         // 'mFavouredSkill' to advance to this rank.
         int32_t mPrimarySkill, mFavouredSkill;
 
-        int32_t mFactReaction; // Reaction from faction members
+        int32_t mFactReputation; // Required faction rep
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

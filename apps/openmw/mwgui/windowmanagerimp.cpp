@@ -12,6 +12,7 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_LayerManager.h>
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_UString.h>
 
@@ -209,8 +210,9 @@ namespace MWGui
         SDL_GL_GetDrawableSize(window, &dw, &dh);
 
         mScalingFactor = Settings::gui().mScalingFactor * (dw / w);
+        constexpr VFS::Path::NormalizedView resourcePath("mygui");
         mGuiPlatform = std::make_unique<MyGUIPlatform::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
-            resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
+            resourceSystem->getVFS(), mScalingFactor, resourcePath, logpath / "MyGUI.log");
 
         mGui = std::make_unique<MyGUI::Gui>();
         mGui->initialise({});
@@ -980,6 +982,10 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
             mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
 
+        WindowBase* activeWindow = mGuiModeStates[mode].mWindows[activeIndex];
+        if (activeWindow->isVisible())
+            MyGUI::LayerManager::getInstance().upLayerItem(activeWindow->mMainWidget);
+
         updateControllerButtonsOverlay();
         setCursorActive(false);
 
@@ -1434,11 +1440,17 @@ namespace MWGui
         if (Settings::gui().mControllerMenus)
         {
             if (mode == GM_Container)
-                mActiveControllerWindows[mode] = 0; // Ensure controller focus is on container
-            // Activate first visible window. This needs to be called after updateVisible.
-            if (mActiveControllerWindows[mode] != 0)
-                mActiveControllerWindows[mode] = mActiveControllerWindows[mode] - 1;
-            cycleActiveControllerWindow(true);
+            {
+                // Ensure controller focus is on container when entering container mode.
+                setActiveControllerWindow(mode, 0);
+            }
+            else
+            {
+                // Activate first visible window. This needs to be called after updateVisible.
+                if (mActiveControllerWindows[mode] != 0)
+                    mActiveControllerWindows[mode] = mActiveControllerWindows[mode] - 1;
+                cycleActiveControllerWindow(true);
+            }
         }
     }
 
@@ -2695,5 +2707,11 @@ namespace MWGui
         }
         else
             mInventoryTabsOverlay->setVisible(false);
+    }
+
+    void WindowManager::inventoryUpdated(const MWWorld::Ptr& ptr) const
+    {
+        for (const auto& window : mWindows)
+            window->onInventoryUpdate(ptr);
     }
 }

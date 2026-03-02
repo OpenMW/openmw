@@ -167,7 +167,9 @@ namespace MWRender
 
             std::string mGroupname;
             std::string mStartKey;
+            std::string mStopKey;
 
+            float getCompletion() const;
             float getTime() const { return *mTime; }
             void setTime(float time) { *mTime = time; }
             bool blendMaskContains(size_t blendMask) const { return (mBlendMask & (1 << blendMask)); }
@@ -314,6 +316,8 @@ namespace MWRender
             std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<ControllerType>>& blendControllers,
             const AnimBlendStateData& stateData, const osg::ref_ptr<const SceneUtil::AnimBlendRules>& blendRules,
             const AnimState& active);
+
+        void animationEnded(AnimState& state) const;
 
     public:
         Animation(

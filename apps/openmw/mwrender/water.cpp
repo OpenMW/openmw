@@ -212,22 +212,15 @@ namespace MWRender
     class RainSettingsUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        RainSettingsUpdater()
-            : mRainIntensity(0.f)
-            , mEnableRipples(false)
-        {
-        }
+        RainSettingsUpdater() = default;
 
         void setRainIntensity(float rainIntensity) { mRainIntensity = rainIntensity; }
-        void setRipplesEnabled(bool enableRipples) { mEnableRipples = enableRipples; }
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = new osg::Uniform("rainIntensity", 0.0f);
             stateset->addUniform(rainIntensityUniform.get());
-            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = new osg::Uniform("enableRainRipples", false);
-            stateset->addUniform(enableRainRipplesUniform.get());
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
@@ -235,14 +228,10 @@ namespace MWRender
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = stateset->getUniform("rainIntensity");
             if (rainIntensityUniform != nullptr)
                 rainIntensityUniform->set(mRainIntensity);
-            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = stateset->getUniform("enableRainRipples");
-            if (enableRainRipplesUniform != nullptr)
-                enableRainRipplesUniform->set(mEnableRipples);
         }
 
     private:
-        float mRainIntensity;
-        bool mEnableRipples;
+        float mRainIntensity{ 0.f };
     };
 
     class Refraction : public SceneUtil::RTTNode
@@ -805,12 +794,6 @@ namespace MWRender
     {
         if (mRainSettingsUpdater)
             mRainSettingsUpdater->setRainIntensity(rainIntensity);
-    }
-
-    void Water::setRainRipplesEnabled(bool enableRipples)
-    {
-        if (mRainSettingsUpdater)
-            mRainSettingsUpdater->setRipplesEnabled(enableRipples);
     }
 
     void Water::update(float dt, bool paused)

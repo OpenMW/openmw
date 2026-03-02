@@ -63,6 +63,8 @@ protected:
     virtual void setDefaultDisplaySettings();
 
     void createRenderer();
+
+    bool event(QEvent* e) override;
 };
 
 #endif // OSGQOPENGLWIDGET_H

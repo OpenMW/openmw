@@ -23,6 +23,19 @@
 -- @return #number
 
 ---
+-- Get the actor's current barter gold.
+-- @function [parent=#Actor] getBarterGold
+-- @param openmw.core#GameObject actor
+-- @return #number
+
+---
+-- Set the actor's current barter gold.
+-- Available in global and local scripts. Can only be used on self in local scripts.
+-- @function [parent=#Actor] setBarterGold
+-- @param openmw.core#GameObject actor
+-- @param #number amount
+
+---
 -- Check if the given actor is dead (health reached 0, so death process started).
 -- @function [parent=#Actor] isDead
 -- @param openmw.core#GameObject actor
@@ -317,12 +330,6 @@
 -- @return true if spell is active, false otherwise
 
 ---
--- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
--- @function [parent=#ActorActiveSpells] canUsePower
--- @param self
--- @param #any spellOrId A @{openmw.core#Spell} or string record id.
-
----
 -- Remove an active spell based on active spell ID (see @{openmw_core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw_core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
@@ -371,7 +378,7 @@
 -- @param openmw.core#GameObject actor
 -- @return #ActorSpells
 
---- List of spells with additional functions add/remove/clear (modification are allowed only in global scripts or on self).
+--- List of spells (modifications are only allowed in global scripts or on self).
 -- @type ActorSpells
 -- @usage -- print available spells
 -- local mySpells = types.Actor.spells(self)
@@ -408,6 +415,12 @@
 -- Remove all spells (only in global scripts or on self).
 -- @function [parent=#ActorSpells] clear
 -- @param self
+
+---
+-- If true, the actor has not used this power in the last 24h. Will return true for powers the actor does not have.
+-- @function [parent=#ActorSpells] canUsePower
+-- @param self
+-- @param #any spellOrId A @{openmw.core#Spell} or string record ID.
 
 --- Values affect how much each attribute can be increased at level up, and are all reset to 0 upon level up.
 -- @type SkillIncreasesForAttributeStats
@@ -793,7 +806,7 @@
 
 ---
 -- @type ItemData
--- @field #number condition The item's current condition. Time remaining for lights. Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
+-- @field #number condition The item's current condition. Time remaining for lights (setting this to `-1` will make it last forever). Uses left for repairs, lockpicks and probes. Current health for weapons and armor.
 -- @field #number enchantmentCharge The item's current enchantment charge. Unenchanted items will always return a value of `nil`. Setting this to `nil` will reset the charge of the item.
 -- @field #string soul The recordId of the item's current soul. Items without soul will always return a value of `nil`. Setting this to `nil` will remove the soul from the item.
 
@@ -805,6 +818,18 @@
 -- @type Creature
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
+
+---
+-- Creates a @{#CreatureRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Creature] createRecordDraft
+-- @param #CreatureRecord creature A Lua table with the fields of a CreatureRecord, with an additional field `template` that accepts a @{#CreatureRecord} as a base.
+-- @return #CreatureRecord A strongly typed Creature record.
+-- @usage local creatureTemplate = types.Creature.records['mudcrab']
+-- local creatureTable = {name = "Epic Mudcrab", template = creatureTemplate, soulValue = 500, isEssential = true}
+-- local recordDraft = types.Creature.createRecordDraft(creatureTable)
+-- local newRecord = world.createRecord(recordDraft)
+-- world.createObject(newRecord.id):teleport(playerCell, playerPosition)
 
 ---
 -- A read-only list of all @{#CreatureRecord}s in the world database, may be indexed by recordId.
@@ -888,7 +913,7 @@
 ---
 -- A read-only list of all @{#NpcRecord}s in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) of #NpcRecord.
--- @field [parent=#NPC] #map<#NpcRecord> records
+-- @field [parent=#NPC] #list<#NpcRecord> records
 -- @usage local npc = types.NPC.records['npc id']  -- get by id
 -- @usage local npc = types.NPC.records[1]  -- get by index
 
@@ -1150,8 +1175,8 @@
 -- @field #string class ID of the NPC's class (e.g. acrobat)
 -- @field #string model Path to the model associated with this NPC, used for animations.
 -- @field #string mwscript MWScript on this NPC (can be nil)
--- @field #string hair Path to the hair body part model
--- @field #string head Path to the head body part model
+-- @field #string hair ID of the hair body part
+-- @field #string head ID of the head body part
 -- @field #number baseGold The base barter gold of the NPC
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #boolean isMale The gender setting of the NPC
@@ -1320,7 +1345,7 @@
 -- @field [parent=#PlayerJournalTextEntry] #string id
 
 ---
--- @type PlayerQuest
+-- @type PLAYERQuest
 -- @field #string id The quest id.
 -- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
 -- @field #boolean started Whether the quest is started.
@@ -2206,6 +2231,18 @@
 -- @function [parent=#Container] content
 -- @param openmw.core#GameObject object
 -- @return openmw.core#Inventory
+
+---
+-- Creates a @{#ContainerRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Container] createRecordDraft
+-- @param #ContainerRecord container A Lua table with the fields of a ContainerRecord, with an additional field `template` that accepts a @{#ContainerRecord} as a base.
+-- @return #ContainerRecord A strongly typed Container record.
+-- @usage local chestTemplate = types.Container.records['chest_small_01']
+-- local containerTable = {name = "Respawning Treasure Chest", template = chestTemplate, isRespawning = true, weight = 150.0}
+-- local recordDraft = types.Container.createRecordDraft(containerTable)
+-- local newRecord = world.createRecord(recordDraft)
+-- world.createObject(newRecord.id):teleport(playerCell, playerPosition)
 
 ---
 -- Container content (same as `Container.content`, added for consistency with `Actor.inventory`).

@@ -155,8 +155,9 @@ namespace MWLua
         weatherT["cloudSpeed"] = sol::property([](const MWWorld::Weather& w) { return w.mCloudSpeed; },
             [](MWWorld::Weather& w, const FiniteFloat cloudSpeed) { w.mCloudSpeed = cloudSpeed; });
         weatherT["cloudTexture"] = sol::property(
-            [vfs](
-                const MWWorld::Weather& w) { return Misc::ResourceHelpers::correctTexturePath(w.mCloudTexture, vfs); },
+            [vfs](const MWWorld::Weather& w) -> std::string {
+                return Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(w.mCloudTexture), *vfs);
+            },
             [](MWWorld::Weather& w, std::string_view cloudTexture) { w.mCloudTexture = cloudTexture; });
         weatherT["cloudsMaximumPercent"]
             = sol::property([](const MWWorld::Weather& w) { return w.mCloudsMaximumPercent; },

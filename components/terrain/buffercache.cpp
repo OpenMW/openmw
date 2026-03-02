@@ -195,8 +195,9 @@ namespace Terrain
         {
             for (unsigned int row = 0; row < numVerts; ++row)
             {
-                uvs->push_back(osg::Vec2f(
-                    col / static_cast<float>(numVerts - 1), ((numVerts - 1) - row) / static_cast<float>(numVerts - 1)));
+                const float u = col / static_cast<float>(numVerts - 1);
+                const float v = row / static_cast<float>(numVerts - 1);
+                uvs->push_back(osg::Vec2f(u, v));
             }
         }
 

@@ -118,8 +118,8 @@ namespace MWLua
             auto args = getPlaySoundArgs(options);
             auto playMode = getPlayMode(args, false);
 
-            MWBase::Environment::get().getSoundManager()->playSound(
-                fileName, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+            MWBase::Environment::get().getSoundManager()->playSound(VFS::Path::Normalized(fileName), args.mVolume,
+                args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
         };
 
         api["stopSound"] = [](std::string_view soundId) {
@@ -127,7 +127,7 @@ namespace MWLua
             MWBase::Environment::get().getSoundManager()->stopSound3D(MWWorld::Ptr(), sound);
         };
         api["stopSoundFile"] = [](std::string_view fileName) {
-            MWBase::Environment::get().getSoundManager()->stopSound3D(MWWorld::Ptr(), fileName);
+            MWBase::Environment::get().getSoundManager()->stopSound3D(MWWorld::Ptr(), VFS::Path::Normalized(fileName));
         };
 
         api["isSoundPlaying"] = [](std::string_view soundId) {
@@ -135,7 +135,8 @@ namespace MWLua
             return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), sound);
         };
         api["isSoundFilePlaying"] = [](std::string_view fileName) {
-            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), fileName);
+            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(
+                MWWorld::Ptr(), VFS::Path::Normalized(fileName));
         };
 
         api["streamMusic"] = [](std::string_view fileName, const sol::optional<sol::table>& options) {
@@ -193,8 +194,8 @@ namespace MWLua
                   auto playMode = getPlayMode(args, true);
                   MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
 
-                  MWBase::Environment::get().getSoundManager()->playSound3D(
-                      ptr, fileName, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+                  MWBase::Environment::get().getSoundManager()->playSound3D(ptr, VFS::Path::Normalized(fileName),
+                      args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
               };
 
         api["stopSound3d"] = [](std::string_view soundId, const sol::object& object) {
@@ -204,7 +205,7 @@ namespace MWLua
         };
         api["stopSoundFile3d"] = [](std::string_view fileName, const sol::object& object) {
             MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
-            MWBase::Environment::get().getSoundManager()->stopSound3D(ptr, fileName);
+            MWBase::Environment::get().getSoundManager()->stopSound3D(ptr, VFS::Path::Normalized(fileName));
         };
 
         api["isSoundPlaying"] = [](std::string_view soundId, const sol::object& object) {
@@ -214,7 +215,7 @@ namespace MWLua
         };
         api["isSoundFilePlaying"] = [](std::string_view fileName, const sol::object& object) {
             const MWWorld::Ptr& ptr = getPtrOrThrow(ObjectVariant(object));
-            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(ptr, fileName);
+            return MWBase::Environment::get().getSoundManager()->getSoundPlaying(ptr, VFS::Path::Normalized(fileName));
         };
 
         api["say"] = [luaManager = context.mLuaManager](

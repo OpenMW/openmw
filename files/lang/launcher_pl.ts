@@ -578,6 +578,50 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
         <source>Text file (*.txt)</source>
         <translation>Plik tekstowy (*.txt)</translation>
     </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Otwórz katalog</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Otwórz %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Lokalny katalog konfiguracyjny używany, ponieważ zawiera plik openmw.cfg.
+Logi i ustawienia zmienione za pomocą programu uruchamiającego i w grze będą zapisywane w tym miejscu.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Lokalny katalog konfiguracyjny używany, ponieważ zawiera plik openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Logi i ustawienia zmienione za pomocą programu uruchamiającego i w grze będą zapisywane w tym miejscu.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Użyto globalnego katalogu konfiguracyjnego, ponieważ lokalny katalog nie zawierał pliku openmw.cfg. 
+Logi i ustawienia zmienione za pomocą programu uruchamiającego i w grze zostaną zapisane w tym miejscu.
+Jest to zazwyczaj objaw uszkodzonej instalacji OpenMW lub wadliwego pakietu.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Użyto globalnego katalogu konfiguracyjnego, ponieważ lokalny katalog nie zawierał pliku openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Katalog konfiguracyjny użytkownika używany, ponieważ %1 zawiera wiersz config=%2.
+Logi i ustawienia zmienione za pomocą programu uruchamiającego i w grze zostaną zapisane w tym miejscu.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Katalog konfiguracyjny użytkownika używany, ponieważ %1 zawiera wiersz config=%2.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -803,14 +847,6 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>Classic Reflected Absorb Spells Behavior</source>
         <translation>Klasyczne zachowanie odbitych zaklęć Absorpcji</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="vanished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sprawia, że ataki nieuzbrojonych stworzeń mogą zmniejszać wytrzymałość pancerza, tak jak ataki NPC i uzbrojonych stworzeń.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation type="vanished">Ataki nieuzbrojonych stworzeń uszkadzają pancerz</translation>
     </message>
     <message>
         <source>Factor Strength into Hand-to-Hand Combat</source>
@@ -1504,6 +1540,10 @@ do domyślnych czcionek Morrowind. Zaznacz to pole, jeśli nadal wolisz oryginal
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Jeśli włączone -- sprawia, że przejścia między różnymi animacjami/pozycjami są znacznie płynniejsze. Pozwala również na ładowanie plików konfiguracyjnych blendowania animacji w formacie YAML, które mogą być dołączone do animacji w celu dostosowania stylów blendowania.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Aktywne katalogi konfiguracyjne</translation>
     </message>
 </context>
 </TS>

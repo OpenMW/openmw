@@ -6,6 +6,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -65,7 +66,6 @@ void MWState::StateManager::cleanup(bool force)
         mCharacterManager.setCurrentCharacter(nullptr);
         mTimePlayed = 0;
         mLastSavegame.clear();
-        MWMechanics::CreatureStats::cleanup();
 
         mState = State_NoGame;
         MWBase::Environment::get().getLuaManager()->noGame();
@@ -148,11 +148,8 @@ void MWState::StateManager::askLoadRecent()
             std::vector<std::string> buttons;
             buttons.emplace_back("#{Interface:Yes}");
             buttons.emplace_back("#{Interface:No}");
-            std::string message
-                = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "AskLoadLastSave");
-            std::string_view tag = "%s";
-            size_t pos = message.find(tag);
-            message.replace(pos, tag.length(), saveName);
+            auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+            std::string message = l10n->formatMessage("AskLoadLastSave", { "save" }, { L10n::toUnicode(saveName) });
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
             mAskLoadRecent = true;
         }
@@ -405,7 +402,7 @@ void MWState::StateManager::loadGame(const std::filesystem::path& filepath)
     {
         for (const auto& slot : character)
         {
-            if (slot.mPath == filepath)
+            if (std::filesystem::equivalent(slot.mPath, filepath))
             {
                 loadGame(&character, slot.mPath);
                 return;
@@ -471,6 +468,10 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
         reader.setContentFileMapping(&contentFileMap);
         MWBase::Environment::get().getLuaManager()->setContentFileMapping(contentFileMap);
+
+        ESM::ActorIdConverter actorIdConverter;
+        if (version <= ESM::MaxActorIdSaveGameFormatVersion)
+            reader.mActorIdConverter = &actorIdConverter;
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
@@ -592,7 +593,6 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 currentPercent = progressPercent;
             }
         }
-
         mCharacterManager.setCurrentCharacter(character);
 
         mState = State_Running;
@@ -602,7 +602,8 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         mLastSavegame = filepath;
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
-        MWBase::Environment::get().getWorld()->saveLoaded();
+        MWBase::Environment::get().getWorld()->saveLoaded(reader);
+        actorIdConverter.apply();
         MWBase::Environment::get().getWorld()->setupPlayer();
         MWBase::Environment::get().getWorld()->renderPlayer();
         MWBase::Environment::get().getWindowManager()->updatePlayer();
@@ -649,6 +650,12 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         MWBase::Environment::get().getWorldScene()->markCellAsUnchanged();
 
         MWBase::Environment::get().getLuaManager()->gameLoaded();
+        for (int actorId : actorIdConverter.mGraveyard)
+        {
+            auto mapped = actorIdConverter.mMappings.find(actorId);
+            if (mapped != actorIdConverter.mMappings.end())
+                MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mapped->second);
+        }
     }
     catch (const SaveVersionTooNewError& e)
     {
@@ -700,7 +707,7 @@ void MWState::StateManager::quickLoad()
         if (currentCharacter->begin() == currentCharacter->end())
             return;
         // use requestLoad, otherwise we can crash by loading during the wrong part of the frame
-        requestLoad(currentCharacter->begin()->mPath);
+        requestLoad(currentCharacter, currentCharacter->begin()->mPath);
     }
 }
 
@@ -766,7 +773,14 @@ void MWState::StateManager::update(float duration)
     if (mLoadRequest)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_MainMenu);
-        loadGame(*mLoadRequest);
+        const Character* character = mLoadRequest->first;
+        // The character may have been deleted after the request was made
+        const bool validCharacter = std::ranges::find_if(mCharacterManager, [=](const Character& c) {
+            return &c == character;
+        }) != mCharacterManager.end();
+        if (!validCharacter)
+            character = getCurrentCharacter();
+        loadGame(character, mLoadRequest->second);
         mLoadRequest = std::nullopt;
     }
 }

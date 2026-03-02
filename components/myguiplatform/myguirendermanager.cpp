@@ -188,12 +188,6 @@ namespace MyGUIPlatform
             mDummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             mDummyTexture->setInternalFormat(GL_RGB);
             mDummyTexture->setTextureSize(1, 1);
-
-            // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
-            osg::Matrix flipMat;
-            flipMat.preMultTranslate(osg::Vec3f(0, 1, 0));
-            flipMat.preMultScale(osg::Vec3f(1, -1, 1));
-            mStateSet->setTextureAttribute(0, new osg::TexMat(flipMat), osg::StateAttribute::ON);
         }
         Drawable(const Drawable& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
             : osg::Drawable(copy, copyop)

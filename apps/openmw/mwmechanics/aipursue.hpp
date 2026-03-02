@@ -39,8 +39,6 @@ namespace MWMechanics
             return options;
         }
 
-        MWWorld::Ptr getTarget() const override;
-
         void writeState(ESM::AiSequence::AiSequence& sequence) const override;
     };
 }

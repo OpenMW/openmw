@@ -225,7 +225,7 @@ CUSTOM, PLAYER: useInterface.lua
 CUSTOM: unload.lua
 CUSTOM: customdata.lua
 )X");
-            mCfg.init(std::move(cfg));
+            mCfg.init(std::move(cfg), false);
         }
 
         int getId(VFS::Path::NormalizedView path) const
@@ -649,5 +649,34 @@ CUSTOM: customdata.lua
             }
             EXPECT_FALSE(true);
         });
+    }
+
+    TEST_F(LuaScriptsContainerTest, ScriptOrderChange)
+    {
+        LuaUtil::ScriptsContainer scripts1(&mLua, "Test");
+        scripts1.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, ESM::RefId(), ESM::RefNum()));
+        scripts1.addAutoStartedScripts();
+        const int scriptId = getId(test1Path);
+        EXPECT_TRUE(scripts1.addCustomScript(scriptId));
+
+        ESM::LuaScripts data;
+        scripts1.save(data);
+
+        ESM::LuaScriptsCfg cfg;
+        LuaUtil::parseOMWScripts(cfg, R"X(
+CUSTOM, NPC: loadSave2.lua
+NPC: loadSave1.lua
+CUSTOM: test1.lua
+)X");
+        mCfg.init(std::move(cfg), true);
+
+        LuaUtil::ScriptsContainer scripts2(&mLua, "Test");
+        scripts2.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, ESM::RefId(), ESM::RefNum()));
+        scripts2.load(data);
+
+        const int newScriptId = getId(test1Path);
+        EXPECT_NE(scriptId, newScriptId);
+        EXPECT_EQ(newScriptId, 2);
+        EXPECT_TRUE(scripts2.hasScript(newScriptId));
     }
 }

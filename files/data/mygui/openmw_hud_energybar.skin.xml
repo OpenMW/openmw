@@ -38,7 +38,7 @@
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="MW_BarTrack_Yellow" size="16 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="1 1 0"/>
+        <Property key="Colour" value="1 0.729 0"/>
         <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
             <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>

@@ -315,14 +315,14 @@ namespace MWLua
             uiElement["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState != LuaUi::Element::Created)
                     return;
-                element->mState = LuaUi::Element::Update;
                 luaManager->addAction([element] { element->update(); }, "Update UI");
+                element->mState = LuaUi::Element::Update;
             };
             uiElement["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
                 if (element->mState == LuaUi::Element::Destroyed)
                     return;
-                element->mState = LuaUi::Element::Destroy;
                 luaManager->addAction([element] { LuaUi::Element::erase(element.get()); }, "Destroy UI");
+                element->mState = LuaUi::Element::Destroy;
             };
 
             auto uiLayer = context.sol().new_usertype<LuaUi::Layer>("UiLayer");

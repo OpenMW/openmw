@@ -285,6 +285,7 @@ Packagers
     Kenny Armstrong (artorius) - Fedora Linux
     Nikolay Kasyanov (corristo) - Mac OS X
     Sandy Carter (bwrsandman) - Arch Linux
+    Sarah Sunday (ssunday) - MacOS
 
 Public Relations and Translations
 ---------------------------------

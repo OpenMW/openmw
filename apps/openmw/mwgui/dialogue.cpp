@@ -20,6 +20,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwdialogue/keywordsearch.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -206,105 +208,72 @@ namespace MWGui
         mText = text;
     }
 
-    void Response::write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch& keywordSearch,
-        std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
+    void Response::write(std::shared_ptr<BookTypesetter> typesetter, const MWDialogue::KeywordSearch& keywordSearch,
+        std::unordered_map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
+        using namespace MWDialogue;
+
+        MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+        const Translation::Storage& translationStorage = windowManager.getTranslationDataStorage();
+        const TextColours& colors = windowManager.getTextColours();
+
         typesetter->sectionBreak(mNeedMargin ? 9 : 0);
-        auto windowManager = MWBase::Environment::get().getWindowManager();
 
         if (!mTitle.empty())
         {
-            const MyGUI::Colour& headerColour = windowManager->getTextColours().header;
-            BookTypesetter::Style* title = typesetter->createStyle({}, headerColour, false);
+            BookTypesetter::Style* title = typesetter->createStyle({}, colors.header, false);
             typesetter->write(title, mTitle);
             typesetter->sectionBreak();
         }
 
-        std::map<std::pair<size_t, size_t>, const Link*> hyperLinks;
-
-        // We need this copy for when @# hyperlinks are replaced
-        std::string text = mText;
-
-        size_t posEnd = std::string::npos;
-        for (;;)
+        struct Token
         {
-            const size_t posBegin = text.find('@');
-            if (posBegin != std::string::npos)
-                posEnd = text.find('#', posBegin);
+            size_t mStart;
+            size_t mEnd;
+            Link* mTopic;
+        };
 
-            if (posBegin != std::string::npos && posEnd != std::string::npos)
-            {
-                std::string link = text.substr(posBegin + 1, posEnd - posBegin - 1);
-                const char specialPseudoAsteriskCharacter = 127;
-                std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                std::string topicName
-                    = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
+        std::vector<KeywordSearch::Match> matches = keywordSearch.parseHyperText(mText, translationStorage);
+        std::vector<Token> tokens;
+        tokens.reserve(matches.size());
+        std::string text;
+        text.reserve(mText.size());
 
-                std::string displayName = std::move(link);
-                while (displayName[displayName.size() - 1] == '*')
-                    displayName.erase(displayName.size() - 1, 1);
+        // Generate the displayed text and a more convenient token list.
+        // The matches we got provide positions in the original text and must be recalculated.
+        KeywordSearch::Point pos = mText.begin();
+        for (const KeywordSearch::Match& token : matches)
+        {
+            const std::string_view displayName(token.getDisplayName());
+            text.append(pos, token.mBeg);
+            text.append(displayName);
+            pos = token.mEnd;
 
-                text.replace(posBegin, posEnd + 1 - posBegin, displayName);
-
-                if (topicLinks.find(topicName) != topicLinks.end())
-                    hyperLinks[std::make_pair(posBegin, posBegin + displayName.size())] = topicLinks[topicName].get();
-            }
-            else
-                break;
+            auto value = topicLinks.find(token.mTopicId);
+            if (value != topicLinks.end())
+                tokens.emplace_back(text.size() - displayName.size(), text.size(), value->second.get());
         }
+        text.append(pos, mText.end());
 
         typesetter->addContent(text);
 
-        if (hyperLinks.size()
-            && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
+        BookTypesetter::Style* textStyle = typesetter->createStyle({}, colors.normal, false);
+
+        size_t i = 0;
+        for (const Token& token : tokens)
         {
-            const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
+            if (i < token.mStart)
+                typesetter->write(textStyle, i, token.mStart);
 
-            BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
-            size_t formatted = 0; // points to the first character that is not laid out yet
-            for (const auto& [range, link] : hyperLinks)
-            {
-                BookTypesetter::Style* hotStyle = typesetter->createHotStyle(style, textColours.link,
-                    textColours.linkOver, textColours.linkPressed, TypesetBook::InteractiveId(link));
-                if (formatted < range.first)
-                    typesetter->write(style, formatted, range.first);
-                typesetter->write(hotStyle, range.first, range.second);
-                formatted = range.second;
-            }
-            if (formatted < text.size())
-                typesetter->write(style, formatted, text.size());
+            auto id = reinterpret_cast<TypesetBook::InteractiveId>(token.mTopic);
+            BookTypesetter::Style* linkStyle
+                = typesetter->createHotStyle(textStyle, colors.link, colors.linkOver, colors.linkPressed, id);
+            typesetter->write(linkStyle, token.mStart, token.mEnd);
+            i = token.mEnd;
         }
-        else
-        {
-            std::vector<TopicSearch::Match> matches;
-            keywordSearch.highlightKeywords(text.begin(), text.end(), matches);
 
-            std::string::const_iterator i = text.begin();
-            for (TopicSearch::Match& match : matches)
-            {
-                if (i != match.mBeg)
-                    addTopicLink(typesetter, nullptr, i - text.begin(), match.mBeg - text.begin());
-
-                addTopicLink(typesetter, match.mValue, match.mBeg - text.begin(), match.mEnd - text.begin());
-
-                i = match.mEnd;
-            }
-            if (i != text.end())
-                addTopicLink(std::move(typesetter), nullptr, i - text.begin(), text.size());
-        }
-    }
-
-    void Response::addTopicLink(
-        std::shared_ptr<BookTypesetter> typesetter, const MWGui::Topic* topic, size_t begin, size_t end) const
-    {
-        const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
-
-        BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
-
-        if (topic)
-            style = typesetter->createHotStyle(style, textColours.link, textColours.linkOver, textColours.linkPressed,
-                TypesetBook::InteractiveId(topic));
-        typesetter->write(style, begin, end);
+        if (i < text.size())
+            typesetter->write(textStyle, i, text.size());
     }
 
     Message::Message(std::string_view text)
@@ -312,8 +281,8 @@ namespace MWGui
         mText = text;
     }
 
-    void Message::write(std::shared_ptr<BookTypesetter> typesetter, const TopicSearch&,
-        std::map<std::string, std::unique_ptr<Link>>&) const
+    void Message::write(std::shared_ptr<BookTypesetter> typesetter, const MWDialogue::KeywordSearch&,
+        std::unordered_map<std::string, std::unique_ptr<Link>>&) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
         BookTypesetter::Style* title = typesetter->createStyle({}, textColour, false);
@@ -651,13 +620,16 @@ namespace MWGui
         if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
+        MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+        const Translation::Storage& translationStorage = windowManager.getTranslationDataStorage();
+
         for (const auto& keyword : mKeywords)
         {
             std::string topicId = Misc::StringUtils::lowerCase(keyword);
             mTopicsList->addItem(keyword, sVerticalPadding);
 
             auto t = std::make_unique<Topic>(keyword);
-            mKeywordSearch.seed(topicId, t.get());
+            mKeywordSearch.seed(translationStorage.topicKeyword(keyword), topicId);
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
 

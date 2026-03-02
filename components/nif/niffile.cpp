@@ -41,7 +41,7 @@ namespace Nif
     static std::unique_ptr<Record> construct()
     {
         auto result = std::make_unique<NodeType>();
-        result->recType = recordType;
+        result->mRecordType = recordType;
         return result;
     }
 
@@ -699,9 +699,9 @@ namespace Nif
                 Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i;
 
             assert(r != nullptr);
-            assert(r->recType != RC_MISSING);
-            r->recName = std::move(rec);
-            r->recIndex = static_cast<unsigned>(i);
+            assert(r->mRecordType != RC_MISSING);
+            r->mRecordName = std::move(rec);
+            r->mRecordIndex = static_cast<unsigned>(i);
             r->read(&nif);
             mRecords.push_back(std::move(r));
         }

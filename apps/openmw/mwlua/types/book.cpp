@@ -108,7 +108,7 @@ namespace MWLua
         addModelProperty(record);
         record["mwscript"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mScript; });
         record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
         record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mEnchant; });
