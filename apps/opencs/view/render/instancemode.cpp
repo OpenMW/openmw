@@ -812,7 +812,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                 newVec.normalize();
 
             // Find angle and axis of rotation
-            angle = std::acos(oldVec * newVec) * speedFactor;
+            angle = std::acos(std::clamp(oldVec * newVec, -1.0f, 1.0f)) * speedFactor;
             if (((oldVec ^ newVec) * camBack < 0) ^ (camBack.z() < 0))
                 angle *= -1;
         }
@@ -879,36 +879,24 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     if (numCenters > 0.0f)
         center /= numCenters;
 
-    // In order to not bloat the already-huge main apply loop, let's calculate center-relative
-    // transform matrixes ahead of time. This isn't going to have a meaningful performance impact, it's fine.
-    std::vector<osg::Matrixf> transforms;
-    uint32_t trueXformCount = 0;
-    for (auto& item : selection)
-    {
-        osg::Matrix matrix = osg::Matrixf::identity();
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
-        {
-            ESM::Position position = objectTag->mObject->getPosition();
-            osg::Vec3 mypos = osg::Vec3(position.pos[0], position.pos[1], position.pos[2]);
-            osg::Vec3 myrot = osg::Vec3(position.rot[0], position.rot[1], position.rot[2]);
-            float myscale = objectTag->mObject->getScale();
-
-            matrix *= osg::Matrixf::scale(osg::Vec3(myscale, myscale, myscale));
-            matrix *= eulerToMat(myrot);
-            matrix *= osg::Matrixf::translate(mypos);
-            matrix *= osg::Matrixf::translate(-center);
-
-            trueXformCount += 1;
-        }
-        transforms.push_back(matrix);
-    }
-
     // Apply
     int i = 0;
-    for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter, i++)
+    for (auto& item : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
+            // Some operations (like group rotation) need this: full transform of the object.
+            ESM::Position position_temp = objectTag->mObject->getPosition();
+            osg::Vec3 mypos = osg::Vec3(position_temp.pos[0], position_temp.pos[1], position_temp.pos[2]);
+            osg::Vec3 myrot = osg::Vec3(position_temp.rot[0], position_temp.rot[1], position_temp.rot[2]);
+            float myscale = objectTag->mObject->getScale();
+
+            osg::Matrix matrix = osg::Matrixf::identity();
+            matrix *= osg::Matrixf::scale(osg::Vec3(myscale, myscale, myscale));
+            matrix *= eulerToMat(myrot);
+            matrix *= osg::Matrixf::translate(mypos - center);
+
+            // Now actually apply the current operation.
             if (mDragMode == DragMode_Move || mDragMode == DragMode_Move_Snap)
             {
                 ESM::Position position = objectTag->mObject->getPosition();
@@ -959,7 +947,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
             else if (mDragMode == DragMode_Rotate || mDragMode == DragMode_Rotate_Snap)
             {
                 // Only one item: use basic rotation logic to ensure no drift
-                if (trueXformCount == 1)
+                if (numCenters == 1.0f)
                 {
                     ESM::Position position = objectTag->mObject->getPosition();
 
@@ -983,8 +971,8 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                     // Therefore we work on raw transforms.
                     osg::Matrixf rotmat = osg::Matrixf(rotation);
 
-                    osg::Matrixf newxform = transforms[i] * rotmat;
-                    osg::Vec3f euler = matToEuler(newxform);
+                    osg::Matrixf newxform = matrix * rotmat;
+                    osg::Vec3f euler = matToEuler(osg::Matrixf::orthoNormal(newxform));
                     osg::Vec3f newpos = newxform.getTrans();
 
                     newpos += center;
@@ -1018,6 +1006,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                 objectTag->mObject->setScale(scale);
             }
         }
+        i++;
     }
 }
 
