@@ -57,7 +57,7 @@ namespace osg
 CSVRender::TerrainVertexPaintMode::TerrainVertexPaintMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-vertex-paint" }, Mask_Terrain,
-          "Terrain vertex paint editing", parent)
+        "Terrain vertex paint editing", parent)
     , mParentNode(parentNode)
     , mVertexPaintEditToolColor(Qt::white)
 {
