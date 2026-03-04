@@ -520,6 +520,16 @@ MessageBox "don't use more than 10 buttons" "1" "2" "3" "4" "5" "6" "7" "8" "9" 
 
 End)mwscript";
 
+    const std::string sIssue8990 = R"mwscript(Begin issue8990
+
+short a
+
+set a to 1
+MessageBox "%g" a
+player->setacrobatics 5000
+
+End)mwscript";
+
     TEST_F(MWScriptTest, mwscript_test_invalid)
     {
         EXPECT_THROW(compile("this is not a valid script", true), Compiler::SourceException);
@@ -1036,5 +1046,11 @@ End)mwscript";
         {
             FAIL();
         }
+    }
+
+    TEST_F(MWScriptTest, mwscript_test_8990)
+    {
+        registerExtensions();
+        EXPECT_FALSE(!compile(sIssue8990));
     }
 }
