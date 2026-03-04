@@ -270,10 +270,10 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
     if (!allowLandColourEditing(mCellId))
         return;
 
-    std::pair<CSMWorld::CellCoordinates, bool> cellCoordinates_pair = CSMWorld::CellCoordinates::fromId(mCellId);
+    std::pair<CSMWorld::CellCoordinates, bool> cellCoordinatesPair = CSMWorld::CellCoordinates::fromId(mCellId);
 
-    int cellX = cellCoordinates_pair.first.getX();
-    int cellY = cellCoordinates_pair.first.getY();
+    int cellX = cellCoordinatesPair.first.getX();
+    int cellY = cellCoordinatesPair.first.getY();
 
     int xHitInCell = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
     int yHitInCell = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
@@ -327,11 +327,11 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
         if (yHitInCell + (r % ESM::Land::LAND_SIZE) > ESM::Land::LAND_SIZE - 1)
             lowerrightCellY++;
 
-        for (int i_cell = upperLeftCellX; i_cell <= lowerrightCellX; i_cell++)
+        for (int iCell = upperLeftCellX; iCell <= lowerrightCellX; iCell++)
         {
-            for (int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
+            for (int jCell = upperLeftCellY; jCell <= lowerrightCellY; jCell++)
             {
-                iteratedCellId = CSMWorld::CellCoordinates::generateId(i_cell, j_cell);
+                iteratedCellId = CSMWorld::CellCoordinates::generateId(iCell, jCell);
                 if (allowLandColourEditing(iteratedCellId))
                 {
                     CSMWorld::LandColoursColumn::DataType newTerrain
@@ -342,7 +342,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                         for (int j = 0; j < ESM::Land::LAND_SIZE; j++)
                         {
 
-                            if (i_cell == cellX && j_cell == cellY && abs(i - xHitInCell) < r
+                            if (iCell == cellX && jCell == cellY && abs(i - xHitInCell) < r
                                 && abs(j - yHitInCell) < r)
                             {
                                 alterColour(newTerrain, i, j, 0.0f);
@@ -351,16 +351,16 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                             {
                                 int distanceX(0);
                                 int distanceY(0);
-                                if (i_cell < cellX)
-                                    distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) - i;
-                                else if (i_cell > cellX)
-                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
+                                if (iCell < cellX)
+                                    distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) - i;
+                                else if (iCell > cellX)
+                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) + i;
                                 else
                                     distanceX = abs(i - xHitInCell);
-                                if (j_cell < cellY)
-                                    distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) - j;
-                                else if (j_cell > cellY)
-                                    distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) + j;
+                                if (jCell < cellY)
+                                    distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) - j;
+                                else if (jCell > cellY)
+                                    distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) + j;
                                 else
                                     distanceY = abs(j - yHitInCell);
                                 if (distanceX < r && distanceY < r)
@@ -390,11 +390,11 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
         if (yHitInCell + (r % ESM::Land::LAND_SIZE) > ESM::Land::LAND_SIZE - 1)
             lowerrightCellY++;
 
-        for (int i_cell = upperLeftCellX; i_cell <= lowerrightCellX; i_cell++)
+        for (int iCell = upperLeftCellX; iCell <= lowerrightCellX; iCell++)
         {
-            for (int j_cell = upperLeftCellY; j_cell <= lowerrightCellY; j_cell++)
+            for (int jCell = upperLeftCellY; jCell <= lowerrightCellY; jCell++)
             {
-                iteratedCellId = CSMWorld::CellCoordinates::generateId(i_cell, j_cell);
+                iteratedCellId = CSMWorld::CellCoordinates::generateId(iCell, jCell);
                 if (allowLandColourEditing(iteratedCellId))
                 {
                     CSMWorld::LandColoursColumn::DataType newTerrain
@@ -404,7 +404,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                     {
                         for (int j = 0; j < ESM::Land::LAND_SIZE; j++)
                         {
-                            if (i_cell == cellX && j_cell == cellY && abs(i - xHitInCell) < r
+                            if (iCell == cellX && jCell == cellY && abs(i - xHitInCell) < r
                                 && abs(j - yHitInCell) < r)
                             {
                                 int distanceX = abs(i - xHitInCell);
@@ -417,16 +417,16 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                             {
                                 int distanceX(0);
                                 int distanceY(0);
-                                if (i_cell < cellX)
-                                    distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) - i;
-                                else if (i_cell > cellX)
-                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(i_cell - cellX) + i;
+                                if (iCell < cellX)
+                                    distanceX = xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) - i;
+                                else if (iCell > cellX)
+                                    distanceX = -xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) + i;
                                 else
                                     distanceX = abs(i - xHitInCell);
-                                if (j_cell < cellY)
-                                    distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) - j;
-                                else if (j_cell > cellY)
-                                    distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(j_cell - cellY) + j;
+                                if (jCell < cellY)
+                                    distanceY = yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) - j;
+                                else if (jCell > cellY)
+                                    distanceY = -yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) + j;
                                 else
                                     distanceY = abs(j - yHitInCell);
                                 float distance = std::round(sqrt(pow(distanceX, 2) + pow(distanceY, 2)));
