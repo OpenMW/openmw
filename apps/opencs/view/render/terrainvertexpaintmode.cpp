@@ -388,13 +388,13 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                 if (allowLandColourEditing(iteratedCellId))
                 {
                     CSMWorld::LandColoursColumn::DataType newTerrain
-                       = landTable.data(landTable.getModelIndex(iteratedCellId, colourColumn))
+                        = landTable.data(landTable.getModelIndex(iteratedCellId, colourColumn))
                               .value<CSMWorld::LandColoursColumn::DataType>();
                     for (int i = 0; i < ESM::Land::LAND_SIZE; i++)
                     {
                         for (int j = 0; j < ESM::Land::LAND_SIZE; j++)
                         {
-                            osg::Vec2f relativeCoords(0.0, 0.0); 
+                            osg::Vec2f relativeCoords(0.0, 0.0);
                             if (iCell < cellX)
                                 relativeCoords.x() = xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) - i;
                             else if (iCell > cellX)
