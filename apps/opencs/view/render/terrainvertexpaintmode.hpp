@@ -135,7 +135,7 @@ namespace CSVRender
 
         bool noLandLoaded(const std::string& cellId);
 
-        bool isLandLoaded(const std::string& cellId);
+        bool canEdit(const std::string& cellId);
 
         /// Push terrain vertex coloir edits to command macro
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,

@@ -475,7 +475,7 @@ bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, 
     {
         std::pair<int, int> vertexCoords = std::make_pair(globalSelectionX, globalSelectionY);
         std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
-        return paged->getCellSelection().has(CSMWorld::CellCoordinates::fromId(cellId).first) && isLandLoaded(cellId);
+        return paged->getCellSelection().has(CSMWorld::CellCoordinates::fromId(cellId).first) && canEdit(cellId);
     }
     return false;
 }
@@ -605,11 +605,9 @@ bool CSVRender::TerrainVertexPaintMode::noLandLoaded(const std::string& cellId)
     return !landCollection.getRecord(ESM::RefId::stringRefId(cellId)).get().isDataLoaded(ESM::Land::DATA_VNML);
 }
 
-bool CSVRender::TerrainVertexPaintMode::isLandLoaded(const std::string& cellId)
+bool CSVRender::TerrainVertexPaintMode::canEdit(const std::string& cellId)
 {
-    if (!noCell(cellId) && !noLand(cellId) && !noLandLoaded(cellId))
-        return true;
-    return false;
+    return !noCell(cellId) && !noLand(cellId) && !noLandLoaded(cellId);
 }
 
 void CSVRender::TerrainVertexPaintMode::createNewLandData(const CSMWorld::CellCoordinates& cellCoords)
@@ -652,7 +650,7 @@ void CSVRender::TerrainVertexPaintMode::createNewLandData(const CSMWorld::CellCo
     if (CSVRender::PagedWorldspaceWidget* paged
         = dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
     {
-        if (isLandLoaded(cellLeftId))
+        if (canEdit(cellLeftId))
         {
             const CSMWorld::LandHeightsColumn::DataType landLeftShapePointer
                 = landTable.data(landTable.getModelIndex(cellLeftId, landshapeColumn))
@@ -665,7 +663,7 @@ void CSVRender::TerrainVertexPaintMode::createNewLandData(const CSMWorld::CellCo
                 leftCellSampleHeight
                     += *paged->getCellAlteredHeight(cellLeftCoords, ESM::Land::LAND_SIZE - 1, ESM::Land::LAND_SIZE / 2);
         }
-        if (isLandLoaded(cellRightId))
+        if (canEdit(cellRightId))
         {
             const CSMWorld::LandHeightsColumn::DataType landRightShapePointer
                 = landTable.data(landTable.getModelIndex(cellRightId, landshapeColumn))
@@ -676,7 +674,7 @@ void CSVRender::TerrainVertexPaintMode::createNewLandData(const CSMWorld::CellCo
             if (paged->getCellAlteredHeight(cellRightCoords, 0, ESM::Land::LAND_SIZE / 2))
                 rightCellSampleHeight += *paged->getCellAlteredHeight(cellRightCoords, 0, ESM::Land::LAND_SIZE / 2);
         }
-        if (isLandLoaded(cellUpId))
+        if (canEdit(cellUpId))
         {
             const CSMWorld::LandHeightsColumn::DataType landUpShapePointer
                 = landTable.data(landTable.getModelIndex(cellUpId, landshapeColumn))
@@ -689,7 +687,7 @@ void CSVRender::TerrainVertexPaintMode::createNewLandData(const CSMWorld::CellCo
                 upCellSampleHeight
                     += *paged->getCellAlteredHeight(cellUpCoords, ESM::Land::LAND_SIZE / 2, ESM::Land::LAND_SIZE - 1);
         }
-        if (isLandLoaded(cellDownId))
+        if (canEdit(cellDownId))
         {
             const CSMWorld::LandHeightsColumn::DataType landDownShapePointer
                 = landTable.data(landTable.getModelIndex(cellDownId, landshapeColumn))
