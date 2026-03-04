@@ -37,6 +37,7 @@
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
+    Feature #5197: Editor: terrain vertex paint editmode
     Feature #7152: OpenMW-CS: Verify global search regexp
     Feature #7830: Preserve global script targets not created by content files
     Feature #8076: Lua: Add read access to Topic info Conditions
