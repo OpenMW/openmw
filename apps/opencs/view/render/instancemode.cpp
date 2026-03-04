@@ -885,18 +885,6 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
     {
         if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
-            // Some operations (like group rotation) need this: full transform of the object.
-            ESM::Position position_temp = objectTag->mObject->getPosition();
-            osg::Vec3 mypos = osg::Vec3(position_temp.pos[0], position_temp.pos[1], position_temp.pos[2]);
-            osg::Vec3 myrot = osg::Vec3(position_temp.rot[0], position_temp.rot[1], position_temp.rot[2]);
-            float myscale = objectTag->mObject->getScale();
-
-            osg::Matrix matrix = osg::Matrixf::identity();
-            matrix *= osg::Matrixf::scale(osg::Vec3(myscale, myscale, myscale));
-            matrix *= eulerToMat(myrot);
-            matrix *= osg::Matrixf::translate(mypos - center);
-
-            // Now actually apply the current operation.
             if (mDragMode == DragMode_Move || mDragMode == DragMode_Move_Snap)
             {
                 ESM::Position position = objectTag->mObject->getPosition();
@@ -967,17 +955,22 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                 }
                 else
                 {
-                    // Group rotation needs to be able to move objects relative to each other.
-                    // Therefore we work on raw transforms.
-                    osg::Matrixf rotmat = osg::Matrixf(rotation);
-
-                    osg::Matrixf newxform = matrix * rotmat;
-                    osg::Vec3f euler = matToEuler(osg::Matrixf::orthoNormal(newxform));
-                    osg::Vec3f newpos = newxform.getTrans();
-
-                    newpos += center;
-
+                    // Used both as a read and as a write.
                     ESM::Position position = objectTag->mObject->getPosition();
+
+                    // Group rotation needs to be able to move objects relative to each other,
+                    //  so we work on localized transforms. For rotation, we can ignore scale.
+                    osg::Vec3 mypos = osg::Vec3(position.pos[0], position.pos[1], position.pos[2]);
+                    osg::Vec3 myrot = osg::Vec3(position.rot[0], position.rot[1], position.rot[2]);
+
+                    osg::Matrix matrix = osg::Matrixf::identity();
+                    matrix *= eulerToMat(myrot);
+                    matrix *= osg::Matrixf::translate(mypos - center);
+
+                    osg::Matrixf newxform = matrix * osg::Matrixf(rotation);
+                    osg::Vec3f euler = matToEuler(osg::Matrixf::orthoNormal(newxform));
+                    osg::Vec3f newpos = newxform.getTrans() + center;
+
                     position.rot[0] = euler.x();
                     position.rot[1] = euler.y();
                     position.rot[2] = euler.z();
