@@ -714,7 +714,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
         if (mode == "Discard")
             return false;
 
-        if (mode == "Create cell and land, then edit" && useTool)
+        if (useTool && mode == "Create cell and land, then edit")
         {
             auto createCommand = std::make_unique<CSMWorld::CreateCommand>(cellTable, cellId);
             int parentIndex = cellTable.findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
@@ -772,7 +772,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
         if (mode == "Discard")
             return false;
 
-        if (mode == "Create cell and land, then edit" && useTool)
+        if (useTool && mode == "Create cell and land, then edit")
         {
             createNewLandData(CSMWorld::CellCoordinates::fromId(cellId).first);
         }
