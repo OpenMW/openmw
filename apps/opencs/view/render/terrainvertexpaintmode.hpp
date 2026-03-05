@@ -139,10 +139,6 @@ namespace CSVRender
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,
             CSMWorld::IdTable& landTable, const std::string& cellId);
 
-        /// Create new blank height record and new normals, if there are valid adjancent cell, take sample points and
-        /// set the average height based on that
-        void createNewLandData(const CSMWorld::CellCoordinates& cellCoords);
-
         /// Create new cell and land if needed, only user tools may ask for opening new cells (useTool == false is for
         /// automated land changes)
         bool allowLandColourEditing(const std::string& textureFileName, bool useTool = true);
