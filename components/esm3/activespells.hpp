@@ -35,7 +35,7 @@ namespace ESM
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
-        RefId mArg; // skill, attribute, or summon
+        std::variant<RefId, RefNum> mArg; // skill, attribute, or summon
         float mDuration;
         float mTimeLeft;
         int32_t mEffectIndex;

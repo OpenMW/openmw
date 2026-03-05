@@ -87,13 +87,16 @@ namespace ESM
                 for (auto& effect : params.mEffects)
                 {
                     esm.writeHNRefId("MGEF", effect.mEffectId);
-                    if (const ESM::RefNum* actor = effect.mArg.getIf<ESM::RefNum>())
+                    if (const ESM::RefId* id = std::get_if<ESM::RefId>(&effect.mArg))
+                    {
+                        if (!id->empty())
+                            esm.writeHNRefId("ARG_", *id);
+                    }
+                    else if (const ESM::RefNum* actor = std::get_if<ESM::RefNum>(&effect.mArg))
                     {
                         if (actor->isSet())
                             esm.writeFormId(*actor, true, "SUM_");
                     }
-                    else if (!effect.mArg.empty())
-                        esm.writeHNRefId("ARG_", effect.mArg);
                     esm.writeHNT("MAGN", effect.mMagnitude);
                     esm.writeHNT("MAGN", effect.mMinMagnitude);
                     esm.writeHNT("MAGN", effect.mMaxMagnitude);
@@ -240,14 +243,14 @@ namespace ESM
 
     RefId ActiveEffect::getSkillOrAttribute() const
     {
-        if (mArg.is<ESM::RefNum>())
-            return {};
-        return mArg;
+        if (const ESM::RefId* id = std::get_if<ESM::RefId>(&mArg))
+            return *id;
+        return {};
     }
 
     RefNum ActiveEffect::getActor() const
     {
-        if (const ESM::RefNum* actor = mArg.getIf<ESM::RefNum>())
+        if (const ESM::RefNum* actor = std::get_if<ESM::RefNum>(&mArg))
             return *actor;
         return {};
     }

@@ -711,7 +711,7 @@ namespace MWMechanics
                     converter->convert(params.mCaster, params.mCaster.mIndex);
                     for (ESM::ActiveEffect& effect : params.mEffects)
                     {
-                        if (ESM::RefNum* refNum = effect.mArg.getIf<ESM::RefNum>())
+                        if (ESM::RefNum* refNum = std::get_if<ESM::RefNum>(&effect.mArg))
                             converter->convert(*refNum, refNum->mIndex);
                     }
                 }
