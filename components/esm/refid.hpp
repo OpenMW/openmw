@@ -146,12 +146,6 @@ namespace ESM
         }
 
         template <class T>
-        T* getIf()
-        {
-            return std::get_if<T>(&mValue);
-        }
-
-        template <class T>
         bool is() const
         {
             return std::holds_alternative<T>(mValue);
