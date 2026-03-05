@@ -16,9 +16,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <apps/opencs/model/prefs/category.hpp>
-#include <apps/opencs/model/prefs/setting.hpp>
-#include <apps/opencs/view/widget/pushbutton.hpp>
+#include <apps/opencs/model/prefs/state.hpp>
 
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
@@ -173,8 +171,6 @@ CSVWidget::SceneToolVertexPaintBrush::SceneToolVertexPaintBrush(
     mTable->setSelectionMode(QAbstractItemView::NoSelection);
 
     layout->addWidget(mTable);
-
-    connect(mTable, &QTableWidget::clicked, this, &SceneToolVertexPaintBrush::clicked);
 }
 
 void CSVWidget::SceneToolVertexPaintBrush::setButtonIcon(CSVWidget::BrushShape brushShape)
@@ -213,10 +209,6 @@ void CSVWidget::SceneToolVertexPaintBrush::setButtonIcon(CSVWidget::BrushShape b
 
 void CSVWidget::SceneToolVertexPaintBrush::showPanel(const QPoint& position) {}
 
-void CSVWidget::SceneToolVertexPaintBrush::updatePanel() {}
-
-void CSVWidget::SceneToolVertexPaintBrush::clicked(const QModelIndex& index) {}
-
 void CSVWidget::SceneToolVertexPaintBrush::activate()
 {
     QPoint position = QCursor::pos();
@@ -226,15 +218,4 @@ void CSVWidget::SceneToolVertexPaintBrush::activate()
         1, CSMPrefs::get()["3D Scene Editing"]["shapebrush-maximumsize"].toInt());
     mVertexPaintBrushWindow->move(position);
     mVertexPaintBrushWindow->show();
-}
-
-void CSVWidget::SceneToolVertexPaintBrush::dragEnterEvent(QDragEnterEvent* event)
-{
-    emit passEvent(event);
-    event->accept();
-}
-void CSVWidget::SceneToolVertexPaintBrush::dropEvent(QDropEvent* event)
-{
-    emit passEvent(event);
-    event->accept();
 }

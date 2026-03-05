@@ -10,8 +10,6 @@
 
 #include <apps/opencs/model/world/cellcoordinates.hpp>
 
-#include <osg/Vec3d>
-
 #include "../../model/world/columnimp.hpp"
 #include "../widget/brushshapes.hpp"
 
@@ -117,8 +115,8 @@ namespace CSVRender
         void editVertexColourGrid(const std::pair<int, int>& vertexCoords, bool dragOperation);
 
         /// Alter one pixel's colour
-        void alterColour(CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY,
-            float alteredHeight, bool useTool = true);
+        void alterColour(
+            CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool = true);
 
         /// Check if global selection coordinate belongs to cell in view
         bool isInCellSelection(int globalSelectionX, int globalSelectionY);
@@ -158,12 +156,8 @@ namespace CSVRender
         osg::Group* mParentNode;
         bool mIsEditing = false;
         std::shared_ptr<TerrainSelection> mTerrainSelection;
-        int mTotalDiffY = 0;
-        std::vector<CSMWorld::CellCoordinates> mAlteredCells;
-        osg::Vec3d mEditingPos;
         int mVertexPaintEditTool = VertexPaintEditTool_Replace;
         QColor mVertexPaintEditToolColor;
-        int mTargetHeight = 0;
 
     public slots:
         void setBrushSize(int brushSize);

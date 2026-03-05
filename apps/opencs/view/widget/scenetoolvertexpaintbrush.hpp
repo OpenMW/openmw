@@ -7,10 +7,8 @@
 #include <QSlider>
 #include <QSpinBox>
 
-#ifndef Q_MOC_RUN
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
-#endif
 
 class QComboBox;
 class QDragEnterEvent;
@@ -144,16 +142,11 @@ namespace CSVWidget
         SceneToolVertexPaintBrush(SceneToolbar* parent, const QString& toolTip, CSMDoc::Document& document);
 
         void showPanel(const QPoint& position) override;
-        void updatePanel();
-
-        void dropEvent(QDropEvent* event) override;
-        void dragEnterEvent(QDragEnterEvent* event) override;
 
         friend class CSVRender::TerrainVertexPaintMode;
 
     public slots:
         void setButtonIcon(CSVWidget::BrushShape brushShape);
-        void clicked(const QModelIndex& index);
         void activate() override;
 
     signals:

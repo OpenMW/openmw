@@ -154,7 +154,6 @@ bool CSVRender::TerrainVertexPaintMode::primaryEditStartDrag(const QPoint& pos)
 
     if (hit.hit && hit.tag == nullptr)
     {
-        mEditingPos = hit.worldPos;
         mIsEditing = true;
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
@@ -200,7 +199,6 @@ void CSVRender::TerrainVertexPaintMode::drag(const QPoint& pos, int diffX, int d
     if (mDragMode == InteractionType_PrimaryEdit)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-        mTotalDiffY += diffY;
         if (mIsEditing)
             editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
     }
@@ -306,7 +304,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 
         if (allowLandColourEditing(mCellId))
         {
-            alterColour(newTerrain, xHitInCell, yHitInCell, 0.0f);
+            alterColour(newTerrain, xHitInCell, yHitInCell);
             pushEditToCommand(newTerrain, document, landTable, mCellId);
         }
     }
@@ -355,7 +353,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                             else
                                 relativeCoords.y() = abs(j - yHitInCell);
                             if (relativeCoords.x() < r && relativeCoords.y() < r)
-                                alterColour(newTerrain, i, j, 0.0f);
+                                alterColour(newTerrain, i, j);
                         }
                     }
                     pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
@@ -408,7 +406,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                             else
                                 relativeCoords.y() = abs(j - yHitInCell);
                             if (relativeCoords.length() < r)
-                                alterColour(newTerrain, i, j, 0.0f);
+                                alterColour(newTerrain, i, j);
                         }
                     }
                     pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
@@ -419,7 +417,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 }
 
 void CSVRender::TerrainVertexPaintMode::alterColour(
-    CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, float alteredHeight, bool useTool)
+    CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool)
 {
     const int red = mVertexPaintEditToolColor.red();
     const int green = mVertexPaintEditToolColor.green();
