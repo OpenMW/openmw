@@ -2,8 +2,6 @@
 
 #include <QButtonGroup>
 #include <QComboBox>
-#include <QDragEnterEvent>
-#include <QDropEvent>
 #include <QFrame>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -16,22 +14,10 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <apps/opencs/model/prefs/state.hpp>
-
 #include "brushshapes.hpp"
 #include "scenetool.hpp"
 
 #include "../../model/prefs/state.hpp"
-
-namespace CSVWidget
-{
-    class SceneToolbar;
-}
-
-namespace CSMDoc
-{
-    class Document;
-}
 
 CSVWidget::VertexPaintBrushSizeControls::VertexPaintBrushSizeControls(const QString& title, QWidget* parent)
     : QGroupBox(title, parent)
@@ -141,8 +127,6 @@ void CSVWidget::VertexPaintBrushWindow::setBrushShape()
     emit passBrushShape(mBrushShape);
 }
 
-void CSVWidget::SceneToolVertexPaintBrush::adjustToolTips() {}
-
 CSVWidget::SceneToolVertexPaintBrush::SceneToolVertexPaintBrush(
     SceneToolbar* parent, const QString& toolTip, CSMDoc::Document& document)
     : SceneTool(parent, Type_TopAction)
@@ -150,7 +134,6 @@ CSVWidget::SceneToolVertexPaintBrush::SceneToolVertexPaintBrush(
     , mDocument(document)
     , mVertexPaintBrushWindow(new VertexPaintBrushWindow(document, this))
 {
-    setAcceptDrops(true);
     connect(mVertexPaintBrushWindow, &VertexPaintBrushWindow::passBrushShape, this,
         &SceneToolVertexPaintBrush::setButtonIcon);
     setButtonIcon(mVertexPaintBrushWindow->mBrushShape);

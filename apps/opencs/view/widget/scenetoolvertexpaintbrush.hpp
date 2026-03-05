@@ -135,9 +135,6 @@ namespace CSVWidget
         QTableWidget* mTable;
         VertexPaintBrushWindow* mVertexPaintBrushWindow;
 
-    private:
-        void adjustToolTips();
-
     public:
         SceneToolVertexPaintBrush(SceneToolbar* parent, const QString& toolTip, CSMDoc::Document& document);
 
