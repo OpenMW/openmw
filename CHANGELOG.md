@@ -37,7 +37,6 @@
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
-    Feature #5197: Editor: terrain vertex paint editmode
     Feature #7152: OpenMW-CS: Verify global search regexp
     Feature #7830: Preserve global script targets not created by content files
     Feature #8076: Lua: Add read access to Topic info Conditions
@@ -411,7 +410,6 @@
     Feature #3501: OpenMW-CS: Instance Editing - Shortcuts for axial locking
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
-    Feature #5197: Editor: terrain vertex paint editmode
     Feature #5492: Let rain and snow collide with statics
     Feature #5926: Refraction based on water depth
     Feature #5944: Option to use camera as sound listener
