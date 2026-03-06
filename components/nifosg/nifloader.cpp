@@ -1487,6 +1487,12 @@ namespace NifOsg
             if (niGeometry->mData.empty())
                 return;
 
+            const Nif::NiGeometryData* niGeometryData = niGeometry->mData.getPtr();
+
+            const auto& vertices = niGeometryData->mVertices;
+            if (vertices.empty())
+                return;
+
             bool hasPartitions = false;
             if (!niGeometry->mSkin.empty())
             {
@@ -1514,7 +1520,6 @@ namespace NifOsg
                 }
             }
 
-            const Nif::NiGeometryData* niGeometryData = niGeometry->mData.getPtr();
             if (!hasPartitions)
             {
                 if (niGeometry->mRecordType == Nif::RC_NiTriShape || nifNode->mRecordType == Nif::RC_BSLODTriShape)
@@ -1552,11 +1557,10 @@ namespace NifOsg
                 }
             }
 
-            const auto& vertices = niGeometryData->mVertices;
             const auto& normals = niGeometryData->mNormals;
             const auto& colors = niGeometryData->mColors;
-            if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(static_cast<unsigned>(vertices.size()), vertices.data()));
+
+            geometry->setVertexArray(new osg::Vec3Array(static_cast<unsigned>(vertices.size()), vertices.data()));
             if (!normals.empty())
                 geometry->setNormalArray(new osg::Vec3Array(static_cast<unsigned>(normals.size()), normals.data()),
                     osg::Array::BIND_PER_VERTEX);
@@ -1605,7 +1609,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Geometry> geom(new osg::Geometry);
             handleNiGeometryData(nifNode, parent, geom, parentNode, composite, boundTextures, animflags);
             // If the record had no valid geometry data in it, early-out
-            if (geom->empty())
+            if (geom->empty() || geom->getVertexArray() == nullptr)
                 return;
 
             osg::ref_ptr<osg::Drawable> drawable = geom;
@@ -1621,16 +1625,15 @@ namespace NifOsg
                 const Nif::NiAVObjectList& bones = skin->mBones;
 
                 // Assign bone weights
-                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo;
-                std::vector<SceneUtil::RigGeometry::VertexWeights> influences;
-                boneInfo.resize(bones.size());
-                influences.resize(bones.size());
+                std::vector<SceneUtil::RigGeometry::BoneInfo> boneInfo(bones.size());
+                std::vector<SceneUtil::RigGeometry::BoneWeights> influences(geom->getVertexArray()->getNumElements());
                 for (std::size_t i = 0; i < bones.size(); ++i)
                 {
                     boneInfo[i].mName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
                     boneInfo[i].mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
                     boneInfo[i].mBoundSphere = data->mBones[i].mBoundSphere;
-                    influences[i] = data->mBones[i].mWeights;
+                    for (const auto& [vertex, weight] : data->mBones[i].mWeights)
+                        influences.at(vertex).emplace_back(i, weight);
                 }
                 rig->setBoneInfo(std::move(boneInfo));
                 rig->setInfluences(influences);
