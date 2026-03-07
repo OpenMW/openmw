@@ -39,6 +39,7 @@ namespace MWLua
 
     void addStaticBindings(sol::table stat, const Context& context)
     {
+        stat["createRecordDraft"] = tableToStatic;
         addRecordFunctionBinding<ESM::Static>(stat, context);
 
         sol::usertype<ESM::Static> record = context.sol().new_usertype<ESM::Static>("ESM3_Static");
