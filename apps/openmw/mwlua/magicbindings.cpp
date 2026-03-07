@@ -702,11 +702,8 @@ namespace MWLua
                 // We need to deselect any enchant items before we can select a spell otherwise the item will be
                 // reselected
                 const auto resetEnchantItem = [&]() {
-                    if (objPtr.getClass().hasInventoryStore(objPtr))
-                    {
-                        MWWorld::InventoryStore& inventory = objPtr.getClass().getInventoryStore(objPtr);
-                        inventory.setSelectedEnchantItem(inventory.end());
-                    }
+                    MWWorld::ContainerStore& inventory = objPtr.getClass().getContainerStore(objPtr);
+                    inventory.setSelectedEnchantItem(inventory.end());
                 };
 
                 if (spellId.empty())
@@ -738,11 +735,8 @@ namespace MWLua
             context.mLuaManager->addAction([obj = Object(o.ptr())]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
                 auto& stats = ptr.getClass().getCreatureStats(ptr);
-                if (ptr.getClass().hasInventoryStore(ptr))
-                {
-                    MWWorld::InventoryStore& inventory = ptr.getClass().getInventoryStore(ptr);
-                    inventory.setSelectedEnchantItem(inventory.end());
-                }
+                MWWorld::ContainerStore& inventory = ptr.getClass().getContainerStore(ptr);
+                inventory.setSelectedEnchantItem(inventory.end());
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
                 else

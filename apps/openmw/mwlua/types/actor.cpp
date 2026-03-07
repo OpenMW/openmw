@@ -30,9 +30,10 @@ namespace MWLua
     static constexpr int sAnySlot = -1;
 
     static std::pair<MWWorld::ContainerStoreIterator, bool> findInInventory(
-        MWWorld::InventoryStore& store, const EquipmentItem& item, int slot = sAnySlot)
+        MWWorld::ContainerStore& store, const EquipmentItem& item, int slot, bool isInventoryStore)
     {
-        auto oldIt = slot != sAnySlot ? store.getSlot(slot) : store.end();
+        auto oldIt = slot != sAnySlot && isInventoryStore ? static_cast<MWWorld::InventoryStore&>(store).getSlot(slot)
+                                                          : store.end();
         MWWorld::Ptr itemPtr;
 
         if (std::holds_alternative<ObjectId>(item))
@@ -40,8 +41,7 @@ namespace MWLua
             itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
             if (oldIt != store.end() && *oldIt == itemPtr)
                 return { oldIt, true }; // already equipped
-            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0
-                || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
+            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0 || itemPtr.getContainerStore() != &store)
             {
                 Log(Debug::Warning) << "Object" << std::get<ObjectId>(item).toString() << " is not in inventory";
                 return { store.end(), false };
@@ -77,7 +77,7 @@ namespace MWLua
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
         auto tryEquipToSlot = [&store, &usedSlots, isPlayer](int slot, const EquipmentItem& item) -> bool {
-            auto [it, alreadyEquipped] = findInInventory(store, item, slot);
+            auto [it, alreadyEquipped] = findInInventory(store, item, slot, true);
             if (alreadyEquipped)
                 return true;
             if (it == store.end())
@@ -138,12 +138,18 @@ namespace MWLua
 
     static void setSelectedEnchantedItem(const MWWorld::Ptr& actor, const EquipmentItem& item)
     {
-        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+        MWWorld::ContainerStore& contStore = actor.getClass().getContainerStore(actor);
         // We're not passing in a specific slot, so ignore the already equipped return value
-        auto [it, _] = findInInventory(store, item, sAnySlot);
-        if (it == store.end())
+        auto [it, _] = findInInventory(contStore, item, sAnySlot, actor.getClass().hasInventoryStore(actor));
+        if (it == contStore.end())
             return;
+        if (!actor.getClass().hasInventoryStore(actor))
+        {
+            contStore.setSelectedEnchantItem(it);
+            return;
+        }
 
+        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
         MWWorld::Ptr itemPtr = *it;
 
         // Equip the item if applicable
@@ -165,7 +171,6 @@ namespace MWLua
                     return;
             }
         }
-
         store.setSelectedEnchantItem(it);
         // to reset WindowManager::mSelectedSpell immediately
         MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(*it);
@@ -231,9 +236,7 @@ namespace MWLua
                     hasSelectedSpell = !stats.getSpells().getSelectedSpell().empty();
                 if (!hasSelectedSpell)
                 {
-                    if (!cls.hasInventoryStore(self.ptr()))
-                        return; // No selected spell and no items; can't use magic stance.
-                    MWWorld::InventoryStore& store = cls.getInventoryStore(self.ptr());
+                    const MWWorld::ContainerStore& store = cls.getContainerStore(self.ptr());
                     if (store.getSelectedEnchantItem() == store.end())
                         return; // No selected spell and no selected enchanted item; can't use magic stance.
                 }
@@ -251,9 +254,9 @@ namespace MWLua
 
         actor["getSelectedEnchantedItem"] = [](sol::this_state thisState, const Object& o) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
-            if (!ptr.getClass().hasInventoryStore(ptr))
+            if (!ptr.getClass().isActor())
                 return sol::nil;
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+            MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             auto it = store.getSelectedEnchantItem();
             if (it == store.end())
                 return sol::nil;
@@ -265,7 +268,7 @@ namespace MWLua
         };
         actor["setSelectedEnchantedItem"] = [context](const SelfObject& obj, const sol::object& item) {
             const MWWorld::Ptr& ptr = obj.ptr();
-            if (!ptr.getClass().hasInventoryStore(ptr))
+            if (!ptr.getClass().isActor())
                 return;
 
             EquipmentItem ei;
@@ -485,5 +488,4 @@ namespace MWLua
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }
-
 }

@@ -189,10 +189,8 @@ namespace MWMechanics
         }
         else if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
         {
-            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-
             // Creatures can not wear armor/clothing, so allow creatures to use non-equipped items,
-            if (actor.getClass().isNpc() && !store.isEquipped(ptr))
+            if (actor.getClass().isNpc() && !actor.getClass().getInventoryStore(actor).isEquipped(ptr))
                 return 0.f;
 
             int castCost = getEffectiveEnchantmentCastCost(*enchantment, actor);

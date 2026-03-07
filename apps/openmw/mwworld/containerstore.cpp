@@ -114,11 +114,22 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
 void MWWorld::ContainerStore::storeEquipmentState(
     const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
+    if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
+        inventory.mSelectedEnchantItem = static_cast<uint32_t>(index);
 }
 
 void MWWorld::ContainerStore::readEquipmentState(
     const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
+    if (index == inventory.mSelectedEnchantItem)
+        mSelectedEnchantItem = iter;
+}
+
+std::ptrdiff_t MWWorld::ContainerStore::index(const ContainerStoreIterator& iter) const
+{
+    if (iter.getType() == -1)
+        return -1;
+    return std::distance(cbegin(), ConstContainerStoreIterator(iter));
 }
 
 template <typename T>
@@ -147,15 +158,96 @@ void MWWorld::ContainerStore::storeStates(
 const ESM::RefId MWWorld::ContainerStore::sGoldId = ESM::RefId::stringRefId("gold_001");
 
 MWWorld::ContainerStore::ContainerStore()
-    : mListener(nullptr)
-    , mRechargingItemsUpToDate(false)
-    , mCachedWeight(0)
-    , mWeightUpToDate(false)
-    , mModified(false)
-    , mResolved(false)
-    , mSeed()
-    , mPtr()
+    : mSelectedEnchantItem(end())
 {
+}
+
+MWWorld::ContainerStore::ContainerStore(const MWWorld::ContainerStore& store)
+    : mListener(store.mListener)
+    , mSelectedEnchantItem(end())
+    , mLists(store.mLists)
+    , mCachedWeight(store.mCachedWeight)
+    , mSeed(store.mSeed)
+    , mPtr(store.mPtr)
+    , mResolutionListener(store.mResolutionListener)
+    , mWeightUpToDate(store.mWeightUpToDate)
+    , mModified(store.mModified)
+    , mResolved(store.mResolved)
+    , mRechargingItemsUpToDate(false)
+{
+    if (store.mSelectedEnchantItem != store.end())
+    {
+        mSelectedEnchantItem = begin();
+        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
+    }
+}
+
+MWWorld::ContainerStore::ContainerStore(MWWorld::ContainerStore&& store)
+    : mListener(store.mListener)
+    , mSelectedEnchantItem(end())
+    , mCachedWeight(store.mCachedWeight)
+    , mSeed(store.mSeed)
+    , mPtr(store.mPtr)
+    , mResolutionListener(std::move(store.mResolutionListener))
+    , mWeightUpToDate(store.mWeightUpToDate)
+    , mModified(store.mModified)
+    , mResolved(store.mResolved)
+    , mRechargingItemsUpToDate(false)
+{
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
+    mLists = std::move(store.mLists);
+    if (distance != -1)
+    {
+        mSelectedEnchantItem = begin();
+        std::advance(mSelectedEnchantItem, distance);
+    }
+}
+
+MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(const ContainerStore& store)
+{
+    if (this == &store)
+        return *this;
+    mListener = store.mListener;
+    mLists = store.mLists;
+    mCachedWeight = store.mCachedWeight;
+    mSeed = store.mSeed;
+    mPtr = store.mPtr;
+    mResolutionListener = store.mResolutionListener;
+    mWeightUpToDate = store.mWeightUpToDate;
+    mModified = store.mModified;
+    mResolved = store.mResolved;
+    mRechargingItemsUpToDate = false;
+    if (store.mSelectedEnchantItem != store.end())
+    {
+        mSelectedEnchantItem = begin();
+        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
+    }
+    else
+        mSelectedEnchantItem = end();
+    return *this;
+}
+
+MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(ContainerStore&& store)
+{
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
+    mListener = store.mListener;
+    mLists = std::move(store.mLists);
+    mCachedWeight = store.mCachedWeight;
+    mSeed = store.mSeed;
+    mPtr = store.mPtr;
+    mResolutionListener = std::move(store.mResolutionListener);
+    mWeightUpToDate = store.mWeightUpToDate;
+    mModified = store.mModified;
+    mResolved = store.mResolved;
+    mRechargingItemsUpToDate = false;
+    if (distance != -1)
+    {
+        mSelectedEnchantItem = begin();
+        std::advance(mSelectedEnchantItem, distance);
+    }
+    else
+        mSelectedEnchantItem = end();
+    return *this;
 }
 
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin(int mask) const
@@ -435,52 +527,52 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack(const Const
     switch (getType(ptr))
     {
         case Type_Potion:
-            potions.mList.push_back(*ptr.get<ESM::Potion>());
-            it = ContainerStoreIterator(this, --potions.mList.end());
+            mLists.mPotions.mList.push_back(*ptr.get<ESM::Potion>());
+            it = ContainerStoreIterator(this, --mLists.mPotions.mList.end());
             break;
         case Type_Apparatus:
-            appas.mList.push_back(*ptr.get<ESM::Apparatus>());
-            it = ContainerStoreIterator(this, --appas.mList.end());
+            mLists.mAppas.mList.push_back(*ptr.get<ESM::Apparatus>());
+            it = ContainerStoreIterator(this, --mLists.mAppas.mList.end());
             break;
         case Type_Armor:
-            armors.mList.push_back(*ptr.get<ESM::Armor>());
-            it = ContainerStoreIterator(this, --armors.mList.end());
+            mLists.mArmors.mList.push_back(*ptr.get<ESM::Armor>());
+            it = ContainerStoreIterator(this, --mLists.mArmors.mList.end());
             break;
         case Type_Book:
-            books.mList.push_back(*ptr.get<ESM::Book>());
-            it = ContainerStoreIterator(this, --books.mList.end());
+            mLists.mBooks.mList.push_back(*ptr.get<ESM::Book>());
+            it = ContainerStoreIterator(this, --mLists.mBooks.mList.end());
             break;
         case Type_Clothing:
-            clothes.mList.push_back(*ptr.get<ESM::Clothing>());
-            it = ContainerStoreIterator(this, --clothes.mList.end());
+            mLists.mClothes.mList.push_back(*ptr.get<ESM::Clothing>());
+            it = ContainerStoreIterator(this, --mLists.mClothes.mList.end());
             break;
         case Type_Ingredient:
-            ingreds.mList.push_back(*ptr.get<ESM::Ingredient>());
-            it = ContainerStoreIterator(this, --ingreds.mList.end());
+            mLists.mIngreds.mList.push_back(*ptr.get<ESM::Ingredient>());
+            it = ContainerStoreIterator(this, --mLists.mIngreds.mList.end());
             break;
         case Type_Light:
-            lights.mList.push_back(*ptr.get<ESM::Light>());
-            it = ContainerStoreIterator(this, --lights.mList.end());
+            mLists.mLights.mList.push_back(*ptr.get<ESM::Light>());
+            it = ContainerStoreIterator(this, --mLists.mLights.mList.end());
             break;
         case Type_Lockpick:
-            lockpicks.mList.push_back(*ptr.get<ESM::Lockpick>());
-            it = ContainerStoreIterator(this, --lockpicks.mList.end());
+            mLists.mLockpicks.mList.push_back(*ptr.get<ESM::Lockpick>());
+            it = ContainerStoreIterator(this, --mLists.mLockpicks.mList.end());
             break;
         case Type_Miscellaneous:
-            miscItems.mList.push_back(*ptr.get<ESM::Miscellaneous>());
-            it = ContainerStoreIterator(this, --miscItems.mList.end());
+            mLists.mMiscItems.mList.push_back(*ptr.get<ESM::Miscellaneous>());
+            it = ContainerStoreIterator(this, --mLists.mMiscItems.mList.end());
             break;
         case Type_Probe:
-            probes.mList.push_back(*ptr.get<ESM::Probe>());
-            it = ContainerStoreIterator(this, --probes.mList.end());
+            mLists.mProbes.mList.push_back(*ptr.get<ESM::Probe>());
+            it = ContainerStoreIterator(this, --mLists.mProbes.mList.end());
             break;
         case Type_Repair:
-            repairs.mList.push_back(*ptr.get<ESM::Repair>());
-            it = ContainerStoreIterator(this, --repairs.mList.end());
+            mLists.mRepairs.mList.push_back(*ptr.get<ESM::Repair>());
+            it = ContainerStoreIterator(this, --mLists.mRepairs.mList.end());
             break;
         case Type_Weapon:
-            weapons.mList.push_back(*ptr.get<ESM::Weapon>());
-            it = ContainerStoreIterator(this, --weapons.mList.end());
+            mLists.mWeapons.mList.push_back(*ptr.get<ESM::Weapon>());
+            it = ContainerStoreIterator(this, --mLists.mWeapons.mList.end());
             break;
     }
 
@@ -488,6 +580,21 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack(const Const
 
     flagAsModified();
     return it;
+}
+
+void MWWorld::ContainerStore::setSelectedEnchantItem(const ContainerStoreIterator& iterator)
+{
+    mSelectedEnchantItem = iterator;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getSelectedEnchantItem()
+{
+    return mSelectedEnchantItem;
+}
+
+MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::getSelectedEnchantItem() const
+{
+    return mSelectedEnchantItem;
 }
 
 void MWWorld::ContainerStore::rechargeItems(float duration)
@@ -572,6 +679,9 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplac
     {
         toRemove -= itemRef.getCount();
         itemRef.setCount(0);
+
+        if (mSelectedEnchantItem != end() && *mSelectedEnchantItem == item)
+            mSelectedEnchantItem = end();
     }
     else
     {
@@ -747,18 +857,18 @@ float MWWorld::ContainerStore::getWeight() const
     {
         mCachedWeight = 0;
 
-        mCachedWeight += getTotalWeight(potions);
-        mCachedWeight += getTotalWeight(appas);
-        mCachedWeight += getTotalWeight(armors);
-        mCachedWeight += getTotalWeight(books);
-        mCachedWeight += getTotalWeight(clothes);
-        mCachedWeight += getTotalWeight(ingreds);
-        mCachedWeight += getTotalWeight(lights);
-        mCachedWeight += getTotalWeight(lockpicks);
-        mCachedWeight += getTotalWeight(miscItems);
-        mCachedWeight += getTotalWeight(probes);
-        mCachedWeight += getTotalWeight(repairs);
-        mCachedWeight += getTotalWeight(weapons);
+        mCachedWeight += getTotalWeight(mLists.mPotions);
+        mCachedWeight += getTotalWeight(mLists.mAppas);
+        mCachedWeight += getTotalWeight(mLists.mArmors);
+        mCachedWeight += getTotalWeight(mLists.mBooks);
+        mCachedWeight += getTotalWeight(mLists.mClothes);
+        mCachedWeight += getTotalWeight(mLists.mIngreds);
+        mCachedWeight += getTotalWeight(mLists.mLights);
+        mCachedWeight += getTotalWeight(mLists.mLockpicks);
+        mCachedWeight += getTotalWeight(mLists.mMiscItems);
+        mCachedWeight += getTotalWeight(mLists.mProbes);
+        mCachedWeight += getTotalWeight(mLists.mRepairs);
+        mCachedWeight += getTotalWeight(mLists.mWeapons);
 
         mWeightUpToDate = true;
     }
@@ -837,73 +947,73 @@ MWWorld::Ptr MWWorld::ContainerStore::search(const ESM::RefId& id)
 {
     resolve();
     {
-        Ptr ptr = searchId(potions, id, this);
+        Ptr ptr = searchId(mLists.mPotions, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(appas, id, this);
+        Ptr ptr = searchId(mLists.mAppas, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(armors, id, this);
+        Ptr ptr = searchId(mLists.mArmors, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(books, id, this);
+        Ptr ptr = searchId(mLists.mBooks, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(clothes, id, this);
+        Ptr ptr = searchId(mLists.mClothes, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(ingreds, id, this);
+        Ptr ptr = searchId(mLists.mIngreds, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(lights, id, this);
+        Ptr ptr = searchId(mLists.mLights, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(lockpicks, id, this);
+        Ptr ptr = searchId(mLists.mLockpicks, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(miscItems, id, this);
+        Ptr ptr = searchId(mLists.mMiscItems, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(probes, id, this);
+        Ptr ptr = searchId(mLists.mProbes, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(repairs, id, this);
+        Ptr ptr = searchId(mLists.mRepairs, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     {
-        Ptr ptr = searchId(weapons, id, this);
+        Ptr ptr = searchId(mLists.mWeapons, id, this);
         if (!ptr.isEmpty())
             return ptr;
     }
@@ -932,18 +1042,18 @@ void MWWorld::ContainerStore::writeState(ESM::InventoryState& state) const
     state.mItems.clear();
 
     size_t index = 0;
-    storeStates(potions, state, index);
-    storeStates(appas, state, index);
-    storeStates(armors, state, index, true);
-    storeStates(books, state, index, true); // not equipable as such, but for selectedEnchantItem
-    storeStates(clothes, state, index, true);
-    storeStates(ingreds, state, index);
-    storeStates(lockpicks, state, index, true);
-    storeStates(miscItems, state, index);
-    storeStates(probes, state, index, true);
-    storeStates(repairs, state, index);
-    storeStates(weapons, state, index, true);
-    storeStates(lights, state, index, true);
+    storeStates(mLists.mPotions, state, index);
+    storeStates(mLists.mAppas, state, index);
+    storeStates(mLists.mArmors, state, index, true);
+    storeStates(mLists.mBooks, state, index, true); // not equipable as such, but for selectedEnchantItem
+    storeStates(mLists.mClothes, state, index, true);
+    storeStates(mLists.mIngreds, state, index);
+    storeStates(mLists.mLockpicks, state, index, true);
+    storeStates(mLists.mMiscItems, state, index);
+    storeStates(mLists.mProbes, state, index, true);
+    storeStates(mLists.mRepairs, state, index);
+    storeStates(mLists.mWeapons, state, index, true);
+    storeStates(mLists.mLights, state, index, true);
 }
 
 void MWWorld::ContainerStore::readState(const ESM::InventoryState& inventory)
@@ -962,40 +1072,40 @@ void MWWorld::ContainerStore::readState(const ESM::InventoryState& inventory)
         switch (type)
         {
             case ESM::REC_ALCH:
-                getState(potions, state);
+                getState(mLists.mPotions, state);
                 break;
             case ESM::REC_APPA:
-                getState(appas, state);
+                getState(mLists.mAppas, state);
                 break;
             case ESM::REC_ARMO:
-                readEquipmentState(getState(armors, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mArmors, state), thisIndex, inventory);
                 break;
             case ESM::REC_BOOK:
-                readEquipmentState(getState(books, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mBooks, state), thisIndex, inventory);
                 break; // not equipable as such, but for selectedEnchantItem
             case ESM::REC_CLOT:
-                readEquipmentState(getState(clothes, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mClothes, state), thisIndex, inventory);
                 break;
             case ESM::REC_INGR:
-                getState(ingreds, state);
+                getState(mLists.mIngreds, state);
                 break;
             case ESM::REC_LOCK:
-                readEquipmentState(getState(lockpicks, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mLockpicks, state), thisIndex, inventory);
                 break;
             case ESM::REC_MISC:
-                getState(miscItems, state);
+                getState(mLists.mMiscItems, state);
                 break;
             case ESM::REC_PROB:
-                readEquipmentState(getState(probes, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mProbes, state), thisIndex, inventory);
                 break;
             case ESM::REC_REPA:
-                getState(repairs, state);
+                getState(mLists.mRepairs, state);
                 break;
             case ESM::REC_WEAP:
-                readEquipmentState(getState(weapons, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mWeapons, state), thisIndex, inventory);
                 break;
             case ESM::REC_LIGH:
-                readEquipmentState(getState(lights, state), thisIndex, inventory);
+                readEquipmentState(getState(mLists.mLights, state), thisIndex, inventory);
                 break;
             case 0:
                 Log(Debug::Warning) << "Dropping inventory reference to '" << state.mRef.mRefID
@@ -1096,63 +1206,63 @@ bool MWWorld::ContainerStoreIteratorBase<PtrType>::resetIterator()
     {
         case ContainerStore::Type_Potion:
 
-            mPotion = mContainer->potions.mList.begin();
-            return mPotion != mContainer->potions.mList.end();
+            mPotion = mContainer->mLists.mPotions.mList.begin();
+            return mPotion != mContainer->mLists.mPotions.mList.end();
 
         case ContainerStore::Type_Apparatus:
 
-            mApparatus = mContainer->appas.mList.begin();
-            return mApparatus != mContainer->appas.mList.end();
+            mApparatus = mContainer->mLists.mAppas.mList.begin();
+            return mApparatus != mContainer->mLists.mAppas.mList.end();
 
         case ContainerStore::Type_Armor:
 
-            mArmor = mContainer->armors.mList.begin();
-            return mArmor != mContainer->armors.mList.end();
+            mArmor = mContainer->mLists.mArmors.mList.begin();
+            return mArmor != mContainer->mLists.mArmors.mList.end();
 
         case ContainerStore::Type_Book:
 
-            mBook = mContainer->books.mList.begin();
-            return mBook != mContainer->books.mList.end();
+            mBook = mContainer->mLists.mBooks.mList.begin();
+            return mBook != mContainer->mLists.mBooks.mList.end();
 
         case ContainerStore::Type_Clothing:
 
-            mClothing = mContainer->clothes.mList.begin();
-            return mClothing != mContainer->clothes.mList.end();
+            mClothing = mContainer->mLists.mClothes.mList.begin();
+            return mClothing != mContainer->mLists.mClothes.mList.end();
 
         case ContainerStore::Type_Ingredient:
 
-            mIngredient = mContainer->ingreds.mList.begin();
-            return mIngredient != mContainer->ingreds.mList.end();
+            mIngredient = mContainer->mLists.mIngreds.mList.begin();
+            return mIngredient != mContainer->mLists.mIngreds.mList.end();
 
         case ContainerStore::Type_Light:
 
-            mLight = mContainer->lights.mList.begin();
-            return mLight != mContainer->lights.mList.end();
+            mLight = mContainer->mLists.mLights.mList.begin();
+            return mLight != mContainer->mLists.mLights.mList.end();
 
         case ContainerStore::Type_Lockpick:
 
-            mLockpick = mContainer->lockpicks.mList.begin();
-            return mLockpick != mContainer->lockpicks.mList.end();
+            mLockpick = mContainer->mLists.mLockpicks.mList.begin();
+            return mLockpick != mContainer->mLists.mLockpicks.mList.end();
 
         case ContainerStore::Type_Miscellaneous:
 
-            mMiscellaneous = mContainer->miscItems.mList.begin();
-            return mMiscellaneous != mContainer->miscItems.mList.end();
+            mMiscellaneous = mContainer->mLists.mMiscItems.mList.begin();
+            return mMiscellaneous != mContainer->mLists.mMiscItems.mList.end();
 
         case ContainerStore::Type_Probe:
 
-            mProbe = mContainer->probes.mList.begin();
-            return mProbe != mContainer->probes.mList.end();
+            mProbe = mContainer->mLists.mProbes.mList.begin();
+            return mProbe != mContainer->mLists.mProbes.mList.end();
 
         case ContainerStore::Type_Repair:
 
-            mRepair = mContainer->repairs.mList.begin();
-            return mRepair != mContainer->repairs.mList.end();
+            mRepair = mContainer->mLists.mRepairs.mList.begin();
+            return mRepair != mContainer->mLists.mRepairs.mList.end();
 
         case ContainerStore::Type_Weapon:
 
-            mWeapon = mContainer->weapons.mList.begin();
-            return mWeapon != mContainer->weapons.mList.end();
+            mWeapon = mContainer->mLists.mWeapons.mList.begin();
+            return mWeapon != mContainer->mLists.mWeapons.mList.end();
     }
 
     return false;
@@ -1166,62 +1276,62 @@ bool MWWorld::ContainerStoreIteratorBase<PtrType>::incIterator()
         case ContainerStore::Type_Potion:
 
             ++mPotion;
-            return mPotion == mContainer->potions.mList.end();
+            return mPotion == mContainer->mLists.mPotions.mList.end();
 
         case ContainerStore::Type_Apparatus:
 
             ++mApparatus;
-            return mApparatus == mContainer->appas.mList.end();
+            return mApparatus == mContainer->mLists.mAppas.mList.end();
 
         case ContainerStore::Type_Armor:
 
             ++mArmor;
-            return mArmor == mContainer->armors.mList.end();
+            return mArmor == mContainer->mLists.mArmors.mList.end();
 
         case ContainerStore::Type_Book:
 
             ++mBook;
-            return mBook == mContainer->books.mList.end();
+            return mBook == mContainer->mLists.mBooks.mList.end();
 
         case ContainerStore::Type_Clothing:
 
             ++mClothing;
-            return mClothing == mContainer->clothes.mList.end();
+            return mClothing == mContainer->mLists.mClothes.mList.end();
 
         case ContainerStore::Type_Ingredient:
 
             ++mIngredient;
-            return mIngredient == mContainer->ingreds.mList.end();
+            return mIngredient == mContainer->mLists.mIngreds.mList.end();
 
         case ContainerStore::Type_Light:
 
             ++mLight;
-            return mLight == mContainer->lights.mList.end();
+            return mLight == mContainer->mLists.mLights.mList.end();
 
         case ContainerStore::Type_Lockpick:
 
             ++mLockpick;
-            return mLockpick == mContainer->lockpicks.mList.end();
+            return mLockpick == mContainer->mLists.mLockpicks.mList.end();
 
         case ContainerStore::Type_Miscellaneous:
 
             ++mMiscellaneous;
-            return mMiscellaneous == mContainer->miscItems.mList.end();
+            return mMiscellaneous == mContainer->mLists.mMiscItems.mList.end();
 
         case ContainerStore::Type_Probe:
 
             ++mProbe;
-            return mProbe == mContainer->probes.mList.end();
+            return mProbe == mContainer->mLists.mProbes.mList.end();
 
         case ContainerStore::Type_Repair:
 
             ++mRepair;
-            return mRepair == mContainer->repairs.mList.end();
+            return mRepair == mContainer->mLists.mRepairs.mList.end();
 
         case ContainerStore::Type_Weapon:
 
             ++mWeapon;
-            return mWeapon == mContainer->weapons.mList.end();
+            return mWeapon == mContainer->mLists.mWeapons.mList.end();
     }
 
     return true;

@@ -1558,12 +1558,12 @@ namespace MWMechanics
                         spellCastResult = world->startSpellCast(mPtr);
                     mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                    if (spellid.empty() && cls.hasInventoryStore(mPtr))
+                    if (spellid.empty())
                     {
-                        MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                        const MWWorld::ContainerStore& inv = cls.getContainerStore(mPtr);
                         if (inv.getSelectedEnchantItem() != inv.end())
                         {
-                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                            const MWWorld::ConstPtr& enchantItem = *inv.getSelectedEnchantItem();
                             spellid = enchantItem.getClass().getEnchantment(enchantItem);
                             isMagicItem = true;
                         }

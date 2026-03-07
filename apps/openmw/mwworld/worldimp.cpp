@@ -3028,9 +3028,9 @@ namespace MWWorld
             const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
             cast.cast(spell);
         }
-        else if (actor.getClass().hasInventoryStore(actor))
+        else
         {
-            MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+            MWWorld::ContainerStore& inv = actor.getClass().getContainerStore(actor);
             if (inv.getSelectedEnchantItem() != inv.end())
             {
                 const auto& itemPtr = *inv.getSelectedEnchantItem();
