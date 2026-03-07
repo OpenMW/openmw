@@ -442,10 +442,9 @@ void CSVRender::TerrainVertexPaintMode::pushEditToCommand(const CSMWorld::LandCo
     undoStack.push(new CSMWorld::ModifyCommand(landTable, index, changedLand));
 }
 
-bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, int globalSelectionY)
+bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, int globalSelectionY) const
 {
-    if (CSVRender::PagedWorldspaceWidget* paged
-        = dynamic_cast<CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
+    if (const auto* paged = dynamic_cast<const CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
     {
         std::pair<int, int> vertexCoords = std::make_pair(globalSelectionX, globalSelectionY);
         std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
@@ -455,7 +454,7 @@ bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, 
 }
 
 void CSVRender::TerrainVertexPaintMode::handleSelection(
-    int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections)
+    int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections) const
 {
     if (isInCellSelection(globalSelectionX, globalSelectionY))
         selections->emplace_back(globalSelectionX, globalSelectionY);
@@ -554,28 +553,28 @@ void CSVRender::TerrainVertexPaintMode::selectTerrainShapes(
         mTerrainSelection->toggleSelect(selections);
 }
 
-bool CSVRender::TerrainVertexPaintMode::noCell(const std::string& cellId)
+bool CSVRender::TerrainVertexPaintMode::noCell(const std::string& cellId) const
 {
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     const CSMWorld::IdCollection<CSMWorld::Cell>& cellCollection = document.getData().getCells();
     return cellCollection.searchId(ESM::RefId::stringRefId(cellId)) == -1;
 }
 
-bool CSVRender::TerrainVertexPaintMode::noLand(const std::string& cellId)
+bool CSVRender::TerrainVertexPaintMode::noLand(const std::string& cellId) const
 {
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
     return landCollection.searchId(ESM::RefId::stringRefId(cellId)) == -1;
 }
 
-bool CSVRender::TerrainVertexPaintMode::noLandLoaded(const std::string& cellId)
+bool CSVRender::TerrainVertexPaintMode::noLandLoaded(const std::string& cellId) const
 {
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
     return !landCollection.getRecord(ESM::RefId::stringRefId(cellId)).get().isDataLoaded(ESM::Land::DATA_VNML);
 }
 
-bool CSVRender::TerrainVertexPaintMode::canEdit(const std::string& cellId)
+bool CSVRender::TerrainVertexPaintMode::canEdit(const std::string& cellId) const
 {
     return !noCell(cellId) && !noLand(cellId) && !noLandLoaded(cellId);
 }

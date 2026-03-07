@@ -119,21 +119,22 @@ namespace CSVRender
             CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool = true);
 
         /// Check if global selection coordinate belongs to cell in view
-        bool isInCellSelection(int globalSelectionX, int globalSelectionY);
+        bool isInCellSelection(int globalSelectionX, int globalSelectionY) const;
 
         /// Select vertex at global selection coordinate
-        void handleSelection(int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections);
+        void handleSelection(
+            int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections) const;
 
         /// Handle brush mechanics for terrain selection
         void selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode);
 
-        bool noCell(const std::string& cellId);
+        bool noCell(const std::string& cellId) const;
 
-        bool noLand(const std::string& cellId);
+        bool noLand(const std::string& cellId) const;
 
-        bool noLandLoaded(const std::string& cellId);
+        bool noLandLoaded(const std::string& cellId) const;
 
-        bool canEdit(const std::string& cellId);
+        bool canEdit(const std::string& cellId) const;
 
         /// Push terrain vertex coloir edits to command macro
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,
