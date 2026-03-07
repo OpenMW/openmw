@@ -16,7 +16,6 @@
 #include <apps/opencs/model/world/columnimp.hpp>
 #include <apps/opencs/model/world/columns.hpp>
 #include <apps/opencs/model/world/data.hpp>
-#include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/idtable.hpp>
 #include <apps/opencs/model/world/land.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
@@ -29,7 +28,6 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolvertexpaintbrush.hpp"
 
-#include "../../model/prefs/state.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtree.hpp"
 
@@ -38,7 +36,6 @@
 #include "editmode.hpp"
 #include "mask.hpp"
 #include "pagedworldspacewidget.hpp"
-#include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
 class QPoint;
@@ -65,12 +62,6 @@ CSVRender::TerrainVertexPaintMode::TerrainVertexPaintMode(
 
 void CSVRender::TerrainVertexPaintMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
-    if (!mTerrainSelection)
-    {
-        mTerrainSelection
-            = std::make_shared<TerrainSelection>(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Shape);
-    }
-
     if (!mVertexPaintBrushScenetool)
     {
         mVertexPaintBrushScenetool = new CSVWidget::SceneToolVertexPaintBrush(
@@ -101,11 +92,6 @@ void CSVRender::TerrainVertexPaintMode::deactivate(CSVWidget::SceneToolbar* tool
         toolbar->removeTool(mVertexPaintBrushScenetool);
     }
 
-    if (mTerrainSelection)
-    {
-        mTerrainSelection.reset();
-    }
-
     if (mBrushDraw)
         mBrushDraw.reset();
 
@@ -120,29 +106,26 @@ void CSVRender::TerrainVertexPaintMode::primaryEditPressed(const WorldspaceHitRe
 {
     if (hit.hit && hit.tag == nullptr)
     {
-        if (mDragMode == InteractionType_PrimaryEdit)
-        {
-            editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
-        }
+        mRestoreMode = true;
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+        undoStack.beginMacro("Restore land vertex colour");
+        editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
+        undoStack.endMacro();
     }
-    endVertexPaintEditing();
+    mRestoreMode = false;
 }
 
 void CSVRender::TerrainVertexPaintMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
     if (hit.hit && hit.tag == nullptr)
     {
-        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
-        mTerrainSelection->clearTemporarySelection();
-    }
-}
-
-void CSVRender::TerrainVertexPaintMode::secondarySelectPressed(const WorldspaceHitResult& hit)
-{
-    if (hit.hit && hit.tag == nullptr)
-    {
-        selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
-        mTerrainSelection->clearTemporarySelection();
+        mRestoreMode = false;
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+        undoStack.beginMacro("Paint land vertex colour");
+        editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
+        undoStack.endMacro();
     }
 }
 
@@ -155,9 +138,10 @@ bool CSVRender::TerrainVertexPaintMode::primaryEditStartDrag(const QPoint& pos)
     if (hit.hit && hit.tag == nullptr)
     {
         mIsEditing = true;
+        mRestoreMode = true;
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
-        undoStack.beginMacro("Set land vertex colours");
+        undoStack.beginMacro("Restore land vertex colours");
     }
 
     return true;
@@ -171,56 +155,34 @@ bool CSVRender::TerrainVertexPaintMode::secondaryEditStartDrag(const QPoint& pos
 bool CSVRender::TerrainVertexPaintMode::primarySelectStartDrag(const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-    mDragMode = InteractionType_PrimarySelect;
-    if (!hit.hit || hit.tag != nullptr)
-    {
-        mDragMode = InteractionType_None;
-        return false;
-    }
-    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
-    return true;
-}
 
-bool CSVRender::TerrainVertexPaintMode::secondarySelectStartDrag(const QPoint& pos)
-{
-    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-    mDragMode = InteractionType_SecondarySelect;
-    if (!hit.hit || hit.tag != nullptr)
+    mDragMode = InteractionType_PrimarySelect;
+
+    if (hit.hit && hit.tag == nullptr)
     {
-        mDragMode = InteractionType_None;
-        return false;
+        mIsEditing = true;
+        mRestoreMode = false;
+        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+        QUndoStack& undoStack = document.getUndoStack();
+        undoStack.beginMacro("Paint land vertex colours");
     }
-    selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
+
     return true;
 }
 
 void CSVRender::TerrainVertexPaintMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
 {
-    if (mDragMode == InteractionType_PrimaryEdit)
+    if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_PrimaryEdit)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
         if (mIsEditing)
             editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
     }
-
-    if (mDragMode == InteractionType_PrimarySelect)
-    {
-        WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == nullptr)
-            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0);
-    }
-
-    if (mDragMode == InteractionType_SecondarySelect)
-    {
-        WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == nullptr)
-            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1);
-    }
 }
 
 void CSVRender::TerrainVertexPaintMode::dragCompleted(const QPoint& pos)
 {
-    if (mDragMode == InteractionType_PrimaryEdit)
+    if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_PrimaryEdit)
     {
         if (mIsEditing)
         {
@@ -229,10 +191,7 @@ void CSVRender::TerrainVertexPaintMode::dragCompleted(const QPoint& pos)
             undoStack.endMacro();
         }
         endVertexPaintEditing();
-    }
-    if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_SecondarySelect)
-    {
-        mTerrainSelection->clearTemporarySelection();
+        mRestoreMode = false;
     }
 }
 
@@ -246,6 +205,7 @@ void CSVRender::TerrainVertexPaintMode::dragAborted()
     }
     endVertexPaintEditing();
     mDragMode = InteractionType_None;
+    mRestoreMode = false;
 }
 
 void CSVRender::TerrainVertexPaintMode::dragWheel(int diff, double speedFactor) {}
@@ -253,7 +213,6 @@ void CSVRender::TerrainVertexPaintMode::dragWheel(int diff, double speedFactor) 
 void CSVRender::TerrainVertexPaintMode::endVertexPaintEditing()
 {
     mIsEditing = false;
-    mTerrainSelection->update();
 }
 
 void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
@@ -419,9 +378,9 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 void CSVRender::TerrainVertexPaintMode::alterColour(
     CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool)
 {
-    const int red = mVertexPaintEditToolColor.red();
-    const int green = mVertexPaintEditToolColor.green();
-    const int blue = mVertexPaintEditToolColor.blue();
+    const int red = mRestoreMode ? 255 : mVertexPaintEditToolColor.red();
+    const int green = mRestoreMode ? 255 : mVertexPaintEditToolColor.green();
+    const int blue = mRestoreMode ? 255 : mVertexPaintEditToolColor.blue();
 
     // TODO: handle different smoothing/blend types with different tools, right now this expects Replace
     landColorsNew[(inCellY * ESM::Land::LAND_SIZE + inCellX) * 3 + 0] = red;
@@ -440,143 +399,6 @@ void CSVRender::TerrainVertexPaintMode::pushEditToCommand(const CSMWorld::LandCo
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push(new CSMWorld::ModifyCommand(landTable, index, changedLand));
-}
-
-bool CSVRender::TerrainVertexPaintMode::isInCellSelection(int globalSelectionX, int globalSelectionY) const
-{
-    if (const auto* paged = dynamic_cast<const CSVRender::PagedWorldspaceWidget*>(&getWorldspaceWidget()))
-    {
-        std::pair<int, int> vertexCoords = std::make_pair(globalSelectionX, globalSelectionY);
-        std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
-        return paged->getCellSelection().has(CSMWorld::CellCoordinates::fromId(cellId).first) && canEdit(cellId);
-    }
-    return false;
-}
-
-void CSVRender::TerrainVertexPaintMode::handleSelection(
-    int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections) const
-{
-    if (isInCellSelection(globalSelectionX, globalSelectionY))
-        selections->emplace_back(globalSelectionX, globalSelectionY);
-    else
-    {
-        int moduloX = globalSelectionX % (ESM::Land::LAND_SIZE - 1);
-        int moduloY = globalSelectionY % (ESM::Land::LAND_SIZE - 1);
-        bool xIsAtCellBorder = moduloX == 0;
-        bool yIsAtCellBorder = moduloY == 0;
-        if (!xIsAtCellBorder && !yIsAtCellBorder)
-            return;
-        int selectionX = globalSelectionX;
-        int selectionY = globalSelectionY;
-
-        /*
-            The northern and eastern edges don't belong to the current cell.
-            If the corresponding adjacent cell is not loaded, some special handling is necessary to select border
-           vertices.
-        */
-        if (xIsAtCellBorder && yIsAtCellBorder)
-        {
-            /*
-                Handle the NW, NE, and SE corner vertices.
-                NW corner: (+1, -1) offset to reach current cell.
-                NE corner: (-1, -1) offset to reach current cell.
-                SE corner: (-1, +1) offset to reach current cell.
-            */
-            if (isInCellSelection(globalSelectionX - 1, globalSelectionY - 1)
-                || isInCellSelection(globalSelectionX + 1, globalSelectionY - 1)
-                || isInCellSelection(globalSelectionX - 1, globalSelectionY + 1))
-            {
-                selections->emplace_back(globalSelectionX, globalSelectionY);
-            }
-        }
-        else if (xIsAtCellBorder)
-        {
-            selectionX--;
-        }
-        else if (yIsAtCellBorder)
-        {
-            selectionY--;
-        }
-
-        if (isInCellSelection(selectionX, selectionY))
-            selections->emplace_back(globalSelectionX, globalSelectionY);
-    }
-}
-
-void CSVRender::TerrainVertexPaintMode::selectTerrainShapes(
-    const std::pair<int, int>& vertexCoords, unsigned char selectMode)
-{
-    int r = mBrushSize / 2;
-    std::vector<std::pair<int, int>> selections;
-
-    if (mBrushShape == CSVWidget::BrushShape_Point)
-    {
-        handleSelection(vertexCoords.first, vertexCoords.second, &selections);
-    }
-    else if (mBrushShape == CSVWidget::BrushShape_Square)
-    {
-        for (int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
-        {
-            for (int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
-            {
-                handleSelection(i, j, &selections);
-            }
-        }
-    }
-    else if (mBrushShape == CSVWidget::BrushShape_Circle)
-    {
-        for (int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
-        {
-            for (int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
-            {
-                osg::Vec2f relativeCoords(i - vertexCoords.first, j - vertexCoords.second);
-                if (relativeCoords.length() <= mBrushSize / 2.f)
-                    handleSelection(i, j, &selections);
-            }
-        }
-    }
-
-    std::string selectAction;
-
-    if (selectMode == 0)
-        selectAction = CSMPrefs::get()["3D Scene Editing"]["primary-select-action"].toString();
-    else
-        selectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
-
-    if (selectAction == "Select only")
-        mTerrainSelection->onlySelect(selections);
-    else if (selectAction == "Add to selection")
-        mTerrainSelection->addSelect(selections);
-    else if (selectAction == "Remove from selection")
-        mTerrainSelection->removeSelect(selections);
-    else if (selectAction == "Invert selection")
-        mTerrainSelection->toggleSelect(selections);
-}
-
-bool CSVRender::TerrainVertexPaintMode::noCell(const std::string& cellId) const
-{
-    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    const CSMWorld::IdCollection<CSMWorld::Cell>& cellCollection = document.getData().getCells();
-    return cellCollection.searchId(ESM::RefId::stringRefId(cellId)) == -1;
-}
-
-bool CSVRender::TerrainVertexPaintMode::noLand(const std::string& cellId) const
-{
-    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
-    return landCollection.searchId(ESM::RefId::stringRefId(cellId)) == -1;
-}
-
-bool CSVRender::TerrainVertexPaintMode::noLandLoaded(const std::string& cellId) const
-{
-    const CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
-    return !landCollection.getRecord(ESM::RefId::stringRefId(cellId)).get().isDataLoaded(ESM::Land::DATA_VNML);
-}
-
-bool CSVRender::TerrainVertexPaintMode::canEdit(const std::string& cellId) const
-{
-    return !noCell(cellId) && !noLand(cellId) && !noLandLoaded(cellId);
 }
 
 bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string& cellId, bool useTool)
@@ -662,11 +484,6 @@ void CSVRender::TerrainVertexPaintMode::mouseMoveEvent(QMouseEvent* event)
         mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
     if (!hit.hit && mBrushDraw)
         mBrushDraw->hide();
-}
-
-std::shared_ptr<CSVRender::TerrainSelection> CSVRender::TerrainVertexPaintMode::getTerrainSelection()
-{
-    return mTerrainSelection;
 }
 
 void CSVRender::TerrainVertexPaintMode::setBrushSize(int brushSize)

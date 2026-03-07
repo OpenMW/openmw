@@ -53,13 +53,28 @@ namespace CSVWidget
     private:
         QColor mColor = Qt::white;
 
+        /// Walk up the widget tree past any Qt::Popup windows to find the real
+        /// top-level application window. Using a popup as the parent for a modal
+        /// dialog breaks window stacking because the popup auto-closes on focus loss.
+        QWidget* findNonPopupParent() const
+        {
+            QWidget* w = window();
+            while (w && (w->windowFlags() & Qt::Popup))
+            {
+                w = w->parentWidget();
+                if (w)
+                    w = w->window();
+            }
+            return w;
+        }
+
     signals:
         void colorChanged(const QColor& newColor);
 
     private slots:
         void openColorDialog()
         {
-            QColor color = QColorDialog::getColor(mColor, this, "Select Color");
+            QColor color = QColorDialog::getColor(mColor, findNonPopupParent(), "Select Color");
             if (color.isValid())
             {
                 mColor = color;

@@ -6,7 +6,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <apps/opencs/model/world/cellcoordinates.hpp>
 
@@ -43,8 +42,6 @@ namespace CSMWorld
 
 namespace CSVRender
 {
-    class PagedWorldspaceWidget;
-    class TerrainSelection;
     class WorldspaceWidget;
     struct WorldspaceHitResult;
     class SceneToolbar;
@@ -59,8 +56,6 @@ namespace CSVRender
         {
             InteractionType_PrimaryEdit,
             InteractionType_PrimarySelect,
-            InteractionType_SecondaryEdit,
-            InteractionType_SecondarySelect,
             InteractionType_None
         };
 
@@ -77,10 +72,8 @@ namespace CSVRender
         /// Create single command for one-click vertex paint editing
         void primaryEditPressed(const WorldspaceHitResult& hit) override;
 
-        /// Open brush settings window
+        /// Paint with selected colour on left click
         void primarySelectPressed(const WorldspaceHitResult&) override;
-
-        void secondarySelectPressed(const WorldspaceHitResult&) override;
 
         void activate(CSVWidget::SceneToolbar*) override;
         void deactivate(CSVWidget::SceneToolbar*) override;
@@ -90,7 +83,6 @@ namespace CSVRender
 
         bool secondaryEditStartDrag(const QPoint& pos) override;
         bool primarySelectStartDrag(const QPoint& pos) override;
-        bool secondarySelectStartDrag(const QPoint& pos) override;
 
         /// Handle vertex paint edit behavior during dragging
         void drag(const QPoint& pos, int diffX, int diffY, double speedFactor) override;
@@ -105,8 +97,6 @@ namespace CSVRender
         void dragMoveEvent(QDragMoveEvent* event) override;
         void mouseMoveEvent(QMouseEvent* event) override;
 
-        std::shared_ptr<TerrainSelection> getTerrainSelection();
-
     private:
         /// Reset everything in the current edit
         void endVertexPaintEditing();
@@ -118,25 +108,7 @@ namespace CSVRender
         void alterColour(
             CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool = true);
 
-        /// Check if global selection coordinate belongs to cell in view
-        bool isInCellSelection(int globalSelectionX, int globalSelectionY) const;
-
-        /// Select vertex at global selection coordinate
-        void handleSelection(
-            int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections) const;
-
-        /// Handle brush mechanics for terrain selection
-        void selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode);
-
-        bool noCell(const std::string& cellId) const;
-
-        bool noLand(const std::string& cellId) const;
-
-        bool noLandLoaded(const std::string& cellId) const;
-
-        bool canEdit(const std::string& cellId) const;
-
-        /// Push terrain vertex coloir edits to command macro
+        /// Push terrain vertex colour edits to command macro
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,
             CSMWorld::IdTable& landTable, const std::string& cellId);
 
@@ -152,9 +124,9 @@ namespace CSVRender
         int mDragMode = InteractionType_None;
         osg::Group* mParentNode;
         bool mIsEditing = false;
-        std::shared_ptr<TerrainSelection> mTerrainSelection;
         int mVertexPaintEditTool = VertexPaintEditTool_Replace;
         QColor mVertexPaintEditToolColor;
+        bool mRestoreMode = false;
 
     public slots:
         void setBrushSize(int brushSize);

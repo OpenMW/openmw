@@ -86,7 +86,7 @@ CSVWidget::VertexPaintBrushWindow::VertexPaintBrushWindow(CSMDoc::Document& docu
 
     QLabel* colorLabel = new QLabel(this);
     colorLabel->setText("Color:");
-    mColorButtonWidget = new ColorButtonWidget();
+    mColorButtonWidget = new ColorButtonWidget(this);
 
     layoutMain->addWidget(mHorizontalGroupBox);
     layoutMain->addWidget(mSizeSliders);
