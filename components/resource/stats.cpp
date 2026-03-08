@@ -111,6 +111,7 @@ namespace Resource
                 "NavMesh Delayed",
                 "NavMesh Pushed",
                 "NavMesh Processing",
+                "NavMesh Posted",
                 "NavMesh DbJobs Write",
                 "NavMesh DbJobs Read",
                 "NavMesh DbCache Get",

@@ -1210,6 +1210,45 @@ namespace
             std::nullopt);
     }
 
+    TEST_F(DetourNavigatorNavigatorTest, should_not_post_jobs_for_tiles_outside_processing_range)
+    {
+        CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
+        compound.shape().addChildShape(
+            btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
+
+        const btTransform transform{ btMatrix3x3::getIdentity(), btVector3(100512, 256, 0) };
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        mNavigator->addObject(
+            ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), transform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
+
+        EXPECT_EQ(mNavigator->getStats().mUpdater.mPosted, 0);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, should_add_jobs_for_tiles_when_they_get_in_range)
+    {
+        CollisionShapeInstance compound(std::make_unique<btCompoundShape>());
+        compound.shape().addChildShape(
+            btTransform(btMatrix3x3::getIdentity(), btVector3(0, 0, 0)), new btBoxShape(btVector3(20, 20, 100)));
+
+        const btTransform transform{ btMatrix3x3::getIdentity(), btVector3(100512, 256, 0) };
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        mNavigator->addObject(
+            ObjectId(&compound.shape()), ObjectShapes(compound.instance(), mObjectTransform), transform, nullptr);
+        mNavigator->update(mPlayerPosition, nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
+
+        EXPECT_EQ(mNavigator->getStats().mUpdater.mPosted, 0);
+
+        mNavigator->update(osg::Vec3f(100512, 256, 0), nullptr);
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
+
+        EXPECT_EQ(mNavigator->getStats().mUpdater.mPosted, 1);
+    }
+
     struct DetourNavigatorUpdateTest : TestWithParam<std::function<void(Navigator&)>>
     {
     };
