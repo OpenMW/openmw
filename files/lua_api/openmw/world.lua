@@ -176,6 +176,7 @@
 -- * @{openmw.types#ClothingRecord},
 -- * @{openmw.types#ContainerRecord},
 -- * @{openmw.types#CreatureRecord},
+-- * @{openmw.types#DoorRecord},
 -- * @{openmw.types#LightRecord},
 -- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#NpcRecord},

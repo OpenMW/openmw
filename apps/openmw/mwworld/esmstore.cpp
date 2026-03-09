@@ -692,7 +692,7 @@ namespace MWWorld
             + get<ESM::Weapon>().getDynamicSize() + get<ESM::CreatureLevList>().getDynamicSize()
             + get<ESM::ItemLevList>().getDynamicSize() + get<ESM::Creature>().getDynamicSize()
             + get<ESM::Container>().getDynamicSize() + get<ESM::Light>().getDynamicSize()
-            + get<ESM::Static>().getDynamicSize();
+            + get<ESM::Static>().getDynamicSize() + get<ESM::Door>().getDynamicSize();
     }
 
     void ESMStore::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -720,6 +720,7 @@ namespace MWWorld
         get<ESM::Container>().write(writer, progress);
         get<ESM::Light>().write(writer, progress);
         get<ESM::Static>().write(writer, progress);
+        get<ESM::Door>().write(writer, progress);
     }
 
     bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t typeId)
@@ -746,6 +747,7 @@ namespace MWWorld
             case ESM::REC_LEVC:
             case ESM::REC_LIGH:
             case ESM::REC_STAT:
+            case ESM::REC_DOOR:
                 mStoreImp->mRecNameToStore[type]->read(reader, true);
                 return true;
 
