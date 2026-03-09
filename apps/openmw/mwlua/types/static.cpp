@@ -18,6 +18,24 @@ namespace sol
 
 namespace MWLua
 {
+    namespace
+    {
+        template <class T, bool readOnly>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            if constexpr (readOnly)
+                addModelProperty(record);
+            else
+                addMutableModelProperty(record);
+        }
+    }
+
     ESM::Static tableToStatic(const sol::table& rec)
     {
         ESM::Static stat;
@@ -37,16 +55,16 @@ namespace MWLua
         return stat;
     }
 
+    void addMutableStaticType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Static>, false>(lua, "ESM3_MutableStatic");
+    }
+
     void addStaticBindings(sol::table stat, const Context& context)
     {
         stat["createRecordDraft"] = tableToStatic;
         addRecordFunctionBinding<ESM::Static>(stat, context);
-
-        sol::usertype<ESM::Static> record = context.sol().new_usertype<ESM::Static>("ESM3_Static");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Static& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Static& rec) -> std::string { return rec.mId.serializeText(); });
-        addModelProperty(record);
+        sol::state_view lua = context.sol();
+        addUserType<ESM::Static, true>(lua, "ESM3_Static");
     }
 }

@@ -1,5 +1,6 @@
 #include "contentbindings.hpp"
 
+#include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
 
@@ -143,15 +144,19 @@ namespace MWLua
                 });
         }
 
+        sol::table initDoorBindings(sol::state_view& lua, MWWorld::Store<ESM::Door>& store)
+        {
+            addRecordStoreBindings<ESM::Door>(lua, &MWLua::tableToDoor);
+            addMutableDoorType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Door>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
         {
             addRecordStoreBindings<ESM::Static>(lua, &MWLua::tableToStatic);
-            using MT = MutableRecord<ESM::Static>;
-            sol::usertype<MT> record = lua.new_usertype<MT>("ESM3_MutableStatic");
-            record[sol::meta_function::to_string]
-                = [](const MT& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
-            record["id"] = sol::readonly_property([](const MT& rec) -> std::string { return rec.mId.serializeText(); });
-            addMutableModelProperty(record);
+            addMutableStaticType(lua);
             sol::table api(lua, sol::create);
             api["records"] = MutableStore<ESM::Static>{ store };
             return LuaUtil::makeReadOnly(api);
@@ -163,6 +168,7 @@ namespace MWLua
         auto lua = context.sol();
         sol::table api(lua, sol::create);
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         return LuaUtil::makeReadOnly(api);

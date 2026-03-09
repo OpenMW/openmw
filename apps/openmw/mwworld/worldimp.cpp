@@ -175,11 +175,6 @@ namespace MWWorld
                 { Globals::sPCHasTurnIn, ESM::Variant(0) },
             };
         }
-
-        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultDoors()
-        {
-            return { { "prisonmarker", "marker_prison.nif" } };
-        }
     }
 
     struct GameContentLoader : public ContentLoader
@@ -546,18 +541,6 @@ namespace MWWorld
                 ESM::Global record;
                 record.mId = ESM::RefId::stringRefId(name.getValue());
                 record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
-        for (const auto& [id, model] : generateDefaultDoors())
-        {
-            if (mStore.get<ESM::Door>().search(ESM::RefId::stringRefId(id)) == nullptr)
-            {
-                ESM::Door record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
