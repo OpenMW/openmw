@@ -20,7 +20,7 @@ namespace VFS
         if (prefix > 0 && str[prefix - 1] != '\\' && str[prefix - 1] != '/')
             ++prefix;
 
-        std::filesystem::recursive_directory_iterator iterator(mPath);
+        std::filesystem::recursive_directory_iterator iterator(mPath, std::filesystem::directory_options::follow_directory_symlink);
 
         for (auto it = std::filesystem::begin(iterator), end = std::filesystem::end(iterator); it != end;)
         {
