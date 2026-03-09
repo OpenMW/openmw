@@ -79,7 +79,7 @@ osg::Vec3f CSVRender::InstanceMode::quatToEuler(const osg::Quat& rot) const
     else
     {
         x = std::atan2(2 * (rot.w() * rot.x() - rot.y() * rot.z()), 1 - 2 * (rot.x() * rot.x() + rot.y() * rot.y()));
-        y = std::asin(test);
+        y = std::asin(std::clamp(test, -1.0f, 1.0f));
         z = std::atan2(2 * (rot.w() * rot.z() - rot.x() * rot.y()), 1 - 2 * (rot.y() * rot.y() + rot.z() * rot.z()));
     }
 
@@ -804,18 +804,22 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
             float oldY = newY - diffY; // diffY appears to already be flipped
 
             osg::Vec3f oldVec = osg::Vec3f(oldX, oldY, 0);
-            oldVec.normalize();
+            if (oldVec.length2() != 0.0f)
+                oldVec.normalize();
 
             osg::Vec3f newVec = osg::Vec3f(newX, newY, 0);
-            newVec.normalize();
+            if (newVec.length2() != 0.0f)
+                newVec.normalize();
 
             // Find angle and axis of rotation
-            angle = std::acos(oldVec * newVec) * speedFactor;
+            angle = std::acos(std::clamp(oldVec * newVec, -1.0f, 1.0f)) * speedFactor;
             if (((oldVec ^ newVec) * camBack < 0) ^ (camBack.z() < 0))
                 angle *= -1;
         }
 
         rotation = osg::Quat(angle, axis);
+        if (rotation != rotation)
+            rotation = osg::Quat(); // NaN flush
     }
     else if (mDragMode == DragMode_Scale || mDragMode == DragMode_Scale_Snap)
     {
@@ -852,12 +856,34 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
         return;
     }
 
-    int i = 0;
+    auto eulerToMat = [&](osg::Vec3 euler) { return osg::Matrixf(eulerToQuat(euler)); };
+    auto matToEuler = [&](const osg::Matrixf& matrix) { return quatToEuler(matrix.getRotate()); };
+
+    // Multiselect rotation needs to be applied to transform matrixes, not angles,
+    //  and we need them to have a collective center.
+    // For the sake of consistency we take the average of each origin in the selection.
+    // This is invariant under rotation and reselection, so it's predictable to the user.
+    osg::Vec3 center;
+    float numCenters = 0.0f;
+    for (auto& item : selection)
+    {
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
+        {
+            ESM::Position position = objectTag->mObject->getPosition();
+            center.x() += position.pos[0];
+            center.y() += position.pos[1];
+            center.z() += position.pos[2];
+            numCenters += 1.0f;
+        }
+    }
+    if (numCenters > 0.0f)
+        center /= numCenters;
 
     // Apply
-    for (std::vector<osg::ref_ptr<TagBase>>::iterator iter(selection.begin()); iter != selection.end(); ++iter, i++)
+    int i = 0;
+    for (auto& item : selection)
     {
-        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(iter->get()))
+        if (CSVRender::ObjectTag* objectTag = dynamic_cast<CSVRender::ObjectTag*>(item.get()))
         {
             if (mDragMode == DragMode_Move || mDragMode == DragMode_Move_Snap)
             {
@@ -908,21 +934,52 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
             }
             else if (mDragMode == DragMode_Rotate || mDragMode == DragMode_Rotate_Snap)
             {
-                ESM::Position position = objectTag->mObject->getPosition();
-
-                osg::Quat currentRot = eulerToQuat(osg::Vec3f(position.rot[0], position.rot[1], position.rot[2]));
-                osg::Quat combined = currentRot * rotation;
-
-                osg::Vec3f euler = quatToEuler(combined);
-                // There appears to be a very rare rounding error that can cause asin to return NaN
-                if (!euler.isNaN())
+                // Only one item: use basic rotation logic to ensure no drift
+                if (numCenters == 1.0f)
                 {
+                    ESM::Position position = objectTag->mObject->getPosition();
+
+                    osg::Quat currentRot = eulerToQuat(osg::Vec3f(position.rot[0], position.rot[1], position.rot[2]));
+                    osg::Quat combined = currentRot * rotation;
+
+                    osg::Vec3f euler = quatToEuler(combined);
+                    // There appears to be a very rare rounding error that can cause asin to return NaN
+                    if (!euler.isNaN())
+                    {
+                        position.rot[0] = euler.x();
+                        position.rot[1] = euler.y();
+                        position.rot[2] = euler.z();
+                    }
+
+                    objectTag->mObject->setRotation(position.rot);
+                }
+                else
+                {
+                    // Used both as a read and as a write.
+                    ESM::Position position = objectTag->mObject->getPosition();
+
+                    // Group rotation needs to be able to move objects relative to each other,
+                    //  so we work on localized transforms. For rotation, we can ignore scale.
+                    osg::Vec3 mypos = osg::Vec3(position.pos[0], position.pos[1], position.pos[2]);
+                    osg::Vec3 myrot = osg::Vec3(position.rot[0], position.rot[1], position.rot[2]);
+
+                    osg::Matrix matrix = osg::Matrixf::identity();
+                    matrix *= eulerToMat(myrot);
+                    matrix *= osg::Matrixf::translate(mypos - center);
+
+                    osg::Matrixf newxform = matrix * osg::Matrixf(rotation);
+                    osg::Vec3f euler = matToEuler(osg::Matrixf::orthoNormal(newxform));
+                    osg::Vec3f newpos = newxform.getTrans() + center;
+
                     position.rot[0] = euler.x();
                     position.rot[1] = euler.y();
                     position.rot[2] = euler.z();
+                    position.pos[0] = newpos.x();
+                    position.pos[1] = newpos.y();
+                    position.pos[2] = newpos.z();
+                    objectTag->mObject->setPosition(position.pos);
+                    objectTag->mObject->setRotation(position.rot);
                 }
-
-                objectTag->mObject->setRotation(position.rot);
             }
             else if (mDragMode == DragMode_Scale || mDragMode == DragMode_Scale_Snap)
             {
@@ -942,6 +999,7 @@ void CSVRender::InstanceMode::drag(const QPoint& pos, int diffX, int diffY, doub
                 objectTag->mObject->setScale(scale);
             }
         }
+        i++;
     }
 }
 
