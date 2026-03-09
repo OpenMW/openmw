@@ -1,5 +1,6 @@
 #include "contentbindings.hpp"
 
+#include <components/esm3/loadacti.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
@@ -144,6 +145,15 @@ namespace MWLua
                 });
         }
 
+        sol::table initActivatorBindings(sol::state_view& lua, MWWorld::Store<ESM::Activator>& store)
+        {
+            addRecordStoreBindings<ESM::Activator>(lua, &MWLua::tableToActivator);
+            addMutableActivatorType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Activator>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initDoorBindings(sol::state_view& lua, MWWorld::Store<ESM::Door>& store)
         {
             addRecordStoreBindings<ESM::Door>(lua, &MWLua::tableToDoor);
@@ -168,6 +178,7 @@ namespace MWLua
         auto lua = context.sol();
         sol::table api(lua, sol::create);
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());

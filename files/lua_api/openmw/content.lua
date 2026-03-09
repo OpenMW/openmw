@@ -6,6 +6,15 @@
 -- @usage local content = require('openmw.content')
 
 
+--- @{#ActivatorContent}: Activator manipulation.
+-- @field [parent=#content] #ActivatorContent activators
+
+---
+-- A mutable list of all @{openmw.types#ActivatorRecord}s.
+-- @field [parent=#ActivatorContent] #list<openmw.types#ActivatorRecord> records
+-- @usage
+-- content.activators.records.MyActivator = { mwscript = 'float', model = 'meshes/w/w_chitin_arrow.nif', name = 'Quest marker' }
+
 --- @{#DoorContent}: Door manipulation.
 -- @field [parent=#content] #DoorContent doors
 
