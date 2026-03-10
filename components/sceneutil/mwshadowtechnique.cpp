@@ -532,7 +532,8 @@ void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::L
 //
 MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* vdd):
     _viewDependentData(vdd),
-    _textureUnit(0)
+    _textureUnit(0),
+    _sm_i(0)
 {
 
     const ShadowSettings* settings = vdd->getViewDependentShadowMap()->getShadowedScene()->getShadowSettings();

@@ -182,13 +182,9 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 CSVRender::Object::Object(
     CSMWorld::Data& data, osg::Group* parentNode, const std::string& id, bool referenceable, bool forceBaseToZero)
     : mData(data)
-    , mBaseNode(nullptr)
-    , mSelected(false)
     , mParentNode(parentNode)
     , mResourceSystem(data.getResourceSystem().get())
     , mForceBaseToZero(forceBaseToZero)
-    , mScaleOverride(1)
-    , mOverrideFlags(0)
 {
     mRootNode = new osg::PositionAttitudeTransform;
 

@@ -90,14 +90,14 @@ namespace CSVRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         osg::ref_ptr<osgFX::Scribe> mOutline;
-        bool mSelected;
-        bool mSnapTarget;
+        bool mSelected{ false };
+        bool mSnapTarget{ false };
         osg::Group* mParentNode;
         Resource::ResourceSystem* mResourceSystem;
         bool mForceBaseToZero;
         ESM::Position mPositionOverride;
-        float mScaleOverride;
-        int mOverrideFlags;
+        float mScaleOverride{ 1.f };
+        int mOverrideFlags{ 0 };
         std::unique_ptr<Actor> mActor;
 
         /// Not implemented
