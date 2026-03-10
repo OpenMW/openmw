@@ -20,6 +20,9 @@ namespace LuaUi
             constexpr std::string_view events = "events";
             constexpr std::string_view content = "content";
             constexpr std::string_view external = "external";
+
+            const std::set<std::string_view> allKeys
+                = { type, name, layer, templateLayout, props, events, content, external };
         }
 
         const std::string defaultWidgetType = "LuaWidget";
@@ -264,6 +267,11 @@ namespace LuaUi
         sGameElements.erase(element);
     }
 
+    std::set<std::string_view> Element::allLayoutProperties()
+    {
+        return LayoutKeys::allKeys;
+    }
+
     void Element::create(uint64_t depth)
     {
         if (mState == New)
@@ -273,6 +281,7 @@ namespace LuaUi
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
             mState = Created;
+            checkWarnings();
         }
     }
 
@@ -312,6 +321,7 @@ namespace LuaUi
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
             mState = Created;
+            checkWarnings();
         }
     }
 
@@ -331,5 +341,13 @@ namespace LuaUi
             mLayout.reset();
         }
         mState = Destroyed;
+    }
+
+    void Element::checkWarnings()
+    {
+        assert(mRoot);
+        auto warnings = mRoot->collectWarnings(0);
+        for (const auto& warning : warnings)
+            Log(Debug::Warning) << warning;
     }
 }

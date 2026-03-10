@@ -17,6 +17,7 @@ namespace LuaUi
         void updateChildren() override;
         MyGUI::IntSize childScalingSize() const override;
         MyGUI::IntSize templateScalingSize() const override;
+        std::string getType() const override;
 
     private:
         void updateSizeToFit();

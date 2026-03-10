@@ -13,6 +13,7 @@
 
 #include "element.hpp"
 #include "registerscriptsettings.hpp"
+#include <ranges>
 
 namespace LuaUi
 {
@@ -54,5 +55,23 @@ namespace LuaUi
     {
         while (!Element::sMenuElements.empty())
             Element::erase(Element::sMenuElements.begin()->second.get());
+    }
+
+    void warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
+        std::set<std::string_view> usedKeys)
+    {
+        if (!object.is<sol::table>())
+            return;
+        sol::table table = object.as<sol::table>();
+        for (const auto& [key, value] : table)
+        {
+            if (!key.is<std::string>())
+                continue;
+            auto keyStr = key.as<std::string>();
+            if (!usedKeys.contains(keyStr))
+            {
+                warnings.push_back("unused key '" + keyStr + "' in " + tableName);
+            }
+        }
     }
 }

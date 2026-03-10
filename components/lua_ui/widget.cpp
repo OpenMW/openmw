@@ -1,7 +1,10 @@
 #include "widget.hpp"
+#include "components/lua_ui/util.hpp"
+#include "element.hpp"
 
 #include <SDL_events.h>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <ranges>
 
 namespace
 {
@@ -382,6 +385,84 @@ namespace LuaUi
         auto it = mCallbacks.find(name);
         if (it != mCallbacks.end())
             it->second.call(argument, mLayout);
+    }
+
+    std::vector<std::string> WidgetExtension::collectWarnings(int depth) const
+    {
+        std::vector<std::string> warnings;
+        collectUnusedWarnings(warnings);
+        if (depth > 0)
+        {
+            std::ranges::transform(warnings, warnings.begin(),
+                [&](const std::string& warning) { return std::string((depth + 1) * 2, ' ') + warning; });
+        }
+
+        for (uint32_t i = 0; i < mChildren.size(); i++)
+        {
+            auto childWarnings = mChildren[i]->collectWarnings(depth + 1);
+            if (childWarnings.empty())
+                continue;
+            warnings.emplace_back(std::string((depth + 1) * 2, ' ') + "in content[" + std::to_string(i) + "]:");
+            std::ranges::move(childWarnings, std::back_inserter(warnings));
+        }
+        if (!warnings.empty())
+        {
+            warnings.insert(warnings.begin(), "Warnings generated for " + diagnosticName() + ":");
+            if (depth > 0)
+                warnings.front() = std::string(depth * 2, ' ') + warnings.front();
+        }
+
+        return warnings;
+    }
+
+    void WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings) const
+    {
+        if (!mProperties.is<sol::table>())
+            return;
+        if (!mLayout.is<sol::table>())
+            // We have bigger problems
+            return;
+        auto& usedPropsKeys = allUsedProperties();
+        auto usedLayoutKeys = LuaUi::Element::allLayoutProperties();
+        warnUnused(warnings, mLayout, "layout", usedLayoutKeys);
+        warnUnused(warnings, mProperties, "props", usedPropsKeys);
+    }
+
+    std::string WidgetExtension::diagnosticName() const
+    {
+        auto name = getLayoutName();
+        if (name.empty())
+            return "unnamed " + getType();
+        return getType() + " named '" + name + "'";
+    }
+
+    const std::set<std::string_view>& WidgetExtension::allUsedProperties() const
+    {
+        static std::set<std::string_view> usedProps = {
+            "propagateEvents",
+            "position",
+            "size",
+            "relativePosition",
+            "relativeSize",
+            "anchor",
+            "visible",
+            "pointer",
+            "alpha",
+            "inheritAlpha",
+        };
+        return usedProps;
+    }
+
+    std::string WidgetExtension::getLayoutName() const
+    {
+        if (mLayout.is<sol::table>())
+            return mLayout.as<sol::table>().get_or<std::string>("name", "");
+        return "";
+    }
+
+    std::string WidgetExtension::getType() const
+    {
+        return "Widget";
     }
 
     void WidgetExtension::keyPress(MyGUI::Widget*, MyGUI::KeyCode code, MyGUI::Char ch)

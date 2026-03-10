@@ -46,6 +46,21 @@ namespace LuaUi
         WidgetExtension::updateProperties();
     }
 
+    const std::set<std::string_view>& LuaWindow::allUsedProperties() const
+    {
+        static std::set<std::string_view> usedProps = std::invoke([this] {
+            auto usedProps = WidgetExtension::allUsedProperties();
+            usedProps.merge(std::set<std::string_view>{ "caption" });
+            return usedProps;
+        });
+        return usedProps;
+    }
+
+    std::string LuaWindow::getType() const
+    {
+        return "Window";
+    }
+
     void LuaWindow::notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
     {
         if (id != MyGUI::MouseButton::Left)

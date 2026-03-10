@@ -68,4 +68,19 @@ namespace LuaUi
 
         WidgetExtension::updateProperties();
     }
+
+    const std::set<std::string_view>& LuaImage::allUsedProperties() const
+    {
+        static std::set<std::string_view> usedProps = std::invoke([this] {
+            auto usedProps = WidgetExtension::allUsedProperties();
+            usedProps.merge(std::set<std::string_view>{ "resource", "tileH", "tileV", "color" });
+            return usedProps;
+        });
+        return usedProps;
+    }
+
+    std::string LuaImage::getType() const
+    {
+        return "Image";
+    }
 }

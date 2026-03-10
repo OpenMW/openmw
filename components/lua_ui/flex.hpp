@@ -18,6 +18,9 @@ namespace LuaUi
 
         void updateCoord() override;
 
+        const std::set<std::string_view>& allUsedProperties() const override;
+        std::string getType() const override;
+
     private:
         bool mHorizontal;
         bool mAutoSized;

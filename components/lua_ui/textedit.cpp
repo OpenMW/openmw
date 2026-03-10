@@ -1,6 +1,7 @@
 #include "textedit.hpp"
 
 #include "alignment.hpp"
+#include <ranges>
 
 namespace LuaUi
 {
@@ -75,5 +76,21 @@ namespace LuaUi
             normalSize.height = std::max(normalSize.height, targetHeight);
         }
         return normalSize;
+    }
+
+    const std::set<std::string_view>& LuaTextEdit::allUsedProperties() const
+    {
+        static std::set<std::string_view> usedProps = std::invoke([this] {
+            auto usedProps = WidgetExtension::allUsedProperties();
+            usedProps.merge(std::set<std::string_view>{ "text", "textSize", "textColor", "wordWrap", "textAlignH",
+                "textAlignV", "multiline", "readOnly", "autoSize" });
+            return usedProps;
+        });
+        return usedProps;
+    }
+
+    std::string LuaTextEdit::getType() const
+    {
+        return "TextEdit";
     }
 }

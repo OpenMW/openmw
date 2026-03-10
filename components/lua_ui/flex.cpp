@@ -104,4 +104,19 @@ namespace LuaUi
         updateChildren();
         WidgetExtension::updateCoord();
     }
+
+    const std::set<std::string_view>& LuaFlex::allUsedProperties() const
+    {
+        static std::set<std::string_view> usedProps = std::invoke([this] {
+            auto usedProps = WidgetExtension::allUsedProperties();
+            usedProps.merge(std::set<std::string_view>{ "horizontal", "autoSize", "arrange", "align" });
+            return usedProps;
+        });
+        return usedProps;
+    }
+
+    std::string LuaFlex::getType() const
+    {
+        return "Flex";
+    }
 }

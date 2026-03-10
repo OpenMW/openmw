@@ -77,6 +77,7 @@ namespace LuaUi
         MyGUI::IntCoord calculateCoord() const;
 
         virtual bool isTextInput() { return false; }
+        std::vector<std::string> collectWarnings(int depth) const;
 
     protected:
         virtual void initialize();
@@ -137,6 +138,13 @@ namespace LuaUi
                     w = nullptr;
             }
         }
+
+        void collectUnusedWarnings(std::vector<std::string>& warnings) const;
+        std::string diagnosticName() const;
+        std::string getLayoutName() const;
+
+        virtual const std::set<std::string_view>& allUsedProperties() const;
+        virtual std::string getType() const;
 
         bool mForcePosition;
         bool mForceSize;

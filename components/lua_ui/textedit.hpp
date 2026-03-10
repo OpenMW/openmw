@@ -22,6 +22,9 @@ namespace LuaUi
         void updateChildren() override;
         MyGUI::IntSize calculateSize() const override;
 
+        const std::set<std::string_view>& allUsedProperties() const override;
+        std::string getType() const override;
+
     private:
         void textChange(MyGUI::EditBox*);
 

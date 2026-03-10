@@ -18,6 +18,8 @@ namespace LuaUi
                 callback(element.get());
         }
 
+        static std::set<std::string_view> allLayoutProperties();
+
         WidgetExtension* mRoot;
         sol::main_object mLayout;
         std::string mLayer;
@@ -40,6 +42,8 @@ namespace LuaUi
 
         friend void clearGameInterface();
         friend void clearMenuInterface();
+
+        void checkWarnings();
 
     private:
         Element(sol::table layout);
