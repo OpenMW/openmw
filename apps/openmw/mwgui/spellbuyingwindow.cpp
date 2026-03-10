@@ -272,8 +272,6 @@ namespace MWGui
         else
             return true;
 
-        winMgr->setCursorVisible(!winMgr->getControllerTooltipVisible());
-
         if (mControllerFocus < mSpellButtons.size())
         {
             // Scroll the list to keep the active item in view

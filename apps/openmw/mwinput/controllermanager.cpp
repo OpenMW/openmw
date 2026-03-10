@@ -374,15 +374,8 @@ namespace MWInput
                     && (arg.axis == SDL_CONTROLLER_AXIS_LEFTX || arg.axis == SDL_CONTROLLER_AXIS_LEFTY))
                 {
                     // Treat the left stick like a cursor, which is the default behavior.
-                    if (winMgr->getControllerTooltipVisible())
-                    {
-                        winMgr->setControllerTooltipVisible(false);
-                        winMgr->setCursorVisible(true);
-                    }
-                    else if (mGamepadGuiCursorEnabled)
-                    {
-                        winMgr->setCursorVisible(true);
-                    }
+                    winMgr->setControllerTooltipVisible(false);
+                    winMgr->setCursorVisible(true);
                     return false;
                 }
 

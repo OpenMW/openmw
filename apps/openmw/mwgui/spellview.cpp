@@ -417,9 +417,6 @@ namespace MWGui
 
     void SpellView::updateControllerFocus(size_t prevFocus, size_t newFocus)
     {
-        MWBase::Environment::get().getWindowManager()->setCursorVisible(
-            !MWBase::Environment::get().getWindowManager()->getControllerTooltipVisible());
-
         if (mButtons.empty())
             return;
 
