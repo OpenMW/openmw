@@ -38,16 +38,7 @@ namespace MWLua
     // Populates a activator struct from a Lua table.
     ESM::Activator tableToActivator(const sol::table& rec)
     {
-        ESM::Activator activator;
-        if (rec["template"] != sol::nil)
-        {
-            if (rec["template"].is<MutableRecord<ESM::Activator>>())
-                activator = rec["template"].get<MutableRecord<ESM::Activator>>().find();
-            else
-                activator = LuaUtil::cast<ESM::Activator>(rec["template"]);
-        }
-        else
-            activator.blank();
+        auto activator = Types::initFromTemplate<ESM::Activator>(rec);
         if (rec["name"] != sol::nil)
             activator.mName = rec["name"];
         if (rec["model"] != sol::nil)

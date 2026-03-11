@@ -76,6 +76,21 @@ namespace MWLua::Types
         else
             ::MWLua::addModelProperty(type);
     }
+
+    template <class Record>
+    Record initFromTemplate(const sol::table& rec)
+    {
+        if (rec["template"] != sol::nil)
+        {
+            if (rec["template"].is<MutableRecord<Record>>())
+                return rec["template"].get<MutableRecord<Record>>().find();
+            else
+                return LuaUtil::cast<Record>(rec["template"]);
+        }
+        Record out;
+        out.blank();
+        return out;
+    }
 }
 
 #endif

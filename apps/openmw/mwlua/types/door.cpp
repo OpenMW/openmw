@@ -60,16 +60,7 @@ namespace MWLua
 
     ESM::Door tableToDoor(const sol::table& rec)
     {
-        ESM::Door door;
-        if (rec["template"] != sol::nil)
-        {
-            if (rec["template"].is<MutableRecord<ESM::Door>>())
-                door = rec["template"].get<MutableRecord<ESM::Door>>().find();
-            else
-                door = LuaUtil::cast<ESM::Door>(rec["template"]);
-        }
-        else
-            door.blank();
+        auto door = Types::initFromTemplate<ESM::Door>(rec);
 
         if (rec["name"] != sol::nil)
             door.mName = rec["name"];

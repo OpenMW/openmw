@@ -35,16 +35,7 @@ namespace MWLua
 
     ESM::Static tableToStatic(const sol::table& rec)
     {
-        ESM::Static stat;
-        if (rec["template"] != sol::nil)
-        {
-            if (rec["template"].is<MutableRecord<ESM::Static>>())
-                stat = rec["template"].get<MutableRecord<ESM::Static>>().find();
-            else
-                stat = LuaUtil::cast<ESM::Static>(rec["template"]);
-        }
-        else
-            stat.blank();
+        auto stat = Types::initFromTemplate<ESM::Static>(rec);
 
         if (rec["model"] != sol::nil)
             stat.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
