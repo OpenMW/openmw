@@ -10,8 +10,6 @@ set(WIZARD
     main.cpp
     mainwizard.cpp
     methodselectionpage.cpp
-
-    utils/componentlistwidget.cpp
 )
 
 if(WIN32)
@@ -29,8 +27,6 @@ set(WIZARD_HEADER
     languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
-
-    utils/componentlistwidget.hpp
 )
 
 if (OPENMW_USE_UNSHIELD)

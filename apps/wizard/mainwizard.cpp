@@ -49,8 +49,6 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
-    setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
-
     mImporterInvoker = new ProcessInvoker();
 
     connect(mImporterInvoker->getProcess(), &QProcess::started, this, &MainWizard::importerStarted);
