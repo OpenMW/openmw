@@ -49,9 +49,9 @@ namespace LuaUi
     const std::set<std::string_view>& LuaWindow::allUsedProperties() const
     {
         static std::set<std::string_view> usedProps = std::invoke([this] {
-            auto usedProps = WidgetExtension::allUsedProperties();
-            usedProps.merge(std::set<std::string_view>{ "caption" });
-            return usedProps;
+            auto props = WidgetExtension::allUsedProperties();
+            props.merge(std::set<std::string_view>{ "caption" });
+            return props;
         });
         return usedProps;
     }
