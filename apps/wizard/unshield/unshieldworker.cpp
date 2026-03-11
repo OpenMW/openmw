@@ -11,8 +11,6 @@
 
 #include <components/files/qtconversion.hpp>
 
-#include <apps/wizard/inisettings.hpp>
-
 Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject* parent)
     : QObject(parent)
     , mExpectedMorrowindBsaSize(expectedMorrowindBsaSize)

@@ -3,7 +3,6 @@ set(WIZARD
     conclusionpage.cpp
     existinginstallationpage.cpp
     importpage.cpp
-    inisettings.cpp
     installationtargetpage.cpp
     intropage.cpp
     languageselectionpage.cpp
@@ -21,7 +20,6 @@ set(WIZARD_HEADER
     conclusionpage.hpp
     existinginstallationpage.hpp
     importpage.hpp
-    inisettings.hpp
     installationtargetpage.hpp
     intropage.hpp
     languageselectionpage.hpp
@@ -30,8 +28,18 @@ set(WIZARD_HEADER
 )
 
 if (OPENMW_USE_UNSHIELD)
-    set (WIZARD ${WIZARD} installationpage.cpp unshield/unshieldworker.cpp)
-    set (WIZARD_HEADER ${WIZARD_HEADER} installationpage.hpp unshield/unshieldworker.hpp)
+    set (WIZARD
+         ${WIZARD}
+         installationpage.cpp
+         unshield/inisettings.cpp
+         unshield/unshieldworker.cpp
+    )
+    set (WIZARD_HEADER
+         ${WIZARD_HEADER}
+         installationpage.hpp
+         unshield/inisettings.hpp
+         unshield/unshieldworker.hpp
+    )
     add_compile_definitions(OPENMW_USE_UNSHIELD)
 endif (OPENMW_USE_UNSHIELD)
 
