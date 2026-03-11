@@ -1,6 +1,5 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
 #include "usertypeutil.hpp"
 
 #include <components/esm3/loadacti.hpp>
@@ -21,7 +20,7 @@ namespace MWLua
 {
     namespace
     {
-        template <class T, bool readOnly>
+        template <class T>
         void addUserType(sol::state_view& lua, std::string_view name)
         {
             sol::usertype<T> record = lua.new_usertype<T>(name);
@@ -31,10 +30,7 @@ namespace MWLua
             record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
 
             Types::addProperty(record, "name", &ESM::Activator::mName);
-            if constexpr (readOnly)
-                addModelProperty(record);
-            else
-                addMutableModelProperty(record);
+            Types::addModelProperty(record);
             Types::addProperty(record, "mwscript", &ESM::Activator::mScript);
         }
     }
@@ -66,7 +62,7 @@ namespace MWLua
 
     void addMutableActivatorType(sol::state_view& lua)
     {
-        addUserType<MutableRecord<ESM::Activator>, false>(lua, "ESM3_MutableActivator");
+        addUserType<MutableRecord<ESM::Activator>>(lua, "ESM3_MutableActivator");
     }
 
     void addActivatorBindings(sol::table activator, const Context& context)
@@ -74,6 +70,6 @@ namespace MWLua
         activator["createRecordDraft"] = tableToActivator;
         addRecordFunctionBinding<ESM::Activator>(activator, context);
         sol::state_view lua = context.sol();
-        addUserType<ESM::Activator, true>(lua, "ESM3_Activator");
+        addUserType<ESM::Activator>(lua, "ESM3_Activator");
     }
 }

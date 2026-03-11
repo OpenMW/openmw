@@ -2,6 +2,7 @@
 #define MWLUA_USERTYPEUTIL_H
 
 #include "../contentbindings.hpp"
+#include "modelproperty.hpp"
 
 namespace MWLua::Types
 {
@@ -53,14 +54,27 @@ namespace MWLua::Types
         }
     };
 
+    template <class T>
+    constexpr bool isMutable = false;
+    template <class T>
+    constexpr bool isMutable<MutableRecord<T>> = true;
+
     template <class Record, class Type, class M>
     void addProperty(sol::usertype<Type>& type, std::string_view key, Member<M, Record> member)
     {
-        constexpr bool isMutable = std::is_same_v<Type, MutableRecord<Record>>;
-        if constexpr (isMutable)
+        if constexpr (isMutable<Type>)
             type[key] = sol::property(Getter<Record, Type, M>{}(member), Setter<Record, M>{}(member));
         else
             type[key] = sol::readonly_property(Getter<Record, Type, M>{}(member));
+    }
+
+    template <class T>
+    void addModelProperty(sol::usertype<T>& type)
+    {
+        if constexpr (isMutable<T>)
+            ::MWLua::addMutableModelProperty(type);
+        else
+            ::MWLua::addModelProperty(type);
     }
 }
 

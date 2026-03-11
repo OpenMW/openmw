@@ -1,6 +1,5 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
 #include "usertypeutil.hpp"
 
 #include "../localscripts.hpp"
@@ -42,7 +41,7 @@ namespace MWLua
             }
         }
 
-        template <class T, bool readOnly>
+        template <class T>
         void addUserType(sol::state_view& lua, std::string_view name)
         {
             sol::usertype<T> record = lua.new_usertype<T>(name);
@@ -52,10 +51,7 @@ namespace MWLua
             record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
 
             Types::addProperty(record, "name", &ESM::Door::mName);
-            if constexpr (readOnly)
-                addModelProperty(record);
-            else
-                addMutableModelProperty(record);
+            Types::addModelProperty(record);
             Types::addProperty(record, "mwscript", &ESM::Door::mScript);
             Types::addProperty(record, "openSound", &ESM::Door::mOpenSound);
             Types::addProperty(record, "closeSound", &ESM::Door::mCloseSound);
@@ -98,7 +94,7 @@ namespace MWLua
 
     void addMutableDoorType(sol::state_view& lua)
     {
-        addUserType<MutableRecord<ESM::Door>, false>(lua, "ESM3_MutableDoor");
+        addUserType<MutableRecord<ESM::Door>>(lua, "ESM3_MutableDoor");
     }
 
     void addDoorBindings(sol::table door, const Context& context)
@@ -164,7 +160,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Door>(door, context);
 
-        addUserType<ESM::Door, true>(lua, "ESM3_Door");
+        addUserType<ESM::Door>(lua, "ESM3_Door");
     }
 
     void addESM4DoorBindings(sol::table door, const Context& context)

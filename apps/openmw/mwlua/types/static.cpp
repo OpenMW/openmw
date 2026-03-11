@@ -1,7 +1,7 @@
 #include "types.hpp"
 
 #include "../contentbindings.hpp"
-#include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/luastate.hpp>
@@ -20,7 +20,7 @@ namespace MWLua
 {
     namespace
     {
-        template <class T, bool readOnly>
+        template <class T>
         void addUserType(sol::state_view& lua, std::string_view name)
         {
             sol::usertype<T> record = lua.new_usertype<T>(name);
@@ -29,10 +29,7 @@ namespace MWLua
                 = [](const T& rec) -> std::string { return "ESM3_Static[" + rec.mId.toDebugString() + "]"; };
             record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
 
-            if constexpr (readOnly)
-                addModelProperty(record);
-            else
-                addMutableModelProperty(record);
+            Types::addModelProperty(record);
         }
     }
 
@@ -57,7 +54,7 @@ namespace MWLua
 
     void addMutableStaticType(sol::state_view& lua)
     {
-        addUserType<MutableRecord<ESM::Static>, false>(lua, "ESM3_MutableStatic");
+        addUserType<MutableRecord<ESM::Static>>(lua, "ESM3_MutableStatic");
     }
 
     void addStaticBindings(sol::table stat, const Context& context)
@@ -65,6 +62,6 @@ namespace MWLua
         stat["createRecordDraft"] = tableToStatic;
         addRecordFunctionBinding<ESM::Static>(stat, context);
         sol::state_view lua = context.sol();
-        addUserType<ESM::Static, true>(lua, "ESM3_Static");
+        addUserType<ESM::Static>(lua, "ESM3_Static");
     }
 }
