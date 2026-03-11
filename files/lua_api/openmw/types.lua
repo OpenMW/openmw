@@ -2304,6 +2304,13 @@
 -- @usage local state = types.Door.STATE["Idle"]
 
 ---
+-- Creates a @{#DoorRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Door] createRecordDraft
+-- @param #DoorRecord door A Lua table with the fields of a DoorRecord, with an optional field `template` that accepts a @{#DoorRecord} as a base.
+-- @return #DoorRecord A strongly typed Door record.
+
+---
 -- A read-only list of all @{#DoorRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #DoorRecord.
 -- @field [parent=#Door] #list<#DoorRecord> records

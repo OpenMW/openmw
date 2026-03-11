@@ -110,6 +110,7 @@ namespace MWLua
                 { "Opening", MWWorld::DoorState::Opening },
                 { "Closing", MWWorld::DoorState::Closing },
             }));
+        door["createRecordDraft"] = tableToDoor;
         door["getDoorState"] = [](const Object& o) -> MWWorld::DoorState {
             const MWWorld::Ptr& ptr = doorPtr(o);
             return ptr.getClass().getDoorState(ptr);
