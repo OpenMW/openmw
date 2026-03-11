@@ -88,9 +88,4 @@ namespace LuaUi
         });
         return usedProps;
     }
-
-    std::string LuaTextEdit::getType() const
-    {
-        return "TextEdit";
-    }
 }

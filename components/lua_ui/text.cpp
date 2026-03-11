@@ -57,11 +57,6 @@ namespace LuaUi
         return usedProps;
     }
 
-    std::string LuaText::getType() const
-    {
-        return "Text";
-    }
-
     MyGUI::IntSize LuaText::calculateSize() const
     {
         if (mAutoSized)

@@ -430,10 +430,11 @@ namespace LuaUi
 
     std::string WidgetExtension::diagnosticName() const
     {
-        auto name = getLayoutName();
+        auto name = widget()->getName();
+        auto typeName = std::string(widget()->getTypeName());
         if (name.empty())
-            return "unnamed " + getType();
-        return getType() + " named '" + name + "'";
+            return "unnamed " + typeName;
+        return typeName + " named '" + name + "'";
     }
 
     const std::set<std::string_view>& WidgetExtension::allUsedProperties() const
@@ -451,18 +452,6 @@ namespace LuaUi
             "inheritAlpha",
         };
         return usedProps;
-    }
-
-    std::string WidgetExtension::getLayoutName() const
-    {
-        if (mLayout.is<sol::table>())
-            return mLayout.as<sol::table>().get_or<std::string>("name", "");
-        return "";
-    }
-
-    std::string WidgetExtension::getType() const
-    {
-        return "Widget";
     }
 
     void WidgetExtension::keyPress(MyGUI::Widget*, MyGUI::KeyCode code, MyGUI::Char ch)

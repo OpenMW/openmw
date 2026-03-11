@@ -28,7 +28,6 @@ namespace LuaUi
     protected:
         void initialize() override;
         void updateProperties() override;
-        std::string getType() const override;
         const std::set<std::string_view>& allUsedProperties() const override;
         LuaTileRect* mTileRect;
     };

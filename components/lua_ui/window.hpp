@@ -26,7 +26,6 @@ namespace LuaUi
         MyGUI::IntCoord mMoveResize;
 
         const std::set<std::string_view>& allUsedProperties() const override;
-        std::string getType() const override;
 
     protected:
         void notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);

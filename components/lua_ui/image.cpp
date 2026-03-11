@@ -78,9 +78,4 @@ namespace LuaUi
         });
         return usedProps;
     }
-
-    std::string LuaImage::getType() const
-    {
-        return "Image";
-    }
 }

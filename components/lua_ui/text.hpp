@@ -18,7 +18,6 @@ namespace LuaUi
         void setCaption(const MyGUI::UString& caption) override;
 
         const std::set<std::string_view>& allUsedProperties() const override;
-        std::string getType() const override;
 
     private:
         bool mAutoSized;

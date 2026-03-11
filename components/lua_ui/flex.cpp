@@ -114,9 +114,4 @@ namespace LuaUi
         });
         return usedProps;
     }
-
-    std::string LuaFlex::getType() const
-    {
-        return "Flex";
-    }
 }

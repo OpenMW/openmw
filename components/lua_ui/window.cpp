@@ -56,11 +56,6 @@ namespace LuaUi
         return usedProps;
     }
 
-    std::string LuaWindow::getType() const
-    {
-        return "Window";
-    }
-
     void LuaWindow::notifyMousePress(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
     {
         if (id != MyGUI::MouseButton::Left)

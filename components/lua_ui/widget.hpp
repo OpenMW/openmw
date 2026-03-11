@@ -141,10 +141,8 @@ namespace LuaUi
 
         void collectUnusedWarnings(std::vector<std::string>& warnings) const;
         std::string diagnosticName() const;
-        std::string getLayoutName() const;
 
         virtual const std::set<std::string_view>& allUsedProperties() const;
-        virtual std::string getType() const;
 
         bool mForcePosition;
         bool mForceSize;

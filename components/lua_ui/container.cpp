@@ -20,11 +20,6 @@ namespace LuaUi
         return mInnerSize;
     }
 
-    std::string LuaContainer::getType() const
-    {
-        return "Container";
-    }
-
     void LuaContainer::updateSizeToFit()
     {
         MyGUI::IntSize innerSize = MyGUI::IntSize();
