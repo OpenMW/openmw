@@ -215,6 +215,7 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(indices);
 }
+
 static void generateSphere(osg::Geometry& geom, float radius, int segments, int rings)
 {
     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
