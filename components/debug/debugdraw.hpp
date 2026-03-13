@@ -65,8 +65,7 @@ namespace Debug
         {
             return { pos, dims, color, DrawShape::Cylinder };
         }
-        static DrawCall sphere(
-            osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
+        static DrawCall sphere(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
         {
             return { pos, dims, color, DrawShape::Sphere };
         }
