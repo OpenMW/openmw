@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
 
@@ -163,6 +164,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initMiscBindings(sol::state_view& lua, MWWorld::Store<ESM::Miscellaneous>& store)
+        {
+            addRecordStoreBindings<ESM::Miscellaneous>(lua, &MWLua::tableToMisc);
+            addMutableMiscType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Miscellaneous>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
         {
             addRecordStoreBindings<ESM::Static>(lua, &MWLua::tableToStatic);
@@ -181,6 +191,7 @@ namespace MWLua
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
+        api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         return LuaUtil::makeReadOnly(api);
     }

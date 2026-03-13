@@ -47,6 +47,8 @@ namespace MWLua
     void addApparatusBindings(sol::table apparatus, const Context& context);
     void addRepairBindings(sol::table repair, const Context& context);
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
+    ESM::Miscellaneous tableToMisc(const sol::table& rec);
+    void addMutableMiscType(sol::state_view& lua);
     void addPotionBindings(sol::table potion, const Context& context);
     void addIngredientBindings(sol::table ingredient, const Context& context);
     void addArmorBindings(sol::table armor, const Context& context);
