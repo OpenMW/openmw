@@ -215,6 +215,56 @@ static void generateCylinder(osg::Geometry& geom, float radius, float height, in
     geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
     geom.addPrimitiveSet(indices);
 }
+static void generateSphere(osg::Geometry& geom, float radius, int segments, int rings)
+{
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
+    osg::ref_ptr<osg::DrawElementsUShort> indices = new osg::DrawElementsUShort(osg::DrawElementsUShort::TRIANGLES, 0);
+    int vertexCount = segments * (rings + 1);
+    vertices->reserve(vertexCount);
+    normals->reserve(vertexCount);
+    int indexCount = segments * rings * 2 * 3;
+    indices->reserve(indexCount);
+
+    for (int i = 0; i <= rings; ++i)
+    {
+        float phi = (float(i) / float(rings)) * osg::PIf;
+        for (int j = 0; j < segments; ++j)
+        {
+            float theta = (float(j) / float(segments)) * osg::PIf * 2.f;
+            auto pos = sphereCoordToCartesian(theta, phi, radius);
+            vertices->push_back(pos);
+            pos.normalize();
+            normals->push_back(pos);
+        }
+    }
+
+    for (int i = 0; i < rings; ++i)
+    {
+        int ringTopBase = i * segments;
+        int ringBottomBase = ringTopBase + segments;
+
+        for (int j = 0; j < segments; ++j)
+        {
+            auto v1 = static_cast<GLushort>(ringTopBase + j);
+            auto v2 = static_cast<GLushort>(ringTopBase + (j + 1) % segments);
+            auto v3 = static_cast<GLushort>(ringBottomBase + j);
+            auto v4 = static_cast<GLushort>(ringBottomBase + (j + 1) % segments);
+
+            indices->push_back(v1);
+            indices->push_back(v4);
+            indices->push_back(v2);
+
+            indices->push_back(v4);
+            indices->push_back(v1);
+            indices->push_back(v3);
+        }
+    }
+
+    geom.setVertexArray(vertices);
+    geom.setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
+    geom.addPrimitiveSet(indices);
+}
 
 static int getIndexBufferReadFromFrame(const unsigned int& nFrame)
 {
@@ -255,6 +305,7 @@ namespace Debug
         , mLinesToDraw(copy.mLinesToDraw)
         , mCubeGeometry(copy.mCubeGeometry)
         , mCylinderGeometry(copy.mCylinderGeometry)
+        , mSphereGeometry(copy.mSphereGeometry)
         , mWireCubeGeometry(copy.mWireCubeGeometry)
     {
     }
@@ -293,6 +344,9 @@ namespace Debug
                     break;
                 case DrawShape::Cylinder:
                     geometry = mCylinderGeometry;
+                    break;
+                case DrawShape::Sphere:
+                    geometry = mSphereGeometry;
                     break;
                 case DrawShape::WireCube:
                     geometry = mWireCubeGeometry;
@@ -341,6 +395,11 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
     cylinderGeom->setUseVertexBufferObjects(true);
     generateCylinder(*cylinderGeom, .5, 1., 20);
 
+    auto sphereGeom = new osg::Geometry;
+    sphereGeom->setSupportsDisplayList(false);
+    sphereGeom->setUseVertexBufferObjects(true);
+    generateSphere(*sphereGeom, .5, 20, 10);
+
     auto wireCube = new osg::Geometry;
     wireCube->setSupportsDisplayList(false);
     wireCube->setUseVertexBufferObjects(true);
@@ -352,6 +411,7 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager)
         mCustomDebugDrawer[i]->setStateSet(stateset);
         mCustomDebugDrawer[i]->mWireCubeGeometry = wireCube;
         mCustomDebugDrawer[i]->mCubeGeometry = cubeGeometry;
+        mCustomDebugDrawer[i]->mSphereGeometry = sphereGeom;
         mCustomDebugDrawer[i]->mCylinderGeometry = cylinderGeom;
     }
 }
@@ -373,6 +433,12 @@ void Debug::DebugDrawer::drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec
     osg::Vec3 dims = max - min;
     osg::Vec3 pos = min + dims * 0.5f;
     drawCube(pos, dims, color);
+}
+
+void Debug::DebugDrawer::drawSphere(osg::Vec3f position, float radius, osg::Vec3f color)
+{
+    mCustomDebugDrawer[getIndexBufferWriteFromFrame(mCurrentFrame)]->mShapesToDraw.push_back(
+        { position, osg::Vec3f(radius, radius, radius) * 2, color, DrawShape::Sphere });
 }
 
 void Debug::DebugDrawer::addDrawCall(const DrawCall& draw)
