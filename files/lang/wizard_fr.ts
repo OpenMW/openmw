@@ -213,22 +213,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
 <context>
     <name>QObject</name>
     <message>
-        <source>&lt;br&gt;&lt;b&gt;Could not find Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;The Wizard needs to update settings in this file.&lt;br&gt;&lt;br&gt;Press &quot;Browse...&quot; to specify the location manually.&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Impossible de trouver Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;L&apos;assistant d&apos;installation requière de mettre à jour les paramètres de ce fichier.&lt;br&gt;&lt;br&gt;Cliquez sur &quot;Parcourir...&quot; afin de spécifier manuellement son emplacement.&lt;br&gt;</translation>
-    </message>
-    <message>
-        <source>B&amp;rowse...</source>
-        <translation>P&amp;arcourir...</translation>
-    </message>
-    <message>
-        <source>Select configuration file</source>
-        <translation>Sélectionnez le fichier de configuration</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Morrowind.bsa&lt;/b&gt; is missing!&lt;br&gt;Make sure your Morrowind installation is complete.</source>
-        <translation>L&apos;archive &lt;b&gt;Morrowind.bsa&lt;/b&gt; est manquante !&lt;br&gt;Assurez-vous que votre installation de Morrowind est complète.</translation>
-    </message>
-    <message>
         <source>&lt;br&gt;&lt;b&gt;There may be a more recent version of Morrowind available.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Do you wish to continue anyway?&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Il semble qu&apos;une version plus à jour de Morrowind soit disponible.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Voulez-vous continuer malgré tout ?&lt;br&gt;</translation>
     </message>
@@ -239,10 +223,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Select a valid %1 installation media.&lt;br&gt;&lt;b&gt;Hint&lt;/b&gt;: make sure that it contains at least one &lt;b&gt;.cab&lt;/b&gt; file.</source>
         <translation>Sélectionnez un support %1 d&apos;installation valide.&lt;br&gt;&lt;b&gt;Aide&lt;/b&gt; : Assurez-vous qu&apos;il contienne au moins un fichier &lt;b&gt;.cab&lt;/b&gt;.</translation>
-    </message>
-    <message>
-        <source>There may be a more recent version of Morrowind available.&lt;br&gt;&lt;br&gt;Do you wish to continue anyway?</source>
-        <translation>Il semble qu&apos;une version plus à jour de Morrowind soit disponible.&lt;br&gt;&lt;br&gt;Voulez-vous continuer malgré tout ?</translation>
     </message>
 </context>
 <context>
@@ -332,6 +312,22 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Error detecting Morrowind files</source>
         <translation>Erreur lors de la détection des fichiers de Morrowind</translation>
+    </message>
+    <message>
+        <source>&lt;br&gt;&lt;b&gt;Could not find Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;The Wizard needs to update settings in this file.&lt;br&gt;&lt;br&gt;Press &quot;Browse...&quot; to specify the location manually.&lt;br&gt;</source>
+        <translation>&lt;br&gt;&lt;b&gt;Impossible de trouver Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;L&apos;assistant d&apos;installation requière de mettre à jour les paramètres de ce fichier.&lt;br&gt;&lt;br&gt;Cliquez sur &quot;Parcourir...&quot; afin de spécifier manuellement son emplacement.&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>B&amp;rowse...</source>
+        <translation>P&amp;arcourir...</translation>
+    </message>
+    <message>
+        <source>Select configuration file</source>
+        <translation>Sélectionnez le fichier de configuration</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Morrowind.bsa&lt;/b&gt; is missing!&lt;br&gt;Make sure your Morrowind installation is complete.</source>
+        <translation>L&apos;archive &lt;b&gt;Morrowind.bsa&lt;/b&gt; est manquante !&lt;br&gt;Assurez-vous que votre installation de Morrowind est complète.</translation>
     </message>
 </context>
 <context>

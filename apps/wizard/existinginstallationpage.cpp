@@ -9,6 +9,33 @@
 
 #include "mainwizard.hpp"
 
+namespace
+{
+    bool versionIsOK(QWidget* parent, const QString& directoryName)
+    {
+        const QFileInfoList infoList = QDir(directoryName).entryInfoList({ "Morrowind.bsa" });
+        if (infoList.size() != 1)
+            return false;
+
+        const qint64 actualFileSize = infoList.at(0).size();
+
+        // Size of Morrowind.bsa in Steam and GOG editions.
+        constexpr qint64 expectedFileSize = 310459500;
+        if (actualFileSize == expectedFileSize)
+            return true;
+
+        QMessageBox msgBox(parent);
+        msgBox.setWindowTitle(QObject::tr("Most recent Morrowind not detected"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        msgBox.setText(
+            QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>"
+                        "Do you wish to continue anyway?<br>"));
+        return msgBox.exec() == QMessageBox::Yes;
+    }
+}
+
 Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget* parent)
     : QWizardPage(parent)
 {
@@ -16,19 +43,21 @@ Wizard::ExistingInstallationPage::ExistingInstallationPage(QWidget* parent)
 
     setupUi(this);
 
+    browseButton->setIcon(Misc::ScalableIcon::load(":folder"));
+    connect(browseButton, &QPushButton::clicked, this, &ExistingInstallationPage::browseButtonClicked);
+
     // Add a placeholder item to the list of installations
-    QListWidgetItem* emptyItem = new QListWidgetItem(tr("No existing installations detected"));
+    QListWidgetItem* emptyItem = new QListWidgetItem(tr("No existing installations detected"), installationsList);
     emptyItem->setFlags(Qt::NoItemFlags);
 
-    browseButton->setIcon(Misc::ScalableIcon::load(":folder"));
-
-    installationsList->insertItem(0, emptyItem);
+    connect(installationsList, &QListWidget::currentTextChanged, this, &ExistingInstallationPage::textChanged);
+    connect(installationsList, &QListWidget::itemSelectionChanged, this, &ExistingInstallationPage::completeChanged);
 }
 
 void Wizard::ExistingInstallationPage::initializePage()
 {
     // Add the available installation paths
-    QStringList paths(mWizard->mInstallations.keys());
+    const QStringList paths(mWizard->mInstallations.keys());
 
     // Hide the default item if there are installations to choose from
     installationsList->item(0)->setHidden(!paths.isEmpty());
@@ -37,14 +66,9 @@ void Wizard::ExistingInstallationPage::initializePage()
     {
         if (installationsList->findItems(path, Qt::MatchExactly).isEmpty())
         {
-            QListWidgetItem* item = new QListWidgetItem(path);
-            installationsList->addItem(item);
+            installationsList->addItem(path);
         }
     }
-
-    connect(installationsList, &QListWidget::currentTextChanged, this, &ExistingInstallationPage::textChanged);
-
-    connect(installationsList, &QListWidget::itemSelectionChanged, this, &ExistingInstallationPage::completeChanged);
 }
 
 bool Wizard::ExistingInstallationPage::validatePage()
@@ -53,77 +77,66 @@ bool Wizard::ExistingInstallationPage::validatePage()
     // It can be missing entirely
     // Or failed to be detected due to the target being a symlink
 
-    QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QLatin1String("installation.path")).toString());
+    QString& iniPath = mWizard->mInstallations[path].iniPath;
 
-    if (!QFile::exists(mWizard->mInstallations[path].iniPath))
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error detecting Morrowind configuration"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
-        msgBox.setText(
-            QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br>"
-                        "The Wizard needs to update settings in this file.<br><br>"
-                        "Press \"Browse...\" to specify the location manually.<br>"));
+    if (QFile::exists(iniPath))
+        return true;
 
-        QAbstractButton* browseButton2 = msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(tr("Error detecting Morrowind configuration"));
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    msgBox.setText(
+        tr("<br><b>Could not find Morrowind.ini</b><br><br>"
+           "The Wizard needs to update settings in this file.<br><br>"
+           "Press \"Browse...\" to specify the location manually.<br>"));
 
-        msgBox.exec();
+    QAbstractButton* browseIniButton = msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
 
-        QString iniFile;
-        if (msgBox.clickedButton() == browseButton2)
-        {
-            iniFile = QFileDialog::getOpenFileName(this, QObject::tr("Select configuration file"), QDir::currentPath(),
-                QString(tr("Morrowind configuration file (*.ini)")));
-        }
+    msgBox.exec();
 
-        if (iniFile.isEmpty())
-        {
-            return false; // Cancel was clicked;
-        }
+    if (msgBox.clickedButton() != browseIniButton)
+        return false;
 
-        // A proper Morrowind.ini was selected, set it
-        QFileInfo info(iniFile);
-        mWizard->mInstallations[path].iniPath = info.absoluteFilePath();
-    }
+    const QString iniFile = QFileDialog::getOpenFileName(
+        this, tr("Select configuration file"), QDir::currentPath(), tr("Morrowind configuration file (*.ini)"));
 
+    // Cancel was clicked
+    if (iniFile.isEmpty())
+        return false;
+
+    // A proper Morrowind.ini was selected, set it
+    iniPath = QFileInfo(iniFile).absoluteFilePath();
     return true;
 }
 
-void Wizard::ExistingInstallationPage::on_browseButton_clicked()
+void Wizard::ExistingInstallationPage::browseButtonClicked()
 {
-    QString selectedFile
-        = QFileDialog::getOpenFileName(this, tr("Select Morrowind.esm (located in Data Files)"), QDir::currentPath(),
-            QString(tr("Morrowind master file (Morrowind.esm)")), nullptr, QFileDialog::DontResolveSymlinks);
+    const QString selectedFile = QFileDialog::getOpenFileName(this, tr("Select Morrowind.esm (located in Data Files)"),
+        QDir::currentPath(), tr("Morrowind master file (Morrowind.esm)"), nullptr, QFileDialog::DontResolveSymlinks);
 
     if (selectedFile.isEmpty())
         return;
 
-    QFileInfo info(selectedFile);
-
-    if (!info.exists())
-        return;
-
-    if (!mWizard->findFiles(QLatin1String("Morrowind"), info.absolutePath()))
+    const QString path(QDir::toNativeSeparators(QFileInfo(selectedFile).absolutePath()));
+    if (!mWizard->findFiles(QLatin1String("Morrowind"), path))
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Error detecting Morrowind files"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            QObject::tr("<b>Morrowind.bsa</b> is missing!<br>"
-                        "Make sure your Morrowind installation is complete."));
+            tr("<b>Morrowind.bsa</b> is missing!<br>"
+               "Make sure your Morrowind installation is complete."));
         msgBox.exec();
         return;
     }
 
-    if (!versionIsOK(info.absolutePath()))
-    {
+    if (!versionIsOK(this, path))
         return;
-    }
 
-    QString path(QDir::toNativeSeparators(info.absolutePath()));
-    QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
+    const QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);
 
     if (items.isEmpty())
     {
@@ -133,8 +146,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         // Hide the default item
         installationsList->item(0)->setHidden(true);
 
-        QListWidgetItem* item = new QListWidgetItem(path);
-        installationsList->addItem(item);
+        QListWidgetItem* item = new QListWidgetItem(path, installationsList);
         installationsList->setCurrentItem(item); // Select it too
     }
     else
@@ -156,51 +168,10 @@ void Wizard::ExistingInstallationPage::textChanged(const QString& text)
 
 bool Wizard::ExistingInstallationPage::isComplete() const
 {
-    if (installationsList->selectionModel()->hasSelection())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return installationsList->selectionModel()->hasSelection();
 }
 
 int Wizard::ExistingInstallationPage::nextId() const
 {
     return MainWizard::Page_LanguageSelection;
-}
-
-bool Wizard::ExistingInstallationPage::versionIsOK(QString directoryName)
-{
-    QDir directory = QDir(directoryName);
-    QFileInfoList infoList = directory.entryInfoList(QStringList(QString("Morrowind.bsa")));
-    if (infoList.size() == 1)
-    {
-        qint64 actualFileSize = infoList.at(0).size();
-        const qint64 expectedFileSize = 310459500; // Size of Morrowind.bsa in Steam and GOG editions.
-
-        if (actualFileSize == expectedFileSize)
-        {
-            return true;
-        }
-
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("Most recent Morrowind not detected"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        msgBox.setText(
-            QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>"
-                        "Do you wish to continue anyway?<br>"));
-        int ret = msgBox.exec();
-        if (ret == QMessageBox::Yes)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    return false;
 }
