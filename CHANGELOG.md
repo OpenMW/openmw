@@ -1,9 +1,12 @@
 0.51.0
 ------
 
+    Bug #4769: Editor: Unable to edit exterior cells from topic info table
     Bug #6494: Some Raven Rock buildings are enabled from the beginning of the game
     Bug #7340: Guards do not become properly aggressive e.g. for dialogue purposes
+    Bug #7605: Creatures without inventory stores cannot use enchanted items
     Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
+    Bug #8129: MessageBox button argument handling differences
     Bug #8270: Editor: Parts of landscape textures are transparent in the cell view, allowing you to see wallpaper or other windows below them
     Bug #8351: Malformed potion model should consistently error out
     Bug #8601: Segfault when opening Options menu while NCGDMW is loaded
@@ -24,22 +27,37 @@
     Bug #8799: 'Show Controller Tooltips By Default' option is not persistent
     Bug #8802: Lua UI layout children removal leaves dangling pointers leading to reloading crashes
     Bug #8820: Trueflame torch effect not working in 0.50
+    Bug #8833: Resizing item and spell views with a mouse leads to breakage when controller tooltips are on
     Bug #8840: Lua UI elements accept table-like objects as properties, causing crashes
     Bug #8842: Loading game with --load-savegame may not detect the original character profile
     Bug #8847: Physics shape "is actor?" test should be based on ratio, not abs diff
+    Bug #8854: Having a sunrays shader in post-processing chain disables default sun glare even if post processing is off
     Bug #8864: Heavy snowfall and rainfall are broken
     Bug #8884: Object paging LOD level selection is unreliable
     Bug #8917: Lua: Spawned gold stacks don't pick a model
+    Bug #8924: Odd animation after throwing all thrown weapon stack
     Bug #8926: No "throwing" sound for thrown weapons
     Bug #8929: Magicka weakness does not enhance itself
+    Bug #8930: Extra data links cannot be null in Gamebryo meshes
     Bug #8946: Spell icon order and visibility should rely on the earliest applied effect
     Bug #8949: Dire Shockballs with 0 duration do too much damage
+    Bug #8955: [Lua] Item:remove() goes by id and deletes *every* item with that id (restocking)
+    Bug #8975: Werewolf attribute bug when boosted over 100 with corprus
+    Bug #8978: Polish needs additional word separators in dialogue
+    Bug #8980: Lua: Teleporting the player while menus are open crashes the game
+    Bug #8983: Animation instant transition on unequipping ammo mid-attack
+    Bug #8988: Particles are not inverted vertically
+    Bug #8996: Crash when skinning data references a nonexistent vertex
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
     Feature #7152: OpenMW-CS: Verify global search regexp
+    Feature #7297: Support topic keyword override files from the Russian localization
+    Feature #7399: Automatically detect supported games via launcher through common locations like steam
+    Feature #7493: Add button to open current openmw.cfg(s) in the launcher
     Feature #7830: Preserve global script targets not created by content files
     Feature #8076: Lua: Add read access to Topic info Conditions
+    Feature #8392: Editor: Rotate a group of selected objects around 1 axis
     Feature #8644: Add loop key to world.vfx.spawn and a way to remove them
     Feature #8705: Dehardcode global map color palette
     Feature #8725: Lua: Expose localized cell names
@@ -55,7 +73,12 @@
     Feature #8902: Controller navigation for quick keys menu spell selection
     Feature #8911: Custom creature and container records
     Feature #8913: Show the current gamma correction value like the other settings in-game
+    Feature #8956: Implement iGreetDuration and fGreetDistanceReset
+    Feature #8957: Implement iMaxInfoDist
     Feature #8966: Add DialogueResponse event
+    Feature #8979: Animation ended handler
+    Feature #8987: Lua Load context
+    Feature #8998: Custom door and static records
     Task #8718: Lua: Cell fields can still return empty strings instead of nil values
 
 0.50.0
