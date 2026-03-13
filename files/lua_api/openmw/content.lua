@@ -34,6 +34,15 @@
 -- @usage
 -- content.globals.records.MyVariable = 42
 
+--- @{#MiscContent}: Misc manipulation.
+-- @field [parent=#content] #MiscContent miscs
+
+---
+-- A mutable list of all @{openmw.types#MiscellaneousRecord}s.
+-- @field [parent=#MiscContent] #list<openmw.types#MiscellaneousRecord> records
+-- @usage
+-- content.miscs.records.MyMisc = { template = content.miscs.records['gold_001'], mwscript = 'BILL_MarksSpiritSummon', weight = 5 }
+
 --- @{#StaticContent}: Static manipulation.
 -- @field [parent=#content] #StaticContent statics
 
