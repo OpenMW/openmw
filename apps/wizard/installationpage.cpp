@@ -64,65 +64,74 @@ Wizard::InstallationPage::~InstallationPage()
 
 void Wizard::InstallationPage::initializePage()
 {
-    QString path(field(QLatin1String("installation.path")).toString());
-    QStringList components(field(QLatin1String("installation.components")).toStringList());
+    const bool morrowind = field(QLatin1String("installation.installMorrowind")).toBool();
+    const bool tribunal = field(QLatin1String("installation.installTribunal")).toBool();
+    const bool bloodmoon = field(QLatin1String("installation.installBloodmoon")).toBool();
+
+    const QString path = field(QLatin1String("installation.path")).toString();
+    const MainWizard::Installation& installation = mWizard->mInstallations[path];
+
+    QStringList installing;
+    if (morrowind)
+        installing << QLatin1String("Morrowind");
+    if (tribunal)
+        installing << QLatin1String("Tribunal");
+    if (bloodmoon)
+        installing << QLatin1String("Bloodmoon");
 
     logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
-    logTextEdit->appendPlainText(QString("Installing %1.").arg(components.join(", ")));
-
-    installProgressBar->setMinimum(0);
+    logTextEdit->appendPlainText(QString("Installing %1.").arg(installing.join(", ")));
 
     // Set the progressbar maximum to a multiple of 100
     // That way installing all three components would yield 300%
     // When one component is done the bar will be filled by 33%
 
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+    int steps = 0;
+    if (!field(QLatin1String("installation.retailDisc")).toBool())
     {
-        installProgressBar->setMaximum((components.count() * 100));
+        steps += tribunal && !installation.hasTribunal;
+        steps += bloodmoon && !installation.hasBloodmoon;
     }
     else
     {
-        if (components.contains(QLatin1String("Tribunal")) && !mWizard->mInstallations[path].hasTribunal)
-            installProgressBar->setMaximum(100);
-
-        if (components.contains(QLatin1String("Bloodmoon")) && !mWizard->mInstallations[path].hasBloodmoon)
-            installProgressBar->setMaximum(installProgressBar->maximum() + 100);
+        steps = installing.count();
     }
+
+    installProgressBar->setMinimum(0);
+    installProgressBar->setMaximum(steps * 100);
 
     startInstallation();
 }
 
 void Wizard::InstallationPage::startInstallation()
 {
-    QStringList components(field(QLatin1String("installation.components")).toStringList());
-    QString path(field(QLatin1String("installation.path")).toString());
+    const QString path = field(QLatin1String("installation.path")).toString();
 
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+    bool hasMorrowind = false;
+    bool hasTribunal = false;
+    bool hasBloodmoon = false;
+    if (!field(QLatin1String("installation.retailDisc")).toBool())
     {
-        // Always install Morrowind
-        mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
+        const MainWizard::Installation& installation = mWizard->mInstallations[path];
 
-        if (components.contains(QLatin1String("Tribunal")))
-            mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
-
-        if (components.contains(QLatin1String("Bloodmoon")))
-            mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
-    }
-    else
-    {
         // Morrowind should already be installed
-        mUnshield->setInstallComponent(Wizard::Component_Morrowind, false);
-
-        if (components.contains(QLatin1String("Tribunal")) && !mWizard->mInstallations[path].hasTribunal)
-            mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
-
-        if (components.contains(QLatin1String("Bloodmoon")) && !mWizard->mInstallations[path].hasBloodmoon)
-            mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
+        hasMorrowind = true;
+        hasTribunal = installation.hasTribunal;
+        hasBloodmoon = installation.hasBloodmoon;
 
         // Set the location of the Morrowind.ini to update
-        mUnshield->setIniPath(mWizard->mInstallations[path].iniPath);
+        mUnshield->setIniPath(installation.iniPath);
         mUnshield->setupSettings();
     }
+
+    if (!hasMorrowind)
+        mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
+
+    if (!hasTribunal && field(QLatin1String("installation.installTribunal")).toBool())
+        mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
+
+    if (!hasBloodmoon && field(QLatin1String("installation.installBloodmoon")).toBool())
+        mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
 
     // Set the installation target path
     mUnshield->setPath(path);
@@ -151,7 +160,6 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     std::string_view name;
     switch (component)
     {
-
         case Wizard::Component_Morrowind:
             name = "Morrowind";
             break;
@@ -266,31 +274,13 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
 
 bool Wizard::InstallationPage::isComplete() const
 {
-    if (!mWizard->mError)
-    {
-        return mFinished;
-    }
-    else
-    {
-        return true;
-    }
+    return mWizard->mError || mFinished;
 }
 
 int Wizard::InstallationPage::nextId() const
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
-    {
-        return MainWizard::Page_Conclusion;
-    }
-    else
-    {
-        if (!mWizard->mError)
-        {
-            return MainWizard::Page_Import;
-        }
-        else
-        {
-            return MainWizard::Page_Conclusion;
-        }
-    }
+    if (!field(QLatin1String("installation.retailDisc")).toBool() && !mWizard->mError)
+        return MainWizard::Page_Import;
+
+    return MainWizard::Page_Conclusion;
 }

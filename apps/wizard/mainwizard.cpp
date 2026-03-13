@@ -49,8 +49,6 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
 
-    setDefaultProperty("ComponentListWidget", "mCheckedItems", "checkedItemsChanged");
-
     mImporterInvoker = new ProcessInvoker();
 
     connect(mImporterInvoker->getProcess(), &QProcess::started, this, &MainWizard::importerStarted);
@@ -258,17 +256,11 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     install.hasBloodmoon = findFiles(QLatin1String("Bloodmoon"), path);
 
     // Try to autodetect the Morrowind.ini location
+    // The installation path is the Data Files directory,
+    // so the INI should be located in the parent directory.
     QDir dir(path);
-    QFile file(dir.filePath("Morrowind.ini"));
-
-    // Try the parent directory
-    // In normal Morrowind installations that's where Morrowind.ini is
-    if (!file.exists())
-    {
-        dir.cdUp();
-        file.setFileName(dir.filePath(QLatin1String("Morrowind.ini")));
-    }
-
+    dir.cdUp();
+    QFile file(dir.filePath(QLatin1String("Morrowind.ini")));
     if (file.exists())
         install.iniPath = file.fileName();
 

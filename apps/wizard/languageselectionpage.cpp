@@ -22,34 +22,24 @@ void Wizard::LanguageSelectionPage::initializePage()
         { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
         { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
 
-    for (auto lang : languages)
+    for (const auto& [name, localizedName] : languages)
     {
-        languageComboBox->addItem(lang.second, lang.first);
+        languageComboBox->addItem(localizedName, name);
     }
 }
 
 int Wizard::LanguageSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
-    {
-        return MainWizard::Page_ComponentSelection;
-    }
-    else
+    if (!field(QLatin1String("installation.retailDisc")).toBool())
     {
         QString path(field(QLatin1String("installation.path")).toString());
-
-        if (path.isEmpty())
-            return MainWizard::Page_ComponentSelection;
-
-        // Check if we have to install something
-        if (mWizard->mInstallations[path].hasMorrowind == true && mWizard->mInstallations[path].hasTribunal == true
-            && mWizard->mInstallations[path].hasBloodmoon == true)
+        if (!path.isEmpty())
         {
-            return MainWizard::Page_Import;
-        }
-        else
-        {
-            return MainWizard::Page_ComponentSelection;
+            const MainWizard::Installation& installation = mWizard->mInstallations[path];
+            if (installation.hasMorrowind && installation.hasTribunal && installation.hasBloodmoon)
+                return MainWizard::Page_Import;
         }
     }
+
+    return MainWizard::Page_ComponentSelection;
 }
