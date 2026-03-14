@@ -68,6 +68,27 @@ namespace MWLua::Types
             type[key] = sol::readonly_property(std::move(getter));
     }
 
+    template <class Type, class Flag, class... Member>
+    void addFlagProperty(sol::usertype<Type>& type, std::string_view key, Flag flag, Member... members)
+    {
+        using Record = RecordType<Type>::Record;
+        const auto getter = [=](const Type& rec) -> bool {
+            const Record& record = RecordType<Type>::asRecord(rec);
+            return (record.*....*members) & flag;
+        };
+        if constexpr (RecordType<Type>::isMutable)
+            type[key] = sol::property(std::move(getter), [=](Type& rec, bool value) {
+                Record& record = rec.find();
+                auto& data = (record.*....*members);
+                if (value)
+                    data |= flag;
+                else
+                    data &= ~flag;
+            });
+        else
+            type[key] = sol::readonly_property(std::move(getter));
+    }
+
     template <class T>
     void addModelProperty(sol::usertype<T>& type)
     {
