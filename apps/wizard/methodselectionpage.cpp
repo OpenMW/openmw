@@ -35,14 +35,10 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
-    {
+    if (field(QLatin1String("installation.retailDisc")).toBool())
         return MainWizard::Page_InstallationTarget;
-    }
-    else
-    {
-        return MainWizard::Page_ExistingInstallation;
-    }
+
+    return MainWizard::Page_ExistingInstallation;
 }
 
 void Wizard::MethodSelectionPage::handleBuyButton()

@@ -30,13 +30,13 @@ void Wizard::InstallationTargetPage::initializePage()
     QString path(QFile::decodeName(Files::pathToUnicodeString(mCfgMgr.getUserDataPath()).c_str()));
     path.append(QDir::separator() + QLatin1String("basedata"));
 
-    QDir dir(path);
+    const QDir dir(path);
     targetLineEdit->setText(QDir::toNativeSeparators(dir.absolutePath()));
 }
 
 bool Wizard::InstallationTargetPage::validatePage()
 {
-    QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QLatin1String("installation.path")).toString());
 
     qDebug() << "Validating path: " << path;
 
@@ -59,7 +59,7 @@ bool Wizard::InstallationTargetPage::validatePage()
         }
     }
 
-    QFileInfo info(path);
+    const QFileInfo info(path);
 
     if (!info.isWritable())
     {
@@ -95,11 +95,11 @@ bool Wizard::InstallationTargetPage::validatePage()
 
 void Wizard::InstallationTargetPage::on_browseButton_clicked()
 {
-    QString selectedPath = QFileDialog::getExistingDirectory(this, tr("Select where to install Morrowind"),
+    const QString selectedPath = QFileDialog::getExistingDirectory(this, tr("Select where to install Morrowind"),
         QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     qDebug() << selectedPath;
-    QFileInfo info(selectedPath);
+    const QFileInfo info(selectedPath);
     if (!info.exists())
         return;
 

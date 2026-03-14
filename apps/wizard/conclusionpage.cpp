@@ -18,7 +18,7 @@ void Wizard::ConclusionPage::initializePage()
     // Write the path to openmw.cfg
     if (field(QLatin1String("installation.retailDisc")).toBool() == true)
     {
-        QString path(field(QLatin1String("installation.path")).toString());
+        const QString path(field(QLatin1String("installation.path")).toString());
         mWizard->addInstallation(path);
     }
 

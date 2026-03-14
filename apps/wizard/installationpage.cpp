@@ -137,7 +137,7 @@ void Wizard::InstallationPage::startInstallation()
     mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
-    QString language(field(QLatin1String("installation.language")).toString());
+    const QString language(field(QLatin1String("installation.language")).toString());
 
     if (language == QLatin1String("Polish"))
     {
@@ -182,7 +182,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
             .arg(QLatin1String(name)));
     msgBox.exec();
 
-    QString path = QFileDialog::getExistingDirectory(
+    const QString path = QFileDialog::getExistingDirectory(
         this, tr("Select %1 installation media").arg(QLatin1String(name)), QDir::rootPath());
 
     if (path.isEmpty())
@@ -215,8 +215,7 @@ void Wizard::InstallationPage::showOldVersionDialog()
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
 
-    int ret = msgBox.exec();
-    if (ret == QMessageBox::No)
+    if (msgBox.exec() == QMessageBox::No)
     {
         logTextEdit->appendHtml(
             tr("<p><br/><span style=\"color:red;\">"

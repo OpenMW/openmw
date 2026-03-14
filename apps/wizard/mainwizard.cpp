@@ -80,14 +80,14 @@ Wizard::MainWizard::~MainWizard()
 
 void Wizard::MainWizard::setupGameSettings()
 {
-    QString message(
+    const QString message(
         tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
            "<p>Please make sure you have the right permissions "
            "and try again.</p></body></html>"));
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
-    QString path(Files::getUserConfigPathQString(mCfgMgr));
+    const QString path(Files::getUserConfigPathQString(mCfgMgr));
     QFile file(path);
 
     qDebug() << "Loading config file:" << path.toUtf8().constData();
@@ -114,7 +114,7 @@ void Wizard::MainWizard::setupGameSettings()
     file.close();
 
     // Now the rest
-    QStringList paths = Files::getActiveConfigPathsQString(mCfgMgr);
+    const QStringList paths = Files::getActiveConfigPathsQString(mCfgMgr);
 
     for (const QString& path2 : paths)
     {
@@ -148,7 +148,7 @@ void Wizard::MainWizard::setupLauncherSettings()
     QString path(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
-    QString message(
+    const QString message(
         tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
            "<p>Please make sure you have the right permissions "
            "and try again.</p></body></html>"));
@@ -184,7 +184,6 @@ void Wizard::MainWizard::setupInstallations()
     // Check if the paths actually contain a Morrowind installation
     for (const auto& path : mGameSettings.getDataDirs())
     {
-
         if (findFiles(QLatin1String("Morrowind"), path.value))
             addInstallation(path.value);
     }
@@ -194,7 +193,7 @@ void Wizard::MainWizard::runSettingsImporter()
 {
     writeSettings();
 
-    QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QLatin1String("installation.path")).toString());
 
     QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
@@ -209,7 +208,7 @@ void Wizard::MainWizard::runSettingsImporter()
     arguments.append(QLatin1String("--encoding"));
 
     // Set encoding
-    QString language(field(QLatin1String("installation.language")).toString());
+    const QString language(field(QLatin1String("installation.language")).toString());
     if (language == QLatin1String("Polish"))
     {
         arguments.append(QLatin1String("win1250"));
@@ -260,7 +259,7 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     // so the INI should be located in the parent directory.
     QDir dir(path);
     dir.cdUp();
-    QFile file(dir.filePath(QLatin1String("Morrowind.ini")));
+    const QFile file(dir.filePath(QLatin1String("Morrowind.ini")));
     if (file.exists())
         install.iniPath = file.fileName();
 
@@ -325,7 +324,7 @@ void Wizard::MainWizard::reject()
 void Wizard::MainWizard::writeSettings()
 {
     // Write the encoding and language settings
-    QString language(field(QLatin1String("installation.language")).toString());
+    const QString language(field(QLatin1String("installation.language")).toString());
     mLauncherSettings.setLanguage(language);
 
     if (language == QLatin1String("Polish"))
@@ -342,13 +341,13 @@ void Wizard::MainWizard::writeSettings()
     }
 
     // Write the installation path so that openmw can find them
-    QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QLatin1String("installation.path")).toString());
 
     // Make sure the installation path is the last data= entry
     mGameSettings.removeDataDir(path);
     mGameSettings.addDataDir({ path });
 
-    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
+    const QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     QDir dir(userPath);
 
     if (!dir.exists())
@@ -426,7 +425,7 @@ void Wizard::MainWizard::writeSettings()
 
 bool Wizard::MainWizard::findFiles(const QString& name, const QString& path)
 {
-    QDir dir(path);
+    const QDir dir(path);
 
     if (!dir.exists())
         return false;

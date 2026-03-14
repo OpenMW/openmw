@@ -18,7 +18,7 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
 void Wizard::LanguageSelectionPage::initializePage()
 {
-    QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
+    const QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
         { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
         { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
 
@@ -32,7 +32,7 @@ int Wizard::LanguageSelectionPage::nextId() const
 {
     if (!field(QLatin1String("installation.retailDisc")).toBool())
     {
-        QString path(field(QLatin1String("installation.path")).toString());
+        const QString path(field(QLatin1String("installation.path")).toString());
         if (!path.isEmpty())
         {
             const MainWizard::Installation& installation = mWizard->mInstallations[path];
