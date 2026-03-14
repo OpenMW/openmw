@@ -24,8 +24,6 @@ namespace CSMDoc
     class Document;
 }
 
-class QTableWidget;
-
 namespace CSVRender
 {
     class TerrainVertexPaintMode;
@@ -146,8 +144,6 @@ namespace CSVWidget
 
         QString mToolTip;
         CSMDoc::Document& mDocument;
-        QFrame* mPanel;
-        QTableWidget* mTable;
         VertexPaintBrushWindow* mVertexPaintBrushWindow;
 
     public:

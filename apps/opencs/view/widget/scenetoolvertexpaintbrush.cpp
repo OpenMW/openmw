@@ -5,12 +5,10 @@
 #include <QFrame>
 #include <QGroupBox>
 #include <QHBoxLayout>
-#include <QHeaderView>
 #include <QIcon>
 #include <QLabel>
 #include <QSizePolicy>
 #include <QSlider>
-#include <QTableWidget>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -137,23 +135,6 @@ CSVWidget::SceneToolVertexPaintBrush::SceneToolVertexPaintBrush(
     connect(mVertexPaintBrushWindow, &VertexPaintBrushWindow::passBrushShape, this,
         &SceneToolVertexPaintBrush::setButtonIcon);
     setButtonIcon(mVertexPaintBrushWindow->mBrushShape);
-
-    mPanel = new QFrame(this, Qt::Popup);
-
-    QHBoxLayout* layout = new QHBoxLayout(mPanel);
-
-    layout->setContentsMargins(QMargins(0, 0, 0, 0));
-
-    mTable = new QTableWidget(0, 2, this);
-
-    mTable->setShowGrid(true);
-    mTable->verticalHeader()->hide();
-    mTable->horizontalHeader()->hide();
-    mTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    mTable->setSelectionMode(QAbstractItemView::NoSelection);
-
-    layout->addWidget(mTable);
 }
 
 void CSVWidget::SceneToolVertexPaintBrush::setButtonIcon(CSVWidget::BrushShape brushShape)

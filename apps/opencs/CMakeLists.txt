@@ -89,7 +89,7 @@ opencs_units (view/render
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
     cellwater terraintexturemode terrainvertexpaintmode actor terrainselection terrainshapemode brushdraw commands objectmarker
-   )
+    )
 
 opencs_units (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage

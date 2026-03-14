@@ -46,7 +46,7 @@ namespace CSVRender
     struct WorldspaceHitResult;
     class SceneToolbar;
 
-    /// \brief EditMode for handling the terrain shape editing
+    /// \brief EditMode for handling terrain vertex colour painting
     class TerrainVertexPaintMode : public EditMode
     {
         Q_OBJECT
@@ -105,8 +105,7 @@ namespace CSVRender
         void editVertexColourGrid(const std::pair<int, int>& vertexCoords, bool dragOperation);
 
         /// Alter one pixel's colour
-        void alterColour(
-            CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool = true);
+        void alterColour(CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY);
 
         /// Push terrain vertex colour edits to command macro
         void pushEditToCommand(const CSMWorld::LandColoursColumn::DataType& newLandColours, CSMDoc::Document& document,
@@ -114,9 +113,8 @@ namespace CSVRender
 
         /// Create new cell and land if needed, only user tools may ask for opening new cells (useTool == false is for
         /// automated land changes)
-        bool allowLandColourEditing(const std::string& textureFileName, bool useTool = true);
+        bool allowLandColourEditing(const std::string& cellId, bool useTool = true);
 
-        std::string mBrushTexture;
         int mBrushSize = 1;
         CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
         std::unique_ptr<BrushDraw> mBrushDraw;

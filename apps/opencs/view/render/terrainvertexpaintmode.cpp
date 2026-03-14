@@ -222,12 +222,12 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
     CSMWorld::IdTable& landTable
         = dynamic_cast<CSMWorld::IdTable&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
 
-    std::string mCellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
+    std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
 
-    if (!allowLandColourEditing(mCellId))
+    if (!allowLandColourEditing(cellId))
         return;
 
-    std::pair<CSMWorld::CellCoordinates, bool> cellCoordinatesPair = CSMWorld::CellCoordinates::fromId(mCellId);
+    std::pair<CSMWorld::CellCoordinates, bool> cellCoordinatesPair = CSMWorld::CellCoordinates::fromId(cellId);
 
     int cellX = cellCoordinatesPair.first.getX();
     int cellY = cellCoordinatesPair.first.getY();
@@ -239,14 +239,14 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
         xHitInCell = xHitInCell + ESM::Land::LAND_SIZE;
         cellX = cellX - 1;
     }
-    if (yHitInCell > 64)
+    if (yHitInCell > ESM::Land::LAND_SIZE - 1)
     {
         yHitInCell = yHitInCell - ESM::Land::LAND_SIZE;
         cellY = cellY + 1;
     }
 
-    mCellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
-    if (!allowLandColourEditing(mCellId))
+    cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
+    if (!allowLandColourEditing(cellId))
         return;
 
     std::string iteratedCellId;
@@ -258,17 +258,19 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
         CSMWorld::LandColoursColumn::DataType newTerrain
-            = landTable.data(landTable.getModelIndex(mCellId, colourColumn))
+            = landTable.data(landTable.getModelIndex(cellId, colourColumn))
                   .value<CSMWorld::LandColoursColumn::DataType>();
 
-        if (allowLandColourEditing(mCellId))
+        if (allowLandColourEditing(cellId))
         {
             alterColour(newTerrain, xHitInCell, yHitInCell);
-            pushEditToCommand(newTerrain, document, landTable, mCellId);
+            pushEditToCommand(newTerrain, document, landTable, cellId);
         }
     }
 
-    if (mBrushShape == CSVWidget::BrushShape_Square)
+    const bool isSquareBrush = mBrushShape == CSVWidget::BrushShape_Square;
+    const bool isCircleBrush = mBrushShape == CSVWidget::BrushShape_Circle;
+    if (isSquareBrush || isCircleBrush)
     {
         int upperLeftCellX = cellX - std::floor(r / ESM::Land::LAND_SIZE);
         int upperLeftCellY = cellY - std::floor(r / ESM::Land::LAND_SIZE);
@@ -311,61 +313,11 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
                                 relativeCoords.y() = -yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) + j;
                             else
                                 relativeCoords.y() = abs(j - yHitInCell);
-                            if (relativeCoords.x() < r && relativeCoords.y() < r)
-                                alterColour(newTerrain, i, j);
-                        }
-                    }
-                    pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
-                }
-            }
-        }
-    }
-
-    if (mBrushShape == CSVWidget::BrushShape_Circle)
-    {
-        int upperLeftCellX = cellX - std::floor(r / ESM::Land::LAND_SIZE);
-        int upperLeftCellY = cellY - std::floor(r / ESM::Land::LAND_SIZE);
-        if (xHitInCell - (r % ESM::Land::LAND_SIZE) < 0)
-            upperLeftCellX--;
-        if (yHitInCell - (r % ESM::Land::LAND_SIZE) < 0)
-            upperLeftCellY--;
-
-        int lowerrightCellX = cellX + std::floor(r / ESM::Land::LAND_SIZE);
-        int lowerrightCellY = cellY + std::floor(r / ESM::Land::LAND_SIZE);
-        if (xHitInCell + (r % ESM::Land::LAND_SIZE) > ESM::Land::LAND_SIZE - 1)
-            lowerrightCellX++;
-        if (yHitInCell + (r % ESM::Land::LAND_SIZE) > ESM::Land::LAND_SIZE - 1)
-            lowerrightCellY++;
-
-        for (int iCell = upperLeftCellX; iCell <= lowerrightCellX; iCell++)
-        {
-            for (int jCell = upperLeftCellY; jCell <= lowerrightCellY; jCell++)
-            {
-                iteratedCellId = CSMWorld::CellCoordinates::generateId(iCell, jCell);
-                if (allowLandColourEditing(iteratedCellId))
-                {
-                    CSMWorld::LandColoursColumn::DataType newTerrain
-                        = landTable.data(landTable.getModelIndex(iteratedCellId, colourColumn))
-                              .value<CSMWorld::LandColoursColumn::DataType>();
-                    for (int i = 0; i < ESM::Land::LAND_SIZE; i++)
-                    {
-                        for (int j = 0; j < ESM::Land::LAND_SIZE; j++)
-                        {
-                            osg::Vec2f relativeCoords(0.0, 0.0);
-                            if (iCell < cellX)
-                                relativeCoords.x() = xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) - i;
-                            else if (iCell > cellX)
-                                relativeCoords.x() = -xHitInCell + ESM::Land::LAND_SIZE * abs(iCell - cellX) + i;
-                            else
-                                relativeCoords.x() = abs(i - xHitInCell);
-                            if (jCell < cellY)
-                                relativeCoords.y() = yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) - j;
-                            else if (jCell > cellY)
-                                relativeCoords.y() = -yHitInCell + ESM::Land::LAND_SIZE * abs(jCell - cellY) + j;
-                            else
-                                relativeCoords.y() = abs(j - yHitInCell);
-                            if (relativeCoords.length() < r)
-                                alterColour(newTerrain, i, j);
+                            if (isSquareBrush && (relativeCoords.x() >= r || relativeCoords.y() >= r))
+                                continue;
+                            if (isCircleBrush && relativeCoords.length() >= r)
+                                continue;
+                            alterColour(newTerrain, i, j);
                         }
                     }
                     pushEditToCommand(newTerrain, document, landTable, iteratedCellId);
@@ -376,7 +328,7 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 }
 
 void CSVRender::TerrainVertexPaintMode::alterColour(
-    CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY, bool useTool)
+    CSMWorld::LandColoursColumn::DataType& landColorsNew, int inCellX, int inCellY)
 {
     const int red = mRestoreMode ? 255 : mVertexPaintEditToolColor.red();
     const int green = mRestoreMode ? 255 : mVertexPaintEditToolColor.green();
