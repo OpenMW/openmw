@@ -1,12 +1,14 @@
 #include "contentbindings.hpp"
 
 #include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadalch.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
 
 #include "context.hpp"
+#include "magictypebindings.hpp"
 #include "types/modelproperty.hpp"
 #include "types/types.hpp"
 
@@ -173,6 +175,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initPotionBindings(sol::state_view& lua, MWWorld::Store<ESM::Potion>& store)
+        {
+            addRecordStoreBindings<ESM::Potion>(lua, &MWLua::tableToPotion);
+            addMutablePotionType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Potion>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initStaticBindings(sol::state_view& lua, MWWorld::Store<ESM::Static>& store)
         {
             addRecordStoreBindings<ESM::Static>(lua, &MWLua::tableToStatic);
@@ -192,6 +203,7 @@ namespace MWLua
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
+        api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         return LuaUtil::makeReadOnly(api);
     }

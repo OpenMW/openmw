@@ -43,6 +43,15 @@
 -- @usage
 -- content.miscs.records.MyMisc = { template = content.miscs.records['gold_001'], mwscript = 'BILL_MarksSpiritSummon', weight = 5 }
 
+--- @{#PotionContent}: Potion manipulation.
+-- @field [parent=#content] #PotionContent potions
+
+---
+-- A mutable list of all @{openmw.types#PotionRecord}s.
+-- @field [parent=#PotionContent] #list<openmw.types#PotionRecord> records
+-- @usage
+-- content.potions.records.MyPotion = { template = content.potions.records['p_dispel_s'], name = 'Too Strong' }
+
 --- @{#StaticContent}: Static manipulation.
 -- @field [parent=#content] #StaticContent statics
 

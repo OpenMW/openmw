@@ -34,6 +34,7 @@
 
 #include "localscripts.hpp"
 #include "luamanagerimp.hpp"
+#include "magictypebindings.hpp"
 #include "object.hpp"
 #include "objectvariant.hpp"
 #include "recordstore.hpp"
@@ -142,14 +143,6 @@ namespace MWLua
 namespace sol
 {
     template <>
-    struct is_automagical<ESM::Spell> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<ESM::IndexedENAMstruct> : std::false_type
-    {
-    };
-    template <>
     struct is_automagical<ESM::MagicEffect> : std::false_type
     {
     };
@@ -204,14 +197,6 @@ namespace MWLua
             auto refId = ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
             return store.get<ESM::Spell>().find(refId);
         }
-    }
-
-    static sol::table effectParamsListToTable(lua_State* lua, const std::vector<ESM::IndexedENAMstruct>& effects)
-    {
-        sol::table res(lua, sol::create);
-        for (size_t i = 0; i < effects.size(); ++i)
-            res[LuaUtil::toLuaIndex(i)] = effects[i]; // ESM::IndexedENAMstruct (effect params)
-        return res;
     }
 
     sol::table initCoreMagicBindings(const Context& context)
@@ -270,81 +255,13 @@ namespace MWLua
         const auto* magicEffectStore = &MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
 
         // Spell record
-        auto spellT = state.new_usertype<ESM::Spell>("ESM3_Spell");
-        spellT[sol::meta_function::to_string]
-            = [](const ESM::Spell& rec) -> std::string { return "ESM3_Spell[" + rec.mId.toDebugString() + "]"; };
-        spellT["id"] = sol::readonly_property([](const ESM::Spell& rec) { return rec.mId.serializeText(); });
-        spellT["name"] = sol::readonly_property([](const ESM::Spell& rec) -> std::string_view { return rec.mName; });
-        spellT["type"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mType; });
-        spellT["cost"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mCost; });
-        spellT["alwaysSucceedFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Always); });
-        spellT["starterSpellFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_PCStart); });
-        // Deprecated for consistency with other record types
-        spellT["autocalcFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
-        spellT["isAutocalc"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
-        spellT["effects"] = sol::readonly_property([lua = state.lua_state()](const ESM::Spell& rec) -> sol::table {
-            return effectParamsListToTable(lua, rec.mEffects.mList);
-        });
+        addSpellBindings(state);
 
         // Enchantment record
-        auto enchantT = state.new_usertype<ESM::Enchantment>("ESM3_Enchantment");
-        enchantT[sol::meta_function::to_string] = [](const ESM::Enchantment& rec) -> std::string {
-            return "ESM3_Enchantment[" + rec.mId.toDebugString() + "]";
-        };
-        enchantT["id"] = sol::readonly_property([](const ESM::Enchantment& rec) { return rec.mId.serializeText(); });
-        enchantT["type"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mType; });
-        // Deprecated for consistency with other record types
-        enchantT["autocalcFlag"] = sol::readonly_property(
-            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
-        enchantT["isAutocalc"] = sol::readonly_property(
-            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
-        enchantT["cost"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCost; });
-        enchantT["charge"]
-            = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCharge; });
-        enchantT["effects"]
-            = sol::readonly_property([lua = state.lua_state()](const ESM::Enchantment& rec) -> sol::table {
-                  return effectParamsListToTable(lua, rec.mEffects.mList);
-              });
+        addEnchantmentBindings(state);
 
         // Effect params
-        auto effectParamsT = state.new_usertype<ESM::IndexedENAMstruct>("ESM3_EffectParams");
-        effectParamsT[sol::meta_function::to_string] = [](const ESM::IndexedENAMstruct& params) {
-            return std::format("ESM3_EffectParams[{}]", params.mData.mEffectID.toDebugString());
-        };
-        effectParamsT["effect"] = sol::readonly_property(
-            [magicEffectStore](const ESM::IndexedENAMstruct& params) -> const ESM::MagicEffect* {
-                return magicEffectStore->find(params.mData.mEffectID);
-            });
-        effectParamsT["id"] = sol::readonly_property(
-            [](const ESM::IndexedENAMstruct& params) -> ESM::RefId { return params.mData.mEffectID; });
-        effectParamsT["affectedSkill"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> sol::optional<std::string> {
-                  if (!params.mData.mSkill.empty())
-                      return params.mData.mSkill.serializeText();
-                  return sol::nullopt;
-              });
-        effectParamsT["affectedAttribute"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> sol::optional<std::string> {
-                  if (!params.mData.mAttribute.empty())
-                      return params.mData.mAttribute.serializeText();
-                  return sol::nullopt;
-              });
-        effectParamsT["range"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> int { return params.mData.mRange; });
-        effectParamsT["area"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> int { return params.mData.mArea; });
-        effectParamsT["magnitudeMin"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> int { return params.mData.mMagnMin; });
-        effectParamsT["magnitudeMax"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> int { return params.mData.mMagnMax; });
-        effectParamsT["duration"] = sol::readonly_property(
-            [](const ESM::IndexedENAMstruct& params) -> int { return params.mData.mDuration; });
-        effectParamsT["index"]
-            = sol::readonly_property([](const ESM::IndexedENAMstruct& params) -> int { return params.mIndex; });
+        addEffectParamsBindings(state);
 
         // MagicEffect record
         auto magicEffectT = state.new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");

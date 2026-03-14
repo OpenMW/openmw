@@ -1,34 +1,20 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
+#include "../magictypebindings.hpp"
+#include "usertypeutil.hpp"
 
 #include <components/esm3/loadalch.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/resourcesystem.hpp>
 
-#include "apps/openmw/mwbase/environment.hpp"
-
-namespace sol
-{
-    template <>
-    struct is_automagical<ESM::Potion> : std::false_type
-    {
-    };
-}
-
-namespace
+namespace MWLua
 {
     // Populates a potion struct from a Lua table.
     ESM::Potion tableToPotion(const sol::table& rec)
     {
-        ESM::Potion potion;
-        if (rec["template"] != sol::nil)
-            potion = LuaUtil::cast<ESM::Potion>(rec["template"]);
-        else
-            potion.blank();
+        auto potion = Types::initFromTemplate<ESM::Potion>(rec);
         if (rec["name"] != sol::nil)
             potion.mName = rec["name"];
         if (rec["model"] != sol::nil)
@@ -55,15 +41,12 @@ namespace
             }
             potion.mEffects.updateIndexes();
         }
-        if (rec["isAutocalc"] != sol::nil && rec["isAutocalc"])
-            potion.mData.mFlags = ESM::Potion::Autocalc;
+        if (rec["isAutocalc"] != sol::nil)
+            potion.mData.mFlags = rec["isAutocalc"] ? ESM::Potion::Autocalc : 0;
 
         return potion;
     }
-}
 
-namespace MWLua
-{
     void addPotionBindings(sol::table potion, const Context& context)
     {
         addRecordFunctionBinding<ESM::Potion>(potion, context);
@@ -74,28 +57,7 @@ namespace MWLua
         // by value.
         potion["createRecordDraft"] = tableToPotion;
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         sol::state_view lua = context.sol();
-        sol::usertype<ESM::Potion> record = lua.new_usertype<ESM::Potion>("ESM3_Potion");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["icon"] = sol::readonly_property([vfs](const ESM::Potion& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
-        record["mwscript"] = sol::readonly_property([](const ESM::Potion& rec) -> ESM::RefId { return rec.mScript; });
-        record["weight"] = sol::readonly_property([](const ESM::Potion& rec) -> float { return rec.mData.mWeight; });
-        record["value"] = sol::readonly_property([](const ESM::Potion& rec) -> int { return rec.mData.mValue; });
-        record["effects"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Potion& rec) -> sol::table {
-            sol::table res(lua, sol::create);
-            for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
-                res[LuaUtil::toLuaIndex(i)] = rec.mEffects.mList[i]; // ESM::IndexedENAMstruct (effect params)
-            return res;
-        });
-        record["isAutocalc"] = sol::readonly_property(
-            [](const ESM::Potion& rec) -> bool { return rec.mData.mFlags & ESM::Potion::Autocalc; });
+        addPotionType(lua);
     }
 }
