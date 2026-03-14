@@ -24,7 +24,7 @@ namespace Wizard
         bool validatePage() override;
 
     private slots:
-        void on_browseButton_clicked();
+        void browseButtonClicked();
 
     private:
         MainWizard* mWizard;

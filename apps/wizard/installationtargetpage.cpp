@@ -19,6 +19,7 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
+    connect(browseButton, &QPushButton::clicked, this, &InstallationTargetPage::browseButtonClicked);
 
     folderIcon->setIcon(Misc::ScalableIcon::load(":folder"));
 
@@ -93,7 +94,7 @@ bool Wizard::InstallationTargetPage::validatePage()
     return true;
 }
 
-void Wizard::InstallationTargetPage::on_browseButton_clicked()
+void Wizard::InstallationTargetPage::browseButtonClicked()
 {
     const QString selectedPath = QFileDialog::getExistingDirectory(this, tr("Select where to install Morrowind"),
         QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
