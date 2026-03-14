@@ -70,10 +70,10 @@ Wizard::MainWizard::~MainWizard() = default;
 
 void Wizard::MainWizard::setupGameSettings()
 {
-    const QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
-           "<p>Please make sure you have the right permissions "
-           "and try again.</p></body></html>"));
+    const QString title = tr("Error opening OpenMW configuration file");
+    const QString message = tr(
+        "<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+        "<p>Please make sure you have the right permissions and try again.</p></body></html>");
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -86,13 +86,7 @@ void Wizard::MainWizard::setupGameSettings()
     {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(message.arg(file.fileName()));
-            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-            msgBox.exec();
+            showCriticalError(title, message.arg(file.fileName()));
             return;
         }
         QTextStream stream(&file);
@@ -114,13 +108,7 @@ void Wizard::MainWizard::setupGameSettings()
         {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(message.arg(file.fileName()));
-                connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-                msgBox.exec();
+                showCriticalError(title, message.arg(file.fileName()));
                 return;
             }
             QTextStream stream(&file);
@@ -137,11 +125,6 @@ void Wizard::MainWizard::setupLauncherSettings()
     const std::filesystem::path configPath = mCfgMgr.getUserConfigPath();
     const QString path(Files::pathToQString(configPath / Config::LauncherSettings::sLauncherConfigFileName));
 
-    const QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
-           "<p>Please make sure you have the right permissions "
-           "and try again.</p></body></html>"));
-
     QFile file(path);
 
     qDebug() << "Loading config file:" << path.toUtf8().constData();
@@ -150,13 +133,12 @@ void Wizard::MainWizard::setupLauncherSettings()
     {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(message.arg(file.fileName()));
-            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-            msgBox.exec();
+            const QString title = tr("Error opening OpenMW configuration file");
+            const QString message = tr(
+                "<html><head/><body><p><b>Could not open %1 for reading</b></p>"
+                "<p>Please make sure you have the right permissions "
+                "and try again.</p></body></html>");
+            showCriticalError(title, message.arg(file.fileName()));
             return;
         }
         QTextStream stream(&file);
@@ -339,17 +321,12 @@ void Wizard::MainWizard::writeSettings()
     {
         if (!dir.mkpath(userPath))
         {
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(
-                tr("<html><head/><body><p><b>Could not create %1</b></p>"
-                   "<p>Please make sure you have the right permissions "
-                   "and try again.</p></body></html>")
-                    .arg(userPath));
-            connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-            msgBox.exec();
+            const QString title = tr("Error creating OpenMW configuration directory");
+            const QString message = tr(
+                "<html><head/><body><p><b>Could not create %1</b></p>"
+                "<p>Please make sure you have the right permissions "
+                "and try again.</p></body></html>");
+            showCriticalError(title, message.arg(userPath), this);
             return;
         }
     }
@@ -357,20 +334,15 @@ void Wizard::MainWizard::writeSettings()
     // Game settings
     QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
+    const QString writeTitle = tr("Error writing OpenMW configuration file");
+    const QString writeMessage = tr(
+        "<html><head/><body><p><b>Could not open %1 for writing</b></p>"
+        "<p>Please make sure you have the right permissions "
+        "and try again.</p></body></html>");
+
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-        // File cannot be opened or created
-        QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-               "<p>Please make sure you have the right permissions "
-               "and try again.</p></body></html>")
-                .arg(file.fileName()));
-        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-        msgBox.exec();
+        showCriticalError(writeTitle, writeMessage.arg(file.fileName()), this);
         return;
     }
 
@@ -386,18 +358,7 @@ void Wizard::MainWizard::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-        // File cannot be opened or created
-        QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-               "<p>Please make sure you have the right permissions "
-               "and try again.</p></body></html>")
-                .arg(file.fileName()));
-        connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-        msgBox.exec();
+        showCriticalError(writeTitle, writeMessage.arg(file.fileName()), this);
         return;
     }
 
@@ -419,4 +380,15 @@ bool Wizard::MainWizard::findFiles(const QString& name, const QString& path)
     // TODO: add MIME handling to make sure the files are real
     return entries.contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
         && entries.contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive);
+}
+
+void Wizard::MainWizard::showCriticalError(const QString& title, const QString& message, QWidget* parent)
+{
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(title);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setText(message);
+    connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
+    msgBox.exec();
 }
