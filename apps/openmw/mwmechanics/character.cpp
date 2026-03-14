@@ -2717,7 +2717,7 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
-        if (mHitState != CharState_None)
+        if (mHitState != CharState_None || mDeathState != CharState_None)
             return true;
 
         if (Settings::game().mPlayerMovementIgnoresAnimation && mPtr == getPlayer())
