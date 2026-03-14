@@ -209,8 +209,9 @@ void Wizard::InstallationPage::showOldVersionDialog()
     QMessageBox msgBox;
     msgBox.setWindowTitle(tr("Morrowind Installation"));
     msgBox.setIcon(QMessageBox::Information);
-    msgBox.setText(QObject::tr(
-        "There may be a more recent version of Morrowind available.<br><br>Do you wish to continue anyway?"));
+    msgBox.setText(
+        QObject::tr("<br><b>There may be a more recent version of Morrowind available.</b><br><br>"
+                    "Do you wish to continue anyway?<br>"));
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
 

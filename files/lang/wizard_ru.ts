@@ -215,22 +215,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
 <context>
     <name>QObject</name>
     <message>
-        <source>&lt;br&gt;&lt;b&gt;Could not find Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;The Wizard needs to update settings in this file.&lt;br&gt;&lt;br&gt;Press &quot;Browse...&quot; to specify the location manually.&lt;br&gt;</source>
-        <translation>&lt;br&gt;&lt;b&gt;Не удалось найти Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;Мастеру требуется обновить настройки в этом файле.&lt;br&gt;&lt;br&gt;Нажмите &quot;Выбрать...&quot;, чтобы задать местоположение файла вручную.&lt;br&gt;</translation>
-    </message>
-    <message>
-        <source>B&amp;rowse...</source>
-        <translation>&amp;Выбрать...</translation>
-    </message>
-    <message>
-        <source>Select configuration file</source>
-        <translation>Выберите файл с настройками</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;Morrowind.bsa&lt;/b&gt; is missing!&lt;br&gt;Make sure your Morrowind installation is complete.</source>
-        <translation>&lt;b&gt;Morrowind.bsa&lt;/b&gt; не найден!&lt;br&gt;Убедитесь, что Morrowind был установлен правильно.</translation>
-    </message>
-    <message>
         <source>&lt;br&gt;&lt;b&gt;There may be a more recent version of Morrowind available.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Do you wish to continue anyway?&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Может существовать более свежая версия Morrowind.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Все равно продолжить?&lt;br&gt;</translation>
     </message>
@@ -241,10 +225,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Select a valid %1 installation media.&lt;br&gt;&lt;b&gt;Hint&lt;/b&gt;: make sure that it contains at least one &lt;b&gt;.cab&lt;/b&gt; file.</source>
         <translation>Выберите корректный установочный дистрибутив %1.&lt;br&gt;&lt;b&gt;Подсказка&lt;/b&gt;: он должен содержать как минимум один &lt;b&gt;.cab&lt;/b&gt;-файл.</translation>
-    </message>
-    <message>
-        <source>There may be a more recent version of Morrowind available.&lt;br&gt;&lt;br&gt;Do you wish to continue anyway?</source>
-        <translation>Может существовать более свежая версия Morrowind.&lt;br&gt;&lt;br&gt;Все равно продолжить?</translation>
     </message>
 </context>
 <context>
@@ -334,6 +314,22 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Error detecting Morrowind files</source>
         <translation>Не удалось обнаружить файлы Morrowind</translation>
+    </message>
+    <message>
+        <source>&lt;br&gt;&lt;b&gt;Could not find Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;The Wizard needs to update settings in this file.&lt;br&gt;&lt;br&gt;Press &quot;Browse...&quot; to specify the location manually.&lt;br&gt;</source>
+        <translation>&lt;br&gt;&lt;b&gt;Не удалось найти Morrowind.ini&lt;/b&gt;&lt;br&gt;&lt;br&gt;Мастеру требуется обновить настройки в этом файле.&lt;br&gt;&lt;br&gt;Нажмите &quot;Выбрать...&quot;, чтобы задать местоположение файла вручную.&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>B&amp;rowse...</source>
+        <translation>&amp;Выбрать...</translation>
+    </message>
+    <message>
+        <source>Select configuration file</source>
+        <translation>Выберите файл с настройками</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;Morrowind.bsa&lt;/b&gt; is missing!&lt;br&gt;Make sure your Morrowind installation is complete.</source>
+        <translation>&lt;b&gt;Morrowind.bsa&lt;/b&gt; не найден!&lt;br&gt;Убедитесь, что Morrowind был установлен правильно.</translation>
     </message>
 </context>
 <context>
