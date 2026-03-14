@@ -38,7 +38,7 @@ namespace MWLua
             Types::addIconProperty(record);
             Types::addProperty(record, "value", &ESM::Miscellaneous::mData, &ESM::Miscellaneous::MCDTstruct::mValue);
             Types::addProperty(record, "weight", &ESM::Miscellaneous::mData, &ESM::Miscellaneous::MCDTstruct::mWeight);
-            if constexpr (Types::isMutable<T>)
+            if constexpr (Types::RecordType<T>::isMutable)
             {
                 record["isKey"] = sol::property(
                     [](const T& mutRec) -> bool { return mutRec.find().mData.mFlags & ESM::Miscellaneous::Key; },
