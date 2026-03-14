@@ -1,13 +1,11 @@
 #include "installationtargetpage.hpp"
 
-#include <string>
-
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/misc/scalableicon.hpp>
 
 #include "mainwizard.hpp"
@@ -28,10 +26,7 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
 
 void Wizard::InstallationTargetPage::initializePage()
 {
-    QString path(QFile::decodeName(Files::pathToUnicodeString(mCfgMgr.getUserDataPath()).c_str()));
-    path.append(QDir::separator() + QLatin1String("basedata"));
-
-    const QDir dir(path);
+    const QDir dir(Files::pathToQString(mCfgMgr.getUserDataPath() / "basedata"));
     targetLineEdit->setText(QDir::toNativeSeparators(dir.absolutePath()));
 }
 
@@ -101,10 +96,7 @@ void Wizard::InstallationTargetPage::browseButtonClicked()
 
     qDebug() << selectedPath;
     const QFileInfo info(selectedPath);
-    if (!info.exists())
-        return;
-
-    if (info.isWritable())
+    if (info.exists() && info.isWritable())
         targetLineEdit->setText(info.absoluteFilePath());
 }
 

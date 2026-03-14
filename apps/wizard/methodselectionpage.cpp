@@ -20,7 +20,6 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
 #ifndef OPENMW_USE_UNSHIELD
     retailDiscRadioButton->setEnabled(false);
     existingLocationRadioButton->setChecked(true);
-    buyLinkButton->released();
 #endif
 
     QFont font = existingLocationRadioButton->font();

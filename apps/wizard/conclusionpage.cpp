@@ -15,8 +15,9 @@ Wizard::ConclusionPage::ConclusionPage(QWidget* parent)
 
 void Wizard::ConclusionPage::initializePage()
 {
+    const bool retailDisc = field(QLatin1String("installation.retailDisc")).toBool();
     // Write the path to openmw.cfg
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+    if (retailDisc)
     {
         const QString path(field(QLatin1String("installation.path")).toString());
         mWizard->addInstallation(path);
@@ -24,17 +25,15 @@ void Wizard::ConclusionPage::initializePage()
 
     if (!mWizard->mError)
     {
-        if ((field(QLatin1String("installation.retailDisc")).toBool() == true)
-            || (field(QLatin1String("installation.import-settings")).toBool() == true))
+        if (retailDisc || field(QLatin1String("installation.import-settings")).toBool())
         {
-            qDebug() << "IMPORT SETTINGS";
             mWizard->runSettingsImporter();
         }
     }
 
     if (!mWizard->mError)
     {
-        if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+        if (retailDisc)
         {
             textLabel->setText(
                 tr("<html><head/><body><p>The OpenMW Wizard successfully installed Morrowind on your "

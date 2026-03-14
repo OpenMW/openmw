@@ -56,9 +56,9 @@ namespace Wizard
 
         Files::ConfigurationManager mCfgMgr;
 
-        Process::ProcessInvoker* mImporterInvoker;
+        std::unique_ptr<Process::ProcessInvoker> mImporterInvoker;
 
-        bool mError;
+        bool mError{ false };
 
     private:
         void setupGameSettings();
@@ -73,7 +73,6 @@ namespace Wizard
 
     private slots:
 
-        void importerStarted();
         void importerFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
         void accept() override;

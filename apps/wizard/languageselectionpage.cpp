@@ -14,15 +14,12 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
     flagIcon->setIcon(Misc::ScalableIcon::load(":preferences-desktop-locale"));
 
     registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
-}
 
-void Wizard::LanguageSelectionPage::initializePage()
-{
-    const QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
-        { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
-        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
+    const QVector<std::pair<QString, QString>> languages = { { tr("English"), "English" }, { tr("French"), "French" },
+        { tr("German"), "German" }, { tr("Italian"), "Italian" }, { tr("Polish"), "Polish" },
+        { tr("Russian"), "Russian" }, { tr("Spanish"), "Spanish" } };
 
-    for (const auto& [name, localizedName] : languages)
+    for (const auto& [localizedName, name] : languages)
     {
         languageComboBox->addItem(localizedName, name);
     }

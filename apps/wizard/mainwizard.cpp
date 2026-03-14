@@ -1,5 +1,7 @@
 #include "mainwizard.hpp"
 
+#include <algorithm>
+
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -25,15 +27,10 @@
 #include "installationpage.hpp"
 #endif
 
-#include <algorithm>
-
-using namespace Process;
-
 Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* parent)
     : QWizard(parent)
-    , mInstallations()
     , mCfgMgr(cfgMgr)
-    , mError(false)
+    , mImporterInvoker(new Process::ProcessInvoker())
     , mGameSettings(mCfgMgr)
 {
 #ifndef Q_OS_MAC
@@ -48,10 +45,6 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
 
     // Set the property for comboboxes to the text instead of index
     setDefaultProperty("QComboBox", "currentText", "currentIndexChanged");
-
-    mImporterInvoker = new ProcessInvoker();
-
-    connect(mImporterInvoker->getProcess(), &QProcess::started, this, &MainWizard::importerStarted);
 
     connect(mImporterInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &MainWizard::importerFinished);
@@ -73,10 +66,7 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     }
 }
 
-Wizard::MainWizard::~MainWizard()
-{
-    delete mImporterInvoker;
-}
+Wizard::MainWizard::~MainWizard() = default;
 
 void Wizard::MainWizard::setupGameSettings()
 {
@@ -109,9 +99,8 @@ void Wizard::MainWizard::setupGameSettings()
         Misc::ensureUtf8Encoding(stream);
 
         mGameSettings.readUserFile(stream, QFileInfo(path).dir().path());
+        file.close();
     }
-
-    file.close();
 
     // Now the rest
     const QStringList paths = Files::getActiveConfigPathsQString(mCfgMgr);
@@ -138,15 +127,15 @@ void Wizard::MainWizard::setupGameSettings()
             Misc::ensureUtf8Encoding(stream);
 
             mGameSettings.readFile(stream, QFileInfo(path2).dir().path());
+            file.close();
         }
-        file.close();
     }
 }
 
 void Wizard::MainWizard::setupLauncherSettings()
 {
-    QString path(Files::pathToQString(mCfgMgr.getUserConfigPath()));
-    path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
+    const std::filesystem::path configPath = mCfgMgr.getUserConfigPath();
+    const QString path(Files::pathToQString(configPath / Config::LauncherSettings::sLauncherConfigFileName));
 
     const QString message(
         tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
@@ -175,8 +164,6 @@ void Wizard::MainWizard::setupLauncherSettings()
 
         mLauncherSettings.readFile(stream);
     }
-
-    file.close();
 }
 
 void Wizard::MainWizard::setupInstallations()
@@ -194,6 +181,7 @@ void Wizard::MainWizard::runSettingsImporter()
     writeSettings();
 
     const QString path(field(QLatin1String("installation.path")).toString());
+    const bool retailDisc(field(QLatin1String("installation.retailDisc")).toBool());
 
     QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
@@ -201,8 +189,7 @@ void Wizard::MainWizard::runSettingsImporter()
     QStringList arguments;
 
     // Import plugin selection?
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true
-        || field(QLatin1String("installation.import-addons")).toBool() == true)
+    if (retailDisc || field(QLatin1String("installation.import-addons")).toBool())
         arguments.append(QLatin1String("--game-files"));
 
     arguments.append(QLatin1String("--encoding"));
@@ -223,15 +210,15 @@ void Wizard::MainWizard::runSettingsImporter()
     }
 
     // Import fonts
-    if (field(QLatin1String("installation.import-fonts")).toBool() == true)
+    if (field(QLatin1String("installation.import-fonts")).toBool())
         arguments.append(QLatin1String("--fonts"));
 
     // Now the paths
     arguments.append(QLatin1String("--ini"));
 
-    if (field(QLatin1String("installation.retailDisc")).toBool() == true)
+    if (retailDisc)
     {
-        arguments.append(path + QDir::separator() + QLatin1String("Morrowind.ini"));
+        arguments.append(QDir(path).filePath(QLatin1String("Morrowind.ini")));
     }
     else
     {
@@ -248,7 +235,7 @@ void Wizard::MainWizard::runSettingsImporter()
 void Wizard::MainWizard::addInstallation(const QString& path)
 {
     qDebug() << "add installation in: " << path;
-    Installation install; // = new Installation();
+    Installation install;
 
     install.hasMorrowind = findFiles(QLatin1String("Morrowind"), path);
     install.hasTribunal = findFiles(QLatin1String("Tribunal"), path);
@@ -289,8 +276,6 @@ void Wizard::MainWizard::setupPages()
     setPage(Page_Conclusion, new ConclusionPage(this));
     setStartId(Page_Intro);
 }
-
-void Wizard::MainWizard::importerStarted() {}
 
 void Wizard::MainWizard::importerFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
@@ -430,7 +415,8 @@ bool Wizard::MainWizard::findFiles(const QString& name, const QString& path)
     if (!dir.exists())
         return false;
 
+    const QStringList entries = dir.entryList();
     // TODO: add MIME handling to make sure the files are real
-    return (dir.entryList().contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
-        && dir.entryList().contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive));
+    return entries.contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
+        && entries.contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive);
 }
