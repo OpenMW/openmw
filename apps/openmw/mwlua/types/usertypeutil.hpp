@@ -6,7 +6,10 @@
 
 #include "apps/openmw/mwbase/environment.hpp"
 
+#include <components/misc/finitevalues.hpp>
 #include <components/resource/resourcesystem.hpp>
+
+#include <concepts>
 
 namespace MWLua::Types
 {
@@ -29,6 +32,16 @@ namespace MWLua::Types
             return [=](MutableRecord<Record>& rec, std::string_view value) {
                 accessor(rec) = ESM::RefId::deserializeText(value);
             };
+        }
+    };
+
+    template <class Record, std::floating_point Float>
+    struct Setter<Record, Float>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](MutableRecord<Record>& rec, Misc::FiniteValue<Float> value) { accessor(rec) = value; };
         }
     };
 

@@ -6,6 +6,7 @@
 #include <components/esm3/loadskil.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -56,7 +57,7 @@ namespace
             book.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            book.mData.mWeight = rec["weight"];
+            book.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             book.mData.mValue = rec["value"];
         if (rec["isScroll"] != sol::nil)

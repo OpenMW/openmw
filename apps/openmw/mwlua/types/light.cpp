@@ -6,6 +6,7 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/color.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -55,7 +56,7 @@ namespace
             light.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            light.mData.mWeight = rec["weight"];
+            light.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             light.mData.mValue = rec["value"];
         if (rec["duration"] != sol::nil)

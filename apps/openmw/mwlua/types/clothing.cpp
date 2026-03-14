@@ -5,6 +5,7 @@
 #include <components/esm3/loadclot.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -48,7 +49,7 @@ namespace
         if (rec["enchantCapacity"] != sol::nil)
             clothing.mData.mEnchant = static_cast<int16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["weight"] != sol::nil)
-            clothing.mData.mWeight = rec["weight"];
+            clothing.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             clothing.mData.mValue = rec["value"];
         if (rec["type"] != sol::nil)

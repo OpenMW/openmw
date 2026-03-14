@@ -5,6 +5,7 @@
 #include <components/esm3/loadalch.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -40,7 +41,7 @@ namespace
             potion.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            potion.mData.mWeight = rec["weight"];
+            potion.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             potion.mData.mValue = rec["value"];
         if (rec["effects"] != sol::nil)

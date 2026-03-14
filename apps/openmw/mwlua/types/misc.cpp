@@ -59,7 +59,7 @@ namespace MWLua
             misc.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            misc.mData.mWeight = rec["weight"];
+            misc.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             misc.mData.mValue = rec["value"];
         return misc;
