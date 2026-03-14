@@ -32,14 +32,7 @@ namespace MWLua
             potion.mData.mValue = rec["value"];
         if (rec["effects"] != sol::nil)
         {
-            sol::table effectsTable = rec["effects"];
-            size_t numEffects = effectsTable.size();
-            potion.mEffects.mList.resize(numEffects);
-            for (size_t i = 0; i < numEffects; ++i)
-            {
-                potion.mEffects.mList[i] = LuaUtil::cast<ESM::IndexedENAMstruct>(effectsTable[LuaUtil::toLuaIndex(i)]);
-            }
-            potion.mEffects.updateIndexes();
+            potion.mEffects = tableToEffectList(rec["effects"]);
         }
         if (rec["isAutocalc"] != sol::nil)
             potion.mData.mFlags = rec["isAutocalc"] ? ESM::Potion::Autocalc : 0;

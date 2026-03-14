@@ -5,6 +5,7 @@
 
 namespace ESM
 {
+    struct EffectList;
     struct Potion;
 }
 
@@ -16,6 +17,8 @@ namespace MWLua
 
     void addPotionType(sol::state_view& lua);
     void addMutablePotionType(sol::state_view& lua);
+
+    ESM::EffectList tableToEffectList(const sol::table&);
 }
 
 #endif // MWLUA_MAGICTYPEBINDINGS_H

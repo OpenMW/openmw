@@ -13,35 +13,33 @@
 
 namespace MWLua::Types
 {
-    template <class Record, class M>
+    template <class Type, class M>
     struct Setter
     {
         template <class Accessor>
         auto operator()(Accessor&& accessor) const
         {
-            return [=](MutableRecord<Record>& rec, const M& value) { accessor(rec) = value; };
+            return [=](Type& rec, const M& value) { accessor(rec) = value; };
         }
     };
 
-    template <class Record>
-    struct Setter<Record, ESM::RefId>
+    template <class Type>
+    struct Setter<Type, ESM::RefId>
     {
         template <class Accessor>
         auto operator()(Accessor&& accessor) const
         {
-            return [=](MutableRecord<Record>& rec, std::string_view value) {
-                accessor(rec) = ESM::RefId::deserializeText(value);
-            };
+            return [=](Type& rec, std::string_view value) { accessor(rec) = ESM::RefId::deserializeText(value); };
         }
     };
 
-    template <class Record, std::floating_point Float>
-    struct Setter<Record, Float>
+    template <class Type, std::floating_point Float>
+    struct Setter<Type, Float>
     {
         template <class Accessor>
         auto operator()(Accessor&& accessor) const
         {
-            return [=](MutableRecord<Record>& rec, Misc::FiniteValue<Float> value) { accessor(rec) = value; };
+            return [=](Type& rec, Misc::FiniteValue<Float> value) { accessor(rec) = value; };
         }
     };
 
@@ -73,7 +71,7 @@ namespace MWLua::Types
         };
         using MemberType = std::remove_cvref_t<std::invoke_result_t<decltype(getter), const Type&>>;
         if constexpr (RecordType<Type>::isMutable)
-            type[key] = sol::property(std::move(getter), Setter<Record, MemberType>{}([=](Type& rec) -> MemberType& {
+            type[key] = sol::property(std::move(getter), Setter<Type, MemberType>{}([=](Type& rec) -> MemberType& {
                 Record& record = rec.find();
                 return (record.*....*members);
             }));

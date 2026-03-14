@@ -205,6 +205,12 @@ namespace MWLua
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
+        api["RANGE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::RangeType>(lua,
+            {
+                { "Self", ESM::RT_Self },
+                { "Touch", ESM::RT_Touch },
+                { "Target", ESM::RT_Target },
+            }));
         return LuaUtil::makeReadOnly(api);
     }
 }
