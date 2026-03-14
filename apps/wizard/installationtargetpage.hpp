@@ -27,7 +27,6 @@ namespace Wizard
         void browseButtonClicked();
 
     private:
-        MainWizard* mWizard;
         const Files::ConfigurationManager& mCfgMgr;
 
     protected:

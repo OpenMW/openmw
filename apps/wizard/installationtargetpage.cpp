@@ -14,8 +14,6 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
     : QWizardPage(parent)
     , mCfgMgr(cfg)
 {
-    mWizard = qobject_cast<MainWizard*>(parent);
-
     setupUi(this);
     connect(browseButton, &QPushButton::clicked, this, &InstallationTargetPage::browseButtonClicked);
 
@@ -71,7 +69,7 @@ bool Wizard::InstallationTargetPage::validatePage()
         return false;
     }
 
-    if (mWizard->findFiles(QLatin1String("Morrowind"), path))
+    if (MainWizard::findFiles(QLatin1String("Morrowind"), path))
     {
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Destination not empty"));

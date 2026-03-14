@@ -120,7 +120,7 @@ void Wizard::ExistingInstallationPage::browseButtonClicked()
         return;
 
     const QString path(QDir::toNativeSeparators(QFileInfo(selectedFile).absolutePath()));
-    if (!mWizard->findFiles(QLatin1String("Morrowind"), path))
+    if (!MainWizard::findFiles(QLatin1String("Morrowind"), path))
     {
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Error detecting Morrowind files"));

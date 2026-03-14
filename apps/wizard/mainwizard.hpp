@@ -48,7 +48,8 @@ namespace Wizard
         MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* parent = nullptr);
         ~MainWizard() override;
 
-        bool findFiles(const QString& name, const QString& path);
+        static bool findFiles(const QString& name, const QString& path);
+
         void addInstallation(const QString& path);
         void runSettingsImporter();
 
