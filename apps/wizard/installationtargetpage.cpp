@@ -46,7 +46,7 @@ bool Wizard::InstallationTargetPage::validatePage()
 
         if (!dir.mkpath(path))
         {
-            QMessageBox msgBox;
+            QMessageBox msgBox(this);
             msgBox.setWindowTitle(tr("Error creating destination"));
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
@@ -63,7 +63,7 @@ bool Wizard::InstallationTargetPage::validatePage()
 
     if (!info.isWritable())
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Insufficient permissions"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -77,7 +77,7 @@ bool Wizard::InstallationTargetPage::validatePage()
 
     if (mWizard->findFiles(QLatin1String("Morrowind"), path))
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Destination not empty"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);

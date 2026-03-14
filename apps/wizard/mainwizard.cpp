@@ -310,7 +310,7 @@ void Wizard::MainWizard::accept()
 
 void Wizard::MainWizard::reject()
 {
-    QMessageBox msgBox;
+    QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Quit Wizard"));
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -355,7 +355,7 @@ void Wizard::MainWizard::writeSettings()
     {
         if (!dir.mkpath(userPath))
         {
-            QMessageBox msgBox;
+            QMessageBox msgBox(this);
             msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
@@ -376,7 +376,7 @@ void Wizard::MainWizard::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
         // File cannot be opened or created
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -403,7 +403,7 @@ void Wizard::MainWizard::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
         // File cannot be opened or created
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);

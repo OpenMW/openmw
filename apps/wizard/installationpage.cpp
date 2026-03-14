@@ -173,7 +173,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(QLatin1String(name)));
     Log(Debug::Info) << "Attempting to install component " << name << ".";
 
-    QMessageBox msgBox;
+    QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("%1 Installation").arg(QLatin1String(name)));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setText(
@@ -206,7 +206,7 @@ void Wizard::InstallationPage::showOldVersionDialog()
     logTextEdit->appendHtml(tr("<p>Detected old version of component Morrowind.</p>"));
     Log(Debug::Info) << "Detected old version of component Morrowind.";
 
-    QMessageBox msgBox;
+    QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Morrowind Installation"));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setText(
@@ -234,7 +234,7 @@ void Wizard::InstallationPage::showOldVersionDialog()
 
 void Wizard::InstallationPage::installationFinished()
 {
-    QMessageBox msgBox;
+    QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Installation finished"));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setStandardButtons(QMessageBox::Ok);
@@ -257,7 +257,7 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
     Log(Debug::Error) << qUtf8Printable(details);
 
     mWizard->mError = true;
-    QMessageBox msgBox;
+    QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("An error occurred"));
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.setStandardButtons(QMessageBox::Ok);

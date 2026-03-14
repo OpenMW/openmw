@@ -80,7 +80,7 @@ bool Wizard::ComponentSelectionPage::validatePage()
 
     if (installingTribunal && !installingBloodmoon && installation.hasBloodmoon)
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("About to install Tribunal after Bloodmoon"));
         msgBox.setIcon(QMessageBox::Information);
         msgBox.setStandardButtons(QMessageBox::Cancel);
