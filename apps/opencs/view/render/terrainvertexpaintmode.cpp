@@ -54,7 +54,7 @@ namespace osg
 CSVRender::TerrainVertexPaintMode::TerrainVertexPaintMode(
     WorldspaceWidget* worldspaceWidget, osg::Group* parentNode, QWidget* parent)
     : EditMode(worldspaceWidget, QIcon{ ":scenetoolbar/editing-terrain-vertex-paint" }, Mask_Terrain,
-        "Terrain vertex paint editing", parent)
+          "Terrain vertex paint editing", parent)
     , mParentNode(parentNode)
     , mVertexPaintEditToolColor(Qt::white)
 {
@@ -257,9 +257,8 @@ void CSVRender::TerrainVertexPaintMode::editVertexColourGrid(
 
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
-        CSMWorld::LandColoursColumn::DataType newTerrain
-            = landTable.data(landTable.getModelIndex(cellId, colourColumn))
-                  .value<CSMWorld::LandColoursColumn::DataType>();
+        CSMWorld::LandColoursColumn::DataType newTerrain = landTable.data(landTable.getModelIndex(cellId, colourColumn))
+                                                               .value<CSMWorld::LandColoursColumn::DataType>();
 
         if (allowLandColourEditing(cellId))
         {
