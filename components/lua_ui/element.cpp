@@ -20,9 +20,10 @@ namespace LuaUi
             constexpr std::string_view events = "events";
             constexpr std::string_view content = "content";
             constexpr std::string_view external = "external";
+            constexpr std::string_view userData = "userData";
 
             const std::set<std::string_view> allKeys
-                = { type, name, layer, templateLayout, props, events, content, external };
+                = { type, name, layer, templateLayout, props, events, content, external, userData };
         }
 
         const std::string defaultWidgetType = "LuaWidget";
