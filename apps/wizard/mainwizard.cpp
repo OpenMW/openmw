@@ -49,12 +49,22 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     connect(mImporterInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &MainWizard::importerFinished);
 
+    Log(Debug::Info) << "Started OpenMW Wizard on " << QDateTime::currentDateTime().toString().toUtf8().constData();
+
     std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
+
+    const QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
+    if (!QDir(userPath).exists())
+    {
+        const QString message = tr(
+            "<html><head/><body><p><b>Could not create %1</b></p>"
+            "<p>Please make sure you have the right permissions and try again.</p></body></html>");
+        showCriticalError(tr("Error creating OpenMW configuration directory"), message.arg(userPath));
+        // TODO: consider quitting instantly if this or config file opening fails
+    }
+
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
 
-    // Added the initial log message in place of the old setupLog() call
-    // since the log file is now created in the entrypoint
-    Log(Debug::Info) << "Started OpenMW Wizard on " << QDateTime::currentDateTime().toString().toUtf8().constData();
     setupGameSettings();
     setupLauncherSettings();
     setupInstallations();
@@ -313,23 +323,6 @@ void Wizard::MainWizard::writeSettings()
     // Make sure the installation path is the last data= entry
     mGameSettings.removeDataDir(path);
     mGameSettings.addDataDir({ path });
-
-    const QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
-    QDir dir(userPath);
-
-    if (!dir.exists())
-    {
-        if (!dir.mkpath(userPath))
-        {
-            const QString title = tr("Error creating OpenMW configuration directory");
-            const QString message = tr(
-                "<html><head/><body><p><b>Could not create %1</b></p>"
-                "<p>Please make sure you have the right permissions "
-                "and try again.</p></body></html>");
-            showCriticalError(title, message.arg(userPath), this);
-            return;
-        }
-    }
 
     // Game settings
     QFile file(Files::getUserConfigPathQString(mCfgMgr));
