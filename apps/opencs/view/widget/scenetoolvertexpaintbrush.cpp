@@ -123,11 +123,16 @@ CSVWidget::VertexPaintBrushWindow::VertexPaintBrushWindow(CSMDoc::Document& docu
     colorLabel->setText("Color:");
     mColorButtonWidget = new ColorButtonWidget(this);
 
+    QHBoxLayout* colorRowLayout = new QHBoxLayout;
+    colorRowLayout->setContentsMargins(QMargins(0, 0, 0, 0));
+    colorRowLayout->addWidget(colorLabel);
+    colorRowLayout->addStretch();
+    colorRowLayout->addWidget(mColorButtonWidget);
+
     layoutMain->addWidget(mHorizontalGroupBox);
     layoutMain->addWidget(mSizeSliders);
     layoutMain->addWidget(mToolSelector);
-    layoutMain->addWidget(colorLabel);
-    layoutMain->addWidget(mColorButtonWidget);
+    layoutMain->addLayout(colorRowLayout);
 
     setLayout(layoutMain);
 
