@@ -1,9 +1,10 @@
 #ifndef CSV_WIDGET_SCENETOOLVERTEXPAINTBRUSH_H
 #define CSV_WIDGET_SCENETOOLVERTEXPAINTBRUSH_H
 
-#include <QColorDialog>
+#include <QColor>
 #include <QFrame>
 #include <QGroupBox>
+#include <QPushButton>
 #include <QSlider>
 #include <QSpinBox>
 
@@ -16,7 +17,6 @@ class QDropEvent;
 class QModelIndex;
 class QObject;
 class QPoint;
-class QPushButton;
 class QWidget;
 
 namespace CSMDoc
@@ -38,50 +38,18 @@ namespace CSVWidget
         Q_OBJECT
 
     public:
-        ColorButtonWidget(QWidget* parent = nullptr)
-            : QPushButton(parent)
-        {
-            this->setFixedSize(50, 25);
-            this->setObjectName("colorSwatchButton");
-            this->setStyleSheet("QPushButton#colorSwatchButton { border: 1px solid #ccc; }");
-
-            connect(this, &QPushButton::clicked, this, &ColorButtonWidget::openColorDialog);
-        }
+        ColorButtonWidget(QWidget* parent = nullptr);
 
     private:
         QColor mColor = Qt::white;
 
-        /// Walk up the widget tree past any Qt::Popup windows to find the real
-        /// top-level application window. Using a popup as the parent for a modal
-        /// dialog breaks window stacking because the popup auto-closes on focus loss.
-        QWidget* findNonPopupParent() const
-        {
-            QWidget* w = window();
-            while (w && (w->windowFlags() & Qt::Popup))
-            {
-                w = w->parentWidget();
-                if (w)
-                    w = w->window();
-            }
-            return w;
-        }
+        QWidget* findNonPopupParent() const;
 
     signals:
         void colorChanged(const QColor& newColor);
 
     private slots:
-        void openColorDialog()
-        {
-            QColor color = QColorDialog::getColor(mColor, findNonPopupParent(), "Select Color");
-            if (color.isValid())
-            {
-                mColor = color;
-                QString css = QString("QPushButton#colorSwatchButton { background-color: %1; border: 1px solid #ccc; }")
-                                  .arg(color.name());
-                this->setStyleSheet(css);
-                emit colorChanged(color);
-            }
-        }
+        void openColorDialog();
     };
 
     /// \brief Layout-box for some brush button settings

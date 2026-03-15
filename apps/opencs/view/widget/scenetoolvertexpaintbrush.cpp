@@ -1,6 +1,7 @@
 #include "scenetoolvertexpaintbrush.hpp"
 
 #include <QButtonGroup>
+#include <QColorDialog>
 #include <QComboBox>
 #include <QFrame>
 #include <QGroupBox>
@@ -16,6 +17,42 @@
 #include "scenetool.hpp"
 
 #include "../../model/prefs/state.hpp"
+
+CSVWidget::ColorButtonWidget::ColorButtonWidget(QWidget* parent)
+    : QPushButton(parent)
+{
+    setFixedSize(50, 25);
+    setObjectName("colorSwatchButton");
+    setStyleSheet("QPushButton#colorSwatchButton { border: 1px solid #ccc; }");
+
+    connect(this, &QPushButton::clicked, this, &ColorButtonWidget::openColorDialog);
+}
+
+QWidget* CSVWidget::ColorButtonWidget::findNonPopupParent() const
+{
+    // Avoid parenting the modal dialog to transient popup windows.
+    QWidget* w = window();
+    while (w && (w->windowFlags() & Qt::Popup))
+    {
+        w = w->parentWidget();
+        if (w)
+            w = w->window();
+    }
+    return w;
+}
+
+void CSVWidget::ColorButtonWidget::openColorDialog()
+{
+    const QColor color = QColorDialog::getColor(mColor, findNonPopupParent(), "Select Color");
+    if (color.isValid())
+    {
+        mColor = color;
+        const QString css = QString("QPushButton#colorSwatchButton { background-color: %1; border: 1px solid #ccc; }")
+                                .arg(color.name());
+        setStyleSheet(css);
+        emit colorChanged(color);
+    }
+}
 
 CSVWidget::VertexPaintBrushSizeControls::VertexPaintBrushSizeControls(const QString& title, QWidget* parent)
     : QGroupBox(title, parent)

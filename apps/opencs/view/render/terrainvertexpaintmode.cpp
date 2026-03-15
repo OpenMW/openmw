@@ -132,19 +132,18 @@ void CSVRender::TerrainVertexPaintMode::primarySelectPressed(const WorldspaceHit
 bool CSVRender::TerrainVertexPaintMode::primaryEditStartDrag(const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-
-    mDragMode = InteractionType_PrimaryEdit;
-
     if (hit.hit && hit.tag == nullptr)
     {
+        mDragMode = InteractionType_PrimaryEdit;
         mIsEditing = true;
         mRestoreMode = true;
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
         undoStack.beginMacro("Restore land vertex colours");
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 bool CSVRender::TerrainVertexPaintMode::secondaryEditStartDrag(const QPoint& pos)
@@ -155,19 +154,18 @@ bool CSVRender::TerrainVertexPaintMode::secondaryEditStartDrag(const QPoint& pos
 bool CSVRender::TerrainVertexPaintMode::primarySelectStartDrag(const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-
-    mDragMode = InteractionType_PrimarySelect;
-
     if (hit.hit && hit.tag == nullptr)
     {
+        mDragMode = InteractionType_PrimarySelect;
         mIsEditing = true;
         mRestoreMode = false;
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
         undoStack.beginMacro("Paint land vertex colours");
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void CSVRender::TerrainVertexPaintMode::drag(const QPoint& pos, int diffX, int diffY, double speedFactor)
@@ -175,7 +173,7 @@ void CSVRender::TerrainVertexPaintMode::drag(const QPoint& pos, int diffX, int d
     if (mDragMode == InteractionType_PrimarySelect || mDragMode == InteractionType_PrimaryEdit)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick(pos, getWorldspaceWidget().getInteractionMask());
-        if (mIsEditing)
+        if (mIsEditing && hit.hit && hit.tag == nullptr)
             editVertexColourGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
     }
 }
