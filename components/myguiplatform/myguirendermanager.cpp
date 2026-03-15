@@ -178,7 +178,6 @@ namespace MyGUIPlatform
             setUpdateCallback(frameUpdate);
 
             mStateSet = new osg::StateSet;
-            mStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             mStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
             mStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);

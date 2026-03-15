@@ -23,11 +23,6 @@ namespace osg
     class Node;
 }
 
-namespace osgFX
-{
-    class Scribe;
-}
-
 namespace Resource
 {
     class ResourceSystem;
@@ -89,7 +84,7 @@ namespace CSVRender
         ESM::RefId mReferenceableId;
         osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-        osg::ref_ptr<osgFX::Scribe> mOutline;
+        osg::ref_ptr<osg::Group> mOutline;
         bool mSelected{ false };
         bool mSnapTarget{ false };
         osg::Group* mParentNode;

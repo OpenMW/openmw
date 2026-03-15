@@ -452,28 +452,16 @@ namespace Resource
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1.f)
         , mParticleSystemMask(~0u)
-        , mLightingMethod(SceneUtil::LightingMethod::FFP)
+        , mLightingMethod(SceneUtil::LightingMethod::PerObjectUniform)
     {
     }
 
-    void SceneManager::setForceShaders(bool force)
-    {
-        mForceShaders = force;
-    }
-
-    bool SceneManager::getForceShaders() const
-    {
-        return mForceShaders;
-    }
-
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix,
-        bool forceShadersForNode, const osg::Program* programTemplate)
+    void SceneManager::recreateShaders(
+        osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, const osg::Program* programTemplate)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix));
         shaderVisitor->setAllowedToModifyStateSets(false);
         shaderVisitor->setProgramTemplate(programTemplate);
-        if (forceShadersForNode)
-            shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
     }
 
@@ -482,16 +470,6 @@ namespace Resource
         osg::ref_ptr<Shader::ReinstateRemovedStateVisitor> reinstateRemovedStateVisitor
             = new Shader::ReinstateRemovedStateVisitor(false);
         node->accept(*reinstateRemovedStateVisitor);
-    }
-
-    void SceneManager::setClampLighting(bool clamp)
-    {
-        mClampLighting = clamp;
-    }
-
-    bool SceneManager::getClampLighting() const
-    {
-        return mClampLighting;
     }
 
     void SceneManager::setAutoUseNormalMaps(bool use)
@@ -1242,7 +1220,6 @@ namespace Resource
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(
             new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix));
-        shaderVisitor->setForceShaders(mForceShaders);
         shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
         shaderVisitor->setNormalMapPattern(mNormalMapPattern);
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);

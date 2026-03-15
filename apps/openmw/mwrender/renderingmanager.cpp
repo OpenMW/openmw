@@ -5,12 +5,9 @@
 
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
-#include <osg/Fog>
 #include <osg/Group>
 #include <osg/Light>
-#include <osg/LightModel>
 #include <osg/Material>
-#include <osg/PolygonMode>
 #include <osg/UserDataContainer>
 
 #include <osgUtil/LineSegmentIntersector>
@@ -37,9 +34,8 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/stateupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
@@ -89,188 +85,6 @@
 
 namespace MWRender
 {
-    class PerViewUniformStateUpdater final : public SceneUtil::StateSetUpdater
-    {
-    public:
-        PerViewUniformStateUpdater(Resource::SceneManager* sceneManager)
-            : mSceneManager(sceneManager)
-        {
-            mOpaqueTextureUnit = mSceneManager->getShaderManager().reserveGlobalTextureUnits(
-                Shader::ShaderManager::Slot::OpaqueDepthTexture);
-        }
-
-        void setDefaults(osg::StateSet* stateset) override
-        {
-            stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf{}));
-            if (mSkyRTT)
-                stateset->addUniform(new osg::Uniform("sky", mSkyTextureUnit));
-        }
-
-        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
-        {
-            stateset->getUniform("projectionMatrix")->set(mProjectionMatrix);
-            if (mSkyRTT && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
-            {
-                osg::Texture* skyTexture = mSkyRTT->getColorTexture(static_cast<osgUtil::CullVisitor*>(nv));
-                stateset->setTextureAttribute(
-                    mSkyTextureUnit, skyTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            }
-
-            stateset->setTextureAttribute(mOpaqueTextureUnit,
-                mSceneManager->getOpaqueDepthTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
-        }
-
-        void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
-        {
-            stateset->getUniform("projectionMatrix")->set(getEyeProjectionMatrix(0));
-        }
-
-        void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
-        {
-            stateset->getUniform("projectionMatrix")->set(getEyeProjectionMatrix(1));
-        }
-
-        void setProjectionMatrix(const osg::Matrixf& projectionMatrix) { mProjectionMatrix = projectionMatrix; }
-
-        const osg::Matrixf& getProjectionMatrix() const { return mProjectionMatrix; }
-
-        void enableSkyRTT(int skyTextureUnit, SceneUtil::RTTNode* skyRTT)
-        {
-            mSkyTextureUnit = skyTextureUnit;
-            mSkyRTT = skyRTT;
-        }
-
-    private:
-        osg::Matrixf getEyeProjectionMatrix(int view)
-        {
-            return Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
-        }
-
-        osg::Matrixf mProjectionMatrix;
-        int mSkyTextureUnit = -1;
-        SceneUtil::RTTNode* mSkyRTT = nullptr;
-
-        Resource::SceneManager* mSceneManager;
-        int mOpaqueTextureUnit = -1;
-    };
-
-    class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
-    {
-    public:
-        SharedUniformStateUpdater()
-            : mNear(0.f)
-            , mFar(0.f)
-            , mWindSpeed(0.f)
-            , mSkyBlendingStartCoef(Settings::fog().mSkyBlendingStart)
-        {
-        }
-
-        void setDefaults(osg::StateSet* stateset) override
-        {
-            stateset->addUniform(new osg::Uniform("near", 0.f));
-            stateset->addUniform(new osg::Uniform("far", 0.f));
-            stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
-            stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
-            stateset->addUniform(new osg::Uniform("isReflection", false));
-            stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
-            stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
-            stateset->addUniform(new osg::Uniform("useTreeAnim", false));
-        }
-
-        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
-        {
-            stateset->getUniform("near")->set(mNear);
-            stateset->getUniform("far")->set(mFar);
-            stateset->getUniform("skyBlendingStart")->set(mFar * mSkyBlendingStartCoef);
-            stateset->getUniform("screenRes")->set(mScreenRes);
-            stateset->getUniform("windSpeed")->set(mWindSpeed);
-            stateset->getUniform("playerPos")->set(mPlayerPos);
-        }
-
-        void setNear(float near) { mNear = near; }
-
-        void setFar(float far) { mFar = far; }
-
-        void setScreenRes(float width, float height) { mScreenRes = osg::Vec2f(width, height); }
-
-        void setWindSpeed(float windSpeed) { mWindSpeed = windSpeed; }
-
-        void setPlayerPos(osg::Vec3f playerPos) { mPlayerPos = playerPos; }
-
-    private:
-        float mNear;
-        float mFar;
-        float mWindSpeed;
-        float mSkyBlendingStartCoef;
-        osg::Vec3f mPlayerPos;
-        osg::Vec2f mScreenRes;
-    };
-
-    class StateUpdater : public SceneUtil::StateSetUpdater
-    {
-    public:
-        StateUpdater()
-            : mFogStart(0.f)
-            , mFogEnd(0.f)
-            , mWireframe(false)
-        {
-        }
-
-        void setDefaults(osg::StateSet* stateset) override
-        {
-            osg::LightModel* lightModel = new osg::LightModel;
-            stateset->setAttribute(lightModel, osg::StateAttribute::ON);
-            osg::Fog* fog = new osg::Fog;
-            fog->setMode(osg::Fog::LINEAR);
-            stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
-            if (mWireframe)
-            {
-                osg::PolygonMode* polygonmode = new osg::PolygonMode;
-                polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-                stateset->setAttributeAndModes(polygonmode, osg::StateAttribute::ON);
-            }
-            else
-                stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
-        }
-
-        void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
-        {
-            osg::LightModel* lightModel
-                = static_cast<osg::LightModel*>(stateset->getAttribute(osg::StateAttribute::LIGHTMODEL));
-            lightModel->setAmbientIntensity(mAmbientColor);
-            osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
-            fog->setColor(mFogColor);
-            fog->setStart(mFogStart);
-            fog->setEnd(mFogEnd);
-        }
-
-        void setAmbientColor(const osg::Vec4f& col) { mAmbientColor = col; }
-
-        void setFogColor(const osg::Vec4f& col) { mFogColor = col; }
-
-        void setFogStart(float start) { mFogStart = start; }
-
-        void setFogEnd(float end) { mFogEnd = end; }
-
-        void setWireframe(bool wireframe)
-        {
-            if (mWireframe != wireframe)
-            {
-                mWireframe = wireframe;
-                reset();
-            }
-        }
-
-        bool getWireframe() const { return mWireframe; }
-
-    private:
-        osg::Vec4f mAmbientColor;
-        osg::Vec4f mFogColor;
-        float mFogStart;
-        float mFogEnd;
-        bool mWireframe;
-    };
-
     class PreloadCommonAssetsWorkItem : public SceneUtil::WorkItem
     {
     public:
@@ -326,61 +140,8 @@ namespace MWRender
         , mGroundCoverStore(groundcoverStore)
     {
         bool reverseZ = SceneUtil::AutoDepth::isReversed();
-        const SceneUtil::LightingMethod lightingMethod = Settings::shaders().mLightingMethod;
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
-
-        // Figure out which pipeline must be used by default and inform the user
-        bool forceShaders = Settings::shaders().mForceShaders;
-        {
-            std::vector<std::string> requesters;
-            if (!forceShaders)
-            {
-                if (Settings::fog().mRadialFog)
-                    requesters.push_back("radial fog");
-                if (Settings::fog().mExponentialFog)
-                    requesters.push_back("exponential fog");
-                if (mSkyBlending)
-                    requesters.push_back("sky blending");
-                if (Settings::shaders().mSoftParticles)
-                    requesters.push_back("soft particles");
-                if (Settings::shadows().mEnableShadows)
-                    requesters.push_back("shadows");
-                if (lightingMethod != SceneUtil::LightingMethod::FFP)
-                    requesters.push_back("lighting method");
-                if (reverseZ)
-                    requesters.push_back("reverse-Z depth buffer");
-                if (Stereo::getMultiview())
-                    requesters.push_back("stereo multiview");
-
-                if (!requesters.empty())
-                    forceShaders = true;
-            }
-
-            if (forceShaders)
-            {
-                std::string message = "Using rendering with shaders by default";
-                if (requesters.empty())
-                {
-                    message += " (forced)";
-                }
-                else
-                {
-                    message += ", requested by:";
-                    for (size_t i = 0; i < requesters.size(); i++)
-                        message += "\n - " + requesters[i];
-                }
-                Log(Debug::Info) << message;
-            }
-            else
-            {
-                Log(Debug::Info) << "Using fixed-function rendering by default";
-            }
-        }
-
-        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
-        // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
-        resourceSystem->getSceneManager()->setClampLighting(Settings::shaders().mClampLighting);
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::shaders().mAutoUseObjectNormalMaps);
         resourceSystem->getSceneManager()->setNormalMapPattern(Settings::shaders().mNormalMapPattern);
         resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::shaders().mNormalHeightMapPattern);
@@ -392,10 +153,10 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAdjustCoverageForAlphaTest(
             Settings::shaders().mAdjustCoverageForAlphaTest);
 
-        // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this
-        // depends on support for various OpenGL extensions.
+        // Let LightManager choose which backend to use based on our hint.
+        // Ultimately dependent on support for various OpenGL extensions.
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(SceneUtil::LightSettings{
-            .mLightingMethod = lightingMethod,
+            .mLightingMethod = Settings::shaders().mLightingMethod,
             .mMaxLights = Settings::shaders().mMaxLights,
             .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
             .mLightFadeStart = Settings::shaders().mLightFadeStart,
@@ -426,10 +187,9 @@ namespace MWRender
             indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static, Settings::shadows(),
             mResourceSystem->getSceneManager()->getShaderManager());
 
+        Shader::ShaderManager::DefineMap globalDefines = Shader::getDefaultDefines();
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
-        Shader::ShaderManager::DefineMap globalDefines
-            = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
 
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
@@ -442,11 +202,6 @@ namespace MWRender
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
-        globalDefines["waterRefraction"] = "0";
-        globalDefines["useGPUShader4"] = "0";
-        globalDefines["useOVR_multiview"] = "0";
-        globalDefines["numViews"] = "1";
-        globalDefines["disableNormals"] = "1";
 
         for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
@@ -499,13 +254,15 @@ namespace MWRender
         mGroundcover = chunkMgr.mGroundcover.get();
         mObjectPaging = chunkMgr.mObjectPaging.get();
 
-        mStateUpdater = new StateUpdater;
+        mStateUpdater = new SceneUtil::StateUpdater();
         sceneRoot->addUpdateCallback(mStateUpdater);
 
-        mSharedUniformStateUpdater = new SharedUniformStateUpdater();
+        mSharedUniformStateUpdater = new SceneUtil::SharedUniformStateUpdater(Settings::fog().mSkyBlendingStart);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
-        mPerViewUniformStateUpdater = new PerViewUniformStateUpdater(mResourceSystem->getSceneManager());
+        mPerViewUniformStateUpdater = new SceneUtil::PerViewUniformStateUpdater(mResourceSystem->getSceneManager(),
+            mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
+                Shader::ShaderManager::Slot::OpaqueDepthTexture));
         rootNode->addCullCallback(mPerViewUniformStateUpdater);
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
@@ -537,7 +294,6 @@ namespace MWRender
         sceneRoot->addChild(source);
 
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-        sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         osg::ref_ptr<osg::Material> defaultMat(new osg::Material);
         defaultMat->setColorMode(osg::Material::OFF);
@@ -600,6 +356,9 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(new SceneUtil::AutoDepth, osg::StateAttribute::ON);
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
+
+        mRootNode->getOrCreateStateSet()->setMode(
+            GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 
         SceneUtil::setCameraClearDepth(mViewer->getCamera());
 
@@ -704,8 +463,7 @@ namespace MWRender
     {
         bool isInterior = !cell.isExterior() && !cell.isQuasiExterior();
         bool needsAdjusting = false;
-        if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            needsAdjusting = isInterior && !Settings::shaders().mClassicFalloff;
+        needsAdjusting = isInterior && !Settings::shaders().mClassicFalloff;
 
         osg::Vec4f ambient = SceneUtil::colourFromRGB(cell.getMood().mAmbiantColor);
 
@@ -1566,7 +1324,7 @@ namespace MWRender
                 lightManager->processChangedSettings(Settings::shaders().mLightBoundsMultiplier,
                     Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
 
-                if (it->second == "max lights" && !lightManager->usingFFP())
+                if (it->second == "max lights")
                 {
                     mViewer->stopThreading();
 

@@ -743,4 +743,23 @@ namespace Shader
         mHotReloadManager->mTriggerReload = true;
     }
 
+    ShaderManager::DefineMap getDefaultDefines()
+    {
+        return {
+            { "forcePPL", "0" },
+            { "clamp", "1" },
+            { "preLightEnv", "0" },
+            { "radialFog", "0" },
+            { "exponentialFog", "0" },
+            { "reverseZ", "0" },
+            { "waterRefraction", "0" },
+            { "classicFalloff", "1" },
+            { "skyBlending", "0" },
+            { "disableNormals", "1" },
+            { "useGPUShader4", "0" },
+            { "useOVR_multiview", "0" },
+            { "distorionRTRatio", "0" },
+            { "numViews", "1" },
+        };
+    }
 }

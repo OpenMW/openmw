@@ -55,7 +55,7 @@ void doLighting(vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuse
     specularLight = vec3(0.0);
 #endif
 
-    for (int i = @startLight; i < @endLight; ++i)
+    for (int i = @startLight; i < PointLightCount; ++i)
     {
 #if @lightingMethodUBO
         int lightIndex = PointLightIndex[i];
@@ -65,8 +65,8 @@ void doLighting(vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuse
         vec3 lightPos = lcalcPosition(lightIndex) - viewPos;
         float lightDistance = length(lightPos);
 
-        // cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
-#if !@classicFalloff && !@lightingMethodFFP
+        // cull point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
+#if !@classicFalloff
         if (lightDistance > lcalcRadius(lightIndex) * 2.0)
             continue;
 #endif

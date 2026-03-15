@@ -570,7 +570,6 @@
                             <UserString key="Caption_Text" value="#{OMWEngine:LightsLightingMethodTooltip}"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="0 28 250 24" align="Left Top" name="LightingMethodButton">
-                            <Property key="AddItem" value="legacy"/>
                             <Property key="AddItem" value="shaders compatibility"/>
                             <Property key="AddItem" value="shaders"/>
                         </Widget>

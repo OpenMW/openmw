@@ -264,10 +264,6 @@ namespace MWRender
     {
         mSkyRootNode = new CameraRelativeTransform;
         mSkyRootNode->setName("Sky Root");
-        // Assign empty program to specify we don't want shaders when we are rendering in FFP pipeline
-        if (!mSceneManager->getForceShaders())
-            mSkyRootNode->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
-                osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
         mSceneManager->setUpNormalsRTForStateSet(mSkyRootNode->getOrCreateStateSet(), false);
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*mSkyRootNode->getOrCreateStateSet());
         parentNode->addChild(mSkyRootNode);
@@ -299,8 +295,6 @@ namespace MWRender
     {
         assert(!mCreated);
 
-        bool forceShaders = mSceneManager->getForceShaders();
-
         mAtmosphereDay = mSceneManager->getInstance(Settings::models().mSkyatmosphere.get(), mEarlyRenderBinRoot);
         ModVertexAlphaVisitor modAtmosphere(ModVertexAlphaVisitor::Atmosphere);
         mAtmosphereDay->accept(modAtmosphere);
@@ -322,7 +316,7 @@ namespace MWRender
 
         ModVertexAlphaVisitor modStars(ModVertexAlphaVisitor::Stars);
         atmosphereNight->accept(modStars);
-        mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager(), forceShaders);
+        mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager());
         atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
         mSun = std::make_unique<Sun>(mEarlyRenderBinRoot, *mSceneManager);
@@ -338,7 +332,7 @@ namespace MWRender
         mCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> cloudMeshChild
             = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mCloudMesh);
-        mCloudUpdater = new CloudUpdater(forceShaders);
+        mCloudUpdater = new CloudUpdater();
         mCloudUpdater->setOpacity(1.f);
         cloudMeshChild->addUpdateCallback(mCloudUpdater);
         mCloudMesh->addChild(cloudMeshChild);
@@ -346,7 +340,7 @@ namespace MWRender
         mNextCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> nextCloudMeshChild
             = mSceneManager->getInstance(Settings::models().mSkyclouds.get(), mNextCloudMesh);
-        mNextCloudUpdater = new CloudUpdater(forceShaders);
+        mNextCloudUpdater = new CloudUpdater();
         mNextCloudUpdater->setOpacity(0.f);
         nextCloudMeshChild->addUpdateCallback(mNextCloudUpdater);
         mNextCloudMesh->setNodeMask(0);
@@ -359,15 +353,12 @@ namespace MWRender
         mCloudMesh->accept(modClouds);
         mNextCloudMesh->accept(modClouds);
 
-        if (mSceneManager->getForceShaders())
-        {
-            Shader::ShaderManager::DefineMap defines = {};
-            Stereo::shaderStereoDefines(defines);
-            auto program = mSceneManager->getShaderManager().getProgram("sky", defines);
-            mEarlyRenderBinRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", -1));
-            mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(
-                program, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-        }
+        Shader::ShaderManager::DefineMap defines = {};
+        Stereo::shaderStereoDefines(defines);
+        auto program = mSceneManager->getShaderManager().getProgram("sky", defines);
+        mEarlyRenderBinRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", -1));
+        mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(
+            program, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);

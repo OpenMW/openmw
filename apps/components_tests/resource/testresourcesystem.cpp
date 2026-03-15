@@ -1,5 +1,6 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/shadow.hpp>
 #include <components/toutf8/toutf8.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -18,6 +19,21 @@ namespace
         const ToUTF8::Utf8Encoder encoder(ToUTF8::WINDOWS_1252);
         Resource::ResourceSystem resourceSystem(&vfsManager, 1.0, &encoder.getStatelessEncoder());
         Resource::SceneManager* sceneManager = resourceSystem.getSceneManager();
+        sceneManager->setShaderPath("resources/shaders");
+
+        auto defines = Shader::getDefaultDefines();
+
+        auto shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
+
+        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{});
+        auto lightDefines = lightManager->getLightDefines();
+
+        for (const auto& define : shadowDefines)
+            defines[define.first] = define.second;
+        for (const auto& define : lightDefines)
+            defines[define.first] = define.second;
+
+        sceneManager->getShaderManager().setGlobalDefines(defines);
 
         constexpr VFS::Path::NormalizedView noSuchPath("meshes/whatever.nif");
         std::vector<std::thread> threads;

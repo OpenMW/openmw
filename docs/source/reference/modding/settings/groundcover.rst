@@ -90,3 +90,12 @@ Groundcover Settings
         - 50
         - 20
         - Gentle levels — subtle and restrained.
+
+.. omw-setting::
+   :title: point lighting
+   :type: boolean
+   :range: true, false
+   :default: true
+   
+
+   When enabled, groundcover will receive lighting from point light sources.

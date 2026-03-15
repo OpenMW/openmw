@@ -97,6 +97,7 @@ namespace CSVRender
         auto markerData = file.readAll();
 
         mResourceSystem->getSceneManager()->loadSelectionMarker(mBaseNode, markerData.data(), markerData.size());
+        mResourceSystem->getSceneManager()->recreateShaders(mBaseNode);
 
         osg::ref_ptr<osg::StateSet> baseNodeState = mBaseNode->getOrCreateStateSet();
         baseNodeState->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);

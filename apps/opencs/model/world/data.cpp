@@ -152,17 +152,16 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourceSystem
         = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
-    Shader::ShaderManager::DefineMap defines
-        = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-    Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
-    defines["forcePPL"] = "0"; // Don't force per-pixel lighting
-    defines["clamp"] = "1"; // Clamp lighting
-    defines["preLightEnv"] = "0"; // Apply environment maps after lighting like Morrowind
-    defines["radialFog"] = "0";
-    defines["lightingModel"] = "0";
-    defines["reverseZ"] = "0";
-    defines["waterRefraction"] = "0";
+    auto defines = Shader::getDefaultDefines();
+
+    auto shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
+
+    osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{});
+    auto lightDefines = lightManager->getLightDefines();
+
     for (const auto& define : shadowDefines)
+        defines[define.first] = define.second;
+    for (const auto& define : lightDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 

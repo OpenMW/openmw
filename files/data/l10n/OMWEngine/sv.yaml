@@ -114,8 +114,6 @@ ForcePerPixelLighting: "Per-pixelljussättning"
 ForcePerPixelLightingTooltip: |-
     Tvingar användningen av per-pixelljussättning. Som standard är det annars bara objekt med normalkartor som använder per-pixelljussättning.
 
-    Denna inställning påverkar endast objekt som ritas med shaderteknik.
-
     Aktivering av per-pixelljussättning kommer ge visuella skillnader jämfört med hur Morrowind ser ut i ordinarie spelmotor.
     Detta då visst ljus i Morrowind är beroende av vertexljussättning för att se ut som det var avsett.
 
@@ -131,7 +129,6 @@ InvertYAxis: "Invertera Y-axeln"
 Language: "Språk"
 LanguageNote: "Notera: dessa inställningar påverkar inte strängar från ESM-filer."
 LightingMethod: "Ljussättningsmetod"
-LightingMethodLegacy: "Gammaldags"
 LightingMethodShaders: "Shader"
 LightingMethodShadersCompatibility: "Shader (kompatibilitet)"
 LightingResetToDefaults: "Återställer till ursprungliga värden, vill du fortsätta? Ändringar till ljussättningsmetod kräver omstart."
@@ -143,8 +140,7 @@ LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
 LightsFadeStartMultiplierValue: "Blekningsstartmultiplikator ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
 LightsLightingMethodTooltip: "Välj intern hantering av ljuskällor.\n\n
-    \"Gammaldags\" använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.\n\n
-    \"Shader (kompatibilitet)\" tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
+    \"Shader (kompatibilitet)\" Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
     \"Shader\" har alla fördelar som \"Shader (kompatibilitet)\" har, med med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara."
 LightsMaximumDistance: "Maximalt ljusavstånd"
 LightsMaximumDistanceValue: "Maximalt ljusavstånd ({value, number, :: group-off})"
@@ -160,7 +156,7 @@ MatchSunlightToSunTooltip: |-
     Detta alternativ gör att solljuskällans position matchar solens synliga position.
 MaxLights: "Max antal ljuskällor"
 MaxLightsValue: "Max antal ljuskällor ({value, number, :: group-off})"
-MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
+MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp liknande det man ser i Morrowind."
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"

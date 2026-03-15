@@ -8,8 +8,6 @@
 #include <osg/FrameBufferObject>
 #include <osg/Node>
 #include <osg/NodeVisitor>
-#include <osg/TexEnvCombine>
-#include <osg/TexGen>
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderStage>
 
@@ -85,20 +83,6 @@ namespace SceneUtil
         else
         {
             stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
-            osg::TexGen* texGen = new osg::TexGen;
-            texGen->setMode(osg::TexGen::SPHERE_MAP);
-
-            stateset->setTextureAttributeAndModes(
-                mTexUnit, texGen, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
-            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-            texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
-            texEnv->setConstantColor(mColor);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-            texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-            texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
-
-            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
             stateset->addUniform(new osg::Uniform("envMapColor", mColor));
         }
     }
@@ -106,8 +90,6 @@ namespace SceneUtil
     void GlowUpdater::removeTexture(osg::StateSet* stateset)
     {
         stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
-        stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
-        stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXENV);
         stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
         stateset->removeUniform("envMapColor");
 
