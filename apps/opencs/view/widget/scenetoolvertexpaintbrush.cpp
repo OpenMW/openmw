@@ -43,9 +43,17 @@ QWidget* CSVWidget::ColorButtonWidget::findNonPopupParent() const
 
 void CSVWidget::ColorButtonWidget::openColorDialog()
 {
-    const QColor color = QColorDialog::getColor(mColor, findNonPopupParent(), "Select Color");
-    if (color.isValid())
+    QWidget* parentWindow = findNonPopupParent();
+
+    QColorDialog colorDialog(mColor, parentWindow);
+    colorDialog.setWindowTitle("Select Color");
+    colorDialog.setWindowModality(parentWindow ? Qt::WindowModal : Qt::ApplicationModal);
+    colorDialog.setOption(QColorDialog::DontUseNativeDialog, true);
+
+    const int dialogResult = colorDialog.exec();
+    if (dialogResult == QDialog::Accepted)
     {
+        const QColor color = colorDialog.selectedColor();
         mColor = color;
         const QString css = QString("QPushButton#colorSwatchButton { background-color: %1; border: 1px solid #ccc; }")
                                 .arg(color.name());
