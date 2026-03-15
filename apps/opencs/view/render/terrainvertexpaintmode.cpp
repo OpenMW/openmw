@@ -415,7 +415,7 @@ bool CSVRender::TerrainVertexPaintMode::allowLandColourEditing(const std::string
         if (mode == "Discard")
             return false;
 
-        if (mode == "Create cell and land, then edit")
+        if (useTool && mode == "Create cell and land, then edit")
         {
             document.getUndoStack().push(new CSMWorld::CreateCommand(landTable, cellId));
         }
