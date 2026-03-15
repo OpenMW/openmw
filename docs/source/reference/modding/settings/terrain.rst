@@ -142,7 +142,6 @@ Terrain Settings
       If this limit is too small, lighting issues arising due to merged objects
       being considered a single object, and they may disrupt your gameplay experience.
       Consider increasing the 'max lights' setting value in the 'Shaders' section to avoid this issue.
-      With the Legacy lighting mode this limit can not be increased (only 8 sources can be used).
 
 .. omw-setting::
    :title: object paging merge factor

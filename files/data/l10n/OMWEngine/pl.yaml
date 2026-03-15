@@ -114,8 +114,6 @@ ForcePerPixelLighting: "Oświetlenie per-piksel"
 ForcePerPixelLightingTooltip: |-
     Wymusza oświetlenie per-pikselowe. Domyślnie tylko obiekty z mapami wypukłości lub normalnymi używają tej metody.
 
-    Dotyczy tylko obiektów renderowanych z użyciem shaderów.
-
     Może powodować różnice wizualne względem oryginalnego silnika Morrowind.
 
     Shadery trawy i efekty cząsteczkowe ignorują to ustawienie.
@@ -130,7 +128,6 @@ InvertYAxis: "Odwróć oś Y"
 Language: "Język"
 LanguageNote: "Uwaga: te ustawienia nie wpływają na teksty z plików ESM."
 LightingMethod: "Metoda oświetlenia"
-LightingMethodLegacy: "Klasyczna"
 LightingMethodShaders: "Shadery"
 LightingMethodShadersCompatibility: "Shadery (kompatybilne)"
 LightingResetToDefaults: "Przywrócić domyślne wartości? Zmiany w metodzie oświetlenia wymagają ponownego uruchomienia."
@@ -142,8 +139,7 @@ LightsFadeStartMultiplier: "Mnożnik początku zanikania"
 LightsFadeStartMultiplierValue: "Mnożnik początku zanikania ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasięgu, w którym światła zaczną zanikać.\n\nNiska wartość = wolniejsze przejścia.\nWysoka wartość = szybsze przejścia."
 LightsLightingMethodTooltip: "Ustawia wewnętrzne przetwarzanie źródeł światła.\n\n
-    \"Klasyczna\" zawsze używa 8 świateł na obiekt. Najbardziej przypomina oryginalne oświetlenie Morrowinda.\n\n
-    \"Shadery (kompatybilne)\" usuwa limit 8 świateł. Obsługuje również oświetlenie trawy. Zalecane dla starszego sprzętu.\n\n
+    \"Shadery (kompatybilne)\" Zalecane dla starszego sprzętu.\n\n
     \"Shadery\" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności."
 LightsMaximumDistance: "Maksymalny zasięg światła"
 LightsMaximumDistanceValue: "Maksymalny zasięg światła ({value, number, :: group-off})"
@@ -159,7 +155,7 @@ MatchSunlightToSunTooltip: |-
     Ta opcja sprawia, że źródło światła słonecznego zgadza się z faktyczną pozycją słońca.
 MaxLights: "Maksymalna liczba świateł"
 MaxLightsValue: "Maksymalna liczba świateł ({value, number, :: group-off})"
-MaxLightsTooltip: "Domyślnie: 8\nMaksymalna liczba świateł na obiekt.\n\nNiska wartość = efekt 'wyskakiwania' świateł, jak w klasycznym trybie."
+MaxLightsTooltip: "Domyślnie: 8\nMaksymalna liczba świateł na obiekt.\n\nNiska wartość = efekt 'wyskakiwania' świateł, jak w Morrowind."
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"
 MouseAndKeyboard: "Mysz i klawiatura"

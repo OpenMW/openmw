@@ -114,8 +114,6 @@ ForcePerPixelLighting: "Éclairage par pixel"
 ForcePerPixelLightingTooltip: |-
     Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
 
-    Affecte uniquement les objets rendus via des shaders.
-
     Activer l'éclairage par pixel donne des résultats visuels différents de ceux du moteur de jeu original, car certaines lumières de Morrowind furent implémentées pour un éclairage par vertex.
 
     Les shaders de végétation au sol et les particules ignorent cette option.
@@ -130,7 +128,6 @@ InvertYAxis: "Inverser l'axe Y"
 Language: "Localisation"
 LanguageNote: "Note: Ce paramètre n'affecte pas les textes des fichiers ESM."
 LightingMethod: "Méthode d'affichage des lumières"
-LightingMethodLegacy: "Traditionnelle"
 LightingMethodShaders: "Shaders"
 LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
 LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage des lumières à leur valeur par défaut ? Ces changements requièrent un redémarrage de l'application."
@@ -142,8 +139,7 @@ LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierValue: "Seuil de perte d'éclat lumineux ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
 LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
-    \"Traditionnelle\" Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.\n\n
-    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
+    \"Shaders (mode de compatibilité)\" Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
     \"Shaders\" offre tous les bénéfices apportés par \"Shaders (mode de compatibilité)\", mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d'augmenter le nombre de sources lumineuses par objet sans perte de performance."
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
 LightsMaximumDistanceValue: "Distance maximale des sources lumineuses ({value, number, :: group-off})"
@@ -159,7 +155,7 @@ MatchSunlightToSunTooltip: |-
     Cette option aligne la source lumineuse du soleil sur la position réelle du soleil.
 MaxLights: "Maximum de sources lumineuses"
 MaxLightsValue: "Maximum de sources lumineuses ({value, number, :: group-off})"
-MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
+MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à ce que l'on voit dans Morrowind."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"
 MouseAndKeyboard: "Souris/Clavier"

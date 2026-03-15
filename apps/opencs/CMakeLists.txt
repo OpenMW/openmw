@@ -92,8 +92,7 @@ opencs_units (view/render
     )
 
 opencs_units (view/render
-    lighting lightingday lightingnight lightingbright object cell terrainstorage
-    cellarrow cellmarker cellborder pathgrid
+    object cell terrainstorage cellarrow cellmarker cellborder pathgrid
     )
 
 opencs_hdrs (view/render

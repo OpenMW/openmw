@@ -114,8 +114,6 @@ ForcePerPixelLighting: "Beleuchtung pro Pixel"
 ForcePerPixelLightingTooltip: |-
     Erzwingt die Verwendung der Beleuchtung pro Pixel. Standardmäßig verwenden nur Bump- und Normal-mapped-Objekte eine Beleuchtung pro Pixel.
 
-    Betrifft nur mit Shadern gezeichnete Objekte.
-
     Die Aktivierung der Per-Pixel-Beleuchtung führt zu visuellen Unterschieden zur ursprünglichen Morrowind-Engine, da bestimmte Lichter in Morrowind auf Vertex-Beleuchtung angewiesen sind, um wie beabsichtigt auszusehen.
 
     Beachten Sie, dass Bodendecker-Shader und Partikeleffekte diese Einstellung ignorieren.
@@ -130,7 +128,6 @@ InvertYAxis: "Y-Achse invertieren"
 Language: "Sprache"
 LanguageNote: "Hinweis: Diese Einstellungen wirken sich nicht auf Texte aus ESM-Dateien aus."
 LightingMethod: "Beleuchtungsmethode"
-LightingMethodLegacy: "Veraltet"
 LightingMethodShaders: "Shader"
 LightingMethodShadersCompatibility: "Shader (Kompatibilitätsmodus)"
 LightingResetToDefaults: "Einstellungen wirklich zurücksetzen? Das Ändern der „Beleuchtungsmethode“ erfordert einen Neustart."
@@ -142,8 +139,7 @@ LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierValue: "Multiplikator für Startwert der Lichtabblendung ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
 LightsLightingMethodTooltip: "Legt die interne Behandlung von Lichtquellen fest.\n\n
-   „Veraltet“ verwendet immer bis zu 8 Lichtquellen pro Objekt und führt zu Ergebnissen, die denen der Original-Engine am ähnlichsten sind.\n\n
-   „Shader (Kompatibilitätsmodus)“ entfernt das Maximum von 8 Lichtquellen pro Objekt; Bodenvegetation wird von Lichtquellen beleuchtet. Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
+   „Shader (Kompatibilitätsmodus)“ Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
    „Shader“ bietet alle Vorteile von „Shader (Kompatibilitätsmodus)“, nutzt aber einen moderneren Ansatz, der größere Maximalwerte für Lichtquellen bei geringen bis keinen Leistungseinbußen ermöglicht. Funktioniert möglicherweise nicht auf älterer Hardware."
 LightsMaximumDistance: "Maximale Lichtreichweite"
 LightsMaximumDistanceValue: "Maximale Lichtreichweite ({value, number, :: group-off})"

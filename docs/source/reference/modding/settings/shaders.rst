@@ -2,16 +2,6 @@ Shaders Settings
 ################
 
 .. omw-setting::
-   :title: force shaders
-   :type: boolean
-   :range: true, false
-   :default: false
-
-   Force rendering with shaders for all objects, even those that do not strictly need them.
-   Required if enhancements like shadows or reverse z are enabled.
-   May have a significant performance impact.
-
-.. omw-setting::
    :title: force per pixel lighting
    :type: boolean
    :range: true, false
@@ -30,7 +20,6 @@ Shaders Settings
 
    Restrict lighting to a maximum of (1,1,1) on shader objects.
    Prevents overly bright or shifted colors but can dull lighting.
-   Terrain is always drawn with shaders to prevent seams.
 
 .. omw-setting::
    :title: auto use object normal maps
@@ -111,13 +100,12 @@ Shaders Settings
 .. omw-setting::
    :title: lighting method
    :type: string
-   :range: legacy | shaders compatibility | shaders
+   :range: shaders compatibility | shaders
    :default: shaders compatibility
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights` :bdg-success:`Launcher > Settings > Visuals > Lighting`
 
    Controls internal light source handling:
-   - `legacy`: fixed-function pipeline, max 8 lights per object.
-   - `shaders compatibility`: removes light limit, better attenuation, recommended for older hardware.
+   - `shaders compatibility`: recommended for older hardware.
    - `shaders`: modern lighting approach, higher light counts, better for modern GPUs.
 
 .. omw-setting::

@@ -93,8 +93,6 @@ namespace Settings
         {
             switch (value)
             {
-                case SceneUtil::LightingMethod::FFP:
-                    return "legacy";
                 case SceneUtil::LightingMethod::PerObjectUniform:
                     return "shaders compatibility";
                 case SceneUtil::LightingMethod::SingleUBO:
@@ -548,8 +546,6 @@ namespace Settings
 
     SceneUtil::LightingMethod parseLightingMethod(std::string_view value)
     {
-        if (value == "legacy")
-            return SceneUtil::LightingMethod::FFP;
         if (value == "shaders compatibility")
             return SceneUtil::LightingMethod::PerObjectUniform;
         if (value == "shaders")

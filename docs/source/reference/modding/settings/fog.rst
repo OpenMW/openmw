@@ -122,7 +122,6 @@ Fog Settings
 
    By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
    This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
-   Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
 .. omw-setting::
    :title: exponential fog
@@ -132,7 +131,6 @@ Fog Settings
    :location: :bdg-success:`Launcher > Settings > Visuals > Fog`
 
    Similar to "radial fog" but uses an exponential formula for the fog.
-   Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
 .. omw-setting::
    :title: sky blending
@@ -143,7 +141,6 @@ Fog Settings
 
    Whether to use blending with the sky for everything that is close to the clipping plane.
    If enabled the clipping plane becomes invisible.
-   Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
 .. omw-setting::
    :title: sky blending start

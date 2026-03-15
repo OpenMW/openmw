@@ -140,7 +140,7 @@ namespace MWRender
     class AtmosphereNightUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        AtmosphereNightUpdater(Resource::ImageManager* imageManager, bool forceShaders);
+        AtmosphereNightUpdater(Resource::ImageManager* imageManager);
 
         void setFade(float fade);
 
@@ -152,13 +152,12 @@ namespace MWRender
     private:
         osg::Vec4f mColor;
         osg::ref_ptr<osg::Texture2D> mTexture;
-        bool mForceShaders;
     };
 
     class CloudUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        CloudUpdater(bool forceShaders);
+        CloudUpdater();
 
         void setTexture(osg::ref_ptr<osg::Texture2D> texture);
 
@@ -174,7 +173,6 @@ namespace MWRender
         osg::ref_ptr<osg::Texture2D> mTexture;
         osg::Vec4f mEmissionColor;
         float mOpacity;
-        bool mForceShaders;
         osg::Matrixf mTexMat;
     };
 
