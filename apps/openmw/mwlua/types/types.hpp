@@ -31,6 +31,7 @@ namespace MWLua
     void addActivatorBindings(sol::table activator, const Context& context);
     ESM::Activator tableToActivator(const sol::table& rec);
     void addMutableActivatorType(sol::state_view& lua);
+    void addBodyPartBindings(sol::table list, const Context& context);
     void addBookBindings(sol::table book, const Context& context);
     void addContainerBindings(sol::table container, const Context& context);
     void addDoorBindings(sol::table door, const Context& context);

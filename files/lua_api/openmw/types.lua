@@ -1508,6 +1508,36 @@
 -- world.createObject(newRecord.id):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 
+--- @{#BodyPart} functions
+-- @field [parent=#types] #BodyPart BodyPart
+
+---
+-- @type BodyPart
+
+---
+-- A read-only list of all @{#BodyPartRecord}s in the world database.
+-- Implements [iterables#List](iterables.html#List) of #BodyPartRecord.
+-- @field [parent=#BodyPart] #list<#BodyPartRecord> records
+-- @usage local record = types.BodyPart.records['example_recordid']
+-- @usage local record = types.BodyPart.records[1]
+
+---
+-- Whether the object is a BodyPart.
+-- @function [parent=#BodyPart] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- @type BodyPartRecord
+-- @field #string id The record ID of the body part
+-- @field #string race The id of the race of the body part
+-- @field #string model VFS path to the model
+-- @field #boolean isFemale Whether the body part only applies to female characters
+-- @field #boolean isPlayable Whether the player can choose this part
+-- @field #boolean isVampire Whether this body part is meant for vampires
+-- @field #string type `armor`, `clothing`, or `skin`
+
+
 --- @{#Book} functions
 -- @field [parent=#types] #Book Book
 
