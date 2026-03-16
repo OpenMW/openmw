@@ -64,20 +64,20 @@ Wizard::InstallationPage::~InstallationPage()
 
 void Wizard::InstallationPage::initializePage()
 {
-    const bool morrowind = field(QLatin1String("installation.installMorrowind")).toBool();
-    const bool tribunal = field(QLatin1String("installation.installTribunal")).toBool();
-    const bool bloodmoon = field(QLatin1String("installation.installBloodmoon")).toBool();
+    const bool morrowind = field(QStringLiteral("installation.installMorrowind")).toBool();
+    const bool tribunal = field(QStringLiteral("installation.installTribunal")).toBool();
+    const bool bloodmoon = field(QStringLiteral("installation.installBloodmoon")).toBool();
 
-    const QString path = field(QLatin1String("installation.path")).toString();
+    const QString path = field(QStringLiteral("installation.path")).toString();
     const MainWizard::Installation& installation = mWizard->mInstallations[path];
 
     QStringList installing;
     if (morrowind)
-        installing << QLatin1String("Morrowind");
+        installing << QStringLiteral("Morrowind");
     if (tribunal)
-        installing << QLatin1String("Tribunal");
+        installing << QStringLiteral("Tribunal");
     if (bloodmoon)
-        installing << QLatin1String("Bloodmoon");
+        installing << QStringLiteral("Bloodmoon");
 
     logTextEdit->appendPlainText(QString("Installing to %1").arg(path));
     logTextEdit->appendPlainText(QString("Installing %1.").arg(installing.join(", ")));
@@ -87,7 +87,7 @@ void Wizard::InstallationPage::initializePage()
     // When one component is done the bar will be filled by 33%
 
     int steps = 0;
-    if (!field(QLatin1String("installation.retailDisc")).toBool())
+    if (!field(QStringLiteral("installation.retailDisc")).toBool())
     {
         steps += tribunal && !installation.hasTribunal;
         steps += bloodmoon && !installation.hasBloodmoon;
@@ -105,12 +105,12 @@ void Wizard::InstallationPage::initializePage()
 
 void Wizard::InstallationPage::startInstallation()
 {
-    const QString path = field(QLatin1String("installation.path")).toString();
+    const QString path = field(QStringLiteral("installation.path")).toString();
 
     bool hasMorrowind = false;
     bool hasTribunal = false;
     bool hasBloodmoon = false;
-    if (!field(QLatin1String("installation.retailDisc")).toBool())
+    if (!field(QStringLiteral("installation.retailDisc")).toBool())
     {
         const MainWizard::Installation& installation = mWizard->mInstallations[path];
 
@@ -127,23 +127,23 @@ void Wizard::InstallationPage::startInstallation()
     if (!hasMorrowind)
         mUnshield->setInstallComponent(Wizard::Component_Morrowind, true);
 
-    if (!hasTribunal && field(QLatin1String("installation.installTribunal")).toBool())
+    if (!hasTribunal && field(QStringLiteral("installation.installTribunal")).toBool())
         mUnshield->setInstallComponent(Wizard::Component_Tribunal, true);
 
-    if (!hasBloodmoon && field(QLatin1String("installation.installBloodmoon")).toBool())
+    if (!hasBloodmoon && field(QStringLiteral("installation.installBloodmoon")).toBool())
         mUnshield->setInstallComponent(Wizard::Component_Bloodmoon, true);
 
     // Set the installation target path
     mUnshield->setPath(path);
 
     // Set the right codec to use for Morrowind.ini
-    const QString language(field(QLatin1String("installation.language")).toString());
+    const QString language(field(QStringLiteral("installation.language")).toString());
 
-    if (language == QLatin1String("Polish"))
+    if (language == QStringLiteral("Polish"))
     {
         mUnshield->setIniEncoding(ToUTF8::FromType::WINDOWS_1250);
     }
-    else if (language == QLatin1String("Russian"))
+    else if (language == QStringLiteral("Russian"))
     {
         mUnshield->setIniEncoding(ToUTF8::FromType::WINDOWS_1251);
     }
@@ -157,33 +157,33 @@ void Wizard::InstallationPage::startInstallation()
 
 void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
 {
-    std::string_view name;
+    QString name;
     switch (component)
     {
         case Wizard::Component_Morrowind:
-            name = "Morrowind";
+            name = QStringLiteral("Morrowind");
             break;
         case Wizard::Component_Tribunal:
-            name = "Tribunal";
+            name = QStringLiteral("Tribunal");
             break;
         case Wizard::Component_Bloodmoon:
-            name = "Bloodmoon";
+            name = QStringLiteral("Bloodmoon");
             break;
     }
-    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(QLatin1String(name)));
-    Log(Debug::Info) << "Attempting to install component " << name << ".";
+    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name));
+    Log(Debug::Info) << "Attempting to install component " << qUtf8Printable(name) << ".";
 
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("%1 Installation").arg(QLatin1String(name)));
+    msgBox.setWindowTitle(tr("%1 Installation").arg(name));
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setText(
         QObject::tr("Select a valid %1 installation media.<br><b>Hint</b>: make sure that it contains at least one "
                     "<b>.cab</b> file.")
-            .arg(QLatin1String(name)));
+            .arg(name));
     msgBox.exec();
 
-    const QString path = QFileDialog::getExistingDirectory(
-        this, tr("Select %1 installation media").arg(QLatin1String(name)), QDir::rootPath());
+    const QString path
+        = QFileDialog::getExistingDirectory(this, tr("Select %1 installation media").arg(name), QDir::rootPath());
 
     if (path.isEmpty())
     {
@@ -279,7 +279,7 @@ bool Wizard::InstallationPage::isComplete() const
 
 int Wizard::InstallationPage::nextId() const
 {
-    if (!field(QLatin1String("installation.retailDisc")).toBool() && !mWizard->mError)
+    if (!field(QStringLiteral("installation.retailDisc")).toBool() && !mWizard->mError)
         return MainWizard::Page_Import;
 
     return MainWizard::Page_Conclusion;

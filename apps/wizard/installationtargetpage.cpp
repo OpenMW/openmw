@@ -19,7 +19,7 @@ Wizard::InstallationTargetPage::InstallationTargetPage(QWidget* parent, const Fi
 
     folderIcon->setIcon(Misc::ScalableIcon::load(":folder"));
 
-    registerField(QLatin1String("installation.path*"), targetLineEdit);
+    registerField(QStringLiteral("installation.path*"), targetLineEdit);
 }
 
 void Wizard::InstallationTargetPage::initializePage()
@@ -30,7 +30,7 @@ void Wizard::InstallationTargetPage::initializePage()
 
 bool Wizard::InstallationTargetPage::validatePage()
 {
-    const QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QStringLiteral("installation.path")).toString());
 
     qDebug() << "Validating path: " << path;
 
@@ -69,7 +69,7 @@ bool Wizard::InstallationTargetPage::validatePage()
         return false;
     }
 
-    if (MainWizard::findFiles(QLatin1String("Morrowind"), path))
+    if (MainWizard::findFiles(QStringLiteral("Morrowind"), path))
     {
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Destination not empty"));

@@ -77,7 +77,7 @@ bool Wizard::ExistingInstallationPage::validatePage()
     // It can be missing entirely
     // Or failed to be detected due to the target being a symlink
 
-    const QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QStringLiteral("installation.path")).toString());
     QString& iniPath = mWizard->mInstallations[path].iniPath;
 
     if (QFile::exists(iniPath))
@@ -120,7 +120,7 @@ void Wizard::ExistingInstallationPage::browseButtonClicked()
         return;
 
     const QString path(QDir::toNativeSeparators(QFileInfo(selectedFile).absolutePath()));
-    if (!MainWizard::findFiles(QLatin1String("Morrowind"), path))
+    if (!MainWizard::findFiles(QStringLiteral("Morrowind"), path))
     {
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("Error detecting Morrowind files"));
@@ -163,7 +163,7 @@ void Wizard::ExistingInstallationPage::textChanged(const QString& text)
     // Set the installation path manually, as registerField doesn't work
     // Because it doesn't accept two widgets operating on a single field
     if (!text.isEmpty())
-        mWizard->setField(QLatin1String("installation.path"), text);
+        mWizard->setField(QStringLiteral("installation.path"), text);
 }
 
 bool Wizard::ExistingInstallationPage::isComplete() const

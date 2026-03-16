@@ -27,14 +27,14 @@ Wizard::MethodSelectionPage::MethodSelectionPage(QWidget* parent)
     existingLocationRadioButton->setFont(font);
     retailDiscRadioButton->setFont(font);
 
-    registerField(QLatin1String("installation.retailDisc"), retailDiscRadioButton);
+    registerField(QStringLiteral("installation.retailDisc"), retailDiscRadioButton);
 
     connect(buyLinkButton, &QPushButton::released, this, &MethodSelectionPage::handleBuyButton);
 }
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool())
+    if (field(QStringLiteral("installation.retailDisc")).toBool())
         return MainWizard::Page_InstallationTarget;
 
     return MainWizard::Page_ExistingInstallation;

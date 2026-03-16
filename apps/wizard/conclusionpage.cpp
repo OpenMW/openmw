@@ -10,22 +10,22 @@ Wizard::ConclusionPage::ConclusionPage(QWidget* parent)
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
-    setPixmap(QWizard::WatermarkPixmap, QPixmap(QLatin1String(":/images/intropage-background.png")));
+    setPixmap(QWizard::WatermarkPixmap, QPixmap(QStringLiteral(":/images/intropage-background.png")));
 }
 
 void Wizard::ConclusionPage::initializePage()
 {
-    const bool retailDisc = field(QLatin1String("installation.retailDisc")).toBool();
+    const bool retailDisc = field(QStringLiteral("installation.retailDisc")).toBool();
     // Write the path to openmw.cfg
     if (retailDisc)
     {
-        const QString path(field(QLatin1String("installation.path")).toString());
+        const QString path(field(QStringLiteral("installation.path")).toString());
         mWizard->addInstallation(path);
     }
 
     if (!mWizard->mError)
     {
-        if (retailDisc || field(QLatin1String("installation.import-settings")).toBool())
+        if (retailDisc || field(QStringLiteral("installation.import-settings")).toBool())
         {
             mWizard->runSettingsImporter();
         }

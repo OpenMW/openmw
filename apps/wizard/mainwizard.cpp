@@ -40,7 +40,7 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
 #endif
 
     setWindowTitle(tr("OpenMW Wizard"));
-    setWindowIcon(QIcon(QLatin1String(":/images/openmw-wizard.png")));
+    setWindowIcon(QIcon(QStringLiteral(":/images/openmw-wizard.png")));
     setMinimumWidth(550);
 
     // Set the property for comboboxes to the text instead of index
@@ -168,7 +168,7 @@ void Wizard::MainWizard::setupInstallations()
     // Check if the paths actually contain a Morrowind installation
     for (const auto& path : mGameSettings.getDataDirs())
     {
-        if (findFiles(QLatin1String("Morrowind"), path.value))
+        if (findFiles(QStringLiteral("Morrowind"), path.value))
             addInstallation(path.value);
     }
 }
@@ -177,8 +177,8 @@ void Wizard::MainWizard::runSettingsImporter()
 {
     writeSettings();
 
-    const QString path(field(QLatin1String("installation.path")).toString());
-    const bool retailDisc(field(QLatin1String("installation.retailDisc")).toBool());
+    const QString path(field(QStringLiteral("installation.path")).toString());
+    const bool retailDisc(field(QStringLiteral("installation.retailDisc")).toBool());
 
     QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
@@ -186,46 +186,46 @@ void Wizard::MainWizard::runSettingsImporter()
     QStringList arguments;
 
     // Import plugin selection?
-    if (retailDisc || field(QLatin1String("installation.import-addons")).toBool())
-        arguments.append(QLatin1String("--game-files"));
+    if (retailDisc || field(QStringLiteral("installation.import-addons")).toBool())
+        arguments.append(QStringLiteral("--game-files"));
 
-    arguments.append(QLatin1String("--encoding"));
+    arguments.append(QStringLiteral("--encoding"));
 
     // Set encoding
-    const QString language(field(QLatin1String("installation.language")).toString());
-    if (language == QLatin1String("Polish"))
+    const QString language(field(QStringLiteral("installation.language")).toString());
+    if (language == QStringLiteral("Polish"))
     {
-        arguments.append(QLatin1String("win1250"));
+        arguments.append(QStringLiteral("win1250"));
     }
-    else if (language == QLatin1String("Russian"))
+    else if (language == QStringLiteral("Russian"))
     {
-        arguments.append(QLatin1String("win1251"));
+        arguments.append(QStringLiteral("win1251"));
     }
     else
     {
-        arguments.append(QLatin1String("win1252"));
+        arguments.append(QStringLiteral("win1252"));
     }
 
     // Import fonts
-    if (field(QLatin1String("installation.import-fonts")).toBool())
-        arguments.append(QLatin1String("--fonts"));
+    if (field(QStringLiteral("installation.import-fonts")).toBool())
+        arguments.append(QStringLiteral("--fonts"));
 
     // Now the paths
-    arguments.append(QLatin1String("--ini"));
+    arguments.append(QStringLiteral("--ini"));
 
     if (retailDisc)
     {
-        arguments.append(QDir(path).filePath(QLatin1String("Morrowind.ini")));
+        arguments.append(QDir(path).filePath(QStringLiteral("Morrowind.ini")));
     }
     else
     {
         arguments.append(mInstallations[path].iniPath);
     }
 
-    arguments.append(QLatin1String("--cfg"));
+    arguments.append(QStringLiteral("--cfg"));
     arguments.append(Files::getUserConfigPathQString(mCfgMgr));
 
-    if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
+    if (!mImporterInvoker->startProcess(QStringLiteral("openmw-iniimporter"), arguments, false))
         return qApp->quit();
 }
 
@@ -234,16 +234,16 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     qDebug() << "add installation in: " << path;
     Installation install;
 
-    install.hasMorrowind = findFiles(QLatin1String("Morrowind"), path);
-    install.hasTribunal = findFiles(QLatin1String("Tribunal"), path);
-    install.hasBloodmoon = findFiles(QLatin1String("Bloodmoon"), path);
+    install.hasMorrowind = findFiles(QStringLiteral("Morrowind"), path);
+    install.hasTribunal = findFiles(QStringLiteral("Tribunal"), path);
+    install.hasBloodmoon = findFiles(QStringLiteral("Bloodmoon"), path);
 
     // Try to autodetect the Morrowind.ini location
     // The installation path is the Data Files directory,
     // so the INI should be located in the parent directory.
     QDir dir(path);
     dir.cdUp();
-    const QFile file(dir.filePath(QLatin1String("Morrowind.ini")));
+    const QFile file(dir.filePath(QStringLiteral("Morrowind.ini")));
     if (file.exists())
         install.iniPath = file.fileName();
 
@@ -253,7 +253,7 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     const auto& dataDirs = mGameSettings.getDataDirs();
     if (std::none_of(dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& d) { return d.value == path; }))
     {
-        mGameSettings.setMultiValue(QLatin1String("data"), { path });
+        mGameSettings.setMultiValue(QStringLiteral("data"), { path });
         mGameSettings.addDataDir({ path });
     }
 }
@@ -300,24 +300,24 @@ void Wizard::MainWizard::reject()
 void Wizard::MainWizard::writeSettings()
 {
     // Write the encoding and language settings
-    const QString language(field(QLatin1String("installation.language")).toString());
+    const QString language(field(QStringLiteral("installation.language")).toString());
     mLauncherSettings.setLanguage(language);
 
-    if (language == QLatin1String("Polish"))
+    if (language == QStringLiteral("Polish"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), { "win1250" });
+        mGameSettings.setValue(QStringLiteral("encoding"), { "win1250" });
     }
-    else if (language == QLatin1String("Russian"))
+    else if (language == QStringLiteral("Russian"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), { "win1251" });
+        mGameSettings.setValue(QStringLiteral("encoding"), { "win1251" });
     }
     else
     {
-        mGameSettings.setValue(QLatin1String("encoding"), { "win1252" });
+        mGameSettings.setValue(QStringLiteral("encoding"), { "win1252" });
     }
 
     // Write the installation path so that openmw can find them
-    const QString path(field(QLatin1String("installation.path")).toString());
+    const QString path(field(QStringLiteral("installation.path")).toString());
 
     // Make sure the installation path is the last data= entry
     mGameSettings.removeDataDir(path);
@@ -372,6 +372,6 @@ bool Wizard::MainWizard::findFiles(const QString& name, const QString& path)
 
     const QStringList entries = dir.entryList();
     // TODO: add MIME handling to make sure the files are real
-    return entries.contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
-        && entries.contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive);
+    return entries.contains(name + QStringLiteral(".esm"), Qt::CaseInsensitive)
+        && entries.contains(name + QStringLiteral(".bsa"), Qt::CaseInsensitive);
 }
