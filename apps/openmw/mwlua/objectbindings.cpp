@@ -319,6 +319,13 @@ namespace MWLua
             objectT["rotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
                 return { toQuat(o.ptr().getRefData().getPosition(), o.ptr().getClass().isActor()) };
             });
+            objectT["startingCell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
+                const MWWorld::Ptr& ptr = o.ptr();
+                MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
+                if (ptr.isInCell() && ptr.getCell() != &wm->getDraftCell())
+                    return Cell<ObjectT>{ ptr.getCell()->getOriginCell(ptr) };
+                return sol::nullopt;
+            });
             objectT["startingPosition"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asVec3(); });
             objectT["startingRotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
