@@ -62,11 +62,11 @@ namespace Files
                     // This should always be true. Note that we don't need to care above because of the trailing \0
                     if (len % sizeof(wchar_t) == 0)
                     {
-                        std::wstring_view view(buffer.data(), buffer.data() + len / sizeof(wchar_t));
+                        std::wstring_view view(buffer.data(), len / sizeof(wchar_t));
                         // Strip trailing \0 because the path constructor won't do it for us
                         const auto pos = view.find(L'\0');
                         if (pos != std::wstring_view::npos)
-                            view.remove_suffix(view.size() - pos);
+                            view = view.substr(0, pos);
                         return std::filesystem::path(view);
                     }
                 }
