@@ -69,8 +69,6 @@ namespace Wizard
 
         void writeSettings();
 
-        void showCriticalError(const QString& title, const QString& message, QWidget* parent = nullptr);
-
         Config::GameSettings mGameSettings;
         Config::LauncherSettings mLauncherSettings;
 

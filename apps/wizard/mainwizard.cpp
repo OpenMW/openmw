@@ -56,11 +56,13 @@ Wizard::MainWizard::MainWizard(Files::ConfigurationManager&& cfgMgr, QWidget* pa
     const QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
     if (!QDir(userPath).exists())
     {
+        const QString title = tr("Error creating OpenMW configuration directory");
         const QString message = tr(
             "<html><head/><body><p><b>Could not create %1</b></p>"
             "<p>Please make sure you have the right permissions and try again.</p></body></html>");
-        showCriticalError(tr("Error creating OpenMW configuration directory"), message.arg(userPath));
-        // TODO: consider quitting instantly if this or config file opening fails
+        QMessageBox::critical(nullptr, title, message.arg(userPath));
+        QApplication::quit();
+        return;
     }
 
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
@@ -96,7 +98,8 @@ void Wizard::MainWizard::setupGameSettings()
     {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            showCriticalError(title, message.arg(file.fileName()));
+            QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+            QApplication::quit();
             return;
         }
         QTextStream stream(&file);
@@ -118,7 +121,8 @@ void Wizard::MainWizard::setupGameSettings()
         {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
-                showCriticalError(title, message.arg(file.fileName()));
+                QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+                QApplication::quit();
                 return;
             }
             QTextStream stream(&file);
@@ -148,7 +152,8 @@ void Wizard::MainWizard::setupLauncherSettings()
                 "<html><head/><body><p><b>Could not open %1 for reading</b></p>"
                 "<p>Please make sure you have the right permissions "
                 "and try again.</p></body></html>");
-            showCriticalError(title, message.arg(file.fileName()));
+            QMessageBox::critical(nullptr, title, message.arg(file.fileName()));
+            QApplication::quit();
             return;
         }
         QTextStream stream(&file);
@@ -286,16 +291,10 @@ void Wizard::MainWizard::accept()
 
 void Wizard::MainWizard::reject()
 {
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Quit Wizard"));
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setText(tr("Are you sure you want to exit the Wizard?"));
-
-    if (msgBox.exec() == QMessageBox::Yes)
-    {
+    const QString title = tr("Quit Wizard");
+    const QString message = tr("Are you sure you want to exit the Wizard?");
+    if (QMessageBox::question(this, title, message) == QMessageBox::Yes)
         QWizard::reject();
-    }
 }
 
 void Wizard::MainWizard::writeSettings()
@@ -335,7 +334,8 @@ void Wizard::MainWizard::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-        showCriticalError(writeTitle, writeMessage.arg(file.fileName()), this);
+        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName()));
+        QApplication::quit();
         return;
     }
 
@@ -351,7 +351,8 @@ void Wizard::MainWizard::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
-        showCriticalError(writeTitle, writeMessage.arg(file.fileName()), this);
+        QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName()));
+        QApplication::quit();
         return;
     }
 
@@ -373,15 +374,4 @@ bool Wizard::MainWizard::findFiles(const QString& name, const QString& path)
     // TODO: add MIME handling to make sure the files are real
     return entries.contains(name + QLatin1String(".esm"), Qt::CaseInsensitive)
         && entries.contains(name + QLatin1String(".bsa"), Qt::CaseInsensitive);
-}
-
-void Wizard::MainWizard::showCriticalError(const QString& title, const QString& message, QWidget* parent)
-{
-    QMessageBox msgBox(parent);
-    msgBox.setWindowTitle(title);
-    msgBox.setIcon(QMessageBox::Critical);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setText(message);
-    connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
-    msgBox.exec();
 }
