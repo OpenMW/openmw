@@ -332,17 +332,14 @@ void Wizard::MainWizard::writeSettings()
         "<p>Please make sure you have the right permissions "
         "and try again.</p></body></html>");
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
         QMessageBox::critical(this, writeTitle, writeMessage.arg(file.fileName()));
         QApplication::quit();
         return;
     }
 
-    QTextStream stream(&file);
-    Misc::ensureUtf8Encoding(stream);
-
-    mGameSettings.writeFile(stream);
+    mGameSettings.writeFileWithComments(file);
     file.close();
 
     // Launcher settings
@@ -356,7 +353,7 @@ void Wizard::MainWizard::writeSettings()
         return;
     }
 
-    stream.setDevice(&file);
+    QTextStream stream(&file);
     Misc::ensureUtf8Encoding(stream);
 
     mLauncherSettings.writeFile(stream);
