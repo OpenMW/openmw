@@ -15,9 +15,9 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget* parent)
     setCommitPage(true);
     setButtonText(QWizard::CommitButton, tr("&Install"));
 
-    registerField(QLatin1String("installation.installMorrowind"), morrowindCheckbox);
-    registerField(QLatin1String("installation.installTribunal"), tribunalCheckbox);
-    registerField(QLatin1String("installation.installBloodmoon"), bloodmoonCheckbox);
+    registerField(QStringLiteral("installation.installMorrowind"), morrowindCheckbox);
+    registerField(QStringLiteral("installation.installTribunal"), tribunalCheckbox);
+    registerField(QStringLiteral("installation.installBloodmoon"), bloodmoonCheckbox);
 
     connect(morrowindCheckbox, &QCheckBox::toggled, this, &ComponentSelectionPage::updateButton);
     connect(tribunalCheckbox, &QCheckBox::toggled, this, &ComponentSelectionPage::updateButton);
@@ -26,7 +26,7 @@ Wizard::ComponentSelectionPage::ComponentSelectionPage(QWidget* parent)
 
 void Wizard::ComponentSelectionPage::updateButton()
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool())
+    if (field(QStringLiteral("installation.retailDisc")).toBool())
         return;
 
     if (!morrowindCheckbox->isChecked() && !tribunalCheckbox->isChecked() && !bloodmoonCheckbox->isChecked())
@@ -42,14 +42,14 @@ void Wizard::ComponentSelectionPage::updateButton()
 
 void Wizard::ComponentSelectionPage::initializePage()
 {
-    const bool retailDisc = field(QLatin1String("installation.retailDisc")).toBool();
+    const bool retailDisc = field(QStringLiteral("installation.retailDisc")).toBool();
 
     bool hasMorrowind = false;
     bool hasTribunal = false;
     bool hasBloodmoon = false;
     if (!retailDisc)
     {
-        const QString path = field(QLatin1String("installation.path")).toString();
+        const QString path = field(QStringLiteral("installation.path")).toString();
         const MainWizard::Installation& installation = mWizard->mInstallations[path];
         hasMorrowind = installation.hasMorrowind;
         hasTribunal = installation.hasTribunal;
@@ -69,18 +69,18 @@ void Wizard::ComponentSelectionPage::initializePage()
 
 bool Wizard::ComponentSelectionPage::validatePage()
 {
-    if (field(QLatin1String("installation.retailDisc")).toBool())
+    if (field(QStringLiteral("installation.retailDisc")).toBool())
         return true;
 
-    const QString path = field(QLatin1String("installation.path")).toString();
+    const QString path = field(QStringLiteral("installation.path")).toString();
     MainWizard::Installation& installation = mWizard->mInstallations[path];
 
-    bool installingTribunal = field(QLatin1String("installation.installTribunal")).toBool();
-    bool installingBloodmoon = field(QLatin1String("installation.installBloodmoon")).toBool();
+    bool installingTribunal = field(QStringLiteral("installation.installTribunal")).toBool();
+    bool installingBloodmoon = field(QStringLiteral("installation.installBloodmoon")).toBool();
 
     if (installingTribunal && !installingBloodmoon && installation.hasBloodmoon)
     {
-        QMessageBox msgBox;
+        QMessageBox msgBox(this);
         msgBox.setWindowTitle(tr("About to install Tribunal after Bloodmoon"));
         msgBox.setIcon(QMessageBox::Information);
         msgBox.setStandardButtons(QMessageBox::Cancel);

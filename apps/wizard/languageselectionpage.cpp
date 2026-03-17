@@ -13,16 +13,14 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(QWidget* parent)
 
     flagIcon->setIcon(Misc::ScalableIcon::load(":preferences-desktop-locale"));
 
-    registerField(QLatin1String("installation.language"), languageComboBox, "currentData", "currentDataChanged");
-}
+    registerField(QStringLiteral("installation.language"), languageComboBox, "currentData", "currentDataChanged");
 
-void Wizard::LanguageSelectionPage::initializePage()
-{
-    QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
-        { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
-        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
+    const QList<std::pair<QString, QString>> languages = { { tr("English"), QStringLiteral("English") },
+        { tr("French"), QStringLiteral("French") }, { tr("German"), QStringLiteral("German") },
+        { tr("Italian"), QStringLiteral("Italian") }, { tr("Polish"), QStringLiteral("Polish") },
+        { tr("Russian"), QStringLiteral("Russian") }, { tr("Spanish"), QStringLiteral("Spanish") } };
 
-    for (const auto& [name, localizedName] : languages)
+    for (const auto& [localizedName, name] : languages)
     {
         languageComboBox->addItem(localizedName, name);
     }
@@ -30,9 +28,9 @@ void Wizard::LanguageSelectionPage::initializePage()
 
 int Wizard::LanguageSelectionPage::nextId() const
 {
-    if (!field(QLatin1String("installation.retailDisc")).toBool())
+    if (!field(QStringLiteral("installation.retailDisc")).toBool())
     {
-        QString path(field(QLatin1String("installation.path")).toString());
+        const QString path(field(QStringLiteral("installation.path")).toString());
         if (!path.isEmpty())
         {
             const MainWizard::Installation& installation = mWizard->mInstallations[path];

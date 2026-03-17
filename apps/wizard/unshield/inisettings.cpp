@@ -34,7 +34,7 @@ bool Wizard::IniSettings::readFile(std::ifstream& stream, ToUTF8::FromType encod
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
     // and one or more periods, "(.+)"
-    QRegularExpression keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
+    QRegularExpression keyRe(QStringLiteral("^([^=]+)\\s*=\\s*(.+)$"));
 
     QString currentSection;
 
@@ -89,7 +89,7 @@ bool Wizard::IniSettings::writeFile(const QString& path, std::ifstream& stream, 
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
     // and one or more periods, "(.+)"
-    QRegularExpression keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
+    QRegularExpression keyRe(QStringLiteral("^([^=]+)\\s*=\\s*(.+)$"));
 
     const QStringList keys(mSettings.keys());
 
@@ -111,14 +111,14 @@ bool Wizard::IniSettings::writeFile(const QString& path, std::ifstream& stream, 
         const QString line = QString::fromStdString(std::string(lineBuffer));
         if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
         {
-            buffer.append(line + QLatin1String("\n"));
+            buffer.append(line + QStringLiteral("\n"));
             continue;
         }
 
         QRegularExpressionMatch sectionMatch = sectionRe.match(line);
         if (sectionMatch.hasMatch())
         {
-            buffer.append(line + QLatin1String("\n"));
+            buffer.append(line + QStringLiteral("\n"));
             currentSection = sectionMatch.captured(1);
             continue;
         }
@@ -133,7 +133,7 @@ bool Wizard::IniSettings::writeFile(const QString& path, std::ifstream& stream, 
             if (!currentSection.isEmpty())
                 lookupKey = currentSection + QLatin1Char('/') + key;
 
-            buffer.append(key + QLatin1Char('=') + mSettings[lookupKey].toString() + QLatin1String("\n"));
+            buffer.append(key + QLatin1Char('=') + mSettings[lookupKey].toString() + QStringLiteral("\n"));
             mSettings.remove(lookupKey);
         }
     }
