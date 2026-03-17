@@ -175,8 +175,6 @@ void Wizard::MainWizard::setupInstallations()
 
 void Wizard::MainWizard::runSettingsImporter()
 {
-    writeSettings();
-
     const QString path(field(QStringLiteral("installation.path")).toString());
     const bool retailDisc(field(QStringLiteral("installation.retailDisc")).toBool());
 
@@ -231,7 +229,10 @@ void Wizard::MainWizard::runSettingsImporter()
 
 void Wizard::MainWizard::addInstallation(const QString& path)
 {
-    qDebug() << "add installation in: " << path;
+    QDir dir(path);
+    if (!dir.exists())
+        return;
+
     Installation install;
 
     install.hasMorrowind = findFiles(QStringLiteral("Morrowind"), path);
@@ -241,21 +242,14 @@ void Wizard::MainWizard::addInstallation(const QString& path)
     // Try to autodetect the Morrowind.ini location
     // The installation path is the Data Files directory,
     // so the INI should be located in the parent directory.
-    QDir dir(path);
-    dir.cdUp();
-    const QFile file(dir.filePath(QStringLiteral("Morrowind.ini")));
-    if (file.exists())
-        install.iniPath = file.fileName();
+    if (dir.cdUp())
+    {
+        const QFile file(dir.filePath(QStringLiteral("Morrowind.ini")));
+        if (file.exists())
+            install.iniPath = file.fileName();
+    }
 
     mInstallations.insert(QDir::toNativeSeparators(path), install);
-
-    // Add it to the openmw.cfg too
-    const auto& dataDirs = mGameSettings.getDataDirs();
-    if (std::none_of(dataDirs.begin(), dataDirs.end(), [&](const Config::SettingValue& d) { return d.value == path; }))
-    {
-        mGameSettings.setMultiValue(QStringLiteral("data"), { path });
-        mGameSettings.addDataDir({ path });
-    }
 }
 
 void Wizard::MainWizard::setupPages()
@@ -318,10 +312,13 @@ void Wizard::MainWizard::writeSettings()
 
     // Write the installation path so that openmw can find them
     const QString path(field(QStringLiteral("installation.path")).toString());
+    const QList<Config::SettingValue> dirs = mGameSettings.getDataDirs();
 
-    // Make sure the installation path is the last data= entry
-    mGameSettings.removeDataDir(path);
-    mGameSettings.addDataDir({ path });
+    const QString canonical = QDir(path).canonicalPath();
+
+    // Don't write the path if it was already in the file
+    if (std::none_of(dirs.begin(), dirs.end(), [&](const Config::SettingValue& dir) { return dir.value == canonical; }))
+        mGameSettings.setMultiValue(QStringLiteral("data"), { path });
 
     // Game settings
     QFile file(Files::getUserConfigPathQString(mCfgMgr));

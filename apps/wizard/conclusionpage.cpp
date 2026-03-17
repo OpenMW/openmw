@@ -16,12 +16,6 @@ Wizard::ConclusionPage::ConclusionPage(QWidget* parent)
 void Wizard::ConclusionPage::initializePage()
 {
     const bool retailDisc = field(QStringLiteral("installation.retailDisc")).toBool();
-    // Write the path to openmw.cfg
-    if (retailDisc)
-    {
-        const QString path(field(QStringLiteral("installation.path")).toString());
-        mWizard->addInstallation(path);
-    }
 
     if (!mWizard->mError)
     {
