@@ -101,7 +101,7 @@ jobs:
         -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/scripts/buildsystems/vcpkg.cmake'
         -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
         ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG /Zi"' || '' }}
-        ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /INCREMENTAL:NO"' || '' }}
+        ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /OPT:REF /OPT:ICF /INCREMENTAL:NO"' || '' }}
         -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/include/luajit'
         -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/lib/lua51.lib'
         -D BUILD_BENCHMARKS=${{ ! inputs.package }}
@@ -112,6 +112,7 @@ jobs:
         -D OPENMW_USE_SYSTEM_YAML_CPP=OFF
         -D OPENMW_LTO_BUILD=ON
         ${{ inputs.package && '-D "VCREDIST64=$env:VCToolsRedistDir/vc_redist.x64.exe"' || '' }}
+        -D CMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     - name: Build OpenMW
       run: cmake --build ${{ github.workspace }}/build
@@ -198,6 +199,16 @@ jobs:
       with:
         name: openmw-windows-${{ inputs.msvc }}-sym-store-${{ github.sha }}
         path: ${{ github.workspace }}/SymStore/*
+    
+    - name: Store log etc. artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openmw-windows-${{ inputs.msvc }}-logs-and-stuff-${{ github.sha }}
+        path: |
+          ${{ github.workspace }}/build/compile_commands.json
+          ${{ github.workspace }}/build/**/*.log
+          ${{ github.workspace }}/build/**/*.ninja_log
+          ${{ github.workspace }}/build/**/CMakeCache.txt
 
     - name: Upload to symbol server
       env:
