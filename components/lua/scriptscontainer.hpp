@@ -32,7 +32,13 @@ namespace LuaUtil
         {
         }
 
-        ScriptsContainer* operator*() const noexcept { return *mWeakPtr.get(); }
+        ScriptsContainer* operator*() const noexcept
+        {
+            if (auto ptr = mWeakPtr.get())
+                return *ptr;
+            // this shouldn't happen unless you use it after a move or try to be funny by constructing from nullptr
+            return nullptr;
+        }
     };
 
     inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, const ScriptsContainerWeakPtr& rhs)
