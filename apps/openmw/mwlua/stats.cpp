@@ -469,6 +469,45 @@ namespace MWLua
                 stats.setAiSetting(index, stat);
             }
         };
+
+        class ReputationStat
+        {
+            ObjectVariant mObject;
+
+            ReputationStat(ObjectVariant object)
+                : mObject(std::move(object))
+            {
+            }
+
+        public:
+            sol::object get(const Context& context, const std::string_view prop) const
+            {
+                return getValue(context, mObject, &ReputationStat::setValue, std::monostate{}, prop,
+                    [](const MWWorld::Ptr& ptr) { return ptr.getClass().getNpcStats(ptr).getReputation(); });
+            }
+
+            static std::optional<ReputationStat> create(ObjectVariant object)
+            {
+                if (!object.ptr().getClass().isNpc())
+                    return {};
+
+                return ReputationStat{ std::move(object) };
+            }
+
+            void cache(const Context& context, const std::string_view prop, const sol::object& value) const
+            {
+                SelfObject* obj = mObject.asSelfObject();
+                obj->cacheStat(*context.mLuaManager,
+                    SelfObject::CachedStat{ &ReputationStat::setValue, std::monostate{}, prop }, value);
+            }
+
+            static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+            {
+                MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
+                int intValue = LuaUtil::cast<int>(value);
+                stats.setReputation(intValue);
+            }
+        };
     }
 }
 
@@ -612,6 +651,13 @@ namespace MWLua
         npcStats["skills"] = LuaUtil::makeReadOnly(skills);
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             skills[ESM::RefId(skill.mId).serializeText()] = addIndexedAccessor<SkillStat>(skill.mId);
+
+        auto reputationStatT = lua.new_usertype<ReputationStat>("ReputationStat");
+        reputationStatT["current"]
+            = sol::property([=](const ReputationStat& stat) { return stat.get(context, "current"); },
+                [=](const ReputationStat& stat, const sol::object& value) { stat.cache(context, "current", value); });
+
+        npcStats["reputation"] = [](const sol::object& o) { return ReputationStat::create(ObjectVariant(o)); };
     }
 
     sol::table initCoreStatsBindings(const Context& context)

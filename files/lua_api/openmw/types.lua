@@ -439,27 +439,27 @@
 -- @field #number magic Number of contributions to magic specialization for the next level up.
 -- @field #number stealth Number of contributions to stealth specialization for the next level up.
 
----
+--- Value modification is delayed
 -- @type LevelStat
 -- @field #number current The actor's current level.
 -- @field #number progress The NPC's level progress.
 -- @field #SkillIncreasesForAttributeStats skillIncreasesForAttribute The NPC's attribute contributions towards the next level up. Values affect how much each attribute can be increased at level up.
 -- @field #SkillIncreasesForSpecializationStats skillIncreasesForSpecialization The NPC's attribute contributions towards the next level up. Values affect the graphic used on the level up screen.
 
----
+--- Value modification is delayed
 -- @type DynamicStat
 -- @field #number base
 -- @field #number current
 -- @field #number modifier
 
----
+--- Value modification is delayed
 -- @type AttributeStat
 -- @field #number base The actor's base attribute value.
 -- @field #number damage The amount the attribute has been damaged.
 -- @field #number modified The actor's current attribute value (read-only.)
 -- @field #number modifier The attribute's modifier.
 
----
+--- Value modification is delayed
 -- @type SkillStat
 -- @field #number base The NPC's base skill value.
 -- @field #number damage The amount the skill has been damaged.
@@ -467,11 +467,15 @@
 -- @field #number modifier The skill's modifier.
 -- @field #number progress [0-1] The NPC's skill progress.
 
----
+--- Value modification is delayed
 -- @type AIStat
 -- @field #number base The stat's base value.
 -- @field #number modifier The stat's modifier.
 -- @field #number modified The actor's current ai value (read-only.)
+
+--- Value modification is delayed
+-- @type ReputationStat
+-- @field #number current Current reputation value.
 
 ---
 -- @type DynamicStats
@@ -756,6 +760,7 @@
 -- @type NpcStats
 -- @extends #ActorStats
 -- @field #SkillStats skills
+-- @field #ReputationStat reputation
 
 
 --------------------------------------------------------------------------------
