@@ -348,6 +348,8 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("atmosphereFade", osg::Vec4f{}));
             stateset->addUniform(new osg::Uniform("diffuseMap", 0));
             stateset->addUniform(new osg::Uniform("maskMap", 1));
+            stateset->setAttributeAndModes(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA),
+                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             stateset->setAttributeAndModes(
                 createUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
