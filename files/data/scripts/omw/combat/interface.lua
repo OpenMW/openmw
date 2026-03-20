@@ -87,7 +87,7 @@ return {
         -- @return #number
         getArmorRating = function(actor) return 0 end,
 
-        --- Computes this character's armor rating.
+        --- Computes this item's armor skill.
         -- You can override this to return any skill you wish (including non-armor skills, if you so wish).
         -- Note that this interface function is read by the engine to update the UI.
         -- This function can still be overridden same as any other interface, but must not call any functions or interfaces that modify anything.
