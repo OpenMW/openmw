@@ -318,47 +318,32 @@ namespace MWRender
 
     struct MoonUpdater : SceneUtil::StateSetUpdater
     {
-        Resource::ImageManager& mImageManager;
-        osg::ref_ptr<osg::Texture2D> mPhaseTex;
-        osg::ref_ptr<osg::Texture2D> mCircleTex;
-        float mTransparency;
-        float mShadowBlend;
-        osg::Vec4f mAtmosphereColor;
-        osg::Vec4f mMoonColor;
+        float mTransparency{ 1.f };
+        float mShadowBlend{ 1.f };
+        osg::Vec4f mAtmosphereColor{ 1.f, 1.f, 1.f, 1.f };
+        osg::Vec4f mMoonColor{ 1.f, 1.f, 1.f, 1.f };
 
         MoonUpdater(Resource::ImageManager& imageManager)
             : mImageManager(imageManager)
-            , mPhaseTex()
-            , mCircleTex()
-            , mTransparency(1.0f)
-            , mShadowBlend(1.0f)
-            , mAtmosphereColor(1.0f, 1.0f, 1.0f, 1.0f)
-            , mMoonColor(1.0f, 1.0f, 1.0f, 1.0f)
         {
         }
 
         void setDefaults(osg::StateSet* stateset) override
         {
             stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Moon)));
-            stateset->setTextureAttributeAndModes(0, mPhaseTex);
-            stateset->setTextureAttributeAndModes(1, mCircleTex);
-            stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setTextureAttribute(0, mPhaseTex);
+            stateset->setTextureAttribute(1, mCircleTex);
             stateset->addUniform(new osg::Uniform("moonBlend", osg::Vec4f{}));
             stateset->addUniform(new osg::Uniform("atmosphereFade", osg::Vec4f{}));
             stateset->addUniform(new osg::Uniform("diffuseMap", 0));
             stateset->addUniform(new osg::Uniform("maskMap", 1));
-            stateset->setAttributeAndModes(new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA),
-                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
             stateset->setAttributeAndModes(
-                createUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
-            stateset->setTextureAttribute(0, mPhaseTex, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            stateset->setTextureAttribute(1, mCircleTex, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
             if (auto* uMoonBlend = stateset->getUniform("moonBlend"))
                 uMoonBlend->set(mMoonColor * mShadowBlend);
             if (auto* uAtmosphereFade = stateset->getUniform("atmosphereFade"))
@@ -377,6 +362,11 @@ namespace MWRender
 
             reset();
         }
+
+    private:
+        Resource::ImageManager& mImageManager;
+        osg::ref_ptr<osg::Texture2D> mPhaseTex;
+        osg::ref_ptr<osg::Texture2D> mCircleTex;
     };
 
     class CameraRelativeTransformCullCallback
