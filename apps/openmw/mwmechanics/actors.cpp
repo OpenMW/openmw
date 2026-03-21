@@ -383,9 +383,8 @@ namespace MWMechanics
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
 
-                AttackType attackType = static_cast<AttackType>(controls.mUse);
-                stats.setAttackingOrSpell(attackType != AttackType::NoAttack);
-                stats.setAttackType(attackTypeName(attackType));
+                stats.setAttackingOrSpell(controls.mUse != AttackType::NoAttack);
+                stats.setAttackType(attackTypeName(controls.mUse));
 
                 controls.mChanged = false;
             }
@@ -398,7 +397,10 @@ namespace MWMechanics
                 controls.mJump = jump;
                 controls.mRun = runFlag;
                 controls.mSneak = sneakFlag;
-                controls.mUse = attackingOrSpell ? controls.mUse | 1 : controls.mUse & ~1;
+                if (!attackingOrSpell)
+                    controls.mUse = AttackType::NoAttack;
+                else if (controls.mUse == AttackType::NoAttack)
+                    controls.mUse = AttackType::Any;
             }
             // For the player these controls are still handled by mwinput, so we need to update the values.
             controls.mPitchChange = rotationX;
