@@ -182,10 +182,8 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     if (UNIX)
         target_link_libraries(sqlite3 ${CMAKE_DL_LIBS})
     endif()
-    add_library(SQLite::SQLite3 ALIAS sqlite3)
 
-    set(SQLite3_INCLUDE_DIR ${sqlite3_SOURCE_DIR}/ PARENT_SCOPE)
-    set(SQLite3_LIBRARY sqlite3 PARENT_SCOPE)
+    add_library(SQLite3::SQLite3 ALIAS sqlite3)
 endif()
 
 add_subdirectory(smhasher)
