@@ -1301,13 +1301,15 @@ namespace MWRender
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
             else if (it->first == "Shaders"
-                && (it->second == "force per pixel lighting" || it->second == "classic falloff"))
+                && (it->second == "force per pixel lighting" || it->second == "classic falloff"
+                    || it->second == "clamp lighting"))
             {
                 mViewer->stopThreading();
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 defines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
                 defines["classicFalloff"] = Settings::shaders().mClassicFalloff ? "1" : "0";
+                defines["clamp"] = Settings::shaders().mClampLighting ? "1" : "0";
                 mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
                 if (MWMechanics::getPlayer().isInCell() && it->second == "classic falloff")

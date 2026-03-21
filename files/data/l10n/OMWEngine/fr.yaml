@@ -80,6 +80,10 @@ CameraSensitivity: "Sensibilité de la caméra"
 CameraZoomIn: "Zoom avant de la caméra"
 CameraZoomOut: "Zoom arrière de la caméra"
 ChangeRequiresRestart: "Ce changement requiert un redémarrage de l'application pour prendre effet."
+ClampLighting: "Limiter l'éclairage"
+ClampLightingTooltip: |-
+    Limite la luminosité de l'éclairage à (1, 1, 1) pour reproduire le rendu de Morrowind.
+    Empêche les couleurs trop vives ou décalées, mais peut atténuer l'éclairage.
 ClassicFalloff: "Atténuation classique"
 ClassicFalloffTooltip: |-
     valeur par défaut: inactif

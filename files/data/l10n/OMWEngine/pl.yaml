@@ -80,6 +80,10 @@ CameraSensitivity: "Czułość kamery"
 CameraZoomIn: "Przybliż kamerę"
 CameraZoomOut: "Oddal kamerę"
 ChangeRequiresRestart: "Ta zmiana wymaga ponownego uruchomienia gry."
+ClampLighting: "Ograniczenie oświetlenia"
+ClampLightingTooltip: |-
+    Ogranicza jasność oświetlenia do (1, 1, 1), aby odwzorować renderowanie Morrowinda.
+    Zapobiega zbyt jaskrawym lub przekłamanym kolorom, ale może przytłumić oświetlenie.
 ClassicFalloff: "Klasyczne zanikanie"
 ClassicFalloffTooltip: |-
     Domyślnie: wyłączone
