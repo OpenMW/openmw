@@ -163,6 +163,7 @@
 -- @field #string id The unique id of this object (not record id), can be used as a key in a table.
 -- @field #string contentFile Lowercase file name of the content file that defines this object; nil for dynamically created objects.
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
+-- @field #boolean saveState Whether this object will be included in save game serialization (default true). When set to false the object is excluded from saves, equivalent to the legacy MWScript `DontSaveObject` instruction. Global and self scripts can set the value. **Important:** the flag is not itself persisted — an excluded object is never written, so it returns from the content file on the next load with the flag cleared. Set it in `onInit` (fires on re-creation after load for unsaved objects), in `onLoad` (if the object may have been saved before the flag was applied), or immediately after `world.createObject` for dynamically spawned objects.
 -- @field openmw.util#Vector3 position Object position.
 -- @field #number scale Object scale.
 -- @field openmw.util#Transform rotation Object rotation.

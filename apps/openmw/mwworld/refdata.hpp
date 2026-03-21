@@ -146,6 +146,13 @@ namespace MWWorld
         bool hasChanged() const;
         ///< Has this RefData changed since it was originally loaded?
 
+        bool isNoSave() const;
+        ///< Returns true if this object should be excluded from save game serialization.
+
+        void setNoSave(bool noSave);
+        ///< If set to true, this object will not be written when the game is saved.
+        ///< This implements the DontSaveObject semantics from legacy MWScript.
+
         const ESM::AnimationState& getAnimationState() const;
         ESM::AnimationState& getAnimationState();
     };

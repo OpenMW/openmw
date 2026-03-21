@@ -19,7 +19,8 @@ namespace
         Flag_SuppressActivate = 1, // If set, activation will be suppressed and redirected to the OnActivate flag, which
                                    // can then be handled by a script.
         Flag_OnActivate = 2,
-        Flag_ActivationBuffered = 4
+        Flag_ActivationBuffered = 4,
+        Flag_NoSave = 8 // If set, this object will be excluded from save game serialization.
     };
 }
 
@@ -315,6 +316,19 @@ namespace MWWorld
     ESM::AnimationState& RefData::getAnimationState()
     {
         return mAnimationState;
+    }
+
+    bool RefData::isNoSave() const
+    {
+        return mFlags & Flag_NoSave;
+    }
+
+    void RefData::setNoSave(bool noSave)
+    {
+        if (noSave)
+            mFlags |= Flag_NoSave;
+        else
+            mFlags &= ~Flag_NoSave;
     }
 
 }

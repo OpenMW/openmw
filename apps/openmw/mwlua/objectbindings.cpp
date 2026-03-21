@@ -362,6 +362,13 @@ namespace MWLua
                 MWBase::Environment::get().getLuaManager()->objectActivated(objPtr, actorPtr);
             };
 
+            auto getSaveState = [](const ObjectT& o) { return !o.ptr().getRefData().isNoSave(); };
+            auto setSaveState = [](const ObjectT& o, bool save) { o.ptr().getRefData().setNoSave(!save); };
+            if constexpr (std::is_same_v<ObjectT, GObject>)
+                objectT["saveState"] = sol::property(getSaveState, setSaveState);
+            else
+                objectT["saveState"] = sol::readonly_property(getSaveState);
+
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
             auto setEnabled = [context](const GObject& object, bool enable) {
                 if (enable && object.ptr().mRef->isDeleted())
