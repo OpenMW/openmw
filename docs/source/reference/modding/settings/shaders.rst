@@ -10,7 +10,7 @@ Shaders Settings
 
    Force the use of per-pixel lighting.
    By default, only bump- and normal-mapped objects use per-pixel lighting.
-   Enabling per-pixel lighting results in visual differences to the original MW engine
+   Enabling per-pixel lighting results in visual differences to the original engine
    as certain lights in Morrowind rely on vertex lighting to look as intended.
    Note that groundcover shaders and particle effects ignore this setting.
 
