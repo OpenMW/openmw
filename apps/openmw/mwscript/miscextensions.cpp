@@ -529,10 +529,8 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                InterpreterContext& context = static_cast<InterpreterContext&>(runtime.getContext());
-                MWWorld::Ptr ptr = context.getReference(false);
-                if (!ptr.isEmpty())
-                    ptr.getRefData().setNoSave(true);
+                // We are ignoring the DontSaveObject statement for now. Probably not worth
+                // bothering with. The incompatibility we are creating should be marginal at most.
             }
         };
 
