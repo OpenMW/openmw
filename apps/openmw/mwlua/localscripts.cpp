@@ -77,8 +77,8 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) -> bool { return self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
-        selfAPI["saveState"] = sol::readonly_property(
-            [](const SelfObject& self) { return self.ptr().getRefData().hasChanged(); });
+        selfAPI["saveState"]
+            = sol::readonly_property([](const SelfObject& self) { return self.ptr().getRefData().hasChanged(); });
         selfAPI["ATTACK_TYPE"]
             = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWMechanics::AttackType>(lua,
                 { { "NoAttack", MWMechanics::AttackType::NoAttack }, { "Any", MWMechanics::AttackType::Any },
