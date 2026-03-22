@@ -225,10 +225,6 @@ Global events that just call the corresponding function in `openmw.world`.
     -- world.setSimulationTimeScale(scale)
     core.sendGlobalEvent('SetSimulationTimeScale', scale)
 
-    -- world.setSimulationTimeScale(scale)
-    core.sendGlobalEvent('SetSimulationTimeScale', scale)
-
-
 **SpawnVfx, PlaySound3d**
 
 Calls the corresponding function in openw.core. Note that PlaySound3d will call core.sound.playSoundFile3d instead of core.sound.playSound3d if you put `file` instead of `sound` in the event data.
