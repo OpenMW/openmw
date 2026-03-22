@@ -578,7 +578,7 @@
                                     <Property key="AddItem" value="shaders compatibility"/>
                                     <Property key="AddItem" value="shaders"/>
                                 </Widget>
-                                <Widget type="TextBox" skin="NormalText" position="258 4 250 18" align="Left Top" name="MaxLightsText">
+                                <Widget type="TextBox" skin="NormalText" position="258 4 350 18" align="Left Top" name="MaxLightsText">
                                     <UserString key="ToolTipType" value="Layout"/>
                                     <UserString key="ToolTipLayout" value="TextToolTip"/>
                                     <UserString key="Caption_Text" value="#{OMWEngine:MaxLightsTooltip}"/>
