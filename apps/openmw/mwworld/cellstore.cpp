@@ -153,11 +153,6 @@ namespace
                 // TODO: Implement loading/saving of REFR4 and ACHR4 with ESM3 reader/writer.
                 continue;
             }
-            if (liveCellRef.mData.isNoSave())
-            {
-                // DontSaveObject: explicitly excluded from save game serialization
-                continue;
-            }
             if (!liveCellRef.mData.hasChanged() && !liveCellRef.mRef.hasChanged() && liveCellRef.mRef.hasContentFile())
             {
                 // Reference that came from a content file and has not been changed -> ignore

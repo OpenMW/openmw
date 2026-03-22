@@ -20,7 +20,6 @@ namespace
                                    // can then be handled by a script.
         Flag_OnActivate = 2,
         Flag_ActivationBuffered = 4,
-        Flag_NoSave = 8 // If set, this object will be excluded from save game serialization.
     };
 }
 
@@ -318,17 +317,9 @@ namespace MWWorld
         return mAnimationState;
     }
 
-    bool RefData::isNoSave() const
+    void RefData::setChanged(bool changed)
     {
-        return mFlags & Flag_NoSave;
-    }
-
-    void RefData::setNoSave(bool noSave)
-    {
-        if (noSave)
-            mFlags |= Flag_NoSave;
-        else
-            mFlags &= ~Flag_NoSave;
+        mChanged = changed;
     }
 
 }
