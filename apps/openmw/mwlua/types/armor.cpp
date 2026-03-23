@@ -5,6 +5,7 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -45,7 +46,7 @@ namespace
         }
 
         if (rec["weight"] != sol::nil)
-            armor.mData.mWeight = rec["weight"];
+            armor.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             armor.mData.mValue = rec["value"];
         if (rec["type"] != sol::nil)

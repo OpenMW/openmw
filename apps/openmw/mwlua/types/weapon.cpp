@@ -5,6 +5,7 @@
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -69,15 +70,15 @@ namespace
                 throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
         }
         if (rec["weight"] != sol::nil)
-            weapon.mData.mWeight = rec["weight"];
+            weapon.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             weapon.mData.mValue = rec["value"];
         if (rec["health"] != sol::nil)
             weapon.mData.mHealth = rec["health"];
         if (rec["speed"] != sol::nil)
-            weapon.mData.mSpeed = rec["speed"];
+            weapon.mData.mSpeed = rec["speed"].get<Misc::FiniteFloat>();
         if (rec["reach"] != sol::nil)
-            weapon.mData.mReach = rec["reach"];
+            weapon.mData.mReach = rec["reach"].get<Misc::FiniteFloat>();
         if (rec["enchantCapacity"] != sol::nil)
             weapon.mData.mEnchant = static_cast<uint16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["chopMinDamage"] != sol::nil)

@@ -6,6 +6,10 @@
 -- @usage local content = require('openmw.content')
 
 
+--- @{openmw.core#SpellRange}: Magic ranges
+-- @field [parent=#content] openmw.core#SpellRange RANGE
+
+
 --- @{#ActivatorContent}: Activator manipulation.
 -- @field [parent=#content] #ActivatorContent activators
 
@@ -42,6 +46,15 @@
 -- @field [parent=#MiscContent] #list<openmw.types#MiscellaneousRecord> records
 -- @usage
 -- content.miscs.records.MyMisc = { template = content.miscs.records['gold_001'], mwscript = 'BILL_MarksSpiritSummon', weight = 5 }
+
+--- @{#PotionContent}: Potion manipulation.
+-- @field [parent=#content] #PotionContent potions
+
+---
+-- A mutable list of all @{openmw.types#PotionRecord}s.
+-- @field [parent=#PotionContent] #list<openmw.types#PotionRecord> records
+-- @usage
+-- content.potions.records.MyPotion = { template = content.potions.records['p_dispel_s'], name = 'Too Strong', effects = { { id = 'FireDamage', duration = 10, range = content.RANGE.Self, magnitudeMin = 100 } } }
 
 --- @{#StaticContent}: Static manipulation.
 -- @field [parent=#content] #StaticContent statics

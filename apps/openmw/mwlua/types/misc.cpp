@@ -38,23 +38,8 @@ namespace MWLua
             Types::addIconProperty(record);
             Types::addProperty(record, "value", &ESM::Miscellaneous::mData, &ESM::Miscellaneous::MCDTstruct::mValue);
             Types::addProperty(record, "weight", &ESM::Miscellaneous::mData, &ESM::Miscellaneous::MCDTstruct::mWeight);
-            if constexpr (Types::isMutable<T>)
-            {
-                record["isKey"] = sol::property(
-                    [](const T& mutRec) -> bool { return mutRec.find().mData.mFlags & ESM::Miscellaneous::Key; },
-                    [](T& mutRec, bool key) {
-                        auto& recordValue = mutRec.find();
-                        if (key)
-                            recordValue.mData.mFlags |= ESM::Miscellaneous::Key;
-                        else
-                            recordValue.mData.mFlags &= ~ESM::Miscellaneous::Key;
-                    });
-            }
-            else
-            {
-                record["isKey"] = sol::readonly_property(
-                    [](const ESM::Miscellaneous& rec) -> bool { return rec.mData.mFlags & ESM::Miscellaneous::Key; });
-            }
+            Types::addFlagProperty(record, "isKey", ESM::Miscellaneous::Key, &ESM::Miscellaneous::mData,
+                &ESM::Miscellaneous::MCDTstruct::mFlags);
         }
     }
 
@@ -74,7 +59,7 @@ namespace MWLua
             misc.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            misc.mData.mWeight = rec["weight"];
+            misc.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             misc.mData.mValue = rec["value"];
         return misc;

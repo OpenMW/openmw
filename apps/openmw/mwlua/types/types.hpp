@@ -50,6 +50,7 @@ namespace MWLua
     ESM::Miscellaneous tableToMisc(const sol::table& rec);
     void addMutableMiscType(sol::state_view& lua);
     void addPotionBindings(sol::table potion, const Context& context);
+    ESM::Potion tableToPotion(const sol::table& rec);
     void addIngredientBindings(sol::table ingredient, const Context& context);
     void addArmorBindings(sol::table armor, const Context& context);
     void addLockableBindings(sol::table lockable);
