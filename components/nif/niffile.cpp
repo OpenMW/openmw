@@ -709,6 +709,8 @@ namespace Nif
         // Determine which records are roots
         const std::uint32_t rootsCount = nif.get<uint32_t>();
         mRoots.reserve(rootsCount);
+        constexpr std::uint32_t maxDoesNotPointWarnings = 10;
+        std::uint32_t doesNotPointWarnings = 0;
         for (std::size_t i = 0; i < rootsCount; i++)
         {
             std::int32_t idx;
@@ -720,10 +722,17 @@ namespace Nif
             else
             {
                 mRoots.push_back(nullptr);
-                Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
-                                    << ". File: " << mFilename;
+                ++doesNotPointWarnings;
+                if (doesNotPointWarnings <= maxDoesNotPointWarnings)
+                {
+                    Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index "
+                                        << idx << ". File: " << mFilename;
+                }
             }
         }
+        if (doesNotPointWarnings > maxDoesNotPointWarnings)
+            Log(Debug::Warning) << "NIFFile Warning: " << doesNotPointWarnings - maxDoesNotPointWarnings
+                                << " more roots did not point to a record. File: " << mFilename;
 
         // Once parsing is done, do post-processing.
         for (const auto& record : mRecords)
