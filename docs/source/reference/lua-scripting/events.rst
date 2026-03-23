@@ -265,4 +265,4 @@ Use this as a means to easily reset **individual** objects. To reset all objects
 
 .. code-block:: Lua
 
-   core.sendGlobalEvent('SetSaveState', nearby.actors[#nearby.actors])
+   core.sendGlobalEvent('SetSaveState', { nearby.actors[#nearby.actors] = false })
