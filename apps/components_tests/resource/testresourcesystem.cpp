@@ -1,3 +1,4 @@
+#include <components/files/configurationmanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/shadow.hpp>
@@ -19,7 +20,8 @@ namespace
         const ToUTF8::Utf8Encoder encoder(ToUTF8::WINDOWS_1252);
         Resource::ResourceSystem resourceSystem(&vfsManager, 1.0, &encoder.getStatelessEncoder());
         Resource::SceneManager* sceneManager = resourceSystem.getSceneManager();
-        sceneManager->setShaderPath("resources/shaders");
+        const Files::ConfigurationManager configurationManager;
+        sceneManager->setShaderPath(configurationManager.getLocalPath() / "resources/shaders");
 
         auto defines = Shader::getDefaultDefines();
 
