@@ -3,11 +3,11 @@ local world = require('openmw.world')
 return {
     eventHandlers = {
         Pause = function(tag) world.pause(tag) end,
-        Unpause = function(tag) world.unpause(tag) end,
+        RemoveVfx = function(vfxId) world.vfx.remove(vfxId) end,
         SetGameTimeScale = function(scale) world.setGameTimeScale(scale) end,
         SetSaveState = function(objects) for k, v in pairs(objects) do k.saveState = v end end,
         SetSimulationTimeScale = function(scale) world.setSimulationTimeScale(scale) end,
         SpawnVfx = function(data) world.vfx.spawn(data.model, data.position, data.options) end,
-        RemoveVfx = function(vfxId) world.vfx.remove(vfxId) end,
+        Unpause = function(tag) world.unpause(tag) end,
     },
 }
