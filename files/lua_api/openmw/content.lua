@@ -28,6 +28,17 @@
 -- @usage
 -- content.doors.records.MyDoor = { template = content.doors.records['door_dwrv_double00'], mwscript = 'blockedDoor', name = 'Overly Heavy Dwemer Door' }
 
+--- @{#EnchantmentContent}: Enchantment manipulation.
+-- @field [parent=#content] #EnchantmentContent enchantments
+
+--- @{openmw.core#EnchantmentType}: Enchantment types
+-- @field [parent=#EnchantmentContent] openmw.core#EnchantmentType TYPE
+
+---
+-- A mutable list of all @{openmw.core#Enchantment}s.
+-- @field [parent=#EnchantmentContent] #list<openmw.core#Enchantment> records
+-- @usage
+-- content.enchantments.records.MyEnchantment = { type = content.enchantments.TYPE.CastOnUse, charge = 1, cost = 1, effects = { { id = 'FortifySkill', affectedSkill = 'enchant', duration = 5, magnitudeMin = 50, magnitudeMax = 100 } } }
 
 --- @{#GlobalContent}: Global variable manipulation.
 -- @field [parent=#content] #GlobalContent globals
@@ -55,6 +66,18 @@
 -- @field [parent=#PotionContent] #list<openmw.types#PotionRecord> records
 -- @usage
 -- content.potions.records.MyPotion = { template = content.potions.records['p_dispel_s'], name = 'Too Strong', effects = { { id = 'FireDamage', duration = 10, range = content.RANGE.Self, magnitudeMin = 100 } } }
+
+--- @{#SpellContent}: Spell manipulation.
+-- @field [parent=#content] #SpellContent spells
+
+--- @{openmw.core#SpellType}: Spell types
+-- @field [parent=#SpellContent] openmw.core#SpellType TYPE
+
+---
+-- A mutable list of all @{openmw.core#Spell}s.
+-- @field [parent=#SpellContent] #list<openmw.core#Spell> records
+-- @usage
+-- content.spells.records.MySpell = { name = 'Enchantment?', type = content.spells.TYPE.Spell, cost = 1000, starterSpellFlag = true, isAutocalc = true, effects = { { id = 'FortifyAttribute', affectedAttribute = 'intelligence', duration = 5, magnitudeMin = 5, magnitudeMax = 10 } } }
 
 --- @{#StaticContent}: Static manipulation.
 -- @field [parent=#content] #StaticContent statics
