@@ -225,6 +225,7 @@ Global events that just call the corresponding function in `openmw.world`.
     -- world.setSimulationTimeScale(scale)
     core.sendGlobalEvent('SetSimulationTimeScale', scale)
 
+
 **SpawnVfx, PlaySound3d**
 
 Calls the corresponding function in openw.core. Note that PlaySound3d will call core.sound.playSoundFile3d instead of core.sound.playSound3d if you put `file` instead of `sound` in the event data.
@@ -257,11 +258,11 @@ Unlock a container or door
 
     core.sendGlobalEvent('Unlock', {target = selected})
 
-**ToggleSaveState**
+**SetSaveState**
 
 Inverts whether or not an object will be written into the save. For script-spawned objects, this effectively means they are deleted after the game loads. For objects from content files, this will restore them to their original state upon loading.
 Use this as a means to easily reset **individual** objects. To reset all objects in a given cell instead, use `cell:getAll` and set `object.saveState` to `false` instead.
 
 .. code-block:: Lua
 
-   core.sendGlobalEvent('ToggleSaveState', nearby.actors[#nearby.actors])
+   core.sendGlobalEvent('SetSaveState', nearby.actors[#nearby.actors])
