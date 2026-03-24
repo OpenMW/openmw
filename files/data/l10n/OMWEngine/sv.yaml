@@ -80,6 +80,10 @@ CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
 ChangeRequiresRestart: "Den här ändringen kräver omstart för att ge effekt."
+ClampLighting: "Begränsa belysning"
+ClampLightingTooltip: |-
+    Begränsar ljusstyrkan till (1, 1, 1) för att efterlikna Morrowinds rendering.
+    Förhindrar alltför ljusa eller förskjutna färger, men kan göra belysningen mattare.
 ClassicFalloff: "Klassiskt ljusavtagande"
 ClassicFalloffTooltip: |-
     Förvalt: av

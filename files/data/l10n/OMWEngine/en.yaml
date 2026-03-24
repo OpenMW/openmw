@@ -80,6 +80,10 @@ CameraSensitivity: "Camera Sensitivity"
 CameraZoomIn: "Zoom Camera In"
 CameraZoomOut: "Zoom Camera Out"
 ChangeRequiresRestart: "This change requires a restart to take effect."
+ClampLighting: "Clamp Lighting"
+ClampLightingTooltip: |-
+    Cap lighting brightness at (1, 1, 1) to replicate Morrowind's rendering.
+    Prevents overly bright or shifted colors but can dull lighting.
 ClassicFalloff: "Classic Falloff"
 ClassicFalloffTooltip: |-
     Default: off
@@ -114,7 +118,7 @@ ForcePerPixelLighting: "Per-Pixel Lighting"
 ForcePerPixelLightingTooltip: |-
     Force the use of per-pixel lighting. By default, only bump- and normal-mapped objects use per-pixel lighting.
 
-    Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended.
+    Enabling per-pixel lighting results in visual differences to the original engine as certain lights in Morrowind rely on vertex lighting to look as intended.
 
     Note that groundcover shaders and particle effects ignore this setting.
 FrameRateHint: "Hint: press F3 to show\nthe current frame rate."

@@ -80,6 +80,10 @@ CameraSensitivity: "Kameraempfindlichkeit"
 CameraZoomIn: "Kamera hineinzoomen"
 CameraZoomOut: "Kamera herauszoomen"
 ChangeRequiresRestart: "Diese Änderung erfordert einen Neustart, um wirksam zu werden."
+ClampLighting: "Beleuchtung begrenzen"
+ClampLightingTooltip: |-
+    Begrenzt die Beleuchtungshelligkeit auf (1, 1, 1), um Morrowinds Darstellung nachzubilden.
+    Verhindert übermäßig helle oder verfälschte Farben, kann die Beleuchtung aber abschwächen.
 ClassicFalloff: "Klassischer Lichtabfall"
 ClassicFalloffTooltip: |-
     Standard: aus
@@ -114,7 +118,7 @@ ForcePerPixelLighting: "Beleuchtung pro Pixel"
 ForcePerPixelLightingTooltip: |-
     Erzwingt die Verwendung der Beleuchtung pro Pixel. Standardmäßig verwenden nur Bump- und Normal-mapped-Objekte eine Beleuchtung pro Pixel.
 
-    Die Aktivierung der Per-Pixel-Beleuchtung führt zu visuellen Unterschieden zur ursprünglichen Morrowind-Engine, da bestimmte Lichter in Morrowind auf Vertex-Beleuchtung angewiesen sind, um wie beabsichtigt auszusehen.
+    Die Aktivierung der Per-Pixel-Beleuchtung führt zu visuellen Unterschieden zur ursprünglichen Engine, da bestimmte Lichter in Morrowind auf Vertex-Beleuchtung angewiesen sind, um wie beabsichtigt auszusehen.
 
     Beachten Sie, dass Bodendecker-Shader und Partikeleffekte diese Einstellung ignorieren.
 FrameRateHint: "Hinweis: Drücken Sie F3,\num die aktuelle Bildrate anzuzeigen."
@@ -153,8 +157,8 @@ MatchSunlightToSunTooltip: |-
     Wir bewahren dieses unrealistische Verhalten, um die Kompatibilität sicherzustellen.
 
     Diese Option passt die Position der Sonnenlichtquelle an die sichtbare Position der Sonne an.
-MaxLights: "Maximale Anzahl von Lichtquellen pro Objekt"
-MaxLightsValue: "Maximale Anzahl von Lichtquellen pro Objekt ({value, number, :: group-off})"
+MaxLights: "Max. Lichter"
+MaxLightsValue: "Max. Lichter ({value, number, :: group-off})"
 MaxLightsTooltip: "Standard: 8\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"
 MenuTransparency: "Menü-Transparenz"

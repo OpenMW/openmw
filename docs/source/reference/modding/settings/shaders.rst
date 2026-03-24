@@ -8,9 +8,11 @@ Shaders Settings
    :default: false
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
-   Force per-pixel lighting on all shader objects.
-   Changes lighting behavior from the original MW engine.
-   Groundcover shaders and particles ignore this setting.
+   Force the use of per-pixel lighting.
+   By default, only bump- and normal-mapped objects use per-pixel lighting.
+   Enabling per-pixel lighting results in visual differences to the original engine
+   as certain lights in Morrowind rely on vertex lighting to look as intended.
+   Note that groundcover shaders and particle effects ignore this setting.
 
 .. omw-setting::
    :title: clamp lighting
@@ -18,7 +20,7 @@ Shaders Settings
    :range: true, false
    :default: true
 
-   Restrict lighting to a maximum of (1,1,1) on shader objects.
+   Cap lighting brightness at (1, 1, 1) to replicate Morrowind's rendering.
    Prevents overly bright or shifted colors but can dull lighting.
 
 .. omw-setting::
