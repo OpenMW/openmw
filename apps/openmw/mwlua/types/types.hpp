@@ -52,6 +52,8 @@ namespace MWLua
     void addPotionBindings(sol::table potion, const Context& context);
     ESM::Potion tableToPotion(const sol::table& rec);
     void addIngredientBindings(sol::table ingredient, const Context& context);
+    void addMutableIngredientType(sol::state_view& lua);
+    ESM::Ingredient tableToIngredient(const sol::table& rec);
     void addArmorBindings(sol::table armor, const Context& context);
     void addLockableBindings(sol::table lockable);
     void addClothingBindings(sol::table clothing, const Context& context);

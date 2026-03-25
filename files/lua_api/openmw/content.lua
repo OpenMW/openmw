@@ -49,6 +49,16 @@
 -- @usage
 -- content.globals.records.MyVariable = 42
 
+--- @{#IngredientContent}: Ingredient manipulation.
+-- @field [parent=#content] #IngredientContent ingredients
+
+---
+-- A mutable list of all @{openmw.types#IngredientRecord}s.
+-- Note that ingredient effects only have the `id`, `affectedAttribute`, and `affectedSkill` properties.
+-- @field [parent=#IngredientContent] #list<openmw.types#IngredientRecord> records
+-- @usage
+-- content.ingredients.records.MyIngredient = { template = content.ingredients.records['ingred_ectoplasm_01'], name = 'Soylent', effects = { { id = 'vampirism' } } }
+
 --- @{#MiscContent}: Misc manipulation.
 -- @field [parent=#content] #MiscContent miscs
 
