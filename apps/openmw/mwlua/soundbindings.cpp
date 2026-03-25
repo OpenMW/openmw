@@ -9,6 +9,7 @@
 
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/pathutil.hpp>
 
 #include "luamanagerimp.hpp"
@@ -148,7 +149,7 @@ namespace MWLua
         api["say"]
             = [luaManager = context.mLuaManager](std::string_view fileName, sol::optional<std::string_view> text) {
                   MWBase::Environment::get().getSoundManager()->say(VFS::Path::Normalized(fileName));
-                  if (text)
+                  if (text && Settings::gui().mSubtitles)
                       luaManager->addUIMessage(*text);
               };
 
@@ -222,7 +223,7 @@ namespace MWLua
                          std::string_view fileName, const sol::object& object, sol::optional<std::string_view> text) {
             MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
             MWBase::Environment::get().getSoundManager()->say(ptr, VFS::Path::Normalized(fileName));
-            if (text)
+            if (text && Settings::gui().mSubtitles)
                 luaManager->addUIMessage(*text);
         };
         api["stopSay"] = [](const sol::object& object) {
