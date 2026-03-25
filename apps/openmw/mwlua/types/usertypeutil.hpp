@@ -33,6 +33,16 @@ namespace MWLua::Types
         }
     };
 
+    template <class Type>
+    struct Setter<Type, std::string>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec, std::string_view value) { accessor(rec) = value; };
+        }
+    };
+
     template <class Type, std::floating_point Float>
     struct Setter<Type, Float>
     {
@@ -65,7 +75,8 @@ namespace MWLua::Types
     void addProperty(sol::usertype<Type>& type, std::string_view key, Member... members)
     {
         using Record = RecordType<Type>::Record;
-        const auto getter = [=](const Type& rec) {
+        const auto getter = [=](const Type& rec) -> const auto&
+        {
             const Record& record = RecordType<Type>::asRecord(rec);
             return (record.*....*members);
         };
