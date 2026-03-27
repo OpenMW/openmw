@@ -279,9 +279,9 @@ namespace MWRender
 
         void setNavMeshMode(Settings::NavMeshRenderMode value);
 
-        void setProjectionOffset(osg::Vec2f offset)
+        void setProjectionOffset(const osg::Vec2f& offset)
         {
-            mProjectionOffset = std::move(offset);
+            mProjectionOffset = offset;
             mUpdateProjectionMatrix = true;
         }
         osg::Vec2f getProjectionOffset() const { return mProjectionOffset; }
