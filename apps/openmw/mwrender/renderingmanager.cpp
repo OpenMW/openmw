@@ -8,6 +8,7 @@
 #include <osg/Group>
 #include <osg/Light>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/UserDataContainer>
 
 #include <osgUtil/LineSegmentIntersector>
@@ -1124,23 +1125,25 @@ namespace MWRender
         const int width = Settings::video().mResolutionX;
         const int height = Settings::video().mResolutionY;
 
-        double aspect = (height == 0) ? 1.0 : static_cast<double>(width) / height;
-        float fov = mFieldOfView;
-        if (mFieldOfViewOverridden)
-            fov = mFieldOfViewOverride;
+        const double aspect = (height == 0) ? 1.0 : static_cast<double>(width) / height;
+        const float fov = mFieldOfViewOverridden ? mFieldOfViewOverride : mFieldOfView;
 
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
+        osg::Matrix projectionMatrix = SceneUtil::AutoDepth::isReversed()
+            ? SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance)
+            : osg::Matrix::perspective(fov, aspect, mNearClip, mViewDistance);
 
-        if (SceneUtil::AutoDepth::isReversed())
-        {
-            mPerViewUniformStateUpdater->setProjectionMatrix(
-                SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
-        }
-        else
-            mPerViewUniformStateUpdater->setProjectionMatrix(mViewer->getCamera()->getProjectionMatrix());
+        double offsetX = (mProjectionOffset.x() / width) * 2.0;
+        double offsetY = (mProjectionOffset.y() / height) * 2.0;
+
+        projectionMatrix.postMult(osg::Matrix::translate(offsetX, offsetY, 0.0));
+
+        mViewer->getCamera()->setProjectionMatrix(projectionMatrix);
+
+        mPerViewUniformStateUpdater->setProjectionMatrix(projectionMatrix);
 
         mSharedUniformStateUpdater->setNear(mNearClip);
         mSharedUniformStateUpdater->setFar(mViewDistance);
+
         if (Stereo::getStereo())
         {
             auto res = Stereo::Manager::instance().eyeResolution();

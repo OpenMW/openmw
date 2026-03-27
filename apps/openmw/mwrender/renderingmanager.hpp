@@ -279,6 +279,13 @@ namespace MWRender
 
         void setNavMeshMode(Settings::NavMeshRenderMode value);
 
+        void setProjectionOffset(osg::Vec2f offset)
+        {
+            mProjectionOffset = std::move(offset);
+            mUpdateProjectionMatrix = true;
+        }
+        osg::Vec2f getProjectionOffset() const { return mProjectionOffset; }
+
     private:
         void updateTextureFiltering();
         void updateAmbient();
@@ -354,6 +361,7 @@ namespace MWRender
         float mFirstPersonFieldOfView;
         bool mUpdateProjectionMatrix = false;
         bool mNight = false;
+        osg::Vec2f mProjectionOffset;
         const MWWorld::GroundcoverStore& mGroundCoverStore;
 
         void operator=(const RenderingManager&);

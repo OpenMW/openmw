@@ -646,7 +646,8 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    std::string target = pass->getTarget();
+                    auto& renderTarget = technique->getRenderTargetsMap()[target];
                     subPass.mSize = renderTarget.mSize;
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
