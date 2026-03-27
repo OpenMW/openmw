@@ -1128,16 +1128,19 @@ namespace MWRender
         const double aspect = (height == 0) ? 1.0 : static_cast<double>(width) / height;
         const float fov = mFieldOfViewOverridden ? mFieldOfViewOverride : mFieldOfView;
 
+        osg::Matrix unreversedProjectionMatrix = osg::Matrix::perspective(fov, aspect, mNearClip, mViewDistance);
+
+        // We always set the cameras projection matrix to the un-reversed variant for correct frustum culling.
+        mViewer->getCamera()->setProjectionMatrix(unreversedProjectionMatrix);
+
         osg::Matrix projectionMatrix = SceneUtil::AutoDepth::isReversed()
             ? SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance)
-            : osg::Matrix::perspective(fov, aspect, mNearClip, mViewDistance);
+            : unreversedProjectionMatrix;
 
         double offsetX = (mProjectionOffset.x() / width) * 2.0;
         double offsetY = (mProjectionOffset.y() / height) * 2.0;
 
         projectionMatrix.postMult(osg::Matrix::translate(offsetX, offsetY, 0.0));
-
-        mViewer->getCamera()->setProjectionMatrix(projectionMatrix);
 
         mPerViewUniformStateUpdater->setProjectionMatrix(projectionMatrix);
 
