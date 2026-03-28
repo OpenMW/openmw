@@ -9,6 +9,7 @@
 #include <SDL_events.h>
 
 #include "../mwgui/mode.hpp"
+#include "../mwmechanics/attacktype.hpp"
 #include "../mwmechanics/damagesourcetype.hpp"
 #include "../mwrender/animationpriority.hpp"
 #include <components/sdlutil/events.hpp>
@@ -141,7 +142,7 @@ namespace MWBase
             float mSideMovement = 0;
             float mPitchChange = 0;
             float mYawChange = 0;
-            int mUse = 0;
+            MWMechanics::AttackType mUse = MWMechanics::AttackType::NoAttack;
         };
 
         virtual ActorControls* getActorControls(const MWWorld::Ptr&) const = 0;
