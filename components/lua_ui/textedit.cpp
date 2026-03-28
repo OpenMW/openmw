@@ -1,7 +1,6 @@
 #include "textedit.hpp"
 
 #include "alignment.hpp"
-#include <ranges>
 
 namespace LuaUi
 {

@@ -421,11 +421,6 @@ namespace LuaUi
 
     bool WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const
     {
-        if (!mProperties.is<sol::table>())
-            return false;
-        if (!mLayout.is<sol::table>())
-            // We have bigger problems
-            return false;
         auto& usedPropsKeys = allUsedProperties();
         auto usedLayoutKeys = LuaUi::Element::allLayoutProperties();
         bool layoutWarn = warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings);

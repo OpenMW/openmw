@@ -12,8 +12,6 @@
 #include "window.hpp"
 
 #include "element.hpp"
-#include "registerscriptsettings.hpp"
-#include <ranges>
 
 namespace LuaUi
 {
