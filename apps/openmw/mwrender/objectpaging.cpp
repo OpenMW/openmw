@@ -111,6 +111,26 @@ namespace MWRender
                     return {};
             }
         }
+
+        // Retrieve pre-computed template radius from node user data, or compute fallback
+        // to ensure robustness in case radius wasn't pre-computed
+        float getTemplateRadius(const osg::Node* node)
+        {
+            if (!node)
+                return 0.0f;
+
+            const auto* userDataContainer = node->getUserDataContainer();
+            if (!userDataContainer || userDataContainer->getNumUserObjects() == 0)
+                return node->getBound().radius();  // Fallback: compute if not cached
+
+            // First user object should be the template radius FloatValueObject
+            if (const auto* floatValue = dynamic_cast<const osg::FloatValueObject*>(
+                    userDataContainer->getUserObject(0)))
+                return floatValue->getValue();
+
+            // Fallback: compute radius if not cached as expected
+            return node->getBound().radius();
+        }
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char /*lod*/,
@@ -794,7 +814,9 @@ namespace MWRender
                     continue;
             }
 
-            const float radius2 = cnode->getBound().radius2() * ref.mScale * ref.mScale;
+            // Use pre-computed template radius to avoid expensive getBound() traversal
+            const float templateRadius = getTemplateRadius(cnode);
+            const float radius2 = templateRadius * templateRadius * ref.mScale * ref.mScale;
             if (radius2 < dSqr * minSize * minSize && !activeGrid)
             {
                 std::lock_guard<std::mutex> lock(mSizeCacheMutex);
@@ -844,8 +866,10 @@ namespace MWRender
             {
                 const PagedCellRef& ref = *refPtr;
 
+                // Use pre-computed template radius for merge decision culling
+                const float templateRadius = getTemplateRadius(cnode);
                 if (!activeGrid && minSizeMerged != minSize
-                    && cnode->getBound().radius2() * ref.mScale * ref.mScale
+                    && templateRadius * templateRadius * ref.mScale * ref.mScale
                         < (viewPoint - ref.mPosition).length2() * minSizeMerged * minSizeMerged)
                     continue;
 

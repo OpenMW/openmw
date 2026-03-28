@@ -9,6 +9,7 @@
 #include <osg/Group>
 #include <osg/Node>
 #include <osg/UserDataContainer>
+#include <osg/ValueObject>
 
 #include <osgAnimation/BasicAnimationManager>
 #include <osgAnimation/Bone>
@@ -1016,6 +1017,13 @@ namespace Resource
                 mIncrementalCompileOperation->add(loaded);
             else
                 loaded->getBound();
+
+            // Pre-compute and cache the bounding radius as user data to avoid redundant
+            // getBound() calls during object paging visibility checks
+            const float radius = loaded->getBound().radius();
+            // Store as first user object for quick retrieval
+            loaded->getOrCreateUserDataContainer()->addUserObject(
+                new osg::FloatValueObject("template_radius", radius));
 
             mCache->addEntryToObjectCache(path.value(), loaded);
             return loaded;
