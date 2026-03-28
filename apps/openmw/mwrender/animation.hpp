@@ -18,6 +18,7 @@
 #include <components/vfs/pathutil.hpp>
 
 #include <map>
+#include <optional>
 #include <span>
 #include <string>
 #include <unordered_map>
@@ -347,12 +348,14 @@ namespace MWRender
          *              you need to remove it manually using removeEffect when the effect should end.
          * @param bonename Bone to attach to, or empty string to use the scene node instead
          * @param texture override the texture specified in the model's materials - if empty, do not override
-         * @param useAmbientLight attach white ambient light to the root VFX node of the scenegraph (Morrowind
-         * default)
+         * @param useAmbientLight attach white ambient light to the root VFX node of the scenegraph (Morrowind default)
+         * @param autoTransform auto-calculate vfx transform
+         * @param transform apply a relative transform
          * @note Will not add an effect twice.
          */
         void addEffect(std::string_view model, std::string_view effectId, bool loop = false,
-            std::string_view bonename = {}, std::string_view texture = {}, bool useAmbientLight = true);
+            std::string_view bonename = {}, std::string_view texture = {}, bool useAmbientLight = true,
+            bool autoTransform = true, const std::optional<osg::Matrix>& transform = std::nullopt);
 
         void removeEffect(std::string_view effectId);
         void removeEffects();
