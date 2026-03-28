@@ -646,6 +646,7 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
+                    // FIXME: https://gitlab.com/OpenMW/openmw/-/work_items/9034
                     std::string target = pass->getTarget();
                     auto& renderTarget = technique->getRenderTargetsMap()[target];
                     subPass.mSize = renderTarget.mSize;
