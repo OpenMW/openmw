@@ -120,8 +120,6 @@ namespace Resource
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setApplyLightingToEnvMaps(bool apply);
-
         void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
         bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
 
@@ -256,7 +254,6 @@ namespace Resource
         SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
         bool mAutoUseNormalMaps = false;
         bool mAutoUseSpecularMaps = false;
-        bool mApplyLightingToEnvMaps = false;
         bool mConvertAlphaTestToAlphaToCoverage = false;
         bool mAdjustCoverageForAlphaTest = false;
         bool mSupportsNormalsRT = false;

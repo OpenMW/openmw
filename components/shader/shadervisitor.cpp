@@ -197,7 +197,6 @@ namespace Shader
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
-        , mApplyLightingToEnvMaps(false)
         , mConvertAlphaTestToAlphaToCoverage(false)
         , mAdjustCoverageForAlphaTest(false)
         , mSupportsNormalsRT(false)
@@ -895,11 +894,6 @@ namespace Shader
     void ShaderVisitor::setSpecularMapPattern(const std::string& pattern)
     {
         mSpecularMapPattern = pattern;
-    }
-
-    void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
     }
 
     void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)

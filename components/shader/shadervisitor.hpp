@@ -40,8 +40,6 @@ namespace Shader
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setApplyLightingToEnvMaps(bool apply);
-
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
         void setAdjustCoverageForAlphaTest(bool adjustCoverage);
 
@@ -68,8 +66,6 @@ namespace Shader
 
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
-
-        bool mApplyLightingToEnvMaps;
 
         bool mConvertAlphaTestToAlphaToCoverage;
         bool mAdjustCoverageForAlphaTest;

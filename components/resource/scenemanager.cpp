@@ -497,11 +497,6 @@ namespace Resource
         mSpecularMapPattern = pattern;
     }
 
-    void SceneManager::setApplyLightingToEnvMaps(bool apply)
-    {
-        mApplyLightingToEnvMaps = apply;
-    }
-
     void SceneManager::setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported)
     {
         mSupportedLightingMethods = supported;
@@ -1225,7 +1220,6 @@ namespace Resource
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
-        shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setAdjustCoverageForAlphaTest(mAdjustCoverageForAlphaTest);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
