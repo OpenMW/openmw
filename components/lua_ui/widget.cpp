@@ -387,10 +387,12 @@ namespace LuaUi
             it->second.call(argument, mLayout);
     }
 
-    std::vector<std::string> WidgetExtension::collectWarnings(int depth) const
+    bool WidgetExtension::collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const
     {
-        std::vector<std::string> warnings;
-        collectUnusedWarnings(warnings);
+        auto beginningSize = warnings.size();
+        if (collectUnusedWarnings(warnings, generateWarningStrings) && !generateWarningStrings)
+            return true;
+
         if (depth > 0)
         {
             std::ranges::transform(warnings, warnings.begin(),
@@ -399,9 +401,11 @@ namespace LuaUi
 
         for (uint32_t i = 0; i < mChildren.size(); i++)
         {
-            auto childWarnings = mChildren[i]->collectWarnings(depth + 1);
-            if (childWarnings.empty())
+            Warnings childWarnings;
+            if (!mChildren[i]->collectWarnings(childWarnings, depth + 1, generateWarningStrings))
                 continue;
+            if (!generateWarningStrings)
+                return true;
             warnings.emplace_back(std::string((depth + 1) * 2, ' ') + "in content[" + std::to_string(i) + "]:");
             std::ranges::move(childWarnings, std::back_inserter(warnings));
         }
@@ -412,20 +416,20 @@ namespace LuaUi
                 warnings.front() = std::string(depth * 2, ' ') + warnings.front();
         }
 
-        return warnings;
+        return warnings.size() != beginningSize;
     }
 
-    void WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings) const
+    bool WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const
     {
         if (!mProperties.is<sol::table>())
-            return;
+            return false;
         if (!mLayout.is<sol::table>())
             // We have bigger problems
-            return;
+            return false;
         auto& usedPropsKeys = allUsedProperties();
         auto usedLayoutKeys = LuaUi::Element::allLayoutProperties();
-        warnUnused(warnings, mLayout, "layout", usedLayoutKeys);
-        warnUnused(warnings, mProperties, "props", usedPropsKeys);
+        return warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings)
+            || warnUnused(warnings, mProperties, "props", usedPropsKeys, generateWarningStrings);
     }
 
     std::string WidgetExtension::diagnosticName() const

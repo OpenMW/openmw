@@ -21,6 +21,7 @@ namespace LuaUi
     class WidgetExtension
     {
     public:
+        using Warnings = std::vector<std::string>;
         WidgetExtension();
 
         virtual ~WidgetExtension() = default;
@@ -77,7 +78,8 @@ namespace LuaUi
         MyGUI::IntCoord calculateCoord() const;
 
         virtual bool isTextInput() { return false; }
-        std::vector<std::string> collectWarnings(int depth) const;
+        bool collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const;
+        std::string diagnosticName() const;
 
     protected:
         virtual void initialize();
@@ -139,8 +141,7 @@ namespace LuaUi
             }
         }
 
-        void collectUnusedWarnings(std::vector<std::string>& warnings) const;
-        std::string diagnosticName() const;
+        bool collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const;
 
         virtual const std::set<std::string_view>& allUsedProperties() const;
 

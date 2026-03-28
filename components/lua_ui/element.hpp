@@ -23,6 +23,7 @@ namespace LuaUi
         WidgetExtension* mRoot;
         sol::main_object mLayout;
         std::string mLayer;
+        bool mWarnedOnce{ false };
 
         enum State
         {

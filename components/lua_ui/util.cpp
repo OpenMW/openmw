@@ -57,11 +57,12 @@ namespace LuaUi
             Element::erase(Element::sMenuElements.begin()->second.get());
     }
 
-    void warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
-        std::set<std::string_view> usedKeys)
+    bool warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
+        std::set<std::string_view> usedKeys, bool generateWarningStrings)
     {
+        auto beginningSize = warnings.size();
         if (!object.is<sol::table>())
-            return;
+            return false;
         sol::table table = object.as<sol::table>();
         for (const auto& [key, value] : table)
         {
@@ -70,8 +71,11 @@ namespace LuaUi
             auto keyStr = key.as<std::string>();
             if (!usedKeys.contains(keyStr))
             {
+                if (!generateWarningStrings)
+                    return true;
                 warnings.push_back("unused key '" + keyStr + "' in " + tableName);
             }
         }
+        return beginningSize != warnings.size();
     }
 }

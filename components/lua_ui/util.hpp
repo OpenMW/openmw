@@ -15,8 +15,8 @@ namespace LuaUi
     void clearGameInterface();
     void clearMenuInterface();
 
-    void warnUnused(std::vector<std::string>& warnings, sol::object table, const std::string& tableName,
-        std::set<std::string_view> usedKeys);
+    bool warnUnused(std::vector<std::string>& warnings, sol::object table, const std::string& tableName,
+        std::set<std::string_view> usedKeys, bool generateWarningStrings);
 }
 
 #endif // OPENMW_LUAUI_WIDGETLIST

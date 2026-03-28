@@ -2,6 +2,7 @@
 
 #include <MyGUI_Gui.h>
 
+#include "components/settings/values.hpp"
 #include "content.hpp"
 #include "util.hpp"
 #include "widget.hpp"
@@ -346,9 +347,23 @@ namespace LuaUi
 
     void Element::checkWarnings()
     {
-        assert(mRoot);
-        auto warnings = mRoot->collectWarnings(0);
-        for (const auto& warning : warnings)
-            Log(Debug::Warning) << warning;
+        if (Settings::lua().mLuaDebug)
+        {
+            assert(mRoot);
+            WidgetExtension::Warnings warnings;
+            mRoot->collectWarnings(warnings, 0, true);
+            for (const auto& warning : warnings)
+                Log(Debug::Warning) << warning;
+        }
+        else if (!mWarnedOnce)
+        {
+            mWarnedOnce = true;
+            WidgetExtension::Warnings dummy;
+            if (mRoot->collectWarnings(dummy, 0, false))
+            {
+                Log(Debug::Warning) << "Warning generated while parsing layouts of a(n) " + mRoot->diagnosticName() + ". Set 'lua "
+                                       "debug=true' in the [Lua] section of settings.cfg to enable detailed warnings.";
+            }
+        }
     }
 }
