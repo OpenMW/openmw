@@ -147,8 +147,6 @@ namespace MWRender
         resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::shaders().mNormalHeightMapPattern);
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::shaders().mAutoUseObjectSpecularMaps);
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::shaders().mSpecularMapPattern);
-        resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(
-            Settings::shaders().mApplyLightingToEnvironmentMaps);
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(shouldAddMSAAIntermediateTarget());
         resourceSystem->getSceneManager()->setAdjustCoverageForAlphaTest(
             Settings::shaders().mAdjustCoverageForAlphaTest);
