@@ -18,7 +18,7 @@ namespace LuaUi
                 callback(element.get());
         }
 
-        static std::set<std::string_view> allLayoutProperties();
+        static const std::set<std::string_view>& allLayoutProperties();
 
         WidgetExtension* mRoot;
         sol::main_object mLayout;

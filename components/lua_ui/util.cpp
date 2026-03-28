@@ -58,7 +58,7 @@ namespace LuaUi
     }
 
     bool warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
-        std::set<std::string_view> usedKeys, bool generateWarningStrings)
+        const std::set<std::string_view>& usedKeys, bool generateWarningStrings)
     {
         auto beginningSize = warnings.size();
         if (!object.is<sol::table>())

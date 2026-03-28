@@ -269,7 +269,7 @@ namespace LuaUi
         sGameElements.erase(element);
     }
 
-    std::set<std::string_view> Element::allLayoutProperties()
+    const std::set<std::string_view>& Element::allLayoutProperties()
     {
         return LayoutKeys::allKeys;
     }

@@ -428,8 +428,9 @@ namespace LuaUi
             return false;
         auto& usedPropsKeys = allUsedProperties();
         auto usedLayoutKeys = LuaUi::Element::allLayoutProperties();
-        return warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings)
-            || warnUnused(warnings, mProperties, "props", usedPropsKeys, generateWarningStrings);
+        auto hadWarnings = warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings);
+        hadWarnings = hadWarnings || warnUnused(warnings, mProperties, "props", usedPropsKeys, generateWarningStrings);
+        return hadWarnings;
     }
 
     std::string WidgetExtension::diagnosticName() const
