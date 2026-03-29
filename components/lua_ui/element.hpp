@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_ELEMENT
 #define OPENMW_LUAUI_ELEMENT
 
+#include <vector>
+
 #include "widget.hpp"
 
 namespace LuaUi
@@ -18,9 +20,12 @@ namespace LuaUi
                 callback(element.get());
         }
 
+        static const std::vector<std::string_view>& allLayoutProperties();
+
         WidgetExtension* mRoot;
         sol::main_object mLayout;
         std::string mLayer;
+        bool mWarnedOnce{ false };
 
         enum State
         {
@@ -40,6 +45,8 @@ namespace LuaUi
 
         friend void clearGameInterface();
         friend void clearMenuInterface();
+
+        void checkWarnings();
 
     private:
         Element(sol::table layout);

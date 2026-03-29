@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
@@ -21,6 +22,7 @@ namespace LuaUi
     class WidgetExtension
     {
     public:
+        using Warnings = std::vector<std::string>;
         WidgetExtension();
 
         virtual ~WidgetExtension() = default;
@@ -77,6 +79,8 @@ namespace LuaUi
         MyGUI::IntCoord calculateCoord() const;
 
         virtual bool isTextInput() { return false; }
+        bool collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const;
+        std::string diagnosticName() const;
 
     protected:
         virtual void initialize();
@@ -137,6 +141,10 @@ namespace LuaUi
                     w = nullptr;
             }
         }
+
+        bool collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const;
+
+        virtual const std::vector<std::string_view>& allUsedProperties() const;
 
         bool mForcePosition;
         bool mForceSize;

@@ -104,4 +104,15 @@ namespace LuaUi
         updateChildren();
         WidgetExtension::updateCoord();
     }
+
+    const std::vector<std::string_view>& LuaFlex::allUsedProperties() const
+    {
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "horizontal", "autoSize", "arrange", "align" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
+            return props;
+        });
+        return usedProps;
+    }
 }

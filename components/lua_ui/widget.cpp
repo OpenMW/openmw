@@ -1,7 +1,10 @@
 #include "widget.hpp"
+#include "components/lua_ui/util.hpp"
+#include "element.hpp"
 
 #include <SDL_events.h>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <ranges>
 
 namespace
 {
@@ -382,6 +385,77 @@ namespace LuaUi
         auto it = mCallbacks.find(name);
         if (it != mCallbacks.end())
             it->second.call(argument, mLayout);
+    }
+
+    bool WidgetExtension::collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const
+    {
+        auto beginningSize = warnings.size();
+        if (collectUnusedWarnings(warnings, generateWarningStrings) && !generateWarningStrings)
+            return true;
+
+        if (depth > 0)
+        {
+            std::ranges::transform(warnings, warnings.begin(),
+                [&](const std::string& warning) { return std::string((depth + 1) * 2, ' ') + warning; });
+        }
+
+        for (size_t i = 0; i < mChildren.size(); i++)
+        {
+            Warnings childWarnings;
+            if (!mChildren[i]->collectWarnings(childWarnings, depth + 1, generateWarningStrings))
+                continue;
+            if (!generateWarningStrings)
+                return true;
+            warnings.emplace_back(std::string((depth + 1) * 2, ' ') + "in content[" + std::to_string(i) + "]:");
+            std::ranges::move(childWarnings, std::back_inserter(warnings));
+        }
+        if (!warnings.empty())
+        {
+            warnings.insert(warnings.begin(), "Warnings generated for " + diagnosticName() + ":");
+            if (depth > 0)
+                warnings.front() = std::string(depth * 2, ' ') + warnings.front();
+        }
+
+        return warnings.size() != beginningSize;
+    }
+
+    bool WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const
+    {
+        const auto& usedPropsKeys = allUsedProperties();
+        const auto& usedLayoutKeys = LuaUi::Element::allLayoutProperties();
+        bool layoutWarn = warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings);
+        if (layoutWarn && !generateWarningStrings)
+            // We can skip checking props
+            return true;
+        bool propsWarn = warnUnused(warnings, mProperties, "props", usedPropsKeys, generateWarningStrings);
+
+        return layoutWarn || propsWarn;
+    }
+
+    std::string WidgetExtension::diagnosticName() const
+    {
+        auto name = widget()->getName();
+        auto typeName = std::string(widget()->getTypeName());
+        if (name.empty())
+            return "unnamed " + typeName;
+        return typeName + " named '" + name + "'";
+    }
+
+    const std::vector<std::string_view>& WidgetExtension::allUsedProperties() const
+    {
+        static std::vector<std::string_view> usedProps = {
+            "propagateEvents",
+            "position",
+            "size",
+            "relativePosition",
+            "relativeSize",
+            "anchor",
+            "visible",
+            "pointer",
+            "alpha",
+            "inheritAlpha",
+        };
+        return usedProps;
     }
 
     void WidgetExtension::keyPress(MyGUI::Widget*, MyGUI::KeyCode code, MyGUI::Char ch)
