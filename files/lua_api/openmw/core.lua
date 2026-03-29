@@ -679,6 +679,13 @@
 --- @{#Spells}: Spells
 -- @field [parent=#Magic] #Spells spells
 
+---
+-- Creates a @{#Spell} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Spells] createRecordDraft
+-- @param #Spell spell A Lua table with the fields of a Spell, with an optional field `template` that accepts a @{#Spell} as a base.
+-- @return #Spell A strongly typed Spell record.
+
 --- List of all @{#Spell}s.
 -- @field [parent=#Spells] #list<#Spell> records A read-only list of all @{#Spell} records in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) of #Spell.
@@ -708,6 +715,13 @@
 
 --- @{#Enchantments}: Enchantments
 -- @field [parent=#Magic] #Enchantments enchantments
+
+---
+-- Creates an @{#Enchantment} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Enchantments] createRecordDraft
+-- @param #Enchantment enchantment A Lua table with the fields of an Enchantment, with an optional field `template` that accepts an @{#Enchantment} as a base.
+-- @return #Enchantment A strongly typed Enchantment record.
 
 --- A read-only list of all @{#Enchantment} records in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) and [iterables#Map](iterables.html#map-iterable) of #Enchantment.
