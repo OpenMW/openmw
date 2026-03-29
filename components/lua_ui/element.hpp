@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_ELEMENT
 #define OPENMW_LUAUI_ELEMENT
 
+#include <vector>
+
 #include "widget.hpp"
 
 namespace LuaUi
@@ -18,7 +20,7 @@ namespace LuaUi
                 callback(element.get());
         }
 
-        static const std::set<std::string_view>& allLayoutProperties();
+        static const std::vector<std::string_view>& allLayoutProperties();
 
         WidgetExtension* mRoot;
         sol::main_object mLayout;

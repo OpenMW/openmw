@@ -46,12 +46,13 @@ namespace LuaUi
             updateCoord();
     }
 
-    const std::set<std::string_view>& LuaText::allUsedProperties() const
+    const std::vector<std::string_view>& LuaText::allUsedProperties() const
     {
-        static std::set<std::string_view> usedProps = std::invoke([this] {
-            auto props = WidgetExtension::allUsedProperties();
-            props.merge(std::set<std::string_view>{ "text", "textSize", "textColor", "wordWrap", "textAlignH",
-                "textAlignV", "multiline", "readOnly", "autoSize", "textShadow", "textShadowColor" });
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "text", "textSize", "textColor", "wordWrap", "textAlignH",
+                "textAlignV", "multiline", "readOnly", "autoSize", "textShadow", "textShadowColor" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
             return props;
         });
         return usedProps;

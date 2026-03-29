@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
@@ -143,7 +144,7 @@ namespace LuaUi
 
         bool collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const;
 
-        virtual const std::set<std::string_view>& allUsedProperties() const;
+        virtual const std::vector<std::string_view>& allUsedProperties() const;
 
         bool mForcePosition;
         bool mForceSize;

@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_FLEX
 #define OPENMW_LUAUI_FLEX
 
+#include <vector>
+
 #include "alignment.hpp"
 #include "widget.hpp"
 
@@ -18,7 +20,7 @@ namespace LuaUi
 
         void updateCoord() override;
 
-        const std::set<std::string_view>& allUsedProperties() const override;
+        const std::vector<std::string_view>& allUsedProperties() const override;
 
     private:
         bool mHorizontal;

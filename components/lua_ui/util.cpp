@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include <ranges>
+
 #include <MyGUI_FactoryManager.h>
 
 #include "adapter.hpp"
@@ -56,7 +58,7 @@ namespace LuaUi
     }
 
     bool warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
-        const std::set<std::string_view>& usedKeys, bool generateWarningStrings)
+        const std::vector<std::string_view>& usedKeys, bool generateWarningStrings)
     {
         auto beginningSize = warnings.size();
         if (!object.is<sol::table>())
@@ -67,7 +69,8 @@ namespace LuaUi
             if (!key.is<std::string>())
                 continue;
             auto keyStr = key.as<std::string>();
-            if (!usedKeys.contains(keyStr))
+
+            if (std::ranges::find(usedKeys, keyStr) == usedKeys.end())
             {
                 if (!generateWarningStrings)
                     return true;

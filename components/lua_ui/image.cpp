@@ -69,11 +69,12 @@ namespace LuaUi
         WidgetExtension::updateProperties();
     }
 
-    const std::set<std::string_view>& LuaImage::allUsedProperties() const
+    const std::vector<std::string_view>& LuaImage::allUsedProperties() const
     {
-        static std::set<std::string_view> usedProps = std::invoke([this] {
-            auto props = WidgetExtension::allUsedProperties();
-            props.merge(std::set<std::string_view>{ "resource", "tileH", "tileV", "color" });
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "resource", "tileH", "tileV", "color" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
             return props;
         });
         return usedProps;

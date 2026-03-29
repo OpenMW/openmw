@@ -399,7 +399,7 @@ namespace LuaUi
                 [&](const std::string& warning) { return std::string((depth + 1) * 2, ' ') + warning; });
         }
 
-        for (uint32_t i = 0; i < mChildren.size(); i++)
+        for (size_t i = 0; i < mChildren.size(); i++)
         {
             Warnings childWarnings;
             if (!mChildren[i]->collectWarnings(childWarnings, depth + 1, generateWarningStrings))
@@ -421,9 +421,12 @@ namespace LuaUi
 
     bool WidgetExtension::collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const
     {
-        auto& usedPropsKeys = allUsedProperties();
-        auto usedLayoutKeys = LuaUi::Element::allLayoutProperties();
+        const auto& usedPropsKeys = allUsedProperties();
+        const auto& usedLayoutKeys = LuaUi::Element::allLayoutProperties();
         bool layoutWarn = warnUnused(warnings, mLayout, "layout", usedLayoutKeys, generateWarningStrings);
+        if (layoutWarn && !generateWarningStrings)
+            // We can skip checking props
+            return true;
         bool propsWarn = warnUnused(warnings, mProperties, "props", usedPropsKeys, generateWarningStrings);
 
         return layoutWarn || propsWarn;
@@ -438,9 +441,9 @@ namespace LuaUi
         return typeName + " named '" + name + "'";
     }
 
-    const std::set<std::string_view>& WidgetExtension::allUsedProperties() const
+    const std::vector<std::string_view>& WidgetExtension::allUsedProperties() const
     {
-        static std::set<std::string_view> usedProps = {
+        static std::vector<std::string_view> usedProps = {
             "propagateEvents",
             "position",
             "size",

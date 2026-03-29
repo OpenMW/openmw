@@ -23,7 +23,7 @@ namespace LuaUi
             constexpr std::string_view external = "external";
             constexpr std::string_view userData = "userData";
 
-            const std::set<std::string_view> allKeys
+            const std::vector<std::string_view> allKeys
                 = { type, name, layer, templateLayout, props, events, content, external, userData };
         }
 
@@ -269,7 +269,7 @@ namespace LuaUi
         sGameElements.erase(element);
     }
 
-    const std::set<std::string_view>& Element::allLayoutProperties()
+    const std::vector<std::string_view>& Element::allLayoutProperties()
     {
         return LayoutKeys::allKeys;
     }
