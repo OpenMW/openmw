@@ -88,4 +88,13 @@
 -- @usage
 -- content.statics.records.MyStatic = { model = 'meshes/b/B_N_Wood Elf_M_Head_02.nif' }
 
+--- @{#SoundContent}: Sound manipulation.
+-- @field [parent=#content] #SoundContent sounds
+
+---
+-- A mutable list of all @{openmw.core#SoundRecord}s.
+-- @field [parent=#SoundContent] #list<openmw.core#SoundRecord> records
+-- @usage
+-- content.sounds.records.MySound = { template = content.sounds.records['MournDayAmb'], fileName = 'sound/fx/funny.wav' }
+
 return nil
