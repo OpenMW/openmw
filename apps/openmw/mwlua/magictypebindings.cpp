@@ -232,46 +232,126 @@ namespace MWLua
 
             addEffectParamsBindings<MutableENAMstruct>(lua, "ESM3_MutableEffectParams");
         }
+
+        template <class T>
+        void addSpellType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Spell[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Spell::mName);
+            Types::addProperty(record, "type", &ESM::Spell::mData, &ESM::Spell::SPDTstruct::mType);
+            Types::addProperty(record, "cost", &ESM::Spell::mData, &ESM::Spell::SPDTstruct::mCost);
+            Types::addFlagProperty(
+                record, "alwaysSucceedFlag", ESM::Spell::F_Always, &ESM::Spell::mData, &ESM::Spell::SPDTstruct::mFlags);
+            Types::addFlagProperty(
+                record, "starterSpellFlag", ESM::Spell::F_PCStart, &ESM::Spell::mData, &ESM::Spell::SPDTstruct::mFlags);
+            if constexpr (!Types::RecordType<T>::isMutable)
+            {
+                // Deprecated for consistency with other record types
+                Types::addFlagProperty(record, "autocalcFlag", ESM::Spell::F_Autocalc, &ESM::Spell::mData,
+                    &ESM::Spell::SPDTstruct::mFlags);
+            }
+            Types::addFlagProperty(
+                record, "isAutocalc", ESM::Spell::F_Autocalc, &ESM::Spell::mData, &ESM::Spell::SPDTstruct::mFlags);
+            addEffectsProperty(lua, record);
+        }
+
+        template <class T>
+        void addEnchantmentType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Enchantment[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "type", &ESM::Enchantment::mData, &ESM::Enchantment::ENDTstruct::mType);
+            Types::addProperty(record, "cost", &ESM::Enchantment::mData, &ESM::Enchantment::ENDTstruct::mCost);
+            Types::addProperty(record, "charge", &ESM::Enchantment::mData, &ESM::Enchantment::ENDTstruct::mCharge);
+            if constexpr (!Types::RecordType<T>::isMutable)
+            {
+                // Deprecated for consistency with other record types
+                Types::addFlagProperty(record, "autocalcFlag", ESM::Enchantment::Autocalc, &ESM::Enchantment::mData,
+                    &ESM::Enchantment::ENDTstruct::mFlags);
+            }
+            Types::addFlagProperty(record, "isAutocalc", ESM::Enchantment::Autocalc, &ESM::Enchantment::mData,
+                &ESM::Enchantment::ENDTstruct::mFlags);
+            addEffectsProperty(lua, record);
+        }
+
+        void setFlagProperty(const sol::table& rec, std::string_view key, int32_t& flags, int flag)
+        {
+            if (rec[key] != sol::nil)
+            {
+                if (rec[key])
+                    flags |= flag;
+                else
+                    flags &= ~flag;
+            }
+        }
     }
 
     void addSpellBindings(sol::state_view& state)
     {
-        auto spellT = state.new_usertype<ESM::Spell>("ESM3_Spell");
-        spellT[sol::meta_function::to_string]
-            = [](const ESM::Spell& rec) -> std::string { return "ESM3_Spell[" + rec.mId.toDebugString() + "]"; };
-        spellT["id"] = sol::readonly_property([](const ESM::Spell& rec) { return rec.mId.serializeText(); });
-        spellT["name"] = sol::readonly_property([](const ESM::Spell& rec) -> std::string_view { return rec.mName; });
-        spellT["type"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mType; });
-        spellT["cost"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mCost; });
-        spellT["alwaysSucceedFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Always); });
-        spellT["starterSpellFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_PCStart); });
-        // Deprecated for consistency with other record types
-        spellT["autocalcFlag"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
-        spellT["isAutocalc"] = sol::readonly_property(
-            [](const ESM::Spell& rec) -> bool { return !!(rec.mData.mFlags & ESM::Spell::F_Autocalc); });
-        addEffectsProperty(state, spellT);
+        addSpellType<ESM::Spell>(state, "ESM3_Spell");
+    }
+
+    void addMutableSpellType(sol::state_view& lua)
+    {
+        addSpellType<MutableRecord<ESM::Spell>>(lua, "ESM3_MutableSpell");
+    }
+
+    ESM::Spell tableToSpell(const sol::table& rec)
+    {
+        auto spell = Types::initFromTemplate<ESM::Spell>(rec);
+        if (rec["name"] != sol::nil)
+            spell.mName = rec["name"];
+        if (rec["type"] != sol::nil)
+            spell.mData.mType = rec["type"];
+        if (spell.mData.mType < ESM::Spell::ST_Spell || spell.mData.mType > ESM::Spell::ST_Power)
+            throw std::runtime_error("Invalid spell type");
+        if (rec["cost"] != sol::nil)
+            spell.mData.mCost = rec["cost"];
+        setFlagProperty(rec, "alwaysSucceedFlag", spell.mData.mFlags, ESM::Spell::F_Always);
+        setFlagProperty(rec, "starterSpellFlag", spell.mData.mFlags, ESM::Spell::F_PCStart);
+        setFlagProperty(rec, "isAutocalc", spell.mData.mFlags, ESM::Spell::F_Autocalc);
+        if (rec["effects"] != sol::nil)
+            spell.mEffects = tableToEffectList(rec["effects"]);
+
+        return spell;
     }
 
     void addEnchantmentBindings(sol::state_view& state)
     {
-        auto enchantT = state.new_usertype<ESM::Enchantment>("ESM3_Enchantment");
-        enchantT[sol::meta_function::to_string] = [](const ESM::Enchantment& rec) -> std::string {
-            return "ESM3_Enchantment[" + rec.mId.toDebugString() + "]";
-        };
-        enchantT["id"] = sol::readonly_property([](const ESM::Enchantment& rec) { return rec.mId.serializeText(); });
-        enchantT["type"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mType; });
-        // Deprecated for consistency with other record types
-        enchantT["autocalcFlag"] = sol::readonly_property(
-            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
-        enchantT["isAutocalc"] = sol::readonly_property(
-            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
-        enchantT["cost"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCost; });
-        enchantT["charge"]
-            = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCharge; });
-        addEffectsProperty(state, enchantT);
+        addEnchantmentType<ESM::Enchantment>(state, "ESM3_Enchantment");
+    }
+
+    void addMutableEnchantmentType(sol::state_view& lua)
+    {
+        addEnchantmentType<MutableRecord<ESM::Enchantment>>(lua, "ESM3_MutableEnchantment");
+    }
+
+    ESM::Enchantment tableToEnchantment(const sol::table& rec)
+    {
+        auto enchantment = Types::initFromTemplate<ESM::Enchantment>(rec);
+        if (rec["type"] != sol::nil)
+            enchantment.mData.mType = rec["type"];
+        if (enchantment.mData.mType < ESM::Enchantment::CastOnce
+            || enchantment.mData.mType > ESM::Enchantment::ConstantEffect)
+            throw std::runtime_error("Invalid enchantment type");
+        if (rec["cost"] != sol::nil)
+            enchantment.mData.mCost = rec["cost"];
+        if (rec["charge"] != sol::nil)
+            enchantment.mData.mCharge = rec["charge"];
+        setFlagProperty(rec, "isAutocalc", enchantment.mData.mFlags, ESM::Enchantment::Autocalc);
+        if (rec["effects"] != sol::nil)
+            enchantment.mEffects = tableToEffectList(rec["effects"]);
+
+        return enchantment;
     }
 
     void addEffectParamsBindings(sol::state_view& state)

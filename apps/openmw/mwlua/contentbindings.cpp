@@ -3,7 +3,9 @@
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
 
@@ -166,6 +168,23 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initEnchantmentBindings(sol::state_view& lua, MWWorld::Store<ESM::Enchantment>& store)
+        {
+            addRecordStoreBindings<ESM::Enchantment>(lua, &MWLua::tableToEnchantment);
+            addMutableEnchantmentType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Enchantment>{ store };
+            api["TYPE"]
+                = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::Enchantment::Type>(lua,
+                    {
+                        { "CastOnce", ESM::Enchantment::Type::CastOnce },
+                        { "CastOnStrike", ESM::Enchantment::Type::WhenStrikes },
+                        { "CastOnUse", ESM::Enchantment::Type::WhenUsed },
+                        { "ConstantEffect", ESM::Enchantment::Type::ConstantEffect },
+                    }));
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initMiscBindings(sol::state_view& lua, MWWorld::Store<ESM::Miscellaneous>& store)
         {
             addRecordStoreBindings<ESM::Miscellaneous>(lua, &MWLua::tableToMisc);
@@ -181,6 +200,25 @@ namespace MWLua
             addMutablePotionType(lua);
             sol::table api(lua, sol::create);
             api["records"] = MutableStore<ESM::Potion>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
+        sol::table initSpellBindings(sol::state_view& lua, MWWorld::Store<ESM::Spell>& store)
+        {
+            addRecordStoreBindings<ESM::Spell>(lua, &MWLua::tableToSpell);
+            addMutableSpellType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Spell>{ store };
+            api["TYPE"]
+                = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::Spell::SpellType>(lua,
+                    {
+                        { "Spell", ESM::Spell::ST_Spell },
+                        { "Ability", ESM::Spell::ST_Ability },
+                        { "Blight", ESM::Spell::ST_Blight },
+                        { "Disease", ESM::Spell::ST_Disease },
+                        { "Curse", ESM::Spell::ST_Curse },
+                        { "Power", ESM::Spell::ST_Power },
+                    }));
             return LuaUtil::makeReadOnly(api);
         }
 
@@ -201,9 +239,11 @@ namespace MWLua
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
+        api["enchantments"] = initEnchantmentBindings(lua, esmStore.getWritable<ESM::Enchantment>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
+        api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         api["RANGE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::RangeType>(lua,
             {
