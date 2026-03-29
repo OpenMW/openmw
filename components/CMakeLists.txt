@@ -577,7 +577,12 @@ endif()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-find_package(SQLite3 REQUIRED)
+if (OPENMW_USE_SYSTEM_SQLITE3)
+    find_package(SQLite3 REQUIRED)
+    if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+        add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+    endif()
+endif()
 
 add_library(components STATIC ${COMPONENT_FILES})
 
@@ -621,7 +626,7 @@ target_link_libraries(components
     RecastNavigation::Recast
 
     Base64
-    SQLite::SQLite3
+    SQLite3::SQLite3
     smhasher
     ${ICU_LIBRARIES}
     ZLIB::ZLIB
