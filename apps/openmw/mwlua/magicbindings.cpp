@@ -241,11 +241,13 @@ namespace MWLua
         // Spell store
         sol::table spells(state, sol::create);
         addRecordFunctionBinding<ESM::Spell>(spells, context);
+        spells["createRecordDraft"] = tableToSpell;
         magicApi["spells"] = LuaUtil::makeReadOnly(spells);
 
         // Enchantment store
         sol::table enchantments(state, sol::create);
         addRecordFunctionBinding<ESM::Enchantment>(enchantments, context);
+        enchantments["createRecordDraft"] = tableToEnchantment;
         magicApi["enchantments"] = LuaUtil::makeReadOnly(enchantments);
 
         // MagicEffect store

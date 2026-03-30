@@ -8,9 +8,11 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadench.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
@@ -197,6 +199,10 @@ namespace MWLua
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(book);
             },
+            [lua = context.mLua](const ESM::Enchantment& enchantment) -> const ESM::Enchantment* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(enchantment);
+            },
             [lua = context.mLua](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(misc);
@@ -204,6 +210,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Potion& potion) -> const ESM::Potion* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(potion);
+            },
+            [lua = context.mLua](const ESM::Spell& spell) -> const ESM::Spell* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(spell);
             },
             [lua = context.mLua](const ESM::Static& stat) -> const ESM::Static* {
                 checkGameInitialized(lua);
