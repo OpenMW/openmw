@@ -381,10 +381,6 @@ if(NOT FFmpeg_FOUND)
     message(FATAL_ERROR "FFmpeg was not found" )
 endif()
 
-if(WIN32)
-    message("Can not detect FFmpeg version, at least the 3.2 is required" )
-endif()
-
 # Required for building the FFmpeg headers
 add_compile_definitions(__STDC_CONSTANT_MACROS)
 
