@@ -44,6 +44,11 @@
 -- @field [parent=#content] #GMSTContent gameSettings
 
 ---
+-- Returns a table containing all fallback values defined in `openmw.cfg`.
+-- @function [parent=#GMSTContent] getFallbacks
+-- @return #table
+
+---
 -- A mutable list of all game settings.
 -- @field [parent=#GMSTContent] #map<#string, #any> records
 -- @usage

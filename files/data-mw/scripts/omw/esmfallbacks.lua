@@ -65,6 +65,10 @@ local function generateDefaultGMSTs()
             store[id] = value
         end
     end
+    local fallbacks = content.gameSettings.getFallbacks()
+    for id, value in pairs(fallbacks) do
+        store[id] = value
+    end
 end
 
 local function generateDefaultDoors()

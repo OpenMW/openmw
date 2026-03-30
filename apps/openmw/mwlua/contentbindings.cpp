@@ -8,6 +8,7 @@
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
+#include <components/fallback/fallback.hpp>
 #include <components/lua/util.hpp>
 
 #include "context.hpp"
@@ -153,6 +154,16 @@ namespace MWLua
                 });
             sol::table api(lua, sol::create);
             api["records"] = MutableStore<ESM::GameSetting>{ store };
+            api["getFallbacks"] = [](sol::this_state state) {
+                sol::table out(state, sol::create);
+                for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
+                    out[key] = sol::make_object(state, value);
+                for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
+                    out[key] = sol::make_object(state, value);
+                for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
+                    out[key] = sol::make_object(state, value);
+                return out;
+            };
             return LuaUtil::makeReadOnly(api);
         }
 
