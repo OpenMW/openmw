@@ -67,39 +67,17 @@ jobs:
     #     name: build_artifact.7z
 
   MacOS:
-    runs-on: macos-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install Building Dependencies
-      run: CI/before_install.macos.sh
-
-    - name: Prime ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-        max-size: 1000M
-
-    - name: Configure
-      run: CI/before_script.macos.sh -C
-    - name: Build
-      run: CI/macos/build.sh
-
-  Output-Envs:
-    name: Read .env file and expose it as output
-    runs-on: ubuntu-latest
-    outputs:
-      VCPKG_DEPS_TAG: ${{ env.VCPKG_DEPS_TAG }}
-      BUILD_TYPE: ${{ env.BUILD_TYPE }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: cat "${{ github.workspace }}/CI/github.env" >> $GITHUB_ENV
+    strategy:
+      fail-fast: true
+      matrix:
+        args:
+          - image: macos-15
+          - image: macos-15-intel
+    uses: ./.github/workflows/macos.yml
+    with:
+      image: ${{ matrix.args.image }}
 
   Windows:
-    needs:
-      - Output-Envs
-
     strategy:
       fail-fast: true
       matrix:
@@ -109,5 +87,3 @@ jobs:
     uses: ./.github/workflows/windows.yml
     with:
       image: ${{ matrix.image }}
-      vcpkg-deps-tag: ${{ needs.Output-Envs.outputs.VCPKG_DEPS_TAG }}
-      build-type: ${{ needs.Output-Envs.outputs.BUILD_TYPE }}

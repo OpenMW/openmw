@@ -11,10 +11,6 @@ on:
         description: MSVC version (2022/2026)
         default: "2022"
         type: string
-      vcpkg-deps-tag:
-        description: Git tag of our deps
-        required: true
-        type: string
       build-type:
         default: RelWithDebInfo
         type: string
@@ -39,7 +35,12 @@ jobs:
       if: ${{ inputs.package }}
       run: choco install nsis
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+
+    - run: |
+        $content = Get-Content "${{ github.workspace }}/CI/deps_versions.msvc.sh"
+        $content = $content -replace "'", ""
+        Add-Content -Path $env:GITHUB_ENV -Value $content
 
     - name: Create directories for dependencies
       run: |
@@ -49,7 +50,7 @@ jobs:
     - name: Download prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
       run: |
-        $MANIFEST = "vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}-manifest.txt"
+        $MANIFEST = "vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}-manifest.txt"
         curl --fail --retry 3 -L -o "$MANIFEST" "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/$MANIFEST"
         $lines = Get-Content "$MANIFEST"
         $URL = $lines[0]
@@ -65,7 +66,7 @@ jobs:
 
     - name: Extract archived prebuilt vcpkg packages
       working-directory: ${{ github.workspace }}/deps
-      run: 7z x -y -ovcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }} $env:archive
+      run: 7z x -y -ovcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }} $env:archive
 
     - name: Cache Qt
       id: qt-cache
@@ -98,12 +99,12 @@ jobs:
         -B ${{ github.workspace }}/build
         -G Ninja
         -D CMAKE_BUILD_TYPE=${{ inputs.build-type }}
-        -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/scripts/buildsystems/vcpkg.cmake'
+        -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/scripts/buildsystems/vcpkg.cmake'
         -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
         ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG /Zi"' || '' }}
         ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /OPT:REF /OPT:ICF /INCREMENTAL:NO"' || '' }}
-        -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/include/luajit'
-        -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/lib/lua51.lib'
+        -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/include/luajit'
+        -D LuaJit_LIBRARY='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/lib/lua51.lib'
         -D BUILD_BENCHMARKS=${{ ! inputs.package }}
         -D BUILD_COMPONENTS_TESTS=${{ ! inputs.package }}
         -D BUILD_OPENMW_TESTS=${{ ! inputs.package }}
@@ -119,9 +120,9 @@ jobs:
 
     - name: Copy missing DLLs
       run: |
-        cp ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/build
-        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/build
-        cp ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ inputs.vcpkg-deps-tag }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/build
+        cp ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/bin/Release/MyGUIEngine.dll ${{ github.workspace }}/build
+        cp -Filter *.dll -Recurse ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/bin/osgPlugins-3.6.5 ${{ github.workspace }}/build
+        cp ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/build
 
     - name: Copy Qt DLLs
       working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
@@ -199,7 +200,7 @@ jobs:
       with:
         name: openmw-windows-${{ inputs.msvc }}-sym-store-${{ github.sha }}
         path: ${{ github.workspace }}/SymStore/*
-    
+
     - name: Store log etc. artifacts
       uses: actions/upload-artifact@v4
       with:
