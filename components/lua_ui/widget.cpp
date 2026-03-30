@@ -434,8 +434,8 @@ namespace LuaUi
 
     std::string WidgetExtension::diagnosticName() const
     {
-        auto name = widget()->getName();
-        auto typeName = std::string(widget()->getTypeName());
+        const std::string& name = mWidget->getName();
+        const std::string typeName(mWidget->getTypeName());
         if (name.empty())
             return "unnamed " + typeName;
         return typeName + " named '" + name + "'";
