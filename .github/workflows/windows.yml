@@ -70,7 +70,7 @@ jobs:
 
     - name: Cache Qt
       id: qt-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
         key: qt-cache-6.6.3-msvc2019_64-v1
@@ -184,25 +184,25 @@ jobs:
         cp install/CI-ID.txt SymStore/CI-ID.txt
 
     - name: Store OpenMW archived pdb files
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openmw-windows-${{ inputs.msvc }}-pdb-${{ github.sha }}
         path: ${{ github.workspace }}/pdb/*
 
     - name: Store OpenMW build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openmw-windows-${{ inputs.msvc }}-${{ github.sha }}
         path: ${{ github.workspace }}/install/*
 
     - name: Store symbol server artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openmw-windows-${{ inputs.msvc }}-sym-store-${{ github.sha }}
         path: ${{ github.workspace }}/SymStore/*
 
     - name: Store log etc. artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openmw-windows-${{ inputs.msvc }}-logs-and-stuff-${{ github.sha }}
         path: |

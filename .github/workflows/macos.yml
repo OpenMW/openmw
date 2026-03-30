@@ -41,7 +41,7 @@ jobs:
       run: CI/macos/build.sh
 
     - name: Store dmg
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: openmw-macos-dmg-${{ env.DMG_IDENTIFIER }}-${{ github.sha }}
         path: |
