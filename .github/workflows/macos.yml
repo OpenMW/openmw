@@ -32,7 +32,7 @@ jobs:
     - name: Prime ccache
       uses: hendrikmuhs/ccache-action@v1.2.22
       with:
-        key: macos-latest-${{ inputs.build-type }}
+        key: ${{ inputs.image }}-${{ inputs.build-type }}
         max-size: 1000M
 
     - name: Configure
