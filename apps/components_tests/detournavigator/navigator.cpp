@@ -1261,6 +1261,39 @@ namespace
         EXPECT_EQ(mNavigator->getStats().mUpdater.mPosted, 1);
     }
 
+    TEST_F(DetourNavigatorNavigatorTest, should_handle_lifted_heightfield)
+    {
+        constexpr std::array<float, 5 * 5> heightfieldData{ {
+            1000, 1000, 1000, 1000, 1000, // row 0
+            1000, 1025, 1025, 1025, 1025, // row 1
+            1000, 1025, 1100, 1100, 1100, // row 2
+            1000, 1025, 1100, 1100, 1100, // row 3
+            1000, 1025, 1100, 1100, 1100, // row 4
+        } };
+
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
+        const int cellSize = heightfieldTileSize * static_cast<int>(surface.mSize - 1);
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        const osg::Vec3f start{ 52, 460, 1001 };
+        const osg::Vec3f end{ 460, 52, 1001 };
+
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, start, end, Flag_walk, mAreaCosts, mEndTolerance, {}, mOut),
+            Status::Success);
+
+        EXPECT_THAT(mPath,
+            ElementsAre( //
+                Vec3fEq(56.66664886474609375, 460, 1019.870361328125),
+                Vec3fEq(460, 56.66664886474609375, 1019.870361328125)))
+            << mPath;
+    }
+
     struct DetourNavigatorUpdateTest : TestWithParam<std::function<void(Navigator&)>>
     {
     };
