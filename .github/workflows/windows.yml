@@ -38,9 +38,9 @@ jobs:
     - uses: actions/checkout@v6
 
     - run: |
-        $content = Get-Content "${{ github.workspace }}/CI/deps_versions.msvc.sh"
-        $content = $content -replace "'", ""
-        Add-Content -Path $env:GITHUB_ENV -Value $content
+        source "${{ github.workspace }}/CI/deps_versions.msvc.sh"
+        echo "QT_VER=$QT_VER" >> $env:GITHUB_ENV
+        echo "VCPKG_TAG=$VCPKG_TAG" >> $env:GITHUB_ENV
 
     - name: Create directories for dependencies
       run: |
@@ -72,8 +72,8 @@ jobs:
       id: qt-cache
       uses: actions/cache@v5
       with:
-        path: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
-        key: qt-cache-6.6.3-msvc2019_64-v1
+        path: ${{ github.workspace }}/deps/Qt/${{ env.QT_VER }}/msvc2019_64
+        key: qt-cache-${{ env.QT_VER }}-msvc2019_64-v1
 
     - name: Download aqt
       if: steps.qt-cache.outputs.cache-hit != 'true'
@@ -86,7 +86,7 @@ jobs:
     - name: Install Qt with aqt
       if: steps.qt-cache.outputs.cache-hit != 'true'
       working-directory: ${{ github.workspace }}/deps/Qt
-      run: .\aqt_x64.exe install-qt windows desktop 6.6.3 win64_msvc2019_64
+      run: .\aqt_x64.exe install-qt windows desktop ${{ env.QT_VER }} win64_msvc2019_64
 
     - uses: ilammy/msvc-dev-cmd@v1
 
@@ -100,7 +100,7 @@ jobs:
         -G Ninja
         -D CMAKE_BUILD_TYPE=${{ inputs.build-type }}
         -D CMAKE_TOOLCHAIN_FILE='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/scripts/buildsystems/vcpkg.cmake'
-        -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64'
+        -D CMAKE_PREFIX_PATH='${{ github.workspace }}/deps/Qt/${{ env.QT_VER }}/msvc2019_64'
         ${{ inputs.package && '-D CMAKE_CXX_FLAGS_RELEASE="/O2 /Ob2 /DNDEBUG /Zi"' || '' }}
         ${{ inputs.package && '-D "CMAKE_EXE_LINKER_FLAGS_RELEASE=/DEBUG /OPT:REF /OPT:ICF /INCREMENTAL:NO"' || '' }}
         -D LuaJit_INCLUDE_DIR='${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/include/luajit'
@@ -125,7 +125,7 @@ jobs:
         cp ${{ github.workspace }}/deps/vcpkg-x64-windows-${{ inputs.msvc }}-${{ env.VCPKG_TAG }}/installed/x64-windows/bin/*.dll ${{ github.workspace }}/build
 
     - name: Copy Qt DLLs
-      working-directory: ${{ github.workspace }}/deps/Qt/6.6.3/msvc2019_64
+      working-directory: ${{ github.workspace }}/deps/Qt/${{ env.QT_VER }}/msvc2019_64
       run: |
         cp bin/Qt6Core.dll ${{ github.workspace }}/build
         cp bin/Qt6Gui.dll ${{ github.workspace }}/build
