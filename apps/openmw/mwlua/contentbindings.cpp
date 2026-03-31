@@ -5,12 +5,14 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/lua/util.hpp>
 
 #include "context.hpp"
 #include "magictypebindings.hpp"
+#include "soundbindings.hpp"
 #include "types/modelproperty.hpp"
 #include "types/types.hpp"
 
@@ -230,6 +232,15 @@ namespace MWLua
             api["records"] = MutableStore<ESM::Static>{ store };
             return LuaUtil::makeReadOnly(api);
         }
+
+        sol::table initSoundBindings(sol::state_view& lua, MWWorld::Store<ESM::Sound>& store)
+        {
+            addRecordStoreBindings<ESM::Sound>(lua, &MWLua::tableToSound);
+            addMutableSoundType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Sound>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
     }
 
     sol::table initContentPackage(const Context& context)
@@ -245,6 +256,7 @@ namespace MWLua
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
+        api["sounds"] = initSoundBindings(lua, esmStore.getWritable<ESM::Sound>());
         api["RANGE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, ESM::RangeType>(lua,
             {
                 { "Self", ESM::RT_Self },

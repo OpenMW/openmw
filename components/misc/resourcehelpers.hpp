@@ -48,6 +48,8 @@ namespace Misc
 
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);
+        // Removes "sound\\".
+        std::string_view soundPathForESM3(std::string_view resPath);
 
         VFS::Path::Normalized correctSoundPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
 
