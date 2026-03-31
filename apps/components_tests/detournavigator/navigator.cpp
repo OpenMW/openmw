@@ -82,30 +82,36 @@ namespace
         0, -25, -100, -100, -100, // row 4
     } };
 
+    template <class T, std::size_t size>
+    std::pair<T, T> getMinMaxHeight(const std::array<T, size>& values)
+    {
+        const auto [min, max] = std::minmax_element(values.begin(), values.end());
+        if (*min == *max)
+            return { *min, *min + 1 };
+        return { *min, *max };
+    }
+
     template <std::size_t size>
     std::unique_ptr<btHeightfieldTerrainShape> makeSquareHeightfieldTerrainShape(
         const std::array<btScalar, size>& values, btScalar heightScale = 1, int upAxis = 2,
         PHY_ScalarType heightDataType = PHY_FLOAT, bool flipQuadEdges = false)
     {
         const int width = static_cast<int>(std::sqrt(size));
-        const btScalar min = *std::min_element(values.begin(), values.end());
-        const btScalar max = *std::max_element(values.begin(), values.end());
-        const btScalar greater = std::max(std::abs(min), std::abs(max));
+        const auto [minHeight, maxHeight] = getMinMaxHeight(values);
         return std::make_unique<btHeightfieldTerrainShape>(
-            width, width, values.data(), heightScale, -greater, greater, upAxis, heightDataType, flipQuadEdges);
+            width, width, values.data(), heightScale, minHeight, maxHeight, upAxis, heightDataType, flipQuadEdges);
     }
 
     template <std::size_t size>
     HeightfieldSurface makeSquareHeightfieldSurface(const std::array<float, size>& values)
     {
-        const auto [min, max] = std::minmax_element(values.begin(), values.end());
-        const float greater = std::max(std::abs(*min), std::abs(*max));
-        HeightfieldSurface surface;
-        surface.mHeights = values.data();
-        surface.mMinHeight = -greater;
-        surface.mMaxHeight = greater;
-        surface.mSize = static_cast<std::size_t>(std::sqrt(size));
-        return surface;
+        const auto [minHeight, maxHeight] = getMinMaxHeight(values);
+        return HeightfieldSurface{
+            .mHeights = values.data(),
+            .mSize = static_cast<std::size_t>(std::sqrt(size)),
+            .mMinHeight = minHeight,
+            .mMaxHeight = maxHeight,
+        };
     }
 
     template <class T>
@@ -310,11 +316,14 @@ namespace
         CollisionShapeInstance heightfield2(makeSquareHeightfieldTerrainShape(heightfieldData2));
         heightfield2.shape().setLocalScaling(btVector3(128, 128, 1));
 
+        const ObjectTransform objectTransform{ ESM::Position{ { 256, 256, -50 }, { 0, 0, 0 } }, 0.0f };
+        const btTransform transform{ btMatrix3x3::getIdentity(), btVector3(256, 256, -50) };
+
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
-        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), mObjectTransform),
-            mTransform, nullptr);
-        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), mObjectTransform),
-            mTransform, nullptr);
+        mNavigator->addObject(ObjectId(&heightfield1.shape()), ObjectShapes(heightfield1.instance(), objectTransform),
+            transform, nullptr);
+        mNavigator->addObject(ObjectId(&heightfield2.shape()), ObjectShapes(heightfield2.instance(), objectTransform),
+            transform, nullptr);
         mNavigator->update(mPlayerPosition, nullptr);
         mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
@@ -391,10 +400,10 @@ namespace
 
         EXPECT_THAT(mPath,
             ElementsAre( //
-                Vec3fEq(56.66664886474609375, 460, 1.99999392032623291015625),
-                Vec3fEq(158.6666412353515625, 249.3332977294921875, -20.6666717529296875),
-                Vec3fEq(249.3332977294921875, 158.6666412353515625, -20.6666717529296875),
-                Vec3fEq(460, 56.66664886474609375, 1.99999392032623291015625)))
+                Vec3fEq(56.66664886474609375, 460, 51.999996185302734375),
+                Vec3fEq(192.666656494140625, 249.3332977294921875, 6.666663646697998046875),
+                Vec3fEq(249.3332977294921875, 192.666656494140625, 6.666663646697998046875),
+                Vec3fEq(460, 56.66664886474609375, 51.999996185302734375)))
             << mPath;
     }
 
@@ -534,9 +543,12 @@ namespace
         CollisionShapeInstance heightfield(makeSquareHeightfieldTerrainShape(defaultHeightfieldDataScalar));
         heightfield.shape().setLocalScaling(btVector3(128, 128, 1));
 
+        const ObjectTransform objectTransform{ ESM::Position{ { 256, 256, -50 }, { 0, 0, 0 } }, 0.0f };
+        const btTransform transform{ btMatrix3x3::getIdentity(), btVector3(256, 256, -50) };
+
         ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform),
-            mTransform, nullptr);
+        mNavigator->addObject(
+            ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), objectTransform), transform, nullptr);
         mNavigator->update(mPlayerPosition, nullptr);
         mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
@@ -544,8 +556,8 @@ namespace
         mNavigator->update(mPlayerPosition, nullptr);
         mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
-        mNavigator->addObject(ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), mObjectTransform),
-            mTransform, nullptr);
+        mNavigator->addObject(
+            ObjectId(&heightfield.shape()), ObjectShapes(heightfield.instance(), objectTransform), transform, nullptr);
         mNavigator->update(mPlayerPosition, nullptr);
         mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
 
