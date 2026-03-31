@@ -291,8 +291,7 @@ namespace MWLua
 
         player["quests"] = [](const Object& object) {
             verifyPlayer(object);
-            bool allowChanges = dynamic_cast<const GObject*>(&object) != nullptr
-                || dynamic_cast<const SelfObject*>(&object) != nullptr;
+            bool allowChanges = object.isGObject() || object.isSelfObject();
             return Quests{ .mMutable = allowChanges };
         };
         sol::usertype<Quests> quests = lua.new_usertype<Quests>("Quests");
@@ -388,7 +387,7 @@ namespace MWLua
         };
         player["setControlSwitch"] = [input](const Object& object, std::string_view key, bool v) {
             verifyPlayer(object);
-            if (dynamic_cast<const LObject*>(&object) && !dynamic_cast<const SelfObject*>(&object))
+            if (object.isLObject() && !object.isSelfObject())
                 throw std::runtime_error("Only player and global scripts can toggle control switches.");
             input->toggleControlSwitch(key, v);
         };
@@ -398,7 +397,7 @@ namespace MWLua
         };
         player["setTeleportingEnabled"] = [](const Object& object, bool state) {
             verifyPlayer(object);
-            if (dynamic_cast<const LObject*>(&object) && !dynamic_cast<const SelfObject*>(&object))
+            if (object.isLObject() && !object.isSelfObject())
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
             MWBase::Environment::get().getWorld()->enableTeleporting(state);
         };
@@ -429,7 +428,7 @@ namespace MWLua
         };
         player["setCrimeLevel"] = [](const Object& o, int amount) {
             verifyPlayer(o);
-            if (!dynamic_cast<const GObject*>(&o))
+            if (!o.isGObject())
                 throw std::runtime_error("Only global scripts can change crime level");
             const MWWorld::Class& cls = o.ptr().getClass();
             cls.getNpcStats(o.ptr()).setBounty(amount);
@@ -453,7 +452,7 @@ namespace MWLua
             verifyPlayer(o);
             if (victim.has_value() && !victim->ptrOrEmpty().isEmpty())
                 verifyNpc(victim->ptrOrEmpty().getClass());
-            if (!dynamic_cast<const GObject*>(&o))
+            if (!o.isGObject())
                 throw std::runtime_error("Only global scripts can commit crime");
             if (type < 0 || type > MWBase::MechanicsManager::OffenseType::OT_Pickpocket)
                 throw std::runtime_error("Invalid offense type");
@@ -477,7 +476,7 @@ namespace MWLua
         };
         player["setBirthSign"] = [](const Object& object, const sol::object& recordOrId) {
             verifyPlayer(object);
-            if (!dynamic_cast<const GObject*>(&object))
+            if (!object.isGObject())
                 throw std::runtime_error("Only global scripts can change birth signs");
             MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(toBirthSignId(recordOrId));
         };

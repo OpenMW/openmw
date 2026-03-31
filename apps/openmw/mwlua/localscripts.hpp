@@ -63,6 +63,7 @@ namespace MWLua
             return nullptr;
         }
         void cacheStat(LuaManager&, CachedStat, sol::main_object);
+        bool isSelfObject() const override { return true; }
 
         MWBase::LuaManager::ActorControls mControls;
         bool mIsActive;

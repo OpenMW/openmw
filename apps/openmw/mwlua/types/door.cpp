@@ -1,5 +1,4 @@
 #include "types.hpp"
-
 #include "usertypeutil.hpp"
 
 #include "../localscripts.hpp"
@@ -117,8 +116,7 @@ namespace MWLua
             return doorIsIdle && !doorIsOpen;
         };
         door["activateDoor"] = [](const Object& o, sol::optional<bool> openState) {
-            bool allowChanges
-                = dynamic_cast<const GObject*>(&o) != nullptr || dynamic_cast<const SelfObject*>(&o) != nullptr;
+            bool allowChanges = o.isGObject() || o.isSelfObject();
             if (!allowChanges)
                 throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
 
@@ -143,7 +141,7 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(thisState, GCell{ &cell });
             else
                 return sol::make_object(thisState, LCell{ &cell });
@@ -167,7 +165,7 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(lua, GCell{ &cell });
             else
                 return sol::make_object(lua, LCell{ &cell });

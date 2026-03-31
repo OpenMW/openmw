@@ -218,7 +218,7 @@ namespace MWLua
                     return owner.serializeText();
             };
             auto setOwnerRecordId = [](const OwnerT& o, sol::optional<std::string_view> ownerId) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner only on self");
                 const MWWorld::Ptr& ptr = o.mObj.ptr();
 
@@ -244,7 +244,7 @@ namespace MWLua
             };
             auto setOwnerFactionId = [](const OwnerT& o, sol::optional<std::string> ownerId) {
                 ESM::RefId ownerFac;
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner faction only on self");
                 if (!ownerId)
                 {
@@ -266,7 +266,7 @@ namespace MWLua
                 return LuaUtil::toLuaIndex(rank);
             };
             auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<int64_t> factionRank) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner faction rank only on self");
                 int64_t rank = std::max<int64_t>(0, LuaUtil::fromLuaIndex(factionRank.value_or(0)));
                 o.mObj.ptr().getCellRef().setFactionRank(static_cast<int>(rank));
