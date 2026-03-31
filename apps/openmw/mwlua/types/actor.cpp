@@ -261,7 +261,7 @@ namespace MWLua
             if (it == store.end())
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(thisState, GObject(*it));
             else
                 return sol::make_object(thisState, LObject(*it));
@@ -327,7 +327,7 @@ namespace MWLua
                 if (it == store.end())
                     continue;
                 MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-                if (dynamic_cast<const GObject*>(&o))
+                if (o.isGObject())
                     equipment[slot] = sol::make_object(thisState, GObject(*it));
                 else
                     equipment[slot] = sol::make_object(thisState, LObject(*it));
@@ -343,7 +343,7 @@ namespace MWLua
             if (it == store.end())
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(thisState, GObject(*it));
             else
                 return sol::make_object(thisState, LObject(*it));
@@ -432,7 +432,7 @@ namespace MWLua
         actor["setBarterGold"] = [context](const Object& object, int gold) {
             if (gold < 0)
                 throw std::runtime_error("Barter gold must be positive");
-            if (dynamic_cast<const GObject*>(&object) == nullptr && dynamic_cast<const SelfObject*>(&object) == nullptr)
+            if (!object.isGObject() && !object.isSelfObject())
                 throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
             context.mLuaManager->addAction(
                 [obj = Object(object), gold] {
