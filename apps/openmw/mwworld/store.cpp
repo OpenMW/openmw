@@ -10,7 +10,6 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -950,27 +949,6 @@ namespace MWWorld
     const ESM::GameSetting* Store<ESM::GameSetting>::search(std::string_view id) const
     {
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
-    }
-
-    void Store<ESM::GameSetting>::setUp()
-    {
-        auto addSetting = [&](const std::string& key, ESM::Variant value) {
-            auto id = ESM::RefId::stringRefId(key);
-            ESM::GameSetting setting;
-            setting.blank();
-            setting.mId = id;
-            setting.mValue = std::move(value);
-            auto [iter, inserted] = mStatic.insert_or_assign(id, std::move(setting));
-            if (inserted)
-                mShared.push_back(&iter->second);
-        };
-        for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        TypedDynamicStore<ESM::GameSetting>::setUp();
     }
 
     // Attribute
