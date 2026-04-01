@@ -42,6 +42,7 @@ namespace ContentSelectorView
         void clearFiles();
         void setNonUserContent(const QStringList& fileList);
         void setProfileContent(const QStringList& fileList);
+        void setContentOrder(const QStringList& contentOrder, const QStringList& groundcoverOrder);
 
         void clearCheckStates();
         void setEncoding(const QString& encoding);

@@ -6,6 +6,7 @@
 #include <QLockFile>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 #include <filesystem>
 #include <fstream>
@@ -72,6 +73,10 @@ namespace CS
         std::pair<Files::PathContainer, std::vector<std::string>> readConfig(bool quiet = false);
         ///< \return data paths
 
+        /// Reads content= and groundcover= lines from openmw.cfg files to determine
+        /// the user's intended load order for the content selector.
+        void readContentOrder();
+
         // not implemented
         Editor(const Editor&);
         Editor& operator=(const Editor&);
@@ -115,6 +120,9 @@ namespace CS
         QString mIpcServerName;
         QLocalServer* mServer;
         QLocalSocket* mClientSocket;
+
+        QStringList mContentOrder;
+        QStringList mGroundcoverOrder;
     };
 }
 

@@ -220,6 +220,12 @@ void ContentSelectorView::ContentSelector::sortFiles()
     mContentModel->sortFiles();
 }
 
+void ContentSelectorView::ContentSelector::setContentOrder(
+    const QStringList& contentOrder, const QStringList& groundcoverOrder)
+{
+    mContentModel->setContentOrder(contentOrder, groundcoverOrder);
+}
+
 bool ContentSelectorView::ContentSelector::containsDataFiles(const QString& path)
 {
     return mContentModel->containsDataFiles(path);

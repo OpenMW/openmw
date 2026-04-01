@@ -535,6 +535,13 @@ void ContentSelectorModel::ContentModel::setCurrentGameFile(const EsmFile* file)
     emit dataChanged(index, index);
 }
 
+void ContentSelectorModel::ContentModel::setContentOrder(
+    const QStringList& contentOrder, const QStringList& groundcoverOrder)
+{
+    mContentOrder = contentOrder;
+    mGroundcoverOrder = groundcoverOrder;
+}
+
 void ContentSelectorModel::ContentModel::sortFiles()
 {
     emit layoutAboutToBeChanged();
@@ -564,6 +571,44 @@ void ContentSelectorModel::ContentModel::sortFiles()
             missingFile->setFromAnotherConfigFile(true);
             mFiles.insert(firstModifiable++, missingFile.release());
         }
+    }
+
+    // Sort the modifiable portion using openmw.cfg content= and groundcover= order.
+    // Files listed under content= come first (in cfg order), then groundcover= files
+    // (in cfg order), then any remaining files sorted alphabetically.
+    if (!mContentOrder.isEmpty() || !mGroundcoverOrder.isEmpty())
+    {
+        // Build a sort key for each file: files in content= get low indices,
+        // groundcover= files get indices after that, and everything else gets a
+        // high index so it sorts to the end alphabetically.
+        QHash<QString, int> orderMap;
+        int order = 0;
+        for (const QString& name : mContentOrder)
+            orderMap.insert(name.toLower(), order++);
+        for (const QString& name : mGroundcoverOrder)
+        {
+            const QString lower = name.toLower();
+            if (!orderMap.contains(lower))
+                orderMap.insert(lower, order++);
+        }
+
+        // Stable sort the modifiable portion
+        std::stable_sort(mFiles.begin() + firstModifiable, mFiles.end(),
+            [&orderMap](const EsmFile* a, const EsmFile* b) {
+                const QString aKey = a->fileName().toLower();
+                const QString bKey = b->fileName().toLower();
+                const bool aHasOrder = orderMap.contains(aKey);
+                const bool bHasOrder = orderMap.contains(bKey);
+
+                if (aHasOrder && bHasOrder)
+                    return orderMap.value(aKey) < orderMap.value(bKey);
+                if (aHasOrder && !bHasOrder)
+                    return true;
+                if (!aHasOrder && bHasOrder)
+                    return false;
+                // Both unordered: sort alphabetically (case-insensitive)
+                return aKey < bKey;
+            });
     }
 
     // For the purposes of dependency sort we'll hallucinate that Bloodmoon is dependent on Tribunal

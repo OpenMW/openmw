@@ -55,6 +55,7 @@ namespace CSVDoc
         void addFiles(const std::vector<std::filesystem::path>& dataDirs);
         void setEncoding(const QString& encoding);
         void clearFiles();
+        void setContentOrder(const QStringList& contentOrder, const QStringList& groundcoverOrder);
 
         QString filename() const;
         QStringList selectedFilePaths();

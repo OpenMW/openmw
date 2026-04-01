@@ -50,6 +50,7 @@ namespace ContentSelectorModel
         void sortFiles();
         bool containsDataFiles(const QString& path);
         void clearFiles();
+        void setContentOrder(const QStringList& contentOrder, const QStringList& groundcoverOrder);
 
         QModelIndex indexFromItem(const EsmFile* item) const;
         const EsmFile* item(const QString& name) const;
@@ -91,6 +92,9 @@ namespace ContentSelectorModel
         QIcon mWarningIcon;
         QIcon mErrorIcon;
         bool mShowOMWScripts;
+
+        QStringList mContentOrder;
+        QStringList mGroundcoverOrder;
 
         QString mErrorToolTips[ContentSelectorModel::LoadOrderError::ErrorCode_LoadOrder]
             = { tr("Unable to find dependent file: %1"), tr("Dependent file needs to be active: %1"),
