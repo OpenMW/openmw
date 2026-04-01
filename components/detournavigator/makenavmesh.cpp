@@ -33,7 +33,7 @@ namespace DetourNavigator
             float mHeight;
         };
 
-        std::vector<float> getOffMeshVerts(const std::vector<OffMeshConnection>& connections)
+        std::vector<float> getOffMeshVerts(std::span<const OffMeshConnection> connections)
         {
             std::vector<float> result;
 
@@ -72,7 +72,7 @@ namespace DetourNavigator
             return Flag_none;
         }
 
-        std::vector<unsigned char> getOffMeshConAreas(const std::vector<OffMeshConnection>& connections)
+        std::vector<unsigned char> getOffMeshConAreas(std::span<const OffMeshConnection> connections)
         {
             std::vector<unsigned char> result;
             result.reserve(connections.size());
@@ -81,7 +81,7 @@ namespace DetourNavigator
             return result;
         }
 
-        std::vector<unsigned short> getOffMeshFlags(const std::vector<OffMeshConnection>& connections)
+        std::vector<unsigned short> getOffMeshFlags(std::span<const OffMeshConnection> connections)
         {
             std::vector<unsigned short> result;
             result.reserve(connections.size());
@@ -550,8 +550,8 @@ namespace DetourNavigator
     }
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
-        const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
-        const TilePosition& tile, const RecastSettings& settings)
+        std::span<const OffMeshConnection> offMeshConnections, const AgentBounds& agentBounds, const TilePosition& tile,
+        const RecastSettings& settings)
     {
         const auto offMeshConVerts = getOffMeshVerts(offMeshConnections);
         const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentBounds));
