@@ -594,9 +594,8 @@ namespace DetourNavigator
 
         unsigned char* navMeshData;
         int navMeshDataSize;
-        const auto navMeshDataCreated = dtCreateNavMeshData(&params, &navMeshData, &navMeshDataSize);
 
-        if (!navMeshDataCreated)
+        if (!dtCreateNavMeshData(&params, &navMeshData, &navMeshDataSize))
             throw NavigatorException("Failed to create navmesh tile data");
 
         return NavMeshData(navMeshData, navMeshDataSize);
