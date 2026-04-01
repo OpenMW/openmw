@@ -2,11 +2,14 @@
 
 #include "dbrefgeometryobject.hpp"
 #include "makenavmesh.hpp"
+#include "navmeshdata.hpp"
 #include "preparednavmeshdata.hpp"
 #include "serialization.hpp"
 #include "settings.hpp"
 
 #include <components/debug/debuglog.hpp>
+
+#include <DetourNavMesh.h>
 
 #include <osg/io_utils>
 
@@ -34,12 +37,13 @@ namespace DetourNavigator
 
     GenerateNavMeshTile::GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
         std::weak_ptr<const RecastMeshProvider> recastMeshProvider, const AgentBounds& agentBounds,
-        const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
+        const DetourNavigator::Settings& settings, bool collectStats, std::weak_ptr<NavMeshTileConsumer> consumer)
         : mWorldspace(worldspace)
         , mTilePosition(tilePosition)
         , mRecastMeshProvider(std::move(recastMeshProvider))
         , mAgentBounds(agentBounds)
         , mSettings(settings)
+        , mCollectStats(collectStats)
         , mConsumer(std::move(consumer))
     {
     }
@@ -78,6 +82,18 @@ namespace DetourNavigator
             if (info.has_value() && info->mVersion == navMeshFormatVersion)
             {
                 consumer->identity(mWorldspace, mTilePosition, info->mTileId);
+
+                if (mCollectStats)
+                {
+                    const NavMeshData tileData
+                        = makeNavMeshTileData(*info->mData, {}, mAgentBounds, mTilePosition, mSettings.mRecast);
+                    const dtMeshHeader& header = *reinterpret_cast<dtMeshHeader*>(tileData.mValue.get());
+
+                    consumer->updateStats(NavMeshTileConsumerStats{
+                        .mPolyCount = header.polyCount,
+                    });
+                }
+
                 ignore.mConsumer = nullptr;
                 return;
             }
@@ -88,10 +104,22 @@ namespace DetourNavigator
             if (data == nullptr)
                 return;
 
+            // Verify generated data before consuming.
+            const NavMeshData tileData = makeNavMeshTileData(*data, {}, mAgentBounds, mTilePosition, mSettings.mRecast);
+
             if (info.has_value())
                 consumer->update(mWorldspace, mTilePosition, info->mTileId, navMeshFormatVersion, *data);
             else
                 consumer->insert(mWorldspace, mTilePosition, navMeshFormatVersion, input, *data);
+
+            if (mCollectStats)
+            {
+                const dtMeshHeader& header = *reinterpret_cast<dtMeshHeader*>(tileData.mValue.get());
+
+                consumer->updateStats(NavMeshTileConsumerStats{
+                    .mPolyCount = header.polyCount,
+                });
+            }
 
             ignore.mConsumer = nullptr;
         }

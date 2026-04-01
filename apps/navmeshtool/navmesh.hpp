@@ -17,6 +17,13 @@ namespace NavMeshTool
 {
     struct WorldspaceData;
 
+    struct GenerateAllNavMeshTilesOptions
+    {
+        bool mRemoveUnusedTiles;
+        bool mWriteBinaryLog;
+        bool mCollectStats;
+    };
+
     enum class Status
     {
         Ok,
@@ -24,14 +31,20 @@ namespace NavMeshTool
         NotEnoughSpace,
     };
 
-    struct Result
+    struct GenerateTilesStats
+    {
+        int mMaxPolyCountPerTile = 0;
+    };
+
+    struct GenerateTilesResult
     {
         Status mStatus;
         bool mNeedVacuum;
+        GenerateTilesStats mStats;
     };
 
-    Result generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
-        const DetourNavigator::Settings& settings, bool removeUnusedTiles, bool writeBinaryLog,
+    GenerateTilesResult generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Settings& settings, const GenerateAllNavMeshTilesOptions& options,
         const WorldspaceData& data, DetourNavigator::NavMeshDb& db, SceneUtil::WorkQueue& workQueue);
 }
 

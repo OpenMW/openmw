@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_GENERATENAVMESHTILE_H
 
 #include "agentbounds.hpp"
+#include "preparednavmeshdata.hpp"
 #include "recastmeshprovider.hpp"
 #include "tileposition.hpp"
 
@@ -19,7 +20,6 @@ namespace DetourNavigator
     class RecastMesh;
     struct NavMeshTileConsumer;
     struct OffMeshConnection;
-    struct PreparedNavMeshData;
     struct Settings;
     struct MeshSource;
 
@@ -27,6 +27,12 @@ namespace DetourNavigator
     {
         std::int64_t mTileId;
         std::int64_t mVersion;
+        std::unique_ptr<PreparedNavMeshData> mData;
+    };
+
+    struct NavMeshTileConsumerStats
+    {
+        int mPolyCount;
     };
 
     struct NavMeshTileConsumer
@@ -52,6 +58,8 @@ namespace DetourNavigator
             = 0;
 
         virtual void cancel(std::string_view reason) = 0;
+
+        virtual void updateStats(const NavMeshTileConsumerStats& value) = 0;
     };
 
     class GenerateNavMeshTile final : public SceneUtil::WorkItem
@@ -59,7 +67,7 @@ namespace DetourNavigator
     public:
         GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
             std::weak_ptr<const RecastMeshProvider> recastMeshProvider, const AgentBounds& agentBounds,
-            const Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer);
+            const Settings& settings, bool collectStats, std::weak_ptr<NavMeshTileConsumer> consumer);
 
         void doWork() final;
 
@@ -69,6 +77,7 @@ namespace DetourNavigator
         const std::weak_ptr<const RecastMeshProvider> mRecastMeshProvider;
         const AgentBounds mAgentBounds;
         const Settings& mSettings;
+        const bool mCollectStats;
         const std::weak_ptr<NavMeshTileConsumer> mConsumer;
 
         inline void impl() noexcept;
