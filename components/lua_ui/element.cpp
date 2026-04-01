@@ -246,17 +246,21 @@ namespace LuaUi
     std::map<Element*, std::shared_ptr<Element>> Element::sMenuElements;
     std::map<Element*, std::shared_ptr<Element>> Element::sGameElements;
 
-    Element::Element(sol::table layout)
+    Element::Element(sol::table layout, sol::optional<sol::table> options)
         : mRoot(nullptr)
         , mLayout(std::move(layout))
         , mLayer()
         , mState(Element::New)
     {
+        if (options.has_value())
+        {
+            mNoWarnUnused = options->get_or("noWarnUnused", false);
+        }
     }
 
-    std::shared_ptr<Element> Element::make(sol::table layout, bool menu)
+    std::shared_ptr<Element> Element::make(sol::table layout, bool menu, sol::optional<sol::table> options)
     {
-        std::shared_ptr<Element> ptr(new Element(std::move(layout)));
+        std::shared_ptr<Element> ptr(new Element(std::move(layout), std::move(options)));
         auto& container = menu ? sMenuElements : sGameElements;
         container[ptr.get()] = ptr;
         return ptr;
@@ -347,6 +351,10 @@ namespace LuaUi
 
     void Element::checkWarnings()
     {
+        if (mNoWarnUnused)
+            // Currently unused warnings are our only warnings so we can just early out here.
+            return;
+
         if (Settings::lua().mLuaDebug)
         {
             assert(mRoot);

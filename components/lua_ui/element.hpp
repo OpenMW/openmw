@@ -9,7 +9,7 @@ namespace LuaUi
 {
     struct Element
     {
-        static std::shared_ptr<Element> make(sol::table layout, bool menu);
+        static std::shared_ptr<Element> make(sol::table layout, bool menu, sol::optional<sol::table> options);
         static void erase(Element* element);
 
         template <class Callback>
@@ -26,6 +26,9 @@ namespace LuaUi
         sol::main_object mLayout;
         std::string mLayer;
         bool mWarnedOnce{ false };
+
+        // From options
+        bool mNoWarnUnused{ false };
 
         enum State
         {
@@ -49,7 +52,7 @@ namespace LuaUi
         void checkWarnings();
 
     private:
-        Element(sol::table layout);
+        Element(sol::table layout, sol::optional<sol::table> options);
         sol::table layout() { return LuaUtil::cast<sol::table>(mLayout); }
         static std::map<Element*, std::shared_ptr<Element>> sGameElements;
         static std::map<Element*, std::shared_ptr<Element>> sMenuElements;
