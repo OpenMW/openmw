@@ -33,6 +33,16 @@ namespace MWLua::Types
         }
     };
 
+    template <class Type>
+    struct Setter<Type, std::string>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec, std::string_view value) { accessor(rec) = value; };
+        }
+    };
+
     template <class Type, std::floating_point Float>
     struct Setter<Type, Float>
     {

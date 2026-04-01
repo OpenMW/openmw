@@ -4,6 +4,7 @@
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
@@ -287,6 +288,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initIngredientBindings(sol::state_view& lua, MWWorld::Store<ESM::Ingredient>& store)
+        {
+            addRecordStoreBindings<ESM::Ingredient>(lua, &MWLua::tableToIngredient);
+            addMutableIngredientType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Ingredient>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initMiscBindings(sol::state_view& lua, MWWorld::Store<ESM::Miscellaneous>& store)
         {
             addRecordStoreBindings<ESM::Miscellaneous>(lua, &MWLua::tableToMisc);
@@ -353,6 +363,7 @@ namespace MWLua
         api["enchantments"] = initEnchantmentBindings(lua, esmStore.getWritable<ESM::Enchantment>());
         api["gameSettings"] = initGameSettingBindings(lua, esmStore.getWritable<ESM::GameSetting>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
+        api["ingredients"] = initIngredientBindings(lua, esmStore.getWritable<ESM::Ingredient>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
