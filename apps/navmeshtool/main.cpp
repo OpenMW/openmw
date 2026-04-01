@@ -243,28 +243,30 @@ namespace NavMeshTool
             bool needVacuum = false;
             std::size_t count = 0;
 
-            SceneUtil::WorkQueue workQueue(threadsNumber);
-
-            Log(Debug::Info) << "Using " << threadsNumber << " parallel workers...";
-
-            for (const auto& [worldspace, cells] : worldspaceCells)
             {
-                const WorldspaceData worldspaceData = gatherWorldspaceData(
-                    navigatorSettings, readers, vfs, bulletShapeManager, esmData, writeBinaryLog, worldspace, cells);
+                SceneUtil::WorkQueue workQueue(threadsNumber);
 
-                const Result result = generateAllNavMeshTiles(
-                    agentBounds, navigatorSettings, removeUnusedTiles, writeBinaryLog, worldspaceData, db, workQueue);
+                Log(Debug::Info) << "Using " << threadsNumber << " parallel workers...";
 
-                ++count;
+                for (const auto& [worldspace, cells] : worldspaceCells)
+                {
+                    const WorldspaceData worldspaceData = gatherWorldspaceData(navigatorSettings, readers, vfs,
+                        bulletShapeManager, esmData, writeBinaryLog, worldspace, cells);
 
-                Log(Debug::Info) << "Processed worldspace (" << count << "/" << worldspaceCells.size() << ") "
-                                 << worldspace;
+                    const Result result = generateAllNavMeshTiles(agentBounds, navigatorSettings, removeUnusedTiles,
+                        writeBinaryLog, worldspaceData, db, workQueue);
 
-                status = result.mStatus;
-                needVacuum = needVacuum || result.mNeedVacuum;
+                    ++count;
 
-                if (status != Status::Ok)
-                    break;
+                    Log(Debug::Info) << "Processed worldspace (" << count << "/" << worldspaceCells.size() << ") "
+                                     << worldspace;
+
+                    status = result.mStatus;
+                    needVacuum = needVacuum || result.mNeedVacuum;
+
+                    if (status != Status::Ok)
+                        break;
+                }
             }
 
             if (status == Status::Ok && needVacuum)

@@ -33,11 +33,11 @@ namespace DetourNavigator
     }
 
     GenerateNavMeshTile::GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
-        RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
+        std::weak_ptr<const RecastMeshProvider> recastMeshProvider, const AgentBounds& agentBounds,
         const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
         : mWorldspace(worldspace)
         , mTilePosition(tilePosition)
-        , mRecastMeshProvider(recastMeshProvider)
+        , mRecastMeshProvider(std::move(recastMeshProvider))
         , mAgentBounds(agentBounds)
         , mSettings(settings)
         , mConsumer(std::move(consumer))
@@ -51,16 +51,21 @@ namespace DetourNavigator
 
     void GenerateNavMeshTile::impl() noexcept
     {
-        const auto consumer = mConsumer.lock();
-
-        if (consumer == nullptr)
-            return;
-
         try
         {
+            const std::shared_ptr<NavMeshTileConsumer> consumer = mConsumer.lock();
+
+            if (consumer == nullptr)
+                return;
+
             Ignore ignore{ mWorldspace, mTilePosition, consumer };
 
-            const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mWorldspace, mTilePosition);
+            const std::shared_ptr<const RecastMeshProvider> recastMeshProvider = mRecastMeshProvider.lock();
+
+            if (recastMeshProvider == nullptr)
+                return;
+
+            const std::shared_ptr<RecastMesh> recastMesh = recastMeshProvider->getMesh(mWorldspace, mTilePosition);
 
             if (recastMesh == nullptr || isEmpty(*recastMesh))
                 return;
@@ -92,9 +97,12 @@ namespace DetourNavigator
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace << "\" tile "
-                                << mTilePosition << ": " << e.what();
-            consumer->cancel(e.what());
+            if (const std::shared_ptr<NavMeshTileConsumer> consumer = mConsumer.lock())
+            {
+                Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace << "\" tile "
+                                    << mTilePosition << ": " << e.what();
+                consumer->cancel(e.what());
+            }
         }
     }
 }

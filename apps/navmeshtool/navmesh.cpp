@@ -38,7 +38,7 @@ namespace NavMeshTool
         using DetourNavigator::NavMeshDb;
         using DetourNavigator::NavMeshTileInfo;
         using DetourNavigator::PreparedNavMeshData;
-        using DetourNavigator::RecastMeshProvider;
+        using DetourNavigator::RecastMesh;
         using DetourNavigator::Settings;
         using DetourNavigator::ShapeId;
         using DetourNavigator::TileId;
@@ -175,6 +175,8 @@ namespace NavMeshTool
             void cancel(std::string_view reason) override
             {
                 std::unique_lock lock(mMutex);
+                if (mStatus != Status::Ok)
+                    return;
                 if (reason.find("database or disk is full") != std::string_view::npos)
                     mStatus = Status::NotEnoughSpace;
                 else
@@ -245,6 +247,23 @@ namespace NavMeshTool
                     logGeneratedTilesMessage(provided);
             }
         };
+
+        class RecastMeshProvider final : public DetourNavigator::RecastMeshProvider
+        {
+        public:
+            explicit RecastMeshProvider(std::shared_ptr<TilesData> tilesData)
+                : mTilesData(std::move(tilesData))
+            {
+            }
+
+            std::shared_ptr<RecastMesh> getMesh(ESM::RefId worldspace, const TilePosition& tilePosition) const override
+            {
+                return mTilesData->mTileCachedRecastMeshManager.getNewMesh(worldspace, tilePosition);
+            }
+
+        private:
+            std::shared_ptr<TilesData> mTilesData;
+        };
     }
 
     Result generateAllNavMeshTiles(const AgentBounds& agentBounds, const Settings& settings, bool removeUnusedTiles,
@@ -252,9 +271,10 @@ namespace NavMeshTool
     {
         Log(Debug::Info) << "Generating navmesh tiles for " << data.mWorldspace << " worldspace...";
 
-        auto navMeshTileConsumer = std::make_shared<NavMeshTileConsumer>(db, removeUnusedTiles, writeBinaryLog);
+        const std::shared_ptr<NavMeshTileConsumer> navMeshTileConsumer
+            = std::make_shared<NavMeshTileConsumer>(db, removeUnusedTiles, writeBinaryLog);
 
-        const auto range = DetourNavigator::makeTilesPositionsRange(
+        const TilesPositionsRange range = DetourNavigator::makeTilesPositionsRange(
             Misc::Convert::toOsgXY(data.mAabb.m_min), Misc::Convert::toOsgXY(data.mAabb.m_max), settings.mRecast);
 
         if (removeUnusedTiles)
@@ -276,9 +296,12 @@ namespace NavMeshTool
             std::shuffle(worldspaceTiles.begin(), worldspaceTiles.end(), random);
         }
 
+        const std::shared_ptr<RecastMeshProvider> recastMeshProvider
+            = std::make_shared<RecastMeshProvider>(data.mTilesData);
+
         for (const TilePosition& tilePosition : worldspaceTiles)
-            workQueue.addWorkItem(new GenerateNavMeshTile(data.mWorldspace, tilePosition,
-                RecastMeshProvider(*data.mTileCachedRecastMeshManager), agentBounds, settings, navMeshTileConsumer));
+            workQueue.addWorkItem(new GenerateNavMeshTile(
+                data.mWorldspace, tilePosition, recastMeshProvider, agentBounds, settings, navMeshTileConsumer));
 
         const Status status = navMeshTileConsumer->wait();
         if (status == Status::Ok)
