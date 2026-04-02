@@ -82,12 +82,28 @@ local function generateDefaultDoors()
     end
 end
 
+local function setMagicEffectNames()
+    local gmsts = content.gameSettings.records
+    local effects = content.magicEffects.records
+    for id, gmst in pairs(content.magicEffects._getGMSTs()) do
+        local effect = effects[id]
+        if effect ~= nil then
+            local name = gmsts[gmst]
+            if type(name) ~= 'string' or name == '' then
+                name = gmst
+            end
+            effect.name = name
+        end
+    end
+end
+
 return {
     engineHandlers = {
         onContentFilesLoaded = function()
             generateDefaultDoors()
             generateDefaultGMSTs()
             generateDefaultStatics()
+            setMagicEffectNames()
         end
     }
 }
