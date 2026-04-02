@@ -211,6 +211,8 @@ namespace NavMeshTool
 
             Status wait()
             {
+                if (mExpected == 0)
+                    return Status::Ok;
                 constexpr std::chrono::seconds transactionInterval(1);
                 std::unique_lock lock(mMutex);
                 auto start = std::chrono::steady_clock::now();
