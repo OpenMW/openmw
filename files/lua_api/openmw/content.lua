@@ -109,6 +109,15 @@
 -- @usage
 -- content.potions.records.MyPotion = { template = content.potions.records['p_dispel_s'], name = 'Too Strong', effects = { { id = 'FireDamage', duration = 10, range = content.RANGE.Self, magnitudeMin = 100 } } }
 
+--- @{#ProbeContent}: Probe manipulation.
+-- @field [parent=#content] #ProbeContent probes
+
+---
+-- A mutable list of all @{openmw.types#ProbeRecord}s.
+-- @field [parent=#ProbeContent] #list<openmw.types#ProbeRecord> records
+-- @usage
+-- content.probes.records.MyProbe = { template = content.probes.records['probe_bent'], quality = 5, name = 'Alien Probe' }
+
 --- @{#SpellContent}: Spell manipulation.
 -- @field [parent=#content] #SpellContent spells
 
