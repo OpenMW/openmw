@@ -76,6 +76,15 @@
 --- @{#MiscContent}: Misc manipulation.
 -- @field [parent=#content] #MiscContent miscs
 
+--- @{#MagicEffectContent}: Magic effect manipulation.
+-- @field [parent=#content] #MagicEffectContent magicEffects
+
+---
+-- A mutable list of all @{openmw.core#MagicEffect}s.
+-- @field [parent=#MagicEffectContent] #list<openmw.core#MagicEffect> records
+-- @usage
+-- content.magicEffects.records.MyMagicEffect = { template = content.magicEffects.records['summonscamp'], name = 'Summon Nothing' }
+
 ---
 -- A mutable list of all @{openmw.types#MiscellaneousRecord}s.
 -- @field [parent=#MiscContent] #list<openmw.types#MiscellaneousRecord> records
