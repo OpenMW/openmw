@@ -474,7 +474,7 @@ namespace MWRender
 
     void CloudUpdater::setTextureCoord(float timer)
     {
-        mTexMat = osg::Matrixf::translate(osg::Vec3f(0.f, -timer, 0.f));
+        mTexMat = osg::Matrixf::translate(osg::Vec3f(0.f, timer, 0.f));
     }
 
     void CloudUpdater::setDefaults(osg::StateSet* stateset)
