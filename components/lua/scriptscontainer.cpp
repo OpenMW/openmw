@@ -831,6 +831,11 @@ namespace LuaUtil
             stats[id].mMemoryUsage += mem;
     }
 
+    ScriptsContainerWeakPtr ScriptsContainer::getWeakPointer() const
+    {
+        return ScriptsContainerWeakPtr(mThis);
+    }
+
     ScriptsContainer::Script::~Script()
     {
         if (mHiddenData != sol::nil)

@@ -137,7 +137,7 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator=(InventoryStore&& sto
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(
-    const Ptr& itemPtr, int count, bool allowAutoEquip, bool resolve)
+    const ConstPtr& itemPtr, int count, bool allowAutoEquip, bool resolve)
 {
     const MWWorld::ContainerStoreIterator& retVal
         = MWWorld::ContainerStore::add(itemPtr, count, allowAutoEquip, resolve);
