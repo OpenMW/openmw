@@ -1,6 +1,8 @@
 #ifndef OPENMW_NAVMESHTOOL_NAVMESH_H
 #define OPENMW_NAVMESHTOOL_NAVMESH_H
 
+#include <cstddef>
+
 namespace DetourNavigator
 {
     class NavMeshDb;
@@ -39,7 +41,10 @@ namespace NavMeshTool
     struct GenerateTilesResult
     {
         Status mStatus;
-        bool mNeedVacuum;
+        std::size_t mProvided;
+        std::size_t mInserted;
+        std::size_t mUpdated;
+        std::size_t mDeleted;
         GenerateTilesStats mStats;
     };
 

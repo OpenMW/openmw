@@ -244,7 +244,10 @@ namespace NavMeshTool
                 = collectWorldspaceCells(esmData, processInteriorCells, worldspaceFilter);
 
             Status status = Status::Ok;
-            bool needVacuum = false;
+            std::size_t provided = 0;
+            std::size_t inserted = 0;
+            std::size_t updated = 0;
+            std::size_t deleted = 0;
             std::size_t count = 0;
             GenerateTilesStats stats;
 
@@ -273,7 +276,10 @@ namespace NavMeshTool
                                      << worldspace;
 
                     status = result.mStatus;
-                    needVacuum = needVacuum || result.mNeedVacuum;
+                    provided += result.mProvided;
+                    inserted += result.mInserted;
+                    updated += result.mUpdated;
+                    deleted += result.mDeleted;
 
                     if (collectStats)
                     {
@@ -286,13 +292,16 @@ namespace NavMeshTool
                 }
             }
 
+            Log(Debug::Info) << "Generated navmesh for " << provided << " tiles: " << inserted << " inserted, "
+                             << updated << " updated, " << deleted << " deleted";
+
             if (collectStats)
             {
                 Log(Debug::Info) << "Stats:";
                 Log(Debug::Info) << "max polygons per tile = " << stats.mMaxPolyCountPerTile;
             }
 
-            if (status == Status::Ok && needVacuum)
+            if (status == Status::Ok && inserted + updated + deleted > 0)
             {
                 Log(Debug::Info) << "Vacuuming the database...";
                 db.vacuum();

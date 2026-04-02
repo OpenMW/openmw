@@ -335,16 +335,20 @@ namespace NavMeshTool
         if (status == Status::Ok)
             navMeshTileConsumer->commit();
 
-        const auto inserted = navMeshTileConsumer->getInserted();
-        const auto updated = navMeshTileConsumer->getUpdated();
-        const auto deleted = navMeshTileConsumer->getDeleted();
+        const std::size_t provided = navMeshTileConsumer->getProvided();
+        const std::size_t inserted = navMeshTileConsumer->getInserted();
+        const std::size_t updated = navMeshTileConsumer->getUpdated();
+        const std::size_t deleted = navMeshTileConsumer->getDeleted();
 
-        Log(Debug::Info) << "Generated navmesh for " << navMeshTileConsumer->getProvided() << " tiles, " << inserted
-                         << " are inserted, " << updated << " updated and " << deleted << " deleted";
+        Log(Debug::Info) << "Generated navmesh for " << provided << " tiles: " << inserted << " inserted, " << updated
+                         << " updated, " << deleted << " deleted";
 
         return GenerateTilesResult{
             .mStatus = status,
-            .mNeedVacuum = inserted + updated + deleted > 0,
+            .mProvided = provided,
+            .mInserted = inserted,
+            .mUpdated = updated,
+            .mDeleted = deleted,
             .mStats = navMeshTileConsumer->getStats(),
         };
     }
