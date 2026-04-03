@@ -16,6 +16,7 @@ namespace CSMDoc
         QThread mThread;
         Operation* mOperation;
         bool mRunning;
+        bool mUseThread;
 
     public:
         OperationHolder(Operation* operation = nullptr);
@@ -30,6 +31,8 @@ namespace CSMDoc
 
         // Abort and wait until thread has finished.
         void abortAndWait();
+
+        void setUseThread(bool useThread);
 
     private slots:
 

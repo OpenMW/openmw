@@ -125,6 +125,9 @@ void CSMDoc::Operation::executeStage()
 
     Messages messages(mDefaultSeverity);
 
+    const auto batchStart = std::chrono::steady_clock::now();
+    static constexpr auto batchBudget = std::chrono::milliseconds(5);
+
     while (mCurrentStage != mStages.end())
     {
         if (mCurrentStep >= mCurrentStage->second)
@@ -146,7 +149,9 @@ void CSMDoc::Operation::executeStage()
             }
 
             ++mCurrentStepTotal;
-            break;
+
+            if (std::chrono::steady_clock::now() - batchStart >= batchBudget)
+                break;
         }
     }
 

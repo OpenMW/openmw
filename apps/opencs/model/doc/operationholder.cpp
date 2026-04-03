@@ -5,6 +5,7 @@
 CSMDoc::OperationHolder::OperationHolder(Operation* operation)
     : mOperation(nullptr)
     , mRunning(false)
+    , mUseThread(true)
 {
     if (operation)
         setOperation(operation);
@@ -13,7 +14,9 @@ CSMDoc::OperationHolder::OperationHolder(Operation* operation)
 void CSMDoc::OperationHolder::setOperation(Operation* operation)
 {
     mOperation = operation;
-    mOperation->moveToThread(&mThread);
+
+    if (mUseThread)
+        mOperation->moveToThread(&mThread);
 
     connect(mOperation, &Operation::progress, this, &OperationHolder::progress);
 
@@ -23,7 +26,8 @@ void CSMDoc::OperationHolder::setOperation(Operation* operation)
 
     connect(this, &OperationHolder::abortSignal, mOperation, &Operation::abort);
 
-    connect(&mThread, &QThread::started, mOperation, &Operation::run);
+    if (mUseThread)
+        connect(&mThread, &QThread::started, mOperation, &Operation::run);
 }
 
 bool CSMDoc::OperationHolder::isRunning() const
@@ -34,7 +38,11 @@ bool CSMDoc::OperationHolder::isRunning() const
 void CSMDoc::OperationHolder::start()
 {
     mRunning = true;
-    mThread.start();
+
+    if (mUseThread)
+        mThread.start();
+    else
+        mOperation->run();
 }
 
 void CSMDoc::OperationHolder::abort()
@@ -47,14 +55,30 @@ void CSMDoc::OperationHolder::abortAndWait()
 {
     if (mRunning)
     {
-        mThread.quit();
-        mThread.wait();
+        if (mUseThread)
+        {
+            abort();
+            mThread.quit();
+            mThread.wait();
+        }
+        else
+        {
+            abort();
+        }
     }
 }
 
 void CSMDoc::OperationHolder::doneSlot(int type, bool failed)
 {
     mRunning = false;
-    mThread.quit();
+
+    if (mUseThread)
+        mThread.quit();
+
     emit done(type, failed);
+}
+
+void CSMDoc::OperationHolder::setUseThread(bool useThread)
+{
+    mUseThread = useThread;
 }
