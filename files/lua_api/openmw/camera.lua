@@ -134,7 +134,7 @@
 ---
 -- The offset applied to the cameras projection matrix, in pixels.
 -- @function [parent=#camera] getProjectionOffset
--- @return #number
+-- @return openmw.util#Vector2
 
 ---
 -- Set the camera position; can be used only if camera is in Static mode.

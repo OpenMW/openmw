@@ -40,7 +40,6 @@
 #include "../mwbase/world.hpp"
 
 #include "actorutil.hpp"
-#include "apps/openmw/mwrender/renderingmanager.hpp"
 #include "postprocessor.hpp"
 #include "renderbin.hpp"
 #include "rotatecontroller.hpp"
