@@ -126,6 +126,17 @@
 -- @param #number value
 
 ---
+-- Applies an offset to the cameras projection matrix, measured in pixels.
+-- Small offsets of up to roughly 2 pixels are safe, large offsets are only for debugging and will cause visual glitches.
+-- @function [parent=#camera] setProjectionOffset
+-- @param openmw.util#Vector2 offset
+
+---
+-- The offset applied to the cameras projection matrix, in pixels.
+-- @function [parent=#camera] getProjectionOffset
+-- @return openmw.util#Vector2
+
+---
 -- Set the camera position; can be used only if camera is in Static mode.
 -- @function [parent=#camera] setStaticPosition
 -- @param openmw.util#Vector3 pos
