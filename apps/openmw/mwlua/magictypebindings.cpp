@@ -313,8 +313,8 @@ namespace MWLua
         void assignColor(ESM::MagicEffect& effect, const Misc::Color& color)
         {
             effect.mData.mRed = std::clamp(static_cast<int32_t>(color.r() * 255), 0, 255);
-            effect.mData.mGreen = std::clamp(static_cast<int32_t>(color.r() * 255), 0, 255);
-            effect.mData.mBlue = std::clamp(static_cast<int32_t>(color.r() * 255), 0, 255);
+            effect.mData.mGreen = std::clamp(static_cast<int32_t>(color.g() * 255), 0, 255);
+            effect.mData.mBlue = std::clamp(static_cast<int32_t>(color.b() * 255), 0, 255);
         }
 
         template <class T>
@@ -390,10 +390,7 @@ namespace MWLua
                 &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mFlags);
             Types::addFlagProperty(record, "negativeLight", ESM::MagicEffect::NegativeLight, &ESM::MagicEffect::mData,
                 &ESM::MagicEffect::MEDTstruct::mFlags);
-
-            // TODO: Should we expose it? Configurable in TESCS but unused by the engine
-            // Types::addProperty(record, "projectileSpeed", &ESM::MagicEffect::mData,
-            // &ESM::MagicEffect::MEDTstruct::mSpeed);
+            Types::addProperty(record, "speed", &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mSpeed);
         }
     }
 
@@ -536,6 +533,8 @@ namespace MWLua
         setFlagProperty(rec, "allowsSpellmaking", effect.mData.mFlags, ESM::MagicEffect::AllowSpellmaking);
         setFlagProperty(rec, "allowsEnchanting", effect.mData.mFlags, ESM::MagicEffect::AllowEnchanting);
         setFlagProperty(rec, "negativeLight", effect.mData.mFlags, ESM::MagicEffect::NegativeLight);
+        if (rec["speed"] != sol::nil)
+            effect.mData.mSpeed = rec["speed"];
         return effect;
     }
 }
