@@ -24,7 +24,7 @@ Lua Settings
    :title: lua profiler
    :type: boolean
    :range: true, false
-   :default: true
+   :default: false
 
    Enables Lua profiler.
 
