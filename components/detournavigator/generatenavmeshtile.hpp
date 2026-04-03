@@ -21,6 +21,7 @@ namespace DetourNavigator
     struct OffMeshConnection;
     struct PreparedNavMeshData;
     struct Settings;
+    struct MeshSource;
 
     struct NavMeshTileInfo
     {
@@ -57,18 +58,18 @@ namespace DetourNavigator
     {
     public:
         GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
-            RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds, const Settings& settings,
-            std::weak_ptr<NavMeshTileConsumer> consumer);
+            std::weak_ptr<const RecastMeshProvider> recastMeshProvider, const AgentBounds& agentBounds,
+            const Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer);
 
         void doWork() final;
 
     private:
         const ESM::RefId mWorldspace;
         const TilePosition mTilePosition;
-        const RecastMeshProvider mRecastMeshProvider;
+        const std::weak_ptr<const RecastMeshProvider> mRecastMeshProvider;
         const AgentBounds mAgentBounds;
         const Settings& mSettings;
-        std::weak_ptr<NavMeshTileConsumer> mConsumer;
+        const std::weak_ptr<NavMeshTileConsumer> mConsumer;
 
         inline void impl() noexcept;
     };
