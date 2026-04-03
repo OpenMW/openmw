@@ -42,6 +42,7 @@
 #include "actorutil.hpp"
 #include "postprocessor.hpp"
 #include "renderbin.hpp"
+#include "renderingmanager.hpp"
 #include "rotatecontroller.hpp"
 #include "vismask.hpp"
 
@@ -365,9 +366,9 @@ namespace MWRender
     class OverrideFieldOfViewCallback : public osg::NodeCallback
     {
     public:
-        OverrideFieldOfViewCallback(float fov, RenderingManager* renderingManger)
+        OverrideFieldOfViewCallback(float fov, RenderingManager* renderingManager)
             : mFov(fov)
-            , mRenderingManager(renderingManger)
+            , mRenderingManager(renderingManager)
         {
         }
 
