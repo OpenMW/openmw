@@ -297,6 +297,27 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initMagicEffectBindings(sol::state_view& lua, MWWorld::Store<ESM::MagicEffect>& store)
+        {
+            addRecordStoreBindings<ESM::MagicEffect>(lua, &MWLua::tableToMagicEffect);
+            addMutableMagicEffectType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::MagicEffect>{ store };
+            // We can't get rid of the GMST table engine side because mwscript needs it, so intead of copying it into a
+            // Lua file we've got this hidden function to generate it
+            api["_getGMSTs"] = [](sol::this_state state) {
+                sol::table gmsts(state, sol::create);
+                for (int i = 0; i < ESM::MagicEffect::Length; ++i)
+                {
+                    const ESM::RefId effect = ESM::MagicEffect::indexToRefId(i);
+                    const std::string_view gmst = ESM::MagicEffect::refIdToGmstString(effect);
+                    gmsts[effect] = gmst;
+                }
+                return gmsts;
+            };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initMiscBindings(sol::state_view& lua, MWWorld::Store<ESM::Miscellaneous>& store)
         {
             addRecordStoreBindings<ESM::Miscellaneous>(lua, &MWLua::tableToMisc);
@@ -364,6 +385,7 @@ namespace MWLua
         api["gameSettings"] = initGameSettingBindings(lua, esmStore.getWritable<ESM::GameSetting>());
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["ingredients"] = initIngredientBindings(lua, esmStore.getWritable<ESM::Ingredient>());
+        api["magicEffects"] = initMagicEffectBindings(lua, esmStore.getWritable<ESM::MagicEffect>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());

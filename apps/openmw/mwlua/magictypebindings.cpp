@@ -5,6 +5,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/color.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -52,6 +53,10 @@ namespace sol
     };
     template <>
     struct is_automagical<ESM::IndexedENAMstruct> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::MagicEffect> : std::false_type
     {
     };
     template <>
@@ -132,7 +137,7 @@ namespace MWLua
             addEffectsProperty(lua, record);
         }
 
-        void addPropertyFromTable(const sol::lua_table& rec, std::string_view key, ESM::RefId& value)
+        void addPropertyFromTable(const sol::table& rec, std::string_view key, ESM::RefId& value)
         {
             if (rec[key] != sol::nil)
             {
@@ -293,6 +298,100 @@ namespace MWLua
                     flags &= ~flag;
             }
         }
+
+        void setReverseFlagProperty(const sol::table& rec, std::string_view key, int32_t& flags, int flag)
+        {
+            if (rec[key] != sol::nil)
+            {
+                if (!rec[key])
+                    flags |= flag;
+                else
+                    flags &= ~flag;
+            }
+        }
+
+        void assignColor(ESM::MagicEffect& effect, const Misc::Color& color)
+        {
+            effect.mData.mRed = std::clamp(static_cast<int32_t>(color.r() * 255), 0, 255);
+            effect.mData.mGreen = std::clamp(static_cast<int32_t>(color.g() * 255), 0, 255);
+            effect.mData.mBlue = std::clamp(static_cast<int32_t>(color.b() * 255), 0, 255);
+        }
+
+        template <class T>
+        void addMagicEffectType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_MagicEffect[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addIconProperty(record);
+            Types::addProperty(record, "particle", &ESM::MagicEffect::mParticle);
+            Types::addFlagProperty(record, "continuousVfx", ESM::MagicEffect::ContinuousVfx, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addProperty(record, "areaSound", &ESM::MagicEffect::mAreaSound);
+            Types::addProperty(record, "boltSound", &ESM::MagicEffect::mBoltSound);
+            Types::addProperty(record, "castSound", &ESM::MagicEffect::mCastSound);
+            Types::addProperty(record, "hitSound", &ESM::MagicEffect::mHitSound);
+            Types::addProperty(record, "areaStatic", &ESM::MagicEffect::mArea);
+            Types::addProperty(record, "bolt", &ESM::MagicEffect::mBolt);
+            Types::addProperty(record, "castStatic", &ESM::MagicEffect::mCasting);
+            Types::addProperty(record, "hitStatic", &ESM::MagicEffect::mHit);
+            Types::addProperty(record, "name", &ESM::MagicEffect::mName);
+            Types::addProperty(record, "school", &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mSchool);
+            Types::addProperty(record, "baseCost", &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mBaseCost);
+            const auto getColor = [](const T& rec) -> Misc::Color {
+                const ESM::MagicEffect& effect = Types::RecordType<T>::asRecord(rec);
+                return Misc::Color(
+                    effect.mData.mRed / 255.f, effect.mData.mGreen / 255.f, effect.mData.mBlue / 255.f, 1.f);
+            };
+            if constexpr (Types::RecordType<T>::isMutable)
+            {
+                record["color"] = sol::property(std::move(getColor), [](T& rec, const Misc::Color& color) {
+                    ESM::MagicEffect& effect = rec.find();
+                    assignColor(effect, color);
+                });
+            }
+            else
+            {
+                record["color"] = sol::readonly_property(std::move(getColor));
+            }
+            Types::addReverseFlagProperty(record, "hasDuration", ESM::MagicEffect::NoDuration, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addReverseFlagProperty(record, "hasMagnitude", ESM::MagicEffect::NoMagnitude,
+                &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mFlags);
+            // TODO: Not self-explanatory. Needs either a better name or documentation. The description in
+            // loadmgef.hpp is uninformative.
+            Types::addFlagProperty(record, "isAppliedOnce", ESM::MagicEffect::AppliedOnce, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "harmful", ESM::MagicEffect::Harmful, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "casterLinked", ESM::MagicEffect::CasterLinked, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "nonRecastable", ESM::MagicEffect::NonRecastable, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+
+            Types::addFlagProperty(record, "hasAttribute", ESM::MagicEffect::TargetAttribute, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "hasSkill", ESM::MagicEffect::TargetSkill, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "onSelf", ESM::MagicEffect::CastSelf, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "onTouch", ESM::MagicEffect::CastTouch, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "onTarget", ESM::MagicEffect::CastTarget, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "unreflectable", ESM::MagicEffect::Unreflectable, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "allowsSpellmaking", ESM::MagicEffect::AllowSpellmaking,
+                &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "allowsEnchanting", ESM::MagicEffect::AllowEnchanting,
+                &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addFlagProperty(record, "negativeLight", ESM::MagicEffect::NegativeLight, &ESM::MagicEffect::mData,
+                &ESM::MagicEffect::MEDTstruct::mFlags);
+            Types::addProperty(record, "speed", &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mSpeed);
+        }
     }
 
     void addSpellBindings(sol::state_view& state)
@@ -381,5 +480,61 @@ namespace MWLua
         }
         out.updateIndexes();
         return out;
+    }
+
+    void addMagicEffectType(sol::state_view& lua)
+    {
+        addMagicEffectType<ESM::MagicEffect>(lua, "ESM3_MagicEffect");
+    }
+
+    void addMutableMagicEffectType(sol::state_view& lua)
+    {
+        addMagicEffectType<MutableRecord<ESM::MagicEffect>>(lua, "ESM3_MutableMagicEffect");
+    }
+
+    ESM::MagicEffect tableToMagicEffect(const sol::table& rec)
+    {
+        auto effect = Types::initFromTemplate<ESM::MagicEffect>(rec);
+        if (rec["icon"] != sol::nil)
+            effect.mIcon = rec["icon"];
+        if (rec["particle"] != sol::nil)
+            effect.mParticle = rec["particle"];
+        setFlagProperty(rec, "continuousVfx", effect.mData.mFlags, ESM::MagicEffect::ContinuousVfx);
+        addPropertyFromTable(rec, "areaSound", effect.mAreaSound);
+        addPropertyFromTable(rec, "boltSound", effect.mBoltSound);
+        addPropertyFromTable(rec, "castSound", effect.mCastSound);
+        addPropertyFromTable(rec, "hitSound", effect.mHitSound);
+        addPropertyFromTable(rec, "areaStatic", effect.mArea);
+        addPropertyFromTable(rec, "bolt", effect.mBolt);
+        addPropertyFromTable(rec, "castStatic", effect.mCasting);
+        addPropertyFromTable(rec, "hitStatic", effect.mHit);
+        if (rec["name"] != sol::nil)
+            effect.mName = rec["name"];
+        addPropertyFromTable(rec, "school", effect.mData.mSchool);
+        if (rec["baseCost"] != sol::nil)
+            effect.mData.mBaseCost = rec["baseCost"];
+        if (rec["color"] != sol::nil)
+        {
+            const auto color = LuaUtil::cast<Misc::Color>(rec["color"]);
+            assignColor(effect, color);
+        }
+        setReverseFlagProperty(rec, "hasDuration", effect.mData.mFlags, ESM::MagicEffect::NoDuration);
+        setReverseFlagProperty(rec, "hasMagnitude", effect.mData.mFlags, ESM::MagicEffect::NoMagnitude);
+        setFlagProperty(rec, "isAppliedOnce", effect.mData.mFlags, ESM::MagicEffect::AppliedOnce);
+        setFlagProperty(rec, "harmful", effect.mData.mFlags, ESM::MagicEffect::Harmful);
+        setFlagProperty(rec, "casterLinked", effect.mData.mFlags, ESM::MagicEffect::CasterLinked);
+        setFlagProperty(rec, "nonRecastable", effect.mData.mFlags, ESM::MagicEffect::NonRecastable);
+        setFlagProperty(rec, "hasAttribute", effect.mData.mFlags, ESM::MagicEffect::TargetAttribute);
+        setFlagProperty(rec, "hasSkill", effect.mData.mFlags, ESM::MagicEffect::TargetSkill);
+        setFlagProperty(rec, "onSelf", effect.mData.mFlags, ESM::MagicEffect::CastSelf);
+        setFlagProperty(rec, "onTouch", effect.mData.mFlags, ESM::MagicEffect::CastTouch);
+        setFlagProperty(rec, "onTarget", effect.mData.mFlags, ESM::MagicEffect::CastTarget);
+        setFlagProperty(rec, "unreflectable", effect.mData.mFlags, ESM::MagicEffect::Unreflectable);
+        setFlagProperty(rec, "allowsSpellmaking", effect.mData.mFlags, ESM::MagicEffect::AllowSpellmaking);
+        setFlagProperty(rec, "allowsEnchanting", effect.mData.mFlags, ESM::MagicEffect::AllowEnchanting);
+        setFlagProperty(rec, "negativeLight", effect.mData.mFlags, ESM::MagicEffect::NegativeLight);
+        if (rec["speed"] != sol::nil)
+            effect.mData.mSpeed = rec["speed"];
+        return effect;
     }
 }
