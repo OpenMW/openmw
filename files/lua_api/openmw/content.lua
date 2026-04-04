@@ -73,8 +73,14 @@
 -- @usage
 -- content.ingredients.records.MyIngredient = { template = content.ingredients.records['ingred_ectoplasm_01'], name = 'Soylent', effects = { { id = 'vampirism' } } }
 
---- @{#MiscContent}: Misc manipulation.
--- @field [parent=#content] #MiscContent miscs
+--- @{#LightContent}: Light manipulation.
+-- @field [parent=#content] #LightContent lights
+
+---
+-- A mutable list of all @{openmw.types#LightRecord}s.
+-- @field [parent=#LightContent] #list<openmw.types#LightRecord> records
+-- @usage
+-- content.lights.records.MyLight = { template = content.lights.records['torch'], duration = -1, name = 'Infinite Torch' }
 
 --- @{#MagicEffectContent}: Magic effect manipulation.
 -- @field [parent=#content] #MagicEffectContent magicEffects
@@ -84,6 +90,9 @@
 -- @field [parent=#MagicEffectContent] #list<openmw.core#MagicEffect> records
 -- @usage
 -- content.magicEffects.records.MyMagicEffect = { template = content.magicEffects.records['summonscamp'], name = 'Summon Nothing' }
+
+--- @{#MiscContent}: Misc manipulation.
+-- @field [parent=#content] #MiscContent miscs
 
 ---
 -- A mutable list of all @{openmw.types#MiscellaneousRecord}s.

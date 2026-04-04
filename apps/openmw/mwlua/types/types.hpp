@@ -61,6 +61,8 @@ namespace MWLua
     ESM::Static tableToStatic(const sol::table& rec);
     void addMutableStaticType(sol::state_view& lua);
     void addLightBindings(sol::table light, const Context& context);
+    ESM::Light tableToLight(const sol::table& rec);
+    void addMutableLightType(sol::state_view& lua);
     void addLevelledCreatureBindings(sol::table list, const Context& context);
 
     void addESM4DoorBindings(sol::table door, const Context& context);
