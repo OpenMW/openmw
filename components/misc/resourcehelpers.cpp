@@ -145,6 +145,14 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctIconPath(VFS::Path::Normaliz
     return correctResourcePath({ { icons } }, resPath, vfs, dds);
 }
 
+VFS::Path::Normalized Misc::ResourceHelpers::correctBigIconPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
+{
+    std::string name("b_");
+    name += resPath.filename().value();
+    return correctIconPath(VFS::Path::join(resPath.parent(), name), vfs);
+}
+
 VFS::Path::Normalized Misc::ResourceHelpers::correctBookartPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
