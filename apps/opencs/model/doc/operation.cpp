@@ -126,7 +126,7 @@ void CSMDoc::Operation::executeStage()
     Messages messages(mDefaultSeverity);
 
     const auto batchStart = std::chrono::steady_clock::now();
-    static constexpr auto batchBudget = std::chrono::milliseconds(5);
+    static constexpr auto batchBudget = std::chrono::milliseconds(33);
 
     while (mCurrentStage != mStages.end())
     {
