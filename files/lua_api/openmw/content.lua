@@ -19,6 +19,15 @@
 -- @usage
 -- content.activators.records.MyActivator = { mwscript = 'float', model = 'meshes/w/w_chitin_arrow.nif', name = 'Quest marker' }
 
+--- @{#BookContent}: Book manipulation.
+-- @field [parent=#content] #BookContent books
+
+---
+-- A mutable list of all @{openmw.types#BookRecord}s.
+-- @field [parent=#BookContent] #list<openmw.types#BookRecord> records
+-- @usage
+-- content.books.records.MyBook = { template = content.books.records['bk_lustyargonianmaid'], text = content.books.records['bk_BoethiahPillowBook'].text }
+
 --- @{#DoorContent}: Door manipulation.
 -- @field [parent=#content] #DoorContent doors
 
