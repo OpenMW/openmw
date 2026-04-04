@@ -1,5 +1,7 @@
 #include "operationholder.hpp"
 
+#include <QCoreApplication>
+
 #include "operation.hpp"
 
 CSMDoc::OperationHolder::OperationHolder(Operation* operation)
@@ -51,6 +53,9 @@ void CSMDoc::OperationHolder::abortAndWait()
         mThread.quit();
         mThread.wait();
     }
+
+    if (mOperation)
+        mOperation->moveToThread(QCoreApplication::instance()->thread());
 }
 
 void CSMDoc::OperationHolder::doneSlot(int type, bool failed)
