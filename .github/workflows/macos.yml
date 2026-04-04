@@ -42,7 +42,7 @@ jobs:
 
     - run: |
         cd build
-        for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${{ env.DMG_IDENTIFIER }}.dmg"; done
+        for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}-${{ env.DMG_IDENTIFIER }}.dmg"; done
 
     - name: Store dmg
       uses: actions/upload-artifact@v6
