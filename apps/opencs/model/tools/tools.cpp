@@ -154,8 +154,6 @@ CSMTools::Tools::Tools(CSMDoc::Document& document, ToUTF8::FromType encoding)
     mReports.insert(std::make_pair(mNextReportNumber++, new ReportModel));
     mActiveReports.insert(std::make_pair(CSMDoc::State_Loading, 0));
 
-    mSearch.setUseThread(false);
-
     connect(&mSearch, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
     connect(&mSearch, &CSMDoc::OperationHolder::done, this, &Tools::done);
     connect(&mSearch, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
