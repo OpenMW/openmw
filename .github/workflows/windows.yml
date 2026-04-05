@@ -39,9 +39,7 @@ jobs:
 
     - shell: bash
       run: |
-        source "${{ github.workspace }}/CI/deps_versions.msvc.sh"
-        echo "QT_VER=$QT_VER" >> $GITHUB_ENV
-        echo "VCPKG_TAG=$VCPKG_TAG" >> $GITHUB_ENV
+        cat "${{ github.workspace }}/CI/deps_versions.msvc.sh" << $GITHUB_ENV
 
     - name: Create directories for dependencies
       run: |
