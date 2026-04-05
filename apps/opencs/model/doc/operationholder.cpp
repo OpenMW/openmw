@@ -16,9 +16,9 @@ CSMDoc::OperationHolder::OperationHolder(QObject* parent, Operation* operation)
 
     connect(&mThread, &QThread::started, mOperation, &Operation::run);
 
-    // When the worker thread finishes, move the operation (and its child QTimer) back to
-    // the main thread so it can be safely reused or deleted. This must be a
-    // DirectConnection so it runs on the worker thread before it fully exits —
+    // When the worker thread finishes, move the operation (and its child QTimer)
+    // back to the main thread so it can be safely reused or deleted. This must be
+    // a DirectConnection so it runs on the worker thread before it fully exits —
     // moveToThread requires being called from the object's current thread.
     connect(&mThread, &QThread::finished, mOperation, &Operation::cleanup, Qt::DirectConnection);
 }
@@ -35,6 +35,9 @@ bool CSMDoc::OperationHolder::isRunning() const
 
 void CSMDoc::OperationHolder::start()
 {
+    if (!mOperation || mThread.isRunning())
+        return;
+
     mOperation->moveToThread(&mThread);
     mThread.start();
 }
