@@ -58,7 +58,7 @@ void CSMDoc::OperationHolder::quit()
 
     if (mOperation)
     {
-        mOperation->deleteLater();
+        delete mOperation;
         mOperation = nullptr;
     }
 }

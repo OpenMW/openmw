@@ -159,8 +159,8 @@ CSMTools::Tools::Tools(CSMDoc::Document& document, ToUTF8::FromType encoding)
 
 CSMTools::Tools::~Tools()
 {
-    // OperationHolder destructors call quit(), which aborts the operation, waits for the
-    // thread to finish, and deletes the operation via deleteLater(). The holders are
+    // OperationHolder destructors call quit(), which aborts the operation, waits
+    // for the thread to finish, and deletes the operation. The holders are
     // QObject children of Tools and are destroyed automatically.
 
     for (std::map<int, ReportModel*>::iterator iter(mReports.begin()); iter != mReports.end(); ++iter)
