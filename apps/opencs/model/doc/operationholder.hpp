@@ -18,9 +18,9 @@ namespace CSMDoc
         bool mRunning;
 
     public:
-        OperationHolder(Operation* operation = nullptr);
+        OperationHolder(QObject* parent, Operation* operation);
 
-        void setOperation(Operation* operation);
+        ~OperationHolder();
 
         bool isRunning() const;
 
@@ -28,8 +28,9 @@ namespace CSMDoc
 
         void abort();
 
-        // Abort and wait until thread has finished.
-        void abortAndWait();
+        /// Stop the operation, wait for the thread to finish, and delete the operation.
+        /// Safe to call multiple times.
+        void quit();
 
     private slots:
 

@@ -65,6 +65,11 @@ namespace CSMDoc
 
         void run();
 
+        /// Stop the timer and move this operation back to the main thread.
+        /// Called via DirectConnection from QThread::finished so it executes
+        /// on the worker thread before it fully exits.
+        void cleanup();
+
     private slots:
 
         void executeStage();

@@ -4,6 +4,8 @@
 #include <exception>
 #include <vector>
 
+#include <QCoreApplication>
+
 #include <components/debug/debuglog.hpp>
 
 #include <apps/opencs/model/doc/messages.hpp>
@@ -180,4 +182,9 @@ void CSMDoc::Operation::executeStage()
 void CSMDoc::Operation::operationDone()
 {
     emit done(mType, mError);
+}
+
+void CSMDoc::Operation::cleanup()
+{
+    moveToThread(QCoreApplication::instance()->thread());
 }

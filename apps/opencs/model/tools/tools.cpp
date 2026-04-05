@@ -47,11 +47,11 @@ CSMDoc::OperationHolder* CSMTools::Tools::get(int type)
     switch (type)
     {
         case CSMDoc::State_Verifying:
-            return &mVerifier;
+            return mVerifier;
         case CSMDoc::State_Searching:
-            return &mSearch;
+            return mSearch;
         case CSMDoc::State_Merging:
-            return &mMerge;
+            return mMerge;
     }
 
     return nullptr;
@@ -64,13 +64,9 @@ const CSMDoc::OperationHolder* CSMTools::Tools::get(int type) const
 
 CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
 {
-    if (!mVerifierOperation)
+    if (!mVerifier)
     {
         mVerifierOperation = new CSMDoc::Operation(CSMDoc::State_Verifying, false);
-
-        connect(&mVerifier, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
-        connect(&mVerifier, &CSMDoc::OperationHolder::done, this, &Tools::done);
-        connect(&mVerifier, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
 
         std::vector<ESM::RefId> mandatoryRefIds;
         {
@@ -135,53 +131,37 @@ CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
 
         mVerifierOperation->appendStage(new EnchantmentCheckStage(mData.getEnchantments()));
 
-        mVerifier.setOperation(mVerifierOperation);
+        mVerifier = new CSMDoc::OperationHolder(this, mVerifierOperation);
+        connect(mVerifier, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+        connect(mVerifier, &CSMDoc::OperationHolder::done, this, &Tools::done);
+        connect(mVerifier, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
     }
 
-    return &mVerifier;
+    return mVerifier;
 }
 
 CSMTools::Tools::Tools(CSMDoc::Document& document, ToUTF8::FromType encoding)
     : mDocument(document)
     , mData(document.getData())
     , mVerifierOperation(nullptr)
+    , mVerifier(nullptr)
     , mSearchOperation(nullptr)
+    , mSearch(nullptr)
     , mMergeOperation(nullptr)
+    , mMerge(nullptr)
     , mNextReportNumber(0)
     , mEncoding(encoding)
 {
     // index 0: load error log
     mReports.insert(std::make_pair(mNextReportNumber++, new ReportModel));
     mActiveReports.insert(std::make_pair(CSMDoc::State_Loading, 0));
-
-    connect(&mSearch, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
-    connect(&mSearch, &CSMDoc::OperationHolder::done, this, &Tools::done);
-    connect(&mSearch, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
-
-    connect(&mMerge, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
-    connect(&mMerge, &CSMDoc::OperationHolder::done, this, &Tools::done);
-    // don't need to connect report message, since there are no messages for merge
 }
 
 CSMTools::Tools::~Tools()
 {
-    if (mVerifierOperation)
-    {
-        mVerifier.abortAndWait();
-        delete mVerifierOperation;
-    }
-
-    if (mSearchOperation)
-    {
-        mSearch.abortAndWait();
-        delete mSearchOperation;
-    }
-
-    if (mMergeOperation)
-    {
-        mMerge.abortAndWait();
-        delete mMergeOperation;
-    }
+    // OperationHolder destructors call quit(), which aborts the operation, waits for the
+    // thread to finish, and deletes the operation via deleteLater(). The holders are
+    // QObject children of Tools and are destroyed automatically.
 
     for (std::map<int, ReportModel*>::iterator iter(mReports.begin()); iter != mReports.end(); ++iter)
         delete iter->second;
@@ -213,25 +193,30 @@ void CSMTools::Tools::runSearch(const CSMWorld::UniversalId& searchId, const Sea
 {
     mActiveReports[CSMDoc::State_Searching] = searchId.getIndex();
 
-    if (!mSearchOperation)
+    if (!mSearch)
     {
         mSearchOperation = new SearchOperation(mDocument);
-        mSearch.setOperation(mSearchOperation);
+        mSearch = new CSMDoc::OperationHolder(this, mSearchOperation);
+        connect(mSearch, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+        connect(mSearch, &CSMDoc::OperationHolder::done, this, &Tools::done);
+        connect(mSearch, &CSMDoc::OperationHolder::reportMessage, this, &Tools::verifierMessage);
     }
 
     mSearchOperation->configure(search);
 
-    mSearch.start();
+    mSearch->start();
 }
 
 void CSMTools::Tools::runMerge(std::unique_ptr<CSMDoc::Document> target)
 {
     // not setting an active report, because merge does not produce messages
 
-    if (!mMergeOperation)
+    if (!mMerge)
     {
         mMergeOperation = new MergeOperation(mDocument, mEncoding);
-        mMerge.setOperation(mMergeOperation);
+        mMerge = new CSMDoc::OperationHolder(this, mMergeOperation);
+        connect(mMerge, &CSMDoc::OperationHolder::progress, this, &Tools::progress);
+        connect(mMerge, &CSMDoc::OperationHolder::done, this, &Tools::done);
         connect(mMergeOperation, &MergeOperation::mergeDone, this, &Tools::mergeDone);
     }
 
@@ -239,7 +224,7 @@ void CSMTools::Tools::runMerge(std::unique_ptr<CSMDoc::Document> target)
 
     mMergeOperation->setTarget(std::move(target));
 
-    mMerge.start();
+    mMerge->start();
 }
 
 void CSMTools::Tools::abortOperation(int type)
