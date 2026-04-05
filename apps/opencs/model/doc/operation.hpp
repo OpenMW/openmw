@@ -25,7 +25,6 @@ namespace CSMDoc
         int mCurrentStep;
         int mCurrentStepTotal;
         int mTotalSteps;
-        int mOrdered;
         bool mFinalAlways;
         bool mError;
         bool mPrepared;
@@ -35,8 +34,7 @@ namespace CSMDoc
         void prepareStages();
 
     public:
-        Operation(State type, bool ordered, bool finalAlways = false);
-        ///< \param ordered Stages must be executed in the given order.
+        Operation(State type, bool finalAlways = false);
         /// \param finalAlways Execute last stage even if an error occurred during earlier stages.
 
         virtual ~Operation();

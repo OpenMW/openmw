@@ -66,7 +66,7 @@ CSMDoc::OperationHolder* CSMTools::Tools::getVerifier()
 {
     if (!mVerifier)
     {
-        mVerifierOperation = new CSMDoc::Operation(CSMDoc::State_Verifying, false);
+        mVerifierOperation = new CSMDoc::Operation(CSMDoc::State_Verifying);
 
         std::vector<ESM::RefId> mandatoryRefIds;
         {

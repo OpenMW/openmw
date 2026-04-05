@@ -55,14 +55,13 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation(State type, bool ordered, bool finalAlways)
+CSMDoc::Operation::Operation(State type, bool finalAlways)
     : mType(type)
     , mStages(std::vector<std::pair<Stage*, int>>())
     , mCurrentStage(mStages.begin())
     , mCurrentStep(0)
     , mCurrentStepTotal(0)
     , mTotalSteps(0)
-    , mOrdered(ordered)
     , mFinalAlways(finalAlways)
     , mError(false)
     , mPrepared(false)
