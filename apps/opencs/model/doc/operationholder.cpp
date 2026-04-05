@@ -5,7 +5,6 @@
 CSMDoc::OperationHolder::OperationHolder(QObject* parent, Operation* operation)
     : QObject(parent)
     , mOperation(operation)
-    , mRunning(false)
 {
     connect(mOperation, &Operation::progress, this, &OperationHolder::progress);
 
@@ -31,19 +30,17 @@ CSMDoc::OperationHolder::~OperationHolder()
 
 bool CSMDoc::OperationHolder::isRunning() const
 {
-    return mRunning;
+    return mThread.isRunning();
 }
 
 void CSMDoc::OperationHolder::start()
 {
-    mRunning = true;
     mOperation->moveToThread(&mThread);
     mThread.start();
 }
 
 void CSMDoc::OperationHolder::abort()
 {
-    mRunning = false;
     emit abortSignal();
 }
 
@@ -65,7 +62,6 @@ void CSMDoc::OperationHolder::quit()
 
 void CSMDoc::OperationHolder::doneSlot(int type, bool failed)
 {
-    mRunning = false;
     mThread.quit();
     mThread.wait();
     emit done(type, failed);

@@ -15,7 +15,6 @@ namespace CSMDoc
 
         QThread mThread;
         Operation* mOperation;
-        bool mRunning;
 
     public:
         OperationHolder(QObject* parent, Operation* operation);
