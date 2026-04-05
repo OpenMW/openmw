@@ -120,6 +120,9 @@ namespace NavMeshTool
             addOption("write-binary-log", bpo::value<bool>()->implicit_value(true)->default_value(false),
                 "write progress in binary messages to be consumed by the launcher");
 
+            addOption("collect-stats", bpo::value<bool>()->implicit_value(true)->default_value(false),
+                "collect statistics for generated navmesh tiles including existing ones stored in database");
+
             addOption("worldspace-filter", bpo::value<std::string>()->default_value(".*"),
                 "Regular expression to filter in specified worldspaces in modified ECMAScript grammar (see "
                 "https://en.cppreference.com/w/cpp/regex/ecmascript.html)");
@@ -184,6 +187,7 @@ namespace NavMeshTool
             const bool processInteriorCells = variables["process-interior-cells"].as<bool>();
             const bool removeUnusedTiles = variables["remove-unused-tiles"].as<bool>();
             const bool writeBinaryLog = variables["write-binary-log"].as<bool>();
+            const bool collectStats = variables["collect-stats"].as<bool>();
 
             const std::regex worldspaceFilter(variables["worldspace-filter"].as<std::string>());
 
@@ -240,8 +244,12 @@ namespace NavMeshTool
                 = collectWorldspaceCells(esmData, processInteriorCells, worldspaceFilter);
 
             Status status = Status::Ok;
-            bool needVacuum = false;
+            std::size_t provided = 0;
+            std::size_t inserted = 0;
+            std::size_t updated = 0;
+            std::size_t deleted = 0;
             std::size_t count = 0;
+            GenerateTilesStats stats;
 
             {
                 SceneUtil::WorkQueue workQueue(threadsNumber);
@@ -253,8 +261,14 @@ namespace NavMeshTool
                     const WorldspaceData worldspaceData = gatherWorldspaceData(navigatorSettings, readers, vfs,
                         bulletShapeManager, esmData, writeBinaryLog, worldspace, cells);
 
-                    const Result result = generateAllNavMeshTiles(agentBounds, navigatorSettings, removeUnusedTiles,
-                        writeBinaryLog, worldspaceData, db, workQueue);
+                    const GenerateAllNavMeshTilesOptions generateAllNavMeshTilesOptions{
+                        .mRemoveUnusedTiles = removeUnusedTiles,
+                        .mWriteBinaryLog = writeBinaryLog,
+                        .mCollectStats = collectStats,
+                    };
+
+                    const GenerateTilesResult result = generateAllNavMeshTiles(
+                        agentBounds, navigatorSettings, generateAllNavMeshTilesOptions, worldspaceData, db, workQueue);
 
                     ++count;
 
@@ -262,14 +276,32 @@ namespace NavMeshTool
                                      << worldspace;
 
                     status = result.mStatus;
-                    needVacuum = needVacuum || result.mNeedVacuum;
+                    provided += result.mProvided;
+                    inserted += result.mInserted;
+                    updated += result.mUpdated;
+                    deleted += result.mDeleted;
+
+                    if (collectStats)
+                    {
+                        stats.mMaxPolyCountPerTile
+                            = std::max(stats.mMaxPolyCountPerTile, result.mStats.mMaxPolyCountPerTile);
+                    }
 
                     if (status != Status::Ok)
                         break;
                 }
             }
 
-            if (status == Status::Ok && needVacuum)
+            Log(Debug::Info) << "Generated navmesh for " << provided << " tiles: " << inserted << " inserted, "
+                             << updated << " updated, " << deleted << " deleted";
+
+            if (collectStats)
+            {
+                Log(Debug::Info) << "Stats:";
+                Log(Debug::Info) << "max polygons per tile = " << stats.mMaxPolyCountPerTile;
+            }
+
+            if (status == Status::Ok && inserted + updated + deleted > 0)
             {
                 Log(Debug::Info) << "Vacuuming the database...";
                 db.vacuum();
