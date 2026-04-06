@@ -391,6 +391,7 @@ namespace MWLua
             Types::addFlagProperty(record, "negativeLight", ESM::MagicEffect::NegativeLight, &ESM::MagicEffect::mData,
                 &ESM::MagicEffect::MEDTstruct::mFlags);
             Types::addProperty(record, "speed", &ESM::MagicEffect::mData, &ESM::MagicEffect::MEDTstruct::mSpeed);
+            Types::addProperty(record, "description", &ESM::MagicEffect::mDescription);
         }
     }
 
@@ -535,6 +536,8 @@ namespace MWLua
         setFlagProperty(rec, "negativeLight", effect.mData.mFlags, ESM::MagicEffect::NegativeLight);
         if (rec["speed"] != sol::nil)
             effect.mData.mSpeed = rec["speed"];
+        if (rec["description"] != sol::nil)
+            effect.mDescription = rec["description"];
         return effect;
     }
 }
