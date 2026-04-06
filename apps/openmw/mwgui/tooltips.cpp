@@ -959,10 +959,8 @@ namespace MWGui
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
-        std::string icon = effect->mIcon;
-        icon.insert(icon.rfind('\\') + 1, "b_");
-        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
-            VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
+            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
