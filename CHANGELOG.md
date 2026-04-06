@@ -2,9 +2,12 @@
 ------
 
     Bug #4769: Editor: Unable to edit exterior cells from topic info table
+    Bug #6439: Moons are blended incorrectly
     Bug #6494: Some Raven Rock buildings are enabled from the beginning of the game
     Bug #7340: Guards do not become properly aggressive e.g. for dialogue purposes
+    Bug #7595: OpenMW-CS does not support shader rendering
     Bug #7605: Creatures without inventory stores cannot use enchanted items
+    Bug #8110: say function doesn't seem to respect subtitles config
     Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
     Bug #8129: MessageBox button argument handling differences
     Bug #8270: Editor: Parts of landscape textures are transparent in the cell view, allowing you to see wallpaper or other windows below them
@@ -13,6 +16,7 @@
     Bug #8657: Preloading crash on exit due to failed startup
     Bug #8692: Can't switch to enchanted weapons' spells in the spell menu when spellcasting
     Bug #8693: Crash when constructing infinite-length UI elements
+    Bug #8699: Dangling Lua script pointer crashes caused by e.g. moving items
     Bug #8732: MessageBox formatting is too limited
     Bug #8760: Single-character topics don't get linked
     Bug #8765: Actors can't transmit diseases to other actors
@@ -46,17 +50,24 @@
     Bug #8978: Polish needs additional word separators in dialogue
     Bug #8980: Lua: Teleporting the player while menus are open crashes the game
     Bug #8983: Animation instant transition on unequipping ammo mid-attack
+    Bug #8985: Objects that share a mesh with a VFX become uninteractable
     Bug #8988: Particles are not inverted vertically
     Bug #8996: Crash when skinning data references a nonexistent vertex
+    Bug #8999: Various Wizard badness
+    Bug #9018: controls.use = 4 sometimes semi-freezes the game
+    Bug #9026: Thrown projectiles are not rotated
+    Bug #9048: Escort AI missing argument
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
+    Feature #5197: Editor: terrain vertex paint editmode
     Feature #7152: OpenMW-CS: Verify global search regexp
     Feature #7297: Support topic keyword override files from the Russian localization
     Feature #7399: Automatically detect supported games via launcher through common locations like steam
     Feature #7493: Add button to open current openmw.cfg(s) in the launcher
     Feature #7830: Preserve global script targets not created by content files
     Feature #8076: Lua: Add read access to Topic info Conditions
+    Feature #8342: Custom spell, enchantment records and effect lists
     Feature #8392: Editor: Rotate a group of selected objects around 1 axis
     Feature #8644: Add loop key to world.vfx.spawn and a way to remove them
     Feature #8705: Dehardcode global map color palette
@@ -64,6 +75,7 @@
     Feature #8731: Use Hand to Hand Hit 2 sound
     Feature #8774: Controller Support: When in the barter/loot menus, have the active menu be brought to the front.
     Feature #8788: Dehardcode script settings window font and colors
+    Feature #8791: Custom magic effect records
     Feature #8796: Expose potion autocalc flag
     Feature #8801: Support additional controller buttons
     Feature #8816: Werewolf transformation binding
@@ -75,11 +87,18 @@
     Feature #8913: Show the current gamma correction value like the other settings in-game
     Feature #8956: Implement iGreetDuration and fGreetDistanceReset
     Feature #8957: Implement iMaxInfoDist
+    Feature #8962: Expose unused magic effect speed parameter
     Feature #8966: Add DialogueResponse event
     Feature #8979: Animation ended handler
     Feature #8987: Lua Load context
     Feature #8998: Custom door and static records
+    Feature #9002: Warn on unknown layout properties
+    Feature #9010: Starting cell binding
+    Feature #9013: Expose reputation to Lua
+    Feature #9027: Bulgarian translation for Qt tools
+    Feature #9030: Lua-controllable camera projection offset
     Task #8718: Lua: Cell fields can still return empty strings instead of nil values
+    Task #9001: Remove the exclusive FFP mode
 
 0.50.0
 ------
