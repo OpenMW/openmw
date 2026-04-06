@@ -40,7 +40,7 @@ jobs:
     - shell: bash
       name: Add deps version env to GITHUB_ENV, stripping comments
       run: |
-        sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' "${{ github.workspace }}/CI/deps_versions.msvc.sh" >> $GITHUB_ENV
+        sed '/^\s*#/d; /^\s*$/d' "${{ github.workspace }}/CI/deps_versions.msvc.sh" >> $GITHUB_ENV
 
     - name: Create directories for dependencies
       run: |
