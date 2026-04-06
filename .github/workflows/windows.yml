@@ -38,6 +38,7 @@ jobs:
     - uses: actions/checkout@v6
 
     - shell: bash
+      name: Add deps version env to GITHUB_ENV, stripping comments
       run: |
         sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' "${{ github.workspace }}/CI/deps_versions.msvc.sh" >> $GITHUB_ENV
 
