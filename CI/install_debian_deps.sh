@@ -40,6 +40,10 @@ declare -rA GROUPED_DEPS=(
     libyaml-cpp-dev libqt6svg6 libqt6svg6-dev
   "
 
+  [openmw-deps-tarball]="
+    p7zip-full pipx libgl-dev libxkbcommon-dev libegl1-mesa-dev
+  "
+
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev libcollada-dom-dev"
   [clang-tidy]="clang-tidy-19"

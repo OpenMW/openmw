@@ -510,6 +510,21 @@ Ubuntu_Clang_tests_Debug:
     reports:
       junit: build/*-tests.xml
 
+Ubuntu_Vcpkg_Deps:
+  extends: .Ubuntu
+  cache:
+    key: Ubuntu_Vcpkg_Deps.ubuntu_24.04.v2
+    paths:
+      - apt-cache/
+      - ccache/
+      - build/extern/fetched/
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps-tarball
+    - ./CI/linux/before_install_for_vcpkg.sh
+  variables:
+    CI_OPENMW_USE_VCPKG: true
+    CCACHE_SIZE: 1G
+
 .Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
   stage: test
@@ -547,6 +562,15 @@ Ubuntu_Clang_integration_tests:
     - Ubuntu_Clang
   cache:
     key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v4.$CI_COMMIT_REF_PROTECTED
+  variables:
+    OPENMW_DEPS: openmw-integration-tests
+
+Ubuntu_Vcpkg_integration_tests:
+  extends: .Ubuntu_integration_tests_base
+  needs:
+    - Ubuntu_Vcpkg_Deps
+  cache:
+    key: Ubuntu_Vcpkg_Deps_tests.ubuntu_24.04.v1
   variables:
     OPENMW_DEPS: openmw-integration-tests
 
