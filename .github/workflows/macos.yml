@@ -1,0 +1,60 @@
+name: Reusable MacOS workflow
+
+on:
+  workflow_call:
+    inputs:
+      build-type:
+        default: RelWithDebInfo
+        type: string
+      image:
+        description: MacOS Runner image
+        required: true
+        type: string
+
+jobs:
+  MacOS:
+    name: ${{ inputs.image }}
+    runs-on: ${{ inputs.image }}
+    steps:
+    - uses: actions/checkout@v6
+    - run: echo "CMAKE_BUILD_TYPE=${{ inputs.build-type }}" >> $GITHUB_ENV
+
+    - run: echo "MACOS_AMD64=true" >> $GITHUB_ENV
+      if: ${{ inputs.image == 'macos-15-intel' }}
+    - run: echo "DMG_IDENTIFIER=amd64" >> $GITHUB_ENV
+      if: ${{ inputs.image == 'macos-15-intel' }}
+    - run: echo "DMG_IDENTIFIER=arm64" >> $GITHUB_ENV
+      if: ${{ inputs.image != 'macos-15-intel' }}
+
+    - name: Install Building Dependencies
+      run: CI/before_install.macos.sh
+
+    - name: Prime ccache
+      uses: hendrikmuhs/ccache-action@v1.2.22
+      with:
+        key: ${{ inputs.image }}-${{ inputs.build-type }}
+        max-size: 1000M
+
+    - name: Configure
+      run: CI/before_script.macos.sh -C
+    - name: Build
+      run: CI/macos/build.sh
+
+    - run: |
+        cd build
+        for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}-${{ env.DMG_IDENTIFIER }}.dmg"; done
+
+    - name: Store dmg
+      uses: actions/upload-artifact@v6
+      with:
+        name: openmw-macos-dmg-${{ env.DMG_IDENTIFIER }}-${{ github.sha }}
+        path: |
+          ${{ github.workspace }}/build/OpenMW-*.dmg
+
+    - name: Create prerelease
+      if: ${{ inputs.build-type == 'Release' }}
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ${{ github.workspace }}/build/OpenMW-*.dmg
+        prerelease: true
+        draft: true
