@@ -1134,13 +1134,16 @@ namespace MWRender
             ? SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance)
             : unreversedProjectionMatrix;
 
-        double offsetX = (mProjectionOffset.x() / width) * 2.0;
-        double offsetY = (mProjectionOffset.y() / height) * 2.0;
+        if (width != 0 && height != 0)
+        {
+            double offsetX = (mProjectionOffset.x() / width) * 2.0;
+            double offsetY = (mProjectionOffset.y() / height) * 2.0;
 
-        const osg::Matrix translation = osg::Matrix::translate(offsetX, offsetY, 0.0);
+            const osg::Matrix translation = osg::Matrix::translate(offsetX, offsetY, 0.0);
 
-        projectionMatrix.postMult(translation);
-        unreversedProjectionMatrix.postMult(translation);
+            projectionMatrix.postMult(translation);
+            unreversedProjectionMatrix.postMult(translation);
+        }
 
         // We always set the cameras projection matrix to the un-reversed variant for correct frustum culling.
         mViewer->getCamera()->setProjectionMatrix(unreversedProjectionMatrix);
