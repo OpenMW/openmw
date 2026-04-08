@@ -50,6 +50,8 @@ namespace MWLua
     void addMutableProbeType(sol::state_view& lua);
     void addApparatusBindings(sol::table apparatus, const Context& context);
     void addRepairBindings(sol::table repair, const Context& context);
+    ESM::Repair tableToRepair(const sol::table& rec);
+    void addMutableRepairType(sol::state_view& lua);
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
     ESM::Miscellaneous tableToMisc(const sol::table& rec);
     void addMutableMiscType(sol::state_view& lua);
