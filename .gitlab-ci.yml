@@ -524,6 +524,7 @@ Ubuntu_Vcpkg_Deps_Integration_Tests:
     - ./CI/linux/before_install_for_vcpkg.sh
     - pip3 install --user --break-system-packages numpy matplotlib termtables click
   script:
+    - !reference [.Ubuntu, script]
     - CI/run_integration_tests.sh
   after_script:
     - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
