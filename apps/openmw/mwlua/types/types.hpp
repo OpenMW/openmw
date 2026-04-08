@@ -43,6 +43,8 @@ namespace MWLua
     void addPlayerBindings(sol::table player, const Context& context);
     void addCreatureBindings(sol::table creature, const Context& context);
     void addLockpickBindings(sol::table lockpick, const Context& context);
+    ESM::Lockpick tableToLockpick(const sol::table& rec);
+    void addMutableLockpickType(sol::state_view& lua);
     void addProbeBindings(sol::table probe, const Context& context);
     ESM::Probe tableToProbe(const sol::table& rec);
     void addMutableProbeType(sol::state_view& lua);
