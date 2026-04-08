@@ -510,20 +510,31 @@ Ubuntu_Clang_tests_Debug:
     reports:
       junit: build/*-tests.xml
 
-Ubuntu_Vcpkg_Deps:
+Ubuntu_Vcpkg_Deps_Integration_Tests:
   extends: .Ubuntu
+  stage: test
   cache:
-    key: Ubuntu_Vcpkg_Deps.ubuntu_24.04.v2
+    key: Ubuntu_Vcpkg_Deps_Integration.v1
     paths:
       - apt-cache/
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps-tarball
+    - CI/install_debian_deps.sh gcc openmw-deps-tarball openmw-integration-tests
     - ./CI/linux/before_install_for_vcpkg.sh
+    - pip3 install --user --break-system-packages numpy matplotlib termtables click
+  script:
+    - CI/run_integration_tests.sh
+  after_script:
+    - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
   variables:
     CI_OPENMW_USE_VCPKG: true
     CCACHE_SIZE: 1G
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
+  artifacts:
+    paths:
+      - "**/CMakeCache.txt"
 
 .Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
@@ -562,15 +573,6 @@ Ubuntu_Clang_integration_tests:
     - Ubuntu_Clang
   cache:
     key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v4.$CI_COMMIT_REF_PROTECTED
-  variables:
-    OPENMW_DEPS: openmw-integration-tests
-
-Ubuntu_Vcpkg_integration_tests:
-  extends: .Ubuntu_integration_tests_base
-  needs:
-    - Ubuntu_Vcpkg_Deps
-  cache:
-    key: Ubuntu_Vcpkg_Deps_tests.ubuntu_24.04.v1
   variables:
     OPENMW_DEPS: openmw-integration-tests
 
