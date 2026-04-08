@@ -2106,6 +2106,13 @@
 -- @field #Item baseType @{#Item}
 
 ---
+-- Creates a @{#ProbeRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Probe] createRecordDraft
+-- @param #ProbeRecord probe A Lua table with the fields of a ProbeRecord, with an optional field `template` that accepts a @{#ProbeRecord} as a base.
+-- @return #ProbeRecord A strongly typed Probe record.
+
+---
 -- A read-only list of all @{#ProbeRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #ProbeRecord.
 -- @field [parent=#Probe] #list<#ProbeRecord> records
