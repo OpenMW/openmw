@@ -7,6 +7,7 @@
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
+#include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
@@ -346,6 +347,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initProbeBindings(sol::state_view& lua, MWWorld::Store<ESM::Probe>& store)
+        {
+            addRecordStoreBindings<ESM::Probe>(lua, &MWLua::tableToProbe);
+            addMutableProbeType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Probe>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initSpellBindings(sol::state_view& lua, MWWorld::Store<ESM::Spell>& store)
         {
             addRecordStoreBindings<ESM::Spell>(lua, &MWLua::tableToSpell);
@@ -399,6 +409,7 @@ namespace MWLua
         api["magicEffects"] = initMagicEffectBindings(lua, esmStore.getWritable<ESM::MagicEffect>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
+        api["probes"] = initProbeBindings(lua, esmStore.getWritable<ESM::Probe>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         api["sounds"] = initSoundBindings(lua, esmStore.getWritable<ESM::Sound>());
