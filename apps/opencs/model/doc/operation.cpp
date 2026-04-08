@@ -4,8 +4,6 @@
 #include <exception>
 #include <vector>
 
-#include <QTimer>
-
 #include <components/debug/debuglog.hpp>
 
 #include <apps/opencs/model/doc/messages.hpp>
@@ -65,11 +63,9 @@ CSMDoc::Operation::Operation(State type, bool ordered, bool finalAlways)
     , mOrdered(ordered)
     , mFinalAlways(finalAlways)
     , mError(false)
-    , mConnected(false)
     , mPrepared(false)
     , mDefaultSeverity(Message::Severity_Error)
 {
-    mTimer = new QTimer(this);
 }
 
 CSMDoc::Operation::~Operation()
@@ -80,18 +76,9 @@ CSMDoc::Operation::~Operation()
 
 void CSMDoc::Operation::run()
 {
-    mTimer->stop();
-
-    if (!mConnected)
-    {
-        connect(mTimer, &QTimer::timeout, this, &Operation::executeStage);
-        mConnected = true;
-    }
-
     mPrepared = false;
     mStart = std::chrono::steady_clock::now();
-
-    mTimer->start(0);
+    QMetaObject::invokeMethod(this, &Operation::executeStage, Qt::QueuedConnection);
 }
 
 void CSMDoc::Operation::appendStage(Stage* stage)
@@ -111,7 +98,7 @@ bool CSMDoc::Operation::hasError() const
 
 void CSMDoc::Operation::abort()
 {
-    if (!mTimer->isActive())
+    if (!mStart.has_value())
         return;
 
     mError = true;
@@ -179,11 +166,13 @@ void CSMDoc::Operation::executeStage()
         }
 
         operationDone();
+        return;
     }
+
+    QMetaObject::invokeMethod(this, &Operation::executeStage, Qt::QueuedConnection);
 }
 
 void CSMDoc::Operation::operationDone()
 {
-    mTimer->stop();
     emit done(mType, mError);
 }
