@@ -81,14 +81,11 @@ int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
 
 void CSMWorld::InfoTableProxyModel::sourceRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
-    refreshFilter();
     mFirstRowCache.clear();
 }
 
 void CSMWorld::InfoTableProxyModel::sourceRowsInserted(const QModelIndex& parent, int /*start*/, int end)
 {
-    refreshFilter();
-
     if (!parent.isValid())
     {
         mFirstRowCache.clear();
@@ -100,8 +97,6 @@ void CSMWorld::InfoTableProxyModel::sourceRowsInserted(const QModelIndex& parent
 
 void CSMWorld::InfoTableProxyModel::sourceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    refreshFilter();
-
     if (mLastAddedSourceRow != -1 && topLeft.row() <= mLastAddedSourceRow && bottomRight.row() >= mLastAddedSourceRow)
     {
         // Now the topic of the last added row is set,
