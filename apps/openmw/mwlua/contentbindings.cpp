@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadbook.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadingr.hpp>
@@ -264,6 +265,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initBookBindings(sol::state_view& lua, MWWorld::Store<ESM::Book>& store)
+        {
+            addRecordStoreBindings<ESM::Book>(lua, &MWLua::tableToBook);
+            addMutableBookType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Book>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initDoorBindings(sol::state_view& lua, MWWorld::Store<ESM::Door>& store)
         {
             addRecordStoreBindings<ESM::Door>(lua, &MWLua::tableToDoor);
@@ -400,6 +410,7 @@ namespace MWLua
         sol::table api(lua, sol::create);
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
+        api["books"] = initBookBindings(lua, esmStore.getWritable<ESM::Book>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["enchantments"] = initEnchantmentBindings(lua, esmStore.getWritable<ESM::Enchantment>());
         api["gameSettings"] = initGameSettingBindings(lua, esmStore.getWritable<ESM::GameSetting>());

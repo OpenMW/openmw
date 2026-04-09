@@ -91,7 +91,7 @@ namespace ESM
         mData.mWeight = 0;
         mData.mValue = 0;
         mData.mIsScroll = 0;
-        mData.mSkillId = 0;
+        mData.mSkillId = -1;
         mData.mEnchant = 0;
         mName.clear();
         mModel.clear();
