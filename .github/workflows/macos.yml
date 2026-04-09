@@ -44,7 +44,7 @@ jobs:
     - name: Store dmg
       uses: actions/upload-artifact@v6
       with:
-        name: openmw-macos-dmg-${{ env.DMG_IDENTIFIER }}--${{ github.sha }}
+        name: openmw-macos-dmg-${{ env.DMG_IDENTIFIER }}-${{ github.sha }}
         path: |
           ${{ github.workspace }}/build/OpenMW-*.dmg
 
