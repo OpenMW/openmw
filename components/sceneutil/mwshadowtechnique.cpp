@@ -3055,7 +3055,7 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
         yMin = osg::maximum(-1.0, convexHull.min(1));
         yMax = osg::minimum(1.0, convexHull.max(1));
 
-        if (xMin != -1.0 || yMin!=-1.0 || xMax != 1.0 || yMax != 1.0)
+        if (xMin != -1.0 || yMin != -1.0 || xMax != 1.0 || yMax != 1.0)
         {
             osg::Matrix m;
             m.makeTranslate(osg::Vec3d(-0.5*(xMax+xMin),
