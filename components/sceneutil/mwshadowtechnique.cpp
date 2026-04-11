@@ -2755,6 +2755,18 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
 
     convexHull.extendTowardsNegativeZ();
 
+    {
+        // extendTowardsNegativeZ is too numerically unstable to do this first
+        convexHull.clip(osg::Plane(-1.0,0.0,0.0,1.0));
+        convexHull.clip(osg::Plane(1.0,0.0,0.0,1.0));
+        convexHull.clip(osg::Plane(0.0,-1.0,0.0,1.0));
+        convexHull.clip(osg::Plane(0.0,1.0,0.0,1.0));
+        convexHullUnextended.clip(osg::Plane(-1.0,0.0,0.0,1.0));
+        convexHullUnextended.clip(osg::Plane(1.0,0.0,0.0,1.0));
+        convexHullUnextended.clip(osg::Plane(0.0,-1.0,0.0,1.0));
+        convexHullUnextended.clip(osg::Plane(0.0,1.0,0.0,1.0));
+    }
+
 #if 0
     convexHull.output(osg::notify(osg::NOTICE));
 
