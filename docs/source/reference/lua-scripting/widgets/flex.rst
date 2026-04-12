@@ -62,6 +62,10 @@ Properties
   * - gap
     - number (0)
     - The pixel gap between children in the main axis.
+  * - wrap
+    - bool (false)
+    - | If true, children will wrap to the next row (or column) when they exceed the main axis size.
+      | Only applicable when `autoSize` is `false`.
 
 Events
 ------
