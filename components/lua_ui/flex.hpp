@@ -28,6 +28,8 @@ namespace LuaUi
         MyGUI::IntSize mChildrenSize;
         Alignment mAlign;
         Alignment mArrange;
+        // The pixels between flex children
+        int mGap;
 
         template <typename T>
         T& primary(MyGUI::types::TPoint<T>& point) const
