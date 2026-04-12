@@ -30,6 +30,8 @@ namespace LuaUi
         Alignment mArrange;
         // The pixels between flex children
         int mGap;
+        // Whether to wrap children to a new row/column when the current one is full
+        bool mWrap;
 
         template <typename T>
         T& primary(MyGUI::types::TPoint<T>& point) const
