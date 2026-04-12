@@ -5,6 +5,7 @@ namespace LuaUi
     void LuaFlex::updateProperties()
     {
         mGap = propertyValue("gap", 0);
+        mWrap = propertyValue("wrap", false);
         mHorizontal = propertyValue("horizontal", false);
         mAutoSized = propertyValue("autoSize", true);
         mAlign = propertyValue("align", Alignment::Start);
@@ -14,6 +15,22 @@ namespace LuaUi
 
     namespace
     {
+        // Flex widgets are made up of tracks based on if mWrap is true
+        // In most circumstances, flex only has one track - it's primary axis track.
+        // We keep track of the "remaining size" on the track to know how much space we have left for widgets that can
+        // grow/stretch
+        // We don't have a "remaining" for the secondary axis because the secondary axis never shares
+        // space with other widgets and is always the max size of the largest widget on that track and its
+        // secondary axis size.
+        struct FlexTrack
+        {
+            int primaryAxisSize = 0;
+            int primaryAxisSizeRemaining = 0;
+            int secondaryAxisSize = 0;
+            float totalPrimaryGrow = 0;
+            std::vector<WidgetExtension*> widgets;
+        };
+
         int alignSize(int container, int content, Alignment alignment)
         {
             int alignedPosition = 0;
@@ -42,55 +59,152 @@ namespace LuaUi
 
     void LuaFlex::updateChildren()
     {
-        float totalGrow = 0;
-
         const auto& flexChildren = children();
-
-        // Collect the total size and grow factor of all child widgets
-        MyGUI::IntSize childrenSize;
-        for (auto* w : flexChildren)
-        {
-            w->clearForced();
-            MyGUI::IntSize size = w->calculateSize();
-            primary(childrenSize) += primary(size);
-            secondary(childrenSize) = std::max(secondary(childrenSize), secondary(size));
-            totalGrow += getGrow(w);
-        }
-
-        // We only apply gap if there is more than one child widget
-        if (flexChildren.size() > 1)
-            primary(childrenSize) += mGap * static_cast<int>(flexChildren.size() - 1);
-
-        mChildrenSize = childrenSize;
-
         MyGUI::IntSize flexSize = calculateSize();
-        int growSize = 0;
-        float growFactor = 0;
-        if (totalGrow > 0)
+
+        std::vector<FlexTrack> tracks;
+        tracks.emplace_back();
+
+        // Set up the first track with the correct size remaining
+        if (!mAutoSized)
         {
-            growSize = primary(flexSize) - primary(childrenSize);
-            growFactor = growSize / totalGrow;
+            tracks.back().primaryAxisSizeRemaining = primary(flexSize);
         }
 
-        MyGUI::IntPoint childPosition;
-        primary(childPosition) = alignSize(primary(flexSize) - growSize, primary(childrenSize), mAlign);
+        MyGUI::IntSize childrenSize;
         for (size_t i = 0; i < flexChildren.size(); ++i)
         {
             auto* w = flexChildren[i];
-            MyGUI::IntSize size = w->calculateSize();
-            primary(size) += static_cast<int>(growFactor * getGrow(w));
-            float stretch = std::clamp(w->externalValue("stretch", 0.0f), 0.0f, 1.0f);
-            secondary(size) = std::max(secondary(size), static_cast<int>(stretch * secondary(flexSize)));
-            secondary(childPosition) = alignSize(secondary(flexSize), secondary(size), mArrange);
-            w->forcePosition(childPosition);
-            w->forceSize(size);
-            w->updateCoord();
-            primary(childPosition) += primary(size);
+            bool isLastChild = (i == flexChildren.size() - 1);
+            auto* currentTrack = &tracks.back();
+            int gapToAdd = !isLastChild ? mGap : 0;
 
-            // Push out the next child by the gap
-            if (i + 1 < flexChildren.size())
-                primary(childPosition) += mGap;
+            w->clearForced();
+
+            MyGUI::IntSize size = w->calculateSize();
+            int sizeToAddToPrimaryAxis = primary(size) + gapToAdd;
+
+            if (!mAutoSized && mWrap)
+            {
+                if (currentTrack->primaryAxisSizeRemaining - sizeToAddToPrimaryAxis < 0 && !currentTrack->widgets.empty())
+                {
+                    // Move to the next track
+                    currentTrack = &tracks.emplace_back();
+
+                    // Insert current child into the new track and compute remaining space correctly
+                    if (isLastChild)
+                        currentTrack->primaryAxisSize = primary(size);
+                    else
+                        currentTrack->primaryAxisSize = sizeToAddToPrimaryAxis;
+
+                    currentTrack->primaryAxisSizeRemaining = primary(flexSize) - currentTrack->primaryAxisSize;
+
+                    // Have the secondary axis of the track be the max of the current widget's secondary axis and the
+                    // current track's secondary axis
+                    currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
+                }
+                else
+                {
+                    // This element will fit on the current track
+                    currentTrack->primaryAxisSize += sizeToAddToPrimaryAxis;
+                    currentTrack->primaryAxisSizeRemaining -= sizeToAddToPrimaryAxis;
+                    currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
+                }
+            }
+            else
+            {
+                // Auto size is enabled or wrap is disabled. In both cases, we don't need to handle multiple tracks
+                // There is also no "remaining" size on the primary axis to keep up with, as when auto size is enabled
+                // we'll adjust the flex widget width/height to match its contents' extents.
+                if (isLastChild)
+                {
+                    currentTrack->primaryAxisSize += primary(size);
+                }
+                else
+                {
+                    currentTrack->primaryAxisSize += sizeToAddToPrimaryAxis;
+                }
+
+                currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
+                currentTrack->totalPrimaryGrow += getGrow(w);
+            }
+
+            // Add the iterated widget to the currently-iterated track
+            currentTrack->widgets.push_back(w);
         }
+
+        // The total children size is primary axis size and the sum of all secondary axis sizes
+        // Note: When calculating the primary axis size we should remove any extra gap that is at the end of the axis
+        // (e.g. when wrap is enabled and we have multiple tracks) because the last element on the track doesn't have a
+        // gap after it, but we added a gap in the iteration above for every element including the last one on the track
+        // However, for the secondary axis size we need to include gap for however many tracks there are, minus one.
+        // This is because gap for secondary axes is not added until we position the children in the iteration below,
+        // and when we position the children we add gap for every track, excluding the last one. So we need to add gap
+        // for the secondary axis here to account for the fact that in the iteration below we will be adding gap for
+        // every track.
+        for (const auto& track : tracks)
+        {
+            if (mHorizontal)
+            {
+                childrenSize.width = std::max(track.primaryAxisSize, mChildrenSize.width) - mGap;
+                childrenSize.height += track.secondaryAxisSize + (mGap * (tracks.size() - 1));
+            }
+            else
+            {
+                childrenSize.height += std::max(track.primaryAxisSize, mChildrenSize.height) - mGap;
+                childrenSize.width = track.secondaryAxisSize + (mGap * (tracks.size() - 1));
+            }
+        }
+
+        mChildrenSize = childrenSize;
+
+        // Now, we'll iterate over each track and expand any widgets with grow > 0 to fill the remaining primary track space
+        for (size_t i = 0; i < tracks.size(); ++i)
+        {
+            auto& track = tracks[i];
+            // For the primary axis, we'll first get an offset based on the set alignment property
+            int primaryAxisChildrenShift = alignSize(
+                track.primaryAxisSize, track.primaryAxisSize - track.primaryAxisSizeRemaining, mAlign);
+
+            int secondaryAxisChildrenShift = track.secondaryAxisSize * i + (mGap * i);
+
+            // This represents the next pixel location to place the next child in the iteration below
+            int currentPrimaryAxisPosition = primaryAxisChildrenShift;
+            for (size_t j = 0; j < track.widgets.size(); ++j)
+            {
+                auto* w = track.widgets[j];
+                bool isLastWidgetOnTrack = j == track.widgets.size() - 1;
+                MyGUI::IntPoint widgetPosition;
+                MyGUI::IntSize widgetSize = w->calculateSize();
+
+                // Note: Grow is on the primary axis and stretch is "grow" on the cross/secondary axis
+                float widgetGrowFactor = getGrow(w);
+                float stretch = std::clamp(w->externalValue("stretch", 0.0f), 0.0f, 1.0f);
+                if (widgetGrowFactor > 0 && track.primaryAxisSizeRemaining > 0)
+                {
+                    // Size the child element on this track
+
+                    // Will not rounding to the nearest integer here cause 1-pixel-off secenarios?
+                    int pixelsToExpandBy = static_cast<int>(
+                        (widgetGrowFactor / track.totalPrimaryGrow) * track.primaryAxisSizeRemaining);
+                    primary(widgetSize) += pixelsToExpandBy;
+                    track.primaryAxisSizeRemaining -= pixelsToExpandBy;
+                }
+
+                secondary(widgetSize) = std::max(secondary(widgetSize), static_cast<int>(stretch * track.secondaryAxisSize));
+
+                // Position the child element on this track
+                primary(widgetPosition) += currentPrimaryAxisPosition;
+                currentPrimaryAxisPosition += primary(widgetSize) + mGap * (!isLastWidgetOnTrack ? 1 : 0);
+                secondary(widgetPosition)
+                    += secondaryAxisChildrenShift + alignSize(track.secondaryAxisSize, secondary(widgetSize), mArrange);
+
+                w->forceSize(widgetSize);
+                w->forcePosition(widgetPosition);
+                w->updateCoord();
+            }
+        }
+
         WidgetExtension::updateChildren();
     }
 
