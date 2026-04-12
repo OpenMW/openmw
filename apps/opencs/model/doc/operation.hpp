@@ -11,8 +11,6 @@
 #include "messages.hpp"
 #include "state.hpp"
 
-class QTimer;
-
 namespace CSMDoc
 {
     class Stage;
@@ -30,8 +28,6 @@ namespace CSMDoc
         int mOrdered;
         bool mFinalAlways;
         bool mError;
-        bool mConnected;
-        QTimer* mTimer;
         bool mPrepared;
         Message::Severity mDefaultSeverity;
         std::optional<std::chrono::steady_clock::time_point> mStart;
