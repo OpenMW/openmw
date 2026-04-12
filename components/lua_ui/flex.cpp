@@ -4,6 +4,7 @@ namespace LuaUi
 {
     void LuaFlex::updateProperties()
     {
+        mGap = propertyValue("gap", 0);
         mHorizontal = propertyValue("horizontal", false);
         mAutoSized = propertyValue("autoSize", true);
         mAlign = propertyValue("align", Alignment::Start);
@@ -42,8 +43,12 @@ namespace LuaUi
     void LuaFlex::updateChildren()
     {
         float totalGrow = 0;
+
+        const auto& flexChildren = children();
+
+        // Collect the total size and grow factor of all child widgets
         MyGUI::IntSize childrenSize;
-        for (auto* w : children())
+        for (auto* w : flexChildren)
         {
             w->clearForced();
             MyGUI::IntSize size = w->calculateSize();
@@ -51,6 +56,11 @@ namespace LuaUi
             secondary(childrenSize) = std::max(secondary(childrenSize), secondary(size));
             totalGrow += getGrow(w);
         }
+
+        // We only apply gap if there is more than one child widget
+        if (flexChildren.size() > 1)
+            primary(childrenSize) += mGap * static_cast<int>(flexChildren.size() - 1);
+
         mChildrenSize = childrenSize;
 
         MyGUI::IntSize flexSize = calculateSize();
@@ -64,8 +74,9 @@ namespace LuaUi
 
         MyGUI::IntPoint childPosition;
         primary(childPosition) = alignSize(primary(flexSize) - growSize, primary(childrenSize), mAlign);
-        for (auto* w : children())
+        for (size_t i = 0; i < flexChildren.size(); ++i)
         {
+            auto* w = flexChildren[i];
             MyGUI::IntSize size = w->calculateSize();
             primary(size) += static_cast<int>(growFactor * getGrow(w));
             float stretch = std::clamp(w->externalValue("stretch", 0.0f), 0.0f, 1.0f);
@@ -75,6 +86,10 @@ namespace LuaUi
             w->forceSize(size);
             w->updateCoord();
             primary(childPosition) += primary(size);
+
+            // Push out the next child by the gap
+            if (i + 1 < flexChildren.size())
+                primary(childPosition) += mGap;
         }
         WidgetExtension::updateChildren();
     }
@@ -108,7 +123,7 @@ namespace LuaUi
     const std::vector<std::string_view>& LuaFlex::allUsedProperties() const
     {
         static std::vector<std::string_view> usedProps = std::invoke([this] {
-            std::vector<std::string_view> props = { "horizontal", "autoSize", "arrange", "align" };
+            std::vector<std::string_view> props = { "horizontal", "autoSize", "arrange", "align", "gap" };
             auto baseProps = WidgetExtension::allUsedProperties();
             props.insert(props.end(), baseProps.begin(), baseProps.end());
             return props;
