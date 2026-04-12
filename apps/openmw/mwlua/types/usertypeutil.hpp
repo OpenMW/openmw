@@ -29,7 +29,9 @@ namespace MWLua::Types
         template <class Accessor>
         auto operator()(Accessor&& accessor) const
         {
-            return [=](Type& rec, std::string_view value) { accessor(rec) = ESM::RefId::deserializeText(value); };
+            return [=](Type& rec, std::optional<std::string_view> value) {
+                accessor(rec) = ESM::RefId::deserializeText(value.value_or(std::string_view()));
+            };
         }
     };
 

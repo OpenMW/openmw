@@ -153,10 +153,10 @@ namespace MWLua
                                   auto& values = ingred.mData.*member;
                                   return values[item.mIndex];
                               },
-                              [=](MutableIngredientEffectsListItem& item, std::string_view value) {
+                              [=](MutableIngredientEffectsListItem& item, std::optional<std::string_view> value) {
                                   ESM::Ingredient& ingred = item.mIngredient.find();
                                   auto& values = ingred.mData.*member;
-                                  values[item.mIndex] = ESM::RefId::deserializeText(value);
+                                  values[item.mIndex] = ESM::RefId::deserializeText(value.value_or(std::string_view()));
                               });
                       };
                 addRefIdProperty(itemType, &ESM::Ingredient::IRDTstruct::mEffectID, "id");
