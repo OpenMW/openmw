@@ -21,7 +21,8 @@ jobs:
 
     - run: echo "MACOS_AMD64=true" >> $GITHUB_ENV
       if: ${{ inputs.image == 'macos-15-intel' }}
-    - run: echo "DMG_IDENTIFIER=amd64" >> $GITHUB_ENV
+
+    - run: echo "DMG_IDENTIFIER=x86_64" >> $GITHUB_ENV
       if: ${{ inputs.image == 'macos-15-intel' }}
     - run: echo "DMG_IDENTIFIER=arm64" >> $GITHUB_ENV
       if: ${{ inputs.image != 'macos-15-intel' }}
@@ -39,10 +40,6 @@ jobs:
       run: CI/before_script.macos.sh -C
     - name: Build
       run: CI/macos/build.sh
-
-    - run: |
-        cd build
-        for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}-${{ env.DMG_IDENTIFIER }}.dmg"; done
 
     - name: Store dmg
       uses: actions/upload-artifact@v6
