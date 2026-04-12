@@ -59,6 +59,9 @@ Properties
   * - arrange
     - ui.ALIGNMENT (Start)
     - How to arrange the children in the cross axis.
+  * - gap
+    - number (0)
+    - The pixel gap between children in the main axis.
 
 Events
 ------
