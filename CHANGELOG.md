@@ -91,7 +91,7 @@
     Feature #8966: Add DialogueResponse event
     Feature #8979: Animation ended handler
     Feature #8987: Lua Load context
-    Feature #8998: Custom door and static records
+    Feature #8998: Custom door, probe, and static records
     Feature #9002: Warn on unknown layout properties
     Feature #9010: Starting cell binding
     Feature #9013: Expose reputation to Lua

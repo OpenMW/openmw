@@ -72,7 +72,7 @@ namespace MWLua
     void addProbeBindings(sol::table probe, const Context& context)
     {
         addRecordFunctionBinding<ESM::Probe>(probe, context);
-
+        probe["createRecordDraft"] = tableToProbe;
         sol::state_view lua = context.sol();
         addUserType<ESM::Probe>(lua, "ESM3_Probe");
     }

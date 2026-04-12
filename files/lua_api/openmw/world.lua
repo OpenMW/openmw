@@ -182,6 +182,7 @@
 -- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#NpcRecord},
 -- * @{openmw.types#PotionRecord},
+-- * @{openmw.types#ProbeRecord},
 -- * @{openmw.core#Spell},
 -- * @{openmw.types#StaticRecord},
 -- * @{openmw.types#WeaponRecord}
