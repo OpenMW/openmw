@@ -75,57 +75,41 @@ namespace LuaUi
         for (size_t i = 0; i < flexChildren.size(); ++i)
         {
             auto* w = flexChildren[i];
-            bool isLastChild = (i == flexChildren.size() - 1);
             auto* currentTrack = &tracks.back();
-            int gapToAdd = !isLastChild ? mGap : 0;
 
             w->clearForced();
 
             MyGUI::IntSize size = w->calculateSize();
-            int sizeToAddToPrimaryAxis = primary(size) + gapToAdd;
+            const int childPrimary = primary(size);
+            const int childSecondary = secondary(size);
 
             if (!mAutoSized && mWrap)
             {
-                if (currentTrack->primaryAxisSizeRemaining - sizeToAddToPrimaryAxis < 0 && !currentTrack->widgets.empty())
+                const bool hasWidgetsInTrack = !currentTrack->widgets.empty();
+                const int neededPrimary = childPrimary + (hasWidgetsInTrack ? mGap : 0);
+
+                if (currentTrack->primaryAxisSizeRemaining - neededPrimary < 0 && hasWidgetsInTrack)
                 {
                     // Move to the next track
                     currentTrack = &tracks.emplace_back();
-
-                    // Insert current child into the new track and compute remaining space correctly
-                    if (isLastChild)
-                        currentTrack->primaryAxisSize = primary(size);
-                    else
-                        currentTrack->primaryAxisSize = sizeToAddToPrimaryAxis;
-
-                    currentTrack->primaryAxisSizeRemaining = primary(flexSize) - currentTrack->primaryAxisSize;
-
-                    // Have the secondary axis of the track be the max of the current widget's secondary axis and the
-                    // current track's secondary axis
-                    currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
+                    currentTrack->primaryAxisSizeRemaining = primary(flexSize);
                 }
-                else
-                {
-                    // This element will fit on the current track
-                    currentTrack->primaryAxisSize += sizeToAddToPrimaryAxis;
-                    currentTrack->primaryAxisSizeRemaining -= sizeToAddToPrimaryAxis;
-                    currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
-                }
+
+                const bool hasWidgetsInActiveTrack = !currentTrack->widgets.empty();
+                const int primaryToAdd = childPrimary + (hasWidgetsInActiveTrack ? mGap : 0);
+                currentTrack->primaryAxisSize += primaryToAdd;
+                currentTrack->primaryAxisSizeRemaining -= primaryToAdd;
+                currentTrack->secondaryAxisSize = std::max(childSecondary, currentTrack->secondaryAxisSize);
+                currentTrack->totalPrimaryGrow += getGrow(w);
             }
             else
             {
                 // Auto size is enabled or wrap is disabled. In both cases, we don't need to handle multiple tracks
                 // There is also no "remaining" size on the primary axis to keep up with, as when auto size is enabled
                 // we'll adjust the flex widget width/height to match its contents' extents.
-                if (isLastChild)
-                {
-                    currentTrack->primaryAxisSize += primary(size);
-                }
-                else
-                {
-                    currentTrack->primaryAxisSize += sizeToAddToPrimaryAxis;
-                }
-
-                currentTrack->secondaryAxisSize = std::max(secondary(size), currentTrack->secondaryAxisSize);
+                const int primaryToAdd = childPrimary + (!currentTrack->widgets.empty() ? mGap : 0);
+                currentTrack->primaryAxisSize += primaryToAdd;
+                currentTrack->secondaryAxisSize = std::max(childSecondary, currentTrack->secondaryAxisSize);
                 currentTrack->totalPrimaryGrow += getGrow(w);
             }
 
@@ -144,29 +128,33 @@ namespace LuaUi
         // every track.
         for (const auto& track : tracks)
         {
+            const int trackCount = static_cast<int>(tracks.size());
+            const int secondaryGapTotal = std::max(0, trackCount - 1) * mGap;
             if (mHorizontal)
             {
                 childrenSize.width = std::max(track.primaryAxisSize, mChildrenSize.width) - mGap;
-                childrenSize.height += track.secondaryAxisSize + (mGap * (tracks.size() - 1));
+                childrenSize.height += track.secondaryAxisSize + secondaryGapTotal;
             }
             else
             {
                 childrenSize.height += std::max(track.primaryAxisSize, mChildrenSize.height) - mGap;
-                childrenSize.width = track.secondaryAxisSize + (mGap * (tracks.size() - 1));
+                childrenSize.width = track.secondaryAxisSize + secondaryGapTotal;
             }
         }
 
         mChildrenSize = childrenSize;
 
-        // Now, we'll iterate over each track and expand any widgets with grow > 0 to fill the remaining primary track space
+        // Now, we'll iterate over each track and expand any widgets with grow > 0 to fill the remaining primary track
+        // space
+        int currentSecondaryAxisPosition = 0;
         for (size_t i = 0; i < tracks.size(); ++i)
         {
             auto& track = tracks[i];
             // For the primary axis, we'll first get an offset based on the set alignment property
-            int primaryAxisChildrenShift = alignSize(
-                track.primaryAxisSize, track.primaryAxisSize - track.primaryAxisSizeRemaining, mAlign);
+            int primaryAxisChildrenShift
+                = alignSize(track.primaryAxisSize, track.primaryAxisSize - track.primaryAxisSizeRemaining, mAlign);
 
-            int secondaryAxisChildrenShift = track.secondaryAxisSize * i + (mGap * i);
+            int secondaryAxisChildrenShift = currentSecondaryAxisPosition;
 
             // This represents the next pixel location to place the next child in the iteration below
             int currentPrimaryAxisPosition = primaryAxisChildrenShift;
@@ -191,7 +179,8 @@ namespace LuaUi
                     track.primaryAxisSizeRemaining -= pixelsToExpandBy;
                 }
 
-                secondary(widgetSize) = std::max(secondary(widgetSize), static_cast<int>(stretch * track.secondaryAxisSize));
+                secondary(widgetSize)
+                    = std::max(secondary(widgetSize), static_cast<int>(stretch * track.secondaryAxisSize));
 
                 // Position the child element on this track
                 primary(widgetPosition) += currentPrimaryAxisPosition;
@@ -203,6 +192,10 @@ namespace LuaUi
                 w->forcePosition(widgetPosition);
                 w->updateCoord();
             }
+
+            currentSecondaryAxisPosition += track.secondaryAxisSize;
+            if (i + 1 < tracks.size())
+                currentSecondaryAxisPosition += mGap;
         }
 
         WidgetExtension::updateChildren();
