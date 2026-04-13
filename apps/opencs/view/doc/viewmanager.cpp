@@ -74,7 +74,7 @@ CSVDoc::ViewManager::ViewManager(CSMDoc::DocumentManager& documentManager)
 
     std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
     for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
-         current != idCompletionColumns.end(); ++current)
+        current != idCompletionColumns.end(); ++current)
     {
         mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
     }

@@ -593,8 +593,8 @@ void ContentSelectorModel::ContentModel::sortFiles()
         }
 
         // Stable sort the modifiable portion
-        std::stable_sort(mFiles.begin() + firstModifiable, mFiles.end(),
-            [&orderMap](const EsmFile* a, const EsmFile* b) {
+        std::stable_sort(
+            mFiles.begin() + firstModifiable, mFiles.end(), [&orderMap](const EsmFile* a, const EsmFile* b) {
                 const QString aKey = a->fileName().toLower();
                 const QString bKey = b->fileName().toLower();
                 const bool aHasOrder = orderMap.contains(aKey);

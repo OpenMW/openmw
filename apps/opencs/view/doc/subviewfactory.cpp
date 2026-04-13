@@ -11,7 +11,7 @@
 CSVDoc::SubViewFactoryManager::~SubViewFactoryManager()
 {
     for (std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase*>::iterator iter(mSubViewFactories.begin());
-         iter != mSubViewFactories.end(); ++iter)
+        iter != mSubViewFactories.end(); ++iter)
         delete iter->second;
 }
 

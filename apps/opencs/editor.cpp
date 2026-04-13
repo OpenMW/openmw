@@ -159,9 +159,9 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
     mFileDialog.setEncoding(QString::fromUtf8(mEncodingName.c_str()));
 
     mDocumentManager.setResourceDir(mResources = variables["resources"]
-                                                     .as<Files::MaybeQuotedPath>()
-                                                     .u8string()); // This call to u8string is redundant, but required
-                                                                   // to build on MSVC 14.26 due to implementation bugs.
+                                        .as<Files::MaybeQuotedPath>()
+                                        .u8string()); // This call to u8string is redundant, but required
+                                                      // to build on MSVC 14.26 due to implementation bugs.
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty())
@@ -170,9 +170,9 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
     }
 
     Files::PathContainer::value_type local(variables["data-local"]
-                                               .as<Files::MaybeQuotedPathContainer::value_type>()
-                                               .u8string()); // This call to u8string is redundant, but required to
-                                                             // build on MSVC 14.26 due to implementation bugs.
+            .as<Files::MaybeQuotedPathContainer::value_type>()
+            .u8string()); // This call to u8string is redundant, but required to
+                          // build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
     {
         std::filesystem::create_directories(local);
