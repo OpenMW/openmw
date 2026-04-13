@@ -57,8 +57,8 @@ namespace CSMDoc
         CSMWorld::Data mData;
         CSMTools::Tools mTools;
         std::filesystem::path mProjectPath;
-        Saving mSavingOperation;
-        OperationHolder mSaving;
+        Saving* mSavingOperation;
+        OperationHolder* mSaving;
         std::filesystem::path mResDir;
         Runner mRunner;
         bool mDirty;

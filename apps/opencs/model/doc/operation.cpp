@@ -4,6 +4,8 @@
 #include <exception>
 #include <vector>
 
+#include <QCoreApplication>
+
 #include <components/debug/debuglog.hpp>
 
 #include <apps/opencs/model/doc/messages.hpp>
@@ -53,14 +55,13 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation(State type, bool ordered, bool finalAlways)
+CSMDoc::Operation::Operation(State type, bool finalAlways)
     : mType(type)
     , mStages(std::vector<std::pair<Stage*, int>>())
     , mCurrentStage(mStages.begin())
     , mCurrentStep(0)
     , mCurrentStepTotal(0)
     , mTotalSteps(0)
-    , mOrdered(ordered)
     , mFinalAlways(finalAlways)
     , mError(false)
     , mPrepared(false)
@@ -125,6 +126,9 @@ void CSMDoc::Operation::executeStage()
 
     Messages messages(mDefaultSeverity);
 
+    const auto batchStart = std::chrono::steady_clock::now();
+    static constexpr auto batchBudget = std::chrono::milliseconds(33);
+
     while (mCurrentStage != mStages.end())
     {
         if (mCurrentStep >= mCurrentStage->second)
@@ -146,7 +150,9 @@ void CSMDoc::Operation::executeStage()
             }
 
             ++mCurrentStepTotal;
-            break;
+
+            if (std::chrono::steady_clock::now() - batchStart >= batchBudget)
+                break;
         }
     }
 
@@ -175,4 +181,9 @@ void CSMDoc::Operation::executeStage()
 void CSMDoc::Operation::operationDone()
 {
     emit done(mType, mError);
+}
+
+void CSMDoc::Operation::cleanup()
+{
+    moveToThread(QCoreApplication::instance()->thread());
 }
