@@ -113,7 +113,8 @@ void CSVDoc::AdjusterWidget::setName(const QString& name, bool addon)
     }
 
     mMessage->setText(message);
-    mIcon->setPixmap(style()
+    mIcon->setPixmap(
+        style()
             ->standardIcon(mValid ? (warning ? QStyle::SP_MessageBoxWarning : QStyle::SP_MessageBoxInformation)
                                   : QStyle::SP_MessageBoxCritical)
             .pixmap(QSize(16, 16)));
