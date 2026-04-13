@@ -97,7 +97,6 @@ namespace MWBase
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
-        // When the game window/viewport size changes
         virtual void viewportResized(int width, int height) = 0;
         virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
 

@@ -43,8 +43,6 @@ namespace MWLua
             return !mConsoleCommandHandlers.mList.empty();
         }
 
-        // Called when the game window viewport size changes. `width` and `height` are the new dimensions of the
-        // viewport in pixels.
         void onViewportResized(int width, int height) { callEngineHandlers(mViewportResizedHandlers, width, height); }
 
         void uiModeChanged() { callEngineHandlers(mUiModeChanged); }
