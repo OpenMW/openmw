@@ -230,7 +230,7 @@ namespace LuaUi
     const std::vector<std::string_view>& LuaFlex::allUsedProperties() const
     {
         static std::vector<std::string_view> usedProps = std::invoke([this] {
-            std::vector<std::string_view> props = { "horizontal", "autoSize", "arrange", "align", "gap" };
+            std::vector<std::string_view> props = { "horizontal", "autoSize", "arrange", "align", "gap", "wrap" };
             auto baseProps = WidgetExtension::allUsedProperties();
             props.insert(props.end(), baseProps.begin(), baseProps.end());
             return props;
