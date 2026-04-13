@@ -11,6 +11,7 @@
     Bug #8123: Can't switch ammo while attacking with a weapon/spell that doesn't use it
     Bug #8129: MessageBox button argument handling differences
     Bug #8270: Editor: Parts of landscape textures are transparent in the cell view, allowing you to see wallpaper or other windows below them
+    Bug #8345: Editor: Random crash on save with Qt6
     Bug #8351: Malformed potion model should consistently error out
     Bug #8601: Segfault when opening Options menu while NCGDMW is loaded
     Bug #8657: Preloading crash on exit due to failed startup
@@ -57,6 +58,7 @@
     Bug #9018: controls.use = 4 sometimes semi-freezes the game
     Bug #9026: Thrown projectiles are not rotated
     Bug #9048: Escort AI missing argument
+    Bug #9062: Actors may fail to reequip the weapon when staggered
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
