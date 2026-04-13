@@ -147,6 +147,9 @@ Engine handler is a function defined by a script, that can be called by the engi
       |     mode, command, selectedObject)
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
+  * - onViewportResized(width, height)
+    - | Called when the game viewport is resized.
+      | Provides the new width and height of the viewport in pixels.
 
 **Only for local scripts attached to a player**
 

@@ -20,7 +20,8 @@ namespace MWLua
             : LocalScripts(lua, obj)
             , mInputProcessor(this)
         {
-            registerEngineHandlers({ &mConsoleCommandHandlers, &mOnFrameHandlers, &mQuestUpdate, &mViewportResizedHandlers, &mUiModeChanged });
+            registerEngineHandlers({ &mConsoleCommandHandlers, &mOnFrameHandlers, &mQuestUpdate,
+                &mViewportResizedHandlers, &mUiModeChanged });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -40,9 +41,7 @@ namespace MWLua
 
         // Called when the game window viewport size changes. `width` and `height` are the new dimensions of the
         // viewport in pixels.
-        void onViewportResized(int width, int height) { 
-            callEngineHandlers(mViewportResizedHandlers, width, height); 
-        }
+        void onViewportResized(int width, int height) { callEngineHandlers(mViewportResizedHandlers, width, height); }
 
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
         void uiModeChanged(ObjectId arg, bool byLuaAction)
