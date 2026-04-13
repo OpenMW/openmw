@@ -9,6 +9,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -203,6 +204,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Enchantment& enchantment) -> const ESM::Enchantment* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(enchantment);
+            },
+            [lua = context.mLua](const ESM::Ingredient& ingred) -> const ESM::Ingredient* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(ingred);
             },
             [lua = context.mLua](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
                 checkGameInitialized(lua);

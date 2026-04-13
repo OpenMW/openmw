@@ -549,6 +549,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 case ESM::REC_STAT:
                 case ESM::REC_DOOR:
                 case ESM::REC_PROB:
+                case ESM::REC_INGR:
                     MWBase::Environment::get().getWorld()->readRecord(reader, n.toInt());
                     break;
 

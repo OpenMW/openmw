@@ -1708,6 +1708,13 @@
 -- @field #Item baseType @{#Item}
 
 ---
+-- Creates an @{#IngredientRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Ingredient] createRecordDraft
+-- @param #IngredientRecord ingredient A Lua table with the fields of an IngredientRecord, with an optional field `template` that accepts an @{#IngredientRecord} as a base.
+-- @return #IngredientRecord A strongly typed Ingredient record.
+
+---
 -- A read-only list of all @{#IngredientRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #IngredientRecord.
 -- @field [parent=#Ingredient] #list<#IngredientRecord> records
