@@ -28,9 +28,7 @@ namespace LuaUi
         MyGUI::IntSize mChildrenSize;
         Alignment mAlign;
         Alignment mArrange;
-        // The pixels between flex children
         int mGap;
-        // Whether to wrap children to a new row/column when the current one is full
         bool mWrap;
 
         template <typename T>
