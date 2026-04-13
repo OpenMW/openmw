@@ -479,6 +479,18 @@ namespace MWLua
             playerScripts->uiModeChanged(argId, false);
     }
 
+    void LuaManager::viewportResized(int width, int height)
+    {
+        if (!mPlayer.isEmpty())
+        {
+            PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+            if (playerScripts)
+                playerScripts->onViewportResized(width, height);
+        }
+
+        mMenuScripts.onViewportResized(width, height);
+    }
+
     void LuaManager::actorDied(const MWWorld::Ptr& actor)
     {
         if (actor.isEmpty())
