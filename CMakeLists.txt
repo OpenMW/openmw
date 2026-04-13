@@ -794,6 +794,8 @@ endif()
 
 if(WIN32 AND CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64")
   set(CUSTOM_CPACK_ARCHITECTURE "x64")
+elseif(APPLE AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+  set(CUSTOM_CPACK_ARCHITECTURE "x86_64")
 else()
   set(CUSTOM_CPACK_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
 endif()
@@ -802,9 +804,12 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CU
 
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE)
-    if (CMAKE_VERSION VERSION_LESS 3.19)
-        message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
-    endif ()
+    if(CMAKE_VERSION VERSION_LESS 3.19)
+      message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES AND NOT CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+      message(FATAL_ERROR "x86_64 only accepted for CMAKE_OSX_ARCHITECTURES")
+    endif()
 
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
