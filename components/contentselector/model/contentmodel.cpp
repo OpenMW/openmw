@@ -578,9 +578,7 @@ void ContentSelectorModel::ContentModel::sortFiles()
     // (in cfg order), then any remaining files sorted alphabetically.
     if (!mContentOrder.isEmpty() || !mGroundcoverOrder.isEmpty())
     {
-        // Build a sort key for each file: files in content= get low indices,
-        // groundcover= files get indices after that, and everything else gets a
-        // high index so it sorts to the end alphabetically.
+
         QHash<QString, int> orderMap;
         int order = 0;
         for (const QString& name : mContentOrder)
@@ -592,7 +590,6 @@ void ContentSelectorModel::ContentModel::sortFiles()
                 orderMap.insert(lower, order++);
         }
 
-        // Stable sort the modifiable portion
         std::stable_sort(
             mFiles.begin() + firstModifiable, mFiles.end(), [&orderMap](const EsmFile* a, const EsmFile* b) {
                 const QString aKey = a->fileName().toLower();
@@ -606,7 +603,6 @@ void ContentSelectorModel::ContentModel::sortFiles()
                     return true;
                 if (!aHasOrder && bHasOrder)
                     return false;
-                // Both unordered: sort alphabetically (case-insensitive)
                 return aKey < bKey;
             });
     }
