@@ -126,11 +126,12 @@ namespace MWLua
         };
         api["content"] = LuaUi::loadContentConstructor(context.mLua);
 
-        api["create"] = [luaManager = context.mLuaManager, menu](const sol::table& layout) {
-            auto element = LuaUi::Element::make(layout, menu);
-            luaManager->addAction([element] { element->create(); }, "Create UI");
-            return element;
-        };
+        api["create"]
+            = [luaManager = context.mLuaManager, menu](const sol::table& layout, sol::optional<sol::table> options) {
+                  auto element = LuaUi::Element::make(layout, menu, options);
+                  luaManager->addAction([element] { element->create(); }, "Create UI");
+                  return element;
+              };
 
         api["updateAll"] = [luaManager = context.mLuaManager, menu]() {
             LuaUi::Element::forEach(menu, [](LuaUi::Element* e) {

@@ -84,7 +84,7 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
-        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mTargetActorRefId, false);
+        const MWWorld::Ptr follower = getTarget();
         const osg::Vec3f leaderPos = actor.getRefData().getPosition().asVec3();
         const osg::Vec3f followerPos = follower.getRefData().getPosition().asVec3();
         const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);

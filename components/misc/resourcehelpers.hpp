@@ -29,6 +29,7 @@ namespace Misc
             VFS::Path::NormalizedView resPath, const VFS::Manager& vfs, VFS::Path::ExtensionView ext = {});
         VFS::Path::Normalized correctTexturePath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
         VFS::Path::Normalized correctIconPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
+        VFS::Path::Normalized correctBigIconPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
         VFS::Path::Normalized correctBookartPath(VFS::Path::NormalizedView resPath, const VFS::Manager& vfs);
         VFS::Path::Normalized correctBookartPath(
             VFS::Path::NormalizedView resPath, int width, int height, const VFS::Manager& vfs);

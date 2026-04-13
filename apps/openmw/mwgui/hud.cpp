@@ -354,12 +354,8 @@ namespace MWGui
             // use the icon of the first effect
             const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
                 spell->mEffects.mList.front().mData.mEffectID);
-            std::string icon = effect->mIcon;
-            std::replace(icon.begin(), icon.end(), '/', '\\');
-            size_t slashPos = icon.rfind('\\');
-            icon.insert(slashPos + 1, "b_");
-            const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
-                VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+            const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
+                VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS());
             mSpellImage->setSpellIcon(iconPath);
         }
         else

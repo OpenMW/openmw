@@ -142,10 +142,6 @@ namespace MWLua
 
 namespace sol
 {
-    template <>
-    struct is_automagical<ESM::MagicEffect> : std::false_type
-    {
-    };
     template <typename T>
     struct is_automagical<MWLua::ActorStore<T>> : std::false_type
     {
@@ -266,63 +262,7 @@ namespace MWLua
         addEffectParamsBindings(state);
 
         // MagicEffect record
-        auto magicEffectT = state.new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");
-
-        magicEffectT[sol::meta_function::to_string]
-            = [](const ESM::MagicEffect& rec) { return std::format("ESM3_MagicEffect[{}]", rec.mId.toDebugString()); };
-        magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> ESM::RefId { return rec.mId; });
-        magicEffectT["icon"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
-            auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
-        magicEffectT["particle"]
-            = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mParticle; });
-        magicEffectT["continuousVfx"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> bool {
-            return (rec.mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
-        });
-        magicEffectT["areaSound"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mAreaSound.serializeText(); });
-        magicEffectT["boltSound"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mBoltSound.serializeText(); });
-        magicEffectT["castSound"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mCastSound.serializeText(); });
-        magicEffectT["hitSound"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mHitSound.serializeText(); });
-        magicEffectT["areaStatic"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mArea.serializeText(); });
-        magicEffectT["bolt"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mBolt.serializeText(); });
-        magicEffectT["castStatic"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mCasting.serializeText(); });
-        magicEffectT["hitStatic"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mHit.serializeText(); });
-        magicEffectT["name"]
-            = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mName; });
-        magicEffectT["school"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> std::string { return rec.mData.mSchool.serializeText(); });
-        magicEffectT["baseCost"]
-            = sol::readonly_property([](const ESM::MagicEffect& rec) -> float { return rec.mData.mBaseCost; });
-        magicEffectT["color"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> Misc::Color {
-            return Misc::Color(rec.mData.mRed / 255.f, rec.mData.mGreen / 255.f, rec.mData.mBlue / 255.f, 1.f);
-        });
-        magicEffectT["hasDuration"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return !(rec.mData.mFlags & ESM::MagicEffect::NoDuration); });
-        magicEffectT["hasMagnitude"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return !(rec.mData.mFlags & ESM::MagicEffect::NoMagnitude); });
-        // TODO: Not self-explanatory. Needs either a better name or documentation. The description in
-        // loadmgef.hpp is uninformative.
-        magicEffectT["isAppliedOnce"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return rec.mData.mFlags & ESM::MagicEffect::AppliedOnce; });
-        magicEffectT["harmful"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return rec.mData.mFlags & ESM::MagicEffect::Harmful; });
-        magicEffectT["casterLinked"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return rec.mData.mFlags & ESM::MagicEffect::CasterLinked; });
-        magicEffectT["nonRecastable"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> bool { return rec.mData.mFlags & ESM::MagicEffect::NonRecastable; });
-
-        // TODO: Should we expose it? What happens if a spell has several effects with different projectileSpeed?
-        // magicEffectT["projectileSpeed"]
-        //     = sol::readonly_property([](const ESM::MagicEffect& rec) -> float { return rec.mData.mSpeed; });
+        addMagicEffectType(state);
 
         auto activeSpellEffectT = state.new_usertype<ESM::ActiveEffect>("ActiveSpellEffect");
         activeSpellEffectT[sol::meta_function::to_string] = [](const ESM::ActiveEffect& self) {

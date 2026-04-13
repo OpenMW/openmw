@@ -40,7 +40,7 @@ namespace
                 // We need to nudge the blendmap to look like vanilla.
                 // This causes visible seams unless the blendmap's resolution is doubled, but Vanilla also doubles the
                 // blendmap, apparently.
-                matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, 1.0f / blendmapScale / 4.0f, 0.f));
+                matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, -1.0f / blendmapScale / 4.0f, 0.f));
 
                 texMat = mTexMatMap.emplace(blendmapScale, new osg::TexMat(matrix)).first;
             }

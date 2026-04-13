@@ -467,7 +467,7 @@ namespace ESMTerrain
                     }
                     size_t index = static_cast<size_t>((starty + y) * blendmapSize + startx + x);
                     auto delta = static_cast<unsigned char>(std::clamp(static_cast<int>(v.opacity * 255.f), 0, 255));
-                    baseBlendmap[index] = std::max<unsigned char>(0, baseBlendmap[index] - delta);
+                    baseBlendmap[index] -= std::min(baseBlendmap[index], delta);
                     layerBlendmap[index] = delta;
                 }
             }

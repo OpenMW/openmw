@@ -402,6 +402,8 @@ namespace LuaUi
         for (size_t i = 0; i < mChildren.size(); i++)
         {
             Warnings childWarnings;
+            if (mChildren[i]->isRoot())
+                continue;
             if (!mChildren[i]->collectWarnings(childWarnings, depth + 1, generateWarningStrings))
                 continue;
             if (!generateWarningStrings)

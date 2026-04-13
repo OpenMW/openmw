@@ -19,6 +19,15 @@
 -- @usage
 -- content.activators.records.MyActivator = { mwscript = 'float', model = 'meshes/w/w_chitin_arrow.nif', name = 'Quest marker' }
 
+--- @{#BookContent}: Book manipulation.
+-- @field [parent=#content] #BookContent books
+
+---
+-- A mutable list of all @{openmw.types#BookRecord}s.
+-- @field [parent=#BookContent] #list<openmw.types#BookRecord> records
+-- @usage
+-- content.books.records.MyBook = { template = content.books.records['bk_lustyargonianmaid'], text = content.books.records['bk_BoethiahPillowBook'].text }
+
 --- @{#DoorContent}: Door manipulation.
 -- @field [parent=#content] #DoorContent doors
 
@@ -40,6 +49,20 @@
 -- @usage
 -- content.enchantments.records.MyEnchantment = { type = content.enchantments.TYPE.CastOnUse, charge = 1, cost = 1, effects = { { id = 'FortifySkill', affectedSkill = 'enchant', duration = 5, magnitudeMin = 50, magnitudeMax = 100 } } }
 
+--- @{#GMSTContent}: GMST manipulation.
+-- @field [parent=#content] #GMSTContent gameSettings
+
+---
+-- Returns a table containing all fallback values defined in `openmw.cfg`.
+-- @function [parent=#GMSTContent] getFallbacks
+-- @return #table
+
+---
+-- A mutable list of all game settings.
+-- @field [parent=#GMSTContent] #map<#string, #any> records
+-- @usage
+-- content.gameSettings.records.fJumpAcrobaticsBase = 1024
+
 --- @{#GlobalContent}: Global variable manipulation.
 -- @field [parent=#content] #GlobalContent globals
 
@@ -48,6 +71,34 @@
 -- @field [parent=#GlobalContent] #map<#string, #number> records
 -- @usage
 -- content.globals.records.MyVariable = 42
+
+--- @{#IngredientContent}: Ingredient manipulation.
+-- @field [parent=#content] #IngredientContent ingredients
+
+---
+-- A mutable list of all @{openmw.types#IngredientRecord}s.
+-- Note that ingredient effects only have the `id`, `affectedAttribute`, and `affectedSkill` properties.
+-- @field [parent=#IngredientContent] #list<openmw.types#IngredientRecord> records
+-- @usage
+-- content.ingredients.records.MyIngredient = { template = content.ingredients.records['ingred_ectoplasm_01'], name = 'Soylent', effects = { { id = 'vampirism' } } }
+
+--- @{#LightContent}: Light manipulation.
+-- @field [parent=#content] #LightContent lights
+
+---
+-- A mutable list of all @{openmw.types#LightRecord}s.
+-- @field [parent=#LightContent] #list<openmw.types#LightRecord> records
+-- @usage
+-- content.lights.records.MyLight = { template = content.lights.records['torch'], duration = -1, name = 'Infinite Torch' }
+
+--- @{#MagicEffectContent}: Magic effect manipulation.
+-- @field [parent=#content] #MagicEffectContent magicEffects
+
+---
+-- A mutable list of all @{openmw.core#MagicEffect}s.
+-- @field [parent=#MagicEffectContent] #list<openmw.core#MagicEffect> records
+-- @usage
+-- content.magicEffects.records.MyMagicEffect = { template = content.magicEffects.records['summonscamp'], name = 'Summon Nothing' }
 
 --- @{#MiscContent}: Misc manipulation.
 -- @field [parent=#content] #MiscContent miscs
@@ -66,6 +117,15 @@
 -- @field [parent=#PotionContent] #list<openmw.types#PotionRecord> records
 -- @usage
 -- content.potions.records.MyPotion = { template = content.potions.records['p_dispel_s'], name = 'Too Strong', effects = { { id = 'FireDamage', duration = 10, range = content.RANGE.Self, magnitudeMin = 100 } } }
+
+--- @{#ProbeContent}: Probe manipulation.
+-- @field [parent=#content] #ProbeContent probes
+
+---
+-- A mutable list of all @{openmw.types#ProbeRecord}s.
+-- @field [parent=#ProbeContent] #list<openmw.types#ProbeRecord> records
+-- @usage
+-- content.probes.records.MyProbe = { template = content.probes.records['probe_bent'], quality = 5, name = 'Alien Probe' }
 
 --- @{#SpellContent}: Spell manipulation.
 -- @field [parent=#content] #SpellContent spells

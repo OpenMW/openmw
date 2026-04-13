@@ -2,11 +2,14 @@
 
 #include "dbrefgeometryobject.hpp"
 #include "makenavmesh.hpp"
+#include "navmeshdata.hpp"
 #include "preparednavmeshdata.hpp"
 #include "serialization.hpp"
 #include "settings.hpp"
 
 #include <components/debug/debuglog.hpp>
+
+#include <DetourNavMesh.h>
 
 #include <osg/io_utils>
 
@@ -33,13 +36,14 @@ namespace DetourNavigator
     }
 
     GenerateNavMeshTile::GenerateNavMeshTile(ESM::RefId worldspace, const TilePosition& tilePosition,
-        RecastMeshProvider recastMeshProvider, const AgentBounds& agentBounds,
-        const DetourNavigator::Settings& settings, std::weak_ptr<NavMeshTileConsumer> consumer)
+        std::weak_ptr<const RecastMeshProvider> recastMeshProvider, const AgentBounds& agentBounds,
+        const DetourNavigator::Settings& settings, bool collectStats, std::weak_ptr<NavMeshTileConsumer> consumer)
         : mWorldspace(worldspace)
         , mTilePosition(tilePosition)
-        , mRecastMeshProvider(recastMeshProvider)
+        , mRecastMeshProvider(std::move(recastMeshProvider))
         , mAgentBounds(agentBounds)
         , mSettings(settings)
+        , mCollectStats(collectStats)
         , mConsumer(std::move(consumer))
     {
     }
@@ -51,16 +55,21 @@ namespace DetourNavigator
 
     void GenerateNavMeshTile::impl() noexcept
     {
-        const auto consumer = mConsumer.lock();
-
-        if (consumer == nullptr)
-            return;
-
         try
         {
+            const std::shared_ptr<NavMeshTileConsumer> consumer = mConsumer.lock();
+
+            if (consumer == nullptr)
+                return;
+
             Ignore ignore{ mWorldspace, mTilePosition, consumer };
 
-            const std::shared_ptr<RecastMesh> recastMesh = mRecastMeshProvider.getMesh(mWorldspace, mTilePosition);
+            const std::shared_ptr<const RecastMeshProvider> recastMeshProvider = mRecastMeshProvider.lock();
+
+            if (recastMeshProvider == nullptr)
+                return;
+
+            const std::shared_ptr<RecastMesh> recastMesh = recastMeshProvider->getMesh(mWorldspace, mTilePosition);
 
             if (recastMesh == nullptr || isEmpty(*recastMesh))
                 return;
@@ -73,6 +82,18 @@ namespace DetourNavigator
             if (info.has_value() && info->mVersion == navMeshFormatVersion)
             {
                 consumer->identity(mWorldspace, mTilePosition, info->mTileId);
+
+                if (mCollectStats)
+                {
+                    const NavMeshData tileData
+                        = makeNavMeshTileData(*info->mData, {}, mAgentBounds, mTilePosition, mSettings.mRecast);
+                    const dtMeshHeader& header = *reinterpret_cast<dtMeshHeader*>(tileData.mValue.get());
+
+                    consumer->updateStats(NavMeshTileConsumerStats{
+                        .mPolyCount = header.polyCount,
+                    });
+                }
+
                 ignore.mConsumer = nullptr;
                 return;
             }
@@ -83,18 +104,33 @@ namespace DetourNavigator
             if (data == nullptr)
                 return;
 
+            // Verify generated data before consuming.
+            const NavMeshData tileData = makeNavMeshTileData(*data, {}, mAgentBounds, mTilePosition, mSettings.mRecast);
+
             if (info.has_value())
                 consumer->update(mWorldspace, mTilePosition, info->mTileId, navMeshFormatVersion, *data);
             else
                 consumer->insert(mWorldspace, mTilePosition, navMeshFormatVersion, input, *data);
 
+            if (mCollectStats)
+            {
+                const dtMeshHeader& header = *reinterpret_cast<dtMeshHeader*>(tileData.mValue.get());
+
+                consumer->updateStats(NavMeshTileConsumerStats{
+                    .mPolyCount = header.polyCount,
+                });
+            }
+
             ignore.mConsumer = nullptr;
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace << "\" tile "
-                                << mTilePosition << ": " << e.what();
-            consumer->cancel(e.what());
+            if (const std::shared_ptr<NavMeshTileConsumer> consumer = mConsumer.lock())
+            {
+                Log(Debug::Warning) << "Failed to generate navmesh for worldspace \"" << mWorldspace << "\" tile "
+                                    << mTilePosition << ": " << e.what();
+                consumer->cancel(e.what());
+            }
         }
     }
 }

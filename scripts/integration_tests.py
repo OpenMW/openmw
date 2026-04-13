@@ -80,6 +80,7 @@ def run_test(test_name):
             "smooth animation transitions = true\n"
             "[Lua]\n"
             f"memory limit = {1024 * 1024 * 256}\n"
+            "lua profiler = true\n"
         )
     stdout_lines = list()
     test_success = True

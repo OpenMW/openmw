@@ -372,7 +372,7 @@
 -- @field #boolean temporary If set, this spell effect is temporary and should end on its own. Either after a single application or after its duration has run out.
 -- @field #boolean affectsBaseValues If set, this spell affects the base values of affected stats, rather than modifying current values.
 -- @field #boolean stackable If set, this spell can be applied multiple times. If not set, the same spell can only be applied once from the same source (where source is determined by caster + item). In vanilla rules, consumables are stackable while spells and enchantments are not.
--- @field #number activeSpellId A number uniquely identifying this active spell within the affected actor's list of active spells.
+-- @field #string activeSpellId Uniquely identifies this active spell within the affected actor's list of active spells.
 -- @field #list<#ActiveSpellEffect> effects The active effects (@{#ActiveSpellEffect}) of this spell.
 
 ---
@@ -753,6 +753,7 @@
 -- @field #string id Effect ID
 -- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
+-- @field #string description Localized description of the effect
 -- @field #string school Skill ID that is this effect's school
 -- @field #number baseCost
 -- @field openmw.util#Color color
@@ -772,6 +773,16 @@
 -- @field #string hitSound Identifier of the sound used on hit
 -- @field #string areaSound Identifier of the sound used for AOE spells
 -- @field #string boltSound Identifier of the projectile sound used for ranged spells
+-- @field #boolean hasAttribute True if the effect requires an attribute parameter
+-- @field #boolean hasSkill True if the effect requires a skill parameter
+-- @field #boolean onSelf True if the effect can be cast on self
+-- @field #boolean onTouch True if the effect can be cast on touch
+-- @field #boolean onTarget True if the effect can be cast on target
+-- @field #boolean unreflectable True if the effect cannot be reflected
+-- @field #boolean allowsSpellmaking True if the effect is available for spellmaking
+-- @field #boolean allowsEnchanting True if the effect is available for enchanting
+-- @field #boolean negativeLight True if the effect casts negative light
+-- @field #number speed Unused
 
 
 ---

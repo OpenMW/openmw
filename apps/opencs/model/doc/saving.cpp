@@ -35,7 +35,7 @@
 #include "state.hpp"
 
 CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectPath, ToUTF8::FromType encoding)
-    : Operation(State_Saving, true, true)
+    : Operation(State_Saving, true)
     , mDocument(document)
     , mState(*this, projectPath, encoding)
 {

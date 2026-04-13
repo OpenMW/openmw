@@ -110,52 +110,6 @@ namespace MWWorld
 {
     namespace
     {
-        std::vector<std::pair<std::string_view, ESM::Variant>> generateDefaultGameSettings()
-        {
-            return {
-                // Companion (tribunal)
-                { "sCompanionShare", ESM::Variant("Companion Share") },
-                { "sCompanionWarningMessage", ESM::Variant("Warning message") },
-                { "sCompanionWarningButtonOne", ESM::Variant("Button 1") },
-                { "sCompanionWarningButtonTwo", ESM::Variant("Button 2") },
-                { "sProfitValue", ESM::Variant("Profit Value") },
-                { "sTeleportDisabled", ESM::Variant("Teleport disabled") },
-                { "sLevitateDisabled", ESM::Variant("Levitate disabled") },
-                // Missing in unpatched MW 1.0
-                { "sDifficulty", ESM::Variant("Difficulty") },
-                { "fDifficultyMult", ESM::Variant(5.f) },
-                { "sAuto_Run", ESM::Variant("Auto Run") },
-                { "sServiceRefusal", ESM::Variant("Service Refusal") },
-                { "sNeedOneSkill", ESM::Variant("Need one skill") },
-                { "sNeedTwoSkills", ESM::Variant("Need two skills") },
-                { "sEasy", ESM::Variant("Easy") },
-                { "sHard", ESM::Variant("Hard") },
-                { "sDeleteNote", ESM::Variant("Delete Note") },
-                { "sEditNote", ESM::Variant("Edit Note") },
-                { "sAdmireSuccess", ESM::Variant("Admire Success") },
-                { "sAdmireFail", ESM::Variant("Admire Fail") },
-                { "sIntimidateSuccess", ESM::Variant("Intimidate Success") },
-                { "sIntimidateFail", ESM::Variant("Intimidate Fail") },
-                { "sTauntSuccess", ESM::Variant("Taunt Success") },
-                { "sTauntFail", ESM::Variant("Taunt Fail") },
-                { "sBribeSuccess", ESM::Variant("Bribe Success") },
-                { "sBribeFail", ESM::Variant("Bribe Fail") },
-                { "fNPCHealthBarTime", ESM::Variant(5.f) },
-                { "fNPCHealthBarFade", ESM::Variant(1.f) },
-                { "fFleeDistance", ESM::Variant(3000.f) },
-                { "sMaxSale", ESM::Variant("Max Sale") },
-                { "sAnd", ESM::Variant("and") },
-                // Werewolf (BM)
-                { "fWereWolfRunMult", ESM::Variant(1.3f) },
-                { "fWereWolfSilverWeaponDamageMult", ESM::Variant(2.f) },
-                { "iWerewolfFightMod", ESM::Variant(100) },
-                { "iWereWolfFleeMod", ESM::Variant(100) },
-                { "iWereWolfLevelToAttack", ESM::Variant(20) },
-                { "iWereWolfBounty", ESM::Variant(1000) },
-                { "fCombatDistanceWerewolfMod", ESM::Variant(0.3f) },
-            };
-        }
-
         std::vector<std::pair<GlobalVariableName, ESM::Variant>> generateDefaultGlobals()
         {
             return {
@@ -522,18 +476,6 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        for (const auto& [id, value] : generateDefaultGameSettings())
-        {
-            if (mStore.get<ESM::GameSetting>().search(id) == nullptr)
-            {
-                ESM::GameSetting record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
         for (const auto& [name, value] : generateDefaultGlobals())
         {
             if (mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(name.getValue())) == nullptr)

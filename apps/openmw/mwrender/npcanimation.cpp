@@ -42,6 +42,7 @@
 #include "actorutil.hpp"
 #include "postprocessor.hpp"
 #include "renderbin.hpp"
+#include "renderingmanager.hpp"
 #include "rotatecontroller.hpp"
 #include "vismask.hpp"
 
@@ -365,8 +366,9 @@ namespace MWRender
     class OverrideFieldOfViewCallback : public osg::NodeCallback
     {
     public:
-        OverrideFieldOfViewCallback(float fov)
+        OverrideFieldOfViewCallback(float fov, RenderingManager* renderingManager)
             : mFov(fov)
+            , mRenderingManager(renderingManager)
         {
         }
 
@@ -379,6 +381,15 @@ namespace MWRender
                 fov = mFov;
                 osg::ref_ptr<osg::RefMatrix> newProjectionMatrix = new osg::RefMatrix();
                 newProjectionMatrix->makePerspective(fov, aspect, zNear, zFar);
+
+                osg::Vec2f offset = mRenderingManager->getProjectionOffset();
+
+                double offsetX = (offset.x() / cv->getViewport()->width()) * 2.0;
+                double offsetY = (offset.y() / cv->getViewport()->height()) * 2.0;
+
+                const osg::Matrix translation = osg::Matrix::translate(offsetX, offsetY, 0.0);
+                newProjectionMatrix->postMult(translation);
+
                 osg::ref_ptr<osg::RefMatrix> invertedOldMatrix = cv->getProjectionMatrix();
                 invertedOldMatrix = new osg::RefMatrix(osg::RefMatrix::inverse(*invertedOldMatrix));
                 osg::ref_ptr<osg::RefMatrix> viewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
@@ -394,6 +405,7 @@ namespace MWRender
 
     private:
         float mFov;
+        RenderingManager* mRenderingManager;
     };
 
     void NpcAnimation::setRenderBin()
@@ -523,7 +535,8 @@ namespace MWRender
         if (is1stPerson)
         {
             mObjectRoot->setNodeMask(Mask_FirstPerson);
-            mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
+            mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(
+                mFirstPersonFieldOfView, MWBase::Environment::get().getWorld()->getRenderingManager()));
         }
 
         mWeaponAnimationTime->updateStartTime();

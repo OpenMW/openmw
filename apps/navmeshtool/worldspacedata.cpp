@@ -338,7 +338,7 @@ namespace NavMeshTool
 
     WorldspaceData::WorldspaceData(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings)
         : mWorldspace(worldspace)
-        , mTileCachedRecastMeshManager(std::make_unique<TileCachedRecastMeshManager>(settings))
+        , mTilesData(std::make_shared<TilesData>(settings))
     {
         mAabb.m_min = btVector3(0, 0, 0);
         mAabb.m_max = btVector3(0, 0, 0);
@@ -395,7 +395,7 @@ namespace NavMeshTool
             serializeToStderr(ExpectedCells{ static_cast<std::uint64_t>(cells.size()) });
 
         WorldspaceData data(worldspace, settings.mRecast);
-        TileCachedRecastMeshManager& manager = *data.mTileCachedRecastMeshManager;
+        TileCachedRecastMeshManager& manager = data.mTilesData->mTileCachedRecastMeshManager;
 
         const auto guard = manager.makeUpdateGuard();
 
@@ -413,7 +413,7 @@ namespace NavMeshTool
                               << cells.size() << ") \"" << cell.getDescription() << "\"";
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
-            const std::size_t cellObjectsBegin = data.mObjects.size();
+            const std::size_t cellObjectsBegin = data.mTilesData->mObjects.size();
 
             if (exterior)
             {
@@ -421,7 +421,7 @@ namespace NavMeshTool
                     = std::lower_bound(esmData.mLands.begin(), esmData.mLands.end(), cellPosition, LessByXY{});
                 const auto [heightfieldShape, minHeight, maxHeight]
                     = makeHeightfieldShape(it == esmData.mLands.end() ? std::optional<ESM::Land>() : *it, cellPosition,
-                        data.mHeightfields, data.mLandData);
+                        data.mTilesData->mHeightfields, data.mTilesData->mLandData);
 
                 mergeOrAssign(getAabb(cellPosition, minHeight, maxHeight), data.mAabb, data.mAabbInitialized);
 
@@ -471,7 +471,7 @@ namespace NavMeshTool
                                 makeAddObjectErrorMessage(avoidObjectId, DetourNavigator::AreaType_null, avoidShape));
                     }
 
-                    data.mObjects.emplace_back(std::move(object));
+                    data.mTilesData->mObjects.emplace_back(std::move(object));
                 });
 
             if (writeBinaryLog)
@@ -479,7 +479,7 @@ namespace NavMeshTool
 
             Log(Debug::Info) << "Processed " << (exterior ? "exterior" : "interior") << " cell (" << (i + 1) << "/"
                              << cells.size() << ") " << cell.getDescription() << " with "
-                             << (data.mObjects.size() - cellObjectsBegin) << " objects";
+                             << (data.mTilesData->mObjects.size() - cellObjectsBegin) << " objects";
         }
 
         const std::map<osg::Vec2i, DetourNavigator::ChangeType> changedTiles = manager.takeChangedTiles(guard.get());
@@ -490,8 +490,8 @@ namespace NavMeshTool
         data.mTiles.reserve(changedTiles.size());
         std::ranges::transform(changedTiles, std::back_inserter(data.mTiles), [](const auto& v) { return v.first; });
 
-        Log(Debug::Info) << "Processed " << cells.size() << " cells, added " << data.mObjects.size() << " objects and "
-                         << data.mHeightfields.size() << " height fields";
+        Log(Debug::Info) << "Processed " << cells.size() << " cells, added " << data.mTilesData->mObjects.size()
+                         << " objects and " << data.mTilesData->mHeightfields.size() << " height fields";
 
         return data;
     }

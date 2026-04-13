@@ -19,7 +19,7 @@ local function startPackage(args)
     elseif args.type == 'Escort' then
         if not args.target then error("target required") end
         if not args.destPosition then error("destPosition required") end
-        self:_startAiEscort(args.target, args.destCell or self.cell, args.duration or 0, args.destPosition, cancelOther)
+        self:_startAiEscort(args.target, args.destCell or self.cell, args.duration or 0, args.destPosition, args.isRepeat or false, cancelOther)
     elseif args.type == 'Wander' then
         local key = "idle"
         local idle = {}

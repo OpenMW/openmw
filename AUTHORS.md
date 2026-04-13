@@ -221,6 +221,7 @@ Programmers
     sir_herrbatka
     smbas
     Sophie Kirschner (pineapplemachine)
+    Sophia Polfliet (Sophie~<3)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)

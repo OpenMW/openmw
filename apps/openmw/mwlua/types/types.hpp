@@ -32,6 +32,8 @@ namespace MWLua
     ESM::Activator tableToActivator(const sol::table& rec);
     void addMutableActivatorType(sol::state_view& lua);
     void addBookBindings(sol::table book, const Context& context);
+    ESM::Book tableToBook(const sol::table& rec);
+    void addMutableBookType(sol::state_view& lua);
     void addContainerBindings(sol::table container, const Context& context);
     void addDoorBindings(sol::table door, const Context& context);
     ESM::Door tableToDoor(const sol::table& rec);
@@ -44,6 +46,8 @@ namespace MWLua
     void addCreatureBindings(sol::table creature, const Context& context);
     void addLockpickBindings(sol::table lockpick, const Context& context);
     void addProbeBindings(sol::table probe, const Context& context);
+    ESM::Probe tableToProbe(const sol::table& rec);
+    void addMutableProbeType(sol::state_view& lua);
     void addApparatusBindings(sol::table apparatus, const Context& context);
     void addRepairBindings(sol::table repair, const Context& context);
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context);
@@ -52,6 +56,8 @@ namespace MWLua
     void addPotionBindings(sol::table potion, const Context& context);
     ESM::Potion tableToPotion(const sol::table& rec);
     void addIngredientBindings(sol::table ingredient, const Context& context);
+    void addMutableIngredientType(sol::state_view& lua);
+    ESM::Ingredient tableToIngredient(const sol::table& rec);
     void addArmorBindings(sol::table armor, const Context& context);
     void addLockableBindings(sol::table lockable);
     void addClothingBindings(sol::table clothing, const Context& context);
@@ -59,6 +65,8 @@ namespace MWLua
     ESM::Static tableToStatic(const sol::table& rec);
     void addMutableStaticType(sol::state_view& lua);
     void addLightBindings(sol::table light, const Context& context);
+    ESM::Light tableToLight(const sol::table& rec);
+    void addMutableLightType(sol::state_view& lua);
     void addLevelledCreatureBindings(sol::table list, const Context& context);
 
     void addESM4DoorBindings(sol::table door, const Context& context);

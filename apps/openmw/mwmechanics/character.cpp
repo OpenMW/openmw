@@ -1860,6 +1860,7 @@ namespace MWMechanics
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
                 mUpperBodyState = UpperBodyState::None;
+                mWeaponType = ESM::Weapon::None;
             }
         }
 

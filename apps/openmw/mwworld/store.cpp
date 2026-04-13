@@ -10,7 +10,6 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -952,27 +951,6 @@ namespace MWWorld
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
     }
 
-    void Store<ESM::GameSetting>::setUp()
-    {
-        auto addSetting = [&](const std::string& key, ESM::Variant value) {
-            auto id = ESM::RefId::stringRefId(key);
-            ESM::GameSetting setting;
-            setting.blank();
-            setting.mId = id;
-            setting.mValue = std::move(value);
-            auto [iter, inserted] = mStatic.insert_or_assign(id, std::move(setting));
-            if (inserted)
-                mShared.push_back(&iter->second);
-        };
-        for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        TypedDynamicStore<ESM::GameSetting>::setUp();
-    }
-
     // Attribute
     //=========================================================================
 
@@ -1019,19 +997,6 @@ namespace MWWorld
             .mDescription = std::string{ getGMSTString(settings, "sLucDesc") },
             .mIcon = "icons\\k\\attribute_luck.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
-    }
-
-    // Magic Effect
-    //=========================================================================
-
-    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
-    {
-        for (ESM::MagicEffect* mgef : mShared)
-        {
-            std::string_view gmst = ESM::MagicEffect::refIdToGmstString(mgef->mId);
-            if (!gmst.empty())
-                mgef->mName = getGMSTString(settings, gmst);
-        }
     }
 
     // Dialogue

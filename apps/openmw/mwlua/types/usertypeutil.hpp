@@ -29,7 +29,19 @@ namespace MWLua::Types
         template <class Accessor>
         auto operator()(Accessor&& accessor) const
         {
-            return [=](Type& rec, std::string_view value) { accessor(rec) = ESM::RefId::deserializeText(value); };
+            return [=](Type& rec, std::optional<std::string_view> value) {
+                accessor(rec) = ESM::RefId::deserializeText(value.value_or(std::string_view()));
+            };
+        }
+    };
+
+    template <class Type>
+    struct Setter<Type, std::string>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec, std::string_view value) { accessor(rec) = value; };
         }
     };
 
@@ -96,6 +108,27 @@ namespace MWLua::Types
                     data |= flag;
                 else
                     data &= ~flag;
+            });
+        else
+            type[key] = sol::readonly_property(std::move(getter));
+    }
+
+    template <class Type, class Flag, class... Member>
+    void addReverseFlagProperty(sol::usertype<Type>& type, std::string_view key, Flag flag, Member... members)
+    {
+        using Record = RecordType<Type>::Record;
+        const auto getter = [=](const Type& rec) -> bool {
+            const Record& record = RecordType<Type>::asRecord(rec);
+            return !((record.*....*members) & flag);
+        };
+        if constexpr (RecordType<Type>::isMutable)
+            type[key] = sol::property(std::move(getter), [=](Type& rec, bool value) {
+                Record& record = rec.find();
+                auto& data = (record.*....*members);
+                if (value)
+                    data &= ~flag;
+                else
+                    data |= flag;
             });
         else
             type[key] = sol::readonly_property(std::move(getter));

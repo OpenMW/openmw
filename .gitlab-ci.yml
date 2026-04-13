@@ -569,7 +569,7 @@ Ubuntu_GCC_integration_tests_asan:
     - CI/before_script.macos.sh -C
     - CI/macos/build.sh
     - cd build
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - brew install s3cmd
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
@@ -607,7 +607,6 @@ macOS15_Xcode16_amd64:
       - ccache/
   variables:
     CCACHE_SIZE: 3G
-    DMG_IDENTIFIER: amd64
     MACOS_AMD64: true
     HOMEBREW_NO_AUTO_UPDATE: 1
     HOMEBREW_NO_EMOJI: true
@@ -626,7 +625,6 @@ macOS15_Xcode16_arm64:
     paths:
       - ccache/
   variables:
-    DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
     HOMEBREW_NO_AUTO_UPDATE: 1
     HOMEBREW_NO_EMOJI: true
