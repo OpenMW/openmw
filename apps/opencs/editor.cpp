@@ -197,36 +197,24 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
         QApplication::exit(1);
     }
 
-    dataDirs.insert(dataDirs.end(), dataLocal.begin(), dataLocal.end());
+    if (!dataLocal.empty())
+        dataDirs.insert(dataDirs.begin(), dataLocal.begin(), dataLocal.end());
 
     dataDirs.insert(dataDirs.begin(), mResources / "vfs");
 
-    // iterate the data directories and add them to the file dialog for loading
-    readContentOrder();
-    mFileDialog.setContentOrder(mContentOrder, mGroundcoverOrder);
     mFileDialog.addFiles(dataDirs);
 
-    return std::make_pair(dataDirs, variables["fallback-archive"].as<std::vector<std::string>>());
-}
-
-void CS::Editor::readContentOrder()
-{
-    mContentOrder.clear();
-    mGroundcoverOrder.clear();
-
-    boost::program_options::variables_map& variables = mConfigVariables;
-
+    QStringList contentOrder;
     if (!variables["content"].empty())
     {
         for (const auto& c : variables["content"].as<std::vector<std::string>>())
-            mContentOrder.append(QString::fromStdString(c));
+            contentOrder.append(QString::fromStdString(c));
     }
 
-    if (!variables["groundcover"].empty())
-    {
-        for (const auto& g : variables["groundcover"].as<std::vector<std::string>>())
-            mGroundcoverOrder.append(QString::fromStdString(g));
-    }
+    if (!contentOrder.isEmpty())
+        mFileDialog.setContentList(contentOrder, true);
+
+    return std::make_pair(dataDirs, variables["fallback-archive"].as<std::vector<std::string>>());
 }
 
 void CS::Editor::createGame()

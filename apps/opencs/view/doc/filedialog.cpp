@@ -54,9 +54,9 @@ void CSVDoc::FileDialog::clearFiles()
     mSelector->clearFiles();
 }
 
-void CSVDoc::FileDialog::setContentOrder(const QStringList& contentOrder, const QStringList& groundcoverOrder)
+void CSVDoc::FileDialog::setContentList(const QStringList& fileList, bool orderOnly)
 {
-    mSelector->setContentOrder(contentOrder, groundcoverOrder);
+    mSelector->setContentList(fileList, orderOnly);
 }
 
 QStringList CSVDoc::FileDialog::selectedFilePaths()

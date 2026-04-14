@@ -535,13 +535,6 @@ void ContentSelectorModel::ContentModel::setCurrentGameFile(const EsmFile* file)
     emit dataChanged(index, index);
 }
 
-void ContentSelectorModel::ContentModel::setContentOrder(
-    const QStringList& contentOrder, const QStringList& groundcoverOrder)
-{
-    mContentOrder = contentOrder;
-    mGroundcoverOrder = groundcoverOrder;
-}
-
 void ContentSelectorModel::ContentModel::sortFiles()
 {
     emit layoutAboutToBeChanged();
@@ -571,40 +564,6 @@ void ContentSelectorModel::ContentModel::sortFiles()
             missingFile->setFromAnotherConfigFile(true);
             mFiles.insert(firstModifiable++, missingFile.release());
         }
-    }
-
-    // Sort the modifiable portion using openmw.cfg content= and groundcover= order.
-    // Files listed under content= come first (in cfg order), then groundcover= files
-    // (in cfg order), then any remaining files sorted alphabetically.
-    if (!mContentOrder.isEmpty() || !mGroundcoverOrder.isEmpty())
-    {
-
-        QHash<QString, int> orderMap;
-        int order = 0;
-        for (const QString& name : mContentOrder)
-            orderMap.insert(name.toLower(), order++);
-        for (const QString& name : mGroundcoverOrder)
-        {
-            const QString lower = name.toLower();
-            if (!orderMap.contains(lower))
-                orderMap.insert(lower, order++);
-        }
-
-        std::stable_sort(
-            mFiles.begin() + firstModifiable, mFiles.end(), [&orderMap](const EsmFile* a, const EsmFile* b) {
-                const QString aKey = a->fileName().toLower();
-                const QString bKey = b->fileName().toLower();
-                const bool aHasOrder = orderMap.contains(aKey);
-                const bool bHasOrder = orderMap.contains(bKey);
-
-                if (aHasOrder && bHasOrder)
-                    return orderMap.value(aKey) < orderMap.value(bKey);
-                if (aHasOrder && !bHasOrder)
-                    return true;
-                if (!aHasOrder && bHasOrder)
-                    return false;
-                return aKey < bKey;
-            });
     }
 
     // For the purposes of dependency sort we'll hallucinate that Bloodmoon is dependent on Tribunal
@@ -693,8 +652,32 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) c
     return !errors.empty();
 }
 
-void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList)
+void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList, bool orderOnly)
 {
+    if (orderOnly)
+    {
+        int previousPosition = -1;
+        for (const auto& name : fileList)
+        {
+            const EsmFile* file = item(name);
+            if (!file)
+                continue;
+
+            int filePosition = indexFromItem(file).row();
+            if (filePosition < previousPosition)
+            {
+                mFiles.move(filePosition, previousPosition);
+            }
+            else
+            {
+                previousPosition = filePosition;
+            }
+        }
+
+        refreshModel();
+        return;
+    }
+
     QProgressDialog progressDialog("Setting content list", {}, 0, static_cast<int>(fileList.size()));
     progressDialog.setWindowModality(Qt::WindowModal);
     progressDialog.setValue(0);
