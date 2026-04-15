@@ -654,39 +654,22 @@ bool ContentSelectorModel::ContentModel::isLoadOrderError(const EsmFile* file) c
 
 void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileList, bool orderOnly)
 {
-    if (orderOnly)
+    QProgressDialog* progressDialog = nullptr;
+    if (!orderOnly)
     {
-        int previousPosition = -1;
-        for (const auto& name : fileList)
-        {
-            const EsmFile* file = item(name);
-            if (!file)
-                continue;
-
-            int filePosition = indexFromItem(file).row();
-            if (filePosition < previousPosition)
-            {
-                mFiles.move(filePosition, previousPosition);
-            }
-            else
-            {
-                previousPosition = filePosition;
-            }
-        }
-
-        refreshModel();
-        return;
+        progressDialog = new QProgressDialog("Setting content list", QString(), 0, static_cast<int>(fileList.size()));
+        progressDialog->setWindowModality(Qt::WindowModal);
+        progressDialog->setValue(0);
     }
-
-    QProgressDialog progressDialog("Setting content list", {}, 0, static_cast<int>(fileList.size()));
-    progressDialog.setWindowModality(Qt::WindowModal);
-    progressDialog.setValue(0);
 
     int previousPosition = -1;
     for (qsizetype i = 0, n = fileList.size(); i < n; ++i)
     {
         const EsmFile* file = item(fileList[i]);
-        if (setCheckState(file, true))
+        if (!file)
+            continue;
+
+        if (orderOnly || setCheckState(file, true))
         {
             // setCheckState already gracefully handles builtIn and fromAnotherConfigFile
             // as necessary, move plug-ins in visible list to match sequence of supplied filelist
@@ -702,8 +685,11 @@ void ContentSelectorModel::ContentModel::setContentList(const QStringList& fileL
             }
         }
 
-        progressDialog.setValue(static_cast<int>(i + 1));
+        if (progressDialog)
+            progressDialog->setValue(static_cast<int>(i + 1));
     }
+
+    delete progressDialog;
 
     refreshModel();
 }
