@@ -180,18 +180,12 @@ void ContentSelectorView::ContentSelector::setEncoding(const QString& encoding)
 
 void ContentSelectorView::ContentSelector::setContentList(const QStringList& list, bool orderOnly)
 {
-    if (orderOnly)
-    {
-        mContentModel->setContentList(list, true);
-        return;
-    }
-
-    if (list.isEmpty())
+    if (list.isEmpty() && !orderOnly)
     {
         slotCurrentGameFileIndexChanged(ui->gameFileView->currentIndex());
     }
     else
-        mContentModel->setContentList(list);
+        mContentModel->setContentList(list, orderOnly);
 }
 
 ContentSelectorModel::ContentFileList ContentSelectorView::ContentSelector::selectedFiles() const
