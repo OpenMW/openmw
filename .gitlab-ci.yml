@@ -173,6 +173,7 @@ Ubuntu_GCC:
     CC: gcc
     CXX: g++
     CCACHE_SIZE: 3G
+    ARTIFACT_COMPRESSION_LEVEL: default
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
