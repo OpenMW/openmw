@@ -102,6 +102,15 @@ namespace
                 npc.mFlags &= ~ESM::NPC::Essential;
         }
 
+        if (rec["isPersistent"] != sol::nil)
+        {
+            bool persistent = rec["isPersistent"];
+            if (persistent)
+                npc.mRecordFlags |= ESM::FLAG_Persistent;
+            else
+                npc.mRecordFlags &= ~ESM::FLAG_Persistent;
+        }
+
         if (rec["isAutocalc"] != sol::nil)
         {
             bool autoCalc = rec["isAutocalc"];
@@ -231,6 +240,8 @@ namespace MWLua
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["isRespawning"]
             = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.mFlags & ESM::NPC::Respawn; });
+        record["isPersistent"] = sol::readonly_property(
+            [](const ESM::NPC& rec) -> bool { return rec.mRecordFlags & ESM::FLAG_Persistent; });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         record["bloodType"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mBloodType; });
         addActorServicesBindings<ESM::NPC>(record, context);
