@@ -1316,6 +1316,7 @@
 -- @field [parent=#Regions] #list<#RegionRecord> records
 -- @usage local record = core.regions.records['bitter coast region']
 -- @usage local record = core.regions.records[1]
+
 ---
 -- Region data record
 -- @type RegionRecord
