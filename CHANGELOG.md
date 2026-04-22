@@ -89,7 +89,7 @@
     Feature #8913: Show the current gamma correction value like the other settings in-game
     Feature #8956: Implement iGreetDuration and fGreetDistanceReset
     Feature #8957: Implement iMaxInfoDist
-    Feature #8962: Expose unused magic effect speed parameter
+    Feature #8962: Expose magic effect speed parameter
     Feature #8966: Add DialogueResponse event
     Feature #8979: Animation ended handler
     Feature #8987: Lua Load context
