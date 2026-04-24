@@ -99,8 +99,8 @@ float lcalcIllumination(int lightIndex, float dist)
 {
     float illumination = 1.0 / (lcalcConstantAttenuation(lightIndex) + lcalcLinearAttenuation(lightIndex) * dist + lcalcQuadraticAttenuation(lightIndex) * dist * dist);
 #if !@classicFalloff
-    // Fade illumination between the radius and the radius doubled to diminish pop-in
-    illumination *= 1.0 - quickstep((dist / lcalcRadius(lightIndex)) - 1.0);
+    // Fade illumination out to 0 when reaching the lights radius
+    illumination *= 1.0 - quickstep((dist / lcalcRadius(lightIndex) - 0.75) / 0.25);
 #endif
     return illumination;
 }

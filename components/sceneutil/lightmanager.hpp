@@ -186,7 +186,7 @@ namespace SceneUtil
         int mMaxLights = 8;
         float mMaximumLightDistance = 8192;
         float mLightFadeStart = 0;
-        float mLightBoundsMultiplier = 1;
+        float mLightRadiusMultiplier = 1;
     };
 
     /// @brief Decorator node implementing the rendering of any number of LightSources that can be anywhere in the
@@ -276,6 +276,8 @@ namespace SceneUtil
         void setCollectPPLights(bool enabled);
 
         std::shared_ptr<PPLightBuffer> getPPLightsBuffer() { return mPPLightBuffer; }
+
+        float getPointLightRadiusMultiplier() const { return mPointLightRadiusMultiplier; }
 
     private:
         void initPerObjectUniform(int targetLights);

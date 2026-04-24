@@ -364,7 +364,8 @@ namespace SceneUtil
                 configureDiffuse(lightMat, light->getDiffuse());
                 configureSpecular(lightMat, light->getSpecular());
                 configureAttenuation(lightMat, light->getConstantAttenuation(), light->getLinearAttenuation(),
-                    light->getQuadraticAttenuation(), lightList[i]->mLightSource->getRadius());
+                    light->getQuadraticAttenuation(),
+                    lightList[i]->mLightSource->getRadius() * mLightManager->getPointLightRadiusMultiplier());
 
                 data->setElement(static_cast<unsigned int>(i + 1), lightMat);
             }
@@ -683,7 +684,7 @@ namespace SceneUtil
 
         addCullCallback(new LightManagerCullCallback(this));
 
-        updateSettings(settings.mLightBoundsMultiplier, settings.mMaximumLightDistance, settings.mLightFadeStart);
+        updateSettings(settings.mLightRadiusMultiplier, settings.mMaximumLightDistance, settings.mLightFadeStart);
     }
 
     LightManager::LightManager(const LightManager& copy, const osg::CopyOp& copyop)
@@ -738,9 +739,9 @@ namespace SceneUtil
     }
 
     void LightManager::processChangedSettings(
-        float lightBoundsMultiplier, float maximumLightDistance, float lightFadeStart)
+        float lightRadiusMultiplier, float maximumLightDistance, float lightFadeStart)
     {
-        updateSettings(lightBoundsMultiplier, maximumLightDistance, lightFadeStart);
+        updateSettings(lightRadiusMultiplier, maximumLightDistance, lightFadeStart);
     }
 
     void LightManager::updateMaxLights(int maxLights)
@@ -757,9 +758,9 @@ namespace SceneUtil
             cache.clear();
     }
 
-    void LightManager::updateSettings(float lightBoundsMultiplier, float maximumLightDistance, float lightFadeStart)
+    void LightManager::updateSettings(float lightRadiusMultiplier, float maximumLightDistance, float lightFadeStart)
     {
-        mPointLightRadiusMultiplier = lightBoundsMultiplier;
+        mPointLightRadiusMultiplier = lightRadiusMultiplier;
         mPointLightFadeEnd = maximumLightDistance;
         if (mPointLightFadeEnd > 0)
             mPointLightFadeStart = mPointLightFadeEnd * lightFadeStart;
@@ -924,9 +925,9 @@ namespace SceneUtil
             {
                 osg::Matrixf worldViewMat = transform.mWorldMatrix * (*viewMatrix);
 
-                float radius = transform.mLightSource->getRadius();
+                float radius = transform.mLightSource->getRadius() * mPointLightRadiusMultiplier;
 
-                osg::BoundingSphere viewBound(osg::Vec3f(), radius * mPointLightRadiusMultiplier);
+                osg::BoundingSphere viewBound(osg::Vec3f(), radius);
                 transformBoundingSphere(worldViewMat, viewBound);
 
                 if (transform.mLightSource->getLastAppliedFrame() != frameNum && mPointLightFadeEnd != 0.f)
@@ -973,7 +974,7 @@ namespace SceneUtil
                         // Ignore negative lights
                         if (light->getDiffuse().x() < 0.f)
                             continue;
-                        const float radius = bound.mLightSource->getRadius();
+                        const float radius = bound.mLightSource->getRadius() * mPointLightRadiusMultiplier;
                         osg::BoundingSphere frustumBound = bound.mViewBound;
                         frustumBound.radius() = radius * 2.f;
                         // Ignore culled lights
@@ -1001,7 +1002,7 @@ namespace SceneUtil
         buf->setSpecular(index, light->getSpecular());
         buf->setAttenuationRadius(index,
             osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(),
-                lightSource->getRadius()));
+                lightSource->getRadius() * mPointLightRadiusMultiplier));
         buf->setPosition(index, light->getPosition() * (*viewMatrix));
     }
 

@@ -111,13 +111,13 @@ Shaders Settings
    - `shaders`: modern lighting approach, higher light counts, better for modern GPUs.
 
 .. omw-setting::
-   :title: light bounds multiplier
+   :title: light radius multiplier
    :type: float32
-   :range: 0.0-5.0
+   :range: 1.0-100.0
    :default: 1.65
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
-   Multiplier for point light bounding sphere radius, affecting light transition smoothness and performance.
+   Multiplier for point light radius.
 
 .. omw-setting::
    :title: classic falloff
@@ -212,7 +212,7 @@ Shaders Settings
    :location: :bdg-success:`Launcher > Settings > Visuals > Shaders`
 
    Prevents rain and snow clipping through ceilings by using an extra render pass.
-   
+
    .. warning::
 
       Experimental and may cause visual oddities.

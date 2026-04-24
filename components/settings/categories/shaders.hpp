@@ -33,8 +33,8 @@ namespace Settings
         SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
         SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
         SettingValue<bool> mMatchSunlightToSun{ mIndex, "Shaders", "match sunlight to sun" };
-        SettingValue<float> mLightBoundsMultiplier{ mIndex, "Shaders", "light bounds multiplier",
-            makeClampSanitizerFloat(0, 5) };
+        SettingValue<float> mLightRadiusMultiplier{ mIndex, "Shaders", "light radius multiplier",
+            makeClampSanitizerFloat(1, 100) };
         SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance",
             makeMaxSanitizerFloat(0) };
         SettingValue<float> mLightFadeStart{ mIndex, "Shaders", "light fade start", makeClampSanitizerFloat(0, 1) };

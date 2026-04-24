@@ -231,7 +231,7 @@ namespace MWRender
             .mMaxLights = Settings::shaders().mMaxLights,
             .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
             .mLightFadeStart = Settings::shaders().mLightFadeStart,
-            .mLightBoundsMultiplier = Settings::shaders().mLightBoundsMultiplier,
+            .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
         });
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();

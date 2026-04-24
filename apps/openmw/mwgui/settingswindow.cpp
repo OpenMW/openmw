@@ -653,7 +653,7 @@ namespace MWGui
         Settings::shaders().mClassicFalloff.reset();
         Settings::shaders().mClampLighting.reset();
         Settings::shaders().mMatchSunlightToSun.reset();
-        Settings::shaders().mLightBoundsMultiplier.reset();
+        Settings::shaders().mLightRadiusMultiplier.reset();
         Settings::shaders().mMaximumLightDistance.reset();
         Settings::shaders().mLightFadeStart.reset();
         Settings::shaders().mMinimumInteriorBrightness.reset();
