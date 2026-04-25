@@ -38,6 +38,13 @@ variables:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
+.Almalinux_Image:
+  tags:
+    - saas-linux-medium-amd64
+  image: almalinux:9
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+
 Ubuntu_GCC_preprocess:
   extends: .Ubuntu_Image
   cache:
@@ -96,8 +103,29 @@ Ubuntu_GCC_preprocess:
     - df -h
     - du -sh build/
     - du -sh build/install/
-    - du -sh apt-cache/
     - du -sh ccache/
+  artifacts:
+    paths:
+      - build/install/
+      - "**/CMakeCache.txt"
+
+.Almalinux_Vcpkg:
+  extends: .Almalinux_Image
+  cache:
+    paths:
+    - ccache/
+  stage: build
+  variables:
+    OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
+    CC: gcc
+    CXX: g++
+  before_script:
+    - dnf install -y epel-release
+    - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
+    - source /opt/rh/gcc-toolset-13/enable
+    - ./CI/linux/before_install_for_vcpkg.sh
+  script:
+    - !reference [.Ubuntu, script]
   artifacts:
     paths:
       - build/install/
@@ -510,21 +538,18 @@ Ubuntu_Clang_tests_Debug:
     reports:
       junit: build/*-tests.xml
 
-Ubuntu_Vcpkg_Deps_Integration_Tests:
-  extends: .Ubuntu
+Almalinux_Vcpkg_Deps_Integration_Tests:
+  extends: .Almalinux_Vcpkg
   stage: test
   cache:
-    key: Ubuntu_Vcpkg_Deps_Integration.v1
+    key: Almalinux_Vcpkg_Deps_Integration.v1
     paths:
-      - apt-cache/
       - ccache/
       - build/extern/fetched/
-  before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps-tarball openmw-integration-tests
-    - ./CI/linux/before_install_for_vcpkg.sh
-    - pip3 install --user --break-system-packages numpy matplotlib termtables click
   script:
-    - !reference [.Ubuntu, script]
+    - !reference [.Almalinux_Vcpkg, script]
+    - dnf install -y python3-pip xorg-x11-server-Xvfb
+    - pip3 install --user --break-system-packages numpy matplotlib termtables click
     - CI/run_integration_tests.sh
   after_script:
     - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
