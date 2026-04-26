@@ -89,3 +89,13 @@ OpenMW is available as a flatpak. With flatpak installed, run the command below.
 .. code-block:: console
 
 	$ flatpak install openmw
+
+NixOS
+=====
+OpenMW is available as a Nix package. To install, add the following Nix code to your NixOS Configuration.
+
+.. code-block:: nix
+
+	environment.systemPackages = [
+	    pkgs.openmw
+	];
