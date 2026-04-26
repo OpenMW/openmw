@@ -1879,10 +1879,13 @@ namespace MWGui
         bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
         LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
         bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
-        if (widget && capturesInput) {
+        if (widget && capturesInput)
+        {
             mTextInputActive = true;
             SDL_StartTextInput();
-        } else {
+        }
+        else
+        {
             mTextInputActive = false;
             SDL_StopTextInput();
         }
