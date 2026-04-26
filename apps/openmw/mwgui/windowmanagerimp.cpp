@@ -189,6 +189,7 @@ namespace MWGui
         , mInventoryTabsOverlay(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
+        , mTextInputActive(false)
         , mHudEnabled(true)
         , mCursorVisible(true)
         , mCursorActive(true)
@@ -1872,13 +1873,19 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
+        if (!widget && !mTextInputActive)
+            return;
+
         bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
         LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
         bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
-        if (widget && capturesInput)
+        if (widget && capturesInput) {
+            mTextInputActive = true;
             SDL_StartTextInput();
-        else
+        } else {
+            mTextInputActive = false;
             SDL_StopTextInput();
+        }
     }
 
     void WindowManager::setEnemy(const MWWorld::Ptr& enemy)
