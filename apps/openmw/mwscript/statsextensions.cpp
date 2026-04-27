@@ -1295,6 +1295,9 @@ namespace MWScript
                     currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
+                // Sound is inverted
+                if (mPositiveEffect == ESM::MagicEffect::Sound)
+                    currentValue *= -1;
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1336,6 +1339,9 @@ namespace MWScript
                     currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
+                // Sound is inverted
+                if (mPositiveEffect == ESM::MagicEffect::Sound)
+                    arg *= -1;
 
                 effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
             }
@@ -1345,12 +1351,10 @@ namespace MWScript
         class OpModMagicEffect : public Interpreter::Opcode0
         {
             ESM::RefId mPositiveEffect;
-            ESM::RefId mNegativeEffect;
 
         public:
-            OpModMagicEffect(int positiveEffect, int negativeEffect)
+            OpModMagicEffect(int positiveEffect)
                 : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
             {
             }
 
@@ -1363,6 +1367,9 @@ namespace MWScript
 
                 if (!ptr.getClass().isActor())
                     return;
+                // Sound is inverted
+                if (mPositiveEffect == ESM::MagicEffect::Sound)
+                    arg *= -1;
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
                 stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
@@ -1612,9 +1619,9 @@ namespace MWScript
                     Compiler::Stats::opcodeSetMagicEffectExplicit + i, positive, negative);
 
                 interpreter.installSegment5<OpModMagicEffect<ImplicitRef>>(
-                    Compiler::Stats::opcodeModMagicEffect + i, positive, negative);
+                    Compiler::Stats::opcodeModMagicEffect + i, positive);
                 interpreter.installSegment5<OpModMagicEffect<ExplicitRef>>(
-                    Compiler::Stats::opcodeModMagicEffectExplicit + i, positive, negative);
+                    Compiler::Stats::opcodeModMagicEffectExplicit + i, positive);
             }
 
             interpreter.installSegment5<OpGetPCVisionBonus>(Compiler::Stats::opcodeGetPCVisionBonus);
