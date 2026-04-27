@@ -192,6 +192,9 @@ local function applyArmor(attack)
                 core.sendGlobalEvent('ModifyItemCondition', { actor = self, item = item, amount = diff })
             end
 
+            if attack.muteSound then
+                return
+            end
             if skillid == 'lightarmor' then
                 core.sound.playSound3d('Light Armor Hit', self)
             elseif skillid == 'mediumarmor' then
@@ -266,15 +269,21 @@ end
 
 local function onHit(data)
     if data.successful and not godMode() then
-        I.Combat.applyArmor(data)
-        I.Combat.adjustDamageForDifficulty(data)
+        if not data.ignoreArmor then
+            I.Combat.applyArmor(data)
+        end
+        if not data.ignoreDifficulty then
+            I.Combat.adjustDamageForDifficulty(data)
+        end
         if getDamage(data, 'health') > 0 then
-            core.sound.playSound3d('Health Damage', self)
+            if not data.muteSound then
+                core.sound.playSound3d('Health Damage', self)
+            end
             if data.hitPos then
                 I.Combat.spawnBloodEffect(data.hitPos)
             end
         end
-    elseif data.attacker and Player.objectIsInstance(data.attacker) then
+    elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
         core.sound.playSound3d('miss', self)
     end
     Actor._onHit(self, data)
