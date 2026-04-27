@@ -38,13 +38,6 @@ variables:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
-.Almalinux_Image:
-  tags:
-    - saas-linux-medium-amd64
-  image: almalinux:9
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
-
 Ubuntu_GCC_preprocess:
   extends: .Ubuntu_Image
   cache:
@@ -110,10 +103,14 @@ Ubuntu_GCC_preprocess:
       - "**/CMakeCache.txt"
 
 .Almalinux_Vcpkg:
-  extends: .Almalinux_Image
+  tags:
+    - saas-linux-medium-amd64
+  image: almalinux:9
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     paths:
-    - ccache/
+      - ccache/
   stage: build
   variables:
     OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
@@ -548,7 +545,7 @@ Almalinux_Vcpkg_Deps_Integration_Tests:
       - build/extern/fetched/
   script:
     - !reference [.Almalinux_Vcpkg, script]
-    - dnf install -y python3-pip xorg-x11-server-Xvfb
+    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils
     - pip3 install --user numpy matplotlib termtables click
     - CI/run_integration_tests.sh
   after_script:
