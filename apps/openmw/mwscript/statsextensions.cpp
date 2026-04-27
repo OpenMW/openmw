@@ -1267,9 +1267,9 @@ namespace MWScript
             ESM::RefId mNegativeEffect;
 
         public:
-            OpGetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
+            OpGetMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1311,9 +1311,9 @@ namespace MWScript
             ESM::RefId mNegativeEffect;
 
         public:
-            OpSetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
+            OpSetMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1353,8 +1353,8 @@ namespace MWScript
             ESM::RefId mPositiveEffect;
 
         public:
-            OpModMagicEffect(int positiveEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
+            OpModMagicEffect(ESM::RefId positiveEffect)
+                : mPositiveEffect(positiveEffect)
             {
             }
 
@@ -1605,8 +1605,8 @@ namespace MWScript
 
             for (int i = 0; i < 24; ++i)
             {
-                int positive = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mPositiveEffect);
-                int negative = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mNegativeEffect);
+                const ESM::RefId& positive = sMagicEffects[i].mPositiveEffect;
+                const ESM::RefId& negative = sMagicEffects[i].mNegativeEffect;
 
                 interpreter.installSegment5<OpGetMagicEffect<ImplicitRef>>(
                     Compiler::Stats::opcodeGetMagicEffect + i, positive, negative);
