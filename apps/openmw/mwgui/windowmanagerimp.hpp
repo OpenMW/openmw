@@ -484,7 +484,6 @@ namespace MWGui
         std::unique_ptr<CharacterCreation> mCharGen;
 
         MyGUI::Widget* mInputBlocker;
-        bool mTextInputActive;
 
         bool mHudEnabled;
         bool mCursorVisible;

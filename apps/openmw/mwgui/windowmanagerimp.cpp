@@ -189,7 +189,6 @@ namespace MWGui
         , mInventoryTabsOverlay(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
-        , mTextInputActive(false)
         , mHudEnabled(true)
         , mCursorVisible(true)
         , mCursorActive(true)
@@ -1873,22 +1872,17 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        if (!widget && !mTextInputActive)
-            return;
-
         bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
         LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
         bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
         if (widget && capturesInput)
-        {
-            mTextInputActive = true;
             SDL_StartTextInput();
-        }
-        else
-        {
-            mTextInputActive = false;
-            SDL_StopTextInput();
-        }
+        else if (SDL_IsTextInputActive())   
+            SDL_StopTextInput();     
+         
+         // The SDL_IsTextInputActive() check fixes duplicate StopTextInput events in SDL2. 
+         // This may not longer be required when switching to SDL3 where the function
+         // has also been renamed to SDL_TextInputActive().
     }
 
     void WindowManager::setEnemy(const MWWorld::Ptr& enemy)
