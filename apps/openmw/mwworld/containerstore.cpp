@@ -127,7 +127,8 @@ void MWWorld::ContainerStore::readEquipmentState(
 
 std::ptrdiff_t MWWorld::ContainerStore::index(const ContainerStoreIterator& iter) const
 {
-    if (iter.getType() == -1)
+    // A count of 0 means the item is being removed/teleported by Lua
+    if (iter.getType() == -1 || !iter->getCellRef().getCount())
         return -1;
     return std::distance(cbegin(), ConstContainerStoreIterator(iter));
 }
@@ -175,10 +176,11 @@ MWWorld::ContainerStore::ContainerStore(const MWWorld::ContainerStore& store)
     , mResolved(store.mResolved)
     , mRechargingItemsUpToDate(false)
 {
-    if (store.mSelectedEnchantItem != store.end())
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
+    if (distance != -1)
     {
         mSelectedEnchantItem = begin();
-        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
+        std::advance(mSelectedEnchantItem, distance);
     }
 }
 
@@ -217,10 +219,11 @@ MWWorld::ContainerStore& MWWorld::ContainerStore::operator=(const ContainerStore
     mModified = store.mModified;
     mResolved = store.mResolved;
     mRechargingItemsUpToDate = false;
-    if (store.mSelectedEnchantItem != store.end())
+    const std::ptrdiff_t distance = store.index(store.mSelectedEnchantItem);
+    if (distance != -1)
     {
         mSelectedEnchantItem = begin();
-        std::advance(mSelectedEnchantItem, store.index(store.mSelectedEnchantItem));
+        std::advance(mSelectedEnchantItem, distance);
     }
     else
         mSelectedEnchantItem = end();
