@@ -1123,20 +1123,38 @@ if (USE_QT)
     file(GLOB COMPONENTS_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/components_*.ts)
     get_target_property(QT_LUPDATE_EXECUTABLE Qt::lupdate IMPORTED_LOCATION)
     add_custom_target(translations
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
-    VERBATIM
-    COMMAND_EXPAND_LISTS
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
+        VERBATIM
+        COMMAND_EXPAND_LISTS
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
-    VERBATIM
-    COMMAND_EXPAND_LISTS
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
+        VERBATIM
+        COMMAND_EXPAND_LISTS
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
-    VERBATIM
-    COMMAND_EXPAND_LISTS)
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
+
+    add_custom_target(purge-obsolete-translations
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         if (APPLE)
