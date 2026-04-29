@@ -1127,16 +1127,19 @@ if (USE_QT)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
         VERBATIM
         COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${COMPONENTS_TS_FILES}
 
         COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
         VERBATIM
         COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${WIZARD_TS_FILES}
 
         COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
         VERBATIM
         COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${LAUNCHER_TS_FILES}
     )
 
     add_custom_target(purge-obsolete-translations
