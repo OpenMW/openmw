@@ -40,6 +40,7 @@ I.Settings.registerGroup({
     permanentStorage = true,
     order = 0,
     settings = {
+        floatSetting('', 'maxDistance', 800),
         boolSetting('', 'viewOverShoulder', false),
         floatSetting('', 'shoulderOffsetX', 30),
         floatSetting('', 'shoulderOffsetY', -10),
