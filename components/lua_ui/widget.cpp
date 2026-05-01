@@ -346,11 +346,7 @@ namespace LuaUi
                 bottom = table.get<sol::optional<float>>(4);
             }
 
-            mPadding = osg::Vec4(
-                left.value_or(0.f),
-                top.value_or(0.f),
-                right.value_or(0.f),
-                bottom.value_or(0.f));
+            mPadding = osg::Vec4(left.value_or(0.f), top.value_or(0.f), right.value_or(0.f), bottom.value_or(0.f));
         }
         else if (padding != sol::nil)
             throw std::logic_error("Property \"padding\" must be either a number or a table");
@@ -379,12 +375,11 @@ namespace LuaUi
         return MyGUI::IntPoint(static_cast<int>(mPadding.x()), static_cast<int>(mPadding.y()));
     }
 
-    MyGUI::IntSize WidgetExtension::getContentSize() const {
+    MyGUI::IntSize WidgetExtension::getContentSize() const
+    {
         MyGUI::IntSize fullSize = calculateSize();
-        return MyGUI::IntSize(
-            std::max(0, fullSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
-            std::max(0, fullSize.height - static_cast<int>(mPadding.y() + mPadding.w()))
-        );
+        return MyGUI::IntSize(std::max(0, fullSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
+            std::max(0, fullSize.height - static_cast<int>(mPadding.y() + mPadding.w())));
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize() const

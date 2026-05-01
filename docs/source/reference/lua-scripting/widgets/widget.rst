@@ -31,6 +31,12 @@ Properties
     - util.vector2 (0, 0)
     - | Offsets the widget's position by a fraction of its size.
       | Useful for centering or aligning to a corner.
+  * - padding
+    - number or table (default 0)
+    - | Adds inset spacing between the outer edge of the widget and its content.
+    - | When providing a number: the top, right, bottom, and right margins are all set
+    - | to that provided numebr. When providing a table, you can provide any of the padding directions
+    - | individually. Such as `{ top = 10, right = 5 }`.
   * - visible
     - boolean (true)
     - Defines if the widget is visible
