@@ -65,4 +65,16 @@ namespace LuaUi
         else
             return WidgetExtension::calculateSize();
     }
+
+    MyGUI::IntCoord LuaText::getTextRegion() const
+    {
+        const MyGUI::IntPoint offset = WidgetExtension::getContentOffset();
+        const MyGUI::IntSize size = WidgetExtension::getContentSize();
+        return MyGUI::IntCoord(offset, size);
+    }
+
+    MyGUI::IntSize LuaText::getViewSize() const
+    {
+        return WidgetExtension::getContentSize();
+    }
 }

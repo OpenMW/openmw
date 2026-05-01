@@ -54,7 +54,8 @@ namespace LuaUi
     void LuaTextEdit::updateCoord()
     {
         WidgetExtension::updateCoord();
-        mEditBox->setSize(widget()->getSize());
+        mEditBox->setPosition(getContentOffset());
+        mEditBox->setSize(getContentSize());
     }
 
     void LuaTextEdit::updateChildren()
@@ -70,9 +71,12 @@ namespace LuaUi
         MyGUI::IntSize normalSize = WidgetExtension::calculateSize();
         if (mAutoSize)
         {
-            mEditBox->setSize(normalSize);
+            const MyGUI::IntSize contentSize(
+                std::max(0, normalSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
+                std::max(0, normalSize.height - static_cast<int>(mPadding.y() + mPadding.w())));
+            mEditBox->setSize(contentSize);
             int targetHeight = mMultiline ? mEditBox->getTextSize().height : mEditBox->getFontHeight();
-            normalSize.height = std::max(normalSize.height, targetHeight);
+            normalSize.height = std::max(normalSize.height, targetHeight + static_cast<int>(mPadding.y() + mPadding.w()));
         }
         return normalSize;
     }

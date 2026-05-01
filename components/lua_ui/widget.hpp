@@ -95,6 +95,7 @@ namespace LuaUi
         MyGUI::IntSize getContentSize() const;
         // Offset of content area relative to widget position, i.e., where the content area starts
         MyGUI::IntPoint getContentOffset() const;
+        MyGUI::Widget* contentWidget() const;
         virtual MyGUI::IntSize childScalingSize() const;
         virtual MyGUI::IntSize templateScalingSize() const;
 
@@ -182,6 +183,7 @@ namespace LuaUi
         WidgetExtension* mParent;
         bool mTemplateChild;
         bool mElementRoot;
+        MyGUI::Widget* mContentWidget;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);

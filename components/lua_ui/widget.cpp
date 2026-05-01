@@ -32,6 +32,7 @@ namespace LuaUi
         , mParent(nullptr)
         , mTemplateChild(false)
         , mElementRoot(false)
+        , mContentWidget(nullptr)
     {
     }
 
@@ -48,6 +49,11 @@ namespace LuaUi
     {
         // \todo might be more efficient to only register these if there are Lua callbacks
         registerEvents(mWidget);
+
+        mContentWidget = mWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(), MyGUI::Align::Default);
+        mContentWidget->setNeedMouseFocus(false);
+        mContentWidget->setNeedKeyFocus(false);
+        mContentWidget->setInheritsPick(true);
     }
 
     void WidgetExtension::deinitialize()
@@ -124,7 +130,7 @@ namespace LuaUi
         }
         ext->mParent = this;
         ext->mTemplateChild = false;
-        ext->widget()->attachToWidget(mSlot->widget());
+        ext->widget()->attachToWidget(mSlot->contentWidget());
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
@@ -286,6 +292,10 @@ namespace LuaUi
 
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
+
+        if (mContentWidget)
+            mContentWidget->setCoord(MyGUI::IntCoord(getContentOffset(), getContentSize()));
+
         updateChildrenCoord();
     }
 
@@ -364,12 +374,9 @@ namespace LuaUi
             return mParent->childScalingSize();
     }
 
-    MyGUI::IntPoint WidgetExtension::getContentOffset() const {
-        MyGUI::IntPoint position = calculatePosition(calculateSize());
-        return MyGUI::IntPoint(
-            position.left + static_cast<int>(mPadding.x()),
-            position.top + static_cast<int>(mPadding.y())
-        );
+    MyGUI::IntPoint WidgetExtension::getContentOffset() const
+    {
+        return MyGUI::IntPoint(static_cast<int>(mPadding.x()), static_cast<int>(mPadding.y()));
     }
 
     MyGUI::IntSize WidgetExtension::getContentSize() const {
@@ -409,6 +416,7 @@ namespace LuaUi
             newPosition.left += static_cast<int>(mRelativeCoord.left * pSize.width - mAnchor.width * size.width);
             newPosition.top += static_cast<int>(mRelativeCoord.top * pSize.height - mAnchor.height * size.height);
         }
+
         newPosition.left = std::clamp(newPosition.left, -sExtCalcPositionLeftCap, sExtCalcPositionLeftCap);
         newPosition.top = std::clamp(newPosition.top, -sExtCalcPositionTopCap, sExtCalcPositionTopCap);
         return newPosition;
@@ -422,9 +430,16 @@ namespace LuaUi
         return newCoord;
     }
 
+    MyGUI::Widget* WidgetExtension::contentWidget() const
+    {
+        if (!mContentWidget)
+            return mWidget;
+        return mContentWidget;
+    }
+
     MyGUI::IntSize WidgetExtension::childScalingSize() const
     {
-        return mSlot->widget()->getSize();
+        return mSlot->getContentSize();
     }
 
     MyGUI::IntSize WidgetExtension::templateScalingSize() const
