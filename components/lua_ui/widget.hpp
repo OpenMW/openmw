@@ -91,6 +91,10 @@ namespace LuaUi
         sol::object mouseEvent(LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize() const;
+        // Size available for content, i.e., parent size minus padding
+        MyGUI::IntSize getContentSize() const;
+        // Offset of content area relative to widget position, i.e., where the content area starts
+        MyGUI::IntPoint getContentOffset() const;
         virtual MyGUI::IntSize childScalingSize() const;
         virtual MyGUI::IntSize templateScalingSize() const;
 
@@ -157,6 +161,8 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
+        // top, right, bottom, left padding in pixels
+        osg::Vec4 mPadding;
 
         bool mPropagateEvents;
         bool mVisible; // used to implement updateVisible
@@ -184,6 +190,7 @@ namespace LuaUi
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);
 
         void updateChildrenCoord();
+        void parsePadding();
 
         void keyPress(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char);
         void keyRelease(MyGUI::Widget*, MyGUI::KeyCode);

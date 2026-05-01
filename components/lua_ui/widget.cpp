@@ -308,6 +308,42 @@ namespace LuaUi
         mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
+        parsePadding();
+    }
+
+    void WidgetExtension::parsePadding()
+    {
+        mPadding = osg::Vec4();
+        sol::object padding = propertyValue("padding", sol::object(mLua, sol::in_place, sol::lua_nil));
+        if (padding.is<double>() || padding.is<float>() || padding.is<int>())
+        {
+            float value = padding.as<float>();
+            mPadding = osg::Vec4(value, value, value, value);
+        }
+        else if (padding.is<sol::table>())
+        {
+            sol::table table = padding.as<sol::table>();
+            sol::optional<float> left = table.get<sol::optional<float>>("left");
+            sol::optional<float> top = table.get<sol::optional<float>>("top");
+            sol::optional<float> right = table.get<sol::optional<float>>("right");
+            sol::optional<float> bottom = table.get<sol::optional<float>>("bottom");
+
+            if (!left.has_value() && !top.has_value() && !right.has_value() && !bottom.has_value())
+            {
+                left = table.get<sol::optional<float>>(1);
+                top = table.get<sol::optional<float>>(2);
+                right = table.get<sol::optional<float>>(3);
+                bottom = table.get<sol::optional<float>>(4);
+            }
+
+            mPadding = osg::Vec4(
+                left.value_or(0.f),
+                top.value_or(0.f),
+                right.value_or(0.f),
+                bottom.value_or(0.f));
+        }
+        else if (padding != sol::nil)
+            throw std::logic_error("Property \"padding\" must be either a number or a table");
     }
 
     void WidgetExtension::updateChildrenCoord()
@@ -326,6 +362,22 @@ namespace LuaUi
             return mParent->templateScalingSize();
         else
             return mParent->childScalingSize();
+    }
+
+    MyGUI::IntPoint WidgetExtension::getContentOffset() const {
+        MyGUI::IntPoint position = calculatePosition(calculateSize());
+        return MyGUI::IntPoint(
+            position.left + static_cast<int>(mPadding.x()),
+            position.top + static_cast<int>(mPadding.y())
+        );
+    }
+
+    MyGUI::IntSize WidgetExtension::getContentSize() const {
+        MyGUI::IntSize fullSize = calculateSize();
+        return MyGUI::IntSize(
+            std::max(0, fullSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
+            std::max(0, fullSize.height - static_cast<int>(mPadding.y() + mPadding.w()))
+        );
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize() const
@@ -456,6 +508,7 @@ namespace LuaUi
             "pointer",
             "alpha",
             "inheritAlpha",
+            "padding",
         };
         return usedProps;
     }
