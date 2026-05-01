@@ -75,6 +75,8 @@ local thirdPerson = storage.playerSection(thirdPersonGroup)
 local headBobbing = storage.playerSection(headBobbingGroup)
 
 local function updateViewOverShoulderDisabled()
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'maxDistance', { min = 30, max = 7168 })
+
     local shoulderDisabled = not thirdPerson:get('viewOverShoulder')
     I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', { disabled = shoulderDisabled })
     I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', { disabled = shoulderDisabled })
