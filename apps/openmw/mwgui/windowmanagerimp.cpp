@@ -1883,10 +1883,12 @@ namespace MWGui
         }
 
         // The SDL_IsTextInputActive() check helps to avoid duplicate calls in SDL2.
-        // This may not longer be required when switching to SDL3 where the function
-        // has also been renamed to SDL_TextInputActive().
+        // This may no longer be required when switching to SDL3 where the function
+        // has also been renamed to SDL_TextInputActive() and returns bool instead
+        // of SDL_bool.
 
-        if (capturesInput == SDL_IsTextInputActive())
+        const bool inputActive = SDL_IsTextInputActive() == SDL_TRUE;
+        if (capturesInput == inputActive)
             return;
 
         if (capturesInput)
