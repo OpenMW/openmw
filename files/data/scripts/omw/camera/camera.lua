@@ -162,6 +162,9 @@ local function updateStandingPreview()
     local mode = camera.getMode()
     if not previewIfStandStill or next(noStandingPreview)
         or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
+        if third_person.standingPreview and mode == MODE.Preview then
+            camera.setMode(primaryMode)
+        end
         third_person.standingPreview = false
         return
     end

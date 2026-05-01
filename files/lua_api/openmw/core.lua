@@ -782,7 +782,7 @@
 -- @field #boolean allowsSpellmaking True if the effect is available for spellmaking
 -- @field #boolean allowsEnchanting True if the effect is available for enchanting
 -- @field #boolean negativeLight True if the effect casts negative light
--- @field #number speed Unused
+-- @field #number speed Projectile speed
 
 
 ---
@@ -1316,6 +1316,7 @@
 -- @field [parent=#Regions] #list<#RegionRecord> records
 -- @usage local record = core.regions.records['bitter coast region']
 -- @usage local record = core.regions.records[1]
+
 ---
 -- Region data record
 -- @type RegionRecord

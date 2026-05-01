@@ -391,10 +391,12 @@ namespace MWGui
 
     void DialogueWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (!mScrollBar->getVisible())
+        if (!mScrollBar->getVisible() || mScrollBar->getScrollRange() == 0)
             return;
-        mScrollBar->setScrollPosition(std::clamp<size_t>(
-            static_cast<size_t>(mScrollBar->getScrollPosition() - rel * 0.3), 0, mScrollBar->getScrollRange() - 1));
+        const int step = static_cast<int>(0.3f * rel);
+        const int newPos = static_cast<int>(mScrollBar->getScrollPosition()) - step;
+        const int maxPos = static_cast<int>(mScrollBar->getScrollRange()) - 1;
+        mScrollBar->setScrollPosition(static_cast<size_t>(std::clamp(newPos, 0, maxPos)));
         onScrollbarMoved(mScrollBar, mScrollBar->getScrollPosition());
     }
 

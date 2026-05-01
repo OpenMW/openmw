@@ -28,7 +28,7 @@ return {
                     end
                 end
             elseif data.slot then
-                equipment[slot] = nil
+                equipment[data.slot] = nil
             end
             Actor.setEquipment(self, equipment)
         end,

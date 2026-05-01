@@ -173,6 +173,7 @@ Ubuntu_GCC:
     CC: gcc
     CXX: g++
     CCACHE_SIZE: 3G
+    ARTIFACT_COMPRESSION_LEVEL: default
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -481,20 +482,6 @@ Ubuntu_Clang_Tidy_other:
   variables:
     BUILD_TARGETS: components-tests bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
-
-.Ubuntu_Clang_tests:
-  extends: Ubuntu_Clang
-  cache:
-    key: Ubuntu_Clang_tests.ubuntu_24.04.v2
-  variables:
-    CCACHE_SIZE: 1G
-    BUILD_TESTS_ONLY: 1
-  artifacts:
-    paths: []
-    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-    when: always
-    reports:
-      junit: build/*-tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang

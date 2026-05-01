@@ -175,7 +175,7 @@ namespace
                 if (!mgef)
                 {
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping invalid effect (index " << iter->mData.mEffectID << ")";
+                                        << ": dropping invalid effect (" << iter->mData.mEffectID << ")";
                     iter = spell.mEffects.mList.erase(iter);
                     changed = true;
                     continue;
