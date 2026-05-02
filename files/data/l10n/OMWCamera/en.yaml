@@ -6,7 +6,7 @@ thirdPersonSettings: "Third Person Mode"
 maxDistance: "Maximum Camera Distance"
 maxDistanceDescription: |
     How far the camera can zoom out, in game units. 
-    (min: 30, max: 7168, default: 800)
+    (min: 30, max: 2400, default: 800)
 
 viewOverShoulder: "View Over the Shoulder"
 viewOverShoulderDescription: |
