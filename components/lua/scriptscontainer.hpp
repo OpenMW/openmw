@@ -123,7 +123,7 @@ namespace LuaUtil
         bool hasScript(int scriptId) const;
         void removeScript(int scriptId);
 
-        void processTimers(double simulationTime, double gameTime);
+        void processTimers(double simulationTime, double gameTime, double realTime);
 
         // Calls `onUpdate` (if present) for every script in the container.
         // Handlers are called in the same order as scripts were added.
@@ -172,6 +172,17 @@ namespace LuaUtil
         // Creates a timer. `callback` is an arbitrary Lua function. These timers are called "unsavable"
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
+
+        // Sets up a real-time timer, that can be automatically saved and loaded.
+        //   time - the absolute real time (in seconds, system clock) when the timer should be executed.
+        //   scriptPath - script path in VFS is used as script id. The script with the given path should already present
+        //   in the container. callbackName - callback (should be registered in advance) for this timer. callbackArg -
+        //   parameter for the callback (should be serializable).
+        void setupSerializableRealTimeTimer(
+            double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg);
+
+        // Creates an unsavable real-time timer. Real-time timers run even when the game is paused.
+        void setupUnsavableRealTimeTimer(double time, int scriptId, sol::main_protected_function callback);
 
         // decayedInstructionCount applies deferred decay.
         void statsNextFrame() { ++mStatsFrame; }
@@ -327,6 +338,7 @@ namespace LuaUtil
 
             std::vector<Timer> mSimulationTimersQueue;
             std::vector<Timer> mGameTimersQueue;
+            std::vector<Timer> mRealTimeTimersQueue;
         };
         using UnloadedData = ESM::LuaScripts;
 

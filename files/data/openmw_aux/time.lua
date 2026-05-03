@@ -12,6 +12,7 @@ local time = {
     day = 3600 * 24,
     GameTime = 'GameTime',
     SimulationTime = 'SimulationTime',
+    RealTime = 'RealTime',
 }
 
 ---
@@ -47,6 +48,19 @@ end
 function time.newSimulationTimer(delay, callback, callbackArg)
     local async = require('openmw.async')
     return async:newSimulationTimer(delay, callback, callbackArg)
+end
+
+---
+-- Alias of async:newRealTimeTimer ; call callback(arg) in `delay` real seconds.
+-- Real-time timers run even when the game is paused.
+-- Callback must be registered in advance.
+-- @function [parent=#time] newRealTimeTimer
+-- @param #number delay
+-- @param openmw.async#TimerCallback callback A callback returned by `registerTimerCallback`
+-- @param arg An argument for `callback`; can be `nil`.
+function time.newRealTimeTimer(delay, callback, callbackArg)
+    local async = require('openmw.async')
+    return async:newRealTimeTimer(delay, callback, callbackArg)
 end
 
 ---

@@ -1,6 +1,7 @@
 #include "luamanagerimp.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <filesystem>
 #include <functional>
 
@@ -275,14 +276,19 @@ namespace MWLua
         mLuaEvents.finalizeEventBatch();
 
         MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
-        if (!timeManager.isPaused())
-        {
-            mMenuScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
-            mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
-            forEachActive(mActiveLocalScripts, [&](LocalScripts* scripts) {
-                scripts->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
-            });
-        }
+        auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+        double realTime = std::chrono::duration<double>(now).count();
+
+        double simulationTime = timeManager.isPaused() ? 0 : timeManager.getSimulationTime();
+        double gameTime = timeManager.isPaused() ? 0 : timeManager.getGameTime();
+
+        // Always process real-time timers (runs even when paused), but only process game/simulation timers when not
+        // paused
+        mMenuScripts.processTimers(simulationTime, gameTime, realTime);
+        mGlobalScripts.processTimers(simulationTime, gameTime, realTime);
+        forEachActive(mActiveLocalScripts, [&](LocalScripts* scripts) {
+          scripts->processTimers(simulationTime, gameTime, realTime);
+        });
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
         mLuaEvents.callEventHandlers();

@@ -1,5 +1,7 @@
 #include "asyncpackage.hpp"
 
+#include <chrono>
+
 namespace sol
 {
     template <>
@@ -90,6 +92,20 @@ namespace LuaUtil
             = [gameTimeFn](const AsyncPackageId& asyncId, double delay, sol::main_protected_function callback) {
                   asyncId.mContainer->setupUnsavableTimer(
                       TimerType::GAME_TIME, gameTimeFn() + delay, asyncId.mScriptId, std::move(callback));
+              };
+        api["newRealTimeTimer"]
+            = [](const AsyncPackageId&, double delay, const TimerCallback& callback, sol::main_object callbackArg) {
+                  auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+                  double currentRealTime = std::chrono::duration<double>(now).count();
+                  callback.mAsyncId.mContainer->setupSerializableRealTimeTimer(
+                      currentRealTime + delay, callback.mAsyncId.mScriptId, callback.mName, std::move(callbackArg));
+              };
+        api["newUnsavableRealTimeTimer"]
+            = [](const AsyncPackageId& asyncId, double delay, sol::main_protected_function callback) {
+                  auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+                  double currentRealTime = std::chrono::duration<double>(now).count();
+                  asyncId.mContainer->setupUnsavableRealTimeTimer(
+                      currentRealTime + delay, asyncId.mScriptId, std::move(callback));
               };
 
         sol::table callbackMeta = Callback::makeMetatable(state);

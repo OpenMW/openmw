@@ -436,6 +436,8 @@ namespace LuaUtil
             saveTimerFn(timer, TimerType::SIMULATION_TIME);
         for (const Timer& timer : loadedData.mGameTimersQueue)
             saveTimerFn(timer, TimerType::GAME_TIME);
+        for (const Timer& timer : loadedData.mRealTimeTimersQueue)
+            saveTimerFn(timer, TimerType::REAL_TIME);
         data.mScripts.clear();
         for (auto& [scriptId, script] : loadedData.mScripts)
         {
@@ -599,6 +601,8 @@ namespace LuaUtil
 
                         if (savedTimer.mType == TimerType::GAME_TIME)
                             data.mGameTimersQueue.push_back(std::move(timer));
+                        else if (savedTimer.mType == TimerType::REAL_TIME)
+                            data.mRealTimeTimersQueue.push_back(std::move(timer));
                         else
                             data.mSimulationTimersQueue.push_back(std::move(timer));
                     }
@@ -612,6 +616,7 @@ namespace LuaUtil
 
         std::make_heap(data.mSimulationTimersQueue.begin(), data.mSimulationTimersQueue.end());
         std::make_heap(data.mGameTimersQueue.begin(), data.mGameTimersQueue.end());
+        std::make_heap(data.mRealTimeTimersQueue.begin(), data.mRealTimeTimersQueue.end());
 
         if (mTracker)
             mTracker->onLoad(*this);
@@ -662,6 +667,7 @@ namespace LuaUtil
                     variant.mEventHandlers.clear();
                     variant.mSimulationTimersQueue.clear();
                     variant.mGameTimersQueue.clear();
+                    variant.mRealTimeTimersQueue.clear();
                     variant.mPublicInterfaces.clear();
                 }
             },
@@ -718,6 +724,34 @@ namespace LuaUtil
         insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
+    void ScriptsContainer::setupSerializableRealTimeTimer(
+        double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg)
+    {
+        Timer t;
+        t.mCallback = std::string(callbackName);
+        t.mScriptId = scriptId;
+        t.mSerializable = true;
+        t.mTime = time;
+        t.mArg = std::move(callbackArg);
+        t.mSerializedArg = serialize(t.mArg, mSerializer);
+        LoadedData& data = ensureLoaded();
+        insertTimer(data.mRealTimeTimersQueue, std::move(t));
+    }
+
+    void ScriptsContainer::setupUnsavableRealTimeTimer(double time, int scriptId, sol::main_protected_function callback)
+    {
+        Timer t;
+        t.mScriptId = scriptId;
+        t.mSerializable = false;
+        t.mTime = time;
+
+        t.mCallback = mTemporaryCallbackCounter;
+        getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
+        mTemporaryCallbackCounter++;
+        LoadedData& data = ensureLoaded();
+        insertTimer(data.mRealTimeTimersQueue, std::move(t));
+    }
+
     void ScriptsContainer::callTimer(const Timer& t)
     {
         try
@@ -755,12 +789,13 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsContainer::processTimers(double simulationTime, double gameTime)
+    void ScriptsContainer::processTimers(double simulationTime, double gameTime, double realTime)
     {
         mLua.protectedCall([&](LuaView& view) {
             LoadedData& data = ensureLoaded();
             updateTimerQueue(data.mSimulationTimersQueue, simulationTime);
             updateTimerQueue(data.mGameTimersQueue, gameTime);
+            updateTimerQueue(data.mRealTimeTimersQueue, realTime);
         });
     }
 
