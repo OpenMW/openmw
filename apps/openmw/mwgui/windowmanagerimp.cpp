@@ -1872,10 +1872,26 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
-        LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
-        bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
-        if (widget && capturesInput)
+        bool capturesInput = false;
+        if (widget)
+        {
+            LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
+            if (luaWidget)
+                capturesInput = luaWidget->isTextInput();
+            else
+                capturesInput = widget->castType<MyGUI::EditBox>(false);
+        }
+
+        // The SDL_IsTextInputActive() check helps to avoid duplicate calls in SDL2.
+        // This may no longer be required when switching to SDL3 where the function
+        // has also been renamed to SDL_TextInputActive() and returns bool instead
+        // of SDL_bool.
+
+        const bool inputActive = SDL_IsTextInputActive() == SDL_TRUE;
+        if (capturesInput == inputActive)
+            return;
+
+        if (capturesInput)
             SDL_StartTextInput();
         else
             SDL_StopTextInput();
