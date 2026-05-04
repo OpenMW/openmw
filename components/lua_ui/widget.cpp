@@ -78,6 +78,7 @@ namespace LuaUi
         w->eventMouseButtonReleased += MyGUI::newDelegate(this, &WidgetExtension::mouseRelease);
         w->eventMouseMove += MyGUI::newDelegate(this, &WidgetExtension::mouseMove);
         w->eventMouseDrag += MyGUI::newDelegate(this, &WidgetExtension::mouseDrag);
+        w->eventMouseWheel += MyGUI::newDelegate(this, &WidgetExtension::mouseWheel);
 
         w->eventMouseSetFocus += MyGUI::newDelegate(this, &WidgetExtension::focusGain);
         w->eventMouseLostFocus += MyGUI::newDelegate(this, &WidgetExtension::focusLoss);
@@ -94,6 +95,7 @@ namespace LuaUi
         w->eventMouseButtonReleased.clear();
         w->eventMouseMove.clear();
         w->eventMouseDrag.clear();
+        w->eventMouseWheel.clear();
 
         w->eventMouseSetFocus.clear();
         w->eventMouseLostFocus.clear();
@@ -562,6 +564,24 @@ namespace LuaUi
     {
         protectedCall([=, this](LuaUtil::LuaView& view) {
             propagateEvent("mouseRelease", [&](auto w) { return w->mouseEvent(view, left, top, button); });
+        });
+    }
+
+    void WidgetExtension::mouseWheel(MyGUI::Widget*, int delta)
+    {
+        protectedCall([=, this](LuaUtil::LuaView& view) {
+            propagateEvent("mouseWheel", [&](auto) {
+                sol::table eventData = view.newTable();
+                eventData["rawDelta"] = delta;
+
+                double stepDelta = static_cast<double>(delta);
+                if (delta != 0 && delta % 120 == 0)
+                    stepDelta = static_cast<double>(delta) / 120.0;
+
+                eventData["delta"] = stepDelta;
+                eventData["direction"] = stepDelta > 0 ? 1 : (stepDelta < 0 ? -1 : 0);
+                return eventData;
+            });
         });
     }
 

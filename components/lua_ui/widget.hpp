@@ -202,6 +202,7 @@ namespace LuaUi
         void mouseDoubleClick(MyGUI::Widget*);
         void mousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
         void mouseRelease(MyGUI::Widget*, int, int, MyGUI::MouseButton);
+        void mouseWheel(MyGUI::Widget*, int);
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 
