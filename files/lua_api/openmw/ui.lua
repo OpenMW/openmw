@@ -302,6 +302,13 @@
 --   Matches the arguments of @{openmw_input#input.isMouseButtonPressed} (`nil` for none, 1 for left, 3 for right).
 
 ---
+-- Mouse wheel event, passed as an argument to mouseWheel UI events
+-- @type MouseWheelEvent
+-- @field number rawDelta The raw mouse wheel delta. Typically +- 120
+-- @field number delta The mouse wheel delta in "notches". Typically +- 1, but can be different for high-precision devices
+-- @field number direction The direction of the mouse wheel scroll. 1 for up, -1 for down
+
+---
 -- Register a new texture resource. Can be used to manually atlas UI textures.
 -- @function [parent=#ui] texture
 -- @param #TextureResourceOptions options

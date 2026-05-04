@@ -89,6 +89,9 @@ The event is still allowed to propagate if the event handler returns `true`.
   * - mouseRelease  
     -  `MouseEvent <../openmw_ui.html##(MouseEvent)>`_
     - A mouse button was released on this widget
+  * - mouseWheel
+    - `MouseWheelEvent <../openmw_ui.html##(MouseWheelEvent)>`_
+    - The mouse wheel was scrolled on this widget.
   * - focusGain
     - nil
     - Widget gained focus (either through mouse or keyboard)
