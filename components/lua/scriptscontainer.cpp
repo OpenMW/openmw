@@ -4,6 +4,8 @@
 
 #include "scripttracker.hpp"
 
+#include <chrono>
+
 #include <components/esm/luascripts.hpp>
 
 namespace
@@ -421,12 +423,16 @@ namespace LuaUtil
             return;
         }
         const auto& loadedData = std::get<LoadedData>(mData);
+        const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+        const double currentRealTime = std::chrono::duration<double>(now).count();
         std::map<int, std::vector<ESM::LuaTimer>> timers;
         auto saveTimerFn = [&](const Timer& timer, TimerType timerType) {
             if (!timer.mSerializable)
                 return;
             ESM::LuaTimer savedTimer;
             savedTimer.mTime = timer.mTime;
+            if (timerType == TimerType::REAL_TIME)
+                savedTimer.mTime = timer.mTime > currentRealTime ? (timer.mTime - currentRealTime) : 0.0;
             savedTimer.mType = timerType;
             savedTimer.mCallbackName = std::get<std::string>(timer.mCallback);
             savedTimer.mCallbackArgument = timer.mSerializedArg;
@@ -558,6 +564,9 @@ namespace LuaUtil
             data.mPublicInterfaces = sol::table(view.sol(), sol::create);
             addPackage("openmw.interfaces", makeReadOnly(data.mPublicInterfaces));
 
+            const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
+            const double currentRealTime = std::chrono::duration<double>(now).count();
+
             for (const auto& [scriptId, scriptInfo] : scripts)
             {
                 std::optional<sol::function> onInit, onLoad;
@@ -588,7 +597,8 @@ namespace LuaUtil
                     timer.mCallback = savedTimer.mCallbackName;
                     timer.mSerializable = true;
                     timer.mScriptId = scriptId;
-                    timer.mTime = savedTimer.mTime;
+                    timer.mTime = savedTimer.mType == TimerType::REAL_TIME ? (currentRealTime + savedTimer.mTime)
+                                                                           : savedTimer.mTime;
 
                     try
                     {
