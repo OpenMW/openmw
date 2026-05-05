@@ -71,7 +71,7 @@ Modify the corresponding stat.
 .. code-block:: Lua
 
     -- Consume 10 magicka
-    actor:sendEvent('ModifyStat', {name = 'magicka', amount = -10})
+    actor:sendEvent('ModifyStat', {stat = 'magicka', amount = -10})
 
 **AddVfx**
 

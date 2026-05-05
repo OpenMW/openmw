@@ -1,6 +1,6 @@
 ---
 -- Defines functions for specific types of game objects.
--- @context global|menu|local|player
+-- @context global|local|player
 -- @module types
 -- @usage local types = require('openmw.types')
 
