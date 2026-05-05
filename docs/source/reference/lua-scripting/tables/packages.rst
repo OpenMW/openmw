@@ -51,7 +51,7 @@
      - |bdg-ctx-all|
      - Storage API. In particular can be used to store data between game sessions.
    * - :doc:`types </reference/lua-scripting/openmw_types>`
-     - |bdg-ctx-non-load|
+     - |bdg-ctx-global| |bdg-ctx-local|
      - Functions for specific types of game objects.
    * - :doc:`ui </reference/lua-scripting/openmw_ui>`
      - |bdg-ctx-menu| |bdg-ctx-player|
