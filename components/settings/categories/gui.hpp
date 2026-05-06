@@ -24,6 +24,10 @@ namespace Settings
         SettingValue<float> mTooltipDelay{ mIndex, "GUI", "tooltip delay", makeMaxSanitizerFloat(0) };
         SettingValue<bool> mStretchMenuBackground{ mIndex, "GUI", "stretch menu background" };
         SettingValue<bool> mControllerMenus{ mIndex, "GUI", "controller menus" };
+        SettingValue<int> mControllerTriggerPressThreshold{ mIndex, "GUI", "controller trigger press",
+            makeClampSanitizerInt(1, 32767) };
+        SettingValue<int> mControllerTriggerReleaseThreshold{ mIndex, "GUI", "controller trigger release",
+            makeClampSanitizerInt(0, 32766) };
         SettingValue<bool> mControllerTooltips{ mIndex, "GUI", "controller tooltips" };
         SettingValue<bool> mSubtitles{ mIndex, "GUI", "subtitles" };
         SettingValue<bool> mHitFader{ mIndex, "GUI", "hit fader" };
