@@ -716,7 +716,11 @@ namespace LuaUtil
         t.mArg = std::move(callbackArg);
         t.mSerializedArg = serialize(t.mArg, mSerializer);
         LoadedData& data = ensureLoaded();
-        insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
+
+        if (type == TimerType::REAL_TIME)
+            insertTimer(data.mRealTimeTimersQueue, std::move(t));
+        else
+            insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::setupUnsavableTimer(
@@ -731,35 +735,11 @@ namespace LuaUtil
         getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
         mTemporaryCallbackCounter++;
         LoadedData& data = ensureLoaded();
-        insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
-    }
 
-    void ScriptsContainer::setupSerializableRealTimeTimer(
-        double time, int scriptId, std::string_view callbackName, sol::main_object callbackArg)
-    {
-        Timer t;
-        t.mCallback = std::string(callbackName);
-        t.mScriptId = scriptId;
-        t.mSerializable = true;
-        t.mTime = time;
-        t.mArg = std::move(callbackArg);
-        t.mSerializedArg = serialize(t.mArg, mSerializer);
-        LoadedData& data = ensureLoaded();
-        insertTimer(data.mRealTimeTimersQueue, std::move(t));
-    }
-
-    void ScriptsContainer::setupUnsavableRealTimeTimer(double time, int scriptId, sol::main_protected_function callback)
-    {
-        Timer t;
-        t.mScriptId = scriptId;
-        t.mSerializable = false;
-        t.mTime = time;
-
-        t.mCallback = mTemporaryCallbackCounter;
-        getScript(t.mScriptId).mTemporaryCallbacks.emplace(mTemporaryCallbackCounter, std::move(callback));
-        mTemporaryCallbackCounter++;
-        LoadedData& data = ensureLoaded();
-        insertTimer(data.mRealTimeTimersQueue, std::move(t));
+        if (type == TimerType::REAL_TIME)
+            insertTimer(data.mRealTimeTimersQueue, std::move(t));
+        else
+            insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::callTimer(const Timer& t)
