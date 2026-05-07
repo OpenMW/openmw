@@ -561,13 +561,13 @@ CUSTOM: customdata.lua
 
         // Advance real time to 5 seconds
         scripts.processTimers(0, 0, 5);
-        EXPECT_EQ(counter5, 1);  // Real-time timer fires at 5 seconds
-        EXPECT_EQ(counter6, 0);  // Waits for 10 seconds
+        EXPECT_EQ(counter5, 1); // Real-time timer fires at 5 seconds
+        EXPECT_EQ(counter6, 0); // Waits for 10 seconds
 
         // Advance real time to 10 seconds (total 10 seconds real time)
         scripts.processTimers(0, 0, 10);
-        EXPECT_EQ(counter5, 1);  // Already fired
-        EXPECT_EQ(counter6, 1);  // Real-time timer fires at 10 seconds
+        EXPECT_EQ(counter5, 1); // Already fired
+        EXPECT_EQ(counter6, 1); // Real-time timer fires at 10 seconds
     }
 
     TEST_F(LuaScriptsContainerTest, CallbackWrapper)

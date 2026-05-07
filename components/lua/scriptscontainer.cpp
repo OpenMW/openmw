@@ -720,7 +720,8 @@ namespace LuaUtil
         if (type == TimerType::REAL_TIME)
             insertTimer(data.mRealTimeTimersQueue, std::move(t));
         else
-            insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
+            insertTimer(
+                type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::setupUnsavableTimer(
@@ -739,7 +740,8 @@ namespace LuaUtil
         if (type == TimerType::REAL_TIME)
             insertTimer(data.mRealTimeTimersQueue, std::move(t));
         else
-            insertTimer(type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
+            insertTimer(
+                type == TimerType::GAME_TIME ? data.mGameTimersQueue : data.mSimulationTimersQueue, std::move(t));
     }
 
     void ScriptsContainer::callTimer(const Timer& t)
