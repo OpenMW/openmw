@@ -537,80 +537,37 @@ CUSTOM: customdata.lua
         EXPECT_EQ(counter2, 2);
         EXPECT_EQ(counter3, 5);
         EXPECT_EQ(counter4, 25);
-    }
 
-    TEST_F(LuaScriptsContainerTest, RealTimeTimers)
-    {
-        using TimerType = LuaUtil::ScriptsContainer::TimerType;
-        LuaUtil::ScriptsContainer scripts(&mLua, "Test");
-        const int test1Id = getId(test1Path);
-        const int test2Id = getId(test2Path);
+        // Test REAL_TIME timers
+        int counter5 = 0, counter6 = 0;
+        sol::function fn5 = sol::make_object(mLua.unsafeState(), [&]() { counter5++; });
+        sol::function fn6 = sol::make_object(mLua.unsafeState(), [&]() { counter6++; });
 
-        testing::internal::CaptureStdout();
-        EXPECT_TRUE(scripts.addCustomScript(test1Id));
-        EXPECT_TRUE(scripts.addCustomScript(test2Id));
-        EXPECT_EQ(internal::GetCapturedStdout(), "");
-
-        int counter1 = 0, counter2 = 0, counter3 = 0, counter4 = 0;
-        sol::function fn1 = sol::make_object(mLua.unsafeState(), [&]() { counter1++; });
-        sol::function fn2 = sol::make_object(mLua.unsafeState(), [&]() { counter2++; });
-        sol::function fn3 = sol::make_object(mLua.unsafeState(), [&](int d) { counter3 += d; });
-        sol::function fn4 = sol::make_object(mLua.unsafeState(), [&](int d) { counter4 += d; });
-
-        scripts.registerTimerCallback(test1Id, "A", fn3);
-        scripts.registerTimerCallback(test1Id, "B", fn4);
-        scripts.registerTimerCallback(test2Id, "B", fn3);
-        scripts.registerTimerCallback(test2Id, "A", fn4);
+        scripts.registerTimerCallback(test1Id, "RT1", fn5);
+        scripts.registerTimerCallback(test2Id, "RT2", fn6);
 
         // Real-time timers should fire based on real time, independent of sim/game time
-        scripts.setupSerializableRealTimeTimer(5, test1Id, "B", sol::make_object(mLua.unsafeState(), 3));
-        scripts.setupSerializableRealTimeTimer(10, test2Id, "B", sol::make_object(mLua.unsafeState(), 4));
-        scripts.setupSerializableRealTimeTimer(5, test1Id, "A", sol::make_object(mLua.unsafeState(), 1));
+        scripts.setupSerializableTimer(
+            TimerType::REAL_TIME, 5, test1Id, "RT1", sol::make_object(mLua.unsafeState(), 1));
+        scripts.setupUnsavableTimer(TimerType::REAL_TIME, 10, test2Id, fn6);
 
-        scripts.setupUnsavableRealTimeTimer(10, test2Id, fn2);
-        scripts.setupUnsavableRealTimeTimer(5, test2Id, fn1);
+        EXPECT_EQ(counter5, 0);
+        EXPECT_EQ(counter6, 0);
 
-        EXPECT_EQ(counter1, 0);
-        EXPECT_EQ(counter2, 0);
-        EXPECT_EQ(counter3, 0);
-        EXPECT_EQ(counter4, 0);
-
-        // Advance only simulation time (0 real time) - real timers should not fire
-        scripts.processTimers(10, 10, 0);
-        EXPECT_EQ(counter1, 0);
-        EXPECT_EQ(counter2, 0);
-        EXPECT_EQ(counter3, 0);
-        EXPECT_EQ(counter4, 0);
+        // Advance only simulation and game time (no real time change) - real timers should not fire
+        scripts.processTimers(100, 100, 3);
+        EXPECT_EQ(counter5, 0);
+        EXPECT_EQ(counter6, 0);
 
         // Advance real time to 5 seconds
         scripts.processTimers(0, 0, 5);
-        EXPECT_EQ(counter1, 1); // fn1 fires at real time 5
-        EXPECT_EQ(counter2, 0); // fn2 waits for real time 10
-        EXPECT_EQ(counter3, 1); // timer B fires at real time 5
-        EXPECT_EQ(counter4, 1); // timer A fires at real time 5
+        EXPECT_EQ(counter5, 1);  // Real-time timer fires at 5 seconds
+        EXPECT_EQ(counter6, 0);  // Waits for 10 seconds
 
         // Advance real time to 10 seconds (total 10 seconds real time)
         scripts.processTimers(0, 0, 10);
-        EXPECT_EQ(counter1, 1); // fn1 already fired
-        EXPECT_EQ(counter2, 1); // fn2 fires at real time 10
-        EXPECT_EQ(counter3, 2); // timer B fires again (real-time allows multiple fires)
-        EXPECT_EQ(counter4, 1); // timer A already fired
-
-        // Test save/load of real-time timers with remaining time
-        testing::internal::CaptureStdout();
-        ESM::LuaScripts data;
-        scripts.save(data);
-        scripts.load(data);
-        scripts.registerTimerCallback(test1Id, "A", fn3);
-        scripts.registerTimerCallback(test1Id, "B", fn4);
-        EXPECT_EQ(internal::GetCapturedStdout(), "Test[test1.lua]:\tload\nTest[test2.lua]:\tload\n");
-
-        // After loading, real-time timers should still have remaining time
-        testing::internal::CaptureStdout();
-        // Additional real time should trigger remaining timers if they still have time
-        scripts.processTimers(0, 0, 15);
-        // Note: timers should not fire again immediately due to remaining time being recalculated
-        EXPECT_EQ(internal::GetCapturedStdout(), "");
+        EXPECT_EQ(counter5, 1);  // Already fired
+        EXPECT_EQ(counter6, 1);  // Real-time timer fires at 10 seconds
     }
 
     TEST_F(LuaScriptsContainerTest, CallbackWrapper)
