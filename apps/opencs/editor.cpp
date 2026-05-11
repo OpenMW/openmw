@@ -199,15 +199,14 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
 
     mFileDialog.addFiles(dataDirs);
 
-    QStringList contentOrder;
     if (!variables["content"].empty())
     {
+        QStringList contentOrder;
         for (const auto& c : variables["content"].as<std::vector<std::string>>())
             contentOrder.append(QString::fromStdString(c));
-    }
 
-    if (!contentOrder.isEmpty())
         mFileDialog.setContentList(contentOrder, true);
+    }
 
     return std::make_pair(dataDirs, variables["fallback-archive"].as<std::vector<std::string>>());
 }
