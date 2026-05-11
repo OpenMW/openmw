@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.16.0)
 
+IF(APPLE)
+    if(CMAKE_VERSION VERSION_LESS 3.19)
+        message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES AND NOT (CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
+        message(FATAL_ERROR "Only x86_64 OR arm64 is accepted for CMAKE_OSX_ARCHITECTURES")
+    endif()
+endif()
+
 #  set the timestamps of extracted contents to the time of extraction
 # remove if cmake version is >= 3.24
 if(POLICY CMP0135)
@@ -799,13 +808,6 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CU
 
 # Apple bundling
 if (APPLE)
-    if(CMAKE_VERSION VERSION_LESS 3.19)
-        message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
-    endif()
-    if(CMAKE_OSX_ARCHITECTURES AND NOT (CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
-        message(FATAL_ERROR "Only x86_64 OR arm64 is accepted for CMAKE_OSX_ARCHITECTURES")
-    endif()
-
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
