@@ -54,7 +54,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#Combat] #number version
-        version = 1,
+        version = 2,
 
         --- Add new onHit handler for this actor
         -- If `handler(attack)` returns false, other handlers for
