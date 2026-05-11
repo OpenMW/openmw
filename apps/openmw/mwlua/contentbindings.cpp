@@ -7,6 +7,7 @@
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadligh.hpp>
+#include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadsoun.hpp>
@@ -318,6 +319,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initLockpickBindings(sol::state_view& lua, MWWorld::Store<ESM::Lockpick>& store)
+        {
+            addRecordStoreBindings<ESM::Lockpick>(lua, &MWLua::tableToLockpick);
+            addMutableLockpickType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Lockpick>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initMagicEffectBindings(sol::state_view& lua, MWWorld::Store<ESM::MagicEffect>& store)
         {
             addRecordStoreBindings<ESM::MagicEffect>(lua, &MWLua::tableToMagicEffect);
@@ -417,6 +427,7 @@ namespace MWLua
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["ingredients"] = initIngredientBindings(lua, esmStore.getWritable<ESM::Ingredient>());
         api["lights"] = initLightBindings(lua, esmStore.getWritable<ESM::Light>());
+        api["lockpicks"] = initLockpickBindings(lua, esmStore.getWritable<ESM::Lockpick>());
         api["magicEffects"] = initMagicEffectBindings(lua, esmStore.getWritable<ESM::MagicEffect>());
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());

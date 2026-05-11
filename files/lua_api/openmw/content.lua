@@ -91,6 +91,15 @@
 -- @usage
 -- content.lights.records.MyLight = { template = content.lights.records['torch'], duration = -1, name = 'Infinite Torch' }
 
+--- @{#LockpickContent}: Lockpick manipulation.
+-- @field [parent=#content] #LockpickContent lockpicks
+
+---
+-- A mutable list of all @{openmw.types#LockpickRecord}s.
+-- @field [parent=#LockpickContent] #list<openmw.types#LockpickRecord> records
+-- @usage
+-- content.lockpicks.records.MyLockpick = { template = content.lockpicks.records['skeleton_key'], name = 'Digipick' }
+
 --- @{#MagicEffectContent}: Magic effect manipulation.
 -- @field [parent=#content] #MagicEffectContent magicEffects
 
