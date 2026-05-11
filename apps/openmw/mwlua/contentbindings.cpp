@@ -10,6 +10,7 @@
 #include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrepa.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/esm3/loadstat.hpp>
@@ -376,6 +377,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initRepairBindings(sol::state_view& lua, MWWorld::Store<ESM::Repair>& store)
+        {
+            addRecordStoreBindings<ESM::Repair>(lua, &MWLua::tableToRepair);
+            addMutableRepairType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Repair>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initSpellBindings(sol::state_view& lua, MWWorld::Store<ESM::Spell>& store)
         {
             addRecordStoreBindings<ESM::Spell>(lua, &MWLua::tableToSpell);
@@ -432,6 +442,7 @@ namespace MWLua
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["probes"] = initProbeBindings(lua, esmStore.getWritable<ESM::Probe>());
+        api["repairs"] = initRepairBindings(lua, esmStore.getWritable<ESM::Repair>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         api["sounds"] = initSoundBindings(lua, esmStore.getWritable<ESM::Sound>());

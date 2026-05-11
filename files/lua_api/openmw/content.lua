@@ -136,6 +136,15 @@
 -- @usage
 -- content.probes.records.MyProbe = { template = content.probes.records['probe_bent'], quality = 5, name = 'Alien Probe' }
 
+--- @{#RepairContent}: Repair item manipulation.
+-- @field [parent=#content] #RepairContent repairs
+
+---
+-- A mutable list of all @{openmw.types#RepairRecord}s.
+-- @field [parent=#RepairContent] #list<openmw.types#RepairRecord> records
+-- @usage
+-- content.repairs.records.MyRepair = { template = content.repairs.records['hammer_repair'], name = 'Hammer Time' }
+
 --- @{#SpellContent}: Spell manipulation.
 -- @field [parent=#content] #SpellContent spells
 
