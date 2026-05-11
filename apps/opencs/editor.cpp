@@ -132,11 +132,6 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
             ->default_value(std::vector<std::string>(), "")
             ->multitoken()
             ->composing());
-    addOption("groundcover",
-        boost::program_options::value<std::vector<std::string>>()
-            ->default_value(std::vector<std::string>(), "")
-            ->multitoken()
-            ->composing());
     Files::ConfigurationManager::addCommonOptions(desc);
 
     boost::program_options::notify(variables);
