@@ -79,7 +79,6 @@ if [[ -n $VERBOSE ]]; then
 fi
 
 declare -a CMAKE_CONF_OPTS=(
--D CMAKE_CXX_FLAGS="-stdlib=libc++"
 -D CMAKE_C_COMPILER="clang"
 -D CMAKE_CXX_COMPILER="clang++"
 -DOPENMW_USE_SYSTEM_YAML_CPP=OFF
