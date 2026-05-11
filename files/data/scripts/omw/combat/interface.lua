@@ -30,6 +30,9 @@ local onHitHandlers = {}
 -- @field [parent=#AttackInfo] openmw.types#Weapon weapon (Optional) Attacking weapon
 -- @field [parent=#AttackInfo] #string ammo (Optional) Ammo record ID
 -- @field [parent=#AttackInfo] openmw.util#Vector3 hitPos (Optional) Where on the victim the attack is landing. Used to spawn blood effects. Blood effects are skipped if nil.
+-- @field [parent=#AttackInfo] #boolean ignoreArmor (Optional) Whether to ignore armor.
+-- @field [parent=#AttackInfo] #boolean ignoreDifficulty (Optional) Whether to ignore difficulty scaling.
+-- @field [parent=#AttackInfo] #boolean muteSound (Optional) If true, does not play miss or damage sounds.
 return {
     --- Basic combat interface
     -- @module Combat
@@ -51,7 +54,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#Combat] #number version
-        version = 1,
+        version = 2,
 
         --- Add new onHit handler for this actor
         -- If `handler(attack)` returns false, other handlers for
