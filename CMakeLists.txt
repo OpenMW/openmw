@@ -167,9 +167,6 @@ option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
-# OS X deployment
-option(OPENMW_OSX_DEPLOYMENT OFF)
-
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
     if (OPENMW_MSBUILD_COMPILER_OVERRIDE)
         if (NOT IS_ABSOLUTE OPENMW_MSBUILD_COMPILER_OVERRIDE)
@@ -550,9 +547,7 @@ if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
 
-    if (OPENMW_OSX_DEPLOYMENT)
-        SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-    endif()
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -803,7 +798,7 @@ endif()
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CUSTOM_CPACK_OS_NAME}-${CUSTOM_CPACK_ARCHITECTURE}")
 
 # Apple bundling
-if (OPENMW_OSX_DEPLOYMENT AND APPLE)
+if (APPLE)
     if(CMAKE_VERSION VERSION_LESS 3.19)
         message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
     endif()
@@ -1091,7 +1086,7 @@ elseif(NOT APPLE)
         # Install resources
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
     endif(WIN32)
-endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
+endif(APPLE)
 
 # what is necessary to build documentation
 if ( BUILD_DOCS )
