@@ -248,6 +248,30 @@ Ubuntu_GCC_Debug:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
+Ubuntu_GCC_Use_Static_Deps:
+  extends: Ubuntu_GCC
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/CMakeLists.txt"
+        - "cmake/**/*"
+        - "CI/**/*"
+        - ".gitlab-ci.yml"
+  cache:
+    key: Ubuntu_GCC_Use_Static_Deps.ubuntu_24.04.v2
+    paths:
+      - apt-cache/
+      - ccache/
+      - build/extern/fetched/
+  before_script:
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
+  variables:
+    CI_OPENMW_USE_STATIC_DEPS: 1
+    CC: gcc
+    CXX: g++
+    CXXFLAGS: -O0
+  timeout: 3h
+
 Ubuntu_GCC_tests:
   extends: Ubuntu_GCC
   cache:
