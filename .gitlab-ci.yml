@@ -321,6 +321,24 @@ Ubuntu_GCC_tests_ubsan:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
+Ubuntu_GCC_tests_tsan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_tests_tsan.ubuntu_24.04.v2
+  variables:
+    CCACHE_SIZE: 1G
+    BUILD_TESTS_ONLY: 1
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
+    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread -fuse-ld=mold
+    TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
+  artifacts:
+    paths: []
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    reports:
+      junit: build/*-tests.xml
+
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
   cache:
