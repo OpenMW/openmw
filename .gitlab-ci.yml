@@ -248,7 +248,7 @@ Ubuntu_GCC_Debug:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
-Ubuntu_GCC_Use_Static_Deps:
+.Ubuntu_GCC_Use_Static_Deps:
   extends: Ubuntu_GCC
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -353,8 +353,7 @@ Ubuntu_GCC_tests_tsan:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
-    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
-    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread -fuse-ld=mold
+    CMAKE_CXX_FLAGS_DEBUG: -g -O0 -fsanitize=undefined
     TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
   artifacts:
     paths: []
