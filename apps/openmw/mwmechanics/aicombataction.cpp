@@ -248,56 +248,6 @@ namespace MWMechanics
         return bestAction;
     }
 
-    float getBestActionRating(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
-    {
-        Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
-
-        float bestActionRating = 0.f;
-        // Default to hand-to-hand combat
-        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-        {
-            return bestActionRating;
-        }
-
-        if (actor.getClass().hasInventoryStore(actor))
-        {
-            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateMagicItem(*it, actor, enemy);
-                if (rating > bestActionRating)
-                {
-                    bestActionRating = rating;
-                }
-            }
-
-            float bestArrowRating = rateAmmo(actor, enemy, ESM::Weapon::Arrow);
-
-            float bestBoltRating = rateAmmo(actor, enemy, ESM::Weapon::Bolt);
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
-                if (rating > bestActionRating)
-                {
-                    bestActionRating = rating;
-                }
-            }
-        }
-
-        for (const ESM::Spell* spell : spells)
-        {
-            float rating = rateSpell(spell, actor, enemy);
-            if (rating > bestActionRating)
-            {
-                bestActionRating = rating;
-            }
-        }
-
-        return bestActionRating;
-    }
-
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool minusZDist)
     {
         osg::Vec3f actor1Pos = actor1.getRefData().getPosition().asVec3();

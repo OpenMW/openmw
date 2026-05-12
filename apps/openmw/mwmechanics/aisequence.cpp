@@ -279,7 +279,7 @@ namespace MWMechanics
             float nearestDist = std::numeric_limits<float>::max();
             osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
 
-            float bestRating = 0.f;
+            bool foundFightable = false;
 
             for (auto it = mPackages.begin(); it != mPackages.end();)
             {
@@ -295,10 +295,6 @@ namespace MWMechanics
                 }
                 else
                 {
-                    float rating = 0.f;
-                    if (MWMechanics::canFight(actor, target))
-                        rating = MWMechanics::getBestActionRating(actor, target);
-
                     const ESM::Position& targetPos = target.getRefData().getPosition();
 
                     float distTo = (targetPos.asVec3() - vActorPos).length2();
@@ -307,12 +303,23 @@ namespace MWMechanics
                     if (it == mPackages.begin())
                         distTo = std::max(0.f, distTo - 2500.f);
 
-                    // if a target has higher priority than current target or has same priority but closer
-                    if (rating > bestRating || ((distTo < nearestDist) && rating == bestRating))
+                    // Pick the closest fightable target
+                    // If none are fightable, pick the closest target
+                    bool updateTarget = false;
+                    if (foundFightable == canFight(actor, target))
+                    {
+                        updateTarget = distTo < nearestDist;
+                    }
+                    else if (!foundFightable)
+                    {
+                        updateTarget = true;
+                        foundFightable = true;
+                    }
+
+                    if (updateTarget)
                     {
                         nearestDist = distTo;
                         itActualCombat = it;
-                        bestRating = rating;
                     }
                     ++it;
                 }
