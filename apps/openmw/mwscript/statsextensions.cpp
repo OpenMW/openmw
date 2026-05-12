@@ -1284,7 +1284,9 @@ namespace MWScript
                 }
 
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
+                float currentValue = 0.f;
+                if (!mPositiveEffect.empty())
+                    currentValue += effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
@@ -1295,9 +1297,6 @@ namespace MWScript
                     currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
-                // Sound is inverted
-                if (mPositiveEffect == ESM::MagicEffect::Sound)
-                    currentValue *= -1;
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1328,7 +1327,9 @@ namespace MWScript
                     return;
 
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
+                float currentValue = 0.f;
+                if (!mPositiveEffect.empty())
+                    currentValue += effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
@@ -1339,11 +1340,13 @@ namespace MWScript
                     currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
-                // Sound is inverted
-                if (mPositiveEffect == ESM::MagicEffect::Sound)
-                    arg *= -1;
 
-                effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
+                arg -= static_cast<int>(currentValue);
+
+                if (!mPositiveEffect.empty())
+                    effects.modifyBase(mPositiveEffect, arg);
+                else
+                    effects.modifyBase(mNegativeEffect, -arg);
             }
         };
 
@@ -1351,10 +1354,12 @@ namespace MWScript
         class OpModMagicEffect : public Interpreter::Opcode0
         {
             ESM::RefId mPositiveEffect;
+            ESM::RefId mNegativeEffect;
 
         public:
-            OpModMagicEffect(ESM::RefId positiveEffect)
+            OpModMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
                 : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1367,12 +1372,12 @@ namespace MWScript
 
                 if (!ptr.getClass().isActor())
                     return;
-                // Sound is inverted
-                if (mPositiveEffect == ESM::MagicEffect::Sound)
-                    arg *= -1;
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
+                if (!mPositiveEffect.empty())
+                    stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
+                else
+                    stats.getMagicEffects().modifyBase(mNegativeEffect, -arg);
             }
         };
 
@@ -1594,7 +1599,7 @@ namespace MWScript
                 { ESM::MagicEffect::Jump, ESM::RefId() },
                 { ESM::MagicEffect::Levitate, ESM::RefId() },
                 { ESM::MagicEffect::Shield, ESM::RefId() },
-                { ESM::MagicEffect::Sound, ESM::RefId() },
+                { ESM::RefId(), ESM::MagicEffect::Sound },
                 { ESM::MagicEffect::Silence, ESM::RefId() },
                 { ESM::MagicEffect::Blind, ESM::RefId() },
                 { ESM::MagicEffect::Paralyze, ESM::RefId() },
@@ -1619,9 +1624,9 @@ namespace MWScript
                     Compiler::Stats::opcodeSetMagicEffectExplicit + i, positive, negative);
 
                 interpreter.installSegment5<OpModMagicEffect<ImplicitRef>>(
-                    Compiler::Stats::opcodeModMagicEffect + i, positive);
+                    Compiler::Stats::opcodeModMagicEffect + i, positive, negative);
                 interpreter.installSegment5<OpModMagicEffect<ExplicitRef>>(
-                    Compiler::Stats::opcodeModMagicEffectExplicit + i, positive);
+                    Compiler::Stats::opcodeModMagicEffectExplicit + i, positive, negative);
             }
 
             interpreter.installSegment5<OpGetPCVisionBonus>(Compiler::Stats::opcodeGetPCVisionBonus);
