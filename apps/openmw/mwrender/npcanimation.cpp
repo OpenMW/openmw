@@ -1068,9 +1068,9 @@ namespace MWRender
         updateQuiver();
     }
 
-    void NpcAnimation::releaseArrow(float attackStrength)
+    void NpcAnimation::releaseArrow(float attackStrength, float attackWindUp)
     {
-        WeaponAnimation::releaseArrow(mPtr, attackStrength);
+        WeaponAnimation::releaseArrow(mPtr, attackStrength, attackWindUp);
         updateQuiver();
     }
 

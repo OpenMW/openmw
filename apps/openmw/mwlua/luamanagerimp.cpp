@@ -611,7 +611,7 @@ namespace MWLua
     }
 
     void LuaManager::onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
-        const MWWorld::Ptr& ammo, int attackType, float attackStrength, float damage, bool isHealth,
+        const MWWorld::Ptr& ammo, int attackType, float attackStrength, float attackWindUp, float damage, bool isHealth,
         const osg::Vec3f& hitPos, bool successful, MWMechanics::DamageSourceType sourceType)
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
@@ -630,6 +630,7 @@ namespace MWLua
                 data["ammo"] = ammo.getCellRef().getRefId().serializeText();
             data["type"] = attackType;
             data["strength"] = attackStrength;
+            data["windUp"] = attackWindUp;
             data["damage"] = damageTable;
             data["hitPos"] = hitPos;
             data["successful"] = successful;

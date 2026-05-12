@@ -99,7 +99,7 @@ namespace MWRender
         mAmmunition.reset();
     }
 
-    void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
+    void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength, float attackWindUp)
     {
         MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -136,7 +136,7 @@ namespace MWRender
 
             MWWorld::Ptr weaponPtr = *weapon;
             MWBase::Environment::get().getWorld()->launchProjectile(
-                actor, weaponPtr, launchPos, orient, weaponPtr, speed, attackStrength);
+                actor, weaponPtr, launchPos, orient, weaponPtr, speed, attackStrength, attackWindUp);
 
             showWeapon(false);
 
@@ -165,7 +165,7 @@ namespace MWRender
             MWWorld::Ptr weaponPtr = *weapon;
             MWWorld::Ptr ammoPtr = *ammo;
             MWBase::Environment::get().getWorld()->launchProjectile(
-                actor, ammoPtr, launchPos, orient, weaponPtr, speed, attackStrength);
+                actor, ammoPtr, launchPos, orient, weaponPtr, speed, attackStrength, attackWindUp);
 
             inv.remove(ammoPtr, 1);
             mAmmunition.reset();

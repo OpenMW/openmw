@@ -256,8 +256,8 @@ namespace MWClass
         return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
     }
 
-    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim,
-        const osg::Vec3f& hitPosition, bool success) const
+    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, float attackWindUp, int type,
+        const MWWorld::Ptr& victim, const osg::Vec3f& hitPosition, bool success) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
@@ -289,7 +289,7 @@ namespace MWClass
         if (!success)
         {
             MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
-                0.0f, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
+                attackWindUp, 0.0f, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -348,7 +348,7 @@ namespace MWClass
         MWMechanics::diseaseContact(victim, ptr);
 
         MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
-            damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
+            attackWindUp, damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Creature::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,

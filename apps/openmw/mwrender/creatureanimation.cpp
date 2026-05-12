@@ -211,9 +211,9 @@ namespace MWRender
         updateQuiver();
     }
 
-    void CreatureWeaponAnimation::releaseArrow(float attackStrength)
+    void CreatureWeaponAnimation::releaseArrow(float attackStrength, float attackWindUp)
     {
-        WeaponAnimation::releaseArrow(mPtr, attackStrength);
+        WeaponAnimation::releaseArrow(mPtr, attackStrength, attackWindUp);
         updateQuiver();
     }
 

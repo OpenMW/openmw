@@ -54,7 +54,7 @@ namespace MWWorld
             ESM::RefNum item);
 
         void launchProjectile(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& projectile, const osg::Vec3f& pos,
-            const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength);
+            const osg::Quat& orient, const MWWorld::Ptr& bow, float speed, float attackStrength, float attackWindUp);
 
         void updateCasters();
 
@@ -121,6 +121,7 @@ namespace MWWorld
 
             osg::Vec3f mVelocity;
             float mAttackStrength;
+            float mAttackWindUp;
         };
 
         std::vector<MagicBoltState> mMagicBolts;

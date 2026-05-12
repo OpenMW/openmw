@@ -1110,7 +1110,8 @@ namespace MWMechanics
             // and processing multiple hit keys for a single attack
             if (mReadyToHit)
             {
-                charClass.hit(mPtr, mAttackStrength, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                charClass.hit(
+                    mPtr, mAttackStrength, mAttackWindUp, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
                 mReadyToHit = false;
             }
         }
@@ -1142,14 +1143,14 @@ namespace MWMechanics
                 prepareHit();
 
                 if (groupname == "attack1" || groupname == "swimattack1")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Chop, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
                 else if (groupname == "attack2" || groupname == "swimattack2")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Slash, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
                 else if (groupname == "attack3" || groupname == "swimattack3")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Thrust, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
             }
         }
         else if (action == "shoot attach")
@@ -1159,7 +1160,7 @@ namespace MWMechanics
             // See notes for melee release above
             if (mReadyToHit)
             {
-                mAnimation->releaseArrow(mAttackStrength);
+                mAnimation->releaseArrow(mAttackStrength, mAttackWindUp);
                 mReadyToHit = false;
             }
         }
@@ -1256,6 +1257,7 @@ namespace MWMechanics
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         mAttackStrength = calculateWindUp();
+        mAttackWindUp = mAttackStrength;
         if (mAttackStrength == -1.f)
             mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;

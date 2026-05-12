@@ -147,7 +147,7 @@ namespace MWRender
 
         void attachArrow() override;
         void detachArrow() override;
-        void releaseArrow(float attackStrength) override;
+        void releaseArrow(float attackStrength, float attackWindUp) override;
 
         osg::Group* getArrowBone() override;
         osg::Node* getWeaponNode() override;
