@@ -89,3 +89,7 @@ venv/
 ## operating system files
 .DS_Store
 Thumbs.db
+
+## Vcpkg setup related
+openmw-manifest.txt
+vcpkg-*.7z
