@@ -19,6 +19,7 @@
     Bug #8693: Crash when constructing infinite-length UI elements
     Bug #8699: Dangling Lua script pointer crashes caused by e.g. moving items
     Bug #8732: MessageBox formatting is too limited
+    Bug #8733: Steam Deck controller triggers not detected in game menus
     Bug #8760: Single-character topics don't get linked
     Bug #8765: Actors can't transmit diseases to other actors
     Bug #8769: LuaUtil::call not wrapped by invokeProtectedCall
@@ -59,6 +60,8 @@
     Bug #9026: Thrown projectiles are not rotated
     Bug #9048: Escort AI missing argument
     Bug #9062: Actors may fail to reequip the weapon when staggered
+    Bug #9078: Player can become decoupled from camera in cases when it shouldn't
+    Bug #9085: Lua item:remove() before queued npc:teleport() hangs main thread
     Feature #721: Editor: Right-to-Left subview placement option
     Feature #2316: ess-Importer: convert targeted scripts
     Feature #2903: Barter gold bindings
