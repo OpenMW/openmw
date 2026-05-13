@@ -138,7 +138,7 @@ LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage
 Lights: "Sources lumineuses"
 LightRadiusMultiplier: "Multiplicateur de sphère englobante"
 LightRadiusMultiplierValue: "Multiplicateur de sphère englobante ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "valeur par défaut: 1.00\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses."
+LightRadiusMultiplierTooltip: "valeur par défaut: 1.65\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses."
 LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
 LightsFadeStartMultiplierValue: "Seuil de perte d'éclat lumineux ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."

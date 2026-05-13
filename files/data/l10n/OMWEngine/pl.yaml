@@ -138,7 +138,7 @@ LightingResetToDefaults: "Przywrócić domyślne wartości? Zmiany w metodzie o�
 Lights: "Światła"
 LightRadiusMultiplier: "Mnożnik sfery ograniczającej"
 LightRadiusMultiplierValue: "Mnożnik sfery ograniczającej ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "Domyślnie: 1.00\nMnożnik sfery ograniczającej światła."
+LightRadiusMultiplierTooltip: "Domyślnie: 1.65\nMnożnik sfery ograniczającej światła."
 LightsFadeStartMultiplier: "Mnożnik początku zanikania"
 LightsFadeStartMultiplierValue: "Mnożnik początku zanikania ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasięgu, w którym światła zaczną zanikać.\n\nNiska wartość = wolniejsze przejścia.\nWysoka wartość = szybsze przejścia."

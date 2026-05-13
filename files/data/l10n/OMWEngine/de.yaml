@@ -138,7 +138,7 @@ LightingResetToDefaults: "Einstellungen wirklich zurücksetzen? Das Ändern der 
 Lights: "Beleuchtung"
 LightRadiusMultiplier: "Multiplikator für Begrenzungssphäre"
 LightRadiusMultiplierValue: "Multiplikator für Begrenzungssphäre ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "Standard: 1,00\nMultiplikator für Größe der Begrenzungssphäre."
+LightRadiusMultiplierTooltip: "Standard: 1,65\nMultiplikator für Größe der Begrenzungssphäre."
 LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierValue: "Multiplikator für Startwert der Lichtabblendung ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
