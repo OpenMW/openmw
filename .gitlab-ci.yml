@@ -329,8 +329,8 @@ Ubuntu_GCC_tests_ubsan:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
-    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fsanitize=thread
-    CMAKE_EXE_LINKER_FLAGS: -fsanitize=thread -fuse-ld=mold
+    CMAKE_CXX_FLAGS_DEBUG: -g -O2 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize=thread -fPIE
+    CMAKE_EXE_LINKER_FLAGS: -pthread -pie -fsanitize=thread -fuse-ld=mold
     TSAN_OPTIONS: second_deadlock_stack=1:halt_on_error=1
   artifacts:
     paths: []
