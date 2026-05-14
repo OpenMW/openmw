@@ -2,6 +2,7 @@
 
 set -xeo pipefail
 
+BUILD_DIR_SUFFIX=""
 USE_CCACHE=""
 
 while [ $# -gt 0 ]; do
@@ -17,6 +18,9 @@ while [ $# -gt 0 ]; do
     for (( i=1; i<${#ARGSTR}; i++ )); do
         ARG=${ARGSTR:$i:1}
         case $ARG in
+            B )
+                BUILD_DIR_SUFFIX=$1
+                shift ;;
             C )
                 USE_CCACHE=true ;;
 
@@ -24,6 +28,8 @@ while [ $# -gt 0 ]; do
                 cat <<EOF
 Usage: $0 [-Ch]
 Options:
+    -B <your string here>
+        Suffix for build directory
     -C
         Use ccache.
     -h
@@ -73,9 +79,9 @@ fi
 if [[ $CI_OPENMW_USE_VCPKG ]]; then
     . ./CI/linux/deps_versions.sh
 
-    DEPENDENCIES_ROOT_PATH="/tmp/openmw-deps"
+    DEPENDENCIES_ROOT_PATH="deps/${VCPKG_FILE}-${VCPKG_TAG}"
     VCPKG_TARGET_TRIPLET="x64-linux-dynamic"
-    QT_PATH="/tmp/QT/$QT_VER/gcc_64"
+    QT_PATH="deps/Qt/$QT_VER/gcc_64"
 
     DEPENDENCIES_INSTALLED_PATH="$DEPENDENCIES_ROOT_PATH/installed/$VCPKG_TARGET_TRIPLET"
 
@@ -137,8 +143,8 @@ if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then
     )
 fi
 
-mkdir -p build
-cd build
+mkdir -p "build${BUILD_DIR_SUFFIX}"
+cd "build${BUILD_DIR_SUFFIX}"
 
 if [[ "${BUILD_TESTS_ONLY}" ]]; then
 
