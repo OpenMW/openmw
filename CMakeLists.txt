@@ -252,7 +252,7 @@ elseif(UNIX)
     SET(DATADIR "${GLOBAL_DATA_PATH}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
     SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-    
+
     SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_SYSCONFDIR}/.." CACHE PATH "Set config dir prefix")
 
     set(OPENMW_RESOURCE_FILES "${DATADIR}/resources" CACHE PATH "location of OpenMW resources files")
@@ -570,16 +570,16 @@ configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
 if (APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}/openmw.cfg")
-elseif (WIN32)
-    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}" "openmw.cfg")
-    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
 else ()
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg")
-    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+    if (OPENMW_LOCAL_INSTALL)
+        configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+            "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+    else ()
+        configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+            "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+    endif ()
 endif ()
 
 pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
