@@ -228,6 +228,7 @@ endif()
 include(GNUInstallDirs)
 # todo: force this suffix to match sApplicationName in configurationmanager.cpp
 set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/openmw")
+set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATADIR}/games/openmw")
 
 # Set up common paths
 if (UNIX AND NOT APPLE)
@@ -244,20 +245,17 @@ if (OPENMW_LOCAL_INSTALL)
 endif()
 
 if (APPLE)
-    set(OPENMW_RESOURCE_FILES "../Resources/resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "../Resources/resources")
 elseif(UNIX)
     # Paths
     SET(DATAROOTDIR "${CMAKE_INSTALL_DATAROOTDIR}" CACHE PATH "Sets the root of data directories to a non-default location")
     SET(GLOBAL_DATA_PATH "${CMAKE_INSTALL_PREFIX}/share/games/" CACHE PATH "Set data path prefix")
-    SET(DATADIR "${GLOBAL_DATA_PATH}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
     SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
     SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_SYSCONFDIR}/.." CACHE PATH "Set config dir prefix")
 
-    set(OPENMW_RESOURCE_FILES "${DATADIR}/resources" CACHE PATH "location of OpenMW resources files")
-else()
-    set(OPENMW_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
+    set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_DATADIR}/resources")
 endif(APPLE)
 
 if (WIN32)
@@ -573,13 +571,6 @@ if (APPLE)
 else ()
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg")
-    if (OPENMW_LOCAL_INSTALL)
-        configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
-            "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
-    else ()
-        configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-            "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
-    endif ()
 endif ()
 
 pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
@@ -993,8 +984,6 @@ elseif(NOT APPLE)
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
 
-        INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION ".")
-
         SET(CPACK_GENERATOR "NSIS")
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
         IF(BUILD_LAUNCHER)
@@ -1050,14 +1039,20 @@ elseif(NOT APPLE)
             INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
         ENDIF(BUILD_OPENCS)
 
-        # Install resources
-        INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
     endif(WIN32)
 
     install(FILES "$<TARGET_FILE_DIR:openmw>/defaults.bin"
                   "$<TARGET_FILE_DIR:openmw>/gamecontrollerdb.txt"
                   TYPE SYSCONF)
-    install(FILES "$<TARGET_FILE_DIR:openmw>/openmw.cfg.install" TYPE SYSCONF RENAME "openmw.cfg")
+    
+    if (OPENMW_LOCAL_INSTALL)
+        install(FILES "${OpenMW_SOURCE_DIR}/files/openmw.cfg.local" TYPE SYSCONF RENAME "openmw.cfg")
+    else ()
+        install(CODE "set(OPENMW_RESOURCE_FILES \"\${CMAKE_INSTALL_PREFIX}/${OPENMW_RESOURCE_FILES}\")")
+        install(CODE "configure_file(\"${OpenMW_SOURCE_DIR}/files/openmw.cfg\" \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_SYSCONFDIR}/openmw.cfg\")")
+    endif ()
+
+    install(DIRECTORY "$<TARGET_FILE_DIR:openmw>/resources" TYPE DATA)
 endif(APPLE)
 
 # what is necessary to build documentation
