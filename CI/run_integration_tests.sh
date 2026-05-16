@@ -11,7 +11,7 @@ cd ..
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24x60' \
     scripts/integration_tests.py \
         --verbose \
-        --omw build/install/bin/openmw \
+        --omw ${OPENMW_BINARY:-build/install/bin/openmw} \
         --workdir integration_tests_output \
         --config example-suite \
         --data example-suite/game_template/data \

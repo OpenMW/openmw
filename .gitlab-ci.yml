@@ -116,6 +116,7 @@ Ubuntu_GCC_preprocess:
     OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
     CC: gcc
     CXX: g++
+    OPENMW_LOCAL_INSTALL: 1
   before_script:
     - dnf install -y epel-release
     - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
@@ -555,6 +556,8 @@ Almalinux_Vcpkg_Deps_Integration_Tests:
     CCACHE_SIZE: 1G
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
+    OPENMW_LOCAL_INSTALL: 1
+    OPENMW_BINARY: build/install/openmw
   artifacts:
     paths:
       - "**/CMakeCache.txt"
