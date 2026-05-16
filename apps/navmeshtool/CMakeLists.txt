@@ -29,8 +29,8 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-navmeshtool gcov)
 endif()
 
-if (WIN32)
-    install(TARGETS openmw-navmeshtool RUNTIME DESTINATION ".")
+if (NOT APPLE)
+    install(TARGETS openmw-navmeshtool)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

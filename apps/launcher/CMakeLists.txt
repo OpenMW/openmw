@@ -62,9 +62,9 @@ openmw_add_executable(openmw-launcher
 
 add_dependencies(openmw-launcher qm-files)
 
-if (WIN32)
-    INSTALL(TARGETS openmw-launcher RUNTIME DESTINATION ".")
-endif (WIN32)
+if (NOT APPLE)
+    INSTALL(TARGETS openmw-launcher)
+endif ()
 
 target_link_libraries(openmw-launcher
     SDL2::SDL2

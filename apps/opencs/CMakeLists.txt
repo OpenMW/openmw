@@ -249,17 +249,9 @@ if (WIN32)
     target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
 endif()
 
-if (WIN32 AND BUILD_OPENCS)
-    INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
-
-    get_generator_is_multi_config(multi_config)
-    if (multi_config)
-        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}/$<CONFIG>")
-    else ()
-        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}")
-    endif ()
-
-    INSTALL(FILES "${INSTALL_SOURCE}/defaults-cs.bin" DESTINATION ".")
+if (NOT APPLE AND BUILD_OPENCS)
+    INSTALL(TARGETS openmw-cs)
+    INSTALL(FILES "$<TARGET_FILE_DIR:openmw-cs>/defaults-cs.bin" DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}")
 endif()
 
 if (MSVC)
