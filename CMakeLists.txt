@@ -226,6 +226,7 @@ if (MSVC)
 endif()
 
 include(GNUInstallDirs)
+# todo: force this suffix to match sApplicationName in configurationmanager.cpp
 set(CMAKE_INSTALL_SYSCONFDIR "${CMAKE_INSTALL_SYSCONFDIR}/openmw")
 
 # Set up common paths
@@ -251,12 +252,8 @@ elseif(UNIX)
     SET(DATADIR "${GLOBAL_DATA_PATH}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
     SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-    IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr")
-        SET(GLOBAL_CONFIG_PATH "/etc/" CACHE PATH "Set config dir prefix")
-    ELSE()
-        SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/etc/" CACHE PATH "Set config dir prefix")
-    ENDIF()
-    SET(SYSCONFDIR "${GLOBAL_CONFIG_PATH}/openmw" CACHE PATH "Set config dir")
+    
+    SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_SYSCONFDIR}/.." CACHE PATH "Set config dir prefix")
 
     set(OPENMW_RESOURCE_FILES "${DATADIR}/resources" CACHE PATH "location of OpenMW resources files")
 else()
@@ -991,13 +988,10 @@ elseif(NOT APPLE)
                                                                                                                   PATTERN "Testing" EXCLUDE
                                                                                                                   PATTERN "tests_output" EXCLUDE
                                                                                                                   PATTERN "try-compile")
-        INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
-        INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION ".")
-        INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION ".")
 
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION ".")
 
@@ -1056,14 +1050,14 @@ elseif(NOT APPLE)
             INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
         ENDIF(BUILD_OPENCS)
 
-        # Install global configuration files
-        INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-        INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
-        INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-
         # Install resources
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
     endif(WIN32)
+
+    install(FILES "$<TARGET_FILE_DIR:openmw>/defaults.bin"
+                  "$<TARGET_FILE_DIR:openmw>/gamecontrollerdb.txt"
+                  TYPE SYSCONF)
+    install(FILES "$<TARGET_FILE_DIR:openmw>/openmw.cfg.install" TYPE SYSCONF RENAME "openmw.cfg")
 endif(APPLE)
 
 # what is necessary to build documentation
