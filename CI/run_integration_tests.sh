@@ -1,12 +1,15 @@
 #!/bin/bash -ex
 
-mkdir example-suite
-cd example-suite
-git init
-git remote add origin https://gitlab.com/OpenMW/example-suite.git
-git fetch --depth=1 origin ${EXAMPLE_SUITE_REVISION}
-git checkout FETCH_HEAD
-cd ..
+if [[ ! -d example-suite ]]; then
+    git lfs version || { echo "git lfs unavailable, unable to correctly clone example suite" >&2 ; exit 1 ; }
+    mkdir example-suite
+    cd example-suite
+    git init
+    git remote add origin https://gitlab.com/OpenMW/example-suite.git
+    git fetch --depth=1 origin ${EXAMPLE_SUITE_REVISION}
+    git checkout FETCH_HEAD
+    cd ..
+fi
 
 xvfb-run --auto-servernum --server-args='-screen 0 640x480x24x60' \
     scripts/integration_tests.py \
