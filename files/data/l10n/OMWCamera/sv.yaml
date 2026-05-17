@@ -3,6 +3,11 @@ settingsPageDescription: "OpenMW Kamerainställningar"
 
 thirdPersonSettings: "Tredjepersonsvy"
 
+maxDistance: "Maximalt kameravstånd"
+maxDistanceDescription: |
+    Längsta avståndet kameran kan zooma ut.
+    (Förvalt: 800 spelenheter)
+
 viewOverShoulder: "Över-axeln-vy"
 viewOverShoulderDescription: |
     Styr tredjepersonsvyn.

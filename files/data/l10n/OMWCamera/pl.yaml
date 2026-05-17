@@ -3,6 +3,9 @@ settingsPageDescription: "Ustawienia kamery OpenMW."
 
 thirdPersonSettings: "Tryb trzecioosobowy"
 
+maxDistance: "Maksymalne oddalenie kamery"
+maxDistanceDescription: "Najdłuższa odległość kamery od postaci gracza (domyślnie: 800)."
+
 viewOverShoulder: "Widok znad ramienia"
 viewOverShoulderDescription: |
     Steruje trybem widoku trzecioosobowego.
