@@ -546,7 +546,7 @@ Almalinux_Vcpkg_Deps_Integration_Tests:
       - build/extern/fetched/
   script:
     - !reference [.Almalinux_Vcpkg, script]
-    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils
+    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils git-lfs
     - pip3 install --user numpy matplotlib termtables click
     - CI/run_integration_tests.sh
   after_script:
