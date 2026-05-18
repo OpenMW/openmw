@@ -1157,3 +1157,68 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
       - ccache
       policy: push
   when: manual
+
+.Ubuntu_AndroidNDK_arm64-v8a:
+  tags:
+    - saas-linux-medium-amd64
+  image: psi29a/android-ndk:focal-ndk22
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    CCACHE_SIZE: 3G
+  cache:
+    key: Ubuntu__Focal_AndroidNDK_r22b_arm64-v8a.v2
+    paths:
+      - apt-cache/
+      - ccache/
+      - build/extern/fetched/
+  before_script:
+    - CI/install_debian_deps.sh android
+  stage: build
+  script:
+    - df -h
+    - export CCACHE_BASEDIR="`pwd`"
+    - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_install.android.sh
+    - CI/before_script.android.sh
+    - cd build
+    - cmake --build . -- -j $(nproc)
+    # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved
+    - ccache -svv
+    - df -h
+    - ls | grep -v -e '^extern$' -e '^install$' | xargs -I '{}' rm -rf './{}'
+    - cd ..
+    - df -h
+    - du -sh build/
+    # - du -sh build/install/ # no install dir because it's commented out above
+    - du -sh apt-cache/
+    - du -sh ccache/
+    - du -sh build/extern/fetched/
+  artifacts:
+    paths:
+      - build/install/
+      - "**/CMakeCache.txt"
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  timeout: 1h30m
+
+flatpak:
+  image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
+  stage: build
+  script:
+    - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
+    - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
+    - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
+    - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
+  cache:
+    key: flatpak
+    paths:
+      - ".flatpak-builder"
+  artifacts:
+    untracked: false
+    paths:
+      - "openmw.flatpak"
+      - "**/CMakeCache.txt"
+  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+  # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
+  timeout: 4h
