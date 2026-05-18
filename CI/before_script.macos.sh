@@ -27,7 +27,7 @@ do
 
 	* )
 	    cat <<EOF
-Usage: $0 [-VCkETh]
+Usage: $0 [-VCkETd]
 Options:
 	-C
 		Use ccache.
