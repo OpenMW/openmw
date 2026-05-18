@@ -6,51 +6,33 @@ KEEP=""
 USE_WERROR=""
 DEPENDENCIES_ROOT_PATH="./deps/openmw-deps"
 
-while [ $# -gt 0 ]; do
-    ARGSTR=$1
-    shift
+while getopts VCkEd: ARG
+do
+    case $ARG in
+	V )
+	    VERBOSE=true ;;
 
-    if [ ${ARGSTR:0:1} != "-" ]; then
-	echo "Unknown argument $ARGSTR"
-	echo "Try '$0 -h'"
-	exit 1;
-    fi
+	C )
+	    USE_CCACHE=true ;;
 
-    for (( i=1; i<${#ARGSTR}; i++ )); do
-	ARG=${ARGSTR:$i:1}
-	case $ARG in
-	    V )
-		VERBOSE=true ;;
+	k )
+	    KEEP=true ;;
 
-	    C )
-		USE_CCACHE=true ;;
+	E )
+	    USE_WERROR=true ;;
 
-	    k )
-		KEEP=true ;;
+        d )
+            DEPENDENCIES_ROOT_PATH="$OPTARG"
+            ;;
 
-	    E )
-		USE_WERROR=true ;;
-
-            d )
-                if [ $i -lt $((${#ARGSTR} - 1)) ]; then
-                    DEPENDENCIES_ROOT_PATH="${ARGSTR:$((i+1))}"
-                    break
-                else
-                    DEPENDENCIES_ROOT_PATH=$1
-                    shift
-                fi
-                ;;
-
-	    h )
-		cat <<EOF
+	* )
+	    cat <<EOF
 Usage: $0 [-VCkETh]
 Options:
 	-C
 		Use ccache.
         -d <dir>
                 This folder points to the openmw-deps (e.g. ./deps/openmw-deps).
-	-h
-		Show this message.
 	-k
 		Keep the old build directory, default is to delete it.
 	-V
@@ -58,15 +40,9 @@ Options:
 	-E
 		Use warnings as errors (-Werror)
 EOF
-		exit 0
-		;;
-
-	    * )
-		echo "Unknown argument $ARG."
-		echo "Try '$0 -h'"
-		exit 1 ;;
-	esac
-    done
+	    exit 1
+	    ;;
+    esac
 done
 
 if [[ -z $KEEP ]]; then
