@@ -1201,24 +1201,3 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
       - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
-
-flatpak:
-  image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
-  stage: build
-  script:
-    - flatpak install -y flathub org.kde.Platform/x86_64/6.9
-    - flatpak install -y flathub org.kde.Sdk/x86_64/6.9
-    - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
-    - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
-  cache:
-    key: flatpak
-    paths:
-      - ".flatpak-builder"
-  artifacts:
-    untracked: false
-    paths:
-      - "openmw.flatpak"
-      - "**/CMakeCache.txt"
-  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-  # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
-  timeout: 4h
