@@ -1206,8 +1206,8 @@ flatpak:
   image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
   stage: build
   script:
-    - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
-    - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
+    - flatpak install -y flathub org.kde.Platform/x86_64/6.9
+    - flatpak install -y flathub org.kde.Sdk/x86_64/6.9
     - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
     - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
   cache:
