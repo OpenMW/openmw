@@ -4,38 +4,51 @@ VERBOSE=""
 USE_CCACHE=""
 KEEP=""
 USE_WERROR=""
+DEPENDENCIES_ROOT_PATH="./deps/openmw-deps"
 
 while [ $# -gt 0 ]; do
-	ARGSTR=$1
-	shift
+    ARGSTR=$1
+    shift
 
-	if [ ${ARGSTR:0:1} != "-" ]; then
-		echo "Unknown argument $ARGSTR"
-		echo "Try '$0 -h'"
-		wrappedExit 1
-	fi
+    if [ ${ARGSTR:0:1} != "-" ]; then
+	echo "Unknown argument $ARGSTR"
+	echo "Try '$0 -h'"
+	exit 1;
+    fi
 
-	for (( i=1; i<${#ARGSTR}; i++ )); do
-		ARG=${ARGSTR:$i:1}
-		case $ARG in
-			V )
-				VERBOSE=true ;;
+    for (( i=1; i<${#ARGSTR}; i++ )); do
+	ARG=${ARGSTR:$i:1}
+	case $ARG in
+	    V )
+		VERBOSE=true ;;
 
-			C )
-				USE_CCACHE=true ;;
+	    C )
+		USE_CCACHE=true ;;
 
-			k )
-				KEEP=true ;;
+	    k )
+		KEEP=true ;;
 
-			E )
-				USE_WERROR=true ;;
+	    E )
+		USE_WERROR=true ;;
 
-			h )
-				cat <<EOF
+            d )
+                if [ $i -lt $((${#ARGSTR} - 1)) ]; then
+                    DEPENDENCIES_ROOT_PATH="${ARGSTR:$((i+1))}"
+                    break
+                else
+                    DEPENDENCIES_ROOT_PATH=$1
+                    shift
+                fi
+                ;;
+
+	    h )
+		cat <<EOF
 Usage: $0 [-VCkETh]
 Options:
 	-C
 		Use ccache.
+        -d <dir>
+                This folder points to the openmw-deps (e.g. ./deps/openmw-deps).
 	-h
 		Show this message.
 	-k
@@ -45,15 +58,15 @@ Options:
 	-E
 		Use warnings as errors (-Werror)
 EOF
-				exit 0
-				;;
+		exit 0
+		;;
 
-			* )
-				echo "Unknown argument $ARG."
-				echo "Try '$0 -h'"
-				exit 1 ;;
-		esac
-	done
+	    * )
+		echo "Unknown argument $ARG."
+		echo "Try '$0 -h'"
+		exit 1 ;;
+	esac
+    done
 done
 
 if [[ -z $KEEP ]]; then
@@ -65,8 +78,6 @@ fi
 
 mkdir -p build
 cd build
-
-DEPENDENCIES_ROOT_PATH="/tmp/openmw-deps"
 
 if [[ "${MACOS_AMD64}" ]]; then
     QT_PATH=$(arch -x86_64 /bin/bash -c "qmake -v | sed -rn -e 's/Using Qt version [.0-9]+ in //p'")
