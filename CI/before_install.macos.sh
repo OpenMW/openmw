@@ -18,13 +18,13 @@ else
     command -v qmake >/dev/null 2>&1 && qmake -v | grep -F "Using Qt version 6." >/dev/null || brew install qt@6
 fi
 
-curl "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/${VCPKG_FILE}-${VCPKG_TAG}-manifest.txt" -o openmw-manifest.txt
+curl "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/${VCPKG_FILE}-${VCPKG_TAG}-manifest.txt" -o /tmp/openmw-manifest.txt
 
-{ read -r URL && read -r HASH FILE; } < openmw-manifest.txt
+{ read -r URL && read -r HASH FILE; } < /tmp/openmw-manifest.txt
 
-curl -fSL -R -J $URL -o $FILE
+curl -fSL -R -J $URL -o /tmp/$FILE
 echo "${HASH:?}  ${FILE:?}" | sha512sum
-7z x -y -o/tmp/openmw-deps-pre $FILE && \
+7z x -y -o/tmp/openmw-deps-pre /tmp/$FILE && \
     mv /tmp/openmw-deps-pre/*/ /tmp/openmw-deps/ && \
     rmdir /tmp/openmw-deps-pre
 
