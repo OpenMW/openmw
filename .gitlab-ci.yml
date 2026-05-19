@@ -423,16 +423,29 @@ Ubuntu_Clang:
   extends: Ubuntu_Clang
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+    # Download 1.2.0 tag of clang_tidy_cache.py
+    - curl https://raw.githubusercontent.com/matus-chochlik/ctcache/e33c063ca6e52b48bcefbc45d46d8c150ffa81ca/src/ctcache/clang_tidy_cache.py -o /usr/local/bin/clang_tidy_cache.py
+    - chmod 0775 /usr/local/bin/clang_tidy_cache.py
   cache:
     key: Ubuntu_Clang_Tidy.ubuntu_24.04.v2
+    paths:
+      - apt-cache/
+      - ctcache/
+      - ccache/
   variables:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
     CI_CLANG_TIDY: 1
     CCACHE_BASEDIR: $CI_PROJECT_DIR
     CCACHE_DIR: $CI_PROJECT_DIR/ccache
+    CTCACHE_CLANG_TIDY: /usr/bin/clang-tidy-19
+    CTCACHE_SAVE_OUTPUT: 1
+    CTCACHE_DIR: $CI_PROJECT_DIR/ctcache
+    
+    CMAKE_CXX_CLANG_TIDY: 'clang_tidy_cache.py;$CTCACHE_CLANG_TIDY'
   script:
     - mkdir -pv "${CCACHE_DIR}"
+    - mkdir -pv "${CTCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
     - mkdir -p build/extern build/apps/launcher build/apps/opencs build/apps/wizard
@@ -440,9 +453,9 @@ Ubuntu_Clang:
     - cp extern/.clang-tidy build/apps/launcher/
     - cp extern/.clang-tidy build/apps/opencs/
     - cp extern/.clang-tidy build/apps/wizard/
-    - cd build
-    - find . -name *.o -exec touch {} \;
-    - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
+    - clang_tidy_cache.py --zero-stats
+    - cmake --build build -- -j $(nproc) ${BUILD_TARGETS}
+    - clang_tidy_cache.py --show-stats
     - ccache -svv
   artifacts:
     paths:
