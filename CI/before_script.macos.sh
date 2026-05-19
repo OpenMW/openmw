@@ -4,7 +4,7 @@ VERBOSE=""
 USE_CCACHE=""
 KEEP=""
 USE_WERROR=""
-DEPENDENCIES_ROOT_PATH="./deps/openmw-deps"
+DEPENDENCIES_ROOT_PATH="/tmp/openmw-deps"
 
 while getopts VCkEd: ARG
 do
@@ -32,7 +32,7 @@ Options:
 	-C
 		Use ccache.
         -d <dir>
-                This folder points to the openmw-deps (e.g. ./deps/openmw-deps).
+                This folder points to the openmw-deps (e.g. /tmp/openmw-deps).
 	-k
 		Keep the old build directory, default is to delete it.
 	-V

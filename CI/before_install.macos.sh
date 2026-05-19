@@ -1,26 +1,6 @@
 #!/bin/bash -e
 
-DEPS_DIR="./deps"
-
-while getopts d: flag
-do
-    case $flag in
-        d )
-            DEPS_DIR="$OPTARG"
-            ;;
-        *)
-            cat <<EOF
-Usage: $0 [-dh]
-Options:
-    -d <dir>
-        Use this folder as the directory to download deps into.
-EOF
-              exit 1
-              ;;
-    esac
-done
-
-mkdir -p $DEPS_DIR
+DEPS_DIR="/tmp"
 
 source ./CI/macos/deps_versions.sh
 
