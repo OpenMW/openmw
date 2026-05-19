@@ -553,8 +553,17 @@ if (APPLE)
 
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 else (APPLE)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+    # Technically, CMake defaults to appending $<CONFIG> if no generator expressions are used, but we use this as the installation source, too.
+    # It's better to set it definitively in one canonical place and reference that value elsewhere.
+    get_generator_is_multi_config(multi_config)
+    if (multi_config)
+        SET(RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}/$<CONFIG>")
+    else ()
+        SET(RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+    endif ()
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}")
 endif (APPLE)
 
 # Other files
@@ -740,11 +749,6 @@ endif()
 
 if (WIN32)
     if (MSVC)
-        foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-            string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-            set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(SolutionDir)$(Configuration)" )
-            set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(ProjectDir)$(Configuration)" )
-        endforeach( OUTPUTCONFIG )
 
         if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
             set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
@@ -765,10 +769,6 @@ if (WIN32)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
         endif()
     endif(MSVC)
-
-    # TODO: At some point release builds should not use the console but rather write to a log file
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-    #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
 
 
@@ -933,52 +933,45 @@ if (APPLE)
 
     include(CPack)
 elseif(NOT APPLE)
-    get_generator_is_multi_config(multi_config)
-    if (multi_config)
-        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}/$<CONFIG>")
-    else ()
-        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}")
-    endif ()
-
     if(WIN32)
-        INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                              PATTERN ".cmake" EXCLUDE
-                                                                              PATTERN ".qt" EXCLUDE
-                                                                              PATTERN "_CPack_Packages" EXCLUDE
-                                                                              PATTERN "_deps" EXCLUDE
-                                                                              PATTERN "apps" EXCLUDE
-                                                                              PATTERN "bin" EXCLUDE
-                                                                              PATTERN "CMakeFiles" EXCLUDE
-                                                                              PATTERN "components" EXCLUDE
-                                                                              PATTERN "deps" EXCLUDE
-                                                                              PATTERN "docs" EXCLUDE
-                                                                              PATTERN "extern" EXCLUDE
-                                                                              PATTERN "files" EXCLUDE
-                                                                              PATTERN "lib" EXCLUDE
-                                                                              PATTERN "SymStore" EXCLUDE
-                                                                              PATTERN "symstore-venv" EXCLUDE
-                                                                              PATTERN "Testing" EXCLUDE
-                                                                              PATTERN "tests_output" EXCLUDE
-                                                                              PATTERN "try-compile")
-        INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
-                                                                                                                  PATTERN ".cmake" EXCLUDE
-                                                                                                                  PATTERN ".qt" EXCLUDE
-                                                                                                                  PATTERN "_CPack_Packages" EXCLUDE
-                                                                                                                  PATTERN "_deps" EXCLUDE
-                                                                                                                  PATTERN "apps" EXCLUDE
-                                                                                                                  PATTERN "bin" EXCLUDE
-                                                                                                                  PATTERN "CMakeFiles" EXCLUDE
-                                                                                                                  PATTERN "components" EXCLUDE
-                                                                                                                  PATTERN "deps" EXCLUDE
-                                                                                                                  PATTERN "docs" EXCLUDE
-                                                                                                                  PATTERN "extern" EXCLUDE
-                                                                                                                  PATTERN "files" EXCLUDE
-                                                                                                                  PATTERN "lib" EXCLUDE
-                                                                                                                  PATTERN "SymStore" EXCLUDE
-                                                                                                                  PATTERN "symstore-venv" EXCLUDE
-                                                                                                                  PATTERN "Testing" EXCLUDE
-                                                                                                                  PATTERN "tests_output" EXCLUDE
-                                                                                                                  PATTERN "try-compile")
+        INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
+                                                                                        PATTERN ".cmake" EXCLUDE
+                                                                                        PATTERN ".qt" EXCLUDE
+                                                                                        PATTERN "_CPack_Packages" EXCLUDE
+                                                                                        PATTERN "_deps" EXCLUDE
+                                                                                        PATTERN "apps" EXCLUDE
+                                                                                        PATTERN "bin" EXCLUDE
+                                                                                        PATTERN "CMakeFiles" EXCLUDE
+                                                                                        PATTERN "components" EXCLUDE
+                                                                                        PATTERN "deps" EXCLUDE
+                                                                                        PATTERN "docs" EXCLUDE
+                                                                                        PATTERN "extern" EXCLUDE
+                                                                                        PATTERN "files" EXCLUDE
+                                                                                        PATTERN "lib" EXCLUDE
+                                                                                        PATTERN "SymStore" EXCLUDE
+                                                                                        PATTERN "symstore-venv" EXCLUDE
+                                                                                        PATTERN "Testing" EXCLUDE
+                                                                                        PATTERN "tests_output" EXCLUDE
+                                                                                        PATTERN "try-compile")
+        INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
+                                                                                                                            PATTERN ".cmake" EXCLUDE
+                                                                                                                            PATTERN ".qt" EXCLUDE
+                                                                                                                            PATTERN "_CPack_Packages" EXCLUDE
+                                                                                                                            PATTERN "_deps" EXCLUDE
+                                                                                                                            PATTERN "apps" EXCLUDE
+                                                                                                                            PATTERN "bin" EXCLUDE
+                                                                                                                            PATTERN "CMakeFiles" EXCLUDE
+                                                                                                                            PATTERN "components" EXCLUDE
+                                                                                                                            PATTERN "deps" EXCLUDE
+                                                                                                                            PATTERN "docs" EXCLUDE
+                                                                                                                            PATTERN "extern" EXCLUDE
+                                                                                                                            PATTERN "files" EXCLUDE
+                                                                                                                            PATTERN "lib" EXCLUDE
+                                                                                                                            PATTERN "SymStore" EXCLUDE
+                                                                                                                            PATTERN "symstore-venv" EXCLUDE
+                                                                                                                            PATTERN "Testing" EXCLUDE
+                                                                                                                            PATTERN "tests_output" EXCLUDE
+                                                                                                                            PATTERN "try-compile")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
@@ -1041,8 +1034,8 @@ elseif(NOT APPLE)
 
     endif(WIN32)
 
-    install(FILES "$<TARGET_FILE_DIR:openmw>/defaults.bin"
-                  "$<TARGET_FILE_DIR:openmw>/gamecontrollerdb.txt"
+    install(FILES "${RUNTIME_OUTPUT_DIRECTORY}/defaults.bin"
+                  "${RUNTIME_OUTPUT_DIRECTORY}/gamecontrollerdb.txt"
                   TYPE SYSCONF)
     
     if (OPENMW_LOCAL_INSTALL)
@@ -1052,7 +1045,7 @@ elseif(NOT APPLE)
         install(CODE "configure_file(\"${OpenMW_SOURCE_DIR}/files/openmw.cfg\" \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_SYSCONFDIR}/openmw.cfg\")")
     endif ()
 
-    install(DIRECTORY "$<TARGET_FILE_DIR:openmw>/resources" TYPE DATA)
+    install(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/resources" TYPE DATA)
 endif(APPLE)
 
 # what is necessary to build documentation
