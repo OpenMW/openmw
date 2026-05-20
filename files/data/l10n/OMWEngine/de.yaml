@@ -138,7 +138,7 @@ LightingResetToDefaults: "Einstellungen wirklich zurücksetzen? Das Ändern der 
 Lights: "Beleuchtung"
 LightRadiusMultiplier: "Multiplikator für Begrenzungssphäre"
 LightRadiusMultiplierValue: "Multiplikator für Begrenzungssphäre ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "Standard: 1,65\nMultiplikator für Größe der Begrenzungssphäre."
+LightRadiusMultiplierTooltip: "Standard: 1,75\nMultiplikator für Größe der Begrenzungssphäre."
 LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierValue: "Multiplikator für Startwert der Lichtabblendung ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
@@ -159,7 +159,7 @@ MatchSunlightToSunTooltip: |-
     Diese Option passt die Position der Sonnenlichtquelle an die sichtbare Position der Sonne an.
 MaxLights: "Max. Lichter"
 MaxLightsValue: "Max. Lichter ({value, number, :: group-off})"
-MaxLightsTooltip: "Standard: 8\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
+MaxLightsTooltip: "Standard: 16\nMaximale Anzahl von Lichtquellen, die ein Objekt beleuchten können.\n\nKleine Werte können gerade an Orten mit vielen Lichtquellen zum Aufploppen und zum schnellen Wechsel von Lichtern führen, wie es aus der Original-Engine und anderen The-Elder-Scrolls-Titeln bekannt ist."
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"
 MenuTransparency: "Menü-Transparenz"
 MouseAndKeyboard: "Maus/Tastatur"

@@ -138,7 +138,7 @@ LightingResetToDefaults: "Przywrócić domyślne wartości? Zmiany w metodzie o�
 Lights: "Światła"
 LightRadiusMultiplier: "Mnożnik sfery ograniczającej"
 LightRadiusMultiplierValue: "Mnożnik sfery ograniczającej ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "Domyślnie: 1.65\nMnożnik sfery ograniczającej światła."
+LightRadiusMultiplierTooltip: "Domyślnie: 1.75\nMnożnik sfery ograniczającej światła."
 LightsFadeStartMultiplier: "Mnożnik początku zanikania"
 LightsFadeStartMultiplierValue: "Mnożnik początku zanikania ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasięgu, w którym światła zaczną zanikać.\n\nNiska wartość = wolniejsze przejścia.\nWysoka wartość = szybsze przejścia."
@@ -159,7 +159,7 @@ MatchSunlightToSunTooltip: |-
     Ta opcja sprawia, że źródło światła słonecznego zgadza się z faktyczną pozycją słońca.
 MaxLights: "Maksymalna liczba świateł"
 MaxLightsValue: "Maksymalna liczba świateł ({value, number, :: group-off})"
-MaxLightsTooltip: "Domyślnie: 8\nMaksymalna liczba świateł na obiekt.\n\nNiska wartość = efekt 'wyskakiwania' świateł, jak w Morrowind."
+MaxLightsTooltip: "Domyślnie: 16\nMaksymalna liczba świateł na obiekt.\n\nNiska wartość = efekt 'wyskakiwania' świateł, jak w Morrowind."
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"
 MouseAndKeyboard: "Mysz i klawiatura"

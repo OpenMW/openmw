@@ -114,10 +114,10 @@ Shaders Settings
    :title: light radius multiplier
    :type: float32
    :range: 1.0-100.0
-   :default: 1.65
+   :default: 1.75
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
-   Multiplier for point light radius.
+   Multiplier for point light radius. Larger values will increase the range of lights.
 
 .. omw-setting::
    :title: classic falloff
@@ -161,7 +161,7 @@ Shaders Settings
    :title: max lights
    :type: int
    :range: 2-64
-   :default: 8
+   :default: 16
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
    Maximum lights affecting each object.
