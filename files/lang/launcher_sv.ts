@@ -707,7 +707,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stops combat with NPCs affected by Calm spells every frame -- like in Morrowind without the MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Avbryter strid med icke-spelbara figurer påverkade av &quot;Calm&quot;-besvjärjelser varje bildruta – såsom i Morrowind utan MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Avbryter strid med bifigurer påverkade av &quot;Calm&quot;-besvjärjelser varje bildruta – såsom i Morrowind utan MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make the value of filled soul gems dependent only on soul magnitude.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -719,15 +719,15 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör det möjligt att stjäla föremål från icke-spelbara figurer som är avsvimmade.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör det möjligt att stjäla föremål från bifigurer som är avsvimmade.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;When enabled, a navigation mesh is built in the background for world geometry to be used for pathfinding. When disabled only the path grid is used to build paths. Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn&apos;t know where to go when you stand behind that stone and cast a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Om aktiv kommer en en navigeringsmesh av världsgeometrin byggas i bakgrunden som används för pathfinding. Om inaktiv kommer endast pathgrid användas för att bygga vägar. Enkelkärnade processorer kan få kraftigt försämrad prestanda. Kan påverka prestandan på flerkärniga processorer något. Flerkärniga processorer kan ha olika fördröjning för att uppdatera navigeringsmesh. Förflyttning mellan externa världar och att gå in eller ut ur en plats producerar en uppdatering av navigeringsmesh. Icke-spelbara figurer kan inte hitta vägar innan navigeringsmesh har skapats runt om dem. Testa att inaktivera denna funktion om du vill ha en mer gammaldags AI som inte vet var den ska gå när du står bakom den där stenen och skjuter ett eldklot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Om aktiv kommer en en navigeringsmesh av världsgeometrin byggas i bakgrunden som används för pathfinding. Om inaktiv kommer endast pathgrid användas för att bygga vägar. Enkelkärnade processorer kan få kraftigt försämrad prestanda. Kan påverka prestandan på flerkärniga processorer något. Flerkärniga processorer kan ha olika fördröjning för att uppdatera navigeringsmesh. Förflyttning mellan externa världar och att gå in eller ut ur en plats producerar en uppdatering av navigeringsmesh. bifigurer kan inte hitta vägar innan navigeringsmesh har skapats runt om dem. Testa att inaktivera denna funktion om du vill ha en mer gammaldags AI som inte vet var den ska gå när du står bakom den där stenen och skjuter ett eldklot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om aktiverat kommer icke-spelbara figurer göra undanmanövrar för att undvika kollisioner med andra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om aktiverat kommer bifigurer göra undanmanövrar för att undvika kollisioner med andra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Don&apos;t use race weight in NPC movement speed calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -763,7 +763,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör spelarens och icke-spelbara figurers rörelser mjukare. Rekommenderas att användas tillsammans med &quot;vänd mot rörelseriktningen&quot; aktiverad.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör spelarens och bifigurers rörelser mjukare. Rekommenderas att användas tillsammans med &quot;vänd mot rörelseriktningen&quot; aktiverad.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -771,7 +771,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character&apos;s body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Påverkar sido- och diagonalförflyttningar. Förflyttningar blir mer realistiska om aktiv.&lt;/p&gt;&lt;p&gt;Om aktiv kommer spelarrollfiguren vända underkroppen i rikting mot förflyttningen. Överkroppen vänds delvis. Huvudet pekar alltid dit kameran ser. I stidsläge fungerar det bara för diagonal förflyttning. Utanför strid ändrar inställningen förflyttningar rakt höger och vänster också. Inställningen vänder också hela kroppen upp eller ner vid simning enligt förflyttningsriktningen.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Påverkar sido- och diagonalförflyttningar. Förflyttningar blir mer realistiska om aktiv.&lt;/p&gt;&lt;p&gt;Om inaktiv kommer rollpersonen vända underkroppen i rikting mot förflyttningen. Överkroppen vänds delvis. Huvudet pekar alltid dit kameran ser. I stidsläge fungerar det bara för diagonal förflyttning. Utanför strid ändrar inställningen förflyttningar rakt höger och vänster också. Inställningen vänder också hela kroppen upp eller ner vid simning enligt förflyttningsriktningen.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered weapons (with quivers and scabbards), requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -945,7 +945,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till den icke-spelbara figur du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till bifiguren du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
@@ -1057,7 +1057,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktiverar skuggor för icke-spelbara figurer och varelser bortsett från spelarrollfiguren. Kan ha en liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktiverar skuggor för bifigurer och varelser bortsett från spelarrollpersonen. Kan ha en liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>512</source>
@@ -1081,7 +1081,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor exklusivt för spelarrollfiguren. Kan ha en mycket liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor exklusivt för spelarrollpersonen. Kan ha en mycket liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1141,7 +1141,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
-        <translation>Använd kameran som ljudlyssnare istället för spelarrollfiguren i tredjepersonsperspektivet.</translation>
+        <translation>Använd kameran som ljudlyssnare istället för spelarrollpersonen i tredjepersonsperspektivet.</translation>
     </message>
     <message>
         <source>Permanent Barter Disposition Changes</source>
@@ -1153,7 +1153,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>NPCs Avoid Collisions</source>
-        <translation>Icke-spelbara figurer undviker kollisioner</translation>
+        <translation>bifigurer undviker kollisioner</translation>
     </message>
     <message>
         <source>Soulgem Values Rebalance</source>
@@ -1328,7 +1328,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>Enable Actor Shadows</source>
-        <translation>Aktivera rollfigurskuggor</translation>
+        <translation>Aktivera rollpersonskuggor</translation>
     </message>
     <message>
         <source>Fade Start Multiplier</source>
@@ -1456,7 +1456,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>Steal from Knocked out Actors in Combat</source>
-        <translation>Stjäl från avsvimmade rollfigurer i strid</translation>
+        <translation>Stjäl från avsvimmade figurer i strid</translation>
     </message>
     <message>
         <source>Factor Strength into Hand-to-Hand Combat</source>
@@ -1464,7 +1464,7 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning styr om basegenskapen Strength (styrka) ska räknas in i skador från obeväpnade attacker: skadan multipliceras med värdet på Strength dividerat med 40.&lt;/p&gt;&lt;p&gt;Kan tillämpas på alla rollfigurer eller endast för rollfigurer som inte är varulvar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning styr om basegenskapen Strength (styrka) ska räknas in i skador från obeväpnade attacker: skadan multipliceras med värdet på Strength dividerat med 40.&lt;/p&gt;&lt;p&gt;Kan tillämpas på alla rollpersoner eller endast för rollpersoner som inte är varulvar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Turn to Movement Direction</source>
@@ -1488,11 +1488,11 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation>Hoppa över meny och generera förinställd rollfigur</translation>
+        <translation>Hoppa över meny och generera förinställd rollperson</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation>Starta förinställd rollfigur vid</translation>
+        <translation>Starta förinställd rollperson vid</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
