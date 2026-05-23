@@ -241,7 +241,8 @@ namespace MWBase
 
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) = 0;
+        virtual std::span<const uint8_t> getRegionWeatherChances(const ESM::RefId& regionid) const = 0;
 
         virtual void changeToInteriorCell(
             std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
