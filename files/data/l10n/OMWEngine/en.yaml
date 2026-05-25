@@ -138,7 +138,7 @@ LightingResetToDefaults: "Resets to default values, would you like to continue? 
 Lights: "Lights"
 LightRadiusMultiplier: "Radius Multiplier"
 LightRadiusMultiplierValue: "Radius Multiplier ({value, number, ::.00})"
-LightRadiusMultiplierTooltip: "Default: 1.75\nMultiplier for radius sphere of lights."
+LightRadiusMultiplierTooltip: "Default: 1.75\nMultiplier for point light radius. Larger values will increase the range of lights."
 LightsFadeStartMultiplier: "Fade Start Multiplier"
 LightsFadeStartMultiplierValue: "Fade Start Multiplier ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value for quicker transitions."
