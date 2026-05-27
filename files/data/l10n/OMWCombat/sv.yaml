@@ -11,6 +11,6 @@ redistributeShieldHitsWhenNotWearingShield: "Omfördela sköldträffar när skö
 redistributeShieldHitsWhenNotWearingShieldDescription: |
     Motsvarar ”Shield hit location fix” från Morrowind Code Patch. Omfördelar träffar på sköldens rustningsplats till vänster axelstycke (pauldron) eller kyrass (cuirass) när du inte bär en sköld.
 
-spawnBloodEffectsOnPlayer: "Skapa blodeffekter på spelarfiguren"
+spawnBloodEffectsOnPlayer: "Skapa blodeffekter på rollpersonen"
 spawnBloodEffectsOnPlayerDescription: |
-    Om blodeffekter är aktiverade visas de på spelarfiguren när denne träffas i strid, precis som på alla andra rollfigurer.
+    Om blodeffekter är aktiverade visas de på rollpersonen när denne träffas i strid, precis som på alla andra bifigurer.
