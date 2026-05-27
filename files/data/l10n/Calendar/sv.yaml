@@ -45,6 +45,7 @@ weekday7: "lördag"
 
 # In Swedish, as with German, we don't use AM/PM but instead a 24h clock.
 # But instead of that, we could use "förmiddag" and "eftermiddag", which is basically "morning" and "afternoon"
+# To make it shorter, we spell it as "f.m." and "e.m."
 am: "f.m."
 pm: "e.m."
 day: "Dag"

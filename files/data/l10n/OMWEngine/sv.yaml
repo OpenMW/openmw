@@ -59,7 +59,7 @@ MissingContentFilesListCopy: |-
     other{\n\nKlicka på kopiera för att placera deras namn i urklipp.}
   } 
 OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
-SelectCharacter: "Välj spelfigur..."
+SelectCharacter: "Välj rollperson..."
 
 
 # Settings menu
@@ -179,7 +179,7 @@ RainRippleDetailSimple: "Förenklat"
 RainRippleDetailSparse: "Glest"
 RebindAction: "Tryck på en tangent eller knapp för att koppla om denna funktion."
 ReflectionShaderDetail: "Reflektionsshader, detaljnivå"
-ReflectionShaderDetailActors: "spelfigurer"
+ReflectionShaderDetailActors: "Figurer"
 ReflectionShaderDetailGroundcover: "Marktäckare"
 ReflectionShaderDetailObjects: "Objekt"
 ReflectionShaderDetailSky: "Himmel"
@@ -233,6 +233,6 @@ EnchantType: "Typ av förtrollning"
 InventorySelect: "Placera"
 JournalQuests: "Uppdrag"
 JournalShowAll: "Visa Alla"
-LoadingSelectCharacter: "Välj spelfigur"
+LoadingSelectCharacter: "Välj rollperson"
 RechargeSelect: "Ladda"
 RepairTool: "Verktyg"
