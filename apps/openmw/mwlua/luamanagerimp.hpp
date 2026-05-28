@@ -109,6 +109,7 @@ namespace MWLua
         void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
         void uiModeChanged(const MWWorld::Ptr& arg) override;
+        void viewportResized(int width, int height) override;
         void actorDied(const MWWorld::Ptr& actor) override;
         void onDialogueResponse(
             const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record) override;

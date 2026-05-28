@@ -1357,6 +1357,8 @@ namespace MWGui
         // Re-apply any controller-specific window changes.
         reapplyActiveControllerWindow();
 
+        MWBase::Environment::get().getLuaManager()->viewportResized(x, y);
+
         // TODO: check if any windows are now off-screen and move them back if so
     }
 
