@@ -96,10 +96,9 @@ namespace LuaUi
             // Keeping a constant total here ensures widgets that use grow don't use the
             // changing 'primaryAxisSizeRemaining' (which shrinks as we take off grown amounts).
             const int totalPrimaryAxisSizeRemaining = primaryAxisSizeRemaining;
-            const int trackPrimarySizeAfterGrow = primaryAxisSize
-                + (totalPrimaryGrow > 0 ? totalPrimaryAxisSizeRemaining : 0);
-            const int primaryAxisChildrenShift
-                = alignSize(primary(flexSize), trackPrimarySizeAfterGrow, mAlign);
+            const int trackPrimarySizeAfterGrow
+                = primaryAxisSize + (totalPrimaryGrow > 0 ? totalPrimaryAxisSizeRemaining : 0);
+            const int primaryAxisChildrenShift = alignSize(primary(flexSize), trackPrimarySizeAfterGrow, mAlign);
             int currentPrimaryAxisPosition = primaryAxisChildrenShift;
 
             for (size_t j = trackStart; j < widgetIndex; ++j)
@@ -123,14 +122,14 @@ namespace LuaUi
 
                 const int stretchTargetSecondary = mWrap ? secondaryAxisSize : secondary(flexSize);
                 secondary(widgetSize) = std::max(secondary(widgetSize),
-                    std::clamp(static_cast<int>(std::round(stretch * stretchTargetSecondary)), 0,
-                        stretchTargetSecondary));
+                    std::clamp(
+                        static_cast<int>(std::round(stretch * stretchTargetSecondary)), 0, stretchTargetSecondary));
 
                 primary(widgetPosition) = currentPrimaryAxisPosition;
                 currentPrimaryAxisPosition += primary(widgetSize) + mGap;
                 const int arrangeTargetSecondary = mWrap ? secondaryAxisSize : secondary(flexSize);
-                secondary(widgetPosition) = currentSecondaryAxisPosition
-                    + alignSize(arrangeTargetSecondary, secondary(widgetSize), mArrange);
+                secondary(widgetPosition)
+                    = currentSecondaryAxisPosition + alignSize(arrangeTargetSecondary, secondary(widgetSize), mArrange);
 
                 w->forceSize(widgetSize);
                 w->forcePosition(widgetPosition);
