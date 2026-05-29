@@ -128,8 +128,9 @@ namespace LuaUi
 
                 primary(widgetPosition) = currentPrimaryAxisPosition;
                 currentPrimaryAxisPosition += primary(widgetSize) + mGap;
-                secondary(widgetPosition)
-                    = currentSecondaryAxisPosition + alignSize(secondaryAxisSize, secondary(widgetSize), mArrange);
+                const int arrangeTargetSecondary = mWrap ? secondaryAxisSize : secondary(flexSize);
+                secondary(widgetPosition) = currentSecondaryAxisPosition
+                    + alignSize(arrangeTargetSecondary, secondary(widgetSize), mArrange);
 
                 w->forceSize(widgetSize);
                 w->forcePosition(widgetPosition);
