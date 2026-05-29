@@ -38,9 +38,28 @@ namespace LuaUi
     void LuaFlex::updateChildren()
     {
         const auto& flexChildren = children();
-        MyGUI::IntSize flexSize = calculateSize();
 
         MyGUI::IntSize childrenSize;
+        if (mAutoSized)
+        {
+            int measuredPrimary = 0;
+            int measuredSecondary = 0;
+            bool isFirst = true;
+            for (auto* w : flexChildren)
+            {
+                w->clearForced();
+                const MyGUI::IntSize size = w->calculateSize();
+                measuredPrimary += primary(size) + (isFirst ? 0 : mGap);
+                measuredSecondary = std::max(measuredSecondary, secondary(size));
+                isFirst = false;
+            }
+            primary(childrenSize) = measuredPrimary;
+            secondary(childrenSize) = measuredSecondary;
+            mChildrenSize = childrenSize;
+        }
+
+        MyGUI::IntSize flexSize = calculateSize();
+
         int currentSecondaryAxisPosition = 0;
         size_t widgetIndex = 0;
 
@@ -48,7 +67,7 @@ namespace LuaUi
         {
             const size_t trackStart = widgetIndex;
             int primaryAxisSize = 0;
-            int primaryAxisSizeRemaining = mAutoSized ? 0 : primary(flexSize);
+            int primaryAxisSizeRemaining = primary(flexSize);
             int secondaryAxisSize = 0;
             float totalPrimaryGrow = 0;
 
@@ -67,19 +86,12 @@ namespace LuaUi
                     break;
 
                 primaryAxisSize += primaryToAdd;
-                if (!mAutoSized)
-                    primaryAxisSizeRemaining -= primaryToAdd;
+                primaryAxisSizeRemaining -= primaryToAdd;
                 secondaryAxisSize = std::max(childSecondary, secondaryAxisSize);
                 totalPrimaryGrow += getGrow(w);
                 widgetIndex++;
             }
             primaryAxisSizeRemaining = std::max(0, primaryAxisSizeRemaining);
-
-            if (mAutoSized)
-            {
-                primary(childrenSize) = std::max(primaryAxisSize, primary(childrenSize));
-                secondary(childrenSize) += secondaryAxisSize;
-            }
 
             const int primaryAxisChildrenShift
                 = alignSize(primaryAxisSize, primaryAxisSize - primaryAxisSizeRemaining, mAlign);
@@ -108,8 +120,10 @@ namespace LuaUi
                     primaryAxisSizeRemaining -= pixelsToExpandBy;
                 }
 
+                const int stretchTargetSecondary = mWrap ? secondaryAxisSize : secondary(flexSize);
                 secondary(widgetSize) = std::max(secondary(widgetSize),
-                    std::clamp(static_cast<int>(std::round(stretch * secondaryAxisSize)), 0, secondaryAxisSize));
+                    std::clamp(static_cast<int>(std::round(stretch * stretchTargetSecondary)), 0,
+                        stretchTargetSecondary));
 
                 primary(widgetPosition) = currentPrimaryAxisPosition;
                 currentPrimaryAxisPosition += primary(widgetSize) + mGap;
