@@ -93,13 +93,14 @@ namespace LuaUi
             }
             primaryAxisSizeRemaining = std::max(0, primaryAxisSizeRemaining);
 
-            const int primaryAxisChildrenShift
-                = alignSize(primaryAxisSize, primaryAxisSize - primaryAxisSizeRemaining, mAlign);
-            int currentPrimaryAxisPosition = primaryAxisChildrenShift;
-
             // Keeping a constant total here ensures widgets that use grow don't use the
-            // changing 'primaryAxisSizeRemaining' (which shrinks as we take off grown amounts
+            // changing 'primaryAxisSizeRemaining' (which shrinks as we take off grown amounts).
             const int totalPrimaryAxisSizeRemaining = primaryAxisSizeRemaining;
+            const int trackPrimarySizeAfterGrow = primaryAxisSize
+                + (totalPrimaryGrow > 0 ? totalPrimaryAxisSizeRemaining : 0);
+            const int primaryAxisChildrenShift
+                = alignSize(primary(flexSize), trackPrimarySizeAfterGrow, mAlign);
+            int currentPrimaryAxisPosition = primaryAxisChildrenShift;
 
             for (size_t j = trackStart; j < widgetIndex; ++j)
             {
