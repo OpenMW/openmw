@@ -1,4 +1,6 @@
-#!/bin/sh -ex
+#!/bin/bash -e
+
+DEPS_DIR="/tmp"
 
 source ./CI/macos/deps_versions.sh
 
@@ -18,14 +20,14 @@ else
     command -v qmake >/dev/null 2>&1 && qmake -v | grep -F "Using Qt version 6." >/dev/null || brew install qt@6
 fi
 
-curl "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/${VCPKG_FILE}-${VCPKG_TAG}-manifest.txt" -o openmw-manifest.txt
+curl "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/${VCPKG_FILE}-${VCPKG_TAG}-manifest.txt" -o $DEPS_DIR/openmw-manifest.txt
 
-{ read -r URL && read -r HASH FILE; } < openmw-manifest.txt
+{ read -r URL && read -r HASH FILE; } < $DEPS_DIR/openmw-manifest.txt
 
-curl -fSL -R -J $URL -o $FILE
+curl -fSL -R -J $URL -o $DEPS_DIR/$FILE
 echo "${HASH:?}  ${FILE:?}" | sha512sum
-7z x -y -o/tmp/openmw-deps-pre $FILE && \
-    mv /tmp/openmw-deps-pre/*/ /tmp/openmw-deps/ && \
-    rmdir /tmp/openmw-deps-pre
+7z x -y -o$DEPS_DIR/openmw-deps-pre $DEPS_DIR/$FILE && \
+    mv $DEPS_DIR/openmw-deps-pre/*/ $DEPS_DIR/openmw-deps/ && \
+    rmdir $DEPS_DIR/openmw-deps-pre
 
 command -v cmake >/dev/null 2>&1 || brew install cmake

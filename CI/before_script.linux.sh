@@ -2,11 +2,6 @@
 
 set -xeo pipefail
 
-free -m
-
-# Silence a git warning
-git config --global advice.detachedHead false
-
 # setup our basic cmake build options
 declare -a CMAKE_CONF_OPTS=(
     -DCMAKE_C_COMPILER="${CC:-/usr/bin/cc}"
