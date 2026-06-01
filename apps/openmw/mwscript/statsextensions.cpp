@@ -1267,9 +1267,9 @@ namespace MWScript
             ESM::RefId mNegativeEffect;
 
         public:
-            OpGetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
+            OpGetMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1284,7 +1284,9 @@ namespace MWScript
                 }
 
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
+                float currentValue = 0.f;
+                if (!mPositiveEffect.empty())
+                    currentValue += effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
@@ -1308,9 +1310,9 @@ namespace MWScript
             ESM::RefId mNegativeEffect;
 
         public:
-            OpSetMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
+            OpSetMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1325,7 +1327,9 @@ namespace MWScript
                     return;
 
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
+                float currentValue = 0.f;
+                if (!mPositiveEffect.empty())
+                    currentValue += effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (!mNegativeEffect.empty())
                     currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
@@ -1337,7 +1341,12 @@ namespace MWScript
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
                     currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
 
-                effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
+                arg -= static_cast<int>(currentValue);
+
+                if (!mPositiveEffect.empty())
+                    effects.modifyBase(mPositiveEffect, arg);
+                else
+                    effects.modifyBase(mNegativeEffect, -arg);
             }
         };
 
@@ -1348,9 +1357,9 @@ namespace MWScript
             ESM::RefId mNegativeEffect;
 
         public:
-            OpModMagicEffect(int positiveEffect, int negativeEffect)
-                : mPositiveEffect(ESM::MagicEffect::indexToRefId(positiveEffect))
-                , mNegativeEffect(ESM::MagicEffect::indexToRefId(negativeEffect))
+            OpModMagicEffect(ESM::RefId positiveEffect, ESM::RefId negativeEffect)
+                : mPositiveEffect(positiveEffect)
+                , mNegativeEffect(negativeEffect)
             {
             }
 
@@ -1365,7 +1374,10 @@ namespace MWScript
                     return;
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
+                if (!mPositiveEffect.empty())
+                    stats.getMagicEffects().modifyBase(mPositiveEffect, arg);
+                else
+                    stats.getMagicEffects().modifyBase(mNegativeEffect, -arg);
             }
         };
 
@@ -1587,7 +1599,7 @@ namespace MWScript
                 { ESM::MagicEffect::Jump, ESM::RefId() },
                 { ESM::MagicEffect::Levitate, ESM::RefId() },
                 { ESM::MagicEffect::Shield, ESM::RefId() },
-                { ESM::MagicEffect::Sound, ESM::RefId() },
+                { ESM::RefId(), ESM::MagicEffect::Sound },
                 { ESM::MagicEffect::Silence, ESM::RefId() },
                 { ESM::MagicEffect::Blind, ESM::RefId() },
                 { ESM::MagicEffect::Paralyze, ESM::RefId() },
@@ -1598,8 +1610,8 @@ namespace MWScript
 
             for (int i = 0; i < 24; ++i)
             {
-                int positive = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mPositiveEffect);
-                int negative = ESM::MagicEffect::refIdToIndex(sMagicEffects[i].mNegativeEffect);
+                const ESM::RefId& positive = sMagicEffects[i].mPositiveEffect;
+                const ESM::RefId& negative = sMagicEffects[i].mNegativeEffect;
 
                 interpreter.installSegment5<OpGetMagicEffect<ImplicitRef>>(
                     Compiler::Stats::opcodeGetMagicEffect + i, positive, negative);
