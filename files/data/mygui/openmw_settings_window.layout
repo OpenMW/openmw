@@ -736,7 +736,8 @@
                                 <Property key="Page" value="1000"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingMin" value="1.0"/>
-                                <UserString key="SettingMax" value="10.0"/>
+                                <!-- We limit the max in the UI as larger values can tank performance  -->
+                                <UserString key="SettingMax" value="5.0"/>
                                 <UserString key="SettingCategory" value="Shaders"/>
                                 <UserString key="SettingName" value="light radius multiplier"/>
                                 <UserString key="SettingValueType" value="Float"/>
