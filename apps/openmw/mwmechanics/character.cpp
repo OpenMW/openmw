@@ -1480,7 +1480,7 @@ namespace MWMechanics
                         }
                     }
 
-                    if (isWerewolf)
+                    if (isWerewolf && weaptype != ESM::Weapon::None)
                     {
                         const MWWorld::ESMStore& store = world->getStore();
                         const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfEquip", prng);
