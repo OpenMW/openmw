@@ -724,10 +724,10 @@
                             <!-- Bounding Sphere Multiplier -->
                             <Widget type="Widget" position="0 0 0 18" align="Top Left HStretch">
                                 <UserString key="HStretch" value="true"/>
-                                <Widget type="TextBox" skin="NormalText" position_real="0 0 1 1" align="Stretch" name="BoundingSphereMultText">
+                                <Widget type="TextBox" skin="NormalText" position_real="0 0 1 1" align="Stretch" name="LightRadiusMultText">
                                     <UserString key="ToolTipType" value="Layout"/>
                                     <UserString key="ToolTipLayout" value="TextToolTip"/>
-                                    <UserString key="Caption_Text" value="#{OMWEngine:LightsBoundingSphereMultiplierTooltip}"/>
+                                    <UserString key="Caption_Text" value="#{OMWEngine:LightsRadiusMultiplierTooltip}"/>
                                 </Widget>
                             </Widget>
                             <Widget type="ScrollBar" skin="MW_HScroll" position="0 0 0 18" align="HStretch Top">
@@ -735,13 +735,14 @@
                                 <Property key="Range" value="500000"/>
                                 <Property key="Page" value="1000"/>
                                 <UserString key="SettingType" value="Slider"/>
-                                <UserString key="SettingMin" value="0.0"/>
+                                <UserString key="SettingMin" value="1.0"/>
+                                <!-- We limit the max in the UI as larger values can tank performance  -->
                                 <UserString key="SettingMax" value="5.0"/>
                                 <UserString key="SettingCategory" value="Shaders"/>
-                                <UserString key="SettingName" value="light bounds multiplier"/>
+                                <UserString key="SettingName" value="light radius multiplier"/>
                                 <UserString key="SettingValueType" value="Float"/>
-                                <UserString key="SettingLabelWidget" value="BoundingSphereMultText"/>
-                                <UserString key="SettingLabelCaption" value="LightsBoundingSphereMultiplierValue"/>
+                                <UserString key="SettingLabelWidget" value="LightRadiusMultText"/>
+                                <UserString key="SettingLabelCaption" value="LightRadiusMultiplierValue"/>
                             </Widget>
 
                             <!-- Minimum Interior Brightness -->

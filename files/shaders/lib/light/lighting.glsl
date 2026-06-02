@@ -67,7 +67,7 @@ void doLighting(vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuse
 
         // cull point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
 #if !@classicFalloff
-        if (lightDistance > lcalcRadius(lightIndex) * 2.0)
+        if (lightDistance > lcalcRadius(lightIndex))
             continue;
 #endif
 

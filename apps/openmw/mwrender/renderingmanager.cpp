@@ -159,7 +159,7 @@ namespace MWRender
             .mMaxLights = Settings::shaders().mMaxLights,
             .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
             .mLightFadeStart = Settings::shaders().mLightFadeStart,
-            .mLightBoundsMultiplier = Settings::shaders().mLightBoundsMultiplier,
+            .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
         });
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setSupportedLightingMethods(sceneRoot->getSupportedLightingMethods());
@@ -1328,12 +1328,12 @@ namespace MWRender
                 mViewer->startThreading();
             }
             else if (it->first == "Shaders"
-                && (it->second == "light bounds multiplier" || it->second == "maximum light distance"
+                && (it->second == "light radius multiplier" || it->second == "maximum light distance"
                     || it->second == "light fade start" || it->second == "max lights"))
             {
                 auto* lightManager = getLightRoot();
 
-                lightManager->processChangedSettings(Settings::shaders().mLightBoundsMultiplier,
+                lightManager->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
                     Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
 
                 if (it->second == "max lights")
