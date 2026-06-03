@@ -50,8 +50,11 @@ namespace MWGui
         MyGUI::ComboBox* mWaterRainRippleDetail;
 
         MyGUI::ComboBox* mMaxLights;
-        MyGUI::ComboBox* mLightingMethodButton;
+        MyGUI::Button* mClusteredLightingButton;
+        MyGUI::Widget* mClassicFalloffWidget;
         MyGUI::Button* mLightsResetButton;
+        MyGUI::Widget* mMinimumBrightnessText;
+        MyGUI::Widget* mMinimumBrightnessScroll;
 
         MyGUI::ComboBox* mPrimaryLanguage;
         MyGUI::ComboBox* mSecondaryLanguage;
@@ -89,7 +92,6 @@ namespace MWGui
         void onWaterReflectionDetailChanged(MyGUI::ComboBox* sender, size_t pos);
         void onWaterRainRippleDetailChanged(MyGUI::ComboBox* sender, size_t pos);
 
-        void onLightingMethodButtonChanged(MyGUI::ComboBox* sender, size_t pos);
         void onLightsResetButtonClicked(MyGUI::Widget* sender);
         void onMaxLightsChanged(MyGUI::ComboBox* sender, size_t pos);
 

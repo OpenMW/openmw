@@ -158,7 +158,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
 
     auto shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
 
-    osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{});
+    osg::ref_ptr<SceneUtil::LightManager> lightManager
+        = new SceneUtil::LightManager(SceneUtil::LightSettings{}, mResourceSystem.get());
     auto lightDefines = lightManager->getLightDefines();
 
     for (const auto& define : shadowDefines)

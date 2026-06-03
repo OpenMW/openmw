@@ -5,8 +5,6 @@
 #include <osg/BlendFunc>
 #include <osg/Camera>
 #include <osg/Fog>
-#include <osg/LightModel>
-#include <osg/LightSource>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
@@ -226,14 +224,15 @@ namespace MWRender
         mRTTNode = new CharacterPreviewRTTNode(sizeX, sizeY);
         mRTTNode->setNodeMask(Mask_RenderToTexture);
 
-        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{
-            .mLightingMethod = mResourceSystem->getSceneManager()->getLightingMethod(),
-            .mMaxLights = Settings::shaders().mMaxLights,
-            .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
-            .mLightFadeStart = Settings::shaders().mLightFadeStart,
-            .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
-        });
-        lightManager->setStartLight(1);
+        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(
+            SceneUtil::LightSettings{
+                .mClusteredLighting = Settings::shaders().mClusteredLighting,
+                .mMaxLights = Settings::shaders().mMaxLights,
+                .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
+                .mLightFadeStart = Settings::shaders().mLightFadeStart,
+                .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
+            },
+            resourceSystem);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
         stateset->setDefine("FORCE_OPAQUE", "1", osg::StateAttribute::ON);
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
@@ -272,10 +271,6 @@ namespace MWRender
         dummyTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
         stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
 
-        osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
-        lightmodel->setAmbientIntensity(osg::Vec4(0.0, 0.0, 0.0, 1.0));
-        stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
-
         osg::ref_ptr<osg::Light> light = new osg::Light;
         float diffuseR = Fallback::Map::getFloat("Inventory_DirectionalDiffuseR");
         float diffuseG = Fallback::Map::getFloat("Inventory_DirectionalDiffuseG");
@@ -290,22 +285,12 @@ namespace MWRender
         float positionZ = std::cos(altitude);
         light->setPosition(osg::Vec4(positionX, positionY, positionZ, 0.0));
         light->setDiffuse(osg::Vec4(diffuseR, diffuseG, diffuseB, 1));
-        osg::Vec4 ambientRGBA = osg::Vec4(ambientR, ambientG, ambientB, 1);
-        lightmodel->setAmbientIntensity(ambientRGBA);
-        light->setAmbient(osg::Vec4(0, 0, 0, 1));
+        light->setAmbient(osg::Vec4(ambientR, ambientG, ambientB, 1));
         light->setSpecular(osg::Vec4(0, 0, 0, 0));
-        light->setLightNum(0);
         light->setConstantAttenuation(1.f);
         light->setLinearAttenuation(0.f);
         light->setQuadraticAttenuation(0.f);
         lightManager->setSunlight(light);
-
-        osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource;
-        lightSource->setLight(light);
-
-        lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON);
-
-        lightManager->addChild(lightSource);
 
         mRTTNode->addChild(lightManager);
 

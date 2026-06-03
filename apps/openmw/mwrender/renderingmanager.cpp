@@ -1,7 +1,6 @@
 #include "renderingmanager.hpp"
 
 #include <cstdlib>
-#include <limits>
 
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
@@ -154,19 +153,23 @@ namespace MWRender
 
         // Let LightManager choose which backend to use based on our hint.
         // Ultimately dependent on support for various OpenGL extensions.
-        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(SceneUtil::LightSettings{
-            .mLightingMethod = Settings::shaders().mLightingMethod,
-            .mMaxLights = Settings::shaders().mMaxLights,
-            .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
-            .mLightFadeStart = Settings::shaders().mLightFadeStart,
-            .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
-        });
-        resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
-        resourceSystem->getSceneManager()->setSupportedLightingMethods(sceneRoot->getSupportedLightingMethods());
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(
+            SceneUtil::LightSettings{
+                .mClusteredLighting = Settings::shaders().mClusteredLighting,
+                .mMaxLights = Settings::shaders().mMaxLights,
+                .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
+                .mLightFadeStart = Settings::shaders().mLightFadeStart,
+                .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
+            },
+            resourceSystem);
+
+        resourceSystem->getSceneManager()->setSupportsClusteredLighting(sceneRoot->isClusteredSupported());
+
+        // Sync clustered lighting setting so it's more intuitive when viewed in the in-game setting panel
+        Settings::shaders().mClusteredLighting.set(sceneRoot->getClusteredLighting());
 
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
-        sceneRoot->setStartLight(1);
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
 
@@ -201,6 +204,7 @@ namespace MWRender
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
+        globalDefines["particlePointLighting"] = Settings::shaders().mParticlePointLighting ? "1" : "0";
 
         for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
@@ -270,6 +274,7 @@ namespace MWRender
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
+        resourceSystem->getSceneManager()->setParticlePointLighting(Settings::shaders().mParticlePointLighting);
 
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
@@ -316,8 +321,6 @@ namespace MWRender
                 Shader::ShaderManager::Slot::SkyTexture);
             mPerViewUniformStateUpdater->enableSkyRTT(skyTextureUnit, mSky->getSkyRTT());
         }
-
-        source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING | osg::Camera::FAR_PLANE_CULLING;
 
@@ -462,7 +465,7 @@ namespace MWRender
     {
         bool isInterior = !cell.isExterior() && !cell.isQuasiExterior();
         bool needsAdjusting = false;
-        needsAdjusting = isInterior && !Settings::shaders().mClassicFalloff;
+        needsAdjusting = isInterior && (!Settings::shaders().mClassicFalloff || Settings::shaders().mClusteredLighting);
 
         osg::Vec4f ambient = SceneUtil::colourFromRGB(cell.getMood().mAmbiantColor);
 
@@ -1202,6 +1205,8 @@ namespace MWRender
         if (mNightEyeFactor > 0.f)
             color += osg::Vec4f(0.7f, 0.7f, 0.7f, 0.0f) * mNightEyeFactor;
 
+        mSunLight->setAmbient(color);
+
         mPostProcessor->getStateUpdater()->setAmbientColor(color);
         mStateUpdater->setAmbientColor(color);
     }
@@ -1329,22 +1334,28 @@ namespace MWRender
             }
             else if (it->first == "Shaders"
                 && (it->second == "light radius multiplier" || it->second == "maximum light distance"
-                    || it->second == "light fade start" || it->second == "max lights"))
+                    || it->second == "light fade start" || it->second == "max lights"
+                    || it->second == "clustered lighting" || it->second == "particle point lighting"))
             {
                 auto* lightManager = getLightRoot();
 
                 lightManager->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
                     Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
 
-                if (it->second == "max lights")
+                configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
+
+                if (it->second == "max lights" || it->second == "clustered lighting"
+                    || it->second == "particle point lighting")
                 {
                     mViewer->stopThreading();
 
                     lightManager->updateMaxLights(Settings::shaders().mMaxLights);
+                    lightManager->enableClustered(Settings::shaders().mClusteredLighting);
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                     for (const auto& [name, key] : lightManager->getLightDefines())
                         defines[name] = key;
+                    defines["particlePointLighting"] = Settings::shaders().mParticlePointLighting ? "1" : "0";
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
                     mStateUpdater->reset();

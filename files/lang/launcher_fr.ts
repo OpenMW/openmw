@@ -1099,10 +1099,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre des terrains. Elle peut avoir un impact faible sur les performances et la qualité des ombres.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Éclairage</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Infobulles</translation>
     </message>
@@ -1121,18 +1117,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored - like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;L&apos;effet réfléchi des sorts d&apos;absorption n&apos;est pas appliqué, comme dans le moteur original.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Définit la gestion des sources lumineuses :&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (mode de compatibilité)&quot; Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders&quot; offre tous les bénéfices apportés par &quot;Shaders (mode de compatibilité)&quot;, mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d&apos;augmenter le nombre de sources lumineuses par objet sans perte de performance.&quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Shaders (mode de compatibilité)</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
@@ -1349,10 +1333,6 @@ Les logs et préférences modifiées y seront sauvegardés.</translation>
     <message>
         <source>Enable Terrain Shadows</source>
         <translation>Ombre des terrains</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Méthode d&apos;illumination</translation>
     </message>
     <message>
         <source>Audio Device</source>

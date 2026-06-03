@@ -1,9 +1,5 @@
 #version 120
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
@@ -41,7 +37,7 @@ varying vec3 passNormal;
 
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
-#include "lib/light/lighting.glsl"
+#include "lib/light/clamp.glsl"
 #include "lib/view/depth.glsl"
 
 uniform float osg_SimulationTime;
@@ -172,9 +168,9 @@ void main(void)
 #else
     vec3 diffuseLight, ambientLight, specularLight;
     vec3 unusedShadowSpecular;
-    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, unusedShadowSpecular);
+    doLighting(clipToScreen(gl_Position), viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, unusedShadowSpecular);
     passLighting = diffuseLight + ambientLight;
-    clampLightingResult(passLighting);
+    clampLighting(passLighting);
 #endif
 
 #if (@shadows_enabled)

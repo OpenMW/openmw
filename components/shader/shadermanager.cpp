@@ -760,6 +760,8 @@ namespace Shader
             { "useOVR_multiview", "0" },
             { "distorionRTRatio", "0" },
             { "numViews", "1" },
+            { "particle", "0" },
+            { "particlePointLighting", "1" },
         };
     }
 }

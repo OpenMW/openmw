@@ -22,8 +22,6 @@
 #include <osg/GraphicsContext>
 #include <osg/Group>
 #include <osg/Light>
-#include <osg/LightModel>
-#include <osg/LightSource>
 #include <osg/Material>
 #include <osg/Matrix>
 #include <osg/PrimitiveSet>
@@ -147,21 +145,16 @@ namespace CSVRender
 
         mView->getCamera()->setGraphicsContext(window);
 
-        osg::ref_ptr<SceneUtil::LightManager> lightMgr = new SceneUtil::LightManager(SceneUtil::LightSettings{});
-        lightMgr->setStartLight(1);
+        osg::ref_ptr<SceneUtil::LightManager> lightMgr
+            = new SceneUtil::LightManager(SceneUtil::LightSettings{}, resourceSystem.get());
         lightMgr->setLightingMask(Mask_Lighting);
 
-        osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
-        source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setAmbient(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setSpecular(osg::Vec4f(0, 0, 0, 0));
         mSunLight->setConstantAttenuation(1.f);
         lightMgr->setSunlight(mSunLight);
-
-        lightMgr->addChild(source);
 
         mRootNode = std::move(lightMgr);
 

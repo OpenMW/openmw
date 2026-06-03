@@ -1,7 +1,6 @@
 #include "stateupdater.hpp"
 
 #include <osg/Fog>
-#include <osg/LightModel>
 #include <osg/PolygonMode>
 
 #include "depth.hpp"
@@ -127,8 +126,6 @@ namespace SceneUtil
 
     void StateUpdater::setDefaults(osg::StateSet* stateset)
     {
-        osg::LightModel* lightModel = new osg::LightModel;
-        stateset->setAttribute(lightModel, osg::StateAttribute::ON);
         osg::Fog* fog = new osg::Fog;
         fog->setMode(osg::Fog::LINEAR);
         stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
@@ -144,9 +141,7 @@ namespace SceneUtil
 
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
     {
-        osg::LightModel* lightModel
-            = static_cast<osg::LightModel*>(stateset->getAttribute(osg::StateAttribute::LIGHTMODEL));
-        lightModel->setAmbientIntensity(mAmbientColor);
+        configureSunAmbientOverride(mAmbientColor, stateset);
         osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
         fog->setColor(mFogColor);
         fog->setStart(mFogStart);

@@ -330,18 +330,6 @@ bool Launcher::SettingsPage::loadSettings()
         }
 
         connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
-
-        int lightingMethod = 0;
-        switch (Settings::shaders().mLightingMethod)
-        {
-            case SceneUtil::LightingMethod::PerObjectUniform:
-                lightingMethod = 0;
-                break;
-            case SceneUtil::LightingMethod::SingleUBO:
-                lightingMethod = 1;
-                break;
-        }
-        lightingMethodComboBox->setCurrentIndex(lightingMethod);
     }
 
     // Audio
@@ -583,12 +571,6 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*exponentialFogCheckBox, Settings::fog().mExponentialFog);
         saveSettingBool(*skyBlendingCheckBox, Settings::fog().mSkyBlending);
         Settings::fog().mSkyBlendingStart.set(skyBlendingStartComboBox->value());
-
-        static constexpr std::array<SceneUtil::LightingMethod, 2> lightingMethodMap = {
-            SceneUtil::LightingMethod::PerObjectUniform,
-            SceneUtil::LightingMethod::SingleUBO,
-        };
-        Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
 
         const int cShadowDist
             = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;

@@ -1,10 +1,6 @@
 #version 120
 #pragma import_defines(FORCE_OPAQUE)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
