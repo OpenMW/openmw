@@ -94,6 +94,7 @@ Programmers
     Florian Weber (Florianjw)
     Frédéric Chardon (fr3dz10)
     Gaëtan Dezeiraud (Brouilles)
+    Garet Cole Green (nox7)
     Gašper Sedej
     Gijsbert ter Horst (Ghostbird)
     Gohan1989
