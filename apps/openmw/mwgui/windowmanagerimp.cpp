@@ -2095,6 +2095,9 @@ namespace MWGui
 
         mVideoBackground->setVisible(true);
 
+        if (mInputBlocker)
+            mInputBlocker->setVisible(false);
+
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
