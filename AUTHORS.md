@@ -48,8 +48,10 @@ Programmers
     Austin Salgat (Salgat)
     Ben Shealy (bentsherman)
     Berulacks
+    bmdhacks
     Bo Svensson
     Britt Mathis (galdor557)
+    Calandiel
     Carl Maxwell
     cc9cii
     Cédric Mocquillon
@@ -102,6 +104,7 @@ Programmers
     guidoj
     Hailey Tribble (daisyhasacat)
     Haoda Wang (h313)
+    Hemaris
     holorat
     hristoast
     Internecine
@@ -232,6 +235,7 @@ Programmers
     svaante
     Sylvain Thesnieres (Garvek)
     t6
+    Telvanni4Life
     terrorfisch
     Tess (tescoShoppah)
     thegriglat
