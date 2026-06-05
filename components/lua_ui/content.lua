@@ -32,11 +32,7 @@ local function getIndexFromKey(self, key)
     local index = key
     if type(key) == 'string' then
         index = self.__nameIndex[key]
-        if not index then
-            error('Unexpected content key:' .. key)
-        end
     end
-    validateIndex(self, index)
     return index
 end
 
