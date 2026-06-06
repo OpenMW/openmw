@@ -28,6 +28,8 @@ namespace LuaUi
         MyGUI::IntSize mChildrenSize;
         Alignment mAlign;
         Alignment mArrange;
+        int mGap;
+        bool mWrap;
 
         template <typename T>
         T& primary(MyGUI::types::TPoint<T>& point) const
