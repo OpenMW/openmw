@@ -7,6 +7,7 @@
 #include <osg/BlendFunc>
 #include <osg/LightModel>
 #include <osg/Material>
+#include <osg/Matrix>
 #include <osg/MatrixTransform>
 #include <osg/Switch>
 
@@ -1704,7 +1705,7 @@ namespace MWRender
     }
 
     void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
-        std::string_view texture, bool useAmbientLight)
+        std::string_view texture, bool useAmbientLight, bool autoTransform, const std::optional<osg::Matrix>& transform)
     {
         if (!mObjectRoot.get())
             return;
@@ -1737,12 +1738,15 @@ namespace MWRender
         }
 
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans = new SceneUtil::PositionAttitudeTransform;
-        if (!mPtr.getClass().isNpc())
+
+        osg::Matrix finalTransform;
+
+        if (!mPtr.getClass().isNpc() && autoTransform)
         {
             osg::Vec3f bounds(MWBase::Environment::get().getWorld()->getHalfExtents(mPtr) * 2.f);
             float scale = std::max({ bounds.x(), bounds.y(), bounds.z() / 2.f }) / 64.f;
             if (scale > 1.f)
-                trans->setScale(osg::Vec3f(scale, scale, scale));
+                finalTransform = osg::Matrix::scale(scale, scale, scale);
             float offset = 0.f;
             if (bounds.z() < 128.f)
                 offset = bounds.z() - 128.f;
@@ -1750,8 +1754,19 @@ namespace MWRender
                 offset = 128.f - bounds.z();
             if (MWBase::Environment::get().getWorld()->isFlying(mPtr))
                 offset /= 20.f;
-            trans->setPosition(osg::Vec3f(0.f, 0.f, offset * scale));
+
+            finalTransform.setTrans(osg::Vec3f(0.f, 0.f, offset * scale));
         }
+
+        if (transform)
+        {
+            finalTransform *= (*transform);
+        }
+
+        trans->setScale(finalTransform.getScale());
+        trans->setAttitude(finalTransform.getRotate());
+        trans->setPosition(finalTransform.getTrans());
+
         parentNode->addChild(trans);
 
         osg::ref_ptr<osg::Node> node
