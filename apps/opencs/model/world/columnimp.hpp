@@ -38,6 +38,16 @@ namespace CSMWorld
 
     std::string getStringId(ESM::RefId value);
 
+    inline QString toQString(const std::string& value)
+    {
+        return QString::fromStdString(value);
+    }
+
+    inline QString toQString(const ESM::Path& value)
+    {
+        return QString::fromStdString(value.getOriginal());
+    }
+
     /// \note Shares ID with VarValueColumn. A table can not have both.
     template <typename ESXRecordT>
     struct FloatValueColumn : public Column<ESXRecordT>
@@ -1822,10 +1832,7 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override
-        {
-            return QString::fromUtf8(record.get().mModel.c_str());
-        }
+        QVariant get(const Record<ESXRecordT>& record) const override { return toQString(record.get().mModel); }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {

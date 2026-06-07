@@ -86,7 +86,7 @@ namespace
         if (vampireHead == nullptr)
             return {};
 
-        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(vampireHead->mModel));
+        return Misc::ResourceHelpers::correctMeshPath(vampireHead->mModel.getNormalized());
     }
 
 }
@@ -479,7 +479,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
             if (bp)
-                mHeadModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
+                mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel.getNormalized());
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
         }
@@ -488,7 +488,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
             if (bp)
-                mHairModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
+                mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel.getNormalized());
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
         }
@@ -685,7 +685,7 @@ namespace MWRender
             {
                 if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)));
+                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized()));
             }
         }
 
@@ -915,8 +915,7 @@ namespace MWRender
 
             if (bodypart)
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)), enchantedGlow,
-                    glowColor);
+                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized()), enchantedGlow, glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
         }

@@ -130,8 +130,8 @@ namespace MWRender
                     const ESM::BodyPart* bodypart = partStore.search(*bodypartName);
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                         return VFS::Path::Normalized();
-                    if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel));
+                    if (!bodypart->mModel.getNormalized().empty())
+                        return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized());
                 }
             }
         }

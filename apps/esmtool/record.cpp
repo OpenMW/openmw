@@ -504,7 +504,7 @@ namespace EsmTool
     void Record<ESM::BodyPart>::print()
     {
         std::cout << "  Race: " << mData.mRace << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         std::cout << "  Type: " << meshTypeLabel(mData.mData.mType) << " (" << (int)mData.mData.mType << ")"
                   << std::endl;
         std::cout << "  Flags: " << bodyPartFlags(mData.mData.mFlags) << std::endl;
