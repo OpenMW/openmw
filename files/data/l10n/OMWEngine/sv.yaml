@@ -132,7 +132,7 @@ InvertXAxis: "Invertera X-axeln"
 InvertYAxis: "Invertera Y-axeln"
 Language: "Språk"
 LanguageNote: "Notera: dessa inställningar påverkar inte strängar från ESM-filer."
-LightsClusteredLighting: "Ljussättningsmetod"
+LightsClusteredLighting: "Klustrad ljussättning"
 LightingResetToDefaults: "Återställer till ursprungliga värden, vill du fortsätta?"
 Lights: "Ljus"
 LightRadiusMultiplier: "Radiemultiplikator"
@@ -141,10 +141,15 @@ LightRadiusMultiplierTooltip: "Förvalt: 1.75\nMultiplikator för punktljusens r
 LightsFadeStartMultiplier: "Blekningsstartmultiplikator"
 LightsFadeStartMultiplierValue: "Blekningsstartmultiplikator ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Förvalt: 0.85\nFraktion av det maximala avståndet från vilket ljuskällor börjar blekna.\n\nVälj lågt värde för långsammare övergång eller högre värde för snabbare övergång."
-LightsClusteredLightingTooltip: "Välj intern hantering av ljuskällor.\n\n
-    \"Shader (kompatibilitet)\" Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.\n\n
-    \"Shader\" har alla fördelar som \"Shader (kompatibilitet)\" har, med med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara."
-LightsMaximumDistance: "Maximalt ljusavstånd"
+LightsClusteredLightingTooltip:  |-
+  Aktivera klustrad ljussättning.
+  Delar upp skärmen i områden för att tilldela ljuskällor, vilket tar bort begränsningarna vid ljus-per-objekt.
+
+  Inställningarna "klassiskt ljusavtagande" och "max antal ljuskällor" har ingen effekt i det här läget.
+
+  Aktiverar högdagrar från punktljus på vattenytan när vattenshader är aktiverad.
+
+  Det är starkt rekommenderat att använda detta tillsammans med per-pixelljussättning aktiverad, då nodljussättning kan orsaka ljusblinkingar vid kanten av skärmen.
 LightsMaximumDistanceValue: "Maximalt ljusavstånd ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Förvalt: 8192\nMaximala avståndet där ljuskällor syns (mätt i enheter).\n\nVärdet 0 ger oändligt avstånd."
 LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"
@@ -162,8 +167,8 @@ MaxLightsTooltip: "Förvalt: 16\nMaximalt antal ljuskällor per objekt.\n\nEtt l
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"
-ParticlePointLighting: "Particle Point Lighting"
-ParticlePointLightingTooltip: "Allows particle systems to be lit by point lights."
+ParticlePointLighting: "Partikelpunktljus"
+ParticlePointLightingTooltip: "Gör att partikelsystem kan bli belysta av punktljus."
 PostProcessing: "Efterbehandling (post processing)"
 PostProcessingIsNotEnabled: "Efterbehandling (post processing) är inte aktiverat"
 PostProcessingTooltip: "Justeras via Efterbehandlings-gränssnittet, se input bindings."
