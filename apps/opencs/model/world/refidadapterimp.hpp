@@ -357,7 +357,7 @@ namespace CSMWorld
             data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         if (column == mInventory.mIcon)
-            return QString::fromUtf8(record.get().mIcon.c_str());
+            return toQString(record.get().mIcon);
 
         if (column == mInventory.mWeight)
             return record.get().mData.mWeight;

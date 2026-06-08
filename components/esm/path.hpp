@@ -24,12 +24,6 @@ namespace ESM
             mNormalized = VFS::Path::Normalized(mOriginal);
         }
 
-        void set(const char* value)
-        {
-            mOriginal = value;
-            mNormalized = VFS::Path::Normalized(mOriginal);
-        }
-
         void set(std::string_view value)
         {
             mOriginal = value;
@@ -42,6 +36,12 @@ namespace ESM
             mNormalized.clear();
         }
 
+        Path& operator=(const std::string& value)
+        {
+            set(std::string_view(value));
+            return *this;
+        }
+
         Path& operator=(std::string&& value)
         {
             set(std::move(value));
@@ -50,7 +50,7 @@ namespace ESM
 
         Path& operator=(const char* value)
         {
-            set(value);
+            set(std::string_view(value));
             return *this;
         }
 
