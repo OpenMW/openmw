@@ -411,7 +411,6 @@ namespace LuaUi
             newPosition.left += static_cast<int>(mRelativeCoord.left * pSize.width - mAnchor.width * size.width);
             newPosition.top += static_cast<int>(mRelativeCoord.top * pSize.height - mAnchor.height * size.height);
         }
-
         newPosition.left = std::clamp(newPosition.left, -sExtCalcPositionLeftCap, sExtCalcPositionLeftCap);
         newPosition.top = std::clamp(newPosition.top, -sExtCalcPositionTopCap, sExtCalcPositionTopCap);
         return newPosition;
@@ -427,8 +426,6 @@ namespace LuaUi
 
     MyGUI::Widget* WidgetExtension::contentWidget() const
     {
-        if (!mContentWidget)
-            return mWidget;
         return mContentWidget;
     }
 
