@@ -52,7 +52,7 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCRefId("SCRI", mScript);
     }

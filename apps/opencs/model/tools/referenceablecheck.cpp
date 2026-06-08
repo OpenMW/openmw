@@ -312,8 +312,9 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
 
     if (activator.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(activator.mModel) == -1)
-        messages.add(id, "Model '" + activator.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(activator.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", activator.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Activator>(activator, messages, id.toString());

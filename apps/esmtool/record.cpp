@@ -436,7 +436,7 @@ namespace EsmTool
     void Record<ESM::Activator>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         if (!mData.mScript.empty())
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
