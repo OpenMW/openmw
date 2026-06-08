@@ -71,14 +71,13 @@ namespace MWMechanics
             if (effectInfo.mData.mArea <= 0)
             {
                 if (effectInfo.mData.mRange == ESM::RT_Target)
-                    world->spawnEffect(
-                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(areaStatic->mModel)), texture,
-                        mHitPosition, 1.0f);
+                    world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel.getNormalized()),
+                        texture, mHitPosition, 1.0f);
                 continue;
             }
             else
-                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(areaStatic->mModel)),
-                    texture, mHitPosition, static_cast<float>(effectInfo.mData.mArea * 2));
+                world->spawnEffect(Misc::ResourceHelpers::correctMeshPath(areaStatic->mModel.getNormalized()), texture,
+                    mHitPosition, static_cast<float>(effectInfo.mData.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             {
@@ -500,7 +499,7 @@ namespace MWMechanics
                 castStatic = store.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_DefaultCast"));
 
             VFS::Path::Normalized castStaticModel
-                = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+                = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
 
             // check if the effect was already added
             if (std::find(addedEffects.begin(), addedEffects.end(), castStaticModel) != addedEffects.end())
@@ -584,7 +583,7 @@ namespace MWMechanics
             if (playNonLooping || loop)
             {
                 const VFS::Path::Normalized castStaticModel
-                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+                    = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
                 anim->addEffect(
                     castStaticModel.value(), magicEffect.mId.getRefIdString(), loop, {}, magicEffect.mParticle);
             }

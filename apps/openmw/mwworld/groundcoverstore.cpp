@@ -27,7 +27,7 @@ namespace MWWorld
         static constexpr std::string_view prefix = "grass/";
         for (const ESM::Static& stat : statics)
         {
-            VFS::Path::Normalized model = VFS::Path::toNormalized(stat.mModel);
+            const VFS::Path::NormalizedView model = stat.mModel.getNormalized();
             if (!model.value().starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);
@@ -35,7 +35,7 @@ namespace MWWorld
 
         for (const ESM::Static& stat : content.mStatics)
         {
-            VFS::Path::Normalized model = VFS::Path::toNormalized(stat.mModel);
+            const VFS::Path::NormalizedView model = stat.mModel.getNormalized();
             if (!model.value().starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);

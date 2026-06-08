@@ -62,13 +62,23 @@ namespace EsmLoader
 
             return returnAs(std::forward<F>(f));
         }
+
+        std::string_view getModelView(const std::string& value)
+        {
+            return value;
+        }
+
+        std::string_view getModelView(const ESM::Path& value)
+        {
+            return value.getOriginal();
+        }
     }
 
     EsmData::~EsmData() {}
 
     std::string_view getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type)
     {
-        return withStatic(refId, type, content, [](const auto& v) { return std::string_view(v.mModel); });
+        return withStatic(refId, type, content, [](const auto& v) { return getModelView(v.mModel); });
     }
 
     ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, std::string_view id)

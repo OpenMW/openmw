@@ -75,7 +75,7 @@ namespace MWRender
         }
 
         template <typename Record>
-        std::string_view getEsm4Model(const Record& record)
+        VFS::Path::Normalized getEsm4Model(const Record& record)
         {
             if (MWClass::ESM4Impl::isMarkerModel(record->mModel))
                 return {};
@@ -83,12 +83,12 @@ namespace MWRender
                 return record->mModel;
         }
 
-        std::string_view getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
+        VFS::Path::Normalized getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
         {
             switch (type)
             {
                 case ESM::REC_STAT:
-                    return store.get<ESM::Static>().searchStatic(id)->mModel;
+                    return store.get<ESM::Static>().searchStatic(id)->mModel.getNormalized();
                 case ESM::REC_ACTI:
                     return store.get<ESM::Activator>().searchStatic(id)->mModel;
                 case ESM::REC_DOOR:
@@ -740,7 +740,7 @@ namespace MWRender
                 continue;
 
             const int type = store.findStatic(ref.mRefId);
-            VFS::Path::Normalized model(getModel(type, ref.mRefId, store));
+            VFS::Path::Normalized model = getModel(type, ref.mRefId, store);
             if (model.empty())
                 continue;
             model = Misc::ResourceHelpers::correctMeshPath(model);

@@ -1,7 +1,7 @@
 #include "referenceablecheck.hpp"
 
-#include <memory>
-#include <stddef.h>
+#include <cstddef>
+#include <format>
 
 #include <apps/opencs/model/doc/messages.hpp>
 #include <apps/opencs/model/prefs/category.hpp>
@@ -867,8 +867,9 @@ void CSMTools::ReferenceableCheckStage::staticCheck(
 
     if (staticElement.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(staticElement.mModel) == -1)
-        messages.add(id, "Model '" + staticElement.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(staticElement.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", staticElement.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 }
 
 // final check

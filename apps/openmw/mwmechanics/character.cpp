@@ -1612,7 +1612,7 @@ namespace MWMechanics
                                     = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
 
                                 const VFS::Path::Normalized castStaticModel
-                                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+                                    = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
 
                                 if (mAnimation->getNode("Bip01 L Hand"))
                                     mAnimation->addEffect(

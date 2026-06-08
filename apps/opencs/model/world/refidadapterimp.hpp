@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <map>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -36,6 +35,7 @@
 #include "record.hpp"
 #include "refidadapter.hpp"
 #include "refiddata.hpp"
+#include "toqstring.hpp"
 #include "universalid.hpp"
 
 namespace ESM
@@ -208,7 +208,7 @@ namespace CSMWorld
             data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         if (column == mModel.mModel)
-            return QString::fromUtf8(record.get().mModel.c_str());
+            return toQString(record.get().mModel);
 
         if (column == mModel.mPersistence)
             return (record.get().mRecordFlags & ESM::FLAG_Persistent) != 0;

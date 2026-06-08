@@ -31,22 +31,13 @@
 #include "info.hpp"
 #include "land.hpp"
 #include "record.hpp"
+#include "toqstring.hpp"
 
 namespace CSMWorld
 {
     std::optional<std::uint32_t> getSkillIndex(std::string_view value);
 
     std::string getStringId(ESM::RefId value);
-
-    inline QString toQString(const std::string& value)
-    {
-        return QString::fromStdString(value);
-    }
-
-    inline QString toQString(const ESM::Path& value)
-    {
-        return QString::fromStdString(value.getOriginal());
-    }
 
     /// \note Shares ID with VarValueColumn. A table can not have both.
     template <typename ESXRecordT>

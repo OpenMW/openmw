@@ -1270,7 +1270,7 @@ namespace EsmTool
     template <>
     void Record<ESM::Static>::print()
     {
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
     }
 
     template <>

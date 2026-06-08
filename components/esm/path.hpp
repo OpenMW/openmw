@@ -4,6 +4,8 @@
 #include <components/vfs/pathutil.hpp>
 
 #include <string>
+#include <string_view>
+#include <utility>
 
 namespace ESM
 {
@@ -14,6 +16,8 @@ namespace ESM
 
         const VFS::Path::Normalized& getNormalized() const { return mNormalized; }
 
+        bool empty() const { return mOriginal.empty(); }
+
         void set(std::string&& value)
         {
             mOriginal = std::move(value);
@@ -21,6 +25,12 @@ namespace ESM
         }
 
         void set(const char* value)
+        {
+            mOriginal = value;
+            mNormalized = VFS::Path::Normalized(mOriginal);
+        }
+
+        void set(std::string_view value)
         {
             mOriginal = value;
             mNormalized = VFS::Path::Normalized(mOriginal);
@@ -39,6 +49,12 @@ namespace ESM
         }
 
         Path& operator=(const char* value)
+        {
+            set(value);
+            return *this;
+        }
+
+        Path& operator=(std::string_view value)
         {
             set(value);
             return *this;
