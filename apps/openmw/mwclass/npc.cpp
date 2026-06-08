@@ -475,13 +475,13 @@ namespace MWClass
         {
             const ESM::BodyPart* head = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back(head->mModel);
+                models.push_back(head->mModel.getOriginal());
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back(hair->mModel);
+                models.push_back(hair->mModel.getOriginal());
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -504,8 +504,8 @@ namespace MWClass
                                 : partRef.mMale;
 
                             const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
-                            if (part && !part->mModel.empty())
-                                models.push_back(part->mModel);
+                            if (part && !part->mModel.getOriginal().empty())
+                                models.push_back(part->mModel.getOriginal());
                         }
                     };
                     if (equipped->getType() == ESM::Clothing::sRecordId)
@@ -535,8 +535,8 @@ namespace MWClass
                 = MWRender::NpcAnimation::getBodyParts(race->mId, female, false, false);
             for (const ESM::BodyPart* part : parts)
             {
-                if (part && !part->mModel.empty())
-                    models.push_back(part->mModel);
+                if (part && !part->mModel.getOriginal().empty())
+                    models.push_back(part->mModel.getOriginal());
             }
         }
     }

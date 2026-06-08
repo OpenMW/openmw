@@ -49,37 +49,44 @@
 namespace
 {
 
-    std::string getVampireHead(const ESM::RefId& race, bool female)
+    VFS::Path::Normalized getVampireHead(ESM::RefId race, bool female)
     {
-        static std::map<std::pair<ESM::RefId, int>, const ESM::BodyPart*> sVampireMapping;
+        static std::map<std::pair<ESM::RefId, bool>, const ESM::BodyPart*> sVampireMapping;
 
-        std::pair<ESM::RefId, int> thisCombination = std::make_pair(race, int(female));
+        const std::pair<ESM::RefId, bool> key(race, female);
+        const ESM::BodyPart* vampireHead = nullptr;
 
-        if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
+        if (const auto it = sVampireMapping.find(key); it == sVampireMapping.end())
         {
             const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            for (const ESM::BodyPart& bodypart : store.get<ESM::BodyPart>())
+
+            for (const ESM::BodyPart& bodyPart : store.get<ESM::BodyPart>())
             {
-                if (!bodypart.mData.mVampire)
+                if (!bodyPart.mData.mVampire)
                     continue;
-                if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
+                if (bodyPart.mData.mType != ESM::BodyPart::MT_Skin)
                     continue;
-                if (bodypart.mData.mPart != ESM::BodyPart::MP_Head)
+                if (bodyPart.mData.mPart != ESM::BodyPart::MP_Head)
                     continue;
-                if (female != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+                if (female != (bodyPart.mData.mFlags & ESM::BodyPart::BPF_Female))
                     continue;
-                if (!(bodypart.mRace == race))
+                if (!(bodyPart.mRace == race))
                     continue;
-                sVampireMapping[thisCombination] = &bodypart;
+
+                vampireHead = &bodyPart;
             }
+
+            sVampireMapping.emplace_hint(it, key, vampireHead);
+        }
+        else
+        {
+            vampireHead = it->second;
         }
 
-        sVampireMapping.emplace(thisCombination, nullptr);
+        if (vampireHead == nullptr)
+            return {};
 
-        const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
-        if (!bodyPart)
-            return std::string();
-        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodyPart->mModel)).value();
+        return Misc::ResourceHelpers::correctMeshPath(vampireHead->mModel.getNormalized());
     }
 
 }
@@ -472,7 +479,7 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(headName);
             if (bp)
-                mHeadModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
+                mHeadModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel.getNormalized());
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << headName << "'";
         }
@@ -481,14 +488,14 @@ namespace MWRender
         {
             const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(hairName);
             if (bp)
-                mHairModel = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bp->mModel));
+                mHairModel = Misc::ResourceHelpers::correctMeshPath(bp->mModel.getNormalized());
             else
                 Log(Debug::Warning) << "Warning: Failed to load body part '" << hairName << "'";
         }
 
-        const std::string vampireHead = getVampireHead(mNpc->mRace, isFemale);
-        if (!isWerewolf && isVampire && !vampireHead.empty())
-            mHeadModel = vampireHead;
+        if (!isWerewolf && isVampire)
+            if (VFS::Path::Normalized vampireHead = getVampireHead(mNpc->mRace, isFemale); !vampireHead.empty())
+                mHeadModel = std::move(vampireHead);
 
         bool is1stPerson = mViewMode == VM_FirstPerson;
         bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -678,7 +685,7 @@ namespace MWRender
             {
                 if (const ESM::BodyPart* bodypart = parts[part])
                     addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part), -1, 1,
-                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)));
+                        Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized()));
             }
         }
 
@@ -908,8 +915,7 @@ namespace MWRender
 
             if (bodypart)
                 addOrReplaceIndividualPart(static_cast<ESM::PartReferenceType>(part.mPart), group, priority,
-                    Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)), enchantedGlow,
-                    glowColor);
+                    Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized()), enchantedGlow, glowColor);
             else
                 reserveIndividualPart((ESM::PartReferenceType)part.mPart, group, priority);
         }
