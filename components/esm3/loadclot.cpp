@@ -79,12 +79,12 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNOCString("FNAM", mName);
         esm.writeNamedComposite("CTDT", mData);
 
         esm.writeHNOCRefId("SCRI", mScript);
-        esm.writeHNOCString("ITEX", mIcon);
+        esm.writeHNOCString("ITEX", mIcon.getOriginal());
 
         mParts.save(esm);
 
