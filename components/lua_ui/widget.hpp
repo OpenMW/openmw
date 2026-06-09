@@ -78,6 +78,7 @@ namespace LuaUi
         virtual MyGUI::IntSize calculateSize() const;
         virtual MyGUI::IntPoint calculatePosition(const MyGUI::IntSize& size) const;
         MyGUI::IntCoord calculateCoord() const;
+        void mouseWheel(MyGUI::Widget*, int, int, int, int);
 
         virtual bool isTextInput() { return false; }
         bool collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const;
@@ -202,7 +203,6 @@ namespace LuaUi
         void mouseDoubleClick(MyGUI::Widget*);
         void mousePress(MyGUI::Widget*, int, int, MyGUI::MouseButton);
         void mouseRelease(MyGUI::Widget*, int, int, MyGUI::MouseButton);
-        void mouseWheel(MyGUI::Widget*, int);
         void focusGain(MyGUI::Widget*, MyGUI::Widget*);
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 

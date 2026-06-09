@@ -304,9 +304,8 @@
 ---
 -- Mouse wheel event, passed as an argument to mouseWheel UI events
 -- @type MouseWheelEvent
--- @field number rawDelta The raw mouse wheel delta. Typically +- 120
--- @field number delta The mouse wheel delta in "notches". Typically +- 1, but can be different for high-precision devices
--- @field number direction The direction of the mouse wheel scroll. 1 for up, -1 for down
+-- @field openmw.util#Vector2 position Absolute position of the mouse cursor
+-- @field openmw.util#Vector2 delta The normalized wheel delta on the X and Y axis. The values are usually -1, 0 or 1, but may be different for high-precision wheels.
 
 ---
 -- Register a new texture resource. Can be used to manually atlas UI textures.
