@@ -1,8 +1,9 @@
 #ifndef OPENMW_ESM_BOOK_H
 #define OPENMW_ESM_BOOK_H
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
 
 #include <cstdint>
 #include <string>
@@ -30,7 +31,10 @@ namespace ESM
         };
 
         BKDTstruct mData;
-        std::string mName, mModel, mIcon, mText;
+        std::string mName;
+        Path mModel;
+        Path mIcon;
+        std::string mText;
         uint32_t mRecordFlags;
         RefId mId;
         RefId mScript, mEnchant;

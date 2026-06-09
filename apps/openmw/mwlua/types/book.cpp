@@ -77,7 +77,7 @@ namespace MWLua
         if (rec["model"] != sol::nil)
             book.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            book.mIcon = rec["icon"];
+            book.mIcon = rec["icon"].get<std::string_view>();
         if (rec["text"] != sol::nil)
             book.mText = rec["text"];
         if (rec["enchant"] != sol::nil)

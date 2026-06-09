@@ -518,8 +518,8 @@ namespace EsmTool
     void Record<ESM::Book>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
-        std::cout << "  Icon: " << mData.mIcon << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
+        std::cout << "  Icon: " << mData.mIcon.getOriginal() << std::endl;
         if (!mData.mScript.empty())
             std::cout << "  Script: " << mData.mScript << std::endl;
         if (!mData.mEnchant.empty())
