@@ -1206,7 +1206,6 @@ namespace Resource
         shaderVisitor->setAdjustCoverageForAlphaTest(mAdjustCoverageForAlphaTest);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
         shaderVisitor->setWeatherParticleOcclusion(mWeatherParticleOcclusion);
-        shaderVisitor->setParticlePointLighting(mParticlePointLighting);
         return shaderVisitor;
     }
 }

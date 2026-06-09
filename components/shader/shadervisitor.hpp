@@ -47,8 +47,6 @@ namespace Shader
 
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
-        void setParticlePointLighting(bool value) { mParticlePointLighting = value; }
-
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -74,7 +72,6 @@ namespace Shader
 
         bool mSupportsNormalsRT;
         bool mWeatherParticleOcclusion = false;
-        bool mParticlePointLighting = true;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;

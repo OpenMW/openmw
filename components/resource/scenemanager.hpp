@@ -221,8 +221,6 @@ namespace Resource
 
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
-        void setParticlePointLighting(bool value) { mParticlePointLighting = value; }
-
     private:
         osg::ref_ptr<Shader::ShaderVisitor> createShaderVisitor(const std::string& shaderPrefix = "objects");
         osg::ref_ptr<osg::Node> loadErrorMarker();
@@ -257,7 +255,6 @@ namespace Resource
         bool mAdjustCoverageForAlphaTest = false;
         bool mSupportsNormalsRT = false;
         bool mWeatherParticleOcclusion = false;
-        bool mParticlePointLighting = true;
         bool mUnRefImageDataAfterApply = false;
 
         SceneManager(const SceneManager&) = delete;

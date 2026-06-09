@@ -274,7 +274,6 @@ namespace MWRender
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
-        resourceSystem->getSceneManager()->setParticlePointLighting(Settings::shaders().mParticlePointLighting);
 
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
