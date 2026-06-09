@@ -107,11 +107,11 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeNamedComposite("AODT", mData);
-        esm.writeHNOCString("ITEX", mIcon);
+        esm.writeHNOCString("ITEX", mIcon.getOriginal());
         mParts.save(esm);
         esm.writeHNOCRefId("ENAM", mEnchant);
     }
