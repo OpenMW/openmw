@@ -88,7 +88,7 @@ Ubuntu_GCC_preprocess:
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
     - ccache -svv
     - df -h
-    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then ~/.local/bin/gcovr --xml-pretty --exclude-unreachable-branches --gcov-ignore-parse-errors=negative_hits.warn_once_per_file --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
+    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then ~/.local/bin/gcovr --merge-mode-functions merge-use-line-max --xml-pretty --exclude-unreachable-branches --gcov-ignore-parse-errors=negative_hits.warn_once_per_file --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
     # this line must be updated when artifacts are added or they'll be deleted, but if we get rid of it, we run out of disk space while archiving
     - find * -type f | grep -v -e '^extern/' -e '^install/' -e 'CMakeCache\.txt$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs rm -f
     - cd ..
@@ -425,7 +425,7 @@ Ubuntu_Clang:
     CTCACHE_CLANG_TIDY: /usr/bin/clang-tidy-19
     CTCACHE_SAVE_OUTPUT: 1
     CTCACHE_DIR: $CI_PROJECT_DIR/ctcache
-    
+
     CMAKE_CXX_CLANG_TIDY: 'clang_tidy_cache.py;$CTCACHE_CLANG_TIDY'
   script:
     - mkdir -pv "${CCACHE_DIR}"
