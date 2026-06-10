@@ -68,10 +68,6 @@ namespace MWInput
 
             MyGUI::InputManager::getInstance().injectMouseMove(
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
-            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the
-            // viewport by scroll wheel
-            MyGUI::InputManager::getInstance().injectMouseMove(
-                static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
             winMgr->setCursorActive(true);
 
