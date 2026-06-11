@@ -205,6 +205,7 @@ namespace MWRender
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
         globalDefines["particlePointLighting"] = Settings::shaders().mParticlePointLighting ? "1" : "0";
+        globalDefines["version"] = sceneRoot->isClusteredSupported() ? "430 compatibility" : "120";
 
         for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
