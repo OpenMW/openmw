@@ -64,7 +64,8 @@ namespace MWInput
             mGuiCursorX = static_cast<float>(arg.x) / uiScale;
             mGuiCursorY = static_cast<float>(arg.y) / uiScale;
 
-            mMouseWheel = static_cast<int>(arg.z);
+            if (arg.zrel != 0)
+                mMouseWheel = static_cast<int>(arg.z);
 
             MyGUI::InputManager::getInstance().injectMouseMove(
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
