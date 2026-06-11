@@ -439,7 +439,7 @@ namespace SDLUtil
         }
         else if (evt.type == SDL_MOUSEWHEEL)
         {
-            mMouseZ += packEvt.zrel = (evt.wheel.y * 120);
+            mMouseZ += packEvt.zrel = (evt.wheel.preciseY * 120);
             packEvt.z = mMouseZ;
             packEvt.type = SDL_MOUSEWHEEL;
         }
