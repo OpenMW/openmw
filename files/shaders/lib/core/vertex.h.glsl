@@ -1,5 +1,6 @@
 @link "lib/core/vertex.glsl" if !@useOVR_multiview
 @link "lib/core/vertex_multiview.glsl" if @useOVR_multiview
+@link "lib/core/lighting_vertex.glsl"
 
 vec4 modelToClip(vec4 pos);
 vec4 modelToView(vec4 pos);

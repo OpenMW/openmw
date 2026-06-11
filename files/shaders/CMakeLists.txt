@@ -20,6 +20,8 @@ set(SHADER_FILES
     lib/core/fragment.glsl
     lib/core/fragment.h.glsl
     lib/core/fragment_multiview.glsl
+    lib/core/lighting_fragment.glsl
+    lib/core/lighting_vertex.glsl
     lib/core/vertex.glsl
     lib/core/vertex.h.glsl
     lib/core/vertex_multiview.glsl
