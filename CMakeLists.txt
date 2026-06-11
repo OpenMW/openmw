@@ -302,16 +302,6 @@ set(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
-if(NOT COLLADA_DOM_VERSION_MAJOR)
-    set(COLLADA_DOM_VERSION_MAJOR 2)
-endif()
-
-if(NOT COLLADA_DOM_VERSION_MINOR)
-    set(COLLADA_DOM_VERSION_MINOR 5)
-endif()
-
-find_package(collada_dom 2.5)
-
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
     find_package(ICU REQUIRED COMPONENTS uc i18n data)
@@ -469,6 +459,18 @@ endif()
 include_directories(BEFORE SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 if(OSG_STATIC)
+    if(NOT COLLADA_DOM_VERSION_MAJOR)
+        set(COLLADA_DOM_VERSION_MAJOR 2)
+    endif()
+
+    if(NOT COLLADA_DOM_VERSION_MINOR)
+        set(COLLADA_DOM_VERSION_MINOR 5)
+    endif()
+
+    find_package(collada_dom 2.5)
+
+    link_directories(${COLLADA_DOM_LIBRARY_DIRS})
+
     add_compile_definitions(OSG_LIBRARY_STATIC)
 endif()
 
@@ -517,8 +519,6 @@ include_directories(
     ${ICU_INCLUDE_DIRS}
 )
 include_directories(".")
-
-link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
 if(MYGUI_STATIC)
     add_compile_definitions(MYGUI_STATIC)
