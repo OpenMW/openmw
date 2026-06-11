@@ -354,7 +354,7 @@ namespace SceneUtil
         // In theory the two extensions should allow us to use SSBO and std430 layout in version 120
         //  1. GL_ARB_shader_storage_buffer_object
         //  2. GL_ARB_shading_language_420pack
-        // However, this is not the case in practice and is known to be broken on at least some AMD drivers.
+        // However, this is not the case in practice and is known to be broken on at least Mesa drivers.
         bool supportsSSBO = exts && static_cast<int>(exts->glslLanguageVersion * 100) >= 430;
 
         mSupportsClustered = supportsSSBO;
