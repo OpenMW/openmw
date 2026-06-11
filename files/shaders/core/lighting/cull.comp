@@ -1,0 +1,71 @@
+#version 430 core
+
+layout(local_size_x = @workGroupSize, local_size_y = 1, local_size_z = 1) in;
+
+#include "lib/light/bindings.glsl"
+
+shared Cluster g_cluster;
+
+shared uint g_Count;
+shared uint g_Offset;
+shared uint g_List[@maxLightsPerCluster];
+
+bool sphereAABBIntersection(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax)
+{
+    vec3 closestPoint = clamp(center, aabbMin, aabbMax);
+    return dot(closestPoint - center, closestPoint - center) <= radius * radius;
+}
+
+bool testSphereAABB(int i, Cluster cluster)
+{
+    vec3 center = pointLight[i].position.xyz;
+    float radius = pointLight[i].radius;
+
+    vec3 aabbMin = cluster.minPoint.xyz;
+    vec3 aabbMax = cluster.maxPoint.xyz;
+
+    return sphereAABBIntersection(center, radius, aabbMin, aabbMax);
+}
+
+void main()
+{
+    if (gl_LocalInvocationIndex == 0) {
+        g_Count = 0;
+        g_cluster = clusters[gl_WorkGroupID.x];
+    }
+
+    barrier();
+
+    uint index = 0;
+
+    for (uint i = gl_LocalInvocationIndex; i < pointLight.length(); i += @workGroupSize) {
+        PointLight light = pointLight[i];
+
+        vec3 center = light.position.xyz;
+        float radius = light.radius;
+
+        vec3 aabbMin = g_cluster.minPoint.xyz;
+        vec3 aabbMax = g_cluster.maxPoint.xyz;
+
+        if (sphereAABBIntersection(center, radius, aabbMin, aabbMax)) {
+            index = atomicAdd(g_Count, 1);
+
+            if (index >= @maxLightsPerCluster) break;
+
+            g_List[index] = i;
+        }
+    }
+
+    barrier();
+
+    if (gl_LocalInvocationIndex == 0) {
+        g_Offset = atomicAdd(globalLightIndexCount, g_Count);
+        lightGrid[gl_WorkGroupID.x] = LightGrid(g_Offset, g_Count);
+    }
+
+    barrier();
+
+    for (uint i = gl_LocalInvocationIndex; i < g_Count; i += @workGroupSize) {
+        lightIndexList[g_Offset + i] = g_List[i];
+    }
+}

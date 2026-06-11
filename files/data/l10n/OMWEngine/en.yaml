@@ -131,10 +131,8 @@ InvertXAxis: "Invert X Axis"
 InvertYAxis: "Invert Y Axis"
 Language: "Language"
 LanguageNote: "Note: these settings do not affect strings from ESM files."
-LightingMethod: "Lighting Method"
-LightingMethodShaders: "Shaders"
-LightingMethodShadersCompatibility: "Shaders (compatibility)"
-LightingResetToDefaults: "Resets to default values, would you like to continue? Changes to lighting method will require a restart."
+LightsClusteredLighting: "Clustered Lighting"
+LightingResetToDefaults: "Resets to default values, would you like to continue?"
 Lights: "Lights"
 LightRadiusMultiplier: "Radius Multiplier"
 LightRadiusMultiplierValue: "Radius Multiplier ({value, number, ::.00})"
@@ -142,9 +140,15 @@ LightRadiusMultiplierTooltip: "Default: 1.75\nMultiplier for point light radius.
 LightsFadeStartMultiplier: "Fade Start Multiplier"
 LightsFadeStartMultiplierValue: "Fade Start Multiplier ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value for quicker transitions."
-LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
-    \"Shaders (compatibility)\" It is recommended to use this with older hardware and a light limit closer to 8.\n\n
-    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
+LightsClusteredLightingTooltip:  |-
+    Enable clustered lighting.
+    Divides the screen into regions to assign lights, removing per-object light limits.
+
+    Classic falloff and max light options do not apply in this mode.
+
+    Enables point light specular highlights on the water plane when the water shader is enabled.
+
+    It is highly recommended to use this with per-pixel lighting enabled, as vertex lighting can cause light pop at screen edges.
 LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceValue: "Maximum Light Distance ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
@@ -163,6 +167,8 @@ MaxLightsTooltip: "Default: 16\nMaximum number of lights per object.\n\nA low nu
 MenuHelpDelay: "Menu Help Delay"
 MenuTransparency: "Menu Transparency"
 MouseAndKeyboard: "Mouse/Keyboard"
+ParticlePointLighting: "Particle Point Lighting"
+ParticlePointLightingTooltip: "Allows particle systems to be lit by point lights."
 PostProcessing: "Post Processing"
 PostProcessingIsNotEnabled: "Postprocessor is not enabled"
 PostProcessingTooltip: "Tweaked via Post Processor HUD, see input bindings."

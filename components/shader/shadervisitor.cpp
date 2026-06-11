@@ -670,12 +670,16 @@ namespace Shader
             // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }
 
+        bool isParticle = dynamic_cast<osgParticle::ParticleSystem*>(&node);
+        defineMap["particle"] = isParticle ? "1" : "0";
+
         bool simpleLighting = false;
         node.getUserValue("simpleLighting", simpleLighting);
-        if (simpleLighting)
-            defineMap["endLight"] = "0";
 
-        if (simpleLighting || dynamic_cast<osgParticle::ParticleSystem*>(&node))
+        if (simpleLighting)
+            defineMap["simpleLighting"] = "1";
+
+        if (simpleLighting || isParticle)
             defineMap["forcePPL"] = "0";
 
         bool particleOcclusion = false;

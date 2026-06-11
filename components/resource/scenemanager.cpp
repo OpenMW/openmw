@@ -452,7 +452,6 @@ namespace Resource
         , mMagFilter(osg::Texture::LINEAR)
         , mMaxAnisotropy(1.f)
         , mParticleSystemMask(~0u)
-        , mLightingMethod(SceneUtil::LightingMethod::PerObjectUniform)
     {
     }
 
@@ -497,31 +496,14 @@ namespace Resource
         mSpecularMapPattern = pattern;
     }
 
-    void SceneManager::setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported)
+    void SceneManager::setSupportsClusteredLighting(bool supported)
     {
-        mSupportedLightingMethods = supported;
+        mSupportsClusteredLighting = supported;
     }
 
-    bool SceneManager::isSupportedLightingMethod(SceneUtil::LightingMethod method) const
+    bool SceneManager::isClusteredLightingSupported() const
     {
-        return mSupportedLightingMethods[static_cast<int>(method)];
-    }
-
-    void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
-    {
-        mLightingMethod = method;
-
-        if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
-        {
-            osg::ref_ptr<osg::Program> program = new osg::Program;
-            program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
-            mShaderManager->setProgramTemplate(program);
-        }
-    }
-
-    SceneUtil::LightingMethod SceneManager::getLightingMethod() const
-    {
-        return mLightingMethod;
+        return mSupportsClusteredLighting;
     }
 
     void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)

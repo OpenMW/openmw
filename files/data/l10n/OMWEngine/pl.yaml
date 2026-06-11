@@ -131,10 +131,8 @@ InvertXAxis: "Odwróć oś X"
 InvertYAxis: "Odwróć oś Y"
 Language: "Język"
 LanguageNote: "Uwaga: te ustawienia nie wpływają na teksty z plików ESM."
-LightingMethod: "Metoda oświetlenia"
-LightingMethodShaders: "Shadery"
-LightingMethodShadersCompatibility: "Shadery (kompatybilne)"
-LightingResetToDefaults: "Przywrócić domyślne wartości? Zmiany w metodzie oświetlenia wymagają ponownego uruchomienia."
+LightsClusteredLighting: "Oświetlenie klastrowe"
+LightingResetToDefaults: "Przywrócić domyślne wartości?"
 Lights: "Światła"
 LightRadiusMultiplier: "Mnożnik promienia"
 LightRadiusMultiplierValue: "Mnożnik promienia ({value, number, ::.00})"
@@ -142,9 +140,15 @@ LightRadiusMultiplierTooltip: "Domyślnie: 1.75\nMnożnik promienia światła pu
 LightsFadeStartMultiplier: "Mnożnik początku zanikania"
 LightsFadeStartMultiplierValue: "Mnożnik początku zanikania ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Domyślnie: 0.85\nProcent maksymalnego zasięgu, w którym światła zaczną zanikać.\n\nNiska wartość = wolniejsze przejścia.\nWysoka wartość = szybsze przejścia."
-LightsLightingMethodTooltip: "Ustawia wewnętrzne przetwarzanie źródeł światła.\n\n
-    \"Shadery (kompatybilne)\" Zalecane dla starszego sprzętu.\n\n
-    \"Shadery\" oferuje te same zalety co wersja kompatybilna, ale działa nowocześnie i pozwala na więcej świateł bez dużych kosztów wydajności."
+LightsClusteredLightingTooltip: |-
+ Włącza oświetlenie klastrowe.
+ Dzieli ekran na regiony w celu przypisania źródeł światła, eliminując ograniczenia liczby świateł przypadających na obiekt.
+
+ Opcje klasycznego zanikania światła oraz maksymalnej liczby świateł nie mają zastosowania w tym trybie.
+
+ Włącza refleksy świetlne od świateł punktowych na powierzchni wody, gdy shader wody jest aktywny.
+
+ Zdecydowanie zaleca się używanie tej opcji wraz z oświetleniem per-pixel, ponieważ oświetlenie wierzchołkowe może powodować widoczne przeskoki oświetlenia na krawędziach ekranu.
 LightsMaximumDistance: "Maksymalny zasięg światła"
 LightsMaximumDistanceValue: "Maksymalny zasięg światła ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Domyślnie: 8192\nMaksymalna odległość wyświetlania świateł (w jednostkach).\n\n0 = brak ograniczenia."
@@ -163,6 +167,8 @@ MaxLightsTooltip: "Domyślnie: 16\nMaksymalna liczba świateł na obiekt.\n\nNis
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"
 MouseAndKeyboard: "Mysz i klawiatura"
+ParticlePointLighting: "Oświetlenie punktowe cząsteczek"
+ParticlePointLightingTooltip: "Umożliwia oświetlanie systemów cząsteczek przez światła punktowe."
 PostProcessing: "Post-processing"
 PostProcessingIsNotEnabled: "Post-processing nie jest włączony"
 PostProcessingTooltip: "Dostosowywany przez HUD Post-processingu, patrz przypisania klawiszy."

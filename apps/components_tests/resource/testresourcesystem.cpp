@@ -27,7 +27,8 @@ namespace
 
         auto shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
 
-        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{});
+        osg::ref_ptr<SceneUtil::LightManager> lightManager
+            = new SceneUtil::LightManager(SceneUtil::LightSettings{}, &resourceSystem);
         auto lightDefines = lightManager->getLightDefines();
 
         for (const auto& define : shadowDefines)

@@ -1,9 +1,6 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
@@ -90,10 +87,10 @@ varying vec4 passTangent;
 #endif
 
 #include "lib/core/fragment.h.glsl"
-#include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"
+#include "lib/light/clamp.glsl"
 
 #include "fog.glsl"
 #include "vertexcolors.glsl"
@@ -229,12 +226,14 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     vec3 specularColor = getSpecularColor().xyz;
 #endif
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
     specular = specularColor * specularLight * specStrength;
 #endif
 
-    clampLightingResult(lighting);
+    clampLighting(lighting);
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
 #if @envMap && !@preLightEnv

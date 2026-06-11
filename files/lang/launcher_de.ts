@@ -1096,10 +1096,6 @@ Logs and settings changed through the launcher and in-game will be saved here.</
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1117,16 +1113,6 @@ Logs and settings changed through the launcher and in-game will be saved here.</
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored - like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1343,10 +1329,6 @@ Logs and settings changed through the launcher and in-game will be saved here.</
     </message>
     <message>
         <source>Enable Terrain Shadows</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

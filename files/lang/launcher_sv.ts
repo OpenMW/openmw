@@ -1104,10 +1104,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor för terräng, inklusive avlägsen terräng. Kan ha en signifikant negativ påverkan på prestanda och skuggkvalité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Ljussättning</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Inforuta</translation>
     </message>
@@ -1126,18 +1122,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored - like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effekter av reflekterade &quot;Absorb&quot;-besvärjelser speglas inte – såsom i Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Välj intern hantering av ljuskällor.&lt;/p&gt;
-&lt;p&gt;&quot;Shader (kompatibilitet)&quot; Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shader&quot; har alla fördelar som &quot;Shader (kompatibilitet)&quot; har, men med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Shader (kompatibilitet)</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
@@ -1357,10 +1341,6 @@ Loggar och inställningar som ändras genom startaren och inne i spelet kommer s
     <message>
         <source>Enable Terrain Shadows</source>
         <translation>Aktivera terrängskuggor</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Ljussättningsmetod</translation>
     </message>
     <message>
         <source>Audio Device</source>

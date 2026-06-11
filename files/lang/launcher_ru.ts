@@ -1443,14 +1443,6 @@ Logs and settings changed through the launcher and in-game will be saved here.</
         <translation>Включить тени от ландшафта</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Освещение</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Способ освещения</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Звуковое устройство</translation>
     </message>
@@ -1481,18 +1473,6 @@ Logs and settings changed through the launcher and in-game will be saved here.</
     <message>
         <source>Screenshot Format</source>
         <translation>Формат снимков экрана</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Задает способ обработки источников света.&lt;/p&gt;
-&lt;p&gt;&quot;Шейдеры (режим совместимости)&quot; Рекомендуется использовать этот режим на устаревшем аппаратном обеспечении и с количеством источников света на объект около 8.&lt;/p&gt;
-&lt;p&gt; &quot;Шейдеры&quot; работает аналогично режиму &quot;Шейдеры (режим совместимости)&quot; но использует более современный подход, позволяющий использовать большее количество источников света с минимальным влиянием на производительность на современном аппаратном обеспечении.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Шейдеры (режим совместимости)</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>

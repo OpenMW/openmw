@@ -120,8 +120,8 @@ namespace Resource
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
-        bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
+        void setSupportsClusteredLighting(bool supported);
+        bool isClusteredLightingSupported() const;
 
         void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
 
@@ -137,8 +137,6 @@ namespace Resource
             LightBuffer,
             PostProcessor
         };
-        void setLightingMethod(SceneUtil::LightingMethod method);
-        SceneUtil::LightingMethod getLightingMethod() const;
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
         void setAdjustCoverageForAlphaTest(bool adjustCoverage);
@@ -250,8 +248,7 @@ namespace Resource
         float mMaxAnisotropy;
 
         unsigned int mParticleSystemMask;
-        SceneUtil::LightingMethod mLightingMethod;
-        SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
+        bool mSupportsClusteredLighting = false;
         bool mAutoUseNormalMaps = false;
         bool mAutoUseSpecularMaps = false;
         bool mConvertAlphaTestToAlphaToCoverage = false;

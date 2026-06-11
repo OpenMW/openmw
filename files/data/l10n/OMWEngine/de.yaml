@@ -131,10 +131,8 @@ InvertXAxis: "X-Achse invertieren"
 InvertYAxis: "Y-Achse invertieren"
 Language: "Sprache"
 LanguageNote: "Hinweis: Diese Einstellungen wirken sich nicht auf Texte aus ESM-Dateien aus."
-LightingMethod: "Beleuchtungsmethode"
-LightingMethodShaders: "Shader"
-LightingMethodShadersCompatibility: "Shader (Kompatibilitätsmodus)"
-LightingResetToDefaults: "Einstellungen wirklich zurücksetzen? Das Ändern der „Beleuchtungsmethode“ erfordert einen Neustart."
+LightsClusteredLighting: "Cluster-Beleuchtung"
+LightingResetToDefaults: "Einstellungen wirklich zurücksetzen?"
 Lights: "Beleuchtung"
 LightRadiusMultiplier: "Multiplikator für den Punktlichtradius"
 LightRadiusMultiplierValue: "Multiplikator für den Punktlichtradius ({value, number, ::.00})"
@@ -142,10 +140,15 @@ LightRadiusMultiplierTooltip: "Standard: 1,75\nMultiplikator für den Punktlicht
 LightsFadeStartMultiplier: "Multiplikator für Startwert der Lichtabblendung"
 LightsFadeStartMultiplierValue: "Multiplikator für Startwert der Lichtabblendung ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Standard: 0,85\nBruchteil der maximalen Lichtreichweite, bei der Lichtquellen langsam zu verblassen beginnen.\n\nKleinere Werte führen zu einem sanfteren Übergang, der allerdings bereits bei geringerer Entfernung startet; größere Werte machen den Übergang abrupter, betreffen aber nur weiter entfernte Lichtquellen."
-LightsLightingMethodTooltip: "Legt die interne Behandlung von Lichtquellen fest.\n\n
-   „Shader (Kompatibilitätsmodus)“ Es wird empfohlen, diese Option für ältere Hardware und Maximalwerte für Lichtquellen nahe 8 zu verwenden.\n\n
-   „Shader“ bietet alle Vorteile von „Shader (Kompatibilitätsmodus)“, nutzt aber einen moderneren Ansatz, der größere Maximalwerte für Lichtquellen bei geringen bis keinen Leistungseinbußen ermöglicht. Funktioniert möglicherweise nicht auf älterer Hardware."
-LightsMaximumDistance: "Maximale Lichtreichweite"
+LightsClusteredLightingTooltip: |-
+ Aktiviert Cluster-Beleuchtung.
+ Unterteilt den Bildschirm in Bereiche, um Lichtquellen zuzuweisen, wodurch die Begrenzung der Lichtanzahl pro Objekt entfällt.
+
+ Die Optionen für klassischen Lichtabfall und maximale Lichtanzahl gelten in diesem Modus nicht.
+
+ Aktiviert spiegelnde Highlights von Punktlichtern auf der Wasseroberfläche, wenn der Wassershader aktiviert ist.
+
+ Es wird dringend empfohlen, dies zusammen mit Per-Pixel-Beleuchtung zu verwenden, da Vertex-Beleuchtung zu sichtbarem Licht-Popping an den Bildschirmrändern führen kann.
 LightsMaximumDistanceValue: "Maximale Lichtreichweite ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Standard: 8192 (1 Zelle)\nMaximale Entfernung, bis zu der Lichtquellen noch dargestellt werden (gemessen in In-Game-Einheiten).\n\nEin Wert von 0 entspricht einer unbegrenzten Reichweite."
 LightsMinimumInteriorBrightness: "Minimale Helligkeit in Innenräumen"
@@ -163,6 +166,8 @@ MaxLightsTooltip: "Standard: 16\nMaximale Anzahl von Lichtquellen, die ein Objek
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"
 MenuTransparency: "Menü-Transparenz"
 MouseAndKeyboard: "Maus/Tastatur"
+ParticlePointLighting: "Partikel-Punktlichtbeleuchtung"
+ParticlePointLightingTooltip: "Ermöglicht die Beleuchtung von Partikelsystemen durch Punktlichter."
 PostProcessing: "Post-Processing"
 PostProcessingIsNotEnabled: "Post-Processing ist nicht aktiviert!"
 PostProcessingTooltip: "Wird über Post-Processing-HUD konfiguriert (siehe Tastenbelegung)."
