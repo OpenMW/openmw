@@ -75,7 +75,7 @@ namespace SDLUtil
         Sint32 mMouseZ;
         Sint32 mMouseX;
         Sint32 mMouseY;
-        float mPendingWheelY;
+        double mPendingWheelY;
 
         bool mWindowHasFocus;
         bool mMouseInWindow;

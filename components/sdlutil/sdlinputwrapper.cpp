@@ -440,7 +440,7 @@ namespace SDLUtil
         }
         else if (evt.type == SDL_MOUSEWHEEL)
         {
-            float preciseY = evt.wheel.preciseY;
+            double preciseY = evt.wheel.preciseY;
 
             mPendingWheelY += preciseY * 120.0;
             const int zrel = static_cast<int>(mPendingWheelY);
