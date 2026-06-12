@@ -724,7 +724,7 @@
                                 <Widget type="TextBox" skin="NormalText" position_real="0 0 1 1" align="Stretch" name="LightRadiusMultText">
                                     <UserString key="ToolTipType" value="Layout"/>
                                     <UserString key="ToolTipLayout" value="TextToolTip"/>
-                                    <UserString key="Caption_Text" value="#{OMWEngine:LightsRadiusMultiplierTooltip}"/>
+                                    <UserString key="Caption_Text" value="#{OMWEngine:LightRadiusMultiplierTooltip}"/>
                                 </Widget>
                             </Widget>
                             <Widget type="ScrollBar" skin="MW_HScroll" position="0 0 0 18" align="HStretch Top">

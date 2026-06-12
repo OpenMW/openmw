@@ -620,6 +620,17 @@ namespace Shader
     void ShaderManager::setGlobalDefines(DefineMap& globalDefines)
     {
         mGlobalDefines = globalDefines;
+        // clear out linked dependencies - changing defines may make them obsolete
+        for (const auto& [pair, program] : mPrograms)
+        {
+            for (unsigned int i = 0; i < program->getNumShaders();)
+            {
+                if (program->getShader(i) != pair.first && program->getShader(i) != pair.second)
+                    program->removeShader(program->getShader(i));
+                else
+                    ++i;
+            }
+        }
         for (const auto& [key, shader] : mShaders)
         {
             std::string templateId = key.first;
@@ -638,6 +649,11 @@ namespace Shader
             shader->setShaderSource(shaderSource);
 
             getLinkedShaders(shader, linkedShaderNames, defines);
+        }
+        for (const auto& [pair, program] : mPrograms)
+        {
+            addLinkedShaders(pair.first, program);
+            addLinkedShaders(pair.second, program);
         }
     }
 

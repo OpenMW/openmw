@@ -3,6 +3,8 @@
 
 @link "lib/core/fragment.glsl" if !@useOVR_multiview
 @link "lib/core/fragment_multiview.glsl" if @useOVR_multiview
+@link "lib/core/lighting_fragment.glsl" if @lightingMethodClustered
+@link "lib/core/lighting_fragment_legacy.glsl" if !@lightingMethodClustered
 
 vec4 sampleReflectionMap(vec2 uv);
 

@@ -4,6 +4,8 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#include "lib/core/fragment.h.glsl"
+
 #define GROUNDCOVER
 
 #if @diffuseMap
