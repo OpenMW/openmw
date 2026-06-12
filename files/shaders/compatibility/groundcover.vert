@@ -29,8 +29,9 @@ varying float linearDepth;
 #if PER_PIXEL_LIGHTING
 varying vec3 passViewPos;
 #else
+centroid varying vec3 shadedLighting;
 centroid varying vec3 passLighting;
-centroid varying vec3 shadowDiffuseLighting;
+#include "lib/light/clamp.glsl"
 #endif
 
 varying vec3 passNormal;
@@ -166,10 +167,15 @@ void main(void)
 #if PER_PIXEL_LIGHTING
     passViewPos = viewPos.xyz;
 #else
-    vec3 diffuseLight, ambientLight, specularLight;
-    vec3 unusedShadowSpecular;
-    doLighting(clipToScreen(gl_Position), viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, unusedShadowSpecular);
-    passLighting = diffuseLight + ambientLight;
+    float shininess = max(1e-4, gl_FrontMaterial.shininess);
+    vec3 viewDir = viewPos.xyz / euclideanDepth;
+
+    vec3 sunDiffuse, sunAmbient, unusedSpecular1, pointDiffuse, pointAmbient, unusedSpecular2;
+    directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, unusedSpecular1);
+    pointLighting(clipToScreen(gl_Position), viewDir, viewPos.xyz, viewNormal, shininess, pointDiffuse, pointAmbient, unusedSpecular2);
+    shadedLighting = pointDiffuse + pointAmbient + sunAmbient;
+    passLighting = shadedLighting + sunDiffuse;
+    clampLighting(shadedLighting);
     clampLighting(passLighting);
 #endif
 

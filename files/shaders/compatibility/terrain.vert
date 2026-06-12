@@ -12,11 +12,13 @@ varying float linearDepth;
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
+centroid varying vec3 shadedLighting;
+centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-centroid varying vec3 shadowDiffuseLighting;
-centroid varying vec3 shadowSpecularLighting;
+#include "lib/light/clamp.glsl"
 #endif
+
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
@@ -24,7 +26,6 @@ varying vec3 passNormal;
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
 
-#include "lib/light/clamp.glsl"
 #include "lib/view/depth.glsl"
 
 void main(void)
@@ -52,13 +53,22 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(clipToScreen(gl_Position), viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, shadowSpecularLighting);
-    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
-    passSpecular = getSpecularColor().xyz * specularLight;
+    float shininess = max(1e-4, gl_FrontMaterial.shininess);
+    vec3 viewDir = passViewPos / euclideanDepth;
+    vec3 diffuseColor = getDiffuseColor().rgb;
+    vec3 ambientColor = getAmbientColor().rgb;
+    vec3 emissionColor = getEmissionColor().rgb;
+    vec3 specularColor = getSpecularColor().rgb;
+
+    vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
+    directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);
+    pointLighting(clipToScreen(gl_Position), viewDir, passViewPos, viewNormal, shininess, pointDiffuse, pointAmbient, pointSpecular);
+    shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor;
+    shadedSpecular = specularColor * pointSpecular;
+    passLighting = shadedLighting + diffuseColor * sunDiffuse;
+    passSpecular = shadedSpecular + specularColor * sunSpecular;
+    clampLighting(shadedLighting);
     clampLighting(passLighting);
-    shadowDiffuseLighting *= getDiffuseColor().xyz;
-    shadowSpecularLighting *= getSpecularColor().xyz;
 #endif
 
     uv = gl_MultiTexCoord0.xy;
