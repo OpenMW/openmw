@@ -196,7 +196,7 @@ namespace MWGui
 
     MWGui::LocalMapBase::MapEntry& LocalMapBase::addMapEntry()
     {
-        const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
+        const int mapWidgetSize = static_cast<int>(getWidgetSize());
         MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>(
             "ImageBox", MyGUI::IntCoord(0, 0, mapWidgetSize, mapWidgetSize), MyGUI::Align::Top | MyGUI::Align::Left);
         map->setDepth(Local_MapLayer);
@@ -218,7 +218,7 @@ namespace MWGui
         mCompass = compass;
         mGrid = createRect({ 0, 0 }, cellDistance);
 
-        const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
+        const int mapWidgetSize = static_cast<int>(getWidgetSize());
         setCanvasSize(mLocalMap, mGrid, mapWidgetSize);
 
         mCompass->setDepth(Local_CompassLayer);
