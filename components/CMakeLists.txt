@@ -111,6 +111,10 @@ add_component_dir (bgsm
     stream file
     )
 
+add_component_dir (spt
+    stream file
+    )
+
 add_component_dir (bsa
     bsafile compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
