@@ -844,7 +844,8 @@ namespace Resource
         else if (ext == "spt")
         {
             sptFileManager->get(normalizedFilename);
-            return new osg::Node();
+            throw std::runtime_error(
+                std::format("SPT model construction is not yet implemented: {}", normalizedFilename.value()));
         }
         else
             return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
