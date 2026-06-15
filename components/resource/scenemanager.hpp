@@ -33,6 +33,7 @@ namespace Resource
     class ImageManager;
     class NifFileManager;
     class BgsmFileManager;
+    class SptFileManager;
     class SharedStateManager;
 }
 
@@ -56,7 +57,8 @@ namespace Resource
     {
     public:
         explicit SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
-            Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager, double expiryDelay);
+            Resource::NifFileManager* nifFileManager, Resource::BgsmFileManager* bgsmFileManager,
+            Resource::SptFileManager* sptFileManager, double expiryDelay);
         ~SceneManager();
 
         Shader::ShaderManager& getShaderManager();
@@ -207,6 +209,7 @@ namespace Resource
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
         Resource::BgsmFileManager* mBgsmFileManager;
+        Resource::SptFileManager* mSptFileManager;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
         mutable osg::ref_ptr<osg::Node> mErrorMarker;
         mutable std::once_flag mErrorMarkerFlag;

@@ -2,18 +2,17 @@
 #define OPENMW_COMPONENTS_SPT_FILE_HPP
 
 #include <memory>
+#include <string>
 
 #include <components/files/istreamptr.hpp>
 
 namespace Spt
 {
-    class SPTStream;
-
     struct SPTFile
     {
+        std::string mVersionId;
+
         SPTFile() = default;
-        virtual void read(SPTStream& stream);
-        virtual ~SPTFile() = default;
     };
 
     using SPTFilePtr = std::shared_ptr<const Spt::SPTFile>;
