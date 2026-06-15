@@ -32,6 +32,8 @@
 
 #include <components/nif/niffile.hpp>
 
+#include <components/sptosg/sptloader.hpp>
+
 #include <components/misc/algorithm.hpp>
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/pathhelpers.hpp>
@@ -842,11 +844,7 @@ namespace Resource
         if (ext == "nif")
             return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager, materialMgr);
         else if (ext == "spt")
-        {
-            sptFileManager->get(normalizedFilename);
-            throw std::runtime_error(
-                std::format("SPT model construction is not yet implemented: {}", normalizedFilename.value()));
-        }
+            return SptOsg::Loader::load(*sptFileManager->get(normalizedFilename));
         else
             return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }
