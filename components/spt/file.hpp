@@ -11,6 +11,9 @@ namespace Spt
     struct SPTFile
     {
         std::string mVersionId;
+        std::string mTextureMap;
+        float mLodFarDistance{};
+        int8_t mUnknown2002{};
 
         SPTFile() = default;
     };
