@@ -440,6 +440,102 @@ namespace Spt
         }
     }
 
+    void SPTFrondTextureMap::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 14001)
+                return;
+            switch (section)
+            {
+                case 14002:
+                    mFilename = stream.readIntString();
+                    break;
+                case 14003:
+                    mUnknown14003 = stream.readFloat();
+                    break;
+                case 14004:
+                    mSizeFactor = stream.readFloat();
+                    break;
+                case 14005:
+                    mMinOffsetAngle = stream.readFloat();
+                    break;
+                case 14006:
+                    mMaxOffsetAngle = stream.readFloat();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in frond texture map block", section));
+            }
+        }
+    }
+
+    void SPTFrondData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 13001)
+                return;
+            switch (section)
+            {
+                case 13002:
+                    mGenerationLevel = stream.readInt();
+                    break;
+                case 13003:
+                    mBladesOrExtruded = stream.readInt();
+                    break;
+                case 13004:
+                    mBladeCount = stream.readInt();
+                    break;
+                case 13005:
+                    mExtrudedProfile = stream.readIntString();
+                    break;
+                case 13006:
+                    mExtrudedSegments = stream.readInt();
+                    break;
+                case 13007:
+                    mEnabled = stream.readByte();
+                    break;
+                case 13008:
+                    mNumTextureMaps = stream.readInt();
+                    break;
+                case 13009:
+                    mNumLods = stream.readInt();
+                    break;
+                case 13010:
+                    mMaxArea = stream.readFloat();
+                    break;
+                case 13011:
+                    mMinArea = stream.readFloat();
+                    break;
+                case 13012:
+                    mFuzziness = stream.readFloat();
+                    break;
+                case 13013:
+                    mRetention = stream.readFloat();
+                    break;
+                case 14007:
+                    mMinExtrusionSegLength = stream.readInt();
+                    break;
+                case 14008:
+                    mMinExtrusionSegProfile = stream.readInt();
+                    break;
+                case 14000:
+                {
+                    SPTFrondTextureMap tex;
+                    tex.read(stream);
+                    mTextureMaps.push_back(std::move(tex));
+                    break;
+                }
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in frond block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -492,6 +588,9 @@ namespace Spt
                     break;
                 case 10000:
                     file->mCompositeMap.read(stream);
+                    break;
+                case 13000:
+                    file->mFrond.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));

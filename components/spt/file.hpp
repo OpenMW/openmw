@@ -140,6 +140,38 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTFrondTextureMap
+    {
+        std::string mFilename;
+        float mUnknown14003{};
+        float mSizeFactor{};
+        float mMinOffsetAngle{};
+        float mMaxOffsetAngle{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTFrondData
+    {
+        int32_t mGenerationLevel{};
+        int32_t mBladesOrExtruded{};
+        int32_t mBladeCount{};
+        std::string mExtrudedProfile;
+        int32_t mExtrudedSegments{};
+        int8_t mEnabled{};
+        int32_t mNumTextureMaps{};
+        int32_t mNumLods{};
+        float mMaxArea{};
+        float mMinArea{};
+        float mFuzziness{};
+        float mRetention{};
+        int32_t mMinExtrusionSegLength{};
+        int32_t mMinExtrusionSegProfile{};
+        std::vector<SPTFrondTextureMap> mTextureMaps;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -165,6 +197,7 @@ namespace Spt
         SPTLodData mLod;
         SPTWindData mWind;
         SPTCompositeMapData mCompositeMap;
+        SPTFrondData mFrond;
 
         SPTFile() = default;
     };
