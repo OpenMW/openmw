@@ -635,6 +635,34 @@ namespace Spt
         }
     }
 
+    void SPTShadowData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 18001)
+                return;
+            switch (section)
+            {
+                case 18002:
+                    stream.readVec3f(mUnknown18002);
+                    break;
+                case 18003:
+                    stream.readVec3f(mUnknown18003);
+                    break;
+                case 18004:
+                    stream.readVec3f(mUnknown18004);
+                    break;
+                case 18005:
+                    mSelfShadowMap = stream.readIntString();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in shadow block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -705,6 +733,9 @@ namespace Spt
                     break;
                 case 16014:
                     file->mLod.mLeafTransition = stream.readFloat();
+                    break;
+                case 18000:
+                    file->mShadow.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));

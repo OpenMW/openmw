@@ -228,6 +228,16 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTShadowData
+    {
+        osg::Vec3f mUnknown18002;
+        osg::Vec3f mUnknown18003;
+        osg::Vec3f mUnknown18004;
+        std::string mSelfShadowMap;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -257,6 +267,7 @@ namespace Spt
         SPTCollisionData mCollision;
         SPTTrunkTilingData mTrunkTiling;
         SPTFlaresData mFlares;
+        SPTShadowData mShadow;
 
         SPTFile() = default;
     };
