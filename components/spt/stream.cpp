@@ -26,6 +26,11 @@ namespace Spt
         }
     }
 
+    SPTEOFError::SPTEOFError()
+        : std::runtime_error("SPT stream EOF")
+    {
+    }
+
     SPTStream::SPTStream(Files::IStreamPtr&& stream)
         : mStream(std::move(stream))
     {
@@ -87,6 +92,8 @@ namespace Spt
 
     int32_t SPTStream::readSection()
     {
+        if (mStream->peek() == std::char_traits<char>::eof())
+            throw SPTEOFError();
         return readInt();
     }
 

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <stdexcept>
 #include <string>
 
 #include <components/files/istreamptr.hpp>
@@ -13,6 +14,11 @@
 
 namespace Spt
 {
+    struct SPTEOFError : std::runtime_error
+    {
+        SPTEOFError();
+    };
+
     class SPTStream
     {
         Files::IStreamPtr mStream;

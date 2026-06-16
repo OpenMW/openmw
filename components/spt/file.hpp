@@ -288,6 +288,9 @@ namespace Spt
         SPTShadowData mShadow;
         SPTShadowRelatedData mShadowRelated;
         SPTGlobalCompositeMapData mCompositeMapGlobal;
+        float mLeafRockAngleScalar{};
+        float mLeafRustleAngleScalar{};
+        uint8_t mBranchWeightingFlexibility{};
 
         SPTFile() = default;
     };

@@ -139,16 +139,30 @@ namespace Spt
                 return;
             switch (section)
             {
-                case 5000: stream.skip(12); break;
-                case 5001: stream.skip(12); break;
-                case 5002: stream.skip(12); break;
-                case 5003: stream.skip(12); break;
-                case 5004: stream.skip(12); break;
-                case 5005: stream.skip(4); break;
-                case 5006: stream.skip(1); break;
+                case 5000:
+                    stream.skip(12);
+                    break;
+                case 5001:
+                    stream.skip(12);
+                    break;
+                case 5002:
+                    stream.skip(12);
+                    break;
+                case 5003:
+                    stream.skip(12);
+                    break;
+                case 5004:
+                    stream.skip(12);
+                    break;
+                case 5005:
+                    stream.skip(4);
+                    break;
+                case 5006:
+                    stream.skip(1);
+                    break;
                 default:
-                    throw std::runtime_error(std::format(
-                        "Unknown section {} in discarded block ending at {}", section, endSection));
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in discarded block ending at {}", section, endSection));
             }
         }
     }
@@ -187,8 +201,7 @@ namespace Spt
                     tex.mUnknown4007 = stream.readFloat();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in leaf texture map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in leaf texture map block", section));
             }
         }
     }
@@ -254,14 +267,12 @@ namespace Spt
                                 break;
                             }
                             default:
-                                throw std::runtime_error(
-                                    std::format("Unknown section {} in leaf 1009 block", inner));
+                                throw std::runtime_error(std::format("Unknown section {} in leaf 1009 block", inner));
                         }
                     }
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in leaf properties block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in leaf properties block", section));
             }
         }
     }
@@ -309,8 +320,7 @@ namespace Spt
                     mFrondMaterial.read(stream);
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in lighting block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in lighting block", section));
             }
         }
     }
@@ -346,8 +356,7 @@ namespace Spt
                     mBranchRetention = stream.readFloat();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in LOD branches block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in LOD branches block", section));
             }
         }
     }
@@ -377,8 +386,7 @@ namespace Spt
                     mBranches.read(stream);
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in LOD block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in LOD block", section));
             }
         }
     }
@@ -396,8 +404,7 @@ namespace Spt
                     mFirstWindLevel = stream.readInt();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in wind block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in wind block", section));
             }
         }
     }
@@ -434,8 +441,7 @@ namespace Spt
                     mFrondQuads = readQuads(stream);
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in composite map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in composite map block", section));
             }
         }
     }
@@ -465,8 +471,7 @@ namespace Spt
                     mMaxOffsetAngle = stream.readFloat();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in frond texture map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in frond texture map block", section));
             }
         }
     }
@@ -530,8 +535,7 @@ namespace Spt
                     break;
                 }
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in frond block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in frond block", section));
             }
         }
     }
@@ -574,8 +578,7 @@ namespace Spt
                     break;
                 }
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in collision block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in collision block", section));
             }
         }
     }
@@ -588,14 +591,12 @@ namespace Spt
             if (section == 15001)
                 return;
             if (section != 15002)
-                throw std::runtime_error(
-                    std::format("Expected section 15002, got {}", section));
+                throw std::runtime_error(std::format("Expected section 15002, got {}", section));
             SPTTrunkTilingEntry entry;
             entry.mRandomVOffset = stream.readByte();
             section = stream.readSection();
             if (section != 15003)
-                throw std::runtime_error(
-                    std::format("Expected section 15003, got {}", section));
+                throw std::runtime_error(std::format("Expected section 15003, got {}", section));
             entry.mTwist = stream.readFloat();
             mEntries.push_back(std::move(entry));
         }
@@ -613,24 +614,43 @@ namespace Spt
 
             switch (section)
             {
-                case 16002: entry.mSegmentsPack = stream.readFloat(); break;
-                case 16003: entry.mFlaresNumber = stream.readInt(); break;
-                case 16004: entry.mFlaresBalance = stream.readFloat(); break;
-                case 16005: entry.mRadialInfluence = stream.readFloat(); break;
-                case 16006: entry.mRadialInfluenceVariance = stream.readFloat(); break;
-                case 16007: entry.mRadialExponent = stream.readFloat(); break;
-                case 16008: entry.mRadialDistance = stream.readFloat(); break;
-                case 16009: entry.mRadialDistanceVariance = stream.readFloat(); break;
-                case 16010: entry.mLengthDistance = stream.readFloat(); break;
-                case 16011: entry.mLengthDistanceVariance = stream.readFloat(); break;
+                case 16002:
+                    entry.mSegmentsPack = stream.readFloat();
+                    break;
+                case 16003:
+                    entry.mFlaresNumber = stream.readInt();
+                    break;
+                case 16004:
+                    entry.mFlaresBalance = stream.readFloat();
+                    break;
+                case 16005:
+                    entry.mRadialInfluence = stream.readFloat();
+                    break;
+                case 16006:
+                    entry.mRadialInfluenceVariance = stream.readFloat();
+                    break;
+                case 16007:
+                    entry.mRadialExponent = stream.readFloat();
+                    break;
+                case 16008:
+                    entry.mRadialDistance = stream.readFloat();
+                    break;
+                case 16009:
+                    entry.mRadialDistanceVariance = stream.readFloat();
+                    break;
+                case 16010:
+                    entry.mLengthDistance = stream.readFloat();
+                    break;
+                case 16011:
+                    entry.mLengthDistanceVariance = stream.readFloat();
+                    break;
                 case 16012:
                     entry.mLengthExponent = stream.readFloat();
                     mEntries.push_back(std::move(entry));
                     entry = {};
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in flares block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in flares block", section));
             }
         }
     }
@@ -657,8 +677,7 @@ namespace Spt
                     mSelfShadowMap = stream.readIntString();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in shadow block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in shadow block", section));
             }
         }
     }
@@ -676,8 +695,7 @@ namespace Spt
                     mUnknown19002 = stream.readInt();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in shadow related block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in shadow related block", section));
             }
         }
     }
@@ -705,8 +723,7 @@ namespace Spt
                         stream.readVec2f(tc);
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in global composite map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in global composite map block", section));
             }
         }
     }
@@ -746,7 +763,15 @@ namespace Spt
 
         while (true)
         {
-            int32_t section = stream.readSection();
+            int32_t section;
+            try
+            {
+                section = stream.readSection();
+            }
+            catch (const SPTEOFError&)
+            {
+                break;
+            }
             switch (section)
             {
                 case 1000:
@@ -791,9 +816,19 @@ namespace Spt
                 case 20000:
                     file->mCompositeMapGlobal.read(stream);
                     break;
+                case 21000:
+                    file->mLeafRockAngleScalar = stream.readFloat();
+                    break;
+                case 21001:
+                    file->mLeafRustleAngleScalar = stream.readFloat();
+                    break;
+                case 22000:
+                    file->mBranchWeightingFlexibility = stream.readByte();
+                    break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
             }
         }
+        return file;
     }
 }
