@@ -601,6 +601,40 @@ namespace Spt
         }
     }
 
+    void SPTFlaresData::read(SPTStream& stream)
+    {
+        SPTFlaresEntry entry;
+
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 16001)
+                return;
+
+            switch (section)
+            {
+                case 16002: entry.mSegmentsPack = stream.readFloat(); break;
+                case 16003: entry.mFlaresNumber = stream.readInt(); break;
+                case 16004: entry.mFlaresBalance = stream.readFloat(); break;
+                case 16005: entry.mRadialInfluence = stream.readFloat(); break;
+                case 16006: entry.mRadialInfluenceVariance = stream.readFloat(); break;
+                case 16007: entry.mRadialExponent = stream.readFloat(); break;
+                case 16008: entry.mRadialDistance = stream.readFloat(); break;
+                case 16009: entry.mRadialDistanceVariance = stream.readFloat(); break;
+                case 16010: entry.mLengthDistance = stream.readFloat(); break;
+                case 16011: entry.mLengthDistanceVariance = stream.readFloat(); break;
+                case 16012:
+                    entry.mLengthExponent = stream.readFloat();
+                    mEntries.push_back(std::move(entry));
+                    entry = {};
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in flares block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -662,6 +696,9 @@ namespace Spt
                     break;
                 case 15000:
                     file->mTrunkTiling.read(stream);
+                    break;
+                case 16000:
+                    file->mFlares.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));

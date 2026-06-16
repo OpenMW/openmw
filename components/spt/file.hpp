@@ -204,6 +204,28 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTFlaresEntry
+    {
+        float mSegmentsPack{};
+        int32_t mFlaresNumber{};
+        float mFlaresBalance{};
+        float mRadialInfluence{};
+        float mRadialInfluenceVariance{};
+        float mRadialExponent{};
+        float mRadialDistance{};
+        float mRadialDistanceVariance{};
+        float mLengthDistance{};
+        float mLengthDistanceVariance{};
+        float mLengthExponent{};
+    };
+
+    struct SPTFlaresData
+    {
+        std::vector<SPTFlaresEntry> mEntries;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -232,6 +254,7 @@ namespace Spt
         SPTFrondData mFrond;
         SPTCollisionData mCollision;
         SPTTrunkTilingData mTrunkTiling;
+        SPTFlaresData mFlares;
 
         SPTFile() = default;
     };
