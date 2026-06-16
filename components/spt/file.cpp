@@ -682,6 +682,35 @@ namespace Spt
         }
     }
 
+    void SPTGlobalCompositeMapData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 20001)
+                return;
+            switch (section)
+            {
+                case 20002:
+                    mFilename = stream.readIntString();
+                    break;
+                case 20003:
+                    mUnknown20003 = stream.readByte();
+                    break;
+                case 20004:
+                    mUnknown20004 = stream.readByte();
+                    break;
+                case 20005:
+                    for (auto& tc : mTexCoords)
+                        stream.readVec2f(tc);
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in global composite map block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -758,6 +787,9 @@ namespace Spt
                     break;
                 case 19000:
                     file->mShadowRelated.read(stream);
+                    break;
+                case 20000:
+                    file->mCompositeMapGlobal.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));

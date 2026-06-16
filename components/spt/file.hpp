@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SPT_FILE_HPP
 #define OPENMW_COMPONENTS_SPT_FILE_HPP
 
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -245,6 +246,16 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTGlobalCompositeMapData
+    {
+        std::string mFilename;
+        uint8_t mUnknown20003{};
+        uint8_t mUnknown20004{};
+        std::array<osg::Vec2f, 4> mTexCoords;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -276,6 +287,7 @@ namespace Spt
         SPTFlaresData mFlares;
         SPTShadowData mShadow;
         SPTShadowRelatedData mShadowRelated;
+        SPTGlobalCompositeMapData mCompositeMapGlobal;
 
         SPTFile() = default;
     };
