@@ -97,6 +97,30 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTLodBranchesData
+    {
+        int32_t mBranchNumLods{};
+        float mBranchMinVol{};
+        float mLeafReduction{};
+        int32_t mLeafNumLods{};
+        float mBranchMaxVol{};
+        float mBranchFuzziness{};
+        float mBranchRetention{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLodData
+    {
+        int32_t mLeafTransitionMethod{};
+        float mLeafRadius{};
+        float mLeafExponent{};
+        float mLeafSize{};
+        SPTLodBranchesData mBranches;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -119,6 +143,7 @@ namespace Spt
     {
         SPTHeader mHeader;
         SPTLightingData mLighting;
+        SPTLodData mLod;
 
         SPTFile() = default;
     };

@@ -315,6 +315,74 @@ namespace Spt
         }
     }
 
+    void SPTLodBranchesData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 9006)
+                return;
+            switch (section)
+            {
+                case 9007:
+                    mBranchNumLods = stream.readInt();
+                    break;
+                case 9008:
+                    mBranchMinVol = stream.readFloat();
+                    break;
+                case 9010:
+                    mLeafReduction = stream.readFloat();
+                    break;
+                case 9011:
+                    mLeafNumLods = stream.readInt();
+                    break;
+                case 9012:
+                    mBranchMaxVol = stream.readFloat();
+                    break;
+                case 9013:
+                    mBranchFuzziness = stream.readFloat();
+                    break;
+                case 9014:
+                    mBranchRetention = stream.readFloat();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in LOD branches block", section));
+            }
+        }
+    }
+
+    void SPTLodData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 9001)
+                return;
+            switch (section)
+            {
+                case 9002:
+                    mLeafTransitionMethod = stream.readInt();
+                    break;
+                case 9003:
+                    mLeafRadius = stream.readFloat();
+                    break;
+                case 9004:
+                    mLeafExponent = stream.readFloat();
+                    break;
+                case 9009:
+                    mLeafSize = stream.readFloat();
+                    break;
+                case 9005:
+                    mBranches.read(stream);
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in LOD block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -358,6 +426,9 @@ namespace Spt
                     break;
                 case 8000:
                     file->mLighting.read(stream);
+                    break;
+                case 9000:
+                    file->mLod.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
