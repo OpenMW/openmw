@@ -190,8 +190,7 @@ namespace Spt
                     file->mBranchWeightingFlexibility = stream.readByte();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown top-level section {} in SPT file", section));
+                    throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
             }
         }
         return file;

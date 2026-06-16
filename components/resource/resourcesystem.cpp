@@ -21,8 +21,8 @@ namespace Resource
         mBgsmFileManager = std::make_unique<BgsmFileManager>(vfs, expiryDelay);
         mSptFileManager = std::make_unique<SptFileManager>(vfs, expiryDelay);
         mImageManager = std::make_unique<ImageManager>(vfs, expiryDelay);
-        mSceneManager = std::make_unique<SceneManager>(
-            vfs, mImageManager.get(), mNifFileManager.get(), mBgsmFileManager.get(), mSptFileManager.get(), expiryDelay);
+        mSceneManager = std::make_unique<SceneManager>(vfs, mImageManager.get(), mNifFileManager.get(),
+            mBgsmFileManager.get(), mSptFileManager.get(), expiryDelay);
         mKeyframeManager = std::make_unique<KeyframeManager>(vfs, mSceneManager.get(), expiryDelay, encoder);
         mAnimBlendRulesManager = std::make_unique<AnimBlendRulesManager>(vfs, expiryDelay);
 
@@ -81,7 +81,7 @@ namespace Resource
     void ResourceSystem::setExpiryDelay(double expiryDelay)
     {
         for (std::vector<BaseResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end();
-             ++it)
+            ++it)
             (*it)->setExpiryDelay(expiryDelay);
 
         // NIF files aren't needed any more once the converted objects are cached in SceneManager / BulletShapeManager,
@@ -92,14 +92,14 @@ namespace Resource
     void ResourceSystem::updateCache(double referenceTime)
     {
         for (std::vector<BaseResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end();
-             ++it)
+            ++it)
             (*it)->updateCache(referenceTime);
     }
 
     void ResourceSystem::clearCache()
     {
         for (std::vector<BaseResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end();
-             ++it)
+            ++it)
             (*it)->clearCache();
     }
 
@@ -124,14 +124,14 @@ namespace Resource
     void ResourceSystem::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
         for (std::vector<BaseResourceManager*>::const_iterator it = mResourceManagers.begin();
-             it != mResourceManagers.end(); ++it)
+            it != mResourceManagers.end(); ++it)
             (*it)->reportStats(frameNumber, stats);
     }
 
     void ResourceSystem::releaseGLObjects(osg::State* state)
     {
         for (std::vector<BaseResourceManager*>::const_iterator it = mResourceManagers.begin();
-             it != mResourceManagers.end(); ++it)
+            it != mResourceManagers.end(); ++it)
             (*it)->releaseGLObjects(state);
     }
 

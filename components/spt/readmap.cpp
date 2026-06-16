@@ -68,8 +68,7 @@ namespace Spt
                         stream.readVec2f(tc);
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in global composite map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in global composite map block", section));
             }
         }
     }

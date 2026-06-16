@@ -181,9 +181,8 @@ namespace Spt
                                 break;
                             }
                             default:
-                                throw std::runtime_error(
-                                    std::format("Unknown section {} in leaf 1009 block", inner));
-                            }
+                                throw std::runtime_error(std::format("Unknown section {} in leaf 1009 block", inner));
+                        }
                     }
                     break;
                 default:
@@ -217,8 +216,7 @@ namespace Spt
                     mMaxOffsetAngle = stream.readFloat();
                     break;
                 default:
-                    throw std::runtime_error(
-                        std::format("Unknown section {} in frond texture map block", section));
+                    throw std::runtime_error(std::format("Unknown section {} in frond texture map block", section));
             }
         }
     }

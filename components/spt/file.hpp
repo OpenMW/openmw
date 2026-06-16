@@ -133,7 +133,10 @@ namespace Spt
 
     struct SPTCompositeMapData
     {
-        struct Quad { osg::Vec2f mCorners[4]; };
+        struct Quad
+        {
+            osg::Vec2f mCorners[4];
+        };
 
         std::vector<Quad> mLeafQuads;
         std::vector<Quad> mBillboardQuads;
@@ -174,7 +177,12 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
-    enum class SPTCollisionType { Sphere, Capsule, Box };
+    enum class SPTCollisionType
+    {
+        Sphere,
+        Capsule,
+        Box
+    };
 
     struct SPTCollisionObject
     {

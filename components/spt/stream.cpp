@@ -4,8 +4,8 @@
 #include <format>
 #include <istream>
 #include <stdexcept>
-#include <type_traits>
 #include <string>
+#include <type_traits>
 
 #include <components/misc/endianness.hpp>
 

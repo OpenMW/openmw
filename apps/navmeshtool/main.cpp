@@ -234,7 +234,8 @@ namespace NavMeshTool
             Resource::NifFileManager nifFileManager(&vfs, &encoder.getStatelessEncoder());
             Resource::BgsmFileManager bgsmFileManager(&vfs, expiryDelay);
             Resource::SptFileManager sptFileManager(&vfs, expiryDelay);
-            Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, &bgsmFileManager, &sptFileManager, expiryDelay);
+            Resource::SceneManager sceneManager(
+                &vfs, &imageManager, &nifFileManager, &bgsmFileManager, &sptFileManager, expiryDelay);
             Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
             DetourNavigator::RecastGlobalAllocator::init();
             DetourNavigator::Settings navigatorSettings
