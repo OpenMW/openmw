@@ -112,7 +112,7 @@ add_component_dir (bgsm
     )
 
 add_component_dir (spt
-    stream file
+    stream file readtree readprop readmap readmisc
     )
 
 add_component_dir (bsa
