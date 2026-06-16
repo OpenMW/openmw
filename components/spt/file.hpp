@@ -191,6 +191,19 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTTrunkTilingEntry
+    {
+        int8_t mRandomVOffset{};
+        float mTwist{};
+    };
+
+    struct SPTTrunkTilingData
+    {
+        std::vector<SPTTrunkTilingEntry> mEntries;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -218,6 +231,7 @@ namespace Spt
         SPTCompositeMapData mCompositeMap;
         SPTFrondData mFrond;
         SPTCollisionData mCollision;
+        SPTTrunkTilingData mTrunkTiling;
 
         SPTFile() = default;
     };

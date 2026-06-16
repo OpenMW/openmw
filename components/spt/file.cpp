@@ -580,6 +580,27 @@ namespace Spt
         }
     }
 
+    void SPTTrunkTilingData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 15001)
+                return;
+            if (section != 15002)
+                throw std::runtime_error(
+                    std::format("Expected section 15002, got {}", section));
+            SPTTrunkTilingEntry entry;
+            entry.mRandomVOffset = stream.readByte();
+            section = stream.readSection();
+            if (section != 15003)
+                throw std::runtime_error(
+                    std::format("Expected section 15003, got {}", section));
+            entry.mTwist = stream.readFloat();
+            mEntries.push_back(std::move(entry));
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -638,6 +659,9 @@ namespace Spt
                     break;
                 case 13000:
                     file->mFrond.read(stream);
+                    break;
+                case 15000:
+                    file->mTrunkTiling.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
