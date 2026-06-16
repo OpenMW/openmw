@@ -172,6 +172,25 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    enum class SPTCollisionType { Sphere, Capsule, Box };
+
+    struct SPTCollisionObject
+    {
+        SPTCollisionType mType{};
+        osg::Vec3f mPosition;
+        float mRadius{};
+        float mLength{};
+        osg::Vec3f mBoxMin;
+        osg::Vec3f mBoxMax;
+    };
+
+    struct SPTCollisionData
+    {
+        std::vector<SPTCollisionObject> mObjects;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -198,6 +217,7 @@ namespace Spt
         SPTWindData mWind;
         SPTCompositeMapData mCompositeMap;
         SPTFrondData mFrond;
+        SPTCollisionData mCollision;
 
         SPTFile() = default;
     };

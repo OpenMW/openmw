@@ -536,6 +536,50 @@ namespace Spt
         }
     }
 
+    void SPTCollisionData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 12001)
+                return;
+            switch (section)
+            {
+                case 12002:
+                {
+                    SPTCollisionObject obj;
+                    obj.mType = SPTCollisionType::Sphere;
+                    stream.readVec3f(obj.mPosition);
+                    obj.mRadius = stream.readFloat();
+                    mObjects.push_back(std::move(obj));
+                    break;
+                }
+                case 12003:
+                {
+                    SPTCollisionObject obj;
+                    obj.mType = SPTCollisionType::Capsule;
+                    stream.readVec3f(obj.mPosition);
+                    obj.mRadius = stream.readFloat();
+                    obj.mLength = stream.readFloat();
+                    mObjects.push_back(std::move(obj));
+                    break;
+                }
+                case 12004:
+                {
+                    SPTCollisionObject obj;
+                    obj.mType = SPTCollisionType::Box;
+                    stream.readVec3f(obj.mBoxMin);
+                    stream.readVec3f(obj.mBoxMax);
+                    mObjects.push_back(std::move(obj));
+                    break;
+                }
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in collision block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -588,6 +632,9 @@ namespace Spt
                     break;
                 case 10000:
                     file->mCompositeMap.read(stream);
+                    break;
+                case 12000:
+                    file->mCollision.read(stream);
                     break;
                 case 13000:
                     file->mFrond.read(stream);
