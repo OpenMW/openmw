@@ -72,6 +72,31 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTLightingMaterial
+    {
+        osg::Vec3f mDiffuse;
+        osg::Vec3f mAmbient;
+        osg::Vec3f mSpecular;
+        osg::Vec3f mEmissive;
+        float mShine{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTLightingData
+    {
+        int32_t mBranchStyle{};
+        SPTLightingMaterial mBranchMaterial;
+        int32_t mLeafStyle{};
+        SPTLightingMaterial mLeafMaterial;
+        float mLeafLightingAdjust{};
+        int32_t mLeafStaticShadows{};
+        int32_t mFrondStyle{};
+        SPTLightingMaterial mFrondMaterial;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -93,6 +118,7 @@ namespace Spt
     struct SPTFile
     {
         SPTHeader mHeader;
+        SPTLightingData mLighting;
 
         SPTFile() = default;
     };

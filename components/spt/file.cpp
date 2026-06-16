@@ -266,6 +266,55 @@ namespace Spt
         }
     }
 
+    void SPTLightingMaterial::read(SPTStream& stream)
+    {
+        stream.readVec3f(mDiffuse);
+        stream.readVec3f(mAmbient);
+        stream.readVec3f(mSpecular);
+        stream.readVec3f(mEmissive);
+        mShine = stream.readFloat();
+    }
+
+    void SPTLightingData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 8001)
+                return;
+            switch (section)
+            {
+                case 8002:
+                    mBranchStyle = stream.readInt();
+                    break;
+                case 8003:
+                    mBranchMaterial.read(stream);
+                    break;
+                case 8004:
+                    mLeafStyle = stream.readInt();
+                    break;
+                case 8005:
+                    mLeafMaterial.read(stream);
+                    break;
+                case 8006:
+                    mLeafLightingAdjust = stream.readFloat();
+                    break;
+                case 8007:
+                    mLeafStaticShadows = stream.readInt();
+                    break;
+                case 8008:
+                    mFrondStyle = stream.readInt();
+                    break;
+                case 8009:
+                    mFrondMaterial.read(stream);
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in lighting block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -306,6 +355,9 @@ namespace Spt
             {
                 case 1000:
                     file->mHeader.read(stream);
+                    break;
+                case 8000:
+                    file->mLighting.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
