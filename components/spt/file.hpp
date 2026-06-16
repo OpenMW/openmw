@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
@@ -121,6 +122,24 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTWindData
+    {
+        int32_t mFirstWindLevel{};
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTCompositeMapData
+    {
+        struct Quad { osg::Vec2f mCorners[4]; };
+
+        std::vector<Quad> mLeafQuads;
+        std::vector<Quad> mBillboardQuads;
+        std::vector<Quad> mFrondQuads;
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -144,6 +163,8 @@ namespace Spt
         SPTHeader mHeader;
         SPTLightingData mLighting;
         SPTLodData mLod;
+        SPTWindData mWind;
+        SPTCompositeMapData mCompositeMap;
 
         SPTFile() = default;
     };

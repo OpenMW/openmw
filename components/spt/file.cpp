@@ -383,6 +383,63 @@ namespace Spt
         }
     }
 
+    void SPTWindData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 11001)
+                return;
+            switch (section)
+            {
+                case 11002:
+                    mFirstWindLevel = stream.readInt();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in wind block", section));
+            }
+        }
+    }
+
+    namespace
+    {
+        std::vector<SPTCompositeMapData::Quad> readQuads(SPTStream& stream)
+        {
+            int32_t n = stream.readInt();
+            std::vector<SPTCompositeMapData::Quad> quads(n);
+            for (auto& quad : quads)
+                for (auto& corner : quad.mCorners)
+                    stream.readVec2f(corner);
+            return quads;
+        }
+    }
+
+    void SPTCompositeMapData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 10001)
+                return;
+            switch (section)
+            {
+                case 10002:
+                    mLeafQuads = readQuads(stream);
+                    break;
+                case 10003:
+                    mBillboardQuads = readQuads(stream);
+                    break;
+                case 10004:
+                    mFrondQuads = readQuads(stream);
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in composite map block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -429,6 +486,12 @@ namespace Spt
                     break;
                 case 9000:
                     file->mLod.read(stream);
+                    break;
+                case 11000:
+                    file->mWind.read(stream);
+                    break;
+                case 10000:
+                    file->mCompositeMap.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
