@@ -663,6 +663,25 @@ namespace Spt
         }
     }
 
+    void SPTShadowRelatedData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 19001)
+                return;
+            switch (section)
+            {
+                case 19002:
+                    mUnknown19002 = stream.readInt();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in shadow related block", section));
+            }
+        }
+    }
+
     void SPTHeader::read(SPTStream& stream)
     {
         mVersionId = stream.readIntString();
@@ -736,6 +755,9 @@ namespace Spt
                     break;
                 case 18000:
                     file->mShadow.read(stream);
+                    break;
+                case 19000:
+                    file->mShadowRelated.read(stream);
                     break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));

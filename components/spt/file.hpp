@@ -238,6 +238,13 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
+    struct SPTShadowRelatedData
+    {
+        int32_t mUnknown19002{};
+
+        void read(SPTStream& stream);
+    };
+
     struct SPTHeader
     {
         std::string mVersionId;
@@ -268,6 +275,7 @@ namespace Spt
         SPTTrunkTilingData mTrunkTiling;
         SPTFlaresData mFlares;
         SPTShadowData mShadow;
+        SPTShadowRelatedData mShadowRelated;
 
         SPTFile() = default;
     };
