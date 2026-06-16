@@ -81,68 +81,234 @@ namespace Spt
         }
     }
 
-    SPTFilePtr parse(Files::IStreamPtr&& inputStream)
+    void readTreeProperties(SPTHeader& header, SPTStream& stream)
     {
-        auto file = std::make_shared<SPTFile>();
-        SPTStream stream(std::move(inputStream));
-
-        {
-            int32_t section = stream.readSection();
-            if (section != 1000)
-                throw std::runtime_error(std::format("Expected SPT section 1000, got {}", section));
-            file->mVersionId = stream.readIntString();
-            if (file->mVersionId != "__IdvSpt_02_")
-                throw std::runtime_error(std::format("Unsupported SPT version '{}'", file->mVersionId));
-        }
-
-        {
-            int32_t section = stream.readSection();
-            if (section != 1002)
-                throw std::runtime_error(std::format("Expected SPT section 1002, got {}", section));
-        }
-
         while (true)
         {
             int32_t section = stream.readSection();
             switch (section)
             {
                 case 2000:
-                    file->mTextureMap = stream.readIntString();
+                    header.mTextureMap = stream.readIntString();
                     break;
                 case 2001:
-                    file->mLodFarDistance = stream.readFloat();
+                    header.mLodFarDistance = stream.readFloat();
                     break;
                 case 2002:
-                    file->mUnknown2002 = stream.readByte();
+                    header.mUnknown2002 = stream.readByte();
                     break;
                 case 2003:
-                    file->mLodNearDistance = stream.readFloat();
+                    header.mLodNearDistance = stream.readFloat();
                     break;
                 case 2005:
-                    file->mSeed = stream.readInt();
+                    header.mSeed = stream.readInt();
                     break;
                 case 2006:
-                    file->mSize = stream.readFloat();
+                    header.mSize = stream.readFloat();
                     break;
                 case 2007:
-                    file->mSizeVariance = stream.readFloat();
+                    header.mSizeVariance = stream.readFloat();
                     break;
                 case 1014:
-                    file->mNumLevels = stream.readInt();
+                    header.mNumLevels = stream.readInt();
                     break;
                 case 1015:
+                    // end of 1014 block, continue til 1003
                     break;
-                case 1016: // begin bezier spline block for one level
+                case 1016:
                 {
                     SPTLevelData level;
                     level.read(stream);
-                    file->mLevelData.push_back(std::move(level));
+                    header.mLevelData.push_back(std::move(level));
                     break;
                 }
                 case 1003:
-                    return file;
+                    return;
                 default:
-                    throw std::runtime_error(std::format("Unsupported section {} in SPT file", section));
+                    throw std::runtime_error(std::format("Unknown section {} in tree properties block", section));
+            }
+        }
+    }
+
+    void discardSections(SPTStream& stream, int32_t endSection)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == endSection)
+                return;
+            switch (section)
+            {
+                case 5000: stream.skip(12); break;
+                case 5001: stream.skip(12); break;
+                case 5002: stream.skip(12); break;
+                case 5003: stream.skip(12); break;
+                case 5004: stream.skip(12); break;
+                case 5005: stream.skip(4); break;
+                case 5006: stream.skip(1); break;
+                default:
+                    throw std::runtime_error(std::format(
+                        "Unknown section {} in discarded block ending at {}", section, endSection));
+            }
+        }
+    }
+
+    void readLeafTextureMap(SPTLeafTextureMap& tex, SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 1008)
+                return;
+            switch (section)
+            {
+                case 4000:
+                    tex.mMakeBlossom = stream.readByte();
+                    break;
+                case 4001:
+                    stream.readVec3f(tex.mColor);
+                    break;
+                case 4002:
+                    tex.mOrientationVariance = stream.readFloat();
+                    break;
+                case 4003:
+                    tex.mFilename = stream.readIntString();
+                    break;
+                case 4004:
+                    stream.readVec3f(tex.mOrigin);
+                    break;
+                case 4005:
+                    stream.readVec3f(tex.mSize);
+                    break;
+                case 4006:
+                    stream.readVec3f(tex.mUnknown4006);
+                    break;
+                case 4007:
+                    tex.mUnknown4007 = stream.readFloat();
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in leaf texture map block", section));
+            }
+        }
+    }
+
+    void SPTLeafData::read(SPTStream& stream)
+    {
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            if (section == 1005)
+                return;
+            switch (section)
+            {
+                case 3000:
+                    mBlossomDistance = stream.readFloat();
+                    break;
+                case 3001:
+                    mBlossomDepth = stream.readInt();
+                    break;
+                case 3002:
+                    mBlossomWeight = stream.readFloat();
+                    break;
+                case 3003:
+                    mUnknown3003 = stream.readByte();
+                    break;
+                case 3004:
+                    mUnknown3004 = stream.readFloat();
+                    break;
+                case 3009:
+                    mLightingDimmingToggle = stream.readByte();
+                    break;
+                case 3010:
+                    mLightingDimming = stream.readFloat();
+                    break;
+                case 3005:
+                    mUnknown3005 = stream.readFloat();
+                    break;
+                case 3006:
+                    mUnknown3006 = stream.readByte();
+                    break;
+                case 3007:
+                    mPlacementTolerance = stream.readFloat();
+                    break;
+                case 3008:
+                    mPlacementCollision = stream.readInt();
+                    break;
+                case 1009:
+                    while (true)
+                    {
+                        int32_t inner = stream.readSection();
+                        if (inner == 1010)
+                            break;
+                        switch (inner)
+                        {
+                            case 1006:
+                                mNumLeafTextures = stream.readInt();
+                                break;
+                            case 1007:
+                            {
+                                SPTLeafTextureMap tex;
+                                readLeafTextureMap(tex, stream);
+                                mLeafTextures.push_back(std::move(tex));
+                                break;
+                            }
+                            default:
+                                throw std::runtime_error(
+                                    std::format("Unknown section {} in leaf 1009 block", inner));
+                        }
+                    }
+                    break;
+                default:
+                    throw std::runtime_error(
+                        std::format("Unknown section {} in leaf properties block", section));
+            }
+        }
+    }
+
+    void SPTHeader::read(SPTStream& stream)
+    {
+        mVersionId = stream.readIntString();
+        if (mVersionId != "__IdvSpt_02_")
+            throw std::runtime_error(std::format("Unsupported SPT version '{}'", mVersionId));
+
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            switch (section)
+            {
+                case 1002:
+                    readTreeProperties(*this, stream);
+                    break;
+                case 1004:
+                    mLeafData.read(stream);
+                    break;
+                case 1011:
+                    discardSections(stream, 1012);
+                    break;
+                case 1001:
+                    return;
+                default:
+                    throw std::runtime_error(std::format("Unknown section {} in header block", section));
+            }
+        }
+    }
+
+    SPTFilePtr parse(Files::IStreamPtr&& inputStream)
+    {
+        auto file = std::make_shared<SPTFile>();
+        SPTStream stream(std::move(inputStream));
+
+        while (true)
+        {
+            int32_t section = stream.readSection();
+            switch (section)
+            {
+                case 1000:
+                    file->mHeader.read(stream);
+                    break;
+                default:
+                    throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
             }
         }
     }

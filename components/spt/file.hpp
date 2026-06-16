@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
 #include <components/files/istreamptr.hpp>
 
 namespace Spt
@@ -37,7 +40,39 @@ namespace Spt
         void read(SPTStream& stream);
     };
 
-    struct SPTFile
+    struct SPTLeafTextureMap
+    {
+        int8_t mMakeBlossom{};
+        osg::Vec3f mColor;
+        float mOrientationVariance{};
+        std::string mFilename;
+        osg::Vec3f mOrigin;
+        osg::Vec3f mSize;
+        osg::Vec3f mUnknown4006;
+        float mUnknown4007{};
+    };
+
+    struct SPTLeafData
+    {
+        float mBlossomDistance{};
+        int32_t mBlossomDepth{};
+        float mBlossomWeight{};
+        int8_t mUnknown3003{};
+        float mUnknown3004{};
+        float mUnknown3005{};
+        int8_t mUnknown3006{};
+        float mPlacementTolerance{};
+        int32_t mPlacementCollision{};
+        int8_t mLightingDimmingToggle{};
+        float mLightingDimming{};
+
+        int32_t mNumLeafTextures{};
+        std::vector<SPTLeafTextureMap> mLeafTextures;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTHeader
     {
         std::string mVersionId;
         std::string mTextureMap;
@@ -50,6 +85,14 @@ namespace Spt
         int8_t mUnknown2002{};
 
         std::vector<SPTLevelData> mLevelData;
+        SPTLeafData mLeafData;
+
+        void read(SPTStream& stream);
+    };
+
+    struct SPTFile
+    {
+        SPTHeader mHeader;
 
         SPTFile() = default;
     };
