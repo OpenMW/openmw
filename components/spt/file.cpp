@@ -700,6 +700,12 @@ namespace Spt
                 case 16000:
                     file->mFlares.read(stream);
                     break;
+                case 16013:
+                    file->mFlares.mFlareSeed = stream.readInt();
+                    break;
+                case 16014:
+                    file->mLod.mLeafTransition = stream.readFloat();
+                    break;
                 default:
                     throw std::runtime_error(std::format("Unknown top-level section {} in SPT file", section));
             }

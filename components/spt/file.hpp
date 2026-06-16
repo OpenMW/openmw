@@ -117,6 +117,7 @@ namespace Spt
         float mLeafRadius{};
         float mLeafExponent{};
         float mLeafSize{};
+        float mLeafTransition{};
         SPTLodBranchesData mBranches;
 
         void read(SPTStream& stream);
@@ -222,6 +223,7 @@ namespace Spt
     struct SPTFlaresData
     {
         std::vector<SPTFlaresEntry> mEntries;
+        int32_t mFlareSeed{};
 
         void read(SPTStream& stream);
     };
