@@ -64,6 +64,10 @@ namespace MWMechanics
     // Cursed distance calculation used for combat proximity and hit checks in Morrowind
     float getDistanceToBounds(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
 
+    float getMeleeWeaponReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon);
+
+    bool isInMeleeReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const float reach);
+
     // Similarly cursed hit target selection
     std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor, float reach);
 

@@ -38,8 +38,6 @@ namespace MWMechanics
         typedef std::map<ESM::RefId, OwnerMap> StolenItemsMap;
         StolenItemsMap mStolenItems;
 
-        MWSound::MusicType mMusicType;
-
     public:
         void buildPlayer();
         ///< build player according to stored class/race/birthsign information. Will
@@ -77,7 +75,7 @@ namespace MWMechanics
         void setPlayerClass(const ESM::RefId& id) override;
         ///< Set player class to stock class.
 
-        void setPlayerClass(const ESM::Class& class_) override;
+        void setPlayerClass(const ESM::Class& value) override;
         ///< Set player class to custom class.
 
         void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) override;
@@ -104,7 +102,7 @@ namespace MWMechanics
         ///< Perform a persuasion action on NPC
 
         /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
-        bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) override;
+        bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer, bool useCache = true) override;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
         void startCombat(
@@ -148,7 +146,7 @@ namespace MWMechanics
             std::string_view startKey, std::string_view stopKey, bool forceLoop) override;
         void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable) override;
         void skipAnimation(const MWWorld::Ptr& ptr) override;
-        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) override;
+        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, std::string_view groupName) override;
         bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const override;
         void persistAnimationStates() override;
         void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted) override;
@@ -184,7 +182,7 @@ namespace MWMechanics
         bool onOpen(const MWWorld::Ptr& ptr) override;
         void onClose(const MWWorld::Ptr& ptr) override;
 
-        int countSavedGameRecords() const override;
+        size_t countSavedGameRecords() const override;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& listener) const override;
 
@@ -229,7 +227,7 @@ namespace MWMechanics
         void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) override;
         void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) override;
 
-        void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) override;
+        void cleanupSummonedCreature(ESM::RefNum creature) override;
 
         void confiscateStolenItemToOwner(
             const MWWorld::Ptr& player, const MWWorld::Ptr& item, const MWWorld::Ptr& victim, int count) override;
@@ -243,13 +241,9 @@ namespace MWMechanics
         int getGreetingTimer(const MWWorld::Ptr& ptr) const override;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const override;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const override;
-        bool isTurningToPlayer(const MWWorld::Ptr& ptr) const override;
-
-        MWSound::MusicType getMusicType() const override { return mMusicType; }
-        void setMusicType(MWSound::MusicType type) override { mMusicType = type; }
+        void fastForwardAi() const override;
 
     private:
-        void updateMusicState();
         bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
         bool canReportCrime(
             const MWWorld::Ptr& actor, const MWWorld::Ptr& victim, std::set<MWWorld::Ptr>& playerFollowers);

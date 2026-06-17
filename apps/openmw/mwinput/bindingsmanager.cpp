@@ -1,9 +1,11 @@
 #include "bindingsmanager.hpp"
 
+#include <filesystem>
+
 #include <MyGUI_EditBox.h>
 
-#include <extern/oics/ICSChannelListener.h>
-#include <extern/oics/ICSInputControlSystem.h>
+#include <oics/ICSChannelListener.h>
+#include <oics/ICSInputControlSystem.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
@@ -71,18 +73,13 @@ namespace MWInput
             mBindingsManager->actionValueChanged(action, currentValue, previousValue);
         }
 
-        void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control, SDL_Scancode key,
+        void keyBindingDetected(ICS::InputControlSystem* ics, ICS::Control* control, SDL_Scancode key,
             ICS::Control::ControlChangingDirection direction) override
         {
             // Disallow binding escape key
             if (key == SDL_SCANCODE_ESCAPE)
             {
-                // Unbind if esc pressed
-                if (mDetectingKeyboard)
-                    clearAllKeyBindings(mInputBinder, control);
-                else
-                    clearAllControllerBindings(mInputBinder, control);
-                control->setInitialValue(0.0f);
+                // Stop binding if esc pressed
                 mInputBinder->cancelDetectingBindingState();
                 MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
                 return;
@@ -103,40 +100,40 @@ namespace MWInput
 
             clearAllKeyBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
-            ICS::DetectingBindingListener::keyBindingDetected(ICS, control, key, direction);
+            ICS::DetectingBindingListener::keyBindingDetected(ics, control, key, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
-        void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control,
-            ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction) override
+        void mouseAxisBindingDetected(ICS::InputControlSystem* /*ics*/, ICS::Control* /*control*/,
+            ICS::InputControlSystem::NamedAxis /*axis*/, ICS::Control::ControlChangingDirection /*direction*/) override
         {
             // we don't want mouse movement bindings
             return;
         }
 
-        void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control, unsigned int button,
+        void mouseButtonBindingDetected(ICS::InputControlSystem* ics, ICS::Control* control, unsigned int button,
             ICS::Control::ControlChangingDirection direction) override
         {
             if (!mDetectingKeyboard)
                 return;
             clearAllKeyBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
-            ICS::DetectingBindingListener::mouseButtonBindingDetected(ICS, control, button, direction);
+            ICS::DetectingBindingListener::mouseButtonBindingDetected(ics, control, button, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
-        void mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control,
+        void mouseWheelBindingDetected(ICS::InputControlSystem* ics, ICS::Control* control,
             ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction) override
         {
             if (!mDetectingKeyboard)
                 return;
             clearAllKeyBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
-            ICS::DetectingBindingListener::mouseWheelBindingDetected(ICS, control, click, direction);
+            ICS::DetectingBindingListener::mouseWheelBindingDetected(ics, control, click, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
-        void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control, int axis,
+        void joystickAxisBindingDetected(ICS::InputControlSystem* ics, int deviceID, ICS::Control* control, int axis,
             ICS::Control::ControlChangingDirection direction) override
         {
             // only allow binding to the trigers
@@ -148,25 +145,18 @@ namespace MWInput
             clearAllControllerBindings(mInputBinder, control);
             control->setValue(0.5f); // axis bindings must start at 0.5
             control->setInitialValue(0.5f);
-            ICS::DetectingBindingListener::joystickAxisBindingDetected(ICS, deviceID, control, axis, direction);
+            ICS::DetectingBindingListener::joystickAxisBindingDetected(ics, deviceID, control, axis, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
-        void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control,
+        void joystickButtonBindingDetected(ICS::InputControlSystem* ics, int deviceID, ICS::Control* control,
             unsigned int button, ICS::Control::ControlChangingDirection direction) override
         {
             if (mDetectingKeyboard)
                 return;
             clearAllControllerBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
-            if (button == SDL_CONTROLLER_BUTTON_START)
-            {
-                // Disallow rebinding SDL_CONTROLLER_BUTTON_START - it is used to open main and without it is not
-                // even possible to exit the game (or change the binding back).
-                mInputBinder->cancelDetectingBindingState();
-            }
-            else
-                ICS::DetectingBindingListener::joystickButtonBindingDetected(ICS, deviceID, control, button, direction);
+            ICS::DetectingBindingListener::joystickButtonBindingDetected(ics, deviceID, control, button, direction);
             MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
         }
 
@@ -190,11 +180,8 @@ namespace MWInput
         mListener = std::make_unique<BindingsListener>(mInputBinder.get(), this);
         mInputBinder->setDetectingBindingListener(mListener.get());
 
-        if (!userFileExists)
-        {
-            loadKeyDefaults();
-            loadControllerDefaults();
-        }
+        loadKeyDefaults();
+        loadControllerDefaults();
 
         for (int i = 0; i < A_Last; ++i)
         {
@@ -209,14 +196,7 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
-        try
-        {
-            mInputBinder->save(Files::pathToUnicodeString(mUserFile));
-        }
-        catch (std::exception& e)
-        {
-            Log(Debug::Error) << "Failed to save input bindings: " << e.what();
-        }
+        saveBindings();
     }
 
     void BindingsManager::update(float dt)
@@ -718,5 +698,27 @@ namespace MWInput
 
         if (previousValue <= 0.6 && currentValue > 0.6)
             manager->executeAction(action);
+    }
+
+    void BindingsManager::saveBindings()
+    {
+        std::string newFileName;
+        try
+        {
+            newFileName = Files::pathToUnicodeString(mUserFile) + ".new";
+            if (mInputBinder->save(newFileName))
+            {
+                std::filesystem::rename(Files::pathFromUnicodeString(newFileName), mUserFile);
+                Log(Debug::Info) << "Saved input bindings: " << mUserFile;
+            }
+            else
+            {
+                Log(Debug::Error) << "Failed to save input bindings to " << newFileName;
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Failed to save input bindings to " << newFileName << ": " << e.what();
+        }
     }
 }

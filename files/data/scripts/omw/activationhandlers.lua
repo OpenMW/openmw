@@ -1,13 +1,16 @@
 local async = require('openmw.async')
+local core = require('openmw.core')
 local types = require('openmw.types')
 local world = require('openmw.world')
+local auxUtil = require('openmw_aux.util')
 
 local EnableObject = async:registerTimerCallback('EnableObject', function(obj) obj.enabled = true end)
 
 local function ESM4DoorActivation(door, actor)
     -- TODO: Implement lockpicking minigame
-    -- TODO: Play door opening animation and sound
+    -- TODO: Play door opening animation
     local Door4 = types.ESM4Door
+    core.sound.playSound3d(Door4.record(door).openSound, actor)
     if Door4.isTeleport(door) then
         actor:teleport(Door4.destCell(door), Door4.destPosition(door), Door4.destRotation(door))
     else
@@ -36,21 +39,9 @@ local function onActivate(obj, actor)
     if obj.parentContainer then
         return
     end
-    local handlers = handlersPerObject[obj.id]
-    if handlers then
-        for i = #handlers, 1, -1 do
-            if handlers[i](obj, actor) == false then
-                return -- skip other handlers
-            end
-        end
-    end
-    handlers = handlersPerType[obj.type]
-    if handlers then
-        for i = #handlers, 1, -1 do
-            if handlers[i](obj, actor) == false then
-                return -- skip other handlers
-            end
-        end
+    local handled = auxUtil.callMultipleEventHandlers({ handlersPerObject[obj.id], handlersPerType[obj.type] }, obj, actor)
+    if handled then
+        return
     end
     types.Actor.activeEffects(actor):remove('invisibility')
     world._runStandardActivationAction(obj, actor)
@@ -60,13 +51,14 @@ return {
     interfaceName = 'Activation',
     ---
     -- @module Activation
+    -- @context global
     -- @usage require('openmw.interfaces').Activation
     interface = {
         --- Interface version
         -- @field [parent=#Activation] #number version
         version = 0,
 
-        --- Add new activation handler for a specific object.
+        --- Add a new activation handler for a specific object.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#Activation] addHandlerForObject
@@ -81,7 +73,7 @@ return {
             handlers[#handlers + 1] = handler
         end,
 
-        --- Add new activation handler for a type of objects.
+        --- Add a new activation handler for a type of object.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#Activation] addHandlerForType

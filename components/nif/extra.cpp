@@ -2,7 +2,6 @@
 
 namespace Nif
 {
-
     void NiExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
@@ -17,18 +16,17 @@ namespace Nif
         nif->getSizedStrings(mData, nif->get<uint32_t>());
     }
 
+    void NiTextKeyExtraData::TextKey::read(NIFStream* nif)
+    {
+        nif->read(mTime);
+        nif->read(mText);
+    }
+
     void NiTextKeyExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
 
-        uint32_t numKeys;
-        nif->read(numKeys);
-        mList.resize(numKeys);
-        for (TextKey& key : mList)
-        {
-            nif->read(key.mTime);
-            nif->read(key.mText);
-        }
+        nif->readVectorOfRecords<uint32_t>(mList);
     }
 
     void NiVertWeightsExtraData::read(NIFStream* nif)
@@ -66,20 +64,10 @@ namespace Nif
     {
         Extra::read(nif);
 
-        uint32_t num;
-        nif->read(num);
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-        {
-            mLegacyMarkers.resize(num);
-            for (auto& marker : mLegacyMarkers)
-                marker.read(nif);
-        }
+            nif->readVectorOfRecords<uint32_t>(mLegacyMarkers);
         else
-        {
-            mMarkers.resize(num);
-            for (auto& marker : mMarkers)
-                marker.read(nif);
-        }
+            nif->readVectorOfRecords<uint32_t>(mMarkers);
     }
 
     void BSInvMarker::read(NIFStream* nif)
@@ -105,9 +93,7 @@ namespace Nif
     {
         Extra::read(nif);
 
-        mData.resize(nif->get<uint32_t>());
-        for (BoneLOD& lod : mData)
-            lod.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mData);
     }
 
     void BSBoneLODExtraData::BoneLOD::read(NIFStream* nif)
@@ -120,9 +106,7 @@ namespace Nif
     {
         NiFloatExtraData::read(nif);
 
-        mBlocks.resize(nif->get<uint16_t>());
-        for (Block& block : mBlocks)
-            block.read(nif);
+        nif->readVectorOfRecords<uint16_t>(mBlocks);
     }
 
     void BSDecalPlacementVectorExtraData::Block::read(NIFStream* nif)
@@ -154,9 +138,7 @@ namespace Nif
     {
         NiExtraData::read(nif);
 
-        mPoints.resize(nif->get<uint32_t>());
-        for (Point& point : mPoints)
-            point.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mPoints);
     }
 
     void BSConnectPoint::Children::read(NIFStream* nif)
@@ -190,9 +172,7 @@ namespace Nif
         nif->read(mLOD1TriOffset);
         nif->read(mLOD2TriCount);
         nif->read(mLOD2TriOffset);
-        mCombined.resize(nif->get<uint32_t>());
-        for (BSPackedGeomDataCombined& data : mCombined)
-            data.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mCombined);
         mVertexDesc.read(nif);
     }
 
@@ -205,12 +185,8 @@ namespace Nif
         nif->read(mNumTriangles);
         nif->read(mFlags1);
         nif->read(mFlags2);
-        mObjects.resize(nif->get<uint32_t>());
-        for (BSPackedGeomObject& object : mObjects)
-            object.read(nif);
-        mObjectData.resize(mObjects.size());
-        for (BSPackedSharedGeomData& objectData : mObjectData)
-            objectData.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mObjects);
+        nif->readVectorOfRecords(mObjects.size(), mObjectData);
     }
 
 }

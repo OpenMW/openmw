@@ -32,6 +32,8 @@ namespace MWInput
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mLastWarpX(-1)
+        , mLastWarpY(-1)
         , mMouseMoveX(0)
         , mMouseMoveY(0)
     {
@@ -57,7 +59,8 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
+            MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+            float uiScale = winMgr->getScalingFactor();
             mGuiCursorX = static_cast<float>(arg.x) / uiScale;
             mGuiCursorY = static_cast<float>(arg.y) / uiScale;
 
@@ -70,7 +73,23 @@ namespace MWInput
             MyGUI::InputManager::getInstance().injectMouseMove(
                 static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
 
-            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
+            winMgr->setCursorActive(true);
+
+            // Check if this movement is from our recent mouse warp
+            bool isFromWarp = (mLastWarpX >= 0 && mLastWarpY >= 0 && std::abs(mGuiCursorX - mLastWarpX) < 0.5f
+                && std::abs(mGuiCursorY - mLastWarpY) < 0.5f);
+
+            if (Settings::gui().mControllerMenus && !winMgr->getCursorVisible()
+                && (std::abs(arg.xrel) > 1 || std::abs(arg.yrel) > 1) && !isFromWarp)
+            {
+                // Unhide the cursor if it was hidden to show a controller tooltip.
+                winMgr->setControllerTooltipVisible(false);
+                winMgr->setCursorVisible(true);
+            }
+
+            // Clear warp tracking after processing
+            mLastWarpX = -1;
+            mLastWarpY = -1;
         }
 
         if (mMouseLookEnabled && !input->controlsDisabled())
@@ -247,19 +266,36 @@ namespace MWInput
     {
         mGuiCursorX += xMove;
         mGuiCursorY += yMove;
-        mMouseWheel += mouseWheelMove;
+        mMouseWheel += static_cast<int>(mouseWheelMove);
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1);
-        mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1);
+        mGuiCursorX = std::clamp<float>(mGuiCursorX, 0.f, viewSize.width - 1.f);
+        mGuiCursorY = std::clamp<float>(mGuiCursorY, 0.f, viewSize.height - 1.f);
 
         MyGUI::InputManager::getInstance().injectMouseMove(
-            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
     }
 
     void MouseManager::warpMouse()
     {
-        float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX * uiScale), static_cast<int>(mGuiCursorY * uiScale));
+        float guiUiScale = Settings::gui().mScalingFactor;
+        mInputWrapper->warpMouse(
+            static_cast<int>(mGuiCursorX * guiUiScale), static_cast<int>(mGuiCursorY * guiUiScale));
     }
+
+    void MouseManager::warpMouseToWidget(MyGUI::Widget* widget)
+    {
+        float widgetX = widget->getAbsoluteCoord().left + widget->getWidth() / 2.f;
+        float widgetY = widget->getAbsoluteCoord().top + widget->getHeight() / 4.f;
+        if (std::abs(mGuiCursorX - widgetX) > 1 || std::abs(mGuiCursorY - widgetY) > 1)
+        {
+            mGuiCursorX = widgetX;
+            mGuiCursorY = widgetY;
+            // Remember where we warped to so we can ignore movement from this warp
+            mLastWarpX = widgetX;
+            mLastWarpY = widgetY;
+            warpMouse();
+        }
+    }
+
 }

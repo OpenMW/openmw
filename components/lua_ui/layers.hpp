@@ -26,7 +26,7 @@ namespace LuaUi
         {
             MyGUI::ILayer* p = refresh();
             MyGUI::IntSize size = p->getSize();
-            return osg::Vec2f(size.width, size.height);
+            return osg::Vec2f(static_cast<float>(size.width), static_cast<float>(size.height));
         }
 
         struct Options

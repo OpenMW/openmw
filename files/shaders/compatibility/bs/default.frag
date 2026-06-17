@@ -1,10 +1,6 @@
 #version 120
 #pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
@@ -26,8 +22,6 @@ uniform sampler2D normalMap;
 varying vec2 normalMapUV;
 #endif
 
-uniform sampler2D opaqueDepthTex;
-
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -42,9 +36,10 @@ uniform float specStrength;
 uniform bool useTreeAnim;
 uniform float distortionStrength;
 
-#include "lib/light/lighting.glsl"
+#include "lib/core/fragment.h.glsl"
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"
+#include "lib/light/clamp.glsl"
 
 #include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_fragment.glsl"
@@ -58,8 +53,8 @@ void main()
 
 #if defined(DISTORTION) && DISTORTION
     vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
-    gl_FragData[0].a = getDiffuseColor().a;
-    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, texture2D(opaqueDepthTex, screenCoords).x);
+    gl_FragData[0].a *= getDiffuseColor().a;
+    gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, sampleOpaqueDepthTex(screenCoords).x);
 
     return;
 #endif
@@ -89,7 +84,7 @@ void main()
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     vec3 diffuse = diffuseColor.xyz * diffuseLight;
     vec3 ambient = getAmbientColor().xyz * ambientLight;
     vec3 emission = getEmissionColor().xyz * emissiveMult;
@@ -99,7 +94,7 @@ void main()
     vec3 lighting = diffuse + ambient + emission;
     vec3 specular = specularColor * specularLight * specStrength;
 
-    clampLightingResult(lighting);
+    clampLighting(lighting);
 
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 

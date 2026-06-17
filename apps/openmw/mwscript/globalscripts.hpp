@@ -64,6 +64,8 @@ namespace MWScript
 
         void removeScript(const ESM::RefId& name);
 
+        const std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>& getScripts() const { return mScripts; }
+
         bool isRunning(const ESM::RefId& name) const;
 
         void run();
@@ -74,7 +76,7 @@ namespace MWScript
         void addStartup();
         ///< Add startup script
 
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 

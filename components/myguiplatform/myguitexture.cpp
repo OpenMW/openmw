@@ -8,7 +8,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/resource/imagemanager.hpp>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     OSGTexture::OSGTexture(const std::string& name, Resource::ImageManager* imageManager)
@@ -95,7 +95,7 @@ namespace osgMyGUI
         if (!mImageManager)
             throw std::runtime_error("No imagemanager set");
 
-        osg::ref_ptr<osg::Image> image(mImageManager->getImage(fname));
+        osg::ref_ptr<osg::Image> image(mImageManager->getImage(VFS::Path::Normalized(fname)));
         mTexture = new osg::Texture2D(image);
         mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
@@ -134,8 +134,6 @@ namespace osgMyGUI
         if (!mLockedImage.valid())
             throw std::runtime_error("Texture not locked");
 
-        mLockedImage->flipVertical();
-
         // mTexture might be in use by the draw thread, so create a new texture instead and use that.
         osg::ref_ptr<osg::Texture2D> newTexture = new osg::Texture2D;
         newTexture->setTextureSize(getWidth(), getHeight());
@@ -161,7 +159,7 @@ namespace osgMyGUI
         return nullptr;
     }
 
-    void OSGTexture::setShader(const std::string& _shaderName)
+    void OSGTexture::setShader(const std::string& /*shaderName*/)
     {
         Log(Debug::Warning) << "OSGTexture::setShader is not implemented";
     }

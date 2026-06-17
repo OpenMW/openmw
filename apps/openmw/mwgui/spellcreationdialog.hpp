@@ -7,6 +7,7 @@
 #include <components/esm3/loadspel.hpp>
 
 #include "referenceinterface.hpp"
+#include "widgets.hpp"
 #include "windowbase.hpp"
 
 namespace Gui
@@ -83,13 +84,18 @@ namespace MWGui
 
         void updateBoxes();
 
-    protected:
+    private:
         ESM::ENAMstruct mEffect;
         ESM::ENAMstruct mOldEffect;
 
         const ESM::MagicEffect* mMagicEffect;
 
         bool mConstantEffect;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void updateControllerFocus(int prevFocus, int newFocus);
+        int mControllerFocus = 0;
+        std::vector<MyGUI::TextBox*> mButtons;
     };
 
     class EffectEditorBase
@@ -107,7 +113,7 @@ namespace MWGui
         void setConstantEffect(bool constant);
 
     protected:
-        std::map<int, short> mButtonMapping; // maps button ID to effect ID
+        std::map<int, ESM::RefId> mButtonMapping; // maps button ID to effect ID
 
         Gui::MWList* mAvailableEffectsList;
         MyGUI::ScrollView* mUsedEffectsView;
@@ -117,7 +123,7 @@ namespace MWGui
         std::unique_ptr<SelectSkillDialog> mSelectSkillDialog;
 
         int mSelectedEffect;
-        short mSelectedKnownEffectId;
+        ESM::RefId mSelectedKnownEffectId;
 
         bool mConstantEffect;
 
@@ -142,8 +148,16 @@ namespace MWGui
 
         virtual void notifyEffectsChanged() {}
 
+        virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg);
+
     private:
         Type mType;
+
+        size_t mAvailableFocus = 0;
+        size_t mEffectFocus = 0;
+        bool mRightColumn = false;
+        std::vector<MyGUI::Button*> mAvailableButtons;
+        std::vector<std::pair<Widgets::MWSpellEffectPtr, MyGUI::Button*>> mEffectButtons;
     };
 
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
@@ -166,6 +180,7 @@ namespace MWGui
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onBuyButtonClicked(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         void notifyEffectsChanged() override;
 
@@ -175,6 +190,7 @@ namespace MWGui
         MyGUI::Button* mBuyButton;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPriceLabel;
+        MyGUI::TextBox* mPlayerGold;
 
         ESM::Spell mSpell;
     };

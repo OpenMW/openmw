@@ -1,6 +1,7 @@
 #include "interpreter.hpp"
 
 #include <cassert>
+#include <format>
 #include <stdexcept>
 #include <string>
 
@@ -9,27 +10,36 @@
 
 namespace Interpreter
 {
-    [[noreturn]] static void abortUnknownCode(int segment, int opcode)
+    namespace
     {
-        const std::string error = "unknown opcode " + std::to_string(opcode) + " in segment " + std::to_string(segment);
-        throw std::runtime_error(error);
-    }
-
-    [[noreturn]] static void abortUnknownSegment(Type_Code code)
-    {
-        const std::string error = "opcode outside of the allocated segment range: " + std::to_string(code);
-        throw std::runtime_error(error);
-    }
-
-    template <typename T>
-    auto& getDispatcher(const T& segment, unsigned int seg, int opcode)
-    {
-        auto it = segment.find(opcode);
-        if (it == segment.end())
+        [[noreturn]] void abortUnknownCode(int segment, int opcode)
         {
-            abortUnknownCode(seg, opcode);
+            const std::string error = std::format("unknown opcode {} in segment {}", opcode, segment);
+            throw std::runtime_error(error);
         }
-        return it->second;
+
+        [[noreturn]] void abortUnknownSegment(Type_Code code)
+        {
+            const std::string error = std::format("opcode outside of the allocated segment range: {}", code);
+            throw std::runtime_error(error);
+        }
+
+        template <typename T>
+        auto& getDispatcher(const T& segment, unsigned int seg, int opcode)
+        {
+            auto it = segment.find(opcode);
+            if (it == segment.end())
+            {
+                abortUnknownCode(seg, opcode);
+            }
+            return it->second;
+        }
+    }
+
+    [[noreturn]] void Interpreter::abortDuplicateInstruction(std::string_view name, int code)
+    {
+        throw std::invalid_argument(
+            std::format("Duplicated interpreter instruction code in segment {}: {:#x}", name, code));
     }
 
     void Interpreter::execute(Type_Code code)

@@ -52,17 +52,16 @@ bool CSMDoc::DocumentManager::isEmpty()
 }
 
 void CSMDoc::DocumentManager::addDocument(
-    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_)
+    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew)
 {
-    Document* document = makeDocument(files, savePath, new_);
+    Document* document = makeDocument(files, savePath, isNew);
     insertDocument(document);
 }
 
 CSMDoc::Document* CSMDoc::DocumentManager::makeDocument(
-    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_)
+    const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool isNew)
 {
-    return new Document(
-        mConfiguration, files, new_, savePath, mResDir, mEncoding, mBlacklistedScripts, mDataPaths, mArchives);
+    return new Document(mConfiguration, files, isNew, savePath, mResDir, mEncoding, mDataPaths, mArchives);
 }
 
 void CSMDoc::DocumentManager::insertDocument(CSMDoc::Document* document)
@@ -100,11 +99,6 @@ void CSMDoc::DocumentManager::setResourceDir(const std::filesystem::path& parRes
 void CSMDoc::DocumentManager::setEncoding(ToUTF8::FromType encoding)
 {
     mEncoding = encoding;
-}
-
-void CSMDoc::DocumentManager::setBlacklistedScripts(const std::vector<std::string>& scriptIds)
-{
-    mBlacklistedScripts = scriptIds;
 }
 
 void CSMDoc::DocumentManager::documentLoaded(Document* document)

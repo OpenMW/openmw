@@ -10,35 +10,36 @@
 
 namespace LuaUtil
 {
+    class LuaView;
 
     class LuaStorage
     {
     public:
-        static void initLuaBindings(lua_State* L);
-        static sol::table initGlobalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage);
-        static sol::table initLocalPackage(LuaUtil::LuaState& luaState, LuaStorage* globalStorage);
+        static void initLuaBindings(LuaUtil::LuaView& view);
+        static sol::table initGlobalPackage(LuaUtil::LuaView& view, LuaStorage* globalStorage);
+        static sol::table initLocalPackage(LuaUtil::LuaView& view, LuaStorage* globalStorage);
         static sol::table initPlayerPackage(
-            LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage);
-        static sol::table initMenuPackage(
-            LuaUtil::LuaState& luaState, LuaStorage* globalStorage, LuaStorage* playerStorage);
+            LuaUtil::LuaView& view, LuaStorage* globalStorage, LuaStorage* playerStorage);
+        static sol::table initMenuPackage(LuaUtil::LuaView& view, LuaStorage* globalStorage, LuaStorage* playerStorage);
+        static sol::table initLoadPackage(LuaUtil::LuaView& view, LuaStorage* playerStorage);
 
-        explicit LuaStorage(lua_State* lua)
-            : mLua(lua)
-            , mActive(false)
-        {
-        }
+        explicit LuaStorage() {}
 
         void clearTemporaryAndRemoveCallbacks();
-        void load(const std::filesystem::path& path);
-        void save(const std::filesystem::path& path) const;
+        void load(lua_State* state, const std::filesystem::path& path);
+        void save(lua_State* state, const std::filesystem::path& path) const;
 
-        sol::object getSection(std::string_view sectionName, bool readOnly, bool forMenuScripts = false);
-        sol::object getMutableSection(std::string_view sectionName, bool forMenuScripts = false)
+        sol::object getSection(
+            lua_State* state, std::string_view sectionName, bool readOnly, bool forMenuScripts = false);
+        sol::object getMutableSection(lua_State* state, std::string_view sectionName, bool forMenuScripts = false)
         {
-            return getSection(sectionName, false, forMenuScripts);
+            return getSection(state, sectionName, false, forMenuScripts);
         }
-        sol::object getReadOnlySection(std::string_view sectionName) { return getSection(sectionName, true); }
-        sol::table getAllSections(bool readOnly = false);
+        sol::object getReadOnlySection(lua_State* state, std::string_view sectionName)
+        {
+            return getSection(state, sectionName, true);
+        }
+        sol::table getAllSections(lua_State* state, bool readOnly = false);
 
         void setSingleValue(std::string_view section, std::string_view key, const sol::object& value)
         {
@@ -70,12 +71,12 @@ namespace LuaUtil
                 : mSerializedValue(serialize(value))
             {
             }
-            sol::object getCopy(lua_State* L) const;
-            sol::object getReadOnly(lua_State* L) const;
+            sol::object getCopy(lua_State* state) const;
+            sol::object getReadOnly(lua_State* state) const;
 
         private:
             std::string mSerializedValue;
-            mutable sol::object mReadOnlyValue = sol::nil;
+            mutable sol::main_object mReadOnlyValue = sol::nil;
         };
 
         struct Section
@@ -95,7 +96,7 @@ namespace LuaUtil
             const Value& get(std::string_view key) const;
             void set(std::string_view key, const sol::object& value);
             void setAll(const sol::optional<sol::table>& values);
-            sol::table asTable();
+            sol::table asTable(lua_State* state);
             void runCallbacks(sol::optional<std::string_view> changedKey);
             void throwIfCallbackRecursionIsTooDeep();
 
@@ -119,17 +120,16 @@ namespace LuaUtil
 
         const std::shared_ptr<Section>& getSection(std::string_view sectionName);
 
-        lua_State* mLua;
         std::map<std::string_view, std::shared_ptr<Section>> mData;
         const Listener* mListener = nullptr;
         std::set<const Section*> mRunningCallbacks;
-        bool mActive;
+        bool mActive = false;
         void checkIfActive() const
         {
             if (!mActive)
                 throw std::logic_error("Trying to access inactive storage");
         }
-        static void registerLifeTime(LuaUtil::LuaState& luaState, sol::table& res);
+        static void registerLifeTime(LuaUtil::LuaView& view, sol::table& res);
     };
 
 }

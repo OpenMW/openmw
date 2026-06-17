@@ -17,10 +17,13 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
 #include "../doc/sizehint.hpp"
+#include "../doc/view.hpp"
 #include "../filter/filterbox.hpp"
 #include "../filter/filterdata.hpp"
 #include "table.hpp"
@@ -52,7 +55,11 @@ CSVWorld::TableSubView::TableSubView(
         "\nCan be useful in finding the moved or modified"
         "\nobject instance while 3D editing.");
     autoJump->setCheckState(Qt::Unchecked);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    connect(autoJump, &QCheckBox::checkStateChanged, mTable, &Table::jumpAfterModChanged);
+#else
     connect(autoJump, &QCheckBox::stateChanged, mTable, &Table::jumpAfterModChanged);
+#endif
     optHLayout->insertWidget(0, autoJump);
     optHLayout->setContentsMargins(QMargins(0, 3, 0, 0));
     mOptions->setLayout(optHLayout);
@@ -60,7 +67,7 @@ CSVWorld::TableSubView::TableSubView(
     mOptions->hide();
 
     QPushButton* opt = new QPushButton();
-    opt->setIcon(QIcon(":startup/configure"));
+    opt->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     opt->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
     opt->setToolTip("Open additional options for this subview.");
     connect(opt, &QPushButton::clicked, this, &TableSubView::toggleOptions);
@@ -79,15 +86,10 @@ CSVWorld::TableSubView::TableSubView(
 
     setWidget(widget);
 
-    // Widget position can be negative, we should clamp it.
-    QPoint position = pos();
-    if (position.x() <= 0)
-        position.setX(0);
-    if (position.y() <= 0)
-        position.setY(0);
+    QScreen* screen = CSVDoc::View::getWidgetScreen(pos());
 
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::screenAt(position)->geometry();
+    const QRect rect = screen->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)

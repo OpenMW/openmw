@@ -114,10 +114,11 @@ namespace MWRender
                 }
 
                 // move the plane back along its normal a little bit to prevent bleeding at the water shore
-                float fov = Settings::camera().mFieldOfView;
-                const float clipFudgeMin = 2.5; // minimum offset of clip plane
-                const float clipFudgeScale = -15000.0;
-                float clipFudge = abs(abs((*mCullPlane)[3]) - eyePoint.z()) * fov / clipFudgeScale - clipFudgeMin;
+                const float fov = Settings::camera().mFieldOfView;
+                constexpr double clipFudgeMin = 2.5; // minimum offset of clip plane
+                constexpr double clipFudgeScale = -15000.0;
+                double clipFudge
+                    = std::abs(std::abs((*mCullPlane)[3]) - eyePoint.z()) * fov / clipFudgeScale - clipFudgeMin;
                 modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
                 cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
@@ -188,7 +189,7 @@ namespace MWRender
     public:
         void operator()(osg::Node* node, osgUtil::CullVisitor* cv)
         {
-            const float fudge = 0.2;
+            const float fudge = 0.2f;
             if (std::abs(cv->getEyeLocal().z()) < fudge)
             {
                 float diff = fudge - cv->getEyeLocal().z();
@@ -211,22 +212,15 @@ namespace MWRender
     class RainSettingsUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        RainSettingsUpdater()
-            : mRainIntensity(0.f)
-            , mEnableRipples(false)
-        {
-        }
+        RainSettingsUpdater() = default;
 
         void setRainIntensity(float rainIntensity) { mRainIntensity = rainIntensity; }
-        void setRipplesEnabled(bool enableRipples) { mEnableRipples = enableRipples; }
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = new osg::Uniform("rainIntensity", 0.0f);
             stateset->addUniform(rainIntensityUniform.get());
-            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = new osg::Uniform("enableRainRipples", false);
-            stateset->addUniform(enableRainRipplesUniform.get());
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
@@ -234,14 +228,10 @@ namespace MWRender
             osg::ref_ptr<osg::Uniform> rainIntensityUniform = stateset->getUniform("rainIntensity");
             if (rainIntensityUniform != nullptr)
                 rainIntensityUniform->set(mRainIntensity);
-            osg::ref_ptr<osg::Uniform> enableRainRipplesUniform = stateset->getUniform("enableRainRipples");
-            if (enableRainRipplesUniform != nullptr)
-                enableRainRipplesUniform->set(mEnableRipples);
         }
 
     private:
-        float mRainIntensity;
-        bool mEnableRipples;
+        float mRainIntensity{ 0.f };
     };
 
     class Refraction : public SceneUtil::RTTNode
@@ -422,7 +412,7 @@ namespace MWRender
         void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable* drawable) const override
         {
             static bool supported = osg::isGLExtensionOrVersionSupported(
-                renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3);
+                renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3f);
             if (!supported)
             {
                 drawable->drawImplementation(renderInfo);
@@ -565,17 +555,9 @@ namespace MWRender
         else
             createSimpleWaterStateSet(mWaterGeom, Fallback::Map::getFloat("Water_World_Alpha"));
 
+        mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(mWaterGeom->getOrCreateStateSet(), true);
+
         updateVisible();
-    }
-
-    osg::Node* Water::getReflectionNode()
-    {
-        return mReflection;
-    }
-
-    osg::Node* Water::getRefractionNode()
-    {
-        return mRefraction;
     }
 
     osg::Vec3d Water::getPosition() const
@@ -599,8 +581,8 @@ namespace MWRender
         {
             std::ostringstream texname;
             texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-            osg::ref_ptr<osg::Texture2D> tex(
-                new osg::Texture2D(mResourceSystem->getImageManager()->getImage(texname.str())));
+            const VFS::Path::Normalized path(texname.str());
+            osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(mResourceSystem->getImageManager()->getImage(path)));
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
             mResourceSystem->getSceneManager()->applyFilterSettings(tex);
@@ -621,10 +603,7 @@ namespace MWRender
         // use a shader to render the simple water, ensuring that fog is applied per pixel as required.
         // this could be removed if a more detailed water mesh, using some sort of paging solution, is implemented.
         Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
-        bool oldValue = sceneManager->getForceShaders();
-        sceneManager->setForceShaders(true);
         sceneManager->recreateShaders(node);
-        sceneManager->setForceShaders(oldValue);
     }
 
     class ShaderWaterStateSetUpdater : public SceneUtil::StateSetUpdater
@@ -713,13 +692,12 @@ namespace MWRender
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
         osg::ref_ptr<osg::Program> program = shaderMgr.getProgram("water", defineMap);
 
+        constexpr VFS::Path::NormalizedView waterImage("textures/omw/water_nm.png");
         osg::ref_ptr<osg::Texture2D> normalMap(
-            new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
+            new osg::Texture2D(mResourceSystem->getImageManager()->getImage(waterImage)));
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-        normalMap->setMaxAnisotropy(16);
-        normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
-        normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mResourceSystem->getSceneManager()->applyFilterSettings(normalMap);
 
         mRainSettingsUpdater = new RainSettingsUpdater();
         node->setUpdateCallback(mRainSettingsUpdater);
@@ -756,7 +734,7 @@ namespace MWRender
         }
     }
 
-    void Water::listAssetsToPreload(std::vector<std::string>& textures)
+    void Water::listAssetsToPreload(std::vector<VFS::Path::Normalized>& textures)
     {
         const int frameCount = std::clamp(Fallback::Map::getInt("Water_SurfaceFrameCount"), 0, 320);
         std::string_view texture = Fallback::Map::getString("Water_SurfaceTexture");
@@ -764,7 +742,7 @@ namespace MWRender
         {
             std::ostringstream texname;
             texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-            textures.push_back(texname.str());
+            textures.emplace_back(texname.str());
         }
     }
 
@@ -813,12 +791,6 @@ namespace MWRender
     {
         if (mRainSettingsUpdater)
             mRainSettingsUpdater->setRainIntensity(rainIntensity);
-    }
-
-    void Water::setRainRipplesEnabled(bool enableRipples)
-    {
-        if (mRainSettingsUpdater)
-            mRainSettingsUpdater->setRipplesEnabled(enableRipples);
     }
 
     void Water::update(float dt, bool paused)

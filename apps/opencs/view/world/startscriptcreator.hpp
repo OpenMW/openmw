@@ -45,7 +45,7 @@ namespace CSVWorld
         CSMWorld::IdTable& getStartScriptsTable() const;
 
     public:
-        StartScriptCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
+        explicit StartScriptCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id,
             CSMWorld::IdCompletionManager& completionManager);
 
         /// \brief Set script ID input widget to ID of record to be cloned.

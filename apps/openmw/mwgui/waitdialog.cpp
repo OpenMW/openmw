@@ -52,7 +52,6 @@ namespace MWGui
 
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
-        , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)
@@ -80,18 +79,35 @@ namespace MWGui
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &WaitDialog::onWaitingProgressChanged);
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
+
+        mControllerButtons.mB = "#{Interface:Cancel}";
+        mDisableGamepadCursor = Settings::gui().mControllerMenus;
     }
 
     void WaitDialog::setPtr(const MWWorld::Ptr& ptr)
     {
-        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld()->canRest() == MWBase::World::Rest_Allowed);
+        const int restFlags = MWBase::Environment::get().getWorld()->canRest();
 
-        if (ptr.isEmpty() && MWBase::Environment::get().getWorld()->canRest() == MWBase::World::Rest_PlayerIsInAir)
+        const bool underwater = (restFlags & MWBase::World::Rest_PlayerIsUnderwater) != 0;
+        // Resting in air is allowed if you're using a bed
+        const bool inAir = ptr.isEmpty() && (restFlags & MWBase::World::Rest_PlayerIsInAir) != 0;
+        const bool enemiesNearby = (restFlags & MWBase::World::Rest_EnemiesAreNearby) != 0;
+        const bool solidGround = !underwater && !inAir;
+
+        if (!solidGround || enemiesNearby)
         {
-            // Resting in air is not allowed unless you're using a bed
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
+            if (!solidGround)
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
+
+            if (enemiesNearby)
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
+
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+            return;
         }
+
+        const bool canSleep = !ptr.isEmpty() || (restFlags & MWBase::World::Rest_CanSleep) != 0;
+        setCanRest(canSleep);
 
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
@@ -138,20 +154,6 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
 
-        MWBase::World::RestPermitted canRest = MWBase::Environment::get().getWorld()->canRest();
-
-        if (canRest == MWBase::World::Rest_EnemiesAreNearby)
-        {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-        else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
-        {
-            // resting underwater not allowed
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage1}");
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-
         onHourSliderChangedPosition(mHourSlider, 0);
         mHourSlider->setScrollPosition(0);
 
@@ -172,14 +174,14 @@ namespace MWGui
         mDateTimeText->setCaptionWithReplacing(dateTimeText);
     }
 
-    void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* /*sender*/)
     {
         int autoHours = MWBase::Environment::get().getMechanicsManager()->getHoursToRest();
 
         startWaiting(autoHours);
     }
 
-    void WaitDialog::onWaitButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onWaitButtonClicked(MyGUI::Widget* /*sender*/)
     {
         startWaiting(mManualHours);
     }
@@ -229,7 +231,7 @@ namespace MWGui
         mProgressBar.setProgress(0, hoursToWait);
     }
 
-    void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
+    void WaitDialog::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
     }
@@ -237,11 +239,11 @@ namespace MWGui
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
     {
         mHourText->setCaptionWithReplacing(MyGUI::utility::toString(position + 1) + " #{sRestMenu2}");
-        mManualHours = position + 1;
+        mManualHours = static_cast<int>(position + 1);
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
     }
 
-    void WaitDialog::onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void WaitDialog::onKeyButtonPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char character)
     {
         if (key == MyGUI::KeyCode::ArrowUp)
             mHourSlider->setScrollPosition(
@@ -324,6 +326,54 @@ namespace MWGui
             mProgressBar.setVisible(true);
             mTimeAdvancer.run(mHours, mInterruptAt);
         }
+    }
+
+    ControllerButtons* WaitDialog::getControllerButtons()
+    {
+        mControllerButtons.mX.clear();
+        if (mSleeping)
+        {
+            mControllerButtons.mA = "#{Interface:Rest}";
+            if (mUntilHealedButton->getVisible())
+                mControllerButtons.mX = "#{Interface:UntilHealed}";
+        }
+        else
+        {
+            mControllerButtons.mA = "#{Interface:Wait}";
+        }
+        return &mControllerButtons;
+    }
+
+    bool WaitDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onWaitButtonClicked(mWaitButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCancelButtonClicked(mCancelButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X && mUntilHealedButton->getVisible())
+        {
+            onUntilHealedButtonClicked(mUntilHealedButton);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowDown, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+            MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::ArrowUp, 0, false);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            mHourSlider->setScrollPosition(0);
+            onHourSliderChangedPosition(mHourSlider, mHourSlider->getScrollPosition());
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            mHourSlider->setScrollPosition(mHourSlider->getScrollRange() - 1);
+            onHourSliderChangedPosition(mHourSlider, mHourSlider->getScrollPosition());
+        }
+
+        return true;
     }
 
     void WaitDialog::stopWaiting()

@@ -13,7 +13,7 @@ PhysicsProfiler: "Profileur des performances de la physique"
 # Messages
 
 BuildingNavigationMesh: "Construction du mesh de navigation"
-AskLoadLastSave: "La sauvegarde la plus récente est '%s'. Voulez-vous la charger ?"
+AskLoadLastSave: "La sauvegarde la plus récente est ''{save}''. Voulez-vous la charger ?"
 InitializingData: "Initialisation des données..."
 LoadingExterior: "Chargement de la zone de jeu"
 LoadingFailed: "Échec du chargement de la sauvegarde"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Quitter la partie ?"
 SaveGameDenied: "Sauvegarde impossible"
 SavingInProgress: "Sauvegarde en cours..."
 ScreenshotFailed: "Échec de la sauvegarde de la capture d'écran"
-ScreenshotMade: "Capture d'écran %s sauvegardée"
+ScreenshotMade: "Capture d'écran {file} sauvegardée"
 
 
 # Save game menu
@@ -38,6 +38,8 @@ ScreenshotMade: "Capture d'écran %s sauvegardée"
 DeleteGame: "Supprimer la partie"
 DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
 EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
+Health: "Santé"
+Level: "Niveau"
 LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
 MissingContentFilesConfirmation: |-
     Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
@@ -63,35 +65,65 @@ TimePlayed: "Temps de jeu"
 # Settings menu
 
 ActorsProcessingRange: "Distance de traitement pour les personnages"
+ActorsProcessingRangeValue: "Distance de traitement pour les personnages ({value, number, :: group-off})"
 Anisotropy: "Anisotropie"
+AnisotropyValue: "Anisotropie ({value})"
 Audio: "Audio"
 AudioEffects: "Ambiance"
 AudioFootsteps: "Bruits de pas"
 AudioMaster: "Général"
 AudioMusic: "Musique"
 AudioVoice: "Voix"
+AutoSaveOnResting: "Sauvegarde auto au repos"
+BestAttack: "Toujours meilleure attaque"
 CameraSensitivity: "Sensibilité de la caméra"
 CameraZoomIn: "Zoom avant de la caméra"
 CameraZoomOut: "Zoom arrière de la caméra"
 ChangeRequiresRestart: "Ce changement requiert un redémarrage de l'application pour prendre effet."
+ClampLighting: "Limiter l'éclairage"
+ClampLightingTooltip: |-
+    Limite la luminosité de l'éclairage à (1, 1, 1) pour reproduire le rendu de Morrowind.
+    Empêche les couleurs trop vives ou décalées, mais peut atténuer l'éclairage.
+ClassicFalloff: "Atténuation classique"
+ClassicFalloffTooltip: |-
+    valeur par défaut: inactif
+    Utilise la formule traditionnelle d'atténuation de la lumière ponctuelle qui n'a pas de diminution précoce.
+
+    Un défaut de la formule traditionnelle est que l'influence de la lumière n'atteint jamais tout à fait zéro.
+    C'est physiquement précis, mais peut causer des coutures d'éclairage car les lumières n'affectent pas toute la scène.
+    La diminution précoce aide à atténuer ces coutures au prix d'un assombrissement de la scène.
+
+    Morrowind utilise la formule traditionnelle, vous pourriez donc vouloir activer ceci si vous n'aimez pas les différences de luminosité.
+    Alternativement, essayez de modifier la luminosité minimale intérieure.
 ConfirmResetBindings: "Réinitialiser tous les contrôles à leurs valeurs par défaut ?"
 ConfirmResolution: "La nouvelle résolution d'affichage sera appliquée instantanément. Voulez-vous continuer ?"
 Controller: "Manette"
 Controls: "Contrôles"
+Crosshair: "Viseur"
 DelayHigh: "Lent"
 DelayLow: "Rapide"
 DetailLevel: "Niveau de détails"
 Difficulty: "Difficulté"
+DifficultyValue: "Difficulté ({value})"
 DifficultyEasy: "Facile"
 DifficultyHard: "Difficile"
 DistanceHigh: "Lointain"
 DistanceLow: "Proche"
 EnableController: "Activer la manette"
 FieldOfView: "Champ de vision"
+FieldOfViewValue: "Champ de vision ({value, number, ::.00})"
 FieldOfViewHigh: "Étendu"
 FieldOfViewLow: "Restreint"
+ForcePerPixelLighting: "Éclairage par pixel"
+ForcePerPixelLightingTooltip: |-
+    Force l'usage de l'éclairage par pixel. Par défaut, seuls les objets avec des "bump" et "normal" maps utilisent l'éclairage par pixel.
+
+    Activer l'éclairage par pixel donne des résultats visuels différents de ceux du moteur de jeu original, car certaines lumières de Morrowind furent implémentées pour un éclairage par vertex.
+
+    Les shaders de végétation au sol et les particules ignorent cette option.
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
 GammaCorrection: "Correction Gamma"
+GammaCorrectionValue: "Correction Gamma ({value, number, ::.00})"
 GammaDark: "Sombre"
 GammaLight: "Clair"
 GmstOverridesL10n: "Les chaînes de caractères des fichiers ESM sont prioritaires"
@@ -99,29 +131,44 @@ InvertXAxis: "Inverser l'axe X"
 InvertYAxis: "Inverser l'axe Y"
 Language: "Localisation"
 LanguageNote: "Note: Ce paramètre n'affecte pas les textes des fichiers ESM."
-LightingMethod: "Méthode d'affichage des lumières"
-LightingMethodLegacy: "Traditionnelle"
-LightingMethodShaders: "Shaders"
-LightingMethodShadersCompatibility: "Shaders (mode de compatibilité)"
-LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage des lumières à leur valeur par défaut ? Ces changements requièrent un redémarrage de l'application."
+LightsClusteredLighting: "Éclairage par cluster"
+LightingResetToDefaults: "Voulez-vous réinitialiser les paramètres d'affichage des lumières à leur valeur par défaut ?"
 Lights: "Sources lumineuses"
-LightsBoundingSphereMultiplier: "Multiplicateur de sphère englobante"
-LightsBoundingSphereMultiplierTooltip: "valeur par défaut: 1.65\nMultiplicateur pour le rayon de la sphère incluant les sources lumineuses.\nUn multiplicateur plus élevé permet une extinction plus douce, mais applique un plus grand nombre de sources lumineuses sur chaque objet.\n\nCe paramètre ne modifie ni l'intensité ni la luminance des lumières."
+LightRadiusMultiplier: "Multiplicateur du rayon"
+LightRadiusMultiplierValue: "Multiplicateur du rayon ({value, number, ::.00})"
+LightRadiusMultiplierTooltip: "valeur par défaut: 1.75\nMultiplicateur de rayon pour les points lumineux. Des valeurs plus larges augmentent la distance des lumières."
 LightsFadeStartMultiplier: "Seuil de perte d'éclat lumineux"
+LightsFadeStartMultiplierValue: "Seuil de perte d'éclat lumineux ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "valeur par défaut: 0.85\nFraction de la distance maximale d'une source à partir de laquelle l'intensité lumineuse commence à décroître.\n\nSélectionnez une valeur basse pour une transition douce ou une valeur plus élevée pour une transition plus abrupte."
-LightsLightingMethodTooltip: "Définit la gestion des sources lumineuses :\n\n
-    \"Traditionnelle\" Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.\n\n
-    \"Shaders (mode de compatibilité)\" supprime la limite des 8 sources lumineuses. Cette méthode permet d'éclairer la végétation au sol, mais aussi de configurer à quel distance une source lumineuse s'estompe. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.\n\n
-    \"Shaders\" offre tous les bénéfices apportés par \"Shaders (mode de compatibilité)\", mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d'augmenter le nombre de sources lumineuses par objet sans perte de performance."
+LightsClusteredLightingTooltip:  |-
+  Activer l'éclairage par cluster.
+  Découpe l'écran en régions pour l'assignement des éclairages, supprimant les limites d'éclairage par objets.
+
+  Les options d'atténuation classique et le maximum de sources lumineuses ne s'appliquent pas dans ce mode.
+
+  Active les éclairage spéculaires sur le plan de l'eau quand les shaders de l'eau sont activés.
+
+  Il est hautement recommandé d'utiliser cette option avec l'éclairage par pixel, car l'éclairage par vertex peut causer des apparitions lumineuses soudaines sur les bords de l'écran.
 LightsMaximumDistance: "Distance maximale des sources lumineuses"
+LightsMaximumDistanceValue: "Distance maximale des sources lumineuses ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "valeur par défaut: 8192\nDistance maximale d'affichage des sources lumineuses (en unité de distance).\n\nMettez cette valeur à 0 pour une distance d'affichage infinie."
 LightsMinimumInteriorBrightness: "Luminosité intérieure minimale"
-LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres."
+LightsMinimumInteriorBrightnessValue: "Luminosité intérieure minimale ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessTooltip: "valeur par défaut: 0.08\nLuminosité ambiante minimum en intérieur.\n\nAugmentez cette valeur si les intérieurs vous semblent trop sombres.\n\nCela n'a aucun effet si l'atténuation classique est utilisée."
+MatchSunlightToSun: "Aligner la lumière du soleil"
+MatchSunlightToSunTooltip: |-
+    Dans Morrowind, la position apparente du soleil ne correspond pas à la direction de sa lumière pour des raisons mystérieuses.
+    Nous conservons ce comportement irréaliste pour maintenir la compatibilité.
+
+    Cette option aligne la source lumineuse du soleil sur la position réelle du soleil.
 MaxLights: "Maximum de sources lumineuses"
-MaxLightsTooltip: "valeur par défaut: 8\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles obtenues avec la méthode d'éclairage traditionnelle."
+MaxLightsValue: "Maximum de sources lumineuses ({value, number, :: group-off})"
+MaxLightsTooltip: "valeur par défaut: 16\nNombre maximum de sources lumineuses par objet.\n\nUne valeur faible mène à des apparitions tardives des sources lumineuses similaires à celles de Morrowind."
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"
 MouseAndKeyboard: "Souris/Clavier"
+ParticlePointLighting: "Éclairage par point des particules"
+ParticlePointLightingTooltip: "Authorise les systèmes de particular a être éclairés par l'éclairage par points."
 PostProcessing: "Post-traitement"
 PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
 PostProcessingTooltip: "Modifiable dans le HUD de post-traitement, accessible à partir les paramètres de contrôle."
@@ -159,6 +206,7 @@ TestingExteriorCells: "Vérification des espaces (cells) extérieurs"
 TestingInteriorCells: "Vérification des espaces (cells) intérieurs"
 TextureFiltering: "Filtre appliqué aux textures"
 TextureFilteringBilinear: "Bilinéaire"
+TextureFilteringNearest: "Plus proche voisin"
 TextureFilteringDisabled: "Aucun"
 TextureFilteringOther: "Autre"
 TextureFilteringTrilinear: "Trilinéaire"
@@ -168,6 +216,8 @@ TransparencyFull: "Haute"
 TransparencyNone: "Basse"
 Video: "Graphisme"
 ViewDistance: "Distance d'affichage"
+ViewDistanceValue: "Distance d'affichage ({value, number, ::.00})"
+ViewDistanceValueCells: "Distance d'affichage (×{cells, number, ::.00})"
 VSync: "VSync"
 VSyncAdaptive: "Adaptif"
 Water: "Eau"
@@ -180,3 +230,14 @@ WindowModeHint: "Info : Le mode \"Fenêtré plein écran\" utilise toujours la r
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
 WobblyShores: "Rivages vacillants"
+
+
+# Controller button names
+
+EnchantType: "Type de lancement"
+InventorySelect: "Placer"
+JournalQuests: "Quêtes"
+JournalShowAll: "Tout Afficher"
+LoadingSelectCharacter: "Sélection du personnage"
+RechargeSelect: "Recharge"
+RepairTool: "Outil"

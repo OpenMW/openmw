@@ -23,18 +23,18 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="folderIconLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QToolButton" name="folderIcon">
+       <property name="styleSheet">
+        <string notr="true">QToolButton { border: none; padding: 0px; }</string>
        </property>
-       <property name="textFormat">
-        <enum>Qt::RichText</enum>
+       <property name="text">
+        <string/>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -80,7 +80,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../wizard/wizard.qrc"/>
+  <include location="../../../files/wizard/wizard.qrc"/>
  </resources>
  <connections/>
 </ui>

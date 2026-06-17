@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -30,7 +30,7 @@
 #include <type_traits>
 #include <string_view>
 
-#if SOL_IS_ON(SOL_USE_CXX_LUA_I_) || SOL_IS_ON(SOL_USE_CXX_LUAJIT_I_)
+#if SOL_IS_ON(SOL_USING_CXX_LUA) || SOL_IS_ON(SOL_USING_CXX_LUAJIT)
 struct lua_State;
 #else
 extern "C" {
@@ -117,7 +117,7 @@ namespace sol {
 	using main_protected_function = main_safe_function;
 	using stack_protected_function = stack_safe_function;
 	using stack_aligned_protected_function = stack_aligned_safe_function;
-#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS_I_)
+#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS)
 	using function = protected_function;
 	using main_function = main_protected_function;
 	using stack_function = stack_protected_function;
@@ -133,7 +133,7 @@ namespace sol {
 	struct unsafe_function_result;
 	struct protected_function_result;
 	using safe_function_result = protected_function_result;
-#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS_I_)
+#if SOL_IS_ON(SOL_SAFE_FUNCTION_OBJECTS)
 	using function_result = safe_function_result;
 #else
 	using function_result = unsafe_function_result;
@@ -234,7 +234,7 @@ namespace sol {
 		struct record;
 	}
 
-#if SOL_IS_OFF(SOL_USE_BOOST_I_)
+#if SOL_IS_OFF(SOL_USE_BOOST)
 	template <class T>
 	class optional;
 
@@ -253,7 +253,7 @@ namespace sol {
 			typedef ::sol::types<__VA_ARGS__> type; \
 		};                                           \
 	}                                                 \
-	void a_sol3_detail_function_decl_please_no_collide()
+	static_assert(true, "")
 #define SOL_DERIVED_CLASSES(T, ...)                    \
 	namespace sol {                                   \
 		template <>                                  \
@@ -261,6 +261,6 @@ namespace sol {
 			typedef ::sol::types<__VA_ARGS__> type; \
 		};                                           \
 	}                                                 \
-	void a_sol3_detail_function_decl_please_no_collide()
+	static_assert(true, "")
 
 #endif // SOL_FORWARD_HPP

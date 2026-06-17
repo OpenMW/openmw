@@ -7,12 +7,39 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/settings/values.hpp>
 #include <components/widgets/imagebutton.hpp>
 
 #include "draganddrop.hpp"
 #include "exposedwindow.hpp"
 
 using namespace MWGui;
+
+size_t MWGui::wrap(size_t index, size_t max, int delta)
+{
+    if (max == 0)
+        return 0;
+    if (delta >= 0)
+    {
+        unsigned absDelta = static_cast<unsigned>(delta);
+        if (absDelta >= max)
+            return 0;
+        else if (index >= max - absDelta)
+            return 0;
+        return index + absDelta;
+    }
+    size_t absDelta = static_cast<size_t>(-static_cast<ptrdiff_t>(delta));
+    index = std::min(index, max);
+    if (index >= absDelta)
+        return index - absDelta;
+    return max - 1;
+}
+
+void MWGui::setControllerFocus(const std::vector<MyGUI::Button*>& buttons, size_t index, bool focused)
+{
+    if (index < buttons.size())
+        buttons[index]->setStateSelected(focused);
+}
 
 WindowBase::WindowBase(std::string_view parLayout)
     : Layout(parLayout)
@@ -41,7 +68,7 @@ void WindowBase::onTitleDoubleClicked()
         MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
 }
 
-void WindowBase::onDoubleClick(MyGUI::Widget* _sender)
+void WindowBase::onDoubleClick(MyGUI::Widget* /*sender*/)
 {
     onTitleDoubleClicked();
 }
@@ -122,6 +149,7 @@ void WindowModal::onOpen()
 void WindowModal::onClose()
 {
     MWBase::Environment::get().getWindowManager()->removeCurrentModal(this);
+    MWBase::Environment::get().getWindowManager()->updateControllerButtonsOverlay();
 
     MyGUI::InputManager::getInstance().removeWidgetModal(mMainWidget);
 }
@@ -181,16 +209,14 @@ float BookWindowBase::adjustButton(std::string_view name)
     WindowBase::getWidget(button, name);
     MyGUI::IntSize requested = button->getRequestedSize();
     float scale = float(requested.height) / button->getSize().height;
-    MyGUI::IntSize newSize = requested;
-    newSize.width /= scale;
-    newSize.height /= scale;
+    MyGUI::IntSize newSize(static_cast<int>(requested.width / scale), static_cast<int>(requested.height / scale));
     button->setSize(newSize);
 
     if (button->getAlign().isRight())
     {
         MyGUI::IntSize diff = (button->getSize() - requested);
-        diff.width /= scale;
-        diff.height /= scale;
+        diff.width = static_cast<int>(diff.width / scale);
+        diff.height = static_cast<int>(diff.height / scale);
         button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width, 0));
     }
 

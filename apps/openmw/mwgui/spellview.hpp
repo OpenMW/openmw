@@ -13,6 +13,11 @@ namespace MyGUI
     class ScrollView;
 }
 
+namespace Gui
+{
+    class SharedStateButton;
+}
+
 namespace MWGui
 {
 
@@ -23,7 +28,7 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(SpellView)
     public:
-        SpellView();
+        SpellView() {}
 
         /// Register needed components with MyGUI's factory manager
         static void registerComponents();
@@ -49,14 +54,15 @@ namespace MWGui
 
         void initialiseOverride() override;
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
         void resetScrollbars();
 
-    private:
-        MyGUI::ScrollView* mScrollView;
+        void setActiveControllerWindow(bool active);
+        void onControllerButton(const unsigned char button);
 
+    private:
         std::unique_ptr<SpellModel> mModel;
 
         /// tracks a row in the spell view
@@ -82,19 +88,27 @@ namespace MWGui
 
         std::vector<LineInfo> mLines;
 
-        bool mShowCostColumn;
-        bool mHighlightSelected;
+        /// Keep a list of buttons for controller navigation and their index in the full list.
+        std::vector<std::pair<Gui::SharedStateButton*, int>> mButtons;
+        /// Keep a list of group offsets for controller navigation
+        std::vector<size_t> mGroupIndices;
+        MyGUI::ScrollView* mScrollView = nullptr;
+        size_t mControllerFocus = 0;
+
+        bool mShowCostColumn = true;
+        bool mHighlightSelected = true;
+        bool mControllerActiveWindow = false;
 
         void layoutWidgets();
         void addGroup(const std::string& label1, const std::string& label2);
         void adjustSpellWidget(const Spell& spell, SpellModel::ModelIndex index, MyGUI::Widget* widget);
 
-        void onSpellSelected(MyGUI::Widget* _sender);
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
+        void updateControllerFocus(size_t prevFocus, size_t newFocus);
 
-        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* _sender);
+        void onSpellSelected(MyGUI::Widget* sender);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
 
-        static const char* sSpellModelIndex;
+        SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* sender);
     };
 
 }

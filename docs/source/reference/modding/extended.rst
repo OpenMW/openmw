@@ -91,7 +91,8 @@ The behavior of such a model:
 
 The actual state toggling time depends on the sunrise/sunset time settings in `openmw.cfg`:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     fallback=Weather_Sunrise_Time,6
     fallback=Weather_Sunset_Time,18
@@ -102,7 +103,8 @@ These settings lead to the "night" starting at 20:00 and ending at 6:00.
 
 The engine checks if the weather is bright enough to support the "interior day" mode using the Glare_View setting. If it is >= 0.5, the engine considers the weather bright.
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     fallback=Weather_Clear_Glare_View,1
     fallback=Weather_Foggy_Glare_View,0.25
@@ -138,7 +140,8 @@ If you want to override walking animations, you should override ``xbase_anim_fem
 
 To enable this feature, you should have this line in your settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     use additional anim sources = true
@@ -157,10 +160,12 @@ This feature conflicts with old mods which use scripted scabbards, arrows with p
 
 The minimum you need is the ``xbase_anim_sh.nif`` file from the `Weapon Sheathing`_ mod and this line in your settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     weapon sheathing = true
+    use additional anim sources = true
 
 The ``xbase_anim_sh.nif`` contains default placement points for different weapon types.
 That way you'll get Gothic-style weapon sheathing for all biped actors (without quivers and scabbards).
@@ -200,12 +205,35 @@ It is important to make sure the names of empty nodes start with ``"Bip01 "``, o
 An example of a mod which uses this feature is `Weapon Sheathing`_.
 
 
+Shield sheathing support
+------------------------
+
+The minimum you need is the ``xbase_anim_sh.nif`` file from the `Weapon Sheathing`_ mod and this line in your settings.cfg:
+
+.. code-block:: ini
+    :caption: settings.cfg
+
+    [Game]
+    shield sheathing = true
+    use additional anim sources = true
+
+The ``xbase_anim_sh.nif`` contains default placement points for shields (a ``"Bip01 AttachShield"`` node). 
+You also may use meshes with ``_sh`` suffix (with ``Bip01 Sheath`` node) to tweak how particular shield looks in the sheathed mode. A stub sheath means that the shield should be excluded from this feature. 
+When a two-handed weapon is equipped, a shield is hidden when this feature is enabled.
+This feature also supports shield equipping and unequipping animations. It is a ``Shield`` group (with ``Equip Start``, ``Equip Attach``, ``Equip Stop``, ``Unequip Start``, ``Unequip Attach`` and ``Unequip Stop`` keys).
+Note that equip and unequip animation blocks should not overlap each other and weapon equip/unequip animations. 
+Basically, you need to avoid situations when you play an animation block where you need both to attach and detach the shield.
+
+An example of a mod which uses this feature is `Weapon Sheathing`_.
+
+
 Skeleton extensions
 -------------------
 
 It is possible to inject custom bones into actor skeletons:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Game]
     use additional anim sources = true
@@ -276,6 +304,14 @@ Also it is possible to add a "Bip01 Arrow" bone to actor skeletons. In this case
 Such approach allows to implement better shooting animations (for example, beast races have tail, so quivers should be attached under different angle and
 default arrow fetching animation does not look good).
 
+Animation blending
+------------------
+
+Animation blending introduces smooth animation transitions between essentially every animation in the game without affecting gameplay. Effective if ``smooth animation transitions`` setting is enabled in the launcher or the config files.
+
+Animation developers can bundle ``.yaml``/``.json`` files together with their ``.kf`` files to specify the blending style of their animations. Those settings will only affect the corresponding animation files. 
+For more details see :doc:`animation-blending`.
+
 Groundcover support
 -------------------
 
@@ -315,14 +351,16 @@ General advices to create assets for this feature:
 
 Groundcover mods can be registered in the openmw.cfg via "groundcover" entries instead of "content" ones:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     groundcover=my_grass_mod.esp
 
 Every static from such mod is treated as a groundcover object.
 Also groundcover detection should be enabled via settings.cfg:
 
-::
+.. code-block:: ini
+    :caption: settings.cfg
 
     [Groundcover]
     enabled = true
@@ -330,7 +368,7 @@ Also groundcover detection should be enabled via settings.cfg:
 Lua scripting
 -------------
 
-OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <OpenMW Lua scripting>`.
+OpenMW supports Lua scripts. See :ref:`Lua scripting documentation <Lua scripting>`.
 It is not compatible with MWSE. A mod with Lua scripts will work only if it was developed specifically for OpenMW.
 
 Installation of a Lua mod is the same as of any other mod: add ``data=`` and ``content=`` entries to ``openmw.cfg``.

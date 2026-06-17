@@ -17,13 +17,6 @@
 
 #include "document.hpp"
 
-CSMDoc::Loader::Stage::Stage()
-    : mFile(0)
-    , mRecordsLoaded(0)
-    , mRecordsLeft(false)
-{
-}
-
 CSMDoc::Loader::Loader()
     : mShouldStop(false)
 {
@@ -105,7 +98,7 @@ void CSMDoc::Loader::load()
 
         if (iter->second.mFile < size) // start loading the files
         {
-            std::filesystem::path path = document->getContentFiles()[iter->second.mFile];
+            const std::filesystem::path& path = document->getContentFiles()[iter->second.mFile];
 
             int steps = document->getData().startLoading(path, iter->second.mFile != editedIndex, /*project*/ false);
             iter->second.mRecordsLeft = true;

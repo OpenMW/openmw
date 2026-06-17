@@ -16,13 +16,21 @@ openmw_add_executable(esmtool
 )
 
 target_link_libraries(esmtool
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
+
+if (WIN32)
+    target_sources(esmtool PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(esmtool PRIVATE --coverage)
     target_link_libraries(esmtool gcov)
+endif()
+
+if (WIN32)
+    install(TARGETS esmtool RUNTIME DESTINATION ".")
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

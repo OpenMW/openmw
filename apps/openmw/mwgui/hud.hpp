@@ -61,56 +61,53 @@ namespace MWGui
 
         void clear() override;
 
+        void dropDraggedItem(float mouseX, float mouseY);
+
     private:
-        MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
-        MyGUI::Widget* mHealthFrame;
-        MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
-        ItemWidget* mWeapImage;
-        SpellWidget* mSpellImage;
-        MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
-        MyGUI::Widget *mEffectBox, *mMinimapBox;
-        MyGUI::Button* mMinimapButton;
-        MyGUI::ScrollView* mMinimap;
-        MyGUI::ImageBox* mCrosshair;
-        MyGUI::TextBox* mCellNameBox;
-        MyGUI::TextBox* mWeaponSpellBox;
-        MyGUI::Widget *mDrowningBar, *mDrowningFrame, *mDrowningFlash;
+        MyGUI::ProgressBar *mHealth = nullptr, *mMagicka = nullptr, *mStamina = nullptr, *mEnemyHealth = nullptr,
+                           *mDrowning = nullptr;
+        MyGUI::Widget* mHealthFrame = nullptr;
+        MyGUI::Widget *mWeapBox = nullptr, *mSpellBox = nullptr, *mSneakBox = nullptr;
+        ItemWidget* mWeapImage = nullptr;
+        SpellWidget* mSpellImage = nullptr;
+        MyGUI::ProgressBar *mWeapStatus = nullptr, *mSpellStatus = nullptr;
+        MyGUI::Widget *mEffectBox = nullptr, *mMinimapBox = nullptr;
+        MyGUI::Button* mMinimapButton = nullptr;
+        MyGUI::ScrollView* mMinimap = nullptr;
+        MyGUI::ImageBox* mCrosshair = nullptr;
+        MyGUI::TextBox* mCellNameBox = nullptr;
+        MyGUI::TextBox* mWeaponSpellBox = nullptr;
+        MyGUI::Widget *mDrowningBar = nullptr, *mDrowningFrame = nullptr, *mDrowningFlash = nullptr;
+        DragAndDrop* mDragAndDrop;
+        std::string mCellName;
+        std::string mWeaponName;
+        std::string mSpellName;
+        std::unique_ptr<SpellIcons> mSpellIcons;
+        ESM::RefNum mEnemyActor;
 
         // bottom left elements
         int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;
         // bottom right elements
         int mMinimapBoxBaseRight, mEffectBoxBaseRight;
 
-        DragAndDrop* mDragAndDrop;
+        float mCellNameTimer = 0.f;
+        float mWeaponSpellTimer = 0.f;
+        float mEnemyHealthTimer = -1;
+        float mDrowningFlashTheta = 0.f;
 
-        std::string mCellName;
-        float mCellNameTimer;
+        bool mMapVisible = true;
+        bool mWeaponVisible = true;
+        bool mSpellVisible = true;
+        bool mWorldMouseOver = false;
+        bool mIsDrowning = false;
 
-        std::string mWeaponName;
-        std::string mSpellName;
-        float mWeaponSpellTimer;
-
-        bool mMapVisible;
-        bool mWeaponVisible;
-        bool mSpellVisible;
-
-        bool mWorldMouseOver;
-
-        std::unique_ptr<SpellIcons> mSpellIcons;
-
-        int mEnemyActorId;
-        float mEnemyHealthTimer;
-
-        bool mIsDrowning;
-        float mDrowningFlashTheta;
-
-        void onWorldClicked(MyGUI::Widget* _sender);
-        void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
-        void onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new);
-        void onHMSClicked(MyGUI::Widget* _sender);
-        void onWeaponClicked(MyGUI::Widget* _sender);
-        void onMagicClicked(MyGUI::Widget* _sender);
-        void onMapClicked(MyGUI::Widget* _sender);
+        void onWorldClicked(MyGUI::Widget* sender);
+        void onWorldMouseOver(MyGUI::Widget* sender, int x, int y);
+        void onWorldMouseLostFocus(MyGUI::Widget* sender, MyGUI::Widget* newWidget);
+        void onHMSClicked(MyGUI::Widget* sender);
+        void onWeaponClicked(MyGUI::Widget* sender);
+        void onMagicClicked(MyGUI::Widget* sender);
+        void onMapClicked(MyGUI::Widget* sender);
 
         // LocalMapBase
         void customMarkerCreated(MyGUI::Widget* marker) override;

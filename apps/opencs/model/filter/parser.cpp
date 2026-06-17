@@ -365,7 +365,7 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry(const Token& keywo
         if (mError)
             return std::shared_ptr<Node>();
 
-        nodes.push_back(node);
+        nodes.push_back(std::move(node));
 
         token = getNextToken();
 

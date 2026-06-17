@@ -2,7 +2,6 @@
 #define MWGUI_CONTROLLERS_H
 
 #include <MyGUI_ControllerItem.h>
-#include <string>
 
 namespace MyGUI
 {
@@ -17,8 +16,8 @@ namespace MWGui::Controllers
         MYGUI_RTTI_DERIVED(ControllerFollowMouse)
 
     private:
-        bool addTime(MyGUI::Widget* _widget, float _time) override;
-        void prepareItem(MyGUI::Widget* _widget) override;
+        bool addTime(MyGUI::Widget* widget, float time) override;
+        void prepareItem(MyGUI::Widget* widget) override;
     };
 }
 

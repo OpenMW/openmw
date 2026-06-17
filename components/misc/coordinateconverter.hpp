@@ -59,10 +59,18 @@ namespace Misc
             point.y() -= static_cast<float>(mCellY);
         }
 
+        osg::Vec3f toWorldVec3(const osg::Vec3f& point) const
+        {
+            osg::Vec3f result = point;
+            toWorld(result);
+            return result;
+        }
+
         osg::Vec3f toLocalVec3(const osg::Vec3f& point) const
         {
-            return osg::Vec3f(
-                point.x() - static_cast<float>(mCellX), point.y() - static_cast<float>(mCellY), point.z());
+            osg::Vec3f result = point;
+            toLocal(result);
+            return result;
         }
 
     private:

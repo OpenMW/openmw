@@ -41,7 +41,8 @@ namespace MWGui
         EventHandle_Int eventButtonSelected;
 
     protected:
-        void onButtonClicked(MyGUI::Widget* _sender);
+        void onButtonClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void fitToText(MyGUI::TextBox* widget);
@@ -50,6 +51,7 @@ namespace MWGui
         MyGUI::TextBox* mText;
         MyGUI::Widget* mButtonBar;
         std::vector<MyGUI::Button*> mButtons;
+        size_t mControllerFocus = 0;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -90,12 +92,16 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool mOkButtonFocus = true;
 
     private:
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mClassName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentClassId;
     };
@@ -127,11 +133,11 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onSelectClass(MyGUI::ListBox* _sender, size_t _index);
-        void onAccept(MyGUI::ListBox* _sender, size_t _index);
+        void onSelectClass(MyGUI::ListBox* sender, size_t index);
+        void onAccept(MyGUI::ListBox* sender, size_t index);
 
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
     private:
         void updateClasses();
@@ -140,11 +146,15 @@ namespace MWGui
         MyGUI::ImageBox* mClassImage;
         MyGUI::ListBox* mClassList;
         MyGUI::TextBox* mSpecializationName;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
         Widgets::MWAttributePtr mFavoriteAttribute[2];
         Widgets::MWSkillPtr mMajorSkill[5];
         Widgets::MWSkillPtr mMinorSkill[5];
 
         ESM::RefId mCurrentClassId;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
     class SelectSpecializationDialog : public WindowModal
@@ -171,8 +181,9 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onSpecializationClicked(MyGUI::Widget* _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onSpecializationClicked(MyGUI::Widget* sender);
+        void onCancelClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::TextBox *mSpecialization0, *mSpecialization1, *mSpecialization2;
@@ -204,8 +215,11 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onAttributeClicked(Widgets::MWAttributePtr _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onAttributeClicked(Widgets::MWAttributePtr sender);
+        void onCancelClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        size_t mControllerFocus = 0;
+        std::vector<Widgets::MWAttribute*> mAttributeButtons;
 
     private:
         ESM::RefId mAttributeId;
@@ -235,11 +249,17 @@ namespace MWGui
         EventHandle_Void eventItemSelected;
 
     protected:
-        void onSkillClicked(Widgets::MWSkillPtr _sender);
-        void onCancelClicked(MyGUI::Widget* _sender);
+        void onSkillClicked(Widgets::MWSkillPtr sender);
+        void onCancelClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        size_t mControllerFocus = 0;
+        std::vector<Widgets::MWSkill*> mSkillButtons;
 
     private:
         ESM::RefId mSkillId;
+        std::array<size_t, 3> mNumSkillsPerSpecialization{};
+
+        void selectNextColumn(int direction);
     };
 
     class DescriptionDialog : public WindowModal
@@ -257,7 +277,8 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         MyGUI::EditBox* mTextEdit;
@@ -294,16 +315,16 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
-        void onSpecializationClicked(MyGUI::Widget* _sender);
+        void onSpecializationClicked(MyGUI::Widget* sender);
         void onSpecializationSelected();
-        void onAttributeClicked(Widgets::MWAttributePtr _sender);
+        void onAttributeClicked(Widgets::MWAttributePtr sender);
         void onAttributeSelected();
-        void onSkillClicked(Widgets::MWSkillPtr _sender);
+        void onSkillClicked(Widgets::MWSkillPtr sender);
         void onSkillSelected();
-        void onDescriptionClicked(MyGUI::Widget* _sender);
+        void onDescriptionClicked(MyGUI::Widget* sender);
         void onDescriptionEntered(WindowBase* parWindow);
         void onDialogCancel();
 
@@ -314,6 +335,7 @@ namespace MWGui
     private:
         MyGUI::EditBox* mEditName;
         MyGUI::TextBox* mSpecializationName;
+        std::vector<MyGUI::Button*> mButtons;
         Widgets::MWAttributePtr mFavoriteAttribute0, mFavoriteAttribute1;
         std::array<Widgets::MWSkillPtr, 5> mMajorSkill;
         std::array<Widgets::MWSkillPtr, 5> mMinorSkill;
@@ -329,6 +351,9 @@ namespace MWGui
 
         Widgets::MWAttributePtr mAffectedAttribute;
         Widgets::MWSkillPtr mAffectedSkill;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        size_t mControllerFocus = 2;
     };
 }
 #endif

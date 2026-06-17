@@ -7,6 +7,7 @@
 #include <variant>
 
 #include <apps/opencs/model/world/cell.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/nestedtablewrapper.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
@@ -40,7 +41,7 @@ namespace CSMWorld
         point.mConnectionNum = 0;
 
         points.insert(points.begin() + position, point);
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -57,7 +58,7 @@ namespace CSMWorld
         // Do not remove dangling edges, does not work with current undo mechanism
         // Do not automatically adjust indices, what would be done with dangling edges?
         points.erase(points.begin() + rowToRemove);
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -66,7 +67,7 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
         pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList>&>(nestedTable).mNestedTable;
-        pathgrid.mData.mPoints = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = static_cast<uint16_t>(pathgrid.mPoints.size());
 
         record.setModified(pathgrid);
     }
@@ -461,7 +462,7 @@ namespace CSMWorld
                 soundRef.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
                 break;
             case 1:
-                soundRef.mChance = static_cast<unsigned char>(value.toInt());
+                soundRef.mChance = static_cast<uint8_t>(value.toInt());
                 break;
             default:
                 throw std::runtime_error("Region sounds subcolumn index out of range");
@@ -542,7 +543,7 @@ namespace CSMWorld
 
         // default row
         ESM::DialogueCondition condStruct;
-        condStruct.mIndex = conditions.size();
+        condStruct.mIndex = static_cast<uint8_t>(conditions.size());
 
         conditions.insert(conditions.begin() + position, condStruct);
 
@@ -854,7 +855,7 @@ namespace CSMWorld
 
     int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
     {
-        return record.get().mData.mBonus.size();
+        return static_cast<int>(record.get().mData.mBonus.size());
     }
 
     void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const
@@ -892,24 +893,24 @@ namespace CSMWorld
             // While the ambient information is not necessarily valid if the subrecord wasn't loaded,
             // the user should still be allowed to edit it
             case 1:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : DisableTag::getVariant();
             case 2:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : DisableTag::getVariant();
             case 3:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : DisableTag::getVariant();
             case 4:
-                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
+                return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : DisableTag::getVariant();
             case 5:
             {
                 if (isInterior && interiorWater)
                     return cell.mWater;
                 else
-                    return QVariant(QVariant::UserType);
+                    return DisableTag::getVariant();
             }
             case 6:
-                return isInterior ? QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+                return isInterior ? DisableTag::getVariant() : cell.mMapColor; // TODO: how to select?
             // case 7: return isInterior ?
-            // behaveLikeExterior : QVariant(QVariant::UserType);
+            // behaveLikeExterior : DisableTag::getVariant();
             default:
                 throw std::runtime_error("Cell subcolumn index out of range");
         }
@@ -1053,14 +1054,14 @@ namespace CSMWorld
 
     QVariant RegionWeatherAdapter::getData(const Record<ESM::Region>& record, int subRowIndex, int subColIndex) const
     {
-        const char* WeatherNames[]
+        const char* weatherNames[]
             = { "Clear", "Cloudy", "Fog", "Overcast", "Rain", "Thunder", "Ash", "Blight", "Snow", "Blizzard" };
 
         const ESM::Region& region = record.get();
 
         if (subColIndex == 0 && subRowIndex >= 0 && subRowIndex < 10)
         {
-            return WeatherNames[subRowIndex];
+            return weatherNames[subRowIndex];
         }
         else if (subColIndex == 1)
         {
@@ -1134,7 +1135,7 @@ namespace CSMWorld
             case 4:
                 return rankData.mFavouredSkill;
             case 5:
-                return rankData.mFactReaction;
+                return rankData.mFactReputation;
             default:
                 throw std::runtime_error("Rank subcolumn index out of range");
         }
@@ -1165,7 +1166,7 @@ namespace CSMWorld
                 rankData.mFavouredSkill = value.toInt();
                 break;
             case 5:
-                rankData.mFactReaction = value.toInt();
+                rankData.mFactReputation = value.toInt();
                 break;
             default:
                 throw std::runtime_error("Rank index out of range");

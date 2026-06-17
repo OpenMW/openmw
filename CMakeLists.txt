@@ -16,7 +16,7 @@ include(GNUInstallDirs)
 
 option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
 if(OPENMW_GL4ES_MANUAL_INIT)
-    add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
+    add_compile_definitions(OPENMW_GL4ES_MANUAL_INIT)
 endif()
 
 if (APPLE OR WIN32)
@@ -39,11 +39,12 @@ option(BUILD_ESMTOOL            "Build ESM inspector" ON)
 option(BUILD_NIFTEST            "Build nif file tester" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
-option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_COMPONENTS_TESTS   "Build components library tests" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(BUILD_OPENMW_TESTS       "Build OpenMW tests" OFF)
 option(PRECOMPILE_HEADERS_WITH_MSVC "Precompile most common used headers with MSVC (alternative to ccache)" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
@@ -79,10 +80,10 @@ endif()
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 49)
+set(OPENMW_VERSION_MINOR 52)
 set(OPENMW_VERSION_RELEASE 0)
-set(OPENMW_LUA_API_REVISION 60)
-set(OPENMW_POSTPROCESSING_API_REVISION 1)
+set(OPENMW_LUA_API_REVISION 134)
+set(OPENMW_POSTPROCESSING_API_REVISION 5)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -123,7 +124,6 @@ include(WholeArchive)
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
-option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
@@ -153,7 +153,7 @@ option(MYGUI_STATIC "Link static build of Mygui into the binaries" ${_mygui_stat
 option(OPENMW_USE_SYSTEM_RECASTNAVIGATION "Use system provided recastnavigation library" OFF)
 if(OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     set(_recastnavigation_static_default OFF)
-    find_package(RecastNavigation REQUIRED)
+    find_package(RecastNavigation REQUIRED CONFIG)
 else()
     set(_recastnavigation_static_default ON)
 endif()
@@ -167,15 +167,33 @@ option(OPENMW_USE_SYSTEM_GOOGLETEST "Use system Google Test library." OFF)
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
-# what is necessary to build documentation
-IF( BUILD_DOCS )
-    # Builds the documentation.
-    FIND_PACKAGE( Sphinx REQUIRED )
-    FIND_PACKAGE( Doxygen REQUIRED )
-ENDIF()
+if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    if (OPENMW_MSBUILD_COMPILER_OVERRIDE)
+        if (NOT IS_ABSOLUTE OPENMW_MSBUILD_COMPILER_OVERRIDE)
+            find_program(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH "${OPENMW_MSBUILD_COMPILER_OVERRIDE}")
+        else()
+            set(OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH "${OPENMW_MSBUILD_COMPILER_OVERRIDE}")
+        endif()
+        if (DEFINED ENV{ChocolateyInstall})
+            # if Chocolatey's installed, it's relatively likely that the command's a shim and won't work if copied
+            # it's safer to shim it
+            execute_process(COMMAND "$ENV{ChocolateyInstall}/tools/shimgen.exe" -p "${OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH}" -o "${CMAKE_BINARY_DIR}/cl.exe" -c cl.exe)
+        else()
+            file(COPY_FILE "${OPENMW_MSBUILD_COMPILER_OVERRIDE_PATH}" "${CMAKE_BINARY_DIR}/cl.exe" ONLY_IF_DIFFERENT)
+        endif()
 
-# OS X deployment
-option(OPENMW_OSX_DEPLOYMENT OFF)
+        list(APPEND CMAKE_VS_GLOBALS
+            "CLToolPath=${CMAKE_BINARY_DIR}"
+            "UseMultiToolTask=true"
+        )
+    endif()
+endif()
+
+if ((NOT CMAKE_GENERATOR MATCHES "Visual Studio") OR ("UseMultiToolTask=true" IN_LIST CMAKE_VS_GLOBALS))
+    # don't spawn multiple moc/uic child processes in parallel - the build system already parallelises the build
+    # this genuinely saves time (confirmed with MSVC+Ninja in CI)
+    set(CMAKE_AUTOGEN_PARALLEL 1)
+endif()
 
 if (MSVC)
     option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
@@ -192,16 +210,16 @@ if (MSVC)
 
     add_compile_options(/Zc:__cplusplus)
 
-    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER)
-        if (CMAKE_GENERATOR MATCHES "Visual Studio")
+    if (CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER OR OPENMW_MSBUILD_COMPILER_OVERRIDE)
+        if ((CMAKE_CXX_COMPILER_LAUNCHER OR CMAKE_C_COMPILER_LAUNCHER) AND CMAKE_GENERATOR MATCHES "Visual Studio")
             message(STATUS "A compiler launcher was specified, but will be unused by the current generator (${CMAKE_GENERATOR})")
         else()
             foreach (config_lower ${CMAKE_CONFIGURATION_TYPES})
                 string(TOUPPER "${config_lower}" config)
-                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache")
+                if (CMAKE_C_COMPILER_LAUNCHER STREQUAL "ccache" OR OPENMW_MSBUILD_COMPILER_OVERRIDE STREQUAL "ccache")
                     string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_${config} "${CMAKE_C_FLAGS_${config}}")
                 endif()
-                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache")
+                if (CMAKE_CXX_COMPILER_LAUNCHER STREQUAL "ccache" OR OPENMW_MSBUILD_COMPILER_OVERRIDE STREQUAL "ccache")
                     string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_${config} "${CMAKE_CXX_FLAGS_${config}}")
                 endif()
             endforeach()
@@ -242,17 +260,22 @@ if(MSVC)
 endif()
 
 # Dependencies
-find_package(OpenGL REQUIRED)
+if (APPLE)
+    # Force CMake to use the installed version of OpenGL on macOS
+    set(_SAVE_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+    set(CMAKE_FIND_FRAMEWORK ONLY)
+    find_package(OpenGL REQUIRED)
+    set(CMAKE_FIND_FRAMEWORK ${_SAVE_CMAKE_FIND_FRAMEWORK})
+    unset(_SAVE_CMAKE_FIND_FRAMEWORK)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 find_package(LZ4 REQUIRED)
 
 if (USE_QT)
-    find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
-    if (QT_VERSION_MAJOR VERSION_EQUAL 5)
-        find_package(Qt5 5.15 COMPONENTS Core Widgets Network OpenGL LinguistTools Svg REQUIRED)
-    else()
-        find_package(Qt6 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets LinguistTools Svg REQUIRED)
-    endif()
+    find_package(QT REQUIRED COMPONENTS Core NAMES Qt6)
+    find_package(Qt6 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets LinguistTools Svg REQUIRED)
     message(STATUS "Using Qt${QT_VERSION}")
 endif()
 
@@ -279,16 +302,6 @@ set(USED_OSG_PLUGINS
     osgdb_serializers_osg
     osgdb_tga)
 
-if(NOT COLLADA_DOM_VERSION_MAJOR)
-    set(COLLADA_DOM_VERSION_MAJOR 2)
-endif()
-
-if(NOT COLLADA_DOM_VERSION_MINOR)
-    set(COLLADA_DOM_VERSION_MINOR 5)
-endif()
-
-find_package(collada_dom 2.5)
-
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
     find_package(ICU REQUIRED COMPONENTS uc i18n data)
@@ -305,7 +318,7 @@ if (OPENMW_USE_SYSTEM_YAML_CPP)
     find_package(yaml-cpp REQUIRED)
 endif()
 
-if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
+if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
     find_package(GTest 1.10 REQUIRED)
     find_package(GMock 1.10 REQUIRED)
 endif()
@@ -322,31 +335,28 @@ find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMP
 if(FFmpeg_FOUND)
     SET(FFVER_OK TRUE)
 
-    # Can not detect FFmpeg version on Windows for now
-    if (NOT WIN32)
-        if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
-            message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
-            set(FFVER_OK FALSE)
-        endif()
-        if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
-            message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
-            set(FFVER_OK FALSE)
-        endif()
-        if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
-            message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
-            set(FFVER_OK FALSE)
-        endif()
-        if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
-            message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
-            set(FFVER_OK FALSE)
-        endif()
-        if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
-            message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
-            set(FFVER_OK FALSE)
-        endif()
+    if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
+        message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
+        set(FFVER_OK FALSE)
+    endif()
+    if(FFmpeg_AVCODEC_VERSION VERSION_LESS "57.64.100")
+        message(STATUS "libavcodec is too old! (${FFmpeg_AVCODEC_VERSION}, wanted 57.64.100)")
+        set(FFVER_OK FALSE)
+    endif()
+    if(FFmpeg_AVUTIL_VERSION VERSION_LESS "55.34.100")
+        message(STATUS "libavutil is too old! (${FFmpeg_AVUTIL_VERSION}, wanted 55.34.100)")
+        set(FFVER_OK FALSE)
+    endif()
+    if(FFmpeg_SWSCALE_VERSION VERSION_LESS "4.2.100")
+        message(STATUS "libswscale is too old! (${FFmpeg_SWSCALE_VERSION}, wanted 4.2.100)")
+        set(FFVER_OK FALSE)
+    endif()
+    if(FFmpeg_SWRESAMPLE_VERSION VERSION_LESS "2.3.100")
+        message(STATUS "libswresample is too old! (${FFmpeg_SWRESAMPLE_VERSION}, wanted 2.3.100)")
+        set(FFVER_OK FALSE)
     endif()
 
-    if(NOT FFVER_OK AND NOT APPLE)  # unable to detect on version on MacOS < 11.0
+    if(NOT FFVER_OK)
         message(FATAL_ERROR "FFmpeg version is too old, 3.2 is required" )
     endif()
 endif()
@@ -355,40 +365,35 @@ if(NOT FFmpeg_FOUND)
     message(FATAL_ERROR "FFmpeg was not found" )
 endif()
 
-if(WIN32)
-    message("Can not detect FFmpeg version, at least the 3.2 is required" )
-endif()
-
 # Required for building the FFmpeg headers
-add_definitions(-D__STDC_CONSTANT_MACROS)
-
-# Required for unity build
-add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
+add_compile_definitions(__STDC_CONSTANT_MACROS)
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if (USE_SYSTEM_TINYXML)
     find_package(TinyXML REQUIRED)
-    add_definitions (-DTIXML_USE_STL)
+    add_compile_definitions(TIXML_USE_STL)
     include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 endif()
 
 # Platform specific
 if (WIN32)
-    if(NOT MINGW)
-    set(Boost_USE_STATIC_LIBS   ON)
-    add_definitions(-DBOOST_ALL_NO_LIB)
-    endif(NOT MINGW)
-
     # Suppress WinMain(), provided by SDL
-    add_definitions(-DSDL_MAIN_HANDLED)
+    add_compile_definitions(SDL_MAIN_HANDLED)
 
     # Get rid of useless crud from windows.h
-    add_definitions(
-        -DNOMINMAX # name conflict with std::min, std::max
-        -DWIN32_LEAN_AND_MEAN
-        -DNOMB # name conflict with MWGui::MessageBox
-        -DNOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
+    add_compile_definitions(
+        NOMINMAX # name conflict with std::min, std::max
+        WIN32_LEAN_AND_MEAN
+        NOMB # name conflict with MWGui::MessageBox
+        NOGDI # name conflict with osgAnimation::MorphGeometry::RELATIVE
+    )
+
+    # Put Win32 API into UTF-16 mode
+    # We really don't care, but targets linking with Qt 6 (not 5 and earlier) inherit this, and mixing and matching stops us reusing precompiled headers
+    add_compile_definitions(
+        _UNICODE
+        UNICODE
     )
 endif()
 
@@ -454,37 +459,34 @@ endif()
 include_directories(BEFORE SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 if(OSG_STATIC)
-    add_definitions(-DOSG_LIBRARY_STATIC)
+    if(NOT COLLADA_DOM_VERSION_MAJOR)
+        set(COLLADA_DOM_VERSION_MAJOR 2)
+    endif()
+
+    if(NOT COLLADA_DOM_VERSION_MINOR)
+        set(COLLADA_DOM_VERSION_MINOR 5)
+    endif()
+
+    find_package(collada_dom 2.5)
+
+    link_directories(${COLLADA_DOM_LIBRARY_DIRS})
+
+    add_compile_definitions(OSG_LIBRARY_STATIC)
 endif()
 
 include(cmake/CheckOsgMultiview.cmake)
 if(HAVE_MULTIVIEW)
-    add_definitions(-DOSG_HAS_MULTIVIEW)
+    add_compile_definitions(OSG_HAS_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
-set(BOOST_COMPONENTS iostreams program_options system)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-    if(MSVC)
-        # boost-zlib is not present (nor needed) in vcpkg version of boost.
-        # there, it is part of boost-iostreams instead.
-        set(BOOST_OPTIONAL_COMPONENTS zlib)
-    endif(MSVC)
-endif(WIN32)
+set(BOOST_COMPONENTS iostreams program_options)
 
-IF(BOOST_STATIC)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif()
-
-set(Boost_NO_BOOST_CMAKE ON)
-set(Boost_NO_WARN_NEW_VERSIONS ON)  # ignore warnings about new releases of boost
-
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
+find_package(Boost 1.70.0 CONFIG REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
     find_package(MyGUI 3.4.3 REQUIRED)
 endif()
-find_package(SDL2 2.0.9 REQUIRED)
+find_package(SDL2 2.0.20 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(ZLIB REQUIRED)
 
@@ -497,7 +499,7 @@ else(USE_LUAJIT)
     find_package(Lua REQUIRED)
     add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
-if (NOT WIN32)
+if (NOT WIN32 AND NOT ANDROID)
     include(cmake/CheckLuaCustomAllocator.cmake)
 endif()
 
@@ -507,8 +509,6 @@ set(SOL_CONFIG_DIR ${OpenMW_SOURCE_DIR}/extern/sol_config)
 
 include_directories(
     BEFORE SYSTEM
-    "."
-    ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${OPENGL_INCLUDE_DIR}
@@ -518,11 +518,10 @@ include_directories(
     ${SOL_CONFIG_DIR}
     ${ICU_INCLUDE_DIRS}
 )
-
-link_directories(${Boost_LIBRARY_DIRS} ${COLLADA_DOM_LIBRARY_DIRS})
+include_directories(".")
 
 if(MYGUI_STATIC)
-    add_definitions(-DMYGUI_STATIC)
+    add_compile_definitions(MYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)
@@ -545,9 +544,7 @@ if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
 
-    if (OPENMW_OSX_DEPLOYMENT)
-        SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-    endif()
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -561,14 +558,19 @@ pack_resource_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
     "${OpenMW_BINARY_DIR}" "openmw.appdata.xml")
 
-if (NOT APPLE)
+if (APPLE)
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
+        "${OpenMW_BINARY_DIR}/openmw.cfg")
+elseif (WIN32)
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg")
+    configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
+        "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
+else ()
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
         "${OpenMW_BINARY_DIR}" "openmw.cfg")
     configure_resource_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
         "${OpenMW_BINARY_DIR}" "openmw.cfg.install")
-else ()
-    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
-        "${OpenMW_BINARY_DIR}/openmw.cfg")
 endif ()
 
 pack_resource_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
@@ -604,26 +606,10 @@ if(OPENMW_LTO_BUILD)
     endif()
 endif()
 
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor -Wunused ${OPENMW_CXX_FLAGS}")
-    add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
-
-    if (APPLE)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-    endif()
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
-        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
-            set(OPENMW_CXX_FLAGS "${OPENMW_CXX_FLAGS} -Wno-potentially-evaluated-expression")
-        endif ()
-    endif()
-
-    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
-        set(OPENMW_CXX_FLAGS "${OPENMW_CXX_FLAGS} -Wno-unused-but-set-parameter -Wduplicated-branches -Wduplicated-cond -Wlogical-op")
-    endif()
-endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+endif()
 
 # Extern
 
@@ -634,15 +620,57 @@ if (BUILD_OPENCS OR BUILD_OPENCS_TESTS)
     add_subdirectory (extern/osgQt)
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    add_compile_options("/W4")
+
+    set(WARNINGS_DISABLE
+        4100 # Unreferenced formal parameter (-Wunused-parameter)
+        4127 # Conditional expression is constant
+        4996 # Function was declared deprecated
+        5054 # Deprecated operations between enumerations of different types caused by Qt headers
+        )
+
+    foreach(d ${WARNINGS_DISABLE})
+        add_compile_options("/wd${d}")
+    endforeach(d)
+
+    set(WARNINGS_EXTRA
+        4855 # implicit capture of 'this' via '[=]' is deprecated in 'version'
+        )
+
+    foreach(d ${WARNINGS_EXTRA})
+        add_compile_options("/w1${d}")
+    endforeach(d)
+
+    if(OPENMW_MSVC_WERROR)
+        add_compile_options("/WX")
+    endif()
+else ()
+    add_compile_options("-Wall" "-Wextra" "-Wundef" "-Wextra-semi" "-Wno-unused-parameter" "-pedantic" "-Wno-long-long" "-Wnon-virtual-dtor" "-Wunused" "-Wshadow")
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT APPLE)
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
+            add_compile_options("-Wno-potentially-evaluated-expression")
+        endif ()
+    endif()
+
+    if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+        add_compile_options("-Wno-unused-but-set-parameter" "-Wduplicated-branches" "-Wduplicated-cond" "-Wlogical-op")
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105438
+        add_compile_options("-Wno-array-bounds")
+    endif()
+endif ()
+
 if (OPENMW_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMW_CXX_FLAGS}")
+    separate_arguments(OPENMW_CXX_FLAGS NATIVE_COMMAND "${OPENMW_CXX_FLAGS}")
+    add_compile_options(${OPENMW_CXX_FLAGS})
 endif()
 
 # Components
 add_subdirectory (components)
 
 # Apps and tools
-if (BUILD_OPENMW)
+if (BUILD_OPENMW OR BUILD_OPENMW_TESTS)
     add_subdirectory( apps/openmw )
 endif()
 
@@ -676,11 +704,10 @@ endif()
 
 if (BUILD_NIFTEST)
     add_subdirectory(apps/niftest)
-endif(BUILD_NIFTEST)
+endif()
 
-# UnitTests
-if (BUILD_UNITTESTS)
-    add_subdirectory( apps/openmw_test_suite )
+if (BUILD_COMPONENTS_TESTS)
+    add_subdirectory(apps/components_tests)
 endif()
 
 if (BUILD_BENCHMARKS)
@@ -692,11 +719,15 @@ if (BUILD_NAVMESHTOOL)
 endif()
 
 if (BUILD_BULLETOBJECTTOOL)
-    add_subdirectory( apps/bulletobjecttool )
+    add_subdirectory(apps/bulletobjecttool)
 endif()
 
 if (BUILD_OPENCS_TESTS)
     add_subdirectory(apps/opencs_tests)
+endif()
+
+if (BUILD_OPENMW_TESTS)
+    add_subdirectory(apps/openmw_tests)
 endif()
 
 if (WIN32)
@@ -722,78 +753,8 @@ if (WIN32)
             set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
         endif()
 
-        # Play a bit with the warning levels
-
-        set(WARNINGS "/W4")
-
-        set(WARNINGS_DISABLE
-            4100 # Unreferenced formal parameter (-Wunused-parameter)
-            4127 # Conditional expression is constant
-            4996 # Function was declared deprecated
-            5054 # Deprecated operations between enumerations of different types caused by Qt headers
-            )
-
-        foreach(d ${WARNINGS_DISABLE})
-            list(APPEND WARNINGS "/wd${d}")
-        endforeach(d)
-
-        if(OPENMW_MSVC_WERROR)
-            list(APPEND WARNINGS "/WX")
-        endif()
-
-        target_compile_options(components PRIVATE ${WARNINGS})
-        target_compile_options(osg-ffmpeg-videoplayer PRIVATE ${WARNINGS})
-
         if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
             target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
-        endif()
-
-        if (BUILD_BSATOOL)
-            target_compile_options(bsatool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_ESMTOOL)
-            target_compile_options(esmtool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_ESSIMPORTER)
-            target_compile_options(openmw-essimporter PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_LAUNCHER)
-            target_compile_options(openmw-launcher PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_MWINIIMPORTER)
-            target_compile_options(openmw-iniimporter PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_OPENCS)
-            target_compile_options(openmw-cs PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_OPENMW)
-            target_compile_options(openmw PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_WIZARD)
-            target_compile_options(openmw-wizard PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_UNITTESTS)
-            target_compile_options(openmw_test_suite PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_BENCHMARKS)
-            target_compile_options(openmw_detournavigator_navmeshtilescache_benchmark PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_NAVMESHTOOL)
-            target_compile_options(openmw-navmeshtool PRIVATE ${WARNINGS})
-        endif()
-
-        if (BUILD_BULLETOBJECTTOOL)
-            target_compile_options(openmw-bulletobjecttool PRIVATE ${WARNINGS} ${MT_BUILD})
         endif()
     endif(MSVC)
 
@@ -802,16 +763,45 @@ if (WIN32)
     #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
 
-if (APPLE)
-    target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
-    target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
+
+# Core CPACK Setup
+set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
+set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
+set(CPACK_PACKAGE_NAME "OpenMW")
+set(CPACK_PACKAGE_VENDOR "OpenMW.org")
+set(CUSTOM_CPACK_OS_NAME "")
+set(CUSTOM_CPACK_ARCHITECTURE "")
+
+if(APPLE)
+    set(CUSTOM_CPACK_OS_NAME "macOS")
+elseif(WIN32)
+    set(CUSTOM_CPACK_OS_NAME "Windows")
+elseif(UNIX)
+    set(CUSTOM_CPACK_OS_NAME "Linux")
+else()
+    set(CUSTOM_CPACK_OS_NAME "${CMAKE_SYSTEM_NAME}")
 endif()
 
+if(WIN32 AND CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64")
+    set(CUSTOM_CPACK_ARCHITECTURE "x64")
+elseif(APPLE AND CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+    set(CUSTOM_CPACK_ARCHITECTURE "x86_64")
+else()
+    set(CUSTOM_CPACK_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CUSTOM_CPACK_OS_NAME}-${CUSTOM_CPACK_ARCHITECTURE}")
+
 # Apple bundling
-if (OPENMW_OSX_DEPLOYMENT AND APPLE)
-    if (CMAKE_VERSION VERSION_LESS 3.19)
+if (APPLE)
+    if(CMAKE_VERSION VERSION_LESS 3.19)
         message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
-    endif ()
+    endif()
+    if(CMAKE_OSX_ARCHITECTURES AND NOT (CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64" OR CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
+        message(FATAL_ERROR "Only x86_64 OR arm64 is accepted for CMAKE_OSX_ARCHITECTURES")
+    endif()
 
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt${QT_VERSION_MAJOR}::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
@@ -852,10 +842,6 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "." COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
-    set(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-    set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
-    set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
     set(INSTALLED_OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${APP_BUNDLE_NAME}")
     set(INSTALLED_OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${OPENCS_BUNDLE_NAME}")
@@ -864,7 +850,6 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
         include(BundleUtilities)
-        cmake_minimum_required(VERSION 3.1)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
@@ -914,6 +899,11 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     install_plugins_for_bundle("${APP_BUNDLE_NAME}" PLUGINS)
     install_plugins_for_bundle("${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "/${INSTALLED_OPENMW_APP}/..")
+
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
     set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/PlugIns/${QT_QMACSTYLE_PLUGIN_GROUP}/${QT_QMACSTYLE_PLUGIN_NAME}")
     set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
@@ -944,39 +934,54 @@ elseif(NOT APPLE)
 
     if(WIN32)
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                              PATTERN "deps" EXCLUDE
+                                                                              PATTERN ".cmake" EXCLUDE
+                                                                              PATTERN ".qt" EXCLUDE
+                                                                              PATTERN "_CPack_Packages" EXCLUDE
+                                                                              PATTERN "_deps" EXCLUDE
                                                                               PATTERN "apps" EXCLUDE
+                                                                              PATTERN "bin" EXCLUDE
                                                                               PATTERN "CMakeFiles" EXCLUDE
                                                                               PATTERN "components" EXCLUDE
+                                                                              PATTERN "deps" EXCLUDE
                                                                               PATTERN "docs" EXCLUDE
                                                                               PATTERN "extern" EXCLUDE
                                                                               PATTERN "files" EXCLUDE
-                                                                              PATTERN "Testing" EXCLUDE)
+                                                                              PATTERN "lib" EXCLUDE
+                                                                              PATTERN "SymStore" EXCLUDE
+                                                                              PATTERN "symstore-venv" EXCLUDE
+                                                                              PATTERN "Testing" EXCLUDE
+                                                                              PATTERN "tests_output" EXCLUDE
+                                                                              PATTERN "try-compile")
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
-                                                                                                                  PATTERN "deps" EXCLUDE
+                                                                                                                  PATTERN ".cmake" EXCLUDE
+                                                                                                                  PATTERN ".qt" EXCLUDE
+                                                                                                                  PATTERN "_CPack_Packages" EXCLUDE
+                                                                                                                  PATTERN "_deps" EXCLUDE
                                                                                                                   PATTERN "apps" EXCLUDE
+                                                                                                                  PATTERN "bin" EXCLUDE
                                                                                                                   PATTERN "CMakeFiles" EXCLUDE
                                                                                                                   PATTERN "components" EXCLUDE
+                                                                                                                  PATTERN "deps" EXCLUDE
                                                                                                                   PATTERN "docs" EXCLUDE
                                                                                                                   PATTERN "extern" EXCLUDE
                                                                                                                   PATTERN "files" EXCLUDE
-                                                                                                                  PATTERN "Testing" EXCLUDE)
+                                                                                                                  PATTERN "lib" EXCLUDE
+                                                                                                                  PATTERN "SymStore" EXCLUDE
+                                                                                                                  PATTERN "symstore-venv" EXCLUDE
+                                                                                                                  PATTERN "Testing" EXCLUDE
+                                                                                                                  PATTERN "tests_output" EXCLUDE
+                                                                                                                  PATTERN "try-compile")
         INSTALL(FILES "${INSTALL_SOURCE}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/LICENSE" DESTINATION "." RENAME "LICENSE.txt")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/AUTHORS.md" DESTINATION "." RENAME "AUTHORS.txt")
         INSTALL(FILES "${INSTALL_SOURCE}/defaults.bin" DESTINATION ".")
         INSTALL(FILES "${INSTALL_SOURCE}/gamecontrollerdb.txt" DESTINATION ".")
 
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION ".")
 
         SET(CPACK_GENERATOR "NSIS")
-        SET(CPACK_PACKAGE_NAME "OpenMW")
-        SET(CPACK_PACKAGE_VENDOR "OpenMW.org")
-        SET(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
-        SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
-        SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
-        SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
         IF(BUILD_LAUNCHER)
             SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};openmw-launcher;OpenMW Launcher")
@@ -1004,24 +1009,15 @@ elseif(NOT APPLE)
         SET(CPACK_NSIS_MUI_UNIICON "${OpenMW_SOURCE_DIR}/files/windows/openmw.ico")
         SET(CPACK_PACKAGE_ICON "${OpenMW_SOURCE_DIR}\\\\files\\\\openmw.bmp")
 
-        SET(VCREDIST32 "${OpenMW_BINARY_DIR}/vcredist_x86.exe")
-        if(EXISTS ${VCREDIST32})
-            INSTALL(FILES ${VCREDIST32} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x86.exe\\\" /q /norestart'" )
-        endif(EXISTS ${VCREDIST32})
-
-        SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe")
+        SET(VCREDIST64 "${OpenMW_BINARY_DIR}/vcredist_x64.exe" CACHE FILEPATH "Path to vcredist_x64.exe")
         if(EXISTS ${VCREDIST64})
             INSTALL(FILES ${VCREDIST64} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "ExecWait '\\\"$INSTDIR\\\\redist\\\\vcredist_x64.exe\\\" /q /norestart'" )
+            get_filename_component(REDIST_FILENAME "${VCREDIST64}" NAME)
+            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+                ExecWait '\\\"$INSTDIR\\\\redist\\\\${REDIST_FILENAME}\\\" /q /norestart'
+                RMDir /r \\\"$INSTDIR\\\\redist\\\"
+                ")
         endif(EXISTS ${VCREDIST64})
-
-        SET(OALREDIST "${OpenMW_BINARY_DIR}/oalinst.exe")
-        if(EXISTS ${OALREDIST})
-            INSTALL(FILES ${OALREDIST} DESTINATION "redist")
-            SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
-                ExecWait '\\\"$INSTDIR\\\\redist\\\\oalinst.exe\\\" /s'" )
-        endif(EXISTS ${OALREDIST})
 
         if(CMAKE_CL_64)
             SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
@@ -1087,14 +1083,19 @@ elseif(NOT APPLE)
         # Install resources
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
     endif(WIN32)
-endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
+endif(APPLE)
 
-# Doxygen Target -- simply run 'make doc' or 'make doc_pages'
-# output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
-# output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
-#                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
-find_package(Doxygen)
-if (DOXYGEN_FOUND)
+# what is necessary to build documentation
+if ( BUILD_DOCS )
+    # Builds the documentation.
+    FIND_PACKAGE( Sphinx REQUIRED )
+    FIND_PACKAGE( Doxygen REQUIRED )
+
+    # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
+    # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
+    # output directory for 'make doc_pages' is "${DOXYGEN_PAGES_OUTPUT_DIR}" if defined
+    #                                       or "${OpenMW_BINARY_DIR}/docs/Pages" otherwise
+
     # determine output directory for doc_pages
     if (NOT DEFINED DOXYGEN_PAGES_OUTPUT_DIR)
         set(DOXYGEN_PAGES_OUTPUT_DIR "${OpenMW_BINARY_DIR}/docs/Pages")
@@ -1119,20 +1120,41 @@ if (USE_QT)
     file(GLOB COMPONENTS_TS_FILES ${CMAKE_SOURCE_DIR}/files/lang/components_*.ts)
     get_target_property(QT_LUPDATE_EXECUTABLE Qt::lupdate IMPORTED_LOCATION)
     add_custom_target(translations
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
-    VERBATIM
-    COMMAND_EXPAND_LISTS
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${COMPONENTS_TS_FILES}
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
-    VERBATIM
-    COMMAND_EXPAND_LISTS
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${WIZARD_TS_FILES}
 
-    COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
-    VERBATIM
-    COMMAND_EXPAND_LISTS)
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+        BYPRODUCTS ${LAUNCHER_TS_FILES}
+    )
+
+    add_custom_target(purge-obsolete-translations
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/components/contentselector ${CMAKE_SOURCE_DIR}/components/process -ts ${COMPONENTS_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/components
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/apps/wizard -ts ${WIZARD_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/wizard
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+
+        COMMAND ${QT_LUPDATE_EXECUTABLE} -locations none -no-obsolete ${CMAKE_SOURCE_DIR}/apps/launcher -ts ${LAUNCHER_TS_FILES}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/apps/launcher
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
 
     if (BUILD_LAUNCHER OR BUILD_WIZARD)
         if (APPLE)

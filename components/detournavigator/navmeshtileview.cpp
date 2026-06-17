@@ -4,7 +4,6 @@
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
 
-#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 #include <tuple>

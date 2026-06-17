@@ -1,3 +1,7 @@
+param (
+    [switch] $SkipCompress
+)
+
 $ErrorActionPreference = "Stop"
 
 if (-Not (Test-Path CMakeCache.txt))
@@ -67,7 +71,12 @@ $artifacts = $artifacts | Where-Object { Test-Path $_ }
 
 Write-Output "Storing symbols..."
 
-symstore-venv\Scripts\symstore --compress --skip-published .\SymStore @artifacts
+$optionalArgs = @()
+if (-not $SkipCompress) {
+    $optionalArgs += "--compress"
+}
+
+symstore-venv\Scripts\symstore $optionalArgs --skip-published .\SymStore @artifacts
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Command exited with code $LASTEXITCODE"
 }

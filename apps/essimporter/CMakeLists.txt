@@ -17,7 +17,6 @@ set(ESSIMPORTER_FILES
     importscpt.cpp
     importproj.cpp
     importsplm.cpp
-    importercontext.cpp
     converter.cpp
     convertacdt.cpp
     convertnpcc.cpp
@@ -34,9 +33,13 @@ openmw_add_executable(openmw-essimporter
 )
 
 target_link_libraries(openmw-essimporter
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components
 )
+
+if (WIN32)
+    target_sources(openmw-essimporter PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
+endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-essimporter PRIVATE --coverage)

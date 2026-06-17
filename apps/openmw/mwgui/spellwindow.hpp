@@ -41,6 +41,8 @@ namespace MWGui
         void onPinToggled() override;
         void onTitleDoubleClicked() override;
         void onOpen() override;
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
 
         SpellView* mSpellView;
         std::unique_ptr<SpellIcons> mSpellIcons;

@@ -18,15 +18,17 @@ namespace MWGui
         void setInventoryAllowed(bool allowed);
 
         void onResChange(int, int) override { center(); }
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         std::string_view getWindowIdForLua() const override { return "Book"; }
+        ControllerButtons* getControllerButtons() override;
 
     protected:
         void onNextPageButtonClicked(MyGUI::Widget* sender);
         void onPrevPageButtonClicked(MyGUI::Widget* sender);
         void onCloseButtonClicked(MyGUI::Widget* sender);
         void onTakeButtonClicked(MyGUI::Widget* sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         void setTakeButtonShow(bool show);
 
         void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);

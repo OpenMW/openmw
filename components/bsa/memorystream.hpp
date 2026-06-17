@@ -23,12 +23,13 @@
 
  */
 
-#ifndef BSA_MEMORY_STREAM_H
-#define BSA_MEMORY_STREAM_H
+#ifndef OPENMW_COMPONENTS_BSA_MEMORYSTREAM_HPP
+#define OPENMW_COMPONENTS_BSA_MEMORYSTREAM_HPP
 
-#include <components/files/memorystream.hpp>
 #include <istream>
 #include <vector>
+
+#include <components/files/memorystream.hpp>
 
 namespace Bsa
 {

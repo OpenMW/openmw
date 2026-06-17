@@ -33,16 +33,14 @@ namespace MWSound
 
     enum class MusicType
     {
-        Special,
-        Explore,
-        Battle,
-        Scripted
+        Normal,
+        MWScript
     };
 
     class Sound;
     class Stream;
-    struct Sound_Decoder;
-    typedef std::shared_ptr<Sound_Decoder> DecoderPtr;
+    struct SoundDecoder;
+    typedef std::shared_ptr<SoundDecoder> DecoderPtr;
 
     /* These must all fit together */
     enum class PlayMode
@@ -117,6 +115,8 @@ namespace MWBase
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
+        virtual MWSound::MusicType getMusicType() const = 0;
+
         virtual void streamMusic(VFS::Path::NormalizedView filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
@@ -125,11 +125,6 @@ namespace MWBase
 
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing
-
-        virtual void playPlaylist(VFS::Path::NormalizedView playlist) = 0;
-        ///< Start playing music from the selected folder
-        /// \param name of the folder that contains the playlist
-        /// Title music playlist is predefined
 
         virtual void say(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView filename) = 0;
         ///< Make an actor say some text.
@@ -171,7 +166,7 @@ namespace MWBase
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound(std::string_view fileName, float volume, float pitch, Type type = Type::Sfx,
+        virtual Sound* playSound(VFS::Path::NormalizedView fileName, float volume, float pitch, Type type = Type::Sfx,
             PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a sound, independently of 3D-position
@@ -184,7 +179,7 @@ namespace MWBase
         ///< Play_NoTrack is specified.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName, float volume,
+        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName, float volume,
             float pitch, Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
@@ -203,7 +198,7 @@ namespace MWBase
         virtual void stopSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) = 0;
         ///< Stop the given object from playing the given sound.
 
-        virtual void stopSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName) = 0;
+        virtual void stopSound3D(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName) = 0;
         ///< Stop the given object from playing the given sound.
 
         virtual void stopSound3D(const MWWorld::ConstPtr& reference) = 0;
@@ -222,7 +217,7 @@ namespace MWBase
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
-        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, std::string_view fileName) const = 0;
+        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, VFS::Path::NormalizedView fileName) const = 0;
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
@@ -238,6 +233,8 @@ namespace MWBase
         virtual void setListenerPosDir(
             const osg::Vec3f& pos, const osg::Vec3f& dir, const osg::Vec3f& up, bool underwater)
             = 0;
+
+        virtual void setListenerVel(const osg::Vec3f& vel) = 0;
 
         virtual void updatePtr(const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) = 0;
 

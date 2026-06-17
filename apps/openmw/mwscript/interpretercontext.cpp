@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/locals.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/esm/records.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -129,7 +130,7 @@ namespace MWScript
         if (ptr)
             mReference = *ptr;
         else
-            mGlobalScriptDesc = globalScriptDesc;
+            mGlobalScriptDesc = std::move(globalScriptDesc);
     }
 
     ESM::RefId InterpreterContext::getTarget() const
@@ -170,7 +171,7 @@ namespace MWScript
         if (!mLocals)
             throw std::runtime_error("local variables not available in this context");
 
-        mLocals->mShorts.at(index) = value;
+        mLocals->mShorts.at(index) = static_cast<Interpreter::Type_Short>(value);
     }
 
     void InterpreterContext::setLocalLong(int index, int value)
@@ -294,32 +295,49 @@ namespace MWScript
     std::string_view InterpreterContext::getNPCClass() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
-        return class_->mName;
+        const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
+        return npcClass->mName;
     }
 
     std::string_view InterpreterContext::getNPCFaction() const
     {
-        const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc->mFaction);
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
+        if (factionId.empty())
+        {
+            Log(Debug::Warning) << "getNPCFaction(): NPC " << ptr.getCellRef().getRefId() << " has no primary faction";
+            return "%";
+        }
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::ESMStore& store = world->getStore();
+        const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
         return faction->mName;
     }
 
     std::string_view InterpreterContext::getNPCRank() const
     {
         const MWWorld::Ptr& ptr = getReferenceImp();
-        const ESM::RefId& faction = ptr.getClass().getPrimaryFaction(ptr);
-        if (faction.empty())
-            throw std::runtime_error("getNPCRank(): NPC is not in a faction");
-
-        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
-        if (rank < 0 || rank > 9)
-            throw std::runtime_error("getNPCRank(): invalid rank");
+        const MWWorld::Class& ptrClass = ptr.getClass();
+        const ESM::RefId& factionId = ptrClass.getPrimaryFaction(ptr);
+        if (factionId.empty())
+        {
+            Log(Debug::Warning) << "getNPCRank(): NPC " << ptr.getCellRef().getRefId() << " has no primary faction";
+            return "%";
+        }
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ESMStore& store = world->getStore();
-        const ESM::Faction* fact = store.get<ESM::Faction>().find(faction);
-        return fact->mRanks[rank];
+        const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
+
+        int rank = ptrClass.getPrimaryFactionRank(ptr);
+        if (rank < 0 || rank > 9)
+        {
+            Log(Debug::Warning) << "getNPCRank(): NPC " << ptr.getCellRef().getRefId() << " has invalid rank " << rank
+                                << " in faction " << factionId;
+            return "%";
+        }
+        return faction->mRanks[rank];
     }
 
     std::string_view InterpreterContext::getPCName() const
@@ -338,19 +356,22 @@ namespace MWScript
     std::string_view InterpreterContext::getPCClass() const
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        const ESM::RefId& class_ = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
-        return world->getStore().get<ESM::Class>().find(class_)->mName;
+        const ESM::RefId& playerClass = world->getPlayerPtr().get<ESM::NPC>()->mBase->mClass;
+        return world->getStore().get<ESM::Class>().find(playerClass)->mName;
     }
 
     std::string_view InterpreterContext::getPCRank() const
     {
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
+        if (factionId.empty())
+        {
+            Log(Debug::Warning) << "getPCRank(): NPC " << ptr.getCellRef().getRefId() << " has no primary faction";
+            return "%";
+        }
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-
-        const ESM::RefId& factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
-        if (factionId.empty())
-            throw std::runtime_error("getPCRank(): NPC is not in a faction");
-
         const auto& ranks = player.getClass().getNpcStats(player).getFactionRanks();
         auto it = ranks.find(factionId);
         int rank = -1;
@@ -373,13 +394,16 @@ namespace MWScript
 
     std::string_view InterpreterContext::getPCNextRank() const
     {
+        const MWWorld::Ptr& ptr = getReferenceImp();
+        const ESM::RefId& factionId = ptr.getClass().getPrimaryFaction(ptr);
+        if (factionId.empty())
+        {
+            Log(Debug::Warning) << "getPCNextRank(): NPC " << ptr.getCellRef().getRefId() << " has no primary faction";
+            return "%";
+        }
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-
-        const ESM::RefId& factionId = getReferenceImp().getClass().getPrimaryFaction(getReferenceImp());
-        if (factionId.empty())
-            throw std::runtime_error("getPCNextRank(): NPC is not in a faction");
-
         const auto& ranks = player.getClass().getNpcStats(player).getFactionRanks();
         auto it = ranks.find(factionId);
         int rank = -1;
@@ -459,7 +483,7 @@ namespace MWScript
     {
         Locals& locals = getMemberLocals(global, id);
 
-        locals.mShorts[findLocalVariableIndex(id, name, 's')] = value;
+        locals.mShorts[findLocalVariableIndex(id, name, 's')] = static_cast<Interpreter::Type_Short>(value);
     }
 
     void InterpreterContext::setMemberLong(ESM::RefId id, std::string_view name, int value, bool global)

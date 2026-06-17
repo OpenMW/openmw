@@ -245,10 +245,10 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
 
                 std::istringstream stream(universalId.substr(index + 2));
 
-                int index = 0;
-                if (stream >> index)
+                int indexValue = 0;
+                if (stream >> indexValue)
                 {
-                    mValue = index;
+                    mValue = indexValue;
                     return;
                 }
 

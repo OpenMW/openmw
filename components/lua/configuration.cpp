@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <bitset>
 #include <cassert>
+#include <format>
 #include <sstream>
 
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace LuaUtil
@@ -14,14 +16,15 @@ namespace LuaUtil
 
     namespace
     {
-        const std::map<std::string, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
+        const std::map<std::string_view, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
             { "GLOBAL", ESM::LuaScriptCfg::sGlobal },
             { "CUSTOM", ESM::LuaScriptCfg::sCustom },
             { "PLAYER", ESM::LuaScriptCfg::sPlayer },
             { "MENU", ESM::LuaScriptCfg::sMenu },
+            { "LOAD", ESM::LuaScriptCfg::sLoad },
         };
 
-        const std::map<std::string, ESM::RecNameInts, std::less<>> typeTagsByName{
+        const std::map<std::string_view, ESM::RecNameInts, std::less<>> typeTagsByName{
             { "ACTIVATOR", ESM::REC_ACTI },
             { "ARMOR", ESM::REC_ARMO },
             { "BOOK", ESM::REC_BOOK },
@@ -47,15 +50,21 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, bool globalOnly)
+    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, bool remap)
     {
+        std::vector<VFS::Path::Normalized> oldPaths;
+        if (remap)
+        {
+            for (ESM::LuaScriptCfg& script : mScripts)
+                oldPaths.emplace_back(std::move(script.mScriptPath));
+        }
         mScripts.clear();
         mPathToIndex.clear();
 
         // Find duplicates; only the last occurrence will be used (unless `sMerge` flag is used).
         // Search for duplicates is case insensitive.
         std::vector<bool> skip(cfg.mScripts.size(), false);
-        for (size_t i = 0; i < cfg.mScripts.size(); ++i)
+        for (int i = 0; i < static_cast<int>(cfg.mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
             bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
@@ -65,16 +74,17 @@ namespace LuaUtil
                 continue;
             }
             if (global && (script.mFlags & ~ESM::LuaScriptCfg::sMerge) != ESM::LuaScriptCfg::sGlobal)
-                throw std::runtime_error(std::string("Global script can not have local flags: ") + script.mScriptPath);
+                throw std::runtime_error(
+                    std::string("Global script can not have local flags: ") + script.mScriptPath.value());
             if (global && (!script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty()))
                 throw std::runtime_error(std::string("Global script can not have per-type and per-object configuration")
-                    + script.mScriptPath);
-            auto [it, inserted] = mPathToIndex.emplace(Misc::StringUtils::lowerCase(script.mScriptPath), i);
+                    + script.mScriptPath.value());
+            auto [it, inserted] = mPathToIndex.emplace(script.mScriptPath, i);
             if (inserted)
                 continue;
             ESM::LuaScriptCfg& oldScript = cfg.mScripts[it->second];
             if (global != bool(oldScript.mFlags & ESM::LuaScriptCfg::sGlobal))
-                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath);
+                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath.value());
             if (script.mFlags & ESM::LuaScriptCfg::sMerge)
             {
                 oldScript.mFlags |= (script.mFlags & ~ESM::LuaScriptCfg::sMerge);
@@ -98,6 +108,9 @@ namespace LuaUtil
 
         // Initialize mappings
         mPathToIndex.clear();
+        mScriptsPerType.clear();
+        mScriptsPerRecordId.clear();
+        mScriptsPerRefNum.clear();
         for (int i = 0; i < static_cast<int>(mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& s = mScripts[i];
@@ -116,9 +129,19 @@ namespace LuaUtil
                     DetailedConf{ i, r.mAttach, data });
             }
         }
+
+        if (remap)
+        {
+            mScriptIdMapping.clear();
+            for (size_t i = 0; i < oldPaths.size(); ++i)
+            {
+                if (std::optional<int> id = findId(oldPaths[i]))
+                    mScriptIdMapping[static_cast<int>(i)] = *id;
+            }
+        }
     }
 
-    std::optional<int> ScriptsConfiguration::findId(std::string_view path) const
+    std::optional<int> ScriptsConfiguration::findId(VFS::Path::NormalizedView path) const
     {
         auto it = mPathToIndex.find(path);
         if (it != mPathToIndex.end())
@@ -134,7 +157,7 @@ namespace LuaUtil
         {
             const ESM::LuaScriptCfg& script = mScripts[id];
             if (script.mFlags & flag)
-                res[id] = script.mInitializationData;
+                res[static_cast<int>(id)] = script.mInitializationData;
         }
         return res;
     }
@@ -173,6 +196,40 @@ namespace LuaUtil
         return res;
     }
 
+    void ScriptsConfiguration::read(ESM::ESMReader& reader)
+    {
+        reader.mScriptsConfiguration = this;
+        mScriptIdMapping.clear();
+        int index = 0;
+        while (reader.isNextSub("LUAP"))
+        {
+            VFS::Path::Normalized path(reader.getHString());
+            if (std::optional<int> id = findId(path))
+                mScriptIdMapping[index] = *id;
+            ++index;
+        }
+    }
+
+    void ScriptsConfiguration::write(ESM::ESMWriter& writer) const
+    {
+        for (const ESM::LuaScriptCfg& script : mScripts)
+            writer.writeHNString("LUAP", script.mScriptPath);
+    }
+
+    std::optional<int> ScriptsConfiguration::mapId(int savedId) const
+    {
+        if (mScriptIdMapping.empty())
+        {
+            if (savedId == -1)
+                return {};
+            return savedId;
+        }
+        auto it = mScriptIdMapping.find(savedId);
+        if (it == mScriptIdMapping.end())
+            return {};
+        return it->second;
+    }
+
     void parseOMWScripts(ESM::LuaScriptsCfg& cfg, std::string_view data)
     {
         while (!data.empty())
@@ -191,20 +248,20 @@ namespace LuaUtil
                 line = line.substr(0, line.size() - 1);
 
             if (!Misc::StringUtils::ciEndsWith(line, ".lua"))
-                throw std::runtime_error(Misc::StringUtils::format(
-                    "Lua script should have suffix '.lua', got: %s", std::string(line.substr(0, 300))));
+                throw std::runtime_error(
+                    std::format("Lua script should have suffix '.lua', got: {}", line.substr(0, 300)));
 
             // Split tags and script path
             size_t semicolonPos = line.find(':');
-            if (semicolonPos == std::string::npos)
-                throw std::runtime_error(Misc::StringUtils::format("No flags found in: %s", std::string(line)));
+            if (semicolonPos == std::string_view::npos)
+                throw std::runtime_error(std::format("No flags found in: {}", line));
             std::string_view tagsStr = line.substr(0, semicolonPos);
             std::string_view scriptPath = line.substr(semicolonPos + 1);
-            while (isSpace(scriptPath[0]))
+            while (!scriptPath.empty() && isSpace(scriptPath[0]))
                 scriptPath = scriptPath.substr(1);
 
             ESM::LuaScriptCfg& script = cfg.mScripts.emplace_back();
-            script.mScriptPath = std::string(scriptPath);
+            script.mScriptPath = VFS::Path::Normalized(scriptPath);
             script.mFlags = 0;
 
             // Parse tags
@@ -226,8 +283,7 @@ namespace LuaUtil
                 else if (typesIt != typeTagsByName.end())
                     script.mTypes.push_back(typesIt->second);
                 else
-                    throw std::runtime_error(
-                        Misc::StringUtils::format("Unknown tag '%s' in: %s", std::string(tagName), std::string(line)));
+                    throw std::runtime_error(std::format("Unknown tag '{}' in: {}", tagName, line));
             }
         }
     }

@@ -53,7 +53,7 @@ namespace MWRender
         if (model.empty())
             return;
         mResourceSystem->getSceneManager()->getInstance(
-            Misc::ResourceHelpers::correctMeshPath(model), mObjectRoot.get());
+            Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(model)), mObjectRoot.get());
     }
 
     template <class Record>

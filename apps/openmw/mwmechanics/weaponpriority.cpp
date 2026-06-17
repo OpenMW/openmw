@@ -117,12 +117,12 @@ namespace MWMechanics
             }
         }
 
-        int value = 50.f;
+        int value = 50;
         ESM::RefId skill = item.getClass().getEquipmentSkill(item);
         if (!skill.empty())
-            value = actor.getClass().getSkill(actor, skill);
+            value = static_cast<int>(actor.getClass().getSkill(actor, skill));
         // Prefer hand-to-hand if our skill is 0 (presumably due to magic)
-        if (value <= 0.f)
+        if (value <= 0)
             return 0.f;
         // Note that a creature with a dagger and 0 Stealth will forgo the weapon despite using Combat for hit chance.
         // The same creature will use a sword provided its Combat stat isn't 0. We're using the "skill" value here to

@@ -13,6 +13,7 @@
 #include <apps/opencs/view/render/tagbase.hpp>
 
 #include "instancedragmodes.hpp"
+#include "objectmarker.hpp"
 #include "scenewidget.hpp"
 
 class QDragEnterEvent;
@@ -75,6 +76,7 @@ namespace CSVRender
         CSMDoc::Document& mDocument;
         unsigned int mInteractionMask;
         CSVWidget::SceneToolMode* mEditMode;
+        CSVWidget::SceneToolMode* mCameraMode;
         bool mLocked;
         int mDragMode;
         bool mDragging;
@@ -88,7 +90,7 @@ namespace CSVRender
         QPoint mToolTipPos;
         bool mShowToolTips;
         int mToolTipDelay;
-        bool mInConstructor;
+        int mSelectedNavigationMode;
 
     public:
         enum DropType
@@ -99,7 +101,7 @@ namespace CSVRender
             Type_DebugProfile
         };
 
-        enum dropRequirments
+        enum DropRequirements
         {
             canHandle,
             needPaged,
@@ -143,7 +145,7 @@ namespace CSVRender
 
         static DropType getDropType(const std::vector<CSMWorld::UniversalId>& data);
 
-        virtual dropRequirments getDropRequirements(DropType type) const;
+        virtual DropRequirements getDropRequirements(DropType type) const;
 
         virtual void useViewHint(const std::string& hint);
         ///< Default-implementation: ignored.
@@ -164,6 +166,7 @@ namespace CSVRender
         virtual void setEditLock(bool locked);
 
         CSMDoc::Document& getDocument();
+        const CSMDoc::Document& getDocument() const;
 
         /// \param elementMask Elements to be affected by the clear operation
         virtual void clearSelection(int elementMask) = 0;
@@ -183,6 +186,12 @@ namespace CSVRender
         virtual void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) = 0;
 
         virtual void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) = 0;
+
+        template <typename Tag>
+        std::optional<WorldspaceHitResult> checkTag(
+            const osgUtil::LineSegmentIntersector::Intersection& intersection) const;
+
+        std::tuple<osg::Vec3d, osg::Vec3d, osg::Vec3d> getStartEndDirection(int pointX, int pointY) const;
 
         /// Return the next intersection with scene elements matched by
         /// \a interactionMask based on \a localPos and the camera vector.
@@ -214,7 +223,14 @@ namespace CSVRender
 
         EditMode* getEditMode();
 
+        virtual CSVRender::Object* getObjectByReferenceId(const std::string& id) = 0;
+
+        ObjectMarker* getSelectionMarker() { return mSelectionMarker.get(); }
+        const ObjectMarker* getSelectionMarker() const { return mSelectionMarker.get(); }
+
     protected:
+        const std::unique_ptr<CSVRender::ObjectMarker> mSelectionMarker;
+
         /// Visual elements in a scene
         /// @note do not change the enumeration values, they are used in pre-existing button file names!
         enum ButtonId
@@ -223,6 +239,13 @@ namespace CSVRender
             Button_Pathgrid = 0x2,
             Button_Water = 0x4,
             Button_Terrain = 0x8
+        };
+
+        enum CameraMode
+        {
+            FirstPerson,
+            Orbit,
+            Free
         };
 
         virtual void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool);
@@ -238,9 +261,13 @@ namespace CSVRender
 
         void settingChanged(const CSMPrefs::Setting* setting) override;
 
-        bool getSpeedMode();
+        void cycleNavigationMode();
 
     private:
+        bool hitBehindMarker(const osg::Vec3d& hitPos) const;
+
+        void handleMarkerHighlight(const int x, const int y);
+
         void dragEnterEvent(QDragEnterEvent* event) override;
 
         void dropEvent(QDropEvent* event) override;

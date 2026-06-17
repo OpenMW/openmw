@@ -109,7 +109,7 @@ namespace SceneUtil
     {
     }
 
-    void WriteScreenshotToFileOperation::operator()(const osg::Image& image, const unsigned int /*context_id*/)
+    void WriteScreenshotToFileOperation::operator()(const osg::Image& image, const unsigned int /*contextId*/)
     {
         std::filesystem::path fileName;
         try
@@ -153,9 +153,9 @@ namespace SceneUtil
             item->waitTillDone();
     }
 
-    void AsyncScreenCaptureOperation::operator()(const osg::Image& image, const unsigned int context_id)
+    void AsyncScreenCaptureOperation::operator()(const osg::Image& image, const unsigned int contextId)
     {
-        osg::ref_ptr<SceneUtil::WorkItem> item(new ScreenCaptureWorkItem(mImpl, image, context_id));
+        osg::ref_ptr<SceneUtil::WorkItem> item(new ScreenCaptureWorkItem(mImpl, image, contextId));
         mQueue->addWorkItem(item);
         const auto isDone = [](const osg::ref_ptr<SceneUtil::WorkItem>& v) { return v->isDone(); };
         const auto workItems = mWorkItems.lock();

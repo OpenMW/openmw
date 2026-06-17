@@ -58,8 +58,6 @@ namespace MWRender
             default:
                 return false;
         }
-
-        return false;
     }
 
     void Pathgrid::addCell(const MWWorld::CellStore* store)

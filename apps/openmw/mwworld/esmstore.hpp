@@ -105,8 +105,12 @@ namespace ESM4
     struct Potion;
     struct Race;
     struct Reference;
+    struct Sound;
+    struct SoundReference;
     struct Static;
+    struct StaticCollection;
     struct Terminal;
+    struct TextureSet;
     struct Tree;
     struct Weapon;
     struct World;
@@ -145,7 +149,8 @@ namespace MWWorld
             Store<ESM4::Land>, Store<ESM4::LandTexture>, Store<ESM4::LevelledCreature>, Store<ESM4::LevelledItem>,
             Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>, Store<ESM4::MovableStatic>,
             Store<ESM4::Npc>, Store<ESM4::Outfit>, Store<ESM4::Potion>, Store<ESM4::Race>, Store<ESM4::Reference>,
-            Store<ESM4::Static>, Store<ESM4::Terminal>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
+            Store<ESM4::Sound>, Store<ESM4::SoundReference>, Store<ESM4::Static>, Store<ESM4::StaticCollection>,
+            Store<ESM4::Terminal>, Store<ESM4::TextureSet>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
 
     private:
         template <typename T>
@@ -165,12 +170,6 @@ namespace MWWorld
         uint64_t mDynamicCount;
 
         mutable std::unordered_map<ESM::RefId, std::weak_ptr<MWMechanics::SpellList>> mSpellListCache;
-
-        template <class T>
-        Store<T>& getWritable()
-        {
-            return static_cast<Store<T>&>(*mStores[getTypeIndex<T>()]);
-        }
 
         /// Validate entries in store after setup
         void validate();
@@ -217,12 +216,18 @@ namespace MWWorld
         void validateDynamic();
 
         void load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
-        void loadESM4(ESM4::Reader& esm);
+        void loadESM4(ESM4::Reader& esm, Loading::Listener* listener);
 
         template <class T>
         const Store<T>& get() const
         {
             return static_cast<const Store<T>&>(*mStores[getTypeIndex<T>()]);
+        }
+
+        template <class T>
+        Store<T>& getWritable()
+        {
+            return static_cast<Store<T>&>(*mStores[getTypeIndex<T>()]);
         }
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
@@ -281,11 +286,11 @@ namespace MWWorld
         void setUp();
         void validateRecords(ESM::ReadersCache& readers);
 
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord(ESM::ESMReader& reader, uint32_t type);
+        bool readRecord(ESM::ESMReader& reader, uint32_t typeId);
         ///< \return Known type?
 
         // To be called when we are done with dynamic record loading

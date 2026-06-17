@@ -38,6 +38,8 @@
 #include "../world/record.hpp"
 #include "../world/universalid.hpp"
 
+#include "effectlistcheck.hpp"
+
 namespace ESM
 {
     class Script;
@@ -330,7 +332,8 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Potion, potion.mId);
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
-    /// \todo Check magic effects for validity
+
+    effectListCheck(potion.mEffects.mList, messages, id);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Potion>(potion, messages, id.toString());
@@ -459,7 +462,7 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     for (size_t i = 0; i < creature.mData.mAttributes.size(); ++i)
     {
         if (creature.mData.mAttributes[i] < 0)
-            messages.add(id, ESM::Attribute::indexToRefId(i).toDebugString() + " is negative", {},
+            messages.add(id, ESM::Attribute::indexToRefId(static_cast<int>(i)).toDebugString() + " is negative", {},
                 CSMDoc::Message::Severity_Warning);
     }
 
@@ -565,6 +568,8 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+
+    ingredientEffectListCheck(ingredient, messages, id);
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
@@ -576,12 +581,12 @@ void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::CreatureLevList& CreatureLevList
+    const ESM::CreatureLevList& creatureLevList
         = (dynamic_cast<const CSMWorld::Record<ESM::CreatureLevList>&>(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList,
-        CreatureLevList.mId); // CreatureLevList but Type_CreatureLevelledList :/
+    // CreatureLevList but Type_CreatureLevelledList :/
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_CreatureLevelledList, creatureLevList.mId);
 
-    listCheck<ESM::CreatureLevList>(CreatureLevList, messages, id.toString());
+    listCheck<ESM::CreatureLevList>(creatureLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(
@@ -593,10 +598,10 @@ void CSMTools::ReferenceableCheckStage::itemLevelledListCheck(
     if ((mIgnoreBaseRecords && baseRecord.mState == CSMWorld::RecordBase::State_BaseOnly) || baseRecord.isDeleted())
         return;
 
-    const ESM::ItemLevList& ItemLevList = (dynamic_cast<const CSMWorld::Record<ESM::ItemLevList>&>(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, ItemLevList.mId);
+    const ESM::ItemLevList& itemLevList = (dynamic_cast<const CSMWorld::Record<ESM::ItemLevList>&>(baseRecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_ItemLevelledList, itemLevList.mId);
 
-    listCheck<ESM::ItemLevList>(ItemLevList, messages, id.toString());
+    listCheck<ESM::ItemLevList>(itemLevList, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::lightCheck(

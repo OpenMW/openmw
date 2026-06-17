@@ -33,14 +33,10 @@ namespace DetourNavigator
             --it->second;
     }
 
-    void NavigatorImpl::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void NavigatorImpl::updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+        const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
-        mNavMeshManager.setWorldspace(worldspace, guard);
-    }
-
-    void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
-    {
-        mNavMeshManager.updateBounds(playerPosition, guard);
+        mNavMeshManager.updateBounds(worldspace, cellGridBounds, playerPosition, guard);
     }
 
     void NavigatorImpl::addObject(

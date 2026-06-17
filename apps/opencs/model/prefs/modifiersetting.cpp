@@ -95,9 +95,9 @@ namespace CSMPrefs
     bool ModifierSetting::handleEvent(QObject* target, int mod, int value)
     {
         // For potential future exceptions
-        const int Blacklist[] = { 0 };
+        const int blacklist[] = { 0 };
 
-        const size_t BlacklistSize = sizeof(Blacklist) / sizeof(int);
+        const size_t blacklistSize = std::size(blacklist);
 
         if (!mEditorActive)
         {
@@ -114,9 +114,9 @@ namespace CSMPrefs
         }
 
         // Handle blacklist
-        for (size_t i = 0; i < BlacklistSize; ++i)
+        for (size_t i = 0; i < blacklistSize; ++i)
         {
-            if (value == Blacklist[i])
+            if (value == blacklist[i])
                 return true;
         }
 

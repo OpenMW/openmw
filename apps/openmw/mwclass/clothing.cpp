@@ -22,6 +22,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -46,10 +47,7 @@ namespace MWClass
 
     std::string_view Clothing::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Clothing>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Clothing::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -68,12 +66,12 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
         if (ref->mBase->mData.mType == ESM::Clothing::Ring)
         {
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_LeftRing));
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_RightRing));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_LeftRing));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_RightRing));
         }
         else
         {
@@ -92,15 +90,15 @@ namespace MWClass
             for (int i = 0; i < size; ++i)
                 if (sMapping[i][0] == ref->mBase->mData.mType)
                 {
-                    slots_.push_back(int(sMapping[i][1]));
+                    slots.push_back(int(sMapping[i][1]));
                     break;
                 }
         }
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
-    ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -192,7 +190,7 @@ namespace MWClass
         ESM::Clothing newItem = *ref->mBase;
         newItem.mId = ESM::RefId();
         newItem.mName = newName;
-        newItem.mData.mEnchant = enchCharge;
+        newItem.mData.mEnchant = static_cast<uint16_t>(enchCharge);
         newItem.mEnchant = enchId;
         const ESM::Clothing* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
@@ -202,9 +200,9 @@ namespace MWClass
         const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots = getEquipmentSlots(ptr);
 
-        if (slots_.first.empty())
+        if (slots.first.empty())
             return { 0, {} };
 
         if (npc.getClass().isNpc())

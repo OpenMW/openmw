@@ -3,44 +3,48 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <components/debug/debuglog.hpp>
-#include <components/files/conversion.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/conversion.hpp>
-#include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
 #include <filesystem>
+#include <format>
 #include <fstream>
-#include <osg/Program>
-#include <osgViewer/Viewer>
 #include <regex>
 #include <set>
 #include <sstream>
+#include <system_error>
 #include <unordered_map>
+
+#include <osg/Program>
+#include <osgViewer/Viewer>
+
+#include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
+#include <components/misc/pathhelpers.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
+#include <components/settings/settings.hpp>
 
 namespace
 {
     osg::Shader::Type getShaderType(const std::string& templateName)
     {
-        auto ext = std::filesystem::path(templateName).extension();
+        std::string_view ext = Misc::getFileExtension(templateName);
 
-        if (ext == ".vert")
+        if (ext == "vert")
             return osg::Shader::VERTEX;
-        if (ext == ".frag")
+        if (ext == "frag")
             return osg::Shader::FRAGMENT;
-        if (ext == ".geom")
+        if (ext == "geom")
             return osg::Shader::GEOMETRY;
-        if (ext == ".comp")
+        if (ext == "comp")
             return osg::Shader::COMPUTE;
-        if (ext == ".tese")
+        if (ext == "tese")
             return osg::Shader::TESSEVALUATION;
-        if (ext == ".tesc")
+        if (ext == "tesc")
             return osg::Shader::TESSCONTROL;
 
         throw std::runtime_error("unrecognized shader template name: " + templateName);
     }
 
-    std::string getRootPrefix(const std::string& path)
+    std::string_view getRootPrefix(std::string_view path)
     {
         if (path.starts_with("lib"))
             return "lib";
@@ -48,24 +52,27 @@ namespace
             return "compatibility";
         else if (path.starts_with("core"))
             return "core";
+        return {};
+    }
+
+    int getLineNumber(std::string_view source, std::size_t foundPos, int lineNumber, int offset)
+    {
+        constexpr std::string_view tag = "#line";
+        std::size_t lineDirectivePosition = source.rfind(tag, foundPos);
+        if (lineDirectivePosition != std::string_view::npos)
+        {
+            std::size_t lineNumberStart = lineDirectivePosition + tag.size() + 1;
+            std::size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
+            std::string_view lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
+            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) + offset;
+        }
         else
-            return "";
-    }
-}
-
-namespace Shader
-{
-
-    ShaderManager::ShaderManager()
-    {
-        mHotReloadManager = std::make_unique<HotReloadManager>();
-    }
-
-    ShaderManager::~ShaderManager() = default;
-
-    void ShaderManager::setShaderPath(const std::filesystem::path& path)
-    {
-        mPath = path;
+        {
+            lineDirectivePosition = 0;
+        }
+        lineNumber
+            += static_cast<int>(std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n'));
+        return lineNumber;
     }
 
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
@@ -85,23 +92,9 @@ namespace Shader
             if (foundPos == std::string::npos)
                 break;
 
-            size_t lineDirectivePosition = source.rfind("#line", foundPos);
-            int lineNumber;
-            if (lineDirectivePosition != std::string::npos)
-            {
-                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
-            }
-            else
-            {
-                lineDirectivePosition = 0;
-                lineNumber = 1;
-            }
-            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+            int lineNumber = getLineNumber(source, foundPos, 1, -1);
 
-            source.replace(foundPos, 0, "#line " + std::to_string(lineNumber) + "\n");
+            source.replace(foundPos, 0, std::format("#line {}\n", lineNumber));
 
             position = foundPos;
         }
@@ -113,7 +106,7 @@ namespace Shader
     // Adjusts #line statements accordingly and detects cyclic includes.
     // cycleIncludeChecker is the set of files that include this file directly or indirectly, and is intentionally not a
     // reference to allow automatic cleanup.
-    static bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName,
+    bool parseIncludes(const std::filesystem::path& shaderPath, std::string& source, const std::string& fileName,
         int& fileNumber, std::set<std::filesystem::path> cycleIncludeChecker,
         std::set<std::filesystem::path>& includedFiles)
     {
@@ -154,28 +147,15 @@ namespace Shader
             std::filesystem::path includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
-            size_t lineDirectivePosition = source.rfind("#line", foundPos);
-            int lineNumber;
-            if (lineDirectivePosition != std::string::npos)
-            {
-                size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-                size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-                std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
-            }
-            else
-            {
-                lineDirectivePosition = 0;
-                lineNumber = 0;
-            }
-            lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+            int lineNumber = getLineNumber(source, foundPos, 0, -1);
 
             // Include the file recursively
             std::ifstream includeFstream;
             includeFstream.open(includePath);
             if (includeFstream.fail())
             {
-                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath;
+                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath << ": "
+                                  << std::generic_category().message(errno);
                 return false;
             }
             int includedFileNumber = fileNumber++;
@@ -199,10 +179,132 @@ namespace Shader
         }
         return true;
     }
+}
+
+namespace Shader
+{
+    struct HotReloadManager
+    {
+        using KeysHolder = std::set<ShaderManager::MapKey>;
+
+        std::unordered_map<std::string, KeysHolder> mShaderFiles;
+        std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
+        std::filesystem::file_time_type mLastAutoRecompileTime;
+        bool mHotReloadEnabled;
+        bool mTriggerReload;
+
+        HotReloadManager()
+        {
+            mTriggerReload = false;
+            mHotReloadEnabled = false;
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+        }
+
+        void addShaderFiles(const std::string& templateName, const ShaderManager::DefineMap& defines)
+        {
+            const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
+            for (const std::filesystem::path& file : shaderFiles)
+            {
+                mShaderFiles[Files::pathToUnicodeString(file)].insert(std::make_pair(templateName, defines));
+            }
+        }
+
+        void update(ShaderManager& manager, osgViewer::Viewer& viewer)
+        {
+            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
+            if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
+            {
+                reloadTouchedShaders(manager, viewer);
+            }
+            mTriggerReload = false;
+        }
+
+        void reloadTouchedShaders(ShaderManager& manager, osgViewer::Viewer& viewer)
+        {
+            bool threadsRunningToStop = false;
+            for (auto& [pathShaderToTest, shaderKeys] : mShaderFiles)
+            {
+                const std::filesystem::file_time_type writeTime = std::filesystem::last_write_time(pathShaderToTest);
+                if (writeTime.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
+                {
+                    if (!threadsRunningToStop)
+                    {
+                        threadsRunningToStop = viewer.areThreadsRunning();
+                        if (threadsRunningToStop)
+                            viewer.stopThreading();
+                    }
+
+                    for (const auto& [templateName, shaderDefines] : shaderKeys)
+                    {
+                        ShaderManager::ShaderMap::iterator shaderIt
+                            = manager.mShaders.find(std::make_pair(templateName, shaderDefines));
+                        if (shaderIt == manager.mShaders.end())
+                        {
+                            Log(Debug::Error) << "Failed to find shader " << templateName;
+                            continue;
+                        }
+
+                        ShaderManager::TemplateMap::iterator templateIt = manager.mShaderTemplates.find(
+                            templateName); // Can't be Null, if we're here it means the template was added
+                        assert(templateIt != manager.mShaderTemplates.end());
+                        std::string& shaderSource = templateIt->second;
+                        std::set<std::filesystem::path> insertedPaths;
+                        std::filesystem::path path = (std::filesystem::path(manager.mPath) / templateName);
+                        std::ifstream stream;
+                        stream.open(path);
+                        if (stream.fail())
+                        {
+                            Log(Debug::Error)
+                                << "Failed to open " << path << ": " << std::generic_category().message(errno);
+                            continue;
+                        }
+                        std::stringstream buffer;
+                        buffer << stream.rdbuf();
+
+                        // parse includes
+                        int fileNumber = 1;
+                        std::string source = buffer.str();
+                        if (!addLineDirectivesAfterConditionalBlocks(source)
+                            || !parseIncludes(std::filesystem::path(manager.mPath), source, templateName, fileNumber,
+                                {}, insertedPaths))
+                        {
+                            break;
+                        }
+                        shaderSource = std::move(source);
+
+                        std::vector<std::string> linkedShaderNames;
+                        if (!manager.createSourceFromTemplate(
+                                shaderSource, linkedShaderNames, templateName, shaderDefines))
+                        {
+                            break;
+                        }
+                        shaderIt->second->setShaderSource(shaderSource);
+                    }
+                }
+            }
+            if (threadsRunningToStop)
+                viewer.startThreading();
+            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
+        }
+    };
+
+    ShaderManager::ShaderManager()
+    {
+        mHotReloadManager = std::make_unique<HotReloadManager>();
+    }
+
+    ShaderManager::~ShaderManager() = default;
+
+    void ShaderManager::setShaderPath(const std::filesystem::path& path)
+    {
+        mPath = path;
+    }
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos)
     {
-        size_t iterNameStart = foundPos + strlen("$foreach") + 1;
+        constexpr std::string_view directiveStart = "$foreach";
+        size_t iterNameStart = foundPos + directiveStart.size() + 1;
         size_t iterNameEnd = source.find_first_of(" \n\r()[].;,", iterNameStart);
         if (iterNameEnd == std::string::npos)
         {
@@ -218,46 +320,32 @@ namespace Shader
             Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
             return false;
         }
-        std::string list = source.substr(listStart, listEnd - listStart);
+        std::string_view list = std::string_view(source).substr(listStart, listEnd - listStart);
         std::vector<std::string> listElements;
-        if (list != "")
+        if (!list.empty())
             Misc::StringUtils::split(list, listElements, ",");
 
         size_t contentStart = source.find_first_not_of("\n\r", listEnd);
-        size_t contentEnd = source.find("$endforeach", contentStart);
+        constexpr std::string_view directiveEnd = "$endforeach";
+        size_t contentEnd = source.find(directiveEnd, contentStart);
         if (contentEnd == std::string::npos)
         {
             Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
             return false;
         }
-        std::string content = source.substr(contentStart, contentEnd - contentStart);
+        std::string_view content = std::string_view(source).substr(contentStart, contentEnd - contentStart);
 
-        size_t overallEnd = contentEnd + std::string("$endforeach").length();
+        size_t overallEnd = contentEnd + directiveEnd.size();
 
-        size_t lineDirectivePosition = source.rfind("#line", overallEnd);
-        int lineNumber;
-        if (lineDirectivePosition != std::string::npos)
-        {
-            size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
-            size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
-            std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2);
-        }
-        else
-        {
-            lineDirectivePosition = 0;
-            lineNumber = 2;
-        }
-        lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + overallEnd, '\n');
+        int lineNumber = getLineNumber(source, overallEnd, 2, 0);
 
         std::string replacement;
-        for (std::vector<std::string>::const_iterator element = listElements.cbegin(); element != listElements.cend();
-             element++)
+        for (const std::string& element : listElements)
         {
-            std::string contentInstance = content;
+            std::string contentInstance(content);
             size_t foundIterator;
             while ((foundIterator = contentInstance.find(iteratorName)) != std::string::npos)
-                contentInstance.replace(foundIterator, iteratorName.length(), *element);
+                contentInstance.replace(foundIterator, iteratorName.length(), element);
             replacement += contentInstance;
         }
         replacement += "\n#line " + std::to_string(lineNumber);
@@ -327,7 +415,7 @@ namespace Shader
                 Log(Debug::Error) << "Shader " << templateName << " error: Unexpected EOF";
                 return false;
             }
-            std::string directive = source.substr(foundPos + 1, endPos - (foundPos + 1));
+            std::string_view directive = std::string_view(source).substr(foundPos + 1, endPos - (foundPos + 1));
             if (directive == "foreach")
             {
                 if (!parseForeachDirective(source, templateName, foundPos))
@@ -339,7 +427,7 @@ namespace Shader
                 if (!parseLinkDirective(source, linkTarget, templateName, foundPos))
                     return false;
                 if (!linkTarget.empty() && linkTarget != templateName)
-                    linkedShaderTemplateNames.push_back(linkTarget);
+                    linkedShaderTemplateNames.push_back(std::move(linkTarget));
             }
             else
             {
@@ -416,111 +504,6 @@ namespace Shader
         return true;
     }
 
-    struct HotReloadManager
-    {
-        using KeysHolder = std::set<ShaderManager::MapKey>;
-
-        std::unordered_map<std::string, KeysHolder> mShaderFiles;
-        std::unordered_map<std::string, std::set<std::filesystem::path>> templateIncludedFiles;
-        std::filesystem::file_time_type mLastAutoRecompileTime;
-        bool mHotReloadEnabled;
-        bool mTriggerReload;
-
-        HotReloadManager()
-        {
-            mTriggerReload = false;
-            mHotReloadEnabled = false;
-            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
-        }
-
-        void addShaderFiles(const std::string& templateName, const ShaderManager::DefineMap& defines)
-        {
-            const std::set<std::filesystem::path>& shaderFiles = templateIncludedFiles[templateName];
-            for (const std::filesystem::path& file : shaderFiles)
-            {
-                mShaderFiles[Files::pathToUnicodeString(file)].insert(std::make_pair(templateName, defines));
-            }
-        }
-
-        void update(ShaderManager& Manager, osgViewer::Viewer& viewer)
-        {
-            auto timeSinceLastCheckMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::filesystem::file_time_type::clock::now() - mLastAutoRecompileTime);
-            if ((mHotReloadEnabled && timeSinceLastCheckMillis.count() > 200) || mTriggerReload == true)
-            {
-                reloadTouchedShaders(Manager, viewer);
-            }
-            mTriggerReload = false;
-        }
-
-        void reloadTouchedShaders(ShaderManager& Manager, osgViewer::Viewer& viewer)
-        {
-            bool threadsRunningToStop = false;
-            for (auto& [pathShaderToTest, shaderKeys] : mShaderFiles)
-            {
-
-                std::filesystem::file_time_type write_time = std::filesystem::last_write_time(pathShaderToTest);
-                if (write_time.time_since_epoch() > mLastAutoRecompileTime.time_since_epoch())
-                {
-                    if (!threadsRunningToStop)
-                    {
-                        threadsRunningToStop = viewer.areThreadsRunning();
-                        if (threadsRunningToStop)
-                            viewer.stopThreading();
-                    }
-
-                    for (const auto& [templateName, shaderDefines] : shaderKeys)
-                    {
-                        ShaderManager::ShaderMap::iterator shaderIt
-                            = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
-                        if (shaderIt == Manager.mShaders.end())
-                        {
-                            Log(Debug::Error) << "Failed to find shader " << templateName;
-                            continue;
-                        }
-
-                        ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(
-                            templateName); // Can't be Null, if we're here it means the template was added
-                        assert(templateIt != Manager.mShaderTemplates.end());
-                        std::string& shaderSource = templateIt->second;
-                        std::set<std::filesystem::path> insertedPaths;
-                        std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);
-                        std::ifstream stream;
-                        stream.open(path);
-                        if (stream.fail())
-                        {
-                            Log(Debug::Error) << "Failed to open " << Files::pathToUnicodeString(path);
-                        }
-                        std::stringstream buffer;
-                        buffer << stream.rdbuf();
-
-                        // parse includes
-                        int fileNumber = 1;
-                        std::string source = buffer.str();
-                        if (!addLineDirectivesAfterConditionalBlocks(source)
-                            || !parseIncludes(std::filesystem::path(Manager.mPath), source, templateName, fileNumber,
-                                {}, insertedPaths))
-                        {
-                            break;
-                        }
-                        shaderSource = std::move(source);
-
-                        std::vector<std::string> linkedShaderNames;
-                        if (!Manager.createSourceFromTemplate(
-                                shaderSource, linkedShaderNames, templateName, shaderDefines))
-                        {
-                            break;
-                        }
-                        shaderIt->second->setShaderSource(shaderSource);
-                    }
-                }
-            }
-            if (threadsRunningToStop)
-                viewer.startThreading();
-            mLastAutoRecompileTime = std::filesystem::file_time_type::clock::now();
-        }
-    };
-
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(
         std::string templateName, const ShaderManager::DefineMap& defines, std::optional<osg::Shader::Type> type)
     {
@@ -542,7 +525,7 @@ namespace Shader
             stream.open(path);
             if (stream.fail())
             {
-                Log(Debug::Error) << "Failed to open " << path;
+                Log(Debug::Error) << "Failed to open shader " << path << ": " << std::generic_category().message(errno);
                 return nullptr;
             }
             std::stringstream buffer;
@@ -575,7 +558,7 @@ namespace Shader
             // Assign a unique prefix to allow the SharedStateManager to compare shaders efficiently.
             // Append shader source filename for debugging.
             static unsigned int counter = 0;
-            shader->setName(Misc::StringUtils::format("%u %s", counter++, templateName));
+            shader->setName(std::format("{} {}", counter++, templateName));
 
             mHotReloadManager->addShaderFiles(templateName, defines);
 
@@ -637,6 +620,17 @@ namespace Shader
     void ShaderManager::setGlobalDefines(DefineMap& globalDefines)
     {
         mGlobalDefines = globalDefines;
+        // clear out linked dependencies - changing defines may make them obsolete
+        for (const auto& [pair, program] : mPrograms)
+        {
+            for (unsigned int i = 0; i < program->getNumShaders();)
+            {
+                if (program->getShader(i) != pair.first && program->getShader(i) != pair.second)
+                    program->removeShader(program->getShader(i));
+                else
+                    ++i;
+            }
+        }
         for (const auto& [key, shader] : mShaders)
         {
             std::string templateId = key.first;
@@ -655,6 +649,11 @@ namespace Shader
             shader->setShaderSource(shaderSource);
 
             getLinkedShaders(shader, linkedShaderNames, defines);
+        }
+        for (const auto& [pair, program] : mPrograms)
+        {
+            addLinkedShaders(pair.first, program);
+            addLinkedShaders(pair.second, program);
         }
     }
 
@@ -760,4 +759,25 @@ namespace Shader
         mHotReloadManager->mTriggerReload = true;
     }
 
+    ShaderManager::DefineMap getDefaultDefines()
+    {
+        return {
+            { "forcePPL", "0" },
+            { "clamp", "1" },
+            { "preLightEnv", "0" },
+            { "radialFog", "0" },
+            { "exponentialFog", "0" },
+            { "reverseZ", "0" },
+            { "waterRefraction", "0" },
+            { "classicFalloff", "1" },
+            { "skyBlending", "0" },
+            { "disableNormals", "1" },
+            { "useGPUShader4", "0" },
+            { "useOVR_multiview", "0" },
+            { "distorionRTRatio", "0" },
+            { "numViews", "1" },
+            { "particle", "0" },
+            { "particlePointLighting", "1" },
+        };
+    }
 }

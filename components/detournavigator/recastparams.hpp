@@ -21,7 +21,7 @@ namespace DetourNavigator
         switch (agentBounds.mShapeType)
         {
             case CollisionShapeType::Aabb:
-                return std::max(agentBounds.mHalfExtents.x(), agentBounds.mHalfExtents.y()) * std::sqrt(2);
+                return std::max(agentBounds.mHalfExtents.x(), agentBounds.mHalfExtents.y()) * std::sqrt(2.0f);
             case CollisionShapeType::RotatingBox:
                 return agentBounds.mHalfExtents.x();
             case CollisionShapeType::Cylinder:

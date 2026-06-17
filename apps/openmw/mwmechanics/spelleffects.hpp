@@ -28,7 +28,8 @@ namespace MWMechanics
 
     // Applies a tick of a single effect. Returns true if the effect should be removed immediately
     MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
-        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt);
+        ActiveSpells::ActiveSpellParams& spellParams, ESM::ActiveEffect& effect, float dt,
+        bool playNonLoopingEffect = true);
 
     // Undoes permanent effects created by ESM::MagicEffect::AppliedOnce
     void onMagicEffectRemoved(

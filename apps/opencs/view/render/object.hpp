@@ -23,11 +23,6 @@ namespace osg
     class Node;
 }
 
-namespace osgFX
-{
-    class Scribe;
-}
-
 namespace Resource
 {
     class ResourceSystem;
@@ -58,14 +53,6 @@ namespace CSVRender
         QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const override;
     };
 
-    class ObjectMarkerTag : public ObjectTag
-    {
-    public:
-        ObjectMarkerTag(Object* object, int axis);
-
-        int mAxis;
-    };
-
     class Object
     {
     public:
@@ -76,29 +63,36 @@ namespace CSVRender
             Override_Scale = 4
         };
 
-    private:
-        static const float MarkerShaftWidth;
-        static const float MarkerShaftBaseLength;
-        static const float MarkerHeadWidth;
-        static const float MarkerHeadLength;
+        enum SubMode
+        {
+            Mode_Move,
+            Mode_Rotate,
+            Mode_Scale,
+            Mode_None,
+        };
 
+        enum Axis
+        {
+            Axis_X,
+            Axis_Y,
+            Axis_Z
+        };
+
+    private:
         CSMWorld::Data& mData;
         ESM::RefId mReferenceId;
         ESM::RefId mReferenceableId;
         osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-        osg::ref_ptr<osgFX::Scribe> mOutline;
-        bool mSelected;
-        bool mSnapTarget;
+        osg::ref_ptr<osg::Group> mOutline;
+        bool mSelected{ false };
+        bool mSnapTarget{ false };
         osg::Group* mParentNode;
         Resource::ResourceSystem* mResourceSystem;
         bool mForceBaseToZero;
         ESM::Position mPositionOverride;
-        float mScaleOverride;
-        int mOverrideFlags;
-        osg::ref_ptr<osg::Node> mMarker[3];
-        int mSubMode;
-        float mMarkerTransparency;
+        float mScaleOverride{ 1.f };
+        int mOverrideFlags{ 0 };
         std::unique_ptr<Actor> mActor;
 
         /// Not implemented
@@ -119,16 +113,6 @@ namespace CSVRender
 
         /// Throws an exception if *this was constructed with referenceable
         const CSMWorld::CellRef& getReference() const;
-
-        void updateMarker();
-
-        osg::ref_ptr<osg::Node> makeMoveOrScaleMarker(int axis);
-        osg::ref_ptr<osg::Node> makeRotateMarker(int axis);
-
-        /// Sets up a stateset with properties common to all marker types.
-        void setupCommonMarkerState(osg::ref_ptr<osg::Geometry> geometry);
-
-        osg::Vec3f getMarkerPosition(float x, float y, float z, int axis);
 
     public:
         Object(CSMWorld::Data& data, osg::Group* cellNode, const std::string& id, bool referenceable,
@@ -198,8 +182,6 @@ namespace CSVRender
 
         /// Apply override changes via command and end edit mode
         void apply(CSMWorld::CommandMacro& commands);
-
-        void setSubMode(int subMode);
 
         /// Erase all overrides and restore the visual representation of the object to its
         /// true state.

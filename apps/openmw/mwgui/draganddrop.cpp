@@ -11,7 +11,6 @@
 #include "controllers.hpp"
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
-#include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 
 namespace MWGui
@@ -27,8 +26,8 @@ namespace MWGui
     {
     }
 
-    void DragAndDrop::startDrag(
-        int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count)
+    void DragAndDrop::startDrag(int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView,
+        std::size_t count, bool playSound)
     {
         mItem = sourceModel->getItem(index);
         mDraggedCount = count;
@@ -49,9 +48,9 @@ namespace MWGui
             ItemModel::ModelIndex newIndex = -1;
             for (size_t i = 0; i < playerModel->getItemCount(); ++i)
             {
-                if (playerModel->getItem(i).mBase == item)
+                if (playerModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase == item)
                 {
-                    newIndex = i;
+                    newIndex = static_cast<ItemModel::ModelIndex>(i);
                     break;
                 }
             }
@@ -63,8 +62,11 @@ namespace MWGui
             mSourceSortModel = playerFilterModel;
         }
 
-        const ESM::RefId& sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
-        MWBase::Environment::get().getWindowManager()->playSound(sound);
+        if (playSound)
+        {
+            const ESM::RefId& sound = mItem.mBase.getClass().getUpSoundId(mItem.mBase);
+            MWBase::Environment::get().getWindowManager()->playSound(sound);
+        }
 
         if (mSourceSortModel)
         {
@@ -72,31 +74,34 @@ namespace MWGui
             mSourceSortModel->addDragItem(mItem.mBase, count);
         }
 
-        ItemWidget* baseWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
+        mDraggedWidget = MyGUI::Gui::getInstance().createWidget<ItemWidget>(
             "MW_ItemIcon", 0, 0, 42, 42, MyGUI::Align::Default, "DragAndDrop");
 
         Controllers::ControllerFollowMouse* controller
             = MyGUI::ControllerManager::getInstance()
                   .createItem(Controllers::ControllerFollowMouse::getClassTypeName())
                   ->castType<Controllers::ControllerFollowMouse>();
-        MyGUI::ControllerManager::getInstance().addItem(baseWidget, controller);
+        MyGUI::ControllerManager::getInstance().addItem(mDraggedWidget, controller);
 
-        mDraggedWidget = baseWidget;
-        baseWidget->setItem(mItem.mBase);
-        baseWidget->setNeedMouseFocus(false);
-        baseWidget->setCount(count);
-
-        sourceView->update();
+        mDraggedWidget->setItem(mItem.mBase);
+        mDraggedWidget->setNeedMouseFocus(false);
+        mDraggedWidget->setCount(static_cast<int>(count));
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(true);
 
         mIsOnDragAndDrop = true;
+
+        // Update item view after completing drag-and-drop setup
+        mSourceView->update();
     }
 
-    void DragAndDrop::drop(ItemModel* targetModel, ItemView* targetView)
+    void DragAndDrop::drop(ItemModel* targetModel, ItemView* targetView, bool playSound)
     {
-        const ESM::RefId& sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
-        MWBase::Environment::get().getWindowManager()->playSound(sound);
+        if (playSound)
+        {
+            const ESM::RefId& sound = mItem.mBase.getClass().getDownSoundId(mItem.mBase);
+            MWBase::Environment::get().getWindowManager()->playSound(sound);
+        }
 
         // We can't drop a conjured item to the ground; the target container should always be the source container
         if (mItem.mFlags & ItemStack::Flag_Bound && targetModel != mSourceModel)
@@ -124,6 +129,22 @@ namespace MWGui
         mSourceView->update();
     }
 
+    void DragAndDrop::update()
+    {
+        if (!mIsOnDragAndDrop)
+            return;
+
+        const unsigned count = mItem.mBase.getCellRef().getAbsCount();
+        if (count >= mDraggedCount)
+            return;
+
+        mItem.mCount = count;
+        mDraggedCount = count;
+        mDraggedWidget->setCount(static_cast<int>(mDraggedCount));
+        mSourceSortModel->clearDragItems();
+        mSourceSortModel->addDragItem(mItem.mBase, mDraggedCount);
+    }
+
     void DragAndDrop::onFrame()
     {
         if (mIsOnDragAndDrop && mItem.mBase.getCellRef().getCount() == 0)
@@ -137,8 +158,12 @@ namespace MWGui
         // since mSourceView doesn't get updated in drag()
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
 
-        MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
-        mDraggedWidget = nullptr;
+        if (mDraggedWidget)
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mDraggedWidget);
+            mDraggedWidget = nullptr;
+        }
+
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
     }
 

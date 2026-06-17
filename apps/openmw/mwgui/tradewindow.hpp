@@ -31,23 +31,27 @@ namespace MWGui
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
-        void borrowItem(int index, size_t count);
-        void returnItem(int index, size_t count);
-
-        int getMerchantServices();
-
         bool exit() override;
 
         void resetReference() override;
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
+        void updateItemView();
+
+        void onInventoryUpdate(const MWWorld::Ptr& ptr) override;
+
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
         EventHandle_TradeDone eventTradeDone;
 
         std::string_view getWindowIdForLua() const override { return "Trade"; }
 
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
+
     private:
+        friend class InventoryWindow;
+
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;
         TradeItemModel* mTradeModel;
@@ -81,27 +85,30 @@ namespace MWGui
         int mCurrentBalance;
         int mCurrentMerchantOffer;
 
-        void sellToNpc(
-            const MWWorld::Ptr& item, int count, bool boughtItem); ///< only used for adjusting the gold balance
-        void buyFromNpc(
-            const MWWorld::Ptr& item, int count, bool soldItem); ///< only used for adjusting the gold balance
+        bool mUpdateNextFrame;
 
         void updateOffer();
 
         void onItemSelected(int index);
-        void sellItem(MyGUI::Widget* sender, int count);
+        void sellItem(MyGUI::Widget* sender, std::size_t count);
 
-        void onFilterChanged(MyGUI::Widget* _sender);
-        void onNameFilterChanged(MyGUI::EditBox* _sender);
-        void onOfferButtonClicked(MyGUI::Widget* _sender);
+        void borrowItem(int index, size_t count);
+        void returnItem(int index, size_t count);
+
+        int getMerchantServices();
+
+        void onFilterChanged(MyGUI::Widget* sender);
+        void onNameFilterChanged(MyGUI::EditBox* sender);
+        void onOfferButtonClicked(MyGUI::Widget* sender);
         void onAccept(MyGUI::EditBox* sender);
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
-        void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onMaxSaleButtonClicked(MyGUI::Widget* sender);
+        void onIncreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onDecreaseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
+        void onBalanceButtonReleased(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
         void onBalanceValueChanged(int value);
         void onRepeatClick(MyGUI::Widget* widget, MyGUI::ControllerItem* controller);
+        void onOfferSubmitted(MyGUI::Widget* sender, size_t offerAmount);
 
         void addRepeatController(MyGUI::Widget* widget);
 

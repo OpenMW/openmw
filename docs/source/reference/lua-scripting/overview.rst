@@ -1,5 +1,5 @@
-Overview of Lua scripting
-#########################
+Overview
+########
 
 .. include:: version.rst
 
@@ -126,10 +126,12 @@ The options are:
 
 Enable it in ``openmw.cfg`` the same way as any other mod:
 
-::
+.. code-block:: openmwcfg
+    :caption: openmw.cfg
 
     data=path/to/my_lua_mod
-    content=my_lua_mod.omwscripts  # or content=my_lua_mod.omwaddon
+    # or content=my_lua_mod.omwaddon
+    content=my_lua_mod.omwscripts
 
 Now every time the player presses "X" on a keyboard, a message is shown.
 
@@ -179,6 +181,7 @@ Possible flags are:
 - ``MENU`` - a menu script; always active, even before a game is loaded
 - ``CUSTOM`` - dynamic local script that can be started or stopped by a global script;
 - ``PLAYER`` - an auto started player script;
+- ``LOAD`` - a load script, active while content files are being loaded;
 - ``ACTIVATOR`` - a local script that will be automatically attached to any activator;
 - ``ARMOR`` - a local script that will be automatically attached to any armor;
 - ``BOOK`` - a local script that will be automatically attached to any book;
@@ -205,6 +208,7 @@ Hot reloading
 It is possible to modify a script without restarting OpenMW. To apply changes, open the in-game console and run the command: ``reloadlua``.
 This will restart all Lua scripts using the `onSave and onLoad`_ handlers the same way as if the game was saved or loaded.
 It reloads all ``.omwscripts`` files and ``.lua`` files that are not packed to any archives. ``.omwaddon`` files and scripts packed to BSA can not be changed without restarting the game.
+Load scripts will not run again until the game is restarted.
 
 Lua console
 ===========
@@ -216,6 +220,7 @@ To enter the Lua mode run one of the commands:
 - ``lua player`` or ``luap`` - enter player context
 - ``lua global`` or ``luag`` - enter global context
 - ``lua selected`` or ``luas`` - enter local context on the selected object
+- ``lua menu`` or ``luam`` - enter menu context
 
 Script structure
 ================
@@ -383,8 +388,8 @@ Player scripts are local scripts that are attached to a player.
 
 .. include:: tables/packages.rst
 
-openmw_aux
-----------
+Auxiliary packages
+------------------
 
 ``openmw_aux.*`` are built-in libraries that are themselves implemented in Lua. They can not do anything that is not possible with the basic API, they only make it more convenient.
 Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can override them, but it is not recommended.
@@ -461,7 +466,7 @@ Using the interface:
 
     return { engineHandlers = {onUpdate = onUpdate} }
 
-The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `lua-scripts=...` in `openmw.cfg`) is correct.
+The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `content=*.omwscripts` in `openmw.cfg`) is correct.
 
 Interfaces of built-in scripts
 ------------------------------
@@ -482,7 +487,7 @@ There are a few methods for sending events:
 
 - `core.sendGlobalEvent <openmw_core.html##(sendGlobalEvent)>`_ to send events to global scripts
 - `GameObject:sendEvent <openmw_core.html##(GameObject).sendEvent>`_ to send events to local scripts attached to a game object
-- `types.Player.sendMenuEvent <openmw_menu.html##(Player).sendMenuEvent>`_ to send events to menu scripts of the given player
+- `types.Player.sendMenuEvent <openmw_types.html##(Player).sendMenuEvent>`_ to send events to menu scripts of the given player
 
 Events are the main way of interacting between local and global scripts.
 They are not recommended for interactions between two global scripts, because in this case interfaces are more convenient.
@@ -543,7 +548,7 @@ The protection mod attaches an additional local script to every actor. The scrip
 
 In order to be able to intercept the event, the protection script should be placed in the load order below the original script.
 
-See :ref:`the list of events <Built-in events>` that are used by built-in scripts.
+See :ref:`the list of events <Events>` that are used by built-in scripts.
 
 
 Timers
@@ -617,7 +622,7 @@ An example:
         }
     }
 
-Also in `openmw_aux`_ is the helper function ``runRepeatedly``, it is implemented on top of unsavable timers:
+Also in `Auxiliary packages`_ is the helper function ``runRepeatedly``, it is implemented on top of unsavable timers:
 
 .. code-block:: Lua
 
@@ -640,7 +645,7 @@ Using IDE for Lua scripting
 Find the directory ``resources/lua_api`` in your installation of OpenMW.
 It describes OpenMW LuaAPI in
 `LDT Documentation Language <https://wiki.eclipse.org/LDT/User_Area/Documentation_Language>`__.
-It is the source from which the :ref:`API reference <Lua API reference>` is generated.
+It is the source from which the :ref:`API reference <API Reference>` is generated.
 
 If you write scripts using `Lua Development Tools <https://www.eclipse.org/ldt/>`__ (eclipse-based IDE),
 you can import these files to get code autocompletion and integrated OpenMW API reference. Here are the steps:

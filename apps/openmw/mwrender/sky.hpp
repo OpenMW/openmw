@@ -8,6 +8,8 @@
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
+#include <components/vfs/pathutil.hpp>
+
 #include "precipitationocclusion.hpp"
 #include "skyutil.hpp"
 
@@ -52,12 +54,6 @@ namespace MWRender
 
         void setEnabled(bool enabled);
 
-        void setHour(double hour);
-        ///< will be called even when sky is disabled.
-
-        void setDate(int day, int month);
-        ///< will be called even when sky is disabled.
-
         int getMasserPhase() const;
         ///< 0 new moon, 1 waxing or waning cresecent, 2 waxing or waning half,
         /// 3 waxing or waning gibbous, 4 full moon
@@ -83,8 +79,6 @@ namespace MWRender
 
         float getPrecipitationAlpha() const;
 
-        void setRainSpeed(float speed);
-
         void setStormParticleDirection(const osg::Vec3f& direction);
 
         void setSunDirection(const osg::Vec3f& direction);
@@ -100,7 +94,8 @@ namespace MWRender
         /// Set height of water plane (used to remove underwater weather particles)
         void setWaterHeight(float height);
 
-        void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
+        void listAssetsToPreload(
+            std::vector<VFS::Path::Normalized>& models, std::vector<VFS::Path::Normalized>& textures);
 
         float getBaseWindSpeed() const;
 
@@ -123,7 +118,8 @@ namespace MWRender
 
         osg::Camera* mCamera;
 
-        osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<CameraRelativeTransform> mSkyRootNode;
+        osg::ref_ptr<osg::Group> mSkyNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
@@ -162,13 +158,8 @@ namespace MWRender
 
         bool mIsStorm;
 
-        int mDay;
-        int mMonth;
-
         bool mTimescaleClouds;
         float mCloudAnimationTimer;
-
-        float mRainTimer;
 
         // particle system rotation is independent of cloud rotation internally
         osg::Vec3f mStormParticleDirection;
@@ -185,11 +176,8 @@ namespace MWRender
         osg::Vec4f mSkyColour;
         osg::Vec4f mFogColour;
 
-        std::string mCurrentParticleEffect;
+        VFS::Path::Normalized mCurrentParticleEffect;
 
-        float mRemainingTransitionTime;
-
-        bool mRainEnabled;
         std::string mRainEffect;
         float mRainSpeed;
         float mRainDiameter;
@@ -203,7 +191,6 @@ namespace MWRender
         float mBaseWindSpeed;
 
         bool mEnabled;
-        bool mSunEnabled;
         bool mSunglareEnabled;
 
         float mPrecipitationAlpha;

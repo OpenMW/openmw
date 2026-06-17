@@ -43,16 +43,11 @@ namespace MWRender
         // we can not trust Apple :)
         mUseCompute = false;
 #else
-        constexpr float minimumGLVersionRequiredForCompute = 4.4;
+        constexpr float minimumGLVersionRequiredForCompute = 4.4f;
         osg::GLExtensions& exts = SceneUtil::getGLExtensions();
         mUseCompute = exts.glVersion >= minimumGLVersionRequiredForCompute
             && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
-
-        if (mUseCompute)
-            Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
-        else
-            Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
 
         for (size_t i = 0; i < mState.size(); ++i)
         {
@@ -72,7 +67,6 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
             texture->setSourceFormat(GL_RGBA);
-            texture->setSourceType(GL_HALF_FLOAT);
             texture->setInternalFormat(GL_RGBA16F);
             texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
             texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
@@ -92,6 +86,17 @@ namespace MWRender
         else
             setupFragmentPipeline();
 
+        if (mProgramBlobber != nullptr)
+        {
+            [[maybe_unused]] static const bool pipelineLogged = [&] {
+                if (mUseCompute)
+                    Log(Debug::Info) << "Initialized compute shader pipeline for water ripples";
+                else
+                    Log(Debug::Info) << "Initialized fallback fragment shader pipeline for water ripples";
+                return true;
+            }();
+        }
+
         setCullCallback(new osg::NodeCallback);
         setUpdateCallback(new osg::NodeCallback);
     }
@@ -103,21 +108,36 @@ namespace MWRender
         Shader::ShaderManager::DefineMap defineMap = { { "rippleMapSize", std::to_string(sRTTSize) + ".0" } };
 
         osg::ref_ptr<osg::Shader> vertex = shaderManager.getShader("fullscreen_tri.vert", {}, osg::Shader::VERTEX);
+        osg::ref_ptr<osg::Shader> blobber
+            = shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT);
+        osg::ref_ptr<osg::Shader> simulate
+            = shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT);
+        if (vertex == nullptr || blobber == nullptr || simulate == nullptr)
+        {
+            Log(Debug::Error) << "Failed to load shaders required for fragment shader ripple pipeline";
+            return;
+        }
 
-        mProgramBlobber = shaderManager.getProgram(
-            vertex, shaderManager.getShader("ripples_blobber.frag", defineMap, osg::Shader::FRAGMENT));
-        mProgramSimulation = shaderManager.getProgram(
-            std::move(vertex), shaderManager.getShader("ripples_simulate.frag", defineMap, osg::Shader::FRAGMENT));
+        mProgramBlobber = shaderManager.getProgram(vertex, std::move(blobber));
+        mProgramSimulation = shaderManager.getProgram(std::move(vertex), std::move(simulate));
     }
 
     void RipplesSurface::setupComputePipeline()
     {
         auto& shaderManager = mResourceSystem->getSceneManager()->getShaderManager();
 
-        mProgramBlobber = shaderManager.getProgram(
-            nullptr, shaderManager.getShader("core/ripples_blobber.comp", {}, osg::Shader::COMPUTE));
-        mProgramSimulation = shaderManager.getProgram(
-            nullptr, shaderManager.getShader("core/ripples_simulate.comp", {}, osg::Shader::COMPUTE));
+        osg::ref_ptr<osg::Shader> blobber
+            = shaderManager.getShader("core/ripples_blobber.comp", {}, osg::Shader::COMPUTE);
+        osg::ref_ptr<osg::Shader> simulate
+            = shaderManager.getShader("core/ripples_simulate.comp", {}, osg::Shader::COMPUTE);
+        if (blobber == nullptr || simulate == nullptr)
+        {
+            Log(Debug::Error) << "Failed to load shaders required for compute shader ripple pipeline";
+            return;
+        }
+
+        mProgramBlobber = shaderManager.getProgram(nullptr, std::move(blobber));
+        mProgramSimulation = shaderManager.getProgram(nullptr, std::move(simulate));
     }
 
     void RipplesSurface::updateState(const osg::FrameStamp& frameStamp, State& state)
@@ -163,7 +183,7 @@ namespace MWRender
                 - osg::Vec3f(mCurrentPlayerPos.x() * sWorldScaleFactor, mCurrentPlayerPos.y() * sWorldScaleFactor, 0.0)
                 + osg::Vec3f(sRTTSize * sWorldScaleFactor / 2, sRTTSize * sWorldScaleFactor / 2, 0.0);
             pos /= sWorldScaleFactor;
-            positions->setElement(i, pos);
+            positions->setElement(static_cast<unsigned>(i), pos);
         }
         positions->dirty();
 
@@ -185,6 +205,9 @@ namespace MWRender
 
     void RipplesSurface::drawImplementation(osg::RenderInfo& renderInfo) const
     {
+        if (mProgramBlobber == nullptr || mProgramSimulation == nullptr)
+            return;
+
         osg::State& state = *renderInfo.getState();
         const std::size_t currentFrame = state.getFrameStamp()->getFrameNumber() % 2;
         const State& frameState = mState[currentFrame];
@@ -194,7 +217,7 @@ namespace MWRender
         }
 
         osg::GLExtensions& ext = *state.get<osg::GLExtensions>();
-        const std::size_t contextID = state.getContextID();
+        const unsigned contextID = state.getContextID();
 
         const auto bindImage = [&](osg::Texture2D* texture, GLuint index, GLenum access) {
             osg::Texture::TextureObject* to = texture->getTextureObject(contextID);
@@ -207,8 +230,14 @@ namespace MWRender
         };
 
         // PASS: Blot in all ripple spawners
-        mProgramBlobber->apply(state);
-        state.apply(frameState.mStateset);
+        state.pushStateSet(frameState.mStateset);
+        state.apply();
+        state.applyAttribute(mProgramBlobber);
+        for (const auto& [name, stack] : state.getUniformMap())
+        {
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
+        }
 
         if (mUseCompute)
         {
@@ -226,8 +255,12 @@ namespace MWRender
         }
 
         // PASS: Wave simulation
-        mProgramSimulation->apply(state);
-        state.apply(frameState.mStateset);
+        state.applyAttribute(mProgramSimulation);
+        for (const auto& [name, stack] : state.getUniformMap())
+        {
+            if (!stack.uniformVec.empty())
+                state.getLastAppliedProgramObject()->apply(*(stack.uniformVec.back().first));
+        }
 
         if (mUseCompute)
         {
@@ -243,6 +276,8 @@ namespace MWRender
             state.applyTextureAttribute(0, mTextures[1]);
             osg::Geometry::drawImplementation(renderInfo);
         }
+
+        state.popStateSet();
     }
 
     osg::Texture* RipplesSurface::getColorTexture() const
@@ -280,7 +315,6 @@ namespace MWRender
         : osg::Camera()
         , mRipples(new RipplesSurface(resourceSystem))
     {
-        getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         setRenderOrder(osg::Camera::PRE_RENDER);
         setReferenceFrame(osg::Camera::ABSOLUTE_RF);

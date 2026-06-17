@@ -11,7 +11,8 @@ print_help() {
 declare -rA GROUPED_DEPS=(
   [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config mold"
   [clang]="binutils clang make cmake ccache curl unzip git pkg-config mold"
-  [coverity]="binutils clang-12 make cmake ccache curl unzip git pkg-config"
+  [coverity]="binutils clang make cmake ccache curl unzip git pkg-config file"
+  [coverity_upload]="curl"
   [gcc_preprocess]="
     binutils
     build-essential
@@ -33,15 +34,15 @@ declare -rA GROUPED_DEPS=(
     libboost-system-dev libboost-iostreams-dev
 
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
-    libsdl2-dev libqt5opengl5-dev qttools5-dev qttools5-dev-tools libopenal-dev
+    libsdl2-dev libqt6opengl6-dev qt6-tools-dev qt6-tools-dev-tools libopenal-dev
     libunshield-dev libtinyxml-dev libbullet-dev liblz4-dev libpng-dev libjpeg-dev
     libluajit-5.1-dev librecast-dev libsqlite3-dev ca-certificates libicu-dev
-    libyaml-cpp-dev libqt5svg5 libqt5svg5-dev
+    libyaml-cpp-dev libqt6svg6 libqt6svg6-dev
   "
 
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev libcollada-dom-dev"
-  [clang-tidy]="clang-tidy"
+  [clang-tidy]="clang-tidy-19"
 
   # Pre-requisites for building MyGUI and OSG for static linking.
   #
@@ -57,22 +58,22 @@ declare -rA GROUPED_DEPS=(
     libsdl2-dev libboost-system-dev libboost-filesystem-dev libgl-dev
   "
 
-  [openmw-coverage]="gcovr"
+  [openmw-coverage]="pipx"
 
   [openmw-integration-tests]="
     ca-certificates
     gdb
     git
     git-lfs
-    libavcodec58
-    libavformat58
-    libavutil56
-    libboost-iostreams1.74.0
-    libboost-program-options1.74.0
-    libboost-system1.74.0
+    libavcodec60
+    libavformat60
+    libavutil58
+    libboost-iostreams1.83.0
+    libboost-program-options1.83.0
+    libboost-system1.83.0
     libbullet3.24
     libcollada-dom2.5-dp0
-    libicu70
+    libicu74
     libjpeg8
     libluajit-5.1-2
     liblz4-1
@@ -80,30 +81,30 @@ declare -rA GROUPED_DEPS=(
     libopenal1
     libopenscenegraph161
     libpng16-16
-    libqt5opengl5
+    libqt6opengl6
     librecast1
     libsdl2-2.0-0
     libsqlite3-0
-    libswresample3
-    libswscale5
+    libswresample4
+    libswscale7
     libtinyxml2.6.2v5
     libyaml-cpp0.8
     python3-pip
     xvfb
   "
 
-  [libasan6]="libasan6"
+  [libasan]="libasan8"
 
   [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
-  
+
   [openmw-clang-format]="
     clang-format-14
     git-core
   "
 
   [openmw-qt-translations]="
-    qttools5-dev
-    qttools5-dev-tools
+    qt6-tools-dev
+    qt6-tools-dev-tools
     git-core
   "
 )
@@ -126,10 +127,24 @@ export APT_CACHE_DIR="${PWD}/apt-cache"
 export DEBIAN_FRONTEND=noninteractive
 set -x
 mkdir -pv "$APT_CACHE_DIR"
-apt-get update -yqq
+
+while true; do
+  apt-get update -yqq && break
+done
+
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends software-properties-common gnupg >/dev/null
-add-apt-repository -y ppa:openmw/openmw
-add-apt-repository -y ppa:openmw/openmw-daily
-add-apt-repository -y ppa:openmw/staging
+
+while true; do
+  add-apt-repository -y ppa:openmw/openmw && break
+done
+
+while true; do
+  add-apt-repository -y ppa:openmw/openmw-daily && break
+done
+
+while true; do
+  add-apt-repository -y ppa:openmw/staging && break
+done
+
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
 apt list --installed

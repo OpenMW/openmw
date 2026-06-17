@@ -11,6 +11,7 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/texturetype.hpp>
 
 namespace SceneUtil
 {
@@ -137,6 +138,16 @@ namespace SceneUtil
         }
     };
 
+    class TextureTypeSerializer : public osgDB::ObjectWrapper
+    {
+    public:
+        TextureTypeSerializer()
+            : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::TextureType>, "SceneUtil::TextureType",
+                "osg::Object osg::StateAttribute SceneUtil::TextureType")
+        {
+        }
+    };
+
     osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
     {
         return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -168,6 +179,7 @@ namespace SceneUtil
             mgr->addWrapper(new CameraRelativeTransformSerializer);
             mgr->addWrapper(new MatrixTransformSerializer);
             mgr->addWrapper(new FogSerializer);
+            mgr->addWrapper(new TextureTypeSerializer);
 
             // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of
             // vertex data that would make the file large and hard to read.
@@ -175,19 +187,48 @@ namespace SceneUtil
             mgr->addWrapper(new GeometrySerializer);
 
             // ignore the below for now to avoid warning spam
-            const char* ignore[]
-                = { "Debug::DebugDrawer", "MWRender::PtrHolder", "Resource::TemplateRef", "Resource::TemplateMultiRef",
-                      "SceneUtil::CompositeStateSetUpdater", "SceneUtil::UBOManager", "SceneUtil::LightListCallback",
-                      "SceneUtil::LightManagerUpdateCallback", "SceneUtil::FFPLightStateAttribute",
-                      "SceneUtil::UpdateRigBounds", "SceneUtil::UpdateRigGeometry", "SceneUtil::LightSource",
-                      "SceneUtil::DisableLight", "SceneUtil::MWShadowTechnique", "SceneUtil::TextKeyMapHolder",
-                      "Shader::AddedState", "Shader::RemovedAlphaFunc", "NifOsg::FlipController",
-                      "NifOsg::KeyframeController", "NifOsg::Emitter", "NifOsg::ParticleColorAffector",
-                      "NifOsg::ParticleSystem", "NifOsg::GravityAffector", "NifOsg::ParticleBomb",
-                      "NifOsg::GrowFadeAffector", "NifOsg::InverseWorldMatrix", "NifOsg::StaticBoundingBoxCallback",
-                      "NifOsg::GeomMorpherController", "NifOsg::UpdateMorphGeometry", "NifOsg::UVController",
-                      "NifOsg::VisController", "osgMyGUI::Drawable", "osg::DrawCallback", "osg::UniformBufferObject",
-                      "osgOQ::ClearQueriesCallback", "osgOQ::RetrieveQueriesCallback", "osg::DummyObject" };
+            const char* ignore[] = {
+                "Debug::DebugDrawer",
+                "MWRender::NifAnimBlendController",
+                "MWRender::BoneAnimBlendController",
+                "MWRender::BoneAnimBlendControllerWrapper",
+                "MWRender::PtrHolder",
+                "Resource::TemplateRef",
+                "Resource::TemplateMultiRef",
+                "SceneUtil::CompositeStateSetUpdater",
+                "SceneUtil::UBOManager",
+                "SceneUtil::LightListCallback",
+                "SceneUtil::LightManagerUpdateCallback",
+                "SceneUtil::UpdateRigBounds",
+                "SceneUtil::UpdateRigGeometry",
+                "SceneUtil::LightSource",
+                "SceneUtil::DisableLight",
+                "SceneUtil::MWShadowTechnique",
+                "SceneUtil::TextKeyMapHolder",
+                "Shader::AddedState",
+                "Shader::RemovedAlphaFunc",
+                "NifOsg::BillboardCallback",
+                "NifOsg::FlipController",
+                "NifOsg::KeyframeController",
+                "NifOsg::Emitter",
+                "NifOsg::ParticleColorAffector",
+                "NifOsg::ParticleSystem",
+                "NifOsg::GravityAffector",
+                "NifOsg::ParticleBomb",
+                "NifOsg::GrowFadeAffector",
+                "NifOsg::InverseWorldMatrix",
+                "NifOsg::StaticBoundingBoxCallback",
+                "NifOsg::GeomMorpherController",
+                "NifOsg::UpdateMorphGeometry",
+                "NifOsg::UVController",
+                "NifOsg::VisController",
+                "osgMyGUI::Drawable",
+                "osg::DrawCallback",
+                "osg::UniformBufferObject",
+                "osgOQ::ClearQueriesCallback",
+                "osgOQ::RetrieveQueriesCallback",
+                "osg::DummyObject",
+            };
             for (size_t i = 0; i < sizeof(ignore) / sizeof(ignore[0]); ++i)
             {
                 mgr->addWrapper(makeDummySerializer(ignore[i]));

@@ -50,10 +50,10 @@ namespace Gui
 
     public:
         MyGUI::IntSize getRequestedSize() override;
-        void setCaption(const MyGUI::UString& _value) override;
+        void setCaption(const MyGUI::UString& value) override;
 
     protected:
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
         std::string mFontSize;
     };
 
@@ -63,12 +63,12 @@ namespace Gui
 
     public:
         MyGUI::IntSize getRequestedSize() override;
-        void setCaption(const MyGUI::UString& _value) override;
+        void setCaption(const MyGUI::UString& value) override;
 
         void initialiseOverride() override;
 
     protected:
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
         int getWidth();
         std::string mFontSize;
         bool mShrink = false;
@@ -82,10 +82,10 @@ namespace Gui
 
     public:
         MyGUI::IntSize getRequestedSize() override;
-        void setCaption(const MyGUI::UString& _value) override;
+        void setCaption(const MyGUI::UString& value) override;
 
     protected:
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
         std::string mFontSize;
     };
 
@@ -105,7 +105,7 @@ namespace Gui
     protected:
         virtual void align() = 0;
 
-        virtual bool _setPropertyImpl(std::string_view _key, std::string_view _value);
+        virtual bool _setPropertyImpl(std::string_view key, std::string_view value);
 
         int mSpacing; // how much space to put between elements
 
@@ -128,8 +128,8 @@ namespace Gui
         MYGUI_RTTI_DERIVED(HBox)
 
     public:
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
     protected:
         void initialiseOverride() override;
@@ -137,9 +137,9 @@ namespace Gui
         void align() override;
         MyGUI::IntSize getRequestedSize() override;
 
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
 
-        void onWidgetCreated(MyGUI::Widget* _widget) override;
+        void onWidgetCreated(MyGUI::Widget* widget) override;
     };
 
     class VBox : public Box, public MyGUI::Widget
@@ -147,8 +147,8 @@ namespace Gui
         MYGUI_RTTI_DERIVED(VBox)
 
     public:
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
     protected:
         void initialiseOverride() override;
@@ -156,9 +156,9 @@ namespace Gui
         void align() override;
         MyGUI::IntSize getRequestedSize() override;
 
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
 
-        void onWidgetCreated(MyGUI::Widget* _widget) override;
+        void onWidgetCreated(MyGUI::Widget* widget) override;
     };
 
 }

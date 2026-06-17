@@ -10,7 +10,6 @@
 #include <components/files/conversion.hpp>
 
 namespace bpo = boost::program_options;
-namespace sfs = std::filesystem;
 
 #ifndef _WIN32
 int main(int argc, char* argv[])
@@ -63,7 +62,7 @@ int wmain(int argc, wchar_t* wargv[])
     try
     {
         bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
-        bpo::positional_options_description p_desc;
+        bpo::positional_options_description positionalDesc;
         auto addOption = desc.add_options();
         addOption("help,h", "produce help message");
         addOption("verbose,v", "verbose output");
@@ -80,11 +79,12 @@ int wmain(int argc, wchar_t* wargv[])
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
         ;
-        p_desc.add("ini", 1).add("cfg", 1);
+        positionalDesc.add("ini", 1).add("cfg", 1);
 
         bpo::variables_map vm;
 
-        bpo::parsed_options parsed = bpo::command_line_parser(argc, argv).options(desc).positional(p_desc).run();
+        bpo::parsed_options parsed
+            = bpo::command_line_parser(argc, argv).options(desc).positional(positionalDesc).run();
         bpo::store(parsed, vm);
 
         if (vm.count("help") || !vm.count("ini") || !vm.count("cfg"))
@@ -126,12 +126,20 @@ int wmain(int argc, wchar_t* wargv[])
         MwIniImporter importer;
         importer.setVerbose(vm.count("verbose") != 0);
 
+        MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
+
         // Font encoding settings
-        std::string encoding(vm["encoding"].as<std::string>());
+        std::string encoding;
+        if (vm["encoding"].defaulted() && cfg.contains("encoding") && !cfg["encoding"].empty())
+            encoding = cfg["encoding"].back();
+        else
+        {
+            encoding = vm["encoding"].as<std::string>();
+            cfg["encoding"] = { encoding };
+        }
         importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
 
         MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
-        MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
         if (!vm.count("fonts"))
         {

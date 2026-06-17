@@ -38,3 +38,7 @@ weekday4: "Миддас"
 weekday5: "Турдас"
 weekday6: "Фредас"
 weekday7: "Лордас"
+
+am: "д.п."
+pm: "п.п."
+day: "День"

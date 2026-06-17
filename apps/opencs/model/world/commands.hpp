@@ -69,7 +69,7 @@ namespace CSMWorld
         IdTable& mLtexs;
         DataType mOld;
         int mOldState;
-        std::vector<std::string> mCreatedTextures;
+        std::vector<std::unique_ptr<RecordBase>> mTouchedTextures;
     };
 
     /// \brief This command is used to fix LandTexture records and texture
@@ -125,8 +125,8 @@ namespace CSMWorld
         CSMWorld::RecordBase::State mOldRecordState;
 
     public:
-        ModifyCommand(
-            QAbstractItemModel& model, const QModelIndex& index, const QVariant& new_, QUndoCommand* parent = nullptr);
+        explicit ModifyCommand(QAbstractItemModel& model, const QModelIndex& index, const QVariant& newValue,
+            QUndoCommand* parent = nullptr);
 
         void redo() override;
 
@@ -169,7 +169,7 @@ namespace CSMWorld
         std::vector<std::pair<int, QVariant>> mOverrideValues;
 
     public:
-        CloneCommand(IdTable& model, const std::string& idOrigin, const std::string& IdDestination,
+        explicit CloneCommand(IdTable& model, const std::string& idOrigin, const std::string& idDestination,
             const UniversalId::Type type, QUndoCommand* parent = nullptr);
 
         void redo() override;

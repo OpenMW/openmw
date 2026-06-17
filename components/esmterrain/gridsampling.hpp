@@ -15,7 +15,9 @@ namespace ESMTerrain
     inline std::pair<std::size_t, std::size_t> toCellAndLocal(
         std::size_t begin, std::size_t global, std::size_t cellSize)
     {
+        // NOLINTBEGIN(clang-analyzer-core.UndefinedBinaryOperatorResult)
         std::size_t cell = global / (cellSize - 1);
+        // NOLINTEND(clang-analyzer-core.UndefinedBinaryOperatorResult)
         std::size_t local = global & (cellSize - 2);
         if (global != begin && local == 0)
         {

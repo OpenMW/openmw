@@ -33,7 +33,7 @@ namespace MWState
         Character* getCurrentCharacter();
         ///< @note May return null
 
-        void deleteSlot(const MWState::Character* character, const MWState::Slot* slot);
+        void deleteSlot(const MWState::Slot* slot, const Character*& character);
 
         Character* createCharacter(const std::string& name);
         ///< Create new character within saved game management

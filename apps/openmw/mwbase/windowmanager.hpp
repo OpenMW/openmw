@@ -78,6 +78,8 @@ namespace MWGui
     class MessageBox;
     class PostProcessorHud;
     class SettingsWindow;
+    class HUD;
+    class WindowBase;
 
     enum ShowInDialogueMode
     {
@@ -110,7 +112,7 @@ namespace MWBase
 
         WindowManager() {}
 
-        virtual ~WindowManager() {}
+        virtual ~WindowManager() = default;
 
         /// @note This method will block until the video finishes playing
         /// (and will continually update the window while doing so)
@@ -120,7 +122,7 @@ namespace MWBase
 
         virtual void pushGuiMode(MWGui::GuiMode mode, const MWWorld::Ptr& arg) = 0;
         virtual void pushGuiMode(MWGui::GuiMode mode) = 0;
-        virtual void popGuiMode() = 0;
+        virtual void popGuiMode(bool forceExit = false) = 0;
 
         virtual void removeGuiMode(MWGui::GuiMode mode) = 0;
         ///< can be anywhere in the stack
@@ -157,7 +159,9 @@ namespace MWBase
         virtual MWGui::CountDialog* getCountDialog() = 0;
         virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
         virtual MWGui::TradeWindow* getTradeWindow() = 0;
+        virtual MWGui::HUD* getHud() = 0;
         virtual MWGui::PostProcessorHud* getPostProcessorHud() = 0;
+        virtual std::vector<MWGui::WindowBase*> getGuiModeWindows(MWGui::GuiMode mode) = 0;
 
         /// Make the player use an item, while updating GUI state accordingly
         virtual void useItem(const MWWorld::Ptr& item, bool force = false) = 0;
@@ -184,7 +188,7 @@ namespace MWBase
         ///< change the active cell
 
         virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
-        virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) = 0;
+        virtual void setFocusObjectScreenCoords(float x, float y) = 0;
 
         virtual void setCursorVisible(bool visible) = 0;
         virtual void setCursorActive(bool active) = 0;
@@ -271,7 +275,7 @@ namespace MWBase
          * @param id Identifier for the GMST setting, e.g. "aName"
          * @param default Default value if the GMST setting cannot be used.
          */
-        virtual std::string_view getGameSettingString(std::string_view id, std::string_view default_) = 0;
+        virtual std::string_view getGameSettingString(std::string_view id, std::string_view defaultValue) = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 
@@ -307,7 +311,7 @@ namespace MWBase
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
 
         /// Does the current stack of GUI-windows permit saving?
         virtual bool isSavingAllowed() const = 0;
@@ -363,7 +367,7 @@ namespace MWBase
         void windowVisibilityChange(bool visible) override = 0;
         void windowResized(int x, int y) override = 0;
         void windowClosed() override = 0;
-        virtual bool isWindowVisible() = 0;
+        virtual bool isWindowVisible() const = 0;
 
         virtual void watchActor(const MWWorld::Ptr& ptr) = 0;
         virtual MWWorld::Ptr getWatchedActor() const = 0;
@@ -381,9 +385,27 @@ namespace MWBase
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
 
+        virtual void inventoryUpdated(const MWWorld::Ptr& ptr) const = 0;
+
+        /// Return the window that should receive controller events
+        virtual MWGui::WindowBase* getActiveControllerWindow() = 0;
+        /// Return the available height for menus accounting for visible controller overlays
+        virtual int getControllerMenuHeight() = 0;
+        /// Cycle to the next window to receive controller events
+        virtual void cycleActiveControllerWindow(bool next) = 0;
+        virtual void setActiveControllerWindow(MWGui::GuiMode mode, size_t activeIndex) = 0;
+        virtual bool getControllerTooltipVisible() const = 0;
+        virtual void setControllerTooltipVisible(bool visible) = 0;
+        virtual bool getControllerTooltipEnabled() const = 0;
+        virtual void setControllerTooltipEnabled(bool enabled) = 0;
+        /// Restore tooltip visibility if user has them enabled but they were hidden by mouse movement
+        virtual void restoreControllerTooltips() = 0;
+        virtual void updateControllerButtonsOverlay() = 0;
+
         // Used in Lua bindings
         virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;
         virtual void setDisabledByLua(std::string_view windowId, bool disabled) = 0;
+        virtual bool isWindowVisible(std::string_view windowId) const = 0;
         virtual std::vector<std::string_view> getAllWindowIds() const = 0;
         virtual std::vector<std::string_view> getAllowedWindowIds(MWGui::GuiMode mode) const = 0;
     };

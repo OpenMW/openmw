@@ -28,6 +28,13 @@ namespace MWGui
         getWidget(mGoldLabel, "PlayerGold");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onOkButtonClick);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{Interface:Repair}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+        }
     }
 
     void MerchantRepair::setPtr(const MWWorld::Ptr& actor)
@@ -38,6 +45,7 @@ namespace MWGui
 
         while (mList->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mList->getChildAt(0));
+        mButtons.clear();
 
         const int lineHeight = Settings::gui().mFontSize + 2;
         int currentY = 0;
@@ -55,7 +63,7 @@ namespace MWGui
             {
                 int maxDurability = iter->getClass().getItemMaxHealth(*iter);
                 int durability = iter->getClass().getItemHealth(*iter);
-                if (maxDurability == durability || maxDurability == 0)
+                if (maxDurability <= durability || maxDurability == 0)
                     continue;
 
                 int basePrice = iter->getClass().getValue(*iter);
@@ -75,7 +83,7 @@ namespace MWGui
                 int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
                 std::string name{ iter->getClass().getName(*iter) };
-                name += " - " + MyGUI::utility::toString(price)
+                name += "  - " + MyGUI::utility::toString(price)
                     + MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("sgp")->mValue.getString();
 
                 items.emplace_back(name, price, *iter);
@@ -101,6 +109,15 @@ namespace MWGui
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
             button->setUserString("ToolTipType", "ItemPtr");
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
+            if (price <= playerGold)
+                mButtons.emplace_back(std::make_pair(button, mButtons.size()));
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mButtons.size() > 0)
+                mButtons[0].first->setStateSelected(true);
         }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
@@ -112,12 +129,12 @@ namespace MWGui
         mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
     }
 
-    void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void MerchantRepair::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mList->getViewOffset().top + _rel * 0.3f > 0)
+        if (mList->getViewOffset().top + rel * 0.3f > 0)
             mList->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + _rel * 0.3f)));
+            mList->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mList->getViewOffset().top + rel * 0.3f)));
     }
 
     void MerchantRepair::onOpen()
@@ -152,9 +169,54 @@ namespace MWGui
         setPtr(mActor);
     }
 
-    void MerchantRepair::onOkButtonClick(MyGUI::Widget* sender)
+    void MerchantRepair::onOkButtonClick(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
     }
 
+    bool MerchantRepair::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mButtons.size())
+                onRepairButtonClick(mButtons[mControllerFocus].first);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onOkButtonClick(mOkButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+
+            mButtons[mControllerFocus].first->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), -1);
+            mButtons[mControllerFocus].first->setStateSelected(true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mButtons.size() <= 1)
+                return true;
+
+            mButtons[mControllerFocus].first->setStateSelected(false);
+            mControllerFocus = wrap(mControllerFocus, mButtons.size(), 1);
+            mButtons[mControllerFocus].first->setStateSelected(true);
+        }
+
+        // Scroll the list to keep the active item in view
+        if (mControllerFocus < mButtons.size())
+        {
+            size_t line = mButtons[mControllerFocus].second;
+            if (line <= 5)
+                mList->setViewOffset(MyGUI::IntPoint(0, 0));
+            else
+            {
+                const int lineHeight = Settings::gui().mFontSize + 2;
+                mList->setViewOffset(MyGUI::IntPoint(0, -lineHeight * static_cast<int>(line - 5)));
+            }
+        }
+
+        return true;
+    }
 }

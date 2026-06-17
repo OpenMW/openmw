@@ -15,7 +15,7 @@
 #include <components/esm4/readerutils.hpp>
 #include <components/esm4/records.hpp>
 #include <components/esm4/typetraits.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 namespace EsmTool
 {
@@ -572,13 +572,13 @@ namespace EsmTool
                 }
             }
 
-            auto visitorRec = [&params](ESM4::Reader& reader) { return readRecord(params, reader); };
-            auto visitorGroup = [&params](ESM4::Reader& reader) {
+            auto visitorRec = [&params](ESM4::Reader& r) { return readRecord(params, r); };
+            auto visitorGroup = [&params](ESM4::Reader& r) {
                 if (params.mQuite)
                     return;
-                auto groupType = static_cast<ESM4::GroupType>(reader.hdr().group.type);
-                std::cout << "\nGroup: " << toString(groupType) << " "
-                          << ESM::NAME(reader.hdr().group.typeId).toStringView() << '\n';
+                auto groupType = static_cast<ESM4::GroupType>(r.hdr().group.type);
+                std::cout << "\nGroup: " << toString(groupType) << " " << ESM::NAME(r.hdr().group.typeId).toStringView()
+                          << '\n';
             };
             ESM4::ReaderUtils::readAll(reader, visitorRec, visitorGroup);
         }

@@ -63,6 +63,16 @@ namespace
 namespace Nif
 {
 
+    namespace
+    {
+        void readBSDistantObjectInstanceTransform(NIFStream& stream, osg::Matrixf& value)
+        {
+            std::array<float, 16> mat;
+            stream.readArray(mat);
+            value.set(mat.data());
+        }
+    }
+
     void BoundingVolume::read(NIFStream* nif)
     {
         nif->read(mType);
@@ -105,9 +115,7 @@ namespace Nif
             }
             case UNION_BV:
             {
-                mChildren.resize(nif->get<uint32_t>());
-                for (BoundingVolume& child : mChildren)
-                    child.read(nif);
+                nif->readVectorOfRecords<uint32_t>(mChildren);
                 break;
             }
             case HALFSPACE_BV:
@@ -177,7 +185,7 @@ namespace Nif
         // FIXME: if node 0 is *not* the only root node, this must not happen.
         // FIXME: doing this here is awful.
         // We want to do this on world scene graph level rather than local scene graph level.
-        if (recIndex == 0 && !Misc::StringUtils::ciEqual(mName, "bip01"))
+        if (mRecordIndex == 0 && !Misc::StringUtils::ciEqual(mName, "bip01"))
         {
             mTransform = Nif::NiTransform::getIdentity();
         }
@@ -202,12 +210,13 @@ namespace Nif
     {
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
             return;
+        std::uint32_t numNames = 0;
         if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
-            mNames.resize(nif->get<uint32_t>());
+            numNames = nif->get<uint32_t>();
         else if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 3))
-            mNames.resize(nif->get<bool>());
-        nif->readVector(mNames, mNames.size());
-        nif->readVector(mExtra, mNames.size());
+            numNames = nif->get<bool>();
+        nif->readVector(mNames, numNames);
+        nif->readVector(mExtra, numNames);
         if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             nif->read(mActive);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
@@ -238,29 +247,29 @@ namespace Nif
         mSkin.post(nif);
         mShaderProperty.post(nif);
         mAlphaProperty.post(nif);
-        if (recType != RC_NiParticles && !mSkin.empty())
+        if (mRecordType != RC_NiParticles && !mSkin.empty())
             nif.setUseSkinning(true);
 
         if (!mData.empty())
         {
-            switch (recType)
+            switch (mRecordType)
             {
                 case RC_NiTriShape:
                 case RC_BSLODTriShape:
                 case RC_BSSegmentedTriShape:
-                    if (mData->recType != RC_NiTriShapeData)
+                    if (mData->mRecordType != RC_NiTriShapeData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiTriStrips:
-                    if (mData->recType != RC_NiTriStripsData)
+                    if (mData->mRecordType != RC_NiTriStripsData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiParticles:
-                    if (mData->recType != RC_NiParticlesData)
+                    if (mData->mRecordType != RC_NiParticlesData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 case RC_NiLines:
-                    if (mData->recType != RC_NiLinesData)
+                    if (mData->mRecordType != RC_NiLinesData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
                 default:
@@ -373,9 +382,7 @@ namespace Nif
     {
         NiTriShape::read(nif);
 
-        mSegments.resize(nif->get<uint32_t>());
-        for (SegmentData& segment : mSegments)
-            segment.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mSegments);
     }
 
     void BSLODTriShape::read(NIFStream* nif)
@@ -426,6 +433,12 @@ namespace Nif
         nif->read(mInitialIndex);
     }
 
+    void NiLODNode::LODRange::read(NIFStream* nif)
+    {
+        nif->read(mMinRange);
+        nif->read(mMaxRange);
+    }
+
     void NiLODNode::read(NIFStream* nif)
     {
         NiSwitchNode::read(nif);
@@ -439,12 +452,7 @@ namespace Nif
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
             nif->read(mLODCenter);
 
-        mLODLevels.resize(nif->get<uint32_t>());
-        for (LODRange& level : mLODLevels)
-        {
-            nif->read(level.mMinRange);
-            nif->read(level.mMaxRange);
-        }
+        nif->readVectorOfRecords<uint32_t>(mLODLevels);
     }
 
     void NiFltAnimationNode::read(NIFStream* nif)
@@ -541,17 +549,19 @@ namespace Nif
         mAlphaProperty.read(nif);
         mVertDesc.read(nif);
 
+        size_t numTriangleIndices;
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
-            mTriangles.resize(nif->get<uint32_t>() * 3);
+            numTriangleIndices = nif->get<uint32_t>() * 3;
         else
-            mTriangles.resize(nif->get<uint16_t>() * 3);
-        mVertData.resize(nif->get<uint16_t>());
+            numTriangleIndices = nif->get<uint16_t>() * 3;
+        nif->read(mNumVertices);
+        mVertData.reserve(mNumVertices);
         nif->read(mDataSize);
         if (mDataSize > 0)
         {
-            for (auto& vertex : mVertData)
-                vertex.read(nif, mVertDesc.mFlags);
-            nif->readVector(mTriangles, mTriangles.size());
+            for (uint16_t i = 0; i < mNumVertices; ++i)
+                mVertData.emplace_back().read(nif, mVertDesc.mFlags);
+            nif->readVector(mTriangles, numTriangleIndices);
         }
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
@@ -559,9 +569,9 @@ namespace Nif
             nif->read(mParticleDataSize);
             if (mParticleDataSize > 0)
             {
-                nif->readVector(mParticleVerts, mVertData.size() * 3);
-                nif->readVector(mParticleNormals, mVertData.size() * 3);
-                nif->readVector(mParticleTriangles, mTriangles.size());
+                nif->readVector(mParticleVerts, mNumVertices * 3);
+                nif->readVector(mParticleNormals, mNumVertices * 3);
+                nif->readVector(mParticleTriangles, numTriangleIndices);
             }
         }
     }
@@ -583,8 +593,8 @@ namespace Nif
 
         nif->read(mDynamicDataSize);
         // nifly style.
-        // Consider complaining if mDynamicDataSize * 16 != mVertData.size()?
-        nif->readVector(mDynamicData, mVertData.size());
+        // Consider complaining if mDynamicDataSize * 16 != mNumVertices?
+        nif->readVector(mDynamicData, mNumVertices);
     }
 
     void BSMeshLODTriShape::read(NIFStream* nif)
@@ -607,9 +617,7 @@ namespace Nif
         nif->read(mStartIndex);
         nif->read(mNumPrimitives);
         nif->read(mParentArrayIndex);
-        mSubSegments.resize(nif->get<uint32_t>());
-        for (SubSegment& subsegment : mSubSegments)
-            subsegment.read(nif);
+        nif->readVectorOfRecords<uint32_t>(mSubSegments);
     }
 
     void BSSubIndexTriShape::SubSegmentDataRecord::read(NIFStream* nif)
@@ -623,22 +631,19 @@ namespace Nif
     {
         uint32_t numArrayIndices;
         nif->read(numArrayIndices);
-        mDataRecords.resize(nif->get<uint32_t>());
+        const uint32_t numRecords = nif->get<uint32_t>();
         nif->readVector(mArrayIndices, numArrayIndices);
-        for (SubSegmentDataRecord& dataRecord : mDataRecords)
-            dataRecord.read(nif);
+        nif->readVectorOfRecords(numRecords, mDataRecords);
         mSSFFile = nif->getSizedString(nif->get<uint16_t>());
     }
 
     void BSSubIndexTriShape::Segmentation::read(NIFStream* nif)
     {
         nif->read(mNumPrimitives);
-        mSegments.resize(nif->get<uint32_t>());
+        const uint32_t numSegments = nif->get<uint32_t>();
         nif->read(mNumTotalSegments);
-        for (Segment& segment : mSegments)
-            segment.read(nif);
-
-        if (mSegments.size() < mNumTotalSegments)
+        nif->readVectorOfRecords(numSegments, mSegments);
+        if (numSegments < mNumTotalSegments)
             mSubSegmentData.read(nif);
     }
 
@@ -647,11 +652,7 @@ namespace Nif
         BSTriShape::read(nif);
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
-        {
-            mSegments.resize(nif->get<uint32_t>());
-            for (BSSegmentedTriShape::SegmentData& segment : mSegments)
-                segment.read(nif);
-        }
+            nif->readVectorOfRecords<uint32_t>(mSegments);
         else if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4 && mDataSize > 0)
             mSegmentation.read(nif);
     }
@@ -664,13 +665,13 @@ namespace Nif
         mDynamicVertexSize = (data & 0xF0) >> 0x04;
         mUV1Offset = (data & 0xF00) >> 0x08;
         mUV2Offset = (data & 0xF000) >> 0x0C;
-        mNormalOffset = (data & 0xF0000) >> 0x10;
-        mTangentOffset = (data & 0xF00000) >> 0x14;
+        mNormalOffset = static_cast<uint8_t>((data & 0xF0000) >> 0x10);
+        mTangentOffset = static_cast<uint8_t>((data & 0xF00000) >> 0x14);
         mColorOffset = (data & 0xF000000) >> 0x18;
         mSkinningDataOffset = (data & 0xF0000000) >> 0x1C;
-        mLandscapeDataOffset = (data & 0xF00000000) >> 0x20;
-        mEyeDataOffset = (data & 0xF000000000) >> 0x24;
-        mFlags = (data & 0xFFF00000000000) >> 0x2C;
+        mLandscapeDataOffset = static_cast<uint8_t>((data & 0xF00000000) >> 0x20);
+        mEyeDataOffset = static_cast<uint8_t>((data & 0xF000000000) >> 0x24);
+        mFlags = static_cast<uint16_t>((data & 0xFFF00000000000) >> 0x2C);
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
             mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
     }
@@ -740,6 +741,38 @@ namespace Nif
         nif->read(mMin);
         nif->read(mMax);
         nif->read(mCurrent);
+    }
+
+    void BSResourceID::read(NIFStream* nif)
+    {
+        nif->read(mFileHash);
+        nif->readArray(mExtension);
+        nif->read(mDirectoryHash);
+    }
+
+    void BSDistantObjectInstance::read(NIFStream* nif)
+    {
+        mResourceID.read(nif);
+        nif->skip(12 * nif->get<uint32_t>()); // Unknown data
+        nif->readVectorOfRecords<uint32_t>(readBSDistantObjectInstanceTransform, mTransforms);
+    }
+
+    void BSShaderTextureArray::read(NIFStream* nif)
+    {
+        nif->skip(1); // Unknown
+        const uint32_t numArrays = nif->get<uint32_t>();
+        mTextureArrays.reserve(numArrays);
+        for (uint32_t i = 0; i < numArrays; ++i)
+            nif->getSizedStrings(mTextureArrays.emplace_back(), nif->get<uint32_t>());
+    }
+
+    void BSDistantObjectInstancedNode::read(NIFStream* nif)
+    {
+        BSMultiBoundNode::read(nif);
+
+        nif->readVectorOfRecords<uint32_t>(mInstances);
+        for (BSShaderTextureArray& textureArray : mShaderTextureArrays)
+            textureArray.read(nif);
     }
 
 }

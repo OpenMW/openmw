@@ -23,7 +23,6 @@ namespace Settings
             makeClampSanitizerInt(1, 8) };
         SettingValue<float> mMaximumShadowMapDistance{ mIndex, "Shadows", "maximum shadow map distance" };
         SettingValue<float> mShadowFadeStart{ mIndex, "Shadows", "shadow fade start", makeClampSanitizerFloat(0, 1) };
-        SettingValue<bool> mAllowShadowMapOverlap{ mIndex, "Shadows", "allow shadow map overlap" };
         SettingValue<float> mSplitPointUniformLogarithmicRatio{ mIndex, "Shadows",
             "split point uniform logarithmic ratio", makeClampSanitizerFloat(0, 1) };
         SettingValue<float> mSplitPointBias{ mIndex, "Shadows", "split point bias" };

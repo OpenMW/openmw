@@ -9,11 +9,11 @@
 
 #include "../mwbase/luamanager.hpp"
 
-#include "context.hpp"
 #include "inputprocessor.hpp"
 
 namespace MWLua
 {
+    struct Context;
 
     sol::table initMenuPackage(const Context& context);
 
@@ -24,7 +24,8 @@ namespace MWLua
             : LuaUtil::ScriptsContainer(lua, "Menu")
             , mInputProcessor(this)
         {
-            registerEngineHandlers({ &mOnFrameHandlers, &mStateChanged, &mConsoleCommandHandlers, &mUiModeChanged });
+            registerEngineHandlers({ &mOnFrameHandlers, &mStateChanged, &mConsoleCommandHandlers,
+                &mViewportResizedHandlers, &mUiModeChanged });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -42,6 +43,8 @@ namespace MWLua
             return !mConsoleCommandHandlers.mList.empty();
         }
 
+        void onViewportResized(int width, int height) { callEngineHandlers(mViewportResizedHandlers, width, height); }
+
         void uiModeChanged() { callEngineHandlers(mUiModeChanged); }
 
     private:
@@ -50,6 +53,7 @@ namespace MWLua
         EngineHandlerList mOnFrameHandlers{ "onFrame" };
         EngineHandlerList mStateChanged{ "onStateChanged" };
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
+        EngineHandlerList mViewportResizedHandlers{ "onViewportResized" };
         EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };
     };
 }

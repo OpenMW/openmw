@@ -1,12 +1,12 @@
 #ifndef MWLUA_CELLBINDINGS_H
 #define MWLUA_CELLBINDINGS_H
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    void initCellBindingsForLocalScripts(const Context&);
-    void initCellBindingsForGlobalScripts(const Context&);
+    struct Context;
+
+    void initCellBindingsForLocalScripts(const Context& context);
+    void initCellBindingsForGlobalScripts(const Context& context);
 }
 
 #endif // MWLUA_CELLBINDINGS_H

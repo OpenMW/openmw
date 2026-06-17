@@ -40,12 +40,12 @@
         }                                                                                                              \
     } while (0)
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class Drawable : public osg::Drawable
     {
-        osgMyGUI::RenderManager* mParent;
+        MyGUIPlatform::RenderManager* mParent;
         osg::ref_ptr<osg::StateSet> mStateSet;
 
     public:
@@ -58,12 +58,12 @@ namespace osgMyGUI
             {
             }
 
-            void setRenderManager(osgMyGUI::RenderManager* renderManager) { mRenderManager = renderManager; }
+            void setRenderManager(MyGUIPlatform::RenderManager* renderManager) { mRenderManager = renderManager; }
 
             void operator()(osg::Node*, osg::NodeVisitor*) { mRenderManager->update(); }
 
         private:
-            osgMyGUI::RenderManager* mRenderManager;
+            MyGUIPlatform::RenderManager* mRenderManager;
         };
 
         // Stage 1: collect draw calls. Run during the Cull traversal.
@@ -75,12 +75,12 @@ namespace osgMyGUI
             {
             }
 
-            void setRenderManager(osgMyGUI::RenderManager* renderManager) { mRenderManager = renderManager; }
+            void setRenderManager(MyGUIPlatform::RenderManager* renderManager) { mRenderManager = renderManager; }
 
             void operator()(osg::Node*, osg::NodeVisitor*) { mRenderManager->collectDrawCalls(); }
 
         private:
-            osgMyGUI::RenderManager* mRenderManager;
+            MyGUIPlatform::RenderManager* mRenderManager;
         };
 
         // Stage 2: execute the draw calls. Run during the Draw traversal. May run in parallel with the update traversal
@@ -141,7 +141,7 @@ namespace osgMyGUI
                         reinterpret_cast<const char*>(vbo->getArray(0)->getDataPointer()) + 16);
                 }
 
-                glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
+                glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(batch.mVertexCount));
 
                 if (batch.mStateSet)
                 {
@@ -162,7 +162,7 @@ namespace osgMyGUI
         }
 
     public:
-        Drawable(osgMyGUI::RenderManager* parent = nullptr)
+        Drawable(MyGUIPlatform::RenderManager* parent = nullptr)
             : mParent(parent)
             , mWriteTo(0)
             , mReadFrom(0)
@@ -178,7 +178,6 @@ namespace osgMyGUI
             setUpdateCallback(frameUpdate);
 
             mStateSet = new osg::StateSet;
-            mStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             mStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
             mStateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -188,12 +187,6 @@ namespace osgMyGUI
             mDummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             mDummyTexture->setInternalFormat(GL_RGB);
             mDummyTexture->setTextureSize(1, 1);
-
-            // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
-            osg::Matrix flipMat;
-            flipMat.preMultTranslate(osg::Vec3f(0, 1, 0));
-            flipMat.preMultScale(osg::Vec3f(1, -1, 1));
-            mStateSet->setTextureAttribute(0, new osg::TexMat(flipMat), osg::StateAttribute::ON);
         }
         Drawable(const Drawable& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
             : osg::Drawable(copy, copyop)
@@ -328,7 +321,8 @@ namespace osgMyGUI
 
     osg::UByteArray* OSGVertexBuffer::create()
     {
-        mVertexArray[mCurrentBuffer] = new osg::UByteArray(mNeedVertexCount * sizeof(MyGUI::Vertex));
+        mVertexArray[mCurrentBuffer]
+            = new osg::UByteArray(static_cast<unsigned int>(mNeedVertexCount * sizeof(MyGUI::Vertex)));
 
         mBuffer[mCurrentBuffer] = new osg::VertexBufferObject;
         mBuffer[mCurrentBuffer]->setDataVariance(osg::Object::DYNAMIC);
@@ -404,7 +398,7 @@ namespace osgMyGUI
         mSceneRoot->addChild(mGuiRoot.get());
 
         osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();
-        setViewSize(vp->width(), vp->height());
+        setViewSize(static_cast<int>(vp->width()), static_cast<int>(vp->height()));
 
         MYGUI_PLATFORM_LOG(Info, getClassTypeName() << " successfully initialized");
         mIsInitialise = true;
@@ -473,13 +467,13 @@ namespace osgMyGUI
     void RenderManager::update()
     {
         static MyGUI::Timer timer;
-        static unsigned long last_time = timer.getMilliseconds();
-        unsigned long now_time = timer.getMilliseconds();
-        unsigned long time = now_time - last_time;
+        static unsigned long lastLime = timer.getMilliseconds();
+        unsigned long nowTime = timer.getMilliseconds();
+        unsigned long time = nowTime - lastLime;
 
-        onFrameEvent((float)((double)(time) / (double)1000));
+        onFrameEvent(static_cast<float>(static_cast<double>(time) / 1000));
 
-        last_time = now_time;
+        lastLime = nowTime;
     }
 
     void RenderManager::collectDrawCalls()
@@ -500,7 +494,7 @@ namespace osgMyGUI
 
         mGuiRoot->setViewport(0, 0, width, height);
 
-        mViewSize.set(width * mInvScalingFactor, height * mInvScalingFactor);
+        mViewSize.set(static_cast<int>(width * mInvScalingFactor), static_cast<int>(height * mInvScalingFactor));
 
         mInfo.maximumDepth = 1;
         mInfo.hOffset = 0;
@@ -550,15 +544,15 @@ namespace osgMyGUI
         return &item->second;
     }
 
-    bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
+    bool RenderManager::checkTexture(MyGUI::ITexture* /*texture*/)
     {
         // We support external textures that aren't registered via this manager, so can't implement this method
         // sensibly.
         return true;
     }
 
-    void RenderManager::registerShader(
-        const std::string& _shaderName, const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile)
+    void RenderManager::registerShader(const std::string& /*shaderName*/, const std::string& /*vertexProgramFile*/,
+        const std::string& /*fragmentProgramFile*/)
     {
         MYGUI_PLATFORM_LOG(Warning, "osgMyGUI::RenderManager::registerShader is not implemented");
     }

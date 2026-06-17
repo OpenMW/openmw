@@ -14,6 +14,8 @@ namespace MWWorld
         ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats = nullptr);
 
     void convertStats(ESM::CreatureStats& creatureStats);
+
+    void convertEnchantmentSlots(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory);
 }
 
 #endif

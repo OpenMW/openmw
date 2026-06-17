@@ -1,6 +1,9 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <format>
+#include <stdexcept>
+#include <typeinfo>
 #include <vector>
 
 #include "niffile.hpp"
@@ -16,20 +19,40 @@ namespace Nif
     template <class X>
     class RecordPtrT
     {
+#ifndef NDEBUG
+        enum class State
+        {
+            Index,
+            Ptr,
+        };
+
+        State mState;
+#endif
+
         union
         {
-            intptr_t index;
-            X* ptr;
+            intptr_t mIndex;
+            X* mPtr;
         };
 
     public:
         RecordPtrT()
-            : index(-2)
+            :
+#ifndef NDEBUG
+            mState(State::Index)
+            ,
+#endif
+            mIndex(-2)
         {
         }
 
         RecordPtrT(X* ptr)
-            : ptr(ptr)
+            :
+#ifndef NDEBUG
+            mState(State::Ptr)
+            ,
+#endif
+            mPtr(ptr)
         {
         }
 
@@ -37,48 +60,94 @@ namespace Nif
         void read(NIFStream* nif)
         {
             // Can only read the index once
-            assert(index == -2);
+#ifndef NDEBUG
+            assert(mState == State::Index);
+#endif
+            assert(mIndex == -2);
 
             // Store the index for later
-            index = nif->get<int32_t>();
-            assert(index >= -1);
+            const int32_t index = nif->get<int32_t>();
+            if (index < -1)
+                throw std::runtime_error(std::format("Invalid index: {}", index));
+
+            mIndex = index;
         }
 
         /// Resolve index to pointer
         void post(Reader& nif)
         {
-            if (index < 0)
-                ptr = nullptr;
+#ifndef NDEBUG
+            assert(mState == State::Index);
+#endif
+
+            if (mIndex < 0)
+                mPtr = nullptr;
             else
             {
-                Record* r = nif.getRecord(index);
-                // And cast it
-                ptr = dynamic_cast<X*>(r);
-                assert(ptr != nullptr);
+                Record* const r = nif.getRecord(mIndex);
+                if (r == nullptr)
+                    throw std::runtime_error(std::format("Record at {} is nullptr", mIndex));
+
+                X* const ptr = dynamic_cast<X*>(r);
+                if (ptr == nullptr)
+                    throw std::runtime_error(std::format("Failed to cast record pointer to {}", typeid(X).name()));
+
+                mPtr = ptr;
             }
+
+#ifndef NDEBUG
+            mState = State::Ptr;
+#endif
         }
 
         /// Look up the actual object from the index
         const X* getPtr() const
         {
-            assert(ptr != nullptr);
-            return ptr;
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
+            assert(mPtr != nullptr);
+            return mPtr;
         }
+
         X* getPtr()
         {
-            assert(ptr != nullptr);
-            return ptr;
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
+            assert(mPtr != nullptr);
+            return mPtr;
         }
 
-        const X& get() const { return *getPtr(); }
-        X& get() { return *getPtr(); }
+        const X& get() const
+        {
+            return *getPtr();
+        }
+
+        X& get()
+        {
+            return *getPtr();
+        }
 
         /// Syntactic sugar
-        const X* operator->() const { return getPtr(); }
-        X* operator->() { return getPtr(); }
+        const X* operator->() const
+        {
+            return getPtr();
+        }
+
+        X* operator->()
+        {
+            return getPtr();
+        }
 
         /// Pointers are allowed to be empty
-        bool empty() const { return ptr == nullptr; }
+        bool empty() const
+        {
+#ifndef NDEBUG
+            assert(mState == State::Ptr);
+#endif
+            return mPtr == nullptr;
+        }
     };
 
     /** A list of references to other records. These are read as a list,
@@ -91,16 +160,7 @@ namespace Nif
     template <class T>
     void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        const std::uint32_t length = nif->get<std::uint32_t>();
-
-        // No reasonable list can hit this generous limit
-        if (length >= (1 << 24))
-            throw std::runtime_error("Record list too long: " + std::to_string(length));
-
-        list.resize(length);
-
-        for (auto& value : list)
-            value.read(nif);
+        nif->readVectorOfRecords<uint32_t>(list);
     }
 
     template <class T>
@@ -137,6 +197,8 @@ namespace Nif
     struct NiPSysModifier;
     struct NiPSysSpawnModifier;
     struct NiBoolData;
+    struct NiBSplineData;
+    struct NiBSplineBasisData;
     struct NiSkinPartition;
     struct BSShaderTextureSet;
     struct NiTriBasedGeom;
@@ -163,6 +225,9 @@ namespace Nif
     struct BSMultiBound;
     struct BSMultiBoundData;
     struct BSSkinBoneData;
+    struct BSAnimNote;
+    struct BSAnimNotes;
+    struct bhkRagdollTemplateData;
 
     using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -189,6 +254,8 @@ namespace Nif
     using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
     using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
+    using NiBSplineDataPtr = RecordPtrT<NiBSplineData>;
+    using NiBSplineBasisDataPtr = RecordPtrT<NiBSplineBasisData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
     using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
     using NiTriBasedGeomPtr = RecordPtrT<NiTriBasedGeom>;
@@ -227,6 +294,9 @@ namespace Nif
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
     using NiPSysModifierList = RecordListT<NiPSysModifier>;
     using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;
+    using BSAnimNoteList = RecordListT<BSAnimNote>;
+    using BSAnimNotesList = RecordListT<BSAnimNotes>;
+    using bhkRagdollTemplateDataList = RecordListT<bhkRagdollTemplateData>;
 
 } // Namespace
 #endif

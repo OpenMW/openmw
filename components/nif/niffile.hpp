@@ -8,6 +8,7 @@
 #include <vector>
 
 #include <components/files/istreamptr.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "record.hpp"
 
@@ -45,7 +46,7 @@ namespace Nif
         std::uint32_t mBethVersion = 0;
 
         /// File name, used for error messages and opening the file
-        std::string mPath;
+        VFS::Path::Normalized mPath;
         std::string mHash;
 
         /// Record list
@@ -56,7 +57,7 @@ namespace Nif
 
         bool mUseSkinning = false;
 
-        explicit NIFFile(std::string_view path)
+        explicit NIFFile(VFS::Path::NormalizedView path)
             : mPath(path)
         {
         }
@@ -77,7 +78,7 @@ namespace Nif
         std::size_t numRoots() const { return mFile->mRoots.size(); }
 
         /// Get the name of the file
-        const std::string& getFilename() const { return mFile->mPath; }
+        const VFS::Path::Normalized& getFilename() const { return mFile->mPath; }
 
         const std::string& getHash() const { return mFile->mHash; }
 

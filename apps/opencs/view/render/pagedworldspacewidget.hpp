@@ -120,7 +120,7 @@ namespace CSVRender
         /// \return Drop handled?
         bool handleDrop(const std::vector<CSMWorld::UniversalId>& data, DropType type) override;
 
-        dropRequirments getDropRequirements(DropType type) const override;
+        DropRequirements getDropRequirements(DropType type) const override;
 
         /// \attention The created tool is not added to the toolbar (via addTool). Doing
         /// that is the responsibility of the calling function.
@@ -173,6 +173,8 @@ namespace CSVRender
 
         /// Erase all overrides and restore the visual representation to its true state.
         void reset(unsigned int elementMask) override;
+
+        CSVRender::Object* getObjectByReferenceId(const std::string& referenceId) override;
 
     protected:
         void addVisibilitySelectorButtons(CSVWidget::SceneToolToggle2* tool) override;

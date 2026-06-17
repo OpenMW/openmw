@@ -10,9 +10,21 @@ namespace DetourNavigator
     struct AgentBounds;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace NavMeshTool
 {
     struct WorldspaceData;
+
+    struct GenerateAllNavMeshTilesOptions
+    {
+        bool mRemoveUnusedTiles;
+        bool mWriteBinaryLog;
+        bool mCollectStats;
+    };
 
     enum class Status
     {
@@ -21,9 +33,24 @@ namespace NavMeshTool
         NotEnoughSpace,
     };
 
-    Status generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
-        const DetourNavigator::Settings& settings, std::size_t threadsNumber, bool removeUnusedTiles,
-        bool writeBinaryLog, WorldspaceData& cellsData, DetourNavigator::NavMeshDb&& db);
+    struct GenerateTilesStats
+    {
+        int mMaxPolyCountPerTile = 0;
+    };
+
+    struct GenerateTilesResult
+    {
+        Status mStatus;
+        std::size_t mProvided;
+        std::size_t mInserted;
+        std::size_t mUpdated;
+        std::size_t mDeleted;
+        GenerateTilesStats mStats;
+    };
+
+    GenerateTilesResult generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
+        const DetourNavigator::Settings& settings, const GenerateAllNavMeshTilesOptions& options,
+        const WorldspaceData& data, DetourNavigator::NavMeshDb& db, SceneUtil::WorkQueue& workQueue);
 }
 
 #endif

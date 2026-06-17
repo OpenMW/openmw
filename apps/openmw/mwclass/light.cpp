@@ -27,6 +27,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -62,7 +63,7 @@ namespace MWClass
     {
         // TODO: add option somewhere to enable collision for placeable objects
         if ((ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry) == 0)
-            physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+            physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
     bool Light::useAnim() const
@@ -81,9 +82,7 @@ namespace MWClass
 
         if (ref->mBase->mModel.empty())
             return {};
-
-        const std::string& name = ref->mBase->mName;
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Light>(ptr);
     }
 
     bool Light::isItem(const MWWorld::ConstPtr& ptr) const
@@ -114,12 +113,12 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
         if (ref->mBase->mData.mFlags & ESM::Light::Carry)
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_CarriedLeft));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_CarriedLeft));
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
     int Light::getValue(const MWWorld::ConstPtr& ptr) const

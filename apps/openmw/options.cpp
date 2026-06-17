@@ -60,16 +60,9 @@ namespace OpenMW
 
         addOption("script-warn", bpo::value<int>()->implicit_value(1)->default_value(1),
             "handling of warnings when compiling scripts\n"
-            "\t0 - ignore warning\n"
-            "\t1 - show warning but consider script as correctly compiled anyway\n"
+            "\t0 - ignore warnings\n"
+            "\t1 - show warnings but consider script as correctly compiled anyway\n"
             "\t2 - treat warnings as errors");
-
-        addOption("script-blacklist",
-            bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
-            "ignore the specified script (if the use of the blacklist is enabled)");
-
-        addOption("script-blacklist-use", bpo::value<bool>()->implicit_value(true)->default_value(true),
-            "enable script blacklisting");
 
         addOption("load-savegame", bpo::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), ""),
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current "

@@ -26,7 +26,8 @@ namespace CSVRender
         CSVRender::Object mObject;
 
     public:
-        PreviewWidget(CSMWorld::Data& data, const std::string& id, bool referenceable, QWidget* parent = nullptr);
+        explicit PreviewWidget(
+            CSMWorld::Data& worldData, const std::string& id, bool referenceable, QWidget* parent = nullptr);
 
     signals:
 

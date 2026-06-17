@@ -42,7 +42,7 @@ namespace MWClass
         ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
         /// stay stacked when equipped?
 
-        ESM::RefId getEquipmentSkill(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const override;
 
         int getValue(const MWWorld::ConstPtr& ptr) const override;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.

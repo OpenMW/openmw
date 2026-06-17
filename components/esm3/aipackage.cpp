@@ -55,25 +55,25 @@ namespace ESM
         {
             pack.mType = AI_Wander;
             esm.getSubComposite(pack.mWander);
-            mList.push_back(pack);
+            mList.push_back(std::move(pack));
         }
         else if (esm.retSubName() == AI_Travel)
         {
             pack.mType = AI_Travel;
             esm.getSubComposite(pack.mTravel);
-            mList.push_back(pack);
+            mList.push_back(std::move(pack));
         }
         else if (esm.retSubName() == AI_Escort || esm.retSubName() == AI_Follow)
         {
             pack.mType = (esm.retSubName() == AI_Escort) ? AI_Escort : AI_Follow;
             esm.getSubComposite(pack.mTarget);
-            mList.push_back(pack);
+            mList.push_back(std::move(pack));
         }
         else if (esm.retSubName() == AI_Activate)
         {
             pack.mType = AI_Activate;
             esm.getSubComposite(pack.mActivate);
-            mList.push_back(pack);
+            mList.push_back(std::move(pack));
         }
     }
 

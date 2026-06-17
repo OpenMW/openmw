@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_FLEX
 #define OPENMW_LUAUI_FLEX
 
+#include <vector>
+
 #include "alignment.hpp"
 #include "widget.hpp"
 
@@ -18,12 +20,16 @@ namespace LuaUi
 
         void updateCoord() override;
 
+        const std::vector<std::string_view>& allUsedProperties() const override;
+
     private:
         bool mHorizontal;
         bool mAutoSized;
         MyGUI::IntSize mChildrenSize;
         Alignment mAlign;
         Alignment mArrange;
+        int mGap;
+        bool mWrap;
 
         template <typename T>
         T& primary(MyGUI::types::TPoint<T>& point) const

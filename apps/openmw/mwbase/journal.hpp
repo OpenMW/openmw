@@ -36,18 +36,15 @@ namespace MWBase
 
     public:
         typedef std::deque<MWDialogue::StampedJournalEntry> TEntryContainer;
-        typedef TEntryContainer::const_iterator TEntryIter;
         typedef std::map<ESM::RefId, MWDialogue::Quest> TQuestContainer; // topic, quest
-        typedef TQuestContainer::const_iterator TQuestIter;
         typedef std::map<ESM::RefId, MWDialogue::Topic> TTopicContainer; // topic-id, topic-content
-        typedef TTopicContainer::const_iterator TTopicIter;
 
     public:
         Journal() {}
 
         virtual void clear() = 0;
 
-        virtual ~Journal() {}
+        virtual ~Journal() = default;
 
         virtual MWDialogue::Quest& getOrStartQuest(const ESM::RefId& id) = 0;
         ///< Gets the quest requested. Creates it and inserts it in quests if it is not yet started.
@@ -71,29 +68,13 @@ namespace MWBase
         ///< Removes the last topic response added for the given topicId and actor name.
         /// \note topicId must be lowercase
 
-        virtual TEntryIter begin() const = 0;
-        ///< Iterator pointing to the begin of the main journal.
-        ///
-        /// \note Iterators to main journal entries will never become invalid.
+        virtual const TEntryContainer& getEntries() const = 0;
 
-        virtual TEntryIter end() const = 0;
-        ///< Iterator pointing past the end of the main journal.
+        virtual const TTopicContainer& getTopics() const = 0;
 
-        virtual TQuestIter questBegin() const = 0;
-        ///< Iterator pointing to the first quest (sorted by topic ID)
+        virtual const TQuestContainer& getQuests() const = 0;
 
-        virtual TQuestIter questEnd() const = 0;
-        ///< Iterator pointing past the last quest.
-
-        virtual TTopicIter topicBegin() const = 0;
-        ///< Iterator pointing to the first topic (sorted by topic ID)
-        ///
-        /// \note The topic ID is identical with the user-visible topic string.
-
-        virtual TTopicIter topicEnd() const = 0;
-        ///< Iterator pointing past the last topic.
-
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) const = 0;
 

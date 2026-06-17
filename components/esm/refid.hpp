@@ -70,7 +70,10 @@ namespace ESM
 
         static RefId esm3ExteriorCell(int32_t x, int32_t y) { return RefId(ESM3ExteriorCellRefId(x, y)); }
 
-        constexpr RefId() = default;
+        constexpr RefId() noexcept
+            : mValue(EmptyRefId{})
+        {
+        }
 
         constexpr RefId(EmptyRefId value) noexcept
             : mValue(value)

@@ -9,7 +9,7 @@
 namespace MWLua
 {
     template <class C, class P = std::identity>
-    sol::table createReadOnlyRefIdTable(const sol::state_view& lua, const C& container, P projection = {})
+    sol::table createReadOnlyRefIdTable(lua_State* lua, const C& container, P projection = {})
     {
         sol::table res(lua, sol::create);
         for (const auto& element : container)

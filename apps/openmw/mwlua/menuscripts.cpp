@@ -1,10 +1,14 @@
 #include "menuscripts.hpp"
 
+#include <components/lua/util.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwstate/character.hpp"
+
+#include "context.hpp"
+#include "luamanagerimp.hpp"
 
 namespace MWLua
 {
@@ -29,15 +33,16 @@ namespace MWLua
 
     sol::table initMenuPackage(const Context& context)
     {
-        sol::state_view lua = context.mLua->sol();
+        sol::state_view lua = context.sol();
         sol::table api(lua, sol::create);
 
         api["STATE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWBase::StateManager::State>({
-                { "NoGame", MWBase::StateManager::State_NoGame },
-                { "Running", MWBase::StateManager::State_Running },
-                { "Ended", MWBase::StateManager::State_Ended },
-            }));
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWBase::StateManager::State>(lua,
+                {
+                    { "NoGame", MWBase::StateManager::State_NoGame },
+                    { "Running", MWBase::StateManager::State_Running },
+                    { "Ended", MWBase::StateManager::State_Ended },
+                }));
 
         api["getState"] = []() -> int { return MWBase::Environment::get().getStateManager()->getState(); };
 
@@ -48,7 +53,7 @@ namespace MWLua
             const MWState::Slot* slot = findSlot(character, slotName);
             if (!slot)
                 throw std::runtime_error("Save game slot not found: " + std::string(dir) + "/" + std::string(slotName));
-            MWBase::Environment::get().getStateManager()->requestLoad(slot->mPath);
+            MWBase::Environment::get().getStateManager()->requestLoad(character, slot->mPath);
         };
 
         api["deleteGame"] = [](std::string_view dir, std::string_view slotName) {
@@ -68,7 +73,9 @@ namespace MWLua
                 return sol::nullopt;
         };
 
-        api["saveGame"] = [](std::string_view description, sol::optional<std::string_view> slotName) {
+        api["saveGame"] = [context](std::string_view description, sol::optional<std::string_view> slotName) {
+            if (!context.mLuaManager->isSynchronizedUpdateRunning())
+                throw std::runtime_error("menu.saveGame can only be used during engine or event handler processing");
             MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
             const MWState::Character* character = manager->getCurrentCharacter();
             const MWState::Slot* slot = nullptr;
@@ -77,23 +84,23 @@ namespace MWLua
             manager->saveGame(description, slot);
         };
 
-        auto getSaves = [](sol::state_view lua, const MWState::Character& character) {
-            sol::table saves(lua, sol::create);
+        auto getSaves = [](sol::state_view currentState, const MWState::Character& character) {
+            sol::table saves(currentState, sol::create);
             for (const MWState::Slot& slot : character)
             {
-                sol::table slotInfo(lua, sol::create);
+                sol::table slotInfo(currentState, sol::create);
                 slotInfo["description"] = slot.mProfile.mDescription;
                 slotInfo["playerName"] = slot.mProfile.mPlayerName;
                 slotInfo["playerLevel"] = slot.mProfile.mPlayerLevel;
                 slotInfo["timePlayed"] = slot.mProfile.mTimePlayed;
-                sol::table contentFiles(lua, sol::create);
+                sol::table contentFiles(currentState, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
-                    contentFiles[i + 1] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
+                    contentFiles[LuaUtil::toLuaIndex(i)] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
 
                 {
-                    auto system_time = std::chrono::system_clock::now()
+                    const auto systemTime = std::chrono::system_clock::now()
                         - (std::filesystem::file_time_type::clock::now() - slot.mTimeStamp);
-                    slotInfo["creationTime"] = std::chrono::duration<double>(system_time.time_since_epoch()).count();
+                    slotInfo["creationTime"] = std::chrono::duration<double>(systemTime.time_since_epoch()).count();
                 }
 
                 slotInfo["contentFiles"] = contentFiles;
@@ -102,18 +109,18 @@ namespace MWLua
             return saves;
         };
 
-        api["getSaves"] = [getSaves](sol::this_state lua, std::string_view dir) -> sol::table {
+        api["getSaves"] = [getSaves](sol::this_state thisState, std::string_view dir) -> sol::table {
             const MWState::Character* character = findCharacter(dir);
             if (!character)
                 throw std::runtime_error("Saves not found: " + std::string(dir));
-            return getSaves(lua, *character);
+            return getSaves(thisState, *character);
         };
 
-        api["getAllSaves"] = [getSaves](sol::this_state lua) -> sol::table {
-            sol::table saves(lua, sol::create);
+        api["getAllSaves"] = [getSaves](sol::this_state thisState) -> sol::table {
+            sol::table saves(thisState, sol::create);
             MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
             for (auto it = manager->characterBegin(); it != manager->characterEnd(); ++it)
-                saves[it->getPath().filename().string()] = getSaves(lua, *it);
+                saves[it->getPath().filename().string()] = getSaves(thisState, *it);
             return saves;
         };
 

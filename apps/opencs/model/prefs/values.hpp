@@ -81,6 +81,11 @@ namespace CSMPrefs
                 "Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further." },
         };
 
+        static constexpr std::array<EnumValueView, 2> sSubviewOpenDirectionValues{
+            EnumValueView{ "Open Right", "New subviews open to the right of existing ones." },
+            EnumValueView{ "Open Left", "New subviews open to the left of existing ones." },
+        };
+
         Settings::SettingValue<int> mDefaultWidth{ mIndex, sName, "default-width", 800 };
         Settings::SettingValue<int> mDefaultHeight{ mIndex, sName, "default-height", 600 };
         Settings::SettingValue<bool> mShowStatusbar{ mIndex, sName, "show-statusbar", true };
@@ -90,6 +95,8 @@ namespace CSMPrefs
         Settings::SettingValue<int> mMinimumWidth{ mIndex, sName, "minimum-width", 325 };
         EnumSettingValue mMainwindowScrollbar{ mIndex, sName, "mainwindow-scrollbar", sMainwindowScrollbarValues, 0 };
         Settings::SettingValue<bool> mGrowLimit{ mIndex, sName, "grow-limit", false };
+        EnumSettingValue mSubviewOpenDirection{ mIndex, sName, "subview-open-direction", sSubviewOpenDirectionValues,
+            0 };
     };
 
     struct RecordsCategory : Settings::WithIndex
@@ -205,13 +212,13 @@ namespace CSMPrefs
         Settings::SettingValue<int> mErrorHeight{ mIndex, sName, "error-height", 100 };
         Settings::SettingValue<bool> mHighlightOccurrences{ mIndex, sName, "highlight-occurrences", true };
         Settings::SettingValue<std::string> mColourHighlight{ mIndex, sName, "colour-highlight", "lightcyan" };
-        Settings::SettingValue<std::string> mColourInt{ mIndex, sName, "colour-int", "darkmagenta" };
+        Settings::SettingValue<std::string> mColourInt{ mIndex, sName, "colour-int", "#aa55ff" };
         Settings::SettingValue<std::string> mColourFloat{ mIndex, sName, "colour-float", "magenta" };
         Settings::SettingValue<std::string> mColourName{ mIndex, sName, "colour-name", "grey" };
         Settings::SettingValue<std::string> mColourKeyword{ mIndex, sName, "colour-keyword", "red" };
         Settings::SettingValue<std::string> mColourSpecial{ mIndex, sName, "colour-special", "darkorange" };
         Settings::SettingValue<std::string> mColourComment{ mIndex, sName, "colour-comment", "green" };
-        Settings::SettingValue<std::string> mColourId{ mIndex, sName, "colour-id", "blue" };
+        Settings::SettingValue<std::string> mColourId{ mIndex, sName, "colour-id", "#0055ff" };
     };
 
     struct GeneralInputCategory : Settings::WithIndex
@@ -258,7 +265,7 @@ namespace CSMPrefs
         Settings::SettingValue<int> mCameraFov{ mIndex, sName, "camera-fov", 90 };
         Settings::SettingValue<bool> mCameraOrtho{ mIndex, sName, "camera-ortho", false };
         Settings::SettingValue<int> mCameraOrthoSize{ mIndex, sName, "camera-ortho-size", 100 };
-        Settings::SettingValue<double> mObjectMarkerAlpha{ mIndex, sName, "object-marker-alpha", 0.5 };
+        Settings::SettingValue<double> mObjectMarkerScale{ mIndex, sName, "object-marker-scale", 5.0 };
         Settings::SettingValue<bool> mSceneUseGradient{ mIndex, sName, "scene-use-gradient", true };
         Settings::SettingValue<std::string> mSceneDayBackgroundColour{ mIndex, sName, "scene-day-background-colour",
             "#6e7880" };
@@ -436,25 +443,18 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mReporttableRemove{ mIndex, sName, "reporttable-remove", "Delete" };
         Settings::SettingValue<std::string> mReporttableReplace{ mIndex, sName, "reporttable-replace", "" };
         Settings::SettingValue<std::string> mReporttableRefresh{ mIndex, sName, "reporttable-refresh", "" };
-        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "LMB" };
-        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+LMB" };
-        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+LMB" };
+        Settings::SettingValue<std::string> mSceneNaviPrimary{ mIndex, sName, "scene-navi-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneNaviSecondary{ mIndex, sName, "scene-navi-secondary", "Ctrl+MMB" };
+        Settings::SettingValue<std::string> mSceneOpenPrimary{ mIndex, sName, "scene-open-primary", "Shift+RMB" };
         Settings::SettingValue<std::string> mSceneEditPrimary{ mIndex, sName, "scene-edit-primary", "RMB" };
         Settings::SettingValue<std::string> mSceneEditSecondary{ mIndex, sName, "scene-edit-secondary", "Ctrl+RMB" };
-        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "MMB" };
+        Settings::SettingValue<std::string> mSceneSelectPrimary{ mIndex, sName, "scene-select-primary", "LMB" };
         Settings::SettingValue<std::string> mSceneSelectSecondary{ mIndex, sName, "scene-select-secondary",
-            "Ctrl+MMB" };
-        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+MMB" };
+            "Ctrl+LMB" };
+        Settings::SettingValue<std::string> mSceneSelectTertiary{ mIndex, sName, "scene-select-tertiary", "Shift+LMB" };
         Settings::SettingValue<std::string> mSceneSpeedModifier{ mIndex, sName, "scene-speed-modifier", "Shift" };
         Settings::SettingValue<std::string> mSceneDelete{ mIndex, sName, "scene-delete", "Delete" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrain{ mIndex, sName, "scene-instance-drop-terrain",
-            "G" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollision{ mIndex, sName, "scene-instance-drop-collision",
-            "H" };
-        Settings::SettingValue<std::string> mSceneInstanceDropTerrainSeparately{ mIndex, sName,
-            "scene-instance-drop-terrain-separately", "" };
-        Settings::SettingValue<std::string> mSceneInstanceDropCollisionSeparately{ mIndex, sName,
-            "scene-instance-drop-collision-separately", "" };
+        Settings::SettingValue<std::string> mSceneInstanceDrop{ mIndex, sName, "scene-instance-drop", "F" };
         Settings::SettingValue<std::string> mSceneDuplicate{ mIndex, sName, "scene-duplicate", "Shift+C" };
         Settings::SettingValue<std::string> mSceneLoadCamCell{ mIndex, sName, "scene-load-cam-cell", "Keypad+5" };
         Settings::SettingValue<std::string> mSceneLoadCamEastcell{ mIndex, sName, "scene-load-cam-eastcell",
@@ -491,23 +491,33 @@ namespace CSMPrefs
         Settings::SettingValue<std::string> mSceneSave8{ mIndex, sName, "scene-save-8", "Ctrl+8" };
         Settings::SettingValue<std::string> mSceneGroup9{ mIndex, sName, "scene-group-9", "9" };
         Settings::SettingValue<std::string> mSceneSave9{ mIndex, sName, "scene-save-9", "Ctrl+9" };
+        Settings::SettingValue<std::string> mSceneAxisX{ mIndex, sName, "scene-axis-x", "X" };
+        Settings::SettingValue<std::string> mSceneAxisY{ mIndex, sName, "scene-axis-y", "Y" };
+        Settings::SettingValue<std::string> mSceneAxisZ{ mIndex, sName, "scene-axis-z", "Z" };
+        Settings::SettingValue<std::string> mSceneMoveSubmode{ mIndex, sName, "scene-submode-move", "G" };
+        Settings::SettingValue<std::string> mSceneScaleSubmode{ mIndex, sName, "scene-submode-scale", "V" };
+        Settings::SettingValue<std::string> mSceneRotateSubmode{ mIndex, sName, "scene-submode-rotate", "R" };
+        Settings::SettingValue<std::string> mSceneCameraCycle{ mIndex, sName, "scene-cam-cycle", "Tab" };
+        Settings::SettingValue<std::string> mSceneToggleMarker{ mIndex, sName, "scene-toggle-marker", "F4" };
         Settings::SettingValue<std::string> mFreeForward{ mIndex, sName, "free-forward", "W" };
         Settings::SettingValue<std::string> mFreeBackward{ mIndex, sName, "free-backward", "S" };
         Settings::SettingValue<std::string> mFreeLeft{ mIndex, sName, "free-left", "A" };
         Settings::SettingValue<std::string> mFreeRight{ mIndex, sName, "free-right", "D" };
         Settings::SettingValue<std::string> mFreeRollLeft{ mIndex, sName, "free-roll-left", "Q" };
         Settings::SettingValue<std::string> mFreeRollRight{ mIndex, sName, "free-roll-right", "E" };
-        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "F" };
+        Settings::SettingValue<std::string> mFreeSpeedMode{ mIndex, sName, "free-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitUp{ mIndex, sName, "orbit-up", "W" };
         Settings::SettingValue<std::string> mOrbitDown{ mIndex, sName, "orbit-down", "S" };
         Settings::SettingValue<std::string> mOrbitLeft{ mIndex, sName, "orbit-left", "A" };
         Settings::SettingValue<std::string> mOrbitRight{ mIndex, sName, "orbit-right", "D" };
         Settings::SettingValue<std::string> mOrbitRollLeft{ mIndex, sName, "orbit-roll-left", "Q" };
         Settings::SettingValue<std::string> mOrbitRollRight{ mIndex, sName, "orbit-roll-right", "E" };
-        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "F" };
+        Settings::SettingValue<std::string> mOrbitSpeedMode{ mIndex, sName, "orbit-speed-mode", "" };
         Settings::SettingValue<std::string> mOrbitCenterSelection{ mIndex, sName, "orbit-center-selection", "C" };
-        Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment", "" };
-        Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment", "" };
+        Settings::SettingValue<std::string> mScriptEditorComment{ mIndex, sName, "script-editor-comment",
+            "Ctrl+Slash" };
+        Settings::SettingValue<std::string> mScriptEditorUncomment{ mIndex, sName, "script-editor-uncomment",
+            "Ctrl+Shift+Question" };
     };
 
     struct ModelsCategory : Settings::WithIndex

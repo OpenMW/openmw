@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SCENEUTIL_KEYFRAME_HPP
 
 #include <map>
+#include <optional>
 
 #include <osg/Object>
 
@@ -16,12 +17,23 @@ namespace SceneUtil
     public:
         KeyframeController() {}
 
-        KeyframeController(const KeyframeController& copy)
+        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
             : SceneUtil::Controller(copy)
         {
         }
 
+        std::shared_ptr<float> mTime = std::make_shared<float>(0.0f);
+
+        struct KfTransform
+        {
+            std::optional<osg::Vec3f> mTranslation;
+            std::optional<osg::Quat> mRotation;
+            std::optional<float> mScale;
+        };
+
         virtual osg::Vec3f getTranslation(float time) const { return osg::Vec3f(); }
+
+        virtual KfTransform getCurrentTransformation(osg::NodeVisitor* nv) { return KfTransform(); }
 
         /// @note We could drop this function in favour of osg::Object::asCallback from OSG 3.6 on.
         virtual osg::Callback* getAsCallback() = 0;

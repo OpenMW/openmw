@@ -25,7 +25,7 @@ namespace CSVWorld
         std::string getId() const override;
 
     public:
-        BodyPartCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        explicit BodyPartCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
         /// \return Error description for current user input.
         std::string getErrors() const override;

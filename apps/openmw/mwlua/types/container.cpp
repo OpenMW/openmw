@@ -1,7 +1,11 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadcont.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -13,6 +17,51 @@ namespace sol
     struct is_automagical<ESM::Container> : std::false_type
     {
     };
+}
+
+namespace
+{
+    ESM::Container tableToContainer(const sol::table& rec)
+    {
+        ESM::Container cont;
+
+        // Start from template if provided
+        if (rec["template"] != sol::nil)
+            cont = LuaUtil::cast<ESM::Container>(rec["template"]);
+        else
+            cont.blank();
+
+        // Basic fields
+        if (rec["name"] != sol::nil)
+            cont.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            cont.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["mwscript"] != sol::nil)
+            cont.mScript = ESM::RefId::deserializeText(rec["mwscript"].get<std::string_view>());
+        if (rec["weight"] != sol::nil)
+            cont.mWeight = rec["weight"].get<Misc::FiniteFloat>();
+
+        // Flags
+        if (rec["isOrganic"] != sol::nil)
+        {
+            bool isOrganic = rec["isOrganic"];
+            if (isOrganic)
+                cont.mFlags |= ESM::Container::Organic;
+            else
+                cont.mFlags &= ~ESM::Container::Organic;
+        }
+
+        if (rec["isRespawning"] != sol::nil)
+        {
+            bool isRespawning = rec["isRespawning"];
+            if (isRespawning)
+                cont.mFlags |= ESM::Container::Respawn;
+            else
+                cont.mFlags &= ~ESM::Container::Respawn;
+        }
+
+        return cont;
+    }
 }
 
 namespace MWLua
@@ -32,6 +81,7 @@ namespace MWLua
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getEncumbrance(ptr);
         };
+        container["createRecordDraft"] = tableToContainer;
         container["encumbrance"] = container["getEncumbrance"]; // for compatibility; should be removed later
         container["getCapacity"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
@@ -41,18 +91,20 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Container>(container, context);
 
-        sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
+        sol::usertype<ESM::Container> record = context.sol().new_usertype<ESM::Container>("ESM3_Container");
         record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string {
             return "ESM3_Container[" + rec.mId.toDebugString() + "]";
         };
         record["id"]
             = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property([](const ESM::Container& rec) -> std::string {
-            return Misc::ResourceHelpers::correctMeshPath(rec.mModel);
-        });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Container& rec) -> std::string { return rec.mScript.serializeText(); });
+        addModelProperty(record);
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::Container& rec) -> ESM::RefId { return rec.mScript; });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
+        record["isOrganic"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Organic; });
+        record["isRespawning"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> bool { return rec.mFlags & ESM::Container::Respawn; });
     }
 }

@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
-import argparse, datetime, os, subprocess, sys, shutil
+import argparse
+import datetime
+import os
+import shutil
+import subprocess
+import sys
+import time
+
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description="OpenMW integration tests.")
@@ -17,11 +24,16 @@ parser.add_argument("--verbose", action='store_true', help="print all openmw out
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
-example_suite_content = example_suite_dir / "game_template" / "data" / "template.omwgame"
-if not example_suite_content.is_file():
-    sys.exit(
-        f"{example_suite_content} not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it"
-    )
+
+content_paths = (
+    example_suite_dir / "game_template" / "data" / "template.omwgame",
+    example_suite_dir / "example_animated_creature" / "data" / "landracer.omwaddon",
+    example_suite_dir / "the_hub" / "data" / "the_hub.omwaddon",
+    example_suite_dir / "integration_tests" / "data" / "mwscript.omwaddon",
+)
+for path in content_paths:
+    if not path.is_file():
+        sys.exit(f"{path} is not found, use 'git clone https://gitlab.com/OpenMW/example-suite/' to get it")
 
 openmw_binary = Path(args.omw).resolve()
 if not openmw_binary.is_file():
@@ -36,90 +48,113 @@ testing_util_dir = tests_dir / "testing_util"
 time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S")
 
 
-def runTest(name):
-    print(f"Start {name}")
+def run_test(test_name):
+    start = time.time()
+    print(f'[----------] Running tests from {test_name}')
     shutil.rmtree(config_dir, ignore_errors=True)
     config_dir.mkdir()
     shutil.copyfile(example_suite_dir / "settings.cfg", config_dir / "settings.cfg")
-    test_dir = tests_dir / name
+    test_dir = tests_dir / test_name
     with open(config_dir / "openmw.cfg", "w", encoding="utf-8") as omw_cfg:
+        for path in content_paths:
+            omw_cfg.write(f'data="{path.parent}"\n')
         omw_cfg.writelines(
             (
-                f'data="{example_suite_dir}{os.sep}game_template{os.sep}data"\n',
                 f'data="{testing_util_dir}"\n',
+                f'data="{example_suite_dir / "example_static_props" / "data"}"\n',
                 f'data-local="{test_dir}"\n',
                 f'user-data="{userdata_dir}"\n',
-                "content=template.omwgame\n",
             )
         )
-        if (test_dir / "openmw.cfg").exists():
-            omw_cfg.write(open(test_dir / "openmw.cfg").read())
-        elif (test_dir / "test.omwscripts").exists():
-            omw_cfg.write("content=test.omwscripts\n")
+        for path in content_paths:
+            omw_cfg.write(f'content={path.name}\n')
+        with open(test_dir / "openmw.cfg") as stream:
+            omw_cfg.write(stream.read())
     with open(config_dir / "settings.cfg", "a", encoding="utf-8") as settings_cfg:
         settings_cfg.write(
             "[Video]\n"
             "resolution x = 640\n"
             "resolution y = 480\n"
             "framerate limit = 60\n"
+            "[Game]\n"
+            "smooth animation transitions = true\n"
+            "[Lua]\n"
+            f"memory limit = {1024 * 1024 * 256}\n"
+            "lua profiler = true\n"
         )
     stdout_lines = list()
-    exit_ok = True
     test_success = True
+    fatal_errors = list()
     with subprocess.Popen(
-        [openmw_binary, "--replace=config", "--config", config_dir, "--skip-menu", "--no-grab", "--no-sound"],
+        [openmw_binary, "--replace=config", "--config", config_dir, "--no-grab"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding="utf-8",
         env={
-            "OPENMW_OSG_STATS_FILE": str(work_dir / f"{name}.{time_str}.osg_stats.log"),
+            "OPENMW_OSG_STATS_FILE": str(work_dir / f"{test_name}.{time_str}.osg_stats.log"),
             "OPENMW_OSG_STATS_LIST": "times",
             **os.environ,
         },
     ) as process:
         quit_requested = False
+        running_test_number = None
+        running_test_name = None
+        count = 0
+        failed_tests = list()
+        test_start = None
         for line in process.stdout:
             if args.verbose:
                 sys.stdout.write(line)
             else:
                 stdout_lines.append(line)
-            words = line.split(" ")
-            if len(words) > 1 and words[1] == "E]":
-                print(line, end="")
-            elif "Quit requested by a Lua script" in line:
+            if "Quit requested by a Lua script" in line:
                 quit_requested = True
             elif "TEST_START" in line:
-                w = line.split("TEST_START")[1].split("\t")
-                print(f"TEST {w[2].strip()}\t\t", end="")
+                test_start = time.time()
+                number, name = line.split("TEST_START")[1].strip().split("\t", maxsplit=1)
+                running_test_number = int(number)
+                running_test_name = name
+                count += 1
+                print(f"[ RUN      ] {running_test_name}")
             elif "TEST_OK" in line:
-                print(f"OK")
+                duration = (time.time() - test_start) * 1000
+                number, name = line.split("TEST_OK")[1].strip().split("\t", maxsplit=1)
+                assert running_test_number == int(number)
+                print(f"[       OK ] {running_test_name} ({duration:.3f} ms)")
             elif "TEST_FAILED" in line:
-                w = line.split("TEST_FAILED")[1].split("\t")
-                print(f"FAILED {w[3]}\t\t")
-                test_success = False
+                duration = (time.time() - test_start) * 1000
+                number, name, error = line.split("TEST_FAILED")[1].strip().split("\t", maxsplit=2)
+                assert running_test_number == int(number)
+                print(error)
+                print(f"[  FAILED  ] {running_test_name} ({duration:.3f} ms)")
+                failed_tests.append(running_test_name)
         process.wait(5)
         if not quit_requested:
-            print("ERROR: Unexpected termination")
-            exit_ok = False
+            fatal_errors.append("unexpected termination")
         if process.returncode != 0:
-            print(f"ERROR: openmw exited with code {process.returncode}")
-            exit_ok = False
+            fatal_errors.append(f"openmw exited with code {process.returncode}")
     if os.path.exists(config_dir / "openmw.log"):
-        shutil.copyfile(config_dir / "openmw.log", work_dir / f"{name}.{time_str}.log")
-    if not exit_ok and not args.verbose:
+        shutil.copyfile(config_dir / "openmw.log", work_dir / f"{test_name}.{time_str}.log")
+    if fatal_errors and not args.verbose:
         sys.stdout.writelines(stdout_lines)
-    if test_success and exit_ok:
-        print(f"{name} succeeded")
-    else:
-        print(f"{name} failed")
-    return test_success and exit_ok
+    total_duration = (time.time() - start) * 1000
+    print(f'\n[----------] {count} tests from {test_name} ({total_duration:.3f} ms total)')
+    print(f"[  PASSED  ] {count - len(failed_tests)} tests.")
+    if fatal_errors:
+        print(f"[  FAILED  ] fatal error: {'; '.join(fatal_errors)}")
+    if failed_tests:
+        print(f"[  FAILED  ] {len(failed_tests)} tests, listed below:")
+        for failed_test in failed_tests:
+            print(f"[  FAILED  ] {failed_test}")
+    return len(failed_tests) == 0 and not fatal_errors
 
 
 status = 0
 for entry in tests_dir.glob("test_*"):
     if entry.is_dir():
-        if not runTest(entry.name):
+        if not run_test(entry.name):
             status = -1
-shutil.rmtree(config_dir, ignore_errors=True)
-shutil.rmtree(userdata_dir, ignore_errors=True)
+if status == 0:
+    shutil.rmtree(config_dir, ignore_errors=True)
+    shutil.rmtree(userdata_dir, ignore_errors=True)
 exit(status)

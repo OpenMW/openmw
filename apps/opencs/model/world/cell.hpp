@@ -1,8 +1,6 @@
 #ifndef CSM_WOLRD_CELL_H
 #define CSM_WOLRD_CELL_H
 
-#include <string>
-
 #include <components/esm3/loadcell.hpp>
 
 namespace ESM
@@ -20,7 +18,12 @@ namespace CSMWorld
     {
         ESM::RefId mId;
 
-        void load(ESM::ESMReader& esm, bool& isDeleted);
+        void load(ESM::ESMReader& esm, bool& isDeleted)
+        {
+            ESM::Cell::load(esm, isDeleted, false);
+
+            mId = ESM::RefId::stringRefId(ESM::Cell::mId.toString());
+        }
     };
 }
 

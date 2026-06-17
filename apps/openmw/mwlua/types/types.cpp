@@ -15,6 +15,7 @@ namespace MWLua
 
         constexpr std::string_view Activator = "Activator";
         constexpr std::string_view Armor = "Armor";
+        constexpr std::string_view BodyPart = "BodyPart";
         constexpr std::string_view Book = "Book";
         constexpr std::string_view Clothing = "Clothing";
         constexpr std::string_view Container = "Container";
@@ -51,6 +52,7 @@ namespace MWLua
         constexpr std::string_view ESM4MovableStatic = "ESM4MovableStatic";
         constexpr std::string_view ESM4Potion = "ESM4Potion";
         constexpr std::string_view ESM4Static = "ESM4Static";
+        constexpr std::string_view ESM4StaticCollection = "ESM4StaticCollection";
         constexpr std::string_view ESM4Terminal = "ESM4Terminal";
         constexpr std::string_view ESM4Tree = "ESM4Tree";
         constexpr std::string_view ESM4Weapon = "ESM4Weapon";
@@ -63,6 +65,7 @@ namespace MWLua
             { ESM::REC_INTERNAL_MARKER, ObjectTypeName::Marker },
             { ESM::REC_ACTI, ObjectTypeName::Activator },
             { ESM::REC_ARMO, ObjectTypeName::Armor },
+            { ESM::REC_BODY, ObjectTypeName::BodyPart },
             { ESM::REC_BOOK, ObjectTypeName::Book },
             { ESM::REC_CLOT, ObjectTypeName::Clothing },
             { ESM::REC_CONT, ObjectTypeName::Container },
@@ -97,6 +100,7 @@ namespace MWLua
             { ESM::REC_MSTT4, ObjectTypeName::ESM4MovableStatic },
             { ESM::REC_ALCH4, ObjectTypeName::ESM4Potion },
             { ESM::REC_STAT4, ObjectTypeName::ESM4Static },
+            { ESM::REC_SCOL4, ObjectTypeName::ESM4StaticCollection },
             { ESM::REC_TERM4, ObjectTypeName::ESM4Terminal },
             { ESM::REC_TREE4, ObjectTypeName::ESM4Tree },
             { ESM::REC_WEAP4, ObjectTypeName::ESM4Weapon },
@@ -143,19 +147,19 @@ namespace MWLua
         return ptr;
     }
 
-    sol::table getTypeToPackageTable(lua_State* L)
+    sol::table getTypeToPackageTable(lua_State* state)
     {
         constexpr std::string_view key = "typeToPackage";
-        sol::state_view lua(L);
+        sol::state_view lua(state);
         if (lua[key] == sol::nil)
             lua[key] = sol::table(lua, sol::create);
         return lua[key];
     }
 
-    sol::table getPackageToTypeTable(lua_State* L)
+    sol::table getPackageToTypeTable(lua_State* state)
     {
         constexpr std::string_view key = "packageToType";
-        sol::state_view lua(L);
+        sol::state_view lua(state);
         if (lua[key] == sol::nil)
             lua[key] = sol::table(lua, sol::create);
         return lua[key];
@@ -163,26 +167,26 @@ namespace MWLua
 
     sol::table initTypesPackage(const Context& context)
     {
-        auto* lua = context.mLua;
+        auto lua = context.sol();
 
-        if (lua->sol()["openmw_types"] != sol::nil)
-            return lua->sol()["openmw_types"];
+        if (lua["openmw_types"] != sol::nil)
+            return lua["openmw_types"];
 
-        sol::table types(lua->sol(), sol::create);
+        sol::table types(lua, sol::create);
         auto addType = [&](std::string_view name, std::vector<ESM::RecNameInts> recTypes,
                            std::optional<std::string_view> base = std::nullopt) -> sol::table {
-            sol::table t(lua->sol(), sol::create);
-            sol::table ro = LuaUtil::makeReadOnly(t);
+            sol::table table(lua, sol::create);
+            sol::table ro = LuaUtil::makeReadOnly(table);
             sol::table meta = ro[sol::metatable_key];
             meta[sol::meta_function::to_string] = [name]() { return name; };
             if (base)
             {
-                t["baseType"] = types[*base];
-                sol::table baseMeta(lua->sol(), sol::create);
+                table["baseType"] = types[*base];
+                sol::table baseMeta(lua, sol::create);
                 baseMeta[sol::meta_function::index] = LuaUtil::getMutableFromReadOnly(types[*base]);
-                t[sol::metatable_key] = baseMeta;
+                table[sol::metatable_key] = baseMeta;
             }
-            t["objectIsInstance"] = [types = recTypes](const Object& o) {
+            table["objectIsInstance"] = [types = recTypes](const Object& o) {
                 unsigned int type = getLiveCellRefType(o.ptr().mRef);
                 for (ESM::RecNameInts t : types)
                     if (t == type)
@@ -190,7 +194,7 @@ namespace MWLua
                 return false;
             };
             types[name] = ro;
-            return t;
+            return table;
         };
 
         addActorBindings(
@@ -203,6 +207,7 @@ namespace MWLua
         addLockableBindings(
             addType(ObjectTypeName::Lockable, { ESM::REC_CONT, ESM::REC_DOOR, ESM::REC_CONT4, ESM::REC_DOOR4 }));
 
+        addBodyPartBindings(addType(ObjectTypeName::BodyPart, { ESM::REC_BODY }), context);
         addCreatureBindings(addType(ObjectTypeName::Creature, { ESM::REC_CREA }, ObjectTypeName::Actor), context);
         addNpcBindings(
             addType(ObjectTypeName::NPC, { ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_ }, ObjectTypeName::Actor), context);
@@ -244,12 +249,13 @@ namespace MWLua
         addType(ObjectTypeName::ESM4MovableStatic, { ESM::REC_MSTT4 });
         addType(ObjectTypeName::ESM4Potion, { ESM::REC_ALCH4 });
         addType(ObjectTypeName::ESM4Static, { ESM::REC_STAT4 });
+        addType(ObjectTypeName::ESM4StaticCollection, { ESM::REC_SCOL4 });
         addESM4TerminalBindings(addType(ObjectTypeName::ESM4Terminal, { ESM::REC_TERM4 }), context);
         addType(ObjectTypeName::ESM4Tree, { ESM::REC_TREE4 });
         addType(ObjectTypeName::ESM4Weapon, { ESM::REC_WEAP4 });
 
-        sol::table typeToPackage = getTypeToPackageTable(context.mLua->sol());
-        sol::table packageToType = getPackageToTypeTable(context.mLua->sol());
+        sol::table typeToPackage = getTypeToPackageTable(lua);
+        sol::table packageToType = getPackageToTypeTable(lua);
         for (const auto& [type, name] : luaObjectTypeInfo)
         {
             sol::object t = types[name];
@@ -259,7 +265,7 @@ namespace MWLua
             packageToType[t] = type;
         }
 
-        lua->sol()["openmw_types"] = LuaUtil::makeReadOnly(types);
-        return lua->sol()["openmw_types"];
+        lua["openmw_types"] = LuaUtil::makeReadOnly(types);
+        return lua["openmw_types"];
     }
 }

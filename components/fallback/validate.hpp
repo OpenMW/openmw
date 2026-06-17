@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 
+// NOLINTBEGIN(readability-identifier-naming)
 namespace boost
 {
     class any;
 }
+// NOLINTEND(readability-identifier-naming)
 
 namespace Fallback
 {
@@ -24,8 +26,6 @@ namespace Fallback
     };
 
     // Parses and validates a fallback map from boost program_options.
-    // Note: for boost to pick up the validate function, you need to pull in the namespace e.g.
-    // by using namespace Fallback;
     void validate(boost::any& v, std::vector<std::string> const& tokens, FallbackMap*, int);
 }
 

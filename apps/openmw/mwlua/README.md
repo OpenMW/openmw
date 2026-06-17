@@ -3,7 +3,7 @@
 This folder contains the C++ implementation of the Lua scripting system.
 
 For user-facing documentation, see
-[OpenMW Lua scripting](https://openmw.readthedocs.io/en/latest/reference/lua-scripting/index.html).
+[Lua scripting](https://openmw.readthedocs.io/en/latest/reference/lua-scripting/index.html).
 The documentation is generated from
 [/docs/source/reference/lua-scripting](/docs/source/reference/lua-scripting).
 You can find instructions for generating the documentation at the

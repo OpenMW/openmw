@@ -37,6 +37,7 @@ namespace Settings
             makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mObjectPagingMinSizeCostMultiplier{ mIndex, "Terrain",
             "object paging min size cost multiplier", makeMaxStrictSanitizerFloat(0) };
+        SettingValue<bool> mWaterCulling{ mIndex, "Terrain", "water culling" };
     };
 }
 

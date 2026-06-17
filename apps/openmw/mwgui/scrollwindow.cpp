@@ -7,6 +7,7 @@
 #include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -37,6 +38,10 @@ namespace MWGui
 
         mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
+
+        mControllerScrollWidget = mTextView;
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mDpad = "#{Interface:ScrollDown}";
 
         center();
     }
@@ -77,7 +82,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
     }
 
-    void ScrollWindow::onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character)
+    void ScrollWindow::onKeyButtonPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char character)
     {
         int scroll = 0;
         if (key == MyGUI::KeyCode::ArrowUp)
@@ -101,12 +106,12 @@ namespace MWGui
         mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
     }
 
-    void ScrollWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void ScrollWindow::onCloseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }
 
-    void ScrollWindow::onTakeButtonClicked(MyGUI::Widget* _sender)
+    void ScrollWindow::onTakeButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Book Up"));
 
@@ -114,5 +119,36 @@ namespace MWGui
         take.execute(MWMechanics::getPlayer());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+    }
+
+    void ScrollWindow::onClose()
+    {
+        if (Settings::gui().mControllerMenus)
+            MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(true);
+        BookWindowBase::onClose();
+    }
+
+    ControllerButtons* ScrollWindow::getControllerButtons()
+    {
+        if (mTakeButton->getVisible())
+            mControllerButtons.mA = "#{Interface:Take}";
+        else
+            mControllerButtons.mA.clear();
+        return &mControllerButtons;
+    }
+
+    bool ScrollWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mTakeButton->getVisible())
+                onTakeButtonClicked(mTakeButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            onCloseButtonClicked(mCloseButton);
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+            return false; // Fall through to keyboard
+
+        return true;
     }
 }

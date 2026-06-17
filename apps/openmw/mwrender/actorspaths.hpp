@@ -7,11 +7,11 @@
 
 #include <deque>
 #include <map>
-#include <unordered_map>
 
 namespace osg
 {
     class Group;
+    class StateSet;
 }
 
 namespace DetourNavigator
@@ -56,6 +56,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         Groups mGroups;
         bool mEnabled;
+        osg::ref_ptr<osg::StateSet> mGroupStateSet;
+        osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
     };
 }
 

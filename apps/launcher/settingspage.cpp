@@ -5,11 +5,13 @@
 #include <string>
 
 #include <QCompleter>
+#include <QDesktopServices>
 #include <QFileDialog>
+#include <QMenu>
 #include <QString>
 
 #include <components/config/gamesettings.hpp>
-
+#include <components/files/qtconversion.hpp>
 #include <components/settings/values.hpp>
 
 #include "utils/openalutil.hpp"
@@ -69,10 +71,39 @@ namespace
         }
         return 0;
     }
+
+    enum FileTypeRoles
+    {
+        Role_ThisFile = Qt::ItemDataRole::UserRole,
+        Role_IsMainUserConfigDirectory,
+        Role_ConfigDirectory,
+        Role_LauncherLog,
+        Role_OpenMWCfg,
+        Role_OpenMWLog,
+        Role_OpenMWCSLog,
+        Role_SettingsCfg,
+    };
+
+    struct FileType
+    {
+        FileTypeRoles itemDataRole;
+        const char* name;
+        bool showInAllConfigDirectories;
+    };
+
+    const std::array configDirectoryFiles{
+        FileType{ Role_LauncherLog, "launcher.log", false },
+        FileType{ Role_OpenMWCfg, "openmw.cfg", true },
+        FileType{ Role_OpenMWLog, "openmw.log", false },
+        FileType{ Role_OpenMWCSLog, "openmw-cs.log", false },
+        FileType{ Role_SettingsCfg, "settings.cfg", true },
+    };
 }
 
-Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget* parent)
+Launcher::SettingsPage::SettingsPage(
+    const Files::ConfigurationManager& configurationManager, Config::GameSettings& gameSettings, QWidget* parent)
     : QWidget(parent)
+    , mCfgMgr(configurationManager)
     , mGameSettings(gameSettings)
 {
     setObjectName("SettingsPage");
@@ -91,6 +122,53 @@ Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget
 
     mCellNameCompleter.setModel(&mCellNameCompleterModel);
     startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
+
+    connect(configsList, &QTreeWidget::itemActivated, this, &SettingsPage::slotOpenFile);
+
+    auto actionOpenDir = new QAction(tr("Open Directory"), configsList);
+    connect(actionOpenDir, &QAction::triggered, [this]() {
+        QUrl configFolderUrl = configsList->currentItem()->data(0, Role_ConfigDirectory).toUrl();
+        QDesktopServices::openUrl(configFolderUrl);
+    });
+
+    QList<QAction*> openFileActions;
+    openFileActions.reserve(configDirectoryFiles.size());
+    for (const auto& fileType : configDirectoryFiles)
+    {
+        QAction* action = new QAction(tr("Open %1").arg(fileType.name), configsList);
+        connect(action, &QAction::triggered, [this, role = fileType.itemDataRole]() {
+            QVariant fileUrl = configsList->currentItem()->data(0, role);
+            if (fileUrl.isValid())
+                QDesktopServices::openUrl(fileUrl.toUrl());
+        });
+        openFileActions.push_back(action);
+    }
+
+    connect(configsList, &QTreeWidget::customContextMenuRequested, [=, this](const QPoint& pos) {
+        if (configsList->currentItem())
+        {
+            QMenu contextMenu;
+
+            contextMenu.addAction(actionOpenDir);
+
+            bool topLevel = !configsList->currentItem()->parent();
+
+            for (qsizetype i = 0; i < openFileActions.size(); ++i)
+            {
+                if (configsList->currentItem()->data(0, Role_IsMainUserConfigDirectory).toBool()
+                    || configDirectoryFiles[i].showInAllConfigDirectories)
+                {
+                    QVariant fileUrl = configsList->currentItem()->data(0, configDirectoryFiles[i].itemDataRole);
+                    bool fileExists = fileUrl.isValid();
+                    openFileActions[i]->setEnabled(fileExists);
+                    openFileActions[i]->setVisible(topLevel || fileExists);
+                    contextMenu.addAction(openFileActions[i]);
+                }
+            }
+
+            contextMenu.exec(configsList->mapToGlobal(pos));
+        }
+    });
 }
 
 void Launcher::SettingsPage::loadCellsForAutocomplete(QStringList cellNames)
@@ -126,16 +204,16 @@ void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
 
 namespace
 {
-    constexpr double CellSizeInUnits = 8192;
+    constexpr double cellSizeInUnits = 8192;
 
     double convertToCells(double unitRadius)
     {
-        return unitRadius / CellSizeInUnits;
+        return unitRadius / cellSizeInUnits;
     }
 
-    int convertToUnits(double CellGridRadius)
+    int convertToUnits(double cellGridRadius)
     {
-        return static_cast<int>(CellSizeInUnits * CellGridRadius);
+        return static_cast<int>(cellSizeInUnits * cellGridRadius);
     }
 }
 
@@ -163,8 +241,6 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingInt(Settings::physics().mAsyncNumThreads, *physicsThreadsSpinBox);
         loadSettingBool(
             Settings::game().mAllowActorsToFollowOverWaterSurface, *allowNPCToFollowOverWaterSurfaceCheckBox);
-        loadSettingBool(
-            Settings::game().mUnarmedCreatureAttacksDamageArmor, *unarmedCreatureAttacksDamageArmorCheckBox);
         loadSettingInt(Settings::game().mActorCollisionShapeType, *actorCollisonShapeTypeComboBox);
     }
 
@@ -189,6 +265,7 @@ bool Launcher::SettingsPage::loadSettings()
             loadSettingBool(Settings::game().mWeaponSheathing, *weaponSheathingCheckBox);
             loadSettingBool(Settings::game().mShieldSheathing, *shieldSheathingCheckBox);
         }
+        loadSettingBool(Settings::game().mSmoothAnimTransitions, *smoothAnimTransitionsCheckBox);
         loadSettingBool(Settings::game().mTurnToMovementDirection, *turnToMovementDirectionCheckBox);
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
@@ -253,31 +330,6 @@ bool Launcher::SettingsPage::loadSettings()
         }
 
         connect(shadowDistanceCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotShadowDistLimitToggled);
-
-        lightsMaxLightsSpinBox->setValue(Settings::shaders().mMaxLights);
-        lightsMaximumDistanceSpinBox->setValue(Settings::shaders().mMaximumLightDistance);
-        lightFadeMultiplierSpinBox->setValue(Settings::shaders().mLightFadeStart);
-        lightsBoundingSphereMultiplierSpinBox->setValue(Settings::shaders().mLightBoundsMultiplier);
-        lightsMinimumInteriorBrightnessSpinBox->setValue(Settings::shaders().mMinimumInteriorBrightness);
-
-        connect(lightingMethodComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this,
-            &SettingsPage::slotLightTypeCurrentIndexChanged);
-
-        int lightingMethod = 1;
-        switch (Settings::shaders().mLightingMethod)
-        {
-            case SceneUtil::LightingMethod::FFP:
-                lightingMethod = 0;
-                break;
-            case SceneUtil::LightingMethod::PerObjectUniform:
-                lightingMethod = 1;
-                break;
-            case SceneUtil::LightingMethod::SingleUBO:
-                lightingMethod = 2;
-                break;
-        }
-        lightingMethodComboBox->setCurrentIndex(lightingMethod);
-        slotLightTypeCurrentIndexChanged(lightingMethod);
     }
 
     // Audio
@@ -302,6 +354,7 @@ bool Launcher::SettingsPage::loadSettings()
             }
         }
         loadSettingBool(Settings::sound().mCameraListener, *cameraListenerCheckBox);
+        dopplerSpinBox->setValue(Settings::sound().mDopplerFactor);
     }
 
     // Interface Changes
@@ -313,6 +366,9 @@ bool Launcher::SettingsPage::loadSettings()
         loadSettingBool(Settings::gui().mColorTopicEnable, *changeDialogTopicsCheckBox);
         showOwnedComboBox->setCurrentIndex(Settings::game().mShowOwned);
         loadSettingBool(Settings::gui().mStretchMenuBackground, *stretchBackgroundCheckBox);
+        connect(controllerMenusCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotControllerMenusToggled);
+        loadSettingBool(Settings::gui().mControllerMenus, *controllerMenusCheckBox);
+        loadSettingBool(Settings::gui().mControllerTooltips, *controllerMenuTooltipsCheckBox);
         loadSettingBool(Settings::map().mAllowZooming, *useZoomOnMapCheckBox);
         loadSettingBool(Settings::game().mGraphicHerbalism, *graphicHerbalismCheckBox);
         scalingSpinBox->setValue(Settings::gui().mScalingFactor);
@@ -329,7 +385,6 @@ bool Launcher::SettingsPage::loadSettings()
     // Miscellaneous
     {
         // Saves
-        loadSettingBool(Settings::saves().mTimeplayed, *timePlayedCheckbox);
         loadSettingInt(Settings::saves().mMaxQuicksaves, *maximumQuicksavesComboBox);
 
         // Other Settings
@@ -339,6 +394,8 @@ bool Launcher::SettingsPage::loadSettings()
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
 
         loadSettingBool(Settings::general().mNotifyOnSavedScreenshot, *notifyOnSavedScreenshotCheckBox);
+
+        populateLoadedConfigs();
     }
 
     // Testing
@@ -357,6 +414,95 @@ bool Launcher::SettingsPage::loadSettings()
         runScriptAfterStartupField->setText(mGameSettings.value("script-run").value);
     }
     return true;
+}
+
+void Launcher::SettingsPage::populateLoadedConfigs()
+{
+    configsList->clear();
+
+    for (const auto& path : mCfgMgr.getActiveConfigPaths())
+    {
+        QString configPath = QDir(Files::pathToQString(path)).absolutePath();
+        QString toolTipText;
+
+        bool isMainUserConfig = path == mCfgMgr.getUserConfigPath();
+
+        if (path == mCfgMgr.getLocalPath())
+        {
+            if (isMainUserConfig)
+                toolTipText = tr(
+                    "Local config directory used because it contains an openmw.cfg.\n"
+                    "Logs and settings changed through the launcher and in-game will be saved here.");
+            else
+                toolTipText = tr("Local config directory used because it contains an openmw.cfg.");
+        }
+        else if (path == mCfgMgr.getGlobalPath())
+        {
+            if (isMainUserConfig)
+                toolTipText = tr(
+                    "Global config directory used because local directory did not contain an openmw.cfg.\n"
+                    "Logs and settings changed through the launcher and in-game will be saved here.\n"
+                    "This is typically a symptom of a broken OpenMW installation or bad package.");
+            else
+                toolTipText = tr("Global config directory used because local directory did not contain an openmw.cfg.");
+        }
+        else
+        {
+            Config::SettingValue configSetting;
+            for (const auto& v : mGameSettings.values(QString("config")))
+            {
+                if (Files::pathFromQString(v.value) == path)
+                {
+                    configSetting = v;
+                    break;
+                }
+            }
+
+            if (!configSetting.value.isEmpty())
+            {
+                const QFileInfo configPathInfo = QFileInfo(configSetting.context + "/openmw.cfg");
+                if (isMainUserConfig)
+                    toolTipText = tr(
+                        "User config directory used because %1 contains the line config=%2.\n"
+                        "Logs and settings changed through the launcher and in-game will be saved here.")
+                                      .arg(configPathInfo.absoluteFilePath(), configSetting.originalRepresentation);
+                else
+                    toolTipText = tr("User config directory used because %1 contains the line config=%2.")
+                                      .arg(configPathInfo.absoluteFilePath(), configSetting.originalRepresentation);
+            }
+            else if (isMainUserConfig)
+                toolTipText = tr("Logs and settings changed through the launcher and in-game will be saved here.");
+        }
+
+        QTreeWidgetItem* configItem = new QTreeWidgetItem(configsList);
+        configItem->setText(0, configPath);
+        configItem->setToolTip(0, toolTipText);
+        configItem->setExpanded(true);
+
+        QUrl directoryUrl = QUrl::fromLocalFile(configPath);
+        configItem->setData(0, Role_ThisFile, directoryUrl);
+        configItem->setData(0, Role_IsMainUserConfigDirectory, isMainUserConfig);
+        configItem->setData(0, Role_ConfigDirectory, directoryUrl);
+
+        for (const auto& fileType : configDirectoryFiles)
+        {
+            if ((isMainUserConfig || fileType.showInAllConfigDirectories)
+                && std::filesystem::exists(path / fileType.name))
+            {
+                QTreeWidgetItem* fileItem = new QTreeWidgetItem(configItem);
+                fileItem->setText(0, fileType.name);
+
+                QUrl url = QUrl::fromLocalFile(Files::pathToQString(path / fileType.name));
+
+                fileItem->setData(0, Role_ThisFile, url);
+                fileItem->setData(0, fileType.itemDataRole, url);
+                fileItem->setData(0, Role_IsMainUserConfigDirectory, isMainUserConfig);
+                fileItem->setData(0, Role_ConfigDirectory, directoryUrl);
+
+                configItem->setData(0, fileType.itemDataRole, url);
+            }
+        }
+    }
 }
 
 void Launcher::SettingsPage::saveSettings()
@@ -383,8 +529,6 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingInt(*physicsThreadsSpinBox, Settings::physics().mAsyncNumThreads);
         saveSettingBool(
             *allowNPCToFollowOverWaterSurfaceCheckBox, Settings::game().mAllowActorsToFollowOverWaterSurface);
-        saveSettingBool(
-            *unarmedCreatureAttacksDamageArmorCheckBox, Settings::game().mUnarmedCreatureAttacksDamageArmor);
         saveSettingInt(*actorCollisonShapeTypeComboBox, Settings::game().mActorCollisionShapeType);
     }
 
@@ -405,6 +549,7 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*weaponSheathingCheckBox, Settings::game().mWeaponSheathing);
         saveSettingBool(*shieldSheathingCheckBox, Settings::game().mShieldSheathing);
         saveSettingBool(*turnToMovementDirectionCheckBox, Settings::game().mTurnToMovementDirection);
+        saveSettingBool(*smoothAnimTransitionsCheckBox, Settings::game().mSmoothAnimTransitions);
         saveSettingBool(*smoothMovementCheckBox, Settings::game().mSmoothMovement);
         saveSettingBool(*playerMovementIgnoresAnimationCheckBox, Settings::game().mPlayerMovementIgnoresAnimation);
 
@@ -426,13 +571,6 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*exponentialFogCheckBox, Settings::fog().mExponentialFog);
         saveSettingBool(*skyBlendingCheckBox, Settings::fog().mSkyBlending);
         Settings::fog().mSkyBlendingStart.set(skyBlendingStartComboBox->value());
-
-        static constexpr std::array<SceneUtil::LightingMethod, 3> lightingMethodMap = {
-            SceneUtil::LightingMethod::FFP,
-            SceneUtil::LightingMethod::PerObjectUniform,
-            SceneUtil::LightingMethod::SingleUBO,
-        };
-        Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
 
         const int cShadowDist
             = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
@@ -472,12 +610,6 @@ void Launcher::SettingsPage::saveSettings()
             Settings::shadows().mComputeSceneBounds.set("primitives");
         else
             Settings::shadows().mComputeSceneBounds.set("none");
-
-        Settings::shaders().mMaxLights.set(lightsMaxLightsSpinBox->value());
-        Settings::shaders().mMaximumLightDistance.set(lightsMaximumDistanceSpinBox->value());
-        Settings::shaders().mLightFadeStart.set(lightFadeMultiplierSpinBox->value());
-        Settings::shaders().mLightBoundsMultiplier.set(lightsBoundingSphereMultiplierSpinBox->value());
-        Settings::shaders().mMinimumInteriorBrightness.set(lightsMinimumInteriorBrightnessSpinBox->value());
     }
 
     // Audio
@@ -501,6 +633,8 @@ void Launcher::SettingsPage::saveSettings()
 
         const bool cCameraListener = cameraListenerCheckBox->checkState() != Qt::Unchecked;
         Settings::sound().mCameraListener.set(cCameraListener);
+
+        Settings::sound().mDopplerFactor.set(dopplerSpinBox->value());
     }
 
     // Interface Changes
@@ -512,6 +646,8 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*changeDialogTopicsCheckBox, Settings::gui().mColorTopicEnable);
         saveSettingInt(*showOwnedComboBox, Settings::game().mShowOwned);
         saveSettingBool(*stretchBackgroundCheckBox, Settings::gui().mStretchMenuBackground);
+        saveSettingBool(*controllerMenusCheckBox, Settings::gui().mControllerMenus);
+        saveSettingBool(*controllerMenuTooltipsCheckBox, Settings::gui().mControllerTooltips);
         saveSettingBool(*useZoomOnMapCheckBox, Settings::map().mAllowZooming);
         saveSettingBool(*graphicHerbalismCheckBox, Settings::game().mGraphicHerbalism);
         Settings::gui().mScalingFactor.set(scalingSpinBox->value());
@@ -528,7 +664,6 @@ void Launcher::SettingsPage::saveSettings()
     // Miscellaneous
     {
         // Saves Settings
-        saveSettingBool(*timePlayedCheckbox, Settings::saves().mTimeplayed);
         saveSettingInt(*maximumQuicksavesComboBox, Settings::saves().mMaxQuicksaves);
 
         // Other Settings
@@ -571,6 +706,11 @@ void Launcher::SettingsPage::slotAnimSourcesToggled(bool checked)
     }
 }
 
+void Launcher::SettingsPage::slotControllerMenusToggled(bool checked)
+{
+    controllerMenuTooltipsCheckBox->setEnabled(checked);
+}
+
 void Launcher::SettingsPage::slotPostProcessToggled(bool checked)
 {
     postprocessTransparentPostpassCheckBox->setEnabled(checked);
@@ -596,11 +736,8 @@ void Launcher::SettingsPage::slotDistantLandToggled(bool checked)
     objectPagingMinSizeComboBox->setEnabled(checked);
 }
 
-void Launcher::SettingsPage::slotLightTypeCurrentIndexChanged(int index)
+void Launcher::SettingsPage::slotOpenFile(QTreeWidgetItem* item)
 {
-    lightsMaximumDistanceSpinBox->setEnabled(index != 0);
-    lightFadeMultiplierSpinBox->setEnabled(index != 0);
-    lightsMaxLightsSpinBox->setEnabled(index != 0);
-    lightsBoundingSphereMultiplierSpinBox->setEnabled(index != 0);
-    lightsMinimumInteriorBrightnessSpinBox->setEnabled(index != 0);
+    QUrl configFolderUrl = item->data(0, Role_ThisFile).toUrl();
+    QDesktopServices::openUrl(configFolderUrl);
 }

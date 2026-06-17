@@ -32,7 +32,7 @@ command -v unixPathAsWindows >/dev/null 2>&1 || function unixPathAsWindows {
 
 
 # capture CMD environment in a shell with MSVC activated
-cmd //c "$(unixPathAsWindows "$(dirname "${BASH_SOURCE[0]}")")\ActivateMSVC.bat" "&&" "bash" "-c" "declare -px > declared_env.sh"
+cmd //c "$(unixPathAsWindows "$(dirname "${BASH_SOURCE[0]}")")\ActivateMSVC.bat" "&&" "$(unixPathAsWindows $BASH)" "-c" "declare -px > declared_env.sh"
 source ./declared_env.sh
 rm declared_env.sh
 

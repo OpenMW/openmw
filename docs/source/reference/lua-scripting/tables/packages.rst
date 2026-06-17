@@ -1,43 +1,67 @@
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-| Package                                                    | Can be used        | Description                                                   |
-+============================================================+====================+===============================================================+
-|:ref:`openmw.interfaces <Script interfaces>`                | everywhere         | | Public interfaces of other scripts.                         |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.util <Package openmw.util>`                    | everywhere         | | Defines utility functions and classes like 3D vectors,      |
-|                                                            |                    | | that don't depend on the game world.                        |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.storage <Package openmw.storage>`              | everywhere         | | Storage API. In particular can be used to store data        |
-|                                                            |                    | | between game sessions.                                      |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.core <Package openmw.core>`                    | everywhere         | | Functions that are common for both global and local scripts |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.types <Package openmw.types>`                  | everywhere         | | Functions for specific types of game objects.               |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.animation <Package openmw.animation>`          | everywhere         | | Animation controls                                          |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.async <Package openmw.async>`                  | everywhere         | | Timers and callbacks.                                       |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.vfs <Package openmw.vfs>`                      | everywhere         | | Read-only access to data directories via VFS.               |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.markup <Package openmw.markup>`                | everywhere         | | API to work with markup languages.                          |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.world <Package openmw.world>`                  | by global scripts  | | Read-write access to the game world.                        |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.self <Package openmw.self>`                    | by local scripts   | | Full access to the object the script is attached to.        |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.nearby <Package openmw.nearby>`                | by local scripts   | | Read-only access to the nearest area of the game world.     |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ambient <Package openmw.ambient>`              | by player scripts  | | Controls background sounds for given player.                |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.input <Package openmw.input>`                  | by player scripts  | | User input.                                                 |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.ui <Package openmw.ui>`                        | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.menu <Package openmw.menu>`                    | by menu scripts    | | Main menu functionality, such as managing game saves        |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.camera <Package openmw.camera>`                | by player scripts  | | Controls camera.                                            |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.postprocessing <Package openmw.postprocessing>`| by player scripts  | | Controls post-process shaders.                              |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
-|:ref:`openmw.debug <Package openmw.debug>`                  | by player scripts  | | Collection of debug utils.                                  |
-+------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+.. list-table::
+   :widths: 30 40 60
+   :header-rows: 1
+
+   * - Package
+     - Context
+     - Description
+   * - :doc:`ambient </reference/lua-scripting/openmw_ambient>`
+     - |bdg-ctx-menu| |bdg-ctx-player|
+     - Controls background sounds for given player.
+   * - :doc:`animation </reference/lua-scripting/openmw_animation>`
+     - |bdg-ctx-local|
+     - Animation controls.
+   * - :doc:`async </reference/lua-scripting/openmw_async>`
+     - |bdg-ctx-all|
+     - Timers and callbacks.
+   * - :doc:`camera </reference/lua-scripting/openmw_camera>`
+     - |bdg-ctx-player|
+     - Controls camera.
+   * - :doc:`content </reference/lua-scripting/openmw_content>`
+     - |bdg-ctx-load|
+     - Content manipulation.
+   * - :doc:`core </reference/lua-scripting/openmw_core>`
+     - |bdg-ctx-all|
+     - Functions that are common for both global and local scripts
+   * - :doc:`debug </reference/lua-scripting/openmw_debug>`
+     - |bdg-ctx-player|
+     - Collection of debug utils.
+   * - :doc:`input </reference/lua-scripting/openmw_input>`
+     - |bdg-ctx-menu| |bdg-ctx-player|
+     - User input.
+   * - :ref:`interfaces <Script interfaces>`
+     - |bdg-ctx-all|
+     - Public interfaces of other scripts.
+   * - :doc:`markup </reference/lua-scripting/openmw_markup>`
+     - |bdg-ctx-all|
+     - API to work with markup languages.
+   * - :doc:`menu </reference/lua-scripting/openmw_menu>`
+     - |bdg-ctx-menu|
+     - Main menu functionality, such as managing game saves
+   * - :doc:`nearby </reference/lua-scripting/openmw_nearby>`
+     - |bdg-ctx-local|
+     - Read-only access to the nearest area of the game world.
+   * - :doc:`postprocessing </reference/lua-scripting/openmw_postprocessing>`
+     - |bdg-ctx-player|
+     - Controls post-process shaders.
+   * - :doc:`self </reference/lua-scripting/openmw_self>`
+     - |bdg-ctx-local|
+     - Full access to the object the script is attached to.
+   * - :doc:`storage </reference/lua-scripting/openmw_storage>`
+     - |bdg-ctx-all|
+     - Storage API. In particular can be used to store data between game sessions.
+   * - :doc:`types </reference/lua-scripting/openmw_types>`
+     - |bdg-ctx-global| |bdg-ctx-local| |bdg-ctx-player|
+     - Functions for specific types of game objects.
+   * - :doc:`ui </reference/lua-scripting/openmw_ui>`
+     - |bdg-ctx-menu| |bdg-ctx-player|
+     - Controls :ref:`user interface <UI reference>`.
+   * - :doc:`util </reference/lua-scripting/openmw_util>`
+     - |bdg-ctx-all|
+     - Defines utility functions and classes like 3D vectors, that don't depend on the game world.
+   * - :doc:`vfs </reference/lua-scripting/openmw_vfs>`
+     - |bdg-ctx-all|
+     - Read-only access to data directories via VFS.
+   * - :doc:`world </reference/lua-scripting/openmw_world>`
+     - |bdg-ctx-global|
+     - Read-write access to the game world.

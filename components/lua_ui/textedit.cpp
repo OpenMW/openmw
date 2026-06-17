@@ -46,7 +46,9 @@ namespace LuaUi
 
     void LuaTextEdit::textChange(MyGUI::EditBox*)
     {
-        triggerEvent("textChanged", sol::make_object(lua(), mEditBox->getCaption().asUTF8()));
+        protectedCall([this](LuaUtil::LuaView& view) {
+            triggerEvent("textChanged", sol::make_object(view.sol(), mEditBox->getCaption().asUTF8()));
+        });
     }
 
     void LuaTextEdit::updateCoord()
@@ -73,5 +75,17 @@ namespace LuaUi
             normalSize.height = std::max(normalSize.height, targetHeight);
         }
         return normalSize;
+    }
+
+    const std::vector<std::string_view>& LuaTextEdit::allUsedProperties() const
+    {
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "text", "textSize", "textColor", "wordWrap", "textAlignH",
+                "textAlignV", "multiline", "readOnly", "autoSize" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
+            return props;
+        });
+        return usedProps;
     }
 }

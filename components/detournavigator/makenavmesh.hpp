@@ -4,8 +4,10 @@
 #include "recastmesh.hpp"
 #include "tileposition.hpp"
 
+#include <components/esm/refid.hpp>
+
 #include <memory>
-#include <vector>
+#include <span>
 
 class dtNavMesh;
 struct rcConfig;
@@ -41,13 +43,12 @@ namespace DetourNavigator
             && recastMesh.getHeightfields().empty() && recastMesh.getFlatHeightfields().empty();
     }
 
-    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
-        std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds,
-        const RecastSettings& settings);
+    std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh, ESM::RefId worldspace,
+        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings);
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
-        const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
-        const TilePosition& tile, const RecastSettings& settings);
+        std::span<const OffMeshConnection> offMeshConnections, const AgentBounds& agentBounds, const TilePosition& tile,
+        const RecastSettings& settings);
 
     void initEmptyNavMesh(const Settings& settings, dtNavMesh& navMesh);
 

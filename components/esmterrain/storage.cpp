@@ -9,8 +9,11 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmterrain.hpp>
+#include <components/esm/util.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm4/loadland.hpp>
+#include <components/esm4/loadltex.hpp>
+#include <components/esm4/loadtxst.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
@@ -88,6 +91,8 @@ namespace ESMTerrain
     LandObject::LandObject(const ESM4::Land& land, int loadFlags)
         : mData(land, loadFlags)
     {
+        mEsm4DefaultLayerInfo.mDiffuseMap = land.mDefaultDiffuseMap;
+        mEsm4DefaultLayerInfo.mNormalMap = land.mDefaultNormalMap;
     }
 
     LandObject::LandObject(const ESM::Land& land, int loadFlags)
@@ -102,8 +107,8 @@ namespace ESMTerrain
 
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
-    Storage::Storage(const VFS::Manager* vfs, const std::string& normalMapPattern,
-        const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern,
+    Storage::Storage(const VFS::Manager* vfs, std::string_view normalMapPattern,
+        std::string_view normalHeightMapPattern, bool autoUseNormalMaps, std::string_view specularMapPattern,
         bool autoUseSpecularMaps)
         : mVFS(vfs)
         , mNormalMapPattern(normalMapPattern)
@@ -125,11 +130,11 @@ namespace ESMTerrain
         osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
         const int landSize = ESM::getLandSize(worldspace);
-        int startRow = (origin.x() - cellX) * landSize;
-        int startColumn = (origin.y() - cellY) * landSize;
+        int startRow = static_cast<int>((origin.x() - cellX) * landSize);
+        int startColumn = static_cast<int>((origin.y() - cellY) * landSize);
 
-        int endRow = startRow + size * (landSize - 1) + 1;
-        int endColumn = startColumn + size * (landSize - 1) + 1;
+        int endRow = static_cast<int>(startRow + size * (landSize - 1) + 1);
+        int endColumn = static_cast<int>(startColumn + size * (landSize - 1) + 1);
 
         if (data)
         {
@@ -278,8 +283,8 @@ namespace ESMTerrain
 
         const auto handleSample = [&](std::size_t cellShiftX, std::size_t cellShiftY, std::size_t row, std::size_t col,
                                       std::size_t vertX, std::size_t vertY) {
-            const int cellX = startCellX + cellShiftX;
-            const int cellY = startCellY + cellShiftY;
+            const int cellX = startCellX + static_cast<int>(cellShiftX);
+            const int cellY = startCellY + static_cast<int>(cellShiftY);
             const std::pair cell{ cellX, cellY };
             const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
 
@@ -306,7 +311,7 @@ namespace ESMTerrain
             if (heightData != nullptr)
                 height = heightData->getHeights()[col * cellSize + row];
             if (alteration)
-                height += getAlteredHeight(col, row);
+                height += getAlteredHeight(static_cast<int>(col), static_cast<int>(row));
 
             const std::size_t vertIndex = vertX * numVerts + vertY;
 
@@ -320,7 +325,7 @@ namespace ESMTerrain
 
             if (normalData != nullptr)
             {
-                for (std::size_t i = 0; i < 3; ++i)
+                for (unsigned short i = 0; i < 3; ++i)
                     normal[i] = normalData->getNormals()[srcArrayIndex + i];
 
                 normal.normalize();
@@ -328,11 +333,11 @@ namespace ESMTerrain
 
             // Normals apparently don't connect seamlessly between cells
             if (col == cellSize - 1 || row == cellSize - 1)
-                fixNormal(normal, cellLocation, col, row, cache);
+                fixNormal(normal, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             // some corner normals appear to be complete garbage (z < 0)
             if ((row == 0 || row == cellSize - 1) && (col == 0 || col == cellSize - 1))
-                averageNormal(normal, cellLocation, col, row, cache);
+                averageNormal(normal, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             assert(normal.z() > 0);
 
@@ -341,16 +346,16 @@ namespace ESMTerrain
             osg::Vec4ub color(255, 255, 255, 255);
 
             if (colourData != nullptr)
-                for (std::size_t i = 0; i < 3; ++i)
+                for (unsigned short i = 0; i < 3; ++i)
                     color[i] = colourData->getColors()[srcArrayIndex + i];
 
             // Does nothing by default, override in OpenMW-CS
             if (alteration)
-                adjustColor(col, row, heightData, color);
+                adjustColor(static_cast<int>(col), static_cast<int>(row), heightData, color);
 
             // Unlike normals, colors mostly connect seamlessly between cells, but not always...
             if (col == cellSize - 1 || row == cellSize - 1)
-                fixColour(color, cellLocation, col, row, cache);
+                fixColour(color, cellLocation, static_cast<int>(col), static_cast<int>(row), cache);
 
             colours[vertIndex] = color;
         };
@@ -365,30 +370,124 @@ namespace ESMTerrain
             std::fill(positions.begin(), positions.end(), osg::Vec3f());
     }
 
-    std::string Storage::getTextureName(UniqueTextureId id)
+    VFS::Path::Normalized Storage::getTextureName(UniqueTextureId id)
     {
-        static constexpr char defaultTexture[] = "textures\\_land_default.dds";
-        if (id.first == 0)
-            return defaultTexture; // Not sure if the default texture really is hardcoded?
-
-        // NB: All vtex ids are +1 compared to the ltex ids
-        const ESM::LandTexture* ltex = getLandTexture(id.first - 1, id.second);
-        if (!ltex)
+        std::string_view texture = "_land_default.dds";
+        if (id.first != 0)
         {
-            Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first - 1 << " in plugin "
-                                << id.second << ", using default texture instead";
-            return defaultTexture;
+            // NB: All vtex ids are +1 compared to the ltex ids
+            const std::string* ltex = getLandTexture(id.first - 1, id.second);
+            if (ltex)
+                texture = *ltex;
+            else
+            {
+                Log(Debug::Warning) << "Warning: Unable to find land texture index " << id.first - 1 << " in plugin "
+                                    << id.second << ", using default texture instead";
+            }
         }
-
         // this is needed due to MWs messed up texture handling
-        std::string texture = Misc::ResourceHelpers::correctTexturePath(ltex->mTexture, mVFS);
+        return Misc::ResourceHelpers::correctTexturePath(VFS::Path::Normalized(texture), *mVFS);
+    }
 
-        return texture;
+    void Storage::getEsm4Blendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+        std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace)
+    {
+        const osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize - 1, chunkSize + 1) * 0.5f;
+        const int startCellX = static_cast<int>(std::floor(origin.x()));
+        const int startCellY = static_cast<int>(std::floor(origin.y()));
+
+        constexpr int quadsPerCell = 2;
+        constexpr int quadSize = ESM4::Land::sVertsPerSide / quadsPerCell;
+        const int quadCount = static_cast<int>(chunkSize * quadsPerCell);
+        assert(quadCount > 0);
+
+        const int blendmapSize = quadCount * quadSize + 1;
+
+        LandCache cache(startCellX - 1, startCellY - 1, static_cast<std::size_t>(std::ceil(chunkSize)) + 2);
+        std::pair lastCell{ startCellX, startCellY };
+        const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
+
+        std::map<ESM::FormId, std::size_t> textureIndicesMap;
+
+        auto getOrCreateBlendmap = [&](ESM::FormId texId) -> unsigned char* {
+            auto found = textureIndicesMap.find(texId);
+            if (found != textureIndicesMap.end())
+                return blendmaps[found->second]->data();
+            Terrain::LayerInfo info
+                = texId.isZeroOrUnset() ? land->getEsm4DefaultLayerInfo() : getLandTextureLayerInfo(texId);
+            osg::ref_ptr<osg::Image> image(new osg::Image);
+            image->allocateImage(blendmapSize, blendmapSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+            std::memset(image->data(), 0, image->getTotalDataSize());
+            textureIndicesMap.emplace(texId, blendmaps.size());
+            blendmaps.push_back(std::move(image));
+            layerList.push_back(std::move(info));
+            return blendmaps.back()->data();
+        };
+
+        const auto handleSample = [&](const CellSample& sample) {
+            const std::pair cell{ sample.mCellX, sample.mCellY };
+            if (lastCell != cell)
+            {
+                land = getLand(ESM::ExteriorCellLocation(sample.mCellX, sample.mCellY, worldspace), cache);
+                lastCell = cell;
+            }
+            if (!land)
+                return;
+            const ESM::LandData* ldata = land->getData(0);
+            if (!ldata)
+                return;
+            int quad;
+            if (sample.mSrcRow == 0)
+                quad = sample.mSrcCol == 0 ? 0 : 2;
+            else
+                quad = sample.mSrcCol == 0 ? 1 : 3;
+            const ESM4::Land::Texture& ltex = ldata->getEsm4Texture(quad);
+
+            unsigned char* const baseBlendmap = getOrCreateBlendmap(ESM::FormId::fromUint32(ltex.base.formId));
+            int starty = (static_cast<int>(sample.mDstCol) - 1) * quadSize;
+            int startx = static_cast<int>(sample.mDstRow) * quadSize;
+            for (int y = std::max(0, starty + 1); y <= starty + quadSize && y < blendmapSize; ++y)
+            {
+                unsigned char* const row = baseBlendmap + y * blendmapSize;
+                for (int x = startx; x < startx + quadSize && x < blendmapSize; ++x)
+                    row[x] = 255;
+            }
+
+            for (const auto& layer : ltex.layers)
+            {
+                unsigned char* const layerBlendmap = getOrCreateBlendmap(ESM::FormId::fromUint32(layer.texture.formId));
+                for (const ESM4::Land::VTXT& v : layer.data)
+                {
+                    int y = v.position / (quadSize + 1);
+                    int x = v.position % (quadSize + 1);
+                    if (x == quadSize || startx + x >= blendmapSize || y == 0 || starty + y >= blendmapSize
+                        || starty + y < 0)
+                    {
+                        continue;
+                    }
+                    size_t index = static_cast<size_t>((starty + y) * blendmapSize + startx + x);
+                    auto delta = static_cast<unsigned char>(std::clamp(static_cast<int>(v.opacity * 255.f), 0, 255));
+                    baseBlendmap[index] -= std::min(baseBlendmap[index], delta);
+                    layerBlendmap[index] = delta;
+                }
+            }
+        };
+
+        sampleBlendmaps(chunkSize, origin.x(), origin.y(), quadsPerCell, handleSample);
+
+        if (blendmaps.size() == 1)
+            blendmaps.clear(); // If a single texture fills the whole terrain, there is no need to blend
     }
 
     void Storage::getBlendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
         std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace)
     {
+        if (ESM::isEsm4Ext(worldspace))
+        {
+            getEsm4Blendmaps(chunkSize, chunkCenter, blendmaps, layerList, worldspace);
+            return;
+        }
+
         const osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize, chunkSize) * 0.5f;
         const int startCellX = static_cast<int>(std::floor(origin.x()));
         const int startCellY = static_cast<int>(std::floor(origin.y()));
@@ -416,21 +515,21 @@ namespace ESMTerrain
 
         sampleBlendmaps(chunkSize, origin.x(), origin.y(), ESM::Land::LAND_TEXTURE_SIZE, handleSample);
 
-        std::map<UniqueTextureId, unsigned int> textureIndicesMap;
+        std::map<UniqueTextureId, std::size_t> textureIndicesMap;
 
         for (std::size_t y = 0; y < blendmapSize; ++y)
         {
             for (std::size_t x = 0; x < blendmapSize; ++x)
             {
                 const UniqueTextureId id = textureIds[y * blendmapSize + x];
-                std::map<UniqueTextureId, unsigned int>::iterator found = textureIndicesMap.find(id);
+                auto found = textureIndicesMap.find(id);
                 if (found == textureIndicesMap.end())
                 {
-                    unsigned int layerIndex = layerList.size();
+                    std::size_t layerIndex = layerList.size();
                     Terrain::LayerInfo info = getLayerInfo(getTextureName(id));
 
                     // look for existing diffuse map, which may be present when several plugins use the same texture
-                    for (unsigned int i = 0; i < layerList.size(); ++i)
+                    for (std::size_t i = 0; i < layerList.size(); ++i)
                     {
                         if (layerList[i].mDiffuseMap == info.mDiffuseMap)
                         {
@@ -451,9 +550,9 @@ namespace ESMTerrain
                         layerList.push_back(std::move(info));
                     }
                 }
-                const unsigned int layerIndex = found->second;
+                const std::size_t layerIndex = found->second;
                 unsigned char* const data = blendmaps[layerIndex]->data();
-                const std::size_t realY = (blendmapSize - y - 1) * imageScaleFactor;
+                const std::size_t realY = y * imageScaleFactor;
                 const std::size_t realX = x * imageScaleFactor;
                 data[((realY + 0) * blendmapImageSize + realX + 0)] = 255;
                 data[((realY + 1) * blendmapImageSize + realX + 0)] = 255;
@@ -468,7 +567,7 @@ namespace ESMTerrain
 
     float Storage::getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace)
     {
-        const float cellSize = ESM::getCellSize(worldspace);
+        const float cellSize = static_cast<float>(ESM::getCellSize(worldspace));
         int cellX = static_cast<int>(std::floor(worldPos.x() / cellSize));
         int cellY = static_cast<int>(std::floor(worldPos.y() / cellSize));
 
@@ -546,7 +645,8 @@ namespace ESMTerrain
         */
 
         // Solve plane equation for z
-        return (-plane.getNormal().x() * nX - plane.getNormal().y() * nY - plane[3]) / plane.getNormal().z() * cellSize;
+        return static_cast<float>(
+            (-plane.getNormal().x() * nX - plane.getNormal().y() * nY - plane[3]) / plane.getNormal().z() * cellSize);
     }
 
     const LandObject* Storage::getLand(ESM::ExteriorCellLocation cellLocation, LandCache& cache)
@@ -566,14 +666,14 @@ namespace ESMTerrain
         return 0;
     }
 
-    Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
+    Terrain::LayerInfo Storage::getLayerInfo(VFS::Path::NormalizedView texture)
     {
         std::lock_guard<std::mutex> lock(mLayerInfoMutex);
 
         // Already have this cached?
-        std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);
-        if (found != mLayerInfoMap.end())
-            return found->second;
+        const auto it = mLayerInfoMap.find(texture);
+        if (it != mLayerInfoMap.end())
+            return it->second;
 
         Terrain::LayerInfo info;
         info.mParallax = false;
@@ -582,34 +682,84 @@ namespace ESMTerrain
 
         if (mAutoUseNormalMaps)
         {
-            std::string texture_ = texture;
-            Misc::StringUtils::replaceLast(texture_, ".", mNormalHeightMapPattern + ".");
-            if (mVFS->exists(texture_))
+            std::string normalHeightMapValue(texture.value());
+            Misc::StringUtils::replaceLast(normalHeightMapValue, ".", mNormalHeightMapPattern + ".");
+            VFS::Path::Normalized normalHeightMap(std::move(normalHeightMapValue));
+            if (mVFS->exists(normalHeightMap))
             {
-                info.mNormalMap = std::move(texture_);
+                info.mNormalMap = std::move(normalHeightMap);
                 info.mParallax = true;
             }
             else
             {
-                texture_ = texture;
-                Misc::StringUtils::replaceLast(texture_, ".", mNormalMapPattern + ".");
-                if (mVFS->exists(texture_))
-                    info.mNormalMap = std::move(texture_);
+                std::string normalMapValue(texture.value());
+                Misc::StringUtils::replaceLast(normalMapValue, ".", mNormalMapPattern + ".");
+                VFS::Path::Normalized normalMap(std::move(normalMapValue));
+                if (mVFS->exists(normalMap))
+                    info.mNormalMap = std::move(normalMap);
             }
         }
 
         if (mAutoUseSpecularMaps)
         {
-            std::string texture_ = texture;
-            Misc::StringUtils::replaceLast(texture_, ".", mSpecularMapPattern + ".");
-            if (mVFS->exists(texture_))
+            std::string specularMapValue(texture.value());
+            Misc::StringUtils::replaceLast(specularMapValue, ".", mSpecularMapPattern + ".");
+            VFS::Path::Normalized specularMap(std::move(specularMapValue));
+            if (mVFS->exists(specularMap))
             {
-                info.mDiffuseMap = std::move(texture_);
+                info.mDiffuseMap = std::move(specularMap);
                 info.mSpecular = true;
             }
         }
 
-        mLayerInfoMap[texture] = info;
+        mLayerInfoMap.emplace_hint(it, texture, info);
+
+        return info;
+    }
+
+    Terrain::LayerInfo Storage::getLandTextureLayerInfo(ESM::FormId id)
+    {
+        if (const ESM4::LandTexture* ltex = getEsm4LandTexture(id))
+        {
+            if (!ltex->mTextureFile.empty())
+            {
+                constexpr VFS::Path::NormalizedView landscape("textures/landscape");
+                return getLayerInfo(VFS::Path::join(landscape, ltex->mTextureFile)); // TES4
+            }
+            if (const ESM4::TextureSet* txst = getEsm4TextureSet(ltex->mTexture))
+                return getTextureSetLayerInfo(*txst); // TES5
+            else
+                Log(Debug::Warning) << "TextureSet not found: " << ltex->mTexture.toString();
+        }
+        else
+            Log(Debug::Warning) << "LandTexture not found: " << id.toString();
+        return getLayerInfo(VFS::Path::NormalizedView());
+    }
+
+    Terrain::LayerInfo Storage::getTextureSetLayerInfo(const ESM4::TextureSet& txst)
+    {
+        Terrain::LayerInfo info;
+
+        assert(!txst.mDiffuse.empty() && "getlayerInfo: empty diffuse map");
+
+        constexpr VFS::Path::NormalizedView textures("textures");
+
+        info.mDiffuseMap = VFS::Path::join(textures, txst.mDiffuse);
+
+        if (!txst.mNormalMap.empty())
+            info.mNormalMap = VFS::Path::join(textures, txst.mNormalMap);
+
+        // FIXME: this flag indicates height info in alpha channel of normal map
+        //        but the normal map alpha channel has specular info instead
+        //        (probably needs some flag in the terrain shader to fix)
+        info.mParallax = false;
+        // FIXME: this flag indicates specular info in alpha channel of diffuse
+        //        but the diffuse alpha channel has transparency data instead
+        //        (probably needs some flag in the terrain shader to fix)
+        info.mSpecular = false;
+
+        // FIXME: should support other features of ESM4::TextureSet
+        //        probably need corresponding support in the terrain shader
 
         return info;
     }
@@ -624,9 +774,12 @@ namespace ESMTerrain
         return ESM::getLandSize(worldspace);
     }
 
-    int Storage::getBlendmapScale(float chunkSize)
+    int Storage::getTextureTileCount(float chunkSize, ESM::RefId worldspace)
     {
-        return ESM::Land::LAND_TEXTURE_SIZE * chunkSize;
+        if (ESM::isEsm4Ext(worldspace))
+            return static_cast<int>(2 * ESM4::Land::sQuadTexturePerSide * chunkSize);
+        else
+            return static_cast<int>(ESM::Land::LAND_TEXTURE_SIZE * chunkSize);
     }
 
 }

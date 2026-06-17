@@ -18,6 +18,7 @@
 #include "../mwgui/tooltips.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -42,10 +43,7 @@ namespace MWClass
 
     std::string_view Apparatus::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Apparatus>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Apparatus::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const

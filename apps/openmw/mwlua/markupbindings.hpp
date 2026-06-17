@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initMarkupPackage(const Context&);
+    struct Context;
+
+    sol::table initMarkupPackage(const Context& context);
 }
 
 #endif // MWLUA_MARKUPBINDINGS_H

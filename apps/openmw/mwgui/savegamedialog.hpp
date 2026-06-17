@@ -24,10 +24,12 @@ namespace MWGui
 
         void setLoadOrSave(bool load);
 
+        ControllerButtons* getControllerButtons() override;
+
     private:
         void confirmDeleteSave();
 
-        void onKeyButtonPressed(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char character);
+        void onKeyButtonPressed(MyGUI::Widget* sender, MyGUI::KeyCode key, MyGUI::Char character);
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onOkButtonClicked(MyGUI::Widget* sender);
         void onDeleteButtonClicked(MyGUI::Widget* sender);
@@ -57,6 +59,7 @@ namespace MWGui
         bool mSaving;
 
         MyGUI::ComboBox* mCharacterSelection;
+        MyGUI::EditBox* mCellName;
         MyGUI::EditBox* mInfoText;
         MyGUI::Button* mOkButton;
         MyGUI::Button* mCancelButton;
@@ -66,6 +69,9 @@ namespace MWGui
 
         const MWState::Character* mCurrentCharacter;
         const MWState::Slot* mCurrentSlot;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        bool mOkButtonFocus = true;
     };
 
 }

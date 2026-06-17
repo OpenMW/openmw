@@ -48,8 +48,8 @@ namespace ESSImport
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             npcStats.mSkills[i].mMod = 0.f;
-            npcStats.mSkills[i].mCurrent = actorData.mSkills[i][1];
-            npcStats.mSkills[i].mBase = actorData.mSkills[i][0];
+            npcStats.mSkills[i].mCurrent = static_cast<float>(actorData.mSkills[i][1]);
+            npcStats.mSkills[i].mBase = static_cast<float>(actorData.mSkills[i][0]);
         }
 
         npcStats.mTimeToStartDrowning = actorData.mACDT.mBreathMeter;
@@ -90,7 +90,7 @@ namespace ESSImport
             scriptedAnim.mAbsolute = true;
             // Neither loop count nor queueing seems to be supported by the ess format.
             scriptedAnim.mLoopCount = std::numeric_limits<size_t>::max();
-            state.mScriptedAnims.push_back(scriptedAnim);
+            state.mScriptedAnims.push_back(std::move(scriptedAnim));
         }
         else
             // TODO: Handle 0xFF index, which seems to be used for finished animations.

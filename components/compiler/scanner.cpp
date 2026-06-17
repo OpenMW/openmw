@@ -77,6 +77,12 @@ namespace Compiler
                     mTolerantNames = tolerant;
                     return cont;
                 }
+                // These are reset when the newline is read, but they could have been re-enabled
+                if (mPutbackCode == S_newline)
+                {
+                    mTolerantNames = false;
+                    mExpectName = false;
+                }
                 return parser.parseSpecial(mPutbackCode, mPutbackLoc, *this);
             }
 
@@ -205,7 +211,7 @@ namespace Compiler
             else if (!c.isMinusSign() && isStringCharacter(c))
             {
                 /// workaround that allows names to begin with digits
-                return scanName(c, parser, cont, value);
+                return scanName(c, parser, cont, std::move(value));
             }
             else if (c == '.')
             {

@@ -12,6 +12,7 @@
 #include <osg/Texture3D>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -86,23 +87,23 @@ namespace
     };
 
     static osg::FrameBufferAttachment createFrameBufferAttachmentFromTemplate(
-        Usage usage, int width, int height, osg::Texture* template_, int samples)
+        Usage usage, int width, int height, osg::Texture* textureTemplate, int samples)
     {
         if (usage == Usage::RENDER_BUFFER && !Stereo::getMultiview())
         {
             osg::ref_ptr<osg::RenderBuffer> attachment
-                = new osg::RenderBuffer(width, height, template_->getInternalFormat(), samples);
+                = new osg::RenderBuffer(width, height, textureTemplate->getInternalFormat(), samples);
             return osg::FrameBufferAttachment(attachment);
         }
 
         auto texture = Stereo::createMultiviewCompatibleTexture(width, height, samples);
-        texture->setSourceFormat(template_->getSourceFormat());
-        texture->setSourceType(template_->getSourceType());
-        texture->setInternalFormat(template_->getInternalFormat());
-        texture->setFilter(osg::Texture2D::MIN_FILTER, template_->getFilter(osg::Texture2D::MIN_FILTER));
-        texture->setFilter(osg::Texture2D::MAG_FILTER, template_->getFilter(osg::Texture2D::MAG_FILTER));
-        texture->setWrap(osg::Texture::WRAP_S, template_->getWrap(osg::Texture2D::WRAP_S));
-        texture->setWrap(osg::Texture::WRAP_T, template_->getWrap(osg::Texture2D::WRAP_T));
+        texture->setSourceFormat(textureTemplate->getSourceFormat());
+        texture->setSourceType(textureTemplate->getSourceType());
+        texture->setInternalFormat(textureTemplate->getInternalFormat());
+        texture->setFilter(osg::Texture2D::MIN_FILTER, textureTemplate->getFilter(osg::Texture2D::MIN_FILTER));
+        texture->setFilter(osg::Texture2D::MAG_FILTER, textureTemplate->getFilter(osg::Texture2D::MAG_FILTER));
+        texture->setWrap(osg::Texture::WRAP_S, textureTemplate->getWrap(osg::Texture2D::WRAP_S));
+        texture->setWrap(osg::Texture::WRAP_T, textureTemplate->getWrap(osg::Texture2D::WRAP_T));
 
         return Stereo::createMultiviewCompatibleAttachment(texture);
     }
@@ -134,13 +135,12 @@ namespace MWRender
 
         mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
-        mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
+        mHUDCamera->setClearColor(osg::Vec4(0.45f, 0.45f, 0.14f, 1.f));
         mHUDCamera->setClearMask(0);
         mHUDCamera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1, 0, 1));
         mHUDCamera->setAllowEventFocus(false);
         mHUDCamera->setViewport(0, 0, mWidth, mHeight);
         mHUDCamera->setNodeMask(Mask_RenderToTexture);
-        mHUDCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         mHUDCamera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         mHUDCamera->addChild(mCanvases[0]);
         mHUDCamera->addChild(mCanvases[1]);
@@ -184,7 +184,7 @@ namespace MWRender
         auto distortion = loadTechnique("internal_distortion");
         distortion->setInternal(true);
         distortion->setLocked(true);
-        mInternalTechniques.push_back(distortion);
+        mInternalTechniques.push_back(std::move(distortion));
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
@@ -204,9 +204,9 @@ namespace MWRender
         else
             Log(Debug::Error) << "'glDisablei' unsupported, pass normals will not be available to shaders.";
 
-        mGLSLVersion = ext->glslLanguageVersion * 100;
+        mGLSLVersion = static_cast<int>(ext->glslLanguageVersion * 100);
         mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
-        mStateUpdater = new fx::StateUpdater(mUBO);
+        mStateUpdater = new Fx::StateUpdater(mUBO);
 
         addChild(mHUDCamera);
         addChild(mRootNode);
@@ -250,14 +250,12 @@ namespace MWRender
 
     void PostProcessor::populateTechniqueFiles()
     {
-        for (const auto& name : mVFS->getRecursiveDirectoryIterator(fx::Technique::sSubdir))
+        for (const auto& path : mVFS->getRecursiveDirectoryIterator(Fx::Technique::sSubdir))
         {
-            std::filesystem::path path = Files::pathFromUnicodeString(name);
-            std::string fileExt = Misc::StringUtils::lowerCase(Files::pathToUnicodeString(path.extension()));
-            if (!path.parent_path().has_parent_path() && fileExt == fx::Technique::sExt)
+            std::string_view fileExt = Misc::getFileExtension(path);
+            if (path.parent().parent().empty() && fileExt == Fx::Technique::sExt)
             {
-                const auto absolutePath = mVFS->getAbsoluteFileName(path);
-                mTechniqueFileMap[Files::pathToUnicodeString(absolutePath.stem())] = absolutePath;
+                mTechniqueFiles.emplace(path);
             }
         }
     }
@@ -276,7 +274,7 @@ namespace MWRender
 
     void PostProcessor::traverse(osg::NodeVisitor& nv)
     {
-        size_t frameId = nv.getTraversalNumber() % 2;
+        unsigned frameId = nv.getTraversalNumber() % 2;
 
         if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
             cull(frameId, static_cast<osgUtil::CullVisitor*>(&nv));
@@ -286,7 +284,7 @@ namespace MWRender
         osg::Group::traverse(nv);
     }
 
-    void PostProcessor::cull(size_t frameId, osgUtil::CullVisitor* cv)
+    void PostProcessor::cull(unsigned frameId, osgUtil::CullVisitor* cv)
     {
         if (const auto& fbo = getFbo(FBO_Intercept, frameId))
         {
@@ -313,7 +311,8 @@ namespace MWRender
 
         size_t frame = cv->getTraversalNumber();
 
-        mStateUpdater->setResolution(osg::Vec2f(cv->getViewport()->width(), cv->getViewport()->height()));
+        mStateUpdater->setResolution(osg::Vec2f(
+            static_cast<float>(cv->getViewport()->width()), static_cast<float>(cv->getViewport()->height())));
 
         // per-frame data
         if (frame != mLastFrameNumber)
@@ -323,6 +322,8 @@ namespace MWRender
 
             mStateUpdater->setSimulationTime(static_cast<float>(stamp->getSimulationTime()));
             mStateUpdater->setDeltaSimulationTime(static_cast<float>(stamp->getSimulationTime() - mLastSimulationTime));
+            // Use a signed int because 'uint' type is not supported in GLSL 120 without extensions
+            mStateUpdater->setFrameNumber(static_cast<int>(stamp->getFrameNumber()));
             mLastSimulationTime = stamp->getSimulationTime();
 
             for (const auto& dispatchNode : mCanvases[frameId]->getPasses())
@@ -346,10 +347,10 @@ namespace MWRender
 
         for (auto& technique : mTechniques)
         {
-            if (!technique || technique->getStatus() == fx::Technique::Status::File_Not_exists)
+            if (technique->getStatus() == Fx::Technique::Status::File_Not_exists)
                 continue;
 
-            const auto lastWriteTime = std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]);
+            const auto lastWriteTime = mVFS->getLastModified(technique->getFileName());
             const bool isDirty = technique->setLastModificationTime(lastWriteTime);
 
             if (!isDirty)
@@ -361,7 +362,7 @@ namespace MWRender
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
             if (technique->compile())
-                Log(Debug::Info) << "Reloaded technique : " << mTechniqueFileMap[technique->getName()];
+                Log(Debug::Info) << "Reloaded technique : " << technique->getFileName();
 
             mReload = technique->isValid();
         }
@@ -399,7 +400,7 @@ namespace MWRender
             createObjectsForFrame(frameId);
 
             mDirty = false;
-            mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
+            mCanvases[frameId]->setPasses(Fx::DispatchArray(mTemplateData));
         }
 
         if ((mNormalsSupported && mNormals != mPrevNormals) || (mPassLights != mPrevPassLights))
@@ -409,10 +410,14 @@ namespace MWRender
 
             mViewer->stopThreading();
 
-            auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
-            auto defines = shaderManager.getGlobalDefines();
-            defines["disableNormals"] = mNormals ? "0" : "1";
-            shaderManager.setGlobalDefines(defines);
+            if (mNormalsSupported)
+            {
+                auto& shaderManager
+                    = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
+                auto defines = shaderManager.getGlobalDefines();
+                defines["disableNormals"] = mNormals ? "0" : "1";
+                shaderManager.setGlobalDefines(defines);
+            }
 
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);
             mStateUpdater->bindPointLights(mPassLights ? mRendering.getLightRoot()->getPPLightsBuffer() : nullptr);
@@ -462,8 +467,8 @@ namespace MWRender
         textures[Tex_Distortion]->setSourceFormat(GL_RGB);
         textures[Tex_Distortion]->setInternalFormat(GL_RGB);
 
-        Stereo::setMultiviewCompatibleTextureSize(
-            textures[Tex_Distortion], width * DistortionRatio, height * DistortionRatio);
+        Stereo::setMultiviewCompatibleTextureSize(textures[Tex_Distortion], static_cast<int>(width * DistortionRatio),
+            static_cast<int>(height * DistortionRatio));
         textures[Tex_Distortion]->dirtyTextureObject();
 
         auto setupDepth = [](osg::Texture* tex) {
@@ -497,6 +502,7 @@ namespace MWRender
         if (mSamples > 1)
         {
             fbos[FBO_Multisample] = new osg::FrameBufferObject;
+            fbos[FBO_Intercept] = new osg::FrameBufferObject;
             auto colorRB = createFrameBufferAttachmentFromTemplate(
                 Usage::RENDER_BUFFER, width, height, textures[Tex_Scene], mSamples);
             if (mNormals && mNormalsSupported)
@@ -505,6 +511,8 @@ namespace MWRender
                     Usage::RENDER_BUFFER, width, height, textures[Tex_Normal], mSamples);
                 fbos[FBO_Multisample]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
                 fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1, normalRB);
+                fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1,
+                    Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
             }
             auto depthRB = createFrameBufferAttachmentFromTemplate(
                 Usage::RENDER_BUFFER, width, height, textures[Tex_Depth], mSamples);
@@ -513,11 +521,8 @@ namespace MWRender
                 osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER, depthRB);
             fbos[FBO_FirstPerson]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, colorRB);
 
-            fbos[FBO_Intercept] = new osg::FrameBufferObject;
             fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                 Stereo::createMultiviewCompatibleAttachment(textures[Tex_Scene]));
-            fbos[FBO_Intercept]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER1,
-                Stereo::createMultiviewCompatibleAttachment(textures[Tex_Normal]));
         }
         else
         {
@@ -560,11 +565,11 @@ namespace MWRender
         mNormals = false;
         mPassLights = false;
 
-        std::vector<fx::Types::RenderTarget> attachmentsToDirty;
+        std::vector<Fx::Types::RenderTarget> attachmentsToDirty;
 
         for (const auto& technique : mTechniques)
         {
-            if (!technique || !technique->isValid())
+            if (!technique->isValid())
                 continue;
 
             if (technique->getGLSLVersion() > mGLSLVersion)
@@ -574,7 +579,7 @@ namespace MWRender
                 continue;
             }
 
-            fx::DispatchNode node;
+            Fx::DispatchNode node;
 
             node.mFlags = technique->getFlags();
 
@@ -587,7 +592,7 @@ namespace MWRender
             if (technique->getLights())
                 mPassLights = true;
 
-            if (node.mFlags & fx::Technique::Flag_Disable_SunGlare)
+            if (node.mFlags & Fx::Technique::Flag_Disable_SunGlare)
                 sunglare = false;
 
             // required default samplers available to every shader pass
@@ -627,13 +632,13 @@ namespace MWRender
 
                 if (auto type = uniform->getType())
                     uniform->setUniform(node.mRootStateSet->getOrCreateUniform(
-                        uniform->mName.c_str(), *type, uniform->getNumElements()));
+                        uniform->mName, *type, static_cast<unsigned>(uniform->getNumElements())));
             }
 
             for (const auto& pass : technique->getPasses())
             {
                 int subTexUnit = texUnit;
-                fx::DispatchNode::SubPass subPass;
+                Fx::DispatchNode::SubPass subPass;
 
                 pass->prepareStateSet(subPass.mStateSet, technique->getName());
 
@@ -641,23 +646,36 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    // FIXME: https://gitlab.com/OpenMW/openmw/-/work_items/9034
+                    std::string target = pass->getTarget();
+                    auto& renderTarget = technique->getRenderTargetsMap()[target];
                     subPass.mSize = renderTarget.mSize;
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
+
+                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
+                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
+
+                    if (subPass.mMipMap)
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+                    }
+                    else
+                    {
+                        subPass.mRenderTexture->setNumMipmapLevels(0);
+                    }
+                    subPass.mRenderTexture->setTextureSize(w, h);
+                    subPass.mRenderTexture->dirtyTextureObject();
 
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                         osg::FrameBufferAttachment(subPass.mRenderTexture));
 
-                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
-                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
-
                     if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
                             [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
                         == attachmentsToDirty.cend())
                     {
-                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                        attachmentsToDirty.push_back(Fx::Types::RenderTarget(renderTarget));
                     }
                 }
 
@@ -676,7 +694,7 @@ namespace MWRender
                             [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
                         == attachmentsToDirty.cend())
                     {
-                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                        attachmentsToDirty.push_back(Fx::Types::RenderTarget(renderTarget));
                     }
                     subTexUnit++;
                 }
@@ -689,26 +707,27 @@ namespace MWRender
             mTemplateData.emplace_back(std::move(node));
         }
 
-        mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
+        mCanvases[frameId]->setPasses(Fx::DispatchArray(mTemplateData));
 
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
 
-        mRendering.getSkyManager()->setSunglare(sunglare);
+        if (mUsePostProcessing)
+            mRendering.getSkyManager()->setSunglare(sunglare);
 
         if (dirtyAttachments)
             mCanvases[frameId]->setDirtyAttachments(attachmentsToDirty);
     }
 
     PostProcessor::Status PostProcessor::enableTechnique(
-        std::shared_ptr<fx::Technique> technique, std::optional<int> location)
+        std::shared_ptr<Fx::Technique> technique, std::optional<int> location)
     {
-        if (!technique || technique->getLocked() || (location.has_value() && location.value() < 0))
+        if (technique->getLocked() || (location.has_value() && location.value() < 0))
             return Status_Error;
 
         disableTechnique(technique, false);
 
-        int pos = std::min<int>(location.value_or(mTechniques.size()) + mInternalTechniques.size(), mTechniques.size());
+        size_t pos = std::min(location.value_or(mTechniques.size()) + mInternalTechniques.size(), mTechniques.size());
 
         mTechniques.insert(mTechniques.begin() + pos, technique);
         dirtyTechniques(Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug);
@@ -716,9 +735,9 @@ namespace MWRender
         return Status_Toggled;
     }
 
-    PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<fx::Technique> technique, bool dirty)
+    PostProcessor::Status PostProcessor::disableTechnique(std::shared_ptr<Fx::Technique> technique, bool dirty)
     {
-        if (!technique || technique->getLocked())
+        if (technique->getLocked())
             return Status_Error;
 
         auto it = std::find(mTechniques.begin(), mTechniques.end(), technique);
@@ -732,35 +751,43 @@ namespace MWRender
         return Status_Toggled;
     }
 
-    bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<fx::Technique>& technique) const
+    bool PostProcessor::isTechniqueEnabled(const std::shared_ptr<Fx::Technique>& technique) const
     {
-        if (!technique)
-            return false;
-
         if (auto it = std::find(mTechniques.begin(), mTechniques.end(), technique); it == mTechniques.end())
             return false;
 
         return technique->isValid();
     }
 
-    std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
+    std::shared_ptr<Fx::Technique> PostProcessor::loadTechnique(std::string_view name, bool loadNextFrame)
+    {
+        VFS::Path::Normalized path = Fx::Technique::makeFileName(name);
+        return loadTechnique(VFS::Path::NormalizedView(path), loadNextFrame);
+    }
+
+    std::shared_ptr<Fx::Technique> PostProcessor::loadTechnique(VFS::Path::NormalizedView path, bool loadNextFrame)
     {
         for (const auto& technique : mTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
         for (const auto& technique : mQueuedTemplates)
-            if (Misc::StringUtils::ciEqual(technique->getName(), name))
+            if (technique->getFileName() == path)
                 return technique;
 
-        auto technique = std::make_shared<fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
-            name, renderWidth(), renderHeight(), mUBO, mNormalsSupported);
+        std::string name;
+        if (mTechniqueFiles.contains(path))
+            name = mVFS->getStem(path);
+        else
+            name = path.stem();
+
+        auto technique = std::make_shared<Fx::Technique>(*mVFS, *mRendering.getResourceSystem()->getImageManager(),
+            path, std::move(name), renderWidth(), renderHeight(), mUBO, mNormalsSupported);
 
         technique->compile();
 
-        if (technique->getStatus() != fx::Technique::Status::File_Not_exists)
-            technique->setLastModificationTime(
-                std::filesystem::last_write_time(mTechniqueFileMap[technique->getName()]));
+        if (technique->getStatus() != Fx::Technique::Status::File_Not_exists)
+            technique->setLastModificationTime(mVFS->getLastModified(path));
 
         if (loadNextFrame)
         {
@@ -771,6 +798,11 @@ namespace MWRender
         mTemplates.push_back(std::move(technique));
 
         return mTemplates.back();
+    }
+
+    PostProcessor::TechniqueList PostProcessor::getChain()
+    {
+        return mTechniques;
     }
 
     void PostProcessor::loadChain()
@@ -799,7 +831,7 @@ namespace MWRender
 
         for (const auto& technique : mTechniques)
         {
-            if (!technique || technique->getDynamic() || technique->getInternal())
+            if (technique->getDynamic() || technique->getInternal())
                 continue;
             chain.push_back(technique->getName());
         }
@@ -810,16 +842,21 @@ namespace MWRender
     void PostProcessor::toggleMode()
     {
         for (auto& technique : mTemplates)
+        {
+            if (technique->getStatus() == Fx::Technique::Status::File_Not_exists)
+                continue;
             technique->compile();
+        }
 
         dirtyTechniques(true);
     }
 
     void PostProcessor::disableDynamicShaders()
     {
-        for (auto& technique : mTechniques)
-            if (technique && technique->getDynamic())
-                disableTechnique(technique);
+        auto erased = std::erase_if(mTechniques, [](const auto& technique) { return technique->getDynamic(); });
+
+        if (erased)
+            dirtyTechniques();
     }
 
     int PostProcessor::renderWidth() const

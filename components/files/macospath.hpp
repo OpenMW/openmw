@@ -4,6 +4,7 @@
 #if defined(macintosh) || defined(Macintosh) || defined(__APPLE__) || defined(__MACH__)
 
 #include <filesystem>
+#include <vector>
 
 /**
  * \namespace Files
@@ -56,7 +57,7 @@ namespace Files
          */
         std::filesystem::path getGlobalDataPath() const;
 
-        std::filesystem::path getInstallPath() const;
+        std::vector<std::filesystem::path> getInstallPaths() const;
 
         std::string mName;
     };

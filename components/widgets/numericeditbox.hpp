@@ -38,7 +38,7 @@ namespace Gui
 
     private:
         void onEditTextChange(MyGUI::EditBox* sender);
-        void onKeyLostFocus(MyGUI::Widget* _new) override;
+        void onKeyLostFocus(MyGUI::Widget* newWidget) override;
         void onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char character) override;
 
         int mValue;

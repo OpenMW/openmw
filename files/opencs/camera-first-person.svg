@@ -47,7 +47,7 @@
        d="M 558.40946,259.99589 557.5,270 h 3 l 0.91695,11.00345 A 1.0867995,1.0867995 42.618179 0 0 562.5,282 h 5 a 1.0867995,1.0867995 137.38182 0 0 1.08305,-0.99655 L 569.5,270 h 2.75 l -0.90946,-10.00411 A 1.0950328,1.0950328 42.402786 0 0 570.25,259 H 559.5 a 1.0950328,1.0950328 137.59721 0 0 -1.09054,0.99589 z"
        transform="scale(0.26458333)" />
     <ellipse
-       style="font-variation-settings:normal;display:inline;opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
+       style="font-variation-settings:normal;display:inline;opacity:1;fill:#ffffff;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.13229157;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:fill markers stroke;stop-color:#000000;stop-opacity:1"
        id="ellipse2327"
        cx="149.48953"
        cy="67.071899"

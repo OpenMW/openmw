@@ -1,21 +1,23 @@
 #include "record.hpp"
 #include "labels.hpp"
 
+#include <format>
 #include <iostream>
+#include <numeric>
 #include <sstream>
+
+#include <osg/Math>
 
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/misc/strings/conversion.hpp>
-#include <components/misc/strings/format.hpp>
 
 namespace
 {
 
     void printAIPackage(const ESM::AIPackage& p)
     {
-        std::cout << "  AI Type: " << aiTypeLabel(p.mType) << " (" << Misc::StringUtils::format("0x%08X", p.mType)
-                  << ")" << std::endl;
+        std::cout << std::format("  AI Type: {} (0x{:08X})\n", aiTypeLabel(p.mType), std::uint32_t(p.mType));
         if (p.mType == ESM::AI_Wander)
         {
             std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
@@ -50,7 +52,7 @@ namespace
         }
         else
         {
-            std::cout << "    BadPackage: " << Misc::StringUtils::format("0x%08X", p.mType) << std::endl;
+            std::cout << std::format("    BadPackage: 0x{:08X}\n", std::uint32_t(p.mType));
         }
 
         if (!p.mCellName.empty())
@@ -59,81 +61,81 @@ namespace
 
     std::string ruleString(const ESM::DialogueCondition& ss)
     {
-        std::string_view type_str = "INVALID";
-        std::string_view func_str;
+        std::string_view typeStr = "INVALID";
+        std::string_view funcStr;
 
         switch (ss.mFunction)
         {
             case ESM::DialogueCondition::Function_Global:
-                type_str = "Global";
-                func_str = ss.mVariable;
+                typeStr = "Global";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Local:
-                type_str = "Local";
-                func_str = ss.mVariable;
+                typeStr = "Local";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Journal:
-                type_str = "Journal";
-                func_str = ss.mVariable;
+                typeStr = "Journal";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Item:
-                type_str = "Item count";
-                func_str = ss.mVariable;
+                typeStr = "Item count";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_Dead:
-                type_str = "Dead";
-                func_str = ss.mVariable;
+                typeStr = "Dead";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotId:
-                type_str = "Not ID";
-                func_str = ss.mVariable;
+                typeStr = "Not ID";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotFaction:
-                type_str = "Not Faction";
-                func_str = ss.mVariable;
+                typeStr = "Not Faction";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotClass:
-                type_str = "Not Class";
-                func_str = ss.mVariable;
+                typeStr = "Not Class";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotRace:
-                type_str = "Not Race";
-                func_str = ss.mVariable;
+                typeStr = "Not Race";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotCell:
-                type_str = "Not Cell";
-                func_str = ss.mVariable;
+                typeStr = "Not Cell";
+                funcStr = ss.mVariable;
                 break;
             case ESM::DialogueCondition::Function_NotLocal:
-                type_str = "Not Local";
-                func_str = ss.mVariable;
+                typeStr = "Not Local";
+                funcStr = ss.mVariable;
                 break;
             default:
-                type_str = "Function";
-                func_str = ruleFunction(ss.mFunction);
+                typeStr = "Function";
+                funcStr = ruleFunction(ss.mFunction);
                 break;
         }
 
-        std::string_view oper_str = "??";
+        std::string_view operStr = "??";
         switch (ss.mComparison)
         {
             case ESM::DialogueCondition::Comp_Eq:
-                oper_str = "==";
+                operStr = "==";
                 break;
             case ESM::DialogueCondition::Comp_Ne:
-                oper_str = "!=";
+                operStr = "!=";
                 break;
             case ESM::DialogueCondition::Comp_Gt:
-                oper_str = "> ";
+                operStr = "> ";
                 break;
             case ESM::DialogueCondition::Comp_Ge:
-                oper_str = ">=";
+                operStr = ">=";
                 break;
             case ESM::DialogueCondition::Comp_Ls:
-                oper_str = "< ";
+                operStr = "< ";
                 break;
             case ESM::DialogueCondition::Comp_Le:
-                oper_str = "<=";
+                operStr = "<=";
                 break;
             default:
                 break;
@@ -142,8 +144,7 @@ namespace
         std::ostringstream stream;
         std::visit([&](auto value) { stream << value; }, ss.mValue);
 
-        std::string result
-            = Misc::StringUtils::format("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
+        std::string result = std::format("{:<12} {:<32} {:2} {}", typeStr, funcStr, operStr, stream.str());
         return result;
     }
 
@@ -152,14 +153,16 @@ namespace
         int i = 0;
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effect.mData.mEffectID) << " ("
-                      << effect.mData.mEffectID << ")" << std::endl;
-            if (effect.mData.mSkill != -1)
-                std::cout << "    Skill: " << skillLabel(effect.mData.mSkill) << " (" << (int)effect.mData.mSkill << ")"
+            int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
+            int skillIdx = ESM::Skill::refIdToIndex(effect.mData.mSkill);
+            int attributeIdx = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
+            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
+                      << std::endl;
+            if (skillIdx != -1)
+                std::cout << "    Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            if (attributeIdx != -1)
+                std::cout << "    Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")"
                           << std::endl;
-            if (effect.mData.mAttribute != -1)
-                std::cout << "    Attribute: " << attributeLabel(effect.mData.mAttribute) << " ("
-                          << (int)effect.mData.mAttribute << ")" << std::endl;
             std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
                       << std::endl;
             // Area is always zero if range type is "Self"
@@ -175,12 +178,11 @@ namespace
     {
         for (const ESM::Transport::Dest& dest : transport)
         {
-            std::cout << "  Destination Position: " << Misc::StringUtils::format("%12.3f", dest.mPos.pos[0]) << ","
-                      << Misc::StringUtils::format("%12.3f", dest.mPos.pos[1]) << ","
-                      << Misc::StringUtils::format("%12.3f", dest.mPos.pos[2]) << ")" << std::endl;
-            std::cout << "  Destination Rotation: " << Misc::StringUtils::format("%9.6f", dest.mPos.rot[0]) << ","
-                      << Misc::StringUtils::format("%9.6f", dest.mPos.rot[1]) << ","
-                      << Misc::StringUtils::format("%9.6f", dest.mPos.rot[2]) << ")" << std::endl;
+            std::cout << std::format("  Destination Position: ({:12.3f}, {:12.3f}, {:12.3f})\n", dest.mPos.pos[0],
+                dest.mPos.pos[1], dest.mPos.pos[2]);
+            std::cout << std::format("  Destination Rotation: ({:12.3f}, {:12.3f}, {:12.3f})\n",
+                osg::RadiansToDegrees(dest.mPos.rot[0]), osg::RadiansToDegrees(dest.mPos.rot[1]),
+                osg::RadiansToDegrees(dest.mPos.rot[2]));
             if (!dest.mCellName.empty())
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
@@ -502,7 +504,7 @@ namespace EsmTool
     void Record<ESM::BodyPart>::print()
     {
         std::cout << "  Race: " << mData.mRace << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         std::cout << "  Type: " << meshTypeLabel(mData.mData.mType) << " (" << (int)mData.mData.mType << ")"
                   << std::endl;
         std::cout << "  Flags: " << bodyPartFlags(mData.mData.mFlags) << std::endl;
@@ -582,7 +584,7 @@ namespace EsmTool
             std::cout << "  Water Level: " << mData.mWater << std::endl;
         }
         else
-            std::cout << "  Map Color: " << Misc::StringUtils::format("0x%08X", mData.mMapColor) << std::endl;
+            std::cout << std::format("  Map Color: 0x{:08X}\n", mData.mMapColor);
         std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -593,7 +595,7 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Playable: " << mData.mData.mIsPlayable << std::endl;
-        std::cout << "  AI Services: " << Misc::StringUtils::format("0x%08X", mData.mData.mServices) << std::endl;
+        std::cout << std::format("  AI Services: 0x{:08X}\n", mData.mData.mServices);
         for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
             std::cout << "  Attribute" << (i + 1) << ": " << attributeLabel(mData.mData.mAttribute[i]) << " ("
                       << mData.mData.mAttribute[i] << ")" << std::endl;
@@ -641,8 +643,7 @@ namespace EsmTool
         std::cout << "  Flags: " << containerFlags(mData.mFlags) << std::endl;
         std::cout << "  Weight: " << mData.mWeight << std::endl;
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                      << " Item: " << item.mItem << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 
@@ -664,7 +665,8 @@ namespace EsmTool
 
         std::cout << "  Attributes:" << std::endl;
         for (size_t i = 0; i < mData.mData.mAttributes.size(); ++i)
-            std::cout << "    " << ESM::Attribute::indexToRefId(i) << ": " << mData.mData.mAttributes[i] << std::endl;
+            std::cout << "    " << ESM::Attribute::indexToRefId(static_cast<int>(i)) << ": "
+                      << mData.mData.mAttributes[i] << std::endl;
 
         std::cout << "  Health: " << mData.mData.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mData.mMana << std::endl;
@@ -679,8 +681,7 @@ namespace EsmTool
         std::cout << "  Gold: " << mData.mData.mGold << std::endl;
 
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                      << " Item: " << item.mItem << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
 
         for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
@@ -692,7 +693,7 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
+        std::cout << std::format("    AI Services:0x{:08X}\n", mData.mAiData.mServices);
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
             printAIPackage(package);
@@ -754,7 +755,7 @@ namespace EsmTool
                 std::cout << "    Attribute2 Requirement: " << mData.mData.mRankData[i].mAttribute2 << std::endl;
                 std::cout << "    One Skill at Level: " << mData.mData.mRankData[i].mPrimarySkill << std::endl;
                 std::cout << "    Two Skills at Level: " << mData.mData.mRankData[i].mFavouredSkill << std::endl;
-                std::cout << "    Faction Reaction: " << mData.mData.mRankData[i].mFactReaction << std::endl;
+                std::cout << "    Faction Reputation: " << mData.mData.mRankData[i].mFactReputation << std::endl;
             }
         for (const auto& reaction : mData.mReactions)
             std::cout << "  Reaction: " << reaction.second << " = " << reaction.first << std::endl;
@@ -844,15 +845,16 @@ namespace EsmTool
         std::cout << "  Value: " << mData.mData.mValue << std::endl;
         for (int i = 0; i != 4; i++)
         {
-            // A value of -1 means no effect
-            if (mData.mData.mEffectID[i] == -1)
+            // A value of EmptyRefId means no effect
+            if (mData.mData.mEffectID[i].empty())
                 continue;
-            std::cout << "  Effect: " << magicEffectLabel(mData.mData.mEffectID[i]) << " (" << mData.mData.mEffectID[i]
-                      << ")" << std::endl;
-            std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i]) << " (" << mData.mData.mSkills[i] << ")"
-                      << std::endl;
-            std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i]) << " ("
-                      << mData.mData.mAttributes[i] << ")" << std::endl;
+
+            int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
+            int skillIdx = ESM::Skill::refIdToIndex(mData.mData.mSkills[i]);
+            int attributeIdx = ESM::Attribute::refIdToIndex(mData.mData.mAttributes[i]);
+            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
+            std::cout << "  Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
+            std::cout << "  Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")" << std::endl;
         }
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -866,7 +868,9 @@ namespace EsmTool
 
         if (const ESM::Land::LandData* data = mData.getLandData(mData.mDataTypes))
         {
-            std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
+            std::cout << "  MinHeight: " << data->mMinHeight << std::endl;
+            std::cout << "  MaxHeight: " << data->mMaxHeight << std::endl;
+            std::cout << "  DataLoaded: " << data->mDataLoaded << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -972,7 +976,8 @@ namespace EsmTool
     template <>
     void Record<ESM::MagicEffect>::print()
     {
-        std::cout << "  Index: " << magicEffectLabel(mData.mIndex) << " (" << mData.mIndex << ")" << std::endl;
+        int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mId);
+        std::cout << "  Index: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Icon: " << mData.mIcon << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
@@ -1052,11 +1057,13 @@ namespace EsmTool
 
             std::cout << "  Attributes:" << std::endl;
             for (size_t i = 0; i != mData.mNpdt.mAttributes.size(); i++)
-                std::cout << "    " << attributeLabel(i) << ": " << int(mData.mNpdt.mAttributes[i]) << std::endl;
+                std::cout << "    " << attributeLabel(static_cast<int>(i)) << ": " << int(mData.mNpdt.mAttributes[i])
+                          << std::endl;
 
             std::cout << "  Skills:" << std::endl;
             for (size_t i = 0; i != mData.mNpdt.mSkills.size(); i++)
-                std::cout << "    " << skillLabel(i) << ": " << int(mData.mNpdt.mSkills[i]) << std::endl;
+                std::cout << "    " << skillLabel(static_cast<int>(i)) << ": " << int(mData.mNpdt.mSkills[i])
+                          << std::endl;
 
             std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
             std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
@@ -1065,8 +1072,7 @@ namespace EsmTool
         }
 
         for (const ESM::ContItem& item : mData.mInventory.mList)
-            std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                      << " Item: " << item.mItem << std::endl;
+            std::cout << std::format("  Inventory: Count: {:4d} Item: ", item.mCount) << item.mItem << std::endl;
 
         for (const auto& spell : mData.mSpells.mList)
             std::cout << "  Spell: " << spell << std::endl;
@@ -1078,7 +1084,7 @@ namespace EsmTool
         std::cout << "    AI Fight:" << (int)mData.mAiData.mFight << std::endl;
         std::cout << "    AI Flee:" << (int)mData.mAiData.mFlee << std::endl;
         std::cout << "    AI Alarm:" << (int)mData.mAiData.mAlarm << std::endl;
-        std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
+        std::cout << std::format("    AI Services:0x{:08X}\n", mData.mAiData.mServices);
 
         for (const ESM::AIPackage& package : mData.mAiPackage.mList)
             printAIPackage(package);
@@ -1179,18 +1185,18 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mId << std::endl;
 
-        std::cout << "  Num Shorts: " << mData.mData.mNumShorts << std::endl;
-        std::cout << "  Num Longs: " << mData.mData.mNumLongs << std::endl;
-        std::cout << "  Num Floats: " << mData.mData.mNumFloats << std::endl;
-        std::cout << "  Script Data Size: " << mData.mData.mScriptDataSize << std::endl;
-        std::cout << "  Table Size: " << mData.mData.mStringTableSize << std::endl;
+        std::cout << "  Num Shorts: " << mData.mNumShorts << std::endl;
+        std::cout << "  Num Longs: " << mData.mNumLongs << std::endl;
+        std::cout << "  Num Floats: " << mData.mNumFloats << std::endl;
+        std::cout << "  Script Data Size: " << mData.mScriptData.size() << std::endl;
+        std::cout << "  Table Size: " << ESM::computeScriptStringTableSize(mData.mVarNames) << std::endl;
 
         for (const std::string& variable : mData.mVarNames)
             std::cout << "  Variable: " << variable << std::endl;
 
         std::cout << "  ByteCode: ";
-        for (const unsigned char& byte : mData.mScriptData)
-            std::cout << Misc::StringUtils::format("%02X", (int)(byte));
+        for (unsigned char byte : mData.mScriptData)
+            std::cout << std::format("{:02X}", byte);
         std::cout << std::endl;
 
         if (mPrintPlain)
@@ -1309,7 +1315,8 @@ namespace EsmTool
         std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
         if (mData.mCellState.mHasFogOfWar)
         {
-            std::cout << "  North Marker Angle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  North Marker Angle: " << osg::RadiansToDegrees(mData.mFogState.mNorthMarkerAngle)
+                      << std::endl;
             std::cout << "  Bounds:" << std::endl;
             std::cout << "    Min X: " << mData.mFogState.mBounds.mMinX << std::endl;
             std::cout << "    Min Y: " << mData.mFogState.mBounds.mMinY << std::endl;

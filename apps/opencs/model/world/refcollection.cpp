@@ -8,6 +8,7 @@
 #include <apps/opencs/model/world/collection.hpp>
 
 #include <components/esm3/cellref.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/misc/strings/conversion.hpp>
 
@@ -47,7 +48,7 @@ namespace CSMWorld
 }
 
 void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages)
+    std::map<ESM::RefNum, unsigned int>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord(cellIndex);
 
@@ -64,6 +65,8 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 
         if (!ESM::Cell::getNextRef(reader, ref, isDeleted, mref, isMoved))
             break;
+        if (!base && reader.getIndex() == ref.mRefNum.mContentFile)
+            ref.mRefNum.mContentFile = -1;
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
         ref.mOriginalCell = base ? cell2.mId : ESM::RefId();
@@ -102,16 +105,7 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
         else
             ref.mCell = cell2.mId;
 
-        if (ref.mRefNum.mContentFile != -1 && !base)
-        {
-            ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
-            ref.mRefNum.mIndex &= 0x00ffffff;
-        }
-
-        unsigned int refNum = (ref.mRefNum.mIndex & 0x00ffffff)
-            | (ref.mRefNum.hasContentFile() ? ref.mRefNum.mContentFile : 0xff) << 24;
-
-        std::map<unsigned int, unsigned int>::iterator iter = cache.find(refNum);
+        auto iter = cache.find(ref.mRefNum);
 
         if (isMoved)
         {
@@ -181,7 +175,10 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
             ref.mIdNum = mNextId; // FIXME: fragile
             ref.mId = ESM::RefId::stringRefId(getNewId());
 
-            cache.emplace(refNum, ref.mIdNum);
+            if (!base && ref.mRefNum.mIndex > mHighestUsedRefNum)
+                mHighestUsedRefNum = ref.mRefNum.mIndex;
+
+            cache.emplace(ref.mRefNum, ref.mIdNum);
 
             auto record = std::make_unique<Record<CellRef>>();
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
@@ -226,6 +223,11 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 std::string CSMWorld::RefCollection::getNewId()
 {
     return "ref#" + std::to_string(mNextId++);
+}
+
+uint32_t CSMWorld::RefCollection::getNextRefNum()
+{
+    return ++mHighestUsedRefNum;
 }
 
 unsigned int CSMWorld::RefCollection::extractIdNum(std::string_view id) const
@@ -289,6 +291,7 @@ void CSMWorld::RefCollection::appendBlankRecord(const ESM::RefId& id, UniversalI
 
     record->get().mId = id;
     record->get().mIdNum = extractIdNum(id.getRefIdString());
+    record->get().mRefNum.mIndex = getNextRefNum();
 
     Collection<CellRef>::appendRecord(std::move(record));
 }
@@ -304,15 +307,13 @@ void CSMWorld::RefCollection::cloneRecord(
 
     copy->get().mId = destination;
     copy->get().mIdNum = extractIdNum(destination.getRefIdString());
+    copy->get().mRefNum.mIndex = getNextRefNum();
 
-    if (copy->get().mRefNum.mContentFile != 0)
+    if (copy->get().mRefNum.hasContentFile())
     {
         mRefIndex.insert(std::make_pair(static_cast<Record<CellRef>*>(copy.get())->get().mIdNum, index));
-        copy->get().mRefNum.mContentFile = 0;
-        copy->get().mRefNum.mIndex = index;
+        copy->get().mRefNum.mContentFile = -1;
     }
-    else
-        copy->get().mRefNum.mIndex = copy->get().mIdNum;
 
     insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
 }

@@ -131,19 +131,20 @@ namespace CSMWorld
         return mFemale;
     }
 
-    std::string ActorAdapter::ActorData::getSkeleton() const
+    VFS::Path::Normalized ActorAdapter::ActorData::getSkeleton() const
     {
+        constexpr VFS::Path::NormalizedView meshes("meshes");
         if (mCreature || !mSkeletonOverride.empty())
-            return "meshes\\" + mSkeletonOverride;
+            return VFS::Path::join(meshes, mSkeletonOverride);
 
         bool beast = mRaceData ? mRaceData->isBeast() : false;
 
         if (beast)
-            return CSMPrefs::get()["Models"]["baseanimkna"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanimkna"].toString());
         else if (mFemale)
-            return CSMPrefs::get()["Models"]["baseanimfemale"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanimfemale"].toString());
         else
-            return CSMPrefs::get()["Models"]["baseanim"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanim"].toString());
     }
 
     ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
@@ -474,8 +475,8 @@ namespace CSMWorld
             return;
         }
 
-        const int TypeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
-        int type = mReferenceables.getData(index, TypeColumn).toInt();
+        const int typeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
+        int type = mReferenceables.getData(index, typeColumn).toInt();
         if (type == UniversalId::Type_Creature)
         {
             // Valid creature record
@@ -606,8 +607,8 @@ namespace CSMWorld
             }
         };
 
-        int TypeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
-        int type = mReferenceables.getData(index, TypeColumn).toInt();
+        const int typeColumn = mReferenceables.findColumnIndex(Columns::ColumnId_RecordType);
+        int type = mReferenceables.getData(index, typeColumn).toInt();
         if (type == UniversalId::Type_Armor)
         {
             auto& armor = dynamic_cast<const Record<ESM::Armor>&>(record).get();
@@ -640,7 +641,7 @@ namespace CSMWorld
                 reservedList.emplace_back(pr);
             }
 
-            int priority = parts.size();
+            int priority = static_cast<int>(parts.size());
             addParts(clothing.mParts.mParts, priority);
             addParts(reservedList, priority);
 

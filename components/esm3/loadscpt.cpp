@@ -1,6 +1,8 @@
 #include "loadscpt.hpp"
 
 #include <algorithm>
+#include <numeric>
+#include <optional>
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
@@ -11,80 +13,93 @@
 
 namespace ESM
 {
-    template <Misc::SameAsWithoutCvref<Script::SCHDstruct> T>
-    void decompose(T&& v, const auto& f)
+    namespace
     {
-        f(v.mNumShorts, v.mNumLongs, v.mNumFloats, v.mScriptDataSize, v.mStringTableSize);
-    }
-
-    void Script::loadSCVR(ESMReader& esm)
-    {
-        uint32_t s = mData.mStringTableSize;
-
-        std::vector<char> tmp(s);
-        // not using getHExact, vanilla doesn't seem to mind unused bytes at the end
-        esm.getSubHeader();
-        uint32_t left = esm.getSubSize();
-        if (left < s)
-            esm.fail("SCVR string list is smaller than specified");
-        esm.getExact(tmp.data(), s);
-        if (left > s)
-            esm.skip(left - s); // skip the leftover junk
-
-        // Set up the list of variable names
-        mVarNames.resize(mData.mNumShorts + mData.mNumLongs + mData.mNumFloats);
-
-        // The tmp buffer is a null-byte separated string list, we
-        // just have to pick out one string at a time.
-        char* str = tmp.data();
-        if (tmp.empty())
+        struct SCHD
         {
-            if (mVarNames.size() > 0)
-                Log(Debug::Warning) << "SCVR with no variable names";
+            /// Data from script-precompling in the editor.
+            /// \warning Do not use them. OpenCS currently does not precompile scripts.
+            std::uint32_t mNumShorts = 0;
+            std::uint32_t mNumLongs = 0;
+            std::uint32_t mNumFloats = 0;
+            std::uint32_t mScriptDataSize = 0;
+            std::uint32_t mStringTableSize = 0;
+        };
 
-            return;
+        template <Misc::SameAsWithoutCvref<SCHD> T>
+        void decompose(T&& v, const auto& f)
+        {
+            f(v.mNumShorts, v.mNumLongs, v.mNumFloats, v.mScriptDataSize, v.mStringTableSize);
         }
 
-        // Support '\r' terminated strings like vanilla.  See Bug #1324.
-        std::replace(tmp.begin(), tmp.end(), '\r', '\0');
-        // Avoid heap corruption
-        if (tmp.back() != '\0')
+        void loadVarNames(const SCHD& header, std::vector<std::string>& varNames, ESMReader& esm)
         {
-            tmp.emplace_back('\0');
-            std::stringstream ss;
-            ss << "Malformed string table";
-            ss << "\n  File: " << esm.getName();
-            ss << "\n  Record: " << esm.getContext().recName.toStringView();
-            ss << "\n  Subrecord: "
-               << "SCVR";
-            ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-            Log(Debug::Verbose) << ss.str();
-            str = tmp.data();
-        }
+            uint32_t s = header.mStringTableSize;
 
-        const auto tmpEnd = tmp.data() + tmp.size();
-        for (size_t i = 0; i < mVarNames.size(); i++)
-        {
-            mVarNames[i] = std::string(str);
-            str += mVarNames[i].size() + 1;
-            if (str >= tmpEnd)
+            std::vector<char> tmp(s);
+            // not using getHExact, vanilla doesn't seem to mind unused bytes at the end
+            esm.getSubHeader();
+            uint32_t left = esm.getSubSize();
+            if (left < s)
+                esm.fail("SCVR string list is smaller than specified");
+            esm.getExact(tmp.data(), s);
+            if (left > s)
+                esm.skip(left - s); // skip the leftover junk
+
+            // Set up the list of variable names
+            varNames.resize(header.mNumShorts + header.mNumLongs + header.mNumFloats);
+
+            // The tmp buffer is a null-byte separated string list, we
+            // just have to pick out one string at a time.
+            if (tmp.empty())
             {
-                if (str > tmpEnd)
+                if (!varNames.empty())
+                    Log(Debug::Warning) << "SCVR with no variable names";
+
+                return;
+            }
+
+            // Support '\r' terminated strings like vanilla.  See Bug #1324.
+            std::replace(tmp.begin(), tmp.end(), '\r', '\0');
+            // Avoid heap corruption
+            if (tmp.back() != '\0')
+            {
+                tmp.push_back('\0');
+                std::stringstream ss;
+                ss << "Malformed string table";
+                ss << "\n  File: " << esm.getName();
+                ss << "\n  Record: " << esm.getContext().recName.toStringView();
+                ss << "\n  Subrecord: "
+                   << "SCVR";
+                ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                Log(Debug::Verbose) << ss.str();
+            }
+
+            const char* str = tmp.data();
+            const char* const tmpEnd = tmp.data() + tmp.size();
+            for (size_t i = 0; i < varNames.size(); i++)
+            {
+                varNames[i] = std::string(str);
+                str += varNames[i].size() + 1;
+                if (str >= tmpEnd)
                 {
-                    // SCVR subrecord is unused and variable names are determined
-                    // from the script source, so an overflow is not fatal.
-                    std::stringstream ss;
-                    ss << "String table overflow";
-                    ss << "\n  File: " << esm.getName();
-                    ss << "\n  Record: " << esm.getContext().recName.toStringView();
-                    ss << "\n  Subrecord: "
-                       << "SCVR";
-                    ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
-                    Log(Debug::Verbose) << ss.str();
+                    if (str > tmpEnd)
+                    {
+                        // SCVR subrecord is unused and variable names are determined
+                        // from the script source, so an overflow is not fatal.
+                        std::stringstream ss;
+                        ss << "String table overflow";
+                        ss << "\n  File: " << esm.getName();
+                        ss << "\n  Record: " << esm.getContext().recName.toStringView();
+                        ss << "\n  Subrecord: "
+                           << "SCVR";
+                        ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+                        Log(Debug::Verbose) << ss.str();
+                    }
+                    // Get rid of empty strings in the list.
+                    varNames.resize(i + 1);
+                    break;
                 }
-                // Get rid of empty strings in the list.
-                mVarNames.resize(i + 1);
-                break;
             }
         }
     }
@@ -96,7 +111,7 @@ namespace ESM
 
         mVarNames.clear();
 
-        bool hasHeader = false;
+        std::optional<SCHD> header;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -106,22 +121,27 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     mId = esm.getMaybeFixedRefIdSize(32);
-                    esm.getComposite(mData);
-
-                    hasHeader = true;
+                    esm.getComposite(header.emplace());
+                    mNumShorts = header->mNumShorts;
+                    mNumLongs = header->mNumLongs;
+                    mNumFloats = header->mNumFloats;
                     break;
                 }
                 case fourCC("SCVR"):
-                    // list of local variables
-                    loadSCVR(esm);
+                    if (!header.has_value())
+                        esm.fail("SCVR is placed before SCHD record");
+                    loadVarNames(*header, mVarNames, esm);
                     break;
                 case fourCC("SCDT"):
                 {
+                    if (!header.has_value())
+                        esm.fail("SCDT is placed before SCHD record");
+
                     // compiled script
                     esm.getSubHeader();
                     uint32_t subSize = esm.getSubSize();
 
-                    if (subSize != mData.mScriptDataSize)
+                    if (subSize != header->mScriptDataSize)
                     {
                         std::stringstream ss;
                         ss << "Script data size defined in SCHD subrecord does not match size of SCDT subrecord";
@@ -147,22 +167,21 @@ namespace ESM
             }
         }
 
-        if (!hasHeader)
+        if (!header.has_value())
             esm.fail("Missing SCHD subrecord");
-        // Reported script data size is not always trustworthy, so override it with actual data size
-        mData.mScriptDataSize = static_cast<uint32_t>(mScriptData.size());
     }
 
     void Script::save(ESMWriter& esm, bool isDeleted) const
     {
-        std::string varNameString;
-        if (!mVarNames.empty())
-            for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
-                varNameString.append(*it);
-
         esm.startSubRecord("SCHD");
         esm.writeMaybeFixedSizeRefId(mId, 32);
-        esm.writeComposite(mData);
+        esm.writeComposite(SCHD{
+            .mNumShorts = mNumShorts,
+            .mNumLongs = mNumLongs,
+            .mNumFloats = mNumFloats,
+            .mScriptDataSize = static_cast<std::uint32_t>(mScriptData.size()),
+            .mStringTableSize = computeScriptStringTableSize(mVarNames),
+        });
         esm.endRecord("SCHD");
 
         if (isDeleted)
@@ -174,15 +193,13 @@ namespace ESM
         if (!mVarNames.empty())
         {
             esm.startSubRecord("SCVR");
-            for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
-            {
-                esm.writeHCString(*it);
-            }
+            for (const std::string& v : mVarNames)
+                esm.writeHCString(v);
             esm.endRecord("SCVR");
         }
 
         esm.startSubRecord("SCDT");
-        esm.write(reinterpret_cast<const char*>(mScriptData.data()), mData.mScriptDataSize);
+        esm.write(reinterpret_cast<const char*>(mScriptData.data()), mScriptData.size());
         esm.endRecord("SCDT");
 
         esm.writeHNOString("SCTX", mScriptText);
@@ -191,9 +208,9 @@ namespace ESM
     void Script::blank()
     {
         mRecordFlags = 0;
-        mData.mNumShorts = mData.mNumLongs = mData.mNumFloats = 0;
-        mData.mScriptDataSize = 0;
-        mData.mStringTableSize = 0;
+        mNumShorts = 0;
+        mNumLongs = 0;
+        mNumFloats = 0;
 
         mVarNames.clear();
         mScriptData.clear();
@@ -204,4 +221,9 @@ namespace ESM
             mScriptText = "Begin " + stringId + "\n\nEnd " + stringId + "\n";
     }
 
+    std::uint32_t computeScriptStringTableSize(const std::vector<std::string>& varNames)
+    {
+        return std::accumulate(varNames.begin(), varNames.end(), static_cast<std::uint32_t>(0),
+            [](std::uint32_t r, const std::string& v) { return r + 1 + static_cast<std::uint32_t>(v.size()); });
+    }
 }

@@ -29,7 +29,8 @@ namespace CSVWorld
         void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
     public:
-        DialogueCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id, int type);
+        explicit DialogueCreator(
+            CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id, int type);
     };
 
     class TopicCreatorFactory : public CreatorFactoryBase

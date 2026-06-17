@@ -8,35 +8,36 @@
 #include <osg/FrameBufferObject>
 #include <osg/Node>
 #include <osg/NodeVisitor>
-#include <osg/TexEnvCombine>
-#include <osg/TexGen>
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderStage>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/texturetype.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace SceneUtil
 {
     namespace
     {
-        std::array<std::string, 32> generateGlowTextureNames()
+        std::array<VFS::Path::Normalized, 32> generateGlowTextureNames()
         {
-            std::array<std::string, 32> result;
+            constexpr VFS::Path::NormalizedView prefix("textures/magicitem");
+            std::array<VFS::Path::Normalized, 32> result;
             for (std::size_t i = 0; i < result.size(); ++i)
             {
                 std::stringstream stream;
-                stream << "textures/magicitem/caust";
+                stream << "caust";
                 stream << std::setw(2);
                 stream << std::setfill('0');
                 stream << i;
                 stream << ".dds";
-                result[i] = std::move(stream).str();
+                result[i] = prefix / VFS::Path::Normalized(std::move(stream).str());
             }
             return result;
         }
 
-        const std::array<std::string, 32> glowTextureNames = generateGlowTextureNames();
+        const std::array<VFS::Path::Normalized, 32> glowTextureNames = generateGlowTextureNames();
 
         struct FindLowestUnusedTexUnitVisitor : public osg::NodeVisitor
         {
@@ -82,20 +83,6 @@ namespace SceneUtil
         else
         {
             stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
-            osg::TexGen* texGen = new osg::TexGen;
-            texGen->setMode(osg::TexGen::SPHERE_MAP);
-
-            stateset->setTextureAttributeAndModes(
-                mTexUnit, texGen, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
-            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-            texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
-            texEnv->setConstantColor(mColor);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
-            texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
-            texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_COLOR);
-
-            stateset->setTextureAttributeAndModes(mTexUnit, texEnv, osg::StateAttribute::ON);
             stateset->addUniform(new osg::Uniform("envMapColor", mColor));
         }
     }
@@ -103,8 +90,6 @@ namespace SceneUtil
     void GlowUpdater::removeTexture(osg::StateSet* stateset)
     {
         stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
-        stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXGEN);
-        stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXENV);
         stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
         stateset->removeUniform("envMapColor");
 
@@ -128,8 +113,8 @@ namespace SceneUtil
         if ((mDuration >= 0) && mStartingTime == 0)
             mStartingTime = nv->getFrameStamp()->getSimulationTime();
 
-        float time = nv->getFrameStamp()->getSimulationTime();
-        int index = (int)(time * 16) % mTextures.size();
+        double time = nv->getFrameStamp()->getSimulationTime();
+        int index = static_cast<int>(time * 16) % mTextures.size();
         stateset->setTextureAttribute(
             mTexUnit, mTextures[index], osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -218,11 +203,10 @@ namespace SceneUtil
         const osg::Vec4f& glowColor, float glowDuration)
     {
         std::vector<osg::ref_ptr<osg::Texture2D>> textures;
-        for (const std::string& name : glowTextureNames)
+        for (const VFS::Path::Normalized& name : glowTextureNames)
         {
             osg::ref_ptr<osg::Image> image = resourceSystem->getImageManager()->getImage(name);
             osg::ref_ptr<osg::Texture2D> tex(new osg::Texture2D(image));
-            tex->setName("envMap");
             tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
             tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex);
@@ -247,6 +231,7 @@ namespace SceneUtil
             node->setStateSet(writableStateSet);
         }
         writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttributeAndModes(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
         resourceSystem->getSceneManager()->recreateShaders(std::move(node));
 
@@ -407,4 +392,12 @@ namespace SceneUtil
         return osg::Image::computePixelFormat(format);
     }
 
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit)
+    {
+        const osg::StateAttribute* type = stateset.getTextureAttribute(texUnit, SceneUtil::TextureType::AttributeType);
+        if (type)
+            return static_cast<const SceneUtil::TextureType*>(type)->getName();
+
+        return texture.getName();
+    }
 }

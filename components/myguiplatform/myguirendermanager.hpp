@@ -28,7 +28,7 @@ namespace osg
     class StateSet;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class Drawable;
@@ -72,7 +72,7 @@ namespace osgMyGUI
             return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr());
         }
 
-        bool checkTexture(MyGUI::ITexture* _texture) override;
+        bool checkTexture(MyGUI::ITexture* texture) override;
 
         /** @see RenderManager::getViewSize */
         const MyGUI::IntSize& getViewSize() const override { return mViewSize; }
@@ -91,7 +91,7 @@ namespace osgMyGUI
         /** @see RenderManager::createTexture */
         MyGUI::ITexture* createTexture(const std::string& name) override;
         /** @see RenderManager::destroyTexture */
-        void destroyTexture(MyGUI::ITexture* _texture) override;
+        void destroyTexture(MyGUI::ITexture* texture) override;
         /** @see RenderManager::getTexture */
         MyGUI::ITexture* getTexture(const std::string& name) override;
 
@@ -115,8 +115,8 @@ namespace osgMyGUI
 
         void setViewSize(int width, int height) override;
 
-        void registerShader(const std::string& _shaderName, const std::string& _vertexProgramFile,
-            const std::string& _fragmentProgramFile) override;
+        void registerShader(const std::string& shaderName, const std::string& vertexProgramFile,
+            const std::string& fragmentProgramFile) override;
 
         /*internal:*/
 

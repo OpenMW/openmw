@@ -18,14 +18,15 @@ namespace CSMWorld
     {
         const IdCollection<Cell>& mCells;
 
-        void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted) override;
+        void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted, bool base) override;
 
     public:
         SubCellCollection(const IdCollection<Cell>& cells);
     };
 
     template <typename ESXRecordT>
-    void SubCellCollection<ESXRecordT>::loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
+    void SubCellCollection<ESXRecordT>::loadRecord(
+        ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted, bool base)
     {
         record.load(reader, isDeleted, mCells);
     }

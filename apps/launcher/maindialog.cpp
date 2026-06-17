@@ -22,6 +22,11 @@
 #include "importpage.hpp"
 #include "settingspage.hpp"
 
+namespace
+{
+    constexpr const char* toolBarStyle = "QToolBar { border: 0px; } QToolButton { min-width: 70px }";
+}
+
 using namespace Process;
 
 void cfgError(const QString& title, const QString& msg)
@@ -50,8 +55,10 @@ Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configuratio
         &MainDialog::wizardFinished);
 
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
-    buttonBox->button(QDialogButtonBox::Ok)->setText(tr(" Launch OpenMW "));
+    buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Launch OpenMW"));
     buttonBox->button(QDialogButtonBox::Help)->setText(tr("Help"));
+
+    buttonBox->button(QDialogButtonBox::Ok)->setMinimumWidth(160);
 
     // Order of buttons can be different on different setups,
     // so make sure that the Play button has a focus by default.
@@ -73,12 +80,25 @@ Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configuratio
     QLabel* logo = new QLabel(this);
     logo->setPixmap(QIcon(":/images/openmw-header.png").pixmap(QSize(294, 64)));
     toolBar->addWidget(logo);
+    toolBar->setStyleSheet(toolBarStyle);
 }
 
 Launcher::MainDialog::~MainDialog()
 {
     delete mGameInvoker;
     delete mWizardInvoker;
+}
+
+bool Launcher::MainDialog::event(QEvent* event)
+{
+    // Apply style sheet again if style was changed
+    if (event->type() == QEvent::PaletteChange)
+    {
+        if (toolBar != nullptr)
+            toolBar->setStyleSheet(toolBarStyle);
+    }
+
+    return QMainWindow::event(event);
 }
 
 void Launcher::MainDialog::createIcons()
@@ -101,7 +121,7 @@ void Launcher::MainDialog::createPages()
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(this);
     mImportPage = new ImportPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mSettingsPage = new SettingsPage(mGameSettings, this);
+    mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, this);
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mDataFilesPage);
@@ -477,11 +497,7 @@ bool Launcher::MainDialog::writeSettings()
     }
 
     // Game settings
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QFile file(userPath / Files::openmwCfgFile);
-#else
-    QFile file(Files::getUserConfigPathQString(mCfgMgr));
-#endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
@@ -584,5 +600,5 @@ void Launcher::MainDialog::play()
 
 void Launcher::MainDialog::help()
 {
-    Misc::HelpViewer::openHelp("reference/index.html");
+    Misc::HelpViewer::openHelp({});
 }

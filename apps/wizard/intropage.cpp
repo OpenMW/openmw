@@ -12,7 +12,7 @@ Wizard::IntroPage::IntroPage(QWidget* parent)
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
-    setPixmap(QWizard::WatermarkPixmap, QPixmap(QLatin1String(":/images/intropage-background.png")));
+    setPixmap(QWizard::WatermarkPixmap, QPixmap(QStringLiteral(":/images/intropage-background.png")));
 }
 
 int Wizard::IntroPage::nextId() const

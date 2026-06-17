@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/creaturestats.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -17,34 +18,7 @@
 
 namespace MWMechanics
 {
-    int CreatureStats::sActorId = 0;
-
     CreatureStats::CreatureStats()
-        : mDrawState(DrawState::Nothing)
-        , mDead(false)
-        , mDeathAnimationFinished(false)
-        , mDied(false)
-        , mMurdered(false)
-        , mFriendlyHits(0)
-        , mTalkedTo(false)
-        , mAlarmed(false)
-        , mAttacked(false)
-        , mKnockdown(false)
-        , mKnockdownOneFrame(false)
-        , mKnockdownOverOneFrame(false)
-        , mHitRecovery(false)
-        , mBlock(false)
-        , mMovementFlags(0)
-        , mFallHeight(0)
-        , mLastRestock(0, 0)
-        , mGoldPool(0)
-        , mActorId(-1)
-        , mHitAttemptActorId(-1)
-        , mDeathAnimation(-1)
-        , mTimeOfDeath()
-        , mSideMovementAngle(0)
-        , mLevel(0)
-        , mAttackingOrSpell(false)
     {
         for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
@@ -218,15 +192,6 @@ namespace MWMechanics
         mLevel = level;
     }
 
-    void CreatureStats::modifyMagicEffects(const MagicEffects& effects)
-    {
-        bool recalc = effects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
-            != mMagicEffects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier();
-        mMagicEffects.setModifiers(effects);
-        if (recalc)
-            recalculateMagicka();
-    }
-
     void CreatureStats::setAiSetting(AiSetting index, Stat<int> value)
     {
         mAiSettings[static_cast<std::underlying_type_t<AiSetting>>(index)] = value;
@@ -241,6 +206,11 @@ namespace MWMechanics
 
     bool CreatureStats::isParalyzed() const
     {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Ptr player = world->getPlayerPtr();
+        if (world->getGodModeState() && this == &player.getClass().getCreatureStats(player))
+            return false;
+
         return mMagicEffects.getOrDefault(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
@@ -394,14 +364,14 @@ namespace MWMechanics
         return mLastHitAttemptObject;
     }
 
-    void CreatureStats::setHitAttemptActorId(int actorId)
+    void CreatureStats::setHitAttemptActor(ESM::RefNum actor)
     {
-        mHitAttemptActorId = actorId;
+        mHitAttemptActor = actor;
     }
 
-    int CreatureStats::getHitAttemptActorId() const
+    ESM::RefNum CreatureStats::getHitAttemptActor() const
     {
-        return mHitAttemptActorId;
+        return mHitAttemptActor;
     }
 
     void CreatureStats::addToFallHeight(float height)
@@ -436,8 +406,8 @@ namespace MWMechanics
         else
             base = world->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->mValue.getFloat();
 
-        double magickaFactor = base
-            + mMagicEffects.getOrDefault(EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
+        float magickaFactor = base
+            + mMagicEffects.getOrDefault(EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1f;
 
         DynamicStat<float> magicka = getMagicka();
         float currentToBaseRatio = magicka.getBase() > 0 ? magicka.getCurrent() / magicka.getBase() : 0;
@@ -536,7 +506,7 @@ namespace MWMechanics
     void CreatureStats::writeState(ESM::CreatureStats& state) const
     {
         for (size_t i = 0; i < state.mAttributes.size(); ++i)
-            getAttribute(ESM::Attribute::indexToRefId(i)).writeState(state.mAttributes[i]);
+            getAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i))).writeState(state.mAttributes[i]);
 
         for (size_t i = 0; i < state.mDynamic.size(); ++i)
             mDynamic[i].writeState(state.mDynamic[i]);
@@ -568,7 +538,6 @@ namespace MWMechanics
         state.mRecalcDynamicStats = false;
         state.mDrawState = static_cast<int>(mDrawState);
         state.mLevel = mLevel;
-        state.mActorId = mActorId;
         state.mDeathAnimation = mDeathAnimation;
         state.mTimeOfDeath = mTimeOfDeath.toEsm();
         // state.mHitAttemptActorId = mHitAttemptActorId;
@@ -579,7 +548,6 @@ namespace MWMechanics
         mMagicEffects.writeState(state.mMagicEffects);
 
         state.mSummonedCreatures = mSummonedCreatures;
-        state.mSummonGraveyard = mSummonGraveyard;
 
         state.mHasAiSettings = true;
         for (size_t i = 0; i < state.mAiSettings.size(); ++i)
@@ -593,7 +561,7 @@ namespace MWMechanics
         if (!state.mMissingACDT)
         {
             for (size_t i = 0; i < state.mAttributes.size(); ++i)
-                mAttributes[ESM::Attribute::indexToRefId(i)].readState(state.mAttributes[i]);
+                mAttributes[ESM::Attribute::indexToRefId(static_cast<int>(i))].readState(state.mAttributes[i]);
 
             for (size_t i = 0; i < state.mDynamic.size(); ++i)
                 mDynamic[i].readState(state.mDynamic[i]);
@@ -622,10 +590,9 @@ namespace MWMechanics
         mLastHitAttemptObject = state.mLastHitAttemptObject;
         mDrawState = DrawState(state.mDrawState);
         mLevel = state.mLevel;
-        mActorId = state.mActorId;
         mDeathAnimation = state.mDeathAnimation;
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
-        // mHitAttemptActorId = state.mHitAttemptActorId;
+        // mHitAttemptActor = state.mHitAttemptActor;
 
         mSpells.readState(state.mSpells, this);
         mActiveSpells.readState(state.mActiveSpells);
@@ -633,13 +600,19 @@ namespace MWMechanics
         mMagicEffects.readState(state.mMagicEffects);
 
         mSummonedCreatures = state.mSummonedCreatures;
-        mSummonGraveyard = state.mSummonGraveyard;
 
         if (state.mHasAiSettings)
             for (size_t i = 0; i < state.mAiSettings.size(); ++i)
                 mAiSettings[i].readState(state.mAiSettings[i]);
         if (state.mRecalcDynamicStats)
             recalculateMagicka();
+        if (state.mAiSequence.mActorIdConverter)
+        {
+            for (auto& [_, refNum] : mSummonedCreatures)
+                state.mAiSequence.mActorIdConverter->convert(refNum, refNum.mIndex);
+            auto& graveyard = state.mAiSequence.mActorIdConverter->mGraveyard;
+            graveyard.insert(graveyard.end(), state.mSummonGraveyard.begin(), state.mSummonGraveyard.end());
+        }
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -661,36 +634,6 @@ namespace MWMechanics
         return mGoldPool;
     }
 
-    int CreatureStats::getActorId()
-    {
-        if (mActorId == -1)
-            mActorId = sActorId++;
-
-        return mActorId;
-    }
-
-    bool CreatureStats::matchesActorId(int id) const
-    {
-        return mActorId != -1 && id == mActorId;
-    }
-
-    void CreatureStats::cleanup()
-    {
-        sActorId = 0;
-    }
-
-    void CreatureStats::writeActorIdCounter(ESM::ESMWriter& esm)
-    {
-        esm.startRecord(ESM::REC_ACTC);
-        esm.writeHNT("COUN", sActorId);
-        esm.endRecord(ESM::REC_ACTC);
-    }
-
-    void CreatureStats::readActorIdCounter(ESM::ESMReader& esm)
-    {
-        esm.getHNT(sActorId, "COUN");
-    }
-
     signed char CreatureStats::getDeathAnimation() const
     {
         return mDeathAnimation;
@@ -706,13 +649,28 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::multimap<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::multimap<ESM::RefId, ESM::RefNum>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }
 
-    std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
+    void CreatureStats::updateAwareness(float duration)
     {
-        return mSummonGraveyard;
+        mAwarenessTimer += duration;
+        // Only reroll for awareness every 5 seconds
+        if (mAwarenessTimer >= 5.f)
+        {
+            mAwarenessTimer = 0.f;
+            mAwarenessRoll = -1;
+        }
+    }
+
+    int CreatureStats::getAwarenessRoll()
+    {
+        if (mAwarenessRoll >= 0)
+            return mAwarenessRoll;
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        mAwarenessRoll = Misc::Rng::roll0to99(prng);
+        return mAwarenessRoll;
     }
 }

@@ -63,15 +63,16 @@ namespace MWGui
         EventHandle_Int eventActivateDialog;
 
     protected:
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
-        void onNameClicked(MyGUI::Widget* _sender);
-        void onRaceClicked(MyGUI::Widget* _sender);
-        void onClassClicked(MyGUI::Widget* _sender);
-        void onBirthSignClicked(MyGUI::Widget* _sender);
+        void onNameClicked(MyGUI::Widget* sender);
+        void onRaceClicked(MyGUI::Widget* sender);
+        void onClassClicked(MyGUI::Widget* sender);
+        void onBirthSignClicked(MyGUI::Widget* sender);
 
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
     private:
         void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
@@ -100,6 +101,10 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
 
         bool mUpdateSkillArea;
+
+        // 0 = Name, 1 = Race, 2 = Class, 3 = BirthSign, 4 = Back, 5 = OK
+        std::vector<MyGUI::Button*> mButtons;
+        size_t mControllerFocus = 0;
     };
 }
 #endif

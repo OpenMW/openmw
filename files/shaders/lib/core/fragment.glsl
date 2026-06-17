@@ -40,3 +40,10 @@ vec3 sampleSkyColor(vec2 uv)
     return texture2D(sky, uv).xyz;
 }
 #endif
+
+uniform sampler2D opaqueDepthTex;
+
+vec4 sampleOpaqueDepthTex(vec2 uv)
+{
+    return texture2D(opaqueDepthTex, uv);
+}

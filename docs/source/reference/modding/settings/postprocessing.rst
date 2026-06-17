@@ -1,55 +1,49 @@
-Post Processing Settings
+Post-Processing Settings
 ########################
 
-.. _Post Processing:
+.. omw-setting::
+   :title: enabled
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings> Visuals > Post Processing` :bdg-info:`In Game > Options > Video`
 
-enabled
--------
+   Enable or disable post-processing effects.
+   Requires post-processing shaders to be installed.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: chain
+   :type: string
+   :location: :bdg-info:`In Game > F2 Menu`
 
-Enable or disable post processing.
-This enables use of post processing shaders, which must be installed.
+   List of active post-processing effects and their order.
+   Recommended to configure via in-game HUD (default key: F2).
+   Note: an empty chain does not disable post-processing.
+   Has no effect if :ref:`enabled` is false.
 
-chain
------
+.. omw-setting::
+   :title: auto exposure speed
+   :type: float32
+   :range: > 0.0001
+   :default: 0.9
+   :location: :bdg-success:`Launcher > Settings> Visuals > Post Processing`
 
-:Type:		string list
+   Controls speed of eye adaptation (scene luminance changes between frames).
+   Smaller values cause slower adaptation.
+   Most noticeable when moving between drastically different lighting (e.g., dark cave to bright sun).
+   Has no effect if HDR or :ref:`enabled` is false.
 
-Controls which post process effects are active and their order.
-It is recommended to configure the settings and order of shaders through the in game HUD. By default this is available with the F2 key.
-Note, an empty chain will not disable post processing.
+.. omw-setting::
+   :title: transparent postpass
+   :type: boolean
+   :range: true, false
+   :default: true
+   :location: :bdg-success:`Launcher > Settings> Visuals > Post Processing`
 
-This setting has no effect if :ref:`enabled` is set to false.
+   Re-renders transparent objects with alpha-clipping using a fixed threshold.
+   Important for vanilla content where blended objects disable depth writes and have large alpha margins.
 
-auto exposure speed
--------------------
-
-:Type:      float
-:Range:     Any number > 0.0001
-:Default:   0.9
-
-Use for eye adaptation to control speed at which average scene luminance can change from one frame to the next.
-Average scene luminance is used in some shader effects for features such as dynamic eye adaptation.
-Smaller values will cause slower changes in scene luminance. This is most impactful when the brightness
-drastically changes quickly, like when entering a dark cave or exiting an interior and looking into a bright sun.
-
-This settings has no effect when HDR is disabled or :ref:`enabled` is set to false.
-
-transparent postpass
---------------------
-
-:Type:      boolean
-:Range:     True/False
-:Default:   True
-
-Re-renders transparent objects with alpha-clipping forced with a fixed threshold. This is particularly important with vanilla content, where blended
-objects usually have depth writes disabled and massive margins between the geometry and texture alpha.
-
-
-.. warning::
-    This can be quite costly with vanilla assets. For best performance it is recommended to use a mod replacer which
-    uses alpha tested foliage and disable this setting. Morrowind Optimization Patch is a great option. 
-    If you are not using any shaders which utilize the depth buffer this setting should be disabled.
+   .. warning::
+      Can be performance heavy with vanilla assets.
+      For better performance, use alpha-tested foliage mods (e.g., Morrowind Optimization Patch) and disable this setting.
+      Disable if no shaders use the depth buffer.

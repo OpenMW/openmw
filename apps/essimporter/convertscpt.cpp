@@ -11,7 +11,7 @@ namespace ESSImport
     {
         out.mId = ESM::RefId::stringRefId(scpt.mSCHD.mName.toString());
         out.mRunning = scpt.mRunning;
-        out.mTargetRef = ESM::RefNum{}; // TODO: convert target reference of global script
+        out.mTargetRef = scpt.mRefNum;
         convertSCRI(scpt.mSCRI, out.mLocals);
     }
 

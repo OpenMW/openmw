@@ -4,7 +4,7 @@
 #include <deque>
 #include <vector>
 
-#include "sound_decoder.hpp"
+#include "sounddecoder.hpp"
 
 namespace MWSound
 {

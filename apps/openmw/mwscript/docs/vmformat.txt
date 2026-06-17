@@ -485,5 +485,6 @@ op 0x2000322: GetPCVisionBonus
 op 0x2000323: SetPCVisionBonus
 op 0x2000324: ModPCVisionBonus
 op 0x2000325: TestModels, T3D
+op 0x2000326: FillJournal
 
-opcodes 0x2000326-0x3ffffff unused
+opcodes 0x2000327-0x3ffffff unused

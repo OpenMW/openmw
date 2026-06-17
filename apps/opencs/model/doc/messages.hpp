@@ -48,7 +48,7 @@ namespace CSMDoc
         Message::Severity mDefault;
 
     public:
-        Messages(Message::Severity default_);
+        explicit Messages(Message::Severity defaultSeverity);
 
         void add(const CSMWorld::UniversalId& id, const std::string& message, const std::string& hint = "",
             Message::Severity severity = Message::Severity_Default);

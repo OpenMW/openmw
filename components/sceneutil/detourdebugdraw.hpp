@@ -18,8 +18,6 @@ namespace SceneUtil
         explicit DebugDraw(osg::Group& group, const osg::ref_ptr<osg::StateSet>& stateSet, const osg::Vec3f& shift,
             float recastInvertedScaleFactor);
 
-        static osg::ref_ptr<osg::StateSet> makeStateSet();
-
         void depthMask(bool state) override;
 
         void texture(bool state) override;
@@ -53,6 +51,8 @@ namespace SceneUtil
 
         void addColor(osg::Vec4f&& value);
     };
+
+    osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet();
 }
 
 #endif

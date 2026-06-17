@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -39,8 +39,10 @@
 #include <initializer_list>
 #include <string>
 #include <string_view>
+#include <limits>
 #include <optional>
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#include <memory>
+#if SOL_IS_ON(SOL_STD_VARIANT)
 #include <variant>
 #endif // variant shenanigans (thanks, Mac OSX)
 
@@ -55,7 +57,7 @@ namespace sol {
 	} // namespace d
 
 	namespace detail {
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 		typedef int (*lua_CFunction_noexcept)(lua_State* L) noexcept;
 #else
 		typedef int (*lua_CFunction_noexcept)(lua_State* L);
@@ -92,7 +94,7 @@ namespace sol {
 	inline bool operator!=(lua_nil_t, lua_nil_t) {
 		return false;
 	}
-#if SOL_IS_ON(SOL_NIL_I_)
+#if SOL_IS_ON(SOL_NIL)
 	using nil_t = lua_nil_t;
 	inline constexpr const nil_t& nil = lua_nil;
 #endif
@@ -465,6 +467,63 @@ namespace sol {
 		return as_container_t<T>(std::forward<T>(value));
 	}
 
+	template <typename T, std::size_t Limit = 15>
+	struct exhaustive_until : private detail::ebco<T> {
+	private:
+		using base_t = detail::ebco<T>;
+
+	public:
+		using base_t::base_t;
+
+		using base_t::value;
+
+		operator std::add_pointer_t<std::remove_reference_t<T>>() {
+			return std::addressof(this->base_t::value());
+		}
+
+		operator std::add_pointer_t<std::add_const_t<std::remove_reference_t<T>>>() const {
+			return std::addressof(this->base_t::value());
+		}
+
+		operator std::add_lvalue_reference_t<T>() {
+			return this->base_t::value();
+		}
+
+		operator std::add_const_t<std::add_lvalue_reference_t<T>>&() const {
+			return this->base_t::value();
+		}
+	};
+
+	template <typename T>
+	using exhaustive = exhaustive_until<T, (std::numeric_limits<size_t>::max)()>;
+
+	template <typename T>
+	struct non_exhaustive : private detail::ebco<T> {
+	private:
+		using base_t = detail::ebco<T>;
+
+	public:
+		using base_t::base_t;
+
+		using base_t::value;
+
+		operator std::add_pointer_t<std::remove_reference_t<T>>() {
+			return std::addressof(this->base_t::value());
+		}
+
+		operator std::add_pointer_t<std::add_const_t<std::remove_reference_t<T>>>() const {
+			return std::addressof(this->base_t::value());
+		}
+
+		operator std::add_lvalue_reference_t<T>() {
+			return this->base_t::value();
+		}
+
+		operator std::add_const_t<std::add_lvalue_reference_t<T>>&() const {
+			return this->base_t::value();
+		}
+	};
+
 	template <typename T>
 	struct push_invoke_t : private detail::ebco<T> {
 	private:
@@ -658,7 +717,7 @@ namespace sol {
 	enum class type : int {
 		none = LUA_TNONE,
 		lua_nil = LUA_TNIL,
-#if SOL_IS_ON(SOL_NIL_I_)
+#if SOL_IS_ON(SOL_NIL)
 		nil = lua_nil,
 #endif // Objective C/C++ Keyword that's found in OSX SDK and OBJC -- check for all forms to protect
 		string = LUA_TSTRING,
@@ -932,7 +991,7 @@ namespace sol {
 		template <std::size_t N>
 		struct lua_type_of<wchar_t[N]> : std::integral_constant<type, type::string> { };
 
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
+#if SOL_IS_ON(SOL_CHAR8_T)
 		template <std::size_t N>
 		struct lua_type_of<char8_t[N]> : std::integral_constant<type, type::string> { };
 #endif
@@ -949,7 +1008,7 @@ namespace sol {
 		template <>
 		struct lua_type_of<wchar_t> : std::integral_constant<type, type::string> { };
 
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
+#if SOL_IS_ON(SOL_CHAR8_T)
 		template <>
 		struct lua_type_of<char8_t> : std::integral_constant<type, type::string> { };
 #endif
@@ -966,7 +1025,7 @@ namespace sol {
 		template <>
 		struct lua_type_of<const wchar_t*> : std::integral_constant<type, type::string> { };
 
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
+#if SOL_IS_ON(SOL_CHAR8_T)
 		template <>
 		struct lua_type_of<const char8_t*> : std::integral_constant<type, type::string> { };
 #endif
@@ -1115,7 +1174,7 @@ namespace sol {
 		template <>
 		struct lua_type_of<type> : std::integral_constant<type, type::poly> { };
 
-#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE)
 		template <typename T>
 		struct lua_type_of<T*> : std::integral_constant<type, std::is_function_v<T> ? type::function : type::userdata> { };
 #else
@@ -1136,7 +1195,7 @@ namespace sol {
 		template <>
 		struct lua_type_of<meta_function> : std::integral_constant<type, type::string> { };
 
-#if SOL_IS_ON(SOL_STD_VARIANT_I_)
+#if SOL_IS_ON(SOL_STD_VARIANT)
 		template <typename... Tn>
 		struct lua_type_of<std::variant<Tn...>> : std::integral_constant<type, type::poly> { };
 #endif // std::variant deployment sucks on Clang
@@ -1193,19 +1252,21 @@ namespace sol {
 	} // namespace detail
 
 	template <typename T>
-	struct is_lua_primitive
-	: std::integral_constant<bool,
-	       type::userdata
-	                 != lua_type_of_v<
-	                      T> || ((type::userdata == lua_type_of_v<T>)&&meta::meta_detail::has_internal_marker_v<lua_type_of<T>> && !meta::meta_detail::has_internal_marker_v<lua_size<T>>)
-	            || is_lua_reference_or_proxy_v<T> || meta::is_specialization_of_v<T, std::tuple> || meta::is_specialization_of_v<T, std::pair>> { };
+	struct is_lua_primitive : std::integral_constant<bool,
+	                               type::userdata != lua_type_of_v<T>                                   // cf
+	                                    || ((type::userdata == lua_type_of_v<T>)                        // cf
+	                                         &&meta::meta_detail::has_internal_marker_v<lua_type_of<T>> // cf
+	                                         && !meta::meta_detail::has_internal_marker_v<lua_size<T>>) // cf
+	                                    || is_lua_reference_or_proxy_v<T>                               // cf
+	                                    || meta::is_specialization_of_v<T, std::tuple>                  // cf
+	                                    || meta::is_specialization_of_v<T, std::pair>> { };
 
 	template <typename T>
 	constexpr inline bool is_lua_primitive_v = is_lua_primitive<T>::value;
 
 	template <typename T>
 	struct is_value_semantic_for_function
-#if SOL_IS_ON(SOL_FUNCTION_CALL_VALUE_SEMANTICS_I_)
+#if SOL_IS_ON(SOL_FUNCTION_CALL_VALUE_SEMANTICS)
 	: std::true_type {
 	};
 #else
@@ -1360,7 +1421,7 @@ namespace sol {
 	template <typename T>
 	struct is_automagical
 	: std::integral_constant<bool,
-	       (SOL_IS_ON(SOL_DEFAULT_AUTOMAGICAL_USERTYPES_I_))
+	       (SOL_IS_ON(SOL_DEFAULT_AUTOMAGICAL_USERTYPES))
 	            || (std::is_array_v<
 	                     meta::unqualified_t<T>> || (!std::is_same_v<meta::unqualified_t<T>, state> && !std::is_same_v<meta::unqualified_t<T>, state_view>))> {
 	};

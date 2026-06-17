@@ -10,7 +10,8 @@ If you feel your name is missing from this list, please add it to `AUTHORS.md`.
 Programmers
 -----------
 
-    Bret Curtis (psi29a) - Project leader 2019-present
+    Alexey Dobrokhotov (Capo) - Project leader 2025-present
+    Bret Curtis (psi29a) - Project leader 2019-2025
     Marc Zinnschlag (Zini) - Project leader 2010-2018
     Nicolay Korslund - Project leader 2008-2010
     scrawl - Top contributor
@@ -47,12 +48,14 @@ Programmers
     Austin Salgat (Salgat)
     Ben Shealy (bentsherman)
     Berulacks
+    bmdhacks
     Bo Svensson
     Britt Mathis (galdor557)
-    Capostrophic
+    Calandiel
     Carl Maxwell
     cc9cii
     Cédric Mocquillon
+    Charles Horn
     Chris Boyce (slothlife)
     Chris Robinson (KittyCat)
     Chris Vigil
@@ -61,6 +64,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     crussell187
+    Sam Hellawell (cykoder)
     Dan Vukelich (sanchezman)
     darkf
     Dave Corley (S3ctor)
@@ -92,12 +96,16 @@ Programmers
     Florian Weber (Florianjw)
     Frédéric Chardon (fr3dz10)
     Gaëtan Dezeiraud (Brouilles)
+    Garet Cole Green (nox7)
     Gašper Sedej
     Gijsbert ter Horst (Ghostbird)
     Gohan1989
     gugus/gus
     guidoj
+    Hailey Tribble (daisyhasacat)
     Haoda Wang (h313)
+    Hemaris
+    holorat
     hristoast
     Internecine
     Ivan Beloborodov (myrix)
@@ -143,6 +151,7 @@ Programmers
     Łukasz Gołębiewski (lukago)
     Lukasz Gromanowski (lgro)
     Mads Sandvei (Foal)
+    Maksim Eremenko (Max Yari)
     Marc Bouvier (CramitDeFrog)
     Marcin Hulist (Gohan)
     Mark Siewert (mark76)
@@ -153,6 +162,7 @@ Programmers
     Mateusz Malisz (malice)
     Max Henzerling (SaintMercury)
     megaton
+    Mehdi Yousfi-Monod (mym)
     Michael Hogan (Xethik)
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)
@@ -192,7 +202,7 @@ Programmers
     Qlonever
     Radu-Marius Popovici (rpopovici)
     Rafael Moura (dhustkoder)
-    Randy Davin (Kindi)
+    Randy Davin (Kuyondo)
     rdimesio
     rexelion
     riothamus
@@ -215,6 +225,7 @@ Programmers
     sir_herrbatka
     smbas
     Sophie Kirschner (pineapplemachine)
+    Sophia Polfliet (Sophie~<3)
     spycrab
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
@@ -224,14 +235,16 @@ Programmers
     svaante
     Sylvain Thesnieres (Garvek)
     t6
+    Telvanni4Life
     terrorfisch
     Tess (tescoShoppah)
     thegriglat
     Thomas Luppi (Digmaster)
+    Tim Hagberg (hazardMan)
     tlmullis
+    trav
     tri4ng1e
     Thoronador
-    Tobias Tribble (zackhasacat)
     Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)
@@ -278,6 +291,7 @@ Packagers
     Kenny Armstrong (artorius) - Fedora Linux
     Nikolay Kasyanov (corristo) - Mac OS X
     Sandy Carter (bwrsandman) - Arch Linux
+    Sarah Sunday (ssunday) - MacOS
 
 Public Relations and Translations
 ---------------------------------
@@ -285,6 +299,8 @@ Public Relations and Translations
     Artem Kotsynyak (greye) - Russian News Writer
     Dawid Lakomy (Vedyimyn) - Polish News Writer
     ElderTroll - Release Manager
+    Georgi Georgiev (RacerBG) - Bulgarian Translation
+    Igor Wiśniewski (Igilq) - Polish Translation
     Jim Clauwaert (Zedd) - Public Outreach
     juanmnzsk8 - Spanish News Writer
     Julien Voisin (jvoisin/ap0) - French News Writer

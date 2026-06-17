@@ -11,9 +11,9 @@ vec4 applySprings(in vec4 samplerData, in vec4 n, in vec4 n2)
     vec4 storage = vec4(0.0, samplerData.r, 0.0, 0.0);
 
     // Tweak to look most like water, not a physically accurate simulation
-    const float a = 0.14;
-    const float udamp = 0.02;
-    const float vdamp = 0.02;
+    const float a = 0.28;
+    const float udamp = 0.04;
+    const float vdamp = 0.04;
 
     // Apply 2d wave equation with dampening
     // Continous impulse needed to maintain simulation, otherwise ripples will fade
@@ -21,7 +21,7 @@ vec4 applySprings(in vec4 samplerData, in vec4 n, in vec4 n2)
     storage.r = a * nsum + ((2.0 - udamp - vdamp) - 4.0 * a) * samplerData.r - (1.0 - vdamp) * samplerData.g;
 
     // Calculate normal and store in blue-alpha channel
-    storage.ba = 2.0 * (n.xy - n.zw) + 0.5 * (n2.xy - n2.zw);
+    storage.ba = 2.0 * (n.xz - n.yw) + 0.5 * (n2.xz - n2.yw);
 
     return storage;
 }

@@ -36,7 +36,7 @@ namespace Gui
         void adjustSize();
 
         void sort();
-        void addItem(std::string_view name);
+        void addItem(std::string_view name, int verticalPadding = 0);
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);
         size_t getItemCount();
@@ -48,23 +48,35 @@ namespace Gui
         ///< get widget for an item name, useful to set up tooltip
 
         void scrollToTop();
+        void setViewOffset(int offset);
 
-        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
+        void setPropertyOverride(std::string_view key, std::string_view value) override;
 
     protected:
         void initialiseOverride() override;
 
         void redraw(bool scrollbarShown = false);
 
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
-        void onItemSelected(MyGUI::Widget* _sender);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
+        void onItemSelected(MyGUI::Widget* sender);
 
     private:
         MyGUI::ScrollView* mScrollView;
         MyGUI::Widget* mClient;
         std::string mListItemSkin;
 
-        std::vector<std::string> mItems;
+        struct ListItemData
+        {
+            std::string mName;
+            int mVPadding;
+
+            ListItemData(std::string_view name, int verticalPadding)
+                : mName(name)
+                , mVPadding(verticalPadding)
+            {
+            }
+        };
+        std::vector<ListItemData> mItems;
 
         int mItemHeight; // height of all items
     };

@@ -23,29 +23,31 @@ namespace ESM
 
 ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     : mData(loadData(land, loadFlags))
+    , mHeights(mData->mHeights)
+    , mNormals(mData->mNormals)
+    , mColors(mData->mColours)
+    , mTextures(mData->mTextures)
     , mLoadFlags(mData->mDataLoaded)
     , mMinHeight(mData->mMinHeight)
     , mMaxHeight(mData->mMaxHeight)
     , mSize(Constants::CellSizeInUnits)
     , mLandSize(ESM::Land::LAND_SIZE)
     , mPlugin(land.getPlugin())
-    , mHeights(mData->mHeights)
-    , mNormals(mData->mNormals)
-    , mColors(mData->mColours)
-    , mTextures(mData->mTextures)
 {
 }
 
 ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
-    : mLoadFlags(land.mDataTypes) // ESM4::Land is always fully loaded. TODO: implement lazy loading
-    , mHeightsData(ESM4::Land::sLandNumVerts)
+    : mHeightsData(ESM4::Land::sLandNumVerts)
+    , mNormals(land.mVertNorm)
+    , mColors(land.mVertColr)
+    , mTextures(textures)
+    , mLoadFlags(land.mDataTypes) // ESM4::Land is always fully loaded. TODO: implement lazy loading
     , mMinHeight(std::numeric_limits<float>::max())
     , mMaxHeight(std::numeric_limits<float>::lowest())
     , mSize(Constants::ESM4CellSizeInUnits)
     , mLandSize(ESM4::Land::sVertsPerSide)
-    , mNormals(land.mVertNorm)
-    , mColors(land.mVertColr)
-    , mTextures(textures)
+    , mPlugin(land.mId.mContentFile)
+    , mIsEsm4(true)
 {
     float rowOffset = land.mHeightMap.heightOffset;
     for (int y = 0; y < mLandSize; y++)
@@ -69,6 +71,9 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     }
 
     mHeights = mHeightsData;
+
+    for (int i = 0; i < 4; ++i)
+        mEsm4Textures[i] = land.mTextures[i];
 }
 
 namespace ESM

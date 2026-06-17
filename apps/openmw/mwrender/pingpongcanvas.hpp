@@ -31,14 +31,14 @@ namespace MWRender
 
         void dirty() { mDirty = true; }
 
-        void setDirtyAttachments(const std::vector<fx::Types::RenderTarget>& attachments)
+        void setDirtyAttachments(const std::vector<Fx::Types::RenderTarget>& attachments)
         {
             mDirtyAttachments = attachments;
         }
 
-        const fx::DispatchArray& getPasses() { return mPasses; }
+        const Fx::DispatchArray& getPasses() { return mPasses; }
 
-        void setPasses(fx::DispatchArray&& passes);
+        void setPasses(Fx::DispatchArray&& passes);
 
         void setMask(bool underwater, bool exterior);
 
@@ -60,8 +60,8 @@ namespace MWRender
         bool mAvgLum = false;
         bool mPostprocessing = false;
 
-        fx::DispatchArray mPasses;
-        fx::FlagsType mMask = 0;
+        Fx::DispatchArray mPasses;
+        Fx::FlagsType mMask = 0;
 
         osg::ref_ptr<osg::Program> mFallbackProgram;
         osg::ref_ptr<osg::Program> mMultiviewResolveProgram;
@@ -74,7 +74,7 @@ namespace MWRender
         osg::ref_ptr<osg::Texture> mTextureDistortion;
 
         mutable bool mDirty = false;
-        mutable std::vector<fx::Types::RenderTarget> mDirtyAttachments;
+        mutable std::vector<Fx::Types::RenderTarget> mDirtyAttachments;
         mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
         mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;

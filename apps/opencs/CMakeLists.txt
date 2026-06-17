@@ -8,7 +8,7 @@ opencs_units (model/doc
     )
 
 opencs_units (model/doc
-    savingstate savingstages blacklist messages
+    savingstate savingstages messages
     )
 
 opencs_hdrs (model/doc
@@ -23,14 +23,14 @@ opencs_units (model/world
 
 
 opencs_units (model/world
-    universalid record commands columnbase columnimp scriptcontext cell refidcollection
+    universalid commands columnbase columnimp scriptcontext refidcollection
     refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    pathgrid land nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
 opencs_hdrs (model/world
-    columnimp idcollection collection info subcellcollection
+    columnimp disabletag idcollection collection info subcellcollection cell nestedtablewrapper record
     )
 
 
@@ -42,7 +42,7 @@ opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
+    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck effectlistcheck
     )
 
 opencs_hdrs (model/tools
@@ -52,7 +52,7 @@ opencs_hdrs (model/tools
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview sizehint
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
     )
 
 
@@ -61,7 +61,7 @@ opencs_units (view/doc
     )
 
 opencs_hdrs (view/doc
-    subviewfactoryimp
+    subviewfactoryimp sizehint
     )
 
 
@@ -70,7 +70,7 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
-    bodypartcreator landtexturecreator landcreator tableheadermouseeventhandler
+    bodypartcreator landcreator tableheadermouseeventhandler
     )
 
 opencs_units (view/world
@@ -80,7 +80,7 @@ opencs_units (view/world
     )
 
 opencs_units (view/widget
-    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
+    scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton scenetoolvertexpaintbrush
     scenetooltoggle2 scenetooltexturebrush scenetoolshapebrush completerpopup coloreditor colorpickerpopup droplineedit
     )
 
@@ -88,16 +88,15 @@ opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-    cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw commands
+    cellwater terraintexturemode terrainvertexpaintmode actor terrainselection terrainshapemode brushdraw commands objectmarker
     )
 
 opencs_units (view/render
-    lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
-    cellarrow cellmarker cellborder pathgrid
+    object cell terrainstorage cellarrow cellmarker cellborder pathgrid
     )
 
 opencs_hdrs (view/render
-    mask
+    mask tagbase
     )
 
 
@@ -123,7 +122,11 @@ opencs_units (model/prefs
     )
 
 opencs_units (model/filter
-    unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
+    unarynode narynode parser andnode ornode notnode textnode valuenode
+    )
+
+opencs_hdrs (model/filter
+    leafnode booleannode
     )
 
 opencs_units (view/filter
@@ -137,28 +140,17 @@ set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
                 ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc
     )
 
-set (OPENCS_UI
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/filedialog.ui
-    )
-
 source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
+    set(OPENCS_RES ${OPENCS_RES} ${CMAKE_SOURCE_DIR}/files/windows/QWindowsVistaDark/dark.qrc)
     set(QT_USE_QTMAIN TRUE)
     set(OPENCS_RC_FILE ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc)
 else(WIN32)
     set(OPENCS_RC_FILE "")
 endif(WIN32)
 
-if (QT_VERSION_MAJOR VERSION_EQUAL 5)
-    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-else ()
-    qt6_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-endif()
 qt_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
-
-# for compiled .ui files
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
     set (OPENCS_MAC_ICON "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns")
@@ -179,8 +171,6 @@ add_library(openmw-cs-lib STATIC
     ${OPENCS_RES_SRC}
 )
 
-set_target_properties(openmw-cs-lib PROPERTIES OUTPUT_NAME openmw-cs)
-
 if(BUILD_OPENCS)
     openmw_add_executable(openmw-cs
         MACOSX_BUNDLE
@@ -194,9 +184,13 @@ if(BUILD_OPENCS)
 
     target_link_libraries(openmw-cs openmw-cs-lib)
 
+    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-cs PROPERTY AUTOUIC_SEARCH_PATHS ui)
+    set_property(TARGET openmw-cs PROPERTY AUTOUIC ON)
+
     if (BUILD_WITH_CODE_COVERAGE)
-        target_compile_options(openmw-cs-lib PRIVATE --coverage)
-        target_link_libraries(openmw-cs-lib gcov)
+        target_compile_options(openmw-cs PRIVATE --coverage)
+        target_link_libraries(openmw-cs gcov)
     endif()
 endif()
 
@@ -245,19 +239,14 @@ target_link_libraries(openmw-cs-lib
     ${OSGTEXT_LIBRARIES}
     ${OSG_LIBRARIES}
     ${EXTERN_OSGQT_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    Boost::program_options
     components_qt
 )
 
-if (QT_VERSION_MAJOR VERSION_EQUAL 6)
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets Qt::Svg)
-else()
-    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::Svg)
-endif()
+target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets Qt::Svg)
 
 if (WIN32)
-    target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
-    target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/openmw-cs.exe.manifest)
+    target_sources(openmw-cs PRIVATE ${CMAKE_SOURCE_DIR}/files/windows/other-apps.manifest)
 endif()
 
 if (WIN32 AND BUILD_OPENCS)
@@ -286,6 +275,8 @@ endif()
 
 if(USE_QT)
     set_property(TARGET openmw-cs-lib PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC_SEARCH_PATHS ui)
+    set_property(TARGET openmw-cs-lib PROPERTY AUTOUIC ON)
 endif(USE_QT)
 
 if (BUILD_WITH_CODE_COVERAGE)

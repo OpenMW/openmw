@@ -9,14 +9,14 @@ namespace ESSImport
     {
         while (esm.isNextSub("KNAM"))
         {
-            std::string refId = esm.getHString();
+            ESM::RefId refId = esm.getRefId();
             int32_t count;
             esm.getHNT(count, "CNAM");
             mKillCounter[refId] = count;
         }
 
         mWerewolfKills = 0;
-        esm.getHNOT(mWerewolfKills, "INTV");
+        esm.getHNOT(mWerewolfKills, "VTNI");
     }
 
 }

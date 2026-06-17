@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <variant>

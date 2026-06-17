@@ -1,9 +1,5 @@
 #version 120
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
@@ -40,6 +36,8 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       // sunlight extinction
 
 const float SUN_SPEC_FADING_THRESHOLD = 0.15;       // visibility at which sun specularity starts to fade
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
+const float SPEC_BUMPINESS = 5.0;                  // surface bumpiness boost for specular
+const float SPEC_BRIGHTNESS = 1.5;                 // boosts the brightness of the specular highlights
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
 const float REFR_FOG_DISTORT_DISTANCE = 3000.0;    // at what distance refraction fog will be calculated using real water depth instead of distorted depth (prevents splotchy shores)
@@ -78,18 +76,20 @@ uniform float near;
 uniform float far;
 
 uniform float rainIntensity;
-uniform bool enableRainRipples;
 
 uniform vec2 screenRes;
 
 #define PER_PIXEL_LIGHTING 0
 
-#include "shadows_fragment.glsl"
-#include "lib/light/lighting.glsl"
-#include "fog.glsl"
 #include "lib/water/fresnel.glsl"
 #include "lib/water/rain_ripples.glsl"
 #include "lib/view/depth.glsl"
+#include "lib/light/struct.glsl"
+
+#include "shadows_fragment.glsl"
+#include "fog.glsl"
+
+uniform DirectionalLight sun;
 
 void main(void)
 {
@@ -110,7 +110,7 @@ void main(void)
 
     vec4 rainRipple;
 
-    if (rainIntensity > 0.01 && enableRainRipples)
+    if (rainIntensity > 0.01)
         rainRipple = rainCombined(position.xy/1000.0, waterTimer) * clamp(rainIntensity, 0.0, 1.0);
     else
         rainRipple = vec4(0.0);
@@ -132,11 +132,11 @@ void main(void)
                    normal3 * midWaves.y + normal4 * smallWaves.x + normal5 * smallWaves.y + rippleAdd);
     normal = normalize(vec3(-normal.x * bump, -normal.y * bump, normal.z));
 
-    vec3 sunWorldDir = normalize((gl_ModelViewMatrixInverse * vec4(lcalcPosition(0).xyz, 0.0)).xyz);
+    vec3 sunWorldDir = normalize((gl_ModelViewMatrixInverse * sun.position).xyz);
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 viewDir = normalize(position.xyz - cameraPos.xyz);
 
-    float sunFade = length(gl_LightModel.ambient.xyz);
+    float sunFade = length(sun.ambient.xyz);
 
     // fresnel
     float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
@@ -156,12 +156,18 @@ void main(void)
 
     vec3 waterColor = WATER_COLOR * sunFade;
 
-    vec4 sunSpec = lcalcSpecular(0);
+    vec4 sunSpec = sun.specular;
     // alpha component is sun visibility; we want to start fading lighting effects when visibility is low
     sunSpec.a = min(1.0, sunSpec.a / SUN_SPEC_FADING_THRESHOLD);
 
     // specular
-    float specular = pow(max(dot(reflect(viewDir, normal), sunWorldDir), 0.0), SPEC_HARDNESS) * shadow * sunSpec.a;
+    const float SPEC_MAGIC = 1.55; // from the original blender shader, changing it makes the spec vanish or become too bright
+
+    vec3 specNormal = normalize(vec3(normal.x * SPEC_BUMPINESS, normal.y * SPEC_BUMPINESS, normal.z));
+    vec3 viewReflectDir = reflect(viewDir, specNormal);
+    float phongTerm = max(dot(viewReflectDir, sunWorldDir), 0.0);
+    float specular = pow(atan(phongTerm * SPEC_MAGIC), SPEC_HARDNESS) * SPEC_BRIGHTNESS;
+    specular = clamp(specular, 0.0, 1.0) * shadow * sunSpec.a;
 
     // artificial specularity to make rain ripples more noticeable
     vec3 skyColorEstimate = vec3(max(0.0, mix(-0.3, 1.0, sunFade)));
@@ -214,7 +220,10 @@ void main(void)
     gl_FragData[0].a = waterTransparency;
 #endif
 
-    gl_FragData[0].rgb += specular * sunSpec.rgb + rainSpecular;
+    vec3 pointSpecular = doSpecularLighting(gl_FragCoord.xy, (gl_ModelViewMatrix * vec4(position.xyz, 1.0)).xyz, normalize(gl_NormalMatrix * specNormal));
+    pointSpecular *= SPEC_BRIGHTNESS;
+
+    gl_FragData[0].rgb += specular * sunSpec.rgb + rainSpecular + pointSpecular;
 
 #if @waterRefraction && @wobblyShores
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping

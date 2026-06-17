@@ -1,6 +1,6 @@
 ---
--- `openmw.ui` controls user interface.
--- Can be used only by menu scripts and local scripts, that are attached to a player.
+-- Controls user interface.
+-- @context menu|player
 -- @module ui
 -- @usage
 -- local ui = require('openmw.ui')
@@ -39,6 +39,14 @@
 -- Shows given message at the bottom of the screen.
 -- @function [parent=#ui] showMessage
 -- @param #string msg
+-- @param #table options An optional table with additional optional arguments. Can contain:
+--
+--   * `showInDialogue` - If true, this message will only be shown in the dialogue window. If false, it will always be shown in a message box.
+--                        When omitted, the message will be displayed in the dialogue window if it is open and will be shown at the bottom of the screen otherwise.
+-- @usage local params = {
+--    showInDialogue=false
+-- };
+-- ui.showMessage("Hello world", params)
 
 ---
 -- Predefined colors for console output
@@ -86,6 +94,10 @@
 -- Creates a UI element from the given layout table
 -- @function [parent=#ui] create
 -- @param #Layout layout
+-- @param #table options Optional table, can take the following options:
+--
+--   * `noWarnUnused` - if set to true this element will never generate warnings about unused properties.
+--
 -- @return #Element
 
 ---

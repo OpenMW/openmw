@@ -2,6 +2,7 @@
 
 #extension GL_OVR_multiview : require
 #extension GL_OVR_multiview2 : require
+#extension GL_EXT_texture_array : require
 
 #include "lib/core/fragment.h.glsl"
 
@@ -44,3 +45,10 @@ vec3 sampleSkyColor(vec2 uv)
     return texture(sky, vec3((uv), gl_ViewID_OVR)).xyz;
 }
 #endif
+
+uniform sampler2DArray opaqueDepthTex;
+
+vec4 sampleOpaqueDepthTex(vec2 uv)
+{
+    return texture(opaqueDepthTex, vec3((uv), gl_ViewID_OVR));
+}

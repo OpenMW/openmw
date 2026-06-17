@@ -14,7 +14,7 @@ namespace MWGui
         mPinButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &WindowPinnableBase::onPinButtonPressed);
     }
 
-    void WindowPinnableBase::onPinButtonPressed(MyGUI::Widget* _sender, int left, int top, MyGUI::MouseButton id)
+    void WindowPinnableBase::onPinButtonPressed(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)
     {
         if (id != MyGUI::MouseButton::Left)
             return;

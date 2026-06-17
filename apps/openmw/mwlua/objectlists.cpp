@@ -1,9 +1,5 @@
 #include "objectlists.hpp"
 
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/esmwriter.hpp>
-#include <components/esm3/loadcell.hpp>
-
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"

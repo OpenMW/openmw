@@ -41,8 +41,8 @@ namespace
         {
             std::ostringstream texname;
             texname << "textures/water/" << tex << std::setw(2) << std::setfill('0') << i << ".dds";
-            osg::ref_ptr<osg::Texture2D> tex2(
-                new osg::Texture2D(resourceSystem->getImageManager()->getImage(texname.str())));
+            const VFS::Path::Normalized path(texname.str());
+            osg::ref_ptr<osg::Texture2D> tex2(new osg::Texture2D(resourceSystem->getImageManager()->getImage(path)));
             tex2->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             tex2->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
             resourceSystem->getSceneManager()->applyFilterSettings(tex2);
@@ -64,16 +64,15 @@ namespace
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
-        polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1 : -1);
-        polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 1 : -1);
+        polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+        polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
         stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
         osg::ref_ptr<osg::Material> mat(new osg::Material);
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         mat->setColorMode(osg::Material::DIFFUSE);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
@@ -84,13 +83,13 @@ namespace
     int findOldestParticleAlive(const osgParticle::ParticleSystem* partsys)
     {
         int oldest = -1;
-        float oldestAge = 0.f;
+        double oldestAge = 0.f;
         for (int i = 0; i < partsys->numParticles(); ++i)
         {
             const osgParticle::Particle* particle = partsys->getParticle(i);
             if (!particle->isAlive())
                 continue;
-            const float age = particle->getAge();
+            const double age = particle->getAge();
             if (oldest == -1 || age > oldestAge)
             {
                 oldest = i;
@@ -111,12 +110,12 @@ namespace MWRender
         mParticleSystem = new osgParticle::ParticleSystem;
 
         mParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
-        mParticleSystem->setAlignVectorX(osg::Vec3f(1, 0, 0));
-        mParticleSystem->setAlignVectorY(osg::Vec3f(0, 1, 0));
+        // Horizontal placement. Inverted vertically so that the UV uses Y-down convention
+        mParticleSystem->setAlignVectors(osg::Vec3f(1, 0, 0), osg::Vec3f(0, -1, 0));
 
         osgParticle::Particle& particleTemplate = mParticleSystem->getDefaultParticleTemplate();
         particleTemplate.setSizeRange(osgParticle::rangef(15, 180));
-        particleTemplate.setColorRange(osgParticle::rangev4(osg::Vec4f(1, 1, 1, 0.7), osg::Vec4f(1, 1, 1, 0.7)));
+        particleTemplate.setColorRange(osgParticle::rangev4(osg::Vec4f(0, 0, 0, 0.7f), osg::Vec4f(0, 0, 0, 0.7f)));
         particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 0.f));
         particleTemplate.setAngularVelocity(osg::Vec3f(0, 0, Fallback::Map::getFloat("Water_RippleRotSpeed")));
         particleTemplate.setLifeTime(Fallback::Map::getFloat("Water_RippleLifetime"));
@@ -169,7 +168,7 @@ namespace MWRender
             {
                 // Ripple simulation needs to continously apply impulses to keep simulation alive.
                 // Adding a timer delay will introduce many smaller ripples around actor instead of a smooth wake
-                currentPos.z() = mParticleNode->getPosition().z();
+                currentPos.z() = static_cast<float>(mParticleNode->getPosition().z());
                 emitRipple(currentPos);
             }
             else if (emitter.mTimer <= 0.f || (currentPos - emitter.mLastEmitPosition).length() > 10)
@@ -177,7 +176,7 @@ namespace MWRender
                 emitter.mLastEmitPosition = currentPos;
                 emitter.mTimer = 1.5f;
 
-                currentPos.z() = mParticleNode->getPosition().z();
+                currentPos.z() = static_cast<float>(mParticleNode->getPosition().z());
 
                 emitRipple(currentPos);
             }
@@ -243,7 +242,7 @@ namespace MWRender
             }
             else
             {
-                if (mMaxNumberRipples == 0)
+                if (mMaxNumberRipples <= 0)
                     return;
 
                 osgParticle::ParticleSystem::ScopedWriteLock lock(*mParticleSystem->getReadWriteMutex());
@@ -258,7 +257,7 @@ namespace MWRender
                 }
                 osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
                 p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
-                p->setAngle(osg::Vec3f(0, 0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
+                p->setAngle(osg::Vec3f(0, 0, Misc::Rng::rollProbability() * osg::PIf * 2 - osg::PIf));
             }
         }
     }

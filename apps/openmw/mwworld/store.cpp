@@ -10,7 +10,6 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -81,7 +80,7 @@ namespace MWWorld
         mStatic.insert_or_assign(idx, std::move(record));
     }
     template <typename T>
-    int IndexedStore<T>::getSize() const
+    size_t IndexedStore<T>::getSize() const
     {
         return mStatic.size();
     }
@@ -109,9 +108,6 @@ namespace MWWorld
         }
         return ptr;
     }
-
-    // Need to instantiate these before they're used
-    template class IndexedStore<ESM::MagicEffect>;
 
     template <class T, class Id>
     TypedDynamicStore<T, Id>::TypedDynamicStore()
@@ -255,7 +251,7 @@ namespace MWWorld
     }
 
     template <class T, class Id>
-    int TypedDynamicStore<T, Id>::getDynamicSize() const
+    size_t TypedDynamicStore<T, Id>::getDynamicSize() const
     {
         return mDynamic.size();
     }
@@ -269,9 +265,12 @@ namespace MWWorld
             list.push_back((*it)->mId);
         }
     }
+
     template <class T, class Id>
     T* TypedDynamicStore<T, Id>::insert(const T& item, bool overrideOnly)
     {
+        if constexpr (std::is_same_v<decltype(item.mId), ESM::RefId>)
+            overrideOnly = overrideOnly && !item.mId.template is<ESM::GeneratedRefId>();
         if (overrideOnly)
         {
             auto it = mStatic.find(item.mId);
@@ -379,83 +378,51 @@ namespace MWWorld
 
     // LandTexture
     //=========================================================================
-    Store<ESM::LandTexture>::Store() {}
-    const ESM::LandTexture* Store<ESM::LandTexture>::search(size_t index, size_t plugin) const
-    {
-        assert(plugin < mStatic.size());
-        const LandTextureList& ltexl = mStatic[plugin];
+    Store<ESM::LandTexture>::Store() = default;
 
-        if (index >= ltexl.size())
+    const std::string* Store<ESM::LandTexture>::search(std::uint32_t index, int plugin) const
+    {
+        auto mapping = mMappings.find(PluginIndex{ plugin, index });
+        if (mapping == mMappings.end())
             return nullptr;
-        return &ltexl[index];
-    }
-    const ESM::LandTexture* Store<ESM::LandTexture>::find(size_t index, size_t plugin) const
-    {
-        const ESM::LandTexture* ptr = search(index, plugin);
-        if (ptr == nullptr)
-        {
-            const std::string msg = "Land texture with index " + std::to_string(index) + " not found";
-            throw std::runtime_error(msg);
-        }
-        return ptr;
-    }
-
-    void Store<ESM::LandTexture>::resize(std::size_t num)
-    {
-        mStatic.resize(num);
+        auto texture = mStatic.find(mapping->second);
+        if (texture == mStatic.end())
+            return nullptr;
+        return &texture->second;
     }
 
     size_t Store<ESM::LandTexture>::getSize() const
     {
         return mStatic.size();
     }
-    size_t Store<ESM::LandTexture>::getSize(size_t plugin) const
-    {
-        assert(plugin < mStatic.size());
-        return mStatic[plugin].size();
-    }
+
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader& esm)
     {
+        const int plugin = esm.getIndex();
+
         ESM::LandTexture lt;
         bool isDeleted = false;
 
         lt.load(esm, isDeleted);
 
-        // Replace texture for records with given ID and index from all plugins.
-        for (unsigned int i = 0; i < mStatic.size(); i++)
+        if (!isDeleted)
         {
-            ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
-            if (tex)
-            {
-                if (tex->mId == lt.mId)
-                    tex->mTexture = lt.mTexture;
-            }
+            mStatic[lt.mId] = std::move(lt.mTexture);
+            mMappings.emplace(PluginIndex{ plugin, lt.mIndex }, lt.mId);
         }
 
-        LandTextureList& ltexl = mStatic.back();
-        if (lt.mIndex + 1 > (int)ltexl.size())
-            ltexl.resize(lt.mIndex + 1);
-
-        // Store it
-        auto idx = lt.mIndex;
-        ltexl[idx] = std::move(lt);
-
-        return RecordId(ltexl[idx].mId, isDeleted);
+        return RecordId(lt.mId, isDeleted);
     }
-    Store<ESM::LandTexture>::iterator Store<ESM::LandTexture>::begin(size_t plugin) const
+
+    bool Store<ESM::LandTexture>::eraseStatic(const ESM::RefId& id)
     {
-        assert(plugin < mStatic.size());
-        return mStatic[plugin].begin();
-    }
-    Store<ESM::LandTexture>::iterator Store<ESM::LandTexture>::end(size_t plugin) const
-    {
-        assert(plugin < mStatic.size());
-        return mStatic[plugin].end();
+        mStatic.erase(id);
+        return true;
     }
 
     // Land
     //=========================================================================
-    Store<ESM::Land>::~Store() {}
+    Store<ESM::Land>::~Store() = default;
     size_t Store<ESM::Land>::getSize() const
     {
         return mStatic.size();
@@ -626,9 +593,10 @@ namespace MWWorld
         newCell.mAmbi.mFogDensity = 0;
         newCell.updateId();
 
-        ESM::Cell* newCellInserted = &mCells.insert(std::make_pair(newCell.mId, newCell)).first->second;
-
-        return mExt.insert(std::make_pair(key, newCellInserted)).first->second;
+        ESM::Cell* newCellInserted = &mCells.emplace(newCell.mId, newCell).first->second;
+        mExt.emplace(key, newCellInserted);
+        mSharedExt.emplace_back(newCellInserted);
+        return newCellInserted;
     }
     const ESM::Cell* Store<ESM::Cell>::find(const ESM::RefId& id) const
     {
@@ -662,20 +630,15 @@ namespace MWWorld
     }
     void Store<ESM::Cell>::clearDynamic()
     {
-        setUp();
-    }
+        for (const auto& [_, cell] : mDynamicExt)
+            mCells.erase(cell->mId);
+        mDynamicExt.clear();
+        for (const auto& [_, cell] : mDynamicInt)
+            mCells.erase(cell->mId);
+        mDynamicInt.clear();
 
-    void Store<ESM::Cell>::setUp()
-    {
-        mSharedInt.clear();
-        mSharedInt.reserve(mInt.size());
-        for (auto& [_, cell] : mInt)
-            mSharedInt.push_back(cell);
-
-        mSharedExt.clear();
-        mSharedExt.reserve(mExt.size());
-        for (auto& [_, cell] : mExt)
-            mSharedExt.push_back(cell);
+        mSharedInt.erase(mSharedInt.begin() + mInt.size(), mSharedInt.end());
+        mSharedExt.erase(mSharedExt.begin() + mExt.size(), mSharedExt.end());
     }
     RecordId Store<ESM::Cell>::load(ESM::ESMReader& esm)
     {
@@ -708,7 +671,10 @@ namespace MWWorld
         {
             cell.loadCell(esm, true);
             if (newCell)
+            {
                 mInt[cell.mName] = &cell;
+                mSharedInt.push_back(&cell);
+            }
         }
         else
         {
@@ -721,7 +687,10 @@ namespace MWWorld
             // push the new references on the list of references to manage
             cell.postLoad(esm);
             if (newCell)
+            {
                 mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = &cell;
+                mSharedExt.push_back(&cell);
+            }
             else
             {
                 // merge lists of leased references, use newer data in case of conflict
@@ -771,38 +740,6 @@ namespace MWWorld
     Store<ESM::Cell>::iterator Store<ESM::Cell>::extEnd() const
     {
         return iterator(mSharedExt.end());
-    }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByName(std::string_view name) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (Misc::StringUtils::ciEqual(sharedCell->mName, name))
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
-    }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByRegion(const ESM::RefId& id) const
-    {
-        const ESM::Cell* cell = nullptr;
-        for (const ESM::Cell* sharedCell : mSharedExt)
-        {
-            if (sharedCell->mRegion == id)
-            {
-                if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
-                    || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
-                {
-                    cell = sharedCell;
-                }
-            }
-        }
-        return cell;
     }
     size_t Store<ESM::Cell>::getSize() const
     {
@@ -1014,31 +951,6 @@ namespace MWWorld
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
     }
 
-    void Store<ESM::GameSetting>::setUp()
-    {
-        auto addSetting = [&](const std::string& key, ESM::Variant value) {
-            auto id = ESM::RefId::stringRefId(key);
-            ESM::GameSetting setting;
-            setting.blank();
-            setting.mId = id;
-            setting.mValue = std::move(value);
-            auto [iter, inserted] = mStatic.insert_or_assign(id, std::move(setting));
-            if (inserted)
-                mShared.push_back(&iter->second);
-        };
-        for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        TypedDynamicStore<ESM::GameSetting>::setUp();
-    }
-
-    // Magic effect
-    //=========================================================================
-    Store<ESM::MagicEffect>::Store() {}
-
     // Attribute
     //=========================================================================
 
@@ -1090,10 +1002,7 @@ namespace MWWorld
     // Dialogue
     //=========================================================================
 
-    Store<ESM::Dialogue>::Store()
-        : mKeywordSearchModFlag(true)
-    {
-    }
+    Store<ESM::Dialogue>::Store() {}
 
     void Store<ESM::Dialogue>::setUp()
     {
@@ -1190,25 +1099,9 @@ namespace MWWorld
             list.push_back(dialogue->mId);
     }
 
-    const MWDialogue::KeywordSearch<int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
+    bool Store<ESM::Dialogue>::getKeywordSearchModFlag() const
     {
-        if (mKeywordSearchModFlag)
-        {
-            mKeywordSearch.clear();
-
-            std::vector<std::string> keywordList;
-            keywordList.reserve(getSize());
-            for (const auto& it : *this)
-                keywordList.push_back(Misc::StringUtils::lowerCase(it.mStringId));
-            sort(keywordList.begin(), keywordList.end());
-
-            for (const auto& it : keywordList)
-                mKeywordSearch.seed(it, 0 /*unused*/);
-
-            mKeywordSearchModFlag = false;
-        }
-
-        return mKeywordSearch;
+        return std::exchange(mKeywordSearchModFlag, false);
     }
 
     // ESM4 Cell
@@ -1325,7 +1218,7 @@ template class MWWorld::TypedDynamicStore<ESM::ItemLevList>;
 // template class MWWorld::Store<ESM::LandTexture>;
 template class MWWorld::TypedDynamicStore<ESM::Light>;
 template class MWWorld::TypedDynamicStore<ESM::Lockpick>;
-// template class MWWorld::Store<ESM::MagicEffect>;
+template class MWWorld::TypedDynamicStore<ESM::MagicEffect>;
 template class MWWorld::TypedDynamicStore<ESM::Miscellaneous>;
 template class MWWorld::TypedDynamicStore<ESM::NPC>;
 // template class MWWorld::Store<ESM::Pathgrid>;
@@ -1375,8 +1268,12 @@ template class MWWorld::TypedDynamicStore<ESM4::Npc>;
 template class MWWorld::TypedDynamicStore<ESM4::Outfit>;
 template class MWWorld::TypedDynamicStore<ESM4::Potion>;
 template class MWWorld::TypedDynamicStore<ESM4::Race>;
+template class MWWorld::TypedDynamicStore<ESM4::Sound>;
+template class MWWorld::TypedDynamicStore<ESM4::SoundReference>;
 template class MWWorld::TypedDynamicStore<ESM4::Static>;
+template class MWWorld::TypedDynamicStore<ESM4::StaticCollection>;
 template class MWWorld::TypedDynamicStore<ESM4::Terminal>;
+template class MWWorld::TypedDynamicStore<ESM4::TextureSet>;
 template class MWWorld::TypedDynamicStore<ESM4::Tree>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
 template class MWWorld::TypedDynamicStore<ESM4::World>;

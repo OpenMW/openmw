@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -61,6 +62,7 @@
 #include <components/esm4/loadmstt.hpp>
 #include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadscol.hpp>
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/loadterm.hpp>
 #include <components/esm4/loadtree.hpp>
@@ -135,25 +137,6 @@ namespace
 
             if (!ptr.isEmpty())
                 return ptr;
-        }
-
-        return MWWorld::Ptr();
-    }
-
-    template <typename T>
-    MWWorld::Ptr searchViaActorId(MWWorld::CellRefList<T>& actorList, int actorId, MWWorld::CellStore* cell,
-        const std::map<MWWorld::LiveCellRefBase*, MWWorld::CellStore*>& toIgnore)
-    {
-        for (typename MWWorld::CellRefList<T>::List::iterator iter(actorList.mList.begin());
-             iter != actorList.mList.end(); ++iter)
-        {
-            MWWorld::Ptr actor(&*iter, cell);
-
-            if (toIgnore.find(&*iter) != toIgnore.end())
-                continue;
-
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(actorId) && actor.getCellRef().getCount() > 0)
-                return actor;
         }
 
         return MWWorld::Ptr();
@@ -264,7 +247,23 @@ namespace
         else if (state.mVersion <= ESM::MaxOldCreatureStatsFormatVersion)
         {
             if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+            {
                 MWWorld::convertStats(state.mCreatureStats);
+                MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
+            }
+        }
+        else if (state.mVersion <= ESM::MaxActiveSpellSlotIndexFormatVersion)
+        {
+            if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+                MWWorld::convertEnchantmentSlots(state.mCreatureStats, state.mInventory);
+        }
+        if constexpr (std::is_same_v<T, ESM::Creature> || std::is_same_v<T, ESM::NPC>)
+        {
+            if (reader.mActorIdConverter && state.mHasCustomState)
+            {
+                MWBase::Environment::get().getWorldModel()->assignSaveFileRefNum(state.mRef);
+                reader.mActorIdConverter->mMappings.emplace(state.mCreatureStats.mActorId, state.mRef.mRefNum);
+            }
         }
 
         if (state.mRef.mRefNum.hasContentFile())
@@ -308,9 +307,9 @@ namespace
         }
 
         // new reference
-        MWWorld::LiveCellRef<T> ref(record);
+        MWWorld::LiveCellRef<T> ref(ESM::makeBlankCellRef(), record);
         ref.load(state);
-        collection.mList.push_back(ref);
+        collection.mList.push_back(std::move(ref));
 
         MWWorld::LiveCellRefBase* base = &collection.mList.back();
         MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(base, cellstore));
@@ -328,13 +327,13 @@ namespace
 
     // helper function for forEachInternal
     template <class Visitor, class List>
-    bool forEachImp(Visitor& visitor, List& list, MWWorld::CellStore* cellStore)
+    bool forEachImp(Visitor& visitor, List& list, MWWorld::CellStore& cellStore, bool includeDeleted)
     {
-        for (typename List::List::iterator iter(list.mList.begin()); iter != list.mList.end(); ++iter)
+        for (auto& v : list.mList)
         {
-            if (!MWWorld::CellStore::isAccessible(iter->mData, iter->mRef))
+            if (!includeDeleted && !MWWorld::CellStore::isAccessible(v.mData, v.mRef))
                 continue;
-            if (!visitor(MWWorld::Ptr(&*iter, cellStore)))
+            if (!visitor(MWWorld::Ptr(&v, &cellStore)))
                 return false;
         }
         return true;
@@ -343,6 +342,34 @@ namespace
 
 namespace MWWorld
 {
+    namespace
+    {
+        template <class T>
+        bool isEnabled(const T& ref, const ESMStore& store)
+        {
+            if (ref.mEsp.parent.isZeroOrUnset())
+                return true;
+
+            // Disable objects that are linked to an initially disabled parent.
+            // Actually when we will start working on Oblivion/Skyrim scripting we will need to:
+            //  - use the current state of the parent instead of initial state of the parent
+            //  - every time when the parent is enabled/disabled we should also enable/disable
+            //        all objects that are linked to it.
+            // But for now we assume that the parent remains in its initial state.
+            if (const ESM4::Reference* parentRef = store.get<ESM4::Reference>().searchStatic(ref.mEsp.parent))
+            {
+                const bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
+                const bool inversed = ref.mEsp.flags & ESM4::EnableParent::Flag_Inversed;
+                if (parentDisabled != inversed)
+                    return false;
+
+                return isEnabled(*parentRef, store);
+            }
+
+            return true;
+        }
+    }
+
     struct CellStoreImp
     {
         CellStoreTuple mRefLists;
@@ -362,12 +389,12 @@ namespace MWWorld
         // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved
         // objects are accounted for.
         template <class Visitor>
-        static bool forEachInternal(Visitor& visitor, MWWorld::CellStore& cellStore)
+        static bool forEachInternal(Visitor& visitor, MWWorld::CellStore& cellStore, bool includeDeleted)
         {
             bool returnValue = true;
 
-            Misc::tupleForEach(cellStore.mCellStoreImp->mRefLists, [&visitor, &returnValue, &cellStore](auto& store) {
-                returnValue = returnValue && forEachImp(visitor, store, &cellStore);
+            Misc::tupleForEach(cellStore.mCellStoreImp->mRefLists, [&](auto& store) {
+                returnValue = returnValue && forEachImp(visitor, store, cellStore, includeDeleted);
             });
 
             return returnValue;
@@ -389,9 +416,9 @@ namespace MWWorld
                 liveCellRef.mData.setDeletedByContentFile(true);
 
             if (iter != mList.end())
-                *iter = liveCellRef;
+                *iter = std::move(liveCellRef);
             else
-                mList.push_back(liveCellRef);
+                mList.push_back(std::move(liveCellRef));
         }
         else
         {
@@ -416,24 +443,9 @@ namespace MWWorld
             return;
         }
         LiveCellRef<X> liveCellRef(ref, ptr);
-        if (!ref.mEsp.parent.isZeroOrUnset())
-        {
-            // Disable objects that are linked to an initially disabled parent.
-            // Actually when we will start working on Oblivion/Skyrim scripting we will need to:
-            //  - use the current state of the parent instead of initial state of the parent
-            //  - every time when the parent is enabled/disabled we should also enable/disable
-            //        all objects that are linked to it.
-            // But for now we assume that the parent remains in its initial state.
-            const ESM4::Reference* parentRef = esmStore.get<ESM4::Reference>().searchStatic(ref.mEsp.parent);
-            if (parentRef)
-            {
-                bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
-                bool inversed = ref.mEsp.flags & ESM4::EnableParent::Flag_Inversed;
-                if (parentDisabled != inversed)
-                    liveCellRef.mData.disable();
-            }
-        }
-        list.push_back(liveCellRef);
+        if (!isEnabled(ref, esmStore))
+            liveCellRef.mData.disable();
+        list.push_back(std::move(liveCellRef));
     }
 
     template <typename X>
@@ -561,11 +573,11 @@ namespace MWWorld
         mMergedRefsNeedsUpdate = true;
     }
 
-    void CellStore::updateMergedRefs() const
+    void CellStore::updateMergedRefs(bool includeDeleted) const
     {
         mMergedRefs.clear();
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
-        CellStoreImp::forEachInternal(visitor, const_cast<CellStore&>(*this));
+        CellStoreImp::forEachInternal(visitor, const_cast<CellStore&>(*this), includeDeleted);
         visitor.merge();
         mMergedRefsNeedsUpdate = false;
     }
@@ -661,26 +673,6 @@ namespace MWWorld
         SearchVisitor<MWWorld::ConstPtr> searchVisitor(id);
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
-    }
-
-    Ptr CellStore::searchViaActorId(int id)
-    {
-        if (Ptr ptr = ::searchViaActorId(get<ESM::NPC>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
-            return ptr;
-
-        if (Ptr ptr = ::searchViaActorId(get<ESM::Creature>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
-            return ptr;
-
-        for (const auto& [base, _] : mMovedHere)
-        {
-            MWWorld::Ptr actor(base, this);
-            if (!actor.getClass().isActor())
-                continue;
-            if (actor.getClass().getCreatureStats(actor).matchesActorId(id) && actor.getCellRef().getCount() > 0)
-                return actor;
-        }
-
-        return Ptr();
     }
 
     class RefNumSearchVisitor
@@ -1168,10 +1160,12 @@ namespace MWWorld
     {
         if (mState == State_Loaded)
         {
+            // Refs with no custom data are at default dynamic stats — there is nothing to restore,
+            // and touching them would force-allocate custom data that then bloats the save file.
             for (MWWorld::LiveCellRef<ESM::Creature>& creature : get<ESM::Creature>().mList)
             {
                 Ptr ptr = getCurrentPtr(&creature);
-                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0 && ptr.getRefData().hasCustomData())
                 {
                     MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
@@ -1179,7 +1173,7 @@ namespace MWWorld
             for (MWWorld::LiveCellRef<ESM::NPC>& npc : get<ESM::NPC>().mList)
             {
                 Ptr ptr = getCurrentPtr(&npc);
-                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0 && ptr.getRefData().hasCustomData())
                 {
                     MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
@@ -1194,10 +1188,12 @@ namespace MWWorld
 
         if (mState == State_Loaded)
         {
+            // Skip refs that have no custom data — they have no container to recharge,
+            // and getContainerStore() would force-allocate custom data and bloat the save file.
             for (MWWorld::LiveCellRef<ESM::Creature>& creature : get<ESM::Creature>().mList)
             {
                 Ptr ptr = getCurrentPtr(&creature);
-                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0 && ptr.getRefData().hasCustomData())
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
@@ -1205,7 +1201,7 @@ namespace MWWorld
             for (MWWorld::LiveCellRef<ESM::NPC>& npc : get<ESM::NPC>().mList)
             {
                 Ptr ptr = getCurrentPtr(&npc);
-                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getCellRef().getCount() > 0 && ptr.getRefData().hasCustomData())
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
@@ -1213,7 +1209,7 @@ namespace MWWorld
             for (MWWorld::LiveCellRef<ESM::Container>& container : get<ESM::Container>().mList)
             {
                 Ptr ptr = getCurrentPtr(&container);
-                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getCellRef().getCount() > 0
+                if (!ptr.isEmpty() && ptr.getRefData().hasCustomData() && ptr.getCellRef().getCount() > 0
                     && ptr.getClass().getContainerStore(ptr).isResolved())
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
@@ -1237,30 +1233,60 @@ namespace MWWorld
                      it != get<ESM::Container>().mList.end(); ++it)
                 {
                     Ptr ptr = getCurrentPtr(&*it);
-                    ptr.getClass().respawn(ptr);
+                    if (ptr.getRefData().hasCustomData())
+                        ptr.getClass().respawn(ptr);
                 }
             }
 
-            for (CellRefList<ESM::Creature>::List::iterator it(get<ESM::Creature>().mList.begin());
-                 it != get<ESM::Creature>().mList.end(); ++it)
+            // Skip refs with no custom data: they cannot have been killed, looted, or had their inventory
+            // generated, so respawn/clearCorpse have no work to do and would only force-allocate custom
+            // data that then bloats the save file. Actors need to respawn here even if they've been moved
+            // to another cell.
+            for (LiveCellRefBase& base : get<ESM::Creature>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
+                Ptr ptr = getCurrentPtr(&base);
+                if (!ptr.getRefData().hasCustomData())
+                    continue;
                 clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
-            for (CellRefList<ESM::NPC>::List::iterator it(get<ESM::NPC>().mList.begin());
-                 it != get<ESM::NPC>().mList.end(); ++it)
+            for (LiveCellRefBase& base : get<ESM::NPC>().mList)
             {
-                Ptr ptr = getCurrentPtr(&*it);
+                Ptr ptr = getCurrentPtr(&base);
+                if (!ptr.getRefData().hasCustomData())
+                    continue;
                 clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
-            forEachType<ESM::CreatureLevList>([](Ptr ptr) {
-                // no need to clearCorpse, handled as part of get<ESM::Creature>()
-                if (!ptr.mRef->isDeleted())
+            for (LiveCellRefBase& base : get<ESM::CreatureLevList>().mList)
+            {
+                Ptr ptr = getCurrentPtr(&base);
+                if (!ptr.mRef->isDeleted() && ptr.getRefData().hasCustomData())
                     ptr.getClass().respawn(ptr);
-                return true;
-            });
+            }
+            for (const auto& [base, _] : mMovedHere)
+            {
+                switch (base->getType())
+                {
+                    case ESM::Creature::sRecordId:
+                    case ESM::NPC::sRecordId:
+                    case ESM::CreatureLevList::sRecordId:
+                    {
+                        MWWorld::Ptr ptr(base, this);
+                        if (ptr.mRef->isDeleted() || !ptr.getRefData().hasCustomData())
+                            continue;
+                        // Remove actors that have been dead a while, but don't belong here and didn't get hit by the
+                        // logic above
+                        if (ptr.getClass().isActor())
+                            clearCorpse(ptr, mStore);
+                        else // Respawn lists in their new position
+                            ptr.getClass().respawn(ptr);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -1318,18 +1344,13 @@ namespace MWWorld
                 ptr.getBase(), static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment)));
     }
 
-    Ptr MWWorld::CellStore::getMovedActor(int actorId) const
+    CellStore* MWWorld::CellStore::getOriginCell(const Ptr& object) const
     {
-        for (const auto& [cellRef, cell] : mMovedToAnotherCell)
-        {
-            if (cellRef->mClass->isActor() && cellRef->mData.getCustomData())
-            {
-                Ptr actor(cellRef, cell);
-                if (actor.getClass().getCreatureStats(actor).getActorId() == actorId)
-                    return actor;
-            }
-        }
-        return {};
+        MovedRefTracker::const_iterator found = mMovedHere.find(object.getBase());
+        if (found != mMovedHere.end())
+            return found->second;
+
+        return object.getCell();
     }
 
     Ptr CellStore::getPtr(ESM::RefId id)

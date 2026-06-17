@@ -75,8 +75,8 @@ Allowed options)");
     bpo::variables_map variables;
     try
     {
-        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(all).positional(p).run();
-        bpo::store(valid_opts, variables);
+        bpo::parsed_options validOpts = bpo::command_line_parser(argc, argv).options(all).positional(p).run();
+        bpo::store(validOpts, variables);
     }
     catch (std::exception& e)
     {
@@ -170,8 +170,8 @@ int list(std::unique_ptr<File>& bsa, Arguments& info)
             // Long format
             std::ios::fmtflags f(std::cout.flags());
             std::cout << std::setw(50) << std::left << file.name();
-            std::cout << std::setw(8) << std::left << std::dec << file.fileSize;
-            std::cout << "@ 0x" << std::hex << file.offset << std::endl;
+            std::cout << std::setw(8) << std::left << std::dec << file.mFileSize;
+            std::cout << "@ 0x" << std::hex << file.mOffset << std::endl;
             std::cout.flags(f);
         }
         else

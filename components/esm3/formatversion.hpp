@@ -27,11 +27,14 @@ namespace ESM
     inline constexpr FormatVersion MaxActiveSpellSlotIndexFormatVersion = 27;
     inline constexpr FormatVersion MaxOldCountFormatVersion = 30;
     inline constexpr FormatVersion MaxActiveSpellTypeVersion = 31;
-    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 32;
+    inline constexpr FormatVersion MaxPlayerBeforeCellDataFormatVersion = 32;
+    inline constexpr FormatVersion MaxActorIdSaveGameFormatVersion = 34;
+    inline constexpr FormatVersion MaxSerializeEffectRefIdFormatVersion = 35;
+    inline constexpr FormatVersion MaxLuaScriptPathFormatVersion = 36;
+    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 37;
 
     inline constexpr FormatVersion MinSupportedSaveGameFormatVersion = 5;
-    inline constexpr FormatVersion OpenMW0_48SaveGameFormatVersion = 21;
-    inline constexpr FormatVersion OpenMW0_49SaveGameFormatVersion = CurrentSaveGameFormatVersion;
+    inline constexpr FormatVersion OpenMW0_49MinSaveGameFormatVersion = 5;
 }
 
 #endif

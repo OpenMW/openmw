@@ -31,7 +31,7 @@ namespace CSMPrefs
         bool getSequence(std::string_view name, QKeySequence& sequence) const;
         void setSequence(std::string_view name, const QKeySequence& sequence);
 
-        bool getModifier(const std::string& name, int& modifier) const;
+        bool getModifier(std::string_view name, int& modifier) const;
         void setModifier(std::string_view name, int modifier);
 
         std::string convertToString(const QKeySequence& sequence) const;
@@ -39,10 +39,10 @@ namespace CSMPrefs
 
         std::string convertToString(const QKeySequence& sequence, int modifier) const;
 
-        void convertFromString(const std::string& data, QKeySequence& sequence) const;
-        void convertFromString(const std::string& data, int& modifier) const;
+        void convertFromString(std::string_view data, QKeySequence& sequence) const;
+        void convertFromString(std::string_view data, int& modifier) const;
 
-        void convertFromString(const std::string& data, QKeySequence& sequence, int& modifier) const;
+        void convertFromString(std::string_view data, QKeySequence& sequence, int& modifier) const;
 
         /// Replaces "{sequence-name}" or "{modifier-name}" with the appropriate text
         QString processToolTip(const QString& toolTip) const;
@@ -53,7 +53,7 @@ namespace CSMPrefs
         typedef std::map<std::string, QKeySequence, std::less<>> SequenceMap;
         typedef std::map<std::string, int, std::less<>> ModifierMap;
         typedef std::map<int, std::string> NameMap;
-        typedef std::map<std::string, int> KeyMap;
+        typedef std::map<std::string, int, std::less<>> KeyMap;
 
         ShortcutMap mShortcuts;
         SequenceMap mSequences;

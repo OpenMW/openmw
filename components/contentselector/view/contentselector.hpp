@@ -45,7 +45,7 @@ namespace ContentSelectorView
 
         void clearCheckStates();
         void setEncoding(const QString& encoding);
-        void setContentList(const QStringList& list);
+        void setContentList(const QStringList& list, bool orderOnly = false);
 
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
@@ -69,7 +69,7 @@ namespace ContentSelectorView
         void buildAddonView();
         void buildContextMenu();
         void setGameFileSelected(int index, bool selected);
-        void setCheckStateForMultiSelectedItems(bool checked);
+        void setCheckStateForMultiSelectedItems(Qt::CheckState checkState);
 
     signals:
         void signalCurrentGamefileIndexChanged(int);

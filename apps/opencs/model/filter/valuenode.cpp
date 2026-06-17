@@ -29,8 +29,8 @@ bool CSMFilter::ValueNode::test(const CSMWorld::IdTableBase& table, int row, con
 
     QVariant data = table.data(index);
 
-    if (data.type() != QVariant::Double && data.type() != QVariant::Bool && data.type() != QVariant::Int
-        && data.type() != QVariant::UInt && data.type() != static_cast<QVariant::Type>(QMetaType::Float))
+    if (data.typeId() != QMetaType::Double && data.typeId() != QMetaType::Bool && data.typeId() != QMetaType::Int
+        && data.typeId() != QMetaType::UInt && data.typeId() != QMetaType::Float)
         return false;
 
     double value = data.toDouble();

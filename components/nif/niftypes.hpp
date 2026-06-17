@@ -52,6 +52,17 @@ namespace Nif
                         return false;
             return true;
         }
+
+        osg::Matrixf toOsgMatrix() const
+        {
+            osg::Matrixf osgMat;
+
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    osgMat(i, j) = mValues[j][i]; // NB: column/row major difference
+
+            return osgMat;
+        }
     };
 
     struct NiTransform

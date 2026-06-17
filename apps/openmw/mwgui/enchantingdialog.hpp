@@ -73,6 +73,8 @@ namespace MWGui
 
         MWMechanics::Enchanting mEnchanting;
         ESM::EffectList mEffectList;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 
 }

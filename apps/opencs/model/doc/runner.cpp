@@ -2,11 +2,8 @@
 
 #include <utility>
 
-#if defined(Q_OS_MAC)
 #include <QCoreApplication>
 #include <QDir>
-#endif
-
 #include <QProcess>
 #include <QString>
 #include <QStringList>
@@ -55,16 +52,17 @@ void CSMDoc::Runner::start(bool delayed)
 
         QString path = "openmw";
 #ifdef Q_OS_WIN
-        path.append(QString(".exe"));
-#elif defined(Q_OS_MAC)
-        QDir dir(QCoreApplication::applicationDirPath());
-        dir.cdUp();
-        dir.cdUp();
-        dir.cdUp();
-        path = dir.absoluteFilePath(path.prepend("OpenMW.app/Contents/MacOS/"));
-#else
-        path.prepend(QString("./"));
+        path.append(QLatin1String(".exe"));
 #endif
+        QDir dir(QCoreApplication::applicationDirPath());
+#ifdef Q_OS_MAC
+        // the CS and engine are in separate .app directories
+        dir.cdUp();
+        dir.cdUp();
+        dir.cdUp();
+        path.prepend("OpenMW.app/Contents/MacOS/");
+#endif
+        path = dir.absoluteFilePath(path);
 
         mStartup = new QTemporaryFile(this);
         mStartup->open();

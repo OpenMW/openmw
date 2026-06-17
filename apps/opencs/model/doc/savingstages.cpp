@@ -17,7 +17,6 @@
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/info.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/metadata.hpp>
 #include <apps/opencs/model/world/pathgrid.hpp>
 #include <apps/opencs/model/world/record.hpp>
@@ -292,8 +291,7 @@ int CSMDoc::WriteCellCollectionStage::setup()
     return mDocument.getData().getCells().getSize();
 }
 
-void CSMDoc::WriteCellCollectionStage::writeReferences(
-    const std::deque<int>& references, bool interior, unsigned int& newRefNum)
+void CSMDoc::WriteCellCollectionStage::writeReferences(const std::deque<int>& references, bool interior)
 {
     ESM::ESMWriter& writer = mState.getWriter();
 
@@ -305,9 +303,10 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
         {
             CSMWorld::CellRef refRecord = ref.get();
 
-            // Check for uninitialized content file
-            if (!refRecord.mRefNum.hasContentFile())
-                refRecord.mRefNum.mContentFile = 0;
+            const bool isLocal = refRecord.mRefNum.mContentFile == -1;
+
+            // -1 is the current file, saved indices are 1-based
+            refRecord.mRefNum.mContentFile++;
 
             // recalculate the ref's cell location
             std::ostringstream stream;
@@ -318,12 +317,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
             }
 
             ESM::RefId streamId = ESM::RefId::stringRefId(stream.str());
-            if (refRecord.mNew || refRecord.mRefNum.mIndex == 0
-                || (!interior && ref.mState == CSMWorld::RecordBase::State_ModifiedOnly && refRecord.mCell != streamId))
-            {
-                refRecord.mRefNum.mIndex = newRefNum++;
-            }
-            else if ((refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != streamId
+            if (!isLocal && (refRecord.mOriginalCell.empty() ? refRecord.mCell : refRecord.mOriginalCell) != streamId
                 && !interior)
             {
                 // An empty mOriginalCell is meant to indicate that it is the same as
@@ -364,9 +358,6 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         CSMWorld::Cell cellRecord = cell.get();
         const bool interior = !cellRecord.mId.startsWith("#");
 
-        // count new references and adjust RefNumCount accordingsly
-        unsigned int newRefNum = cellRecord.mRefNumCounter;
-
         if (references != nullptr)
         {
             for (std::deque<int>::const_iterator iter(references->begin()); iter != references->end(); ++iter)
@@ -392,9 +383,6 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
                         ESM::RefId::stringRefId(CSMWorld::CellCoordinates(refRecord.getCellIndex()).getId(""))
                             != refRecord.mCell))
                     ++cellRecord.mRefNumCounter;
-
-                if (refRecord.mRefNum.mIndex >= newRefNum)
-                    newRefNum = refRecord.mRefNum.mIndex + 1;
             }
         }
 
@@ -417,9 +405,9 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         // write references
         if (references != nullptr)
         {
-            writeReferences(persistentRefs, interior, newRefNum);
-            cellRecord.saveTempMarker(writer, static_cast<int>(references->size()) - persistentRefs.size());
-            writeReferences(tempRefs, interior, newRefNum);
+            writeReferences(persistentRefs, interior);
+            cellRecord.saveTempMarker(writer, static_cast<int>(references->size() - persistentRefs.size()));
+            writeReferences(tempRefs, interior);
         }
 
         writer.endRecord(cellRecord.sRecordId);
@@ -499,11 +487,11 @@ int CSMDoc::WriteLandTextureCollectionStage::setup()
 void CSMDoc::WriteLandTextureCollectionStage::perform(int stage, Messages& messages)
 {
     ESM::ESMWriter& writer = mState.getWriter();
-    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
+    const CSMWorld::Record<ESM::LandTexture>& landTexture = mDocument.getData().getLandTextures().getRecord(stage);
 
     if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)
     {
-        CSMWorld::LandTexture record = landTexture.get();
+        ESM::LandTexture record = landTexture.get();
         writer.startRecord(record.sRecordId);
         record.save(writer, landTexture.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord(record.sRecordId);

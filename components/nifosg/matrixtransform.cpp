@@ -40,7 +40,7 @@ namespace NifOsg
             for (int j = 0; j < 3; ++j)
             {
                 // Update the current decomposed rotation and restore the known scale.
-                mRotationScale.mValues[j][i] = _matrix(i, j); // NB: column/row major difference
+                mRotationScale.mValues[j][i] = static_cast<float>(_matrix(i, j)); // NB: column/row major difference
                 _matrix(i, j) *= mScale;
             }
         }

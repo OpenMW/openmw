@@ -33,9 +33,9 @@ void CSVWorld::ReferenceCreator::configureCreateCommand(CSMWorld::CreateCommand&
     command.addValue(cellIdColumn, mCell->text());
 }
 
-CSVWorld::ReferenceCreator::ReferenceCreator(CSMWorld::Data& data, QUndoStack& undoStack,
+CSVWorld::ReferenceCreator::ReferenceCreator(CSMWorld::Data& worldData, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager)
-    : GenericCreator(data, undoStack, id)
+    : GenericCreator(worldData, undoStack, id)
 {
     QLabel* label = new QLabel("Cell", this);
     insertBeforeButtons(label, false);

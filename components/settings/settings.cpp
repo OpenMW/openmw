@@ -89,21 +89,6 @@ namespace Settings
             return stream.str();
         }
 
-        std::string toString(SceneUtil::LightingMethod value)
-        {
-            switch (value)
-            {
-                case SceneUtil::LightingMethod::FFP:
-                    return "legacy";
-                case SceneUtil::LightingMethod::PerObjectUniform:
-                    return "shaders compatibility";
-                case SceneUtil::LightingMethod::SingleUBO:
-                    return "shaders";
-            }
-
-            throw std::invalid_argument("Invalid LightingMethod value: " + std::to_string(static_cast<int>(value)));
-        }
-
         int toInt(HrtfMode value)
         {
             switch (value)
@@ -118,23 +103,6 @@ namespace Settings
 
             Log(Debug::Warning) << "Invalid HRTF mode value: " << static_cast<int>(value) << ", fallback to auto (-1)";
             return -1;
-        }
-
-        ScreenshotType parseScreenshotType(std::string_view value)
-        {
-            if (value == "regular")
-                return ScreenshotType::Regular;
-            if (value == "spherical")
-                return ScreenshotType::Spherical;
-            if (value == "cylindrical")
-                return ScreenshotType::Cylindrical;
-            if (value == "planet")
-                return ScreenshotType::Planet;
-            if (value == "cubemap")
-                return ScreenshotType::Cubemap;
-
-            Log(Debug::Warning) << "Invalid screenshot type: " << value << ", fallback to regular";
-            return ScreenshotType::Regular;
         }
     }
 
@@ -510,11 +478,6 @@ namespace Settings
         setString(setting, category, value.print());
     }
 
-    void Manager::set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value)
-    {
-        setString(setting, category, toString(value));
-    }
-
     void Manager::set(std::string_view setting, std::string_view category, HrtfMode value)
     {
         setInt(setting, category, toInt(value));
@@ -561,43 +524,5 @@ namespace Settings
             return NavMeshRenderMode::UpdateFrequency;
 
         throw std::invalid_argument("Invalid navigation mesh rendering mode: " + std::string(value));
-    }
-
-    SceneUtil::LightingMethod parseLightingMethod(std::string_view value)
-    {
-        if (value == "legacy")
-            return SceneUtil::LightingMethod::FFP;
-        if (value == "shaders compatibility")
-            return SceneUtil::LightingMethod::PerObjectUniform;
-        if (value == "shaders")
-            return SceneUtil::LightingMethod::SingleUBO;
-
-        constexpr const char* fallback = "shaders compatibility";
-        Log(Debug::Warning) << "Unknown lighting method '" << value << "', returning fallback '" << fallback << "'";
-        return SceneUtil::LightingMethod::PerObjectUniform;
-    }
-
-    ScreenshotSettings parseScreenshotSettings(std::string_view value)
-    {
-        std::vector<std::string_view> settingArgs;
-        Misc::StringUtils::split(value, settingArgs);
-
-        ScreenshotSettings result;
-
-        if (settingArgs.size() > 0)
-            result.mType = parseScreenshotType(settingArgs[0]);
-        else
-            result.mType = ScreenshotType::Regular;
-
-        if (settingArgs.size() > 1)
-            result.mWidth = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[1], 0));
-
-        if (settingArgs.size() > 2)
-            result.mHeight = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[2], 0));
-
-        if (settingArgs.size() > 3)
-            result.mCubeSize = std::min(5000, Misc::StringUtils::toNumeric<int>(settingArgs[3], 0));
-
-        return result;
     }
 }

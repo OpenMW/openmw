@@ -1,11 +1,13 @@
-#include <QApplication>
 #include <QDir>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <components/debug/debugging.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
+#include <components/platform/platform.hpp>
 
 #include "mainwizard.hpp"
 
@@ -15,7 +17,7 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-int main(int argc, char* argv[])
+int runWizard(int argc, char* argv[])
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description description;
@@ -23,7 +25,9 @@ int main(int argc, char* argv[])
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
 
-    QApplication app(argc, argv);
+    Debug::setupLogging(configurationManager.getLogPath(), "Wizard");
+
+    Platform::Application app(argc, argv);
 
     // Now we make sure the current dir is set to application path
     QDir dir(QCoreApplication::applicationDirPath());
@@ -45,10 +49,15 @@ int main(int argc, char* argv[])
         resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
     }
 
-    l10n::installQtTranslations(app, "wizard", resourcesPath);
+    L10n::installQtTranslations(app, "wizard", resourcesPath);
 
     Wizard::MainWizard wizard(std::move(configurationManager));
 
     wizard.show();
     return app.exec();
+}
+
+int main(int argc, char* argv[])
+{
+    return Debug::wrapApplication(runWizard, argc, argv, "Wizard");
 }

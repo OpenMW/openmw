@@ -1,7 +1,11 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -60,23 +64,23 @@ namespace
         if (rec["type"] != sol::nil)
         {
             int weaponType = rec["type"].get<int>();
-            if (weaponType >= 0 && weaponType <= ESM::Weapon::MarksmanThrown)
-                weapon.mData.mType = weaponType;
+            if (weaponType >= 0 && weaponType <= ESM::Weapon::Last)
+                weapon.mData.mType = static_cast<int16_t>(weaponType);
             else
                 throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
         }
         if (rec["weight"] != sol::nil)
-            weapon.mData.mWeight = rec["weight"];
+            weapon.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             weapon.mData.mValue = rec["value"];
         if (rec["health"] != sol::nil)
             weapon.mData.mHealth = rec["health"];
         if (rec["speed"] != sol::nil)
-            weapon.mData.mSpeed = rec["speed"];
+            weapon.mData.mSpeed = rec["speed"].get<Misc::FiniteFloat>();
         if (rec["reach"] != sol::nil)
-            weapon.mData.mReach = rec["reach"];
+            weapon.mData.mReach = rec["reach"].get<Misc::FiniteFloat>();
         if (rec["enchantCapacity"] != sol::nil)
-            weapon.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+            weapon.mData.mEnchant = static_cast<uint16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["chopMinDamage"] != sol::nil)
             weapon.mData.mChop[0] = rec["chopMinDamage"];
         if (rec["chopMaxDamage"] != sol::nil)
@@ -98,43 +102,42 @@ namespace MWLua
 {
     void addWeaponBindings(sol::table weapon, const Context& context)
     {
-        weapon["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "ShortBladeOneHand", ESM::Weapon::ShortBladeOneHand },
-            { "LongBladeOneHand", ESM::Weapon::LongBladeOneHand },
-            { "LongBladeTwoHand", ESM::Weapon::LongBladeTwoHand },
-            { "BluntOneHand", ESM::Weapon::BluntOneHand },
-            { "BluntTwoClose", ESM::Weapon::BluntTwoClose },
-            { "BluntTwoWide", ESM::Weapon::BluntTwoWide },
-            { "SpearTwoWide", ESM::Weapon::SpearTwoWide },
-            { "AxeOneHand", ESM::Weapon::AxeOneHand },
-            { "AxeTwoHand", ESM::Weapon::AxeTwoHand },
-            { "MarksmanBow", ESM::Weapon::MarksmanBow },
-            { "MarksmanCrossbow", ESM::Weapon::MarksmanCrossbow },
-            { "MarksmanThrown", ESM::Weapon::MarksmanThrown },
-            { "Arrow", ESM::Weapon::Arrow },
-            { "Bolt", ESM::Weapon::Bolt },
-        }));
+        sol::state_view lua = context.sol();
+        weapon["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "ShortBladeOneHand", ESM::Weapon::ShortBladeOneHand },
+                { "LongBladeOneHand", ESM::Weapon::LongBladeOneHand },
+                { "LongBladeTwoHand", ESM::Weapon::LongBladeTwoHand },
+                { "BluntOneHand", ESM::Weapon::BluntOneHand },
+                { "BluntTwoClose", ESM::Weapon::BluntTwoClose },
+                { "BluntTwoWide", ESM::Weapon::BluntTwoWide },
+                { "SpearTwoWide", ESM::Weapon::SpearTwoWide },
+                { "AxeOneHand", ESM::Weapon::AxeOneHand },
+                { "AxeTwoHand", ESM::Weapon::AxeTwoHand },
+                { "MarksmanBow", ESM::Weapon::MarksmanBow },
+                { "MarksmanCrossbow", ESM::Weapon::MarksmanCrossbow },
+                { "MarksmanThrown", ESM::Weapon::MarksmanThrown },
+                { "Arrow", ESM::Weapon::Arrow },
+                { "Bolt", ESM::Weapon::Bolt },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Weapon>(weapon, context);
         weapon["createRecordDraft"] = tableToWeapon;
 
-        sol::usertype<ESM::Weapon> record = context.mLua->sol().new_usertype<ESM::Weapon>("ESM3_Weapon");
+        sol::usertype<ESM::Weapon> record = lua.new_usertype<ESM::Weapon>("ESM3_Weapon");
         record[sol::meta_function::to_string]
             = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property(
-            [](const ESM::Weapon& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
+        addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
-        record["enchant"] = sol::readonly_property(
-            [](const ESM::Weapon& rec) -> std::string { return rec.mEnchant.serializeText(); });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mEnchant; });
+        record["mwscript"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mScript; });
         record["isMagical"] = sol::readonly_property(
             [](const ESM::Weapon& rec) -> bool { return rec.mData.mFlags & ESM::Weapon::Magical; });
         record["isSilver"] = sol::readonly_property(

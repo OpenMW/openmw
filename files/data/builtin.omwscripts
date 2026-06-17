@@ -8,9 +8,9 @@ GLOBAL: scripts/omw/settings/global.lua
 
 # Mechanics
 GLOBAL: scripts/omw/activationhandlers.lua
-GLOBAL: scripts/omw/cellhandlers.lua
 GLOBAL: scripts/omw/usehandlers.lua
 GLOBAL: scripts/omw/worldeventhandlers.lua
+GLOBAL: scripts/omw/crimes.lua
 CREATURE, NPC, PLAYER: scripts/omw/mechanics/animationcontroller.lua
 PLAYER: scripts/omw/skillhandlers.lua
 PLAYER: scripts/omw/mechanics/playercontroller.lua
@@ -22,6 +22,9 @@ PLAYER: scripts/omw/input/actionbindings.lua
 PLAYER: scripts/omw/input/smoothmovement.lua
 PLAYER: scripts/omw/input/gamepadcontrols.lua
 NPC,CREATURE: scripts/omw/ai.lua
+GLOBAL: scripts/omw/mechanics/globalcontroller.lua
+CREATURE, NPC, PLAYER: scripts/omw/mechanics/actorcontroller.lua
+NPC,CREATURE,PLAYER: scripts/omw/combat/interface.lua
 
 # User interface
 PLAYER: scripts/omw/ui.lua
@@ -31,3 +34,6 @@ MENU: scripts/omw/console/menu.lua
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua
 CUSTOM: scripts/omw/console/local.lua
+
+# Music system
+NPC,CREATURE: scripts/omw/music/actor.lua

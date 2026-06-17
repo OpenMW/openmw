@@ -74,9 +74,9 @@ namespace Gui
         mMaxValue = maxValue;
     }
 
-    void NumericEditBox::onKeyLostFocus(MyGUI::Widget* _new)
+    void NumericEditBox::onKeyLostFocus(MyGUI::Widget* newWidget)
     {
-        Base::onKeyLostFocus(_new);
+        Base::onKeyLostFocus(newWidget);
         setCaption(MyGUI::utility::toString(mValue));
     }
 

@@ -24,6 +24,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -48,10 +49,7 @@ namespace MWClass
 
     std::string_view Book::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Book>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Book::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const

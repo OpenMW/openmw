@@ -3,10 +3,10 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
+    struct Context;
+
     sol::table initClassRecordBindings(const Context& context);
 }
 

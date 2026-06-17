@@ -19,6 +19,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -31,12 +32,17 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "companionwindow.hpp"
+#include "container.hpp"
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
+#include "hud.hpp"
 #include "inventoryitemmodel.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "settings.hpp"
 #include "sortfilteritemmodel.hpp"
+#include "statswindow.hpp"
 #include "tooltips.hpp"
 #include "tradeitemmodel.hpp"
 #include "tradewindow.hpp"
@@ -74,10 +80,11 @@ namespace MWGui
         }
     }
 
-    InventoryWindow::InventoryWindow(
-        DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem)
+    InventoryWindow::InventoryWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, osg::Group* parent,
+        Resource::ResourceSystem* resourceSystem)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mDragAndDrop(dragAndDrop)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mSelectedItem(-1)
         , mSortModel(nullptr)
         , mTradeModel(nullptr)
@@ -86,10 +93,11 @@ namespace MWGui
         , mLastYSize(0)
         , mPreview(std::make_unique<MWRender::InventoryPreview>(parent, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
-        , mUpdateTimer(0.f)
+        , mUpdateNextFrame(false)
+        , mPendingControllerAction(ControllerAction::None)
     {
         mPreviewTexture
-            = std::make_unique<osgMyGUI::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
+            = std::make_unique<MyGUIPlatform::OSGTexture>(mPreview->getTexture(), mPreview->getTextureStateSet());
         mPreview->rebuild();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
@@ -110,7 +118,8 @@ namespace MWGui
 
         mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
         mAvatarImage->setRenderItemTexture(mPreviewTexture.get());
-        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
+        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
@@ -126,6 +135,25 @@ namespace MWGui
         mFilterAll->setStateSelected(true);
 
         setGuiMode(mGuiMode);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            // Show L1 and R1 buttons next to tabs
+            MyGUI::ImageBox* image;
+            getWidget(image, "BtnL1Image");
+            image->setVisible(true);
+            image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_LEFTSHOULDER));
+
+            getWidget(image, "BtnR1Image");
+            image->setVisible(true);
+            image->setUserString("Hidden", "false");
+            image->setImageTexture(MWBase::Environment::get().getInputManager()->getControllerButtonIcon(
+                SDL_CONTROLLER_BUTTON_RIGHTSHOULDER));
+
+            mControllerButtons.mR3 = "#{Interface:Info}";
+        }
 
         adjustPanes();
     }
@@ -189,10 +217,10 @@ namespace MWGui
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        const float x = rect.mX * viewSize.width;
-        const float y = rect.mY * viewSize.height;
-        const float w = rect.mW * viewSize.width;
-        const float h = rect.mH * viewSize.height;
+        const int x = static_cast<int>(rect.mX * viewSize.width);
+        const int y = static_cast<int>(rect.mY * viewSize.height);
+        const int w = static_cast<int>(rect.mW * viewSize.width);
+        const int h = static_cast<int>(rect.mH * viewSize.height);
         MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
         window->setCoord(x, y, w, h);
 
@@ -204,9 +232,13 @@ namespace MWGui
 
     void InventoryWindow::setGuiMode(GuiMode mode)
     {
+        if (Settings::gui().mControllerMenus && mGuiMode == mode && isVisible())
+            return;
+
         mGuiMode = mode;
         const WindowSettingValues settings = getModeSettings(mGuiMode);
-        setPinButtonVisible(mode == GM_Inventory);
+        setPinButtonVisible(
+            mode != GM_Container && mode != GM_Companion && mode != GM_Barter && !Settings::gui().mControllerMenus);
 
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 
@@ -263,7 +295,7 @@ namespace MWGui
         const ESM::RefId& sound = item.mBase.getClass().getDownSoundId(item.mBase);
 
         MWWorld::Ptr object = item.mBase;
-        int count = item.mCount;
+        size_t count = item.mCount;
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
 
         if (MyGUI::InputManager::getInstance().isControlPressed())
@@ -292,38 +324,60 @@ namespace MWGui
         // If we unequip weapon during attack, it can lead to unexpected behaviour
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPtr))
         {
-            bool isWeapon = item.mBase.getType() == ESM::Weapon::sRecordId;
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-
-            if (isWeapon && invStore.isEquipped(item.mBase))
+            MWWorld::ContainerStoreIterator weapIt = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+            bool weapActive = mPtr.getClass().getCreatureStats(mPtr).getDrawState() == MWMechanics::DrawState::Weapon;
+            if (weapActive && weapIt != invStore.end() && *weapIt == item.mBase)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sCantEquipWeapWarning}");
                 return;
             }
         }
 
-        if (count > 1 && !shift)
+        // Show a dialog to select a count of items, but not when using an item from the inventory
+        // in controller mode. In that case, we skip the dialog and just use one item immediately.
+        if (count > 1 && !shift && mPendingControllerAction != ControllerAction::Use)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
+            std::string message = "#{sTake}";
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
+                message = "#{sQuanityMenuMessage01}";
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                message = "#{sDrop}";
             std::string name{ object.getClass().getName(object) };
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
-            dialog->openCountDialog(name, message, count);
+            dialog->openCountDialog(name, message, static_cast<int>(count));
             dialog->eventOkClicked.clear();
-            if (mTrading)
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dropItem);
+            else if (MyGUI::InputManager::getInstance().isAltPressed()
+                || mPendingControllerAction == ControllerAction::Transfer)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::transferItem);
             else
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
+
             mSelectedItem = index;
         }
         else
         {
             mSelectedItem = index;
-            if (mTrading)
+
+            if (mTrading || mPendingControllerAction == ControllerAction::Sell)
                 sellItem(nullptr, count);
+            else if (mPendingControllerAction == ControllerAction::Use)
+                equipItem(count);
+            else if (mPendingControllerAction == ControllerAction::Drop)
+                dropItem(nullptr, count);
+            else if (MyGUI::InputManager::getInstance().isAltPressed()
+                || mPendingControllerAction == ControllerAction::Transfer)
+                transferItem(nullptr, count);
             else
                 dragItem(nullptr, count);
         }
+
+        mPendingControllerAction = ControllerAction::None;
     }
 
     void InventoryWindow::ensureSelectedItemUnequipped(int count)
@@ -344,9 +398,9 @@ namespace MWGui
                 int newIndex = -1;
                 for (size_t i = 0; i < mTradeModel->getItemCount(); ++i)
                 {
-                    if (mTradeModel->getItem(i).mBase == newStack)
+                    if (mTradeModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase == newStack)
                     {
-                        newIndex = i;
+                        newIndex = static_cast<int>(i);
                         break;
                     }
                 }
@@ -359,16 +413,23 @@ namespace MWGui
         }
     }
 
-    void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        ensureSelectedItemUnequipped(count);
+        ensureSelectedItemUnequipped(static_cast<int>(count));
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
         notifyContentChanged();
     }
 
-    void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
+    void InventoryWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
-        ensureSelectedItemUnequipped(count);
+        ensureSelectedItemUnequipped(static_cast<int>(count));
+        mItemTransfer->apply(mTradeModel->getItem(mSelectedItem), count, *mItemView);
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::sellItem(MyGUI::Widget* /*sender*/, std::size_t count)
+    {
+        ensureSelectedItemUnequipped(static_cast<int>(count));
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
         const ESM::RefId& sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
@@ -388,6 +449,38 @@ namespace MWGui
 
         mItemView->update();
         notifyContentChanged();
+    }
+
+    void InventoryWindow::dropItem(MyGUI::Widget* sender, size_t count)
+    {
+        if (mGuiMode != MWGui::GM_Inventory)
+            return;
+
+        if (!mDragAndDrop->mIsOnDragAndDrop)
+            dragItem(sender, count);
+
+        // Drop the item into the gameworld
+        if (mDragAndDrop->mIsOnDragAndDrop)
+            MWBase::Environment::get().getWindowManager()->getHud()->dropDraggedItem(0.5f, 0.5f);
+    }
+
+    void InventoryWindow::equipItem(std::size_t count)
+    {
+        const ItemStack& item = mTradeModel->getItem(mSelectedItem);
+        ensureSelectedItemUnequipped(static_cast<int>(count));
+        // Disable the pick up sound as the item will be used immediately
+        mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count, false);
+        notifyContentChanged();
+
+        const bool wasEquipped = item.mType == ItemStack::Type_Equipped;
+        // Drop the item on the avatar to activate or equip it.
+        if (!wasEquipped)
+            onAvatarClicked(nullptr);
+
+        // Drop the item to unequip it or drop any remaining items back in inventory.
+        // This is needed when clicking on a stack of items; we only want to use the first item.
+        if (mDragAndDrop->mIsOnDragAndDrop)
+            mDragAndDrop->drop(mTradeModel, mItemView, wasEquipped);
     }
 
     void InventoryWindow::updateItemView()
@@ -413,21 +506,28 @@ namespace MWGui
             notifyContentChanged();
         }
         adjustPanes();
+
+        mItemTransfer->addTarget(*mItemView);
     }
 
-    void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
+    void InventoryWindow::onClose()
     {
-        WindowBase::clampWindowCoordinates(_sender);
+        mItemTransfer->removeTarget(*mItemView);
+    }
+
+    void InventoryWindow::onWindowResize(MyGUI::Window* sender)
+    {
+        WindowBase::clampWindowCoordinates(sender);
 
         adjustPanes();
         const WindowSettingValues settings = getModeSettings(mGuiMode);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
-        settings.mRegular.mX.set(_sender->getPosition().left / static_cast<float>(viewSize.width));
-        settings.mRegular.mY.set(_sender->getPosition().top / static_cast<float>(viewSize.height));
-        settings.mRegular.mW.set(_sender->getSize().width / static_cast<float>(viewSize.width));
-        settings.mRegular.mH.set(_sender->getSize().height / static_cast<float>(viewSize.height));
+        settings.mRegular.mX.set(sender->getPosition().left / static_cast<float>(viewSize.width));
+        settings.mRegular.mY.set(sender->getPosition().top / static_cast<float>(viewSize.height));
+        settings.mRegular.mW.set(sender->getSize().width / static_cast<float>(viewSize.width));
+        settings.mRegular.mH.set(sender->getSize().height / static_cast<float>(viewSize.height));
         settings.mIsMaximized.set(false);
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
@@ -442,39 +542,42 @@ namespace MWGui
 
     void InventoryWindow::updateArmorRating()
     {
-        mArmorRating->setCaptionWithReplacing(
-            "#{sArmor}: " + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+        if (mPtr.isEmpty())
+            return;
+
+        auto rating = MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr, true)));
+        mArmorRating->setCaptionWithReplacing("#{sArmor}: " + rating);
         if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-            mArmorRating->setCaptionWithReplacing(
-                MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+            mArmorRating->setCaptionWithReplacing(rating);
     }
 
     void InventoryWindow::updatePreviewSize()
     {
         const MyGUI::IntSize viewport = getPreviewViewportSize();
         mPreview->setViewport(viewport.width, viewport.height);
-        mAvatarImage->getSubWidgetMain()->_setUVSet(
-            MyGUI::FloatRect(0.f, 0.f, viewport.width / float(mPreview->getTextureWidth()),
-                viewport.height / float(mPreview->getTextureHeight())));
+        const float top = viewport.height / static_cast<float>(mPreview->getTextureHeight());
+        const float right = viewport.width / static_cast<float>(mPreview->getTextureWidth());
+        // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
+        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, top, right, 0.f));
     }
 
-    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* sender)
     {
-        mSortModel->setNameFilter(_sender->getCaption());
+        mSortModel->setNameFilter(sender->getCaption());
         mItemView->update();
     }
 
-    void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
+    void InventoryWindow::onFilterChanged(MyGUI::Widget* sender)
     {
-        if (_sender == mFilterAll)
+        if (sender == mFilterAll)
             mSortModel->setCategory(SortFilterItemModel::Category_All);
-        else if (_sender == mFilterWeapon)
+        else if (sender == mFilterWeapon)
             mSortModel->setCategory(SortFilterItemModel::Category_Weapon);
-        else if (_sender == mFilterApparel)
+        else if (sender == mFilterApparel)
             mSortModel->setCategory(SortFilterItemModel::Category_Apparel);
-        else if (_sender == mFilterMagic)
+        else if (sender == mFilterMagic)
             mSortModel->setCategory(SortFilterItemModel::Category_Magic);
-        else if (_sender == mFilterMisc)
+        else if (sender == mFilterMisc)
             mSortModel->setCategory(SortFilterItemModel::Category_Misc);
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
@@ -484,7 +587,7 @@ namespace MWGui
 
         mItemView->update();
 
-        _sender->castType<MyGUI::Button>()->setStateSelected(true);
+        sender->castType<MyGUI::Button>()->setStateSelected(true);
     }
 
     void InventoryWindow::onPinToggled()
@@ -496,7 +599,9 @@ namespace MWGui
 
     void InventoryWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus && mGuiMode == GM_Inventory)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
             toggleMaximized();
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
@@ -517,36 +622,28 @@ namespace MWGui
         }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
+        auto type = ptr.getType();
+        bool isWeaponOrArmor = type == ESM::Weapon::sRecordId || type == ESM::Armor::sRecordId;
+        bool isBroken = ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0;
+        const bool isFromDragAndDrop = mDragAndDrop->mIsOnDragAndDrop && mDragAndDrop->mItem.mBase == ptr;
+        const auto [canEquipResult, canEquipMsg] = ptr.getClass().canBeEquipped(ptr, mPtr);
 
-        // early-out for items that need to be equipped, but can't be equipped: we don't want to set OnPcEquip in that
-        // case
-        if (!ptr.getClass().getEquipmentSlots(ptr).first.empty())
+        // In vanilla, broken armor or weapons cannot be equipped
+        // tools with 0 charges is equippable
+        if (isBroken && isWeaponOrArmor)
         {
-            if (ptr.getClass().hasItemHealth(ptr) && ptr.getCellRef().getCharge() == 0)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage1}");
-                updateItemView();
-                return;
-            }
-
-            if (!force)
-            {
-                auto canEquip = ptr.getClass().canBeEquipped(ptr, player);
-
-                if (canEquip.first == 0)
-                {
-                    MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
-                    updateItemView();
-                    return;
-                }
-            }
+            if (isFromDragAndDrop)
+                mDragAndDrop->drop(mTradeModel, mItemView);
+            MWBase::Environment::get().getWindowManager()->messageBox(canEquipMsg);
+            return;
         }
 
+        const bool willEquip = canEquipResult != 0 || force;
+
         // If the item has a script, set OnPCEquip or PCSkipEquip to 1
-        if (!script.empty())
+        if (!script.empty() && willEquip)
         {
             // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
-            auto type = ptr.getType();
             bool isBook = type == ESM::Book::sRecordId;
             if (!isBook && type != ESM::Ingredient::sRecordId && type != ESM::Repair::sRecordId)
                 ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
@@ -556,38 +653,49 @@ namespace MWGui
         }
 
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
-        action->execute(player);
 
-        // Handles partial equipping (final part)
-        if (mEquippedStackableCount.has_value())
+        MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+        auto [eqSlots, canStack] = ptr.getClass().getEquipmentSlots(ptr);
+        int useCount = isFromDragAndDrop ? static_cast<int>(mDragAndDrop->mDraggedCount) : ptr.getCellRef().getCount();
+
+        if (!eqSlots.empty())
         {
-            // the count to unequip
-            int count = ptr.getCellRef().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
-            if (count > 0)
-            {
-                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-                invStore.unequipItemQuantity(ptr, count);
-                updateItemView();
-            }
-            mEquippedStackableCount.reset();
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(eqSlots.front());
+            if (it != invStore.end() && it->getCellRef().getRefId() == ptr.getCellRef().getRefId())
+                useCount += it->getCellRef().getCount();
+        }
+
+        action->execute(player, !willEquip);
+
+        // Partial equipping
+        int excess = ptr.getCellRef().getCount() - useCount;
+        if (excess > 0 && canStack)
+            invStore.unequipItemQuantity(ptr, excess);
+
+        if (isFromDragAndDrop)
+        {
+            // Feature: Don't finish draganddrop if potion or ingredient was used
+            if (type == ESM::Potion::sRecordId || type == ESM::Ingredient::sRecordId)
+                mDragAndDrop->update();
+            else if (!willEquip)
+                mDragAndDrop->drop(mTradeModel, mItemView);
+            else
+                mDragAndDrop->finish();
         }
 
         if (isVisible())
         {
             mItemView->update();
-
             notifyContentChanged();
         }
         // else: will be updated in open()
     }
 
-    void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
+    void InventoryWindow::onAvatarClicked(MyGUI::Widget* /*sender*/)
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
-
-            mDragAndDrop->finish();
 
             if (mDragAndDrop->mSourceModel != mTradeModel)
             {
@@ -596,33 +704,7 @@ namespace MWGui
                     mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
 
-            // Handles partial equipping
-            mEquippedStackableCount.reset();
-            const auto slots = ptr.getClass().getEquipmentSlots(ptr);
-            if (!slots.first.empty() && slots.second)
-            {
-                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-                MWWorld::ConstContainerStoreIterator slotIt = invStore.getSlot(slots.first.front());
-
-                // Save the currently equipped count before useItem()
-                if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
-                    mEquippedStackableCount = slotIt->getCellRef().getCount();
-                else
-                    mEquippedStackableCount = 0;
-            }
-
             MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
-
-            // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
-            // item
-            if ((ptr.getType() == ESM::Potion::sRecordId || ptr.getType() == ESM::Ingredient::sRecordId)
-                && mDragAndDrop->mDraggedCount > 1)
-            {
-                // Item can be provided from other window for example container.
-                // But after DragAndDrop::startDrag item automaticly always gets to player inventory.
-                mSelectedItem = getModel()->getIndex(mDragAndDrop->mItem);
-                dragItem(nullptr, mDragAndDrop->mDraggedCount - 1);
-            }
         }
         else
         {
@@ -636,9 +718,9 @@ namespace MWGui
 
             for (size_t i = 0; i < mTradeModel->getItemCount(); ++i)
             {
-                if (mTradeModel->getItem(i).mBase == itemSelected)
+                if (mTradeModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase == itemSelected)
                 {
-                    onItemSelectedFromSourceModel(i);
+                    onItemSelectedFromSourceModel(static_cast<int>(i));
                     return;
                 }
             }
@@ -648,8 +730,8 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
-        const osg::Vec2f viewport_coords = mapPreviewWindowToViewport(x, y);
-        int slot = mPreview->getSlotSelected(viewport_coords.x(), viewport_coords.y());
+        const osg::Vec2i viewportCoords = mapPreviewWindowToViewport(x, y);
+        int slot = mPreview->getSlotSelected(viewportCoords.x(), viewportCoords.y());
 
         if (slot == -1)
             return MWWorld::Ptr();
@@ -670,30 +752,30 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
-        float capacity = player.getClass().getCapacity(player);
+        int capacity = static_cast<int>(player.getClass().getCapacity(player));
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
+        mEncumbranceBar->setValue(static_cast<int>(std::ceil(encumbrance)), capacity);
     }
 
     void InventoryWindow::onFrame(float dt)
     {
         updateEncumbranceBar();
 
-        if (mPinned)
+        if (mUpdateNextFrame)
         {
-            mUpdateTimer += dt;
-            if (0.1f < mUpdateTimer)
+            if (mTrading)
             {
-                mUpdateTimer = 0;
-
-                // Update pinned inventory in-game
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                {
-                    mItemView->update();
-                    notifyContentChanged();
-                }
+                mTradeModel->updateBorrowed();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->mTradeModel->updateBorrowed();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateItemView();
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->updateOffer();
             }
+
+            mDragAndDrop->update();
+            mItemView->update();
+            notifyContentChanged();
+            mUpdateNextFrame = false;
         }
     }
 
@@ -749,8 +831,7 @@ namespace MWGui
 
         // Player must not be paralyzed, knocked down, or dead to pick up an item.
         const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
+        if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
@@ -767,7 +848,7 @@ namespace MWGui
         size_t i = 0;
         for (; i < mTradeModel->getItemCount(); ++i)
         {
-            if (mTradeModel->getItem(i).mBase == newObject)
+            if (mTradeModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase == newObject)
                 break;
         }
         if (i == mTradeModel->getItemCount())
@@ -776,7 +857,16 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
             mDragAndDrop->finish();
 
-        mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
+        if (MyGUI::InputManager::getInstance().isAltPressed())
+        {
+            const MWWorld::Ptr item = mTradeModel->getItem(static_cast<ItemModel::ModelIndex>(i)).mBase;
+            MWBase::Environment::get().getWindowManager()->playSound(item.getClass().getDownSoundId(item));
+            mItemView->update();
+        }
+        else
+        {
+            mDragAndDrop->startDrag(static_cast<int>(i), mSortModel, mTradeModel, mItemView, count);
+        }
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
@@ -789,8 +879,7 @@ namespace MWGui
             return;
 
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
             return;
 
         ItemModel::ModelIndex selected = -1;
@@ -817,7 +906,7 @@ namespace MWGui
         for (size_t i = 0; i < model.getItemCount(); ++i)
         {
             cycled += incr;
-            cycled = (cycled + model.getItemCount()) % model.getItemCount();
+            cycled = static_cast<ItemModel::ModelIndex>((cycled + model.getItemCount()) % model.getItemCount());
 
             MWWorld::Ptr item = model.getItem(cycled).mBase;
 
@@ -847,22 +936,176 @@ namespace MWGui
         mPreview->rebuild();
     }
 
+    void InventoryWindow::onInventoryUpdate(const MWWorld::Ptr& ptr)
+    {
+        if (ptr == mPtr)
+            mUpdateNextFrame = true;
+    }
+
     MyGUI::IntSize InventoryWindow::getPreviewViewportSize() const
     {
         const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
         const float scale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
 
-        return MyGUI::IntSize(std::min<int>(mPreview->getTextureWidth(), previewWindowSize.width * scale),
-            std::min<int>(mPreview->getTextureHeight(), previewWindowSize.height * scale));
+        return MyGUI::IntSize(std::min(mPreview->getTextureWidth(), static_cast<int>(previewWindowSize.width * scale)),
+            std::min(mPreview->getTextureHeight(), static_cast<int>(previewWindowSize.height * scale)));
     }
 
-    osg::Vec2f InventoryWindow::mapPreviewWindowToViewport(int x, int y) const
+    osg::Vec2i InventoryWindow::mapPreviewWindowToViewport(int x, int y) const
     {
         const MyGUI::IntSize previewWindowSize = mAvatarImage->getSize();
-        const float normalisedX = x / std::max<float>(1.0f, previewWindowSize.width);
-        const float normalisedY = y / std::max<float>(1.0f, previewWindowSize.height);
+        const float normalisedX = x / std::max(1.f, static_cast<float>(previewWindowSize.width));
+        const float normalisedY = y / std::max(1.f, static_cast<float>(previewWindowSize.height));
 
         const MyGUI::IntSize viewport = getPreviewViewportSize();
-        return osg::Vec2f(normalisedX * float(viewport.width - 1), (1.0 - normalisedY) * float(viewport.height - 1));
+        return osg::Vec2i(static_cast<int>(normalisedX * (viewport.width - 1)),
+            static_cast<int>((1 - normalisedY) * (viewport.height - 1)));
+    }
+
+    ControllerButtons* InventoryWindow::getControllerButtons()
+    {
+        switch (mGuiMode)
+        {
+            case MWGui::GM_Companion:
+                mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
+                mControllerButtons.mB = "#{Interface:Close}";
+                mControllerButtons.mX.clear();
+                mControllerButtons.mR2 = "#{Interface:Share}";
+                break;
+            case MWGui::GM_Container:
+                mControllerButtons.mA = "#{OMWEngine:InventorySelect}";
+                mControllerButtons.mB = "#{Interface:Close}";
+                mControllerButtons.mX = "#{Interface:TakeAll}";
+                mControllerButtons.mR2 = "#{Interface:Container}";
+                break;
+            case MWGui::GM_Barter:
+                mControllerButtons.mA = "#{Interface:Sell}";
+                mControllerButtons.mB = "#{Interface:Cancel}";
+                mControllerButtons.mX = "#{Interface:Offer}";
+                mControllerButtons.mR2 = "#{Interface:Barter}";
+                break;
+            case MWGui::GM_Inventory:
+            default:
+                mControllerButtons.mA = "#{Interface:Equip}";
+                mControllerButtons.mB = "#{Interface:Back}";
+                mControllerButtons.mX = "#{Interface:Drop}";
+                mControllerButtons.mR2.clear();
+                break;
+        }
+        return &mControllerButtons;
+    }
+
+    bool InventoryWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        mPendingControllerAction = ControllerAction::None; // Clear any pending controller actions
+
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mGuiMode == MWGui::GM_Inventory)
+                mPendingControllerAction = ControllerAction::Use;
+            else if (mGuiMode == MWGui::GM_Companion || mGuiMode == MWGui::GM_Container)
+                mPendingControllerAction = ControllerAction::Transfer;
+            else if (mGuiMode == MWGui::GM_Barter)
+                mPendingControllerAction = ControllerAction::Sell;
+
+            mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_X)
+        {
+            if (mGuiMode == MWGui::GM_Inventory)
+            {
+                mPendingControllerAction = ControllerAction::Drop;
+                mItemView->onControllerButton(SDL_CONTROLLER_BUTTON_A);
+            }
+            else if (mGuiMode == MWGui::GM_Container)
+            {
+                // Take all. Pass the button press to the container window and let it do the
+                // logic of taking all.
+                MWGui::ContainerWindow* containerWindow = static_cast<MWGui::ContainerWindow*>(
+                    MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(0));
+                containerWindow->onControllerButtonEvent(arg);
+            }
+            else if (mGuiMode == MWGui::GM_Barter)
+            {
+                // Offer. Pass the button press to the barter window and let it do the logic
+                // of making an offer.
+                MWGui::TradeWindow* tradeWindow = static_cast<MWGui::TradeWindow*>(
+                    MWBase::Environment::get().getWindowManager()->getGuiModeWindows(mGuiMode).at(1));
+                tradeWindow->onControllerButtonEvent(arg);
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterAll);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterMagic);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
+        {
+            if (mFilterAll->getStateSelected())
+                onFilterChanged(mFilterWeapon);
+            else if (mFilterWeapon->getStateSelected())
+                onFilterChanged(mFilterApparel);
+            else if (mFilterApparel->getStateSelected())
+                onFilterChanged(mFilterMagic);
+            else if (mFilterMagic->getStateSelected())
+                onFilterChanged(mFilterMisc);
+            else if (mFilterMisc->getStateSelected())
+                onFilterChanged(mFilterAll);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+        }
+        else
+        {
+            mItemView->onControllerButton(arg.button);
+        }
+
+        return true;
+    }
+
+    void InventoryWindow::setActiveControllerWindow(bool active)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // match the size of the stats window.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, 1600);
+            int height = std::min(winMgr->getControllerMenuHeight(), StatsWindow::getIdealHeight());
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
+
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+
+            adjustPanes();
+            updatePreviewSize();
+        }
+
+        // Show L1 and R1 buttons next to tabs
+        MyGUI::Widget* image;
+        getWidget(image, "BtnL1Image");
+        image->setVisible(active);
+
+        getWidget(image, "BtnR1Image");
+        image->setVisible(active);
+
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
     }
 }

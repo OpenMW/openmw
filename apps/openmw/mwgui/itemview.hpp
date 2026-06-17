@@ -17,6 +17,8 @@ namespace MWGui
         /// Register needed components with MyGUI's factory manager
         static void registerComponents();
 
+        ItemModel* getModel() { return mModel.get(); }
+
         /// Takes ownership of \a model
         void setModel(std::unique_ptr<ItemModel> model);
 
@@ -31,20 +33,31 @@ namespace MWGui
 
         void resetScrollBars();
 
+        void setActiveControllerWindow(bool active);
+        int getControllerFocus() { return mControllerFocus; }
+        int getItemCount() { return mItemCount; }
+        void onControllerButton(const unsigned char button);
+
     private:
         void initialiseOverride() override;
 
         void layoutWidgets();
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
         void onSelectedItem(MyGUI::Widget* sender);
         void onSelectedBackground(MyGUI::Widget* sender);
-        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* sender, int rel);
 
         std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;
+
+        int mItemCount = 0;
+        int mRows = 1;
+        int mControllerFocus = 0;
+        bool mControllerActiveWindow;
+        void updateControllerFocus(int prevFocus, int newFocus);
     };
 
 }

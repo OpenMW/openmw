@@ -55,10 +55,14 @@ namespace NifOsg
         static void setIntersectionDisabledNodeMask(unsigned int mask);
         static unsigned int getIntersectionDisabledNodeMask();
 
+        static void setSoftEffectEnabled(bool enabled);
+        static bool getSoftEffectEnabled();
+
     private:
         static unsigned int sHiddenNodeMask;
         static unsigned int sIntersectionDisabledNodeMask;
         static bool sShowMarkers;
+        static bool sSoftEffectEnabled;
     };
 
 }

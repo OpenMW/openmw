@@ -38,8 +38,11 @@
 #include <numeric>
 
 #include <iterator>
+#include <cassert>
 
 #include <components/sceneutil/depth.hpp>
+
+// NOLINTBEGIN(readability-identifier-naming)
 
 using namespace osgUtil;
 
@@ -1197,6 +1200,67 @@ bool containsSharedPrimitives(const osg::Geometry* geom)
     return false;
 }
 
+    // clang-format on
+
+    namespace
+    {
+        unsigned getArraySizeOrZero(const osg::Array* array)
+        {
+            return array == nullptr ? 0 : array->getNumElements();
+        }
+
+        void fillArraySizes(const std::vector<osg::ref_ptr<osg::Array>>& arrays, std::vector<unsigned>& sizes)
+        {
+            sizes.reserve(arrays.size());
+            for (const auto& array : arrays)
+                sizes.push_back(getArraySizeOrZero(array));
+        }
+
+        void initArraySizes(const osg::Geometry& geometry, Optimizer::GeometryArraySizes& sizes)
+        {
+            sizes.mVertex = getArraySizeOrZero(geometry.getVertexArray());
+            sizes.mNormal = getArraySizeOrZero(geometry.getNormalArray());
+            sizes.mColor = getArraySizeOrZero(geometry.getColorArray());
+            sizes.mSecondaryColor = getArraySizeOrZero(geometry.getSecondaryColorArray());
+            sizes.mFogCoord = getArraySizeOrZero(geometry.getFogCoordArray());
+            sizes.mTexCoord.clear();
+            sizes.mVertexAttrib.clear();
+
+            fillArraySizes(geometry.getTexCoordArrayList(), sizes.mTexCoord);
+            fillArraySizes(geometry.getVertexAttribArrayList(), sizes.mVertexAttrib);
+        }
+
+        void addArraySize(const osg::Array* array, unsigned& size)
+        {
+            if (array != nullptr)
+                size += array->getNumElements();
+        }
+
+        void addArraySizes(const std::vector<osg::ref_ptr<osg::Array>>& dst,
+            const std::vector<osg::ref_ptr<osg::Array>>& src, std::vector<unsigned>& sizes)
+        {
+            assert(sizes.size() == dst.size());
+
+            for (std::size_t i = 0, n = std::min(dst.size(), src.size()); i < n; ++i)
+                if (osg::Array* const array = src[i])
+                    sizes[i] += array->getNumElements();
+        }
+
+        void addArraysSizes(const osg::Geometry& dst, const osg::Geometry& src, Optimizer::GeometryArraySizes& sizes)
+        {
+            addArraySize(src.getVertexArray(), sizes.mVertex);
+            addArraySize(src.getNormalArray(), sizes.mNormal);
+            addArraySize(src.getColorArray(), sizes.mColor);
+            addArraySize(src.getSecondaryColorArray(), sizes.mSecondaryColor);
+            addArraySize(src.getFogCoordArray(), sizes.mFogCoord);
+
+            addArraySizes(dst.getTexCoordArrayList(), src.getTexCoordArrayList(), sizes.mTexCoord);
+            addArraySizes(dst.getVertexAttribArrayList(), src.getVertexAttribArrayList(), sizes.mVertexAttrib);
+        }
+    }
+
+    // clang-format off
+
 bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
 {
     if (!isOperationPermissibleForObject(&group)) return false;
@@ -1331,7 +1395,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 subset.push_back(geometry);
                 if (subset.size()>1) needToDoMerge = true;
             }
-            if (!subset.empty()) mergeList.push_back(subset);
+            if (!subset.empty()) mergeList.push_back(std::move(subset));
         }
 
         if (needToDoMerge)
@@ -1345,6 +1409,9 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
             {
                 group.addChild(*itr);
             }
+
+            // Place outside the loop to keep vectors allocated
+            GeometryArraySizes sizes;
 
             // now do the merging of geometries
             for(MergeList::iterator mitr = mergeList.begin();
@@ -1362,12 +1429,18 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                     }
                     DuplicateList::iterator ditr = duplicateList.begin();
                     osg::ref_ptr<osg::Geometry> lhs = *ditr++;
+
+                    initArraySizes(*lhs, sizes);
+
+                    for (auto it = ditr; it != duplicateList.end(); ++it)
+                        addArraysSizes(*lhs, **it, sizes);
+
                     group.addChild(lhs.get());
                     for(;
                         ditr != duplicateList.end();
                         ++ditr)
                     {
-                        mergeGeometry(*lhs, **ditr);
+                        mergeGeometry(*lhs, **ditr, sizes);
                     }
                 }
             }
@@ -1665,7 +1738,7 @@ class MergeArrayVisitor : public osg::ArrayVisitor
         void apply(osg::Vec4sArray& rhs) override { _merge(rhs); }
 };
 
-bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geometry& rhs)
+bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs, osg::Geometry& rhs, const GeometryArraySizes& sizes)
 {
     MergeArrayVisitor merger;
     osg::VertexBufferObject* vbo = nullptr;
@@ -1675,6 +1748,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
         base = lhs.getVertexArray()->getNumElements();
         if (lhs.getVertexArray()->referenceCount() > 1)
             lhs.setVertexArray(cloneArray(lhs.getVertexArray(), vbo, &lhs));
+        lhs.getVertexArray()->reserveArray(sizes.mVertex);
         if (!merger.merge(lhs.getVertexArray(),rhs.getVertexArray()))
         {
             OSG_DEBUG << "MergeGeometry: vertex array not merged. Some data may be lost." <<std::endl;
@@ -1691,6 +1765,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
     {
         if (lhs.getNormalArray()->referenceCount() > 1)
             lhs.setNormalArray(cloneArray(lhs.getNormalArray(), vbo, &lhs));
+        lhs.getNormalArray()->reserveArray(sizes.mNormal);
         if (!merger.merge(lhs.getNormalArray(),rhs.getNormalArray()))
         {
             OSG_DEBUG << "MergeGeometry: normal array not merged. Some data may be lost." <<std::endl;
@@ -1706,6 +1781,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
     {
         if (lhs.getColorArray()->referenceCount() > 1)
             lhs.setColorArray(cloneArray(lhs.getColorArray(), vbo, &lhs));
+        lhs.getColorArray()->reserveArray(sizes.mColor);
         if (!merger.merge(lhs.getColorArray(),rhs.getColorArray()))
         {
             OSG_DEBUG << "MergeGeometry: color array not merged. Some data may be lost." <<std::endl;
@@ -1720,6 +1796,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
     {
         if (lhs.getSecondaryColorArray()->referenceCount() > 1)
             lhs.setSecondaryColorArray(cloneArray(lhs.getSecondaryColorArray(), vbo, &lhs));
+        lhs.getSecondaryColorArray()->reserveArray(static_cast<unsigned>(sizes.mSecondaryColor));
         if (!merger.merge(lhs.getSecondaryColorArray(),rhs.getSecondaryColorArray()))
         {
             OSG_DEBUG << "MergeGeometry: secondary color array not merged. Some data may be lost." <<std::endl;
@@ -1734,6 +1811,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
     {
         if (lhs.getFogCoordArray()->referenceCount() > 1)
             lhs.setFogCoordArray(cloneArray(lhs.getFogCoordArray(), vbo, &lhs));
+        lhs.getFogCoordArray()->reserveArray(sizes.mFogCoord);
         if (!merger.merge(lhs.getFogCoordArray(),rhs.getFogCoordArray()))
         {
             OSG_DEBUG << "MergeGeometry: fog coord array not merged. Some data may be lost." <<std::endl;
@@ -1751,7 +1829,9 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
         if (!lhs.getTexCoordArray(unit)) continue;
         if (lhs.getTexCoordArray(unit)->referenceCount() > 1)
             lhs.setTexCoordArray(unit, cloneArray(lhs.getTexCoordArray(unit), vbo, &lhs));
-        if (!merger.merge(lhs.getTexCoordArray(unit),rhs.getTexCoordArray(unit)))
+        osg::Array* const lhsArray = lhs.getTexCoordArray(unit);
+        lhsArray->reserveArray(sizes.mTexCoord[unit]);
+        if (!merger.merge(lhsArray, rhs.getTexCoordArray(unit)))
         {
             OSG_DEBUG << "MergeGeometry: tex coord array not merged. Some data may be lost." <<std::endl;
         }
@@ -1762,7 +1842,9 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
         if (!lhs.getVertexAttribArray(unit)) continue;
         if (lhs.getVertexAttribArray(unit)->referenceCount() > 1)
             lhs.setVertexAttribArray(unit, cloneArray(lhs.getVertexAttribArray(unit), vbo, &lhs));
-        if (!merger.merge(lhs.getVertexAttribArray(unit),rhs.getVertexAttribArray(unit)))
+        osg::Array* const lhsArray = lhs.getVertexAttribArray(unit);
+        lhsArray->reserveArray(sizes.mVertexAttrib[unit]);
+        if (!merger.merge(lhsArray, rhs.getVertexAttribArray(unit)))
         {
             OSG_DEBUG << "MergeGeometry: vertex attrib array not merged. Some data may be lost." <<std::endl;
         }
@@ -1977,4 +2059,7 @@ void Optimizer::MergeGroupsVisitor::apply(osg::Group &group)
 }
 
 }
+
+// NOLINTEND(readability-identifier-naming)
+
 // clang-format on

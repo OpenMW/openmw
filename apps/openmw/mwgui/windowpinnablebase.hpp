@@ -14,7 +14,7 @@ namespace MWGui
         void setPinButtonVisible(bool visible);
 
     private:
-        void onPinButtonPressed(MyGUI::Widget* _sender, int left, int top, MyGUI::MouseButton id);
+        void onPinButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id);
 
     protected:
         virtual void onPinToggled() = 0;

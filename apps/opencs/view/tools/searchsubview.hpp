@@ -31,7 +31,7 @@ namespace CSVTools
         SearchBox mSearchBox;
         CSMDoc::Document& mDocument;
         CSMTools::Search mSearch;
-        bool mLocked;
+        bool mAllowReplace{ false };
         CSVWorld::TableBottomBox* mBottom;
 
     private:

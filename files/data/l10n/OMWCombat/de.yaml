@@ -1,0 +1,16 @@
+Combat: "OpenMW: Kampf"
+combatSettingsPageDescription: "OpenMW-Kampfeinstellungen"
+
+combatSettings: "Kampf"
+
+unarmedCreatureAttacksDamageArmor: "Angriffe unbewaffneter Kreaturen beschädigen Rüstung"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Auch Angriffe unbewaffneter Kreaturen beschädigen Rüstung.
+
+redistributeShieldHitsWhenNotWearingShield: "Schildtreffer bei fehlendem Schild umverteilen"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Entspricht "Shield hit location fix" aus dem Morrowind Code Patch. Wenn kein Schild getragen wird, werden Treffer auf den Schild‑Slot auf den linken Schulterpanzer oder den Kürass umverteilt.
+
+spawnBloodEffectsOnPlayer: "Bluteffekte für Spieler anzeigen"
+spawnBloodEffectsOnPlayerDescription: |
+    Wenn aktiviert, werden beim Spieler bei Treffern im Kampf Bluteffekte angezeigt, genau wie bei anderen Charakteren.

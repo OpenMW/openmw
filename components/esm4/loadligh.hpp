@@ -56,9 +56,9 @@ namespace ESM4
 
         struct Data
         {
-            std::int32_t time;
-            std::uint32_t radius;
-            std::uint32_t colour; // RGBA
+            std::int32_t time = 0;
+            std::uint32_t radius = 0;
+            std::uint32_t colour = 0; // RGBA
             // flags:
             // 0x00000001 = Dynamic
             // 0x00000002 = Can be Carried
@@ -70,19 +70,19 @@ namespace ESM4
             // 0x00000100 = Pulse Slow
             // 0x00000200 = Spot Light
             // 0x00000400 = Spot Shadow
-            std::int32_t flags;
+            std::int32_t flags = 0;
             float falloff = 1.f;
             float FOV = 90; // FIXME: FOV in degrees or radians?
-            float nearClip; // TES5+
-            float frequency; // TES5+
-            float intensityAmplitude; // TES5+
-            float movementAmplitude; // TES5+
-            float constant; // FO4
-            float scalar; // FO4
-            float exponent; // FO4
-            float godRaysNearClip; // FO4
-            std::uint32_t value; // gold
-            float weight;
+            float nearClip = 0.f; // TES5+
+            float frequency = 0.f; // TES5+
+            float intensityAmplitude = 0.f; // TES5+
+            float movementAmplitude = 0.f; // TES5+
+            float constant = 0.f; // FO4
+            float scalar = 0.f; // FO4
+            float exponent = 0.f; // FO4
+            float godRaysNearClip = 0.f; // FO4
+            std::uint32_t value = 0; // gold
+            float weight = 0.f;
         };
 
         ESM::FormId mId; // from the header

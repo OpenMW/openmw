@@ -1,7 +1,9 @@
-#ifndef COMPONENTS_CRASH_WINDOWSCRASHDUMPPATHHELPERS_H
-#include "windows_crashshm.hpp"
+#ifndef OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHDUMPPATHHELPERS_HPP
+#define OPENMW_COMPONENTS_CRASHCATCHER_WINDOWSCRASHDUMPPATHHELPERS_HPP
 
 #include <filesystem>
+
+#include "windowscrashshm.hpp"
 
 namespace Crash
 {

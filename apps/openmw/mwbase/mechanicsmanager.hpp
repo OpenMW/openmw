@@ -8,9 +8,6 @@
 #include <string_view>
 #include <vector>
 
-#include "../mwmechanics/greetingstate.hpp"
-#include "../mwrender/animationpriority.hpp"
-
 #include "../mwworld/ptr.hpp"
 
 namespace osg
@@ -27,9 +24,9 @@ namespace ESM
     class ESMWriter;
 }
 
-namespace MWSound
+namespace MWMechanics
 {
-    enum class MusicType;
+    enum class GreetingState;
 }
 
 namespace MWWorld
@@ -84,7 +81,7 @@ namespace MWBase
         virtual void setPlayerClass(const ESM::RefId& id) = 0;
         ///< Set player class to stock class.
 
-        virtual void setPlayerClass(const ESM::Class& class_) = 0;
+        virtual void setPlayerClass(const ESM::Class& value) = 0;
         ///< Set player class to custom class.
 
         virtual void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep) = 0;
@@ -107,7 +104,7 @@ namespace MWBase
         ///< Return the number of deaths for actors with the given ID.
 
         /// Check if \a observer is potentially aware of \a ptr. Does not do a line of sight check!
-        virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer) = 0;
+        virtual bool awarenessCheck(const MWWorld::Ptr& ptr, const MWWorld::Ptr& observer, bool useCache = true) = 0;
 
         /// Makes \a ptr fight \a target. Also shouts a combat taunt.
         virtual void startCombat(
@@ -205,7 +202,7 @@ namespace MWBase
         ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
         /// references that are currently not in the scene should be ignored.
 
-        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
+        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, std::string_view groupName) = 0;
 
         virtual bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const = 0;
 
@@ -248,7 +245,7 @@ namespace MWBase
 
         virtual void playerLoaded() = 0;
 
-        virtual int countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
@@ -297,7 +294,7 @@ namespace MWBase
         /// It only applies to the current form the NPC is in.
         virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
 
-        virtual void cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId) = 0;
+        virtual void cleanupSummonedCreature(ESM::RefNum creature) = 0;
 
         virtual void confiscateStolenItemToOwner(
             const MWWorld::Ptr& player, const MWWorld::Ptr& item, const MWWorld::Ptr& victim, int count)
@@ -311,10 +308,7 @@ namespace MWBase
         virtual int getGreetingTimer(const MWWorld::Ptr& ptr) const = 0;
         virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const = 0;
         virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
-        virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
-
-        virtual MWSound::MusicType getMusicType() const = 0;
-        virtual void setMusicType(MWSound::MusicType type) = 0;
+        virtual void fastForwardAi() const = 0;
     };
 }
 

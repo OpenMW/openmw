@@ -11,6 +11,7 @@
 
 #include <iterator>
 #include <optional>
+#include <span>
 
 namespace DetourNavigator
 {
@@ -21,13 +22,13 @@ namespace DetourNavigator
      * @param end path at given point.
      * @param includeFlags setup allowed navmesh areas.
      * @param out the beginning of the destination range.
-     * @param endTolerance defines maximum allowed distance to end path point in addition to agentHalfExtents
+     * @param endTolerance defines maximum allowed distance to end path point in addition to agentHalfExtents.
+     * @param checkpoints is a sequence of positions the path should go over if possible.
      * @return Status.
-     * Equal to out if no path is found.
      */
     inline Status findPath(const Navigator& navigator, const AgentBounds& agentBounds, const osg::Vec3f& start,
         const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts, float endTolerance,
-        std::output_iterator<osg::Vec3f> auto out)
+        std::span<const osg::Vec3f> checkpoints, std::output_iterator<osg::Vec3f> auto out)
     {
         const auto navMesh = navigator.getNavMesh(agentBounds);
         if (navMesh == nullptr)
@@ -37,7 +38,8 @@ namespace DetourNavigator
         const auto locked = navMesh->lock();
         return findSmoothPath(locked->getQuery(), toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
             toNavMeshCoordinates(settings.mRecast, start), toNavMeshCoordinates(settings.mRecast, end), includeFlags,
-            areaCosts, settings.mDetour, endTolerance, outTransform);
+            areaCosts, settings.mDetour, endTolerance, ToNavMeshCoordinatesSpan(checkpoints, settings.mRecast),
+            outTransform);
     }
 
     /**

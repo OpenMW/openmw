@@ -1,5 +1,7 @@
 #include "startup.hpp"
 
+#include <components/misc/scalableicon.hpp>
+
 #include <QGridLayout>
 #include <QGuiApplication>
 #include <QHBoxLayout>
@@ -16,7 +18,7 @@ QPushButton* CSVDoc::StartupDialogue::addButton(const QString& label, const QStr
 
     QPushButton* button = new QPushButton(this);
 
-    button->setIcon(QIcon(icon));
+    button->setIcon(Misc::ScalableIcon::load(icon));
 
     button->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
 
@@ -78,7 +80,7 @@ QWidget* CSVDoc::StartupDialogue::createTools()
     QPushButton* config = new QPushButton(widget);
 
     config->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    config->setIcon(QIcon(":startup/configure"));
+    config->setIcon(Misc::ScalableIcon::load(":startup/configure"));
     config->setToolTip("Open user settings");
 
     layout->addWidget(config);

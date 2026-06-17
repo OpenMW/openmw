@@ -7,6 +7,8 @@
 #include "../mwrender/characterpreview.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include <components/misc/notnullptr.hpp>
+
 namespace osg
 {
     class Group;
@@ -29,13 +31,17 @@ namespace MWGui
     class TradeItemModel;
     class DragAndDrop;
     class ItemModel;
+    class ItemTransfer;
 
     class InventoryWindow : public WindowPinnableBase
     {
     public:
-        InventoryWindow(DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem);
+        explicit InventoryWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, osg::Group* parent,
+            Resource::ResourceSystem* resourceSystem);
 
         void onOpen() override;
+
+        void onClose() override;
 
         /// start trading, disables item drag&drop
         void setTrading(bool trading);
@@ -62,19 +68,25 @@ namespace MWGui
 
         void setGuiMode(GuiMode mode);
 
+        void onInventoryUpdate(const MWWorld::Ptr& ptr) override;
+
         /// Cycle to previous/next weapon
         void cycle(bool next);
 
         std::string_view getWindowIdForLua() const override { return "Inventory"; }
 
+        ControllerButtons* getControllerButtons() override;
+
     protected:
         void onTitleDoubleClicked() override;
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
 
     private:
-        DragAndDrop* mDragAndDrop;
+        Misc::NotNullPtr<DragAndDrop> mDragAndDrop;
+        Misc::NotNullPtr<ItemTransfer> mItemTransfer;
 
         int mSelectedItem;
-        std::optional<int> mEquippedStackableCount;
 
         MWWorld::Ptr mPtr;
 
@@ -107,7 +119,7 @@ namespace MWGui
         std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
         bool mTrading;
-        float mUpdateTimer;
+        bool mUpdateNextFrame;
 
         void toggleMaximized();
 
@@ -116,13 +128,26 @@ namespace MWGui
 
         void onBackgroundSelected();
 
-        void sellItem(MyGUI::Widget* sender, int count);
-        void dragItem(MyGUI::Widget* sender, int count);
+        enum class ControllerAction
+        {
+            None,
+            Use,
+            Transfer,
+            Sell,
+            Drop,
+        };
+        ControllerAction mPendingControllerAction;
 
-        void onWindowResize(MyGUI::Window* _sender);
-        void onFilterChanged(MyGUI::Widget* _sender);
-        void onNameFilterChanged(MyGUI::EditBox* _sender);
-        void onAvatarClicked(MyGUI::Widget* _sender);
+        void sellItem(MyGUI::Widget* sender, std::size_t count);
+        void dragItem(MyGUI::Widget* sender, std::size_t count);
+        void transferItem(MyGUI::Widget* sender, std::size_t count);
+        void dropItem(MyGUI::Widget* sender, std::size_t count);
+        void equipItem(std::size_t count);
+
+        void onWindowResize(MyGUI::Window* sender);
+        void onFilterChanged(MyGUI::Widget* sender);
+        void onNameFilterChanged(MyGUI::EditBox* sender);
+        void onAvatarClicked(MyGUI::Widget* sender);
         void onPinToggled() override;
 
         void updateEncumbranceBar();
@@ -132,7 +157,7 @@ namespace MWGui
         void updateArmorRating();
 
         MyGUI::IntSize getPreviewViewportSize() const;
-        osg::Vec2f mapPreviewWindowToViewport(int x, int y) const;
+        osg::Vec2i mapPreviewWindowToViewport(int x, int y) const;
 
         void adjustPanes();
 

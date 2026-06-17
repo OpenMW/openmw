@@ -357,14 +357,9 @@ namespace ICS
 		return file.substr(0, file.find_last_of("."));
 	}
 
-	bool InputControlSystem::save(std::string fileName)
+	bool InputControlSystem::save(const std::string& fileName)
 	{
-		if(fileName != "")
-		{
-			mFileName = fileName;
-		}
-
-		TiXmlDocument doc(  mFileName.c_str() );
+		TiXmlDocument doc(fileName.c_str());
 
 		TiXmlDeclaration dec;
 		dec.Parse( "<?xml version='1.0' encoding='utf-8'?>", 0, TIXML_ENCODING_UNKNOWN );

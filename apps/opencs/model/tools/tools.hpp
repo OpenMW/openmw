@@ -6,7 +6,7 @@
 
 #include <apps/opencs/model/world/universalid.hpp>
 
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include <QObject>
 
@@ -38,11 +38,11 @@ namespace CSMTools
         CSMDoc::Document& mDocument;
         CSMWorld::Data& mData;
         CSMDoc::Operation* mVerifierOperation;
-        CSMDoc::OperationHolder mVerifier;
+        CSMDoc::OperationHolder* mVerifier;
         SearchOperation* mSearchOperation;
-        CSMDoc::OperationHolder mSearch;
+        CSMDoc::OperationHolder* mSearch;
         MergeOperation* mMergeOperation;
-        CSMDoc::OperationHolder mMerge;
+        CSMDoc::OperationHolder* mMerge;
         std::map<int, ReportModel*> mReports;
         int mNextReportNumber;
         std::map<int, int> mActiveReports; // type, report number

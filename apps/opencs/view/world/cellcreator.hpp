@@ -38,7 +38,7 @@ namespace CSVWorld
         void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
     public:
-        CellCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        explicit CellCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
         void reset() override;
 

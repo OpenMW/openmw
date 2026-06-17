@@ -189,10 +189,16 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, false);
 
                 ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (ptr.isEmpty() || (ptr.getType() != ESM::Container::sRecordId && !ptr.getClass().isActor()))
+                {
+                    runtime.push(0);
+                    return;
+                }
 
                 if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
                     item = MWWorld::ContainerStore::sGoldId;

@@ -13,21 +13,21 @@ void CSVDoc::Operation::updateLabel(int threads)
 {
     if (threads == -1 || ((threads == 0) != mStalling))
     {
-        std::string name("unknown operation");
+        std::string name("Unknown operation");
 
         switch (mType)
         {
             case CSMDoc::State_Saving:
-                name = "saving";
+                name = "Saving";
                 break;
             case CSMDoc::State_Verifying:
-                name = "verifying";
+                name = "Verifying";
                 break;
             case CSMDoc::State_Searching:
-                name = "searching";
+                name = "Searching";
                 break;
             case CSMDoc::State_Merging:
-                name = "merging";
+                name = "Merging";
                 break;
         }
 
@@ -70,6 +70,7 @@ void CSVDoc::Operation::initWidgets()
     mProgressBar = new QProgressBar();
     mAbortButton = new QPushButton("Abort");
     mLayout = new QHBoxLayout();
+    mLayout->setContentsMargins(8, 4, 8, 4);
 
     mLayout->addWidget(mProgressBar);
     mLayout->addWidget(mAbortButton);
@@ -94,17 +95,18 @@ void CSVDoc::Operation::setBarColor(int type)
     QString style
         = "QProgressBar {"
           "text-align: center;"
+          "border: 1px solid #4e4e4e;"
           "}"
           "QProgressBar::chunk {"
           "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 %1, stop:.50 %2 stop: .51 %3 stop:1 %4);"
           "text-align: center;"
-          "margin: 2px 1px 1p 2px;"
+          "margin: 2px;"
           "}";
 
-    QString topColor = "#F2F6F8";
-    QString bottomColor = "#E0EFF9";
-    QString midTopColor = "#D8E1E7";
-    QString midBottomColor = "#B5C6D0"; // default gray gloss
+    QString topColor = "#9e9e9e";
+    QString bottomColor = "#919191";
+    QString midTopColor = "#848484";
+    QString midBottomColor = "#717171"; // default gray
 
     // colors inspired by samples from:
     // http://www.colorzilla.com/gradient-editor/
@@ -113,42 +115,35 @@ void CSVDoc::Operation::setBarColor(int type)
     {
         case CSMDoc::State_Saving:
 
-            topColor = "#FECCB1";
-            midTopColor = "#F17432";
-            midBottomColor = "#EA5507";
-            bottomColor = "#FB955E"; // red gloss #2
+            topColor = "#f27d6e";
+            midTopColor = "#ee6954";
+            midBottomColor = "#f05536";
+            bottomColor = "#de511e"; // red
             break;
 
         case CSMDoc::State_Searching:
 
-            topColor = "#EBF1F6";
-            midTopColor = "#ABD3EE";
-            midBottomColor = "#89C3EB";
-            bottomColor = "#D5EBFB"; // blue gloss #4
+            topColor = "#6db3f2";
+            midTopColor = "#54a3ee";
+            midBottomColor = "#3690f0";
+            bottomColor = "#1e69de"; // blue
             break;
 
         case CSMDoc::State_Verifying:
 
-            topColor = "#BFD255";
-            midTopColor = "#8EB92A";
-            midBottomColor = "#72AA00";
-            bottomColor = "#9ECB2D"; // green gloss
+            topColor = "#bfd255";
+            midTopColor = "#8eb92a";
+            midBottomColor = "#72aa00";
+            bottomColor = "#9ecb2d"; // green
             break;
 
         case CSMDoc::State_Merging:
 
-            topColor = "#F3E2C7";
-            midTopColor = "#C19E67";
-            midBottomColor = "#B68D4C";
-            bottomColor = "#E9D4B3"; // l Brown 3D
+            topColor = "#d89188";
+            midTopColor = "#d07f72";
+            midBottomColor = "#cc6d5a";
+            bottomColor = "#b86344"; // brown
             break;
-
-        default:
-
-            topColor = "#F2F6F8";
-            bottomColor = "#E0EFF9";
-            midTopColor = "#D8E1E7";
-            midBottomColor = "#B5C6D0"; // gray gloss for undefined ops
     }
 
     mProgressBar->setStyleSheet(style.arg(topColor).arg(midTopColor).arg(midBottomColor).arg(bottomColor));

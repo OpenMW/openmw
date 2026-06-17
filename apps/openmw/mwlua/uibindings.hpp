@@ -3,11 +3,11 @@
 
 #include <sol/forward.hpp>
 
-#include "context.hpp"
-
 namespace MWLua
 {
-    sol::table initUserInterfacePackage(const Context&);
+    struct Context;
+
+    sol::table initUserInterfacePackage(const Context& context);
 }
 
 #endif // MWLUA_UIBINDINGS_H

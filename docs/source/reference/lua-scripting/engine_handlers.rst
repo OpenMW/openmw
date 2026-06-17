@@ -7,6 +7,8 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Can be defined by any script**
 
+|bdg-ctx-all|
+
 .. list-table::
   :widths: 20 80
 
@@ -16,6 +18,8 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Can be defined by any non-menu script**
 
+|bdg-ctx-global| |bdg-ctx-local|
+
 .. list-table::
   :widths: 20 80
 
@@ -24,7 +28,7 @@ Engine handler is a function defined by a script, that can be called by the engi
       | `assigned to a script in openmw-cs (not yet implemented).`
       | ``onInterfaceOverride`` can be called before ``onInit``.
   * - onUpdate(dt)
-    - | Called every frame if the game is not paused. `dt` is
+    - | Called every frame in the Lua thread (even if the game is paused). `dt` is
       | the simulation time from the last update in seconds.
   * - onSave() -> savedData
     - | Called when the game is saving. May be called in inactive state,
@@ -38,6 +42,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | called, but ``onInit`` will.
 
 **Only for global scripts**
+
+|bdg-ctx-global|
 
 .. list-table::
   :widths: 20 80
@@ -60,6 +66,8 @@ Engine handler is a function defined by a script, that can be called by the engi
     - A new exterior cell not defined by a content file has been generated.
 
 **Only for local scripts**
+
+|bdg-ctx-local|
 
 .. list-table::
   :widths: 20 80
@@ -85,6 +93,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | from the actor's inventory, and the count was set to zero.
 
 **Only menu scripts and local scripts attached to a player**
+
+|bdg-ctx-menu| |bdg-ctx-player|
 
 .. list-table::
   :widths: 20 80
@@ -137,8 +147,13 @@ Engine handler is a function defined by a script, that can be called by the engi
       |     mode, command, selectedObject)
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
+  * - onViewportResized(width, height)
+    - | Called when the game viewport is resized.
+      | Provides the new width and height of the viewport in pixels.
 
 **Only for local scripts attached to a player**
+
+|bdg-ctx-player|
 
 .. list-table::
   :widths: 20 80
@@ -152,9 +167,21 @@ Engine handler is a function defined by a script, that can be called by the engi
 
 **Only for menu scripts**
 
+|bdg-ctx-menu|
+
 .. list-table::
   :widths: 20 80
 
   * - onStateChanged()
     - | Called whenever the current game changes
-      | (i. e. the result of `getState <openmw_menu.html##(getState)>`_ changes)
+      | (i. e. the result of `getState <openmw_menu.html##(menu).getState>`_ changes)
+
+**Only for load scripts**
+
+|bdg-ctx-load|
+
+.. list-table::
+  :widths: 20 80
+
+  * - onContentFilesLoaded()
+    - | Called after all content files have been parsed, but before the main menu.

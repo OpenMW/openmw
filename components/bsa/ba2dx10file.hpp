@@ -1,5 +1,5 @@
-#ifndef BSA_BA2_DX10_FILE_H
-#define BSA_BA2_DX10_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_BA2DX10FILE_HPP
+#define OPENMW_COMPONENTS_BSA_BA2DX10FILE_HPP
 
 #include <list>
 #include <map>
@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <components/bsa/bsa_file.hpp>
+#include "bsafile.hpp"
 
 namespace Bsa
 {
@@ -41,7 +41,7 @@ namespace Bsa
 
         std::list<std::vector<char>> mFileNames;
 
-        std::optional<FileRecord> getFileRecord(const std::string& str) const;
+        std::optional<FileRecord> getFileRecord(std::string_view str) const;
 
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
 
@@ -50,15 +50,15 @@ namespace Bsa
     public:
         using BSAFile::getFilename;
         using BSAFile::getList;
+        using BSAFile::getPath;
         using BSAFile::open;
 
         BA2DX10File();
         virtual ~BA2DX10File();
 
         /// Read header information from the input source
-        void readHeader() override;
+        void readHeader(std::istream& stream) override;
 
-        Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);
         void addFile(const std::string& filename, std::istream& file);
     };

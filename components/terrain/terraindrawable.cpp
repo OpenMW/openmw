@@ -12,7 +12,7 @@ namespace Terrain
 
     TerrainDrawable::TerrainDrawable() {}
 
-    TerrainDrawable::~TerrainDrawable() {}
+    TerrainDrawable::~TerrainDrawable() = default;
 
     TerrainDrawable::TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop)
         : osg::Geometry(copy, copyop)
@@ -37,28 +37,26 @@ namespace Terrain
 
     inline float distance(const osg::Vec3& coord, const osg::Matrix& matrix)
     {
-        return -((float)coord[0] * (float)matrix(0, 2) + (float)coord[1] * (float)matrix(1, 2)
-            + (float)coord[2] * (float)matrix(2, 2) + matrix(3, 2));
+        return -(coord[0] * static_cast<float>(matrix(0, 2)) + coord[1] * static_cast<float>(matrix(1, 2))
+            + coord[2] * static_cast<float>(matrix(2, 2)) + static_cast<float>(matrix(3, 2)));
     }
 
     // canot use ClusterCullingCallback::cull: viewpoint != eyepoint
     //  !osgfixpotential!
     bool clusterCull(osg::ClusterCullingCallback* cb, const osg::Vec3f& eyePoint, bool shadowcam)
     {
-        float _deviation = cb->getDeviation();
-        const osg::Vec3& _controlPoint = cb->getControlPoint();
-        osg::Vec3 _normal = cb->getNormal();
+        const float deviation = cb->getDeviation();
+        const osg::Vec3& controlPoint = cb->getControlPoint();
+        osg::Vec3 normal = cb->getNormal();
         if (shadowcam)
-            _normal = _normal * -1; // inverting for shadowcam frontfaceculing
-        float _radius = cb->getRadius();
-        if (_deviation <= -1.0f)
+            normal = normal * -1; // inverting for shadowcam frontfaceculing
+        if (deviation <= -1.0f)
             return false;
-        osg::Vec3 eye_cp = eyePoint - _controlPoint;
-        float radius = eye_cp.length();
-        if (radius < _radius)
+        const osg::Vec3 eyeControlPoint = eyePoint - controlPoint;
+        const float radius = eyeControlPoint.length();
+        if (radius < cb->getRadius())
             return false;
-        float deviation = (eye_cp * _normal) / radius;
-        return deviation < _deviation;
+        return (eyeControlPoint * normal) / radius < deviation;
     }
 
     void TerrainDrawable::cull(osgUtil::CullVisitor* cv)

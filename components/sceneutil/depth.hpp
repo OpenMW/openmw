@@ -64,7 +64,9 @@ namespace SceneUtil
     {
     public:
         AutoDepth(
-            osg::Depth::Function func = osg::Depth::LESS, double zNear = 0.0, double zFar = 1.0, bool writeMask = true)
+            // NB: OSG uses LESS test function by default, Morrowind uses LEQUAL
+            osg::Depth::Function func = osg::Depth::LEQUAL, double zNear = 0.0, double zFar = 1.0,
+            bool writeMask = true)
         {
             setFunction(func);
             setZNear(zNear);
@@ -93,13 +95,10 @@ namespace SceneUtil
 
         static void setReversed(bool reverseZ)
         {
-            static bool init = false;
-
-            if (!init)
-            {
+            [[maybe_unused]] static const bool init = [&] {
                 AutoDepth::sReversed = reverseZ;
-                init = true;
-            }
+                return true;
+            }();
         }
 
         static bool isReversed()

@@ -7,6 +7,12 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/settings/values.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "itemmodel.hpp"
 #include "itemwidget.hpp"
 
@@ -15,6 +21,7 @@ namespace MWGui
 
     ItemView::ItemView()
         : mScrollView(nullptr)
+        , mControllerActiveWindow(false)
     {
     }
 
@@ -46,13 +53,16 @@ namespace MWGui
         MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
         int maxHeight = mScrollView->getHeight();
 
-        int rows = maxHeight / 42;
-        rows = std::max(rows, 1);
-        bool showScrollbar = int(std::ceil(dragArea->getChildCount() / float(rows))) > mScrollView->getWidth() / 42;
+        mRows = std::max(maxHeight / 42, 1);
+        mItemCount = static_cast<int>(dragArea->getChildCount());
+        bool showScrollbar = static_cast<int>(std::ceil(mItemCount / float(mRows))) > mScrollView->getWidth() / 42;
         if (showScrollbar)
+        {
             maxHeight -= 18;
+            mRows = std::max(maxHeight / 42, 1);
+        }
 
-        for (unsigned int i = 0; i < dragArea->getChildCount(); ++i)
+        for (int i = 0; i < mItemCount; ++i)
         {
             MyGUI::Widget* w = dragArea->getChildAt(i);
 
@@ -60,7 +70,7 @@ namespace MWGui
 
             y += 42;
 
-            if (y > maxHeight - 42 && i < dragArea->getChildCount() - 1)
+            if (y > maxHeight - 42 && i < mItemCount - 1)
             {
                 x += 42;
                 y = 0;
@@ -69,6 +79,15 @@ namespace MWGui
         x += 42;
 
         MyGUI::IntSize size = MyGUI::IntSize(std::max(mScrollView->getSize().width, x), mScrollView->getSize().height);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mItemCount > 0)
+                mControllerFocus = std::clamp(mControllerFocus, 0, mItemCount - 1);
+            else
+                mControllerFocus = -1;
+            updateControllerFocus(-1, mControllerFocus);
+        }
 
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
@@ -110,7 +129,7 @@ namespace MWGui
             if (item.mType == ItemStack::Type_Equipped)
                 state = ItemWidget::Equip;
             itemWidget->setItem(item.mBase, state);
-            itemWidget->setCount(item.mCount);
+            itemWidget->setCount(static_cast<int>(item.mCount));
 
             itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
             itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);
@@ -122,6 +141,11 @@ namespace MWGui
     void ItemView::resetScrollBars()
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+        if (Settings::gui().mControllerMenus)
+        {
+            updateControllerFocus(mControllerFocus, 0);
+            mControllerFocus = 0;
+        }
     }
 
     void ItemView::onSelectedItem(MyGUI::Widget* sender)
@@ -130,32 +154,32 @@ namespace MWGui
         eventItemClicked(index);
     }
 
-    void ItemView::onSelectedBackground(MyGUI::Widget* sender)
+    void ItemView::onSelectedBackground(MyGUI::Widget* /*sender*/)
     {
         eventBackgroundClicked();
     }
 
-    void ItemView::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
+    void ItemView::onMouseWheelMoved(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mScrollView->getViewOffset().left + _rel * 0.3f > 0)
+        if (mScrollView->getViewOffset().left + rel * 0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mScrollView->setViewOffset(
-                MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + _rel * 0.3f), 0));
+                MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + rel * 0.3f), 0));
     }
 
-    void ItemView::setSize(const MyGUI::IntSize& _value)
+    void ItemView::setSize(const MyGUI::IntSize& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setSize(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setSize(value);
         if (changed)
             layoutWidgets();
     }
 
-    void ItemView::setCoord(const MyGUI::IntCoord& _value)
+    void ItemView::setCoord(const MyGUI::IntCoord& value)
     {
-        bool changed = (_value.width != getWidth() || _value.height != getHeight());
-        Base::setCoord(_value);
+        bool changed = (value.width != getWidth() || value.height != getHeight());
+        Base::setCoord(value);
         if (changed)
             layoutWidgets();
     }
@@ -165,4 +189,112 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ItemView>("Widget");
     }
 
+    void ItemView::setActiveControllerWindow(bool active)
+    {
+        mControllerActiveWindow = active;
+
+        MWBase::Environment::get().getWindowManager()->setControllerTooltipVisible(
+            active && Settings::gui().mControllerTooltips);
+
+        if (active)
+            updateControllerFocus(-1, mControllerFocus);
+        else
+            updateControllerFocus(mControllerFocus, -1);
+    }
+
+    void ItemView::onControllerButton(const unsigned char button)
+    {
+        if (!mItemCount)
+            return;
+
+        int prevFocus = mControllerFocus;
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+
+        switch (button)
+        {
+            case SDL_CONTROLLER_BUTTON_A:
+                // Select the focused item, if any.
+                if (mControllerFocus >= 0 && mControllerFocus < mItemCount)
+                {
+                    MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+                    onSelectedItem(dragArea->getChildAt(mControllerFocus));
+                }
+                break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+                // Toggle info tooltip
+                winMgr->setControllerTooltipEnabled(!winMgr->getControllerTooltipEnabled());
+                updateControllerFocus(-1, mControllerFocus);
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                winMgr->restoreControllerTooltips();
+                if (mControllerFocus % mRows == 0)
+                    mControllerFocus = std::min(mControllerFocus + mRows - 1, mItemCount - 1);
+                else
+                    mControllerFocus--;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                winMgr->restoreControllerTooltips();
+                if (mControllerFocus % mRows == mRows - 1 || mControllerFocus == mItemCount - 1)
+                    mControllerFocus -= mControllerFocus % mRows;
+                else
+                    mControllerFocus++;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                winMgr->restoreControllerTooltips();
+                if (mControllerFocus >= mRows)
+                    mControllerFocus -= mRows;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                winMgr->restoreControllerTooltips();
+                if (mControllerFocus + mRows < mItemCount)
+                    mControllerFocus += mRows;
+                else if (mControllerFocus / mRows != (mItemCount - 1) / mRows)
+                    mControllerFocus = mItemCount - 1;
+                break;
+            default:
+                return;
+        }
+
+        if (prevFocus != mControllerFocus)
+            updateControllerFocus(prevFocus, mControllerFocus);
+        else
+            updateControllerFocus(-1, mControllerFocus);
+    }
+
+    void ItemView::updateControllerFocus(int prevFocus, int newFocus)
+    {
+        if (!mItemCount)
+            return;
+
+        MyGUI::Widget* dragArea = mScrollView->getChildAt(0);
+
+        if (prevFocus >= 0 && prevFocus < mItemCount)
+        {
+            ItemWidget* prev = static_cast<ItemWidget*>(dragArea->getChildAt(prevFocus));
+            if (prev)
+                prev->setControllerFocus(false);
+        }
+
+        if (mControllerActiveWindow && newFocus >= 0 && newFocus < mItemCount)
+        {
+            ItemWidget* focused = static_cast<ItemWidget*>(dragArea->getChildAt(newFocus));
+            if (focused)
+            {
+                focused->setControllerFocus(true);
+
+                // Scroll the list to keep the active item in view
+                int column = newFocus / mRows;
+                if (column <= 3)
+                    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+                else
+                    mScrollView->setViewOffset(MyGUI::IntPoint(-42 * (column - 3), 0));
+
+                MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+                winMgr->restoreControllerTooltips();
+
+                if (winMgr->getControllerTooltipVisible())
+                    MWBase::Environment::get().getInputManager()->warpMouseToWidget(focused);
+            }
+        }
+    }
 }

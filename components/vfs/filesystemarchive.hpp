@@ -17,7 +17,9 @@ namespace VFS
 
         Files::IStreamPtr open() override;
 
-        std::filesystem::path getPath() override { return mPath; }
+        std::filesystem::file_time_type getLastModified() const override;
+
+        std::string getStem() const override;
 
     private:
         std::filesystem::path mPath;

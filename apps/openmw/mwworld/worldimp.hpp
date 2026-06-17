@@ -4,9 +4,11 @@
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -119,7 +121,7 @@ namespace MWWorld
 
         float mSwimHeightScale;
 
-        float mDistanceToFacedObject;
+        float mDistanceToFocusObject;
 
         bool mTeleportEnabled;
         bool mLevitationEnabled;
@@ -134,6 +136,7 @@ namespace MWWorld
         ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
         uint32_t mRandomSeed{};
+        bool mIdsRebuilt{};
 
         // not implemented
         World(const World&) = delete;
@@ -149,7 +152,7 @@ namespace MWWorld
 
         void preloadSpells();
 
-        MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer = true);
+        MWWorld::Ptr getFocusObject(float maxDistance, bool ignorePlayer = true);
 
         void PCDropped(const Ptr& item);
 
@@ -170,8 +173,6 @@ namespace MWWorld
 
         void fillGlobalVariables();
 
-        void updateSkyDate();
-
         void loadContentFiles(const Files::Collections& fileCollections, const std::vector<std::string>& content,
             ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener);
 
@@ -180,7 +181,6 @@ namespace MWWorld
             Loading::Listener* listener);
 
         float feetToGameUnits(float feet);
-        float getActivationDistancePlusTelekinesis();
 
         MWWorld::ConstPtr getClosestMarker(const MWWorld::ConstPtr& ptr, const ESM::RefId& id);
         MWWorld::ConstPtr getClosestMarkerFromExteriorPosition(const osg::Vec3f& worldPos, const ESM::RefId& id);
@@ -201,8 +201,8 @@ namespace MWWorld
             Loading::Listener* listener);
 
         // Must be called after `loadData`.
-        void init(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, SceneUtil::WorkQueue* workQueue,
-            SceneUtil::UnrefQueue& unrefQueue);
+        void init(Debug::Level maxRecastLogLevel, osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
+            SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue);
 
         virtual ~World();
 
@@ -213,8 +213,8 @@ namespace MWWorld
 
         void clear() override;
 
-        int countSavedGameRecords() const override;
-        int countSavedGameCells() const override;
+        size_t countSavedGameRecords() const override;
+        size_t countSavedGameCells() const override;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
 
@@ -238,6 +238,8 @@ namespace MWWorld
         MWWorld::ConstPtr getPlayerConstPtr() const override;
 
         MWWorld::ESMStore& getStore() override { return mStore; }
+
+        const MWWorld::ESMStore& getStore() const override { return mStore; }
 
         const std::vector<int>& getESMVersions() const override;
 
@@ -285,9 +287,6 @@ namespace MWWorld
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do not search inactive cells.
 
-        Ptr searchPtrViaActorId(int actorId) override;
-        ///< Search is limited to the active cells.
-
         MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) override;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
         /// \note Search is limited to the active cells.
@@ -314,9 +313,16 @@ namespace MWWorld
 
         void changeWeather(const ESM::RefId& region, const unsigned int id) override;
 
-        int getCurrentWeather() const override;
+        void changeWeather(const ESM::RefId& region, const ESM::RefId& id) override;
 
-        int getNextWeather() const override;
+        const std::vector<MWWorld::Weather>& getAllWeather() const override;
+
+        int getCurrentWeatherScriptId() const override;
+        const MWWorld::Weather& getCurrentWeather() const override;
+        const MWWorld::Weather* getWeather(size_t index) const override;
+        const MWWorld::Weather* getWeather(const ESM::RefId& id) const override;
+        int getNextWeatherScriptId() const override;
+        const MWWorld::Weather* getNextWeather() const override;
 
         float getWeatherTransition() const override;
 
@@ -328,7 +334,8 @@ namespace MWWorld
 
         void setMoonColour(bool red) override;
 
-        void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) override;
+        void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) override;
+        std::span<const uint8_t> getRegionWeatherChances(const ESM::RefId& regionid) const override;
 
         void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
@@ -339,10 +346,10 @@ namespace MWWorld
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        MWWorld::Ptr getFacedObject() override;
+        MWWorld::Ptr getFocusObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
-        float getDistanceToFacedObject() override;
+        float getDistanceToFocusObject() override;
 
         /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
         void deleteObject(const Ptr& ptr) override;
@@ -409,7 +416,7 @@ namespace MWWorld
         void updatePhysics(
             float duration, bool paused, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
-        void updateWindowManager();
+        void updateFocusObject();
 
         MWWorld::Ptr placeObject(
             const MWWorld::Ptr& object, float cursorX, float cursorY, int amount, bool copy = true) override;
@@ -457,7 +464,7 @@ namespace MWWorld
         void applyDeferredPreviewRotationToPlayer(float dt) override;
         void disableDeferredPreviewRotation() override;
 
-        void saveLoaded() override;
+        void saveLoaded(const ESM::ESMReader& reader) override;
 
         void setupPlayer() override;
         void renderPlayer() override;
@@ -487,7 +494,7 @@ namespace MWWorld
         ///< Apply a health difference to any actors colliding with \a object.
         /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
-        float getWindSpeed() override;
+        float getWindSpeed() const override;
 
         void getContainersOwnedBy(const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) override;
         ///< get all containers in active cells owned by this Npc
@@ -502,11 +509,11 @@ namespace MWWorld
 
         void enableActorCollision(const MWWorld::Ptr& actor, bool enable) override;
 
-        RestPermitted canRest() const override;
+        int canRest() const override;
         ///< check if the player is allowed to rest
 
         void rest(double hours) override;
-        void rechargeItems(double duration, bool activeOnly);
+        void rechargeItems(float duration, bool activeOnly);
 
         /// \todo Probably shouldn't be here
         MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr) override;
@@ -515,7 +522,6 @@ namespace MWWorld
 
         /// \todo this does not belong here
         void screenshot(osg::Image* image, int w, int h) override;
-        bool screenshot360(osg::Image* image) override;
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
@@ -571,8 +577,11 @@ namespace MWWorld
         // Allow NPCs to use torches?
         bool useTorches() const override;
 
+        const osg::Vec4f& getSunLightPosition() const override;
         float getSunVisibility() const override;
         float getSunPercentage() const override;
+
+        float getPhysicsFrameRateDt() const override;
 
         bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) override;
 
@@ -598,11 +607,11 @@ namespace MWWorld
         /// Spawn a random creature from a levelled list next to the player
         void spawnRandomCreature(const ESM::RefId& creatureList) override;
 
-        /// Spawn a blood effect for \a ptr at \a worldPosition
-        void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) override;
+        void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
+            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true,
+            std::string_view effectId = {}, bool loop = false) override;
 
-        void spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
-            float scale = 1.f, bool isMagicVFX = true) override;
+        void removeEffect(std::string_view effectId) override;
 
         /// @see MWWorld::WeatherManager::isInStorm
         bool isInStorm() const override;
@@ -653,8 +662,7 @@ namespace MWWorld
         bool hasCollisionWithDoor(
             const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
-        bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors) const override;
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const override;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 

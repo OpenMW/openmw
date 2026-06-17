@@ -39,11 +39,11 @@ namespace MWGui
         EventHandle_WindowBase eventDone;
 
     protected:
-        void onSelectBirth(MyGUI::ListBox* _sender, size_t _index);
+        void onSelectBirth(MyGUI::ListBox* sender, size_t index);
 
-        void onAccept(MyGUI::ListBox* _sender, size_t index);
-        void onOkClicked(MyGUI::Widget* _sender);
-        void onBackClicked(MyGUI::Widget* _sender);
+        void onAccept(MyGUI::ListBox* sender, size_t index);
+        void onOkClicked(MyGUI::Widget* sender);
+        void onBackClicked(MyGUI::Widget* sender);
 
     private:
         void updateBirths();
@@ -53,8 +53,12 @@ namespace MWGui
         MyGUI::ScrollView* mSpellArea;
         MyGUI::ImageBox* mBirthImage;
         std::vector<MyGUI::Widget*> mSpellItems;
+        MyGUI::Button* mBackButton;
+        MyGUI::Button* mOkButton;
 
         ESM::RefId mCurrentBirthId;
+
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
     };
 }
 #endif

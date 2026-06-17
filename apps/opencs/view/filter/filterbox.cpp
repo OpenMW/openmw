@@ -16,14 +16,14 @@
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/world/dragrecordtable.hpp>
 
-CSVFilter::FilterBox::FilterBox(CSMWorld::Data& data, QWidget* parent)
+CSVFilter::FilterBox::FilterBox(CSMWorld::Data& worldData, QWidget* parent)
     : QWidget(parent)
 {
     QHBoxLayout* layout = new QHBoxLayout(this);
 
     layout->setContentsMargins(0, 0, 0, 0);
 
-    mRecordFilterBox = new RecordFilterBox(data, this);
+    mRecordFilterBox = new RecordFilterBox(worldData, this);
 
     layout->addWidget(mRecordFilterBox);
 

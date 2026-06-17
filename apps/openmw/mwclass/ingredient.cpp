@@ -22,6 +22,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -46,10 +47,7 @@ namespace MWClass
 
     std::string_view Ingredient::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Ingredient>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Ingredient::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -73,7 +71,7 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Ingredient::use(const MWWorld::Ptr& ptr, bool force) const
     {
-        if (ptr.get<ESM::Ingredient>()->mBase->mData.mEffectID[0] < 0)
+        if (ptr.get<ESM::Ingredient>()->mBase->mData.mEffectID[0].empty())
             return std::make_unique<MWWorld::NullAction>();
         std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEat>(ptr);
 
@@ -133,12 +131,12 @@ namespace MWClass
         MWGui::Widgets::SpellEffectList list;
         for (int i = 0; i < 4; ++i)
         {
-            if (ref->mBase->mData.mEffectID[i] < 0)
+            if (ref->mBase->mData.mEffectID[i].empty())
                 continue;
             MWGui::Widgets::SpellEffectParams params;
             params.mEffectID = ref->mBase->mData.mEffectID[i];
-            params.mAttribute = ESM::Attribute::indexToRefId(ref->mBase->mData.mAttributes[i]);
-            params.mSkill = ESM::Skill::indexToRefId(ref->mBase->mData.mSkills[i]);
+            params.mAttribute = ref->mBase->mData.mAttributes[i];
+            params.mSkill = ref->mBase->mData.mSkills[i];
             params.mKnown = alchemySkill >= fWortChanceValue * (i + 1);
 
             list.push_back(params);

@@ -34,6 +34,8 @@
 
 #include <components/shader/shadermanager.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 namespace SceneUtil {
 
     /** ViewDependentShadowMap provides an base implementation of view dependent shadow mapping techniques.*/
@@ -157,6 +159,7 @@ namespace SceneUtil {
             * the resulting shadow map may be invalid. */
             virtual void operator()(osgUtil::CullVisitor& cv, osg::BoundingBoxd& customClipSpace, osgUtil::CullVisitor*& sharedFrustumHint) = 0;
         };
+        typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
 
         // forward declare
         class ViewDependentData;
@@ -192,6 +195,7 @@ namespace SceneUtil {
             ViewDependentData*                  _viewDependentData;
 
             unsigned int                        _textureUnit;
+            unsigned int                        _sm_i;
             osg::ref_ptr<osg::Texture2D>        _texture;
             osg::ref_ptr<osg::Camera>           _camera;
         };
@@ -228,6 +232,7 @@ namespace SceneUtil {
 
             LightDataList               _lightDataList;
             ShadowDataList              _shadowDataList;
+            std::array<Uniforms, 2>     _uniforms;
 
             unsigned int _numValidShadows;
         };
@@ -240,6 +245,8 @@ namespace SceneUtil {
 
         void setCustomFrustumCallback(CustomFrustumCallback* cfc);
 
+        void copyShadowStateSettings(osgUtil::CullVisitor& cv, ViewDependentData* vdd);
+
         virtual void createShaders();
 
         virtual bool selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const;
@@ -251,6 +258,10 @@ namespace SceneUtil {
         virtual bool cropShadowCameraToMainFrustum(Frustum& frustum, osg::Camera* camera, double viewNear, double viewFar, std::vector<osg::Plane>& planeList);
 
         virtual bool adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& positionedLight, osg::Camera* camera, double viewNear, double viewFar);
+        
+        virtual void assignShadowStateSettings(osgUtil::CullVisitor& cv, osg::Camera* camera, unsigned int sm_i, Uniforms& uniforms);
+        
+        virtual void assignValidRegionSettings(osgUtil::CullVisitor& cv, osg::Camera* camera, unsigned int sm_i, Uniforms& uniforms);
 
         virtual void cullShadowReceivingScene(osgUtil::CullVisitor* cv) const;
 
@@ -280,7 +291,6 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Texture2D>            _fallbackBaseTexture;
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
-        typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
         std::array<Uniforms, 2>                 _uniforms;
         osg::ref_ptr<osg::Program>              _program;
 
@@ -290,12 +300,12 @@ namespace SceneUtil {
         double                                  _splitPointUniformLogRatio = 0.5;
         double                                  _splitPointDeltaBias = 0.0;
 
-        float                                   _polygonOffsetFactor = 1.1;
-        float                                   _polygonOffsetUnits = 4.0;
+        float                                   _polygonOffsetFactor = 1.1f;
+        float                                   _polygonOffsetUnits = 4.0f;
 
         bool                                    _useFrontFaceCulling = true;
 
-        float                                   _shadowFadeStart = 0.0;
+        float                                   _shadowFadeStart = 0.0f;
 
         unsigned int                            _worldMask = ~0u;
 
@@ -330,6 +340,8 @@ namespace SceneUtil {
     };
 
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 #endif
 // clang-format on

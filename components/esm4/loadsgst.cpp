@@ -58,7 +58,7 @@ void ESM4::SigilStone::load(ESM4::Reader& reader)
                     std::string scriptEffectName;
                     if (!reader.getZString(scriptEffectName))
                         throw std::runtime_error("SGST FULL data read error");
-                    mScriptEffect.push_back(scriptEffectName);
+                    mScriptEffect.push_back(std::move(scriptEffectName));
                 }
                 break;
             }

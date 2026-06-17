@@ -392,6 +392,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>This archive is enabled in an openmw.cfg other than the user one</source>
         <translation>Этот архив включен в openmw.cfg, не являющемся пользовательским</translation>
     </message>
+    <message>
+        <source>&amp;Copy Path(s) to Clipboard</source>
+        <translation>&amp;Скопировать пути в буфер обмена</translation>
+    </message>
+    <message>
+        <source>&amp;Open Path in File Explorer</source>
+        <translation>&amp;Открыть путь в диспетчере файлов</translation>
+    </message>
 </context>
 <context>
     <name>Launcher::GraphicsPage</name>
@@ -418,6 +426,18 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;br&gt;&lt;b&gt;SDL_GetDisplayMode failed:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</source>
         <translation>&lt;br&gt;&lt;b&gt;Вызов SDL_GetDisplayMode завершился с ошибкой:&lt;/b&gt;&lt;br&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Custom window size is available only in Windowed mode.</source>
+        <translation>Особый размер окна доступен только в оконном режиме.</translation>
+    </message>
+    <message>
+        <source>Window border is available only in Windowed mode.</source>
+        <translation>Рамка окна доступна только в оконном режиме.</translation>
+    </message>
+    <message>
+        <source>Windowed Fullscreen mode always uses the native display resolution.</source>
+        <translation>Режим &quot;Оконный без полей&quot; всегда использует родное разрешение экрана.</translation>
     </message>
 </context>
 <context>
@@ -450,8 +470,8 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Закрыть</translation>
     </message>
     <message>
-        <source> Launch OpenMW </source>
-        <translation> Запустить OpenMW </translation>
+        <source>Launch OpenMW</source>
+        <translation>Запустить OpenMW</translation>
     </message>
     <message>
         <source>Help</source>
@@ -555,6 +575,50 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Text file (*.txt)</source>
         <translation>Текстовый файл (*.txt)</translation>
+    </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Открыть директорию</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Открыть %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Локальная директория конфигурации используется, потому что содержит openmw.cfg.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Локальная директория конфигурации используется, потому что содержит openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Глобальная директория конфигурации используется, потому что локальная директория не содержит openmw.cfg.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.
+Обычно это знак, что OpenMW установлен или упакован некорректно.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Глобальная директория конфигурации используется, потому что локальная директория не содержит openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Эта пользовательская директория конфигурации используется, потому что в %1 содержится строка config=%2.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Эта пользовательская директория конфигурации используется, потому что в %1 содержится строка config=%2.</translation>
     </message>
 </context>
 <context>
@@ -717,14 +781,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет любым персонажам плыть возле поверхности воды, чтобы следовать за другим персонажем, вне зависимости от того, могут они плыть, или нет. Работает только с навигационной сеткой.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes unarmed creature attacks able to reduce armor condition, just as attacks from NPCs and armed creatures.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Позволяет атакам существ без оружия повреждать броню цели, по аналогии с атаками оружием.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Unarmed Creature Attacks Damage Armor</source>
-        <translation>Атаки существ повреждают броню</translation>
-    </message>
-    <message>
         <source>Off</source>
         <translation>Отключено</translation>
     </message>
@@ -771,6 +827,14 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Use Magic Item Animation</source>
         <translation>Анимации магических предметов</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, она делает переходы между различными анимациями/позами намного глаже. Кроме того, она позволяет загружать YAML-файлы конфигураций смешивания анимаций, которые могут быть включены с анимациями, чтобы настроить стили смешивания.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Smooth Animation Transitions</source>
+        <translation>Плавные переходы между анимациями</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -863,11 +927,9 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren&apos;t affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
                   Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-                  Affected objects will use shaders.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обычно освещение не должно влиять на карты окружения, из-за чего объекты с картами окружения (в том числе объекты с рельефными текстурами) светятся в темноте.
                   Morrowind Code Patch предоставляет способ обойти эту проблему, применяя карты окружения перед применением освещения, аналогично этой опции.
-                  Объекты с картами окружения будут использовать шейдеры.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -1141,14 +1203,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Сохранения</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting determines whether the amount of the time the player has spent playing will be displayed for each saved game in the Load menu.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Эта настройка определяет, будет ли отображаться время с начала новой игры для выбранного сохранения в меню загрузки.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Add &quot;Time Played&quot; to Saves</source>
-        <translation>Выводить &quot;Время в игре&quot; в сохранениях</translation>
-    </message>
-    <message>
         <source>JPG</source>
         <translation>JPG</translation>
     </message>
@@ -1226,11 +1280,11 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled, a magical ammunition is required to bypass normal weapon resistance or weakness. If disabled, a magical ranged weapon or a magical ammunition is required.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, требуются магические метательные снаряды, чтобы обойти сопротивление обычному оружию или уязвимость к нему. Если отключена, то требуются магические снаряды или магическое оружие дальнего боя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если настройка включена, для обхода сопротивления или уязвимости к обычному оружию необходимо, чтобы снаряд был магическим. Если выключена, то магическим для этого может быть как снаряд, так и оружие дальнего боя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Only Magical Ammo Bypass Resistance</source>
-        <translation>Только снаряды обходят сопротивление</translation>
+        <translation>Обычные снаряды не обходят сопротивление</translation>
     </message>
     <message>
         <source>Graphic Herbalism</source>
@@ -1251,6 +1305,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>Factor Strength into Hand-to-Hand Combat</source>
         <translation>Учет Силы в рукопашном бою</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Настройка определяет поведение учета атрибута Сила в рукопашном уроне: урон умножается на его значение, разделенное на 40.&lt;/p&gt;&lt;p&gt;Может быть применено ко всем персонажам или же только персонажам, не являющимся оборотнями.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Background Physics Threads</source>
@@ -1385,14 +1443,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Включить тени от ландшафта</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Освещение</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Способ освещения</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Звуковое устройство</translation>
     </message>
@@ -1425,56 +1475,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Формат снимков экрана</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum distance at which lights will appear (measured in units).&lt;/p&gt;&lt;p&gt;Set this to 0 to use an unlimited distance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное расстояние, на котором будут отображаться источники света (во внутриигровых единицах измерения).&lt;/p&gt;&lt;p&gt;Если 0, то расстояние не ограничено.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Maximum Light Distance</source>
-        <translation>Дальность отображения источников света</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of lights per object.&lt;/p&gt;&lt;p&gt;A low number near default will cause light popping similar to what you would see with legacy lighting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Максимальное количество источников света для каждого объекта.&lt;/p&gt;&lt;p&gt;Низкие числа (близкие к значению по умолчанию) приводят к резким перепадам освещения, как при устаревшем методе освещения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Max Lights</source>
-        <translation>Макс. кол-во источников света</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraction of maximum distance at which lights will start to fade.&lt;/p&gt;&lt;p&gt;Set this to a low value for slower transitions or a high value for quicker transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Доля расстояния (относительно дальности отображения источников света), на которой свет начинает затухать.&lt;/p&gt;&lt;p&gt;Низкие значения ведут к плавному затуханию, высокие - к резкому.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object and provides a lighting closest to an original game.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Задает способ обработки источников света.&lt;/p&gt;
-&lt;p&gt; &quot;Устаревший&quot; всегда использует 8 источников света на объект и выдает освещение, наиболее близкое к таковому в оригинальной игре.&lt;/p&gt;
-&lt;p&gt;&quot;Шейдеры (режим совместимости)&quot; убирает ограничение в 8 источников света. Этот режим также позволяет освещению влиять на анимированную траву и позволяет настроить угасание света на расстоянии. Рекомендуется использовать этот режим на устаревшем аппаратном обеспечении и с количеством источников света на объект около 8.&lt;/p&gt;
-&lt;p&gt; &quot;Шейдеры&quot; работает аналогично режиму &quot;Шейдеры (режим совместимости)&quot; но использует более современный подход, позволяющий использовать большее количество источников света с минимальным влиянием на производительность на современном аппаратном обеспечении.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Legacy</source>
-        <translation>Устаревший</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Шейдеры (режим совместимости)</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multipler for bounding sphere of lights.&lt;/p&gt;&lt;p&gt;Higher numbers allows for smooth falloff but require an increase in number of max lights.&lt;/p&gt;&lt;p&gt;Does not effect the illumination or strength of lights.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Множитель размера ограничивающей сферы источников света.&lt;/p&gt;&lt;p&gt;Высокие значения делают затухание света плавнее, но требуют более высокого максимального количества источников света.&lt;/p&gt;&lt;p&gt;Настройка не влияет на уровень освещения или мощность источников света.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Bounding Sphere Multiplier</source>
-        <translation>Множитель размера ограничивающей сферы</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum ambient interior brightness.&lt;/p&gt;&lt;p&gt;Increase this if you feel interiors are too dark.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Минимальный уровень фонового освещения в помещениях.&lt;/p&gt;&lt;p&gt;Увеличьте значение, если помещения в игре кажутся слишком темными.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
         <translation>Использовать в виде от третьего лица положение камеры, а не персонажа игрока для прослушивания звуков.</translation>
     </message>
@@ -1483,8 +1483,32 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Использовать камеру как слушателя</translation>
     </message>
     <message>
-        <source>Minimum Interior Brightness</source>
-        <translation>Минимальный уровень освещения в помещениях</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make it easier to use game menus with a controller.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Упрощает использование игровых меню на геймпаде.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Enable Controller Menus</source>
+        <translation>Интерфейс для геймпадов</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When using controller menus, make tooltips visible by default.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Показывать подсказки интерфейса для геймпадов по умолчанию.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Show Controller Tooltips By Default</source>
+        <translation>Подсказки для геймпадов по умолчанию</translation>
+    </message>
+    <message>
+        <source>Doppler Factor</source>
+        <translation>Множитель эффекта Доплера</translation>
+    </message>
+    <message>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет силу эффекта Доплера. Нулевое значение означает, что эффект отключен полностью.&lt;/p&gt;&lt;p&gt;Эффект Доплера увеличивает или уменьшает высоту звуков в зависимости от скорости источника звука и слушателя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Активные директории конфигурации</translation>
     </message>
 </context>
 </TS>

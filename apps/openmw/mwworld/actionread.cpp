@@ -23,15 +23,15 @@ namespace MWWorld
 
     void ActionRead::executeImp(const MWWorld::Ptr& actor)
     {
-
-        if (actor != MWMechanics::getPlayer())
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
+        if (actor != player && getTarget().getContainerStore() != nullptr)
             return;
 
         // Ensure we're not in combat
         if (MWMechanics::isPlayerInCombat()
             // Reading in combat is still allowed if the scroll/book is not in the player inventory yet
             // (since otherwise, there would be no way to pick it up)
-            && getTarget().getContainerStore() == &actor.getClass().getContainerStore(actor))
+            && getTarget().getContainerStore() == &player.getClass().getContainerStore(player))
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage4}");
             return;
@@ -44,13 +44,13 @@ namespace MWWorld
         else
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Book, getTarget());
 
-        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
+        MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 
         // Skill gain from books
         ESM::RefId skill = ESM::Skill::indexToRefId(ref->mBase->mData.mSkillId);
         if (!skill.empty() && !npcStats.hasBeenUsed(ref->mBase->mId))
         {
-            MWBase::Environment::get().getLuaManager()->skillLevelUp(actor, skill, "book");
+            MWBase::Environment::get().getLuaManager()->skillLevelUp(player, skill, "book");
 
             npcStats.flagAsUsed(ref->mBase->mId);
         }

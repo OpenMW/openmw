@@ -1,5 +1,5 @@
-Built-in Setting Renderers
-==========================
+Setting Renderers
+=================
 
 .. include:: version.rst
 

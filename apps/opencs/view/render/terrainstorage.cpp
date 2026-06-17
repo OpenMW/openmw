@@ -7,7 +7,6 @@
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
 #include <algorithm>
@@ -42,14 +41,9 @@ namespace CSVRender
             land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
+    const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
-        const int row = mData.getLandTextures().searchId(
-            ESM::RefId::stringRefId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index)));
-        if (row == -1)
-            return nullptr;
-
-        return &mData.getLandTextures().getRecord(row).get();
+        return mData.getLandTextures().getLandTexture(index, plugin);
     }
 
     void TerrainStorage::setAlteredHeight(int inCellX, int inCellY, float height)
@@ -154,6 +148,8 @@ namespace CSVRender
 
     void TerrainStorage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const
     {
+        if (!heightData)
+            return;
         // Highlight broken height changes
         int heightWarningLimit = 1024;
         if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData->getHeights()))

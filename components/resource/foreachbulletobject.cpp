@@ -16,10 +16,6 @@
 #include <osg/ref_ptr>
 
 #include <algorithm>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -97,7 +93,7 @@ namespace Resource
 
             for (CellRef& cellRef : cellRefs)
             {
-                std::string model(getModel(esmData, cellRef.mRefId, cellRef.mType));
+                VFS::Path::Normalized model(getModel(esmData, cellRef.mRefId, cellRef.mType));
                 if (model.empty())
                     continue;
 
@@ -107,7 +103,8 @@ namespace Resource
                 osg::ref_ptr<const Resource::BulletShape> shape = [&] {
                     try
                     {
-                        return bulletShapeManager.getShape("meshes/" + model);
+                        constexpr VFS::Path::NormalizedView prefix("meshes");
+                        return bulletShapeManager.getShape(prefix / model);
                     }
                     catch (const std::exception& e)
                     {

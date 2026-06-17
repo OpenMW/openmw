@@ -32,16 +32,16 @@ namespace Bsa
         0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e,
         0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
-    uint32_t generateHash(const std::string& name)
+    uint32_t generateHash(std::string_view name)
     {
         uint32_t result = 0;
-        for (auto c : name)
+        for (unsigned char c : name)
         {
-            if (uint8_t(c) > 127)
+            if (c > 127)
                 continue;
             if (c == '/')
                 c = '\\';
-            result = (result >> 8) ^ crc32table[(result ^ (unsigned)(c)) & 0xFF];
+            result = (result >> 8) ^ crc32table[(result ^ c) & 0xFF];
         }
         return result;
     }
@@ -49,8 +49,8 @@ namespace Bsa
     uint32_t generateExtensionHash(std::string_view extension)
     {
         uint32_t result = 0;
-        for (size_t i = 0; i < 4 && i < extension.size() - 1; i++)
-            result |= static_cast<uint8_t>(extension[i + 1]) << (8 * i);
+        for (size_t i = 0; i < 4 && i < extension.size(); i++)
+            result |= static_cast<uint8_t>(extension[i]) << (8 * i);
         return result;
     }
 

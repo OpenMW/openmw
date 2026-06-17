@@ -34,7 +34,7 @@ bool CSMWorld::CellSelection::has(const CellCoordinates& coordinates) const
 
 int CSMWorld::CellSelection::getSize() const
 {
-    return mCells.size();
+    return static_cast<int>(mCells.size());
 }
 
 CSMWorld::CellCoordinates CSMWorld::CellSelection::getCentre() const

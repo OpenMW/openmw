@@ -2,6 +2,7 @@
 
 #if defined(_WIN32) || defined(__WINDOWS__)
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 
@@ -22,26 +23,75 @@
  */
 namespace Files
 {
+    namespace
+    {
+        struct RegistryKey
+        {
+            HKEY mKey = nullptr;
+
+            ~RegistryKey()
+            {
+                if (mKey)
+                    RegCloseKey(mKey);
+            }
+        };
+
+        std::filesystem::path getRegistryPath(LPCWSTR subKey, LPCWSTR valueName, bool use32)
+        {
+            RegistryKey key;
+            REGSAM flags = KEY_READ;
+            if (use32)
+                flags |= KEY_WOW64_32KEY;
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, subKey, 0, flags, &key.mKey) == ERROR_SUCCESS)
+            {
+                // Key existed, let's try to read the install dir
+                std::wstring buffer;
+                buffer.reserve(MAX_PATH);
+                DWORD len = static_cast<DWORD>(MAX_PATH * sizeof(wchar_t));
+
+                auto result = RegQueryValueExW(
+                    key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                if (result == ERROR_MORE_DATA)
+                {
+                    buffer.reserve(len / sizeof(wchar_t));
+                    result = RegQueryValueExW(
+                        key.mKey, valueName, nullptr, nullptr, reinterpret_cast<LPBYTE>(buffer.data()), &len);
+                }
+                if (result == ERROR_SUCCESS)
+                {
+                    // This should always be true. Note that we don't need to care above because of the trailing \0
+                    if (len % sizeof(wchar_t) == 0)
+                    {
+                        std::wstring_view view(buffer.data(), len / sizeof(wchar_t));
+                        // Strip trailing \0 because the path constructor won't do it for us
+                        const auto pos = view.find(L'\0');
+                        if (pos != std::wstring_view::npos)
+                            view = view.substr(0, pos);
+                        return std::filesystem::path(view);
+                    }
+                }
+            }
+            return {};
+        }
+    }
 
     WindowsPath::WindowsPath(const std::string& application_name)
         : mName(application_name)
     {
-        std::error_code ec;
-        current_path(getLocalPath(), ec);
-        if (ec.value() != 0)
-            Log(Debug::Warning) << "Error " << ec.value() << " when changing current directory";
     }
 
     std::filesystem::path WindowsPath::getUserConfigPath() const
     {
         std::filesystem::path userPath = std::filesystem::current_path();
 
-        WCHAR path[MAX_PATH + 1] = {};
+        PWSTR cString;
+        HRESULT result = SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &cString);
+        if (SUCCEEDED(result))
+            userPath = std::filesystem::path(cString);
+        else
+            Log(Debug::Error) << "Error " << result << " when getting Documents path";
 
-        if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, nullptr, 0, path)))
-        {
-            userPath = std::filesystem::path(path);
-        }
+        CoTaskMemFree(cString);
 
         return userPath / "My Games" / mName;
     }
@@ -54,27 +104,26 @@ namespace Files
 
     std::filesystem::path WindowsPath::getGlobalConfigPath() const
     {
-        std::filesystem::path globalPath = std::filesystem::current_path();
-
-        WCHAR path[MAX_PATH + 1] = {};
-
-        if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, nullptr, 0, path)))
-        {
-            globalPath = std::filesystem::path(path);
-        }
-
-        return globalPath / mName;
+        // The concept of a global config path is absurd on Windows.
+        // Always use local config instead.
+        return {};
     }
 
     std::filesystem::path WindowsPath::getLocalPath() const
     {
         std::filesystem::path localPath = std::filesystem::current_path() / "";
 
-        WCHAR path[MAX_PATH + 1] = {};
-
-        if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
+        std::wstring executablePath;
+        DWORD copied = 0;
+        do
         {
-            localPath = std::filesystem::path(path).parent_path() / "";
+            executablePath.resize(executablePath.size() + MAX_PATH);
+            copied = GetModuleFileNameW(nullptr, executablePath.data(), static_cast<DWORD>(executablePath.size()));
+        } while (GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+
+        if (copied > 0)
+        {
+            localPath = std::filesystem::path(executablePath).parent_path() / "";
         }
 
         // lookup exe path
@@ -91,27 +140,30 @@ namespace Files
         return getUserConfigPath() / "cache";
     }
 
-    std::filesystem::path WindowsPath::getInstallPath() const
+    std::vector<std::filesystem::path> WindowsPath::getInstallPaths() const
     {
-        std::filesystem::path installPath{};
-
-        if (HKEY hKey; RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Bethesda Softworks\\Morrowind", 0,
-                           KEY_READ | KEY_WOW64_32KEY, &hKey)
-            == ERROR_SUCCESS)
+        std::vector<std::filesystem::path> paths;
         {
-            // Key existed, let's try to read the install dir
-            std::array<wchar_t, 512> buf{};
-            DWORD len = static_cast<DWORD>(buf.size() * sizeof(wchar_t));
-
-            if (RegQueryValueExW(hKey, L"Installed Path", nullptr, nullptr, reinterpret_cast<LPBYTE>(buf.data()), &len)
-                == ERROR_SUCCESS)
-            {
-                installPath = std::filesystem::path(buf.data());
-            }
-            RegCloseKey(hKey);
+            std::filesystem::path disk
+                = getRegistryPath(L"SOFTWARE\\Bethesda Softworks\\Morrowind", L"Installed Path", true);
+            if (!disk.empty() && std::filesystem::is_directory(disk))
+                paths.emplace_back(std::move(disk));
         }
-
-        return installPath;
+        {
+            std::filesystem::path gog = getRegistryPath(L"SOFTWARE\\GOG.com\\Games\\1435828767", L"path", true);
+            if (!gog.empty() && std::filesystem::is_directory(gog))
+                paths.emplace_back(std::move(gog));
+        }
+        {
+            std::filesystem::path steam = getRegistryPath(
+                L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Steam App 22320", L"InstallLocation", false);
+            if (!steam.empty() && std::filesystem::is_directory(steam))
+                paths.emplace_back(std::move(steam));
+        }
+        std::ranges::sort(paths);
+        const auto [first, last] = std::ranges::unique(paths);
+        paths.erase(first, last);
+        return paths;
     }
 
 } /* namespace Files */

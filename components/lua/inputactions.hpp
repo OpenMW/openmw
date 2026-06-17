@@ -29,6 +29,7 @@ namespace LuaUtil::InputAction
         std::string mName;
         std::string mDescription;
         sol::main_object mDefaultValue;
+        bool mPersistent;
     };
 
     class MultiTree
@@ -73,16 +74,7 @@ namespace LuaUtil::InputAction
         {
             mHandlers[safeIdByKey(key)].push_back(handler);
         }
-        void clear()
-        {
-            mKeys.clear();
-            mIds.clear();
-            mInfo.clear();
-            mHandlers.clear();
-            mBindings.clear();
-            mValues.clear();
-            mBindingTree.clear();
-        }
+        void clear(bool force = false);
 
     private:
         using Id = MultiTree::Node;
@@ -110,6 +102,7 @@ namespace LuaUtil::InputTrigger
         std::string mL10n;
         std::string mName;
         std::string mDescription;
+        bool mPersistent;
     };
 
     class Registry
@@ -130,12 +123,7 @@ namespace LuaUtil::InputTrigger
         void insert(const Info& info);
         void registerHandler(std::string_view key, const LuaUtil::Callback& callback);
         void activate(std::string_view key);
-        void clear()
-        {
-            mInfo.clear();
-            mHandlers.clear();
-            mIds.clear();
-        }
+        void clear(bool force = false);
 
     private:
         using Id = size_t;

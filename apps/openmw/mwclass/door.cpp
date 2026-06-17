@@ -35,6 +35,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -81,7 +82,7 @@ namespace MWClass
     void Door::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_Door);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_Door);
     }
 
     bool Door::isDoor() const
@@ -101,10 +102,7 @@ namespace MWClass
 
     std::string_view Door::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Door>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Door::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -126,7 +124,7 @@ namespace MWClass
 
         // make door glow if player activates it with telekinesis
         if (actor == MWMechanics::getPlayer()
-            && MWBase::Environment::get().getWorld()->getDistanceToFacedObject()
+            && MWBase::Environment::get().getWorld()->getDistanceToFocusObject()
                 > MWBase::Environment::get().getWorld()->getMaxActivationDistance())
         {
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
@@ -186,7 +184,7 @@ namespace MWClass
             if (ptr.getCellRef().getTeleport())
             {
                 if (actor == MWMechanics::getPlayer()
-                    && MWBase::Environment::get().getWorld()->getDistanceToFacedObject()
+                    && MWBase::Environment::get().getWorld()->getDistanceToFocusObject()
                         > MWBase::Environment::get().getWorld()->getMaxActivationDistance())
                 {
                     // player activated teleport door with telekinesis
@@ -217,14 +215,14 @@ namespace MWClass
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr, closeSound, 0.5f);
                     // Doors rotate at 90 degrees per second, so start the sound at
                     // where it would be at the current rotation.
-                    float offset = doorRot / (osg::PI * 0.5f);
+                    float offset = doorRot / (osg::PIf * 0.5f);
                     action->setSoundOffset(offset);
                     action->setSound(openSound);
                 }
                 else
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr, openSound, 0.5f);
-                    float offset = 1.0f - doorRot / (osg::PI * 0.5f);
+                    float offset = 1.0f - doorRot / (osg::PIf * 0.5f);
                     action->setSoundOffset(std::max(offset, 0.0f));
                     action->setSound(closeSound);
                 }

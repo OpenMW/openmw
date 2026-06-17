@@ -23,20 +23,19 @@
 
  */
 
-#ifndef BSA_COMPRESSED_BSA_FILE_H
-#define BSA_COMPRESSED_BSA_FILE_H
+#ifndef OPENMW_COMPONENTS_BSA_COMPRESSEDBSAFILE_HPP
+#define OPENMW_COMPONENTS_BSA_COMPRESSEDBSAFILE_HPP
 
 #include <limits>
 #include <map>
 
-#include <components/bsa/bsa_file.hpp>
-#include <filesystem>
+#include "bsafile.hpp"
 
 namespace Bsa
 {
     class CompressedBSAFile : private BSAFile
     {
-    private:
+    public:
         enum ArchiveFlags
         {
             ArchiveFlag_FolderNames = 0x0001,
@@ -89,8 +88,6 @@ namespace Bsa
             std::uint32_t mFileFlags;
         };
 
-        Header mHeader;
-
         struct FileRecord
         {
             std::uint64_t mHash;
@@ -103,29 +100,32 @@ namespace Bsa
         {
             std::uint32_t mCount;
             std::int64_t mOffset;
+            std::string mName;
             std::map<std::uint64_t, FileRecord> mFiles;
         };
 
+    private:
+        Header mHeader;
         std::map<std::uint64_t, FolderRecord> mFolders;
 
-        FileRecord getFileRecord(const std::string& str) const;
+        FileRecord getFileRecord(std::string_view str) const;
 
         /// \brief Normalizes given filename or folder and generates format-compatible hash.
-        static std::uint64_t generateHash(const std::filesystem::path& stem, std::string extension);
+        static std::uint64_t generateHash(std::string_view stem, std::string_view extension);
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
 
     public:
         using BSAFile::getFilename;
         using BSAFile::getList;
+        using BSAFile::getPath;
         using BSAFile::open;
 
         CompressedBSAFile() = default;
         virtual ~CompressedBSAFile() = default;
 
         /// Read header information from the input source
-        void readHeader() override;
+        void readHeader(std::istream& input) override;
 
-        Files::IStreamPtr getFile(const char* filePath);
         Files::IStreamPtr getFile(const FileStruct* fileStruct);
         void addFile(const std::string& filename, std::istream& file);
     };

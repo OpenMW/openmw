@@ -35,7 +35,8 @@ local function processZoom3rdPerson()
         not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
         not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
         input.getBooleanActionValue('TogglePOV') or
-        not I.Camera.isModeControlEnabled()
+        not I.Camera.isModeControlEnabled() or
+        not I.Camera.isZoomEnabled()
     then
         return
     end

@@ -5,14 +5,18 @@
 
 #include <array>
 #include <cassert>
+#include <cerrno>
+#include <format>
 #include <istream>
 #include <stdexcept>
 #include <stdint.h>
 #include <string>
+#include <system_error>
 #include <type_traits>
 #include <vector>
 
 #include <components/files/istreamptr.hpp>
+#include <components/files/utils.hpp>
 #include <components/misc/endianness.hpp>
 #include <components/misc/float16.hpp>
 
@@ -40,9 +44,9 @@ namespace Nif
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
         static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
-        if (pIStream->bad())
-            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") buffer of "
-                + std::to_string(numInstances) + " instances");
+        if (pIStream->fail())
+            throw std::runtime_error(std::format("Failed to read typed ({}) dynamic buffer of {} instances: {}",
+                typeid(T).name(), numInstances, std::generic_category().message(errno)));
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
@@ -61,13 +65,18 @@ namespace Nif
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
         static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
-        if (pIStream->bad())
-            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") dynamic buffer of "
-                + std::to_string(numInstances) + " instances");
+        if (pIStream->fail())
+            throw std::runtime_error(std::format("Failed to read typed ({}) dynamic buffer of {} instances: {}",
+                typeid(T).name(), numInstances, std::generic_category().message(errno)));
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
     }
+
+    class NIFStream;
+
+    template <class T>
+    void readRecord(NIFStream& stream, T& value);
 
     class NIFStream
     {
@@ -75,6 +84,7 @@ namespace Nif
         Files::IStreamPtr mStream;
         const ToUTF8::StatelessUtf8Encoder* mEncoder;
         std::string mBuffer;
+        std::size_t mStreamSize;
 
     public:
         explicit NIFStream(
@@ -82,6 +92,7 @@ namespace Nif
             : mReader(reader)
             , mStream(std::move(stream))
             , mEncoder(encoder)
+            , mStreamSize(static_cast<std::size_t>(Files::getStreamSizeLeft(*mStream)))
         {
         }
 
@@ -126,6 +137,9 @@ namespace Nif
         {
             if (size == 0)
                 return;
+
+            checkStreamSize(size * sizeof(T));
+
             vec.resize(size);
             read(vec.data(), size);
         }
@@ -156,7 +170,47 @@ namespace Nif
 
         /// Read a sequence of null-terminated strings
         std::string getStringPalette();
+
+        template <class Count, class T, class Read>
+        void readVectorOfRecords(Count count, Read&& read, std::vector<T>& values)
+        {
+            values.clear();
+            values.reserve(count);
+            for (Count i = 0; i < count; ++i)
+            {
+                T value;
+                read(*this, value);
+                values.push_back(std::move(value));
+            }
+        }
+
+        template <class Count, class T, class Read>
+        void readVectorOfRecords(Read&& read, std::vector<T>& values)
+        {
+            readVectorOfRecords(get<Count>(), std::forward<Read>(read), values);
+        }
+
+        template <class Count, class T>
+        void readVectorOfRecords(Count count, std::vector<T>& values)
+        {
+            readVectorOfRecords(count, readRecord<T>, values);
+        }
+
+        template <class Count, class T>
+        void readVectorOfRecords(std::vector<T>& values)
+        {
+            readVectorOfRecords<Count>(readRecord<T>, values);
+        }
+
+    private:
+        void checkStreamSize(std::size_t size);
     };
+
+    template <class T>
+    void readRecord(NIFStream& stream, T& value)
+    {
+        value.read(&stream);
+    }
 
     template <>
     void NIFStream::read<osg::Vec2f>(osg::Vec2f& vec);

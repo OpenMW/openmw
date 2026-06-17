@@ -67,7 +67,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->streamMusic(
-                    Misc::ResourceHelpers::correctMusicPath(music), MWSound::MusicType::Scripted);
+                    Misc::ResourceHelpers::correctMusicPath(music), MWSound::MusicType::MWScript);
             }
         };
 
@@ -162,10 +162,16 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr = R()(runtime, false);
 
                 int index = runtime[0].mInteger;
                 runtime.pop();
+
+                if (ptr.isEmpty())
+                {
+                    runtime.push(0);
+                    return;
+                }
 
                 bool ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying(
                     ptr, ESM::RefId::stringRefId(runtime.getStringLiteral(index)));

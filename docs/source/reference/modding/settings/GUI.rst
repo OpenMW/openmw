@@ -1,171 +1,235 @@
 GUI Settings
 ############
 
-scaling factor
---------------
+.. omw-setting::
+   :title: scaling factor
+   :type: float32
+   :range: 0.5 to 8.0
+   :default: 1.0
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-:Type:		floating point
-:Range:		0.5 to 8.0
-:Default:	1.0
+   This setting scales GUI windows.
+   A value of 1.0 results in normal scale.
+   Larger values increase GUI scale for high resolution displays.
 
-This setting scales GUI windows.
-A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
+.. omw-setting::
+   :title: font size
+   :type: int
+   :range: 12 to 18
+   :default: 16
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-This setting can be controlled in the Settings tab of the launcher.
+   Specifies glyph size for in-game fonts.
+   Default bitmap fonts work best at 16px; others may be blurry.
+   trueType fonts do not have this issue.
 
-font size
----------
+.. omw-setting::
+   :title: menu transparency
+   :type: float32
+   :range: 0.0 (transparent) to 1.0 (opaque)
+   :default: 0.84
 
-:Type:		integer
-:Range:		12 to 18
-:Default:	16
+   Controls transparency of GUI windows.
+   Adjustable in game via Menu Transparency slider in the Prefs panel of Options.
 
-Allows to specify glyph size for in-game fonts.
-Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
-TrueType fonts do not have this issue.
+.. omw-setting::
+   :title: tooltip delay
+   :type: float32
+   :range: ≥ 0.0
+   :default: 0.0
 
-This setting can be controlled in the Settings tab of the launcher.
+   Seconds delay before tooltip appears when hovering over an item in GUI mode.
+   Tooltips show context-sensitive info (weight, value, damage, etc.).
+   Adjustable in game with Menu Help Delay slider in Prefs panel.
 
-menu transparency
------------------
+.. omw-setting::
+   :title: keyboard navigation
+   :type: boolean
+   :range: true, false
+   :default: true
 
-:Type:		floating point
-:Range:		0.0 (transparent) to 1.0 (opaque)
-:Default:	0.84
+   Enable or disable keyboard navigation (arrow keys, tab focus, spacebar, Use key).
 
-This setting controls the transparency of the GUI windows.
-This setting can be adjusted in game with the Menu Transparency slider in the Prefs panel of the Options menu.
+.. omw-setting::
+   :title: stretch menu background
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-tooltip delay
--------------
+   Stretch or shrink main menu, splash screens, intro movies, and cut scenes
+   to fill the video resolution, possibly distorting aspect ratio.
+   Bethesda assets are 4:3 ratio; others may differ.
+   If false, assets are centered with black bars filling remainder.
 
-:Type:		floating point
-:Range:		>= 0.0
-:Default:	0.0
+.. omw-setting::
+   :title: controller menus
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-This value determines the number of seconds between when you begin hovering over an item and when its tooltip appears.
-This setting only affects the tooltip delay for objects under the crosshair in GUI mode windows.
+   Menus are now fully navigable with a controller using the DPad, triggers, and
+   face buttons. Most button mappings follow the Xbox version, with modern
+   additions like R3 to toggle item info. All menus can be opened and closed
+   with the controller, though some elements—such as editing settings or viewing
+   certain tooltips—still use the controller’s mouse cursor.
+   A button hint bar appears at the bottom of each menu, with icons that match
+   the connected controller type (Xbox, PlayStation, Switch, or Steam). In the
+   inventory menu, L2/R2 switch between sub-menus (Map, Inventory, Magic, Stats),
+   while L1/R1 adjust filters in inventory and barter screens. R3 toggles
+   tooltips, similar to Oblivion Remastered. Mouse input remains fully supported.
+   If false, the controller works as a GUI mouse.
 
-The tooltip displays context sensitive information on the selected GUI element,
-such as weight, value, damage, armor rating, magical effects, and detailed description.
+.. omw-setting::
+   :title: controller trigger press
+   :type: int
+   :range: 1, 32767
+   :default: 30720
 
-This setting can be adjusted between 0.0 and 1.0 in game
-with the Menu Help Delay slider in the Prefs panel of the Options menu.
+   Sets how far the triggers (L2/R2) must be pulled before controller menus
+   recognize them as a button press. 
+   The default value is 15/16ths depressed.
 
-stretch menu background
------------------------
+.. omw-setting::
+   :title: controller trigger release
+   :type: int
+   :range: 0, 32766
+   :default: 26624
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Sets how far the triggers (L2/R2) must be released before their latch 
+   is reset and it can be pressed again in controller menus. 
+   This value must be less than controller trigger press. 
+   If it is not, it will be clamped to controller trigger press - 1.
+   The default value is 13/16ths depressed.
 
-Stretch or shrink the main menu screen, loading splash screens, introductory movie,
-and cut scenes to fill the specified video resolution, distorting their aspect ratio.
-The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permitted to have other aspect ratios.
-If this setting is false, the assets will be centered in the mentioned 4:3 aspect ratio,
-with black bars filling the remainder of the screen.
+.. omw-setting::
+   :title: controller tooltips
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-This setting can be controlled in the Settings tab of the launcher.
+   When true, you do not need to press R3 to show tooltips when using
+   controller menus.
+   If false, controller menu tooltips are hidden until R3 is pressed.
 
-subtitles
----------
+.. omw-setting::
+   :title: subtitles
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Enable or disable subtitles for NPC dialog and some sound effects.
+   Subtitles appear in a tooltip box at screen lower center.
+   Toggleable in game with Subtitles button in Prefs panel.
 
-Enable or disable subtitles for NPC spoken dialog (and some sound effects).
-Subtitles will appear in a tool tip box in the lower center of the screen.
+.. omw-setting::
+   :title: hit fader
+   :type: boolean
+   :range: true, false
+   :default: true
 
-This setting can be toggled in game with the Subtitles button in the Prefs panel of Options menu.
 
-hit fader
----------
+   Enables or disables the red flash overlay when the character takes damage.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+.. omw-setting::
+   :title: werewolf overlay
+   :type: boolean
+   :range: true, false
+   :default: true
 
-This setting enables or disables the "red flash" overlay that provides a visual clue when the character has taken damage.
 
-If this setting is disabled, the player will "bleed" like NPCs do.
+   Enable or disable the werewolf visual effect in first-person mode.
 
-This setting can only be configured by editing the settings configuration file.
+.. omw-setting::
+   :title: color background owned
+   :type: color
+   :range: [0, 1]
+   :default: 0.15 0.0 0.0 1.0
 
-werewolf overlay
-----------------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   Background color of tooltip and crosshair when hovering over an NPC-owned item.
+   Four floating point values: red, green, blue, alpha (alpha ignored).
+   No effect if "show owned" in Game Settings is false.
 
-Enable or disable the werewolf visual effect in first-person mode.
+.. omw-setting::
+   :title: color crosshair owned
+   :type: color
+   :range: [0, 1]
+   :default: 1.0 0.15 0.15 1.0
 
-This setting can only be configured by editing the settings configuration file.
 
-color background owned
-----------------------
+   Crosshair color when hovering over an NPC-owned item.
+   Four floating point values: red, green, blue, alpha (alpha ignored).
+   No effect if crosshair setting in HUD is false or "show owned" in Game Settings is false.
 
-:Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	0.15 0.0 0.0 1.0 (dark red)
+.. omw-setting::
+   :title: color topic enable
+   :type: boolean
+   :range: true, false
+   :default: false
+   :location: :bdg-success:`Launcher > Settings > Interface`
 
-The following two settings determine the background color of the tool tip and the crosshair
-when hovering over an item owned by an NPC.
-The color definitions are composed of four floating point values between 0.0 and 1.0 inclusive,
-representing the red, green, blue and alpha channels. The alpha value is currently ignored.
-The crosshair color will have no effect if the crosshair setting in the HUD section is disabled.
+   Controls whether dialogue topics in the list are colored by their state.
+   See related "color topic specific" and "color topic exhausted".
 
-This setting can only be configured by editing the settings configuration file.
-This setting has no effect if the show owned setting in the Game Settings Section is false.
+.. omw-setting::
+   :title: color topic specific
+   :type: color
+   :range: [0, 1]
+   :default: 0.45 0.5 0.8 1
 
-color crosshair owned
----------------------
+   Overrides color of dialogue topics with unique actor responses.
+   Four floating point values: red, green, blue, alpha (alpha ignored).
+   Unique if Actor filter matches speaking actor and not read yet.
 
-:Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	1.0 0.15 0.15 1.0 (bright red)
+.. omw-setting::
+   :title: color topic specific over
+   :type: color
+   :range: [0, 1]
+   :default: 0.6 0.6 0.85 1
 
-This setting sets the color of the crosshair when hovering over an item owned by an NPC.
-The value is composed of four floating point values representing the red, green, blue and alpha channels.
-The alpha value is currently ignored.
+   "Over" color for dialogue topics meeting "color topic specific" criteria.
+   Four floating point values; alpha ignored.
+   Active GUI element via keyboard or mouse events.
 
-This setting can only be configured by editing the settings configuration file.
-This setting has no effect if the crosshair setting in the HUD Settings Section is false.
-This setting has no effect if the show owned setting in the Game Settings Section is false.
+.. omw-setting::
+   :title: color topic specific pressed
+   :type: color
+   :range: [0, 1]
+   :default: 0.3 0.35 0.75 1
 
-color topic enable
-------------------
+   "Pressed" color for dialogue topics meeting "color topic specific".
+   Four floating point values; alpha ignored.
+   Active GUI element receiving sustained input.
 
-:Type:      boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: color topic exhausted
+   :type: color
+   :range: [0, 1]
+   :default: 0.3 0.3 0.3 1
 
-This setting controls whether the topics available in the dialogue topic list are coloured according to their state.
-See 'color topic specific' and 'color topic exhausted' for details.
+   Overrides color of dialogue topics exhausted by the player.
+   Four floating point values; alpha ignored.
+   Exhausted if response has been seen.
 
-color topic specific
---------------------
+.. omw-setting::
+   :title: color topic exhausted over
+   :type: color
+   :range: [0, 1]
+   :default: 0.55 0.55 0.55 1
 
-:Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
+   "Over" color for dialogue topics meeting "color topic exhausted".
+   Four floating point values; alpha ignored.
+   Active GUI element via keyboard or mouse.
 
-This setting overrides the colour of dialogue topics that have a response unique to the actors speaking.
-The value is composed of four floating point values representing the red, green, blue and alpha channels.
-The alpha value is currently ignored.
+.. omw-setting::
+   :title: color topic exhausted pressed
+   :type: color
+   :range: [0, 1]
+   :default: 0.45 0.45 0.45 1
 
-A topic response is considered unique if its Actor filter field contains the speaking actor's object ID and hasn't yet been read.
-
-color topic exhausted
----------------------
-
-:Type:		RGBA floating point
-:Range:		0.0 to 1.0
-:Default:	empty
-
-This setting overrides the colour of dialogue topics which have been "exhausted" by the player.
-The value is composed of four floating point values representing the red, green, blue and alpha channels.
-The alpha value is currently ignored.
-
-A topic is considered "exhausted" if the response the player is about to see has already been seen.
+   "Pressed" color for dialogue topics meeting "color topic exhausted".
+   Four floating point values; alpha ignored.
+   Active GUI element receiving sustained input.

@@ -5,7 +5,7 @@ OpenMW is an open-source open-world RPG game engine that supports playing Morrow
 
 OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 
-* Version: 0.49.0
+* Version: 0.52.0
 * License: GPLv3 (see [LICENSE](https://gitlab.com/OpenMW/openmw/-/raw/master/LICENSE) for more information)
 * Website: https://www.openmw.org
 * IRC: #openmw on irc.libera.chat
@@ -20,7 +20,7 @@ Font Licenses:
 Current Status
 --------------
 
-The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/-/issues/?milestone_title=openmw-1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces.
+The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://gitlab.com/OpenMW/openmw/-/issues/?milestone_title=openmw-1.0) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release, however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces.
 
 Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://wiki.openmw.org/index.php?title=Mod_status) wiki page.
 
@@ -45,6 +45,14 @@ Command line options
 
     Syntax: openmw <options>
     Allowed options:
+      --config arg                          additional config directories
+      --replace arg                         settings where the values from the
+                                            current source should replace those
+                                            from lower-priority sources instead of
+                                            being appended
+      --user-data arg                       set user data directory (used for
+                                            saves, screenshots, etc)
+      --resources arg (=resources)          set resources directory
       --help                                print help message
       --version                             print version information and quit
       --data arg (=data)                    set data directories (later directories
@@ -54,16 +62,16 @@ Command line options
       --fallback-archive arg (=fallback-archive)
                                             set fallback BSA archives (later
                                             archives have higher priority)
-      --resources arg (=resources)          set resources directory
       --net-type arg (=0)                   set networking type, eg whether this 
                                             instance of openmw is a server, client,
                                             or both. 0 is mixed, 1 is client-only, 
                                             2 is server-only.
       --start arg                           set initial cell
       --content arg                         content file(s): esm/esp, or
-                                            omwgame/omwaddon
+                                            omwgame/omwaddon/omwscripts
+      --groundcover arg                     groundcover content file(s): esm/esp,
+                                            or omwgame/omwaddon
       --no-sound [=arg(=1)] (=0)            disable all sounds
-      --script-verbose [=arg(=1)] (=0)      verbose script output
       --script-all [=arg(=1)] (=0)          compile all scripts (excluding dialogue
                                             scripts) at startup
       --script-all-dialogue [=arg(=1)] (=0) compile all dialogue scripts at startup
@@ -74,14 +82,10 @@ Command line options
                                             startup
       --script-warn [=arg(=1)] (=1)         handling of warnings when compiling
                                             scripts
-                                            0 - ignore warning
-                                            1 - show warning but consider script as
+                                            0 - ignore warnings
+                                            1 - show warnings but consider script as
                                             correctly compiled anyway
                                             2 - treat warnings as errors
-      --script-blacklist arg                ignore the specified script (if the use
-                                            of the blacklist is enabled)
-      --script-blacklist-use [=arg(=1)] (=1)
-                                            enable script blacklisting
       --load-savegame arg                   load a save game file on game startup
                                             (specify an absolute filename or a
                                             filename relative to the current
@@ -105,7 +109,7 @@ Command line options
                                             win1252 - Western European (Latin)
                                             alphabet, used by default
       --fallback arg                        fallback values
-      --no-grab                             Don't grab mouse cursor
+      --no-grab [=arg(=1)] (=0)             Don't grab mouse cursor
       --export-fonts [=arg(=1)] (=0)        Export Morrowind .fnt fonts to PNG
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override

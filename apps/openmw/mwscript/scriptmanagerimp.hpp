@@ -42,7 +42,6 @@ namespace MWScript
         Compiler::Context& mCompilerContext;
         Compiler::FileParser mParser;
         Interpreter::Interpreter mInterpreter;
-        bool mOpcodesInstalled;
 
         struct CompiledScript
         {
@@ -60,11 +59,9 @@ namespace MWScript
         std::unordered_map<ESM::RefId, CompiledScript> mScripts;
         GlobalScripts mGlobalScripts;
         std::unordered_map<ESM::RefId, Compiler::Locals> mOtherLocals;
-        std::vector<ESM::RefId> mScriptBlacklist;
 
     public:
-        ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode,
-            const std::vector<ESM::RefId>& scriptBlacklist);
+        ScriptManager(const MWWorld::ESMStore& store, Compiler::Context& compilerContext, int warningsMode);
 
         void clear() override;
 

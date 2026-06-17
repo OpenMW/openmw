@@ -35,7 +35,6 @@ namespace MWMechanics
 {
     class Actor;
     class CharacterController;
-    class CreatureStats;
     class SidingCache;
 
     class Actors
@@ -119,7 +118,7 @@ namespace MWMechanics
             std::string_view startKey, std::string_view stopKey, bool forceLoop);
         void enableLuaAnimations(const MWWorld::Ptr& ptr, bool enable);
         void skipAnimation(const MWWorld::Ptr& ptr) const;
-        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) const;
+        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, std::string_view groupName) const;
         bool checkScriptedAnimationPlaying(const MWWorld::Ptr& ptr) const;
         void persistAnimationStates() const;
         void clearAnimationQueue(const MWWorld::Ptr& ptr, bool clearScripted);
@@ -128,7 +127,7 @@ namespace MWMechanics
 
         bool isAnyObjectInRange(const osg::Vec3f& position, float radius) const;
 
-        void cleanupSummonedCreature(CreatureStats& casterStats, int creatureActorId) const;
+        void cleanupSummonedCreature(ESM::RefNum creature) const;
 
         /// Returns the list of actors which are siding with the given actor in fights
         /**ie AiFollow or AiEscort is active and the target is the actor **/
@@ -162,12 +161,9 @@ namespace MWMechanics
         bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
         bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
-        bool playerHasHostiles() const;
-
         int getGreetingTimer(const MWWorld::Ptr& ptr) const;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;
-        bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
     private:
         std::map<ESM::RefId, int> mDeathCount;
@@ -191,7 +187,7 @@ namespace MWMechanics
 
         void killDeadActors();
 
-        void purgeSpellEffects(int casterActorId) const;
+        void purgeSpellEffects(ESM::RefNum creature) const;
 
         void predictAndAvoidCollisions(float duration) const;
 

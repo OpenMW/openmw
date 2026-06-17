@@ -4,7 +4,7 @@
 #include <components/lua/luastate.hpp>
 
 #include "idcollectionbindings.hpp"
-#include "types/types.hpp"
+#include "recordstore.hpp"
 
 namespace sol
 {
@@ -19,8 +19,8 @@ namespace MWLua
 
     sol::table initClassRecordBindings(const Context& context)
     {
-        sol::state_view& lua = context.mLua->sol();
-        sol::table classes(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table classes(lua, sol::create);
         addRecordFunctionBinding<ESM::Class>(classes, context);
 
         auto classT = lua.new_usertype<ESM::Class>("ESM3_Class");

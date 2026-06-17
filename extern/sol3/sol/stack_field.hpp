@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -113,7 +113,17 @@ namespace sol { namespace stack {
 						lua_getglobal(L, &key[0]);
 					}
 					else {
-						lua_getfield(L, tableindex, &key[0]);
+						if constexpr (std::is_same_v<std::decay_t<Key>, const char*>) {
+							// Handle const char* case
+							if (key != nullptr) {
+								lua_getfield(L, tableindex, key);
+							} else {
+								push(L, lua_nil);
+							}
+						} else {
+							// Handle std::string case
+							lua_getfield(L, tableindex, key.c_str());
+						}
 					}
 				}
 				else if constexpr (std::is_same_v<T, meta_function>) {

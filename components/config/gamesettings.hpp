@@ -40,9 +40,8 @@ namespace Config
 
         inline void setValue(const QString& key, const SettingValue& value)
         {
-            mSettings.remove(key);
+            remove(key);
             mSettings.insert(key, value);
-            mUserSettings.remove(key);
             if (isUserSetting(value))
                 mUserSettings.insert(key, value);
         }
@@ -63,31 +62,20 @@ namespace Config
 
         inline void remove(const QString& key)
         {
-            mSettings.remove(key);
+            // simplify to removeIf when Qt5 goes
+            for (auto itr = mSettings.lowerBound(key); itr != mSettings.upperBound(key);)
+            {
+                if (isUserSetting(*itr))
+                    itr = mSettings.erase(itr);
+                else
+                    ++itr;
+            }
             mUserSettings.remove(key);
         }
 
         QList<SettingValue> getDataDirs() const;
 
         QString getResourcesVfs() const;
-
-        inline void removeDataDir(const QString& existingDir)
-        {
-            if (!existingDir.isEmpty())
-            {
-                // non-user settings can't be removed as we can't edit the openmw.cfg they're in
-                mDataDirs.erase(
-                    std::remove_if(mDataDirs.begin(), mDataDirs.end(),
-                        [&](const SettingValue& dir) { return isUserSetting(dir) && dir.value == existingDir; }),
-                    mDataDirs.end());
-            }
-        }
-
-        inline void addDataDir(const SettingValue& dir)
-        {
-            if (!dir.value.isEmpty())
-                mDataDirs.append(dir);
-        }
 
         inline QString getDataLocal() const { return mDataLocal; }
 
@@ -111,6 +99,8 @@ namespace Config
 
         const QString& getUserContext() const { return mContexts.back(); }
         bool isUserSetting(const SettingValue& settingValue) const;
+
+        SettingValue processPathSettingValue(const SettingValue& value);
 
         void clear();
 

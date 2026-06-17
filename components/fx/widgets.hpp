@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_WIDGETS_H
-#define OPENMW_COMPONENTS_FX_WIDGETS_H
+#ifndef OPENMW_COMPONENTS_FX_WIDGETS_HPP
+#define OPENMW_COMPONENTS_FX_WIDGETS_HPP
 
 #include <MyGUI_Button.h>
 #include <MyGUI_Delegate.h>
@@ -10,6 +10,7 @@
 #include <MyGUI_Widget.h>
 
 #include <algorithm>
+#include <format>
 #include <memory>
 #include <string>
 #include <vector>
@@ -17,8 +18,6 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
-
-#include <components/misc/strings/format.hpp>
 
 #include "types.hpp"
 
@@ -28,7 +27,7 @@ namespace Gui
     class AutoSizedButton;
 }
 
-namespace fx
+namespace Fx
 {
     namespace Widgets
     {
@@ -46,7 +45,7 @@ namespace fx
         public:
             virtual ~EditBase() = default;
 
-            void setData(const std::shared_ptr<fx::Types::UniformBase>& uniform, Index index = None)
+            void setData(const std::shared_ptr<Fx::Types::UniformBase>& uniform, Index index = None)
             {
                 mUniform = uniform;
                 mIndex = index;
@@ -57,7 +56,7 @@ namespace fx
             virtual void toDefault() = 0;
 
         protected:
-            std::weak_ptr<fx::Types::UniformBase> mUniform;
+            std::shared_ptr<Fx::Types::UniformBase> mUniform;
             Index mIndex;
         };
 
@@ -88,29 +87,26 @@ namespace fx
             {
                 mValue = value;
                 if constexpr (std::is_floating_point_v<T>)
-                    mValueLabel->setCaption(Misc::StringUtils::format("%.3f", mValue));
+                    mValueLabel->setCaption(std::format("{:.3f}", mValue));
                 else
                     mValueLabel->setCaption(std::to_string(mValue));
 
                 float range = 0.f;
                 float min = 0.f;
 
-                if (auto uniform = mUniform.lock())
+                if constexpr (std::is_fundamental_v<UType>)
                 {
-                    if constexpr (std::is_fundamental_v<UType>)
-                    {
-                        uniform->template setValue<UType>(mValue);
-                        range = uniform->template getMax<UType>() - uniform->template getMin<UType>();
-                        min = uniform->template getMin<UType>();
-                    }
-                    else
-                    {
-                        UType uvalue = uniform->template getValue<UType>();
-                        uvalue[mIndex] = mValue;
-                        uniform->template setValue<UType>(uvalue);
-                        range = uniform->template getMax<UType>()[mIndex] - uniform->template getMin<UType>()[mIndex];
-                        min = uniform->template getMin<UType>()[mIndex];
-                    }
+                    mUniform->template setValue<UType>(mValue);
+                    range = static_cast<float>(mUniform->template getMax<UType>() - mUniform->template getMin<UType>());
+                    min = static_cast<float>(mUniform->template getMin<UType>());
+                }
+                else
+                {
+                    UType uvalue = mUniform->template getValue<UType>();
+                    uvalue[mIndex] = mValue;
+                    mUniform->template setValue<UType>(uvalue);
+                    range = mUniform->template getMax<UType>()[mIndex] - mUniform->template getMin<UType>()[mIndex];
+                    min = mUniform->template getMin<UType>()[mIndex];
                 }
 
                 float fill = (range == 0.f) ? 1.f : (mValue - min) / range;
@@ -119,28 +115,22 @@ namespace fx
 
             void setValueFromUniform() override
             {
-                if (auto uniform = mUniform.lock())
-                {
-                    T value;
+                T value;
 
-                    if constexpr (std::is_fundamental_v<UType>)
-                        value = uniform->template getValue<UType>();
-                    else
-                        value = uniform->template getValue<UType>()[mIndex];
+                if constexpr (std::is_fundamental_v<UType>)
+                    value = mUniform->template getValue<UType>();
+                else
+                    value = mUniform->template getValue<UType>()[mIndex];
 
-                    setValue(value);
-                }
+                setValue(value);
             }
 
             void toDefault() override
             {
-                if (auto uniform = mUniform.lock())
-                {
-                    if constexpr (std::is_fundamental_v<UType>)
-                        setValue(uniform->template getDefault<UType>());
-                    else
-                        setValue(uniform->template getDefault<UType>()[mIndex]);
-                }
+                if constexpr (std::is_fundamental_v<UType>)
+                    setValue(mUniform->template getDefault<UType>());
+                else
+                    setValue(mUniform->template getDefault<UType>()[mIndex]);
             }
 
         private:
@@ -162,42 +152,32 @@ namespace fx
                 mDragger->eventMouseWheel += MyGUI::newDelegate(this, &EditNumber::notifyMouseWheel);
             }
 
-            void notifyMouseWheel(MyGUI::Widget* sender, int rel)
+            void notifyMouseWheel(MyGUI::Widget* /*sender*/, int rel)
             {
-                auto uniform = mUniform.lock();
-
-                if (!uniform)
-                    return;
-
                 if (rel > 0)
-                    increment(uniform->mStep);
+                    increment(static_cast<T>(mUniform->mStep));
                 else
-                    increment(-uniform->mStep);
+                    increment(static_cast<T>(-mUniform->mStep));
             }
 
-            void notifyMouseButtonDragged(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
+            void notifyMouseButtonDragged(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)
             {
                 if (id != MyGUI::MouseButton::Left)
-                    return;
-
-                auto uniform = mUniform.lock();
-
-                if (!uniform)
                     return;
 
                 int delta = left - mLastPointerX;
 
                 // allow finer tuning when shift is pressed
                 constexpr double scaling = 20.0;
-                T step
-                    = MyGUI::InputManager::getInstance().isShiftPressed() ? uniform->mStep / scaling : uniform->mStep;
+                T step = static_cast<T>(
+                    MyGUI::InputManager::getInstance().isShiftPressed() ? mUniform->mStep / scaling : mUniform->mStep);
 
                 if (step == 0)
                 {
                     if constexpr (std::is_integral_v<T>)
                         step = 1;
                     else
-                        step = uniform->mStep;
+                        step = static_cast<T>(mUniform->mStep);
                 }
 
                 if (delta > 0)
@@ -208,7 +188,7 @@ namespace fx
                 mLastPointerX = left;
             }
 
-            void notifyMouseButtonPressed(MyGUI::Widget* sender, int left, int top, MyGUI::MouseButton id)
+            void notifyMouseButtonPressed(MyGUI::Widget* /*sender*/, int left, int top, MyGUI::MouseButton id)
             {
                 if (id != MyGUI::MouseButton::Left)
                     return;
@@ -218,30 +198,20 @@ namespace fx
 
             void increment(T step)
             {
-                auto uniform = mUniform.lock();
-
-                if (!uniform)
-                    return;
-
                 if constexpr (std::is_fundamental_v<UType>)
-                    setValue(std::clamp<T>(uniform->template getValue<UType>() + step,
-                        uniform->template getMin<UType>(), uniform->template getMax<T>()));
+                    setValue(std::clamp<T>(mUniform->template getValue<UType>() + step,
+                        mUniform->template getMin<UType>(), mUniform->template getMax<T>()));
                 else
-                    setValue(std::clamp<T>(uniform->template getValue<UType>()[mIndex] + step,
-                        uniform->template getMin<UType>()[mIndex], uniform->template getMax<UType>()[mIndex]));
+                    setValue(std::clamp<T>(mUniform->template getValue<UType>()[mIndex] + step,
+                        mUniform->template getMin<UType>()[mIndex], mUniform->template getMax<UType>()[mIndex]));
             }
 
             void notifyButtonClicked(MyGUI::Widget* sender)
             {
-                auto uniform = mUniform.lock();
-
-                if (!uniform)
-                    return;
-
                 if (sender == mButtonDecrease)
-                    increment(-uniform->mStep);
+                    increment(static_cast<T>(-mUniform->mStep));
                 else if (sender == mButtonIncrease)
-                    increment(uniform->mStep);
+                    increment(static_cast<T>(mUniform->mStep));
             }
 
             MyGUI::Button* mButtonDecrease{ nullptr };
@@ -275,12 +245,29 @@ namespace fx
             MYGUI_RTTI_DERIVED(EditNumberInt)
         };
 
+        class EditChoice : public EditBase, public MyGUI::Widget
+        {
+            MYGUI_RTTI_DERIVED(EditChoice)
+
+        public:
+            template <class T>
+            void setValue(const T& value);
+            void setValueFromUniform() override;
+            void toDefault() override;
+
+        private:
+            void initialiseOverride() override;
+            void notifyComboBoxChanged(MyGUI::ComboBox* sender, size_t pos);
+
+            MyGUI::ComboBox* mChoices{ nullptr };
+        };
+
         class UniformBase final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED(UniformBase)
 
         public:
-            void init(const std::shared_ptr<fx::Types::UniformBase>& uniform);
+            void init(const std::shared_ptr<Fx::Types::UniformBase>& uniform);
 
             void toDefault();
 

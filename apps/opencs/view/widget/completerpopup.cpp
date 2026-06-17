@@ -22,12 +22,8 @@ int CSVWidget::CompleterPopup::sizeHintForRow(int row) const
 
     ensurePolished();
     QModelIndex index = model()->index(row, modelColumn());
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QStyleOptionViewItem option;
     initViewItemOption(&option);
-#else
-    QStyleOptionViewItem option = viewOptions();
-#endif
-    QAbstractItemDelegate* delegate = itemDelegate(index);
+    QAbstractItemDelegate* delegate = itemDelegateForIndex(index);
     return delegate->sizeHint(option, index).height();
 }

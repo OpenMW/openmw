@@ -6,6 +6,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -14,6 +16,7 @@
 #include "companionitemmodel.hpp"
 #include "countdialog.hpp"
 #include "draganddrop.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "messagebox.hpp"
 #include "sortfilteritemmodel.hpp"
@@ -38,12 +41,14 @@ namespace
 namespace MWGui
 {
 
-    CompanionWindow::CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager)
+    CompanionWindow::CompanionWindow(DragAndDrop& dragAndDrop, ItemTransfer& itemTransfer, MessageBoxManager* manager)
         : WindowBase("openmw_companion_window.layout")
         , mSortModel(nullptr)
         , mModel(nullptr)
         , mSelectedItem(-1)
-        , mDragAndDrop(dragAndDrop)
+        , mUpdateNextFrame(false)
+        , mDragAndDrop(&dragAndDrop)
+        , mItemTransfer(&itemTransfer)
         , mMessageBoxManager(manager)
     {
         getWidget(mCloseButton, "CloseButton");
@@ -58,6 +63,11 @@ namespace MWGui
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
         setCoord(200, 0, 600, 300);
+
+        mControllerButtons.mA = "#{Interface:Take}";
+        mControllerButtons.mB = "#{Interface:Close}";
+        mControllerButtons.mR3 = "#{Interface:Info}";
+        mControllerButtons.mL2 = "#{Interface:Inventory}";
     }
 
     void CompanionWindow::onItemSelected(int index)
@@ -79,7 +89,7 @@ namespace MWGui
         }
 
         MWWorld::Ptr object = item.mBase;
-        int count = item.mCount;
+        size_t count = item.mCount;
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -91,23 +101,33 @@ namespace MWGui
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string name{ object.getClass().getName(object) };
             name += MWGui::ToolTips::getSoulString(object.getCellRef());
-            dialog->openCountDialog(name, "#{sTake}", count);
+            dialog->openCountDialog(name, "#{sTake}", static_cast<int>(count));
             dialog->eventOkClicked.clear();
-            dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
+            if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::transferItem);
+            else
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
         }
+        else if (Settings::gui().mControllerMenus || MyGUI::InputManager::getInstance().isAltPressed())
+            transferItem(nullptr, count);
         else
             dragItem(nullptr, count);
     }
 
-    void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* sender)
     {
-        mSortModel->setNameFilter(_sender->getCaption());
+        mSortModel->setNameFilter(sender->getCaption());
         mItemView->update();
     }
 
-    void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
+    void CompanionWindow::dragItem(MyGUI::Widget* /*sender*/, std::size_t count)
     {
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
+    }
+
+    void CompanionWindow::transferItem(MyGUI::Widget* /*sender*/, std::size_t count)
+    {
+        mItemTransfer->apply(mModel->getItem(mSelectedItem), count, *mItemView);
     }
 
     void CompanionWindow::onBackgroundSelected()
@@ -139,16 +159,22 @@ namespace MWGui
     void CompanionWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
-        updateEncumbranceBar();
+
+        if (mUpdateNextFrame)
+        {
+            updateEncumbranceBar();
+            mItemView->update();
+            mUpdateNextFrame = false;
+        }
     }
 
     void CompanionWindow::updateEncumbranceBar()
     {
         if (mPtr.isEmpty())
             return;
-        float capacity = mPtr.getClass().getCapacity(mPtr);
-        float encumbrance = mPtr.getClass().getEncumbrance(mPtr);
-        mEncumbranceBar->setValue(std::ceil(encumbrance), static_cast<int>(capacity));
+        int capacity = static_cast<int>(mPtr.getClass().getCapacity(mPtr));
+        float encumbrance = std::ceil(mPtr.getClass().getEncumbrance(mPtr));
+        mEncumbranceBar->setValue(static_cast<int>(encumbrance), capacity);
 
         if (mModel && mModel->hasProfit(mPtr))
         {
@@ -158,7 +184,7 @@ namespace MWGui
             mProfitLabel->setCaption({});
     }
 
-    void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
+    void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* /*sender*/)
     {
         if (exit())
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Companion);
@@ -202,4 +228,47 @@ namespace MWGui
         mSortModel = nullptr;
     }
 
+    void CompanionWindow::onInventoryUpdate(const MWWorld::Ptr& ptr)
+    {
+        if (ptr == mPtr)
+            mUpdateNextFrame = true;
+    }
+
+    void CompanionWindow::onOpen()
+    {
+        mItemTransfer->addTarget(*mItemView);
+    }
+
+    void CompanionWindow::onClose()
+    {
+        mItemTransfer->removeTarget(*mItemView);
+    }
+
+    bool CompanionWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            int index = mItemView->getControllerFocus();
+            if (index >= 0 && index < mItemView->getItemCount())
+                onItemSelected(index);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCloseButtonClicked(mCloseButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_RIGHTSTICK || arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN || arg.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT
+            || arg.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT)
+        {
+            mItemView->onControllerButton(arg.button);
+        }
+
+        return true;
+    }
+
+    void CompanionWindow::setActiveControllerWindow(bool active)
+    {
+        mItemView->setActiveControllerWindow(active);
+        WindowBase::setActiveControllerWindow(active);
+    }
 }

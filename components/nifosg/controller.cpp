@@ -5,6 +5,8 @@
 #include <osg/TexMat>
 #include <osg/Texture2D>
 
+#include <osgAnimation/Bone>
+
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
@@ -92,7 +94,7 @@ namespace NifOsg
     {
         if (!keyctrl->mInterpolator.empty())
         {
-            if (keyctrl->mInterpolator->recType == Nif::RC_NiTransformInterpolator)
+            if (keyctrl->mInterpolator->mRecordType == Nif::RC_NiTransformInterpolator)
             {
                 const Nif::NiTransformInterpolator* interp
                     = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
@@ -175,25 +177,48 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
+        auto [translation, rotation, scale] = getCurrentTransformation(nv);
+
+        if (rotation)
+        {
+            node->setRotation(*rotation);
+        }
+        else
+        {
+            // This is necessary to prevent first person animations glitching out due to RotationController
+            node->setRotation(node->mRotationScale);
+        }
+
+        if (translation)
+            node->setTranslation(*translation);
+
+        if (scale)
+            node->setScale(*scale);
+
+        traverse(node, nv);
+    }
+
+    KeyframeController::KfTransform KeyframeController::getCurrentTransformation(osg::NodeVisitor* nv)
+    {
+        KfTransform out;
+
         if (hasInput())
         {
             float time = getInputValue(nv);
 
             if (!mRotations.empty())
-                node->setRotation(mRotations.interpKey(time));
+                out.mRotation = mRotations.interpKey(time);
             else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-                node->setRotation(getXYZRotation(time));
-            else
-                node->setRotation(node->mRotationScale);
+                out.mRotation = getXYZRotation(time);
 
             if (!mTranslations.empty())
-                node->setTranslation(mTranslations.interpKey(time));
+                out.mTranslation = mTranslations.interpKey(time);
 
             if (!mScales.empty())
-                node->setScale(mScales.interpKey(time));
+                out.mScale = mScales.interpKey(time);
         }
 
-        traverse(node, nv);
+        return out;
     }
 
     GeomMorpherController::GeomMorpherController() {}
@@ -223,7 +248,7 @@ namespace NifOsg
 
         for (std::size_t i = 0, n = ctrl->mInterpolators.size(); i < n; ++i)
         {
-            if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->recType == Nif::RC_NiFloatInterpolator)
+            if (!ctrl->mInterpolators[i].empty() && ctrl->mInterpolators[i]->mRecordType == Nif::RC_NiFloatInterpolator)
             {
                 auto interpolator = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolators[i].getPtr());
                 mKeyFrames[i] = FloatInterpolator(interpolator);
@@ -238,7 +263,7 @@ namespace NifOsg
             if (mKeyFrames.size() <= 1)
                 return;
             float input = getInputValue(nv);
-            size_t i = 1;
+            unsigned int i = 1;
             for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin() + 1; it != mKeyFrames.end();
                  ++it, ++i)
             {
@@ -295,11 +320,10 @@ namespace NifOsg
             float value = getInputValue(nv);
 
             // First scale the UV relative to its center, then apply the offset.
-            // U offset is flipped regardless of the graphics library,
-            // while V offset is flipped to account for OpenGL Y axis convention.
+            // U offset is flipped regardless of the graphics library
             osg::Vec3f uvOrigin(0.5f, 0.5f, 0.f);
             osg::Vec3f uvScale(mUScale.interpKey(value), mVScale.interpKey(value), 1.f);
-            osg::Vec3f uvTrans(-mUTrans.interpKey(value), -mVTrans.interpKey(value), 0.f);
+            osg::Vec3f uvTrans(-mUTrans.interpKey(value), mVTrans.interpKey(value), 0.f);
 
             osg::Matrixf mat = osg::Matrixf::translate(uvOrigin);
             mat.preMultScale(uvScale);
@@ -321,7 +345,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
+            if (ctrl->mInterpolator->mRecordType != Nif::RC_NiBoolInterpolator)
                 return;
 
             mInterpolator = { static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()) };
@@ -349,7 +373,8 @@ namespace NifOsg
         if (mData->empty())
             return true;
 
-        auto iter = mData->upper_bound(time);
+        auto iter = std::upper_bound(mData->begin(), mData->end(), time,
+            [](float t, const std::pair<float, bool>& key) { return t < key.first; });
         if (iter != mData->begin())
             --iter;
         return iter->second;
@@ -369,7 +394,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
                 mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -415,7 +440,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
                 mData = FloatInterpolator(static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -457,7 +482,7 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiPoint3Interpolator)
+            if (ctrl->mInterpolator->mRecordType == Nif::RC_NiPoint3Interpolator)
                 mData = Vec3Interpolator(static_cast<const Nif::NiPoint3Interpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
@@ -526,7 +551,7 @@ namespace NifOsg
         , mDelta(ctrl->mDelta)
         , mTextures(textures)
     {
-        if (!ctrl->mInterpolator.empty() && ctrl->mInterpolator->recType == Nif::RC_NiFloatInterpolator)
+        if (!ctrl->mInterpolator.empty() && ctrl->mInterpolator->mRecordType == Nif::RC_NiFloatInterpolator)
             mData = static_cast<const Nif::NiFloatInterpolator*>(ctrl->mInterpolator.getPtr());
     }
 

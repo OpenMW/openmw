@@ -2,7 +2,6 @@
 
 #include "state.hpp"
 
-#include <apps/opencs/model/doc/blacklist.hpp>
 #include <apps/opencs/model/doc/messages.hpp>
 #include <apps/opencs/model/doc/operationholder.hpp>
 #include <apps/opencs/model/doc/runner.hpp>
@@ -129,11 +128,18 @@ void CSMDoc::Document::addOptionalGlobals()
 
 void CSMDoc::Document::addOptionalMagicEffects()
 {
-    for (int i = ESM::MagicEffect::SummonFabricant; i <= ESM::MagicEffect::SummonCreature05; ++i)
+    static const std::array<ESM::RefId, 6> optionalMagicEffects{
+        ESM::MagicEffect::SummonFabricant,
+        ESM::MagicEffect::SummonWolf,
+        ESM::MagicEffect::SummonBear,
+        ESM::MagicEffect::SummonBonewolf,
+        ESM::MagicEffect::SummonCreature04,
+        ESM::MagicEffect::SummonCreature05,
+    };
+    for (const auto effectId : optionalMagicEffects)
     {
         ESM::MagicEffect effect;
-        effect.mIndex = i;
-        effect.mId = ESM::MagicEffect::indexToRefId(i);
+        effect.mId = effectId;
         effect.blank();
 
         addOptionalMagicEffect(effect);
@@ -283,10 +289,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; i < ESM::MagicEffect::Length; ++i)
     {
         ESM::MagicEffect record;
-
-        record.mIndex = i;
         record.mId = ESM::MagicEffect::indexToRefId(i);
-
         record.blank();
 
         getData().getMagicEffects().add(record);
@@ -294,17 +297,16 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files,
-    bool new_, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-    const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
-    const std::vector<std::string>& archives)
+    bool isNew, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
+    const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
     : mSavePath(savePath)
     , mContentFiles(std::move(files))
-    , mNew(new_)
+    , mNew(isNew)
     , mData(encoding, dataPaths, archives, resDir)
     , mTools(*this, encoding)
     , mProjectPath((configuration.getUserDataPath() / "projects") / (savePath.filename().u8string() + u8".project"))
-    , mSavingOperation(*this, mProjectPath, encoding)
-    , mSaving(&mSavingOperation)
+    , mSavingOperation(nullptr)
+    , mSaving(nullptr)
     , mResDir(resDir)
     , mRunner(mProjectPath)
     , mDirty(false)
@@ -339,8 +341,6 @@ CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std
             createBase();
     }
 
-    mBlacklist.add(CSMWorld::UniversalId::Type_Script, blacklistedScripts);
-
     addOptionalGmsts();
     addOptionalGlobals();
     addOptionalMagicEffects();
@@ -352,10 +352,13 @@ CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std
     connect(&mTools, &CSMTools::Tools::done, this, &Document::operationDone2);
     connect(&mTools, &CSMTools::Tools::mergeDone, this, &Document::mergeDone);
 
-    connect(&mSaving, &OperationHolder::progress, this, qOverload<int, int, int>(&Document::progress));
-    connect(&mSaving, &OperationHolder::done, this, &Document::operationDone2);
+    mSavingOperation = new Saving(*this, mProjectPath, encoding);
+    mSaving = new OperationHolder(this, mSavingOperation);
 
-    connect(&mSaving, &OperationHolder::reportMessage, this, &Document::reportMessage);
+    connect(mSaving, &OperationHolder::progress, this, qOverload<int, int, int>(&Document::progress));
+    connect(mSaving, &OperationHolder::done, this, &Document::operationDone2);
+
+    connect(mSaving, &OperationHolder::reportMessage, this, &Document::reportMessage);
 
     connect(&mRunner, &Runner::runStateChanged, this, &Document::runStateChanged);
 }
@@ -372,7 +375,7 @@ int CSMDoc::Document::getState() const
     if (!mUndoStack.isClean() || mDirty)
         state |= State_Modified;
 
-    if (mSaving.isRunning())
+    if (mSaving->isRunning())
         state |= State_Locked | State_Saving | State_Operation;
 
     if (mRunner.isRunning())
@@ -411,10 +414,10 @@ bool CSMDoc::Document::isNew() const
 
 void CSMDoc::Document::save()
 {
-    if (mSaving.isRunning())
+    if (mSaving->isRunning())
         throw std::logic_error("Failed to initiate save, because a save operation is already running.");
 
-    mSaving.start();
+    mSaving->start();
 
     emit stateChanged(getState(), this);
 }
@@ -446,7 +449,7 @@ void CSMDoc::Document::runMerge(std::unique_ptr<CSMDoc::Document> target)
 void CSMDoc::Document::abortOperation(int type)
 {
     if (type == State_Saving)
-        mSaving.abort();
+        mSaving->abort();
     else
         mTools.abortOperation(type);
 }
@@ -485,11 +488,6 @@ CSMTools::ReportModel* CSMDoc::Document::getReport(const CSMWorld::UniversalId& 
     return mTools.getReport(id);
 }
 
-bool CSMDoc::Document::isBlacklisted(const CSMWorld::UniversalId& id) const
-{
-    return mBlacklist.isBlacklisted(id);
-}
-
 void CSMDoc::Document::startRunning(const std::string& profile, const std::string& startupInstruction)
 {
     std::vector<std::filesystem::path> contentFiles;
@@ -509,7 +507,7 @@ void CSMDoc::Document::startRunning(const std::string& profile, const std::strin
         // need to save first
         mRunner.start(true);
 
-        new SaveWatcher(&mRunner, &mSaving); // no, that is not a memory leak. Qt is weird.
+        new SaveWatcher(&mRunner, mSaving); // no, that is not a memory leak. Qt is weird.
 
         if (!(state & State_Saving))
             save();

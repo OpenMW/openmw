@@ -178,15 +178,10 @@ namespace MWPhysics
         // Now that we have the effective movement vector, apply wind forces to it
         if (worldData.mIsInStorm && velocity.length() > 0)
         {
-            osg::Vec3f stormDirection = worldData.mStormDirection;
-            float angleDegrees = osg::RadiansToDegrees(
-                std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
-            static const float fStromWalkMult = MWBase::Environment::get()
-                                                    .getESMStore()
-                                                    ->get<ESM::GameSetting>()
-                                                    .find("fStromWalkMult")
-                                                    ->mValue.getFloat();
-            velocity *= 1.f - (fStromWalkMult * (angleDegrees / 180.f));
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+            const float fStromWalkMult = store.get<ESM::GameSetting>().find("fStromWalkMult")->mValue.getFloat();
+            const float angleCos = worldData.mStormDirection * velocity / velocity.length();
+            velocity *= 1.f + fStromWalkMult * angleCos;
         }
 
         Stepper stepper(collisionWorld, actor.mCollisionObject);
@@ -467,12 +462,11 @@ namespace MWPhysics
         resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
 
         const btQuaternion btrot = btQuaternion::getIdentity();
-        btTransform from_(btrot, btFrom);
-        btTransform to_(btrot, btTo);
 
         const btCollisionShape* shape = projectile.mCollisionObject->getCollisionShape();
         assert(shape->isConvex());
-        collisionWorld->convexSweepTest(static_cast<const btConvexShape*>(shape), from_, to_, resultCallback);
+        collisionWorld->convexSweepTest(static_cast<const btConvexShape*>(shape), btTransform(btrot, btFrom),
+            btTransform(btrot, btTo), resultCallback);
 
         projectile.mPosition
             = Misc::Convert::toOsg(projectile.mProjectile->isActive() ? btTo : resultCallback.m_hitPointWorld);

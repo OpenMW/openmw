@@ -75,7 +75,7 @@ namespace CSVRender
         QString text("Pathgrid: ");
         text += mPathgrid->getId().c_str();
         text += " (";
-        text += QString::number(SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0)));
+        text += QString::number(SceneUtil::getPathgridNode(hit.index0));
         text += ")";
 
         return text;
@@ -97,10 +97,10 @@ namespace CSVRender
         , mDragGeometry(nullptr)
         , mTag(new PathgridTag(this))
     {
-        const float CoordScalar = ESM::Land::REAL_SIZE;
+        const float coordScalar = ESM::Land::REAL_SIZE;
 
         mBaseNode = new osg::PositionAttitudeTransform();
-        mBaseNode->setPosition(osg::Vec3f(mCoords.getX() * CoordScalar, mCoords.getY() * CoordScalar, 0.f));
+        mBaseNode->setPosition(osg::Vec3f(mCoords.getX() * coordScalar, mCoords.getY() * coordScalar, 0.f));
         mBaseNode->setUserData(mTag);
         mBaseNode->setUpdateCallback(new PathgridNodeCallback());
         mBaseNode->setNodeMask(Mask_Pathgrid);
@@ -306,15 +306,17 @@ namespace CSVRender
                 commands.push(new CSMWorld::RevertCommand(*model, idString));
 
                 int parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridPoints);
-                for (int row = source->mPoints.size() - 1; row >= 0; --row)
+                for (size_t row = source->mPoints.size(); row > 0; --row)
                 {
-                    commands.push(new CSMWorld::DeleteNestedCommand(*model, idString, row, parentColumn));
+                    commands.push(
+                        new CSMWorld::DeleteNestedCommand(*model, idString, static_cast<int>(row - 1), parentColumn));
                 }
 
                 parentColumn = mPathgridCollection.findColumnIndex(CSMWorld::Columns::ColumnId_PathgridEdges);
-                for (int row = source->mEdges.size() - 1; row >= 0; --row)
+                for (size_t row = source->mEdges.size(); row > 0; --row)
                 {
-                    commands.push(new CSMWorld::DeleteNestedCommand(*model, idString, row, parentColumn));
+                    commands.push(
+                        new CSMWorld::DeleteNestedCommand(*model, idString, static_cast<int>(row - 1), parentColumn));
                 }
             }
         }
@@ -420,8 +422,8 @@ namespace CSVRender
 
             for (size_t edge = 0; edge < source->mEdges.size(); ++edge)
             {
-                int adjustment0 = 0;
-                int adjustment1 = 0;
+                size_t adjustment0 = 0;
+                size_t adjustment1 = 0;
 
                 // Determine necessary adjustment
                 for (const auto point : mSelected)
@@ -436,24 +438,24 @@ namespace CSVRender
                     }
 
                     if (source->mEdges[edge].mV0 > point)
-                        --adjustment0;
+                        ++adjustment0;
 
                     if (source->mEdges[edge].mV1 > point)
-                        --adjustment1;
+                        ++adjustment1;
                 }
 
                 if (adjustment0 != 0)
                 {
-                    int adjustedEdge = source->mEdges[edge].mV0 + adjustment0;
-                    commands.push(
-                        new CSMWorld::ModifyCommand(*model, model->index(edge, edge0Column, parent), adjustedEdge));
+                    int adjustedEdge = static_cast<int>(source->mEdges[edge].mV0 - adjustment0);
+                    commands.push(new CSMWorld::ModifyCommand(
+                        *model, model->index(static_cast<int>(edge), edge0Column, parent), adjustedEdge));
                 }
 
                 if (adjustment1 != 0)
                 {
-                    int adjustedEdge = source->mEdges[edge].mV1 + adjustment1;
-                    commands.push(
-                        new CSMWorld::ModifyCommand(*model, model->index(edge, edge1Column, parent), adjustedEdge));
+                    int adjustedEdge = static_cast<int>(source->mEdges[edge].mV1 - adjustment1);
+                    commands.push(new CSMWorld::ModifyCommand(
+                        *model, model->index(static_cast<int>(edge), edge1Column, parent), adjustedEdge));
                 }
             }
 
@@ -635,7 +637,6 @@ namespace CSVRender
         mDragGeometry->setVertexArray(vertices);
         mDragGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
         mDragGeometry->addPrimitiveSet(indices);
-        mDragGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
         mPathgridGroup->addChild(mDragGeometry);
     }
@@ -698,12 +699,12 @@ namespace CSVRender
 
     int Pathgrid::clampToCell(int v)
     {
-        const int CellExtent = ESM::Land::REAL_SIZE;
+        const int cellExtent = ESM::Land::REAL_SIZE;
 
         if (mInterior)
             return v;
-        else if (v > CellExtent)
-            return CellExtent;
+        else if (v > cellExtent)
+            return cellExtent;
         else if (v < 0)
             return 0;
         else

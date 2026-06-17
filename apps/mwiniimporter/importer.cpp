@@ -9,7 +9,22 @@
 #include <fstream>
 #include <iostream>
 
-namespace sfs = std::filesystem;
+namespace
+{
+    // from configfileparser.cpp
+    std::string trim_ws(const std::string& s)
+    {
+        std::string::size_type n, n2;
+        n = s.find_first_not_of(" \t\r\n");
+        if (n == std::string::npos)
+            return std::string();
+        else
+        {
+            n2 = s.find_last_not_of(" \t\r\n");
+            return s.substr(n, n2 - n + 1);
+        }
+    }
+}
 
 MwIniImporter::MwIniImporter()
     : mVerbose(false)
@@ -311,10 +326,10 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
             continue;
         }
 
-        int comment_pos = static_cast<int>(utf8.find(';'));
-        if (comment_pos > 0)
+        const std::string::size_type commentPos = utf8.find(';');
+        if (commentPos != std::string::npos)
         {
-            utf8 = utf8.substr(0, comment_pos);
+            utf8 = utf8.substr(0, commentPos);
         }
 
         int pos = static_cast<int>(utf8.find('='));
@@ -336,7 +351,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::filesystem::pat
         if (it == map.end())
             it = map.emplace_hint(it, std::move(key), std::vector<std::string>());
 
-        it->second.push_back(std::string(value));
+        it->second.emplace_back(value);
     }
 
     return map;
@@ -352,12 +367,10 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
     std::string line;
     while (std::getline(file, line))
     {
-
-        // we cant say comment by only looking at first char anymore
-        int comment_pos = static_cast<int>(line.find('#'));
-        if (comment_pos > 0)
+        // ignore comments - keep in sync with configfileparser.cpp
+        if (line.find('#') == line.find_first_not_of(" \t\r\n"))
         {
-            line = line.substr(0, comment_pos);
+            continue;
         }
 
         if (line.empty())
@@ -373,12 +386,14 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const std::filesystem::pat
 
         std::string key(line.substr(0, pos));
         std::string value(line.substr(pos + 1));
+        key = trim_ws(key);
+        value = trim_ws(value);
 
         if (map.find(key) == map.end())
         {
             map.insert(std::make_pair(key, std::vector<std::string>()));
         }
-        map[key].push_back(value);
+        map[key].push_back(std::move(value));
     }
 
     return map;

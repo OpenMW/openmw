@@ -12,6 +12,7 @@
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
+#include <MyGUI_LayerManager.h>
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_UString.h>
 
@@ -83,6 +84,7 @@
 #include "confirmationdialog.hpp"
 #include "console.hpp"
 #include "container.hpp"
+#include "controllerbuttonsoverlay.hpp"
 #include "controllers.hpp"
 #include "countdialog.hpp"
 #include "cursor.hpp"
@@ -91,8 +93,10 @@
 #include "enchantingdialog.hpp"
 #include "exposedwindow.hpp"
 #include "hud.hpp"
+#include "inventorytabsoverlay.hpp"
 #include "inventorywindow.hpp"
 #include "itemchargeview.hpp"
+#include "itemtransfer.hpp"
 #include "itemview.hpp"
 #include "itemwidget.hpp"
 #include "jailscreen.hpp"
@@ -146,7 +150,7 @@ namespace MWGui
     WindowManager::WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& logpath,
         bool consoleOnlyScripts, Translation::Storage& translationDataStorage, ToUTF8::FromType encoding,
-        const std::string& versionDescription, bool useShaders, Files::ConfigurationManager& cfgMgr)
+        bool exportFonts, const std::string& versionDescription, Files::ConfigurationManager& cfgMgr)
         : mOldUpdateMask(0)
         , mOldCullMask(0)
         , mStore(nullptr)
@@ -181,6 +185,8 @@ namespace MWGui
         , mPostProcessorHud(nullptr)
         , mJailScreen(nullptr)
         , mContainerWindow(nullptr)
+        , mControllerButtonsOverlay(nullptr)
+        , mInventoryTabsOverlay(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
         , mHudEnabled(true)
@@ -204,8 +210,9 @@ namespace MWGui
         SDL_GL_GetDrawableSize(window, &dw, &dh);
 
         mScalingFactor = Settings::gui().mScalingFactor * (dw / w);
-        mGuiPlatform = std::make_unique<osgMyGUI::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
-            resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
+        constexpr VFS::Path::NormalizedView resourcePath("mygui");
+        mGuiPlatform = std::make_unique<MyGUIPlatform::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
+            resourceSystem->getVFS(), mScalingFactor, resourcePath, logpath / "MyGUI.log");
 
         mGui = std::make_unique<MyGUI::Gui>();
         mGui->initialise({});
@@ -215,7 +222,8 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), mScalingFactor);
+        mFontLoader
+            = std::make_unique<Gui::FontLoader>(encoding, resourceSystem->getVFS(), mScalingFactor, exportFonts);
 
         // Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -227,8 +235,8 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Window>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
-        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<MyGUIPlatform::AdditiveLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<MyGUIPlatform::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents();
         PostProcessorHud::registerMyGUIComponents();
         ItemView::registerComponents();
@@ -296,8 +304,7 @@ namespace MWGui
         mVideoWrapper = std::make_unique<SDLUtil::VideoWrapper>(window, viewer);
         mVideoWrapper->setGammaContrast(Settings::video().mGamma, Settings::video().mContrast);
 
-        if (useShaders)
-            mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
+        mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
 
         mStatsWatcher = std::make_unique<StatsWatcher>();
     }
@@ -311,6 +318,7 @@ namespace MWGui
         mTextColours.loadColours();
 
         mDragAndDrop = std::make_unique<DragAndDrop>();
+        mItemTransfer = std::make_unique<ItemTransfer>(*this);
 
         auto recharge = std::make_unique<Recharge>();
         mGuiModeStates[GM_Recharge] = GuiModeState(recharge.get());
@@ -333,7 +341,7 @@ namespace MWGui
         trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
         auto inventoryWindow = std::make_unique<InventoryWindow>(
-            mDragAndDrop.get(), mViewer->getSceneData()->asGroup(), mResourceSystem);
+            *mDragAndDrop, *mItemTransfer, mViewer->getSceneData()->asGroup(), mResourceSystem);
         mInventoryWindow = inventoryWindow.get();
         mWindows.push_back(std::move(inventoryWindow));
 
@@ -380,7 +388,7 @@ namespace MWGui
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
-        auto containerWindow = std::make_unique<ContainerWindow>(mDragAndDrop.get());
+        auto containerWindow = std::make_unique<ContainerWindow>(*mDragAndDrop, *mItemTransfer);
         mContainerWindow = containerWindow.get();
         mWindows.push_back(std::move(containerWindow));
         trackWindow(mContainerWindow, makeContainerWindowSettingValues());
@@ -406,7 +414,7 @@ namespace MWGui
         mCountDialog = countDialog.get();
         mWindows.push_back(std::move(countDialog));
 
-        auto settingsWindow = std::make_unique<SettingsWindow>();
+        auto settingsWindow = std::make_unique<SettingsWindow>(mCfgMgr);
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
         trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
@@ -456,7 +464,8 @@ namespace MWGui
 
         mSoulgemDialog = std::make_unique<SoulgemDialog>(mMessageBoxManager.get());
 
-        auto companionWindow = std::make_unique<CompanionWindow>(mDragAndDrop.get(), mMessageBoxManager.get());
+        auto companionWindow
+            = std::make_unique<CompanionWindow>(*mDragAndDrop, *mItemTransfer, mMessageBoxManager.get());
         trackWindow(companionWindow.get(), makeCompanionWindowSettingValues());
         mGuiModeStates[GM_Companion] = GuiModeState({ mInventoryWindow, companionWindow.get() });
         mWindows.push_back(std::move(companionWindow));
@@ -484,7 +493,7 @@ namespace MWGui
         if (!mResourceSystem->getVFS()->exists(hitFaderTexture))
         {
             hitFaderTexture = "textures\\player_hit_01.dds";
-            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+            hitFaderCoord = MyGUI::FloatCoord(0.2f, 0.25f, 0.6f, 0.5f);
         }
         auto hitFader = std::make_unique<ScreenFader>(hitFaderTexture, hitFaderLayout, hitFaderCoord);
         mHitFader = hitFader.get();
@@ -499,10 +508,21 @@ namespace MWGui
         mWindows.push_back(std::move(debugWindow));
         trackWindow(mDebugWindow, makeDebugWindowSettingValues());
 
-        auto postProcessorHud = std::make_unique<PostProcessorHud>();
+        auto postProcessorHud = std::make_unique<PostProcessorHud>(mCfgMgr);
         mPostProcessorHud = postProcessorHud.get();
         mWindows.push_back(std::move(postProcessorHud));
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
+
+        auto controllerButtonsOverlay = std::make_unique<ControllerButtonsOverlay>();
+        mControllerButtonsOverlay = controllerButtonsOverlay.get();
+        mWindows.push_back(std::move(controllerButtonsOverlay));
+
+        auto inventoryTabsOverlay = std::make_unique<InventoryTabsOverlay>();
+        mInventoryTabsOverlay = inventoryTabsOverlay.get();
+        mWindows.push_back(std::move(inventoryTabsOverlay));
+
+        mControllerTooltipEnabled = Settings::gui().mControllerTooltips;
+        mActiveControllerWindows[GM_Inventory] = 1; // Start on Inventory page
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
             {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
@@ -661,6 +681,14 @@ namespace MWGui
                 && !(mForceHidden & GW_Inventory) && (mAllowed & GW_Inventory));
             mSpellWindow->setVisible(
                 mSpellWindow->pinned() && !isConsoleMode() && !(mForceHidden & GW_Magic) && (mAllowed & GW_Magic));
+
+            if (Settings::gui().mControllerMenus)
+            {
+                if (mControllerButtonsOverlay)
+                    mControllerButtonsOverlay->setVisible(false);
+                if (mInventoryTabsOverlay)
+                    mInventoryTabsOverlay->setVisible(false);
+            }
             return;
         }
         else if (getMode() != GM_Inventory)
@@ -689,6 +717,8 @@ namespace MWGui
             mSpellWindow->setVisible(eff & GW_Magic);
             mStatsWindow->setVisible(eff & GW_Stats);
         }
+
+        updateControllerButtonsOverlay();
 
         switch (mode)
         {
@@ -719,6 +749,7 @@ namespace MWGui
             return;
         dialog->setVisible(false);
         mGarbageDialogs.push_back(std::move(dialog));
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::exitCurrentGuiMode()
@@ -728,6 +759,9 @@ namespace MWGui
             mDragAndDrop->finish();
             return;
         }
+
+        if (mGuiModes.empty())
+            return;
 
         GuiModeState& state = mGuiModeStates[mGuiModes.back()];
         for (const auto& window : state.mWindows)
@@ -757,8 +791,8 @@ namespace MWGui
             while (mMessageBoxManager->readPressedButton(false) == -1
                 && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                const double dt
-                    = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+                const float dt
+                    = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                           .count();
 
                 mKeyboardNavigation->onFrame();
@@ -818,14 +852,14 @@ namespace MWGui
         return mMessageBoxManager->readPressedButton();
     }
 
-    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view default_)
+    std::string_view WindowManager::getGameSettingString(std::string_view id, std::string_view defaultValue)
     {
         const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType() == ESM::VT_String)
             return setting->mValue.getString();
 
-        return default_;
+        return defaultValue;
     }
 
     void WindowManager::updateMap()
@@ -853,6 +887,109 @@ namespace MWGui
         mMap->setPlayerPos(x, y, u, v);
         mHud->setPlayerDir(playerdirection.x(), playerdirection.y());
         mHud->setPlayerPos(x, y, u, v);
+    }
+
+    WindowBase* WindowManager::getActiveControllerWindow()
+    {
+        if (!mCurrentModals.empty())
+            return mCurrentModals.back();
+
+        if (mWindows.empty())
+            return nullptr;
+
+        if (isSettingsWindowVisible())
+            return mSettingsWindow;
+
+        if (!mGuiModes.empty())
+        {
+            GuiMode mode = mGuiModes.back();
+            GuiModeState& state = mGuiModeStates[mode];
+            if (state.mWindows.empty())
+                return nullptr;
+
+            size_t activeIndex = std::clamp<size_t>(mActiveControllerWindows[mode], 0, state.mWindows.size() - 1);
+
+            // If the active window is no longer visible, find the next visible window.
+            if (!state.mWindows[activeIndex]->isVisible())
+                cycleActiveControllerWindow(true);
+
+            return state.mWindows[activeIndex];
+        }
+
+        return nullptr;
+    }
+
+    void WindowManager::cycleActiveControllerWindow(bool next)
+    {
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
+            return;
+
+        GuiMode mode = mGuiModes.back();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
+
+        size_t activeIndex = 0;
+        if (winCount > 1)
+        {
+            // Find next/previous visible window
+            activeIndex = mActiveControllerWindows[mode];
+            int delta = next ? 1 : -1;
+
+            for (size_t i = 0; i < winCount; ++i)
+            {
+                activeIndex = wrap(activeIndex, winCount, delta);
+                if (mGuiModeStates[mode].mWindows[activeIndex]->isVisible())
+                    break;
+            }
+        }
+
+        if (mActiveControllerWindows[mode] != activeIndex)
+            setActiveControllerWindow(mode, activeIndex);
+    }
+
+    void WindowManager::reapplyActiveControllerWindow()
+    {
+        if (!Settings::gui().mControllerMenus || mGuiModes.empty())
+            return;
+
+        const GuiMode mode = mGuiModes.back();
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
+
+        for (size_t i = 0; i < winCount; i++)
+        {
+            // Set active window last so inactive windows don't stomp on changes it makes, e.g. to tooltips.
+            if (i != mActiveControllerWindows[mode])
+                mGuiModeStates[mode].mWindows[i]->setActiveControllerWindow(false);
+        }
+        if (winCount > 0)
+            mGuiModeStates[mode].mWindows[mActiveControllerWindows[mode]]->setActiveControllerWindow(true);
+    }
+
+    void WindowManager::setActiveControllerWindow(GuiMode mode, size_t activeIndex)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        size_t winCount = mGuiModeStates[mode].mWindows.size();
+        if (winCount == 0)
+            return;
+
+        activeIndex = std::clamp<size_t>(activeIndex, 0, winCount - 1);
+        mActiveControllerWindows[mode] = activeIndex;
+
+        reapplyActiveControllerWindow();
+
+        MWBase::Environment::get().getInputManager()->setGamepadGuiCursorEnabled(
+            mGuiModeStates[mode].mWindows[activeIndex]->isGamepadCursorAllowed());
+
+        WindowBase* activeWindow = mGuiModeStates[mode].mWindows[activeIndex];
+        if (activeWindow->isVisible())
+            MyGUI::LayerManager::getInstance().upLayerItem(activeWindow->mMainWidget);
+
+        updateControllerButtonsOverlay();
+        setCursorActive(false);
+
+        if (winCount > 1)
+            playSound(ESM::RefId::stringRefId("Menu Size"));
     }
 
     void WindowManager::update(float frameDuration)
@@ -917,6 +1054,12 @@ namespace MWGui
 
         if (isSettingsWindowVisible())
             mSettingsWindow->onFrame(frameDuration);
+
+        if (mControllerButtonsOverlay && mControllerButtonsOverlay->isVisible())
+            mControllerButtonsOverlay->onFrame(frameDuration);
+
+        if (mInventoryTabsOverlay && mInventoryTabsOverlay->isVisible())
+            mInventoryTabsOverlay->onFrame(frameDuration);
 
         if (!gameRunning)
             return;
@@ -1038,9 +1181,9 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
+    void WindowManager::setFocusObjectScreenCoords(float x, float y)
     {
-        mToolTips->setFocusObjectScreenCoords(min_x, min_y, max_x, max_y);
+        mToolTips->setFocusObjectScreenCoords(x, y);
     }
 
     bool WindowManager::toggleFullHelp()
@@ -1085,44 +1228,47 @@ namespace MWGui
         mCursorActive = active;
     }
 
-    void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
+    void WindowManager::onRetrieveTag(const MyGUI::UString& tag, MyGUI::UString& result)
     {
-        std::string_view tag = _tag;
+        std::string_view tagView = tag;
 
-        std::string_view MyGuiPrefix = "setting=";
+        constexpr std::string_view myGuiPrefix = "setting=";
 
-        std::string_view tokenToFind = "sCell=";
+        constexpr std::string_view tokenToFind = "sCell=";
 
-        if (tag.starts_with(MyGuiPrefix))
+        if (tagView.starts_with(myGuiPrefix))
         {
-            tag = tag.substr(MyGuiPrefix.length());
-            size_t comma_pos = tag.find(',');
-            std::string_view settingSection = tag.substr(0, comma_pos);
-            std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
+            tagView = tagView.substr(myGuiPrefix.length());
+            const size_t commaPos = tagView.find(',');
+            if (commaPos == std::string_view::npos)
+                throw std::runtime_error("Invalid setting tag (expected comma): " + std::string(tagView));
 
-            _result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
+            std::string_view settingSection = tagView.substr(0, commaPos);
+            std::string_view settingTag = tagView.substr(commaPos + 1, tagView.length());
+
+            result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
         }
-        else if (tag.starts_with(tokenToFind))
+        else if (tagView.starts_with(tokenToFind))
         {
-            std::string_view cellName = mTranslationDataStorage.translateCellName(tag.substr(tokenToFind.length()));
-            _result.assign(cellName.data(), cellName.size());
-            _result = MyGUI::TextIterator::toTagsString(_result);
+            std::string_view cellName = mTranslationDataStorage.translateCellName(tagView.substr(tokenToFind.length()));
+            result.assign(cellName.data(), cellName.size());
+            result = MyGUI::TextIterator::toTagsString(result);
         }
-        else if (Gui::replaceTag(tag, _result))
+        else if (Gui::replaceTag(tagView, result))
         {
             return;
         }
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(tag, split, ":");
+            Misc::StringUtils::split(tagView, split, ":");
 
-            l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
+            L10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
             // If a key has a "Context:KeyName" format, use YAML to translate data
             if (split.size() == 2)
             {
-                _result = l10nManager.getContext(split[0])->formatMessage(split[1], {}, {});
+                result = l10nManager.getContext(split[0])->formatMessage(split[1], {}, {});
                 return;
             }
 
@@ -1130,16 +1276,16 @@ namespace MWGui
             if (!mStore)
             {
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '"
-                                  << tag << "'";
-                _result.assign(tag.data(), tag.size());
+                                  << tagView << "'";
+                result.assign(tagView.data(), tagView.size());
                 return;
             }
-            const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(tag);
+            const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(tagView);
 
             if (setting && setting->mValue.getType() == ESM::VT_String)
-                _result = setting->mValue.getString();
+                result = setting->mValue.getString();
             else
-                _result.assign(tag.data(), tag.size());
+                result.assign(tagView.data(), tagView.size());
         }
     }
 
@@ -1208,10 +1354,15 @@ namespace MWGui
         for (const auto& window : mWindows)
             window->onResChange(x, y);
 
+        // Re-apply any controller-specific window changes.
+        reapplyActiveControllerWindow();
+
+        MWBase::Environment::get().getLuaManager()->viewportResized(x, y);
+
         // TODO: check if any windows are now off-screen and move them back if so
     }
 
-    bool WindowManager::isWindowVisible()
+    bool WindowManager::isWindowVisible() const
     {
         return mWindowVisible;
     }
@@ -1286,6 +1437,22 @@ namespace MWGui
 
         updateVisible();
         MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mode == GM_Container)
+            {
+                // Ensure controller focus is on container when entering container mode.
+                setActiveControllerWindow(mode, 0);
+            }
+            else
+            {
+                // Activate first visible window. This needs to be called after updateVisible.
+                if (mActiveControllerWindows[mode] != 0)
+                    mActiveControllerWindows[mode] = mActiveControllerWindows[mode] - 1;
+                cycleActiveControllerWindow(true);
+            }
+        }
     }
 
     void WindowManager::setCullMask(uint32_t mask)
@@ -1303,7 +1470,7 @@ namespace MWGui
         return mViewer->getCamera()->getCullMask();
     }
 
-    void WindowManager::popGuiMode()
+    void WindowManager::popGuiMode(bool forceExit)
     {
         if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -1313,10 +1480,19 @@ namespace MWGui
         if (!mGuiModes.empty())
         {
             const GuiMode mode = mGuiModes.back();
+            if (forceExit)
+            {
+                GuiModeState& state = mGuiModeStates[mode];
+                for (const auto& window : state.mWindows)
+                    window->exit();
+            }
             mKeyboardNavigation->saveFocus(mode);
-            mGuiModes.pop_back();
-            mGuiModeStates[mode].update(false);
-            MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+            if (containsMode(mode))
+            {
+                mGuiModes.pop_back();
+                mGuiModeStates[mode].update(false);
+                MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+            }
         }
 
         if (!mGuiModes.empty())
@@ -1331,6 +1507,18 @@ namespace MWGui
         // To make sure that console window get focus again
         if (mConsole && mConsole->isVisible())
             mConsole->onOpen();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            if (mGuiModes.empty())
+            {
+                setControllerTooltipVisible(false);
+                // When all windows are hidden, reset tooltip visibility to user's preference.
+                mControllerTooltipEnabled = Settings::gui().mControllerTooltips;
+            }
+            else
+                reapplyActiveControllerWindow();
+        }
     }
 
     void WindowManager::removeGuiMode(GuiMode mode)
@@ -1456,6 +1644,10 @@ namespace MWGui
         mConsole->executeFile(path);
     }
 
+    std::vector<MWGui::WindowBase*> WindowManager::getGuiModeWindows(GuiMode mode)
+    {
+        return mGuiModeStates[mode].mWindows;
+    }
     MWGui::InventoryWindow* WindowManager::getInventoryWindow()
     {
         return mInventoryWindow;
@@ -1467,6 +1659,10 @@ namespace MWGui
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog()
     {
         return mConfirmationDialog;
+    }
+    MWGui::HUD* WindowManager::getHud()
+    {
+        return mHud;
     }
     MWGui::TradeWindow* WindowManager::getTradeWindow()
     {
@@ -1678,10 +1874,26 @@ namespace MWGui
 
     void WindowManager::onKeyFocusChanged(MyGUI::Widget* widget)
     {
-        bool isEditBox = widget && widget->castType<MyGUI::EditBox>(false);
-        LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
-        bool capturesInput = luaWidget ? luaWidget->isTextInput() : isEditBox;
-        if (widget && capturesInput)
+        bool capturesInput = false;
+        if (widget)
+        {
+            LuaUi::WidgetExtension* luaWidget = dynamic_cast<LuaUi::WidgetExtension*>(widget);
+            if (luaWidget)
+                capturesInput = luaWidget->isTextInput();
+            else
+                capturesInput = widget->castType<MyGUI::EditBox>(false);
+        }
+
+        // The SDL_IsTextInputActive() check helps to avoid duplicate calls in SDL2.
+        // This may no longer be required when switching to SDL3 where the function
+        // has also been renamed to SDL_TextInputActive() and returns bool instead
+        // of SDL_bool.
+
+        const bool inputActive = SDL_IsTextInputActive() == SDL_TRUE;
+        if (capturesInput == inputActive)
+            return;
+
+        if (capturesInput)
             SDL_StartTextInput();
         else
             SDL_StopTextInput();
@@ -1740,10 +1952,10 @@ namespace MWGui
         const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        const float x = rect.mX * viewSize.width;
-        const float y = rect.mY * viewSize.height;
-        const float w = rect.mW * viewSize.width;
-        const float h = rect.mH * viewSize.height;
+        const int x = static_cast<int>(rect.mX * viewSize.width);
+        const int y = static_cast<int>(rect.mY * viewSize.height);
+        const int w = static_cast<int>(rect.mW * viewSize.width);
+        const int h = static_cast<int>(rect.mH * viewSize.height);
         window->setCoord(x, y, w, h);
 
         settings.mIsMaximized.set(!settings.mIsMaximized.get());
@@ -1751,6 +1963,13 @@ namespace MWGui
 
     void WindowManager::onWindowChangeCoord(MyGUI::Window* window)
     {
+        // If using controller menus, don't persist changes to size of the stats or magic
+        // windows.
+        if (Settings::gui().mControllerMenus
+            && (window == mStatsWindow->mMainWidget->castType<MyGUI::Window>()
+                || window == mSpellWindow->mMainWidget->castType<MyGUI::Window>()))
+            return;
+
         const auto it = mTrackedWindows.find(window);
         if (it == mTrackedWindows.end())
             return;
@@ -1810,11 +2029,10 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (CustomMarkerCollection::ContainerType::const_iterator it = mCustomMarkers.begin();
-             it != mCustomMarkers.end(); ++it)
+        for (const auto& [_, marker] : mCustomMarkers)
         {
             writer.startRecord(ESM::REC_MARK);
-            it->second.save(writer);
+            marker.save(writer);
             writer.endRecord(ESM::REC_MARK);
         }
     }
@@ -1840,7 +2058,7 @@ namespace MWGui
         }
     }
 
-    int WindowManager::countSavedGameRecords() const
+    size_t WindowManager::countSavedGameRecords() const
     {
         return 1 // Global map
             + 1 // QuickKeysMenu
@@ -1877,6 +2095,9 @@ namespace MWGui
 
         mVideoBackground->setVisible(true);
 
+        if (mInputBlocker)
+            mInputBlocker->setVisible(false);
+
         bool cursorWasVisible = mCursorVisible;
         setCursorVisible(false);
 
@@ -1888,8 +2109,8 @@ namespace MWGui
             = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            const double dt
-                = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration())
+            const float dt
+                = std::chrono::duration_cast<std::chrono::duration<float>>(frameRateLimiter.getLastFrameDuration())
                       .count();
 
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
@@ -1944,6 +2165,7 @@ namespace MWGui
             if (!window->exit())
                 return;
             window->setVisible(false);
+            updateControllerButtonsOverlay();
         }
     }
 
@@ -1957,6 +2179,8 @@ namespace MWGui
 
         mKeyboardNavigation->setModalWindow(input->mMainWidget);
         mKeyboardNavigation->setDefaultFocus(input->mMainWidget, input->getDefaultKeyFocus());
+
+        updateControllerButtonsOverlay();
     }
 
     void WindowManager::removeCurrentModal(WindowModal* input)
@@ -1986,14 +2210,24 @@ namespace MWGui
             mKeyboardNavigation->setModalWindow(mCurrentModals.back()->mMainWidget);
     }
 
-    void WindowManager::onVideoKeyPressed(MyGUI::Widget* _sender, MyGUI::KeyCode _key, MyGUI::Char _char)
+    void WindowManager::onVideoKeyPressed(MyGUI::Widget* /*sender*/, MyGUI::KeyCode key, MyGUI::Char value)
     {
-        if (_key == MyGUI::KeyCode::Escape)
+        if (key == MyGUI::KeyCode::Escape)
             mVideoWidget->stop();
     }
 
     void WindowManager::updatePinnedWindows()
     {
+        if (Settings::gui().mControllerMenus)
+        {
+            // In controller mode, don't hide any menus and only allow pinning the map.
+            mInventoryWindow->setPinned(false);
+            mMap->setPinned(Settings::windows().mMapPin);
+            mSpellWindow->setPinned(false);
+            mStatsWindow->setPinned(false);
+            return;
+        }
+
         mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
         if (Settings::windows().mInventoryHidden)
             mShown = (GuiWindow)(mShown ^ GW_Inventory);
@@ -2082,20 +2316,20 @@ namespace MWGui
             mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
-    void WindowManager::onClipboardChanged(std::string_view _type, std::string_view _data)
+    void WindowManager::onClipboardChanged(std::string_view type, std::string_view data)
     {
-        if (_type == "Text")
-            SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(_data)).asUTF8().c_str());
+        if (type == "Text")
+            SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(data)).asUTF8().c_str());
     }
 
-    void WindowManager::onClipboardRequested(std::string_view _type, std::string& _data)
+    void WindowManager::onClipboardRequested(std::string_view type, std::string& data)
     {
-        if (_type != "Text")
+        if (type != "Text")
             return;
         char* text = nullptr;
         text = SDL_GetClipboardText();
         if (text)
-            _data = MyGUI::TextIterator::toTagsString(text);
+            data = MyGUI::TextIterator::toTagsString(text);
 
         SDL_free(text);
     }
@@ -2217,19 +2451,20 @@ namespace MWGui
             ResourceImageSetPointerFix* imgSetPointer = resource->castType<ResourceImageSetPointerFix>(false);
             if (!imgSetPointer)
                 continue;
-            auto tex_name = imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture;
 
-            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
+            const VFS::Path::Normalized path(imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture);
+
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(path);
 
             if (image.valid())
             {
                 // everything looks good, send it to the cursor manager
-                Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
-                Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
+                const Uint8 hotspotX = static_cast<Uint8>(imgSetPointer->getHotSpot().left);
+                const Uint8 hotspotY = static_cast<Uint8>(imgSetPointer->getHotSpot().top);
                 int rotation = imgSetPointer->getRotation();
                 MyGUI::IntSize pointerSize = imgSetPointer->getSize();
 
-                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspot_x, hotspot_y,
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, image, hotspotX, hotspotY,
                     pointerSize.width, pointerSize.height);
             }
         }
@@ -2389,6 +2624,14 @@ namespace MWGui
         updateVisible();
     }
 
+    bool WindowManager::isWindowVisible(std::string_view windowId) const
+    {
+        auto it = mLuaIdToWindow.find(windowId);
+        if (it == mLuaIdToWindow.end())
+            throw std::logic_error("Invalid window name: " + std::string(windowId));
+        return it->second->isVisible();
+    }
+
     std::vector<std::string_view> WindowManager::getAllWindowIds() const
     {
         std::vector<std::string_view> res;
@@ -2422,5 +2665,73 @@ namespace MWGui
             }
         }
         return res;
+    }
+
+    int WindowManager::getControllerMenuHeight()
+    {
+        int height = MyGUI::RenderManager::getInstance().getViewSize().height;
+        if (mControllerButtonsOverlay != nullptr && mControllerButtonsOverlay->isVisible())
+            height -= mControllerButtonsOverlay->getHeight();
+        if (mInventoryTabsOverlay != nullptr && mInventoryTabsOverlay->isVisible())
+            height -= mInventoryTabsOverlay->getHeight();
+        return height;
+    }
+
+    void WindowManager::setControllerTooltipVisible(bool visible)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mControllerTooltipVisible = visible;
+    }
+
+    void WindowManager::setControllerTooltipEnabled(bool enabled)
+    {
+        if (!Settings::gui().mControllerMenus)
+            return;
+
+        mControllerTooltipEnabled = enabled;
+        // When user toggles the setting, also update visibility
+        mControllerTooltipVisible = enabled;
+    }
+
+    void WindowManager::restoreControllerTooltips()
+    {
+        // Restore tooltip visibility if user has them enabled but they were hidden by mouse movement
+        if (mControllerTooltipEnabled && !mControllerTooltipVisible)
+            setControllerTooltipVisible(true);
+    }
+
+    void WindowManager::updateControllerButtonsOverlay()
+    {
+        if (!Settings::gui().mControllerMenus || !mControllerButtonsOverlay)
+            return;
+
+        if (mWindows.empty())
+            return;
+
+        WindowBase* topWin = getActiveControllerWindow();
+        if (!topWin || !topWin->isVisible())
+        {
+            mControllerButtonsOverlay->setVisible(false);
+            mInventoryTabsOverlay->setVisible(false);
+            return;
+        }
+
+        // setButtons will handle setting visibility based on if any buttons are defined.
+        mControllerButtonsOverlay->setButtons(topWin->getControllerButtons());
+        if (getMode() == GM_Inventory)
+        {
+            mInventoryTabsOverlay->setVisible(true);
+            mInventoryTabsOverlay->setTab(mActiveControllerWindows[GM_Inventory]);
+        }
+        else
+            mInventoryTabsOverlay->setVisible(false);
+    }
+
+    void WindowManager::inventoryUpdated(const MWWorld::Ptr& ptr) const
+    {
+        for (const auto& window : mWindows)
+            window->onInventoryUpdate(ptr);
     }
 }

@@ -7,7 +7,7 @@
 #include <string_view>
 #include <unordered_map>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "cellstore.hpp"
@@ -49,9 +49,9 @@ namespace MWWorld
 
         CellStore& getExterior(ESM::ExteriorCellLocation location, bool forceLoad = true) const;
 
-        CellStore* findCell(ESM::RefId Id, bool forceLoad = true) const;
+        CellStore* findCell(ESM::RefId id, bool forceLoad = true) const;
 
-        CellStore& getCell(ESM::RefId Id, bool forceLoad = true) const;
+        CellStore& getCell(ESM::RefId id, bool forceLoad = true) const;
 
         // Returns a special cell that is never active. Can be used for creating objects
         // without adding them to the scene.
@@ -77,9 +77,11 @@ namespace MWWorld
 
         std::size_t getPtrRegistryRevision() const { return mPtrRegistry.getRevision(); }
 
-        void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
+        void registerPtr(const Ptr& ptr);
 
-        void deregisterLiveCellRef(const LiveCellRefBase& ref) noexcept { mPtrRegistry.remove(ref); }
+        void deregisterLiveCellRef(LiveCellRefBase& ref) noexcept;
+
+        void assignSaveFileRefNum(ESM::CellRef& ref) { mPtrRegistry.assign(ref); }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
@@ -95,13 +97,15 @@ namespace MWWorld
 
         std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id);
 
-        int countSavedGameRecords() const;
+        size_t countSavedGameRecords() const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
         bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
+        struct GetCellStoreCallback;
+
         PtrRegistry mPtrRegistry; // defined before mCells because during destruction it should be the last
 
         MWWorld::ESMStore& mStore;

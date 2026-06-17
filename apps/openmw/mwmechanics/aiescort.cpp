@@ -1,5 +1,6 @@
 #include "aiescort.hpp"
 
+#include <components/esm/util.hpp>
 #include <components/esm3/aisequence.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/misc/algorithm.hpp>
@@ -23,15 +24,16 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(const ESM::RefId& actorId, int duration, float x, float y, float z, bool repeat)
+    AiEscort::AiEscort(ESM::RefNum actor, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
+        , mCellId(cellId)
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mDuration(duration)
+        , mDuration(static_cast<float>(duration))
         , mRemainingDuration(static_cast<float>(duration))
     {
-        mTargetActorRefId = actorId;
+        mTargetActor = actor;
     }
 
     AiEscort::AiEscort(
@@ -41,7 +43,7 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mDuration(duration)
+        , mDuration(static_cast<float>(duration))
         , mRemainingDuration(static_cast<float>(duration))
     {
         mTargetActorRefId = actorId;
@@ -57,7 +59,19 @@ namespace MWMechanics
         , mRemainingDuration(escort->mRemainingDuration)
     {
         mTargetActorRefId = escort->mTargetId;
-        mTargetActorId = escort->mTargetActorId;
+        mTargetActor = escort->mTargetActor;
+    }
+
+    namespace
+    {
+        bool isInEscortRange(const MWWorld::Ptr& follower, const MWWorld::Ptr& actor, float maxDist)
+        {
+            if (follower.isEmpty())
+                return false;
+            const osg::Vec3f leaderPos = actor.getRefData().getPosition().asVec3();
+            const osg::Vec3f followerPos = follower.getRefData().getPosition().asVec3();
+            return (leaderPos - followerPos).length2() <= maxDist * maxDist;
+        }
     }
 
     bool AiEscort::execute(
@@ -82,13 +96,10 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
 
-        const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mTargetActorRefId, false);
-        const osg::Vec3f leaderPos = actor.getRefData().getPosition().asVec3();
-        const osg::Vec3f followerPos = follower.getRefData().getPosition().asVec3();
         const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
         const float maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
 
-        if ((leaderPos - followerPos).length2() <= mMaxDist * mMaxDist)
+        if (isInEscortRange(getTarget(), actor, mMaxDist))
         {
             // TESCS allows the creation of Escort packages without a specific destination
             constexpr float nowhere = std::numeric_limits<float>::max();
@@ -128,9 +139,9 @@ namespace MWMechanics
         escort->mData.mX = mX;
         escort->mData.mY = mY;
         escort->mData.mZ = mZ;
-        escort->mData.mDuration = mDuration;
+        escort->mData.mDuration = static_cast<int16_t>(mDuration);
         escort->mTargetId = mTargetActorRefId;
-        escort->mTargetActorId = mTargetActorId;
+        escort->mTargetActor = mTargetActor;
         escort->mRemainingDuration = mRemainingDuration;
         escort->mCellId = mCellId;
         escort->mRepeat = getRepeat();

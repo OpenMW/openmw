@@ -21,6 +21,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -45,10 +46,7 @@ namespace MWClass
 
     std::string_view Lockpick::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Lockpick>* ref = ptr.get<ESM::Lockpick>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Lockpick>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Lockpick::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -65,11 +63,11 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Lockpick::getEquipmentSlots(const MWWorld::ConstPtr& ptr) const
     {
-        std::vector<int> slots_;
+        std::vector<int> slots;
 
-        slots_.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
+        slots.push_back(static_cast<int>(MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair(slots_, false);
+        return std::make_pair(slots, false);
     }
 
     int Lockpick::getValue(const MWWorld::ConstPtr& ptr) const
@@ -148,6 +146,7 @@ namespace MWClass
     {
         // Do not allow equip tools from inventory during attack
         if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc)
+            && !MWBase::Environment::get().getMechanicsManager()->isCastingSpell(npc)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
             return { 0, "#{sCantEquipWeapWarning}" };
 

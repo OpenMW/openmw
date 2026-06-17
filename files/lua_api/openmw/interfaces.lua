@@ -1,4 +1,5 @@
 ---
+-- @context global|menu|local|player
 -- @module interfaces
 -- @usage local I = require('openmw.interfaces')
 
@@ -15,6 +16,9 @@
 -- @field [parent=#interfaces] scripts.omw.camera.camera#scripts.omw.camera.camera Camera
 
 ---
+-- @field [parent=#interfaces] scripts.omw.combat.interface#scripts.omw.combat.interface Combat
+
+---
 -- @field [parent=#interfaces] scripts.omw.mwui.init#scripts.omw.mwui.init MWUI
 
 ---
@@ -28,6 +32,9 @@
 
 ---
 -- @field [parent=#interfaces] scripts.omw.skillhandlers#scripts.omw.skillhandlers SkillProgression
+
+---
+-- @field [parent=#interfaces] scripts.omw.crimes#scripts.omw.crimes Crimes
 
 ---
 -- @function [parent=#interfaces] __index

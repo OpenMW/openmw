@@ -33,12 +33,12 @@ QValidator::State CSVWorld::IdValidator::validate(QString& input, int& pos) cons
 
         if (!mNamespace.empty())
         {
-            std::string namespace_ = input.left(static_cast<int>(mNamespace.size())).toUtf8().constData();
+            const std::string namespaceName = input.left(static_cast<int>(mNamespace.size())).toUtf8().constData();
 
-            if (Misc::StringUtils::lowerCase(namespace_) != mNamespace)
+            if (Misc::StringUtils::lowerCase(namespaceName) != mNamespace)
                 return QValidator::Invalid; // incorrect namespace
 
-            iter += namespace_.size();
+            iter += namespaceName.size();
             first = false;
             prevScope = true;
         }
@@ -48,9 +48,9 @@ QValidator::State CSVWorld::IdValidator::validate(QString& input, int& pos) cons
 
             if (index != -1)
             {
-                QString namespace_ = input.left(index);
+                const QString namespaceName = input.left(index);
 
-                if (namespace_ == "project" || namespace_ == "session")
+                if (namespaceName == "project" || namespaceName == "session")
                     return QValidator::Invalid; // reserved namespace
             }
         }
@@ -102,9 +102,9 @@ QValidator::State CSVWorld::IdValidator::validate(QString& input, int& pos) cons
     return QValidator::Acceptable;
 }
 
-void CSVWorld::IdValidator::setNamespace(const std::string& namespace_)
+void CSVWorld::IdValidator::setNamespace(const std::string& value)
 {
-    mNamespace = Misc::StringUtils::lowerCase(namespace_);
+    mNamespace = Misc::StringUtils::lowerCase(value);
 }
 
 std::string CSVWorld::IdValidator::getError() const

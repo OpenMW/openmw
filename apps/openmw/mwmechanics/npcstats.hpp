@@ -85,7 +85,7 @@ namespace MWMechanics
 
         bool isInFaction(const ESM::RefId& faction) const;
 
-        float getSkillProgressRequirement(ESM::RefId id, const ESM::Class& class_) const;
+        float getSkillProgressRequirement(ESM::RefId id, const ESM::Class& npcClass) const;
 
         int getLevelProgress() const;
         void setLevelProgress(int progress);

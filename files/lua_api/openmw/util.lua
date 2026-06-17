@@ -1,5 +1,6 @@
 ---
--- `openmw.util` defines utility functions and classes like 3D vectors, that don't depend on the game world.
+-- Defines utility functions and classes like 3D vectors, that don't depend on the game world.
+-- @context global|menu|local|player|load
 -- @module util
 -- @usage local util = require('openmw.util')
 
@@ -94,6 +95,7 @@
 -- @type Vector2
 -- @field #number x
 -- @field #number y
+-- @field #string xy01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector2(3, 4)
 -- v.x, v.y       -- 3.0, 4.0
@@ -108,6 +110,9 @@
 -- v1 - v2        -- vector subtraction
 -- v1 * x         -- multiplication by a number
 -- v1 / x         -- division by a number
+-- v1.xx, v1.xyx  -- swizzle with standard fields
+-- v1.y1y, v1.x00 -- swizzle with 0/1 constant
+-- v1['0xy']      -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 2D vector. Vectors are immutable and can not be changed after creation.
@@ -195,6 +200,7 @@
 -- @field #number x
 -- @field #number y
 -- @field #number z
+-- @field #string xyz01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector3(3, 4, 5)
 -- v.x, v.y, v.z  -- 3.0, 4.0, 5.0
@@ -210,6 +216,9 @@
 -- v1 - v2        -- vector subtraction
 -- v1 * x         -- multiplication by a number
 -- v1 / x         -- division by a number
+-- v1.zyz, v1.yx  -- swizzle with standard fields
+-- v1.w1y, v1.z0z -- swizzle with 0/1 constant
+-- v1['0xy']      -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 3D vector. Vectors are immutable and can not be changed after creation.
@@ -304,19 +313,23 @@
 -- @field #number y
 -- @field #number z
 -- @field #number w
+-- @field #string xyzw01 swizzle support, any combination of fields can be used to construct a new vector including the 0/1 constants
 -- @usage
 -- v = util.vector4(3, 4, 5, 6)
 -- v.x, v.y, v.z, v.w  -- 3.0, 4.0, 5.0, 6.0
--- str(v)         -- "(3.0, 4.0, 5.0, 6.0)"
--- v:length()     -- length
--- v:length2()    -- square of the length
--- v:normalize()  -- normalized vector
--- v1:dot(v2)     -- dot product (returns a number)
--- v1 * v2        -- dot product (returns a number)
--- v1 + v2        -- vector addition
--- v1 - v2        -- vector subtraction
--- v1 * x         -- multiplication by a number
--- v1 / x         -- division by a number
+-- str(v)           -- "(3.0, 4.0, 5.0, 6.0)"
+-- v:length()       -- length
+-- v:length2()      -- square of the length
+-- v:normalize()    -- normalized vector
+-- v1:dot(v2)       -- dot product (returns a number)
+-- v1 * v2          -- dot product (returns a number)
+-- v1 + v2          -- vector addition
+-- v1 - v2          -- vector subtraction
+-- v1 * x           -- multiplication by a number
+-- v1 / x           -- division by a number
+-- v1.zyz, v1.wwwx  -- swizzle with standard fields
+-- v1.w1, v1.z000   -- swizzle with 0/1 constant
+-- v1['000w']       -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
 -- Creates a new 4D vector. Vectors are immutable and can not be changed after creation.
@@ -463,6 +476,16 @@
 -- @param #number b
 -- @param #number a
 -- @return #Color
+
+---
+-- Creates a Color from comma-separated string (in RGB or RGBA order, spaces are ignored)
+-- @function [parent=#COLOR] commaString
+-- @param #string str
+-- @return #Color
+-- @usage local color = util.color.commaString('255,0,0') -- red color
+-- @usage local color = util.color.commaString('10000,0,0') -- red color (values are still capped at 255)
+-- @usage local color = util.color.commaString('0, 0, 255, 255') -- blue color, with explicit alpha
+-- @usage local color = util.color.commaString('0,255,0,128') -- green color, semi-transparent
 
 ---
 -- Creates a Color from RGB format. Equivalent to calling util.rgba with a = 1.

@@ -8,7 +8,6 @@ namespace Misc
     struct OsgUserValues
     {
         static const std::string sFileHash;
-        static const std::string sExtraData;
         static const std::string sXSoftEffect;
     };
 }

@@ -58,7 +58,7 @@ const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter(UniversalId
     return *iter->second;
 }
 
-CSMWorld::RefIdCollection::RefIdCollection()
+CSMWorld::RefIdCollection::RefIdCollection(const IdCollection<ESM::MagicEffect>& magicEffects)
 {
     BaseColumns baseColumns;
 
@@ -104,7 +104,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_EffectList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue);
     ingredientColumns.mEffects = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> ingredientEffectsMap;
-    ingredientEffectsMap.insert(std::make_pair(UniversalId::Type_Ingredient, new IngredEffectRefIdAdapter()));
+    ingredientEffectsMap.insert(
+        std::make_pair(UniversalId::Type_Ingredient, new IngredEffectRefIdAdapter(magicEffects)));
     mNestedAdapters.emplace_back(&mColumns.back(), ingredientEffectsMap);
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_EffectId, ColumnBase::Display_IngredEffectId));
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
@@ -115,8 +116,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.emplace_back(Columns::ColumnId_EffectList, ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue);
     potionColumns.mEffects = &mColumns.back(); // see refidadapterimp.hpp
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> effectsMap;
-    effectsMap.insert(
-        std::make_pair(UniversalId::Type_Potion, new EffectsRefIdAdapter<ESM::Potion>(UniversalId::Type_Potion)));
+    effectsMap.insert(std::make_pair(
+        UniversalId::Type_Potion, new EffectsRefIdAdapter<ESM::Potion>(UniversalId::Type_Potion, magicEffects)));
     mNestedAdapters.emplace_back(&mColumns.back(), effectsMap);
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mColumns.back().addColumn(new NestedChildColumn(Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
@@ -665,7 +666,7 @@ int CSMWorld::RefIdCollection::getIndex(const ESM::RefId& id) const
 
 int CSMWorld::RefIdCollection::getColumns() const
 {
-    return mColumns.size();
+    return static_cast<int>(mColumns.size());
 }
 
 const CSMWorld::ColumnBase& CSMWorld::RefIdCollection::getColumn(int column) const
@@ -753,7 +754,6 @@ void CSMWorld::RefIdCollection::cloneRecord(
 bool CSMWorld::RefIdCollection::touchRecord(const ESM::RefId& id)
 {
     throw std::runtime_error("RefIdCollection::touchRecord is unimplemented");
-    return false;
 }
 
 void CSMWorld::RefIdCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)

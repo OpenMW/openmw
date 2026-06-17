@@ -39,6 +39,7 @@ namespace Settings
         SettingValue<bool> mCanLootDuringDeathAnimation{ mIndex, "Game", "can loot during death animation" };
         SettingValue<bool> mRebalanceSoulGemValues{ mIndex, "Game", "rebalance soul gem values" };
         SettingValue<bool> mUseAdditionalAnimSources{ mIndex, "Game", "use additional anim sources" };
+        SettingValue<bool> mSmoothAnimTransitions{ mIndex, "Game", "smooth animation transitions" };
         SettingValue<bool> mBarterDispositionChangeIsPermanent{ mIndex, "Game",
             "barter disposition change is permanent" };
         SettingValue<int> mStrengthInfluencesHandToHand{ mIndex, "Game", "strength influences hand to hand",
@@ -70,8 +71,6 @@ namespace Settings
         SettingValue<osg::Vec3f> mDefaultActorPathfindHalfExtents{ mIndex, "Game",
             "default actor pathfind half extents", makeMaxStrictSanitizerVec3f(osg::Vec3f(0, 0, 0)) };
         SettingValue<bool> mDayNightSwitches{ mIndex, "Game", "day night switches" };
-        SettingValue<bool> mUnarmedCreatureAttacksDamageArmor{ mIndex, "Game",
-            "unarmed creature attacks damage armor" };
         SettingValue<DetourNavigator::CollisionShapeType> mActorCollisionShapeType{ mIndex, "Game",
             "actor collision shape type" };
         SettingValue<bool> mPlayerMovementIgnoresAnimation{ mIndex, "Game", "player movement ignores animation" };

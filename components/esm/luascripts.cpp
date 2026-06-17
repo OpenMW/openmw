@@ -1,8 +1,10 @@
 #include "luascripts.hpp"
 
-#include "components/esm3/esmreader.hpp"
-#include "components/esm3/esmwriter.hpp"
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 
+#include <components/lua/configuration.hpp>
+#include <components/lua/luastateptr.hpp>
 #include <components/lua/serialization.hpp>
 
 // List of all records, that are related to Lua.
@@ -56,7 +58,7 @@ void ESM::LuaScriptsCfg::load(ESMReader& esm)
     {
         mScripts.emplace_back();
         ESM::LuaScriptCfg& script = mScripts.back();
-        script.mScriptPath = esm.getHString();
+        script.mScriptPath = VFS::Path::Normalized(esm.getHString());
 
         esm.getSubNameIs("LUAF");
         esm.getSubHeader();
@@ -102,13 +104,16 @@ void ESM::LuaScriptsCfg::adjustRefNums(const ESMReader& esm)
             throw std::runtime_error("Incorrect contentFile index");
     };
 
-    lua_State* L = luaL_newstate();
+    LuaUtil::LuaStatePtr state(luaL_newstate());
+    if (state == nullptr)
+        throw std::runtime_error("Failed to create Lua runtime");
+
     LuaUtil::BasicSerializer serializer(adjustRefNumFn);
 
     auto adjustLuaData = [&](std::string& data) {
         if (data.empty())
             return;
-        sol::object luaData = LuaUtil::deserialize(L, data, &serializer);
+        sol::object luaData = LuaUtil::deserialize(state.get(), data, &serializer);
         data = LuaUtil::serialize(luaData, &serializer);
     };
 
@@ -123,7 +128,6 @@ void ESM::LuaScriptsCfg::adjustRefNums(const ESMReader& esm)
             refCfg.mRefnumContentFile = adjustRefNumFn(refCfg.mRefnumContentFile);
         }
     }
-    lua_close(L);
 }
 
 void ESM::LuaScriptsCfg::save(ESMWriter& esm) const
@@ -161,7 +165,15 @@ void ESM::LuaScripts::load(ESMReader& esm)
 {
     while (esm.isNextSub("LUAS"))
     {
-        std::string name = esm.getHString();
+        int32_t id = -1;
+        if (esm.getFormatVersion() <= ESM::MaxLuaScriptPathFormatVersion)
+        {
+            VFS::Path::Normalized name(esm.getHString());
+            if (esm.mScriptsConfiguration)
+                id = esm.mScriptsConfiguration->findId(name).value_or(-1);
+        }
+        else
+            esm.getHT(id);
         std::string data = loadLuaBinaryData(esm);
         std::vector<LuaTimer> timers;
         while (esm.isNextSub("LUAT"))
@@ -174,7 +186,7 @@ void ESM::LuaScripts::load(ESMReader& esm)
             timer.mCallbackArgument = loadLuaBinaryData(esm);
             timers.push_back(std::move(timer));
         }
-        mScripts.push_back({ std::move(name), std::move(data), std::move(timers) });
+        mScripts.push_back({ id, std::move(data), std::move(timers) });
     }
 }
 
@@ -182,7 +194,7 @@ void ESM::LuaScripts::save(ESMWriter& esm) const
 {
     for (const LuaScript& script : mScripts)
     {
-        esm.writeHNString("LUAS", script.mScriptPath);
+        esm.writeHNT("LUAS", script.mScriptId);
         saveLuaBinaryData(esm, script.mData);
         for (const LuaTimer& timer : script.mTimers)
         {

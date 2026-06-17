@@ -12,7 +12,7 @@
 namespace MWMechanics
 {
     template <class T>
-    void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value)
+    void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, unsigned char value)
     {
         T copy = *MWBase::Environment::get().getESMStore()->get<T>().find(id);
         switch (setting)

@@ -35,7 +35,7 @@
 #include "state.hpp"
 
 CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectPath, ToUTF8::FromType encoding)
-    : Operation(State_Saving, true, true)
+    : Operation(State_Saving, true)
     , mDocument(document)
     , mState(*this, projectPath, encoding)
 {
@@ -97,9 +97,6 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
     appendStage(
         new WriteCollectionStage<CSMWorld::IdCollection<ESM::BodyPart>>(mDocument.getData().getBodyParts(), mState));
 
-    appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator>>(
-        mDocument.getData().getSoundGens(), mState));
-
     appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::MagicEffect>>(
         mDocument.getData().getMagicEffects(), mState));
 
@@ -108,15 +105,20 @@ CSMDoc::Saving::Saving(Document& document, const std::filesystem::path& projectP
 
     appendStage(new WriteRefIdCollectionStage(mDocument, mState));
 
+    // Can reference creatures so needs to load after them for TESCS compatibility
+    appendStage(new WriteCollectionStage<CSMWorld::IdCollection<ESM::SoundGenerator>>(
+        mDocument.getData().getSoundGens(), mState));
+
     appendStage(new CollectionReferencesStage(mDocument, mState));
 
     appendStage(new WriteCellCollectionStage(mDocument, mState));
 
-    // Dialogue can reference objects and cells so must be written after these records for vanilla-compatible files
-
-    appendStage(new WriteDialogueCollectionStage(mDocument, mState, false));
+    // Dialogue can reference objects, cells, and journals so must be written after these records for vanilla-compatible
+    // files
 
     appendStage(new WriteDialogueCollectionStage(mDocument, mState, true));
+
+    appendStage(new WriteDialogueCollectionStage(mDocument, mState, false));
 
     appendStage(new WritePathgridCollectionStage(mDocument, mState));
 

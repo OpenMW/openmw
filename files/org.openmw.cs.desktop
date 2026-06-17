@@ -8,3 +8,4 @@ TryExec=openmw-cs
 Exec=openmw-cs
 Icon=openmw-cs
 Categories=Game;RolePlaying;
+StartupWMClass=openmw-cs

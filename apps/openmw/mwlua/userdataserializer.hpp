@@ -1,7 +1,8 @@
 #ifndef MWLUA_USERDATASERIALIZER_H
 #define MWLUA_USERDATASERIALIZER_H
 
-#include "object.hpp"
+#include <map>
+#include <memory>
 
 namespace LuaUtil
 {

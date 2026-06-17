@@ -27,16 +27,22 @@ namespace MWGui
 
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
-        , mTimeAdvancer(0.05f)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
-        getWidget(mCancelButton, "CancelButton");
+        getWidget(mCancelButton, "OkButton");
         getWidget(mPlayerGold, "PlayerGold");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onCancelButtonClicked);
 
         mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &TrainingWindow::onTrainingProgressChanged);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &TrainingWindow::onTrainingFinished);
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{Interface:Buy}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+        }
     }
 
     void TrainingWindow::onOpen()
@@ -105,6 +111,7 @@ namespace MWGui
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
+        mTrainingButtons.clear();
         for (size_t i = 0; i < skills.size(); ++i)
         {
             const ESM::Skill* skill = skills[i].first;
@@ -116,18 +123,28 @@ namespace MWGui
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold
                     ? "SandTextButton"
                     : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
-                MyGUI::IntCoord(5, 5 + i * lineHeight, mTrainingOptions->getWidth() - 10, lineHeight),
+                MyGUI::IntCoord(4, static_cast<int>(3 + i * lineHeight), mTrainingOptions->getWidth() - 10, lineHeight),
                 MyGUI::Align::Default);
 
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
             button->setCaptionWithReplacing(
-                MyGUI::TextIterator::toTagsString(skill->mName) + " - " + MyGUI::utility::toString(price));
+                MyGUI::TextIterator::toTagsString(skill->mName) + "  - " + MyGUI::utility::toString(price) + "#{sgp}");
 
             button->setSize(button->getTextSize().width + 12, button->getSize().height);
 
             ToolTips::createSkillToolTip(button, skill->mId);
+
+            if (price <= playerGold)
+                mTrainingButtons.emplace_back(button);
+        }
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mTrainingButtons.size() > 0)
+                mTrainingButtons[0]->setStateSelected(true);
         }
 
         center();
@@ -138,7 +155,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
 
-    void TrainingWindow::onCancelButtonClicked(MyGUI::Widget* sender)
+    void TrainingWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
@@ -152,8 +169,8 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        int price = pcStats.getSkill(skill->mId).getBase()
-            * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
+        int price = static_cast<int>(pcStats.getSkill(skill->mId).getBase()
+            * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
@@ -229,4 +246,36 @@ namespace MWGui
         return !mTimeAdvancer.isRunning();
     }
 
+    bool TrainingWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mTrainingButtons.size())
+                onTrainingSelected(mTrainingButtons[mControllerFocus]);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mTrainingButtons.size() <= 1)
+                return true;
+
+            setControllerFocus(mTrainingButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus, mTrainingButtons.size(), -1);
+            setControllerFocus(mTrainingButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mTrainingButtons.size() <= 1)
+                return true;
+
+            setControllerFocus(mTrainingButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus, mTrainingButtons.size(), 1);
+            setControllerFocus(mTrainingButtons, mControllerFocus, true);
+        }
+
+        return true;
+    }
 }

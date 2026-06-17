@@ -1,0 +1,69 @@
+# This is the default OpenMW animation blending config file (global config) , will affect NPCs and creatures but not animated objects.
+# If you want to provide an animation blending config for your modded animations - DO NOT override the global config in your mod.
+# For details on how to edit and create your own blending rules, see https://openmw.readthedocs.io/en/latest/reference/modding/animation-blending.html
+
+blending_rules:
+  # General blending rule, any transition that will not be caught by the rules below - will use this rule
+  - from: "*"
+    to: "*"
+    easing: "sineOut"
+    duration: 0.25
+  # From anything to sneaking
+  - from: "*"
+    to: "idlesneak*"
+    easing: "springOutWeak"
+    duration: 0.4
+  - from: "*"
+    to: "sneakforward*"
+    easing: "springOutWeak"
+    duration: 0.4
+  # From any to preparing for an attack swing (e.g "weapononehanded: chop start").
+  # Note that Rules like *:chop* will technically match any weapon attack animation with
+  # an animation key beginning on "chop". This includes attack preparation, attack itself and follow-through.
+  # Yet since rules below this block take care of more specific transitions - most likely this block will
+  # only affect "any animation"->"attack swing preparation".
+  - from: "*"
+    to: "*:shoot*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:chop*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:thrust*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:slash*"
+    easing: "sineOut"
+    duration: 0.1
+  # From preparing for an attack swing (e.g "weapononehanded: chop start") to an attack swing (e.g "weapononehanded: chop max attack").
+  - from: "*:*start"
+    to: "*:*attack"
+    easing: "sineOut"
+    duration: 0.05
+  # From a weapon swing to the final follow-through
+  - from: "*"
+    to: "*:*follow start"
+    easing: "linear"
+    duration: 0
+  # Sharper out of jumping transition, so bunny-hopping looks similar to vanilla
+  - from: "jump:start"
+    to: "*"
+    easing: "sineOut"
+    duration: 0.1
+  # Inventory doll poses don't work with transitions, so 0 duraion.
+  - from: "*"
+    to: "inventory*"
+    easing: "linear"
+    duration: 0
+  - from: "inventory*"
+    to: "*"
+    easing: "linear"
+    duration: 0
+  # Transitions from a no-state are always instant
+  - from: ""
+    to: "*"
+    easing: "linear"
+    duration: 0

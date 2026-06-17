@@ -5,15 +5,15 @@
 #include <osg/Vec4i>
 #include <osg/ref_ptr>
 
+#include "positioncellgrid.hpp"
 #include "ptr.hpp"
 
 #include <memory>
 #include <optional>
 #include <set>
-#include <unordered_map>
 #include <vector>
 
-#include <components/esm/util.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/misc/constants.hpp>
 
 namespace osg
@@ -102,6 +102,7 @@ namespace MWWorld
         bool mPreloadDoors;
         bool mPreloadFastTravel;
         float mPredictionTime;
+        float mLowestPoint;
 
         int mHalfGridSize = Constants::CellGridRadius;
 
@@ -123,14 +124,14 @@ namespace MWWorld
 
         void requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent = true);
 
-        typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
-
         void preloadCells(float dt);
-        void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos,
-            std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
         void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
-        void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos,
-            std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadFastTravelDestinations(
+            const osg::Vec3f& playerPos, std::vector<PositionCellGrid>& exteriorPositions);
+        void preloadCellWithSurroundings(MWWorld::CellStore& cell);
+        void preloadCell(MWWorld::CellStore& cell);
+        void preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync = false);
 
         osg::Vec4i gridCenterToBounds(const osg::Vec2i& centerCell) const;
         osg::Vec2i getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter = nullptr) const;
@@ -145,8 +146,6 @@ namespace MWWorld
 
         ~Scene();
 
-        void preloadCell(MWWorld::CellStore& cell, bool preloadSurrounding = false);
-        void preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync = false);
         void reloadTerrain();
 
         void playerMoved(const osg::Vec3f& pos);
@@ -197,8 +196,6 @@ namespace MWWorld
         void updateObjectScale(const Ptr& ptr);
 
         bool isCellActive(const CellStore& cell);
-
-        Ptr searchPtrViaActorId(int actorId);
 
         void preload(const std::string& mesh, bool useAnim = false);
 

@@ -28,8 +28,6 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #include <unistd.h>
 #endif
 
-using namespace Fallback;
-
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
  * to parse configuration files.
@@ -53,23 +51,24 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     if (variables.count("help"))
     {
-        getRawStdout() << desc << std::endl;
+        Debug::getRawStdout() << desc << std::endl;
         return false;
     }
 
     if (variables.count("version"))
     {
-        getRawStdout() << Version::getOpenmwVersionDescription() << std::endl;
+        Debug::getRawStdout() << Version::getOpenmwVersionDescription() << std::endl;
         return false;
     }
 
     unsigned int netType = variables["net-type"].as<unsigned int>();
     engine.setServerPid(netType);
     engine.setNetType(netType);
+    cfgMgr.processPaths(variables, std::filesystem::current_path());
 
     cfgMgr.readConfiguration(variables, desc);
 
-    setupLogging(cfgMgr.getLogPath(), "OpenMW");
+    Debug::setupLogging(cfgMgr.getLogPath(), "OpenMW");
     Log(Debug::Info) << Version::getOpenmwVersionDescription();
 
     Settings::Manager::load(cfgMgr);
@@ -90,7 +89,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
                                                .u8string()); // This call to u8string is redundant, but required to
                                                              // build on MSVC 14.26 due to implementation bugs.
     if (!local.empty())
-        dataDirs.push_back(local);
+        dataDirs.push_back(std::move(local));
 
     cfgMgr.filterOutNonExistingPaths(dataDirs);
 
@@ -153,20 +152,13 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setScriptConsoleMode(variables["script-console"].as<bool>());
     engine.setStartupScript(variables["script-run"].as<std::string>());
     engine.setWarningsMode(variables["script-warn"].as<int>());
-    std::vector<ESM::RefId> scriptBlacklist;
-    auto& scriptBlacklistString = variables["script-blacklist"].as<StringsVector>();
-    for (const auto& blacklistString : scriptBlacklistString)
-    {
-        scriptBlacklist.push_back(ESM::RefId::stringRefId(blacklistString));
-    }
-    engine.setScriptBlacklist(scriptBlacklist);
-    engine.setScriptBlacklistUse(variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
-    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
+    Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
+    engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;
@@ -232,6 +224,8 @@ int runApplication(int argc, char* argv[])
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
 
+    engine->setRecastMaxLogLevel(Debug::getRecastMaxLogLevel());
+
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {
         if (!Misc::checkRequiredOSGPluginsArePresent())
@@ -249,7 +243,7 @@ extern "C" int SDL_main(int argc, char** argv)
 int main(int argc, char** argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW");
+    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
 // Platform specific for Windows when there is no console built into the executable.

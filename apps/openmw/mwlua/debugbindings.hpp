@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWLUA_DEBUGBINDINGS_H
 #define OPENMW_MWLUA_DEBUGBINDINGS_H
 
-#include <sol/sol.hpp>
+#include <sol/forward.hpp>
 
 namespace MWLua
 {

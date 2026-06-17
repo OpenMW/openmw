@@ -37,14 +37,20 @@
                     <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="Screenshot"/>
                 </Widget>
 
+                <Widget type="AutoSizedEditBox" skin="NormalText" position="0 0 263 0" name="CellName">
+                    <Property key="Static" value="true"/>
+                    <Property key="MultiLine" value="true"/>
+                    <Property key="WordWrap" value="true"/>
+                    <Property key="NeedKey" value="false"/>
+                    <Property key="TextAlign" value="Center"/>
+                </Widget>
+
                 <Widget type="AutoSizedEditBox" skin="SandText" position="0 0 263 0" name="InfoText">
                     <Property key="Static" value="true"/>
                     <Property key="MultiLine" value="true"/>
                     <Property key="WordWrap" value="true"/>
                     <Property key="NeedKey" value="false"/>
                 </Widget>
-
-
             </Widget>
 
         </Widget>

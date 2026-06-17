@@ -1,64 +1,58 @@
 Stereo Settings
 ###############
 
-stereo enabled
---------------
+.. omw-setting::
+   :title: stereo enabled
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Enable/disable stereo view. This setting is ignored in VR.
 
-Enable/disable stereo view. This setting is ignored in VR.
+.. omw-setting::
+   :title: multiview
+   :type: boolean
+   :range: true, false
+   :default: false
 
-multiview
----------
+   If enabled, OpenMW will use the :code:`GL_OVR_MultiView` and :code:`GL_OVR_MultiView2` extensions where possible.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+.. omw-setting::
+   :title: shared shadow maps
+   :type: boolean
+   :range: true, false
+   :default: true
 
-If enabled, OpenMW will use the :code:`GL_OVR_MultiView` and :code:`GL_OVR_MultiView2` extensions where possible.
+   Use one set of shadow maps for both eyes.
+   Will likely be significantly faster than the brute-force approach of rendering a separate copy for each eye with no or imperceptible quality loss.
 
-shared shadow maps
-------------------
+.. omw-setting::
+   :title: allow display lists for multiview
+   :type: boolean
+   :range: true, false
+   :default: true
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   If false, OpenMW-VR will disable display lists when using multiview. Necessary on some buggy drivers, but may incur a slight performance penalty.
 
-Use one set of shadow maps for both eyes.
-Will likely be significantly faster than the brute-force approach of rendering a separate copy for each eye with no or imperceptible quality loss.
+.. omw-setting::
+   :title: use custom view
+   :type: boolean
+   :range: true, false
+   :default: false
 
-allow display lists for multiview
----------------------------------
+   If false, the default OSG horizontal split will be used for stereo.
+   If true, the config defined in the :ref:`[Stereo View]<Stereo View Settings>` settings category will be used.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+   .. note::
+      This option is ignored in VR, and exists primarily for debugging purposes
 
-If false, OpenMW-VR will disable display lists when using multiview. Necessary on some buggy drivers, but may incur a slight performance penalty.
+.. omw-setting::
+   :title: use custom eye resolution
+   :type: boolean
+   :range: true, false
+   :default: false
 
-use custom view
----------------
+   If true, overrides rendering resolution for each eye.
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-If false, the default OSG horizontal split will be used for stereo.
-If true, the config defined in the :ref:`[Stereo View]<Stereo View Settings>` settings category will be used.
-
-.. note::
-	This option is ignored in VR, and exists primarily for debugging purposes
-
-use custom eye resolution
--------------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-If true, overrides rendering resolution for each eye.
-
-.. note::
-	This option is ignored in VR, and exists primarily for debugging purposes
+   .. note::
+      This option is ignored in VR, and exists primarily for debugging purposes

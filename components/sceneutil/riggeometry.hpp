@@ -4,6 +4,8 @@
 #include <osg/Geometry>
 #include <osg/Matrixf>
 
+#include <string_view>
+
 namespace SceneUtil
 {
     class Skeleton;
@@ -43,20 +45,20 @@ namespace SceneUtil
             osg::Matrixf mInvBindMatrix;
         };
 
-        using VertexWeight = std::pair<unsigned short, float>;
-        using VertexWeights = std::vector<VertexWeight>;
         using BoneWeight = std::pair<size_t, float>;
         using BoneWeights = std::vector<BoneWeight>;
 
         void setBoneInfo(std::vector<BoneInfo>&& bones);
-        // Convert influences in vertex and weight list per bone format
-        void setInfluences(const std::vector<VertexWeights>& influences);
         // Convert influences in bone and weight list per vertex format
         void setInfluences(const std::vector<BoneWeights>& influences);
 
         /// Initialize this geometry from the source geometry.
         /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
+
+        void setTransform(osg::Matrixf&& transform);
+
+        void setRootBone(std::string_view name);
 
         osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
@@ -89,13 +91,15 @@ namespace SceneUtil
         osg::ref_ptr<const osg::Vec4Array> mSourceTangents;
         Skeleton* mSkeleton{ nullptr };
 
-        osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
+        osg::ref_ptr<osg::RefMatrix> mSkinToSkelMatrix;
 
         using VertexList = std::vector<unsigned short>;
         struct InfluenceData : public osg::Referenced
         {
             std::vector<BoneInfo> mBones;
             std::vector<std::pair<BoneWeights, VertexList>> mInfluences;
+            osg::Matrixf mTransform;
+            std::string mRootBone;
         };
         osg::ref_ptr<InfluenceData> mData;
         std::vector<Bone*> mNodes;
@@ -105,7 +109,7 @@ namespace SceneUtil
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
-        void updateGeomToSkelMatrix(const osg::NodePath& nodePath);
+        void updateSkinToSkelMatrix(const osg::NodePath& nodePath);
     };
 
 }

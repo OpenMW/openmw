@@ -1,0 +1,16 @@
+Combat: "OpenMW : Combat"
+combatSettingsPageDescription: "Paramètres de combat d'OpenMW"
+
+combatSettings: "Combat"
+
+unarmedCreatureAttacksDamageArmor: "Les attaques de créatures sans armes endomagent l'armure"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Les attaques des créatures sans armes endomagent également l'armure.
+
+redistributeShieldHitsWhenNotWearingShield: "Redistribe les impacts visant le bouclier lors de son absence"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Équivalent au "Shield hit location fix" du Morrowind Code Patch. Redistribe les impacts visant le bouclier lors de son absence sur l'épaulette gauche ou la cuirasse.
+
+spawnBloodEffectsOnPlayer: "Effets de sang sur le joueur"
+spawnBloodEffectsOnPlayerDescription: |
+    L'activation de cette option fait apparaitre du sang sur le joueur s'il est blessé lors d'un combat, comme c'est le cas sur les PNJ.

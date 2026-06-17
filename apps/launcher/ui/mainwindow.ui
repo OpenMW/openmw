@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
+    <width>775</width>
     <height>635</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>750</width>
+    <width>775</width>
     <height>635</height>
    </size>
   </property>
@@ -57,7 +57,7 @@
         </property>
        </spacer>
       </item>
-      <item>
+      <item alignment="Qt::AlignRight">
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="standardButtons">
          <set>QDialogButtonBox::Close|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
@@ -74,16 +74,6 @@
    </property>
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QToolBar {
-	border: 0px;
-}
-
-QToolButton {
-	min-width: 70px;
-}
-</string>
    </property>
    <property name="movable">
     <bool>false</bool>

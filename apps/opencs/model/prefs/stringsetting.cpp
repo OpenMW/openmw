@@ -1,6 +1,7 @@
 
 #include "stringsetting.hpp"
 
+#include <QLabel>
 #include <QLineEdit>
 #include <QMutexLocker>
 
@@ -26,17 +27,21 @@ CSMPrefs::StringSetting& CSMPrefs::StringSetting::setTooltip(const std::string& 
 
 CSMPrefs::SettingWidgets CSMPrefs::StringSetting::makeWidgets(QWidget* parent)
 {
+    QLabel* label = new QLabel(getLabel(), parent);
+
     mWidget = new QLineEdit(QString::fromStdString(getValue()), parent);
+    mWidget->setMinimumWidth(300);
 
     if (!mTooltip.empty())
     {
         QString tooltip = QString::fromUtf8(mTooltip.c_str());
+        label->setToolTip(tooltip);
         mWidget->setToolTip(tooltip);
     }
 
     connect(mWidget, &QLineEdit::textChanged, this, &StringSetting::textChanged);
 
-    return SettingWidgets{ .mLabel = nullptr, .mInput = mWidget };
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget };
 }
 
 void CSMPrefs::StringSetting::updateWidget()

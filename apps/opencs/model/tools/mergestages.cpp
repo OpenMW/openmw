@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/metadata.hpp>
 #include <apps/opencs/model/world/ref.hpp>
 #include <apps/opencs/model/world/refcollection.hpp>
@@ -117,7 +116,7 @@ void CSMTools::MergeReferencesStage::perform(int stage, CSMDoc::Messages& messag
         ref.mOriginalCell = ref.mCell;
 
         ref.mRefNum.mIndex = mIndex[ref.mCell]++;
-        ref.mRefNum.mContentFile = 0;
+        ref.mRefNum.mContentFile = -1;
         ref.mNew = false;
 
         mState.mTarget->getData().getReferences().appendRecord(std::make_unique<CSMWorld::Record<CSMWorld::CellRef>>(
@@ -137,13 +136,12 @@ int CSMTools::PopulateLandTexturesMergeStage::setup()
 
 void CSMTools::PopulateLandTexturesMergeStage::perform(int stage, CSMDoc::Messages& messages)
 {
-    const CSMWorld::Record<CSMWorld::LandTexture>& record = mState.mSource.getData().getLandTextures().getRecord(stage);
+    const CSMWorld::Record<ESM::LandTexture>& record = mState.mSource.getData().getLandTextures().getRecord(stage);
 
     if (!record.isDeleted())
     {
-        mState.mTarget->getData().getLandTextures().appendRecord(
-            std::make_unique<CSMWorld::Record<CSMWorld::LandTexture>>(CSMWorld::Record<CSMWorld::LandTexture>(
-                CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get())));
+        mState.mTarget->getData().getLandTextures().appendRecord(std::make_unique<CSMWorld::Record<ESM::LandTexture>>(
+            CSMWorld::Record<ESM::LandTexture>(CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get())));
     }
 }
 

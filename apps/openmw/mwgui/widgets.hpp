@@ -10,6 +10,7 @@
 #include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadskil.hpp>
 
 namespace MyGUI
@@ -40,7 +41,6 @@ namespace MWGui
                 , mIsConstant(false)
                 , mNoMagnitude(false)
                 , mKnown(true)
-                , mEffectID(-1)
                 , mMagnMin(-1)
                 , mMagnMax(-1)
                 , mRange(-1)
@@ -55,35 +55,14 @@ namespace MWGui
 
             bool mKnown; // is this effect known to the player? (If not, will display as a question mark instead)
 
-            // value of -1 here means the effect is unknown to the player
-            short mEffectID;
-
-            ESM::RefId mSkill, mAttribute;
+            // value of EmptyRefId here means the effect is unknown to the player
+            ESM::RefId mEffectID, mSkill, mAttribute;
 
             // value of -1 here means the value is unavailable
             int mMagnMin, mMagnMax, mRange, mDuration;
 
             // value of 0 -> no area effect
             int mArea;
-
-            bool operator==(const SpellEffectParams& other) const
-            {
-                if (mEffectID != other.mEffectID)
-                    return false;
-
-                bool involvesAttribute = (mEffectID == 74 // restore attribute
-                    || mEffectID == 85 // absorb attribute
-                    || mEffectID == 17 // drain attribute
-                    || mEffectID == 79 // fortify attribute
-                    || mEffectID == 22); // damage attribute
-                bool involvesSkill = (mEffectID == 78 // restore skill
-                    || mEffectID == 89 // absorb skill
-                    || mEffectID == 21 // drain skill
-                    || mEffectID == 83 // fortify skill
-                    || mEffectID == 26); // damage skill
-                return ((other.mSkill == mSkill) || !involvesSkill)
-                    && ((other.mAttribute == mAttribute) && !involvesAttribute) && (other.mArea == mArea);
-            }
         };
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
@@ -106,16 +85,18 @@ namespace MWGui
             typedef MyGUI::delegates::MultiDelegate<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
-                signature : void method(MWSkill* _sender)\n
+                signature : void method(MWSkill* sender)\n
             */
             EventHandle_SkillVoid eventClicked;
+
+            void setStateSelected(bool selected);
 
         protected:
             virtual ~MWSkill();
 
             void initialiseOverride() override;
 
-            void onClicked(MyGUI::Widget* _sender);
+            void onClicked(MyGUI::Widget* sender);
 
         private:
             void updateWidgets();
@@ -145,16 +126,18 @@ namespace MWGui
             typedef MyGUI::delegates::MultiDelegate<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
-                signature : void method(MWAttribute* _sender)\n
+                signature : void method(MWAttribute* sender)\n
             */
             EventHandle_AttributeVoid eventClicked;
+
+            void setStateSelected(bool selected);
 
         protected:
             ~MWAttribute() override = default;
 
             void initialiseOverride() override;
 
-            void onClicked(MyGUI::Widget* _sender);
+            void onClicked(MyGUI::Widget* sender);
 
         private:
             void updateWidgets();
@@ -190,6 +173,8 @@ namespace MWGui
                 std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator, MyGUI::IntCoord& coord, int flags);
 
             const ESM::RefId& getSpellId() const { return mId; }
+
+            void setStateSelected(bool selected);
 
         protected:
             virtual ~MWSpell();
@@ -255,6 +240,8 @@ namespace MWGui
             void setSpellEffect(const SpellEffectParams& params);
 
             int getRequestedWidth() const { return mRequestedWidth; }
+
+            void setStateSelected(bool selected);
 
         protected:
             virtual ~MWSpellEffect();

@@ -1,6 +1,8 @@
 
 #include "combat.hpp"
 
+#include <array>
+
 #include <components/misc/rng.hpp>
 #include <components/settings/values.hpp>
 
@@ -12,6 +14,7 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -130,7 +133,7 @@ namespace MWMechanics
 
         static const int iBlockMaxChance = gmst.find("iBlockMaxChance")->mValue.getInteger();
         static const int iBlockMinChance = gmst.find("iBlockMinChance")->mValue.getInteger();
-        int x = std::clamp<int>(blockerTerm - attackerTerm, iBlockMinChance, iBlockMaxChance);
+        int x = std::clamp(static_cast<int>(blockerTerm - attackerTerm), iBlockMinChance, iBlockMaxChance);
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (Misc::Rng::roll0to99(prng) < x)
@@ -236,12 +239,12 @@ namespace MWMechanics
             if (attacker == getPlayer())
                 MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-            int skillValue = attacker.getClass().getSkill(attacker, weaponSkill);
+            int skillValue = static_cast<int>(attacker.getClass().getSkill(attacker, weaponSkill));
 
             if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
-                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false,
-                    MWMechanics::DamageSourceType::Ranged);
+                MWBase::Environment::get().getLuaManager()->onHit(attacker, victim, weapon, projectile, 0,
+                    attackStrength, damage, false, hitPosition, false, MWMechanics::DamageSourceType::Ranged);
                 MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
                 return;
             }
@@ -299,8 +302,8 @@ namespace MWMechanics
                     victim.getClass().getContainerStore(victim).add(projectile, 1);
             }
 
-            victim.getClass().onHit(
-                victim, damage, true, projectile, attacker, hitPosition, true, MWMechanics::DamageSourceType::Ranged);
+            MWBase::Environment::get().getLuaManager()->onHit(attacker, victim, weapon, projectile, 0, attackStrength,
+                damage, true, hitPosition, true, MWMechanics::DamageSourceType::Ranged);
         }
     }
 
@@ -347,12 +350,14 @@ namespace MWMechanics
         if (godmode)
             return;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        for (int i = 0; i < 3; ++i)
+        static const std::array<ESM::RefId, 3> elementalShieldEffects{ ESM::MagicEffect::FireShield,
+            ESM::MagicEffect::LightningShield, ESM::MagicEffect::FrostShield };
+        for (const auto elementalShieldEffect : elementalShieldEffects)
         {
             float magnitude = victim.getClass()
                                   .getCreatureStats(victim)
                                   .getMagicEffects()
-                                  .getOrDefault(ESM::MagicEffect::FireShield + i)
+                                  .getOrDefault(elementalShieldEffect)
                                   .getMagnitude();
 
             if (!magnitude)
@@ -372,10 +377,10 @@ namespace MWMechanics
 
             float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99(prng));
 
-            int element = ESM::MagicEffect::FireDamage;
-            if (i == 1)
+            ESM::RefId element = ESM::MagicEffect::FireDamage;
+            if (elementalShieldEffect == ESM::MagicEffect::LightningShield)
                 element = ESM::MagicEffect::ShockDamage;
-            if (i == 2)
+            if (elementalShieldEffect == ESM::MagicEffect::FrostShield)
                 element = ESM::MagicEffect::FrostDamage;
 
             float elementResistance
@@ -503,15 +508,19 @@ namespace MWMechanics
         }
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (isWerewolf)
         {
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfHit", prng);
             if (sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }
         else if (!healthdmg)
-            sndMgr->playSound3D(victim, ESM::RefId::stringRefId("Hand To Hand Hit"), 1.0f, 1.0f);
+        {
+            static const std::array<ESM::RefId, 2> sounds
+                = { ESM::RefId::stringRefId("Hand To Hand Hit"), ESM::RefId::stringRefId("Hand To Hand Hit 2") };
+            sndMgr->playSound3D(victim, sounds[Misc::Rng::rollDice(sounds.size(), prng)], 1.0f, 1.0f);
+        }
     }
 
     void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength)
@@ -578,6 +587,24 @@ namespace MWMechanics
         return dist;
     }
 
+    float getMeleeWeaponReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& weapon)
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+        const float fCombatDistance = store.find("fCombatDistance")->mValue.getFloat();
+        if (!weapon.isEmpty())
+            return fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
+        if (actor.getClass().isNpc())
+            return fCombatDistance * store.find("fHandToHandReach")->mValue.getFloat();
+        return fCombatDistance;
+    }
+
+    bool isInMeleeReach(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const float reach)
+    {
+        const float heightDiff = actor.getRefData().getPosition().pos[2] - target.getRefData().getPosition().pos[2];
+        return std::abs(heightDiff) < reach && getDistanceToBounds(actor, target) < reach;
+    }
+
     std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor, float reach)
     {
         // Lasciate ogne speranza, voi ch'entrate
@@ -608,16 +635,18 @@ namespace MWMechanics
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targets);
         else
             MWBase::Environment::get().getMechanicsManager()->getActorsInRange(
-                actorPos, Settings::game().mActorsProcessingRange, targets);
+                actorPos, static_cast<float>(Settings::game().mActorsProcessingRange), targets);
 
         for (MWWorld::Ptr& target : targets)
         {
             if (actor == target || target.getClass().getCreatureStats(target).isDead())
                 continue;
+
             const float dist = getDistanceToBounds(actor, target);
-            const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
-            if (dist >= reach || dist >= minDist || std::abs(targetPos.z() - actorPos.z()) >= reach)
+            if (dist >= minDist || !isInMeleeReach(actor, target, reach))
                 continue;
+
+            const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
 
             // Horizontal angle checks.
             osg::Vec2f actorToTargetXY{ targetPos.x() - actorPos.x(), targetPos.y() - actorPos.y() };

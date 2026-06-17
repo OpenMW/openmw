@@ -59,7 +59,7 @@ namespace CSVRender
     public:
         UnpagedWorldspaceWidget(const std::string& cellId, CSMDoc::Document& document, QWidget* parent);
 
-        dropRequirments getDropRequirements(DropType type) const override;
+        DropRequirements getDropRequirements(DropType type) const override;
 
         /// \return Drop handled?
         bool handleDrop(const std::vector<CSMWorld::UniversalId>& data, DropType type) override;
@@ -103,6 +103,8 @@ namespace CSVRender
 
         /// Erase all overrides and restore the visual representation to its true state.
         void reset(unsigned int elementMask) override;
+
+        CSVRender::Object* getObjectByReferenceId(const std::string& id) override;
 
     private:
         void referenceableDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight) override;

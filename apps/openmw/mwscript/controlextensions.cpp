@@ -25,11 +25,11 @@ namespace MWScript
     {
         class OpSetControl : public Interpreter::Opcode0
         {
-            std::string mControl;
+            std::string_view mControl;
             bool mEnable;
 
         public:
-            OpSetControl(const std::string& control, bool enable)
+            OpSetControl(std::string_view control, bool enable)
                 : mControl(control)
                 , mEnable(enable)
             {
@@ -43,10 +43,10 @@ namespace MWScript
 
         class OpGetDisabled : public Interpreter::Opcode0
         {
-            std::string mControl;
+            std::string_view mControl;
 
         public:
-            OpGetDisabled(const std::string& control)
+            OpGetDisabled(std::string_view control)
                 : mControl(control)
             {
             }
@@ -164,14 +164,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-
-                bool stanceOn = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
-                bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr);
-                bool inair = !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
-
-                runtime.push(stanceOn && (running || inair));
+                runtime.push(MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
             }
         };
 

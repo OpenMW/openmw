@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,7 @@
 
 #include <bitset>
 #include <unordered_map>
+#include <memory>
 
 namespace sol { namespace u_detail {
 
@@ -67,7 +68,7 @@ namespace sol { namespace u_detail {
 	struct binding : binding_base {
 		using uF = meta::unqualified_t<Fq>;
 		using F = meta::conditional_t<meta::is_c_str_of_v<uF, char>
-#if SOL_IS_ON(SOL_CHAR8_T_I_)
+#if SOL_IS_ON(SOL_CHAR8_T)
 			     || meta::is_c_str_of_v<uF, char8_t>
 #endif
 			     || meta::is_c_str_of_v<uF, char16_t> || meta::is_c_str_of_v<uF, char32_t> || meta::is_c_str_of_v<uF, wchar_t>,
@@ -307,12 +308,15 @@ namespace sol { namespace u_detail {
 		usertype_storage_base(lua_State* L_)
 		: m_L(L_)
 		, storage()
+		, string_keys_storage()
 		, string_keys()
 		, auxiliary_keys(0, stateless_reference_hash(L_), stateless_reference_equals(L_))
 		, value_index_table()
 		, reference_index_table()
 		, unique_index_table()
 		, const_reference_index_table()
+		, const_value_index_table()
+		, named_index_table()
 		, type_table(make_reference<stateless_reference>(L_, create))
 		, gc_names_table(make_reference<stateless_reference>(L_, create))
 		, named_metatable(make_reference<stateless_reference>(L_, create))
@@ -459,7 +463,7 @@ namespace sol { namespace u_detail {
 			}
 			(void)L_;
 			(void)self;
-#if SOL_IS_ON(SOL_USE_UNSAFE_BASE_LOOKUP_I_)
+#if SOL_IS_ON(SOL_USE_UNSAFE_BASE_LOOKUP)
 			usertype_storage_base& base_storage = get_usertype_storage<Base>(L_);
 			base_result = self_index_call<is_new_index, true>(bases(), L_, base_storage);
 #else
@@ -498,7 +502,11 @@ namespace sol { namespace u_detail {
 					stateless_reference* target = nullptr;
 					{
 						stack_reference k = stack::get<stack_reference>(L, 2);
+#if __cpp_lib_generic_unordered_lookup >= 201811L
 						auto it = self.auxiliary_keys.find(k);
+#else
+						auto it = self.auxiliary_keys.find(basic_reference(k));
+#endif
 						if (it != self.auxiliary_keys.cend()) {
 							target = &it->second;
 						}

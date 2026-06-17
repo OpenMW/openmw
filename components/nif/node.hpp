@@ -232,6 +232,8 @@ namespace Nif
         {
             float mMinRange;
             float mMaxRange;
+
+            void read(NIFStream* nif);
         };
 
         osg::Vec3f mLODCenter;
@@ -383,6 +385,7 @@ namespace Nif
         NiAlphaPropertyPtr mAlphaProperty;
         BSVertexDesc mVertDesc;
         uint32_t mDataSize;
+        uint16_t mNumVertices;
         std::vector<BSVertexData> mVertData;
         std::vector<unsigned short> mTriangles;
         uint32_t mParticleDataSize;
@@ -490,6 +493,38 @@ namespace Nif
     {
         uint8_t mMin, mMax;
         uint8_t mCurrent;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSResourceID
+    {
+        uint32_t mFileHash;
+        std::array<char, 4> mExtension;
+        uint32_t mDirectoryHash;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSDistantObjectInstance
+    {
+        BSResourceID mResourceID;
+        std::vector<osg::Matrixf> mTransforms;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSShaderTextureArray
+    {
+        std::vector<std::vector<std::string>> mTextureArrays;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSDistantObjectInstancedNode : BSMultiBoundNode
+    {
+        std::vector<BSDistantObjectInstance> mInstances;
+        std::array<BSShaderTextureArray, 3> mShaderTextureArrays;
 
         void read(NIFStream* nif) override;
     };

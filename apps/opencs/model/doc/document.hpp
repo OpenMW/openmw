@@ -12,14 +12,13 @@
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/files/multidircollection.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "../world/data.hpp"
 #include "../world/idcompletionmanager.hpp"
 
 #include "../tools/tools.hpp"
 
-#include "blacklist.hpp"
 #include "operationholder.hpp"
 #include "runner.hpp"
 #include "saving.hpp"
@@ -58,10 +57,9 @@ namespace CSMDoc
         CSMWorld::Data mData;
         CSMTools::Tools mTools;
         std::filesystem::path mProjectPath;
-        Saving mSavingOperation;
-        OperationHolder mSaving;
+        Saving* mSavingOperation;
+        OperationHolder* mSaving;
         std::filesystem::path mResDir;
-        Blacklist mBlacklist;
         Runner mRunner;
         bool mDirty;
 
@@ -93,10 +91,9 @@ namespace CSMDoc
         void addOptionalMagicEffect(const ESM::MagicEffect& effect);
 
     public:
-        Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool new_,
+        Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool isNew,
             const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-            const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
-            const std::vector<std::string>& archives);
+            const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
         ~Document() override = default;
 
@@ -135,8 +132,6 @@ namespace CSMDoc
 
         CSMTools::ReportModel* getReport(const CSMWorld::UniversalId& id);
         ///< The ownership of the returned report is not transferred.
-
-        bool isBlacklisted(const CSMWorld::UniversalId& id) const;
 
         void startRunning(const std::string& profile, const std::string& startupInstruction = "");
 

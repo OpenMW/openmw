@@ -29,14 +29,14 @@ namespace Gui
                 MyGUI::Align::Top | MyGUI::Align::Left | MyGUI::Align::Stretch, getName() + "_ScrollView");
     }
 
-    void MWList::addItem(std::string_view name)
+    void MWList::addItem(std::string_view name, int verticalPadding)
     {
-        mItems.emplace_back(name);
+        mItems.emplace_back(name, verticalPadding);
     }
 
     void MWList::addSeparator()
     {
-        mItems.emplace_back(std::string{});
+        addItem({});
     }
 
     void MWList::adjustSize()
@@ -46,9 +46,8 @@ namespace Gui
 
     void MWList::redraw(bool scrollbarShown)
     {
-        constexpr int _scrollBarWidth = 20; // fetch this from skin?
-        const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
-        constexpr int spacing = 3;
+        constexpr int scrollbarShownScrollBarWidth = 20; // fetch this from skin?
+        const int scrollBarWidth = scrollbarShown ? scrollbarShownScrollBarWidth : 0;
         int viewPosition = -mScrollView->getViewOffset().top;
 
         while (mScrollView->getChildCount())
@@ -60,25 +59,27 @@ namespace Gui
         int i = 0;
         for (const auto& item : mItems)
         {
-            if (!item.empty())
+            mItemHeight += item.mVPadding;
+            if (!item.mName.empty())
             {
                 if (mListItemSkin.empty())
                     return;
                 MyGUI::Button* button = mScrollView->createWidget<MyGUI::Button>(mListItemSkin,
                     MyGUI::IntCoord(0, mItemHeight, mScrollView->getSize().width - scrollBarWidth - 2, 24),
-                    MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + item);
-                button->setCaption(item);
+                    MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + item.mName);
+                button->setCaption(item.mName);
                 button->getSubWidgetText()->setWordWrap(true);
                 button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
                 button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheelMoved);
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWList::onItemSelected);
                 button->setNeedKeyFocus(true);
 
-                int height = button->getTextSize().height;
+                // Morrowind list item text widgets are typically 18 pixels tall
+                int height = button->getTextSize().height + 2;
                 button->setSize(MyGUI::IntSize(button->getSize().width, height));
                 button->setUserData(i);
 
-                mItemHeight += height + spacing;
+                mItemHeight += height;
             }
             else
             {
@@ -87,8 +88,9 @@ namespace Gui
                     MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch);
                 separator->setNeedMouseFocus(false);
 
-                mItemHeight += 18 + spacing;
+                mItemHeight += 18;
             }
+            mItemHeight += item.mVPadding;
             ++i;
         }
 
@@ -107,12 +109,12 @@ namespace Gui
         mScrollView->setViewOffset(MyGUI::IntPoint(0, -viewPosition));
     }
 
-    void MWList::setPropertyOverride(std::string_view _key, std::string_view _value)
+    void MWList::setPropertyOverride(std::string_view key, std::string_view value)
     {
-        if (_key == "ListItemSkin")
-            mListItemSkin = _value;
+        if (key == "ListItemSkin")
+            mListItemSkin = value;
         else
-            Base::setPropertyOverride(_key, _value);
+            Base::setPropertyOverride(key, value);
     }
 
     size_t MWList::getItemCount()
@@ -123,18 +125,19 @@ namespace Gui
     const std::string& MWList::getItemNameAt(size_t at)
     {
         assert(at < mItems.size() && "List item out of bounds");
-        return mItems[at];
+        return mItems[at].mName;
     }
 
     void MWList::sort()
     {
         // A special case for separators is not needed for now
-        std::sort(mItems.begin(), mItems.end(), Misc::StringUtils::ciLess);
+        std::sort(mItems.begin(), mItems.end(),
+            [](const auto& left, const auto& right) { return Misc::StringUtils::ciLess(left.mName, right.mName); });
     }
 
     void MWList::removeItem(const std::string& name)
     {
-        auto it = std::find(mItems.begin(), mItems.end(), name);
+        auto it = std::find_if(mItems.begin(), mItems.end(), [&name](const auto& item) { return item.mName == name; });
         assert(it != mItems.end());
         mItems.erase(it);
     }
@@ -144,22 +147,22 @@ namespace Gui
         mItems.clear();
     }
 
-    void MWList::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
+    void MWList::onMouseWheelMoved(MyGUI::Widget* /*sender*/, int rel)
     {
         // NB view offset is negative
-        if (mScrollView->getViewOffset().top + _rel * 0.3f > 0)
+        if (mScrollView->getViewOffset().top + rel * 0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mScrollView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel * 0.3)));
+                MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + rel * 0.3)));
     }
 
-    void MWList::onItemSelected(MyGUI::Widget* _sender)
+    void MWList::onItemSelected(MyGUI::Widget* sender)
     {
-        std::string name = _sender->castType<MyGUI::Button>()->getCaption();
-        int id = *_sender->getUserData<int>();
+        std::string name = sender->castType<MyGUI::Button>()->getCaption();
+        int id = *sender->getUserData<int>();
         eventItemSelected(name, id);
-        eventWidgetSelected(_sender);
+        eventWidgetSelected(sender);
     }
 
     MyGUI::Button* MWList::getItemWidget(std::string_view name)
@@ -172,5 +175,10 @@ namespace Gui
     void MWList::scrollToTop()
     {
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
+
+    void MWList::setViewOffset(int offset)
+    {
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, offset));
     }
 }

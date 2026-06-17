@@ -38,7 +38,7 @@ namespace MWPhysics
     }
 
     void ActorTracer::doTrace(const btCollisionObject* actor, const osg::Vec3f& start, const osg::Vec3f& end,
-        const btCollisionWorld* world, bool attempt_short_trace)
+        const btCollisionWorld* world, bool attemptShortTrace)
     {
         const btVector3 btstart = Misc::Convert::toBullet(start);
         btVector3 btend = Misc::Convert::toBullet(end);
@@ -50,16 +50,16 @@ namespace MWPhysics
         // This trace needs to be at least a couple units long, but there's no one particular ideal length.
         // The length of 2.1 chosen here is a "works well in practice after testing a few random lengths" value.
         // (Also, we only do this short test if the intended collision trace is long enough for it to make sense.)
-        const float fallback_length = 2.1f;
-        bool doing_short_trace = false;
+        const float fallbackLength = 2.1f;
+        bool doingShortTrace = false;
         // For some reason, typical scenes perform a little better if we increase the threshold length for the length
         // test. (Multiplying by 2 in 'square distance' units gives us about 1.4x the threshold length. In benchmarks
         // this was
         //  slightly better for the performance of normal scenes than 4.0, and just plain better than 1.0.)
-        if (attempt_short_trace && (btend - btstart).length2() > fallback_length * fallback_length * 2.0)
+        if (attemptShortTrace && (btend - btstart).length2() > fallbackLength * fallbackLength * 2.0)
         {
-            btend = btstart + (btend - btstart).normalized() * fallback_length;
-            doing_short_trace = true;
+            btend = btstart + (btend - btstart).normalized() * fallbackLength;
+            doingShortTrace = true;
         }
 
         const auto traceCallback = sweepHelper(actor, btstart, btend, world, false);
@@ -67,10 +67,10 @@ namespace MWPhysics
         // Copy the hit data over to our trace results struct:
         if (traceCallback.hasHit())
         {
-            mFraction = traceCallback.m_closestHitFraction;
+            mFraction = static_cast<float>(traceCallback.m_closestHitFraction);
             // ensure fraction is correct (covers intended distance traveled instead of actual distance traveled)
-            if (doing_short_trace && (end - start).length2() > 0.0)
-                mFraction *= (btend - btstart).length() / (end - start).length();
+            if (doingShortTrace && (end - start).length2() > 0.0)
+                mFraction *= static_cast<float>((btend - btstart).length() / (end - start).length());
             mPlaneNormal = Misc::Convert::toOsg(traceCallback.m_hitNormalWorld);
             mEndPos = (end - start) * mFraction + start;
             mHitPoint = Misc::Convert::toOsg(traceCallback.m_hitPointWorld);
@@ -78,14 +78,14 @@ namespace MWPhysics
         }
         else
         {
-            if (doing_short_trace)
+            if (doingShortTrace)
             {
                 btend = Misc::Convert::toBullet(end);
                 const auto newTraceCallback = sweepHelper(actor, btstart, btend, world, false);
 
                 if (newTraceCallback.hasHit())
                 {
-                    mFraction = newTraceCallback.m_closestHitFraction;
+                    mFraction = static_cast<float>(newTraceCallback.m_closestHitFraction);
                     mPlaneNormal = Misc::Convert::toOsg(newTraceCallback.m_hitNormalWorld);
                     mEndPos = (end - start) * mFraction + start;
                     mHitPoint = Misc::Convert::toOsg(newTraceCallback.m_hitPointWorld);
@@ -109,7 +109,7 @@ namespace MWPhysics
             actor->getCollisionObject(), Misc::Convert::toBullet(start), Misc::Convert::toBullet(end), world, true);
         if (traceCallback.hasHit())
         {
-            mFraction = traceCallback.m_closestHitFraction;
+            mFraction = static_cast<float>(traceCallback.m_closestHitFraction);
             mPlaneNormal = Misc::Convert::toOsg(traceCallback.m_hitNormalWorld);
             mEndPos = (end - start) * mFraction + start;
         }

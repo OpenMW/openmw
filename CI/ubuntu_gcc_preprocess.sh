@@ -31,7 +31,8 @@ cmake \
     -D BUILD_OPENCS=ON \
     -D BUILD_OPENCS_TESTS=ON \
     -D BUILD_OPENMW=ON \
-    -D BUILD_UNITTESTS=ON \
+    -D BUILD_OPENMW_TESTS=ON \
+    -D BUILD_COMPONENTS_TESTS=ON \
     -D BUILD_WIZARD=ON \
     "${SRC}"
 cmake --build . --parallel
@@ -49,15 +50,16 @@ git remote add target "${CI_MERGE_REQUEST_PROJECT_URL:-https://gitlab.com/OpenMW
 
 TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-master}"
 
-git fetch target "${TARGET_BRANCH:?}"
+# Use unshallow to prevent error with git-merge-base: https://stackoverflow.com/a/78596539/22975246
+git fetch --unshallow target "${TARGET_BRANCH:?}" || git fetch target "${TARGET_BRANCH:?}"
 
 if [[ "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]]; then
     git remote add source "${CI_MERGE_REQUEST_SOURCE_PROJECT_URL}"
-    git fetch --unshallow source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    git fetch --unshallow source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" || git fetch source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
 elif [[ "${CI_COMMIT_BRANCH}" ]]; then
-    git fetch origin "${CI_COMMIT_BRANCH:?}"
+    git fetch --unshallow origin "${CI_COMMIT_BRANCH:?}" || git fetch origin "${CI_COMMIT_BRANCH:?}"
 else
-    git fetch origin
+    git fetch --unshallow origin || git fetch origin
 fi
 
 BASE_VERSION=$(git merge-base "target/${TARGET_BRANCH:?}" "${VERSION:?}")

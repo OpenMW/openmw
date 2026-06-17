@@ -1,5 +1,7 @@
 #include "pingpongcanvas.hpp"
 
+#include <cassert>
+
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -44,7 +46,7 @@ namespace MWRender
         mMultiviewResolveStateSet->addUniform(new osg::Uniform("lastShader", 0));
     }
 
-    void PingPongCanvas::setPasses(fx::DispatchArray&& passes)
+    void PingPongCanvas::setPasses(Fx::DispatchArray&& passes)
     {
         mPasses = std::move(passes);
     }
@@ -52,8 +54,8 @@ namespace MWRender
     void PingPongCanvas::setMask(bool underwater, bool exterior)
     {
         mMask = 0;
-        mMask |= underwater ? fx::Technique::Flag_Disable_Underwater : fx::Technique::Flag_Disable_Abovewater;
-        mMask |= exterior ? fx::Technique::Flag_Disable_Exteriors : fx::Technique::Flag_Disable_Interiors;
+        mMask |= underwater ? Fx::Technique::Flag_Disable_Underwater : Fx::Technique::Flag_Disable_Abovewater;
+        mMask |= exterior ? Fx::Technique::Flag_Disable_Exteriors : Fx::Technique::Flag_Disable_Interiors;
     }
 
     void PingPongCanvas::drawGeometry(osg::RenderInfo& renderInfo) const
@@ -276,35 +278,7 @@ namespace MWRender
 
                 if (pass.mRenderTarget)
                 {
-                    if (mDirtyAttachments.size() > 0)
-                    {
-                        const auto [w, h]
-                            = pass.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
-
-                        // Custom render targets must be shared between frame ids, so it's impossible to double buffer
-                        // without expensive copies. That means the only thread-safe place to resize is in the draw
-                        // thread.
-                        osg::Texture2D* texture = const_cast<osg::Texture2D*>(dynamic_cast<const osg::Texture2D*>(
-                            pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
-                                .getTexture()));
-
-                        assert(texture != nullptr);
-
-                        texture->setTextureSize(w, h);
-                        texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());
-                        texture->dirtyTextureObject();
-                    }
-
                     pass.mRenderTarget->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-
-                    if (pass.mRenderTexture->getNumMipmapLevels() > 0)
-                    {
-                        state.setActiveTextureUnit(0);
-                        state.applyTextureAttribute(0,
-                            pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
-                                .getTexture());
-                        ext->glGenerateMipmap(GL_TEXTURE_2D);
-                    }
 
                     lastApplied = pass.mRenderTarget->getHandle(state.getContextID());
                 }
@@ -341,6 +315,15 @@ namespace MWRender
                     mFallbackProgram->apply(state);
 
                 drawGeometry(renderInfo);
+
+                if (pass.mRenderTarget && pass.mRenderTexture->getNumMipmapLevels() > 0)
+                {
+                    state.setActiveTextureUnit(0);
+                    state.applyTextureAttribute(0,
+                        pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
+                            .getTexture());
+                    ext->glGenerateMipmap(GL_TEXTURE_2D);
+                }
 
                 state.popStateSet();
                 state.apply();

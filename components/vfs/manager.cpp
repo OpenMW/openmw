@@ -1,6 +1,5 @@
 #include "manager.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <stdexcept>
 
@@ -38,6 +37,11 @@ namespace VFS
             archive->listResources(mIndex);
     }
 
+    Files::IStreamPtr Manager::find(Path::NormalizedView name) const
+    {
+        return findNormalized(name.value());
+    }
+
     Files::IStreamPtr Manager::get(const Path::Normalized& name) const
     {
         return getNormalized(name);
@@ -51,10 +55,10 @@ namespace VFS
     Files::IStreamPtr Manager::getNormalized(std::string_view normalizedName) const
     {
         assert(Path::isNormalized(normalizedName));
-        const auto found = mIndex.find(normalizedName);
-        if (found == mIndex.end())
+        auto ptr = findNormalized(normalizedName);
+        if (ptr == nullptr)
             throw std::runtime_error("Resource '" + std::string(normalizedName) + "' not found");
-        return found->second->open();
+        return ptr;
     }
 
     bool Manager::exists(const Path::Normalized& name) const
@@ -77,15 +81,20 @@ namespace VFS
         return {};
     }
 
-    std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path& name) const
+    std::filesystem::file_time_type Manager::getLastModified(VFS::Path::NormalizedView name) const
     {
-        std::string normalized = Files::pathToUnicodeString(name);
-        Path::normalizeFilenameInPlace(normalized);
-
-        const auto found = mIndex.find(normalized);
+        const auto found = mIndex.find(name);
         if (found == mIndex.end())
-            throw std::runtime_error("Resource '" + normalized + "' not found");
-        return found->second->getPath();
+            throw std::runtime_error("Resource '" + std::string(name.value()) + "' not found");
+        return found->second->getLastModified();
+    }
+
+    std::string Manager::getStem(VFS::Path::NormalizedView name) const
+    {
+        const auto found = mIndex.find(name);
+        if (found == mIndex.end())
+            throw std::runtime_error("Resource '" + std::string(name.value()) + "' not found");
+        return found->second->getStem();
     }
 
     RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator(std::string_view path) const
@@ -115,5 +124,14 @@ namespace VFS
     RecursiveDirectoryRange Manager::getRecursiveDirectoryIterator() const
     {
         return { mIndex.begin(), mIndex.end() };
+    }
+
+    Files::IStreamPtr Manager::findNormalized(std::string_view normalizedPath) const
+    {
+        assert(Path::isNormalized(normalizedPath));
+        const auto it = mIndex.find(normalizedPath);
+        if (it == mIndex.end())
+            return nullptr;
+        return it->second->open();
     }
 }

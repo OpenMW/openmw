@@ -1,22 +1,21 @@
 #ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
 #define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include <span>
-
-#include <osg/Camera>
-#include <osg/Light>
-#include <osg/ref_ptr>
-
-#include <components/settings/settings.hpp>
-
-#include <osgUtil/IncrementalCompileOperation>
-
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
 
+#include <components/settings/settings.hpp>
+#include <components/vfs/pathutil.hpp>
+
+#include <osg/Light>
+#include <osg/ref_ptr>
+
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <deque>
 #include <memory>
+#include <span>
 #include <unordered_map>
 
 namespace osg
@@ -64,6 +63,9 @@ namespace SceneUtil
     class WorkQueue;
     class LightManager;
     class UnrefQueue;
+    class PerViewUniformStateUpdater;
+    class SharedUniformStateUpdater;
+    class StateUpdater;
 }
 
 namespace DetourNavigator
@@ -86,9 +88,6 @@ namespace Debug
 
 namespace MWRender
 {
-    class StateUpdater;
-    class SharedUniformStateUpdater;
-    class PerViewUniformStateUpdater;
     class IntersectionVisitorWithIgnoreList;
 
     class EffectManager;
@@ -136,11 +135,11 @@ namespace MWRender
 
         void setAmbientColour(const osg::Vec4f& colour);
 
-        void skySetDate(int day, int month);
         int skyGetMasserPhase() const;
         int skyGetSecundaPhase() const;
         void skySetMoonColour(bool red);
 
+        const osg::Vec4f& getSunLightPosition() const { return mSunLight->getPosition(); }
         void setSunDirection(const osg::Vec3f& direction);
         void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular, float sunVis);
         void setNight(bool isNight) { mNight = isNight; }
@@ -168,7 +167,6 @@ namespace MWRender
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
         void screenshot(osg::Image* image, int w, int h);
-        bool screenshot360(osg::Image* image);
 
         struct RayResult
         {
@@ -188,9 +186,8 @@ namespace MWRender
         RayResult castCameraToViewportRay(
             const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors = false);
 
-        /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being
-        /// the top left corner.
-        osg::Vec4f getScreenBounds(const osg::BoundingBox& worldbb);
+        /// Get normalized screen coordinates of the bounding box's summit, where (0,0) is the top left corner
+        osg::Vec2f getScreenCoords(const osg::BoundingBox& bb);
 
         void setSkyEnabled(bool enabled);
 
@@ -198,8 +195,11 @@ namespace MWRender
 
         SkyManager* getSkyManager();
 
-        void spawnEffect(const std::string& model, std::string_view texture, const osg::Vec3f& worldPosition,
-            float scale = 1.f, bool isMagicVFX = true);
+        void spawnEffect(VFS::Path::NormalizedView model, std::string_view texture, const osg::Vec3f& worldPosition,
+            float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true, std::string_view effectId = {},
+            bool loop = false);
+
+        void removeEffect(std::string_view effectId);
 
         /// Clear all savegame-specific data
         void clear();
@@ -279,11 +279,17 @@ namespace MWRender
 
         void setNavMeshMode(Settings::NavMeshRenderMode value);
 
+        void setProjectionOffset(const osg::Vec2f& offset)
+        {
+            mProjectionOffset = offset;
+            mUpdateProjectionMatrix = true;
+        }
+        osg::Vec2f getProjectionOffset() const { return mProjectionOffset; }
+
     private:
         void updateTextureFiltering();
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
-        void updateThirdPersonViewMode();
 
         struct WorldspaceChunkMgr
         {
@@ -340,9 +346,9 @@ namespace MWRender
         std::unique_ptr<Camera> mCamera;
         osg::ref_ptr<Debug::DebugDrawer> mDebugDraw;
 
-        osg::ref_ptr<StateUpdater> mStateUpdater;
-        osg::ref_ptr<SharedUniformStateUpdater> mSharedUniformStateUpdater;
-        osg::ref_ptr<PerViewUniformStateUpdater> mPerViewUniformStateUpdater;
+        osg::ref_ptr<SceneUtil::StateUpdater> mStateUpdater;
+        osg::ref_ptr<SceneUtil::SharedUniformStateUpdater> mSharedUniformStateUpdater;
+        osg::ref_ptr<SceneUtil::PerViewUniformStateUpdater> mPerViewUniformStateUpdater;
 
         osg::Vec4f mAmbientColor;
         float mNightEyeFactor;
@@ -355,6 +361,7 @@ namespace MWRender
         float mFirstPersonFieldOfView;
         bool mUpdateProjectionMatrix = false;
         bool mNight = false;
+        osg::Vec2f mProjectionOffset;
         const MWWorld::GroundcoverStore& mGroundCoverStore;
 
         void operator=(const RenderingManager&);

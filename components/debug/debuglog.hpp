@@ -6,24 +6,23 @@
 
 namespace Debug
 {
-    enum Level
+    enum Level : unsigned
     {
         Error = 1,
         Warning = 2,
         Info = 3,
         Verbose = 4,
         Debug = 5,
-        Marker = Debug,
-
-        NoLevel = 6 // Do not filter messages in this case
+        All = 6,
     };
-
-    extern Level CurrentDebugLevel;
 }
 
 class Log
 {
 public:
+    static Debug::Level sMinDebugLevel;
+    static bool sWriteLevel;
+
     explicit Log(Debug::Level level);
     ~Log();
 

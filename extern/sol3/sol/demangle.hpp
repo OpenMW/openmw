@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -28,7 +28,7 @@
 #include <string>
 #include <array>
 #include <cctype>
-#if SOL_IS_ON(SOL_MINGW_CCTYPE_IS_POISONED_I_)
+#if SOL_IS_ON(SOL_MINGW_CCTYPE_IS_POISONED)
 extern "C" {
 #include <ctype.h>
 }
@@ -47,7 +47,7 @@ namespace sol { namespace detail {
 		"`anonymous namespace'" } };
 
 
-#if SOL_IS_ON(SOL_COMPILER_GCC_I_) || SOL_IS_ON(SOL_COMPILER_CLANG_I_)
+#if SOL_IS_ON(SOL_COMPILER_GCC) || SOL_IS_ON(SOL_COMPILER_CLANG)
 	inline std::string ctti_get_type_name_from_sig(std::string name) {
 		// cardinal sins from MINGW
 		using namespace std;
@@ -85,7 +85,7 @@ namespace sol { namespace detail {
 	inline std::string ctti_get_type_name() {
 		return ctti_get_type_name_from_sig(__PRETTY_FUNCTION__);
 	}
-#elif SOL_IS_ON(SOL_COMPILER_VCXX_I_)
+#elif SOL_IS_ON(SOL_COMPILER_VCXX)
 	inline std::string ctti_get_type_name_from_sig(std::string name) {
 		std::size_t start = name.find("get_type_name");
 		if (start == std::string::npos)

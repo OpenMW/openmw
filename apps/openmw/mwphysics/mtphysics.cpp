@@ -275,10 +275,13 @@ namespace
                 if (mAdvanceSimulation)
                 {
                     MWWorld::Ptr standingOn;
-                    auto* ptrHolder
-                        = static_cast<MWPhysics::PtrHolder*>(scheduler->getUserPointer(frameData.mStandingOn));
-                    if (ptrHolder)
-                        standingOn = ptrHolder->getPtr();
+                    if (frameData.mStandingOn != nullptr)
+                    {
+                        auto* const ptrHolder
+                            = static_cast<MWPhysics::PtrHolder*>(scheduler->getUserPointer(frameData.mStandingOn));
+                        if (ptrHolder != nullptr)
+                            standingOn = ptrHolder->getPtr();
+                    }
                     actor->setStandingOnPtr(standingOn);
                     // the "on ground" state of an actor might have been updated by a traceDown, don't overwrite the
                     // change
@@ -455,10 +458,10 @@ namespace MWPhysics
             thread.join();
     }
 
-    std::tuple<int, float> PhysicsTaskScheduler::calculateStepConfig(float timeAccum) const
+    std::tuple<unsigned, float> PhysicsTaskScheduler::calculateStepConfig(float timeAccum) const
     {
-        int maxAllowedSteps = 2;
-        int numSteps = timeAccum / mDefaultPhysicsDt;
+        unsigned maxAllowedSteps = 2;
+        unsigned numSteps = static_cast<unsigned>(timeAccum / mDefaultPhysicsDt);
 
         // adjust maximum step count based on whether we're likely physics bottlenecked or not
         // if maxAllowedSteps ends up higher than numSteps, we will not invoke delta time
@@ -475,13 +478,13 @@ namespace MWPhysics
         // ensure sane minimum value
         budgetMeasurement = std::max(0.00001f, budgetMeasurement);
         // we're spending almost or more than realtime per physics frame; limit to a single step
-        if (budgetMeasurement > 0.95)
+        if (budgetMeasurement > 0.95f)
             maxAllowedSteps = 1;
         // physics is fairly cheap; limit based on expense
-        if (budgetMeasurement < 0.5)
-            maxAllowedSteps = std::ceil(1.0 / budgetMeasurement);
+        if (budgetMeasurement < 0.5f)
+            maxAllowedSteps = static_cast<unsigned>(std::ceil(1.f / budgetMeasurement));
         // limit to a reasonable amount
-        maxAllowedSteps = std::min(10, maxAllowedSteps);
+        maxAllowedSteps = std::min(10u, maxAllowedSteps);
 
         // fall back to delta time for this frame if fixed timestep physics would fall behind
         float actualDelta = mDefaultPhysicsDt;
@@ -520,7 +523,7 @@ namespace MWPhysics
 
         MaybeExclusiveLock lock(mSimulationMutex, mLockingPolicy);
 
-        double timeStart = mTimer->tick();
+        auto timeStart = mTimer->tick();
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
@@ -547,7 +550,7 @@ namespace MWPhysics
         mPhysicsDt = newDelta;
         mSimulations = &simulations;
         mAdvanceSimulation = (mRemainingSteps != 0);
-        mNumJobs = mSimulations->size();
+        mNumJobs = static_cast<int>(mSimulations->size());
         mNextLOS.store(0, std::memory_order_relaxed);
         mNextJob.store(0, std::memory_order_release);
 
@@ -650,15 +653,15 @@ namespace MWPhysics
     void PhysicsTaskScheduler::addCollisionObject(
         btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask)
     {
-        mCollisionObjects.insert(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.insert(collisionObject);
         mCollisionWorld->addCollisionObject(collisionObject, collisionFilterGroup, collisionFilterMask);
     }
 
     void PhysicsTaskScheduler::removeCollisionObject(btCollisionObject* collisionObject)
     {
-        mCollisionObjects.erase(collisionObject);
         MaybeExclusiveLock lock(mCollisionWorldMutex, mLockingPolicy);
+        mCollisionObjects.erase(collisionObject);
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
@@ -696,7 +699,7 @@ namespace MWPhysics
     {
         MaybeSharedLock lock(mLOSCacheMutex, mLockingPolicy);
         int job = 0;
-        int numLOS = mLOSCache.size();
+        int numLOS = static_cast<int>(mLOSCache.size());
         while ((job = mNextLOS.fetch_add(1, std::memory_order_relaxed)) < numLOS)
         {
             auto& req = mLOSCache[job];
@@ -761,9 +764,9 @@ namespace MWPhysics
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
     {
         btVector3 pos1 = Misc::Convert::toBullet(
-            actor1->getCollisionObjectPosition() + osg::Vec3f(0, 0, actor1->getHalfExtents().z() * 0.9)); // eye level
+            actor1->getCollisionObjectPosition() + osg::Vec3f(0, 0, actor1->getHalfExtents().z() * 0.9f)); // eye level
         btVector3 pos2 = Misc::Convert::toBullet(
-            actor2->getCollisionObjectPosition() + osg::Vec3f(0, 0, actor2->getHalfExtents().z() * 0.9));
+            actor2->getCollisionObjectPosition() + osg::Vec3f(0, 0, actor2->getHalfExtents().z() * 0.9f));
 
         btCollisionWorld::ClosestRayResultCallback resultCallback(pos1, pos2);
         resultCallback.m_collisionFilterGroup = CollisionType_AnyPhysical;

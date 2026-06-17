@@ -9,6 +9,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/l10n/qttranslations.hpp>
+#include <components/platform/application.hpp>
 #include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -29,11 +30,11 @@ int runLauncher(int argc, char* argv[])
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
 
-    setupLogging(configurationManager.getLogPath(), "Launcher");
+    Debug::setupLogging(configurationManager.getLogPath(), "Launcher");
 
     try
     {
-        QApplication app(argc, argv);
+        Platform::Application app(argc, argv);
 
         QString resourcesPath(".");
         if (!variables["resources"].empty())
@@ -41,7 +42,7 @@ int runLauncher(int argc, char* argv[])
             resourcesPath = Files::pathToQString(variables["resources"].as<Files::MaybeQuotedPath>().u8string());
         }
 
-        l10n::installQtTranslations(app, "launcher", resourcesPath);
+        L10n::installQtTranslations(app, "launcher", resourcesPath);
 
         Launcher::MainDialog mainWin(configurationManager);
 
@@ -65,5 +66,5 @@ int runLauncher(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(runLauncher, argc, argv, "Launcher");
+    return Debug::wrapApplication(runLauncher, argc, argv, "Launcher");
 }

@@ -25,14 +25,12 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <string>
-#include <string_view>
 #include <unordered_map>
-#include <vector>
 
 namespace DetourNavigator
 {
     class RecastMesh;
+    struct TileCachedRecastMeshManagerStats;
 
     class TileCachedRecastMeshManager
     {
@@ -49,7 +47,7 @@ namespace DetourNavigator
 
         TilesPositionsRange getLimitedObjectsRange() const;
 
-        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
+        void setWorldspace(ESM::RefId worldspace, const UpdateGuard* guard);
 
         bool addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform, AreaType areaType,
             const UpdateGuard* guard);
@@ -67,11 +65,11 @@ namespace DetourNavigator
 
         void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        std::shared_ptr<RecastMesh> getMesh(std::string_view worldspace, const TilePosition& tilePosition);
+        std::shared_ptr<RecastMesh> getMesh(ESM::RefId worldspace, const TilePosition& tilePosition);
 
-        std::shared_ptr<RecastMesh> getCachedMesh(std::string_view worldspace, const TilePosition& tilePosition) const;
+        std::shared_ptr<RecastMesh> getCachedMesh(ESM::RefId worldspace, const TilePosition& tilePosition) const;
 
-        std::shared_ptr<RecastMesh> getNewMesh(std::string_view worldspace, const TilePosition& tilePosition) const;
+        std::shared_ptr<RecastMesh> getNewMesh(ESM::RefId worldspace, const TilePosition& tilePosition) const;
 
         std::size_t getRevision() const { return mRevision; }
 
@@ -80,6 +78,8 @@ namespace DetourNavigator
         void addChangedTile(const TilePosition& tilePosition, ChangeType changeType);
 
         std::map<osg::Vec2i, ChangeType> takeChangedTiles(const UpdateGuard* guard);
+
+        TileCachedRecastMeshManagerStats getStats() const;
 
     private:
         struct Report
@@ -128,7 +128,7 @@ namespace DetourNavigator
 
         const RecastSettings& mSettings;
         TilesPositionsRange mRange;
-        std::string mWorldspace;
+        ESM::RefId mWorldspace;
         std::unordered_map<ObjectId, std::unique_ptr<ObjectData>> mObjects;
         boost::geometry::index::rtree<ObjectIndexValue, boost::geometry::index::quadratic<16>> mObjectIndex;
         std::map<osg::Vec2i, WaterData> mWater;

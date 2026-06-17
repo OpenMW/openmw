@@ -4,6 +4,7 @@
 #include <limits>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -400,7 +401,7 @@ namespace MWMechanics
         const auto newTypeId = package.getTypeId();
         if (currentTypeId <= MWMechanics::AiPackageTypeId::Wander
             && !hasPackage(MWMechanics::AiPackageTypeId::InternalTravel)
-            && (newTypeId <= MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
+            && (newTypeId == MWMechanics::AiPackageTypeId::Combat || newTypeId == MWMechanics::AiPackageTypeId::Pursue
                 || newTypeId == MWMechanics::AiPackageTypeId::Cast))
         {
             osg::Vec3f dest;
@@ -444,8 +445,15 @@ namespace MWMechanics
 
             if ((*it)->getPriority() <= package.getPriority())
             {
+                if (cancelOther && isActualAiPackage((*it)->getTypeId()))
+                    mAiState.reset();
                 onPackageAdded(package);
-                mPackages.insert(it, package.clone());
+                it = mPackages.insert(it, package.clone());
+                if (newTypeId == MWMechanics::AiPackageTypeId::Follow)
+                {
+                    for (++it; it != mPackages.end(); ++it)
+                        (*it)->resetInitialPosition();
+                }
                 return;
             }
         }
@@ -455,11 +463,7 @@ namespace MWMechanics
 
         // Make sure that temporary storage is empty
         if (cancelOther)
-        {
-            mAiState.moveIn(std::make_unique<AiCombatStorage>());
-            mAiState.moveIn(std::make_unique<AiFollowStorage>());
-            mAiState.moveIn(std::make_unique<AiWanderStorage>());
-        }
+            mAiState.reset();
     }
 
     bool MWMechanics::AiSequence::isEmpty() const
@@ -535,6 +539,7 @@ namespace MWMechanics
         for (auto& container : sequence.mPackages)
         {
             std::unique_ptr<MWMechanics::AiPackage> package;
+            bool hasTarget = false;
             switch (container.mType)
             {
                 case ESM::AiSequence::Ai_Wander:
@@ -557,12 +562,14 @@ namespace MWMechanics
                 {
                     package = std::make_unique<AiEscort>(
                         &static_cast<const ESM::AiSequence::AiEscort&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Follow:
                 {
                     package = std::make_unique<AiFollow>(
                         &static_cast<const ESM::AiSequence::AiFollow&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Activate:
@@ -575,12 +582,14 @@ namespace MWMechanics
                 {
                     package = std::make_unique<AiCombat>(
                         &static_cast<const ESM::AiSequence::AiCombat&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 case ESM::AiSequence::Ai_Pursue:
                 {
                     package = std::make_unique<AiPursue>(
                         &static_cast<const ESM::AiSequence::AiPursue&>(*container.mPackage));
+                    hasTarget = true;
                     break;
                 }
                 default:
@@ -589,6 +598,8 @@ namespace MWMechanics
 
             if (!package.get())
                 continue;
+            if (hasTarget && sequence.mActorIdConverter)
+                sequence.mActorIdConverter->convert(package->mTargetActor, package->mTargetActor.mIndex);
 
             onPackageAdded(*package);
             mPackages.push_back(std::move(package));

@@ -41,7 +41,7 @@ namespace SceneUtil
         float mDuration;
         float mOriginalDuration; // for recording that this is originally a permanent glow if it is changed to a
                                  // temporary one
-        float mStartingTime;
+        double mStartingTime;
         Resource::ResourceSystem* mResourceSystem;
         bool mColorChanged;
         bool mDone;
@@ -68,19 +68,19 @@ namespace SceneUtil
         bsphere._center = bsphere._center * matrix;
 
         xdash -= bsphere._center;
-        typename VT::value_type sqrlen_xdash = xdash.length2();
+        typename VT::value_type sqrlenXdash = xdash.length2();
 
         ydash -= bsphere._center;
-        typename VT::value_type sqrlen_ydash = ydash.length2();
+        typename VT::value_type sqrlenYdash = ydash.length2();
 
         zdash -= bsphere._center;
-        typename VT::value_type sqrlen_zdash = zdash.length2();
+        typename VT::value_type sqrlenZdash = zdash.length2();
 
-        bsphere._radius = sqrlen_xdash;
-        if (bsphere._radius < sqrlen_ydash)
-            bsphere._radius = sqrlen_ydash;
-        if (bsphere._radius < sqrlen_zdash)
-            bsphere._radius = sqrlen_zdash;
+        bsphere._radius = sqrlenXdash;
+        if (bsphere._radius < sqrlenYdash)
+            bsphere._radius = sqrlenYdash;
+        if (bsphere._radius < sqrlenZdash)
+            bsphere._radius = sqrlenZdash;
         bsphere._radius = sqrtf(bsphere._radius);
     }
 
@@ -116,6 +116,10 @@ namespace SceneUtil
     // Compute the unsized format equivalent to the given pixel format
     // Unlike osg::Image::computePixelFormat, this also covers compressed formats
     GLenum computeUnsizedPixelFormat(GLenum format);
+
+    // Recover the presumed texture type for the given texture unit
+    // It may be set as a state attribute or it may come from the used texture's name
+    const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit);
 }
 
 #endif

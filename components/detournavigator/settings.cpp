@@ -44,7 +44,7 @@ namespace DetourNavigator
             };
         }
 
-        RecastSettings makeRecastSettingsFromSettingsManager()
+        RecastSettings makeRecastSettingsFromSettingsManager(Debug::Level maxLogLevel)
         {
             RecastSettings result;
 
@@ -63,6 +63,7 @@ namespace DetourNavigator
             result.mRegionMergeArea = ::Settings::navigator().mRegionMergeArea;
             result.mRegionMinArea = ::Settings::navigator().mRegionMinArea;
             result.mTileSize = ::Settings::navigator().mTileSize;
+            result.mMaxLogLevel = maxLogLevel;
 
             return result;
         }
@@ -80,11 +81,11 @@ namespace DetourNavigator
         }
     }
 
-    Settings makeSettingsFromSettingsManager()
+    Settings makeSettingsFromSettingsManager(Debug::Level maxLogLevel)
     {
         Settings result;
 
-        result.mRecast = makeRecastSettingsFromSettingsManager();
+        result.mRecast = makeRecastSettingsFromSettingsManager(maxLogLevel);
         result.mDetour = makeDetourSettingsFromSettingsManager();
 
         const NavMeshLimits limits = getNavMeshTileLimits(result.mDetour);
@@ -105,6 +106,11 @@ namespace DetourNavigator
         result.mEnableNavMeshDiskCache = ::Settings::navigator().mEnableNavMeshDiskCache;
         result.mWriteToNavMeshDb = ::Settings::navigator().mWriteToNavmeshdb;
         result.mMaxDbFileSize = ::Settings::navigator().mMaxNavmeshdbFileSize;
+
+        if (result.mMaxTilesNumber < ::Settings::navigator().mMaxTilesNumber.get())
+            Log(Debug::Warning)
+                << "Navigator max tiles number is adjusted due to limitation on number of bits for tile identifier: "
+                << result.mMaxTilesNumber;
 
         return result;
     }

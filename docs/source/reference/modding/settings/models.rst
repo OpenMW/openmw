@@ -1,274 +1,174 @@
 Models Settings
 ###############
 
-load unsupported nif files
---------------------------
+.. omw-setting::
+   :title: load unsupported nif files
+   :type: boolean
+   :range: true, false
+   :default: false
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+   Allows the engine to load arbitrary NIF files that appear valid.
+   Support is limited and experimental; enabling may cause crashes or memory issues.
+   Do not enable unless you understand the risks.
 
-Allow the engine to load arbitrary NIF files as long as they appear to be valid.
+.. omw-setting::
+   :title: xbaseanim
+   :type: string
+   :default: meshes/xbase_anim.nif
 
-OpenMW has limited and **experimental** support for NIF files
-that Morrowind itself cannot load, which normally goes unused.
+   Path to the 3rd person base animation model file; expects a matching KF file.
+   For COLLADA, use the same file for all animation entries with corresponding textkeys.
 
-If enabled, this setting allows the NIF loader to make use of that functionality.
+.. omw-setting::
+   :title: baseanim
+   :type: string
+   :default: meshes/base_anim.nif
 
-.. warning::
-	You must keep in mind that since the mentioned support is experimental,
-	loading unsupported NIF files may fail, and the degree of this failure may vary.
-	
-	In milder cases, OpenMW will reject the file anyway because
-	it lacks a definition for a certain record type that the file may use.
-	
-	In more severe cases OpenMW's incomplete understanding of a record type
-	can lead to memory corruption, freezes or even crashes.
-	
-	**Do not enable** this if you're not so sure that you know what you're doing.
+   Path to the 3rd person base model file with textkeys data.
 
-To help debug possible issues OpenMW will log its progress in loading
-every file that uses an unsupported NIF version.
+.. omw-setting::
+   :title: xbaseanim1st
+   :type: string
+   :default: meshes/xbase_anim.1st.nif
 
-xbaseanim
----------
+   Path to the 1st person base animation model file; expects a matching KF file.
 
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim.nif
+.. omw-setting::
+   :title: baseanimkna
+   :type: string
+   :default: meshes/base_animkna.nif
 
-Path to the file used for 3rd person base animation model that looks also for 
-the corresponding kf-file.
+   Path to the 3rd person beast race base model with textkeys data.
 
-.. note::
-	If you are using the COLLADA format, you don't need to separate the files as 
-	they are separated between .nif and .kf files. It works if you plug the same 
-	COLLADA file into all animation-related entries, just make sure there is a 
-	corresponding textkeys file. You can read more about the textkeys in 
-	:doc:`../../modding/custom-models/pipeline-blender-collada-animated-creature`.
+.. omw-setting::
+   :title: baseanimkna1st
+   :type: string
+   :default: meshes/base_animkna.1st.nif
 
-baseanim
---------
+   Path to the 1st person beast race base animation model.
 
-:Type:		string
-:Range:		
-:Default:	meshes/base_anim.nif
+.. omw-setting::
+   :title: xbaseanimfemale
+   :type: string
+   :default: meshes/xbase_anim_female.nif
 
-Path to the file used for 3rd person base model with textkeys-data.
+   Path to the 3rd person female base animation model.
 
-xbaseanim1st
-------------
+.. omw-setting::
+   :title: baseanimfemale
+   :type: string
+   :default: meshes/base_anim_female.nif
 
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim.1st.nif
+   Path to the 3rd person female base model with textkeys data.
 
-Path to the file used for 1st person base animation model that looks also for 
-corresponding kf-file.
+.. omw-setting::
+   :title: baseanimfemale1st
+   :type: string
+   :default: meshes/base_anim_female.1st.nif
 
-baseanimkna
------------
+   Path to the 1st person female base model with textkeys data.
 
-:Type:		string
-:Range:		
-:Default:	meshes/base_animkna.nif
+.. omw-setting::
+   :title: wolfskin
+   :type: string
+   :default: meshes/wolf/skin.nif
 
-Path to the file used for 3rd person beast race base model with textkeys-data.
+   Path to the 3rd person werewolf skin model.
 
-baseanimkna1st
---------------
+.. omw-setting::
+   :title: wolfskin1st
+   :type: string
+   :default: meshes/wolf/skin.1st.nif
 
-:Type:		string
-:Range:		
-:Default:	meshes/base_animkna.1st.nif
+   Path to the 1st person werewolf skin model.
 
-Path to the file used for 1st person beast race base animation model.
+.. omw-setting::
+   :title: xargonianswimkna
+   :type: string
+   :default: meshes/xargonian_swimkna.nif
 
-xbaseanimfemale
----------------
+   Path to the Argonian swimkna model.
 
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim_female.nif
+.. omw-setting::
+   :title: xbaseanimkf
+   :type: string
+   :default: meshes/xbase_anim.kf
 
-Path to the file used for 3rd person female base animation model.
+   Animation file for xbaseanim 3rd person animations.
 
-baseanimfemale
---------------
+.. omw-setting::
+   :title: xbaseanim1stkf
+   :type: string
+   :default: meshes/xbase_anim.1st.kf
 
-:Type:		string
-:Range:		
-:Default:	meshes/base_anim_female.nif
+   Animation file for xbaseanim 1st person animations.
 
-Path to the file used for 3rd person female base model with textkeys-data.
+.. omw-setting::
+   :title: xbaseanimfemalekf
+   :type: string
+   :default: meshes/xbase_anim_female.kf
 
-baseanimfemale1st
------------------
+   Animation file for xbaseanim female animations.
 
-:Type:		string
-:Range:		
-:Default:	meshes/base_anim_female.1st.nif
+.. omw-setting::
+   :title: xargonianswimknakf
+   :type: string
+   :default: meshes/xargonian_swimkna.kf
 
-Path to the file used for 1st person female base model with textkeys-data.
+   Animation file for xargonianswimkna animations.
 
-wolfskin
---------
+.. omw-setting::
+   :title: skyatmosphere
+   :type: string
+   :default: meshes/sky_atmosphere.nif
 
-:Type:		string
-:Range:		
-:Default:	meshes/wolf/skin.nif
+   Sky atmosphere mesh for the top half of the sky.
 
-Path to the file used for 3rd person werewolf skin.
+.. omw-setting::
+   :title: skyclouds
+   :type: string
+   :default: meshes/sky_clouds_01.nif
 
-wolfskin1st
------------
+   Sky clouds mesh displaying scrolling cloud textures.
 
-:Type:		string
-:Range:		
-:Default:	meshes/wolf/skin.1st.nif
+.. omw-setting::
+   :title: skynight01
+   :type: string
+   :default: meshes/sky_night_01.nif
 
-Path to the file used for 1st person werewolf skin.
+   Sky stars mesh used during night if skynight02 is not present.
 
-xargonianswimkna
-----------------
+.. omw-setting::
+   :title: skynight02
+   :type: string
+   :default: meshes/sky_night_02.nif
 
-:Type:		string
-:Range:		
-:Default:	meshes/xargonian_swimkna.nif
+   Sky stars mesh used during night, takes priority over skynight01.
 
-Path to the file used for Argonian swimkna.
+.. omw-setting::
+   :title: weatherashcloud
+   :type: string
+   :default: meshes/ashcloud.nif
 
-xbaseanimkf
------------
+   Ash clouds weather effect file from Morrowind (not used by OpenMW).
 
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim.kf
+.. omw-setting::
+   :title: weatherblightcloud
+   :type: string
+   :default: meshes/blightcloud.nif
 
-File to load xbaseanim 3rd person animations.
+   Blight clouds weather effect file from Morrowind (not used by OpenMW).
 
-xbaseanim1stkf
---------------
+.. omw-setting::
+   :title: weathersnow
+   :type: string
+   :default: meshes/snow.nif
 
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim.1st.kf
+   Snow falling weather effect file from Morrowind (not used by OpenMW).
 
-File to load xbaseanim 3rd person animations.
+.. omw-setting::
+   :title: weatherblizzard
+   :type: string
+   :default: meshes/blizzard.nif
 
-xbaseanimfemalekf
------------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/xbase_anim_female.kf
-
-File to load xbaseanim animations from.
-
-xargonianswimknakf
-------------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/xargonian_swimkna.kf
-
-File to load xargonianswimkna animations from.
-
-skyatmosphere
--------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/sky_atmosphere.nif
-
-Path to the file used for the sky atmosphere mesh, which is one of the three 
-meshes needed to render the sky. It's used to make the top half of the sky blue 
-and renders in front of the background color.
-
-skyclouds
----------
-
-:Type:		string
-:Range:		
-:Default:	meshes/sky_clouds_01.nif.
-
-Path to the file used for the sky clouds mesh, which is one of the three meshes 
-needed to render the sky. It displays a scrolling texture of clouds in front of 
-the atmosphere mesh and background color
-
-skynight01
-----------
-
-:Type:		string
-:Range:		
-:Default:	meshes/sky_night_01.nif
-
-Path to the file used for the sky stars mesh, which is one of the three meshes 
-needed to render the sky. During night, it displays a texture with stars in 
-front of the atmosphere and behind the clouds. If skynight02 is present, 
-skynight01 will not be used.
-
-skynight02
-----------
-
-:Type:		string
-:Range:		
-:Default:	meshes/sky_night_02.nif
-
-Path to the file used for the sky stars mesh, which is one of the three meshes 
-needed to render the sky. During night, it displays a texture with stars in 
-front of the atmosphere and behind the clouds. If it's present it will be used 
-instead of skynight01.
-
-weatherashcloud
----------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/ashcloud.nif
-
-Path to the file used for the ash clouds weather effect in Morrowind. OpenMW 
-doesn't use this file, instead it renders a similar looking particle effect. 
-Changing this won't have any effect.
-
-weatherblightcloud
-------------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/blightcloud.nif
-
-Path to the file used for the blight clouds weather effect in Morrowind. OpenMW 
-doesn't use this file, instead it renders a similar looking particle effect. 
-Changing this won't have any effect.
-
-weathersnow
------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/snow.nif
-
-Path to the file used for the snow falling weather effect in Morrowind. OpenMW 
-doesn't use this file, instead it renders a similar looking particle effect. 
-Changing this won't have any effect.
-
-weatherblizzard
----------------
-
-:Type:		string
-:Range:		
-:Default:	meshes/blizzard.nif
-
-Path to the file used for the blizzard clouds weather effect in Morrowind. 
-OpenMW doesn't use this file, instead it renders a similar looking particle 
-effect. Changing this won't have any effect.
-
-write nif debug log
--------------------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-If enabled, log the loading process of NIF files.
+   Blizzard weather effect file from Morrowind (not used by OpenMW).

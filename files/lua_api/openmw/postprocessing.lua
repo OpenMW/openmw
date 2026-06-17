@@ -1,9 +1,15 @@
 ---
--- `openmw.postprocessing` is an interface to postprocessing shaders.
--- Can be used only by local scripts, that are attached to a player.
+-- Provides an interface to postprocessing shaders.
+-- @context player
 -- @module postprocessing
 -- @usage local postprocessing = require('openmw.postprocessing')
 
+---
+-- @type Shader
+-- @field #string name Name of the shader
+-- @field #string description Description of the shader
+-- @field #string author Author of the shader
+-- @field #string version Version of the shader
 
 ---
 -- Load a shader and return its handle.
@@ -14,6 +20,12 @@
 -- -- If the shader exists and compiles, the shader will still be off by default.
 -- -- It must be enabled to see its effect.
 -- local vignetteShader = postprocessing.load('vignette')
+
+---
+-- Returns the ordered list of active shaders.
+-- Active shaders may change between frames.
+-- @function [parent=#postprocessing] getChain
+-- @return #list<#Shader> list The currently active shaders, in order
 
 ---
 -- Enable the shader. Has no effect if the shader is already enabled or does

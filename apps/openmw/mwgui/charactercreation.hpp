@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 
+#include "mode.hpp"
 #include "statswatcher.hpp"
 
 namespace osg
@@ -42,7 +43,7 @@ namespace MWGui
         virtual ~CharacterCreation();
 
         // Show a dialog
-        void spawnDialog(const char id);
+        void spawnDialog(const GuiMode id);
 
         void setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
@@ -93,13 +94,13 @@ namespace MWGui
         void selectRace();
 
         // Class dialogs
-        void onClassChoice(int _index);
+        void onClassChoice(int index);
         void onPickClassDialogDone(WindowBase* parWindow);
         void onPickClassDialogBack();
         void onCreateClassDialogDone(WindowBase* parWindow);
         void onCreateClassDialogBack();
         void showClassQuestionDialog();
-        void onClassQuestionChosen(int _index);
+        void onClassQuestionChosen(int index);
         void onGenerateClassBack();
         void onGenerateClassDone(WindowBase* parWindow);
         void selectGeneratedClass();

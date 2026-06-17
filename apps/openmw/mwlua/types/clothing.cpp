@@ -1,7 +1,11 @@
 #include "types.hpp"
 
+#include "modelproperty.hpp"
+
 #include <components/esm3/loadclot.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -43,9 +47,9 @@ namespace
             clothing.mEnchant = ESM::RefId::deserializeText(enchantId);
         }
         if (rec["enchantCapacity"] != sol::nil)
-            clothing.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+            clothing.mData.mEnchant = static_cast<int16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["weight"] != sol::nil)
-            clothing.mData.mWeight = rec["weight"];
+            clothing.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             clothing.mData.mValue = rec["value"];
         if (rec["type"] != sol::nil)
@@ -65,38 +69,37 @@ namespace MWLua
     {
         clothing["createRecordDraft"] = tableToClothing;
 
-        clothing["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "Amulet", ESM::Clothing::Amulet },
-            { "Belt", ESM::Clothing::Belt },
-            { "LGlove", ESM::Clothing::LGlove },
-            { "Pants", ESM::Clothing::Pants },
-            { "RGlove", ESM::Clothing::RGlove },
-            { "Ring", ESM::Clothing::Ring },
-            { "Robe", ESM::Clothing::Robe },
-            { "Shirt", ESM::Clothing::Shirt },
-            { "Shoes", ESM::Clothing::Shoes },
-            { "Skirt", ESM::Clothing::Skirt },
-        }));
+        sol::state_view lua = context.sol();
+        clothing["TYPE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
+            {
+                { "Amulet", ESM::Clothing::Amulet },
+                { "Belt", ESM::Clothing::Belt },
+                { "LGlove", ESM::Clothing::LGlove },
+                { "Pants", ESM::Clothing::Pants },
+                { "RGlove", ESM::Clothing::RGlove },
+                { "Ring", ESM::Clothing::Ring },
+                { "Robe", ESM::Clothing::Robe },
+                { "Shirt", ESM::Clothing::Shirt },
+                { "Shoes", ESM::Clothing::Shoes },
+                { "Skirt", ESM::Clothing::Skirt },
+            }));
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Clothing>(clothing, context);
 
-        sol::usertype<ESM::Clothing> record = context.mLua->sol().new_usertype<ESM::Clothing>("ESM3_Clothing");
+        sol::usertype<ESM::Clothing> record = lua.new_usertype<ESM::Clothing>("ESM3_Clothing");
         record[sol::meta_function::to_string]
             = [](const ESM::Clothing& rec) -> std::string { return "ESM3_Clothing[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mName; });
-        record["model"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return Misc::ResourceHelpers::correctMeshPath(rec.mModel); });
+        addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Clothing& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
         });
-        record["enchant"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return rec.mEnchant.serializeText(); });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return rec.mScript.serializeText(); });
+        record["enchant"] = sol::readonly_property([](const ESM::Clothing& rec) -> ESM::RefId { return rec.mEnchant; });
+        record["mwscript"] = sol::readonly_property([](const ESM::Clothing& rec) -> ESM::RefId { return rec.mScript; });
         record["weight"] = sol::readonly_property([](const ESM::Clothing& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Clothing& rec) -> int { return rec.mData.mValue; });
         record["type"] = sol::readonly_property([](const ESM::Clothing& rec) -> int { return rec.mData.mType; });

@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_RESOURCE_CACHESATS
 
 #include <cstddef>
+#include <string>
 #include <string_view>
 #include <vector>
 

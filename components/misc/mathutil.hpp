@@ -7,11 +7,11 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+#include <cmath>
 #include <type_traits>
 
 namespace Misc
 {
-
     /// Normalizes given angle to the range [-PI, PI]. E.g. PI*3/2 -> -PI/2.
     inline double normalizeAngle(double angle)
     {
@@ -29,15 +29,19 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesXZ(osg::Vec3f forward)
     {
-        float x = -asin(forward.z());
-        float z = atan2(forward.x(), forward.y());
+        float x = -std::asin(forward.z());
+        float z = std::atan2(forward.x(), forward.y());
         return osg::Vec3f(x, 0, z);
     }
-    inline osg::Vec3f toEulerAnglesXZ(osg::Quat quat)
+
+    inline osg::Vec3f toEulerAnglesXZ(const osg::Quat& quat)
     {
-        return toEulerAnglesXZ(quat * osg::Vec3f(0, 1, 0));
+        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
+        forward.normalize();
+        return toEulerAnglesXZ(forward);
     }
-    inline osg::Vec3f toEulerAnglesXZ(osg::Matrixf m)
+
+    inline osg::Vec3f toEulerAnglesXZ(const osg::Matrixf& m)
     {
         osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
         forward.normalize();
@@ -46,17 +50,23 @@ namespace Misc
 
     inline osg::Vec3f toEulerAnglesZYX(osg::Vec3f forward, osg::Vec3f up)
     {
-        float y = -asin(up.x());
-        float x = atan2(up.y(), up.z());
+        float y = -std::asin(up.x());
+        float x = std::atan2(up.y(), up.z());
         osg::Vec3f forwardZ = (osg::Quat(x, osg::Vec3f(1, 0, 0)) * osg::Quat(y, osg::Vec3f(0, 1, 0))) * forward;
-        float z = atan2(forwardZ.x(), forwardZ.y());
+        float z = std::atan2(forwardZ.x(), forwardZ.y());
         return osg::Vec3f(x, y, z);
     }
-    inline osg::Vec3f toEulerAnglesZYX(osg::Quat quat)
+
+    inline osg::Vec3f toEulerAnglesZYX(const osg::Quat& quat)
     {
-        return toEulerAnglesZYX(quat * osg::Vec3f(0, 1, 0), quat * osg::Vec3f(0, 0, 1));
+        osg::Vec3f forward = quat * osg::Vec3f(0, 1, 0);
+        forward.normalize();
+        osg::Vec3f up = quat * osg::Vec3f(0, 0, 1);
+        up.normalize();
+        return toEulerAnglesZYX(forward, up);
     }
-    inline osg::Vec3f toEulerAnglesZYX(osg::Matrixf m)
+
+    inline osg::Vec3f toEulerAnglesZYX(const osg::Matrixf& m)
     {
         osg::Vec3f forward(m(1, 0), m(1, 1), m(1, 2));
         osg::Vec3f up(m(2, 0), m(2, 1), m(2, 2));

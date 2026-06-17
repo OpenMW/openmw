@@ -4,13 +4,13 @@
 #include "rotationflags.hpp"
 
 #include <deque>
-#include <map>
 #include <set>
 #include <span>
 #include <string_view>
 #include <vector>
 
 #include <components/misc/rng.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwworld/doorstate.hpp"
 #include "../mwworld/globalvariablename.hpp"
@@ -22,6 +22,7 @@
 namespace osg
 {
     class Vec3f;
+    class Vec4f;
     class Matrixf;
     class Quat;
     class Image;
@@ -93,6 +94,7 @@ namespace MWWorld
     class RefData;
     class Cell;
     class DateTimeManager;
+    class Weather;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }
@@ -118,7 +120,7 @@ namespace MWBase
 
         World() {}
 
-        virtual ~World() {}
+        virtual ~World() = default;
 
         virtual void setRandomSeed(uint32_t seed) = 0;
         ///< \param seed The seed used when starting a new game.
@@ -128,8 +130,8 @@ namespace MWBase
 
         virtual void clear() = 0;
 
-        virtual int countSavedGameRecords() const = 0;
-        virtual int countSavedGameCells() const = 0;
+        virtual size_t countSavedGameRecords() const = 0;
+        virtual size_t countSavedGameCells() const = 0;
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& listener) const = 0;
 
@@ -148,7 +150,7 @@ namespace MWBase
         virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
         virtual MWWorld::ESMStore& getStore() = 0;
-        const MWWorld::ESMStore& getStore() const { return const_cast<MWBase::World*>(this)->getStore(); }
+        virtual const MWWorld::ESMStore& getStore() const = 0;
 
         virtual const std::vector<int>& getESMVersions() const = 0;
 
@@ -194,9 +196,6 @@ namespace MWBase
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
-        virtual MWWorld::Ptr searchPtrViaActorId(int actorId) = 0;
-        ///< Search is limited to the active cells.
-
         virtual MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) = 0;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
         /// \note Search is limited to the active cells.
@@ -216,9 +215,21 @@ namespace MWBase
 
         virtual void changeWeather(const ESM::RefId& region, const unsigned int id) = 0;
 
-        virtual int getCurrentWeather() const = 0;
+        virtual void changeWeather(const ESM::RefId& region, const ESM::RefId& id) = 0;
 
-        virtual int getNextWeather() const = 0;
+        virtual const std::vector<MWWorld::Weather>& getAllWeather() const = 0;
+
+        virtual int getCurrentWeatherScriptId() const = 0;
+
+        virtual const MWWorld::Weather& getCurrentWeather() const = 0;
+
+        virtual const MWWorld::Weather* getWeather(size_t index) const = 0;
+
+        virtual const MWWorld::Weather* getWeather(const ESM::RefId& id) const = 0;
+
+        virtual int getNextWeatherScriptId() const = 0;
+
+        virtual const MWWorld::Weather* getNextWeather() const = 0;
 
         virtual float getWeatherTransition() const = 0;
 
@@ -230,7 +241,8 @@ namespace MWBase
 
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) = 0;
+        virtual std::span<const uint8_t> getRegionWeatherChances(const ESM::RefId& regionid) const = 0;
 
         virtual void changeToInteriorCell(
             std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
@@ -243,10 +255,10 @@ namespace MWBase
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual MWWorld::Ptr getFacedObject() = 0;
+        virtual MWWorld::Ptr getFocusObject() = 0;
         ///< Return pointer to the object the player is looking at, if it is within activation range
 
-        virtual float getDistanceToFacedObject() = 0;
+        virtual float getDistanceToFocusObject() = 0;
 
         virtual float getMaxActivationDistance() const = 0;
 
@@ -361,7 +373,7 @@ namespace MWBase
         virtual void applyDeferredPreviewRotationToPlayer(float dt) = 0;
         virtual void disableDeferredPreviewRotation() = 0;
 
-        virtual void saveLoaded() = 0;
+        virtual void saveLoaded(const ESM::ESMReader& reader) = 0;
 
         virtual void setupPlayer() = 0;
         virtual void renderPlayer() = 0;
@@ -390,7 +402,7 @@ namespace MWBase
         ///< Apply a health difference to any actors colliding with \a object.
         /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
-        virtual float getWindSpeed() = 0;
+        virtual float getWindSpeed() const = 0;
 
         virtual void getContainersOwnedBy(const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) = 0;
         ///< get all containers in active cells owned by this Npc
@@ -406,17 +418,16 @@ namespace MWBase
 
         virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
-        enum RestPermitted
+        enum RestFlags
         {
-            Rest_Allowed = 0,
-            Rest_OnlyWaiting = 1,
+            Rest_PlayerIsUnderwater = 1,
             Rest_PlayerIsInAir = 2,
-            Rest_PlayerIsUnderwater = 3,
-            Rest_EnemiesAreNearby = 4
+            Rest_EnemiesAreNearby = 4,
+            Rest_CanSleep = 8,
         };
 
         /// check if the player is allowed to rest
-        virtual RestPermitted canRest() const = 0;
+        virtual int canRest() const = 0;
 
         /// \todo Probably shouldn't be here
         virtual MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr) = 0;
@@ -425,7 +436,6 @@ namespace MWBase
 
         /// \todo this does not belong here
         virtual void screenshot(osg::Image* image, int w, int h) = 0;
-        virtual bool screenshot360(osg::Image* image) = 0;
 
         /// Find default position inside exterior cell specified by name
         /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise
@@ -480,8 +490,11 @@ namespace MWBase
         // Allow NPCs to use torches?
         virtual bool useTorches() const = 0;
 
+        virtual const osg::Vec4f& getSunLightPosition() const = 0;
         virtual float getSunVisibility() const = 0;
         virtual float getSunPercentage() const = 0;
+
+        virtual float getPhysicsFrameRateDt() const = 0;
 
         virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
@@ -513,12 +526,12 @@ namespace MWBase
         /// Spawn a random creature from a levelled list next to the player
         virtual void spawnRandomCreature(const ESM::RefId& creatureList) = 0;
 
-        /// Spawn a blood effect for \a ptr at \a worldPosition
-        virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
-
-        virtual void spawnEffect(const std::string& model, const std::string& textureOverride,
-            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true)
+        virtual void spawnEffect(VFS::Path::NormalizedView model, const std::string& textureOverride,
+            const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true, bool useAmbientLight = true,
+            std::string_view effectId = {}, bool loop = false)
             = 0;
+
+        virtual void removeEffect(std::string_view effectId) = 0;
 
         /// @see MWWorld::WeatherManager::isInStorm
         virtual bool isInStorm() const = 0;
@@ -576,8 +589,7 @@ namespace MWBase
         virtual bool hasCollisionWithDoor(
             const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
 
-        virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius,
-            std::span<const MWWorld::ConstPtr> ignore, std::vector<MWWorld::Ptr>* occupyingActors = nullptr) const = 0;
+        virtual bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr& actor, const osg::Vec3f& position) const = 0;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 

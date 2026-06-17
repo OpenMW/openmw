@@ -3,6 +3,8 @@
 
 #include <boost/program_options/parsers.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 namespace Files
 {
 
@@ -13,5 +15,7 @@ namespace Files
         std::basic_istream<charT>&, const bpo::options_description&, bool allow_unregistered = false);
 
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 #endif // COMPONENTS_FILES_CONFIGFILEPARSER_HPP

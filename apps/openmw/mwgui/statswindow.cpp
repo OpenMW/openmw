@@ -6,6 +6,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LanguageManager.h>
 #include <MyGUI_ProgressBar.h>
+#include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Window.h>
@@ -80,16 +81,24 @@ namespace MWGui
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &StatsWindow::onWindowResize);
 
+        if (Settings::gui().mControllerMenus)
+        {
+            setPinButtonVisible(false);
+            mControllerButtons.mLStick = "#{Interface:Mouse}";
+            mControllerButtons.mRStick = "#{Interface:ScrollDown}";
+            mControllerButtons.mB = "#{Interface:Back}";
+        }
+
         onWindowResize(t);
     }
 
-    void StatsWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void StatsWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mSkillView->getViewOffset().top + _rel * 0.3 > 0)
+        if (mSkillView->getViewOffset().top + rel * 0.3 > 0)
             mSkillView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mSkillView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + _rel * 0.3)));
+                MyGUI::IntPoint(0, static_cast<int>(mSkillView->getViewOffset().top + rel * 0.3)));
     }
 
     void StatsWindow::onWindowResize(MyGUI::Window* window)
@@ -249,8 +258,8 @@ namespace MWGui
         MyGUI::TextBox* nameWidget = widgets.first;
         if (valueWidget && nameWidget)
         {
-            int modified = value.getModified(), base = value.getBase();
-            std::string text = MyGUI::utility::toString(modified);
+            float modified = value.getModified(), base = value.getBase();
+            std::string text = MyGUI::utility::toString(static_cast<int>(modified));
             std::string state = "normal";
             if (modified > base)
                 state = "increased";
@@ -325,15 +334,15 @@ namespace MWGui
         NoDrop::onFrame(dt);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        const MWMechanics::NpcStats& PCstats = player.getClass().getNpcStats(player);
+        const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
         const auto& store = MWBase::Environment::get().getESMStore();
 
         std::stringstream detail;
         bool first = true;
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
-            float mult = PCstats.getLevelupAttributeMultiplier(attribute.mId);
-            mult = std::min(mult, 100 - PCstats.getAttribute(attribute.mId).getBase());
+            int mult = playerStats.getLevelupAttributeMultiplier(attribute.mId);
+            mult = std::min(mult, static_cast<int>(100 - playerStats.getAttribute(attribute.mId).getBase()));
             if (mult > 1)
             {
                 if (!first)
@@ -352,21 +361,21 @@ namespace MWGui
             getWidget(levelWidget, i == 0 ? "Level_str" : "LevelText");
 
             levelWidget->setUserString(
-                "RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
+                "RangePosition_LevelProgress", MyGUI::utility::toString(playerStats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelProgressText",
-                MyGUI::utility::toString(PCstats.getLevelProgress()) + "/" + MyGUI::utility::toString(max));
+                MyGUI::utility::toString(playerStats.getLevelProgress()) + "/" + MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelDetailText", detailText);
         }
 
-        setFactions(PCstats.getFactionRanks());
-        setExpelled(PCstats.getExpelled());
+        setFactions(playerStats.getFactionRanks());
+        setExpelled(playerStats.getExpelled());
 
         const auto& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         setBirthSign(signId);
-        setReputation(PCstats.getReputation());
-        setBounty(PCstats.getBounty());
+        setReputation(playerStats.getReputation());
+        setBounty(playerStats.getBounty());
 
         if (mChanged)
             updateSkillArea();
@@ -578,8 +587,8 @@ namespace MWGui
         if (!mFactions.empty())
         {
             MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
-            const MWMechanics::NpcStats& PCstats = playerPtr.getClass().getNpcStats(playerPtr);
-            const std::set<ESM::RefId>& expelled = PCstats.getExpelled();
+            const MWMechanics::NpcStats& playerStats = playerPtr.getClass().getNpcStats(playerPtr);
+            const std::set<ESM::RefId>& expelled = playerStats.getExpelled();
 
             bool firstFaction = true;
             for (const auto& [factionId, factionRank] : mFactions)
@@ -714,7 +723,9 @@ namespace MWGui
 
     void StatsWindow::onTitleDoubleClicked()
     {
-        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        if (Settings::gui().mControllerMenus)
+            return;
+        else if (MyGUI::InputManager::getInstance().isShiftPressed())
         {
             MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
             MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
@@ -722,5 +733,36 @@ namespace MWGui
         }
         else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
+    }
+
+    bool StatsWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_B)
+            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+
+        return true;
+    }
+
+    void StatsWindow::setActiveControllerWindow(bool active)
+    {
+        MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
+        if (winMgr->getMode() == MWGui::GM_Inventory)
+        {
+            // Fill the screen, or limit to a certain size on large screens. Size chosen to
+            // show all stats.
+            MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+            int width = std::min(viewSize.width, getIdealWidth());
+            int height = std::min(winMgr->getControllerMenuHeight(), getIdealHeight());
+            int x = (viewSize.width - width) / 2;
+            int y = (viewSize.height - height) / 2;
+
+            MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+            window->setCoord(x, active ? y : viewSize.height + 1, width, height);
+
+            if (active)
+                onWindowResize(window);
+        }
+
+        WindowBase::setActiveControllerWindow(active);
     }
 }

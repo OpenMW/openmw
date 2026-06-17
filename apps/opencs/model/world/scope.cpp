@@ -13,17 +13,17 @@ namespace CSMWorld
         {
             Scope operator()(ESM::StringRefId v) const
             {
-                std::string_view namespace_;
+                std::string_view namespaceValue;
 
                 const std::string::size_type i = v.getValue().find("::");
 
                 if (i != std::string::npos)
-                    namespace_ = std::string_view(v.getValue()).substr(0, i);
+                    namespaceValue = std::string_view(v.getValue()).substr(0, i);
 
-                if (Misc::StringUtils::ciEqual(namespace_, "project"))
+                if (Misc::StringUtils::ciEqual(namespaceValue, "project"))
                     return Scope_Project;
 
-                if (Misc::StringUtils::ciEqual(namespace_, "session"))
+                if (Misc::StringUtils::ciEqual(namespaceValue, "session"))
                     return Scope_Session;
 
                 return Scope_Content;

@@ -78,7 +78,7 @@ namespace CSMPrefs
         }
     }
 
-    bool ShortcutManager::getModifier(const std::string& name, int& modifier) const
+    bool ShortcutManager::getModifier(std::string_view name, int& modifier) const
     {
         ModifierMap::const_iterator item = mModifiers.find(name);
         if (item != mModifiers.end())
@@ -115,15 +115,12 @@ namespace CSMPrefs
 
     std::string ShortcutManager::convertToString(const QKeySequence& sequence) const
     {
-        const int MouseKeyMask = 0x01FFFFFF;
-        const int ModMask = 0x7E000000;
-
         std::string result;
 
-        for (int i = 0; i < (int)sequence.count(); ++i)
+        for (int i = 0; i < sequence.count(); ++i)
         {
-            int mods = sequence[i] & ModMask;
-            int key = sequence[i] & MouseKeyMask;
+            int mods = sequence[i].keyboardModifiers();
+            int key = sequence[i].key();
 
             if (key)
             {
@@ -175,27 +172,27 @@ namespace CSMPrefs
         return concat;
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, QKeySequence& sequence) const
+    void ShortcutManager::convertFromString(std::string_view data, QKeySequence& sequence) const
     {
-        const int MaxKeys = 4; // A limitation of QKeySequence
+        const int maxKeys = 4; // A limitation of QKeySequence
 
         size_t end = data.find(';');
         size_t size = std::min(end, data.size());
 
-        std::string value = data.substr(0, size);
+        std::string_view value = data.substr(0, size);
         size_t start = 0;
 
         int keyPos = 0;
         int mods = 0;
 
-        int keys[MaxKeys] = {};
+        int keys[maxKeys] = {};
 
         while (start < value.size())
         {
             end = data.find('+', start);
             end = std::min(end, value.size());
 
-            std::string name = value.substr(start, end - start);
+            std::string_view name = value.substr(start, end - start);
 
             if (name == "Ctrl")
             {
@@ -231,7 +228,7 @@ namespace CSMPrefs
                     mods = 0;
                     keyPos += 1;
 
-                    if (keyPos >= MaxKeys)
+                    if (keyPos >= maxKeys)
                         break;
                 }
             }
@@ -242,12 +239,12 @@ namespace CSMPrefs
         sequence = QKeySequence(keys[0], keys[1], keys[2], keys[3]);
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, int& modifier) const
+    void ShortcutManager::convertFromString(std::string_view data, int& modifier) const
     {
         size_t start = data.find(';') + 1;
         start = std::min(start, data.size());
 
-        std::string name = data.substr(start);
+        std::string_view name = data.substr(start);
         KeyMap::const_iterator searchResult = mKeys.find(name);
         if (searchResult != mKeys.end())
         {
@@ -259,7 +256,7 @@ namespace CSMPrefs
         }
     }
 
-    void ShortcutManager::convertFromString(const std::string& data, QKeySequence& sequence, int& modifier) const
+    void ShortcutManager::convertFromString(std::string_view data, QKeySequence& sequence, int& modifier) const
     {
         convertFromString(data, sequence);
         convertFromString(data, modifier);
@@ -289,14 +286,14 @@ namespace CSMPrefs
 
     QString ShortcutManager::processToolTip(const QString& toolTip) const
     {
-        const QChar SequenceStart = '{';
-        const QChar SequenceEnd = '}';
+        const QChar sequenceStart = '{';
+        const QChar sequenceEnd = '}';
 
         QStringList substrings;
 
         int prevIndex = 0;
-        int startIndex = toolTip.indexOf(SequenceStart);
-        int endIndex = (startIndex != -1) ? toolTip.indexOf(SequenceEnd, startIndex) : -1;
+        int startIndex = toolTip.indexOf(sequenceStart);
+        int endIndex = (startIndex != -1) ? toolTip.indexOf(sequenceEnd, startIndex) : -1;
 
         // Process every valid shortcut escape sequence
         while (startIndex != -1 && endIndex != -1)
@@ -331,8 +328,8 @@ namespace CSMPrefs
                 prevIndex = endIndex + 1; // '}' character
             }
 
-            startIndex = toolTip.indexOf(SequenceStart, endIndex);
-            endIndex = (startIndex != -1) ? toolTip.indexOf(SequenceEnd, startIndex) : -1;
+            startIndex = toolTip.indexOf(sequenceStart, endIndex);
+            endIndex = (startIndex != -1) ? toolTip.indexOf(sequenceEnd, startIndex) : -1;
         }
 
         if (prevIndex < toolTip.size())
@@ -434,7 +431,11 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_twosuperior, "twosuperior"),
         std::make_pair((int)Qt::Key_threesuperior, "threesuperior"),
         std::make_pair((int)Qt::Key_acute, "acute"),
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+        std::make_pair((int)Qt::Key_micro, "mu"),
+#else
         std::make_pair((int)Qt::Key_mu, "mu"),
+#endif
         std::make_pair((int)Qt::Key_paragraph, "paragraph"),
         std::make_pair((int)Qt::Key_periodcentered, "periodcentered"),
         std::make_pair((int)Qt::Key_cedilla, "cedilla"),

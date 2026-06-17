@@ -49,10 +49,8 @@ namespace MWInput
     {
     public:
         InputManager(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer,
-            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
-            osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
-            const std::filesystem::path& userFile, bool userFileExists,
-            const std::filesystem::path& userControllerBindingsFile,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler, const std::filesystem::path& userFile,
+            bool userFileExists, const std::filesystem::path& userControllerBindingsFile,
             const std::filesystem::path& controllerBindingsFile, bool grab);
 
         ~InputManager() final;
@@ -83,6 +81,7 @@ namespace MWInput
         float getControllerAxisValue(SDL_GameControllerAxis axis) const override;
         int getMouseMoveX() const override;
         int getMouseMoveY() const override;
+        void warpMouseToWidget(MyGUI::Widget* widget) override;
 
         int getNumActions() override { return A_Last; }
         const std::initializer_list<int>& getActionKeySorting() override;
@@ -93,8 +92,10 @@ namespace MWInput
 
         void setJoystickLastUsed(bool enabled) override;
         bool joystickLastUsed() override;
+        std::string getControllerButtonIcon(int button) override;
+        std::string getControllerAxisIcon(int axis) override;
 
-        int countSavedGameRecords() const override;
+        size_t countSavedGameRecords() const override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
         void readRecord(ESM::ESMReader& reader, uint32_t type) override;
 
@@ -106,17 +107,9 @@ namespace MWInput
         bool controlsDisabled() override { return mControlsDisabled; }
 
     private:
-        void convertMousePosForMyGUI(int& x, int& y);
-
-        void handleGuiArrowKey(int action);
-
-        void quickKey(int index);
-        void showQuickKeysMenu();
-
-        void loadKeyDefaults(bool force = false);
-        void loadControllerDefaults(bool force = false);
-
         bool mControlsDisabled;
+
+        void saveBindings() override;
 
         std::unique_ptr<SDLUtil::InputWrapper> mInputWrapper;
         std::unique_ptr<BindingsManager> mBindingsManager;

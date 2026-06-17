@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_LEXER_H
-#define OPENMW_COMPONENTS_FX_LEXER_H
+#ifndef OPENMW_COMPONENTS_FX_LEXER_HPP
+#define OPENMW_COMPONENTS_FX_LEXER_HPP
 
 #include <cstddef>
 #include <optional>
@@ -7,9 +7,9 @@
 #include <string>
 #include <string_view>
 
-#include "lexer_types.hpp"
+#include "lexertypes.hpp"
 
-namespace fx
+namespace Fx
 {
     namespace Lexer
     {
@@ -46,12 +46,12 @@ namespace fx
 
             Block getLastJumpBlock() const;
 
-            [[noreturn]] void error(const std::string& msg);
+            [[noreturn]] void error(std::string_view msg);
 
         private:
             void drop();
             void advance();
-            char head();
+            unsigned char head();
             bool peekChar(char c);
 
             Token scanToken();

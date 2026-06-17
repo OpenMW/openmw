@@ -1,14 +1,19 @@
 #include "timeadvancer.hpp"
 
+namespace
+{
+    // Time per hour tick
+    constexpr float kProgressStepDelay = 1.0f / 60.0f;
+}
+
 namespace MWGui
 {
-    TimeAdvancer::TimeAdvancer(float delay)
+    TimeAdvancer::TimeAdvancer()
         : mRunning(false)
         , mCurHour(0)
         , mHours(1)
         , mInterruptAt(-1)
-        , mDelay(delay)
-        , mRemainingTime(delay)
+        , mRemainingTime(kProgressStepDelay)
     {
     }
 
@@ -17,7 +22,7 @@ namespace MWGui
         mHours = hours;
         mCurHour = 0;
         mInterruptAt = interruptAt;
-        mRemainingTime = mDelay;
+        mRemainingTime = kProgressStepDelay;
 
         mRunning = true;
     }
@@ -43,7 +48,7 @@ namespace MWGui
 
         while (mRemainingTime <= 0)
         {
-            mRemainingTime += mDelay;
+            mRemainingTime += kProgressStepDelay;
             ++mCurHour;
 
             if (mCurHour <= mHours)

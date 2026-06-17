@@ -12,7 +12,7 @@ PhysicsProfiler: "Physics Profiler"
 
 # Messages
 
-AskLoadLastSave: "The most recent save is '%s'. Do you want to load it?"
+AskLoadLastSave: "The most recent save is ''{save}''. Do you want to load it?"
 BuildingNavigationMesh: "Building Navigation Mesh"
 InitializingData: "Initializing Data..."
 LoadingExterior: "Loading Area"
@@ -30,7 +30,7 @@ QuitGameConfirmation: "Quit the game?"
 SaveGameDenied: "The game cannot be saved right now."
 SavingInProgress: "Saving..."
 ScreenshotFailed: "Failed to save screenshot"
-ScreenshotMade: "%s has been saved"
+ScreenshotMade: "{file} has been saved"
 
 
 # Save game menu
@@ -38,6 +38,8 @@ ScreenshotMade: "%s has been saved"
 DeleteGame: "Delete Game"
 DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
 EmptySaveNameError: "Game can not be saved without a name!"
+Health: "Health"
+Level: "Level"
 LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
 MissingContentFilesConfirmation: |-
     The currently selected content files do not match the ones used by this save game.
@@ -63,35 +65,65 @@ TimePlayed: "Time Played"
 # Settings menu
 
 ActorsProcessingRange: "Actors Processing Range"
+ActorsProcessingRangeValue: "Actors Processing Range ({value, number, :: group-off})"
 Anisotropy: "Anisotropy"
+AnisotropyValue: "Anisotropy ({value})"
 Audio: "Audio"
 AudioEffects: "Effects"
 AudioFootsteps: "Footsteps"
 AudioMaster: "Master"
 AudioMusic: "Music"
 AudioVoice: "Voice"
+AutoSaveOnResting: "Auto-Save on Resting"
+BestAttack: "Always Use Best Attack"
 CameraSensitivity: "Camera Sensitivity"
 CameraZoomIn: "Zoom Camera In"
 CameraZoomOut: "Zoom Camera Out"
 ChangeRequiresRestart: "This change requires a restart to take effect."
+ClampLighting: "Clamp Lighting"
+ClampLightingTooltip: |-
+    Cap lighting brightness at (1, 1, 1) to replicate Morrowind's rendering.
+    Prevents overly bright or shifted colors but can dull lighting.
+ClassicFalloff: "Classic Falloff"
+ClassicFalloffTooltip: |-
+    Default: off
+    Use the traditional point light attenuation formula which lacks an early fade out.
+
+    A flaw of the traditional formula is that light influence never quite reaches zero.
+    This is physically accurate, but can cause lighting seams because lights do not affect the entire scene.
+    Early fade out helps diminish these seams at the cost of darkening the scene.
+
+    Morrowind uses the traditional formula, so you may want to enable this if you dislike the brightness differences.
+    Alternatively, try changing the minimum interior brightness.
 ConfirmResetBindings: "Reset all controls to the default?"
 ConfirmResolution: "New resolution will be applied immediately. Do you want to continue?"
 Controller: "Controller"
 Controls: "Controls"
+Crosshair: "Crosshair"
 DelayLow: "Fast"
 DelayHigh: "Slow"
 DetailLevel: "Detail Level"
 Difficulty: "Difficulty"
+DifficultyValue: "Difficulty ({value})"
 DifficultyEasy: "Easy"
 DifficultyHard: "Hard"
 DistanceHigh: "Far"
 DistanceLow: "Near"
 EnableController: "Enable Controller"
 FieldOfView: "Field of View"
+FieldOfViewValue: "Field of View ({value, number, ::.00})"
 FieldOfViewHigh: "High"
 FieldOfViewLow: "Low"
+ForcePerPixelLighting: "Per-Pixel Lighting"
+ForcePerPixelLightingTooltip: |-
+    Force the use of per-pixel lighting. By default, only bump- and normal-mapped objects use per-pixel lighting.
+
+    Enabling per-pixel lighting results in visual differences to the original engine as certain lights in Morrowind rely on vertex lighting to look as intended.
+
+    Note that groundcover shaders and particle effects ignore this setting.
 FrameRateHint: "Hint: press F3 to show\nthe current frame rate."
 GammaCorrection: "Gamma Correction"
+GammaCorrectionValue: "Gamma Correction ({value, number, ::.00})"
 GammaDark: "Dark"
 GammaLight: "Light"
 GmstOverridesL10n: "Strings From ESM Files Have Priority"
@@ -99,29 +131,44 @@ InvertXAxis: "Invert X Axis"
 InvertYAxis: "Invert Y Axis"
 Language: "Language"
 LanguageNote: "Note: these settings do not affect strings from ESM files."
-LightingMethod: "Lighting Method"
-LightingMethodLegacy: "Legacy"
-LightingMethodShaders: "Shaders"
-LightingMethodShadersCompatibility: "Shaders (compatibility)"
-LightingResetToDefaults: "Resets to default values, would you like to continue? Changes to lighting method will require a restart."
+LightsClusteredLighting: "Clustered Lighting"
+LightingResetToDefaults: "Resets to default values, would you like to continue?"
 Lights: "Lights"
-LightsBoundingSphereMultiplier: "Bounding Sphere Multiplier"
-LightsBoundingSphereMultiplierTooltip: "Default: 1.65\nMultipler for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."
+LightRadiusMultiplier: "Radius Multiplier"
+LightRadiusMultiplierValue: "Radius Multiplier ({value, number, ::.00})"
+LightRadiusMultiplierTooltip: "Default: 1.75\nMultiplier for point light radius. Larger values will increase the range of lights."
 LightsFadeStartMultiplier: "Fade Start Multiplier"
+LightsFadeStartMultiplierValue: "Fade Start Multiplier ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value for quicker transitions."
-LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
-    \"Legacy\" always uses 8 lights per object and provides a lighting closest to an original game.\n\n
-    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
-    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
+LightsClusteredLightingTooltip:  |-
+    Enable clustered lighting.
+    Divides the screen into regions to assign lights, removing per-object light limits.
+
+    Classic falloff and max light options do not apply in this mode.
+
+    Enables point light specular highlights on the water plane when the water shader is enabled.
+
+    It is highly recommended to use this with per-pixel lighting enabled, as vertex lighting can cause light pop at screen edges.
 LightsMaximumDistance: "Maximum Light Distance"
+LightsMaximumDistanceValue: "Maximum Light Distance ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
 LightsMinimumInteriorBrightness: "Minimum Interior Brightness"
-LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark."
+LightsMinimumInteriorBrightnessValue: "Minimum Interior Brightness ({value, number, ::.00})"
+LightsMinimumInteriorBrightnessTooltip: "Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark.\n\nThis has no effect if classic falloff is used."
+MatchSunlightToSun: "Match Sunlight to Sun"
+MatchSunlightToSunTooltip: |-
+    In Morrowind, the apparent sun position does not match its light direction due to mysterious reasons.
+    We preserve this unrealistic behavior for compatibility.
+
+    This option makes the sun light source's position match the sun's position.
 MaxLights: "Max Lights"
-MaxLightsTooltip: "Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."
+MaxLightsValue: "Max Lights ({value, number, :: group-off})"
+MaxLightsTooltip: "Default: 16\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see in Morrowind."
 MenuHelpDelay: "Menu Help Delay"
 MenuTransparency: "Menu Transparency"
 MouseAndKeyboard: "Mouse/Keyboard"
+ParticlePointLighting: "Particle Point Lighting"
+ParticlePointLightingTooltip: "Allows particle systems to be lit by point lights."
 PostProcessing: "Post Processing"
 PostProcessingIsNotEnabled: "Postprocessor is not enabled"
 PostProcessingTooltip: "Tweaked via Post Processor HUD, see input bindings."
@@ -159,6 +206,7 @@ TestingExteriorCells: "Testing Exterior Cells"
 TestingInteriorCells: "Testing Interior Cells"
 TextureFiltering: "Texture Filtering"
 TextureFilteringBilinear: "Bilinear"
+TextureFilteringNearest: "Nearest"
 TextureFilteringDisabled: "None"
 TextureFilteringOther: "Other"
 TextureFilteringTrilinear: "Trilinear"
@@ -168,6 +216,8 @@ TransparencyFull: "Full"
 TransparencyNone: "None"
 Video: "Video"
 ViewDistance: "View Distance"
+ViewDistanceValue: "View Distance ({value, number, ::.00})"
+ViewDistanceValueCells: "View Distance (×{cells, number, ::.00})"
 VSync: "VSync"
 VSyncAdaptive: "Adaptive"
 Water: "Water"
@@ -180,3 +230,14 @@ WindowModeHint: "Hint: Windowed Fullscreen mode\nalways uses the native display 
 WindowModeWindowed: "Windowed"
 WindowModeWindowedFullscreen: "Windowed Fullscreen"
 WobblyShores: "Wobbly Shores"
+
+
+# Controller button names
+
+EnchantType: "Cast Type"
+InventorySelect: "Put"
+JournalQuests: "Quests"
+JournalShowAll: "Show All"
+LoadingSelectCharacter: "Change Character"
+RechargeSelect: "Recharge"
+RepairTool: "Tool"

@@ -23,6 +23,7 @@
 #include <apps/opencs/view/widget/modebutton.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/misc/scalableicon.hpp>
 
 #include <osg/Camera>
 #include <osg/Group>
@@ -51,7 +52,6 @@
 #include "cameracontroller.hpp"
 #include "instancemode.hpp"
 #include "mask.hpp"
-#include "object.hpp"
 #include "pathgridmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidget* parent)
@@ -73,7 +73,8 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     , mToolTipPos(-1, -1)
     , mShowToolTips(false)
     , mToolTipDelay(0)
-    , mInConstructor(true)
+    , mSelectedNavigationMode(0)
+    , mSelectionMarker(ObjectMarker::create(this, document.getData().getResourceSystem().get()))
 {
     setAcceptDrops(true);
 
@@ -143,9 +144,14 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
         &WorldspaceWidget::unhideAll);
 
     connect(new CSMPrefs::Shortcut("scene-clear-selection", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
-        [this] { this->clearSelection(Mask_Reference); });
+        [this] { clearSelection(Mask_Reference); });
 
-    mInConstructor = false;
+    CSMPrefs::Shortcut* switchPerspectiveShortcut = new CSMPrefs::Shortcut("scene-cam-cycle", this);
+    connect(switchPerspectiveShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        &WorldspaceWidget::cycleNavigationMode);
+
+    connect(new CSMPrefs::Shortcut("scene-toggle-marker", this), qOverload<>(&CSMPrefs::Shortcut::activated), this,
+        [this]() { mSelectionMarker->toggleVisibility(); });
 }
 
 void CSVRender::WorldspaceWidget::settingChanged(const CSMPrefs::Setting* setting)
@@ -156,17 +162,8 @@ void CSVRender::WorldspaceWidget::settingChanged(const CSMPrefs::Setting* settin
         mDragWheelFactor = setting->toDouble();
     else if (*setting == "3D Scene Input/drag-shift-factor")
         mDragShiftFactor = setting->toDouble();
-    else if (*setting == "Rendering/object-marker-alpha" && !mInConstructor)
-    {
-        float alpha = setting->toDouble();
-        // getSelection is virtual, thus this can not be called from the constructor
-        auto selection = getSelection(Mask_Reference);
-        for (osg::ref_ptr<TagBase> tag : selection)
-        {
-            if (auto objTag = dynamic_cast<ObjectTag*>(tag.get()))
-                objTag->mObject->setMarkerTransparency(alpha);
-        }
-    }
+    else if (*setting == "Rendering/object-marker-scale")
+        mSelectionMarker->updateScale(setting->toDouble());
     else if (*setting == "Tooltips/scene-delay")
         mToolTipDelay = setting->toInt();
     else if (*setting == "Tooltips/scene")
@@ -220,7 +217,7 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
         "<li>Hold {free-forward:mod} to speed up movement</li>"
         "</ul>");
     tool->addButton(
-        new CSVRender::OrbitCameraMode(this, QIcon(":scenetoolbar/orbiting-camera"),
+        new CSVRender::OrbitCameraMode(this, Misc::ScalableIcon::load(":scenetoolbar/orbiting-camera"),
             "Orbiting Camera"
             "<ul><li>Always facing the centre point</li>"
             "<li>Rotate around the centre point via {orbit-up}, {orbit-left}, {orbit-down}, {orbit-right} or by moving "
@@ -234,9 +231,11 @@ CSVWidget::SceneToolMode* CSVRender::WorldspaceWidget::makeNavigationSelector(CS
             tool),
         "orbit");
 
-    connect(tool, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+    mCameraMode = tool;
 
-    return tool;
+    connect(mCameraMode, &CSVWidget::SceneToolMode::modeChanged, this, &WorldspaceWidget::selectNavigationMode);
+
+    return mCameraMode;
 }
 
 CSVWidget::SceneToolToggle2* CSVRender::WorldspaceWidget::makeSceneVisibilitySelector(CSVWidget::SceneToolbar* parent)
@@ -271,9 +270,9 @@ CSVWidget::SceneToolRun* CSVRender::WorldspaceWidget::makeRunTool(CSVWidget::Sce
     {
         int state = debugProfiles.data(debugProfiles.index(i, stateColumn)).toInt();
 
-        bool default_ = debugProfiles.data(debugProfiles.index(i, defaultColumn)).toInt();
+        const bool defaultValue = debugProfiles.data(debugProfiles.index(i, defaultColumn)).toInt();
 
-        if (state != CSMWorld::RecordBase::State_Deleted && default_)
+        if (state != CSMWorld::RecordBase::State_Deleted && defaultValue)
             profiles.emplace_back(debugProfiles.data(debugProfiles.index(i, idColumn)).toString().toUtf8().constData());
     }
 
@@ -324,7 +323,7 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType(
     return output;
 }
 
-CSVRender::WorldspaceWidget::dropRequirments CSVRender::WorldspaceWidget::getDropRequirements(DropType type) const
+CSVRender::WorldspaceWidget::DropRequirements CSVRender::WorldspaceWidget::getDropRequirements(DropType type) const
 {
     if (type == Type_DebugProfile)
         return canHandle;
@@ -388,17 +387,38 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
     return mDocument;
 }
 
-CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
-    const QPoint& localPos, unsigned int interactionMask) const
+const CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument() const
 {
-    // may be okay to just use devicePixelRatio() directly
-    QScreen* screen = SceneWidget::windowHandle() && SceneWidget::windowHandle()->screen()
-        ? SceneWidget::windowHandle()->screen()
-        : QGuiApplication::primaryScreen();
+    return mDocument;
+}
 
+template <typename Tag>
+std::optional<CSVRender::WorldspaceHitResult> CSVRender::WorldspaceWidget::checkTag(
+    const osgUtil::LineSegmentIntersector::Intersection& intersection) const
+{
+    for (auto* node : intersection.nodePath)
+    {
+        if (auto* tag = dynamic_cast<Tag*>(node->getUserData()))
+        {
+            WorldspaceHitResult hit = { true, tag, 0, 0, 0, intersection.getWorldIntersectPoint() };
+            if (intersection.indexList.size() >= 3)
+            {
+                hit.index0 = intersection.indexList[0];
+                hit.index1 = intersection.indexList[1];
+                hit.index2 = intersection.indexList[2];
+            }
+            return hit;
+        }
+    }
+    return std::nullopt;
+}
+
+std::tuple<osg::Vec3d, osg::Vec3d, osg::Vec3d> CSVRender::WorldspaceWidget::getStartEndDirection(
+    int pointX, int pointY) const
+{
     // (0,0) is considered the lower left corner of an OpenGL window
-    int x = localPos.x() * screen->devicePixelRatio();
-    int y = height() * screen->devicePixelRatio() - localPos.y() * screen->devicePixelRatio();
+    int x = pointX * devicePixelRatio();
+    int y = height() * devicePixelRatio() - pointY * devicePixelRatio();
 
     // Convert from screen space to world space
     osg::Matrixd wpvMat;
@@ -410,6 +430,13 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
     osg::Vec3d start = wpvMat.preMult(osg::Vec3d(x, y, 0));
     osg::Vec3d end = wpvMat.preMult(osg::Vec3d(x, y, 1));
     osg::Vec3d direction = end - start;
+    return { start, end, direction };
+}
+
+CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
+    const QPoint& localPos, unsigned int interactionMask) const
+{
+    auto [start, end, direction] = getStartEndDirection(localPos.x(), localPos.y());
 
     // Get intersection
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(
@@ -422,51 +449,46 @@ CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
 
     mView->getCamera()->accept(visitor);
 
-    // Get relevant data
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
-    {
-        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+    const auto& intersections = intersector->getIntersections();
 
-        // reject back-facing polygons
-        if (direction * intersection.getWorldIntersectNormal() > 0)
-        {
-            continue;
-        }
+    std::vector<osgUtil::LineSegmentIntersector::Intersection> validIntersections
+        = { intersections.begin(), intersections.end() };
 
-        for (std::vector<osg::Node*>::iterator nodeIter = intersection.nodePath.begin();
-             nodeIter != intersection.nodePath.end(); ++nodeIter)
-        {
-            osg::Node* node = *nodeIter;
-            if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase*>(node->getUserData()))
-            {
-                WorldspaceHitResult hit = { true, std::move(tag), 0, 0, 0, intersection.getWorldIntersectPoint() };
-                if (intersection.indexList.size() >= 3)
-                {
-                    hit.index0 = intersection.indexList[0];
-                    hit.index1 = intersection.indexList[1];
-                    hit.index2 = intersection.indexList[2];
-                }
-                return hit;
-            }
-        }
+    const auto& removeBackfaces = [direction](const osgUtil::LineSegmentIntersector::Intersection& i) {
+        return direction * i.getWorldIntersectNormal() > 0;
+    };
 
-        // Something untagged, probably terrain
-        WorldspaceHitResult hit = { true, nullptr, 0, 0, 0, intersection.getWorldIntersectPoint() };
-        if (intersection.indexList.size() >= 3)
-        {
-            hit.index0 = intersection.indexList[0];
-            hit.index1 = intersection.indexList[1];
-            hit.index2 = intersection.indexList[2];
-        }
-        return hit;
-    }
+    validIntersections.erase(std::remove_if(validIntersections.begin(), validIntersections.end(), removeBackfaces),
+        validIntersections.end());
 
     // Default placement
     direction.normalize();
     direction *= CSMPrefs::get()["3D Scene Editing"]["distance"].toInt();
 
-    WorldspaceHitResult hit = { false, nullptr, 0, 0, 0, start + direction };
+    if (validIntersections.empty())
+        return WorldspaceHitResult{ false, nullptr, 0, 0, 0, start + direction };
+
+    const auto& firstHit = validIntersections.front();
+
+    for (const auto& hit : validIntersections)
+        if (const auto& markerHit = checkTag<ObjectMarkerTag>(hit))
+        {
+            if (mSelectionMarker->hitBehindMarker(markerHit->worldPos, mView->getCamera()))
+                return WorldspaceHitResult{ false, nullptr, 0, 0, 0, start + direction };
+            else
+                return *markerHit;
+        }
+    if (auto hit = checkTag<TagBase>(firstHit))
+        return *hit;
+
+    // Something untagged, probably terrain
+    WorldspaceHitResult hit = { true, nullptr, 0, 0, 0, firstHit.getWorldIntersectPoint() };
+    if (firstHit.indexList.size() >= 3)
+    {
+        hit.index0 = firstHit.indexList[0];
+        hit.index1 = firstHit.indexList[1];
+        hit.index2 = firstHit.indexList[2];
+    }
     return hit;
 }
 
@@ -624,17 +646,53 @@ void CSVRender::WorldspaceWidget::elementSelectionChanged()
 
 void CSVRender::WorldspaceWidget::updateOverlay() {}
 
+void CSVRender::WorldspaceWidget::handleMarkerHighlight(const int x, const int y)
+{
+    auto [start, end, _] = getStartEndDirection(x, y);
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(
+        new osgUtil::LineSegmentIntersector(osgUtil::Intersector::MODEL, start, end));
+
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    visitor.setTraversalMask(Mask_Reference);
+
+    mView->getCamera()->accept(visitor);
+
+    bool hitMarker = false;
+    for (const auto& intersection : intersector->getIntersections())
+    {
+        if (mSelectionMarker->hitBehindMarker(intersection.getWorldIntersectPoint(), mView->getCamera()))
+            continue;
+
+        for (const auto& node : intersection.nodePath)
+        {
+            if (const auto& marker = dynamic_cast<ObjectMarkerTag*>(node->getUserData()))
+            {
+                hitMarker = true;
+                mSelectionMarker->updateMarkerHighlight(node->getName(), marker->mAxis);
+                break;
+            }
+        }
+    }
+
+    if (!hitMarker)
+        mSelectionMarker->resetMarkerHighlight();
+}
+
 void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
 {
     dynamic_cast<CSVRender::EditMode&>(*mEditMode->getCurrent()).mouseMoveEvent(event);
 
     if (mDragging)
     {
-        int diffX = event->x() - mDragX;
-        int diffY = (height() - event->y()) - mDragY;
+        QPoint pos = event->position().toPoint();
+        int diffX = pos.x() - mDragX;
+        int diffY = (height() - pos.y()) - mDragY;
 
-        mDragX = event->x();
-        mDragY = height() - event->y();
+        mDragX = pos.x();
+        mDragY = height() - pos.y();
 
         double factor = mDragFactor;
 
@@ -643,32 +701,32 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&>(*mEditMode->getCurrent());
 
-        editMode.drag(event->pos(), diffX, diffY, factor);
+        editMode.drag(event->position().toPoint(), diffX, diffY, factor);
     }
     else if (mDragMode != InteractionType_None)
     {
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&>(*mEditMode->getCurrent());
 
         if (mDragMode == InteractionType_PrimaryEdit)
-            mDragging = editMode.primaryEditStartDrag(event->pos());
+            mDragging = editMode.primaryEditStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_SecondaryEdit)
-            mDragging = editMode.secondaryEditStartDrag(event->pos());
+            mDragging = editMode.secondaryEditStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_PrimarySelect)
-            mDragging = editMode.primarySelectStartDrag(event->pos());
+            mDragging = editMode.primarySelectStartDrag(event->position().toPoint());
         else if (mDragMode == InteractionType_SecondarySelect)
-            mDragging = editMode.secondarySelectStartDrag(event->pos());
+            mDragging = editMode.secondarySelectStartDrag(event->position().toPoint());
 
         if (mDragging)
         {
-            mDragX = event->localPos().x();
-            mDragY = height() - event->localPos().y();
+            mDragX = event->position().x();
+            mDragY = height() - event->position().y();
         }
     }
     else
     {
-        if (event->globalPos() != mToolTipPos)
+        if (event->globalPosition().toPoint() != mToolTipPos)
         {
-            mToolTipPos = event->globalPos();
+            mToolTipPos = event->globalPosition().toPoint();
 
             if (mShowToolTips)
             {
@@ -677,6 +735,8 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent(QMouseEvent* event)
             }
         }
 
+        QPoint pos = event->position().toPoint();
+        handleMarkerHighlight(pos.x(), pos.y());
         SceneWidget::mouseMoveEvent(event);
     }
 }
@@ -766,6 +826,26 @@ void CSVRender::WorldspaceWidget::toggleHiddenInstances()
     for (const auto& object : selection)
         if (const auto objectTag = static_cast<CSVRender::ObjectTag*>(object.get()))
             objectTag->mObject->getRootNode()->setNodeMask(firstMask);
+}
+
+void CSVRender::WorldspaceWidget::cycleNavigationMode()
+{
+    switch (++mSelectedNavigationMode)
+    {
+        case (CameraMode::FirstPerson):
+            mCameraMode->setButton("1st");
+            break;
+        case (CameraMode::Orbit):
+            mCameraMode->setButton("orbit");
+            break;
+        case (CameraMode::Free):
+            mCameraMode->setButton("free");
+            break;
+        default:
+            mCameraMode->setButton("1st");
+            mSelectedNavigationMode = 0;
+            break;
+    }
 }
 
 void CSVRender::WorldspaceWidget::handleInteraction(InteractionType type, bool activate)

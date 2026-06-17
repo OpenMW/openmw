@@ -1,12 +1,10 @@
 #version 120
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
+
+#include "lib/core/fragment.h.glsl"
 
 #define GROUNDCOVER
 
@@ -40,7 +38,7 @@ centroid varying vec3 shadowDiffuseLighting;
 varying vec3 passNormal;
 
 #include "shadows_fragment.glsl"
-#include "lib/light/lighting.glsl"
+#include "lib/light/clamp.glsl"
 #include "lib/material/alpha.glsl"
 #include "fog.glsl"
 #include "compatibility/normals.glsl"
@@ -76,11 +74,11 @@ void main()
     lighting = passLighting + shadowDiffuseLighting * shadowing;
 #else
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseLight + ambientLight;
 #endif
 
-    clampLightingResult(lighting);
+    clampLighting(lighting);
 
     gl_FragData[0].xyz *= lighting;
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);

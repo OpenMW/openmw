@@ -2,19 +2,6 @@
 
 set -xeo pipefail
 
-free -m
-
-# Silence a git warning
-git config --global advice.detachedHead false
-
-BUILD_UNITTESTS=OFF
-BUILD_BENCHMARKS=OFF
-
-if [[ "${BUILD_TESTS_ONLY}" ]]; then
-    BUILD_UNITTESTS=ON
-    BUILD_BENCHMARKS=ON
-fi
-
 # setup our basic cmake build options
 declare -a CMAKE_CONF_OPTS=(
     -DCMAKE_C_COMPILER="${CC:-/usr/bin/cc}"
@@ -25,7 +12,7 @@ declare -a CMAKE_CONF_OPTS=(
     -DBUILD_SHARED_LIBS="${BUILD_SHARED_LIBS:-OFF}"
     -DUSE_SYSTEM_TINYXML=ON
     -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=ON
-    -DOPENMW_CXX_FLAGS="-Werror -Werror=implicit-fallthrough"  # flags specific to OpenMW project
+    -DOPENMW_CXX_FLAGS="${OPENMW_CXX_FLAGS}"  # flags specific to OpenMW project
 )
 
 if [[ "${CMAKE_EXE_LINKER_FLAGS}" ]]; then
@@ -46,13 +33,13 @@ fi
 
 if [[ $CI_CLANG_TIDY ]]; then
     CMAKE_CONF_OPTS+=(
-          -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
-          -DBUILD_UNITTESTS=ON
-          -DBUILD_OPENCS_TESTS=ON
-          -DBUILD_BENCHMARKS=ON
+        -DCMAKE_CXX_CLANG_TIDY=${CMAKE_CXX_CLANG_TIDY}
+        -DBUILD_COMPONENTS_TESTS=ON
+        -DBUILD_OPENMW_TESTS=ON
+        -DBUILD_OPENCS_TESTS=ON
+        -DBUILD_BENCHMARKS=ON
     )
 fi
-
 
 if [[ "${CMAKE_BUILD_TYPE}" ]]; then
     CMAKE_CONF_OPTS+=(
@@ -103,9 +90,10 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_NAVMESHTOOL=OFF \
         -DBUILD_BULLETOBJECTTOOL=OFF \
         -DBUILD_NIFTEST=OFF \
-        -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
-        -DBUILD_OPENCS_TESTS=${BUILD_UNITTESTS} \
-        -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
+        -DBUILD_COMPONENTS_TESTS=ON \
+        -DBUILD_OPENMW_TESTS=ON \
+        -DBUILD_OPENCS_TESTS=ON \
+        -DBUILD_BENCHMARKS=ON \
         ..
 elif [[ "${BUILD_OPENMW_ONLY}" ]]; then
     ${ANALYZE} cmake \

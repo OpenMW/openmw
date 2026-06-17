@@ -37,7 +37,7 @@ namespace MWMechanics
             ESM::RefId mSourceSpellId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
-            int mCasterActorId;
+            ESM::RefNum mCaster;
             ESM::RefNum mItem;
             ESM::ActiveSpells::Flags mFlags;
             int mWorsenings;
@@ -69,7 +69,7 @@ namespace MWMechanics
             const std::vector<ActiveEffect>& getEffects() const { return mEffects; }
             std::vector<ActiveEffect>& getEffects() { return mEffects; }
 
-            int getCasterActorId() const { return mCasterActorId; }
+            ESM::RefNum getCaster() const { return mCaster; }
 
             int getWorsenings() const { return mWorsenings; }
 
@@ -116,16 +116,22 @@ namespace MWMechanics
             IterationGuard(ActiveSpells& spells);
             ~IterationGuard();
         };
+        struct UpdateContext;
 
         std::list<ActiveSpellParams> mSpells;
         std::vector<ActiveSpellParams> mQueue;
         std::queue<Predicate> mPurges;
         bool mIterating;
 
-        void addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell);
+        void addToSpells(const MWWorld::Ptr& ptr, const ActiveSpellParams& spell, UpdateContext& context);
 
         bool applyPurges(const MWWorld::Ptr& ptr, std::list<ActiveSpellParams>::iterator* currentSpell = nullptr,
             std::vector<ActiveEffect>::iterator* currentEffect = nullptr);
+
+        bool updateActiveSpell(
+            const MWWorld::Ptr& ptr, float duration, Collection::iterator& spellIt, UpdateContext& context);
+
+        bool initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context);
 
     public:
         ActiveSpells();
@@ -137,8 +143,8 @@ namespace MWMechanics
         ///
         void addSpell(const ActiveSpellParams& params);
 
-        /// Bypasses resistances
-        void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor);
+        /// Force resistances
+        void addSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances = true);
 
         /// Removes the active effects from this spell/potion/.. with \a id
         void removeEffectsBySourceSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id);
@@ -146,13 +152,13 @@ namespace MWMechanics
         void removeEffectsByActiveSpellId(const MWWorld::Ptr& ptr, const ESM::RefId& id);
 
         /// Remove all active effects with this effect id
-        void purgeEffect(const MWWorld::Ptr& ptr, int effectId, ESM::RefId effectArg = {});
+        void purgeEffect(const MWWorld::Ptr& ptr, ESM::RefId effectId, ESM::RefId effectArg = {});
 
         void purge(EffectPredicate predicate, const MWWorld::Ptr& ptr);
         void purge(ParamsPredicate predicate, const MWWorld::Ptr& ptr);
 
-        /// Remove all effects that were cast by \a casterActorId
-        void purge(const MWWorld::Ptr& ptr, int casterActorId);
+        /// Remove all effects that were cast by \a actor
+        void purge(const MWWorld::Ptr& ptr, ESM::RefNum actor);
 
         /// Remove all spells
         void clear(const MWWorld::Ptr& ptr);

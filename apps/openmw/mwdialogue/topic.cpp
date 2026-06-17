@@ -14,8 +14,6 @@ namespace MWDialogue
     {
     }
 
-    Topic::~Topic() {}
-
     bool Topic::addEntry(const JournalEntry& entry)
     {
         if (entry.mTopic != mTopic)

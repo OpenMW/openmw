@@ -5,7 +5,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <string_view>
 #include <unordered_set>
 #include <utility>
 
@@ -15,6 +14,7 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/misc/weakcache.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "idcollection.hpp"
 
@@ -75,8 +75,8 @@ namespace CSMWorld
             /// Marks an additional dependency
             void addOtherDependency(const ESM::RefId& id);
             /// Clears parts and dependencies
-            void reset_data(const ESM::RefId& raceId,
-                const WeightsHeights& raceStats = { osg::Vec2f(1.f, 1.f), osg::Vec2f(1.f, 1.f) }, bool isBeast = false);
+            void reset_data(const ESM::RefId& raceId, const WeightsHeights& raceStats = { { 1.f, 1.f }, { 1.f, 1.f } },
+                bool isBeast = false);
 
         private:
             bool handles(ESM::PartReferenceType type) const;
@@ -103,7 +103,7 @@ namespace CSMWorld
             /// Checks if the actor is female
             bool isFemale() const;
             /// Returns the skeleton the actor should use for attaching parts to
-            std::string getSkeleton() const;
+            VFS::Path::Normalized getSkeleton() const;
             /// Retrieves the associated actor part
             ESM::RefId getPart(ESM::PartReferenceType index) const;
 

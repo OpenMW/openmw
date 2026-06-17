@@ -21,44 +21,33 @@ namespace MWWorld
         query.mLoadCells = true;
 
         ESM::ReadersCache readers;
-        const ::EsmLoader::EsmData content
+        ::EsmLoader::EsmData content
             = ::EsmLoader::loadEsmData(query, groundcoverFiles, fileCollections, readers, encoder, listener);
 
-        static constexpr std::string_view prefix = "grass\\";
+        static constexpr std::string_view prefix = "grass/";
         for (const ESM::Static& stat : statics)
         {
-            std::string model = Misc::StringUtils::lowerCase(stat.mModel);
-            std::replace(model.begin(), model.end(), '/', '\\');
-            if (!model.starts_with(prefix))
+            VFS::Path::Normalized model = VFS::Path::toNormalized(stat.mModel);
+            if (!model.value().starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);
         }
 
         for (const ESM::Static& stat : content.mStatics)
         {
-            std::string model = Misc::StringUtils::lowerCase(stat.mModel);
-            std::replace(model.begin(), model.end(), '/', '\\');
-            if (!model.starts_with(prefix))
+            VFS::Path::Normalized model = VFS::Path::toNormalized(stat.mModel);
+            if (!model.value().starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model);
         }
 
-        for (const ESM::Cell& cell : content.mCells)
+        for (ESM::Cell& cell : content.mCells)
         {
             if (!cell.isExterior())
                 continue;
             auto cellIndex = std::make_pair(cell.getGridX(), cell.getGridY());
             mCellContexts[cellIndex] = std::move(cell.mContextList);
         }
-    }
-
-    std::string GroundcoverStore::getGroundcoverModel(const ESM::RefId& id) const
-    {
-        auto search = mMeshCache.find(id);
-        if (search == mMeshCache.end())
-            return std::string();
-
-        return search->second;
     }
 
     void GroundcoverStore::initCell(ESM::Cell& cell, int cellX, int cellY) const

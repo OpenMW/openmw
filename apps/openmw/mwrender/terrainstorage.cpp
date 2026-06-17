@@ -1,6 +1,8 @@
 #include "terrainstorage.hpp"
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm4/loadltex.hpp>
+#include <components/esm4/loadtxst.hpp>
 #include <components/esm4/loadwrld.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -11,8 +13,8 @@
 namespace MWRender
 {
 
-    TerrainStorage::TerrainStorage(Resource::ResourceSystem* resourceSystem, const std::string& normalMapPattern,
-        const std::string& normalHeightMapPattern, bool autoUseNormalMaps, const std::string& specularMapPattern,
+    TerrainStorage::TerrainStorage(Resource::ResourceSystem* resourceSystem, std::string_view normalMapPattern,
+        std::string_view normalHeightMapPattern, bool autoUseNormalMaps, std::string_view specularMapPattern,
         bool autoUseSpecularMaps)
         : ESMTerrain::Storage(resourceSystem->getVFS(), normalMapPattern, normalHeightMapPattern, autoUseNormalMaps,
             specularMapPattern, autoUseSpecularMaps)
@@ -105,10 +107,21 @@ namespace MWRender
         return mLandManager->getLand(cellLocation);
     }
 
-    const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
+    const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }
 
+    const ESM4::LandTexture* TerrainStorage::getEsm4LandTexture(ESM::RefId ltexId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::LandTexture>().search(ltexId);
+    }
+
+    const ESM4::TextureSet* TerrainStorage::getEsm4TextureSet(ESM::RefId txstId) const
+    {
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        return esmStore.get<ESM4::TextureSet>().search(txstId);
+    }
 }

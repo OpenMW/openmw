@@ -9,7 +9,7 @@ namespace
 {
     void settingsManager(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::Manager::getFloat("sky blending start", "Fog"));
         }
@@ -17,7 +17,7 @@ namespace
 
     void settingsManager2(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::Manager::getFloat("near clip", "Camera"));
             benchmark::DoNotOptimize(Settings::Manager::getBool("transparent postpass", "Post Processing"));
@@ -26,7 +26,7 @@ namespace
 
     void settingsManager3(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::Manager::getFloat("near clip", "Camera"));
             benchmark::DoNotOptimize(Settings::Manager::getBool("transparent postpass", "Post Processing"));
@@ -36,7 +36,7 @@ namespace
 
     void localStatic(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             static float v = Settings::Manager::getFloat("sky blending start", "Fog");
             benchmark::DoNotOptimize(v);
@@ -45,7 +45,7 @@ namespace
 
     void localStatic2(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             static float v1 = Settings::Manager::getFloat("near clip", "Camera");
             static bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
@@ -56,7 +56,7 @@ namespace
 
     void localStatic3(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             static float v1 = Settings::Manager::getFloat("near clip", "Camera");
             static bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
@@ -69,7 +69,7 @@ namespace
 
     void settingsStorage(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             float v = Settings::fog().mSkyBlendingStart.get();
             benchmark::DoNotOptimize(v);
@@ -78,7 +78,7 @@ namespace
 
     void settingsStorage2(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             bool v1 = Settings::postProcessing().mTransparentPostpass.get();
             float v2 = Settings::camera().mNearClip.get();
@@ -89,7 +89,7 @@ namespace
 
     void settingsStorage3(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             bool v1 = Settings::postProcessing().mTransparentPostpass.get();
             float v2 = Settings::camera().mNearClip.get();
@@ -102,7 +102,7 @@ namespace
 
     void settingsStorageGet(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::get<float>("Fog", "sky blending start"));
         }
@@ -110,7 +110,7 @@ namespace
 
     void settingsStorageGet2(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::get<bool>("Post Processing", "transparent postpass"));
             benchmark::DoNotOptimize(Settings::get<float>("Camera", "near clip"));
@@ -119,7 +119,7 @@ namespace
 
     void settingsStorageGet3(benchmark::State& state)
     {
-        for (auto _ : state)
+        for ([[maybe_unused]] auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::get<bool>("Post Processing", "transparent postpass"));
             benchmark::DoNotOptimize(Settings::get<float>("Camera", "near clip"));

@@ -6,6 +6,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/texturetype.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
 
@@ -13,10 +15,9 @@ namespace MWRender
 {
     namespace
     {
-        class TextureOverrideVisitor : public osg::NodeVisitor
+        struct TextureOverrideVisitor : osg::NodeVisitor
         {
-        public:
-            TextureOverrideVisitor(std::string_view texture, Resource::ResourceSystem* resourcesystem)
+            explicit TextureOverrideVisitor(VFS::Path::NormalizedView texture, Resource::ResourceSystem* resourcesystem)
                 : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
                 , mTexture(texture)
                 , mResourcesystem(resourcesystem)
@@ -33,28 +34,31 @@ namespace MWRender
                 }
                 traverse(node);
             }
-            std::string_view mTexture;
+
+            VFS::Path::NormalizedView mTexture;
             Resource::ResourceSystem* mResourcesystem;
         };
     }
 
-    void overrideFirstRootTexture(std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
+    void overrideFirstRootTexture(
+        VFS::Path::NormalizedView texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
     {
         TextureOverrideVisitor overrideVisitor(texture, resourceSystem);
         node.accept(overrideVisitor);
     }
 
-    void overrideTexture(std::string_view texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
+    void overrideTexture(VFS::Path::NormalizedView texture, Resource::ResourceSystem* resourceSystem, osg::Node& node)
     {
         if (texture.empty())
             return;
-        std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture, resourceSystem->getVFS());
+        const VFS::Path::Normalized correctedTexture
+            = Misc::ResourceHelpers::correctTexturePath(texture, *resourceSystem->getVFS());
         // Not sure if wrap settings should be pulled from the overridden texture?
         osg::ref_ptr<osg::Texture2D> tex
             = new osg::Texture2D(resourceSystem->getImageManager()->getImage(correctedTexture));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-        tex->setName("diffuseMap");
+        resourceSystem->getSceneManager()->applyFilterSettings(tex);
 
         osg::ref_ptr<osg::StateSet> stateset;
         if (const osg::StateSet* const src = node.getStateSet())
@@ -63,6 +67,7 @@ namespace MWRender
             stateset = new osg::StateSet;
 
         stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttribute(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::OVERRIDE);
 
         node.setStateSet(stateset);
     }
@@ -71,5 +76,4 @@ namespace MWRender
     {
         return Settings::shaders().mAntialiasAlphaTest && Settings::video().mAntialiasing > 1;
     }
-
 }

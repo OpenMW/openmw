@@ -14,6 +14,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    class ActorIdConverter;
 
     // Parameters of an effect concerning lasting effects.
     // Note we are not using ENAMstruct since the magnitude may be modified by magic resistance, etc.
@@ -26,21 +27,22 @@ namespace ESM
             Flag_Remove = 1 << 1,
             Flag_Ignore_Resistances = 1 << 2,
             Flag_Ignore_Reflect = 1 << 3,
-            Flag_Ignore_SpellAbsorption = 1 << 4
+            Flag_Ignore_SpellAbsorption = 1 << 4,
+            Flag_Invalid = 1 << 5
         };
 
-        int32_t mEffectId;
+        RefId mEffectId;
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
-        std::variant<RefId, int> mArg; // skill, attribute, or summon
+        std::variant<RefId, RefNum> mArg; // skill, attribute, or summon
         float mDuration;
         float mTimeLeft;
         int32_t mEffectIndex;
         int32_t mFlags;
 
         RefId getSkillOrAttribute() const;
-        int getActorId() const;
+        RefNum getActor() const;
     };
 
     // format 0, saved games only
@@ -64,7 +66,7 @@ namespace ESM
             RefId mSourceSpellId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
-            int32_t mCasterActorId;
+            RefNum mCaster;
             RefNum mItem;
             Flags mFlags;
             int32_t mWorsenings;
@@ -73,6 +75,7 @@ namespace ESM
 
         std::vector<ActiveSpellParams> mSpells;
         std::vector<ActiveSpellParams> mQueue;
+        ActorIdConverter* mActorIdConverter = nullptr;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

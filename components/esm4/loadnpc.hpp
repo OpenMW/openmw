@@ -44,7 +44,7 @@ namespace ESM4
 
     struct Npc
     {
-        enum ACBS_TES4
+        enum ActorBaseFlagsTes4
         {
             TES4_Female = 0x000001,
             TES4_Essential = 0x000002,
@@ -58,7 +58,7 @@ namespace ESM4
             TES4_CanCorpseCheck = 0x100000 // opposite of crea
         };
 
-        enum ACBS_FO3
+        enum ActorBaseFlagsFo3
         {
             FO3_Female = 0x00000001,
             FO3_Essential = 0x00000002,
@@ -79,7 +79,7 @@ namespace ESM4
         };
 
         // In FO4 flags seem to be the same.
-        enum ACBS_TES5
+        enum ActorBaseFlagsTes5
         {
             TES5_Female = 0x00000001,
             TES5_Essential = 0x00000002,
@@ -103,7 +103,7 @@ namespace ESM4
         };
 
         // All FO3+ games.
-        enum Template_Flags
+        enum TemplateFlags
         {
             Template_UseTraits = 0x0001, // Destructible Object; Traits tab, including race, gender, height, weight,
                                          // voice type, death item; Sounds tab; Animation tab; Character Gen tabs

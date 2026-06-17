@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include <components/esm3/loadlevlist.hpp>
+#include <components/lua/util.hpp>
 
 #include "../../mwbase/environment.hpp"
 #include "../../mwbase/world.hpp"
@@ -22,7 +23,7 @@ namespace MWLua
 {
     void addLevelledCreatureBindings(sol::table list, const Context& context)
     {
-        auto& state = context.mLua->sol();
+        auto state = context.sol();
         auto item = state.new_usertype<ESM::LevelledListBase::LevelItem>("ESM3_LevelledListItem");
         item["id"] = sol::readonly_property(
             [](const ESM::LevelledListBase::LevelItem& rec) -> std::string { return rec.mId.serializeText(); });
@@ -42,10 +43,10 @@ namespace MWLua
             [](const ESM::CreatureLevList& rec) -> std::string { return rec.mId.serializeText(); });
         record["chanceNone"] = sol::readonly_property(
             [](const ESM::CreatureLevList& rec) -> float { return std::clamp(rec.mChanceNone / 100.f, 0.f, 1.f); });
-        record["creatures"] = sol::readonly_property([&](const ESM::CreatureLevList& rec) -> sol::table {
+        record["creatures"] = sol::readonly_property([state](const ESM::CreatureLevList& rec) -> sol::table {
             sol::table res(state, sol::create);
             for (size_t i = 0; i < rec.mList.size(); ++i)
-                res[i + 1] = rec.mList[i];
+                res[LuaUtil::toLuaIndex(i)] = rec.mList[i];
             return res;
         });
         record["calculateFromAllLevels"] = sol::readonly_property(

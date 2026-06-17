@@ -62,39 +62,31 @@ namespace CSMPrefs
         {
             QWidget* widget = static_cast<QWidget*>(watched);
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            unsigned int mod = (unsigned int)keyEvent->modifiers();
-            unsigned int key = (unsigned int)keyEvent->key();
 
             if (!keyEvent->isAutoRepeat())
-                return activate(widget, mod, key);
+                return activate(widget, keyEvent->keyCombination());
         }
         else if (event->type() == QEvent::KeyRelease)
         {
             QWidget* widget = static_cast<QWidget*>(watched);
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            unsigned int mod = (unsigned int)keyEvent->modifiers();
-            unsigned int key = (unsigned int)keyEvent->key();
 
             if (!keyEvent->isAutoRepeat())
-                return deactivate(widget, mod, key);
+                return deactivate(widget, keyEvent->keyCombination());
         }
         else if (event->type() == QEvent::MouseButtonPress)
         {
             QWidget* widget = static_cast<QWidget*>(watched);
             QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-            unsigned int mod = (unsigned int)mouseEvent->modifiers();
-            unsigned int button = (unsigned int)mouseEvent->button();
 
-            return activate(widget, mod, button);
+            return activate(widget, QKeyCombination(mouseEvent->modifiers(), Qt::Key(mouseEvent->button())));
         }
         else if (event->type() == QEvent::MouseButtonRelease)
         {
             QWidget* widget = static_cast<QWidget*>(watched);
             QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-            unsigned int mod = (unsigned int)mouseEvent->modifiers();
-            unsigned int button = (unsigned int)mouseEvent->button();
 
-            return deactivate(widget, mod, button);
+            return deactivate(widget, QKeyCombination(mouseEvent->modifiers(), Qt::Key(mouseEvent->button())));
         }
         else if (event->type() == QEvent::FocusOut)
         {
@@ -149,7 +141,7 @@ namespace CSMPrefs
         }
     }
 
-    bool ShortcutEventHandler::activate(QWidget* widget, unsigned int mod, unsigned int button)
+    bool ShortcutEventHandler::activate(QWidget* widget, QKeyCombination keyCombination)
     {
         std::vector<std::pair<MatchResult, Shortcut*>> potentials;
         bool used = false;
@@ -167,7 +159,7 @@ namespace CSMPrefs
                 if (!shortcut->isEnabled())
                     continue;
 
-                if (checkModifier(mod, button, shortcut, true))
+                if (checkModifier(keyCombination, shortcut, true))
                     used = true;
 
                 if (shortcut->getActivationStatus() != Shortcut::AS_Inactive)
@@ -175,7 +167,8 @@ namespace CSMPrefs
 
                 int pos = shortcut->getPosition();
                 int lastPos = shortcut->getLastPosition();
-                MatchResult result = match(mod, button, shortcut->getSequence()[pos]);
+                MatchResult result = match(keyCombination.keyboardModifiers(), keyCombination.key(),
+                    shortcut->getSequence()[pos].toCombined());
 
                 if (result == Matches_WithMod || result == Matches_NoMod)
                 {
@@ -220,10 +213,8 @@ namespace CSMPrefs
         return used;
     }
 
-    bool ShortcutEventHandler::deactivate(QWidget* widget, unsigned int mod, unsigned int button)
+    bool ShortcutEventHandler::deactivate(QWidget* widget, QKeyCombination keyCombination)
     {
-        const int KeyMask = 0x01FFFFFF;
-
         bool used = false;
 
         while (widget)
@@ -235,11 +226,11 @@ namespace CSMPrefs
             {
                 Shortcut* shortcut = *it;
 
-                if (checkModifier(mod, button, shortcut, false))
+                if (checkModifier(keyCombination, shortcut, false))
                     used = true;
 
                 int pos = shortcut->getPosition();
-                MatchResult result = match(0, button, shortcut->getSequence()[pos] & KeyMask);
+                MatchResult result = match(0, keyCombination.key(), shortcut->getSequence()[pos].key());
 
                 if (result != Matches_Not)
                 {
@@ -268,13 +259,13 @@ namespace CSMPrefs
         return used;
     }
 
-    bool ShortcutEventHandler::checkModifier(unsigned int mod, unsigned int button, Shortcut* shortcut, bool activate)
+    bool ShortcutEventHandler::checkModifier(QKeyCombination keyCombination, Shortcut* shortcut, bool activate)
     {
         if (!shortcut->isEnabled() || !shortcut->getModifier() || shortcut->getSecondaryMode() == Shortcut::SM_Ignore
             || shortcut->getModifierStatus() == activate)
             return false;
 
-        MatchResult result = match(mod, button, shortcut->getModifier());
+        MatchResult result = match(keyCombination.keyboardModifiers(), keyCombination.key(), shortcut->getModifier());
         bool used = false;
 
         if (result != Matches_Not)

@@ -5,7 +5,7 @@
 
 #include <components/resource/scenemanager.hpp>
 
-namespace fx
+namespace Fx
 {
     std::string StateUpdater::sDefinition = UniformData::getDefinition("_omw_data");
 

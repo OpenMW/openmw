@@ -47,6 +47,7 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -94,7 +95,7 @@ namespace
             if (stateset)
             {
                 const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
-                for (size_t i = 0; i < texAttributes.size(); i++)
+                for (unsigned i = 0; i < static_cast<unsigned>(texAttributes.size()); i++)
                 {
                     const osg::StateAttribute* attr = stateset->getTextureAttribute(i, osg::StateAttribute::TEXTURE);
                     if (!attr)
@@ -106,7 +107,7 @@ namespace
                     std::string fileName;
                     if (image)
                         fileName = image->getFileName();
-                    mTextures.emplace_back(texture->getName(), fileName);
+                    mTextures.emplace_back(SceneUtil::getTextureType(*stateset, *texture, i), fileName);
                 }
             }
 
@@ -114,7 +115,7 @@ namespace
         }
     };
 
-    void addToLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, uint16_t level)
     {
         for (auto& levelItem : list->mList)
         {
@@ -253,7 +254,26 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                MWWorld::Ptr ptr = R()(runtime);
+                MWWorld::Ptr ptr;
+                if (!R::implicit)
+                {
+                    ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                    runtime.pop();
+
+                    ptr = MWBase::Environment::get().getWorld()->searchPtr(name, false);
+                    // We don't normally want to let this go, but some mods insist on trying this
+                    if (ptr.isEmpty())
+                    {
+                        const std::string error = "Failed to find an instance of object " + name.toDebugString();
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        return;
+                    }
+                }
+                else
+                {
+                    ptr = R()(runtime);
+                }
                 MWBase::Environment::get().getWorld()->disable(ptr);
             }
         };
@@ -584,7 +604,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view effect = runtime.getStringLiteral(runtime[0].mInteger);
+                const std::string_view effectName = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 if (!ptr.getClass().isActor())
@@ -593,24 +613,24 @@ namespace MWScript
                     return;
                 }
 
-                long key;
+                ESM::RefId key;
 
-                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect.data());
+                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effectName);
                     k.has_value() && *k >= 0 && *k <= 32767)
-                    key = *k;
+                    key = ESM::MagicEffect::indexToRefId(*k);
                 else
-                    key = ESM::MagicEffect::effectGmstIdToIndex(effect);
+                    key = ESM::MagicEffect::effectGmstIdToRefId(effectName);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-
-                const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
-
-                for (const auto& activeEffect : effects)
+                for (const auto& spell : stats.getActiveSpells())
                 {
-                    if (activeEffect.first.mId == key && activeEffect.second.getModifier() > 0)
+                    for (const auto& effect : spell.getEffects())
                     {
-                        runtime.push(1);
-                        return;
+                        if (effect.mFlags & ESM::ActiveEffect::Flag_Remove && effect.mEffectId == key)
+                        {
+                            runtime.push(1);
+                            return;
+                        }
                     }
                 }
                 runtime.push(0);
@@ -704,16 +724,17 @@ namespace MWScript
                 if (!ptr.getClass().isActor())
                     return;
 
+                MWWorld::InventoryStore* invStorePtr = nullptr;
                 if (ptr.getClass().hasInventoryStore(ptr))
                 {
+                    invStorePtr = &ptr.getClass().getInventoryStore(ptr);
                     // Prefer dropping unequipped items first; re-stack if possible by unequipping items before dropping
                     // them.
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    int numNotEquipped = store.count(item);
+                    int numNotEquipped = invStorePtr->count(item);
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
-                        MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ConstContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
                             numNotEquipped -= it->getCellRef().getCount();
                         }
@@ -721,29 +742,30 @@ namespace MWScript
 
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
                     {
-                        MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && it->getCellRef().getRefId() == item)
+                        MWWorld::ContainerStoreIterator it = invStorePtr->getSlot(slot);
+                        if (it != invStorePtr->end() && it->getCellRef().getRefId() == item)
                         {
                             int numToRemove = std::min(amount - numNotEquipped, it->getCellRef().getCount());
-                            store.unequipItemQuantity(*it, numToRemove);
+                            invStorePtr->unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
                     }
+                }
 
-                    for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                {
+                    if (iter->getCellRef().getRefId() == item && (!invStorePtr || !invStorePtr->isEquipped(*iter)))
                     {
-                        if (iter->getCellRef().getRefId() == item && !store.isEquipped(*iter))
-                        {
-                            int removed = store.remove(*iter, amount);
-                            MWWorld::Ptr dropped
-                                = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
-                            dropped.getCellRef().setOwner(ESM::RefId());
+                        int removed = store.remove(*iter, amount);
+                        MWWorld::Ptr dropped
+                            = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
+                        dropped.getCellRef().setOwner(ESM::RefId());
 
-                            amount -= removed;
+                        amount -= removed;
 
-                            if (amount <= 0)
-                                break;
-                        }
+                        if (amount <= 0)
+                            break;
                     }
                 }
 
@@ -862,8 +884,8 @@ namespace MWScript
                     return;
                 }
 
-                const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                runtime.push(stats.getActiveSpells().isSpellActive(id));
+                const auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
+                runtime.push(activeSpells.isSpellActive(id) || activeSpells.isEnchantmentActive(id));
             }
         };
 
@@ -1124,9 +1146,18 @@ namespace MWScript
         {
             void printLocalVars(Interpreter::Runtime& runtime, const MWWorld::Ptr& ptr)
             {
-                std::stringstream str;
+                std::ostringstream str;
 
                 const ESM::RefId& script = ptr.getClass().getScript(ptr);
+
+                auto printVariables = [&str](const auto& names, const auto& values, std::string_view type) {
+                    size_t size = std::min(names.size(), values.size());
+                    for (size_t i = 0; i < size; ++i)
+                    {
+                        str << "\n  " << names[i] << " = " << values[i] << " (" << type << ")";
+                    }
+                };
+
                 if (script.empty())
                     str << ptr.getCellRef().getRefId() << " does not have a script.";
                 else
@@ -1137,27 +1168,9 @@ namespace MWScript
                     const Compiler::Locals& complocals
                         = MWBase::Environment::get().getScriptManager()->getLocals(script);
 
-                    const std::vector<std::string>* names = &complocals.get('s');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mShorts.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mShorts[i] << " (short)";
-                    }
-                    names = &complocals.get('l');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mLongs.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mLongs[i] << " (long)";
-                    }
-                    names = &complocals.get('f');
-                    for (size_t i = 0; i < names->size(); ++i)
-                    {
-                        if (i >= locals.mFloats.size())
-                            break;
-                        str << std::endl << "  " << (*names)[i] << " = " << locals.mFloats[i] << " (float)";
-                    }
+                    printVariables(complocals.get('s'), locals.mShorts, "short");
+                    printVariables(complocals.get('l'), locals.mLongs, "long");
+                    printVariables(complocals.get('f'), locals.mFloats, "float");
                 }
 
                 runtime.getContext().report(str.str());
@@ -1165,36 +1178,78 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime& runtime)
             {
-                std::stringstream str;
-                str << "Global variables:";
+                std::ostringstream str;
+                str << "Global Variables:";
 
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = runtime.getContext().getGlobals();
-                for (size_t i = 0; i < names.size(); ++i)
-                {
-                    char type = world->getGlobalVariableType(names[i]);
-                    str << std::endl << " " << names[i] << " = ";
+                auto& context = runtime.getContext();
+                std::vector<std::string> names = context.getGlobals();
 
+                std::sort(names.begin(), names.end(), ::Misc::StringUtils::ciLess);
+
+                auto printVariable = [&str, &context](const std::string& name, char type) {
+                    str << "\n " << name << " = ";
                     switch (type)
                     {
                         case 's':
-
-                            str << runtime.getContext().getGlobalShort(names[i]) << " (short)";
+                            str << context.getGlobalShort(name) << " (short)";
                             break;
-
                         case 'l':
-
-                            str << runtime.getContext().getGlobalLong(names[i]) << " (long)";
+                            str << context.getGlobalLong(name) << " (long)";
                             break;
-
                         case 'f':
-
-                            str << runtime.getContext().getGlobalFloat(names[i]) << " (float)";
+                            str << context.getGlobalFloat(name) << " (float)";
                             break;
-
                         default:
-
                             str << "<unknown type>";
+                    }
+                };
+
+                for (const auto& name : names)
+                    printVariable(name, world->getGlobalVariableType(name));
+
+                context.report(str.str());
+            }
+
+            void printGlobalScriptsVars(Interpreter::Runtime& runtime)
+            {
+                std::ostringstream str;
+                str << "\nGlobal Scripts:";
+
+                const auto& scripts = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getScripts();
+
+                // sort for user convenience
+                std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> globalScripts(scripts.begin(), scripts.end());
+
+                auto printVariables
+                    = [&str](std::string_view scptName, const auto& names, const auto& values, std::string_view type) {
+                          size_t size = std::min(names.size(), values.size());
+                          for (size_t i = 0; i < size; ++i)
+                          {
+                              str << "\n " << scptName << "->" << names[i] << " = " << values[i] << " (" << type << ")";
+                          }
+                      };
+
+                for (const auto& [refId, script] : globalScripts)
+                {
+                    // Skip dormant global scripts
+                    if (!script->mRunning)
+                        continue;
+
+                    std::string_view scptName = refId.getRefIdString();
+
+                    const Compiler::Locals& complocals
+                        = MWBase::Environment::get().getScriptManager()->getLocals(refId);
+                    const Locals& locals
+                        = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocals(refId);
+
+                    if (locals.isEmpty())
+                        str << "\n No variables in script " << scptName;
+                    else
+                    {
+                        printVariables(scptName, complocals.get('s'), locals.mShorts, "short");
+                        printVariables(scptName, complocals.get('l'), locals.mLongs, "long");
+                        printVariables(scptName, complocals.get('f'), locals.mFloats, "float");
                     }
                 }
 
@@ -1211,6 +1266,7 @@ namespace MWScript
                 {
                     // No reference, no problem.
                     printGlobalVars(runtime);
+                    printGlobalScriptsVars(runtime);
                 }
             }
         };
@@ -1434,9 +1490,9 @@ namespace MWScript
                     osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                    std::string model
+                    const VFS::Path::Normalized model
                         = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getCorrectedModel(ptr), vfs);
-                    msg << "Model: " << model << std::endl;
+                    msg << "Model: " << model.value() << std::endl;
                     if (!model.empty())
                     {
                         const std::string archive = vfs->getArchive(model);
@@ -1522,7 +1578,7 @@ namespace MWScript
 
                 ESM::CreatureLevList listCopy
                     = *MWBase::Environment::get().getESMStore()->get<ESM::CreatureLevList>().find(levId);
-                addToLevList(&listCopy, creatureId, level);
+                addToLevList(&listCopy, creatureId, static_cast<uint16_t>(level));
                 MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
@@ -1560,7 +1616,7 @@ namespace MWScript
 
                 ESM::ItemLevList listCopy
                     = *MWBase::Environment::get().getESMStore()->get<ESM::ItemLevList>().find(levId);
-                addToLevList(&listCopy, itemId, level);
+                addToLevList(&listCopy, itemId, static_cast<uint16_t>(level));
                 MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
@@ -1711,7 +1767,7 @@ namespace MWScript
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);
-                    std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
+                    VFS::Path::Normalized model(ref.getPtr().getClass().getCorrectedModel(ref.getPtr()));
                     if (!model.empty())
                     {
                         sceneManager->getTemplate(model);

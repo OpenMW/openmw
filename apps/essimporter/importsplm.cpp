@@ -38,7 +38,7 @@ namespace ESSImport
             unsigned char xnam; // sentinel
             esm.getHNT(xnam, "XNAM");
 
-            mActiveSpells.push_back(spell);
+            mActiveSpells.push_back(std::move(spell));
         }
     }
 

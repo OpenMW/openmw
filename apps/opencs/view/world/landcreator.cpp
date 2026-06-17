@@ -15,29 +15,29 @@
 
 namespace CSVWorld
 {
-    LandCreator::LandCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-        : GenericCreator(data, undoStack, id)
+    LandCreator::LandCreator(CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+        : GenericCreator(worldData, undoStack, id)
         , mXLabel(nullptr)
         , mYLabel(nullptr)
         , mX(nullptr)
         , mY(nullptr)
     {
-        const int MaxInt = std::numeric_limits<int>::max();
-        const int MinInt = std::numeric_limits<int>::min();
+        const int maxInt = std::numeric_limits<int>::max();
+        const int minInt = std::numeric_limits<int>::min();
 
         setManualEditing(false);
 
         mXLabel = new QLabel("X: ");
         mX = new QSpinBox();
-        mX->setMinimum(MinInt);
-        mX->setMaximum(MaxInt);
+        mX->setMinimum(minInt);
+        mX->setMaximum(maxInt);
         insertBeforeButtons(mXLabel, false);
         insertBeforeButtons(mX, true);
 
         mYLabel = new QLabel("Y: ");
         mY = new QSpinBox();
-        mY->setMinimum(MinInt);
-        mY->setMaximum(MaxInt);
+        mY->setMinimum(minInt);
+        mY->setMaximum(maxInt);
         insertBeforeButtons(mYLabel, false);
         insertBeforeButtons(mY, true);
 

@@ -1,6 +1,7 @@
 #include "gamesettings.hpp"
 
 #include <QDir>
+#include <QProgressDialog>
 #include <QRegularExpression>
 
 #include <components/files/configurationmanager.hpp>
@@ -24,11 +25,6 @@ namespace
 Config::GameSettings::GameSettings(const Files::ConfigurationManager& cfg)
     : mCfgMgr(cfg)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    // this needs calling once so Qt can see its stream operators, which it needs when dragging and dropping
-    // it's automatic with Qt 6
-    qRegisterMetaTypeStreamOperators<SettingValue>("Config::SettingValue");
-#endif
 }
 
 void Config::GameSettings::validatePaths()
@@ -36,6 +32,10 @@ void Config::GameSettings::validatePaths()
     QList<SettingValue> paths = mSettings.values(QString("data"));
 
     mDataDirs.clear();
+
+    QProgressDialog progressBar("Validating paths", {}, 0, static_cast<int>(paths.size() + 1));
+    progressBar.setWindowModality(Qt::WindowModal);
+    progressBar.setValue(0);
 
     for (const auto& dataDir : paths)
     {
@@ -45,10 +45,13 @@ void Config::GameSettings::validatePaths()
             copy.value = QDir(dataDir.value).canonicalPath();
             mDataDirs.append(copy);
         }
+        progressBar.setValue(progressBar.value() + 1);
     }
 
     // Do the same for data-local
     const QString& local = mSettings.value(QString("data-local")).value;
+
+    progressBar.setValue(progressBar.value() + 1);
 
     if (!local.isEmpty() && QDir(local).exists())
     {
@@ -121,8 +124,7 @@ bool Config::GameSettings::readFile(
             // Replace composing entries with a replace= line
             if (key == QLatin1String("config") || key == QLatin1String("replace") || key == QLatin1String("data")
                 || key == QLatin1String("fallback-archive") || key == QLatin1String("content")
-                || key == QLatin1String("groundcover") || key == QLatin1String("script-blacklist")
-                || key == QLatin1String("fallback"))
+                || key == QLatin1String("groundcover") || key == QLatin1String("fallback"))
                 settings.remove(key);
         }
     }
@@ -145,8 +147,7 @@ bool Config::GameSettings::readFile(
             // Don't remove composing entries
             if (key != QLatin1String("config") && key != QLatin1String("replace") && key != QLatin1String("data")
                 && key != QLatin1String("fallback-archive") && key != QLatin1String("content")
-                && key != QLatin1String("groundcover") && key != QLatin1String("script-blacklist")
-                && key != QLatin1String("fallback"))
+                && key != QLatin1String("groundcover") && key != QLatin1String("fallback"))
                 settings.remove(key);
 
             if (key == QLatin1String("config") || key == QLatin1String("user-data") || key == QLatin1String("resources")
@@ -178,26 +179,21 @@ bool Config::GameSettings::readFile(
                     value.originalRepresentation = value.value;
                 }
 
-                std::filesystem::path path = Files::pathFromQString(value.value);
-                mCfgMgr.processPath(path, Files::pathFromQString(context));
-                value.value = Files::pathToQString(path);
+                value = processPathSettingValue(value);
             }
             if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
 
-            QList<SettingValue> values = cache.values(key);
-            values.append(settings.values(key));
-
-            bool exists = false;
-            for (const auto& existingValue : values)
-            {
-                if (existingValue.value == value.value)
+            auto containsValue = [&](const QMultiMap<QString, SettingValue>& map) {
+                for (auto [itr, end] = map.equal_range(key); itr != end; ++itr)
                 {
-                    exists = true;
-                    break;
+                    if (itr->value == value.value)
+                        return true;
                 }
-            }
-            if (!exists)
+                return false;
+            };
+
+            if (!containsValue(cache) && !containsValue(settings))
             {
                 cache.insert(key, value);
             }
@@ -206,7 +202,7 @@ bool Config::GameSettings::readFile(
 
     if (settings.isEmpty())
     {
-        settings = cache; // This is the first time we read a file
+        settings = std::move(cache); // This is the first time we read a file
         validatePaths();
         return true;
     }
@@ -278,9 +274,8 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
 // - Always ignore a line beginning with '#' or empty lines; added above a config
 //   entry.
 //
-// - If a line in file exists with matching key and first part of value (before ',',
-//   '\n', etc) also matches, then replace the line with that of mUserSettings.
-// - else remove line
+// - If a line in file exists with matching key and value, then replace the line with that of mUserSettings.
+// - else if only the key matches, remove comment
 //
 // - If there is no corresponding line in file, add at the end
 //
@@ -306,6 +301,25 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     if (fileCopy.empty())
         return writeFile(stream);
 
+    QMultiMap<QString, SettingValue> existingSettings;
+    QString context = QFileInfo(file).absoluteDir().path();
+    if (readFile(stream, existingSettings, context))
+    {
+        // don't use QMultiMap operator== as mUserSettings may have blank context fields
+        // don't use one std::equal with custom predicate as (until Qt 6.4) there was no key-value iterator
+        if (std::equal(existingSettings.keyBegin(), existingSettings.keyEnd(), mUserSettings.keyBegin(),
+                mUserSettings.keyEnd())
+            && std::equal(existingSettings.cbegin(), existingSettings.cend(), mUserSettings.cbegin(),
+                [](const SettingValue& l, const SettingValue& r) {
+                    return l.originalRepresentation == r.originalRepresentation;
+                }))
+        {
+            // The existing file already contains what we need, don't risk scrambling comments and formatting
+            return true;
+        }
+    }
+    stream.seek(0);
+
     // start
     //   |
     //   |    +----------------------------------------------------------+
@@ -329,7 +343,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     //        +----------------------------------------------------------+
     //
     //
-    QRegularExpression settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
+    QRegularExpression settingRegex("^([^=]+)\\s*=\\s*(.+?)\\s*$");
     std::vector<QString> comments;
     auto commentStart = fileCopy.end();
     std::map<QString, std::vector<QString>> commentsMap;
@@ -399,8 +413,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             // look for a key in the line
             if (!match.hasMatch() || settingRegex.captureCount() < 2)
             {
-                // no key or first part of value found in line, replace with a null string which
-                // will be removed later
+                // no key or no value found in line, replace with a null string which will be removed later
                 *iter = QString();
                 comments.clear();
                 commentStart = fileCopy.end();
@@ -586,6 +599,14 @@ QList<Config::SettingValue> Config::GameSettings::getContentList() const
 bool Config::GameSettings::isUserSetting(const SettingValue& settingValue) const
 {
     return settingValue.context.isEmpty() || settingValue.context == getUserContext();
+}
+
+Config::SettingValue Config::GameSettings::processPathSettingValue(const SettingValue& value)
+{
+    std::filesystem::path path = Files::pathFromQString(value.value);
+    std::filesystem::path basePath = Files::pathFromQString(value.context.isEmpty() ? getUserContext() : value.context);
+    mCfgMgr.processPath(path, basePath);
+    return SettingValue{ Files::pathToQString(path), value.originalRepresentation, value.context };
 }
 
 void Config::GameSettings::clear()

@@ -20,9 +20,9 @@ namespace Settings
 
         SettingValue<int> mEyeResolutionX{ mIndex, "Stereo View", "eye resolution x", makeMaxSanitizerInt(1) };
         SettingValue<int> mEyeResolutionY{ mIndex, "Stereo View", "eye resolution y", makeMaxSanitizerInt(1) };
-        SettingValue<double> mLeftEyeOffsetX{ mIndex, "Stereo View", "left eye offset x" };
-        SettingValue<double> mLeftEyeOffsetY{ mIndex, "Stereo View", "left eye offset y" };
-        SettingValue<double> mLeftEyeOffsetZ{ mIndex, "Stereo View", "left eye offset z" };
+        SettingValue<float> mLeftEyeOffsetX{ mIndex, "Stereo View", "left eye offset x" };
+        SettingValue<float> mLeftEyeOffsetY{ mIndex, "Stereo View", "left eye offset y" };
+        SettingValue<float> mLeftEyeOffsetZ{ mIndex, "Stereo View", "left eye offset z" };
         SettingValue<double> mLeftEyeOrientationX{ mIndex, "Stereo View", "left eye orientation x",
             makeClampSanitizerDouble(-1, 1) };
         SettingValue<double> mLeftEyeOrientationY{ mIndex, "Stereo View", "left eye orientation y",
@@ -39,9 +39,9 @@ namespace Settings
             makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
         SettingValue<float> mLeftEyeFovDown{ mIndex, "Stereo View", "left eye fov down",
             makeClampSanitizerFloat(-osg::PIf, osg::PIf) };
-        SettingValue<double> mRightEyeOffsetX{ mIndex, "Stereo View", "right eye offset x" };
-        SettingValue<double> mRightEyeOffsetY{ mIndex, "Stereo View", "right eye offset y" };
-        SettingValue<double> mRightEyeOffsetZ{ mIndex, "Stereo View", "right eye offset z" };
+        SettingValue<float> mRightEyeOffsetX{ mIndex, "Stereo View", "right eye offset x" };
+        SettingValue<float> mRightEyeOffsetY{ mIndex, "Stereo View", "right eye offset y" };
+        SettingValue<float> mRightEyeOffsetZ{ mIndex, "Stereo View", "right eye offset z" };
         SettingValue<double> mRightEyeOrientationX{ mIndex, "Stereo View", "right eye orientation x",
             makeClampSanitizerDouble(-1, 1) };
         SettingValue<double> mRightEyeOrientationY{ mIndex, "Stereo View", "right eye orientation y",

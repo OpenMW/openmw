@@ -1,15 +1,13 @@
 #ifndef COMPONENTS_ESM_ESMTERRAIN
 #define COMPONENTS_ESM_ESMTERRAIN
 
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <span>
 #include <vector>
 
-namespace ESM4
-{
-    struct Land;
-}
+#include <components/esm4/loadland.hpp>
 
 namespace ESM
 {
@@ -20,15 +18,14 @@ namespace ESM
     {
     public:
         LandData();
-        LandData(const ESM::Land& Land, int loadFlags);
-        LandData(const ESM4::Land& Land, int loadFlags);
+        explicit LandData(const ESM::Land& land, int loadFlags);
+        explicit LandData(const ESM4::Land& land, int loadFlags);
 
         ~LandData();
 
         std::span<const float> getHeights() const { return mHeights; }
         std::span<const std::int8_t> getNormals() const { return mNormals; }
         std::span<const std::uint8_t> getColors() const { return mColors; }
-        std::span<const std::uint16_t> getTextures() const { return mTextures; }
         float getSize() const { return mSize; }
         float getMinHeight() const { return mMinHeight; }
         float getMaxHeight() const { return mMaxHeight; }
@@ -36,19 +33,37 @@ namespace ESM
         int getLoadFlags() const { return mLoadFlags; }
         int getPlugin() const { return mPlugin; }
 
+        bool isEsm4() const { return mIsEsm4; }
+
+        std::span<const std::uint16_t> getTextures() const
+        {
+            if (mIsEsm4)
+                throw std::logic_error("ESM3 textures requested from ESM4 LandData");
+            return mTextures;
+        }
+
+        const ESM4::Land::Texture& getEsm4Texture(std::size_t quad) const
+        {
+            if (!mIsEsm4)
+                throw std::logic_error("ESM4 texture requested from ESM3 LandData");
+            return mEsm4Textures[quad];
+        }
+
     private:
         std::unique_ptr<const ESM::LandRecordData> mData;
-        int mLoadFlags = 0;
         std::vector<float> mHeightsData;
+        std::span<const float> mHeights;
+        std::span<const std::int8_t> mNormals;
+        std::span<const std::uint8_t> mColors;
+        std::span<const std::uint16_t> mTextures;
+        std::array<ESM4::Land::Texture, 4> mEsm4Textures;
+        int mLoadFlags = 0;
         float mMinHeight = 0.f;
         float mMaxHeight = 0.f;
         float mSize = 0.f;
         int mLandSize = 0;
         int mPlugin = 0;
-        std::span<const float> mHeights;
-        std::span<const std::int8_t> mNormals;
-        std::span<const std::uint8_t> mColors;
-        std::span<const std::uint16_t> mTextures;
+        bool mIsEsm4 = false;
     };
 
 }

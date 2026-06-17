@@ -10,6 +10,7 @@
 #include "animationbindings.hpp"
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
+#include "contentbindings.hpp"
 #include "corebindings.hpp"
 #include "debugbindings.hpp"
 #include "inputbindings.hpp"
@@ -29,10 +30,9 @@ namespace MWLua
 {
     std::map<std::string, sol::object> initCommonPackages(const Context& context)
     {
-        sol::state_view lua = context.mLua->sol();
+        sol::state_view lua = context.mLua->unsafeState();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
-            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },
@@ -59,6 +59,7 @@ namespace MWLua
         initCellBindingsForLocalScripts(context);
         LocalScripts::initializeSelfPackage(context);
         return {
+            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.core", initCorePackage(context) },
             { "openmw.types", initTypesPackage(context) },
             { "openmw.nearby", initNearbyPackage(context) },
@@ -69,7 +70,7 @@ namespace MWLua
     {
         return {
             { "openmw.ambient", initAmbientPackage(context) },
-            { "openmw.camera", initCameraPackage(context.mLua->sol()) },
+            { "openmw.camera", initCameraPackage(context.sol()) },
             { "openmw.debug", initDebugPackage(context) },
             { "openmw.input", initInputPackage(context) },
             { "openmw.postprocessing", initPostprocessingPackage(context) },
@@ -80,11 +81,19 @@ namespace MWLua
     std::map<std::string, sol::object> initMenuPackages(const Context& context)
     {
         return {
-            { "openmw.core", initCorePackageForMenuScripts(context) },
+            { "openmw.core", initCorePackage(context) },
             { "openmw.ambient", initAmbientPackage(context) },
             { "openmw.ui", initUserInterfacePackage(context) },
             { "openmw.menu", initMenuPackage(context) },
             { "openmw.input", initInputPackage(context) },
+        };
+    }
+
+    std::map<std::string, sol::object> initLoadPackages(const Context& context)
+    {
+        return {
+            { "openmw.core", initCorePackage(context) },
+            { "openmw.content", initContentPackage(context) },
         };
     }
 }

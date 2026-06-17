@@ -2,7 +2,7 @@
 
 // The MIT License (MIT)
 
-// Copyright (c) 2013-2021 Rapptz, ThePhD and contributors
+// Copyright (c) 2013-2022 Rapptz, ThePhD and contributors
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -217,7 +217,7 @@ namespace sol {
 						int upvalues = 0;
 						upvalues += stack::push(L, nullptr);
 						upvalues += stack::push(L, std::forward<Fx>(fx));
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 						if constexpr (std::is_nothrow_invocable_r_v<int, uFx, lua_State*>) {
 							detail::lua_CFunction_noexcept cf = &lua_c_noexcept_wrapper<true>;
 							lua_pushcclosure(L, reinterpret_cast<lua_CFunction>(cf), upvalues);
@@ -237,7 +237,7 @@ namespace sol {
 					int upvalues = 0;
 					upvalues += stack::push(L, nullptr);
 					upvalues += stack::push(L, std::forward<Fx>(fx));
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 					if constexpr (std::is_nothrow_invocable_r_v<int, uFx, lua_State*>) {
 						detail::lua_CFunction_noexcept cf = &lua_c_noexcept_wrapper<is_yielding>;
 						lua_pushcclosure(L, reinterpret_cast<lua_CFunction>(cf), upvalues);
@@ -398,7 +398,7 @@ namespace sol {
 		struct unqualified_pusher<Signature,
 		     std::enable_if_t<meta::all<std::is_function<std::remove_pointer_t<Signature>>, meta::neg<std::is_same<Signature, lua_CFunction>>,
 		          meta::neg<std::is_same<Signature, std::remove_pointer_t<lua_CFunction>>>
-#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE_I_)
+#if SOL_IS_ON(SOL_USE_NOEXCEPT_FUNCTION_TYPE)
 		          ,
 		          meta::neg<std::is_same<Signature, detail::lua_CFunction_noexcept>>,
 		          meta::neg<std::is_same<Signature, std::remove_pointer_t<detail::lua_CFunction_noexcept>>>
@@ -711,7 +711,7 @@ namespace sol {
 		namespace stack_detail {
 			template <typename Function, typename Handler>
 			bool check_function_pointer(lua_State* L, int index, Handler&& handler, record& tracking) noexcept {
-#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE)
 				tracking.use(1);
 				bool success = lua_iscfunction(L, index) == 1;
 				if (success) {
@@ -737,7 +737,7 @@ namespace sol {
 
 			template <typename Function>
 			Function* get_function_pointer(lua_State* L, int index, record& tracking) noexcept {
-#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_ON(SOL_GET_FUNCTION_POINTER_UNSAFE)
 				tracking.use(1);
 				auto udata = stack::stack_detail::get_as_upvalues_using_function<Function*>(L, index);
 				Function* fx = udata.first;
@@ -747,7 +747,7 @@ namespace sol {
 				(void)index;
 				(void)tracking;
 				static_assert(meta::meta_detail::always_true<Function>::value,
-#if SOL_IS_DEFAULT_OFF(SOL_GET_FUNCTION_POINTER_UNSAFE_I_)
+#if SOL_IS_DEFAULT_OFF(SOL_GET_FUNCTION_POINTER_UNSAFE)
 				     "You are attempting to retrieve a function pointer type. "
 				     "This is inherently unsafe in sol2. In order to do this, you must turn on the "
 				     "SOL_GET_FUNCTION_POINTER_UNSAFE configuration macro, as detailed in the documentation. "

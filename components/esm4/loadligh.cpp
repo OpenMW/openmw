@@ -48,7 +48,11 @@ void ESM4::Light::load(ESM4::Reader& reader)
                 break;
             case ESM::fourCC("DATA"):
             {
-                if (subHdr.dataSize != 32 && subHdr.dataSize != 48 && subHdr.dataSize != 64)
+                // 24: older TES4 records (found in GOG release)
+                // 32: newer TES4 records, FO3/FNV
+                // 48: TES5
+                // 64: FO4/FO76
+                if (subHdr.dataSize != 24 && subHdr.dataSize != 32 && subHdr.dataSize != 48 && subHdr.dataSize != 64)
                 {
                     reader.skipSubRecordData();
                     break;
@@ -57,21 +61,23 @@ void ESM4::Light::load(ESM4::Reader& reader)
                 reader.get(mData.radius);
                 reader.get(mData.colour);
                 reader.get(mData.flags);
-                reader.get(mData.falloff);
-                reader.get(mData.FOV);
-                // TES5, FO4
-                if (subHdr.dataSize >= 48)
+                if (subHdr.dataSize >= 32)
                 {
-                    reader.get(mData.nearClip);
-                    reader.get(mData.frequency);
-                    reader.get(mData.intensityAmplitude);
-                    reader.get(mData.movementAmplitude);
-                    if (subHdr.dataSize == 64)
+                    reader.get(mData.falloff);
+                    reader.get(mData.FOV);
+                    if (subHdr.dataSize >= 48)
                     {
-                        reader.get(mData.constant);
-                        reader.get(mData.scalar);
-                        reader.get(mData.exponent);
-                        reader.get(mData.godRaysNearClip);
+                        reader.get(mData.nearClip);
+                        reader.get(mData.frequency);
+                        reader.get(mData.intensityAmplitude);
+                        reader.get(mData.movementAmplitude);
+                        if (subHdr.dataSize == 64)
+                        {
+                            reader.get(mData.constant);
+                            reader.get(mData.scalar);
+                            reader.get(mData.exponent);
+                            reader.get(mData.godRaysNearClip);
+                        }
                     }
                 }
                 reader.get(mData.value);

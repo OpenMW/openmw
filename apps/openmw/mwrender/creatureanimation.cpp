@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/values.hpp>
@@ -110,7 +111,7 @@ namespace MWRender
         MWWorld::ConstPtr item = *it;
 
         std::string_view bonename;
-        std::string itemModel = item.getClass().getCorrectedModel(item);
+        VFS::Path::Normalized itemModel = item.getClass().getCorrectedModel(item);
         if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
         {
             if (item.getType() == ESM::Weapon::sRecordId)
@@ -172,6 +173,9 @@ namespace MWRender
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::move(source));
             attached->accept(assignVisitor);
+
+            if (item.getType() == ESM::Light::sRecordId)
+                addExtraLight(scene->getNode()->asGroup(), SceneUtil::LightCommon(*item.get<ESM::Light>()->mBase));
         }
         catch (std::exception& e)
         {
@@ -255,7 +259,8 @@ namespace MWRender
     void CreatureWeaponAnimation::addControllers()
     {
         Animation::addControllers();
-        WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
+        if (mObjectRoot)
+            WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
     }
 
     osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)

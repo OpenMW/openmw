@@ -35,8 +35,8 @@ std::string CSMDoc::Message::toString(Severity severity)
     return "";
 }
 
-CSMDoc::Messages::Messages(Message::Severity default_)
-    : mDefault(default_)
+CSMDoc::Messages::Messages(Message::Severity defaultSeverity)
+    : mDefault(defaultSeverity)
 {
 }
 

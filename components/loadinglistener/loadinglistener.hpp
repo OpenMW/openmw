@@ -22,7 +22,7 @@ namespace Loading
         /// periodically.
         /// @note It is best to use the ScopedLoad object instead of using loadingOn()/loadingOff() directly,
         ///  so that the loading is exception safe.
-        virtual void loadingOn(bool visible = true) {}
+        virtual void loadingOn() {}
         virtual void loadingOff() {}
 
         /// Set the total range of progress (e.g. the number of objects to load).

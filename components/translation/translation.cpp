@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include <components/misc/pathhelpers.hpp>
+
 namespace Translation
 {
     Storage::Storage()
@@ -11,25 +13,24 @@ namespace Translation
 
     void Storage::loadTranslationData(const Files::Collections& dataFileCollections, std::string_view esmFileName)
     {
-        std::string esmNameNoExtension(Misc::StringUtils::lowerCase(esmFileName));
-        // changing the extension
-        size_t dotPos = esmNameNoExtension.rfind('.');
-        if (dotPos != std::string::npos)
-            esmNameNoExtension.resize(dotPos);
+        std::string_view esmNameNoExtension = Misc::stemFile(esmFileName);
 
-        loadData(mCellNamesTranslations, esmNameNoExtension, ".cel", dataFileCollections);
-        loadData(mPhraseForms, esmNameNoExtension, ".top", dataFileCollections);
-        loadData(mTopicIDs, esmNameNoExtension, ".mrk", dataFileCollections);
+        loadData(mCellNamesTranslations, esmNameNoExtension, "cel", dataFileCollections);
+        loadData(mPhraseForms, esmNameNoExtension, "top", dataFileCollections);
+        loadData(mKeywords, esmNameNoExtension, "mrk", dataFileCollections);
     }
 
-    void Storage::loadData(ContainerType& container, const std::string& fileNameNoExtension,
-        const std::string& extension, const Files::Collections& dataFileCollections)
+    void Storage::loadData(ContainerType& container, std::string_view fileNameNoExtension, std::string_view extension,
+        const Files::Collections& dataFileCollections)
     {
-        std::string fileName = fileNameNoExtension + extension;
+        std::string fileName(fileNameNoExtension);
+        fileName += '.';
+        fileName += extension;
 
-        if (dataFileCollections.getCollection(extension).doesExist(fileName))
+        const Files::MultiDirCollection& collection = dataFileCollections.getCollection(extension);
+        if (collection.doesExist(fileName))
         {
-            std::ifstream stream(dataFileCollections.getCollection(extension).getPath(fileName).c_str());
+            std::ifstream stream(collection.getPath(fileName));
 
             if (!stream.is_open())
                 throw std::runtime_error("failed to open translation file: " + fileName);
@@ -51,11 +52,11 @@ namespace Translation
             {
                 const std::string_view utf8 = mEncoder->getUtf8(line);
 
-                size_t tab_pos = utf8.find('\t');
-                if (tab_pos != std::string::npos && tab_pos > 0 && tab_pos < utf8.size() - 1)
+                size_t tabPos = utf8.find('\t');
+                if (tabPos != std::string::npos && tabPos > 0 && tabPos < utf8.size() - 1)
                 {
-                    const std::string_view key = utf8.substr(0, tab_pos);
-                    const std::string_view value = utf8.substr(tab_pos + 1);
+                    const std::string_view key = utf8.substr(0, tabPos);
+                    const std::string_view value = utf8.substr(tabPos + 1);
 
                     if (!key.empty() && !value.empty())
                         container.emplace(key, value);
@@ -74,19 +75,6 @@ namespace Translation
         return entry->second;
     }
 
-    std::string_view Storage::topicID(std::string_view phrase) const
-    {
-        std::string_view result = topicStandardForm(phrase);
-
-        // seeking for the topic ID
-        auto topicIDIterator = mTopicIDs.find(result);
-
-        if (topicIDIterator != mTopicIDs.end())
-            result = topicIDIterator->second;
-
-        return result;
-    }
-
     std::string_view Storage::topicStandardForm(std::string_view phrase) const
     {
         auto phraseFormsIterator = mPhraseForms.find(phrase);
@@ -97,13 +85,23 @@ namespace Translation
             return phrase;
     }
 
+    std::string_view Storage::topicKeyword(std::string_view phrase) const
+    {
+        auto entry = mKeywords.find(phrase);
+
+        if (entry == mKeywords.end())
+            return phrase;
+
+        return entry->second;
+    }
+
+    void Storage::addPhraseForm(std::string_view phrase, std::string_view topicId)
+    {
+        mPhraseForms.emplace(phrase, topicId);
+    }
+
     void Storage::setEncoder(ToUTF8::Utf8Encoder* encoder)
     {
         mEncoder = encoder;
-    }
-
-    bool Storage::hasTranslation() const
-    {
-        return !mCellNamesTranslations.empty() || !mTopicIDs.empty() || !mPhraseForms.empty();
     }
 }

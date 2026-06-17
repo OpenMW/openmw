@@ -19,7 +19,7 @@ namespace CSVWorld
 
         State validate(QString& input, int& pos) const override;
 
-        void setNamespace(const std::string& namespace_);
+        void setNamespace(const std::string& value);
 
         /// Return a description of the error that resulted in the last call of validate
         /// returning QValidator::Intermediate. If the last call to validate returned

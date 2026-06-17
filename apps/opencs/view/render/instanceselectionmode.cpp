@@ -194,7 +194,6 @@ namespace CSVRender
 
         geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
 
-        geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
         geometry->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
@@ -292,7 +291,6 @@ namespace CSVRender
 
         geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
 
-        geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
         geometry->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
@@ -393,7 +391,6 @@ namespace CSVRender
 
         geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
 
-        geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
         geometry->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         geometry->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);

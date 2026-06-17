@@ -59,8 +59,8 @@ namespace MWRender
     };
 
     // Defines masks to remove when using ToggleWorld command
-    constexpr static unsigned int sToggleWorldMask
-        = Mask_Debug | Mask_Actor | Mask_Terrain | Mask_Object | Mask_Static | Mask_Groundcover;
+    constexpr inline unsigned int sToggleWorldMask
+        = Mask_Actor | Mask_Terrain | Mask_Object | Mask_Static | Mask_Groundcover;
 
 }
 

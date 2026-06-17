@@ -66,6 +66,13 @@ namespace ESM
             DATA_VTEX = 16
         };
 
+        enum Flags
+        {
+            Flag_HeightsNormals = 0x1,
+            Flag_Colors = 0x2,
+            Flag_Textures = 0x4
+        };
+
         // default height to use in case there is no Land record
         static constexpr int DEFAULT_HEIGHT = -2048;
 
@@ -78,7 +85,7 @@ namespace ESM
         // total number of vertices
         static constexpr int LAND_NUM_VERTS = LandRecordData::sLandNumVerts;
 
-        static constexpr int HEIGHT_SCALE = 8;
+        static constexpr int sHeightScale = 8;
 
         // number of textures per side of land
         static constexpr int LAND_TEXTURE_SIZE = LandRecordData::sLandTextureSize;
@@ -86,23 +93,25 @@ namespace ESM
         // total number of textures per land
         static constexpr int LAND_NUM_TEXTURES = LandRecordData::sLandNumTextures;
 
-        static constexpr unsigned LAND_GLOBAL_MAP_LOD_SIZE = 81;
+        static constexpr std::size_t sGlobalMapLodSizeSqrt = 9;
 
-        static constexpr unsigned LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
+        static constexpr std::size_t sGlobalMapLodSize = sGlobalMapLodSizeSqrt * sGlobalMapLodSizeSqrt;
 
         using LandData = ESM::LandRecordData;
 
         // low-LOD heightmap (used for rendering the global map)
-        std::array<std::int8_t, LAND_GLOBAL_MAP_LOD_SIZE> mWnam;
+        std::array<std::int8_t, sGlobalMapLodSize> mWnam;
+
+        mutable std::unique_ptr<LandData> mLandData;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 
         void blank();
 
-        void loadData(int flags) const;
+        void loadData(int dataTypes) const;
 
-        void loadData(int flags, LandData& data) const;
+        void loadData(int dataTypes, LandData& data) const;
 
         /**
          * Frees memory allocated for mLandData
@@ -127,10 +136,12 @@ namespace ESM
         ///
         /// \note Added data fields will be uninitialised
         void add(int flags);
-
-    private:
-        mutable std::unique_ptr<LandData> mLandData;
     };
 
+    void loadLandRecordData(int dataTypes, ESMReader& reader, LandRecordData& data);
+
+    void generateWnam(const std::array<float, LandRecordData::sLandNumVerts>& heights,
+        std::array<std::int8_t, Land::sGlobalMapLodSize>& wnam);
 }
+
 #endif

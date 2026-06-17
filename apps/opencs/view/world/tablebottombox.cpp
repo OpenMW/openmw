@@ -15,6 +15,11 @@
 #include "creator.hpp"
 #include "infocreator.hpp"
 
+namespace
+{
+    constexpr const char* statusBarStyle = "QStatusBar::item { border: 0px }";
+}
+
 void CSVWorld::TableBottomBox::updateSize()
 {
     // Make sure that the size of the bottom box is determined by the currently visible widget
@@ -104,6 +109,7 @@ CSVWorld::TableBottomBox::TableBottomBox(const CreatorFactoryBase& creatorFactor
     mStatusBar = new QStatusBar(this);
 
     mStatusBar->addWidget(mStatus);
+    mStatusBar->setStyleSheet(statusBarStyle);
 
     mLayout->addWidget(mStatusBar);
 
@@ -127,6 +133,18 @@ CSVWorld::TableBottomBox::TableBottomBox(const CreatorFactoryBase& creatorFactor
     connect(mExtendedConfigurator, &ExtendedCommandConfigurator::done, this, &TableBottomBox::requestDone);
 
     updateSize();
+}
+
+bool CSVWorld::TableBottomBox::event(QEvent* event)
+{
+    // Apply style sheet again if style was changed
+    if (event->type() == QEvent::PaletteChange)
+    {
+        if (mStatusBar != nullptr)
+            mStatusBar->setStyleSheet(statusBarStyle);
+    }
+
+    return QWidget::event(event);
 }
 
 void CSVWorld::TableBottomBox::setEditLock(bool locked)

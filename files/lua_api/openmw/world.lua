@@ -1,6 +1,6 @@
 ---
--- `openmw.world` is an interface to the game world for global scripts.
--- Can not be used from local scripts.
+-- Provides an interface to the game world for global scripts.
+-- @context global
 -- @module world
 -- @usage local world = require('openmw.world')
 
@@ -52,6 +52,7 @@
 -- @field #string recordId Id of the script
 -- @field openmw.core#GameObject object The object the script is attached to.
 -- @field openmw.core#GameObject player The player the script refers to.
+-- @field #boolean isRunning Whether the script is currently running
 -- @field #MWScriptVariables variables Local variables of the script (mutable)
 -- @usage
 -- for _, script in ipairs(world.mwscript.getLocalScripts(object)) do
@@ -65,6 +66,12 @@
 -- Loads a named cell
 -- @function [parent=#world] getCellByName
 -- @param #string cellName
+-- @return openmw.core#Cell
+
+---
+-- Loads a cell by ID provided
+-- @function [parent=#world] getCellById
+-- @param #string cellId
 -- @return openmw.core#Cell
 
 ---
@@ -112,12 +119,7 @@
 -- @param #number ratio
 
 ---
--- Frame duration in seconds
--- @function [parent=#world] getRealFrameDuration
--- @return #number
-
----
--- Whether the world is paused (onUpdate doesn't work when the world is paused).
+-- Whether the world is paused.
 -- @function [parent=#world] isWorldPaused
 -- @return #boolean
 
@@ -127,7 +129,7 @@
 -- @param #string tag (optional, empty string by default) The game will be paused until `unpause` is called with the same tag.
 
 ---
--- Remove given tag from the list of pause tags. Resume the game starting from the next frame if the list became empty.
+-- Remove the given tag from the list of pause tags. Resume the game starting from the next frame if the list became empty.
 -- @function [parent=#world] unpause
 -- @param #string tag (optional, empty string by default) Needed to undo `pause` called with this tag.
 
@@ -151,7 +153,7 @@
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
 -- Note that dynamically created creatures, NPCs, and container inventories will not respawn.
 -- @function [parent=#world] createObject
--- @param #string recordId Record ID in lowercase
+-- @param #string recordId Record ID. String ids that came from ESM3 content files are lower-cased. If another ID is provided, it must be provided exactly as it is, case sensitive.
 -- @param #number count (optional, 1 by default) The number of objects in stack
 -- @return openmw.core#GameObject
 -- @usage  -- put 100 gold on the ground at the position of `actor`
@@ -160,21 +162,70 @@
 -- @usage -- put 50 gold into the actor's inventory
 -- money = world.createObject('gold_001', 50)
 -- money:moveInto(types.Actor.inventory(actor))
+-- @usage -- create the an object for the first generated item
+-- potion = world.createObject('Generated:0x0', 1)
 
 ---
--- Creates a custom record in the world database.
+-- Creates a custom record in the world database; string IDs that came from ESM3 content files are lower-cased.
 -- Eventually meant to support all records, but the current
 -- set of supported types is limited to:
 --
--- * @{openmw.types#PotionRecord},
+-- * @{openmw.types#ActivatorRecord},
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},
--- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#ClothingRecord},
--- * @{openmw.types#WeaponRecord},
--- * @{openmw.types#ActivatorRecord}
+-- * @{openmw.types#ContainerRecord},
+-- * @{openmw.types#CreatureRecord},
+-- * @{openmw.types#DoorRecord},
+-- * @{openmw.core#Enchantment},
+-- * @{openmw.types#LightRecord},
+-- * @{openmw.types#MiscellaneousRecord},
+-- * @{openmw.types#NpcRecord},
+-- * @{openmw.types#PotionRecord},
+-- * @{openmw.types#ProbeRecord},
+-- * @{openmw.core#Spell},
+-- * @{openmw.types#StaticRecord},
+-- * @{openmw.types#WeaponRecord}
 -- @function [parent=#world] createRecord
--- @param #any record A record to be registered in the database. Must be one of the supported types.
+-- @param #any record A record to be registered in the database. Must be one of the supported types. The id field is not used, one will be generated for you.
 -- @return #any A new record added to the database. The type is the same as the input's.
+
+--- @{#VFX}: Visual effects
+-- @field [parent=#world] #VFX vfx
+
+---
+-- Spawn a VFX at the given location in the world. Best invoked through the SpawnVfx global event
+-- @function [parent=#VFX] spawn
+-- @param #string model string model path (normally taken from a record such as @{openmw.types#StaticRecord.model} or similar)
+-- @param openmw.util#Vector3 position
+-- @param #table options optional table of parameters. Can contain:
+--
+--   * `mwMagicVfx` - Boolean that if true causes the textureOverride parameter to only affect nodes with the Nif::RC_NiTexturingProperty property set. (default: true).
+--   * `particleTextureOverride` - Name of a particle texture that should override this effect's default texture. (default: "")
+--   * `scale` - A number that scales the size of the vfx (Default: 1)
+--   * `useAmbientLight` - boolean, vfx get a white ambient light attached in Morrowind. If false don't attach this. (default: true)
+--   * `loop` - boolean, if true the effect will loop until removed (default: false).
+--   * `vfxId` - a string ID that can be used to remove the effect later, using @{#VFX.remove}. (Default: "").
+--
+-- @usage -- Spawn a sanctuary effect near the player
+-- local effect = core.magic.effects.records[core.magic.EFFECT_TYPE.Sanctuary]
+-- local pos = self.position + util.vector3(0, 100, 0)
+-- local model = types.Static.records[effect.castStatic].model
+-- core.sendGlobalEvent('SpawnVfx', {model = model, position = pos, options = { useAmbientLight = false, vfxId = "myVfx" }})
+--
+
+---
+-- Remove all VFX with the given vfxId. Best invoked through the RemoveVfx global event
+-- @function [parent=#VFX] remove
+-- @param #string vfxId the vfxId of the VFX to remove. Passing an empty string removes all VFX that don't have a vfxId (this includes non-scripted VFX!)
+--
+-- @usage -- Remove all VFX with vfxId "myvfx"
+-- core.sendGlobalEvent('RemoveVfx', "myvfx")
+--
+
+---
+-- Advance the world time by a certain number of hours. This advances time, weather, and AI, but does not perform other functions associated with the passage of time, e.g., regeneration.
+-- @function [parent=#world] advanceTime
+-- @param #number hours Number of hours to advance time
 
 return nil

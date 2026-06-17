@@ -20,19 +20,21 @@ namespace MWLua
 {
     sol::table initDebugPackage(const Context& context)
     {
-        sol::table api = context.mLua->newTable();
+        auto view = context.sol();
+        sol::table api(view, sol::create);
 
         api["RENDER_MODE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWRender::RenderMode>({
-                { "CollisionDebug", MWRender::Render_CollisionDebug },
-                { "Wireframe", MWRender::Render_Wireframe },
-                { "Pathgrid", MWRender::Render_Pathgrid },
-                { "Water", MWRender::Render_Water },
-                { "Scene", MWRender::Render_Scene },
-                { "NavMesh", MWRender::Render_NavMesh },
-                { "ActorsPaths", MWRender::Render_ActorsPaths },
-                { "RecastMesh", MWRender::Render_RecastMesh },
-            }));
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWRender::RenderMode>(view,
+                {
+                    { "CollisionDebug", MWRender::Render_CollisionDebug },
+                    { "Wireframe", MWRender::Render_Wireframe },
+                    { "Pathgrid", MWRender::Render_Pathgrid },
+                    { "Water", MWRender::Render_Water },
+                    { "Scene", MWRender::Render_Scene },
+                    { "NavMesh", MWRender::Render_NavMesh },
+                    { "ActorsPaths", MWRender::Render_ActorsPaths },
+                    { "RecastMesh", MWRender::Render_RecastMesh },
+                }));
 
         api["toggleRenderMode"] = [context](MWRender::RenderMode value) {
             context.mLuaManager->addAction([value] { MWBase::Environment::get().getWorld()->toggleRenderMode(value); });
@@ -56,10 +58,11 @@ namespace MWLua
         api["reloadLua"] = []() { MWBase::Environment::get().getLuaManager()->reloadAllScripts(); };
 
         api["NAV_MESH_RENDER_MODE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, Settings::NavMeshRenderMode>({
-                { "AreaType", Settings::NavMeshRenderMode::AreaType },
-                { "UpdateFrequency", Settings::NavMeshRenderMode::UpdateFrequency },
-            }));
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Settings::NavMeshRenderMode>(view,
+                {
+                    { "AreaType", Settings::NavMeshRenderMode::AreaType },
+                    { "UpdateFrequency", Settings::NavMeshRenderMode::UpdateFrequency },
+                }));
 
         api["setNavMeshRenderMode"] = [context](Settings::NavMeshRenderMode value) {
             context.mLuaManager->addAction(

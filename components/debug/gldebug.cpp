@@ -239,7 +239,7 @@ namespace Debug
             group->push(state);
             lastAppliedStack.push_back(group);
         }
-        if (!(lastAppliedStack.back() == this))
+        if (lastAppliedStack.empty() || !(lastAppliedStack.back() == this))
         {
             push(state);
             lastAppliedStack.push_back(this);
@@ -273,7 +273,8 @@ namespace Debug
     void DebugGroup::push(osg::State& state) const
     {
         if (isValid())
-            PushDebugGroup::sInstance->glPushDebugGroup(mSource, mId, mMessage.size(), mMessage.c_str());
+            PushDebugGroup::sInstance->glPushDebugGroup(
+                mSource, mId, static_cast<GLsizei>(mMessage.size()), mMessage.c_str());
     }
 
     void DebugGroup::pop(osg::State& state) const

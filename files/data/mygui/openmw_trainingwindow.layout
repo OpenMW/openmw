@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 319 200" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 320 200" align="Center" name="_Main">
 
-        <Widget type="TextBox" skin="NormalText" position="0 5 319 24" name="Select" align="Right Top">
+        <Widget type="TextBox" skin="NormalText" position="6 3 300 24" name="Select" align="Right Top">
             <Property key="TextAlign" value="Center"/>
             <Property key="Caption" value="#{sServiceTrainingTitle}"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="5 30 319 24" name="Travel" align="Right Top">
+        <Widget type="TextBox" skin="SandText" position="6 22 300 24" name="Travel" align="Right Top">
             <Property key="TextAlign" value="Left"/>
             <Property key="Caption" value="#{sTrainingServiceTitle}"/>
         </Widget>
 
 
-        <Widget type="Widget" skin="MW_Box" position="6 54 299 100" align="Left Top" name="TrainingOptions">
+        <Widget type="Widget" skin="MW_Box" position="6 42 300 115" align="Left Top" name="TrainingOptions">
         </Widget>
 
 
-        <Widget type="TextBox" skin="SandText" position="8 161 200 24" name="PlayerGold" align="Right Top">
+        <Widget type="TextBox" skin="SandText" position="6 161 200 24" name="PlayerGold" align="Right Top">
             <Property key="TextAlign" value="Left"/>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="244 161 60 24" name="CancelButton" align="Right Top">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="246 161 60 24" name="OkButton" align="Right Top">
             <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{Interface:Cancel}"/>
+            <Property key="Caption" value="#{Interface:OK}"/>
         </Widget>
 
     </Widget>

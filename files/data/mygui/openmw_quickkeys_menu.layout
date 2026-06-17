@@ -1,36 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" position="0 0 370 230" layer="Modal" align="Center" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" position="0 0 380 224" layer="Modal" align="Center" name="_Main">
 
-        <Widget type="TextBox" skin="SandText" position="8 8 354 18">
+        <Widget type="TextBox" skin="SandText" position="8 7 356 18">
             <Property key="Caption" value="#{sQuickMenuTitle}"/>
             <Property key="TextAlign" value="Center"/>
         </Widget>
 
-        <Widget type="EditBox" skin="SandText" position="8 26 354 18" name="InstructionLabel" align="Left Top VStretch">
+        <Widget type="EditBox" skin="SandText" position="23 26 354 18" name="InstructionLabel" align="Left Top VStretch">
             <Property key="Caption" value="#{sQuickMenuInstruc}"/>
             <Property key="MultiLine" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="Static" value="true"/>
-            <Property key="TextAlign" value="Center"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="15 55 332 128" align="Left Bottom HCenter">
+        <Widget type="Widget" skin="" position="20 49 332 128" align="Left Bottom HCenter">
 
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 60 60" name="QuickKey1"/>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 0 60 60" name="QuickKey2"/>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 0 60 60" name="QuickKey3"/>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 0 60 60" name="QuickKey4"/>
             <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 0 60 60" name="QuickKey5"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 67 60 60" name="QuickKey6"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 67 60 60" name="QuickKey7"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 67 60 60" name="QuickKey8"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 67 60 60" name="QuickKey9"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 67 60 60" name="QuickKey10"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 68 60 60" name="QuickKey6"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 68 60 60" name="QuickKey7"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 68 60 60" name="QuickKey8"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 68 60 60" name="QuickKey9"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 68 60 60" name="QuickKey10"/>
 
         </Widget>
 
-        <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton" position="315 190 32 24" align="Right Bottom">
+        <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton" position="330 185 32 24" align="Right Bottom">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{Interface:OK}"/>
         </Widget>

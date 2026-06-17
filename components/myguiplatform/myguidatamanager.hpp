@@ -3,52 +3,54 @@
 
 #include <MyGUI_DataManager.h>
 
-#include <filesystem>
 #include <string>
+
+#include <components/vfs/pathutil.hpp>
 
 namespace VFS
 {
     class Manager;
 }
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     class DataManager : public MyGUI::DataManager
     {
     public:
-        explicit DataManager(const std::string& path, const VFS::Manager* vfs);
+        explicit DataManager(VFS::Path::NormalizedView path, const VFS::Manager* vfs);
 
-        void setResourcePath(const std::filesystem::path& path);
+        void setResourcePath(VFS::Path::NormalizedView path);
+        VFS::Path::NormalizedView getResourcePath() const;
 
         /** Get data stream from specified resource name.
-            @param _name Resource name (usually file name).
+            @param name Resource name (usually file name).
         */
-        MyGUI::IDataStream* getData(const std::string& _name) const override;
+        MyGUI::IDataStream* getData(const std::string& name) const override;
 
         /** Free data stream.
-            @param _data Data stream.
+            @param data Data stream.
         */
-        void freeData(MyGUI::IDataStream* _data) override;
+        void freeData(MyGUI::IDataStream* data) override;
 
         /** Is data with specified name exist.
-            @param _name Resource name.
+            @param name Resource name.
         */
-        bool isDataExist(const std::string& _name) const override;
+        bool isDataExist(const std::string& name) const override;
 
         /** Get all data names with names that matches pattern.
-            @param _pattern Pattern to match (for example "*.layout").
+            @param pattern Pattern to match (for example "*.layout").
         */
-        const MyGUI::VectorString& getDataListNames(const std::string& _pattern) const override;
+        const MyGUI::VectorString& getDataListNames(const std::string& pattern) const override;
 
         /** Get full path to data.
-            @param _name Resource name.
+            @param name Resource name.
             @return Return full path to specified data.
         */
-        std::string getDataPath(const std::string& _name) const override;
+        std::string getDataPath(const std::string& name) const override;
 
     private:
-        std::filesystem::path mResourcePath;
+        VFS::Path::Normalized mResourcePath;
 
         const VFS::Manager* mVfs;
     };

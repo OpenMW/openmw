@@ -14,6 +14,8 @@
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "dragdroputils.hpp"
 
 void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table, const QModelIndex& index)
@@ -29,7 +31,7 @@ void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTab
     mime->setIndexAtDragStart(index);
     QDrag* drag = new QDrag(this);
     drag->setMimeData(mime);
-    drag->setPixmap(QIcon(mime->getIcon().c_str()).pixmap(QSize(16, 16)));
+    drag->setPixmap(Misc::ScalableIcon::load(mime->getIcon().c_str()).pixmap(QSize(16, 16)));
     drag->exec(Qt::CopyAction);
 }
 
@@ -53,7 +55,7 @@ void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent* event)
 
 void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
+    QModelIndex index = indexAt(event->position().toPoint());
     if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index))
         || CSVWorld::DragDropUtils::isInfo(*event, getIndexDisplayType(index))
         || CSVWorld::DragDropUtils::isTopicOrJournal(*event, getIndexDisplayType(index)))
@@ -69,7 +71,7 @@ void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent* event)
 
 void CSVWorld::DragRecordTable::dropEvent(QDropEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
+    QModelIndex index = indexAt(event->position().toPoint());
     CSMWorld::ColumnBase::Display display = getIndexDisplayType(index);
     if (CSVWorld::DragDropUtils::canAcceptData(*event, display))
     {

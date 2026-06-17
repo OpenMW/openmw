@@ -17,13 +17,16 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 
-const int CSVRender::CellBorder::CellSize = ESM::Land::REAL_SIZE;
+namespace
+{
+    constexpr int CellSize = ESM::Land::REAL_SIZE;
 
-/*
-    The number of vertices per cell border is equal to the number of vertices per edge
-    minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
-*/
-const int CSVRender::CellBorder::VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
+    /*
+        The number of vertices per cell border is equal to the number of vertices per edge
+        minus the duplicated corner vertices. An additional vertex to close the loop is NOT needed.
+    */
+    constexpr unsigned VertexCount = (ESM::Land::LAND_SIZE * 4) - 4;
+}
 
 CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoordinates& coords)
     : mParentNode(cellNode)
@@ -47,9 +50,6 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
 {
     const ESM::Land::LandData* landData = esmLand.getLandData(ESM::Land::DATA_VHGT);
 
-    if (!landData)
-        return;
-
     mBaseNode->removeChild(mBorderGeometry);
     mBorderGeometry = new osg::Geometry();
 
@@ -62,20 +62,40 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         Traverse the cell border counter-clockwise starting at the SW corner vertex (0, 0).
         Each loop starts at a corner vertex and ends right before the next corner vertex.
     */
-    for (; x < ESM::Land::LAND_SIZE - 1; ++x)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+    if (landData)
+    {
+        for (; x < ESM::Land::LAND_SIZE - 1; ++x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    x = ESM::Land::LAND_SIZE - 1;
-    for (; y < ESM::Land::LAND_SIZE - 1; ++y)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        x = ESM::Land::LAND_SIZE - 1;
+        for (; y < ESM::Land::LAND_SIZE - 1; ++y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    y = ESM::Land::LAND_SIZE - 1;
-    for (; x > 0; --x)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        y = ESM::Land::LAND_SIZE - 1;
+        for (; x > 0; --x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
 
-    x = 0;
-    for (; y > 0; --y)
-        vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+        x = 0;
+        for (; y > 0; --y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), landData->mHeights[landIndex(x, y)]));
+    }
+    else
+    {
+        for (; x < ESM::Land::LAND_SIZE - 1; ++x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        x = ESM::Land::LAND_SIZE - 1;
+        for (; y < ESM::Land::LAND_SIZE - 1; ++y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        y = ESM::Land::LAND_SIZE - 1;
+        for (; x > 0; --x)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+
+        x = 0;
+        for (; y > 0; --y)
+            vertices->push_back(osg::Vec3f(scaleToWorld(x), scaleToWorld(y), ESM::Land::DEFAULT_HEIGHT));
+    }
 
     mBorderGeometry->setVertexArray(vertices);
 
@@ -88,14 +108,13 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
         = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP, VertexCount + 1);
 
     // Assign one primitive to each vertex.
-    for (size_t i = 0; i < VertexCount; ++i)
+    for (unsigned i = 0; i < VertexCount; ++i)
         primitives->setElement(i, i);
 
     // Assign the last primitive to the first vertex to close the loop.
     primitives->setElement(VertexCount, 0);
 
     mBorderGeometry->addPrimitiveSet(primitives);
-    mBorderGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
     mBaseNode->addChild(mBorderGeometry);
 }

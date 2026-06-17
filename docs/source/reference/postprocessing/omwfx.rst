@@ -1,6 +1,6 @@
-#########################
-OMWFX Language Reference
-#########################
+##############
+OMWFX Language
+##############
 
 Overview
 ########
@@ -73,15 +73,17 @@ Builtin Uniforms
 +-------------+------------------------------+--------------------------------------------------+
 | vec4        | ``omw.sunColor``             | The RGBA color of sun                            |
 +-------------+------------------------------+--------------------------------------------------+
-| vec4        | ``omw.sunPos``               | The normalized sun direction                     |
+| vec4        | ``omw.sunPos``               | The normalized sun disc position                 |
 |             |                              |                                                  |
-|             |                              | When the sun is set `omw.sunpos.z` is negated    |
+|             |                              | When the sun is set `omw.sunPos.z` is negated    |
++-------------+------------------------------+--------------------------------------------------+
+| vec4        | ``omw.sunVec``               | The normalized sunlight direction                |
 +-------------+------------------------------+--------------------------------------------------+
 | vec2        | ``omw.resolution``           | The render target's resolution                   |
 +-------------+------------------------------+--------------------------------------------------+
 | vec2        | ``omw.rcpResolution``        | Reciprocal of the render target resolution       |
 +-------------+------------------------------+--------------------------------------------------+
-| vec2        | ``omw.fogNear``              | The units at which the fog begins to render      |
+| float       | ``omw.fogNear``              | The units at which the fog begins to render      |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.fogFar``               | The units at which the fog ends                  |
 +-------------+------------------------------+--------------------------------------------------+
@@ -106,6 +108,8 @@ Builtin Uniforms
 | float       | ``omw.simulationTime``       | The time in milliseconds since simulation began  |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.deltaSimulationTime``  | The change in `omw.simulationTime`               |
++-------------+------------------------------+--------------------------------------------------+
+| int         | ``omw.frameNumber``          | The current frame number                         |
 +-------------+------------------------------+--------------------------------------------------+
 | float       | ``omw.windSpeed``            | The current wind speed                           |
 +-------------+------------------------------+--------------------------------------------------+
@@ -451,21 +455,21 @@ To use the sampler, define the appropriately named `sampler2D` in any of your pa
 It is possible to define settings for your shaders that can be adjusted by either users or a Lua script.
 
 
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |
-+=================+==========+==========+==========+=========+==========+==============+===================+=========+
-|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
-|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |
-+-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+| Block           | default  | min      | max      | static  | step     | description  |  display_name     | header  |  widget_type |
++=================+==========+==========+==========+=========+==========+==============+===================+=========+==============+
+|``uniform_bool`` | boolean  | x        | x        | boolean | x        | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_float``| float    | float    | float    | boolean | float    | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_int``  | integer  | integer  | integer  | boolean | integer  | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec2`` | vec2     | vec2     | vec2     | boolean | vec2     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec3`` | vec3     | vec3     | vec3     | boolean | vec3     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
+|``uniform_vec4`` | vec4     | vec4     | vec4     | boolean | vec4     | string       |  string           | string  |  choice(...) |
++-----------------+----------+----------+----------+---------+----------+--------------+-------------------+---------+--------------+
 
 The ``description`` field is used to display a toolip when viewed in the in-game HUD. The ``header`` field
 field can be used to organize uniforms into groups in the HUD. The ``display_name`` field can be used to create a
@@ -507,6 +511,21 @@ These uniform blocks must be defined with the new ``size`` parameter.
 
     uniform_vec3 uArray {
         size = 10;
+    }
+
+You may also define a dropdown list for users to select specific values from instead of the default sliders using the ``widget_type`` field.
+Each item in the dropdown has an associated display name, which can be a localized string.
+
+.. code-block:: none
+
+    uniform_int uStrength {
+        default = 2;
+        display_name = "Strength";
+        widget_type = choice(
+            "Low" = 1,
+            "Medium" = 2,
+            "High" = 3
+        );
     }
 
 ``render_target``
@@ -560,7 +579,7 @@ color buffer will accumulate.
         height = 4;
         source_format = rgb;
         internal_format = rgb16f;
-        source_type = float;
+        source_type = half_float;
         clear_color = vec4(0,0,0,1);
     }
 
@@ -600,13 +619,13 @@ Below is an example which calculates a naive average scene luminance and transit
         mipmaps = true;
         source_format = rgb;
         internal_format = rgb16f;
-        source_type = float;
+        source_type = half_float;
         min_filter = linear_mipmap_linear;
         mag_filter = linear;
     }
 
     render_target RT_LumAvg {
-        source_type = float;
+        source_type = half_float;
         source_format = rgb;
         internal_format = rgb16f;
         min_filter = nearest;
@@ -614,7 +633,7 @@ Below is an example which calculates a naive average scene luminance and transit
     }
 
     render_target RT_LumAvgLastFrame {
-        source_type = float;
+        source_type = half_float;
         source_format = rgb;
         internal_format = rgb16f;
         min_filter = nearest;
@@ -911,6 +930,8 @@ Types
 | unsigned_int_24_8  | GL_UNSIGNED_INT_24_8  |
 +--------------------+-----------------------+
 | float              | GL_FLOAT              |
++--------------------+-----------------------+
+| half_float         | GL_HALF_FLOAT         |
 +--------------------+-----------------------+
 | double             | GL_DOUBLE             |
 +--------------------+-----------------------+

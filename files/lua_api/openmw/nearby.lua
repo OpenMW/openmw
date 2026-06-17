@@ -1,6 +1,6 @@
 ---
--- `openmw.nearby` provides read-only access to the nearest area of the game world.
--- Can be used only from local scripts.
+-- Provides read-only access to the nearest area of the game world.
+-- @context local
 -- @module nearby
 -- @usage local nearby = require('openmw.nearby')
 
@@ -59,7 +59,7 @@
 -- @field [parent=#nearby] #COLLISION_TYPE COLLISION_TYPE
 
 ---
--- Result of raycasing
+-- Result of raycasting
 -- @type RayCastingResult
 -- @field [parent=#RayCastingResult] #boolean hit Is there a collision? (true/false)
 -- @field [parent=#RayCastingResult] openmw.util#Vector3 hitPos Position of the collision point (nil if no collision)
@@ -69,13 +69,13 @@
 ---
 -- A table of parameters for @{#nearby.castRay}
 -- @type CastRayOptions
--- @field openmw.core#GameObject ignore An object to ignore (specify here the source of the ray)
+-- @field #any ignore An @{openmw.core#GameObject} or @{openmw.core#ObjectList} to ignore (specify here the source of the ray, or other objects which should not collide)
 -- @field #number collisionType Object types to work with (see @{openmw.nearby#COLLISION_TYPE})
 -- @field #number radius The radius of the ray (zero by default). If not zero then castRay actually casts a sphere with given radius.
 --  NOTE: currently `ignore` is not supported if `radius>0`.
 
 ---
--- Cast ray from one point to another and return the first collision.
+-- Cast a ray from one point to another and return the first collision.
 -- @function [parent=#nearby] castRay
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
@@ -92,26 +92,29 @@
 ---
 -- A table of parameters for @{#nearby.castRenderingRay} and @{#nearby.asyncCastRenderingRay}
 -- @type CastRenderingRayOptions
--- @field #table ignore A list of @{openmw.core#GameObject} to ignore while doing the ray cast
+-- @field #any ignore A @{openmw.core#GameObject} or @{openmw.core#ObjectList} to ignore while doing the ray cast
 
 ---
--- Cast ray from one point to another and find the first visual intersection with anything in the scene.
--- As opposite to `castRay` can find an intersection with an object without collisions.
--- In order to avoid threading issues can be used only in player scripts only in `onFrame` or
--- in engine handlers for user input. In other cases use `asyncCastRenderingRay` instead.
+-- Cast a ray from one point to another and find the first visual intersection with anything in the scene.
+-- Unlike `castRay`, `castRenderingRay` can find an intersection with an object without collisions.
+-- To avoid threading issues, `castRenderingRay` can only be used in:
+-- - The `onFrame` engine handler.
+-- - Engine handlers for user input.
+-- - Callbacks provided to @{openmw.input#registerActionHandler}
+-- In other cases, use `asyncCastRenderingRay` instead.
 -- @function [parent=#nearby] castRenderingRay
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
--- @param #CastRenderingRayOptions
+-- @param #CastRenderingRayOptions options An optional table with additional optional arguments
 -- @return #RayCastingResult
 
 ---
--- Asynchronously cast ray from one point to another and find the first visual intersection with anything in the scene.
+-- Asynchronously cast a ray from one point to another and find the first visual intersection with anything in the scene.
 -- @function [parent=#nearby] asyncCastRenderingRay
 -- @param openmw.async#Callback callback The callback to pass the result to (should accept a single argument @{openmw.nearby#RayCastingResult}).
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
--- @param #CastRenderingRayOptions
+-- @param #CastRenderingRayOptions options An optional table with additional optional arguments
 
 ---
 -- @type NAVIGATOR_FLAGS
@@ -180,6 +183,7 @@
 -- @field [parent=#FindPathOptions] #AreaCosts areaCosts a table defining relative cost for each type of area.
 -- @field [parent=#FindPathOptions] #number destinationTolerance a floating point number representing maximum allowed
 -- distance between destination and a nearest point on the navigation mesh in addition to agent size (default: 1).
+-- @field [parent=#FindPathOptions] #table checkpoints an array of positions to build path over if possible.
 
 ---
 -- A table of parameters for @{#nearby.findRandomPointAroundCircle} and @{#nearby.castNavigationRay}
@@ -201,7 +205,7 @@
 -- type to cover the whole active grid).
 
 ---
--- Find path over navigation mesh from source to destination with given options. Result is unstable since navigation
+-- Find a path over the navigation mesh from the source to the destination with the given options. Result is unstable since navigation
 -- mesh generation is asynchronous.
 -- @function [parent=#nearby] findPath
 -- @param openmw.util#Vector3 source Initial path position.
@@ -221,7 +225,7 @@
 -- })
 
 ---
--- Returns random location on navigation mesh within the reach of specified location.
+-- Returns a random location on the navigation mesh within the reach of the specified location.
 -- The location is not exactly constrained by the circle, but it limits the area.
 -- @function [parent=#nearby] findRandomPointAroundCircle
 -- @param openmw.util#Vector3 position Center of the search circle.

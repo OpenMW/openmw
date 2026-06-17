@@ -168,7 +168,7 @@ the file path to the texture is incorrect and OpenMW can't find it.
 To fix this you can open the exported ``.dae`` file in a text editor and check
 the texture's filepath. In the example of this barrel model it's found on lines 13-17.
 
-.. code::
+.. code-block:: xml
     
     <library_images>
         <image id="id-image-4" name="the_barrel">

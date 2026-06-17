@@ -26,6 +26,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -50,10 +51,7 @@ namespace MWClass
 
     std::string_view Weapon::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Weapon>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Weapon::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -88,26 +86,26 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         ESM::WeaponType::Class weapClass = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mWeaponClass;
 
-        std::vector<int> slots_;
+        std::vector<int> slots;
         bool stack = false;
 
         if (weapClass == ESM::WeaponType::Ammo)
         {
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_Ammunition));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_Ammunition));
             stack = true;
         }
         else if (weapClass == ESM::WeaponType::Thrown)
         {
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
             stack = true;
         }
         else
-            slots_.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
+            slots.push_back(int(MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair(slots_, stack);
+        return std::make_pair(slots, stack);
     }
 
-    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Weapon::getEquipmentSkill(const MWWorld::ConstPtr& ptr, bool useLuaInterfaceIfAvailable) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
@@ -263,7 +261,7 @@ namespace MWClass
         ESM::Weapon newItem = *ref->mBase;
         newItem.mId = ESM::RefId();
         newItem.mName = newName;
-        newItem.mData.mEnchant = enchCharge;
+        newItem.mData.mEnchant = static_cast<uint16_t>(enchCharge);
         newItem.mEnchant = enchId;
         newItem.mData.mFlags |= ESM::Weapon::Magical;
         const ESM::Weapon* record = MWBase::Environment::get().getESMStore()->insert(newItem);
@@ -272,20 +270,34 @@ namespace MWClass
 
     std::pair<int, std::string_view> Weapon::canBeEquipped(const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const
     {
-        if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
-            return { 0, "#{sInventoryMessage1}" };
+        int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
 
         // Do not allow equip weapons from inventory during attack
         if (npc.isInCell() && MWBase::Environment::get().getWindowManager()->isGuiMode()
             && MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(npc))
-            return { 0, "#{sCantEquipWeapWarning}" };
+        {
+            int activeWeaponType = ESM::Weapon::None;
+            MWMechanics::getActiveWeapon(npc, &activeWeaponType);
+            if (activeWeaponType > ESM::Weapon::None || activeWeaponType == ESM::Weapon::HandToHand)
+            {
+                auto* activeWeapon = MWMechanics::getWeaponType(activeWeaponType);
+                bool isAmmo = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Class::Ammo;
+                bool activeWeapUsesAmmo = activeWeapon->mWeaponClass == ESM::WeaponType::Class::Ranged;
+                bool sameAmmoType = activeWeapon->mAmmoType == type;
+                // special case for ammo equipping
+                if ((activeWeapUsesAmmo && !sameAmmoType) || !isAmmo)
+                    return { 0, "#{sCantEquipWeapWarning}" };
+            }
+        }
 
-        std::pair<std::vector<int>, bool> slots_ = getEquipmentSlots(ptr);
+        if (hasItemHealth(ptr) && getItemHealth(ptr) == 0)
+            return { 0, "#{sInventoryMessage1}" };
 
-        if (slots_.first.empty())
+        std::pair<std::vector<int>, bool> slots = getEquipmentSlots(ptr);
+
+        if (slots.first.empty())
             return { 0, {} };
 
-        int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
         if (MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded)
         {
             return { 2, {} };

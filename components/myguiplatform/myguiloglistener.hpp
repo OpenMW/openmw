@@ -10,7 +10,7 @@
 #include <MyGUI_LevelLogFilter.h>
 #include <MyGUI_LogSource.h>
 
-namespace osgMyGUI
+namespace MyGUIPlatform
 {
 
     /// \brief  Custom MyGUI::ILogListener interface implementation
@@ -30,8 +30,8 @@ namespace osgMyGUI
         void close() override;
         void flush() override;
 
-        void log(std::string_view _section, MyGUI::LogLevel _level, const struct tm* _time, std::string_view _message,
-            std::string_view _file, int _line) override;
+        void log(std::string_view section, MyGUI::LogLevel level, const struct tm* time, std::string_view message,
+            std::string_view file, int line) override;
 
     private:
         std::ofstream mStream;

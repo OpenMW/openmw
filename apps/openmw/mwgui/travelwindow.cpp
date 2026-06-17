@@ -4,6 +4,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/misc/strings/conversion.hpp>
@@ -33,15 +34,16 @@ namespace MWGui
     {
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
-        getWidget(mSelect, "Select");
-        getWidget(mDestinations, "Travel");
         getWidget(mDestinationsView, "DestinationsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onCancelButtonClicked);
 
-        mDestinations->setCoord(450 / 2 - mDestinations->getTextSize().width / 2, mDestinations->getTop(),
-            mDestinations->getTextSize().width, mDestinations->getHeight());
-        mSelect->setCoord(8, mSelect->getTop(), mSelect->getTextSize().width, mSelect->getHeight());
+        if (Settings::gui().mControllerMenus)
+        {
+            mDisableGamepadCursor = true;
+            mControllerButtons.mA = "#{Interface:Travel}";
+            mControllerButtons.mB = "#{Interface:Cancel}";
+        }
     }
 
     void TravelWindow::addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior)
@@ -60,9 +62,9 @@ namespace MWGui
         }
         else
         {
-            ESM::Position PlayerPos = player.getRefData().getPosition();
-            float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2)
-                + pow(pos.pos[2] - PlayerPos.pos[2], 2));
+            const ESM::Position playerPos = player.getRefData().getPosition();
+            double d = std::sqrt(std::pow(pos.pos[0] - playerPos.pos[0], 2) + std::pow(pos.pos[1] - playerPos.pos[1], 2)
+                + std::pow(pos.pos[2] - playerPos.pos[2], 2));
             float fTravelMult = gmst.find("fTravelMult")->mValue.getFloat();
             if (fTravelMult != 0)
                 price = static_cast<int>(d / fTravelMult);
@@ -70,15 +72,15 @@ namespace MWGui
                 price = static_cast<int>(d);
         }
 
-        price = std::max(1, price);
-        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
-
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
         MWWorld::ActionTeleport::getFollowers(player, followers, !interior);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
+
+        price = std::max(1, price);
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
@@ -93,13 +95,14 @@ namespace MWGui
 
         const std::string& nameString = name.getRefIdString();
         toAdd->setUserString("price", std::to_string(price));
-        toAdd->setCaptionWithReplacing(
-            "#{sCell=" + nameString + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing("#{sCell=" + nameString + "}  - " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mDestinationsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
         toAdd->setUserString("Destination", nameString);
         toAdd->setUserData(pos);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onTravelButtonClick);
+        if (price <= playerGold)
+            mDestinationButtons.emplace_back(toAdd);
     }
 
     void TravelWindow::clearDestinations()
@@ -108,6 +111,7 @@ namespace MWGui
         mCurrentY = 0;
         while (mDestinationsView->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mDestinationsView->getChildAt(0));
+        mDestinationButtons.clear();
     }
 
     void TravelWindow::setPtr(const MWWorld::Ptr& actor)
@@ -131,16 +135,35 @@ namespace MWGui
             bool interior = true;
             const ESM::ExteriorCellLocation cellIndex
                 = ESM::positionToExteriorCellLocation(dest.mPos.pos[0], dest.mPos.pos[1]);
+            const MWWorld::WorldModel& worldModel = *MWBase::Environment::get().getWorldModel();
             if (cellname.empty())
             {
-                MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
+                MWWorld::CellStore& cell = worldModel.getExterior(cellIndex);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
+            }
+            else
+            {
+                const MWWorld::CellStore* destCell = worldModel.findCell(cellname, false);
+                if (destCell == nullptr)
+                {
+                    Log(Debug::Error) << "Failed to add travel destination: unknown cell (" << cellname << ")";
+                    continue;
+                }
+                interior = !destCell->getCell()->isExterior();
             }
             addDestination(ESM::RefId::stringRefId(cellname), dest.mPos, interior);
         }
 
         updateLabels();
+
+        if (Settings::gui().mControllerMenus)
+        {
+            mControllerFocus = 0;
+            if (mDestinationButtons.size() > 0)
+                mDestinationButtons[0]->setStateSelected(true);
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the
         // scrollbar is hidden
         mDestinationsView->setVisibleVScroll(false);
@@ -149,9 +172,9 @@ namespace MWGui
         mDestinationsView->setVisibleVScroll(true);
     }
 
-    void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)
+    void TravelWindow::onTravelButtonClick(MyGUI::Widget* sender)
     {
-        const int price = Misc::StringUtils::toNumeric<int>(_sender->getUserString("price"), 0);
+        const int price = Misc::StringUtils::toNumeric<int>(sender->getUserString("price"), 0);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
@@ -174,20 +197,19 @@ namespace MWGui
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
-        ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        std::string_view cellname = _sender->getUserString("Destination");
-        bool interior = _sender->getUserString("interior") == "y";
+        ESM::Position pos = *sender->getUserData<ESM::Position>();
+        std::string_view cellname = sender->getUserString("Destination");
+        bool interior = sender->getUserString("interior") == "y";
         if (mPtr.getCell()->isExterior())
         {
             ESM::Position playerPos = player.getRefData().getPosition();
-            float d
-                = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
-            int hours = static_cast<int>(d
-                / MWBase::Environment::get()
-                      .getESMStore()
-                      ->get<ESM::GameSetting>()
-                      .find("fTravelTimeMult")
-                      ->mValue.getFloat());
+            float d = (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(playerPos.pos[0], playerPos.pos[1])).length();
+            const float fTravelTimeMult = MWBase::Environment::get()
+                                              .getESMStore()
+                                              ->get<ESM::GameSetting>()
+                                              .find("fTravelTimeMult")
+                                              ->mValue.getFloat();
+            int hours = static_cast<int>(d / fTravelTimeMult);
             MWBase::Environment::get().getMechanicsManager()->rest(hours, true);
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }
@@ -207,7 +229,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
     }
 
-    void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void TravelWindow::onCancelButtonClicked(MyGUI::Widget* /*sender*/)
     {
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
@@ -227,12 +249,57 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
-    void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void TravelWindow::onMouseWheel(MyGUI::Widget* /*sender*/, int rel)
     {
-        if (mDestinationsView->getViewOffset().top + _rel * 0.3f > 0)
+        if (mDestinationsView->getViewOffset().top + rel * 0.3f > 0)
             mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
             mDestinationsView->setViewOffset(
-                MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + _rel * 0.3f)));
+                MyGUI::IntPoint(0, static_cast<int>(mDestinationsView->getViewOffset().top + rel * 0.3f)));
+    }
+
+    bool TravelWindow::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            if (mControllerFocus < mDestinationButtons.size())
+            {
+                onTravelButtonClick(mDestinationButtons[mControllerFocus]);
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            }
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_B)
+        {
+            onCancelButtonClicked(mCancelButton);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_UP)
+        {
+            if (mDestinationButtons.size() <= 1)
+                return true;
+
+            setControllerFocus(mDestinationButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus, mDestinationButtons.size(), -1);
+            setControllerFocus(mDestinationButtons, mControllerFocus, true);
+        }
+        else if (arg.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+        {
+            if (mDestinationButtons.size() <= 1)
+                return true;
+
+            setControllerFocus(mDestinationButtons, mControllerFocus, false);
+            mControllerFocus = wrap(mControllerFocus, mDestinationButtons.size(), 1);
+            setControllerFocus(mDestinationButtons, mControllerFocus, true);
+        }
+
+        // Scroll the list to keep the active item in view
+        if (mControllerFocus <= 5)
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, 0));
+        else
+        {
+            const int lineHeight = Settings::gui().mFontSize + 2;
+            mDestinationsView->setViewOffset(MyGUI::IntPoint(0, -lineHeight * static_cast<int>(mControllerFocus - 5)));
+        }
+
+        return true;
     }
 }

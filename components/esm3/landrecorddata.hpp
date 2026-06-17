@@ -20,8 +20,6 @@ namespace ESM
         // total number of textures per land
         static constexpr unsigned sLandNumTextures = sLandTextureSize * sLandTextureSize;
 
-        // Initial reference height for the first vertex, only needed for filling mHeights
-        float mHeightOffset = 0;
         // Height in world space for each vertex
         std::array<float, sLandNumVerts> mHeights;
         float mMinHeight = 0;

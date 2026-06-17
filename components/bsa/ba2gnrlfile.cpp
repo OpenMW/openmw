@@ -1,33 +1,19 @@
 #include "ba2gnrlfile.hpp"
 
+#include <algorithm>
 #include <cassert>
-#include <filesystem>
+#include <format>
 #include <fstream>
 
-#include <lz4frame.h>
+#include <zlib.h>
 
-#if defined(_MSC_VER)
-// why is this necessary? These are included with /external:I
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#pragma warning(disable : 4702)
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#pragma warning(pop)
-#else
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
-#endif
-
-#include <boost/iostreams/device/array.hpp>
-#include <components/bsa/ba2file.hpp>
-#include <components/bsa/memorystream.hpp>
 #include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
-#include <components/files/conversion.hpp>
-#include <components/misc/strings/lower.hpp>
+#include <components/files/utils.hpp>
+#include <components/vfs/pathutil.hpp>
+
+#include "ba2file.hpp"
+#include "memorystream.hpp"
 
 namespace Bsa
 {
@@ -75,26 +61,18 @@ namespace Bsa
             mFolders[dirHash][{ nameHash, extHash }] = file;
 
             FileStruct fileStruct{};
-            fileStruct.fileSize = file.size;
-            fileStruct.offset = file.offset;
+            fileStruct.mFileSize = file.size;
+            fileStruct.mOffset = file.offset;
             mFiles.push_back(fileStruct);
         }
     }
 
     /// Read header information from the input source
-    void BA2GNRLFile::readHeader()
+    void BA2GNRLFile::readHeader(std::istream& input)
     {
         assert(!mIsLoaded);
 
-        std::ifstream input(mFilepath, std::ios_base::binary);
-
-        // Total archive size
-        std::streamoff fsize = 0;
-        if (input.seekg(0, std::ios_base::end))
-        {
-            fsize = input.tellg();
-            input.seekg(0);
-        }
+        const std::streamsize fsize = Files::getStreamSizeLeft(input);
 
         if (fsize < 24) // header is 24 bytes
             fail("File too small to be a valid BSA archive");
@@ -107,19 +85,25 @@ namespace Bsa
             input.read(reinterpret_cast<char*>(header), 16);
             input.read(reinterpret_cast<char*>(&fileTableOffset), 8);
 
-            if (header[0] == 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
+            if (header[0] != ESM::fourCC("BTDX"))
+                fail("Unrecognized BA2 signature");
             mVersion = header[1];
-            if (mVersion != 0x01 /*FO4*/ && mVersion != 0x02 /*Starfield*/)
-                fail("Unrecognized compressed BSA version");
+            switch (static_cast<BA2Version>(mVersion))
+            {
+                case BA2Version::Fallout4:
+                case BA2Version::Fallout4NextGen_v7:
+                case BA2Version::Fallout4NextGen_v8:
+                    break;
+                case BA2Version::StarfieldGeneral:
+                    uint64_t dummy;
+                    input.read(reinterpret_cast<char*>(&dummy), 8);
+                    break;
+                default:
+                    fail("Unrecognized general BA2 version");
+            }
 
             type = header[2];
             fileCount = header[3];
-            if (mVersion == 0x02)
-            {
-                uint64_t dummy;
-                input.read(reinterpret_cast<char*>(&dummy), 8);
-            }
         }
 
         if (type == ESM::fourCC("GNRL"))
@@ -134,40 +118,29 @@ namespace Bsa
             std::vector<char> fileName;
             uint16_t fileNameSize;
             input.read(reinterpret_cast<char*>(&fileNameSize), sizeof(uint16_t));
-            fileName.resize(fileNameSize);
-            input.read(fileName.data(), fileName.size());
-            fileName.push_back('\0');
-            mFileNames.push_back(fileName);
-            mFiles[i].setNameInfos(0, &mFileNames.back());
+            fileName.resize(fileNameSize + 1);
+            input.read(fileName.data(), fileNameSize);
+            mFileNames.push_back(std::move(fileName));
+            mFiles[i].mNameOffset = 0;
+            mFiles[i].mNameSize = fileNameSize;
+            mFiles[i].mNamesBuffer = &mFileNames.back();
         }
-
-        mIsLoaded = true;
     }
 
-    BA2GNRLFile::FileRecord BA2GNRLFile::getFileRecord(const std::string& str) const
+    BA2GNRLFile::FileRecord BA2GNRLFile::getFileRecord(std::string_view str) const
     {
         for (const auto c : str)
         {
             if (((static_cast<unsigned>(c) >> 7U) & 1U) != 0U)
             {
-                fail("File record " + str + " contains unicode characters, refusing to load.");
+                fail(std::format("File record {} contains unicode characters, refusing to load.", str));
             }
         }
 
-#ifdef _WIN32
-        const auto& path = str;
-#else
-        // Force-convert the path into something UNIX can handle first
-        // to make sure std::filesystem::path doesn't think the entire path is the filename on Linux
-        // and subsequently purge it to determine the file folder.
-        std::string path = str;
-        std::replace(path.begin(), path.end(), '\\', '/');
-#endif
+        const VFS::Path::Normalized path(str);
 
-        const auto p = std::filesystem::path{ path }; // Purposefully damage Unicode strings.
-        const auto fileName = Misc::StringUtils::lowerCase(p.stem().string());
-        const auto ext = Misc::StringUtils::lowerCase(p.extension().string()); // Purposefully damage Unicode strings.
-        const auto folder = Misc::StringUtils::lowerCase(p.parent_path().string());
+        const std::string_view fileName = path.stem();
+        const std::string_view folder = path.parent().value();
 
         uint32_t folderHash = generateHash(folder);
         auto it = mFolders.find(folderHash);
@@ -175,7 +148,7 @@ namespace Bsa
             return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
 
         uint32_t fileHash = generateHash(fileName);
-        uint32_t extHash = generateExtensionHash(ext);
+        uint32_t extHash = generateExtensionHash(path.extension().value());
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
             return FileRecord(); // file not found, return default which has offset of sInvalidOffset
@@ -198,16 +171,6 @@ namespace Bsa
         fail("Add file is not implemented for compressed BSA: " + filename);
     }
 
-    Files::IStreamPtr BA2GNRLFile::getFile(const char* file)
-    {
-        FileRecord fileRec = getFileRecord(file);
-        if (!fileRec.isValid())
-        {
-            fail("File not found: " + std::string(file));
-        }
-        return getFile(fileRec);
-    }
-
     Files::IStreamPtr BA2GNRLFile::getFile(const FileRecord& fileRecord)
     {
         const uint32_t inputSize = fileRecord.packedSize ? fileRecord.packedSize : fileRecord.size;
@@ -215,12 +178,14 @@ namespace Bsa
         auto memoryStreamPtr = std::make_unique<MemoryInputStream>(fileRecord.size);
         if (fileRecord.packedSize)
         {
-            boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-            inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-            inputStreamBuf.push(*streamPtr);
+            std::vector<char> buffer(inputSize);
+            streamPtr->read(buffer.data(), inputSize);
+            uLongf destSize = static_cast<uLongf>(fileRecord.size);
+            int ec = ::uncompress(reinterpret_cast<Bytef*>(memoryStreamPtr->getRawData()), &destSize,
+                reinterpret_cast<Bytef*>(buffer.data()), static_cast<uLong>(buffer.size()));
 
-            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), fileRecord.size);
-            boost::iostreams::copy(inputStreamBuf, sr);
+            if (ec != Z_OK)
+                fail("zlib uncompress failed: " + std::string(::zError(ec)));
         }
         else
         {

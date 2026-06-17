@@ -18,18 +18,17 @@ MWState::CharacterManager::CharacterManager(std::filesystem::path saves, const s
     }
     else
     {
-        for (std::filesystem::directory_iterator iter(mPath); iter != std::filesystem::directory_iterator(); ++iter)
+        for (const std::filesystem::path& characterDir : std::filesystem::directory_iterator(mPath))
         {
-            std::filesystem::path characterDir = *iter;
-
             if (std::filesystem::is_directory(characterDir))
             {
                 Character character(characterDir, mGame);
 
                 if (character.begin() != character.end())
-                    mCharacters.push_back(character);
+                    mCharacters.push_back(std::move(character));
             }
         }
+        mCharacters.sort();
     }
 }
 
@@ -38,7 +37,7 @@ MWState::Character* MWState::CharacterManager::getCurrentCharacter()
     return mCurrent;
 }
 
-void MWState::CharacterManager::deleteSlot(const MWState::Character* character, const MWState::Slot* slot)
+void MWState::CharacterManager::deleteSlot(const MWState::Slot* slot, const MWState::Character*& character)
 {
     std::list<Character>::iterator it = findCharacter(character);
 
@@ -51,6 +50,7 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character* character, 
         if (character == mCurrent)
             mCurrent = nullptr;
         mCharacters.erase(it);
+        character = nullptr;
     }
 }
 
@@ -81,8 +81,7 @@ MWState::Character* MWState::CharacterManager::createCharacter(const std::string
         path = mPath / test.str();
     }
 
-    mCharacters.emplace_back(path, mGame);
-    return &mCharacters.back();
+    return &mCharacters.emplace_front(path, mGame);
 }
 
 std::list<MWState::Character>::iterator MWState::CharacterManager::findCharacter(const MWState::Character* character)

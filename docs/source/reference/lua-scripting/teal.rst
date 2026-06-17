@@ -8,7 +8,7 @@ What is Teal?
 Teal is a typed dialect of Lua. `Teal's Github repository <https://github.com/teal-language/tl>`_.
 
 Teal compiles into Lua, so you can use it in any Lua 5.1+ runtime. If you are familiar with TypeScript, Teal is to Lua what TypeScript is to JavaScript.
-You can find the basics of the syntax and justification for typed Lua in the `Teal tutorial <https://github.com/teal-language/tl/blob/master/docs/tutorial.md>`_.
+You can learn the syntax in the `Teal book <https://teal-language.org/book/>`_.
 
 Teal's syntax is mostly the same as Lua, but with additional type declarations and annotations.
 It will help you catch many mistakes before even running a script, and provide confidence about large code changes.
@@ -20,7 +20,7 @@ To compile your ``.tl`` files into ``.lua`` files, install `Cyan, Teal's build s
 
 Create a directory for your project, with a ``tlconfig.lua`` file inside.
 All of your scripts (i. e. the ``scripts`` directory) should be within this directory.
-``tlconfig.lua`` configures the Teal build system and compiler, see the `complete list here <https://github.com/teal-language/tl/blob/master/docs/compiler_options.md>`_.
+``tlconfig.lua`` configures the Teal build system and compiler, see the `complete list here <https://teal-language.org/book/compiler_options.html>`_.
 
 .. note::
   You can use ``cyan init`` to set up a directory for a Teal project automatically.

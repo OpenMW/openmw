@@ -13,6 +13,10 @@ namespace MWGui
     public:
         typedef std::map<ESM::RefId, int> FactionList;
 
+        /// It would be nice to measure these, but for now they're hardcoded.
+        static int getIdealHeight() { return 750; }
+        static int getIdealWidth() { return 600; }
+
         StatsWindow(DragAndDrop* drag);
 
         /// automatically updates all the data in the stats window, but only if it has changed.
@@ -47,6 +51,10 @@ namespace MWGui
 
         std::string_view getWindowIdForLua() const override { return "Stats"; }
 
+    protected:
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        void setActiveControllerWindow(bool active) override;
+
     private:
         void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
             const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
@@ -61,7 +69,7 @@ namespace MWGui
         void setBirthSign(const ESM::RefId& signId);
 
         void onWindowResize(MyGUI::Window* window);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
 
         MyGUI::Widget* mLeftPane;
         MyGUI::Widget* mRightPane;

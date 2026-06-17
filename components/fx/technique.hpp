@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_FX_TECHNIQUE_H
-#define OPENMW_COMPONENTS_FX_TECHNIQUE_H
+#ifndef OPENMW_COMPONENTS_FX_TECHNIQUE_HPP
+#define OPENMW_COMPONENTS_FX_TECHNIQUE_HPP
 
 #include <filesystem>
 #include <memory>
@@ -29,7 +29,7 @@ namespace VFS
     class Manager;
 }
 
-namespace fx
+namespace Fx
 {
     using FlagsType = size_t;
 
@@ -47,6 +47,10 @@ namespace fx
             for (const auto& subpass : other.mPasses)
                 mPasses.emplace_back(subpass, copyOp);
         }
+
+        ~DispatchNode() = default;
+
+        DispatchNode& operator=(const DispatchNode&) = default;
 
         struct SubPass
         {
@@ -70,6 +74,10 @@ namespace fx
                 if (other.mRenderTexture)
                     mRenderTexture = new osg::Texture2D(*other.mRenderTexture, copyOp);
             }
+
+            ~SubPass() = default;
+
+            SubPass& operator=(const SubPass&) = default;
         };
 
         void compile()
@@ -85,7 +93,7 @@ namespace fx
         }
 
         // not safe to read/write in draw thread
-        std::shared_ptr<fx::Technique> mHandle = nullptr;
+        std::shared_ptr<Fx::Technique> mHandle = nullptr;
 
         FlagsType mFlags = 0;
 
@@ -105,8 +113,8 @@ namespace fx
         using UniformMap = std::vector<std::shared_ptr<Types::UniformBase>>;
         using RenderTargetMap = std::unordered_map<std::string_view, Types::RenderTarget>;
 
-        static constexpr std::string_view sExt = ".omwfx";
-        static constexpr std::string_view sSubdir = "shaders";
+        static constexpr std::string_view sExt = "omwfx";
+        static constexpr VFS::Path::NormalizedView sSubdir{ "shaders" };
 
         enum class Status
         {
@@ -123,8 +131,10 @@ namespace fx
         static constexpr FlagsType Flag_Disable_SunGlare = (1 << 4);
         static constexpr FlagsType Flag_Hidden = (1 << 5);
 
-        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, std::string name, int width,
-            int height, bool ubo, bool supportsNormals);
+        static VFS::Path::Normalized makeFileName(std::string_view name);
+
+        Technique(const VFS::Manager& vfs, Resource::ImageManager& imageManager, VFS::Path::NormalizedView fileName,
+            std::string name, int width, int height, bool ubo, bool supportsNormals);
 
         bool compile();
 
@@ -170,7 +180,7 @@ namespace fx
 
         std::string getLastError() const { return mLastError; }
 
-        UniformMap::iterator findUniform(const std::string& name);
+        UniformMap::iterator findUniform(std::string_view name);
 
         bool getDynamic() const { return mDynamic; }
 
@@ -181,17 +191,17 @@ namespace fx
         bool getInternal() const { return mInternal; }
 
     private:
-        [[noreturn]] void error(const std::string& msg);
+        [[noreturn]] void error(std::string_view msg);
 
         void clear();
 
         std::string_view asLiteral() const;
 
         template <class T>
-        void expect(const std::string& err = "");
+        void expect(std::string_view err = {});
 
         template <class T, class T2>
-        void expect(const std::string& err = "");
+        void expect(std::string_view err = {});
 
         template <class T>
         bool isNext();
@@ -227,6 +237,12 @@ namespace fx
         int parseSourceType();
 
         int parseSourceFormat();
+
+        template <class SrcT, class T>
+        void parseWidgetType(Types::Uniform<SrcT>& uniform);
+
+        template <class SrcT, class T>
+        SrcT getUniformValue();
 
         osg::BlendEquation::Equation parseBlendEquation();
 

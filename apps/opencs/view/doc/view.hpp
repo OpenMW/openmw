@@ -108,6 +108,8 @@ namespace CSVDoc
         View& operator=(const View&) = delete;
         ~View() override = default;
 
+        static QScreen* getWidgetScreen(const QPoint& position);
+
         const CSMDoc::Document* getDocument() const;
 
         CSMDoc::Document* getDocument();

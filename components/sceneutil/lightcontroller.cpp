@@ -41,6 +41,7 @@ namespace SceneUtil
         if (mType == LT_Normal)
         {
             light->setDiffuse(mDiffuseColor);
+            light->setSpecular(mSpecularColor);
             traverse(node, nv);
             return;
         }
@@ -65,10 +66,10 @@ namespace SceneUtil
                 mPhase = mPhase <= 0.5f ? 1.f : 0.25f;
         }
 
-        osg::Vec4f result = mDiffuseColor * mBrightness * node->getActorFade();
+        const float result = mBrightness * node->getActorFade();
 
-        light->setDiffuse(result);
-        light->setSpecular(result);
+        light->setDiffuse(mDiffuseColor * result);
+        light->setSpecular(mSpecularColor * result);
 
         traverse(node, nv);
     }
@@ -76,6 +77,11 @@ namespace SceneUtil
     void LightController::setDiffuse(const osg::Vec4f& color)
     {
         mDiffuseColor = color;
+    }
+
+    void LightController::setSpecular(const osg::Vec4f& color)
+    {
+        mSpecularColor = color;
     }
 
 }

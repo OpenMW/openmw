@@ -10,32 +10,31 @@ namespace MWRender
         if (!firstPerson)
         {
             if (isWerewolf)
-                return Settings::models().mWolfskin;
+                return Settings::models().mWolfskin.get().value();
             else if (isBeast)
-                return Settings::models().mBaseanimkna;
+                return Settings::models().mBaseanimkna.get().value();
             else if (isFemale)
-                return Settings::models().mBaseanimfemale;
+                return Settings::models().mBaseanimfemale.get().value();
             else
-                return Settings::models().mBaseanim;
+                return Settings::models().mBaseanim.get().value();
         }
         else
         {
             if (isWerewolf)
-                return Settings::models().mWolfskin1st;
+                return Settings::models().mWolfskin1st.get().value();
             else if (isBeast)
-                return Settings::models().mBaseanimkna1st;
+                return Settings::models().mBaseanimkna1st.get().value();
             else if (isFemale)
-                return Settings::models().mBaseanimfemale1st;
+                return Settings::models().mBaseanimfemale1st.get().value();
             else
-                return Settings::models().mXbaseanim1st;
+                return Settings::models().mXbaseanim1st.get().value();
         }
     }
 
-    bool isDefaultActorSkeleton(std::string_view model)
+    bool isDefaultActorSkeleton(VFS::Path::NormalizedView model)
     {
-        return VFS::Path::pathEqual(Settings::models().mBaseanimkna.get(), model)
-            || VFS::Path::pathEqual(Settings::models().mBaseanimfemale.get(), model)
-            || VFS::Path::pathEqual(Settings::models().mBaseanim.get(), model);
+        return Settings::models().mBaseanimkna.get() == model || Settings::models().mBaseanimfemale.get() == model
+            || Settings::models().mBaseanim.get() == model;
     }
 
     std::string addSuffixBeforeExtension(const std::string& filename, const std::string& suffix)

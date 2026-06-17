@@ -1,6 +1,6 @@
 #include "videowidget.hpp"
 
-#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
+#include <osg-ffmpeg-videoplayer/videoplayer.hpp>
 
 #include <MyGUI_RenderManager.h>
 
@@ -50,10 +50,11 @@ namespace MWGui
         if (!texture)
             return;
 
-        mTexture = std::make_unique<osgMyGUI::OSGTexture>(texture);
+        mTexture = std::make_unique<MyGUIPlatform::OSGTexture>(texture);
 
         setRenderItemTexture(mTexture.get());
-        getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+        // Both the widget and the video frame are Y-down, so this UV is not inverted
+        getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 
     int VideoWidget::getVideoWidth()

@@ -8,8 +8,8 @@
 #include <osg/Vec3f>
 #include <osg/ref_ptr>
 
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm/util.hpp>
 
 #include "defs.hpp"
 
@@ -25,7 +25,7 @@ namespace Terrain
     class Storage
     {
     public:
-        virtual ~Storage() {}
+        virtual ~Storage() = default;
 
     public:
         /// Get bounds of the whole terrain in cell units
@@ -36,8 +36,8 @@ namespace Terrain
         virtual bool hasData(ESM::ExteriorCellLocation cellLocation)
         {
             float dummy;
-            return getMinMaxHeights(
-                1, osg::Vec2f(cellLocation.mX + 0.5, cellLocation.mY + 0.5), cellLocation.mWorldspace, dummy, dummy);
+            return getMinMaxHeights(1.f, osg::Vec2f(cellLocation.mX + 0.5f, cellLocation.mY + 0.5f),
+                cellLocation.mWorldspace, dummy, dummy);
         }
 
         /// Get the minimum and maximum heights of a terrain region.
@@ -88,7 +88,8 @@ namespace Terrain
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
         virtual int getCellVertices(ESM::RefId worldspace) = 0;
 
-        virtual int getBlendmapScale(float chunkSize) = 0;
+        /// Get the number of texture tiles on one side per chunk (chunkSize 1.0 = 1 cell).
+        virtual int getTextureTileCount(float chunkSize, ESM::RefId worldspace) = 0;
     };
 
 }

@@ -1,5 +1,7 @@
 #include "groundcover.hpp"
 
+#include <span>
+
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/ComputeBoundsVisitor>
@@ -46,13 +48,13 @@ namespace MWRender
         class InstancedComputeNearFarCullCallback : public osg::DrawableCullCallback
         {
         public:
-            InstancedComputeNearFarCullCallback(const std::vector<Groundcover::GroundcoverEntry>& instances,
+            explicit InstancedComputeNearFarCullCallback(std::span<const Groundcover::GroundcoverEntry> instances,
                 const osg::Vec3& chunkPosition, const osg::BoundingBox& instanceBounds)
                 : mInstanceMatrices()
                 , mInstanceBounds(instanceBounds)
             {
                 mInstanceMatrices.reserve(instances.size());
-                for (const auto& instance : instances)
+                for (const Groundcover::GroundcoverEntry& instance : instances)
                     mInstanceMatrices.emplace_back(computeInstanceMatrix(instance, chunkPosition));
             }
 
@@ -104,7 +106,7 @@ namespace MWRender
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
-                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                osg::Vec3d instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
                                 unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
                                     | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
@@ -144,7 +146,7 @@ namespace MWRender
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
-                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                osg::Vec3d instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
                                 unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
                                     | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
@@ -191,7 +193,8 @@ namespace MWRender
         class InstancingVisitor : public osg::NodeVisitor
         {
         public:
-            InstancingVisitor(std::vector<Groundcover::GroundcoverEntry>& instances, osg::Vec3f& chunkPosition)
+            explicit InstancingVisitor(
+                std::span<const Groundcover::GroundcoverEntry> instances, osg::Vec3f& chunkPosition)
                 : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
                 , mInstances(instances)
                 , mChunkPosition(chunkPosition)
@@ -214,10 +217,10 @@ namespace MWRender
             {
                 for (unsigned int i = 0; i < geom.getNumPrimitiveSets(); ++i)
                 {
-                    geom.getPrimitiveSet(i)->setNumInstances(mInstances.size());
+                    geom.getPrimitiveSet(i)->setNumInstances(static_cast<int>(mInstances.size()));
                 }
 
-                osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(mInstances.size());
+                osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(static_cast<unsigned>(mInstances.size()));
                 osg::BoundingBox box;
                 osg::BoundingBox originalBox = geom.getBoundingBox();
                 float radius = originalBox.radius();
@@ -235,7 +238,7 @@ namespace MWRender
 
                 geom.setInitialBound(box);
 
-                osg::ref_ptr<osg::Vec3Array> rotations = new osg::Vec3Array(mInstances.size());
+                osg::ref_ptr<osg::Vec3Array> rotations = new osg::Vec3Array(static_cast<unsigned>(mInstances.size()));
                 for (unsigned int i = 0; i < rotations->getNumElements(); i++)
                 {
                     (*rotations)[i] = mInstances[i].mPos.asRotationVec3();
@@ -252,7 +255,7 @@ namespace MWRender
             }
 
         private:
-            std::vector<Groundcover::GroundcoverEntry> mInstances;
+            std::span<const Groundcover::GroundcoverEntry> mInstances;
             osg::Vec3f mChunkPosition;
         };
 
@@ -365,7 +368,7 @@ namespace MWRender
         mProgramTemplate->addBindAttribLocation("aRotation", 7);
     }
 
-    Groundcover::~Groundcover() {}
+    Groundcover::~Groundcover() = default;
 
     void Groundcover::collectInstances(InstanceMap& instances, float size, const osg::Vec2f& center)
     {
@@ -376,7 +379,8 @@ namespace MWRender
         osg::Vec2f maxBound = (center + osg::Vec2f(size / 2.f, size / 2.f));
         DensityCalculator calculator(mDensity);
         ESM::ReadersCache readers;
-        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+        osg::Vec2i startCell = osg::Vec2i(static_cast<int>(std::floor(center.x() - size / 2.f)),
+            static_cast<int>(std::floor(center.y() - size / 2.f)));
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
@@ -411,12 +415,15 @@ namespace MWRender
                     }
                 }
 
-                for (auto& pair : refs)
+                for (auto& [refNum, cellRef] : refs)
                 {
-                    ESM::CellRef& ref = pair.second;
-                    const std::string& model = mGroundcoverStore.getGroundcoverModel(ref.mRefID);
-                    if (!model.empty())
-                        instances[model].emplace_back(std::move(ref));
+                    const VFS::Path::NormalizedView model = mGroundcoverStore.getGroundcoverModel(cellRef.mRefID);
+                    if (model.empty())
+                        continue;
+                    auto it = instances.find(model);
+                    if (it == instances.end())
+                        it = instances.emplace_hint(it, VFS::Path::Normalized(model), std::vector<GroundcoverEntry>());
+                    it->second.emplace_back(std::move(cellRef));
                 }
             }
         }
@@ -426,9 +433,9 @@ namespace MWRender
     {
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
-        for (auto& pair : instances)
+        for (const auto& [model, entries] : instances)
         {
-            const osg::Node* temp = mSceneManager->getTemplate(pair.first);
+            const osg::Node* temp = mSceneManager->getTemplate(model);
             osg::ref_ptr<osg::Node> node = static_cast<osg::Node*>(temp->clone(osg::CopyOp::DEEP_COPY_NODES
                 | osg::CopyOp::DEEP_COPY_DRAWABLES | osg::CopyOp::DEEP_COPY_USERDATA | osg::CopyOp::DEEP_COPY_ARRAYS
                 | osg::CopyOp::DEEP_COPY_PRIMITIVES));
@@ -436,7 +443,7 @@ namespace MWRender
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
 
-            InstancingVisitor visitor(pair.second, worldCenter);
+            InstancingVisitor visitor(entries, worldCenter);
             node->accept(visitor);
             group->addChild(node);
         }
@@ -448,9 +455,9 @@ namespace MWRender
 
         group->setStateSet(mStateset);
         group->setNodeMask(Mask_Groundcover);
-        if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+        if (Settings::groundcover().mPointLighting)
             group->addCullCallback(new SceneUtil::LightListCallback);
-        mSceneManager->recreateShaders(group, "groundcover", true, mProgramTemplate);
+        mSceneManager->recreateShaders(group, "groundcover", mProgramTemplate);
         mSceneManager->shareState(group);
         group->getBound();
         return group;

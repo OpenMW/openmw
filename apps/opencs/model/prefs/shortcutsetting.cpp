@@ -118,9 +118,9 @@ namespace CSMPrefs
     bool ShortcutSetting::handleEvent(QObject* target, int mod, int value, bool active)
     {
         // Modifiers are handled differently
-        const int Blacklist[] = { Qt::Key_Shift, Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_AltGr };
+        const int blacklist[] = { Qt::Key_Shift, Qt::Key_Control, Qt::Key_Meta, Qt::Key_Alt, Qt::Key_AltGr };
 
-        const size_t BlacklistSize = sizeof(Blacklist) / sizeof(int);
+        const size_t blacklistSize = std::size(blacklist);
 
         if (!mEditorActive)
         {
@@ -137,9 +137,9 @@ namespace CSMPrefs
         }
 
         // Handle blacklist
-        for (size_t i = 0; i < BlacklistSize; ++i)
+        for (size_t i = 0; i < blacklistSize; ++i)
         {
-            if (value == Blacklist[i])
+            if (value == blacklist[i])
                 return true;
         }
 

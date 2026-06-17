@@ -43,6 +43,7 @@ namespace CSMTools
         const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
         const CSMWorld::IdCollection<ESM::Faction>& mFactions;
         const CSMWorld::IdCollection<ESM::BodyPart>& mBodyParts;
+        std::unordered_map<ESM::RefNum, ESM::RefId> mUsedReferenceIDs;
         bool mIgnoreBaseRecords;
     };
 }

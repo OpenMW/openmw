@@ -130,7 +130,7 @@ int MWDialogue::SelectWrapper::getArgument() const
             return 22;
         case ESM::DialogueCondition::Function_PcMarksman:
             return 23;
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
             return 24;
         case ESM::DialogueCondition::Function_PcSpeechcraft:
             return 25;
@@ -193,7 +193,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         case ESM::DialogueCondition::Function_FriendHit:
@@ -245,29 +245,6 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         default:
             return Type_None;
     };
-}
-
-bool MWDialogue::SelectWrapper::isNpcOnly() const
-{
-    switch (mSelect.mFunction)
-    {
-        case ESM::DialogueCondition::Function_NotFaction:
-        case ESM::DialogueCondition::Function_NotClass:
-        case ESM::DialogueCondition::Function_NotRace:
-        case ESM::DialogueCondition::Function_SameSex:
-        case ESM::DialogueCondition::Function_SameRace:
-        case ESM::DialogueCondition::Function_SameFaction:
-        case ESM::DialogueCondition::Function_RankRequirement:
-        case ESM::DialogueCondition::Function_Reputation:
-        case ESM::DialogueCondition::Function_FactionRankDifference:
-        case ESM::DialogueCondition::Function_Werewolf:
-        case ESM::DialogueCondition::Function_PcWerewolfKills:
-        case ESM::DialogueCondition::Function_FacReactionLowest:
-        case ESM::DialogueCondition::Function_FacReactionHighest:
-            return true;
-        default:
-            return false;
-    }
 }
 
 bool MWDialogue::SelectWrapper::selectCompare(int value) const

@@ -57,21 +57,11 @@ namespace MWGui
 
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
-        MWWorld::Ptr ret = MWWorld::Ptr();
-        if (static_cast<size_t>(item.mBase.getCellRef().getCount()) <= count)
-        {
-            // We are moving the full stack
-            ret = otherModel->addItem(item, count, allowAutoEquip);
-            removeItem(item, count);
-        }
-        else
-        {
-            // We are moving only part of the stack, so create a copy in the other model
-            // and then remove count from this model.
-            ret = otherModel->copyItem(item, count, allowAutoEquip);
-            removeItem(item, count);
-        }
-        return ret;
+        removeItem(item, count);
+        // If we removed the entire stack we can transfer it instead of creating a copy with a different RefNum
+        if (item.mBase.getCellRef().getCount() == 0)
+            return otherModel->addItem(item, count, allowAutoEquip);
+        return otherModel->copyItem(item, count, allowAutoEquip);
     }
 
     bool ItemModel::allowedToUseItems() const
@@ -109,9 +99,9 @@ namespace MWGui
         const ItemStack& itemToSearch = getItem(index);
         for (size_t i = 0; i < mSourceModel->getItemCount(); ++i)
         {
-            const ItemStack& item = mSourceModel->getItem(i);
+            const ItemStack& item = mSourceModel->getItem(static_cast<ModelIndex>(i));
             if (item.mBase == itemToSearch.mBase)
-                return i;
+                return static_cast<ModelIndex>(i);
         }
         return -1;
     }
@@ -121,9 +111,9 @@ namespace MWGui
         const ItemStack& itemToSearch = mSourceModel->getItem(index);
         for (size_t i = 0; i < getItemCount(); ++i)
         {
-            const ItemStack& item = getItem(i);
+            const ItemStack& item = getItem(static_cast<ModelIndex>(i));
             if (item.mBase == itemToSearch.mBase)
-                return i;
+                return static_cast<ModelIndex>(i);
         }
         return -1;
     }

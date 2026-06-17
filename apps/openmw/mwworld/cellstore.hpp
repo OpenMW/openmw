@@ -75,6 +75,7 @@ namespace ESM4
     struct ItemMod;
     struct MiscItem;
     struct MovableStatic;
+    struct StaticCollection;
     struct Terminal;
     struct Tree;
     struct Weapon;
@@ -99,7 +100,7 @@ namespace MWWorld
         CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Flora>, CellRefList<ESM4::Ingredient>,
         CellRefList<ESM4::ItemMod>, CellRefList<ESM4::Terminal>, CellRefList<ESM4::Tree>, CellRefList<ESM4::MiscItem>,
         CellRefList<ESM4::MovableStatic>, CellRefList<ESM4::Weapon>, CellRefList<ESM4::Furniture>,
-        CellRefList<ESM4::Creature>, CellRefList<ESM4::Npc>>;
+        CellRefList<ESM4::Creature>, CellRefList<ESM4::Npc>, CellRefList<ESM4::StaticCollection>>;
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -182,9 +183,6 @@ namespace MWWorld
         /// containers.
         /// @note Does not trigger CellStore hasState flag.
 
-        Ptr searchViaActorId(int id);
-        ///< Will return an empty Ptr if cell is not loaded.
-
         float getWaterLevel() const;
 
         bool movedHere(const MWWorld::Ptr& ptr) const;
@@ -212,13 +210,13 @@ namespace MWWorld
         /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
         /// \return Iteration completed?
         template <class Visitor>
-        bool forEach(Visitor&& visitor)
+        bool forEach(Visitor&& visitor, bool includeDeleted = false)
         {
             if (mState != State_Loaded)
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
             if (mMergedRefs.empty())
                 return true;
 
@@ -226,7 +224,7 @@ namespace MWWorld
 
             for (LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
+                if (!includeDeleted && !isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
                 if (!visitor(MWWorld::Ptr(mergedRef, this)))
@@ -241,17 +239,17 @@ namespace MWWorld
         /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
         /// \return Iteration completed?
         template <class Visitor>
-        bool forEachConst(Visitor&& visitor) const
+        bool forEachConst(Visitor&& visitor, bool includeDeleted = false) const
         {
             if (mState != State_Loaded)
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
 
             for (const LiveCellRefBase* mergedRef : mMergedRefs)
             {
-                if (!isAccessible(mergedRef->mData, mergedRef->mRef))
+                if (!includeDeleted && !isAccessible(mergedRef->mData, mergedRef->mRef))
                     continue;
 
                 if (!visitor(MWWorld::ConstPtr(mergedRef, this)))
@@ -266,28 +264,25 @@ namespace MWWorld
         /// unintended behaviour. \attention This function also lists deleted (count 0) objects!
         /// \return Iteration completed?
         template <class T, class Visitor>
-        bool forEachType(Visitor&& visitor)
+        bool forEachType(Visitor&& visitor, bool includeDeleted = false)
         {
             if (mState != State_Loaded)
                 return false;
 
             if (mMergedRefsNeedsUpdate)
-                updateMergedRefs();
+                updateMergedRefs(includeDeleted);
             if (mMergedRefs.empty())
                 return true;
 
             mHasState = true;
 
-            CellRefList<T>& list = get<T>();
-
-            for (typename CellRefList<T>::List::iterator it(list.mList.begin()); it != list.mList.end(); ++it)
+            for (LiveCellRefBase& base : get<T>().mList)
             {
-                LiveCellRefBase* base = &*it;
-                if (mMovedToAnotherCell.find(base) != mMovedToAnotherCell.end())
+                if (mMovedToAnotherCell.contains(&base))
                     continue;
-                if (!isAccessible(base->mData, base->mRef))
+                if (!includeDeleted && !isAccessible(base.mData, base.mRef))
                     continue;
-                if (!visitor(MWWorld::Ptr(base, this)))
+                if (!visitor(MWWorld::Ptr(&base, this)))
                     return false;
             }
 
@@ -338,7 +333,7 @@ namespace MWWorld
         void respawn();
         ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
-        Ptr getMovedActor(int actorId) const;
+        CellStore* getOriginCell(const Ptr& object) const;
 
         Ptr getPtr(ESM::RefId id);
 
@@ -405,7 +400,7 @@ namespace MWWorld
 
         /// Repopulate mMergedRefs.
         void requestMergedRefsUpdate();
-        void updateMergedRefs() const;
+        void updateMergedRefs(bool includeDeleted = false) const;
 
         // (item, max charge)
         typedef std::vector<std::pair<LiveCellRefBase*, float>> TRechargingItems;

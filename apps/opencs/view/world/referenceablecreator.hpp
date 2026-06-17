@@ -29,7 +29,8 @@ namespace CSVWorld
         void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
     public:
-        ReferenceableCreator(CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
+        explicit ReferenceableCreator(
+            CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
         void reset() override;
 

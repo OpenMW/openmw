@@ -7,12 +7,6 @@ user-data="?userdata?"
 config="?userconfig?"
 resources=./resources
 data=./resources/vfs-mw
-script-blacklist=Museum
-script-blacklist=MockChangeScript
-script-blacklist=doortestwarp
-script-blacklist=WereChange2Script
-script-blacklist=wereDreamScript2
-script-blacklist=wereDreamScript3
 
 # lighting
 fallback=LightAttenuation_UseConstant,0

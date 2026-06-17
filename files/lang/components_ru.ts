@@ -31,11 +31,15 @@
     </message>
     <message>
         <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is part of OpenMW.&lt;/b&gt;&lt;br/&gt;</source>
-        <translation>&lt;br/&gt;&lt;b&gt;Этот контентный файл не может быть отключен, потому что он является частью OpenMW.&lt;/b&gt;&lt;br/&gt;</translation>
+        <translation>&lt;br/&gt;&lt;b&gt;Этот файл данных не может быть отключен, потому что он является частью OpenMW.&lt;/b&gt;&lt;br/&gt;</translation>
     </message>
     <message>
         <source>&lt;br/&gt;&lt;b&gt;This content file cannot be disabled because it is enabled in a config file other than the user one.&lt;/b&gt;&lt;br/&gt;</source>
-        <translation>&lt;br/&gt;&lt;b&gt;Этот контентный файл не может быть отключен, потому что он включен в конфигурационном файле, не являющемся пользовательским.&lt;/b&gt;&lt;br/&gt;</translation>
+        <translation>&lt;br/&gt;&lt;b&gt;Этот файл данных не может быть отключен, потому что он включен в файле с настройками, не являющемся пользовательским.&lt;/b&gt;&lt;br/&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;This file is specified in a non-user config file, but does not exist in the VFS.&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Этот файл указан в непользовательском файле настроек, но не существует в виртуальной файловой системе.&lt;/b&gt;</translation>
     </message>
 </context>
 <context>

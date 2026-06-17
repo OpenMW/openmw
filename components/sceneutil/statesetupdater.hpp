@@ -79,8 +79,8 @@ namespace SceneUtil
 
         META_Object(SceneUtil, CompositeStateSetUpdater)
 
-        unsigned int getNumControllers();
-        StateSetUpdater* getController(int i);
+        size_t getNumControllers();
+        StateSetUpdater* getController(size_t i);
 
         void addController(StateSetUpdater* ctrl);
 

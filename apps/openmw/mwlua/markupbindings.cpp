@@ -14,17 +14,17 @@ namespace MWLua
 {
     sol::table initMarkupPackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table api(lua, sol::create);
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        api["loadYaml"] = [lua = context.mLua, vfs](std::string_view fileName) {
+        api["loadYaml"] = [lua, vfs](std::string_view fileName) {
             Files::IStreamPtr file = vfs->get(VFS::Path::Normalized(fileName));
-            return LuaUtil::loadYaml(*file, lua->sol());
+            return LuaUtil::loadYaml(*file, lua);
         };
-        api["decodeYaml"] = [lua = context.mLua](std::string_view inputData) {
-            return LuaUtil::loadYaml(std::string(inputData), lua->sol());
-        };
+        api["decodeYaml"]
+            = [lua](std::string_view inputData) { return LuaUtil::loadYaml(std::string(inputData), lua); };
 
         return LuaUtil::makeReadOnly(api);
     }

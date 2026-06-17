@@ -16,11 +16,14 @@ namespace CSVRender
         Mask mMask;
 
     public:
-        TagBase(Mask mask);
+        explicit TagBase(Mask mask)
+            : mMask(mask)
+        {
+        }
 
-        Mask getMask() const;
+        Mask getMask() const { return mMask; }
 
-        virtual QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const;
+        virtual QString getToolTip(bool hideBasics, const WorldspaceHitResult& hit) const { return {}; }
     };
 }
 

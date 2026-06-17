@@ -5,7 +5,7 @@
 
 namespace MWLua
 {
-    sol::table initCameraPackage(sol::state_view& lua);
+    sol::table initCameraPackage(sol::state_view lua);
 }
 
 #endif // MWLUA_CAMERABINDINGS_H

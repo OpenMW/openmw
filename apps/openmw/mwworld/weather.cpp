@@ -1,5 +1,6 @@
 #include "weather.hpp"
 
+#include <components/esm/stringrefid.hpp>
 #include <components/settings/values.hpp>
 
 #include <components/misc/rng.hpp>
@@ -141,9 +142,12 @@ namespace MWWorld
         return direction;
     }
 
-    Weather::Weather(const std::string& name, float stormWindSpeed, float rainSpeed, float dlFactor, float dlOffset,
-        const std::string& particleEffect)
-        : mCloudTexture(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture"))
+    Weather::Weather(ESM::RefId id, int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
+        float dlFactor, float dlOffset, const std::string& particleEffect)
+        : mId(id)
+        , mScriptId(scriptId)
+        , mName(name)
+        , mCloudTexture(Fallback::Map::getString("Weather_" + name + "_Cloud_Texture"))
         , mSkyColor(Fallback::Map::getColour("Weather_" + name + "_Sky_Sunrise_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Day_Color"),
               Fallback::Map::getColour("Weather_" + name + "_Sky_Sunset_Color"),
@@ -171,7 +175,7 @@ namespace MWWorld
         , mIsStorm(mWindSpeed > stormWindSpeed)
         , mRainSpeed(rainSpeed)
         , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
-        , mRainMaxRaindrops(Fallback::Map::getFloat("Weather_" + name + "_Max_Raindrops"))
+        , mRainMaxRaindrops(Fallback::Map::getInt("Weather_" + name + "_Max_Raindrops"))
         , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
         , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
         , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
@@ -302,15 +306,20 @@ namespace MWWorld
         return state;
     }
 
-    void RegionWeather::setChances(const std::vector<uint8_t>& chances)
+    void RegionWeather::setChances(std::span<const uint8_t> chances)
     {
-        mChances = chances;
+        mChances.assign(chances.begin(), chances.end());
 
         // Regional weather no longer supports the current type, select a new weather pattern.
         if ((static_cast<size_t>(mWeather) >= mChances.size()) || (mChances[mWeather] == 0))
         {
             chooseNewWeather();
         }
+    }
+
+    std::span<const uint8_t> RegionWeather::getChances() const
+    {
+        return mChances;
     }
 
     void RegionWeather::setWeather(int weatherID)
@@ -352,6 +361,30 @@ namespace MWWorld
         mWeather = 0;
     }
 
+    MoonModel::MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish,
+        float axisOffset, float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle,
+        float moonShadowEarlyFadeAngle)
+    {
+        mFadeInStart = fadeInStart;
+        mFadeInFinish = fadeInFinish;
+        mFadeOutStart = fadeOutStart;
+        mFadeOutFinish = fadeOutFinish;
+        mAxisOffset = axisOffset;
+        mDailyIncrement = dailyIncrement;
+        mFadeStartAngle = fadeStartAngle;
+        mFadeEndAngle = fadeEndAngle;
+        mMoonShadowEarlyFadeAngle = moonShadowEarlyFadeAngle;
+
+        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
+        // complete a full rotation in a single 24-hour period. The reverse-engineered formula is
+        // 180 degrees (full hemisphere) / 23 hours / 15 degrees (1 hour travel at speed 1.0).
+        mSpeed = std::max(speed, (180.0f / 23.0f / 15.0f));
+
+        // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
+        // the moon would increment more than an entire rotation in a single day.
+        mDailyIncrement = std::fmod(mDailyIncrement, 24.0f);
+    }
+
     MoonModel::MoonModel(const std::string& name)
         : mFadeInStart(Fallback::Map::getFloat("Moons_" + name + "_Fade_In_Start"))
         , mFadeInFinish(Fallback::Map::getFloat("Moons_" + name + "_Fade_In_Finish"))
@@ -364,14 +397,19 @@ namespace MWWorld
         , mFadeEndAngle(Fallback::Map::getFloat("Moons_" + name + "_Fade_End_Angle"))
         , mMoonShadowEarlyFadeAngle(Fallback::Map::getFloat("Moons_" + name + "_Moon_Shadow_Early_Fade_Angle"))
     {
-        // Morrowind appears to have a minimum speed in order to avoid situations where the moon couldn't conceivably
-        // complete a rotation in a single 24 hour period. The value of 180/23 was deduced from reverse engineering.
-        mSpeed = std::min(mSpeed, 180.0f / 23.0f);
+        // Morrowind appears to have a minimum speed to avoid situations where the moon can't
+        // complete a full rotation in a single 24-hour period. The reverse-engineered formula is
+        // 180 degrees (full hemisphere) / 23 hours / 15 degrees (1 hour travel at speed 1.0).
+        mSpeed = std::max(mSpeed, (180.0f / 23.0f / 15.0f));
+
+        // Morrowind appears to reduce mDailyIncrement with modulo 24.0f to avoid situations where
+        // the moon would increment more than an entire rotation in a single day.
+        mDailyIncrement = std::fmod(mDailyIncrement, 24.0f);
     }
 
     MWRender::MoonState MoonModel::calculateState(const TimeStamp& gameTime) const
     {
-        float rotationFromHorizon = angle(gameTime);
+        float rotationFromHorizon = angle(gameTime.getDay(), gameTime.getHour());
         MWRender::MoonState state = { rotationFromHorizon,
             mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
             phase(gameTime), shadowBlend(rotationFromHorizon),
@@ -380,7 +418,7 @@ namespace MWWorld
         return state;
     }
 
-    inline float MoonModel::angle(const TimeStamp& gameTime) const
+    inline float MoonModel::angle(int gameDay, float gameHour) const
     {
         // Morrowind's moons start travel on one side of the horizon (let's call it H-rise) and travel 180 degrees to
         // the opposite horizon (let's call it H-set). Upon reaching H-set, they reset to H-rise until the next moon
@@ -390,49 +428,83 @@ namespace MWWorld
         // 1. Moon rises and then sets in one day.
         // 2. Moon sets and doesn't rise in one day (occurs when the moon rise hour is >= 24).
         // 3. Moon sets and then rises in one day.
-        float moonRiseHourToday = moonRiseHour(gameTime.getDay());
-        float moonRiseAngleToday = 0;
+        float moonRiseHourToday = moonRiseHour(gameDay);
+        float moonRiseAngleToday = 0.0f;
 
-        if (gameTime.getHour() < moonRiseHourToday)
+        if (gameHour < moonRiseHourToday)
         {
-            float moonRiseHourYesterday = moonRiseHour(gameTime.getDay() - 1);
-            if (moonRiseHourYesterday < 24)
+            // Rise hour increases by mDailyIncrement each day, so yesterday's is easy to calculate
+            float moonRiseHourYesterday = moonRiseHourToday - mDailyIncrement;
+            if (moonRiseHourYesterday < 24.0f)
             {
-                float moonRiseAngleYesterday = rotation(24 - moonRiseHourYesterday);
-                if (moonRiseAngleYesterday < 180)
+                // Morrowind offsets the increment by -1 when the previous day's visible point crosses into the next
+                // day. The offset lasts from this point until the next 24-day loop starts. To find this point we add
+                // mDailyIncrement to the previous visible point and check the result.
+                float moonShadowEarlyFadeAngle1 = mFadeEndAngle - mMoonShadowEarlyFadeAngle;
+                float timeToVisible = moonShadowEarlyFadeAngle1 / rotation(1.0f);
+                float cycleOffset = moonRiseHourYesterday + timeToVisible > 24.0f ? mDailyIncrement : 0.0f;
+
+                float moonRiseAngleYesterday = rotation(24.0f - (moonRiseHourYesterday + cycleOffset));
+                if (moonRiseAngleYesterday < 180.0f)
                 {
                     // The moon rose but did not set yesterday, so accumulate yesterday's angle with how much we've
                     // travelled today.
-                    moonRiseAngleToday = rotation(gameTime.getHour()) + moonRiseAngleYesterday;
+                    moonRiseAngleToday = rotation(gameHour) + moonRiseAngleYesterday;
                 }
             }
         }
         else
         {
-            moonRiseAngleToday = rotation(gameTime.getHour() - moonRiseHourToday);
+            moonRiseAngleToday = rotation(gameHour - moonRiseHourToday);
         }
 
-        if (moonRiseAngleToday >= 180)
+        if (moonRiseAngleToday >= 180.0f)
         {
             // The moon set today, reset the angle to the horizon.
-            moonRiseAngleToday = 0;
+            moonRiseAngleToday = 0.0f;
         }
 
         return moonRiseAngleToday;
     }
 
-    inline float MoonModel::moonRiseHour(unsigned int daysPassed) const
+    inline float MoonModel::moonPhaseHour(int gameDay) const
     {
+        // Morrowind delays moon phase changes until one of these is true:
+        //   * The moon is invisible at midnight.
+        //   * The moon reached moonShadowEarlyFadeAngle2 one daily increment ago (therefore invisible).
+        if (!isVisible(gameDay, 0.0f))
+            return 0.0f;
+        else
+        {
+            // Calculate the angle at which the moon becomes transparent and the starting angle.
+            float moonShadowEarlyFadeAngle2 = (180.0f - mFadeEndAngle) + mMoonShadowEarlyFadeAngle;
+            float midnightAngle = angle(gameDay, 0.0f);
+
+            // We can assume that moonShadowEarlyFadeAngle2 > midnightAngle, because the opposite
+            // case would make the moon invisible at midnight, which is checked above.
+            return ((moonShadowEarlyFadeAngle2 - midnightAngle) / rotation(1.0f)) + std::max(mDailyIncrement, 0.0f);
+        }
+    }
+
+    inline float MoonModel::moonRiseHour(int gameDay) const
+    {
+        if (mDailyIncrement == 0.0f)
+            return 0.0f;
+
         // This arises from the start date of 16 Last Seed, 427
         // TODO: Find an alternate formula that doesn't rely on this day being fixed.
-        static const unsigned int startDay = 16;
+        constexpr int startDay = 16;
+
+        // This formula finds the number of missed increments necessary to make the rise hour a 24-day loop.
+        // The offset increases on the first day of the loop and is multiplied by the number of completed loops.
+        float incrementOffset = (24.0f - std::abs(24.0f / mDailyIncrement)) * std::floor((gameDay + startDay) / 24.0f);
 
         // This odd formula arises from the fact that on 16 Last Seed, 17 increments have occurred, meaning
         // that upon starting a new game, it must only calculate the moon phase as far back as 1 Last Seed.
         // Note that we don't modulo after adding the latest daily increment because other calculations need to
         // know if doing so would cause the moon rise to be postponed until the next day (which happens when
         // the moon rise hour is >= 24 in Morrowind).
-        return mDailyIncrement + std::fmod((daysPassed - 1 + startDay) * mDailyIncrement, 24.0f);
+        return mDailyIncrement + std::fmod((gameDay - 1 + startDay - incrementOffset) * mDailyIncrement, 24.0f);
     }
 
     inline float MoonModel::rotation(float hours) const
@@ -449,10 +521,16 @@ namespace MWWorld
         // phase cycle.
 
         // If the moon didn't rise yet today, use yesterday's moon phase.
-        if (gameTime.getHour() < moonRiseHour(gameTime.getDay()))
+        if (gameTime.getHour() < moonPhaseHour(gameTime.getDay()))
             return static_cast<MWRender::MoonState::Phase>((gameTime.getDay() / 3) % 8);
         else
             return static_cast<MWRender::MoonState::Phase>(((gameTime.getDay() + 1) / 3) % 8);
+    }
+
+    inline bool MoonModel::isVisible(int gameDay, float gameHour) const
+    {
+        // Moons are "visible" when their alpha value is non-zero.
+        return hourlyAlpha(gameHour) > 0.f && earlyMoonShadowAlpha(angle(gameDay, gameHour)) > 0.f;
     }
 
     inline float MoonModel::shadowBlend(float angle) const
@@ -480,6 +558,10 @@ namespace MWWorld
 
     inline float MoonModel::hourlyAlpha(float gameHour) const
     {
+        // Morrowind culls the moon one minute before mFadeOutFinish
+        constexpr float oneMinute = 0.0167f;
+        float adjustedFadeOutFinish = mFadeOutFinish - oneMinute;
+
         // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
         // appears and disappears.
         // Depending on the current hour, the following values describe how transparent the moon is.
@@ -487,9 +569,9 @@ namespace MWWorld
         // 2. From Fade Out Finish to Fade In Start: 0 (transparent)
         // 3. From Fade In Start to Fade In Finish: 0..1
         // 4. From Fade In Finish to Fade Out Start: 1 (solid)
-        if ((gameHour >= mFadeOutStart) && (gameHour < mFadeOutFinish))
-            return (mFadeOutFinish - gameHour) / (mFadeOutFinish - mFadeOutStart);
-        else if ((gameHour >= mFadeOutFinish) && (gameHour < mFadeInStart))
+        if ((gameHour >= mFadeOutStart) && (gameHour < adjustedFadeOutFinish))
+            return (adjustedFadeOutFinish - gameHour) / (adjustedFadeOutFinish - mFadeOutStart);
+        else if ((gameHour >= adjustedFadeOutFinish) && (gameHour < mFadeInStart))
             return 0.0f;
         else if ((gameHour >= mFadeInStart) && (gameHour < mFadeInFinish))
             return (gameHour - mFadeInStart) / (mFadeInFinish - mFadeInStart);
@@ -603,6 +685,41 @@ namespace MWWorld
         stopSounds();
     }
 
+    const Weather* WeatherManager::getWeather(size_t index) const
+    {
+        if (index < mWeatherSettings.size())
+            return &mWeatherSettings[index];
+
+        return nullptr;
+    }
+
+    const Weather* WeatherManager::getWeather(const ESM::RefId& id) const
+    {
+        auto it = std::find_if(
+            mWeatherSettings.begin(), mWeatherSettings.end(), [id](const auto& weather) { return weather.mId == id; });
+
+        if (it != mWeatherSettings.end())
+            return &*it;
+
+        return nullptr;
+    }
+
+    void WeatherManager::changeWeather(const ESM::RefId& regionID, const ESM::RefId& weatherID)
+    {
+        auto wIt = std::find_if(mWeatherSettings.begin(), mWeatherSettings.end(),
+            [weatherID](const auto& weather) { return weather.mId == weatherID; });
+
+        if (wIt != mWeatherSettings.end())
+        {
+            auto rIt = mRegions.find(regionID);
+            if (rIt != mRegions.end())
+            {
+                rIt->second.setWeather(wIt->mScriptId);
+                regionalWeatherChanged(rIt->first, rIt->second);
+            }
+        }
+    }
+
     void WeatherManager::changeWeather(const ESM::RefId& regionID, const unsigned int weatherID)
     {
         // In Morrowind, this seems to have the following behavior, when applied to the current region:
@@ -625,7 +742,7 @@ namespace MWWorld
         }
     }
 
-    void WeatherManager::modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances)
+    void WeatherManager::modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:
@@ -641,6 +758,14 @@ namespace MWWorld
             it->second.setChances(chances);
             regionalWeatherChanged(it->first, it->second);
         }
+    }
+
+    std::span<const uint8_t> WeatherManager::getRegionChances(const ESM::RefId& regionID) const
+    {
+        auto it = mRegions.find(regionID);
+        if (it != mRegions.end())
+            return it->second.getChances();
+        return {};
     }
 
     void WeatherManager::playerTeleported(const ESM::RefId& playerRegion, bool isExterior)
@@ -746,12 +871,12 @@ namespace MWWorld
             if (mTimeSettings.mNightStart < mSunriseTime)
                 adjustedNightStart += 24.f;
 
-            const bool is_night = adjustedHour >= adjustedNightStart;
+            const bool isNight = adjustedHour >= adjustedNightStart;
             const float dayDuration = adjustedNightStart - mSunriseTime;
             const float nightDuration = 24.f - dayDuration;
 
             float orbit;
-            if (!is_night)
+            if (!isNight)
             {
                 float t = (adjustedHour - mSunriseTime) / dayDuration;
                 orbit = 1.f - 2.f * t;
@@ -765,7 +890,7 @@ namespace MWWorld
             // Hardcoded constant from Morrowind
             const osg::Vec3f sunDir(-400.f * orbit, 75.f, -100.f);
             mRendering.setSunDirection(sunDir);
-            mRendering.setNight(is_night);
+            mRendering.setNight(isNight);
         }
 
         float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings, "Fog");
@@ -869,7 +994,7 @@ namespace MWWorld
     {
         // In Morrowind, when the player sleeps/waits, serves jail time, travels, or trains, all weather transitions are
         // immediately applied, regardless of whatever transition time might have been remaining.
-        mTimePassed += hours;
+        mTimePassed += static_cast<float>(hours);
         mFastForward = !incremental ? true : mFastForward;
     }
 
@@ -980,10 +1105,11 @@ namespace MWWorld
         const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect)
     {
         static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->mValue.getFloat();
+        ESM::StringRefId id(name);
+        Weather weather(id, static_cast<int>(mWeatherSettings.size()), name, fStromWindSpeed, mRainSpeed, dlFactor,
+            dlOffset, particleEffect);
 
-        Weather weather(name, fStromWindSpeed, mRainSpeed, dlFactor, dlOffset, particleEffect);
-
-        mWeatherSettings.push_back(weather);
+        mWeatherSettings.push_back(std::move(weather));
     }
 
     inline void WeatherManager::importRegions()

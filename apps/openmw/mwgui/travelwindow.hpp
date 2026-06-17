@@ -24,14 +24,14 @@ namespace MWGui
     protected:
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
-        MyGUI::TextBox* mDestinations;
-        MyGUI::TextBox* mSelect;
+
+        std::vector<MyGUI::Button*> mDestinationButtons;
 
         MyGUI::ScrollView* mDestinationsView;
 
-        void onCancelButtonClicked(MyGUI::Widget* _sender);
-        void onTravelButtonClick(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onCancelButtonClicked(MyGUI::Widget* sender);
+        void onTravelButtonClick(MyGUI::Widget* sender);
+        void onMouseWheel(MyGUI::Widget* sender, int rel);
         void addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior);
         void clearDestinations();
         int mCurrentY;
@@ -39,6 +39,10 @@ namespace MWGui
         void updateLabels();
 
         void onReferenceUnavailable() override;
+
+    private:
+        bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
+        size_t mControllerFocus = 0;
     };
 }
 

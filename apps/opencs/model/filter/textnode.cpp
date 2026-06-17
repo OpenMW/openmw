@@ -34,11 +34,11 @@ bool CSMFilter::TextNode::test(const CSMWorld::IdTableBase& table, int row, cons
 
     QString string;
 
-    if (data.type() == QVariant::String)
+    if (data.typeId() == QMetaType::QString)
     {
         string = data.toString();
     }
-    else if ((data.type() == QVariant::Int || data.type() == QVariant::UInt)
+    else if ((data.typeId() == QMetaType::Int || data.typeId() == QMetaType::UInt)
         && CSMWorld::Columns::hasEnums(static_cast<CSMWorld::Columns::ColumnId>(mColumnId)))
     {
         int value = data.toInt();
@@ -49,7 +49,7 @@ bool CSMFilter::TextNode::test(const CSMWorld::IdTableBase& table, int row, cons
         if (value >= 0 && value < static_cast<int>(enums.size()))
             string = QString::fromUtf8(enums[value].second.c_str());
     }
-    else if (data.type() == QVariant::Bool)
+    else if (data.typeId() == QMetaType::Bool)
     {
         string = data.toBool() ? "true" : "false";
     }

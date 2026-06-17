@@ -1,19 +1,19 @@
 ControlsPage: "OpenMW : Contrôles"
-ControlsPageDescription: "Paramètres additionnels de contrôle"
+ControlsPageDescription: "Paramètres additionnels des contrôles d'OpenMW"
 
 MovementSettings: "Mouvements"
 
 alwaysRun: "Course permanente"
 alwaysRunDescription: |
-    Actif : Le personnage se déplace par défaut en courant ; \n\n
-    Inactif : Le personnage se déplace par défaut en marchant.\n\n
-    La touche Maj.  inverse temporairement ce paramètre.\n\n
+    Actif : Le personnage se déplace par défaut en courant ;
+    Inactif : Le personnage se déplace par défaut en marchant.
+    La touche Maj.  inverse temporairement ce paramètre.
     La touche Verr Maj inverse ce paramètre lorsqu'elle est verrouillée.
 
 toggleSneak: "Mode discrétion maintenu"
 toggleSneakDescription: |
-    Une simple pression de la touche associée (Ctrl par défaut) active le mode discrétion, une seconde pression désactive le mode discrétion.\n\n
-    Il n'est plus nécessaire de maintenir une touche appuyée pour que le mode discrétion soit actif.\n\n
+    Une simple pression de la touche associée (Ctrl par défaut) active le mode discrétion, une seconde pression désactive le mode discrétion.
+    Il n'est plus nécessaire de maintenir une touche appuyée pour que le mode discrétion soit actif.
     Certains joueurs ayant une utilisation intensive du mode discrétion considèrent qu'il est plus aisé de contrôler leur personnage ainsi.
 
 smoothControllerMovement: "Mouvements à la manette adoucis"

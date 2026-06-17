@@ -265,10 +265,6 @@ bool MWDialogue::Filter::testFunctionLocal(const MWDialogue::SelectWrapper& sele
 
 bool MWDialogue::Filter::testSelectStruct(const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && (mActor.getType() != ESM::NPC::sRecordId))
-        // If the actor is a creature, we pass all conditions only applicable to NPCs.
-        return true;
-
     if (select.getFunction() == ESM::DialogueCondition::Function_Choice && mChoice == -1)
         // If not currently in a choice, we reject all conditions that test against choices.
         return false;
@@ -305,9 +301,13 @@ bool MWDialogue::Filter::testSelectStructNumeric(const SelectWrapper& select) co
     switch (select.getFunction())
     {
         case ESM::DialogueCondition::Function_Global:
-
+        {
+            const auto& world = MWBase::Environment::get().getWorld();
+            if (world->getGlobalVariableType(select.getName()) == ' ')
+                return true; // ignore this filter if the global doesn't exist
             // internally all globals are float :(
-            return select.selectCompare(MWBase::Environment::get().getWorld()->getGlobalFloat(select.getName()));
+            return select.selectCompare(world->getGlobalFloat(select.getName()));
+        }
 
         case ESM::DialogueCondition::Function_Local:
         {
@@ -400,7 +400,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
         case ESM::DialogueCondition::Function_PcLuck:
         {
             ESM::RefId attribute = ESM::Attribute::indexToRefId(select.getArgument());
-            return player.getClass().getCreatureStats(player).getAttribute(attribute).getModified();
+            return static_cast<int>(player.getClass().getCreatureStats(player).getAttribute(attribute).getModified());
         }
         case ESM::DialogueCondition::Function_PcBlock:
         case ESM::DialogueCondition::Function_PcArmorer:
@@ -426,7 +426,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
         case ESM::DialogueCondition::Function_PcLightArmor:
         case ESM::DialogueCondition::Function_PcShortBlade:
         case ESM::DialogueCondition::Function_PcMarksman:
-        case ESM::DialogueCondition::Function_PcMerchantile:
+        case ESM::DialogueCondition::Function_PcMercantile:
         case ESM::DialogueCondition::Function_PcSpeechcraft:
         case ESM::DialogueCondition::Function_PcHandToHand:
         {
@@ -501,10 +501,11 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
         case ESM::DialogueCondition::Function_Weather:
 
-            return MWBase::Environment::get().getWorld()->getCurrentWeather();
+            return MWBase::Environment::get().getWorld()->getCurrentWeatherScriptId();
 
         case ESM::DialogueCondition::Function_Reputation:
-
+            if (!mActor.getClass().isNpc())
+                return 0;
             return mActor.getClass().getNpcStats(mActor).getReputation();
 
         case ESM::DialogueCondition::Function_FactionRankDifference:
@@ -586,11 +587,11 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case ESM::DialogueCondition::Function_NotClass:
 
-            return mActor.get<ESM::NPC>()->mBase->mClass != select.getId();
+            return !mActor.getClass().isNpc() || mActor.get<ESM::NPC>()->mBase->mClass != select.getId();
 
         case ESM::DialogueCondition::Function_NotRace:
 
-            return mActor.get<ESM::NPC>()->mBase->mRace != select.getId();
+            return !mActor.getClass().isNpc() || mActor.get<ESM::NPC>()->mBase->mRace != select.getId();
 
         case ESM::DialogueCondition::Function_NotCell:
         {
@@ -598,12 +599,14 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
             return !Misc::StringUtils::ciStartsWith(actorCell, select.getCellName());
         }
         case ESM::DialogueCondition::Function_SameSex:
-
+            if (!mActor.getClass().isNpc())
+                return false;
             return (player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female)
                 == (mActor.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female);
 
         case ESM::DialogueCondition::Function_SameRace:
-
+            if (!mActor.getClass().isNpc())
+                return false;
             return mActor.get<ESM::NPC>()->mBase->mRace == player.get<ESM::NPC>()->mBase->mRace;
 
         case ESM::DialogueCondition::Function_SameFaction:
@@ -668,7 +671,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case ESM::DialogueCondition::Function_Werewolf:
 
-            return mActor.getClass().getNpcStats(mActor).isWerewolf();
+            return mActor.getClass().isNpc() && mActor.getClass().getNpcStats(mActor).isWerewolf();
 
         default:
 
@@ -705,7 +708,7 @@ bool MWDialogue::Filter::hasFactionRankReputationRequirements(
 
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
-    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReaction;
+    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReputation;
 }
 
 MWDialogue::Filter::Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)

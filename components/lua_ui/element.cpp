@@ -2,6 +2,7 @@
 
 #include <MyGUI_Gui.h>
 
+#include "components/settings/values.hpp"
 #include "content.hpp"
 #include "util.hpp"
 #include "widget.hpp"
@@ -20,6 +21,10 @@ namespace LuaUi
             constexpr std::string_view events = "events";
             constexpr std::string_view content = "content";
             constexpr std::string_view external = "external";
+            constexpr std::string_view userData = "userData";
+
+            const std::vector<std::string_view> allKeys
+                = { type, name, layer, templateLayout, props, events, content, external, userData };
         }
 
         const std::string defaultWidgetType = "LuaWidget";
@@ -49,14 +54,6 @@ namespace LuaUi
             MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
         }
 
-        void destroyChild(WidgetExtension* ext)
-        {
-            if (!ext->isRoot())
-                destroyWidget(ext);
-            else
-                ext->detachFromParent();
-        }
-
         void detachElements(WidgetExtension* ext)
         {
             auto predicate = [](WidgetExtension* child) {
@@ -67,6 +64,17 @@ namespace LuaUi
             };
             ext->detachChildrenIf(predicate);
             ext->detachTemplateChildrenIf(predicate);
+        }
+
+        void destroyChild(WidgetExtension* ext)
+        {
+            if (!ext->isRoot())
+            {
+                detachElements(ext);
+                destroyWidget(ext);
+            }
+            else
+                ext->detachFromParent();
         }
 
         void destroyRoot(WidgetExtension* ext)
@@ -113,6 +121,7 @@ namespace LuaUi
             ContentView content(LuaUtil::cast<sol::table>(contentObj));
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
+            std::vector<WidgetExtension*> toDestroy;
             for (size_t i = 0; i < minSize; i++)
             {
                 WidgetExtension* ext = children[i];
@@ -121,7 +130,7 @@ namespace LuaUi
                 {
                     WidgetExtension* root = pluckElementRoot(child, depth);
                     if (ext != root)
-                        destroyChild(ext);
+                        toDestroy.emplace_back(ext);
                     result[i] = root;
                 }
                 else
@@ -133,14 +142,12 @@ namespace LuaUi
                     }
                     else
                     {
-                        destroyChild(ext);
+                        toDestroy.emplace_back(ext);
                         ext = createWidget(newLayout, false, depth);
                     }
                     result[i] = ext;
                 }
             }
-            for (size_t i = minSize; i < children.size(); i++)
-                destroyChild(children[i]);
             for (size_t i = minSize; i < content.size(); i++)
             {
                 sol::object child = content.at(i);
@@ -149,6 +156,11 @@ namespace LuaUi
                 else
                     result[i] = createWidget(child.as<sol::table>(), false, depth);
             }
+            // Don't destroy anything until element creation has had a chance to throw
+            for (size_t i = minSize; i < children.size(); i++)
+                destroyChild(children[i]);
+            for (WidgetExtension* ext : toDestroy)
+                destroyChild(ext);
             return result;
         }
 
@@ -217,7 +229,9 @@ namespace LuaUi
         std::string setLayer(WidgetExtension* ext, const sol::table& layout)
         {
             MyGUI::ILayer* layerNode = ext->widget()->getLayer();
-            std::string currentLayer = layerNode ? layerNode->getName() : std::string();
+            std::string_view currentLayer;
+            if (layerNode)
+                currentLayer = layerNode->getName();
             std::string newLayer = layout.get_or(LayoutKeys::layer, std::string());
             if (!newLayer.empty() && !MyGUI::LayerManager::getInstance().isExist(newLayer))
                 throw std::logic_error(std::string("Layer ") + newLayer + " doesn't exist");
@@ -232,17 +246,21 @@ namespace LuaUi
     std::map<Element*, std::shared_ptr<Element>> Element::sMenuElements;
     std::map<Element*, std::shared_ptr<Element>> Element::sGameElements;
 
-    Element::Element(sol::table layout)
+    Element::Element(sol::table layout, sol::optional<sol::table> options)
         : mRoot(nullptr)
         , mLayout(std::move(layout))
         , mLayer()
         , mState(Element::New)
     {
+        if (options.has_value())
+        {
+            mNoWarnUnused = options->get_or("noWarnUnused", false);
+        }
     }
 
-    std::shared_ptr<Element> Element::make(sol::table layout, bool menu)
+    std::shared_ptr<Element> Element::make(sol::table layout, bool menu, sol::optional<sol::table> options)
     {
-        std::shared_ptr<Element> ptr(new Element(std::move(layout)));
+        std::shared_ptr<Element> ptr(new Element(std::move(layout), std::move(options)));
         auto& container = menu ? sMenuElements : sGameElements;
         container[ptr.get()] = ptr;
         return ptr;
@@ -255,6 +273,11 @@ namespace LuaUi
         sGameElements.erase(element);
     }
 
+    const std::vector<std::string_view>& Element::allLayoutProperties()
+    {
+        return LayoutKeys::allKeys;
+    }
+
     void Element::create(uint64_t depth)
     {
         if (mState == New)
@@ -264,6 +287,7 @@ namespace LuaUi
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
             mState = Created;
+            checkWarnings();
         }
     }
 
@@ -278,9 +302,21 @@ namespace LuaUi
                 WidgetExtension* parent = mRoot->getParent();
                 auto children = parent->children();
                 auto it = std::find(children.begin(), children.end(), mRoot);
-                mRoot = createWidget(layout(), true, 0);
                 assert(it != children.end());
-                *it = mRoot;
+                try
+                {
+                    mRoot = createWidget(layout(), true, 0);
+                    *it = mRoot;
+                }
+                catch (...)
+                {
+                    // Remove mRoot from its parent's children even if we couldn't replace it
+                    children.erase(it);
+                    parent->setChildren(children);
+                    mRoot = nullptr;
+                    mState = New;
+                    throw;
+                }
                 parent->setChildren(children);
                 mRoot->updateCoord();
             }
@@ -291,6 +327,7 @@ namespace LuaUi
             mLayer = setLayer(mRoot, layout());
             updateRootCoord(mRoot);
             mState = Created;
+            checkWarnings();
         }
     }
 
@@ -300,11 +337,41 @@ namespace LuaUi
         {
             if (mRoot != nullptr)
             {
+                // If someone decided to destroy an element used as another element's content, we need to detach it
+                // first so the parent doesn't end up holding a stale pointer
+                if (WidgetExtension* parent = mRoot->getParent())
+                    parent->detachChildrenIf([&](WidgetExtension* child) { return child == mRoot; });
                 destroyRoot(mRoot);
                 mRoot = nullptr;
             }
-            mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
+            mLayout.reset();
         }
         mState = Destroyed;
+    }
+
+    void Element::checkWarnings()
+    {
+        if (mNoWarnUnused)
+            // Currently unused warnings are our only warnings so we can just early out here.
+            return;
+
+        if (Settings::lua().mLuaDebug)
+        {
+            assert(mRoot);
+            WidgetExtension::Warnings warnings;
+            mRoot->collectWarnings(warnings, 0, true);
+            for (const auto& warning : warnings)
+                Log(Debug::Warning) << warning;
+        }
+        else if (!mWarnedOnce)
+        {
+            mWarnedOnce = true;
+            WidgetExtension::Warnings dummy;
+            if (mRoot->collectWarnings(dummy, 0, false))
+            {
+                Log(Debug::Warning) << "Warning generated while parsing layouts of a(n) " + mRoot->diagnosticName() + ". Set 'lua "
+                                       "debug=true' in the [Lua] section of settings.cfg to enable detailed warnings.";
+            }
+        }
     }
 }

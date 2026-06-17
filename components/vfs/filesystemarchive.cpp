@@ -20,7 +20,8 @@ namespace VFS
         if (prefix > 0 && str[prefix - 1] != '\\' && str[prefix - 1] != '/')
             ++prefix;
 
-        std::filesystem::recursive_directory_iterator iterator(mPath);
+        std::filesystem::recursive_directory_iterator iterator(
+            mPath, std::filesystem::directory_options::follow_directory_symlink);
 
         for (auto it = std::filesystem::begin(iterator), end = std::filesystem::end(iterator); it != end;)
         {
@@ -79,6 +80,16 @@ namespace VFS
     Files::IStreamPtr FileSystemArchiveFile::open()
     {
         return Files::openConstrainedFileStream(mPath);
+    }
+
+    std::filesystem::file_time_type FileSystemArchiveFile::getLastModified() const
+    {
+        return std::filesystem::last_write_time(mPath);
+    }
+
+    std::string FileSystemArchiveFile::getStem() const
+    {
+        return Files::pathToUnicodeString(mPath.stem());
     }
 
 }

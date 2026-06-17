@@ -2,11 +2,12 @@
 
 #include <apps/opencs/model/world/columnbase.hpp>
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/disabletag.hpp>
 #include <apps/opencs/model/world/land.hpp>
-#include <apps/opencs/model/world/landtexture.hpp>
 #include <apps/opencs/model/world/record.hpp>
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadmgef.hpp>
 
 #include <algorithm>
@@ -24,18 +25,7 @@ namespace CSMWorld
 
             std::string operator()(ESM::FormId value) const { return value.toString("FormId:"); }
 
-            std::string operator()(ESM::IndexRefId value) const
-            {
-                switch (value.getRecordType())
-                {
-                    case ESM::REC_MGEF:
-                        return std::string(ESM::MagicEffect::sIndexNames[value.getValue()]);
-                    default:
-                        break;
-                }
-
-                return value.toDebugString();
-            }
+            std::string operator()(ESM::IndexRefId value) const { return value.toDebugString(); }
 
             template <class T>
             std::string operator()(const T& value) const
@@ -45,36 +35,13 @@ namespace CSMWorld
         };
     }
 
-    /* LandTextureNicknameColumn */
-    LandTextureNicknameColumn::LandTextureNicknameColumn()
-        : Column<LandTexture>(Columns::ColumnId_TextureNickname, ColumnBase::Display_String)
-    {
-    }
-
-    QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
-    {
-        return QString::fromStdString(record.get().mId.toString());
-    }
-
-    void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)
-    {
-        LandTexture copy = record.get();
-        copy.mId = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
-        record.setModified(copy);
-    }
-
-    bool LandTextureNicknameColumn::isEditable() const
-    {
-        return true;
-    }
-
     /* LandTextureIndexColumn */
     LandTextureIndexColumn::LandTextureIndexColumn()
-        : Column<LandTexture>(Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
+        : Column<ESM::LandTexture>(Columns::ColumnId_TextureIndex, ColumnBase::Display_Integer)
     {
     }
 
-    QVariant LandTextureIndexColumn::get(const Record<LandTexture>& record) const
+    QVariant LandTextureIndexColumn::get(const Record<ESM::LandTexture>& record) const
     {
         return record.get().mIndex;
     }
@@ -100,22 +67,6 @@ namespace CSMWorld
         return false;
     }
 
-    /* LandTexturePluginIndexColumn */
-    LandTexturePluginIndexColumn::LandTexturePluginIndexColumn()
-        : Column<LandTexture>(Columns::ColumnId_PluginIndex, ColumnBase::Display_Integer, 0)
-    {
-    }
-
-    QVariant LandTexturePluginIndexColumn::get(const Record<LandTexture>& record) const
-    {
-        return record.get().mPluginIndex;
-    }
-
-    bool LandTexturePluginIndexColumn::isEditable() const
-    {
-        return false;
-    }
-
     /* LandNormalsColumn */
     LandNormalsColumn::LandNormalsColumn()
         : Column<Land>(Columns::ColumnId_LandNormalsIndex, ColumnBase::Display_String, 0)
@@ -124,14 +75,14 @@ namespace CSMWorld
 
     QVariant LandNormalsColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS * 3;
+        const int size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VNML))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mNormals[i];
         }
 
@@ -171,14 +122,14 @@ namespace CSMWorld
 
     QVariant LandHeightsColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS;
+        const int size = Land::LAND_NUM_VERTS;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VHGT))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mHeights[i];
         }
 
@@ -202,6 +153,8 @@ namespace CSMWorld
             copy.getLandData()->mHeights[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_HeightsNormals;
+
         record.setModified(copy);
     }
 
@@ -218,14 +171,17 @@ namespace CSMWorld
 
     QVariant LandColoursColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_VERTS * 3;
+        const int size = Land::LAND_NUM_VERTS * 3;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        // Missing VCLR should behave like default vertex colour (white),
+        // not black. This avoids newly created/undefined edge land turning dark
+        // when a single vertex edit writes the whole array back.
+        DataType values(size, 255);
 
         if (land.isDataLoaded(Land::DATA_VCLR))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mColours[i];
         }
 
@@ -249,6 +205,8 @@ namespace CSMWorld
             copy.getLandData()->mColours[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_Colors;
+
         record.setModified(copy);
     }
 
@@ -265,14 +223,14 @@ namespace CSMWorld
 
     QVariant LandTexturesColumn::get(const Record<Land>& record) const
     {
-        const int Size = Land::LAND_NUM_TEXTURES;
+        const int size = Land::LAND_NUM_TEXTURES;
         const Land& land = record.get();
 
-        DataType values(Size, 0);
+        DataType values(size, 0);
 
         if (land.isDataLoaded(Land::DATA_VTEX))
         {
-            for (int i = 0; i < Size; ++i)
+            for (int i = 0; i < size; ++i)
                 values[i] = land.getLandData()->mTextures[i];
         }
 
@@ -296,6 +254,8 @@ namespace CSMWorld
             copy.getLandData()->mTextures[i] = values[i];
         }
 
+        copy.mFlags |= Land::Flag_Textures;
+
         record.setModified(copy);
     }
 
@@ -316,7 +276,8 @@ namespace CSMWorld
         {
             return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
         }
-        return QVariant(QVariant::UserType);
+
+        return DisableTag::getVariant();
     }
 
     void BodyPartRaceColumn::set(Record<ESM::BodyPart>& record, const QVariant& data)

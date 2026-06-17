@@ -8,7 +8,6 @@
 #include <map>
 #include <memory>
 #include <optional>
-#include <string_view>
 #include <unordered_map>
 
 namespace DetourNavigator
@@ -28,9 +27,8 @@ namespace DetourNavigator
 
         void removeAgent(const AgentBounds& agentBounds) override;
 
-        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) override;
-
-        void updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard) override;
+        void updateBounds(ESM::RefId worldspace, const std::optional<CellGridBounds>& cellGridBounds,
+            const osg::Vec3f& playerPosition, const UpdateGuard* guard) override;
 
         void addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform,
             const UpdateGuard* guard) override;

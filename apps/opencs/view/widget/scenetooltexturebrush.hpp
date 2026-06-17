@@ -9,6 +9,8 @@
 #include "scenetool.hpp"
 #endif
 
+#include <components/esm/refid.hpp>
+
 class QTableWidget;
 class QDragEnterEvent;
 class QDropEvent;
@@ -70,7 +72,7 @@ namespace CSVWidget
     private:
         CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
         int mBrushSize = 1;
-        std::string mBrushTexture = "L0#0";
+        ESM::RefId mBrushTexture;
         CSMDoc::Document& mDocument;
         QLabel* mSelectedBrush;
         QGroupBox* mHorizontalGroupBox;
@@ -85,14 +87,14 @@ namespace CSVWidget
         friend class CSVRender::TerrainTextureMode;
 
     public slots:
-        void setBrushTexture(std::string brushTexture);
+        void setBrushTexture(ESM::RefId brushTexture);
         void setBrushShape();
         void setBrushSize(int brushSize);
 
     signals:
         void passBrushSize(int brushSize);
         void passBrushShape(CSVWidget::BrushShape brushShape);
-        void passTextureId(std::string brushTexture);
+        void passTextureId(ESM::RefId brushTexture);
     };
 
     class SceneToolTextureBrush : public SceneTool
@@ -103,7 +105,7 @@ namespace CSVWidget
         CSMDoc::Document& mDocument;
         QFrame* mPanel;
         QTableWidget* mTable;
-        std::vector<std::string> mBrushHistory;
+        std::vector<ESM::RefId> mBrushHistory;
         TextureBrushWindow* mTextureBrushWindow;
 
     private:
@@ -122,14 +124,14 @@ namespace CSVWidget
 
     public slots:
         void setButtonIcon(CSVWidget::BrushShape brushShape);
-        void updateBrushHistory(const std::string& mBrushTexture);
+        void updateBrushHistory(ESM::RefId mBrushTexture);
         void clicked(const QModelIndex& index);
         void activate() override;
 
     signals:
         void passEvent(QDropEvent* event);
         void passEvent(QDragEnterEvent* event);
-        void passTextureId(std::string brushTexture);
+        void passTextureId(ESM::RefId brushTexture);
     };
 }
 

@@ -36,6 +36,8 @@
 
 #include <components/files/conversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/scalableicon.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/timeconvert.hpp>
 #include <components/version/version.hpp>
 
@@ -140,13 +142,13 @@ void CSVDoc::View::setupEditMenu()
     mUndo = mDocument->getUndoStack().createUndoAction(this, tr("Undo"));
     setupShortcut("document-edit-undo", mUndo);
     connect(mUndo, &QAction::changed, this, &View::undoActionChanged);
-    mUndo->setIcon(QIcon(QString::fromStdString(":menu-undo")));
+    mUndo->setIcon(Misc::ScalableIcon::load(":menu-undo"));
     edit->addAction(mUndo);
 
     mRedo = mDocument->getUndoStack().createRedoAction(this, tr("Redo"));
     connect(mRedo, &QAction::changed, this, &View::redoActionChanged);
     setupShortcut("document-edit-redo", mRedo);
-    mRedo->setIcon(QIcon(QString::fromStdString(":menu-redo")));
+    mRedo->setIcon(Misc::ScalableIcon::load(":menu-redo"));
     edit->addAction(mRedo);
 
     QAction* userSettings = createMenuEntry("Preferences", ":menu-preferences", edit, "document-edit-preferences");
@@ -340,7 +342,7 @@ void CSVDoc::View::setupDebugMenu()
     QAction* runDebug = debug->addMenu(mGlobalDebugProfileMenu);
     runDebug->setText(tr("Run OpenMW"));
     setupShortcut("document-debug-run", runDebug);
-    runDebug->setIcon(QIcon(QString::fromStdString(":run-openmw")));
+    runDebug->setIcon(Misc::ScalableIcon::load(":run-openmw"));
 
     QAction* stopDebug = createMenuEntry("Stop OpenMW", ":stop-openmw", debug, "document-debug-shutdown");
     connect(stopDebug, &QAction::triggered, this, &View::stop);
@@ -374,7 +376,7 @@ QAction* CSVDoc::View::createMenuEntry(CSMWorld::UniversalId::Type type, QMenu* 
     setupShortcut(shortcutName, entry);
     const std::string iconName = CSMWorld::UniversalId(type).getIcon();
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 
@@ -387,7 +389,7 @@ QAction* CSVDoc::View::createMenuEntry(
     QAction* entry = new QAction(QString::fromStdString(title), this);
     setupShortcut(shortcutName, entry);
     if (!iconName.empty() && iconName != ":placeholder")
-        entry->setIcon(QIcon(QString::fromStdString(iconName)));
+        entry->setIcon(Misc::ScalableIcon::load(QString::fromStdString(iconName)));
 
     menu->addAction(entry);
 
@@ -657,13 +659,34 @@ void CSVDoc::View::addSubView(const CSMWorld::UniversalId& id, const std::string
     //
     mScrollbarOnly = windows["mainwindow-scrollbar"].toString() == "Scrollbar Only";
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    updateWidth(windows["grow-limit"].isTrue(), minWidth);
-#else
     updateWidth(true, minWidth);
-#endif
 
     mSubViewWindow.addDockWidget(Qt::TopDockWidgetArea, view);
+
+    // Horizontal orientation doesn't respect layout direction, so we need to move the new view
+    if (windows["subview-open-direction"].toString() == "Open Left" && mSubViews.size() > 1)
+    {
+        // Get list of top-area dock widget subviews sorted by coordinates
+        QList<SubView*> orderedTopViews;
+        for (const auto& windowView : mSubViews)
+            if (windowView != view && mSubViewWindow.dockWidgetArea(windowView) == Qt::TopDockWidgetArea)
+                orderedTopViews.append(windowView);
+        if (!orderedTopViews.isEmpty())
+        {
+            std::sort(orderedTopViews.begin(), orderedTopViews.end(), [](auto* a, auto* b) {
+                if (a->x() != b->x())
+                    return a->x() < b->x();
+                else if (a->y() != b->y())
+                    return a->y() < b->y();
+                return a->getUniversalId() < b->getUniversalId();
+            });
+
+            // Split twice to make the new view the leftmost.
+            // If the leftmost view is nested, the new view will be added above it.
+            mSubViewWindow.splitDockWidget(orderedTopViews[0], view, Qt::Orientation::Horizontal);
+            mSubViewWindow.splitDockWidget(view, orderedTopViews[0], Qt::Orientation::Horizontal);
+        }
+    }
 
     updateSubViewIndices();
 
@@ -708,7 +731,11 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 {
     if (mScroll)
     {
-        mScroll->horizontalScrollBar()->setValue(max);
+        CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
+        if (windows["subview-open-direction"].toString() == "Open Left")
+            mScroll->horizontalScrollBar()->setValue(min);
+        else
+            mScroll->horizontalScrollBar()->setValue(max);
 
         QObject::disconnect(mScroll->horizontalScrollBar(), &QScrollBar::rangeChanged, this, &View::moveScrollBarToEnd);
     }
@@ -1111,14 +1138,8 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
     QRect rect;
     if (isGrowLimit)
     {
-        // Widget position can be negative, we should clamp it.
-        QPoint position = pos();
-        if (position.x() <= 0)
-            position.setX(0);
-        if (position.y() <= 0)
-            position.setY(0);
-
-        rect = QApplication::screenAt(position)->geometry();
+        QScreen* screen = getWidgetScreen(pos());
+        rect = screen->geometry();
     }
     else
         rect = desktopRect();
@@ -1130,7 +1151,8 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
         if (newWidth + frameWidth <= rect.width())
         {
             resize(newWidth, height());
-            // WARNING: below code assumes that new subviews are added to the right
+            // WARNING: below code assumes that the frame geometry expands to the right.
+            // This doesn't conflict with subview-open-direction.
             if (x() > rect.width() - (newWidth + frameWidth))
                 move(rect.width() - (newWidth + frameWidth), y()); // shift left to stay within the screen
         }
@@ -1163,4 +1185,35 @@ void CSVDoc::View::onRequestFocus(const std::string& id)
     {
         addSubView(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Reference, id));
     }
+}
+
+QScreen* CSVDoc::View::getWidgetScreen(const QPoint& position)
+{
+    QScreen* screen = QApplication::screenAt(position);
+    if (screen)
+        return screen;
+
+    const QList<QScreen*> screens = QApplication::screens();
+    if (screens.isEmpty())
+        throw std::runtime_error("No screens available");
+
+    int closestDistance = std::numeric_limits<int>::max();
+    for (QScreen* candidate : screens)
+    {
+        const QRect geometry = candidate->geometry();
+        const int dx = position.x() - std::clamp(position.x(), geometry.left(), geometry.right());
+        const int dy = position.y() - std::clamp(position.y(), geometry.top(), geometry.bottom());
+        const int distance = dx * dx + dy * dy;
+
+        if (distance < closestDistance)
+        {
+            closestDistance = distance;
+            screen = candidate;
+        }
+    }
+
+    if (screen == nullptr)
+        screen = screens.first();
+
+    return screen;
 }

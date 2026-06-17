@@ -16,6 +16,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/terrain/terraingrid.hpp>
 
+#include "../../model/doc/document.hpp"
 #include "../../model/world/idtable.hpp"
 
 #include "cellarrow.hpp"
@@ -24,13 +25,15 @@
 #include "cellwater.hpp"
 #include "instancedragmodes.hpp"
 #include "mask.hpp"
-#include "object.hpp"
+#include "objectmarker.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
+#include "worldspacewidget.hpp"
 
 #include <apps/opencs/model/world/cell.hpp>
 #include <apps/opencs/model/world/cellcoordinates.hpp>
 #include <apps/opencs/model/world/columns.hpp>
+#include <apps/opencs/model/world/commands.hpp>
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/idcollection.hpp>
 #include <apps/opencs/model/world/land.hpp>
@@ -105,9 +108,6 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
             auto object = std::make_unique<Object>(mData, mCellNode, id, false);
 
-            if (mSubModeElementMask & Mask_Reference)
-                object->setSubMode(mSubMode);
-
             mObjects.insert(std::make_pair(id, object.release()));
             modified = true;
         }
@@ -130,40 +130,31 @@ void CSVRender::Cell::updateLand()
         return;
     }
 
-    // Setup land if available
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-    int landIndex = land.searchId(mId);
-    if (landIndex != -1 && !land.getRecord(mId).isDeleted())
+
+    if (land.getRecord(mId).isDeleted())
+        return;
+
+    const ESM::Land& esmLand = land.getRecord(mId).get();
+
+    if (mTerrain)
     {
-        const ESM::Land& esmLand = land.getRecord(mId).get();
-
-        if (esmLand.getLandData(ESM::Land::DATA_VHGT))
-        {
-            if (mTerrain)
-            {
-                mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
-                mTerrain->clearAssociatedCaches();
-            }
-            else
-            {
-                constexpr double expiryDelay = 0;
-                mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode, mData.getResourceSystem().get(),
-                    mTerrainStorage, Mask_Terrain, ESM::Cell::sDefaultWorldspaceId, expiryDelay);
-            }
-
-            mTerrain->loadCell(esmLand.mX, esmLand.mY);
-
-            if (!mCellBorder)
-                mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
-
-            mCellBorder->buildShape(esmLand);
-
-            return;
-        }
+        mTerrain->unloadCell(mCoordinates.getX(), mCoordinates.getY());
+        mTerrain->clearAssociatedCaches();
+    }
+    else
+    {
+        constexpr double expiryDelay = 0;
+        mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode, mData.getResourceSystem().get(),
+            mTerrainStorage, Mask_Terrain, ESM::Cell::sDefaultWorldspaceId, expiryDelay);
     }
 
-    // No land data
-    unloadLand();
+    mTerrain->loadCell(esmLand.mX, esmLand.mY);
+
+    if (!mCellBorder)
+        mCellBorder = std::make_unique<CellBorder>(mCellNode, mCoordinates);
+
+    mCellBorder->buildShape(esmLand);
 }
 
 void CSVRender::Cell::unloadLand()
@@ -175,13 +166,15 @@ void CSVRender::Cell::unloadLand()
         mCellBorder.reset();
 }
 
-CSVRender::Cell::Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted)
-    : mData(data)
+CSVRender::Cell::Cell(CSMDoc::Document& document, ObjectMarker* selectionMarker, osg::Group* rootNode,
+    const std::string& id, bool deleted, bool isExterior)
+    : mSelectionMarker(selectionMarker)
+    , mData(document.getData())
     , mId(ESM::RefId::stringRefId(id))
     , mDeleted(deleted)
     , mSubMode(0)
     , mSubModeElementMask(0)
-    , mUpdateLand(true)
+    , mUpdateLand(isExterior)
     , mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId(id);
@@ -207,7 +200,17 @@ CSVRender::Cell::Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::str
 
         addObjects(0, rows - 1);
 
-        updateLand();
+        if (mUpdateLand)
+        {
+            int landIndex = document.getData().getLand().searchId(mId);
+            if (landIndex == -1)
+            {
+                CSMWorld::IdTable& landTable
+                    = dynamic_cast<CSMWorld::IdTable&>(*mData.getTableModel(CSMWorld::UniversalId::Type_Land));
+                document.getUndoStack().push(new CSMWorld::CreateCommand(landTable, mId.getRefIdString()));
+            }
+            updateLand();
+        }
 
         mPathgrid = std::make_unique<Pathgrid>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
         mCellWater = std::make_unique<CellWater>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
@@ -462,7 +465,10 @@ void CSVRender::Cell::setSelection(int elementMask, Selection mode)
             }
 
             iter->second->setSelected(selected);
+            if (selected)
+                mSelectionMarker->addToSelectionHistory(iter->second->getReferenceId(), false);
         }
+        mSelectionMarker->updateSelectionMarker();
     }
     if (mPathgrid && elementMask & Mask_Pathgrid)
     {
@@ -502,8 +508,10 @@ void CSVRender::Cell::selectAllWithSameParentId(int elementMask)
         if (!iter->second->getSelected() && ids.find(iter->second->getReferenceableId()) != ids.end())
         {
             iter->second->setSelected(true);
+            mSelectionMarker->addToSelectionHistory(iter->second->getReferenceId(), false);
         }
     }
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::Cell::handleSelectDrag(Object* object, DragMode dragMode)
@@ -516,6 +524,9 @@ void CSVRender::Cell::handleSelectDrag(Object* object, DragMode dragMode)
 
     else if (dragMode == DragMode_Select_Invert)
         object->setSelected(!object->getSelected());
+
+    if (object->getSelected())
+        mSelectionMarker->addToSelectionHistory(object->getReferenceId(), false);
 }
 
 void CSVRender::Cell::selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode)
@@ -538,6 +549,8 @@ void CSVRender::Cell::selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3
             }
         }
     }
+
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::Cell::selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode)
@@ -551,6 +564,8 @@ void CSVRender::Cell::selectWithinDistance(const osg::Vec3d& point, float distan
         if (distanceFromObject < distance)
             handleSelectDrag(object.second, dragMode);
     }
+
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::Cell::setCellArrows(int mask)
@@ -621,9 +636,11 @@ void CSVRender::Cell::selectFromGroup(const std::vector<std::string>& group)
             if (objectName == object->getReferenceId())
             {
                 object->setSelected(true, osg::Vec4f(1, 0, 1, 1));
+                mSelectionMarker->addToSelectionHistory(object->getReferenceId(), false);
             }
         }
     }
+    mSelectionMarker->updateSelectionMarker();
 }
 
 void CSVRender::Cell::unhideAll()
@@ -669,8 +686,7 @@ void CSVRender::Cell::setSubMode(int subMode, unsigned int elementMask)
     mSubModeElementMask = elementMask;
 
     if (elementMask & Mask_Reference)
-        for (std::map<std::string, Object*>::const_iterator iter(mObjects.begin()); iter != mObjects.end(); ++iter)
-            iter->second->setSubMode(subMode);
+        mSelectionMarker->setSubMode(subMode);
 }
 
 void CSVRender::Cell::reset(unsigned int elementMask)
@@ -680,4 +696,12 @@ void CSVRender::Cell::reset(unsigned int elementMask)
             iter->second->reset();
     if (mPathgrid && elementMask & Mask_Pathgrid)
         mPathgrid->resetIndicators();
+}
+
+CSVRender::Object* CSVRender::Cell::getObjectByReferenceId(const std::string& referenceId)
+{
+    if (auto iter = mObjects.find(Misc::StringUtils::lowerCase(referenceId)); iter != mObjects.end())
+        return iter->second;
+    else
+        return nullptr;
 }

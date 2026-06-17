@@ -1,0 +1,17 @@
+ReleasedFromPrison:
+  pattern: |-
+    {days, plural,
+      one{{gmst:sNotifyMessage42}}
+      other{{gmst:sNotifyMessage43}}
+    }
+  variables:
+    - ["days"]
+    - ["days"]
+SkillIncreasedTo:
+  pattern: "{gmst:sNotifyMessage39}"
+  variables:
+    - ["skill", "level"]
+SkillDecreasedTo:
+  pattern: "{gmst:sNotifyMessage44}"
+  variables:
+    - ["skill", "level"]

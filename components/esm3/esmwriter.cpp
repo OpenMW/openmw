@@ -7,7 +7,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/misc/notnullptr.hpp>
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "formatversion.hpp"
 
@@ -127,7 +127,7 @@ namespace ESM
         Header::MasterData d;
         d.name = name;
         d.size = size;
-        mHeader.mMaster.push_back(d);
+        mHeader.mMaster.push_back(std::move(d));
     }
 
     void ESMWriter::save(std::ostream& file)

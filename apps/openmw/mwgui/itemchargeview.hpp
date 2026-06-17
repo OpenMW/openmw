@@ -52,6 +52,8 @@ namespace MWGui
 
         MyGUI::delegates::MultiDelegate<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
 
+        void onControllerButton(const unsigned char button);
+
     private:
         struct Line
         {
@@ -72,6 +74,9 @@ namespace MWGui
         std::unique_ptr<ItemModel> mModel;
         MyGUI::ScrollView* mScrollView;
         DisplayMode mDisplayMode;
+
+        size_t mControllerFocus = 0;
+        void updateControllerFocus(size_t prevFocus, size_t newFocus);
     };
 }
 

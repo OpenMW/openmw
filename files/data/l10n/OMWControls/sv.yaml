@@ -5,14 +5,14 @@ MovementSettings: "Rörelser"
 
 alwaysRun: "Spring alltid"
 alwaysRunDescription: |
-    Om denna iställningen är aktiverad springer spelarrollfiguren som standard, annars kommer spelarrollfiguren att gå.
+    Om denna iställningen är aktiverad springer rollpersonen som standard, annars kommer rollpersonen att gå.
     Skift-tangenten kommer temporärt invertera denna inställning, och caps lock-knappen kommer invertera inställningen när den är aktiverad.
 
 toggleSneak: "Växla till smygläge"
 toggleSneakDescription: |
     Denna inställningen gör att smygknappen (förinställt till ctrl) slår smygning på eller av vid ett knapptryck
     istället för att att kräva att knappen hålls nedtryckt för att smyga.
-    Spelare som spenderar mycket tid med att smyga lär ha lättare att kontrollera rollfiguren med denna funktion aktiverad.
+    Spelare som spenderar mycket tid med att smyga lär ha lättare att kontrollera rollpersonen med denna funktion aktiverad.
 
 smoothControllerMovement: "Mjuka handkontrollsrörelser"
 smoothControllerMovementDescription: |
@@ -22,7 +22,7 @@ TogglePOV_name: "Växla perspektiv"
 TogglePOV_description: "Växlar mellan första- och tredjepersonsperspektiv. Håll in för att aktivera omloppskamera."
 
 Zoom3rdPerson_name: "Zooma in/ut"
-Zoom3rdPerson_description: "Flyttar kameran närmare / längre bort i tredjepersonsperspektivet."
+Zoom3rdPerson_description: "Flyttar kameran närmare / längre bort i tredjepersonsvyn."
 
 MoveForward_name: "Förflyttning framåt"
 MoveForward_description: "Kan avbrytas med Förflyttning bakåt."

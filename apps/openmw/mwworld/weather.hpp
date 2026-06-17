@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <map>
+#include <span>
 #include <string>
 
 #include <osg/Vec4f>
@@ -109,6 +110,16 @@ namespace MWWorld
 
         T getValue(const float gameHour, const TimeOfDaySettings& timeSettings, const std::string& prefix) const;
 
+        const T& getSunriseValue() const { return mSunriseValue; }
+        const T& getDayValue() const { return mDayValue; }
+        const T& getSunsetValue() const { return mSunsetValue; }
+        const T& getNightValue() const { return mNightValue; }
+
+        void setSunriseValue(const T& sunriseValue) { mSunriseValue = sunriseValue; }
+        void setDayValue(const T& dayValue) { mDayValue = dayValue; }
+        void setSunsetValue(const T& sunsetValue) { mSunsetValue = sunsetValue; }
+        void setNightValue(const T& nightValue) { mNightValue = nightValue; }
+
     private:
         T mSunriseValue, mDayValue, mSunsetValue, mNightValue;
     };
@@ -119,9 +130,12 @@ namespace MWWorld
     public:
         static osg::Vec3f defaultDirection();
 
-        Weather(const std::string& name, float stormWindSpeed, float rainSpeed, float dlFactor, float dlOffset,
-            const std::string& particleEffect);
+        Weather(const ESM::RefId id, const int scriptId, const std::string& name, float stormWindSpeed, float rainSpeed,
+            float dlFactor, float dlOffset, const std::string& particleEffect);
 
+        ESM::RefId mId;
+        int mScriptId;
+        std::string mName;
         std::string mCloudTexture;
 
         // Sky (atmosphere) color
@@ -233,7 +247,8 @@ namespace MWWorld
 
         operator ESM::RegionWeatherState() const;
 
-        void setChances(const std::vector<uint8_t>& chances);
+        void setChances(std::span<const uint8_t> chances);
+        std::span<const uint8_t> getChances() const;
 
         void setWeather(int weatherID);
 
@@ -251,6 +266,9 @@ namespace MWWorld
     {
     public:
         MoonModel(const std::string& name);
+        MoonModel(float fadeInStart, float fadeInFinish, float fadeOutStart, float fadeOutFinish, float axisOffset,
+            float speed, float dailyIncrement, float fadeStartAngle, float fadeEndAngle,
+            float moonShadowEarlyFadeAngle);
 
         MWRender::MoonState calculateState(const TimeStamp& gameTime) const;
 
@@ -266,10 +284,12 @@ namespace MWWorld
         float mFadeEndAngle;
         float mMoonShadowEarlyFadeAngle;
 
-        float angle(const TimeStamp& gameTime) const;
-        float moonRiseHour(unsigned int daysPassed) const;
+        float angle(int gameDay, float gameHour) const;
+        float moonPhaseHour(int gameDay) const;
+        float moonRiseHour(int gameDay) const;
         float rotation(float hours) const;
         MWRender::MoonState::Phase phase(const TimeStamp& gameTime) const;
+        bool isVisible(int gameDay, float gameHour) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;
@@ -284,12 +304,14 @@ namespace MWWorld
         ~WeatherManager();
 
         /**
-         * Change the weather in the specified region
+         * Change the weather in the specified region by id of the weather
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
         void changeWeather(const ESM::RefId& regionID, const unsigned int weatherID);
-        void modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances);
+        void changeWeather(const ESM::RefId& regionID, const ESM::RefId& weatherID);
+        void modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances);
+        std::span<const uint8_t> getRegionChances(const ESM::RefId& regionID) const;
         void playerTeleported(const ESM::RefId& playerRegion, bool isExterior);
 
         /**
@@ -311,7 +333,22 @@ namespace MWWorld
 
         void advanceTime(double hours, bool incremental);
 
+        const std::vector<Weather>& getAllWeather() { return mWeatherSettings; }
+
+        const Weather& getWeather() { return mWeatherSettings[mCurrentWeather]; }
+
+        const Weather* getWeather(size_t index) const;
+
+        const Weather* getWeather(const ESM::RefId& id) const;
+
         int getWeatherID() const { return mCurrentWeather; }
+
+        const Weather* getNextWeather()
+        {
+            if (mNextWeather > -1)
+                return &mWeatherSettings[mNextWeather];
+            return nullptr;
+        }
 
         int getNextWeatherID() const { return mNextWeather; }
 

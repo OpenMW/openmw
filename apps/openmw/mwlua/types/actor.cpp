@@ -4,6 +4,7 @@
 
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/settings/values.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
@@ -29,18 +30,18 @@ namespace MWLua
     static constexpr int sAnySlot = -1;
 
     static std::pair<MWWorld::ContainerStoreIterator, bool> findInInventory(
-        MWWorld::InventoryStore& store, const EquipmentItem& item, int slot = sAnySlot)
+        MWWorld::ContainerStore& store, const EquipmentItem& item, int slot, bool isInventoryStore)
     {
-        auto old_it = slot != sAnySlot ? store.getSlot(slot) : store.end();
+        auto oldIt = slot != sAnySlot && isInventoryStore ? static_cast<MWWorld::InventoryStore&>(store).getSlot(slot)
+                                                          : store.end();
         MWWorld::Ptr itemPtr;
 
         if (std::holds_alternative<ObjectId>(item))
         {
             itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
-            if (old_it != store.end() && *old_it == itemPtr)
-                return { old_it, true }; // already equipped
-            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0
-                || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
+            if (oldIt != store.end() && *oldIt == itemPtr)
+                return { oldIt, true }; // already equipped
+            if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0 || itemPtr.getContainerStore() != &store)
             {
                 Log(Debug::Warning) << "Object" << std::get<ObjectId>(item).toString() << " is not in inventory";
                 return { store.end(), false };
@@ -50,8 +51,8 @@ namespace MWLua
         {
             const auto& stringId = std::get<std::string>(item);
             ESM::RefId recordId = ESM::RefId::deserializeText(stringId);
-            if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
-                return { old_it, true }; // already equipped
+            if (oldIt != store.end() && oldIt->getCellRef().getRefId() == recordId)
+                return { oldIt, true }; // already equipped
             itemPtr = store.search(recordId);
             if (itemPtr.isEmpty() || itemPtr.getCellRef().getCount() == 0)
             {
@@ -76,7 +77,7 @@ namespace MWLua
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
         auto tryEquipToSlot = [&store, &usedSlots, isPlayer](int slot, const EquipmentItem& item) -> bool {
-            auto [it, alreadyEquipped] = findInInventory(store, item, slot);
+            auto [it, alreadyEquipped] = findInInventory(store, item, slot, true);
             if (alreadyEquipped)
                 return true;
             if (it == store.end())
@@ -119,15 +120,15 @@ namespace MWLua
 
         for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
-            auto old_it = store.getSlot(slot);
-            auto new_it = equipment.find(slot);
-            if (new_it == equipment.end())
+            auto oldIt = store.getSlot(slot);
+            auto newIt = equipment.find(slot);
+            if (newIt == equipment.end())
             {
-                if (old_it != store.end())
+                if (oldIt != store.end())
                     store.unequipSlot(slot);
                 continue;
             }
-            if (tryEquipToSlot(slot, new_it->second))
+            if (tryEquipToSlot(slot, newIt->second))
                 usedSlots[slot] = true;
         }
         for (const auto& [slot, item] : equipment)
@@ -137,12 +138,18 @@ namespace MWLua
 
     static void setSelectedEnchantedItem(const MWWorld::Ptr& actor, const EquipmentItem& item)
     {
-        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
+        MWWorld::ContainerStore& contStore = actor.getClass().getContainerStore(actor);
         // We're not passing in a specific slot, so ignore the already equipped return value
-        auto [it, _] = findInInventory(store, item, sAnySlot);
-        if (it == store.end())
+        auto [it, _] = findInInventory(contStore, item, sAnySlot, actor.getClass().hasInventoryStore(actor));
+        if (it == contStore.end())
             return;
+        if (!actor.getClass().hasInventoryStore(actor))
+        {
+            contStore.setSelectedEnchantItem(it);
+            return;
+        }
 
+        MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
         MWWorld::Ptr itemPtr = *it;
 
         // Equip the item if applicable
@@ -164,7 +171,6 @@ namespace MWLua
                     return;
             }
         }
-
         store.setSelectedEnchantItem(it);
         // to reset WindowManager::mSelectedSpell immediately
         MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(*it);
@@ -172,13 +178,15 @@ namespace MWLua
 
     void addActorBindings(sol::table actor, const Context& context)
     {
+        sol::state_view lua = context.sol();
         actor["STANCE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWMechanics::DrawState>({
-                { "Nothing", MWMechanics::DrawState::Nothing },
-                { "Weapon", MWMechanics::DrawState::Weapon },
-                { "Spell", MWMechanics::DrawState::Spell },
-            }));
-        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>(
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWMechanics::DrawState>(lua,
+                {
+                    { "Nothing", MWMechanics::DrawState::Nothing },
+                    { "Weapon", MWMechanics::DrawState::Weapon },
+                    { "Spell", MWMechanics::DrawState::Spell },
+                }));
+        actor["EQUIPMENT_SLOT"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, int>(lua,
             { { "Helmet", MWWorld::InventoryStore::Slot_Helmet }, { "Cuirass", MWWorld::InventoryStore::Slot_Cuirass },
                 { "Greaves", MWWorld::InventoryStore::Slot_Greaves },
                 { "LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron },
@@ -228,9 +236,7 @@ namespace MWLua
                     hasSelectedSpell = !stats.getSpells().getSelectedSpell().empty();
                 if (!hasSelectedSpell)
                 {
-                    if (!cls.hasInventoryStore(self.ptr()))
-                        return; // No selected spell and no items; can't use magic stance.
-                    MWWorld::InventoryStore& store = cls.getInventoryStore(self.ptr());
+                    const MWWorld::ContainerStore& store = cls.getContainerStore(self.ptr());
                     if (store.getSelectedEnchantItem() == store.end())
                         return; // No selected spell and no selected enchanted item; can't use magic stance.
                 }
@@ -246,23 +252,23 @@ namespace MWLua
             stats.setDrawState(newDrawState);
         };
 
-        actor["getSelectedEnchantedItem"] = [](sol::this_state lua, const Object& o) -> sol::object {
+        actor["getSelectedEnchantedItem"] = [](sol::this_state thisState, const Object& o) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
-            if (!ptr.getClass().hasInventoryStore(ptr))
+            if (!ptr.getClass().isActor())
                 return sol::nil;
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+            MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             auto it = store.getSelectedEnchantItem();
             if (it == store.end())
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-            if (dynamic_cast<const GObject*>(&o))
-                return sol::make_object(lua, GObject(*it));
+            if (o.isGObject())
+                return sol::make_object(thisState, GObject(*it));
             else
-                return sol::make_object(lua, LObject(*it));
+                return sol::make_object(thisState, LObject(*it));
         };
         actor["setSelectedEnchantedItem"] = [context](const SelfObject& obj, const sol::object& item) {
             const MWWorld::Ptr& ptr = obj.ptr();
-            if (!ptr.getClass().hasInventoryStore(ptr))
+            if (!ptr.getClass().isActor())
                 return;
 
             EquipmentItem ei;
@@ -308,9 +314,9 @@ namespace MWLua
 
         actor["inventory"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
             [](const GObject& o) { return Inventory<GObject>{ o }; });
-        auto getAllEquipment = [](sol::this_state lua, const Object& o) {
+        auto getAllEquipment = [](sol::this_state thisState, const Object& o) {
             const MWWorld::Ptr& ptr = o.ptr();
-            sol::table equipment(lua, sol::create);
+            sol::table equipment(thisState, sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return equipment;
 
@@ -321,14 +327,14 @@ namespace MWLua
                 if (it == store.end())
                     continue;
                 MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-                if (dynamic_cast<const GObject*>(&o))
-                    equipment[slot] = sol::make_object(lua, GObject(*it));
+                if (o.isGObject())
+                    equipment[slot] = sol::make_object(thisState, GObject(*it));
                 else
-                    equipment[slot] = sol::make_object(lua, LObject(*it));
+                    equipment[slot] = sol::make_object(thisState, LObject(*it));
             }
             return equipment;
         };
-        auto getEquipmentFromSlot = [](sol::this_state lua, const Object& o, int slot) -> sol::object {
+        auto getEquipmentFromSlot = [](sol::this_state thisState, const Object& o, int slot) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return sol::nil;
@@ -337,10 +343,10 @@ namespace MWLua
             if (it == store.end())
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-            if (dynamic_cast<const GObject*>(&o))
-                return sol::make_object(lua, GObject(*it));
+            if (o.isGObject())
+                return sol::make_object(thisState, GObject(*it));
             else
-                return sol::make_object(lua, LObject(*it));
+                return sol::make_object(thisState, LObject(*it));
         };
         actor["getEquipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
         actor["equipment"] = actor["getEquipment"]; // for compatibility; should be removed later
@@ -371,10 +377,10 @@ namespace MWLua
             context.mLuaManager->addAction(
                 [obj = Object(ptr), eqp = std::move(eqp)] { setEquipment(obj.ptr(), eqp); }, "SetEquipmentAction");
         };
-        actor["getPathfindingAgentBounds"] = [](sol::this_state lua, const LObject& o) {
+        actor["getPathfindingAgentBounds"] = [](sol::this_state thisState, const LObject& o) {
             const DetourNavigator::AgentBounds agentBounds
                 = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
-            sol::table result(lua, sol::create);
+            sol::table result(thisState, sol::create);
             result["shapeType"] = agentBounds.mShapeType;
             result["halfExtents"] = agentBounds.mHalfExtents;
             return result;
@@ -394,8 +400,8 @@ namespace MWLua
             const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
             const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
-            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length();
-            return dist <= actorsProcessingRange;
+            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length2();
+            return dist <= (actorsProcessingRange * actorsProcessingRange);
         };
 
         actor["isDead"] = [](const Object& o) {
@@ -408,13 +414,78 @@ namespace MWLua
             return target.getClass().getCreatureStats(target).isDeathAnimationFinished();
         };
 
-        actor["getEncumbrance"] = [](const Object& actor) -> float {
-            const MWWorld::Ptr ptr = actor.ptr();
+        actor["getEncumbrance"] = [](const Object& object) -> float {
+            const MWWorld::Ptr ptr = object.ptr();
             return ptr.getClass().getEncumbrance(ptr);
+        };
+
+        actor["getCapacity"] = [](const Object& object) -> float {
+            const MWWorld::Ptr ptr = object.ptr();
+            return ptr.getClass().getCapacity(ptr);
+        };
+
+        actor["getBarterGold"] = [](const Object& object) -> int {
+            const MWWorld::Ptr ptr = object.ptr();
+            return ptr.getClass().getCreatureStats(ptr).getGoldPool();
+        };
+
+        actor["setBarterGold"] = [context](const Object& object, int gold) {
+            if (gold < 0)
+                throw std::runtime_error("Barter gold must be positive");
+            if (!object.isGObject() && !object.isSelfObject())
+                throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
+            context.mLuaManager->addAction(
+                [obj = Object(object), gold] {
+                    const MWWorld::Ptr ptr = obj.ptr();
+                    ptr.getClass().getCreatureStats(ptr).setGoldPool(gold);
+                },
+                "SetBarterGoldAction");
+        };
+
+        actor["_onHit"] = [context](const SelfObject& self, const sol::table& options) {
+            sol::optional<sol::table> damageLua = options.get<sol::optional<sol::table>>("damage");
+            std::map<std::string, float> damageCpp;
+            if (damageLua)
+            {
+                for (auto& [key, value] : damageLua.value())
+                {
+                    damageCpp[key.as<std::string>()] = value.as<Misc::FiniteFloat>();
+                }
+            }
+            std::string sourceTypeStr = options.get_or<std::string>("sourceType", "unspecified");
+            MWMechanics::DamageSourceType sourceType = MWMechanics::DamageSourceType::Unspecified;
+            if (sourceTypeStr == "melee")
+                sourceType = MWMechanics::DamageSourceType::Melee;
+            else if (sourceTypeStr == "ranged")
+                sourceType = MWMechanics::DamageSourceType::Ranged;
+            else if (sourceTypeStr == "magic")
+                sourceType = MWMechanics::DamageSourceType::Magical;
+            std::string_view ammoId = options.get_or<std::string_view>("ammo", {});
+            ESM::RefId weaponId = ESM::RefId::deserializeText(ammoId);
+            if (weaponId.empty())
+            {
+                if (sol::optional<Object> weapon = options.get<sol::optional<Object>>("weapon"))
+                {
+                    MWWorld::Ptr weaponPtr = weapon->ptrOrEmpty();
+                    if (!weaponPtr.isEmpty())
+                        weaponId = weaponPtr.getCellRef().getRefId();
+                }
+            }
+
+            context.mLuaManager->addAction(
+                [self = Object(self), damages = std::move(damageCpp),
+                    attacker = options.get<sol::optional<Object>>("attacker"), weaponId,
+                    successful = options.get<bool>("successful"), sourceType = sourceType] {
+                    MWWorld::Ptr attackerPtr;
+                    MWWorld::Ptr weaponPtr;
+                    if (attacker)
+                        attackerPtr = attacker->ptr();
+                    self.ptr().getClass().onHit(self.ptr(), damages, weaponId, attackerPtr, successful, sourceType);
+                },
+                "HitAction");
         };
 
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }
-
 }

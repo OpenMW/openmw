@@ -230,16 +230,14 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill))
             {
-                ESM::RefId skill = ESM::Skill::indexToRefId(spellEffect.mData.mSkill);
-                auto found = actorSkills.find(skill);
+                auto found = actorSkills.find(spellEffect.mData.mSkill);
                 if (found == actorSkills.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
             }
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute))
             {
-                ESM::RefId attribute = ESM::Attribute::indexToRefId(spellEffect.mData.mAttribute);
-                auto found = actorAttributes.find(attribute);
+                auto found = actorAttributes.find(spellEffect.mData.mAttribute);
                 if (found == actorAttributes.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
             }
@@ -278,10 +276,10 @@ namespace MWMechanics
                                                      .find("fEffectCostMult")
                                                      ->mValue.getFloat();
 
-            float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
-            x *= 0.1 * magicEffect->mData.mBaseCost;
+            float x = 0.5f * (std::max(1, minMagn) + std::max(1, maxMagn));
+            x *= 0.1f * magicEffect->mData.mBaseCost;
             x *= 1 + duration;
-            x += 0.05 * std::max(1, effect.mData.mArea) * magicEffect->mData.mBaseCost;
+            x += 0.05f * std::max(1, effect.mData.mArea) * magicEffect->mData.mBaseCost;
             x *= fEffectCostMult;
 
             if (effect.mData.mRange == ESM::RT_Target)

@@ -39,7 +39,6 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
-        , mVisible(false)
         , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
@@ -60,11 +59,10 @@ namespace MWGui
     void LoadingScreen::findSplashScreens()
     {
         auto isSupportedExtension = [](const std::string_view& ext) {
-            static const std::array<std::string, 7> supported_extensions{ { "tga", "dds", "ktx", "png", "bmp", "jpeg",
+            static const std::array<std::string, 7> supportedExtensions{ { "tga", "dds", "ktx", "png", "bmp", "jpeg",
                 "jpg" } };
             return !ext.empty()
-                && std::find(supported_extensions.begin(), supported_extensions.end(), ext)
-                != supported_extensions.end();
+                && std::find(supportedExtensions.begin(), supportedExtensions.end(), ext) != supportedExtensions.end();
         };
 
         constexpr VFS::Path::NormalizedView splash("splash/");
@@ -122,8 +120,9 @@ namespace MWGui
 
         void operator()(osg::RenderInfo& renderInfo) const override
         {
-            int w = renderInfo.getCurrentCamera()->getViewport()->width();
-            int h = renderInfo.getCurrentCamera()->getViewport()->height();
+            const osg::Viewport* viewPort = renderInfo.getCurrentCamera()->getViewport();
+            int w = static_cast<int>(viewPort->width());
+            int h = static_cast<int>(viewPort->height());
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
 
             mOneshot = false;
@@ -142,7 +141,7 @@ namespace MWGui
         osg::BoundingSphere computeBound(const osg::Node&) const override { return osg::BoundingSphere(); }
     };
 
-    void LoadingScreen::loadingOn(bool visible)
+    void LoadingScreen::loadingOn()
     {
         // Early-out if already on
         if (mNestedLoadingCount++ > 0 && mMainWidget->getVisible())
@@ -161,16 +160,7 @@ namespace MWGui
             mOldIcoMax = ico->getMaximumNumOfObjectsToCompilePerFrame();
         }
 
-        mVisible = visible;
-        mLoadingBox->setVisible(mVisible);
         setVisible(true);
-
-        if (!mVisible)
-        {
-            mShowWallpaper = false;
-            draw();
-            return;
-        }
 
         mShowWallpaper = MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
 
@@ -186,7 +176,6 @@ namespace MWGui
     {
         if (--mNestedLoadingCount > 0)
             return;
-        mLoadingBox->setVisible(true); // restore
 
         if (mLastRenderTime < mLoadingOnTime)
         {
@@ -271,10 +260,10 @@ namespace MWGui
             return false;
 
         // the minimal delay before a loading screen shows
-        const float initialDelay = 0.05;
+        constexpr float initialDelay = 0.05f;
 
         bool alreadyShown = (mLastRenderTime > mLoadingOnTime);
-        float diff = (mTimer.time_m() - mLoadingOnTime);
+        double diff = (mTimer.time_m() - mLoadingOnTime);
 
         if (!alreadyShown)
         {
@@ -305,7 +294,7 @@ namespace MWGui
 
         if (!mGuiTexture.get())
         {
-            mGuiTexture = std::make_unique<osgMyGUI::OSGTexture>(mTexture);
+            mGuiTexture = std::make_unique<MyGUIPlatform::OSGTexture>(mTexture);
         }
 
         if (!mCopyFramebufferToTextureCallback)
@@ -321,13 +310,14 @@ namespace MWGui
         mSplashImage->setVisible(false);
 
         mSceneImage->setRenderItemTexture(mGuiTexture.get());
-        mSceneImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
+        mSceneImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
         mSceneImage->setVisible(true);
     }
 
     void LoadingScreen::draw()
     {
-        if (mVisible && !needToDrawLoadingScreen())
+        if (!needToDrawLoadingScreen())
             return;
 
         if (mShowWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000 * 1)
@@ -343,7 +333,12 @@ namespace MWGui
 
         MWBase::Environment::get().getInputManager()->update(0, true, true);
 
-        mResourceSystem->reportStats(mViewer->getFrameStamp()->getFrameNumber(), mViewer->getViewerStats());
+        osg::Stats* const stats = mViewer->getViewerStats();
+        const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+
+        stats->setAttribute(frameNumber, "Loading", 1);
+
+        mResourceSystem->reportStats(frameNumber, stats);
         if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
         {
             ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f / getTargetFrameRate());

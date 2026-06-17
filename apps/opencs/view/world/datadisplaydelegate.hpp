@@ -41,6 +41,7 @@ namespace CSVWorld
 
     class DataDisplayDelegate : public EnumDelegate
     {
+        Q_OBJECT
     public:
         typedef std::vector<Icon> IconList;
         typedef std::vector<std::pair<int, QString>> ValueList;
@@ -61,6 +62,8 @@ namespace CSVWorld
         QSize mIconSize;
         int mHorizontalMargin;
         int mTextLeftOffset;
+        QColor mPixmapsColor;
+        qreal mUiScale;
 
         std::string mSettingKey;
 
@@ -79,6 +82,8 @@ namespace CSVWorld
 
         /// offset the horizontal position of the text from the right edge of the icon.  Default is 8 pixels.
         void setTextLeftOffset(int offset);
+
+        bool eventFilter(QObject* target, QEvent* event) override;
 
     private:
         /// update the display mode based on a passed string

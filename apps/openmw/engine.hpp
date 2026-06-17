@@ -4,6 +4,7 @@
 #include <filesystem>
 
 #include <components/compiler/extensions.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/esm/refid.hpp>
 #include <components/files/collections.hpp>
 #include <components/settings/settings.hpp>
@@ -112,7 +113,7 @@ namespace MWDialogue
     class Journal;
 }
 
-namespace l10n
+namespace L10n
 {
     class Manager;
 }
@@ -140,7 +141,7 @@ namespace OMW
         std::unique_ptr<MWState::StateManager> mStateManager;
         std::unique_ptr<MWLua::LuaManager> mLuaManager;
         std::unique_ptr<MWLua::Worker> mLuaWorker;
-        std::unique_ptr<l10n::Manager> mL10nManager;
+        std::unique_ptr<L10n::Manager> mL10nManager;
         MWBase::Environment mEnvironment;
         ToUTF8::FromType mEncoding;
         std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;
@@ -171,18 +172,21 @@ namespace OMW
         // Grab mouse?
         bool mGrab;
 
+        bool mExportFonts;
         unsigned int mRandomSeed;
         unsigned int mNetType;
         pid_t mServerPid;
+        Debug::Level mMaxRecastLogLevel = Debug::Error;
 
         Compiler::Extensions mExtensions;
         std::unique_ptr<Compiler::Context> mScriptContext;
 
         Files::Collections mFileCollections;
         Translation::Storage mTranslationDataStorage;
-        std::vector<ESM::RefId> mScriptBlacklist;
-        bool mScriptBlacklistUse;
         bool mNewGame;
+
+        Files::ConfigurationManager& mCfgMgr;
+        int mGlMaxTextureImageUnits;
 
         // not implemented
         Engine(const Engine&);
@@ -190,7 +194,7 @@ namespace OMW
 
         void executeLocalScripts();
 
-        bool frame(float dt);
+        bool frame(unsigned frameNumber, float dt);
 
         /// Prepare engine for game play
         void prepareEngine();
@@ -255,9 +259,7 @@ namespace OMW
 
         void setWarningsMode(int mode);
 
-        void setScriptBlacklist(const std::vector<ESM::RefId>& list);
-
-        void setScriptBlacklistUse(bool use);
+        void enableFontExport(bool exportFonts);
 
         /// Set the save game file to load after initialising the engine.
         void setSaveGameFile(const std::filesystem::path& savegame);
@@ -268,9 +270,7 @@ namespace OMW
 
         void setServerPid(const unsigned int netType);
 
-    private:
-        Files::ConfigurationManager& mCfgMgr;
-        int mGlMaxTextureImageUnits;
+        void setRecastMaxLogLevel(Debug::Level value) { mMaxRecastLogLevel = value; }
     };
 }
 

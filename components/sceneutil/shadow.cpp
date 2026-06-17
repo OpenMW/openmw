@@ -61,7 +61,7 @@ namespace SceneUtil
         else if (Misc::StringUtils::ciEqual(computeSceneBounds, "bounds"))
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
-        const int mapres = settings.mShadowMapResolution;
+        const short mapres = static_cast<short>(settings.mShadowMapResolution);
         mShadowSettings->setTextureSize(osg::Vec2s(mapres, mapres));
 
         mShadowTechnique->setSplitPointUniformLogarithmicRatio(settings.mSplitPointUniformLogarithmicRatio);
@@ -74,10 +74,7 @@ namespace SceneUtil
         else
             mShadowTechnique->disableFrontFaceCulling();
 
-        if (settings.mAllowShadowMapOverlap)
-            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
-        else
-            mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::PARALLEL_SPLIT);
+        mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
 
         if (settings.mEnableDebugHud)
             mShadowTechnique->enableDebugHUD();
@@ -107,6 +104,8 @@ namespace SceneUtil
                 ("shadowTexture" + std::to_string(i - mShadowSettings->getBaseShadowTextureUnit())).c_str(),
                 static_cast<int>(i)));
         }
+        stateset.addUniform(new osg::Uniform("maximumShadowMapDistance", 0.00001f));
+        stateset.addUniform(new osg::Uniform("shadowFadeStart", 0.0f));
     }
 
     ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode,
@@ -161,8 +160,6 @@ namespace SceneUtil
         definesWithShadows["shadow_texture_unit_list"] = definesWithShadows["shadow_texture_unit_list"].substr(
             0, definesWithShadows["shadow_texture_unit_list"].length() - 1);
 
-        definesWithShadows["shadowMapsOverlap"] = settings.mAllowShadowMapOverlap ? "1" : "0";
-
         definesWithShadows["useShadowDebugOverlay"] = settings.mEnableDebugOverlay ? "1" : "0";
 
         // switch this to reading settings if it's ever exposed to the user
@@ -185,8 +182,6 @@ namespace SceneUtil
         definesWithoutShadows["shadows_enabled"] = "0";
 
         definesWithoutShadows["shadow_texture_unit_list"] = "";
-
-        definesWithoutShadows["shadowMapsOverlap"] = "0";
 
         definesWithoutShadows["useShadowDebugOverlay"] = "0";
 

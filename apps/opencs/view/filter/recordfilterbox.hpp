@@ -33,7 +33,7 @@ namespace CSVFilter
         EditWidget* mEdit;
 
     public:
-        RecordFilterBox(CSMWorld::Data& data, QWidget* parent = nullptr);
+        explicit RecordFilterBox(CSMWorld::Data& worldData, QWidget* parent = nullptr);
 
         void setFilter(const std::string& filter);
 

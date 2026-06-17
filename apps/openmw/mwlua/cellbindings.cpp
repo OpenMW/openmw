@@ -1,7 +1,5 @@
 #include "cellbindings.hpp"
 
-#include <components/esm/esmbridge.hpp>
-
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
@@ -27,7 +25,6 @@
 #include <components/esm4/loadammo.hpp>
 #include <components/esm4/loadarmo.hpp>
 #include <components/esm4/loadbook.hpp>
-#include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadclot.hpp>
 #include <components/esm4/loadcont.hpp>
 #include <components/esm4/loaddoor.hpp>
@@ -38,12 +35,17 @@
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadmisc.hpp>
 #include <components/esm4/loadmstt.hpp>
-#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadscol.hpp>
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
+#include <components/misc/convert.hpp>
+
+#include <components/translation/translation.hpp>
+
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -60,6 +62,10 @@ namespace sol
     struct is_automagical<MWLua::GCell> : std::false_type
     {
     };
+    template <>
+    struct is_automagical<ESM::Pathgrid> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -68,7 +74,8 @@ namespace MWLua
     template <class CellT, class ObjectT>
     static void initCellBindings(const std::string& prefix, const Context& context)
     {
-        sol::usertype<CellT> cellT = context.mLua->sol().new_usertype<CellT>(prefix + "Cell");
+        auto view = context.sol();
+        sol::usertype<CellT> cellT = view.new_usertype<CellT>(prefix + "Cell");
 
         cellT[sol::meta_function::equal_to] = [](const CellT& a, const CellT& b) { return a.mStore == b.mStore; };
         cellT[sol::meta_function::to_string] = [](const CellT& c) {
@@ -83,10 +90,15 @@ namespace MWLua
         };
 
         cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
-        cellT["region"] = sol::readonly_property(
-            [](const CellT& c) -> std::string { return c.mStore->getCell()->getRegion().serializeText(); });
-        cellT["worldSpaceId"] = sol::readonly_property(
-            [](const CellT& c) -> std::string { return c.mStore->getCell()->getWorldSpace().serializeText(); });
+        cellT["displayName"] = sol::readonly_property([](const CellT& c) -> std::string_view {
+            const auto& storage = MWBase::Environment::get().getWindowManager()->getTranslationDataStorage();
+            return storage.translateCellName(c.mStore->getCell()->getNameId());
+        });
+        cellT["id"] = sol::readonly_property([](const CellT& c) -> ESM::RefId { return c.mStore->getCell()->getId(); });
+        cellT["region"]
+            = sol::readonly_property([](const CellT& c) -> ESM::RefId { return c.mStore->getCell()->getRegion(); });
+        cellT["worldSpaceId"]
+            = sol::readonly_property([](const CellT& c) -> ESM::RefId { return c.mStore->getCell()->getWorldSpace(); });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });
         cellT["gridY"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridY(); });
         cellT["hasWater"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->hasWater(); });
@@ -122,10 +134,17 @@ namespace MWLua
                 return sol::nullopt;
         });
 
+        cellT["pathGrid"] = sol::readonly_property([](const CellT& c) -> const ESM::Pathgrid* {
+            const ESM::Pathgrid* grid
+                = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*c.mStore->getCell());
+            if (grid && grid->mPoints.empty())
+                return nullptr;
+            return grid;
+        });
+
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
-            cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
-                                  const CellT& cell, sol::optional<sol::table> type) {
+            cellT["getAll"] = [ids = getPackageToTypeTable(view)](const CellT& cell, sol::optional<sol::table> type) {
                 if (cell.mStore->getState() != MWWorld::CellStore::State_Loaded)
                     cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
@@ -260,6 +279,9 @@ namespace MWLua
                         case ESM::REC_ALCH4:
                             cell.mStore->template forEachType<ESM4::Potion>(visitor);
                             break;
+                        case ESM::REC_SCOL4:
+                            cell.mStore->template forEachType<ESM4::StaticCollection>(visitor);
+                            break;
                         case ESM::REC_STAT4:
                             cell.mStore->template forEachType<ESM4::Static>(visitor);
                             break;
@@ -278,6 +300,34 @@ namespace MWLua
                     throw std::runtime_error(
                         std::string("Incorrect type argument in cell:getAll: " + LuaUtil::toString(*type)));
                 return GObjectList{ std::move(res) };
+            };
+        }
+
+        if (context.initializeOnce("openmw_cellbindings"))
+        {
+            auto pathGridT = view.new_usertype<ESM::Pathgrid>("ESM3_PathGrid");
+            pathGridT[sol::meta_function::to_string] = [](const ESM::Pathgrid& rec) -> std::string {
+                return "ESM3_PathGrid[" + rec.mCell.toDebugString() + "]";
+            };
+            pathGridT["getPoints"] = [](sol::this_state lua, const ESM::Pathgrid& rec) -> sol::table {
+                sol::table points(lua, sol::create);
+                for (const ESM::Pathgrid::Point& point : rec.mPoints)
+                {
+                    sol::table table(lua, sol::create);
+                    table["autoGenerated"] = point.mAutogenerated == 0;
+                    table["relativePosition"] = Misc::Convert::makeOsgVec3f(point);
+                    sol::table edges(lua, sol::create);
+                    table["connections"] = edges;
+                    points.add(table);
+                }
+                for (const ESM::Pathgrid::Edge& edge : rec.mEdges)
+                {
+                    sol::table p1 = points[edge.mV0 + 1];
+                    sol::table p2 = points[edge.mV1 + 1];
+                    p1.get<sol::table>("connections").add(p2);
+                    p2.get<sol::table>("connections").add(p1);
+                }
+                return points;
             };
         }
     }

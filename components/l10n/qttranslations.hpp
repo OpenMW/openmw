@@ -4,7 +4,7 @@
 #include <QApplication>
 #include <QTranslator>
 
-namespace l10n
+namespace L10n
 {
     extern QTranslator AppTranslator;
     extern QTranslator ComponentsTranslator;

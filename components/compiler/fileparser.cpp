@@ -1,5 +1,7 @@
 #include "fileparser.hpp"
 
+#include <components/misc/strings/algorithm.hpp>
+
 #include "scanner.hpp"
 #include "tokenloc.hpp"
 
@@ -10,11 +12,6 @@ namespace Compiler
         , mScriptParser(errorHandler, context, mLocals, true)
         , mState(BeginState)
     {
-    }
-
-    std::string FileParser::getName() const
-    {
-        return mName;
     }
 
     Interpreter::Program FileParser::getProgram() const
@@ -39,7 +36,7 @@ namespace Compiler
         if (mState == EndNameState)
         {
             // optional repeated name after end statement
-            if (mName != name)
+            if (!Misc::StringUtils::ciEqual(mName, name))
                 reportWarning("Names for script " + mName + " do not match", loc);
 
             mState = EndCompleteState;
@@ -79,7 +76,7 @@ namespace Compiler
         if (mState == EndNameState)
         {
             // optional repeated name after end statement
-            if (mName != loc.mLiteral)
+            if (!Misc::StringUtils::ciEqual(mName, loc.mLiteral))
                 reportWarning("Names for script " + mName + " do not match", loc);
 
             mState = EndCompleteState;

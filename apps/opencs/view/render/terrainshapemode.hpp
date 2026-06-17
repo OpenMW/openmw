@@ -74,7 +74,8 @@ namespace CSVRender
             ShapeEditTool_PaintToRaise = 1,
             ShapeEditTool_PaintToLower = 2,
             ShapeEditTool_Smooth = 3,
-            ShapeEditTool_Flatten = 4
+            ShapeEditTool_Flatten = 4,
+            ShapeEditTool_Equalize = 5
         };
 
         /// Editmode for terrain shape grid
@@ -144,6 +145,9 @@ namespace CSVRender
         /// Do a single flattening height alteration for transient shape edit map
         void flattenHeight(
             const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, int toolStrength, int targetHeight);
+
+        /// Do a single equalize alteration for transient shape edit map
+        void equalizeHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, int targetHeight);
 
         /// Get altered height values around one vertex
         void updateKeyHeightValues(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY,

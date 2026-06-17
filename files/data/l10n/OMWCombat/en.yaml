@@ -1,0 +1,16 @@
+Combat: "OpenMW Combat"
+combatSettingsPageDescription: "OpenMW Combat settings"
+
+combatSettings: "Combat"
+
+unarmedCreatureAttacksDamageArmor: "Unarmed creature attacks damage armor"
+unarmedCreatureAttacksDamageArmorDescription: |
+    Unarmed creatures now also damage armor.
+
+redistributeShieldHitsWhenNotWearingShield: "Redistribute shield hits when not wearing a shield"
+redistributeShieldHitsWhenNotWearingShieldDescription: |
+    Equivalent to "Shield hit location fix" from Morrowind Code Patch. Redistributes hits to the shield armor slot to left pauldron or cuirass when not wearing a shield.
+    
+spawnBloodEffectsOnPlayer: "Spawn blood effects on player"
+spawnBloodEffectsOnPlayerDescription: |
+    If enabled blood effects are spawned on the player when hit in combat, same as any other character.

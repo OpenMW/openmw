@@ -1,13 +1,12 @@
 #include "display.hpp"
 
+#include <format>
 #include <numeric>
 #include <string>
 
-#include <components/misc/strings/format.hpp>
-
 namespace Misc
 {
-    std::string getResolutionText(int x, int y, const std::string& format)
+    std::string getResolutionText(int x, int y)
     {
         int gcd = std::gcd(x, y);
         if (gcd == 0)
@@ -77,6 +76,6 @@ namespace Misc
         if (flipped)
             std::swap(xaspect, yaspect);
 
-        return Misc::StringUtils::format(format, x, y, xaspect, yaspect);
+        return std::format("{} × {} ({}:{})", x, y, xaspect, yaspect);
     }
 }

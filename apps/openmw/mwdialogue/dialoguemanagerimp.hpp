@@ -14,9 +14,10 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/translation/translation.hpp>
 
+#include "../mwscript/compilercontext.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include "../mwscript/compilercontext.hpp"
+#include "keywordsearch.hpp"
 
 namespace ESM
 {
@@ -42,6 +43,9 @@ namespace MWDialogue
         std::map<ESM::RefId, ActorKnownTopicInfo> mActorKnownTopics;
 
         Translation::Storage& mTranslationDataStorage;
+        mutable bool mKeywordSearchInitialized{ false };
+        mutable MWDialogue::KeywordSearch mKeywordSearch;
+
         MWScript::CompilerContext mCompilerContext;
         Compiler::StreamErrorHandler mErrorHandler;
 
@@ -59,7 +63,8 @@ namespace MWDialogue
         int mCurrentDisposition;
         int mPermanentDispositionChange;
 
-        std::vector<ESM::RefId> parseTopicIdsFromText(const std::string& text);
+        const MWDialogue::KeywordSearch& getKeywordSearch() const;
+        std::vector<ESM::RefId> parseTopicIdsFromText(const std::string& text) const;
         void addTopicsFromText(const std::string& text);
 
         void updateActorKnownTopics();
@@ -100,7 +105,7 @@ namespace MWDialogue
 
         bool checkServiceRefused(ResponseCallback* callback, ServiceType service = ServiceType::Any) override;
 
-        void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) override;
+        bool say(const MWWorld::Ptr& actor, const ESM::RefId& topic) override;
 
         // calbacks for the GUI
         void keywordSelected(std::string_view keyword, ResponseCallback* callback) override;
@@ -112,7 +117,7 @@ namespace MWDialogue
         /// @note Controlled by an option, gets discarded when dialogue ends by default
         void applyBarterDispositionChange(int delta) override;
 
-        int countSavedGameRecords() const override;
+        size_t countSavedGameRecords() const override;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
 
@@ -125,6 +130,8 @@ namespace MWDialogue
 
         /// @return faction1's opinion of faction2
         int getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const override;
+
+        const std::map<ESM::RefId, int>* getFactionReactionOverrides(const ESM::RefId& faction) const override;
 
         /// Removes the last added topic response for the given actor from the journal
         void clearInfoActor(const MWWorld::Ptr& actor) const override;

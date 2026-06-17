@@ -2,13 +2,13 @@
     <Resource type="ResourceTrueTypeFont">
         <Property key="Source" value="MysticCards.ttf"/>
         <Property key="Antialias" value="false"/>
-        <Property key="SubstituteCode" value="63"/>
+        <Property key="SubstituteCode" value="95"/>
         <Property key="TabWidth" value="8"/>
         <Property key="OffsetHeight" value="0"/>
         <Property key="Resolution" value="70"/>
         <Codes>
             <Code range="33 126"/>
-            <Code range="161"/>
+            <Code range="160 161"/>
             <Code range="173"/>
             <Code range="175 177"/>
             <Code range="180"/>

@@ -169,8 +169,11 @@ namespace Nif
     {
         struct Mipmap
         {
-            uint32_t mWidth, mHeight;
+            uint32_t mWidth;
+            uint32_t mHeight;
             uint32_t mOffset;
+
+            void read(NIFStream* nif);
         };
 
         NiPixelFormat mPixelFormat;
@@ -193,8 +196,8 @@ namespace Nif
 
     struct NiVisData : public Record
     {
-        // TODO: investigate possible use of BoolKeyMap
-        std::shared_ptr<std::map<float, bool>> mKeys;
+        // This is theoretically a "flat map" sorted by time
+        std::shared_ptr<std::vector<std::pair<float, bool>>> mKeys;
 
         void read(NIFStream* nif) override;
     };
@@ -218,6 +221,8 @@ namespace Nif
         {
             uint16_t mFlags;
             uint16_t mType;
+
+            void read(NIFStream* nif);
         };
 
         std::vector<BodyPart> mParts;
@@ -261,6 +266,8 @@ namespace Nif
         {
             osg::BoundingSpheref mBoundSphere;
             NiTransform mTransform;
+
+            void read(NIFStream* nif);
         };
 
         std::vector<BoneInfo> mBones;
@@ -288,8 +295,8 @@ namespace Nif
         };
         std::vector<Partition> mPartitions;
 
-        unsigned int mDataSize;
-        unsigned int mVertexSize;
+        uint32_t mDataSize;
+        uint32_t mVertexSize;
         BSVertexDesc mVertexDesc;
         std::vector<BSVertexData> mVertexData;
 
@@ -343,7 +350,7 @@ namespace Nif
     struct NiPalette : public Record
     {
         // 32-bit RGBA colors that correspond to 8-bit indices
-        std::vector<uint32_t> mColors;
+        std::array<uint32_t, 256> mColors{};
 
         void read(NIFStream* nif) override;
     };
@@ -358,6 +365,21 @@ namespace Nif
     struct NiBoolData : public Record
     {
         BoolKeyMapPtr mKeyList;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineData : public Record
+    {
+        std::vector<float> mFloatControlPoints;
+        std::vector<int16_t> mCompactControlPoints;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBSplineBasisData : public Record
+    {
+        uint32_t mNumControlPoints;
 
         void read(NIFStream* nif) override;
     };
@@ -386,8 +408,6 @@ namespace Nif
             std::vector<char> mData;
             uint32_t mShaderIndex;
             uint32_t mTotalSize;
-
-            void read(NIFStream* nif, bool bsPacked);
         };
 
         uint16_t mNumVertices;
@@ -432,6 +452,32 @@ namespace Nif
         osg::BoundingSpheref mSphere;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSAnimNote : public Record
+    {
+        enum class Type : uint32_t
+        {
+            Invalid = 0,
+            GrabIK = 1,
+            LookIK = 2,
+        };
+
+        Type mType;
+        float mTime;
+        uint32_t mArm;
+        float mGain;
+        uint32_t mState;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSAnimNotes : public Record
+    {
+        BSAnimNoteList mList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
 }

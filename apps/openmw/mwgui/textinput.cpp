@@ -7,6 +7,8 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_UString.h>
 
+#include <components/esm/refid.hpp>
+
 namespace MWGui
 {
 
@@ -25,6 +27,8 @@ namespace MWGui
 
         // Make sure the edit box has focus
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+
+        mControllerButtons.mA = "#{Interface:OK}";
     }
 
     void TextInputDialog::setNextButtonShow(bool shown)
@@ -54,7 +58,7 @@ namespace MWGui
 
     // widget controls
 
-    void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
+    void TextInputDialog::onOkClicked(MyGUI::Widget* /*sender*/)
     {
         if (mTextEdit->getCaption().empty())
         {
@@ -65,9 +69,9 @@ namespace MWGui
             eventDone(this);
     }
 
-    void TextInputDialog::onTextAccepted(MyGUI::EditBox* _sender)
+    void TextInputDialog::onTextAccepted(MyGUI::EditBox* sender)
     {
-        onOkClicked(_sender);
+        onOkClicked(sender);
 
         // To do not spam onTextAccepted() again and again
         MWBase::Environment::get().getWindowManager()->injectKeyRelease(MyGUI::KeyCode::None);
@@ -83,4 +87,15 @@ namespace MWGui
         mTextEdit->setCaption(text);
     }
 
+    bool TextInputDialog::onControllerButtonEvent(const SDL_ControllerButtonEvent& arg)
+    {
+        if (arg.button == SDL_CONTROLLER_BUTTON_A)
+        {
+            onOkClicked(nullptr);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
+            return true;
+        }
+
+        return false;
+    }
 }

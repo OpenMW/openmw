@@ -106,7 +106,7 @@ namespace NifOsg
     {
         mNormalArray = new osg::Vec3Array(1);
         mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-        (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
+        (*mNormalArray.get())[0] = osg::Vec3(0.3f, 0.3f, 0.3f);
     }
 
     ParticleSystem::ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop)
@@ -115,7 +115,7 @@ namespace NifOsg
     {
         mNormalArray = new osg::Vec3Array(1);
         mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-        (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
+        (*mNormalArray.get())[0] = osg::Vec3(0.3f, 0.3f, 0.3f);
 
         // For some reason the osgParticle constructor doesn't copy the particles
         for (int i = 0; i < copy.numParticles() - copy.numDeadParticles(); ++i)
@@ -247,9 +247,9 @@ namespace NifOsg
     {
         float size = mCachedDefaultSize;
         if (particle->getAge() < mGrowTime && mGrowTime != 0.f)
-            size *= particle->getAge() / mGrowTime;
+            size *= static_cast<float>(particle->getAge() / mGrowTime);
         if (particle->getLifeTime() - particle->getAge() < mFadeTime && mFadeTime != 0.f)
-            size *= (particle->getLifeTime() - particle->getAge()) / mFadeTime;
+            size *= static_cast<float>(particle->getLifeTime() - particle->getAge()) / mFadeTime;
         particle->setSizeRange(osgParticle::rangef(size, size));
     }
 
@@ -326,7 +326,7 @@ namespace NifOsg
                     decayFactor = std::exp(-1.f * mDecay * distance);
                 }
 
-                particle->addVelocity(mCachedWorldDirection * mForce * dt * decayFactor * magic);
+                particle->addVelocity(mCachedWorldDirection * mForce * static_cast<float>(dt) * decayFactor * magic);
 
                 break;
             }
@@ -340,7 +340,7 @@ namespace NifOsg
 
                 diff.normalize();
 
-                particle->addVelocity(diff * mForce * dt * decayFactor * magic);
+                particle->addVelocity(diff * mForce * static_cast<float>(dt) * decayFactor * magic);
                 break;
             }
         }
@@ -421,7 +421,7 @@ namespace NifOsg
                 break;
         }
 
-        particle->addVelocity(explosionDir * mStrength * decay * dt);
+        particle->addVelocity(explosionDir * mStrength * decay * static_cast<float>(dt));
     }
 
     Emitter::Emitter()
@@ -476,28 +476,28 @@ namespace NifOsg
 
         if (useGeometryEmitter || !mTargets.empty())
         {
-            int recIndex;
+            int recordIndex;
 
             if (useGeometryEmitter)
             {
                 if (!mGeometryEmitterTarget.has_value())
                     return;
 
-                recIndex = mGeometryEmitterTarget.value();
+                recordIndex = mGeometryEmitterTarget.value();
             }
             else
             {
-                int randomIndex = Misc::Rng::rollClosedProbability() * (mTargets.size() - 1);
-                recIndex = mTargets[randomIndex];
+                size_t randomIndex = Misc::Rng::rollDice(mTargets.size());
+                recordIndex = mTargets[randomIndex];
             }
 
             // we could use a map here for faster lookup
-            FindGroupByRecIndex visitor(recIndex);
+            FindGroupByRecordIndex visitor(recordIndex);
             getParent(0)->accept(visitor);
 
             if (!visitor.mFound)
             {
-                Log(Debug::Info) << "Can't find emitter node" << recIndex;
+                Log(Debug::Info) << "Can't find emitter node" << recordIndex;
                 return;
             }
 
@@ -550,47 +550,47 @@ namespace NifOsg
 
         for (int i = 0; i < n; ++i)
         {
-            osgParticle::Particle* P = getParticleSystem()->createParticle(nullptr);
-            if (P)
+            osgParticle::Particle* const particle = getParticleSystem()->createParticle(nullptr);
+            if (particle)
             {
                 if (useGeometryEmitter)
-                    P->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
+                    particle->setPosition((*geometryVertices)[Misc::Rng::rollDice(geometryVertices->getNumElements())]);
                 else if (mPlacer)
-                    mPlacer->place(P);
+                    mPlacer->place(particle);
 
-                mShooter->shoot(P);
+                mShooter->shoot(particle);
 
-                P->transformPositionVelocity(emitterToPs);
+                particle->transformPositionVelocity(emitterToPs);
             }
         }
     }
 
-    FindGroupByRecIndex::FindGroupByRecIndex(unsigned int recIndex)
+    FindGroupByRecordIndex::FindGroupByRecordIndex(unsigned int recordIndex)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mFound(nullptr)
-        , mRecIndex(recIndex)
+        , mRecordIndex(recordIndex)
     {
     }
 
-    void FindGroupByRecIndex::apply(osg::Node& node)
+    void FindGroupByRecordIndex::apply(osg::Node& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::apply(osg::MatrixTransform& node)
+    void FindGroupByRecordIndex::apply(osg::MatrixTransform& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::apply(osg::Geometry& node)
+    void FindGroupByRecordIndex::apply(osg::Geometry& node)
     {
         applyNode(node);
     }
 
-    void FindGroupByRecIndex::applyNode(osg::Node& searchNode)
+    void FindGroupByRecordIndex::applyNode(osg::Node& searchNode)
     {
-        unsigned int recIndex;
-        if (searchNode.getUserValue("recIndex", recIndex) && mRecIndex == recIndex)
+        unsigned int recordIndex;
+        if (searchNode.getUserValue("recordIndex", recordIndex) && mRecordIndex == recordIndex)
         {
             osg::Group* group = searchNode.asGroup();
             if (!group)

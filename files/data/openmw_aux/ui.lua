@@ -4,6 +4,7 @@ local ui = require('openmw.ui')
 -- `openmw_aux.ui` defines utility functions for UI.
 -- Implementation can be found in `resources/vfs/openmw_aux/ui.lua`.
 -- @module ui
+-- @context menu|player
 -- @usage local auxUi = require('openmw_aux.ui')
 local aux_ui = {}
 

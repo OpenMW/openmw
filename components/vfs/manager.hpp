@@ -45,17 +45,15 @@ namespace VFS
 
         bool exists(Path::NormalizedView name) const;
 
+        // Returns open file if exists or nullptr.
+        Files::IStreamPtr find(Path::NormalizedView name) const;
+
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr get(const Path::Normalized& name) const;
 
         Files::IStreamPtr get(Path::NormalizedView name) const;
-
-        /// Retrieve a file by name (name is already normalized).
-        /// @note Throws an exception if the file can not be found.
-        /// @note May be called from any thread once the index has been built.
-        Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
 
         std::string getArchive(const Path::Normalized& name) const;
 
@@ -69,15 +67,21 @@ namespace VFS
 
         RecursiveDirectoryRange getRecursiveDirectoryIterator() const;
 
-        /// Retrieve the absolute path to the file
-        /// @note Throws an exception if the file can not be found.
-        /// @note May be called from any thread once the index has been built.
-        std::filesystem::path getAbsoluteFileName(const std::filesystem::path& name) const;
+        std::filesystem::file_time_type getLastModified(VFS::Path::NormalizedView name) const;
+        // Equivalent to std::filesystem::path::stem. The result isn't normalized.
+        std::string getStem(VFS::Path::NormalizedView name) const;
 
     private:
         std::vector<std::unique_ptr<Archive>> mArchives;
 
         FileMap mIndex;
+
+        inline Files::IStreamPtr findNormalized(std::string_view normalizedPath) const;
+
+        /// Retrieve a file by name (name is already normalized).
+        /// @note Throws an exception if the file can not be found.
+        /// @note May be called from any thread once the index has been built.
+        Files::IStreamPtr getNormalized(std::string_view normalizedName) const;
     };
 
 }

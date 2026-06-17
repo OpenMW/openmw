@@ -275,7 +275,7 @@ void CSMWorld::RefIdData::erase(const LocalIndex& index, int count)
 
 int CSMWorld::RefIdData::getSize() const
 {
-    return mIndex.size();
+    return static_cast<int>(mIndex.size());
 }
 
 std::vector<ESM::RefId> CSMWorld::RefIdData::getIds(bool listDeleted) const

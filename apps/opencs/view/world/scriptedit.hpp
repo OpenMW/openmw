@@ -74,6 +74,7 @@ namespace CSVWorld
 
     protected:
         bool event(QEvent* event) override;
+        void keyPressEvent(QKeyEvent* e) override;
 
     public:
         ScriptEdit(const CSMDoc::Document& document, ScriptHighlighter::Mode mode, QWidget* parent);

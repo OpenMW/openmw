@@ -2,6 +2,7 @@
 
 #include <charconv>
 #include <cmath>
+#include <format>
 #include <limits>
 #include <regex>
 #include <stdexcept>
@@ -13,8 +14,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <components/misc/strings/format.hpp>
-#include <components/misc/strings/lower.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 namespace LuaUtil
 {
@@ -213,10 +213,10 @@ namespace LuaUtil
                 }
                 case ScalarType::Boolean:
                 {
-                    if (Misc::StringUtils::lowerCase(value) == "true")
+                    if (Misc::StringUtils::ciEqual(value, "true"))
                         return sol::make_object<bool>(lua, true);
 
-                    if (Misc::StringUtils::lowerCase(value) == "false")
+                    if (Misc::StringUtils::ciEqual(value, "false"))
                         return sol::make_object<bool>(lua, false);
 
                     nodeError(node, "Can not read a boolean value '" + value + "'");
@@ -272,8 +272,8 @@ namespace LuaUtil
         [[noreturn]] void nodeError(const YAML::Node& node, const std::string& message)
         {
             const auto& mark = node.Mark();
-            std::string error = Misc::StringUtils::format(
-                " at line=%d column=%d position=%d", mark.line + 1, mark.column + 1, mark.pos + 1);
+            std::string error
+                = std::format(" at line={} column={} position={}", mark.line + 1, mark.column + 1, mark.pos + 1);
             throw std::runtime_error(message + error);
         }
     }

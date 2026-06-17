@@ -2,6 +2,7 @@
 -- `openmw_aux.calendar` defines utility functions for formatting game time.
 -- Implementation can be found in `resources/vfs/openmw_aux/calendar.lua`.
 -- @module calendar
+-- @context global|menu|local
 -- @usage local calendar = require('openmw_aux.calendar')
 
 local core = require('openmw.core')

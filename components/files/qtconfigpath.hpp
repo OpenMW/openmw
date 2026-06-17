@@ -8,19 +8,9 @@
 
 namespace Files
 {
-    inline QString getLocalConfigPathQString(const Files::ConfigurationManager& cfgMgr)
-    {
-        return Files::pathToQString(cfgMgr.getLocalPath() / openmwCfgFile);
-    }
-
     inline QString getUserConfigPathQString(const Files::ConfigurationManager& cfgMgr)
     {
         return Files::pathToQString(cfgMgr.getUserConfigPath() / openmwCfgFile);
-    }
-
-    inline QString getGlobalConfigPathQString(const Files::ConfigurationManager& cfgMgr)
-    {
-        return Files::pathToQString(cfgMgr.getGlobalPath() / openmwCfgFile);
     }
 
     inline QStringList getActiveConfigPathsQString(const Files::ConfigurationManager& cfgMgr)

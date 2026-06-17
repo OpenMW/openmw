@@ -28,7 +28,6 @@ namespace SDLUtil
         float mY;
         float mPressure;
 
-#if SDL_VERSION_ATLEAST(2, 0, 14)
         explicit TouchEvent(const SDL_ControllerTouchpadEvent& arg)
             : mDevice(arg.touchpad)
             , mFinger(arg.finger)
@@ -37,7 +36,6 @@ namespace SDLUtil
             , mPressure(arg.pressure)
         {
         }
-#endif
     };
 
     ///////////////

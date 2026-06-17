@@ -10,13 +10,18 @@
 #include <type_traits>
 #include <vector>
 
-#include <components/to_utf8/to_utf8.hpp>
+#include <components/toutf8/toutf8.hpp>
 
 #include "components/esm/decompose.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 
 #include "loadtes3.hpp"
+
+namespace LuaUtil
+{
+    class ScriptsConfiguration;
+}
 
 namespace ESM
 {
@@ -43,6 +48,7 @@ namespace ESM
     inline constexpr bool IsReadable<void> = false;
 
     class ReadersCache;
+    class ActorIdConverter; // For old save games
 
     class ESMReader
     {
@@ -118,7 +124,6 @@ namespace ESM
 
         // Used only when loading saves to adjust FormIds if load order was changes.
         void setContentFileMapping(const std::map<int, int>* mapping) { mContentFileMapping = mapping; }
-        const std::map<int, int>* getContentFileMapping();
 
         // Returns false if content file not found.
         bool applyContentFileMapping(FormId& id);
@@ -374,8 +379,6 @@ namespace ESM
 
         uint32_t mRecordFlags;
 
-        // Special file signifier (see SpecialFile enum above)
-
         // Buffer for ESM strings
         std::vector<char> mBuffer;
 
@@ -386,6 +389,11 @@ namespace ESM
         size_t mFileSize;
 
         const std::map<int, int>* mContentFileMapping = nullptr;
+
+    public:
+        ActorIdConverter* mActorIdConverter = nullptr;
+
+        const LuaUtil::ScriptsConfiguration* mScriptsConfiguration = nullptr;
     };
 }
 #endif

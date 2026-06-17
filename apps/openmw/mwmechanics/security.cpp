@@ -11,6 +11,7 @@
 #include "../mwbase/world.hpp"
 
 #include "creaturestats.hpp"
+#include "spellutil.hpp"
 
 namespace MWMechanics
 {
@@ -89,7 +90,7 @@ namespace MWMechanics
 
         const ESM::Spell* trapSpell
             = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(trap.getCellRef().getTrap());
-        int trapSpellPoints = trapSpell->mData.mCost;
+        int trapSpellPoints = MWMechanics::calcSpellCost(*trapSpell);
 
         float fTrapCostMult = MWBase::Environment::get()
                                   .getESMStore()

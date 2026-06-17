@@ -46,6 +46,7 @@ local templatesMeta = {
 
 ---
 -- @module MWUI
+-- @context menu|player
 -- @usage require('openmw.interfaces').MWUI
 local function TemplateOverrides(templates)
     return setmetatable({

@@ -2,10 +2,11 @@
 #define OPENMW_MWRENDER_EFFECTMANAGER_H
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <osg/ref_ptr>
+
+#include <components/vfs/pathutil.hpp>
 
 namespace osg
 {
@@ -33,8 +34,11 @@ namespace MWRender
         ~EffectManager();
 
         /// Add an effect. When it's finished playing, it will be removed automatically.
-        void addEffect(const std::string& model, std::string_view textureOverride, const osg::Vec3f& worldPosition,
-            float scale, bool isMagicVFX = true);
+        void addEffect(VFS::Path::NormalizedView model, std::string_view textureOverride,
+            const osg::Vec3f& worldPosition, float scale, bool isMagicVFX = true, bool useAmbientLight = true,
+            std::string_view effectId = {}, bool loop = false);
+
+        void removeEffect(std::string_view effectId);
 
         void update(float dt);
 
@@ -44,7 +48,9 @@ namespace MWRender
     private:
         struct Effect
         {
+            std::string mEffectId;
             float mMaxControllerLength;
+            bool mLoop;
             std::shared_ptr<EffectAnimationTime> mAnimTime;
             osg::ref_ptr<osg::PositionAttitudeTransform> mTransform;
         };

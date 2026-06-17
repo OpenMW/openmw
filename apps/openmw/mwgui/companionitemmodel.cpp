@@ -28,7 +28,7 @@ namespace MWGui
     MWWorld::Ptr CompanionItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
     {
         if (hasProfit(mActor))
-            modifyProfit(mActor, item.mBase.getClass().getValue(item.mBase) * count);
+            modifyProfit(mActor, static_cast<int>(item.mBase.getClass().getValue(item.mBase) * count));
 
         return InventoryItemModel::addItem(item, count, allowAutoEquip);
     }
@@ -36,7 +36,7 @@ namespace MWGui
     MWWorld::Ptr CompanionItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
     {
         if (hasProfit(mActor))
-            modifyProfit(mActor, item.mBase.getClass().getValue(item.mBase) * count);
+            modifyProfit(mActor, static_cast<int>(item.mBase.getClass().getValue(item.mBase) * count));
 
         return InventoryItemModel::copyItem(item, count, allowAutoEquip);
     }
@@ -44,7 +44,7 @@ namespace MWGui
     void CompanionItemModel::removeItem(const ItemStack& item, size_t count)
     {
         if (hasProfit(mActor))
-            modifyProfit(mActor, -item.mBase.getClass().getValue(item.mBase) * count);
+            modifyProfit(mActor, -static_cast<int>(item.mBase.getClass().getValue(item.mBase) * count));
 
         InventoryItemModel::removeItem(item, count);
     }

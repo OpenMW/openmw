@@ -65,14 +65,19 @@ namespace Nif
         RC_bhkPackedNiTriStripsShape,
         RC_bhkPlaneShape,
         RC_bhkPhysicsSystem,
+        RC_bhkPoseArray,
         RC_bhkPrismaticConstraint,
         RC_bhkRagdollConstraint,
         RC_bhkRagdollSystem,
+        RC_bhkRagdollTemplate,
+        RC_bhkRagdollTemplateData,
         RC_bhkRigidBody,
         RC_bhkRigidBodyT,
         RC_bhkSimpleShapePhantom,
         RC_bhkSphereShape,
         RC_bhkStiffSpringConstraint,
+        RC_BSAnimNote,
+        RC_BSAnimNotes,
         RC_BSBehaviorGraphExtraData,
         RC_BSBound,
         RC_BSBoneLODExtraData,
@@ -85,6 +90,7 @@ namespace Nif
         RC_BSDynamicTriShape,
         RC_BSDismemberSkinInstance,
         RC_BSDistantObjectExtraData,
+        RC_BSDistantObjectInstancedNode,
         RC_BSDistantObjectLargeRefExtraData,
         RC_BSEffectShaderProperty,
         RC_BSEffectShaderPropertyColorController,
@@ -127,6 +133,7 @@ namespace Nif
         RC_BSStripPSysData,
         RC_BSRefractionFirePeriodController,
         RC_BSRefractionStrengthController,
+        RC_BSRotAccumTransfInterpolator,
         RC_BSSegmentedTriShape,
         RC_BSShaderNoLightingProperty,
         RC_BSShaderPPLightingProperty,
@@ -136,6 +143,7 @@ namespace Nif
         RC_BSSkinInstance,
         RC_BSSkyShaderProperty,
         RC_BSSubIndexTriShape,
+        RC_BSTreadTransfInterpolator,
         RC_BSTriShape,
         RC_BSWArray,
         RC_BSWaterShaderProperty,
@@ -162,6 +170,12 @@ namespace Nif
         RC_NiBSAnimationNode,
         RC_NiBSPArrayController,
         RC_NiBSParticleNode,
+        RC_NiBSplineData,
+        RC_NiBSplineBasisData,
+        RC_NiBSplineCompFloatInterpolator,
+        RC_NiBSplineCompPoint3Interpolator,
+        RC_NiBSplineCompTransformInterpolator,
+        RC_NiBSplineTransformInterpolator,
         RC_NiCamera,
         RC_NiClusterAccumulator,
         RC_NiCollisionObject,
@@ -258,6 +272,7 @@ namespace Nif
         RC_NiPSysPlanarCollider,
         RC_NiPSysPositionModifier,
         RC_NiPSysRotationModifier,
+        RC_NiPSysRotDampeningCtlr,
         RC_NiPSysResetOnLoopCtlr,
         RC_NiPSysSpawnModifier,
         RC_NiPSysSphericalCollider,
@@ -308,10 +323,9 @@ namespace Nif
     /// Base class for all records
     struct Record
     {
-        // Record type and type name
-        RecordType recType{ RC_MISSING };
-        std::string recName;
-        unsigned int recIndex{ ~0u };
+        RecordType mRecordType{ RC_MISSING };
+        std::string mRecordName;
+        unsigned int mRecordIndex{ ~0u };
 
         Record() = default;
 

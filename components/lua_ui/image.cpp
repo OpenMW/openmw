@@ -6,7 +6,7 @@
 
 namespace LuaUi
 {
-    void LuaTileRect::_setAlign(const MyGUI::IntSize& _oldsize)
+    void LuaTileRect::_setAlign(const MyGUI::IntSize& /*oldSize*/)
     {
         mCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
         mTileSize = mSetTileSize;
@@ -20,9 +20,9 @@ namespace LuaUi
         // mCoord could be zero, prevent division by 0
         // use arbitrary large numbers to prevent performance issues
         if (mTileSize.width <= 0)
-            mTileSize.width = 1e7;
+            mTileSize.width = 10000000;
         if (mTileSize.height <= 0)
-            mTileSize.height = 1e7;
+            mTileSize.height = 10000000;
 
         MyGUI::TileRect::_updateView();
     }
@@ -67,5 +67,16 @@ namespace LuaUi
         setColour(propertyValue("color", MyGUI::Colour(1, 1, 1, 1)));
 
         WidgetExtension::updateProperties();
+    }
+
+    const std::vector<std::string_view>& LuaImage::allUsedProperties() const
+    {
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "resource", "tileH", "tileV", "color" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
+            return props;
+        });
+        return usedProps;
     }
 }

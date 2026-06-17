@@ -39,7 +39,7 @@ namespace SDLUtil
         _setWindowScale();
     }
 
-    InputWrapper::~InputWrapper() {}
+    InputWrapper::~InputWrapper() = default;
 
     void InputWrapper::_setWindowScale()
     {
@@ -47,8 +47,8 @@ namespace SDLUtil
         SDL_GetWindowSize(mSDLWindow, &w, &h);
         int dw, dh;
         SDL_GL_GetDrawableSize(mSDLWindow, &dw, &dh);
-        mScaleX = dw / w;
-        mScaleY = dh / h;
+        mScaleX = static_cast<Uint16>(dw / w);
+        mScaleY = static_cast<Uint16>(dh / h);
     }
 
     void InputWrapper::capture(bool windowEventsOnly)
@@ -76,6 +76,18 @@ namespace SDLUtil
 
         while (SDL_PollEvent(&evt))
         {
+#if SDL_VERSION_ATLEAST(2, 30, 50)
+            // SDL2-compat may pass us SDL3 display and window events alongside the SDL2 events for funsies
+            // Until we are ready to move to SDL3, we'll want to prevent the noise
+
+            // Silence 0x151 to 0x1FF range
+            if (evt.type > SDL_DISPLAYEVENT && evt.type < SDL_WINDOWEVENT)
+                continue;
+
+            // Silence 0x202 to 0x2FF range
+            if (evt.type > SDL_SYSWMEVENT && evt.type < SDL_KEYDOWN)
+                continue;
+#endif
             switch (evt.type)
             {
                 case SDL_MOUSEMOTION:
@@ -161,7 +173,6 @@ namespace SDLUtil
                     if (mConListener)
                         mConListener->axisMoved(1, evt.caxis);
                     break;
-#if SDL_VERSION_ATLEAST(2, 0, 14)
                 case SDL_CONTROLLERSENSORUPDATE:
                     // controller sensor data is received on demand
                     break;
@@ -174,7 +185,6 @@ namespace SDLUtil
                 case SDL_CONTROLLERTOUCHPADUP:
                     mConListener->touchpadReleased(1, TouchEvent(evt.ctouchpad));
                     break;
-#endif
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;
@@ -310,8 +320,8 @@ namespace SDLUtil
     {
         SDL_WarpMouseInWindow(mSDLWindow, x, y);
         mWarpCompensate = true;
-        mWarpX = x;
-        mWarpY = y;
+        mWarpX = static_cast<Uint16>(x);
+        mWarpY = static_cast<Uint16>(y);
     }
 
     /// \brief Locks the pointer to the window
@@ -393,12 +403,12 @@ namespace SDLUtil
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width / 4;
-        const int FUDGE_FACTOR_Y = height / 4;
+        const int fudgeFactorX = width / 4;
+        const int fudgeFactorY = height / 4;
 
         // warp the mouse if it's about to go outside the window
-        if (evt.x - FUDGE_FACTOR_X < 0 || evt.x + FUDGE_FACTOR_X > width || evt.y - FUDGE_FACTOR_Y < 0
-            || evt.y + FUDGE_FACTOR_Y > height)
+        if (evt.x - fudgeFactorX < 0 || evt.x + fudgeFactorX > width || evt.y - fudgeFactorY < 0
+            || evt.y + fudgeFactorY > height)
         {
             warpMouse(width / 2, height / 2);
         }
@@ -407,37 +417,37 @@ namespace SDLUtil
     /// \brief Package mouse and mousewheel motions into a single event
     MouseMotionEvent InputWrapper::_packageMouseMotion(const SDL_Event& evt)
     {
-        MouseMotionEvent pack_evt = {};
-        pack_evt.x = mMouseX * mScaleX;
-        pack_evt.y = mMouseY * mScaleY;
-        pack_evt.z = mMouseZ;
+        MouseMotionEvent packEvt = {};
+        packEvt.x = mMouseX * mScaleX;
+        packEvt.y = mMouseY * mScaleY;
+        packEvt.z = mMouseZ;
 
         if (evt.type == SDL_MOUSEMOTION)
         {
-            pack_evt.x = mMouseX = evt.motion.x * mScaleX;
-            pack_evt.y = mMouseY = evt.motion.y * mScaleY;
-            pack_evt.xrel = evt.motion.xrel * mScaleX;
-            pack_evt.yrel = evt.motion.yrel * mScaleY;
-            pack_evt.type = SDL_MOUSEMOTION;
+            packEvt.x = mMouseX = evt.motion.x * mScaleX;
+            packEvt.y = mMouseY = evt.motion.y * mScaleY;
+            packEvt.xrel = evt.motion.xrel * mScaleX;
+            packEvt.yrel = evt.motion.yrel * mScaleY;
+            packEvt.type = SDL_MOUSEMOTION;
             if (mFirstMouseMove)
             {
                 // first event should be treated as non-relative, since there's no point of reference
                 // SDL then (incorrectly) uses (0,0) as point of reference, on Linux at least...
-                pack_evt.xrel = pack_evt.yrel = 0;
+                packEvt.xrel = packEvt.yrel = 0;
                 mFirstMouseMove = false;
             }
         }
         else if (evt.type == SDL_MOUSEWHEEL)
         {
-            mMouseZ += pack_evt.zrel = (evt.wheel.y * 120);
-            pack_evt.z = mMouseZ;
-            pack_evt.type = SDL_MOUSEWHEEL;
+            mMouseZ += packEvt.zrel = (evt.wheel.y * 120);
+            packEvt.z = mMouseZ;
+            packEvt.type = SDL_MOUSEWHEEL;
         }
         else
         {
             throw std::runtime_error("Tried to package non-motion event!");
         }
 
-        return pack_evt;
+        return packEvt;
     }
 }

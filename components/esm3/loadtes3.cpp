@@ -38,7 +38,7 @@ namespace ESM
             MasterData m;
             m.name = esm.getHString();
             esm.getHNT(m.size, "DATA");
-            mMaster.push_back(m);
+            mMaster.push_back(std::move(m));
         }
 
         esm.getHNOT("GMDT", mGameData.mCurrentHealth, mGameData.mMaximumHealth, mGameData.mHour, mGameData.unknown1,

@@ -1,10 +1,24 @@
 #include "postprocessingbindings.hpp"
 
+#include "MyGUI_LanguageManager.h"
+
+#include <components/lua/util.hpp>
+#include <components/misc/strings/format.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwrender/postprocessor.hpp"
 
+#include "context.hpp"
 #include "luamanagerimp.hpp"
+
+namespace
+{
+    std::string getLocalizedMyGUIString(std::string_view unlocalized)
+    {
+        return MyGUI::LanguageManager::getInstance().replaceTags(std::string(unlocalized)).asUTF8();
+    }
+}
 
 namespace MWLua
 {
@@ -23,9 +37,9 @@ namespace MWLua
 {
     struct Shader
     {
-        std::shared_ptr<fx::Technique> mShader;
+        std::shared_ptr<Fx::Technique> mShader;
 
-        Shader(std::shared_ptr<fx::Technique> shader)
+        Shader(std::shared_ptr<Fx::Technique> shader)
             : mShader(std::move(shader))
         {
         }
@@ -35,7 +49,7 @@ namespace MWLua
             if (!mShader)
                 return "Shader(nil)";
 
-            return Misc::StringUtils::format("Shader(%s, %s)", mShader->getName(), mShader->getFileName());
+            return Misc::StringUtils::format("Shader(%s, %s)", mShader->getName(), mShader->getFileName().value());
         }
 
         enum
@@ -78,7 +92,7 @@ namespace MWLua
 
             for (size_t i = 0; i < *targetSize; ++i)
             {
-                sol::object obj = table[i + 1];
+                sol::object obj = table[LuaUtil::toLuaIndex(i)];
                 if (!obj.is<T>())
                     throw std::runtime_error("Invalid type for uniform array");
                 values.push_back(obj.as<T>());
@@ -94,60 +108,72 @@ namespace MWLua
 
     sol::table initPostprocessingPackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view lua = context.sol();
+        sol::table api(lua, sol::create);
 
-        sol::usertype<Shader> shader = context.mLua->sol().new_usertype<Shader>("Shader");
-        shader[sol::meta_function::to_string] = [](const Shader& shader) { return shader.toString(); };
+        {
+            sol::usertype<Shader> shader = lua.new_usertype<Shader>("Shader");
+            shader[sol::meta_function::to_string] = [](const Shader& self) { return self.toString(); };
 
-        shader["enable"] = [context](Shader& shader, sol::optional<int> optPos) {
-            std::optional<int> pos = std::nullopt;
-            if (optPos)
-                pos = optPos.value();
+            shader["enable"] = [context](Shader& self, sol::optional<int> optPos) {
+                std::optional<int> pos = std::nullopt;
+                if (optPos)
+                    pos = optPos.value();
 
-            if (shader.mShader && shader.mShader->isValid())
-                shader.mQueuedAction = Shader::Action_Enable;
+                if (self.mShader && self.mShader->isValid())
+                    self.mQueuedAction = Shader::Action_Enable;
 
-            context.mLuaManager->addAction([=, &shader] {
-                shader.mQueuedAction = Shader::Action_None;
+                context.mLuaManager->addAction([=, &self] {
+                    self.mQueuedAction = Shader::Action_None;
 
-                if (MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(shader.mShader, pos)
-                    == MWRender::PostProcessor::Status_Error)
-                    throw std::runtime_error("Failed enabling shader '" + shader.mShader->getName() + "'");
-            });
-        };
+                    if (MWBase::Environment::get().getWorld()->getPostProcessor()->enableTechnique(self.mShader, pos)
+                        == MWRender::PostProcessor::Status_Error)
+                        throw std::runtime_error("Failed enabling shader '" + self.mShader->getName() + "'");
+                });
+            };
 
-        shader["disable"] = [context](Shader& shader) {
-            shader.mQueuedAction = Shader::Action_Disable;
+            shader["disable"] = [context](Shader& self) {
+                self.mQueuedAction = Shader::Action_Disable;
 
-            context.mLuaManager->addAction([&] {
-                shader.mQueuedAction = Shader::Action_None;
+                context.mLuaManager->addAction([&] {
+                    self.mQueuedAction = Shader::Action_None;
 
-                if (MWBase::Environment::get().getWorld()->getPostProcessor()->disableTechnique(shader.mShader)
-                    == MWRender::PostProcessor::Status_Error)
-                    throw std::runtime_error("Failed disabling shader '" + shader.mShader->getName() + "'");
-            });
-        };
+                    if (MWBase::Environment::get().getWorld()->getPostProcessor()->disableTechnique(self.mShader)
+                        == MWRender::PostProcessor::Status_Error)
+                        throw std::runtime_error("Failed disabling shader '" + self.mShader->getName() + "'");
+                });
+            };
 
-        shader["isEnabled"] = [](const Shader& shader) {
-            if (shader.mQueuedAction == Shader::Action_Enable)
-                return true;
-            else if (shader.mQueuedAction == Shader::Action_Disable)
-                return false;
-            return MWBase::Environment::get().getWorld()->getPostProcessor()->isTechniqueEnabled(shader.mShader);
-        };
+            shader["isEnabled"] = [](const Shader& self) {
+                if (self.mQueuedAction == Shader::Action_Enable)
+                    return true;
+                else if (self.mQueuedAction == Shader::Action_Disable)
+                    return false;
+                return MWBase::Environment::get().getWorld()->getPostProcessor()->isTechniqueEnabled(self.mShader);
+            };
 
-        shader["setBool"] = getSetter<bool>(context);
-        shader["setFloat"] = getSetter<float>(context);
-        shader["setInt"] = getSetter<int>(context);
-        shader["setVector2"] = getSetter<osg::Vec2f>(context);
-        shader["setVector3"] = getSetter<osg::Vec3f>(context);
-        shader["setVector4"] = getSetter<osg::Vec4f>(context);
+            shader["name"] = sol::readonly_property(
+                [](const Shader& self) { return getLocalizedMyGUIString(self.mShader->getName()); });
+            shader["author"] = sol::readonly_property(
+                [](const Shader& self) { return getLocalizedMyGUIString(self.mShader->getAuthor()); });
+            shader["description"] = sol::readonly_property(
+                [](const Shader& self) { return getLocalizedMyGUIString(self.mShader->getDescription()); });
+            shader["version"] = sol::readonly_property(
+                [](const Shader& self) { return getLocalizedMyGUIString(self.mShader->getVersion()); });
 
-        shader["setFloatArray"] = getArraySetter<float>(context);
-        shader["setIntArray"] = getArraySetter<int>(context);
-        shader["setVector2Array"] = getArraySetter<osg::Vec2f>(context);
-        shader["setVector3Array"] = getArraySetter<osg::Vec3f>(context);
-        shader["setVector4Array"] = getArraySetter<osg::Vec4f>(context);
+            shader["setBool"] = getSetter<bool>(context);
+            shader["setFloat"] = getSetter<float>(context);
+            shader["setInt"] = getSetter<int>(context);
+            shader["setVector2"] = getSetter<osg::Vec2f>(context);
+            shader["setVector3"] = getSetter<osg::Vec3f>(context);
+            shader["setVector4"] = getSetter<osg::Vec4f>(context);
+
+            shader["setFloatArray"] = getArraySetter<float>(context);
+            shader["setIntArray"] = getArraySetter<int>(context);
+            shader["setVector2Array"] = getArraySetter<osg::Vec2f>(context);
+            shader["setVector3Array"] = getArraySetter<osg::Vec3f>(context);
+            shader["setVector4Array"] = getArraySetter<osg::Vec4f>(context);
+        }
 
         api["load"] = [](const std::string& name) {
             Shader shader{ MWBase::Environment::get().getWorld()->getPostProcessor()->loadTechnique(name, false) };
@@ -155,10 +181,21 @@ namespace MWLua
             if (!shader.mShader || !shader.mShader->isValid())
                 throw std::runtime_error(Misc::StringUtils::format("Failed loading shader '%s'", name));
 
-            if (!shader.mShader->getDynamic())
-                throw std::runtime_error(Misc::StringUtils::format("Shader '%s' is not marked as dynamic", name));
-
             return shader;
+        };
+
+        api["getChain"] = [context]() {
+            sol::table chain(context.sol(), sol::create);
+
+            for (const auto& shader : MWBase::Environment::get().getWorld()->getPostProcessor()->getChain())
+            {
+                // Don't expose internal shaders to the API, they should be invisible to the user
+                if (shader->getInternal())
+                    continue;
+                chain.add(Shader(shader));
+            }
+
+            return chain;
         };
 
         return LuaUtil::makeReadOnly(api);

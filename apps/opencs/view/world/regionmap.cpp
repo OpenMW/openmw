@@ -133,10 +133,10 @@ QModelIndexList CSVWorld::RegionMap::getMissingRegionCells() const
 
     for (QModelIndexList::const_iterator iter(selected.begin()); iter != selected.end(); ++iter)
     {
-        std::string region = model->data(*iter, CSMWorld::RegionMap::Role_Region).toString().toUtf8().constData();
+        std::string_view region = model->data(*iter, CSMWorld::RegionMap::Role_Region).toString().toUtf8().constData();
 
         if (!region.empty())
-            regions.insert(region);
+            regions.emplace(region);
     }
 
     QModelIndexList list;
@@ -341,7 +341,7 @@ void CSVWorld::RegionMap::viewInTable()
 
 void CSVWorld::RegionMap::mouseMoveEvent(QMouseEvent* event)
 {
-    startDragFromTable(*this, indexAt(event->pos()));
+    startDragFromTable(*this, indexAt(event->position().toPoint()));
 }
 
 std::vector<CSMWorld::UniversalId> CSVWorld::RegionMap::getDraggedRecords() const
@@ -376,7 +376,7 @@ void CSVWorld::RegionMap::dragMoveEvent(QDragMoveEvent* event)
 
 void CSVWorld::RegionMap::dropEvent(QDropEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
+    QModelIndex index = indexAt(event->position().toPoint());
 
     bool exists = QTableView::model()->data(index, Qt::BackgroundRole) != QBrush(Qt::DiagCrossPattern);
     if (!index.isValid() || !exists)

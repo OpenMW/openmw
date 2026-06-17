@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 
+#include <MyGUI_Types.h>
 #include <osg/BoundingBox>
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -82,14 +83,14 @@ namespace MWRender
          * Save the fog of war for this cell to its CellStore.
          * @remarks This should be called when unloading a cell, and for all active cells prior to saving the game.
          */
-        void saveFogOfWar(MWWorld::CellStore* cell);
+        void saveFogOfWar(MWWorld::CellStore* cell) const;
 
         /**
          * Get the interior map texture index and normalized position on this texture, given a world position
          */
-        void worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y);
+        void worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y) const;
 
-        osg::Vec2f interiorMapToWorldPosition(float nX, float nY, int x, int y);
+        osg::Vec2f interiorMapToWorldPosition(float nX, float nY, int x, int y) const;
 
         /**
          * Check if a given position is explored by the player (i.e. not obscured by fog of war)
@@ -98,15 +99,14 @@ namespace MWRender
 
         osg::Group* getRoot();
 
+        MyGUI::IntRect getInteriorGrid() const;
+
     private:
         osg::ref_ptr<osg::Group> mRoot;
         osg::ref_ptr<osg::Node> mSceneRoot;
 
         typedef std::vector<osg::ref_ptr<LocalMapRenderToTexture>> RTTVector;
         RTTVector mLocalMapRTTs;
-
-        typedef std::set<std::pair<int, int>> Grid;
-        Grid mCurrentGrid;
 
         enum NeighbourCellFlag : std::uint8_t
         {
@@ -144,21 +144,22 @@ namespace MWRender
         static const int sFogOfWarResolution = 32;
 
         // size of a map segment (for exteriors, 1 cell)
-        float mMapWorldSize;
+        int mMapWorldSize;
 
         int mCellDistance;
 
         float mAngle;
-        const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
+        const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle) const;
 
         void requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment);
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
         void setupRenderToTexture(
-            int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
+            int segmentX, int segmentY, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
-        bool mInterior;
         osg::BoundingBox mBounds;
+        osg::Vec2f mCenter;
+        bool mInterior;
 
         std::uint8_t getExteriorNeighbourFlags(int cellX, int cellY) const;
     };

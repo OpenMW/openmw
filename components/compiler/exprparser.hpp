@@ -30,7 +30,7 @@ namespace Compiler
 
         static int getPriority(char op);
 
-        char getOperandType(int Index = 0) const;
+        char getOperandType(int index = 0) const;
 
         char getOperator() const;
 

@@ -4,8 +4,8 @@
 #include <osg/Vec2i>
 
 #include <components/esm/esmbridge.hpp>
+#include <components/esm/exteriorcelllocation.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm/util.hpp>
 
 namespace ESM
 {
@@ -48,8 +48,12 @@ namespace MWWorld
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
         const ESM::RefId& getId() const { return mId; }
-        ESM::RefId getWorldSpace() const;
-        ESM::ExteriorCellLocation getExteriorCellLocation() const;
+        ESM::RefId getWorldSpace() const { return mIsExterior ? mParent : mId; }
+
+        ESM::ExteriorCellLocation getExteriorCellLocation() const
+        {
+            return ESM::ExteriorCellLocation(mGridPos.x(), mGridPos.y(), getWorldSpace());
+        }
 
     private:
         bool mIsExterior;

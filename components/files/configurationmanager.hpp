@@ -1,7 +1,6 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
-#include <map>
 #include <optional>
 #include <stack>
 #include <string_view>
@@ -9,11 +8,13 @@
 #include <components/files/collections.hpp>
 #include <components/files/fixedpath.hpp>
 
+// NOLINTBEGIN(readability-identifier-naming)
 namespace boost::program_options
 {
     class options_description;
     class variables_map;
 }
+// NOLINTEND(readability-identifier-naming)
 
 /**
  * \namespace Files
@@ -47,8 +48,7 @@ namespace Files
 
         const std::filesystem::path& getUserConfigPath() const;
         const std::filesystem::path& getUserDataPath() const;
-        const std::filesystem::path& getLocalDataPath() const;
-        const std::filesystem::path& getInstallPath() const;
+        std::vector<std::filesystem::path> getInstallPaths() const;
         const std::vector<std::filesystem::path>& getActiveConfigPaths() const { return mActiveConfigPaths; }
 
         const std::filesystem::path& getCachePath() const;
@@ -61,16 +61,11 @@ namespace Files
     private:
         typedef Files::FixedPath<> FixedPathType;
 
-        typedef const std::filesystem::path& (FixedPathType::*path_type_f)() const;
-        typedef std::map<std::u8string, path_type_f> TokensMappingContainer;
-
         std::optional<boost::program_options::variables_map> loadConfig(
             const std::filesystem::path& path, const boost::program_options::options_description& description) const;
 
         void addExtraConfigDirs(
             std::stack<std::filesystem::path>& dirs, const boost::program_options::variables_map& variables) const;
-
-        void setupTokensMapping();
 
         std::vector<std::filesystem::path> mActiveConfigPaths;
 
@@ -78,8 +73,6 @@ namespace Files
 
         std::filesystem::path mUserDataPath;
         std::filesystem::path mScreenshotPath;
-
-        TokensMappingContainer mTokensMapping;
 
         bool mSilent;
     };
@@ -100,11 +93,11 @@ namespace Files
     {
     };
 
-    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& MaybeQuotedPath);
+    std::istream& operator>>(std::istream& istream, MaybeQuotedPath& value);
 
     typedef std::vector<MaybeQuotedPath> MaybeQuotedPathContainer;
 
-    PathContainer asPathContainer(const MaybeQuotedPathContainer& MaybeQuotedPathContainer);
+    PathContainer asPathContainer(const MaybeQuotedPathContainer& value);
 
 } /* namespace Files */
 

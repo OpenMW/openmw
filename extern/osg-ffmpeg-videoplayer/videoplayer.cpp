@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <osg/Notify>
 #include <osg/Texture2D>
 
 #include "audiofactory.hpp"
@@ -45,7 +46,7 @@ void VideoPlayer::playVideo(std::unique_ptr<std::istream>&& inputstream, const s
         }
     }
     catch(std::exception& e) {
-        std::cerr<< "Failed to play video: "<<e.what() <<std::endl;
+        OSG_FATAL << "Failed to play video: " << e.what() << std::endl;
         close();
     }
 }

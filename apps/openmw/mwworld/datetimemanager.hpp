@@ -53,8 +53,8 @@ namespace MWWorld
     private:
         friend class World;
         void setup(Globals& globalVariables);
-        bool updateGlobalInt(GlobalVariableName name, int value);
-        bool updateGlobalFloat(GlobalVariableName name, float value);
+        void updateGlobalInt(GlobalVariableName name, int value);
+        void updateGlobalFloat(GlobalVariableName name, float value);
         void advanceTime(double hours, Globals& globalVariables);
 
         void setHour(double hour);

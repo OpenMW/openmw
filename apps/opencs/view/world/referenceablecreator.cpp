@@ -7,6 +7,8 @@
 
 #include <apps/opencs/view/world/genericcreator.hpp>
 
+#include <components/misc/scalableicon.hpp>
+
 #include "../../model/world/commands.hpp"
 #include "../../model/world/universalid.hpp"
 
@@ -23,8 +25,8 @@ void CSVWorld::ReferenceableCreator::configureCreateCommand(CSMWorld::CreateComm
 }
 
 CSVWorld::ReferenceableCreator::ReferenceableCreator(
-    CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
-    : GenericCreator(data, undoStack, id)
+    CSMWorld::Data& worldData, QUndoStack& undoStack, const CSMWorld::UniversalId& id)
+    : GenericCreator(worldData, undoStack, id)
 {
     QLabel* label = new QLabel("Type", this);
     insertBeforeButtons(label, false);
@@ -38,7 +40,8 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator(
     {
         CSMWorld::UniversalId id2(*iter, "");
 
-        mType->addItem(QIcon(id2.getIcon().c_str()), id2.getTypeName().c_str(), static_cast<int>(id2.getType()));
+        mType->addItem(Misc::ScalableIcon::load(id2.getIcon().c_str()), id2.getTypeName().c_str(),
+            static_cast<int>(id2.getType()));
     }
 
     mType->model()->sort(0);

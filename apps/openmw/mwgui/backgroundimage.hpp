@@ -26,8 +26,8 @@ namespace MWGui
          */
         void setBackgroundImage(const std::string& image, bool fixedRatio = true, bool stretch = true);
 
-        void setSize(const MyGUI::IntSize& _value) override;
-        void setCoord(const MyGUI::IntCoord& _value) override;
+        void setSize(const MyGUI::IntSize& value) override;
+        void setCoord(const MyGUI::IntCoord& value) override;
 
     private:
         MyGUI::ImageBox* mChild;

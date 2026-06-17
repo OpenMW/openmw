@@ -3,7 +3,6 @@
 
 #include <components/sdlutil/vsyncmode.hpp>
 #include <components/settings/sanitizerimpl.hpp>
-#include <components/settings/screenshotsettings.hpp>
 #include <components/settings/settingvalue.hpp>
 #include <components/settings/windowmode.hpp>
 
@@ -32,7 +31,6 @@ namespace Settings
         SettingValue<float> mFramerateLimit{ mIndex, "Video", "framerate limit", makeMaxSanitizerFloat(0) };
         SettingValue<float> mContrast{ mIndex, "Video", "contrast", makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mGamma{ mIndex, "Video", "gamma", makeMaxStrictSanitizerFloat(0) };
-        SettingValue<ScreenshotSettings> mScreenshotType{ mIndex, "Video", "screenshot type" };
     };
 }
 

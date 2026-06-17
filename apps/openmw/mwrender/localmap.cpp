@@ -4,7 +4,6 @@
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Fog>
-#include <osg/LightModel>
 #include <osg/LightSource>
 #include <osg/PolygonMode>
 #include <osg/Texture2D>
@@ -40,7 +39,7 @@ namespace
         return val * val;
     }
 
-    std::pair<int, int> divideIntoSegments(const osg::BoundingBox& bounds, float mapSize)
+    std::pair<int, int> divideIntoSegments(const osg::BoundingBox& bounds, int mapSize)
     {
         osg::Vec2f min(bounds.xMin(), bounds.yMin());
         osg::Vec2f max(bounds.xMax(), bounds.yMax());
@@ -76,8 +75,8 @@ namespace MWRender
 
     LocalMap::LocalMap(osg::Group* root)
         : mRoot(root)
-        , mMapResolution(
-              Settings::map().mLocalMapResolution * MWBase::Environment::get().getWindowManager()->getScalingFactor())
+        , mMapResolution(static_cast<int>(
+              Settings::map().mLocalMapResolution * MWBase::Environment::get().getWindowManager()->getScalingFactor()))
         , mMapWorldSize(Constants::CellSizeInUnits)
         , mCellDistance(Constants::CellGridRadius)
         , mAngle(0.f)
@@ -96,7 +95,7 @@ namespace MWRender
             mRoot->removeChild(rtt);
     }
 
-    const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
+    const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle) const
     {
         return osg::Vec2f(
             std::cos(angle) * (point.x() - center.x()) - std::sin(angle) * (point.y() - center.y()) + center.x(),
@@ -109,12 +108,15 @@ namespace MWRender
         mInteriorSegments.clear();
     }
 
-    void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
+    void LocalMap::saveFogOfWar(MWWorld::CellStore* cell) const
     {
         if (!mInterior)
         {
-            const MapSegment& segment
-                = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
+            const auto it
+                = mExteriorSegments.find(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
+            if (it == mExteriorSegments.end())
+                return;
+            const MapSegment& segment = it->second;
 
             if (segment.mFogOfWarImage && segment.mHasFogState)
             {
@@ -137,6 +139,8 @@ namespace MWRender
             fog->mBounds.mMinY = mBounds.yMin();
             fog->mBounds.mMaxY = mBounds.yMax();
             fog->mNorthMarkerAngle = mAngle;
+            fog->mCenterX = mCenter.x();
+            fog->mCenterY = mCenter.y();
 
             fog->mFogTextures.reserve(segments.first * segments.second);
 
@@ -144,16 +148,16 @@ namespace MWRender
             {
                 for (int y = 0; y < segments.second; ++y)
                 {
-                    const MapSegment& segment = mInteriorSegments[std::make_pair(x, y)];
-
-                    fog->mFogTextures.emplace_back();
-
-                    // saving even if !segment.mHasFogState so we don't mess up the segmenting
-                    // plus, older openmw versions can't deal with empty images
-                    segment.saveFogOfWar(fog->mFogTextures.back());
-
-                    fog->mFogTextures.back().mX = x;
-                    fog->mFogTextures.back().mY = y;
+                    const auto it = mInteriorSegments.find(std::make_pair(x, y));
+                    if (it == mInteriorSegments.end())
+                        continue;
+                    const MapSegment& segment = it->second;
+                    if (!segment.mHasFogState)
+                        continue;
+                    ESM::FogTexture& texture = fog->mFogTextures.emplace_back();
+                    segment.saveFogOfWar(texture);
+                    texture.mX = x;
+                    texture.mY = y;
                 }
             }
 
@@ -162,15 +166,15 @@ namespace MWRender
     }
 
     void LocalMap::setupRenderToTexture(
-        int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
+        int segmentX, int segmentY, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax)
     {
         mLocalMapRTTs.emplace_back(
             new LocalMapRenderToTexture(mSceneRoot, mMapResolution, mMapWorldSize, left, top, upVector, zmin, zmax));
 
         mRoot->addChild(mLocalMapRTTs.back());
 
-        MapSegment& segment = mInterior ? mInteriorSegments[std::make_pair(segment_x, segment_y)]
-                                        : mExteriorSegments[std::make_pair(segment_x, segment_y)];
+        MapSegment& segment = mInterior ? mInteriorSegments[std::make_pair(segmentX, segmentY)]
+                                        : mExteriorSegments[std::make_pair(segmentX, segmentY)];
         segment.mMapTexture = static_cast<osg::Texture2D*>(mLocalMapRTTs.back()->getColorTexture(nullptr));
     }
 
@@ -187,7 +191,8 @@ namespace MWRender
 
         MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
         const std::uint8_t neighbourFlags = getExteriorNeighbourFlags(cellX, cellY);
-        if ((segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
+        if (segment.mLastRenderNeighbourFlags != 0
+            && (segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
             return;
         requestExteriorMap(cell, segment);
         segment.mLastRenderNeighbourFlags = neighbourFlags;
@@ -209,9 +214,7 @@ namespace MWRender
     {
         saveFogOfWar(cell);
 
-        if (cell->isExterior())
-            mExteriorSegments.erase({ cell->getCell()->getGridX(), cell->getCell()->getGridY() });
-        else
+        if (!cell->isExterior())
             mInteriorSegments.clear();
     }
 
@@ -267,7 +270,7 @@ namespace MWRender
         if (segment.mFogOfWarImage != nullptr)
             return;
 
-        if (cell->getFog())
+        if (cell->getFog() && !cell->getFog()->mFogTextures.empty())
             segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
         else
             segment.initFogOfWar();
@@ -300,6 +303,7 @@ namespace MWRender
             return;
 
         mInterior = true;
+        mExteriorSegments.clear();
 
         mBounds = bounds;
 
@@ -332,22 +336,20 @@ namespace MWRender
 
         float zMin = mBounds.zMin();
         float zMax = mBounds.zMax();
+        mCenter = osg::Vec2f(mBounds.center().x(), mBounds.center().y());
 
         // If there is fog state in the CellStore (e.g. when it came from a savegame) we need to do some checks
         // to see if this state is still valid.
         // Both the cell bounds and the NorthMarker rotation could be changed by the content files or exchanged models.
         // If they changed by too much then parts of the interior might not be covered by the map anymore.
         // The following code detects this, and discards the CellStore's fog state if it needs to.
-        std::vector<std::pair<int, int>> segmentMappings;
-        if (cell->getFog())
+        int xOffset = 0;
+        int yOffset = 0;
+        if (const ESM::FogState* fog = cell->getFog())
         {
-            ESM::FogState* fog = cell->getFog();
-
             if (std::abs(mAngle - fog->mNorthMarkerAngle) < osg::DegreesToRadians(5.f))
             {
                 // Expand mBounds so the saved textures fit the same grid
-                int xOffset = 0;
-                int yOffset = 0;
                 if (fog->mBounds.mMinX < mBounds.xMin())
                 {
                     mBounds.xMin() = fog->mBounds.mMinX;
@@ -355,8 +357,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinX > mBounds.xMin())
                 {
                     float diff = fog->mBounds.mMinX - mBounds.xMin();
-                    xOffset += diff / mMapWorldSize;
-                    xOffset++;
+                    xOffset = static_cast<int>(std::ceil(diff / mMapWorldSize));
                     mBounds.xMin() = fog->mBounds.mMinX - xOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMinY < mBounds.yMin())
@@ -366,8 +367,7 @@ namespace MWRender
                 else if (fog->mBounds.mMinY > mBounds.yMin())
                 {
                     float diff = fog->mBounds.mMinY - mBounds.yMin();
-                    yOffset += diff / mMapWorldSize;
-                    yOffset++;
+                    yOffset = static_cast<int>(std::ceil(diff / mMapWorldSize));
                     mBounds.yMin() = fog->mBounds.mMinY - yOffset * mMapWorldSize;
                 }
                 if (fog->mBounds.mMaxX > mBounds.xMax())
@@ -378,22 +378,14 @@ namespace MWRender
                 if (xOffset != 0 || yOffset != 0)
                     Log(Debug::Warning) << "Warning: expanding fog by " << xOffset << ", " << yOffset;
 
-                const auto& textures = fog->mFogTextures;
-                segmentMappings.reserve(textures.size());
-                osg::BoundingBox savedBounds{ fog->mBounds.mMinX, fog->mBounds.mMinY, 0, fog->mBounds.mMaxX,
-                    fog->mBounds.mMaxY, 0 };
-                auto segments = divideIntoSegments(savedBounds, mMapWorldSize);
-                for (int x = 0; x < segments.first; ++x)
-                    for (int y = 0; y < segments.second; ++y)
-                        segmentMappings.emplace_back(std::make_pair(x + xOffset, y + yOffset));
-
                 mAngle = fog->mNorthMarkerAngle;
+                mCenter.x() = fog->mCenterX;
+                mCenter.y() = fog->mCenterY;
             }
         }
 
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
 
-        osg::Vec2f center(mBounds.center().x(), mBounds.center().y());
         osg::Quat cameraOrient(mAngle, osg::Vec3d(0, 0, -1));
 
         auto segments = divideIntoSegments(mBounds, mMapWorldSize);
@@ -401,13 +393,14 @@ namespace MWRender
         {
             for (int y = 0; y < segments.second; ++y)
             {
-                osg::Vec2f start = min + osg::Vec2f(mMapWorldSize * x, mMapWorldSize * y);
+                osg::Vec2f start
+                    = min + osg::Vec2f(static_cast<float>(mMapWorldSize * x), static_cast<float>(mMapWorldSize * y));
                 osg::Vec2f newcenter = start + osg::Vec2f(mMapWorldSize / 2.f, mMapWorldSize / 2.f);
 
-                osg::Vec2f a = newcenter - center;
+                osg::Vec2f a = newcenter - mCenter;
                 osg::Vec3f rotatedCenter = cameraOrient * (osg::Vec3f(a.x(), a.y(), 0));
 
-                osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + center;
+                osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + mCenter;
 
                 setupRenderToTexture(x, y, pos.x(), pos.y(), osg::Vec3f(north.x(), north.y(), 0.f), zMin, zMax);
 
@@ -416,14 +409,16 @@ namespace MWRender
                 if (!segment.mFogOfWarImage)
                 {
                     bool loaded = false;
-                    for (size_t index{}; index < segmentMappings.size(); index++)
+                    if (const ESM::FogState* fog = cell->getFog())
                     {
-                        if (segmentMappings[index] == coords)
+                        auto match = std::find_if(
+                            fog->mFogTextures.begin(), fog->mFogTextures.end(), [&](const ESM::FogTexture& texture) {
+                                return texture.mX == x - xOffset && texture.mY == y - yOffset;
+                            });
+                        if (match != fog->mFogTextures.end())
                         {
-                            ESM::FogState* fog = cell->getFog();
-                            segment.loadFogOfWar(fog->mFogTextures[index]);
+                            segment.loadFogOfWar(*match);
                             loaded = true;
-                            break;
                         }
                     }
                     if (!loaded)
@@ -433,9 +428,9 @@ namespace MWRender
         }
     }
 
-    void LocalMap::worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y)
+    void LocalMap::worldToInteriorMapPosition(osg::Vec2f pos, float& nX, float& nY, int& x, int& y) const
     {
-        pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), mAngle);
+        pos = rotatePoint(pos, mCenter, mAngle);
 
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
 
@@ -446,12 +441,12 @@ namespace MWRender
         nY = 1.0f - (pos.y() - min.y() - mMapWorldSize * y) / mMapWorldSize;
     }
 
-    osg::Vec2f LocalMap::interiorMapToWorldPosition(float nX, float nY, int x, int y)
+    osg::Vec2f LocalMap::interiorMapToWorldPosition(float nX, float nY, int x, int y) const
     {
         osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
         osg::Vec2f pos(mMapWorldSize * (nX + x) + min.x(), mMapWorldSize * (1.0f - nY + y) + min.y());
 
-        pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), -mAngle);
+        pos = rotatePoint(pos, mCenter, -mAngle);
         return pos;
     }
 
@@ -546,8 +541,8 @@ namespace MWRender
                         float sqrDist = square((texU + mx * (sFogOfWarResolution - 1)) - u * (sFogOfWarResolution - 1))
                             + square((texV + my * (sFogOfWarResolution - 1)) - v * (sFogOfWarResolution - 1));
 
-                        const std::uint8_t alpha = std::min<std::uint8_t>(
-                            *data >> 24, std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255);
+                        const std::uint8_t alpha = std::min<std::uint8_t>(*data >> 24,
+                            static_cast<std::uint8_t>(std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255));
                         std::uint32_t val = static_cast<std::uint32_t>(alpha << 24);
                         if (*data != val)
                         {
@@ -582,9 +577,18 @@ namespace MWRender
         };
         std::uint8_t result = 0;
         for (const auto& [flag, dx, dy] : flags)
-            if (mExteriorSegments.contains(std::pair(cellX + dx, cellY + dy)))
+        {
+            auto it = mExteriorSegments.find(std::pair(cellX + dx, cellY + dy));
+            if (it != mExteriorSegments.end() && it->second.mMapTexture)
                 result |= flag;
+        }
         return result;
+    }
+
+    MyGUI::IntRect LocalMap::getInteriorGrid() const
+    {
+        auto segments = divideIntoSegments(mBounds, mMapWorldSize);
+        return { -1, -1, segments.first, segments.second };
     }
 
     void LocalMap::MapSegment::createFogOfWarTexture()
@@ -741,34 +745,23 @@ namespace MWRender
         // turn of sky blending
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
-        stateset->addUniform(new osg::Uniform("sky", 0));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
-
-        osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
-        lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
-        stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::Light> light = new osg::Light;
         light->setPosition(osg::Vec4(-0.3f, -0.3f, 0.7f, 0.f));
         light->setDiffuse(osg::Vec4(0.7f, 0.7f, 0.7f, 1.f));
-        light->setAmbient(osg::Vec4(0, 0, 0, 1));
+        light->setAmbient(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
         light->setSpecular(osg::Vec4(0, 0, 0, 0));
         light->setLightNum(0);
         light->setConstantAttenuation(1.f);
         light->setLinearAttenuation(0.f);
         light->setQuadraticAttenuation(0.f);
 
-        osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource;
-        lightSource->setLight(light);
-
-        lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
         // override sun for local map
-        SceneUtil::configureStateSetSunOverride(static_cast<SceneUtil::LightManager*>(mSceneRoot), light, stateset);
+        SceneUtil::configureStateSetSunOverride(light, stateset);
 
-        camera->addChild(lightSource);
         camera->addChild(mSceneRoot);
     }
 

@@ -1,6 +1,8 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
+#include <SDL_events.h>
+
 #include "layout.hpp"
 
 namespace MWWorld
@@ -11,6 +13,28 @@ namespace MWWorld
 namespace MWGui
 {
     class DragAndDrop;
+
+    size_t wrap(size_t index, size_t max, int delta);
+    void setControllerFocus(const std::vector<MyGUI::Button*>& buttons, size_t index, bool selected);
+
+    struct ControllerButtons
+    {
+        std::string mA;
+        std::string mB;
+        std::string mDpad;
+        std::string mL1;
+        std::string mL2;
+        std::string mL3;
+        std::string mLStick;
+        std::string mMenu;
+        std::string mR1;
+        std::string mR2;
+        std::string mR3;
+        std::string mRStick;
+        std::string mView;
+        std::string mX;
+        std::string mY;
+    };
 
     class WindowBase : public Layout
     {
@@ -49,16 +73,30 @@ namespace MWGui
 
         virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) {}
 
-        virtual std::string_view getWindowIdForLua() const { return ""; }
+        virtual void onInventoryUpdate(const MWWorld::Ptr& ptr) {}
+
+        virtual std::string_view getWindowIdForLua() const { return {}; }
         void setDisabledByLua(bool disabled) { mDisabledByLua = disabled; }
 
         static void clampWindowCoordinates(MyGUI::Window* window);
 
+        virtual ControllerButtons* getControllerButtons() { return &mControllerButtons; }
+        MyGUI::Widget* getControllerScrollWidget() { return mControllerScrollWidget; }
+        bool isGamepadCursorAllowed() { return !mDisableGamepadCursor; }
+        virtual bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) { return true; }
+        virtual bool onControllerThumbstickEvent(const SDL_ControllerAxisEvent& arg) { return false; }
+        virtual void setActiveControllerWindow(bool active) { mActiveControllerWindow = active; }
+
     protected:
         virtual void onTitleDoubleClicked();
 
+        ControllerButtons mControllerButtons;
+        bool mActiveControllerWindow = false;
+        bool mDisableGamepadCursor = false;
+        MyGUI::Widget* mControllerScrollWidget = nullptr;
+
     private:
-        void onDoubleClick(MyGUI::Widget* _sender);
+        void onDoubleClick(MyGUI::Widget* sender);
 
         bool mDisabledByLua = false;
     };

@@ -14,6 +14,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
+#include "textcolours.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -66,7 +68,13 @@ namespace MWGui::Widgets
         }
     }
 
-    void MWSkill::onClicked(MyGUI::Widget* _sender)
+    void MWSkill::setStateSelected(bool selected)
+    {
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mSkillNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
+    }
+
+    void MWSkill::onClicked(MyGUI::Widget* /*sender*/)
     {
         eventClicked(this);
     }
@@ -117,7 +125,7 @@ namespace MWGui::Widgets
         updateWidgets();
     }
 
-    void MWAttribute::onClicked(MyGUI::Widget* _sender)
+    void MWAttribute::onClicked(MyGUI::Widget* /*sender*/)
     {
         eventClicked(this);
     }
@@ -139,8 +147,9 @@ namespace MWGui::Widgets
         }
         if (mAttributeValueWidget)
         {
-            int modified = mValue.getModified(), base = mValue.getBase();
-            mAttributeValueWidget->setCaption(MyGUI::utility::toString(modified));
+            float modified = mValue.getModified();
+            float base = mValue.getBase();
+            mAttributeValueWidget->setCaption(MyGUI::utility::toString(static_cast<int>(modified)));
             if (modified > base)
                 mAttributeValueWidget->_setWidgetState("increased");
             else if (modified < base)
@@ -148,6 +157,12 @@ namespace MWGui::Widgets
             else
                 mAttributeValueWidget->_setWidgetState("normal");
         }
+    }
+
+    void MWAttribute::setStateSelected(bool selected)
+    {
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mAttributeNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
     }
 
     void MWAttribute::initialiseOverride()
@@ -201,8 +216,8 @@ namespace MWGui::Widgets
                 = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
             SpellEffectParams params;
             params.mEffectID = effectInfo.mData.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mSkill = effectInfo.mData.mSkill;
+            params.mAttribute = effectInfo.mData.mAttribute;
             params.mDuration = effectInfo.mData.mDuration;
             params.mMagnMin = effectInfo.mData.mMagnMin;
             params.mMagnMax = effectInfo.mData.mMagnMax;
@@ -229,6 +244,12 @@ namespace MWGui::Widgets
             else
                 mSpellNameWidget->setCaption({});
         }
+    }
+
+    void MWSpell::setStateSelected(bool selected)
+    {
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mSpellNameWidget->setTextColour(selected ? textColours.link : textColours.normal);
     }
 
     void MWSpell::initialiseOverride()
@@ -312,8 +333,8 @@ namespace MWGui::Widgets
         {
             SpellEffectParams params;
             params.mEffectID = effectInfo.mData.mEffectID;
-            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mData.mSkill);
-            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mData.mAttribute);
+            params.mSkill = effectInfo.mData.mSkill;
+            params.mAttribute = effectInfo.mData.mAttribute;
             params.mDuration = effectInfo.mData.mDuration;
             params.mMagnMin = effectInfo.mData.mMagnMin;
             params.mMagnMax = effectInfo.mData.mMagnMax;
@@ -456,10 +477,16 @@ namespace MWGui::Widgets
         mRequestedWidth = mTextWidget->getTextSize().width + sIconOffset;
 
         mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-            magicEffect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
+            VFS::Path::toNormalized(magicEffect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
     }
 
     MWSpellEffect::~MWSpellEffect() {}
+
+    void MWSpellEffect::setStateSelected(bool selected)
+    {
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mTextWidget->setTextColour(selected ? textColours.link : textColours.normal);
+    }
 
     void MWSpellEffect::initialiseOverride()
     {

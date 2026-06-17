@@ -25,6 +25,7 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -56,10 +57,7 @@ namespace MWClass
 
     std::string_view Miscellaneous::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Miscellaneous>(ptr);
     }
 
     std::unique_ptr<MWWorld::Action> Miscellaneous::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -92,13 +90,13 @@ namespace MWClass
                 if (Settings::game().mRebalanceSoulGemValues)
                 {
                     // use the 'soul gem value rebalance' formula from the Morrowind Code Patch
-                    float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;
+                    double soulValue = 0.0001 * std::pow(soul, 3) + 2 * soul;
 
                     // for Azura's star add the unfilled value
                     if (ptr.getCellRef().getRefId() == "Misc_SoulGem_Azura")
-                        value += soulValue;
+                        value += static_cast<int>(soulValue);
                     else
-                        value = soulValue;
+                        value = static_cast<int>(soulValue);
                 }
                 else
                     value *= soul;
@@ -197,7 +195,10 @@ namespace MWClass
     {
         MWWorld::Ptr newPtr;
         if (isGold(ptr))
+        {
             newPtr = createGold(cell, getValue(ptr) * count);
+            newPtr.getRefData() = ptr.getRefData();
+        }
         else
         {
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();

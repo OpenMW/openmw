@@ -3,7 +3,7 @@
 #include <QLibraryInfo>
 #include <QLocale>
 
-namespace l10n
+namespace L10n
 {
     QTranslator AppTranslator{};
     QTranslator ComponentsTranslator{};
@@ -14,11 +14,7 @@ namespace l10n
         // Try to load OpenMW translations from resources folder first.
         // If we loaded them, try to load Qt translations from both
         // resources folder and default translations folder as well.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         auto qtPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
-#else
-        auto qtPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-#endif
         auto localPath = resourcesPath + "/translations";
 
         if (AppTranslator.load(QLocale::system(), appName, "_", localPath)

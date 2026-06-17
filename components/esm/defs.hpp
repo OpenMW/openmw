@@ -288,9 +288,9 @@ namespace ESM
         REC_MSET4 = esm4Recname(ESM4::REC_MSET) // Media Set
     };
 
-    constexpr bool isESM4Rec(RecNameInts RecName)
+    constexpr bool isESM4Rec(RecNameInts value)
     {
-        return RecName & sEsm4RecnameFlag;
+        return value & sEsm4RecnameFlag;
     }
 
     constexpr inline FixedString<6> getRecNameString(ESM::RecNameInts recName)

@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/defs.hpp>
+#include <components/esm3/actoridconverter.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadbsgn.hpp>
@@ -36,8 +37,20 @@
 
 namespace MWWorld
 {
+    namespace
+    {
+        ESM::CellRef makePlayerCellRef()
+        {
+            ESM::CellRef result;
+            result.blank();
+            result.mRefID = ESM::RefId::stringRefId("Player");
+            return result;
+        }
+    }
+
     Player::Player(const ESM::NPC* player)
-        : mCellStore(nullptr)
+        : mPlayer(makePlayerCellRef(), player)
+        , mCellStore(nullptr)
         , mLastKnownExteriorPosition(0, 0, 0)
         , mMarkedPosition(ESM::Position())
         , mMarkedCell(nullptr)
@@ -46,11 +59,6 @@ namespace MWWorld
         , mPaidCrimeId(-1)
         , mJumping(false)
     {
-        ESM::CellRef cellRef;
-        cellRef.blank();
-        cellRef.mRefID = ESM::RefId::stringRefId("Player");
-        mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
-
         ESM::Position playerPos = mPlayer.mData.getPosition();
         playerPos.pos[0] = playerPos.pos[1] = playerPos.pos[2] = 0;
         mPlayer.mData.setPosition(playerPos);
@@ -61,9 +69,9 @@ namespace MWWorld
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
-            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(i)).getModified();
+            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i))).getModified();
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(i)).getModified();
+            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i))).getModified();
     }
 
     void Player::restoreStats()
@@ -76,13 +84,13 @@ namespace MWWorld
         creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
         {
-            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(i));
+            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)));
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
         {
-            auto id = ESM::Attribute::indexToRefId(i);
+            auto id = ESM::Attribute::indexToRefId(static_cast<int>(i));
             auto attribute = npcStats.getAttribute(id);
             attribute.restore(attribute.getDamage());
             attribute.setModifier(mSaveAttributes[i] - attribute.getBase());
@@ -101,7 +109,8 @@ namespace MWWorld
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
             MWMechanics::AttributeValue value = npcStats.getAttribute(attribute.mId);
-            value.setModifier(attribute.mWerewolfValue - value.getModified());
+            value.setBase(value.getBase(), true);
+            value.setModifier(attribute.mWerewolfValue - value.getBase());
             npcStats.setAttribute(attribute.mId, value);
         }
 
@@ -112,7 +121,8 @@ namespace MWWorld
                 continue;
 
             MWMechanics::SkillValue& value = npcStats.getSkill(skill.mId);
-            value.setModifier(skill.mWerewolfValue - value.getModified());
+            value.setBase(value.getBase(), true);
+            value.setModifier(skill.mWerewolfValue - value.getBase());
         }
     }
 
@@ -183,11 +193,10 @@ namespace MWWorld
 
         MWWorld::Ptr player = getPlayer();
         const MWMechanics::NpcStats& playerStats = player.getClass().getNpcStats(player);
-        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && playerStats.isParalyzed()) || playerStats.getKnockedDown() || playerStats.isDead())
+        if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
-        MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFacedObject();
+        MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFocusObject();
 
         if (toActivate.isEmpty())
             return;
@@ -243,6 +252,11 @@ namespace MWWorld
 
     void Player::clear()
     {
+        ESM::CellRef cellRef;
+        cellRef.blank();
+        cellRef.mRefID = ESM::RefId::stringRefId("Player");
+        cellRef.mRefNum = mPlayer.mRef.getRefNum();
+        mPlayer = LiveCellRef<ESM::NPC>(cellRef, mPlayer.mBase);
         mCellStore = nullptr;
         mSign = ESM::RefId();
         mMarkedCell = nullptr;
@@ -317,7 +331,12 @@ namespace MWWorld
                 convertMagicEffects(
                     player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
             else if (reader.getFormatVersion() <= ESM::MaxOldCreatureStatsFormatVersion)
+            {
                 convertStats(player.mObject.mCreatureStats);
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
+            }
+            else if (reader.getFormatVersion() <= ESM::MaxActiveSpellSlotIndexFormatVersion)
+                convertEnchantmentSlots(player.mObject.mCreatureStats, player.mObject.mInventory);
 
             if (!player.mObject.mEnabled)
             {
@@ -327,6 +346,10 @@ namespace MWWorld
 
             MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(mPlayer);
             mPlayer.load(player.mObject);
+            MWBase::Environment::get().getWorldModel()->registerPtr(getPlayer());
+            if (reader.mActorIdConverter)
+                reader.mActorIdConverter->mMappings.emplace(
+                    player.mObject.mCreatureStats.mActorId, mPlayer.mRef.getRefNum());
 
             for (size_t i = 0; i < mSaveAttributes.size(); ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];

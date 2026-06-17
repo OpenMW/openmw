@@ -59,12 +59,7 @@ namespace MWMechanics
             mStorage = std::make_unique<Derived>(payload);
         }
 
-        /// \brief takes ownership of the passed object
-        template <class Derived>
-        void moveIn(std::unique_ptr<Derived>&& storage)
-        {
-            mStorage = std::move(storage);
-        }
+        void reset() { mStorage.reset(); }
     };
 }
 

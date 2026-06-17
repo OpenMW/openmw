@@ -34,6 +34,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "classmodel.hpp"
+#include "nameorid.hpp"
 
 namespace MWClass
 {
@@ -123,7 +124,7 @@ namespace MWClass
     void Container::insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
         MWPhysics::PhysicsSystem& physics) const
     {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
+        physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
     std::string_view Container::getModel(const MWWorld::ConstPtr& ptr) const
@@ -191,12 +192,13 @@ namespace MWClass
         {
             if (!isTrapped)
             {
-                if (canBeHarvested(ptr))
-                {
-                    return std::make_unique<MWWorld::ActionHarvest>(ptr);
-                }
+                if (!canBeHarvested(ptr))
+                    return std::make_unique<MWWorld::ActionOpen>(ptr);
 
-                return std::make_unique<MWWorld::ActionOpen>(ptr);
+                if (hasToolTip(ptr))
+                    return std::make_unique<MWWorld::ActionHarvest>(ptr);
+
+                return std::make_unique<MWWorld::FailedAction>(std::string_view{}, ptr);
             }
             else
             {
@@ -217,10 +219,7 @@ namespace MWClass
 
     std::string_view Container::getName(const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::Container>(ptr);
     }
 
     MWWorld::ContainerStore& Container::getContainerStore(const MWWorld::Ptr& ptr) const
@@ -239,7 +238,12 @@ namespace MWClass
     bool Container::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().mStore.hasVisibleItems();
+        {
+            if (!canBeHarvested(ptr))
+                return true;
+            const MWWorld::ContainerStore& store = data->asContainerCustomData().mStore;
+            return !store.isResolved() || store.hasVisibleItems();
+        }
         return true;
     }
 

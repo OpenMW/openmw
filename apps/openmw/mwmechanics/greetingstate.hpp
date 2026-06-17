@@ -3,11 +3,11 @@
 
 namespace MWMechanics
 {
-    enum GreetingState
+    enum class GreetingState
     {
-        Greet_None,
-        Greet_InProgress,
-        Greet_Done
+        None,
+        InProgress,
+        Done
     };
 }
 

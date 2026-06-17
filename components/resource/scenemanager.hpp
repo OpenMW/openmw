@@ -99,20 +99,13 @@ namespace Resource
         /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode
         /// have changed.
         void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects",
-            bool forceShadersForNode = false, const osg::Program* programTemplate = nullptr);
+            const osg::Program* programTemplate = nullptr);
 
         /// Applying shaders to a node may replace some fixed-function state.
         /// This restores it.
         /// When editing such state, it should be reinstated before the edits, and shaders should be recreated
         /// afterwards.
         void reinstateRemovedState(osg::ref_ptr<osg::Node> node);
-
-        /// @see ShaderVisitor::setForceShaders
-        void setForceShaders(bool force);
-        bool getForceShaders() const;
-
-        void setClampLighting(bool clamp);
-        bool getClampLighting() const;
 
         /// @see ShaderVisitor::setAutoUseNormalMaps
         void setAutoUseNormalMaps(bool use);
@@ -127,14 +120,15 @@ namespace Resource
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setApplyLightingToEnvMaps(bool apply);
-
-        void setSupportedLightingMethods(const SceneUtil::LightManager::SupportedMethods& supported);
-        bool isSupportedLightingMethod(SceneUtil::LightingMethod method) const;
+        void setSupportsClusteredLighting(bool supported);
+        bool isClusteredLightingSupported() const;
 
         void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
 
         osg::ref_ptr<osg::Texture> getOpaqueDepthTex(size_t frame);
+
+        void loadSelectionMarker(
+            osg::ref_ptr<osg::Group> parentNode, const char* markerData, long long markerSize) const;
 
         enum class UBOBinding
         {
@@ -143,8 +137,6 @@ namespace Resource
             LightBuffer,
             PostProcessor
         };
-        void setLightingMethod(SceneUtil::LightingMethod method);
-        SceneUtil::LightingMethod getLightingMethod() const;
 
         void setConvertAlphaTestToAlphaToCoverage(bool convert);
         void setAdjustCoverageForAlphaTest(bool adjustCoverage);
@@ -152,13 +144,13 @@ namespace Resource
         void setShaderPath(const std::filesystem::path& path);
 
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
-        bool checkLoaded(const std::string& name, double referenceTime);
+        bool checkLoaded(VFS::Path::NormalizedView name, double referenceTime);
 
         /// Get a read-only copy of this scene "template"
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.
         /// @note Thread safe.
-        osg::ref_ptr<const osg::Node> getTemplate(std::string_view name, bool compile = true);
+        osg::ref_ptr<const osg::Node> getTemplate(VFS::Path::NormalizedView path, bool compile = true);
 
         /// Clone osg::Node safely.
         /// @note Thread safe.
@@ -173,12 +165,12 @@ namespace Resource
         /// Instance the given scene template.
         /// @see getTemplate
         /// @note Thread safe.
-        osg::ref_ptr<osg::Node> getInstance(std::string_view name);
+        osg::ref_ptr<osg::Node> getInstance(VFS::Path::NormalizedView path);
 
         /// Instance the given scene template and immediately attach it to a parent node
         /// @see getTemplate
         /// @note Not thread safe, unless parentNode is not part of the main scene graph yet.
-        osg::ref_ptr<osg::Node> getInstance(std::string_view name, osg::Group* parentNode);
+        osg::ref_ptr<osg::Node> getInstance(VFS::Path::NormalizedView path, osg::Group* parentNode);
 
         /// Attach the given scene instance to the given parent node
         /// @note You should have the parentNode in its intended position before calling this method,
@@ -204,7 +196,7 @@ namespace Resource
         /// @warning It is unsafe to call this method while the draw thread is using textures! call
         /// Viewer::stopThreading first.
         void setFilterSettings(
-            const std::string& magfilter, const std::string& minfilter, const std::string& mipmap, int maxAnisotropy);
+            const std::string& magfilter, const std::string& minfilter, const std::string& mipmap, float maxAnisotropy);
 
         /// Apply filter settings to the given texture. Note, when loading an object through this scene manager (i.e.
         /// calling getTemplate or createInstance) the filter settings are applied automatically. This method is
@@ -227,9 +219,6 @@ namespace Resource
 
         void setUpNormalsRTForStateSet(osg::StateSet* stateset, bool enabled);
 
-        void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
-        bool getSoftParticles() const { return mSoftParticles; }
-
         void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
 
     private:
@@ -237,46 +226,40 @@ namespace Resource
         osg::ref_ptr<osg::Node> loadErrorMarker();
         osg::ref_ptr<osg::Node> cloneErrorMarker();
 
+        mutable std::mutex mSharedStateMutex;
+
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
-        bool mForceShaders;
-        bool mClampLighting;
-        bool mAutoUseNormalMaps;
         std::string mNormalMapPattern;
         std::string mNormalHeightMapPattern;
-        bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
-        bool mApplyLightingToEnvMaps;
-        SceneUtil::LightingMethod mLightingMethod;
-        SceneUtil::LightManager::SupportedMethods mSupportedLightingMethods;
-        bool mConvertAlphaTestToAlphaToCoverage;
-        bool mAdjustCoverageForAlphaTest;
-        bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
-        bool mSoftParticles = false;
-        bool mWeatherParticleOcclusion = false;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        mutable std::mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
         Resource::BgsmFileManager* mBgsmFileManager;
+        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+        mutable osg::ref_ptr<osg::Node> mErrorMarker;
+        mutable std::once_flag mErrorMarkerFlag;
 
         osg::Texture::FilterMode mMinFilter;
         osg::Texture::FilterMode mMagFilter;
-        int mMaxAnisotropy;
-        bool mUnRefImageDataAfterApply;
-
-        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+        float mMaxAnisotropy;
 
         unsigned int mParticleSystemMask;
-        mutable osg::ref_ptr<osg::Node> mErrorMarker;
+        bool mSupportsClusteredLighting = false;
+        bool mAutoUseNormalMaps = false;
+        bool mAutoUseSpecularMaps = false;
+        bool mConvertAlphaTestToAlphaToCoverage = false;
+        bool mAdjustCoverageForAlphaTest = false;
+        bool mSupportsNormalsRT = false;
+        bool mWeatherParticleOcclusion = false;
+        bool mUnRefImageDataAfterApply = false;
 
-        SceneManager(const SceneManager&);
-        void operator=(const SceneManager&);
+        SceneManager(const SceneManager&) = delete;
+        void operator=(const SceneManager&) = delete;
     };
-
-    std::string getFileExtension(const std::string& file);
 }
 
 #endif
