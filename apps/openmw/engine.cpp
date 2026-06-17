@@ -83,6 +83,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mwnet/networkmanager.hpp"
+
 #include "profile.hpp"
 
 namespace
@@ -205,13 +207,17 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
     try
     {
-        const bool isServer = mEnvironment.getIsServer();
+        const bool isServer = mEnvironment.getNetworkManager()->isServer();
         // update input
         {
             if (!isServer)
             {
                 ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
                 mInputManager->update(frametime, false);
+            }
+            if (!mNetworkManager->update())
+            {
+                mEnvironment.getStateManager()->requestQuit();
             }
         }
 
@@ -367,7 +373,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         stats->setAttribute(frameNumber, "StringRefId Count", static_cast<double>(ESM::StringRefId::totalCount()));
     }
 
-    const bool isServer = mEnvironment.getIsServer();
+    const bool isServer = mEnvironment.getNetworkManager()->isServer();
 
     if (!isServer)
     {
@@ -747,7 +753,8 @@ void OMW::Engine::setWindowIcon()
 
 void OMW::Engine::prepareEngine()
 {
-    mEnvironment.setIsServer(mNetType == NetType::Server);
+    mNetworkManager = std::make_unique<MWNet::NetworkManager>(mNetType == NetType::Server);
+    mEnvironment.setNetworkManager(*mNetworkManager);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
     osg::ref_ptr<osg::Group> rootNode = nullptr;

@@ -93,6 +93,8 @@
 
 #include "../mwsound/constants.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "actionteleport.hpp"
 #include "cellstore.hpp"
 #include "containerstore.hpp"
@@ -245,7 +247,7 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             mRendering = std::make_unique<MWRender::RenderingManager>(
                 viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
@@ -275,7 +277,7 @@ namespace MWWorld
         mScriptsEnabled = true;
         mSky = true;
 
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             // Rebuild player
             setupPlayer();
@@ -374,7 +376,7 @@ namespace MWWorld
 
     void World::clear()
     {
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
 
             mWeatherManager->clear();
@@ -822,7 +824,7 @@ namespace MWWorld
             rechargeItems(duration, false);
         }
 
-        bool isServer = MWBase::Environment::get().getIsServer();
+        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
 
         if (!isServer)
         {

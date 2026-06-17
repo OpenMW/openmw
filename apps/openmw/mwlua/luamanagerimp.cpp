@@ -35,6 +35,8 @@
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "luabindings.hpp"
 #include "playerscripts.hpp"
 #include "types/types.hpp"
@@ -96,8 +98,8 @@ namespace MWLua
 
     void LuaManager::initConfiguration(bool reload)
     {
-        bool globalOnly = MWBase::Environment::get().getIsServer();
         // We've probably broken hot-reloading?
+        bool globalOnly = MWBase::Environment::get().getNetworkManager()->isServer();
         mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(), globalOnly);
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
@@ -227,7 +229,7 @@ namespace MWLua
         if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
             lua_gc(mLua.unsafeState(), LUA_GCSTEP, steps);
 
-        bool isServer = MWBase::Environment::get().getIsServer();
+        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
 
         if (!isServer)
         {
@@ -335,7 +337,7 @@ namespace MWLua
         }
         BoolScopeGuard updateGuard(mRunningSynchronizedUpdates);
 
-        if (MWBase::Environment::get().getIsServer())
+        if (MWBase::Environment::get().getNetworkManager()->isServer())
         {
             return;
         }
@@ -403,7 +405,7 @@ namespace MWLua
 
     void LuaManager::clear()
     {
-        bool isServer = MWBase::Environment::get().getIsServer();
+        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
         LuaUi::clearGameInterface();
         mUiResourceManager.clear();
         if (!isServer)

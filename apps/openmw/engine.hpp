@@ -141,7 +141,8 @@ namespace OMW
         std::unique_ptr<MWState::StateManager> mStateManager;
         std::unique_ptr<MWLua::LuaManager> mLuaManager;
         std::unique_ptr<MWLua::Worker> mLuaWorker;
-        std::unique_ptr<L10n::Manager> mL10nManager;
+        std::unique_ptr<l10n::Manager> mL10nManager;
+        std::unique_ptr<MWNet::NetworkManager> mNetworkManager;
         MWBase::Environment mEnvironment;
         ToUTF8::FromType mEncoding;
         std::unique_ptr<ToUTF8::Utf8Encoder> mEncoder;

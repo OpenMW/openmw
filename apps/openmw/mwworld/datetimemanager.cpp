@@ -8,6 +8,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwnet/networkmanager.hpp"
+
 #include "duration.hpp"
 #include "globals.hpp"
 #include "timestamp.hpp"
@@ -242,7 +244,7 @@ namespace MWWorld
     void DateTimeManager::setSimulationTimeScale(float scale)
     {
         mSimulationTimeScale = std::max(0.f, scale);
-        if (!MWBase::Environment::get().getIsServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isServer())
         {
             MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
         }
@@ -257,7 +259,7 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
-        if (MWBase::Environment::get().getIsServer())
+        if (MWBase::Environment::get().getNetworkManager()->isServer())
         {
             mPaused = false;
             return;

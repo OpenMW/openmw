@@ -15,6 +15,11 @@ namespace L10n
     class Manager;
 }
 
+namespace MWNet
+{
+    class NetworkManager;
+}
+
 namespace MWWorld
 {
     class ESMStore;
@@ -43,7 +48,6 @@ namespace MWBase
     {
         static Environment* sThis;
 
-        bool mIsServer = false;
         World* mWorld = nullptr;
         MWWorld::WorldModel* mWorldModel = nullptr;
         MWWorld::Scene* mWorldScene = nullptr;
@@ -58,7 +62,8 @@ namespace MWBase
         StateManager* mStateManager = nullptr;
         LuaManager* mLuaManager = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
-        L10n::Manager* mL10nManager = nullptr;
+        l10n::Manager* mL10nManager = nullptr;
+        MWNet::NetworkManager* mNetworkManager = nullptr;
         float mFrameRateLimit = 0;
         float mFrameDuration = 0;
 
@@ -98,7 +103,7 @@ namespace MWBase
 
         void setL10nManager(L10n::Manager& value) { mL10nManager = &value; }
 
-        void setIsServer(bool isServer) { mIsServer = isServer; }
+        void setNetworkManager(MWNet::NetworkManager& value) { mNetworkManager = &value; }
 
         Misc::NotNullPtr<World> getWorld() const { return mWorld; }
         Misc::NotNullPtr<MWWorld::WorldModel> getWorldModel() const { return mWorldModel; }
@@ -127,7 +132,7 @@ namespace MWBase
 
         Misc::NotNullPtr<L10n::Manager> getL10nManager() const { return mL10nManager; }
 
-        bool getIsServer() const { return mIsServer; }
+        Misc::NotNullPtr<MWNet::NetworkManager> getNetworkManager() const { return mNetworkManager; }
 
         float getFrameRateLimit() const { return mFrameRateLimit; }
 

@@ -41,8 +41,14 @@ declare -rA GROUPED_DEPS=(
   "
 
   # These dependencies can alternatively be built and linked statically.
-  [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev libsqlite3-dev libcollada-dom-dev"
-  [clang-tidy]="clang-tidy-19"
+  [openmw-deps-dynamic]="
+    libmygui-dev
+    libopenscenegraph-dev
+    libsqlite3-dev
+    libcollada-dom-dev
+    libsodium-dev
+  "
+  [clang-tidy]="clang-tidy"
 
   # Pre-requisites for building MyGUI and OSG for static linking.
   #

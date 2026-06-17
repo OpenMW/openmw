@@ -116,6 +116,10 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager luamanager
     )
 
+add_openmw_dir (mwnet
+    server client
+    )
+
 # Main executable
 
 add_library(openmw-lib STATIC
@@ -186,8 +190,9 @@ target_link_libraries(openmw-lib
     ${MyGUI_LIBRARIES}
     SDL2::SDL2
     ${RecastNavigation_LIBRARIES}
-    osg-ffmpeg-videoplayer
-    oics
+    "yojimbo"
+    "osg-ffmpeg-videoplayer"
+    "oics"
     components
 )
 

@@ -13,6 +13,7 @@
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
+#include "apps/openmw/mwnet/networkmanager.hpp"
 #include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/globals.hpp"
@@ -382,7 +383,7 @@ namespace MWLua
 
         // HACK: Disable input bindings completely due to server things
         player["getControlSwitch"] = [](const Object& player, std::string_view key) {
-            if (MWBase::Environment::get().getIsServer())
+            if (MWBase::Environment::get().getNetworkManager()->isServer())
             {
                 Log(Debug::Warning) << "getControlSwitch called on server, returning false";
                 return false;
@@ -395,7 +396,7 @@ namespace MWLua
             }
         };
         player["setControlSwitch"] = [](const Object& player, std::string_view key, bool v) {
-            if (MWBase::Environment::get().getIsServer())
+            if (MWBase::Environment::get().getNetworkManager()->isServer())
             {
                 Log(Debug::Warning) << "setControlSwitch called on server! Not implemented!";
                 return;
