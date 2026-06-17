@@ -14,7 +14,9 @@
 #include "../mwmechanics/attacktype.hpp"
 #include "../mwmechanics/damagesourcetype.hpp"
 #include "../mwrender/animationpriority.hpp"
+#include "components/esm3/refnum.hpp"
 #include <components/sdlutil/events.hpp>
+#include <vector>
 
 namespace MWWorld
 {
@@ -107,6 +109,8 @@ namespace MWBase
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
         virtual void viewportResized(int width, int height) = 0;
         virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
+        virtual void applyMagicEffects(const ESM::RefId& id, const MWWorld::Ptr& caster, const ESM::RefNum& item,
+            const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool stackable) = 0;
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,

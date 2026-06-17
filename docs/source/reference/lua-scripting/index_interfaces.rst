@@ -19,6 +19,7 @@ Interfaces
     MWUI <interface_mwui>
     Settings <interface_settings>
     SkillProgression <interface_skill_progression>
+    SpellCasting <interface_spellcasting>
     UI <interface_ui>
 
 **Interfaces of built-in scripts**

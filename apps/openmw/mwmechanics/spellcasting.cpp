@@ -20,6 +20,8 @@
 
 #include "../mwrender/animation.hpp"
 
+#include "../mwbase/luamanager.hpp"
+
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
 #include "spelleffects.hpp"
@@ -142,14 +144,7 @@ namespace MWMechanics
     void CastSpell::inflict(
         const MWWorld::Ptr& target, const ESM::EffectList& effects, ESM::RangeType range, bool exploded) const
     {
-        bool targetIsDeadActor = false;
         const bool targetIsActor = !target.isEmpty() && target.getClass().isActor();
-        if (targetIsActor)
-        {
-            const auto& stats = target.getClass().getCreatureStats(target);
-            if (stats.isDead() && stats.isDeathAnimationFinished())
-                targetIsDeadActor = true;
-        }
 
         // If none of the effects need to apply, we can early-out
         bool found = false;
@@ -168,8 +163,6 @@ namespace MWMechanics
         if (!found)
             return;
 
-        ActiveSpells::ActiveSpellParams params(mCaster, mId, mSourceName, mItem);
-        params.setFlag(mFlags);
         bool castByPlayer = (!mCaster.isEmpty() && mCaster == getPlayer());
 
         const ActiveSpells* targetSpells = nullptr;
@@ -183,6 +176,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCannotRecast}");
             return;
         }
+
+        std::vector<int> indexes;
 
         for (auto& enam : effects.mList)
         {
@@ -199,62 +194,14 @@ namespace MWMechanics
                 && (mCaster.isEmpty() || !mCaster.getClass().isActor()))
                 continue;
 
-            ActiveSpells::ActiveEffect effect;
-            effect.mEffectId = enam.mData.mEffectID;
-            effect.mArg = MWMechanics::EffectKey(enam.mData).mArg;
-            effect.mMagnitude = 0.f;
-            effect.mMinMagnitude = static_cast<float>(enam.mData.mMagnMin);
-            effect.mMaxMagnitude = static_cast<float>(enam.mData.mMagnMax);
-            effect.mTimeLeft = 0.f;
-            effect.mEffectIndex = enam.mIndex;
-            effect.mFlags = ESM::ActiveEffect::Flag_None;
-            if (mScriptedSpell)
-                effect.mFlags |= ESM::ActiveEffect::Flag_Ignore_Reflect;
-
-            bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-            effect.mDuration = hasDuration ? static_cast<float>(enam.mData.mDuration) : 1.f;
-
-            effect.mTimeLeft = effect.mDuration;
-
-            // add to list of active effects, to apply in next frame
-            params.getEffects().emplace_back(effect);
-
-            bool effectAffectsHealth = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful
-                || enam.mData.mEffectID == ESM::MagicEffect::RestoreHealth;
-            if (castByPlayer && target != mCaster && targetIsActor && !targetIsDeadActor && effectAffectsHealth)
-            {
-                // If player is attempting to cast a harmful spell on or is healing a living target, show the target's
-                // HP bar.
-                MWBase::Environment::get().getWindowManager()->setEnemy(target);
-            }
-
-            if (!targetIsActor && magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
-            {
-                playEffects(target, *magicEffect);
-            }
+            indexes.push_back(enam.mIndex);
         }
+
+        MWBase::Environment::get().getLuaManager()->applyMagicEffects(
+            mId, mCaster, mItem, target, indexes, mScriptedSpell, mFlags & ESM::ActiveSpells::Flag_Stackable);
 
         if (!exploded)
             explodeSpell(effects, target, range);
-
-        if (!target.isEmpty())
-        {
-            if (!params.getEffects().empty())
-            {
-                if (targetIsActor)
-                {
-                    if (!targetIsDeadActor)
-                        target.getClass().getCreatureStats(target).getActiveSpells().addSpell(params);
-                }
-                else
-                {
-                    // Apply effects instantly. We can ignore effect deletion since the entire params object gets
-                    // deleted afterwards anyway and we can ignore reflection since non-actors cannot reflect spells
-                    for (auto& effect : params.getEffects())
-                        applyMagicEffect(target, mCaster, params, effect, 0.f);
-                }
-            }
-        }
     }
 
     bool CastSpell::cast(const ESM::RefId& id)

@@ -475,7 +475,9 @@ namespace MWMechanics
 
     bool ActiveSpells::initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context)
     {
-        mSpells.emplace_back(params).setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+        mSpells.emplace_back(params);
+        if (mSpells.back().getActiveSpellId().empty())
+            mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
         auto it = mSpells.end();
         --it;
         // We instantly apply the effect with a duration of 0 so continuous effects can be purged before truly applying

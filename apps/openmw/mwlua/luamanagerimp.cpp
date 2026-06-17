@@ -520,6 +520,30 @@ namespace MWLua
         });
     }
 
+    void LuaManager::applyMagicEffects(const ESM::RefId& id, const MWWorld::Ptr& caster, const ESM::RefNum& item,
+        const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool stackable)
+    {
+        if (!target.isEmpty())
+        {
+            mLua.protectedCall([&](LuaUtil::LuaView& view) {
+                sol::table luaEffects = view.newTable();
+                for (int i = 1; i <= static_cast<int>(effects.size()); i++)
+                    luaEffects[i] = effects[i - 1];
+                sol::table data = view.newTable();
+                if (!caster.isEmpty())
+                    data["caster"] = LObject(caster);
+                if (!item.isZeroOrUnset())
+                    data["item"] = LObject(item);
+                data["id"] = id.serializeText();
+                data["target"] = LObject(target);
+                data["effects"] = luaEffects;
+                data["ignoreReflect"] = ignoreReflect;
+                data["stackable"] = stackable;
+                sendLocalEvent(target, "ApplyMagicEffects", data);
+            });
+        }
+    }
+
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
