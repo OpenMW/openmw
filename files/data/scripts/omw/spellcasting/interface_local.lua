@@ -18,7 +18,7 @@ return {
         -- Invokes handlers added via addApplyMagicEffectHandler. The default handler adds effects as a new active spell using Actor.activeSpells(self):add(options),
         -- and handles spawning appropriate VFX. Including looping effects for magic effects like shield.
         -- @function [parent=#SpellCasting] applyMagicEffects
-        -- @param #function handler The handler.
+        -- @param #function options The options. Will be passed as-is to Actor.activeSpells(self):add(options) by the built-in handler.
         applyMagicEffects = function(options)
             auxUtil.callEventHandlers(applyMagicEffectsHandlers, options)
         end,
