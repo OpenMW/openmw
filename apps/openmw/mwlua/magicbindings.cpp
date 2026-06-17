@@ -20,6 +20,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwmechanics/activespells.hpp"
@@ -28,6 +29,7 @@
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -728,10 +730,9 @@ namespace MWLua
         };
 
         // types.Actor.activeSpells(o):add(id, spellid, effects, options)
-        activeSpellsT["add"] = [](const ActorActiveSpells& spells, const sol::table& options) {
+        activeSpellsT["add"] = [context](const ActorActiveSpells& spells, const sol::table& options) {
             if (spells.isLObject())
                 throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
-
             if (auto* store = spells.getStore())
             {
                 ESM::RefId id = ESM::RefId::deserializeText(options.get<std::string_view>("id"));
@@ -755,6 +756,8 @@ namespace MWLua
                 MWWorld::Ptr casterPtr;
                 if (caster)
                     casterPtr = caster->ptrOrEmpty();
+                bool casterIsPlayer = casterPtr == MWMechanics::getPlayer();
+                bool targetIsPlayer = spells.mActor.ptr() == MWMechanics::getPlayer();
 
                 bool affectsHealth = false;
                 MWMechanics::ActiveSpells::ActiveSpellParams params(casterPtr, id, name, itemId);
@@ -791,11 +794,23 @@ namespace MWLua
                         || effect.mEffectId == ESM::MagicEffect::RestoreHealth;
                 }
                 store->addSpell(params);
-                if (affectsHealth && casterPtr == MWMechanics::getPlayer())
-                    // If player is attempting to cast a harmful spell on or is healing a living target, show the
-                    // target's HP bar.
-                    // TODO: This should be moved to Lua once the HUD has been dehardcoded
-                    MWBase::Environment::get().getWindowManager()->setEnemy(spells.mActor.ptr());
+                if (affectsHealth && casterIsPlayer && !targetIsPlayer)
+                {
+                    context.mLuaManager->addAction([enemy = spells.mActor.object()]() {
+                        // If player is attempting to cast a harmful spell on or is healing a living target, show
+                        // the target's HP bar.
+                        MWBase::Environment::get().getWindowManager()->setEnemy(enemy.ptr());
+                    });
+                }
+
+                // Need to update UI explicitly in case game is currently paused
+                if (targetIsPlayer && MWBase::Environment::get().getWorld()->getTimeManager()->isPaused())
+                {
+                    context.mLuaManager->addAction([]() {
+                        MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(MWMechanics::getPlayer());
+                        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    });
+                }
             }
         };
 
