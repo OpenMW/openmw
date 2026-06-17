@@ -1,4 +1,3 @@
-local I = require('openmw.interfaces')
 local core = require('openmw.core')
 local types = require('openmw.types')
 local Actor = types.Actor

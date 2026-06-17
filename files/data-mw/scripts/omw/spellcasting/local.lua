@@ -1,15 +1,9 @@
 local self = require('openmw.self')
 local types = require('openmw.types')
-local util = require('openmw.util')
-local core = require('openmw.core')
-local animation = require('openmw.animation')
 local I = require('openmw.interfaces')
 local auxUtil = require('openmw_aux.util')
 local common = require('scripts.omw.spellcasting.common')
 local Actor = types.Actor
-local Item = types.Item
-local isPlayer = types.Player.objectIsInstance(self)
-local actorSpells = Actor.spells(self)
 
 local interface = auxUtil.shallowCopy(I.SpellCasting)
 
