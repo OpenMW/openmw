@@ -46,7 +46,7 @@ namespace yojimbo
             @param allocator The allocator for all memory used by the client.
             @param config The base client/server configuration.
             @param time The current time in seconds. See ClientInterface::AdvanceTime
-            @param allocator The adapter to the game program. Specifies allocators, message factory to use etc.
+            @param adapter The adapter to the game program. Specifies allocators, message factory to use etc.
          */
 
         explicit BaseClient( class Allocator & allocator, const ClientServerConfig & config, class Adapter & adapter, double time );

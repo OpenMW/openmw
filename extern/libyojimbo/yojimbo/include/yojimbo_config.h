@@ -32,8 +32,8 @@
 #endif
 
 #define YOJIMBO_MAJOR_VERSION 1
-#define YOJIMBO_MINOR_VERSION 0
-#define YOJIMBO_PATCH_VERSION 0
+#define YOJIMBO_MINOR_VERSION 2
+#define YOJIMBO_PATCH_VERSION 5
 
 #if !defined(YOJIMBO_DEBUG) && !defined(YOJIMBO_RELEASE)
 #if defined(NDEBUG)
@@ -170,8 +170,9 @@ namespace yojimbo
 
         ConnectionConfig()
         {
-            numChannels = 1;
+            numChannels = 2;
             maxPacketSize = 8 * 1024;
+            channel[0].type = CHANNEL_TYPE_RELIABLE_ORDERED;
         }
     };
 

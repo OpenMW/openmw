@@ -90,6 +90,7 @@ namespace yojimbo
 
     void BaseClient::SetLatency( float milliseconds )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetLatency( milliseconds );
@@ -98,6 +99,7 @@ namespace yojimbo
 
     void BaseClient::SetJitter( float milliseconds )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetJitter( milliseconds );
@@ -106,6 +108,7 @@ namespace yojimbo
 
     void BaseClient::SetPacketLoss( float percent )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetPacketLoss( percent );
@@ -114,6 +117,7 @@ namespace yojimbo
 
     void BaseClient::SetDuplicates( float percent )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetDuplicates( percent );
@@ -132,15 +136,19 @@ namespace yojimbo
         yojimbo_assert( m_clientMemory == NULL );
         yojimbo_assert( m_clientAllocator == NULL );
         yojimbo_assert( m_messageFactory == NULL );
+
         m_clientMemory = (uint8_t*) YOJIMBO_ALLOCATE( *m_allocator, m_config.clientMemory );
         m_clientAllocator = m_adapter->CreateAllocator( *m_allocator, m_clientMemory, m_config.clientMemory );
         m_messageFactory = m_adapter->CreateMessageFactory( *m_clientAllocator );
         m_connection = YOJIMBO_NEW( *m_clientAllocator, Connection, *m_clientAllocator, *m_messageFactory, m_config, m_time );
+
         yojimbo_assert( m_connection );
+
         if ( m_config.networkSimulator )
         {
             m_networkSimulator = YOJIMBO_NEW( *m_clientAllocator, NetworkSimulator, *m_clientAllocator, m_config.maxSimulatorPackets, m_time );
         }
+
         reliable_config_t reliable_config;
         reliable_default_config( &reliable_config );
         yojimbo_copy_string( reliable_config.name, "client endpoint", sizeof( reliable_config.name ) );
@@ -158,7 +166,9 @@ namespace yojimbo
         reliable_config.allocator_context = m_clientAllocator;
         reliable_config.allocate_function = BaseClient::StaticAllocateFunction;
         reliable_config.free_function = BaseClient::StaticFreeFunction;
+
         m_endpoint = reliable_endpoint_create( &reliable_config, m_time );
+
         reliable_endpoint_reset( m_endpoint );
     }
 
@@ -235,24 +245,32 @@ namespace yojimbo
     bool BaseClient::CanSendMessage( int channelIndex ) const
     {
         yojimbo_assert( m_connection );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_connection->CanSendMessage( channelIndex );
     }
 
     bool BaseClient::HasMessagesToSend( int channelIndex ) const
     {
         yojimbo_assert( m_connection );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_connection->HasMessagesToSend( channelIndex );
     }
 
     void BaseClient::SendMessage( int channelIndex, Message * message )
     {
         yojimbo_assert( m_connection );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         m_connection->SendMessage( channelIndex, message, GetContext() );
     }
 
     Message * BaseClient::ReceiveMessage( int channelIndex )
     {
         yojimbo_assert( m_connection );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_connection->ReceiveMessage( channelIndex );
     }
 
@@ -273,6 +291,12 @@ namespace yojimbo
             info.numPacketsReceived = counters[RELIABLE_ENDPOINT_COUNTER_NUM_PACKETS_RECEIVED];
             info.numPacketsAcked = counters[RELIABLE_ENDPOINT_COUNTER_NUM_PACKETS_ACKED];
             info.RTT = reliable_endpoint_rtt( m_endpoint );
+            info.minRTT = reliable_endpoint_rtt_min( m_endpoint );
+            info.maxRTT = reliable_endpoint_rtt_max( m_endpoint );
+            info.averageRTT = reliable_endpoint_rtt_avg( m_endpoint );
+            info.averageJitter = reliable_endpoint_jitter_avg_vs_min_rtt( m_endpoint );
+            info.maxJitter = reliable_endpoint_jitter_max_vs_min_rtt( m_endpoint );
+            info.stddevJitter = reliable_endpoint_jitter_stddev_vs_avg_rtt( m_endpoint );
             info.packetLoss = reliable_endpoint_packet_loss( m_endpoint );
             reliable_endpoint_bandwidth( m_endpoint, &info.sentBandwidth, &info.receivedBandwidth, &info.ackedBandwidth );
         }

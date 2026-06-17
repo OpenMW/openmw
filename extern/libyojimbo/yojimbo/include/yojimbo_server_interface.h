@@ -144,6 +144,13 @@ namespace yojimbo
         virtual uint64_t GetClientId( int clientIndex ) const = 0;
 
         /**
+            Get the user data of the client.
+            @param clientIndex the index of the client slot in [0,maxClients-1], where maxClients corresponds to the value passed into the last call to Server::Start.
+            @returns The user data of the client.
+         */
+        const uint8_t * GetClientUserData( int clientIndex ) const;
+
+        /**
             Get the address of the client
             @param clientIndex the index of the client slot in [0,maxClients-1], where maxClients corresponds to the value passed into the last call to Server::Start.
             @returns The address of the client.

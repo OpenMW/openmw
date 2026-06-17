@@ -168,7 +168,9 @@ double yojimbo_time()
 //             Windows
 // ===============================
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 
 void yojimbo_sleep( double time )

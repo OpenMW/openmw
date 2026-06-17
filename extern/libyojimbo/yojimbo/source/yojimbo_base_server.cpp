@@ -45,24 +45,33 @@ namespace yojimbo
 
     void BaseServer::Start( int maxClients )
     {
+        yojimbo_assert( maxClients <= MaxClients );
+
         Stop();
+
         m_running = true;
         m_maxClients = maxClients;
+
         yojimbo_assert( !m_globalMemory );
         yojimbo_assert( !m_globalAllocator );
         m_globalMemory = (uint8_t*) YOJIMBO_ALLOCATE( *m_allocator, m_config.serverGlobalMemory );
+
         m_globalAllocator = m_adapter->CreateAllocator( *m_allocator, m_globalMemory, m_config.serverGlobalMemory );
         yojimbo_assert( m_globalAllocator );
+
         if ( m_config.networkSimulator )
         {
             m_networkSimulator = YOJIMBO_NEW( *m_globalAllocator, NetworkSimulator, *m_globalAllocator, m_config.maxSimulatorPackets, m_time );
         }
+
         for ( int i = 0; i < m_maxClients; ++i )
         {
             yojimbo_assert( !m_clientMemory[i] );
             yojimbo_assert( !m_clientAllocator[i] );
             
             m_clientMemory[i] = (uint8_t*) YOJIMBO_ALLOCATE( *m_allocator, m_config.serverPerClientMemory );
+            yojimbo_assert( m_clientMemory[i] );            
+
             m_clientAllocator[i] = m_adapter->CreateAllocator( *m_allocator, m_clientMemory[i], m_config.serverPerClientMemory );
             yojimbo_assert( m_clientAllocator[i] );
             
@@ -104,6 +113,8 @@ namespace yojimbo
             yojimbo_assert( m_globalMemory );
             yojimbo_assert( m_globalAllocator );
             YOJIMBO_DELETE( *m_globalAllocator, NetworkSimulator, m_networkSimulator );
+            yojimbo_assert( m_maxClients > 0 );
+            yojimbo_assert( m_maxClients <= MaxClients );
             for ( int i = 0; i < m_maxClients; ++i )
             {
                 yojimbo_assert( m_clientMemory[i] );
@@ -118,6 +129,14 @@ namespace yojimbo
             }
             YOJIMBO_DELETE( *m_allocator, Allocator, m_globalAllocator );
             YOJIMBO_FREE( *m_allocator, m_globalMemory );
+        }
+        for ( int i = 0; i < MaxClients; ++i )
+        {
+            m_clientMemory[i] = NULL;
+            m_clientAllocator[i] = NULL;
+            m_clientMessageFactory[i] = NULL;
+            m_clientConnection[i] = NULL;
+            m_clientEndpoint[i] = NULL;
         }
         m_running = false;
         m_maxClients = 0;
@@ -154,6 +173,7 @@ namespace yojimbo
 
     void BaseServer::SetLatency( float milliseconds )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetLatency( milliseconds );
@@ -162,6 +182,7 @@ namespace yojimbo
 
     void BaseServer::SetJitter( float milliseconds )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetJitter( milliseconds );
@@ -170,6 +191,7 @@ namespace yojimbo
 
     void BaseServer::SetPacketLoss( float percent )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetPacketLoss( percent );
@@ -178,6 +200,7 @@ namespace yojimbo
 
     void BaseServer::SetDuplicates( float percent )
     {
+        yojimbo_assert( m_networkSimulator );
         if ( m_networkSimulator )
         {
             m_networkSimulator->SetDuplicates( percent );
@@ -223,6 +246,8 @@ namespace yojimbo
     {
         yojimbo_assert( clientIndex >= 0 );
         yojimbo_assert( clientIndex < m_maxClients );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         yojimbo_assert( m_clientConnection[clientIndex] );
         return m_clientConnection[clientIndex]->CanSendMessage( channelIndex );
     }
@@ -232,6 +257,8 @@ namespace yojimbo
         yojimbo_assert( clientIndex >= 0 );
         yojimbo_assert( clientIndex < m_maxClients );
         yojimbo_assert( m_clientConnection[clientIndex] );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_clientConnection[clientIndex]->HasMessagesToSend( channelIndex );
     }
 
@@ -240,6 +267,8 @@ namespace yojimbo
         yojimbo_assert( clientIndex >= 0 );
         yojimbo_assert( clientIndex < m_maxClients );
         yojimbo_assert( m_clientConnection[clientIndex] );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_clientConnection[clientIndex]->SendMessage( channelIndex, message, GetContext() );
     }
 
@@ -248,6 +277,8 @@ namespace yojimbo
         yojimbo_assert( clientIndex >= 0 );
         yojimbo_assert( clientIndex < m_maxClients );
         yojimbo_assert( m_clientConnection[clientIndex] );
+        yojimbo_assert( channelIndex >= 0 );
+        yojimbo_assert( channelIndex < m_config.numChannels );
         return m_clientConnection[clientIndex]->ReceiveMessage( channelIndex );
     }
 
@@ -273,6 +304,12 @@ namespace yojimbo
             info.numPacketsReceived = counters[RELIABLE_ENDPOINT_COUNTER_NUM_PACKETS_RECEIVED];
             info.numPacketsAcked = counters[RELIABLE_ENDPOINT_COUNTER_NUM_PACKETS_ACKED];
             info.RTT = reliable_endpoint_rtt( m_clientEndpoint[clientIndex] );
+            info.minRTT = reliable_endpoint_rtt_min( m_clientEndpoint[clientIndex] );
+            info.maxRTT = reliable_endpoint_rtt_max( m_clientEndpoint[clientIndex] );
+            info.averageRTT = reliable_endpoint_rtt_avg( m_clientEndpoint[clientIndex] );
+            info.averageJitter = reliable_endpoint_jitter_avg_vs_min_rtt( m_clientEndpoint[clientIndex] );
+            info.maxJitter = reliable_endpoint_jitter_max_vs_min_rtt( m_clientEndpoint[clientIndex] );
+            info.stddevJitter = reliable_endpoint_jitter_stddev_vs_avg_rtt( m_clientEndpoint[clientIndex] );
             info.packetLoss = reliable_endpoint_packet_loss( m_clientEndpoint[clientIndex] );
             reliable_endpoint_bandwidth( m_clientEndpoint[clientIndex], &info.sentBandwidth, &info.receivedBandwidth, &info.ackedBandwidth );
         }

@@ -49,10 +49,11 @@ namespace yojimbo
             @param allocator The allocator to use.
             @param messageFactory Message factory for creating and destroying messages.
             @param config The configuration for this channel.
+            @param maxPacketSize The maximum packet size in bytes (see ConnectionConfig::maxPacketSize).
             @param channelIndex The channel index in [0,numChannels-1].
          */
 
-        ReliableOrderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int channelIndex, double time );
+        ReliableOrderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int maxPacketSize, int channelIndex, double time );
 
         /**
             Reliable ordered channel destructor.

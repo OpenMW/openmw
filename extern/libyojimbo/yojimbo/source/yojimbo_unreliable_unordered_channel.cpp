@@ -29,12 +29,14 @@ namespace yojimbo
 {
     UnreliableUnorderedChannel::UnreliableUnorderedChannel( Allocator & allocator, 
                                                             MessageFactory & messageFactory, 
-                                                            const ChannelConfig & config, 
+                                                            const ChannelConfig & config,
+                                                            const int maxPacketSize,
                                                             int channelIndex, 
                                                             double time ) 
         : Channel( allocator, 
                    messageFactory, 
-                   config, 
+                   config,
+                   maxPacketSize,
                    channelIndex, 
                    time )
     {
@@ -181,6 +183,20 @@ namespace yojimbo
             }
 
             const int messageBits = messageTypeBits + measureStream.GetBitsProcessed();
+
+            const bool isOverBudget = m_config.packetBudget > 0 && messageBits > m_config.packetBudget * 8;
+            const bool isOverPacketSize = messageBits > m_maxPacketSize * 8;
+            const bool isTooLarge = isOverBudget || isOverPacketSize;
+
+            yojimbo_assert( !isTooLarge );
+
+            if ( isTooLarge )
+            {
+                // You tried to send a message that is too large to ever fit into a packet for this channel. Large data should be sent as a block message over a reliable-ordered channel.
+                SetErrorLevel( CHANNEL_ERROR_MESSAGE_TOO_LARGE );
+                m_messageFactory->ReleaseMessage( message );
+                break;
+            }
             
             if ( usedBits + messageBits > availableBits )
             {

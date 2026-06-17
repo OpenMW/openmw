@@ -67,6 +67,14 @@ namespace yojimbo
 bool InitializeYojimbo();
 
 /**
+    Enable packet tagging.
+    Enable before you create any client or servers, and DSCP packet tagging will be applied to all packets sent.
+    Packet tagging can significantly reduce jitter on modern Wi-Fi 6+ routers, by marking your game traffic to be sent in the real-time queue.
+ */
+
+void EnablePacketTagging();
+
+/**
     Shutdown the yojimbo library.
     Call this after you finish using the library and it will run some checks for you (for example, checking for memory leaks in debug build).
  */

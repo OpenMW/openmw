@@ -419,7 +419,7 @@ namespace yojimbo
 
     // ------------------------------------------------------------------------------------
 
-    Channel::Channel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int channelIndex, double time ) : m_config( config )
+    Channel::Channel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, const int maxPacketSize, int channelIndex, double time ) : m_config( config ), m_maxPacketSize( maxPacketSize )
     {
         yojimbo_assert( channelIndex >= 0 );
         yojimbo_assert( channelIndex < MaxChannels );

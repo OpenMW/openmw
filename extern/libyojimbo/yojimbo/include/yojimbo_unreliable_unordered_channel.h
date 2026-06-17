@@ -41,14 +41,15 @@ namespace yojimbo
     public:
 
         /**
-            Reliable ordered channel constructor.
+            Unreliable unordered channel constructor.
             @param allocator The allocator to use.
             @param messageFactory Message factory for creating and destroying messages.
             @param config The configuration for this channel.
+            @param maxPacketSize The maximum packet size in bytes (see ConnectionConfig::maxPacketSize).
             @param channelIndex The channel index in [0,numChannels-1].
          */
 
-        UnreliableUnorderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int channelIndex, double time );
+        UnreliableUnorderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int maxPacketSize, int channelIndex, double time );
 
         /**
             Unreliable unordered channel destructor.
