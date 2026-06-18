@@ -208,8 +208,10 @@ namespace Nif
 
     const NiNode* NiNode::findRootCollisionNode(bool recursive) const
     {
-        for (const auto& child : mChildren)
+        // Yes, this search needs to be reversed
+        for (auto it = mChildren.crbegin(); it != mChildren.crend(); ++it)
         {
+            const NiAVObjectPtr& child = *it;
             if (child.empty())
                 continue;
 

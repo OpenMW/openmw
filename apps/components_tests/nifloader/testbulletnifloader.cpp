@@ -1504,7 +1504,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, rcn_flag_with_multiple_nested_rcns_uses_first_found_rcn_for_collision)
+    TEST_F(TestBulletNifLoader, rcn_flag_with_multiple_nested_rcns_uses_last_rcn)
     {
         Nif::NiNode rcn1;
         init(rcn1);
@@ -1522,16 +1522,16 @@ namespace
         mNiNode3.mParents.push_back(&mNiNode);
 
         rcn1.mParents.push_back(&mNiNode2);
-        mNiTriShape2.mParents.push_back(&rcn1);
+        mNiTriShape.mParents.push_back(&rcn1);
 
         rcn2.mParents.push_back(&mNiNode3);
-        mNiTriShape.mParents.push_back(&rcn2);
+        mNiTriShape2.mParents.push_back(&rcn2);
 
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiNode2), Nif::NiAVObjectPtr(&mNiNode3) };
         mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn1) };
         mNiNode3.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn2) };
-        rcn1.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
-        rcn2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        rcn1.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        rcn2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
 
         Nif::NIFFile file(testNif);
         file.mRoots.push_back(&mNiNode);
