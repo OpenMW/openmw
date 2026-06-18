@@ -8,7 +8,7 @@ local Actor = types.Actor
 local interface = auxUtil.shallowCopy(I.SpellCasting)
 
 I.SpellCasting.addApplyMagicEffectsHandler(function(options)
-    if Actor.isDead(self) then return end
+    if Actor.isDeathFinished(self) then return end
     local id = Actor.activeSpells(self):add(options)
     if id then
         -- It takes a frame for a spell to actually be applied, meaning we cannot yet tell
