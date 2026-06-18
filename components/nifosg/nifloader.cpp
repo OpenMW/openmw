@@ -393,6 +393,7 @@ namespace NifOsg
             bool mHasMarkers = false;
             bool mHasAnimatedParents = false;
             osg::Node* mRootNode = nullptr;
+            const Nif::NiNode* mCollisionNode = nullptr;
         };
 
         osg::ref_ptr<osg::Node> load(Nif::FileView nif)
@@ -682,6 +683,7 @@ namespace NifOsg
             node->setUserValue("recordIndex", nifNode->mRecordIndex);
 
             std::string extraData;
+            bool recursiveCollision = false;
 
             for (const auto& e : nifNode->getExtraList())
             {
@@ -711,6 +713,11 @@ namespace NifOsg
                     {
                         node->getOrCreateUserDataContainer()->addDescription("CustomBone");
                     }
+                    else if (sd->mData == "RCN")
+                    {
+                        if (args.mRootNode == node)
+                            recursiveCollision = true;
+                    }
                     else if (sd->mData.rfind(extraDataIdentifer, 0) == 0)
                     {
                         extraData = sd->mData.substr(extraDataIdentifer.length());
@@ -727,6 +734,10 @@ namespace NifOsg
                         args.mHasMarkers = true;
                 }
             }
+
+            const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
+            if (ninode && args.mRootNode == node)
+                args.mCollisionNode = ninode->findRootCollisionNode(recursiveCollision);
 
             if (nifNode->mRecordType == Nif::RC_NiBSAnimationNode || nifNode->mRecordType == Nif::RC_NiBSParticleNode)
                 args.mAnimFlags = nifNode->mFlags;
@@ -751,7 +762,7 @@ namespace NifOsg
 
             // Hide collision shapes, but don't skip the subgraph
             // We still need to animate the hidden bones so the physics system can access them
-            if (nifNode->mRecordType == Nif::RC_RootCollisionNode)
+            if (nifNode == args.mCollisionNode)
             {
                 args.mSkipMeshes = true;
                 node->setNodeMask(Loader::getHiddenNodeMask());
@@ -875,7 +886,6 @@ namespace NifOsg
                 currentNode = sequenceNode;
             }
 
-            const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if (ninode)
             {
                 const Nif::NiAVObjectList& children = ninode->mChildren;

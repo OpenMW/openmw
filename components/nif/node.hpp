@@ -119,6 +119,8 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+
+        const NiNode* findRootCollisionNode(bool recursive) const;
     };
 
     struct NiGeometry : NiAVObject

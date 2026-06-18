@@ -206,6 +206,29 @@ namespace Nif
         }
     }
 
+    const NiNode* NiNode::findRootCollisionNode(bool recursive) const
+    {
+        for (const auto& child : mChildren)
+        {
+            if (child.empty())
+                continue;
+
+            if (child->mRecordType == Nif::RC_RootCollisionNode)
+                return static_cast<const NiNode*>(child.getPtr());
+
+            if (recursive)
+            {
+                const NiNode* childNode = dynamic_cast<const NiNode*>(child.getPtr());
+                if (!childNode)
+                    continue;
+                if (const NiNode* found = childNode->findRootCollisionNode(recursive))
+                    return found;
+            }
+        }
+
+        return nullptr;
+    }
+
     void NiGeometry::MaterialData::read(NIFStream* nif)
     {
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
