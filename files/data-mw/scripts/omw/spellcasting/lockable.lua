@@ -53,9 +53,8 @@ local function unlockAttempted(actor)
 end
 
 local function onApplyMagicEffects(options)
-    -- Non-actors do not have an active spell store so we have to manually
-    -- apply the effects of open/lock spells here.
-    local effects = common.getMagicRecord(options.id).effects
+    local record = common.getMagicRecord(options.id)
+    local effects = common.filterByIndex(record.effects, options.effects)
 
     -- Lockables are only affected by Lock/Unlock spells
     -- Lock state from global scripts, so we need to use events to affect lock state.

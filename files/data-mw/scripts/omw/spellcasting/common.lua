@@ -103,8 +103,33 @@ local function targetIsValid(target)
     return target ~= nil and (Actor.objectIsInstance(target) or Lockable.objectIsInstance(target))
 end
 
+
+local function findByIndex(effects, index)
+    if not effects then return nil end
+    for _, effect in pairs(effects) do
+        if effect.index == index then return effect end
+    end
+    return nil
+end
+
+local function filterByIndex(effects, filter)
+    if not filter or #filter == 0 then return effects end
+    local effectsByIndex = {}
+    for _, index in pairs(filter) do
+        local effect = findByIndex(effects, index)
+        if effect then
+            effectsByIndex[#effectsByIndex + 1] = effect
+        else
+            print('Warning: Spell has no such effect [index='..tostring(index)..']')
+        end
+    end
+    return effectsByIndex
+end
+
+
 return {
     playMagicEffects = playMagicEffects,
     getMagicRecord = getMagicRecord,
     findActiveSpell = findActiveSpell,
+    filterByIndex = filterByIndex,
 }
