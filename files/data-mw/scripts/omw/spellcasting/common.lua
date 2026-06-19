@@ -66,19 +66,23 @@ local function playMagicEffects(target, type, effects, allowEffectLoop)
         if not static or static == '' then static = 'vfx_default'..type end
         if not addedStatic[static] then
             addedStatic[static] = true
-            local eventParams = {
-                model = types.Static.record(static).model,
-                options = {
-                    vfxId = mgef.id,
-                    particleTextureOverride = mgef.particle,
-                    loop = loop,
+            local static = types.Static.records[static]
+            local model = static and static.model or nil
+            if model then
+                local eventParams = {
+                    model = model,
+                    options = {
+                        vfxId = mgef.id,
+                        particleTextureOverride = mgef.particle,
+                        loop = loop,
+                    }
                 }
-            }
-            if Actor.objectIsInstance(target) then
-                target:sendEvent('AddVfx', eventParams)
-            else
-                eventParams.position = target.position
-                core.sendGlobalEvent('SpawnVfx', eventParams)
+                if Actor.objectIsInstance(target) then
+                    target:sendEvent('AddVfx', eventParams)
+                else
+                    eventParams.position = target.position
+                    core.sendGlobalEvent('SpawnVfx', eventParams)
+                end
             end
         end
         if not Actor.objectIsInstance(target) then
