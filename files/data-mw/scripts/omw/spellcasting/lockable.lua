@@ -7,6 +7,7 @@ local core = require('openmw.core')
 local self = require('openmw.self')
 local common = require('scripts.omw.spellcasting.common')
 local nearby = require('openmw.nearby')
+local auxUtil = require('openmw_aux.util')
 local l10n = core.l10n('OMWEngine')
 
 local function isAllowedToOpen(player)
@@ -66,7 +67,7 @@ local function onApplyMagicEffects(options)
     for _, effect in ipairs(effects) do
         if effect.id == core.magic.EFFECT_TYPE.Lock then
             playEffects[#playEffects + 1] = effect
-            local magnitude = math.random(effect.magnitudeMin, effect.magnitudeMax)
+            local magnitude = auxUtil.random(effect.magnitudeMin, effect.magnitudeMax)
             if magnitude >= lockLevel or not isLocked then
                 lockLevel = magnitude
                 isLocked = true
@@ -80,7 +81,7 @@ local function onApplyMagicEffects(options)
         if effect.id == core.magic.EFFECT_TYPE.Open then
             playEffects[#playEffects + 1] = effect
             unlockAttempt = true
-            local magnitude = math.random(effect.magnitudeMin, effect.magnitudeMax)
+            local magnitude = auxUtil.random(effect.magnitudeMin, effect.magnitudeMax)
             if magnitude >= lockLevel and isLocked then
                 lockLevel = 0
                 isLocked = false
