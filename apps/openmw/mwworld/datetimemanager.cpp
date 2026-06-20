@@ -244,7 +244,7 @@ namespace MWWorld
     void DateTimeManager::setSimulationTimeScale(float scale)
     {
         mSimulationTimeScale = std::max(0.f, scale);
-        if (!MWBase::Environment::get().getNetworkManager()->isServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
         {
             MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
         }
@@ -259,7 +259,7 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
-        if (MWBase::Environment::get().getNetworkManager()->isServer())
+        if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
         {
             mPaused = false;
             return;

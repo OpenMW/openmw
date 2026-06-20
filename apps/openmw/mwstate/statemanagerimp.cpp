@@ -56,8 +56,8 @@ void MWState::StateManager::cleanup(bool force)
 {
     if (mState != State_NoGame || force)
     {
-        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
-        if (!isServer)
+        const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+        if (!isDedicatedServer)
         {
             MWBase::Environment::get().getSoundManager()->clear();
             MWBase::Environment::get().getWindowManager()->clear();
@@ -69,7 +69,7 @@ void MWState::StateManager::cleanup(bool force)
         MWBase::Environment::get().getWorld()->clear();
         MWBase::Environment::get().getMechanicsManager()->clear();
 
-        if (!isServer)
+        if (!isDedicatedServer)
         {
             mCharacterManager.setCurrentCharacter(nullptr);
         }
@@ -174,7 +174,9 @@ void MWState::StateManager::newGame(bool bypass)
 {
     cleanup();
 
-    if (!bypass)
+    const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+
+    if (!isDedicatedServer && !bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame(true);
 
     try
@@ -186,7 +188,7 @@ void MWState::StateManager::newGame(bool bypass)
         mState = State_Running;
         MWBase::Environment::get().getLuaManager()->gameLoaded();
 
-        if (!MWBase::Environment::get().getNetworkManager()->isServer())
+        if (!isDedicatedServer)
         {
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
@@ -199,6 +201,12 @@ void MWState::StateManager::newGame(bool bypass)
 
         Log(Debug::Error) << error.str();
         cleanup(true);
+
+        if (isDedicatedServer)
+        {
+            requestQuit();
+            throw;
+        }
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
 

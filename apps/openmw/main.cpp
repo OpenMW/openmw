@@ -23,10 +23,46 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #endif
 
 #include <filesystem>
+#include <stdexcept>
 
-#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
-#include <unistd.h>
-#endif
+namespace
+{
+    namespace bpo = boost::program_options;
+
+    void addRuntimeRoleOptions(bpo::options_description& description)
+    {
+        auto addOption = description.add_options();
+        addOption("host", bpo::value<bool>()->implicit_value(true)->default_value(false),
+            "run as host (default when no runtime role is specified)");
+        addOption("client", bpo::value<bool>()->implicit_value(true)->default_value(false), "run as client");
+        addOption("dedicated-server", bpo::value<bool>()->implicit_value(true)->default_value(false),
+            "run as dedicated server");
+    }
+
+    OMW::RuntimeRole runtimeRoleFromOptions(const bpo::variables_map& variables)
+    {
+        int selectedRoles = 0;
+        OMW::RuntimeRole runtimeRole = OMW::RuntimeRole::Host;
+
+        const auto selectRuntimeRole = [&](const char* option, OMW::RuntimeRole role) {
+            if (!variables[option].as<bool>())
+                return;
+
+            ++selectedRoles;
+            runtimeRole = role;
+        };
+
+        selectRuntimeRole("host", OMW::RuntimeRole::Host);
+        selectRuntimeRole("client", OMW::RuntimeRole::Client);
+        selectRuntimeRole("dedicated-server", OMW::RuntimeRole::DedicatedServer);
+
+        if (selectedRoles > 1)
+            throw std::runtime_error(
+                "Conflicting runtime role options: use only one of --host, --client, or --dedicated-server");
+
+        return runtimeRole;
+    }
+}
 
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
@@ -44,14 +80,18 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     typedef std::vector<std::string> StringsVector;
 
     bpo::options_description desc = OpenMW::makeOptionsDescription();
+    bpo::options_description commandLineDesc(desc);
+    bpo::options_description runtimeRoleOptions("Runtime role options");
+    addRuntimeRoleOptions(runtimeRoleOptions);
+    commandLineDesc.add(runtimeRoleOptions);
     bpo::variables_map variables;
 
-    Files::parseArgs(argc, argv, variables, desc);
+    Files::parseArgs(argc, argv, variables, commandLineDesc);
     bpo::notify(variables);
 
     if (variables.count("help"))
     {
-        Debug::getRawStdout() << desc << std::endl;
+        Debug::getRawStdout() << commandLineDesc << std::endl;
         return false;
     }
 
@@ -61,9 +101,10 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         return false;
     }
 
-    unsigned int netType = variables["net-type"].as<unsigned int>();
-    engine.setServerPid(netType);
-    engine.setNetType(netType);
+    engine.setRuntimeRole(runtimeRoleFromOptions(variables));
+    variables.erase("host");
+    variables.erase("client");
+    variables.erase("dedicated-server");
     cfgMgr.processPaths(variables, std::filesystem::current_path());
 
     cfgMgr.readConfiguration(variables, desc);

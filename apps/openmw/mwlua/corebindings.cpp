@@ -88,7 +88,7 @@ namespace MWLua
         api["contentFiles"] = initContentFilesBindings(lua);
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
             const auto netMan = MWBase::Environment::get().getNetworkManager();
-            if (!netMan->isServer())
+            if (!netMan->isDedicatedServer())
             {
                 const auto globalEventMessage = std::make_shared<MWNet::GlobalEventDataMessageEntry>(
                     std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer));

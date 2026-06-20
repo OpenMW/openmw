@@ -14,26 +14,51 @@ namespace MWNet
 {
     class NetworkManager
     {
-        bool mIsServer = false;
-        std::unique_ptr<Connection> mConnection;
+    public:
+        enum class Role
+        {
+            Host,
+            Client,
+            DedicatedServer,
+        };
+
+    private:
+        bool mIsDedicatedServer = false;
+        std::unique_ptr<Server> mServer;
+        std::unique_ptr<Client> mClient;
 
     public:
-        NetworkManager(bool isServer)
-            : mIsServer(isServer)
+        NetworkManager(Role role)
         {
-            if (isServer)
+            switch (role)
             {
-                mConnection = std::make_unique<MWNet::Server>();
-            }
-            else
-            {
-                mConnection = std::make_unique<MWNet::Client>();
+                case Role::Host:
+                    Log(Debug::Info) << "Host mode: starting authoritative server and local client endpoints in-process";
+                    // The current transport still uses localhost yojimbo endpoints; threading and protocol separation
+                    // are intentionally left for later networking work.
+                    mServer = std::make_unique<MWNet::Server>();
+                    mClient = std::make_unique<MWNet::Client>();
+                    break;
+                case Role::Client:
+                    mClient = std::make_unique<MWNet::Client>();
+                    break;
+                case Role::DedicatedServer:
+                    mIsDedicatedServer = true;
+                    mServer = std::make_unique<MWNet::Server>();
+                    break;
             }
         }
 
         bool update()
         {
-            if (!mConnection->tick())
+            bool running = true;
+
+            if (mServer)
+                running = mServer->tick() && running;
+            if (mClient)
+                running = mClient->tick() && running;
+
+            if (!running)
             {
                 ShutdownYojimbo();
                 return false;
@@ -41,9 +66,15 @@ namespace MWNet
             return true;
         }
 
-        bool isServer() { return mIsServer; }
+        bool isDedicatedServer() const { return mIsDedicatedServer; }
 
-        void queueMessage(const std::shared_ptr<MessageEntry> messageEntry) { mConnection->queueMessage(messageEntry); }
+        void queueMessage(const std::shared_ptr<MessageEntry> messageEntry)
+        {
+            if (mClient)
+                mClient->queueMessage(messageEntry);
+            else if (mServer)
+                mServer->queueMessage(messageEntry);
+        }
     };
 }
 

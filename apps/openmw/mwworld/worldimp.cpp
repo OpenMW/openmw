@@ -245,7 +245,7 @@ namespace MWWorld
             mNavigator = DetourNavigator::makeNavigatorStub();
         }
 
-        if (!MWBase::Environment::get().getNetworkManager()->isServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
         {
             mRendering = std::make_unique<MWRender::RenderingManager>(
                 viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
@@ -275,9 +275,9 @@ namespace MWWorld
         mScriptsEnabled = true;
         mSky = true;
 
-        const bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
+        const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
 
-        if (!isServer)
+        if (!isDedicatedServer)
         {
             // Rebuild player
             setupPlayer();
@@ -301,7 +301,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getLuaManager()->newGameStarted();
 
-        if (!isServer)
+        if (!isDedicatedServer)
         {
             if (bypass && !mStartCell.empty())
             {
@@ -365,7 +365,7 @@ namespace MWWorld
 
     void World::clear()
     {
-        if (!MWBase::Environment::get().getNetworkManager()->isServer())
+        if (!MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
         {
 
             mWeatherManager->clear();
@@ -813,16 +813,16 @@ namespace MWWorld
             rechargeItems(duration, false);
         }
 
-        bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
+        const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
 
-        if (!isServer)
+        if (!isDedicatedServer)
         {
             mWeatherManager->advanceTime(hours, incremental);
         }
 
         mTimeManager->advanceTime(hours, mGlobalVariables);
 
-        if (!isServer && !incremental)
+        if (!isDedicatedServer && !incremental)
         {
             mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
