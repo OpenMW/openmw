@@ -751,10 +751,7 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override
-        {
-            return QString::fromUtf8(record.get().mTexture.c_str());
-        }
+        QVariant get(const Record<ESXRecordT>& record) const override { return toQString(record.get().mTexture); }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {

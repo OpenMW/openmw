@@ -547,7 +547,7 @@ namespace EsmTool
     void Record<ESM::BirthSign>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Texture: " << mData.mTexture << std::endl;
+        std::cout << "  Texture: " << mData.mTexture.getOriginal() << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         for (const auto& power : mData.mPowers.mList)
             std::cout << "  Power: " << power << std::endl;

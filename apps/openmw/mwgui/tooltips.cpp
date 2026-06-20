@@ -888,7 +888,7 @@ namespace MWGui
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
         widget->setUserString("ImageTexture_BirthSignImage",
-            Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(sign->mTexture), *vfs));
+            Misc::ResourceHelpers::correctTexturePath(sign->mTexture.getNormalized(), *vfs));
         widget->setUserString("Caption_BirthSignName", sign->mName);
         widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
