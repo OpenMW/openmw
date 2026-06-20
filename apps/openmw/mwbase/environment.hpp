@@ -3,7 +3,9 @@
 
 #include <components/misc/notnullptr.hpp>
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
 namespace Resource
@@ -62,9 +64,9 @@ namespace MWBase
         Journal* mJournal = nullptr;
         InputManager* mInputManager = nullptr;
         StateManager* mStateManager = nullptr;
-        LuaManager* mLuaManager = nullptr;
-        LuaManager* mAuthoritativeLuaManager = nullptr;
-        LuaManager* mClientLuaManager = nullptr;
+        std::optional<std::reference_wrapper<LuaManager>> mLuaManager;
+        std::optional<std::reference_wrapper<LuaManager>> mAuthoritativeLuaManager;
+        std::optional<std::reference_wrapper<LuaManager>> mClientLuaManager;
         LuaEventRouter* mLuaEventRouter = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
         L10n::Manager* mL10nManager = nullptr;
@@ -103,11 +105,11 @@ namespace MWBase
         void setStateManager(StateManager& value) { mStateManager = &value; }
 
         // Transitional default accessor for systems that still operate on the only current Lua runtime.
-        void setLuaManager(LuaManager& value) { mLuaManager = &value; }
+        void setLuaManager(LuaManager& value) { mLuaManager = std::ref(value); }
 
-        void setAuthoritativeLuaManager(LuaManager& value) { mAuthoritativeLuaManager = &value; }
+        void setAuthoritativeLuaManager(LuaManager& value) { mAuthoritativeLuaManager = std::ref(value); }
 
-        void setClientLuaManager(LuaManager& value) { mClientLuaManager = &value; }
+        void setClientLuaManager(LuaManager& value) { mClientLuaManager = std::ref(value); }
 
         void setLuaEventRouter(LuaEventRouter& value) { mLuaEventRouter = &value; }
 
@@ -140,25 +142,25 @@ namespace MWBase
 
         Misc::NotNullPtr<StateManager> getStateManager() const { return mStateManager; }
 
-        bool hasAuthoritativeLuaManager() const { return mAuthoritativeLuaManager != nullptr; }
+        bool hasAuthoritativeLuaManager() const { return mAuthoritativeLuaManager.has_value(); }
 
-        bool hasClientLuaManager() const { return mClientLuaManager != nullptr; }
+        bool hasClientLuaManager() const { return mClientLuaManager.has_value(); }
 
         // Transitional default accessor for systems that still operate on the only current Lua runtime.
-        Misc::NotNullPtr<LuaManager> getLuaManager() const { return mLuaManager; }
+        Misc::NotNullPtr<LuaManager> getLuaManager() const { return mLuaManager ? &mLuaManager->get() : nullptr; }
 
         Misc::NotNullPtr<LuaManager> getAuthoritativeLuaManager() const
         {
-            if (mAuthoritativeLuaManager == nullptr)
+            if (!mAuthoritativeLuaManager)
                 throw std::logic_error("Authoritative Lua manager is not registered");
-            return mAuthoritativeLuaManager;
+            return &mAuthoritativeLuaManager->get();
         }
 
         Misc::NotNullPtr<LuaManager> getClientLuaManager() const
         {
-            if (mClientLuaManager == nullptr)
+            if (!mClientLuaManager)
                 throw std::logic_error("Client Lua manager is not registered");
-            return mClientLuaManager;
+            return &mClientLuaManager->get();
         }
 
         Misc::NotNullPtr<LuaEventRouter> getLuaEventRouter() const
