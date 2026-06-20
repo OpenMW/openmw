@@ -13,6 +13,7 @@
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
                         <Property key="Page" value="300"/>
+                        <Property key="WheelPage" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="menu transparency"/>
@@ -34,6 +35,7 @@
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
                         <Property key="Page" value="300"/>
+                        <Property key="WheelPage" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="GUI"/>
                         <UserString key="SettingName" value="tooltip delay"/>
@@ -55,6 +57,7 @@
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="201"/>
                         <Property key="Page" value="1"/>
+                        <Property key="WheelPage" value="1"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="difficulty"/>
@@ -80,6 +83,7 @@
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="3584"/>
                         <Property key="Page" value="300"/>
+                        <Property key="WheelPage" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="actors processing range"/>
@@ -147,6 +151,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 28 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Sound"/>
                     <UserString key="SettingName" value="master volume"/>
@@ -158,6 +163,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 78 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Sound"/>
                     <UserString key="SettingName" value="voice volume"/>
@@ -169,6 +175,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 128 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Sound"/>
                     <UserString key="SettingName" value="sfx volume"/>
@@ -180,6 +187,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 178 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Sound"/>
                     <UserString key="SettingName" value="footsteps volume"/>
@@ -191,6 +199,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 228 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Sound"/>
                     <UserString key="SettingName" value="music volume"/>
@@ -243,6 +252,7 @@
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 282 352 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
+                    <Property key="WheelPage" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
                     <UserString key="SettingCategory" value="Input"/>
                     <UserString key="SettingName" value="camera sensitivity"/>
@@ -332,6 +342,7 @@
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 262 352 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
+                            <Property key="WheelPage" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
@@ -354,6 +365,7 @@
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 332 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
+                            <Property key="WheelPage" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Video"/>
                             <UserString key="SettingName" value="gamma"/>
@@ -391,6 +403,7 @@
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 80 352 18" align="HStretch Top">
                             <Property key="Range" value="17"/>
                             <Property key="Page" value="1"/>
+                            <Property key="WheelPage" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="General"/>
                             <UserString key="SettingName" value="anisotropy"/>
@@ -404,6 +417,7 @@
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4669"/>
                             <Property key="Page" value="128"/>
+                            <Property key="WheelPage" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
@@ -416,6 +430,7 @@
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79421"/>
                             <Property key="Page" value="2048"/>
+                            <Property key="WheelPage" value="2048"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
@@ -708,6 +723,7 @@
                                 <UserString key="HStretch" value="true"/>
                                 <Property key="Range" value="8193"/>
                                 <Property key="Page" value="128"/>
+                                <Property key="WheelPage" value="128"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingMin" value="0"/>
                                 <UserString key="SettingMax" value="8192"/>
@@ -731,6 +747,7 @@
                                 <UserString key="HStretch" value="true"/>
                                 <Property key="Range" value="500000"/>
                                 <Property key="Page" value="1000"/>
+                                <Property key="WheelPage" value="1000"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingMin" value="1.0"/>
                                 <!-- We limit the max in the UI as larger values can tank performance  -->
@@ -755,6 +772,7 @@
                                 <UserString key="HStretch" value="true"/>
                                 <Property key="Range" value="10000"/>
                                 <Property key="Page" value="100"/>
+                                <Property key="WheelPage" value="100"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingCategory" value="Shaders"/>
                                 <UserString key="SettingName" value="minimum interior brightness"/>
