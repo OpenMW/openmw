@@ -540,7 +540,7 @@ Ubuntu_GCC_integration_tests_asan:
     # Merge request event rule is architecture-specific
     # Unlike ARM64, AMD64 job is manual non-blocking as it's seldom useful
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
-  image: macos-15-xcode-16
+  image: macos-26-xcode-26
   tags:
     - saas-macos-medium-m1
   script:
@@ -575,7 +575,7 @@ Ubuntu_GCC_integration_tests_asan:
       - build/OpenMW-*.dmg
       - "**/CMakeCache.txt"
 
-macOS15_Xcode16_amd64:
+macOS26_Xcode26_amd64:
   extends: .MacOS
   rules:
     - !reference [.MacOS, rules]
@@ -584,7 +584,7 @@ macOS15_Xcode16_amd64:
       allow_failure: true
   cache:
     key:
-      prefix: macOS15_Xcode16_amd64.v3
+      prefix: macOS26_Xcode26_amd64.v1
       files:
         - CI/macos/deps_versions.sh
     paths:
@@ -596,14 +596,14 @@ macOS15_Xcode16_amd64:
     HOMEBREW_NO_EMOJI: true
     HOMEBREW_NO_INSTALL_CLEANUP: true
 
-macOS15_Xcode16_arm64:
+macOS26_Xcode26_arm64:
   extends: .MacOS
   rules:
     - !reference [.MacOS, rules]
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
     key:
-      prefix: macOS15_Xcode16_arm64.v3
+      prefix: macOS26_Xcode26_arm64.v1
       files:
         - CI/macos/deps_versions.sh
     paths:
