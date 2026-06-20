@@ -39,10 +39,12 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
+        LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir, RuntimeMode runtimeMode);
         LuaManager(const LuaManager&) = delete;
         LuaManager(LuaManager&&) = delete;
         ~LuaManager();
+
+        RuntimeMode getRuntimeMode() const override { return mRuntimeMode; }
 
         // Called by engine.cpp as part of content file loading
         void initPreLoad();
@@ -219,6 +221,7 @@ namespace MWLua
         void reloadAllScriptsImpl();
         void synchronizedUpdateUnsafe();
 
+        RuntimeMode mRuntimeMode;
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         bool mProcessingInputEvents = false;

@@ -35,8 +35,6 @@
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
 
-#include "../mwnet/networkmanager.hpp"
-
 #include "luabindings.hpp"
 #include "playerscripts.hpp"
 #include "types/types.hpp"
@@ -77,8 +75,9 @@ namespace MWLua
             .mLogMemoryUsage = Settings::lua().mLogMemoryUsage };
     }
 
-    LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir)
-        : mLua(vfs, &mConfiguration, createLuaStateSettings())
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir, RuntimeMode runtimeMode)
+        : mRuntimeMode(runtimeMode)
+        , mLua(vfs, &mConfiguration, createLuaStateSettings())
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);
@@ -98,7 +97,7 @@ namespace MWLua
 
     void LuaManager::initConfiguration(bool reload)
     {
-        const bool globalOnly = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+        const bool globalOnly = isAuthoritativeServer();
         mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(),
             LuaUtil::ScriptsConfiguration::InitOptions{ .mGlobalOnly = globalOnly, .mRemap = reload });
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
@@ -116,15 +115,15 @@ namespace MWLua
             context.mLuaManager = this;
             context.mLua = &mLua;
 
-        for (const auto& [name, package] : initCommonPackages(context))
-            mLua.addCommonPackage(name, package);
+            for (const auto& [name, package] : initCommonPackages(context))
+                mLua.addCommonPackage(name, package);
 
-        for (const auto& [name, package] : initLoadPackages(context))
-            mLoadScripts.addPackage(name, package);
+            for (const auto& [name, package] : initLoadPackages(context))
+                mLoadScripts.addPackage(name, package);
 
-        mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
+            mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
 
-        LuaUtil::LuaStorage::initLuaBindings(view);
+            LuaUtil::LuaStorage::initLuaBindings(view);
         });
     }
 
@@ -148,13 +147,14 @@ namespace MWLua
             globalContext.mLuaEvents = &mLuaEvents;
             globalContext.mSerializer = mGlobalSerializer.get();
 
-            const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+            const bool isAuthoritativeServerRuntime = isAuthoritativeServer();
 
-            if (isDedicatedServer)
+            if (isAuthoritativeServerRuntime)
             {
                 for (const auto& [name, package] : initGlobalPackages(globalContext))
                     mGlobalScripts.addPackage(name, package);
-                mGlobalScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(view, &mGlobalStorage));
+                mGlobalScripts.addPackage(
+                    "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(view, &mGlobalStorage));
             }
             else
             {
@@ -180,11 +180,11 @@ namespace MWLua
                     = LuaUtil::LuaStorage::initPlayerPackage(view, &mGlobalStorage, &mPlayerStorage);
             }
 
-            mPlayerStorage.setActive(!isDedicatedServer);
-            mGlobalStorage.setActive(isDedicatedServer);
+            mPlayerStorage.setActive(!isAuthoritativeServerRuntime);
+            mGlobalStorage.setActive(isAuthoritativeServerRuntime);
 
             mInitialized = true;
-            if (!isDedicatedServer)
+            if (!isAuthoritativeServerRuntime)
                 mMenuScripts.addAutoStartedScripts();
         });
     }
@@ -229,9 +229,9 @@ namespace MWLua
         if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
             lua_gc(mLua.unsafeState(), LUA_GCSTEP, steps);
 
-        const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+        const bool isAuthoritativeServerRuntime = isAuthoritativeServer();
 
-        if (!isDedicatedServer)
+        if (!isAuthoritativeServerRuntime)
         {
             if (mPlayer.isEmpty())
                 return; // The game is not started yet.
@@ -337,7 +337,7 @@ namespace MWLua
         }
         BoolScopeGuard updateGuard(mRunningSynchronizedUpdates);
 
-        if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
+        if (isAuthoritativeServer())
         {
             return;
         }
@@ -405,10 +405,10 @@ namespace MWLua
 
     void LuaManager::clear()
     {
-        const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
+        const bool isAuthoritativeServerRuntime = isAuthoritativeServer();
         LuaUi::clearGameInterface();
         mUiResourceManager.clear();
-        if (!isDedicatedServer)
+        if (!isAuthoritativeServerRuntime)
         {
             MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
             mActiveLocalScripts.clear();
@@ -431,7 +431,7 @@ namespace MWLua
         mGlobalStorage.setActive(true);
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mGlobalStorage.setActive(false);
-        if (!isDedicatedServer)
+        if (!isAuthoritativeServerRuntime)
         {
             mPlayerStorage.clearTemporaryAndRemoveCallbacks();
             mInputActions.clear();

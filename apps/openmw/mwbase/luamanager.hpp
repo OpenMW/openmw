@@ -62,7 +62,16 @@ namespace MWBase
     class LuaManager
     {
     public:
+        enum class RuntimeMode
+        {
+            AuthoritativeServer,
+            Client,
+        };
+
         virtual ~LuaManager() = default;
+
+        virtual RuntimeMode getRuntimeMode() const = 0;
+        bool isAuthoritativeServer() const { return getRuntimeMode() == RuntimeMode::AuthoritativeServer; }
 
         virtual void contentFilesLoaded() = 0;
         virtual void newGameStarted() = 0;

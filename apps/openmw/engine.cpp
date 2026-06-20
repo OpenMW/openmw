@@ -126,6 +126,20 @@ namespace
         throw std::logic_error("Unhandled runtime role");
     }
 
+    MWBase::LuaManager::RuntimeMode luaRuntimeModeFromRuntimeRole(OMW::RuntimeRole role)
+    {
+        switch (role)
+        {
+            case OMW::RuntimeRole::Host:
+            case OMW::RuntimeRole::Client:
+                return MWBase::LuaManager::RuntimeMode::Client;
+            case OMW::RuntimeRole::DedicatedServer:
+                return MWBase::LuaManager::RuntimeMode::AuthoritativeServer;
+        }
+
+        throw std::logic_error("Unhandled runtime role");
+    }
+
     void checkSDLError(int ret)
     {
         if (ret != 0)
@@ -870,7 +884,8 @@ void OMW::Engine::prepareEngine()
     mL10nManager->setPreferredLocales(Settings::general().mPreferredLocales, Settings::general().mGmstOverridesL10n);
     mEnvironment.setL10nManager(*mL10nManager);
 
-    mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
+    mLuaManager = std::make_unique<MWLua::LuaManager>(
+        mVFS.get(), mResDir / "lua_libs", luaRuntimeModeFromRuntimeRole(mRuntimeRole));
     mEnvironment.setLuaManager(*mLuaManager);
 
     // Create input and UI first to set up a bootstrapping environment for

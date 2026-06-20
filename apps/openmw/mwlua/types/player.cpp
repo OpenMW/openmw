@@ -13,7 +13,6 @@
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/world.hpp"
 #include "apps/openmw/mwmechanics/npcstats.hpp"
-#include "apps/openmw/mwnet/networkmanager.hpp"
 #include "apps/openmw/mwworld/class.hpp"
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwworld/globals.hpp"
@@ -286,6 +285,7 @@ namespace MWLua
     void addPlayerBindings(sol::table player, const Context& context)
     {
         MWBase::Journal* const journal = MWBase::Environment::get().getJournal();
+        const bool isAuthoritativeServerRuntime = context.mLuaManager->isAuthoritativeServer();
 
         sol::state_view lua = context.sol();
         addJournalEntryBindings(player, lua, journal);
@@ -382,8 +382,8 @@ namespace MWLua
                 }));
 
         // HACK: Disable input bindings completely due to server things
-        player["getControlSwitch"] = [](const Object& object, std::string_view key) {
-            if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
+        player["getControlSwitch"] = [isAuthoritativeServerRuntime](const Object& object, std::string_view key) {
+            if (isAuthoritativeServerRuntime)
             {
                 Log(Debug::Warning) << "getControlSwitch called on server, returning false";
                 return false;
@@ -395,8 +395,8 @@ namespace MWLua
                 return input->getControlSwitch(key);
             }
         };
-        player["setControlSwitch"] = [](const Object& object, std::string_view key, bool v) {
-            if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
+        player["setControlSwitch"] = [isAuthoritativeServerRuntime](const Object& object, std::string_view key, bool v) {
+            if (isAuthoritativeServerRuntime)
             {
                 Log(Debug::Warning) << "setControlSwitch called on server! Not implemented!";
                 return;
