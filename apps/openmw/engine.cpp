@@ -1024,18 +1024,37 @@ void OMW::Engine::go()
     prepareEngine();
 
     std::ofstream stats;
-    std::filesystem::path path;
     if (mNetType != NetType::Server)
     {
 #ifdef _WIN32
-    const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
+        const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
 #else
-    const auto* statsFile = std::getenv("OPENMW_OSG_STATS_FILE");
+        const auto* statsFile = std::getenv("OPENMW_OSG_STATS_FILE");
 #endif
 
-    std::filesystem::path path;
-    if (statsFile != nullptr)
-        path = statsFile;
+        std::filesystem::path path;
+        if (statsFile != nullptr)
+            path = statsFile;
+
+        if (!path.empty())
+        {
+            stats.open(path, std::ios_base::out);
+            if (stats.is_open())
+                Log(Debug::Info) << "OSG stats will be written to: " << path;
+            else
+                Log(Debug::Warning) << "Failed to open file to write OSG stats \"" << path
+                                    << "\": " << std::generic_category().message(errno);
+        }
+
+        // Setup profiler
+        osg::ref_ptr<Resource::Profiler> statsHandler = new Resource::Profiler(stats.is_open(), *mVFS);
+
+        initStatsHandler(*statsHandler);
+
+        mViewer->addEventHandler(statsHandler);
+
+        osg::ref_ptr<Resource::StatsHandler> resourcesHandler = new Resource::StatsHandler(stats.is_open(), *mVFS);
+        mViewer->addEventHandler(resourcesHandler);
 
         if (stats.is_open())
             Resource::collectStatistics(*mViewer);
