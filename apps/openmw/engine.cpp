@@ -5,6 +5,7 @@
 #include <future>
 #include <stdexcept>
 #include <system_error>
+#include <thread>
 
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
@@ -90,6 +91,10 @@
 
 namespace
 {
+
+    constexpr int dedicatedServerTickRate = 20;
+    constexpr std::chrono::milliseconds dedicatedServerTickInterval{ 50 };
+    constexpr double dedicatedServerTickStep = 1.0 / dedicatedServerTickRate;
 
     const char* runtimeRoleName(OMW::RuntimeRole role)
     {
@@ -1149,32 +1154,52 @@ void OMW::Engine::go()
         mWindowManager->executeInConsole(mStartupScript);
     }
 
-    // Start the main rendering loop
+    // Start the main engine loop
     MWWorld::DateTimeManager& timeManager = *mWorld->getTimeManager();
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
     const std::chrono::steady_clock::duration maxSimulationInterval(std::chrono::milliseconds(200));
     unsigned int frameNumber = 0;
-    Log(Debug::Info) << (isDedicatedServer ? "DedicatedServer main loop starting" : "Interactive main loop starting");
+    unsigned long long dedicatedServerTickCount = 0;
+    std::chrono::steady_clock::time_point nextDedicatedServerTick;
+    if (isDedicatedServer)
+    {
+        nextDedicatedServerTick = std::chrono::steady_clock::now();
+        Log(Debug::Info) << "DedicatedServer main loop starting: " << dedicatedServerTickRate
+                         << " Hz tick cadence (" << dedicatedServerTickInterval.count() << " ms)";
+    }
+    else
+        Log(Debug::Info) << "Interactive main loop starting";
+
     while ((isDedicatedServer || !mViewer->done()) && !mStateManager->hasQuitRequest())
     {
-        const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
-                              std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
-                              .count()
-            * timeManager.getSimulationTimeScale();
-
-        if (!isDedicatedServer)
+        double dt = dedicatedServerTickStep;
+        if (isDedicatedServer)
         {
+            std::this_thread::sleep_until(nextDedicatedServerTick);
+            ++frameNumber;
+        }
+        else
+        {
+            dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+                     std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
+                     .count()
+                * timeManager.getSimulationTimeScale();
+
             mViewer->advance(timeManager.getRenderingSimulationTime());
             frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         }
-        else
-            ++frameNumber;
 
         if (!frame(frameNumber, static_cast<float>(dt)))
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            if (isDedicatedServer)
+                nextDedicatedServerTick = std::chrono::steady_clock::now() + dedicatedServerTickInterval;
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
+        if (isDedicatedServer)
+            ++dedicatedServerTickCount;
+
         timeManager.updateIsPaused();
         if (!timeManager.isPaused())
         {
@@ -1197,8 +1222,20 @@ void OMW::Engine::go()
             }
         }
 
-        frameRateLimiter.limit();
+        if (isDedicatedServer)
+        {
+            nextDedicatedServerTick += dedicatedServerTickInterval;
+            const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            if (nextDedicatedServerTick < now)
+                nextDedicatedServerTick = now;
+        }
+        else
+            frameRateLimiter.limit();
     }
+
+    if (isDedicatedServer)
+        Log(Debug::Info) << "DedicatedServer shutdown tick summary: " << dedicatedServerTickCount
+                         << " ticks at configured " << dedicatedServerTickRate << " Hz";
 
     if (mStateManager->hasQuitRequest())
         Log(Debug::Info) << "Main loop exiting: quit requested";
