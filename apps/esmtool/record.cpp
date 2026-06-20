@@ -969,7 +969,7 @@ namespace EsmTool
     {
         std::cout << "  Id: " << mData.mId << std::endl;
         std::cout << "  Index: " << mData.mIndex << std::endl;
-        std::cout << "  Texture: " << mData.mTexture << std::endl;
+        std::cout << "  Texture: " << mData.mTexture.getOriginal() << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 

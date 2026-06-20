@@ -2,7 +2,6 @@
 #define OPENMW_MWWORLD_STORE_H
 
 #include <map>
-#include <memory>
 #include <set>
 #include <span>
 #include <string>
@@ -10,6 +9,7 @@
 #include <vector>
 
 #include <components/esm/attr.hpp>
+#include <components/esm/path.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -254,15 +254,16 @@ namespace MWWorld
     class Store<ESM::LandTexture> : public DynamicStore
     {
         using PluginIndex = std::pair<int, std::uint32_t>; // This is essentially a FormId
-        std::unordered_map<ESM::RefId, std::string> mStatic;
+
         std::map<PluginIndex, ESM::RefId> mMappings;
+        std::unordered_map<ESM::RefId, ESM::Path> mStatic;
 
     public:
         Store();
 
         // Must be threadsafe! Called from terrain background loading threads.
         // Not a big deal here, since ESM::LandTexture can never be modified or inserted/erased
-        const std::string* search(std::uint32_t index, int plugin) const;
+        const ESM::Path* search(std::uint32_t index, int plugin) const;
 
         size_t getSize() const override;
         bool eraseStatic(const ESM::RefId& id) override;

@@ -35,7 +35,6 @@
 #include "record.hpp"
 #include "refidadapter.hpp"
 #include "refiddata.hpp"
-#include "toqstring.hpp"
 #include "universalid.hpp"
 
 namespace ESM

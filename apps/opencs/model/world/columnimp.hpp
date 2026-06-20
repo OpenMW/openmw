@@ -31,7 +31,6 @@
 #include "info.hpp"
 #include "land.hpp"
 #include "record.hpp"
-#include "toqstring.hpp"
 
 namespace CSMWorld
 {
@@ -751,7 +750,10 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return toQString(record.get().mTexture); }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return QString::fromStdString(record.get().mTexture.getOriginal());
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {

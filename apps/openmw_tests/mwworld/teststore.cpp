@@ -493,7 +493,7 @@ namespace
             const RecordType* result = nullptr;
             if constexpr (std::is_same_v<RecordType, ESM::LandTexture>)
             {
-                const std::string* texture = esmStore.get<RecordType>().search(index, 0);
+                const ESM::Path* const texture = esmStore.get<RecordType>().search(index, 0);
                 ASSERT_NE(texture, nullptr);
                 return;
             }
