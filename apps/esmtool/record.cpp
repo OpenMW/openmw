@@ -1027,7 +1027,7 @@ namespace EsmTool
     void Record<ESM::NPC>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Animation: " << mData.mModel << std::endl;
+        std::cout << "  Animation: " << mData.mModel.getOriginal() << std::endl;
         std::cout << "  Hair Model: " << mData.mHair << std::endl;
         std::cout << "  Head Model: " << mData.mHead << std::endl;
         std::cout << "  Race: " << mData.mRace << std::endl;

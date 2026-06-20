@@ -5,10 +5,12 @@
 #include <string>
 #include <vector>
 
+#include <components/esm/attr.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
+
 #include "aipackage.hpp"
-#include "components/esm/attr.hpp"
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
 #include "loadcont.hpp"
 #include "loadskil.hpp"
 #include "spelllist.hpp"
@@ -111,7 +113,8 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mRace, mClass, mFaction, mScript;
-        std::string mModel, mName;
+        std::string mName;
+        Path mModel;
 
         // body parts
         RefId mHair, mHead;
