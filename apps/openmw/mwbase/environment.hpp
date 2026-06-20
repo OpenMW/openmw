@@ -62,7 +62,7 @@ namespace MWBase
         StateManager* mStateManager = nullptr;
         LuaManager* mLuaManager = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
-        l10n::Manager* mL10nManager = nullptr;
+        L10n::Manager* mL10nManager = nullptr;
         MWNet::NetworkManager* mNetworkManager = nullptr;
         float mFrameRateLimit = 0;
         float mFrameDuration = 0;
