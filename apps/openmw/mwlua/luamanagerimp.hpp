@@ -215,6 +215,10 @@ namespace MWLua
         }
 
     private:
+        bool ownsAuthoritativeScriptContexts() const { return getRuntimeMode() == RuntimeMode::AuthoritativeServer; }
+        bool ownsClientScriptContexts() const { return getRuntimeMode() == RuntimeMode::Client; }
+        bool ownsLoadScriptContext() const { return ownsAuthoritativeScriptContexts(); }
+
         void initConfiguration(bool reload);
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
             std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);

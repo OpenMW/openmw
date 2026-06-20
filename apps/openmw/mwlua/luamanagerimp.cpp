@@ -97,7 +97,7 @@ namespace MWLua
 
     void LuaManager::initConfiguration(bool reload)
     {
-        const auto runtimeFilter = getRuntimeMode() == MWBase::LuaManager::RuntimeMode::AuthoritativeServer
+        const auto runtimeFilter = ownsAuthoritativeScriptContexts()
             ? LuaUtil::ScriptsConfiguration::InitOptions::RuntimeFilter::AuthoritativeServer
             : LuaUtil::ScriptsConfiguration::InitOptions::RuntimeFilter::Client;
         mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(),
@@ -112,18 +112,24 @@ namespace MWLua
     void LuaManager::initPreLoad()
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
-            Context context;
-            context.mType = Context::Load;
-            context.mLuaManager = this;
-            context.mLua = &mLua;
+            Context commonContext;
+            commonContext.mType = Context::Common;
+            commonContext.mLuaManager = this;
+            commonContext.mLua = &mLua;
 
-            for (const auto& [name, package] : initCommonPackages(context))
+            for (const auto& [name, package] : initCommonPackages(commonContext))
                 mLua.addCommonPackage(name, package);
 
-            for (const auto& [name, package] : initLoadPackages(context))
-                mLoadScripts.addPackage(name, package);
+            if (ownsLoadScriptContext())
+            {
+                Context loadContext = commonContext;
+                loadContext.mType = Context::Load;
 
-            mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
+                for (const auto& [name, package] : initLoadPackages(loadContext))
+                    mLoadScripts.addPackage(name, package);
+
+                mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
+            }
 
             LuaUtil::LuaStorage::initLuaBindings(view);
         });
@@ -132,6 +138,9 @@ namespace MWLua
     void LuaManager::contentFilesLoaded()
     {
         initConfiguration(false);
+        if (!ownsLoadScriptContext())
+            return;
+
         mLoadScripts.setAutoStartConf(mConfiguration.getLoadConf());
         mLoadScripts.addAutoStartedScripts();
         mLoadScripts.contentFilesLoaded();
@@ -149,16 +158,17 @@ namespace MWLua
             globalContext.mLuaEvents = &mLuaEvents;
             globalContext.mSerializer = mGlobalSerializer.get();
 
-            const bool isAuthoritativeServerRuntime = isAuthoritativeServer();
+            const bool ownsAuthoritativeContexts = ownsAuthoritativeScriptContexts();
+            const bool ownsClientContexts = ownsClientScriptContexts();
 
-            if (isAuthoritativeServerRuntime)
+            if (ownsAuthoritativeContexts)
             {
                 for (const auto& [name, package] : initGlobalPackages(globalContext))
                     mGlobalScripts.addPackage(name, package);
                 mGlobalScripts.addPackage(
                     "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(view, &mGlobalStorage));
             }
-            else
+            else if (ownsClientContexts)
             {
                 Context localContext = globalContext;
                 localContext.mType = Context::Local;
@@ -182,11 +192,11 @@ namespace MWLua
                     = LuaUtil::LuaStorage::initPlayerPackage(view, &mGlobalStorage, &mPlayerStorage);
             }
 
-            mPlayerStorage.setActive(!isAuthoritativeServerRuntime);
-            mGlobalStorage.setActive(isAuthoritativeServerRuntime);
+            mPlayerStorage.setActive(ownsClientContexts);
+            mGlobalStorage.setActive(ownsAuthoritativeContexts);
 
             mInitialized = true;
-            if (!isAuthoritativeServerRuntime)
+            if (ownsClientContexts)
                 mMenuScripts.addAutoStartedScripts();
         });
     }
