@@ -27,8 +27,8 @@
 
 namespace yojimbo
 {
-    ReliableOrderedChannel::ReliableOrderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int channelIndex, double time ) 
-        : Channel( allocator, messageFactory, config, channelIndex, time )
+    ReliableOrderedChannel::ReliableOrderedChannel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, const int maxPacketSize, int channelIndex, double time )
+        : Channel( allocator, messageFactory, config, maxPacketSize, channelIndex, time )
     {
         yojimbo_assert( config.type == CHANNEL_TYPE_RELIABLE_ORDERED );
 
@@ -154,6 +154,27 @@ namespace yojimbo
 
         message->SetId( m_sendMessageId );
 
+        MeasureStream measureStream;
+        measureStream.SetContext( context );
+        measureStream.SetAllocator( &m_messageFactory->GetAllocator() );
+        message->SerializeInternal( measureStream );
+
+        const int measuredBits = measureStream.GetBitsProcessed();
+
+        const bool isOverBudget = m_config.packetBudget > 0 && measuredBits > m_config.packetBudget * 8;
+        const bool isOverPacketSize = measuredBits > m_maxPacketSize * 8;
+        const bool isTooLarge = ( isOverBudget || isOverPacketSize ) && !message->IsBlockMessage();
+
+        yojimbo_assert( !isTooLarge );
+
+        if ( isTooLarge )
+        {
+            // You tried to send a message that is too large to ever fit into a packet for this channel. Large data should be sent as a block message instead.
+            SetErrorLevel( CHANNEL_ERROR_MESSAGE_TOO_LARGE );
+            m_messageFactory->ReleaseMessage( message );
+            return;
+        }
+
         MessageSendQueueEntry * entry = m_messageSendQueue->Insert( m_sendMessageId );
 
         yojimbo_assert( entry );
@@ -169,11 +190,7 @@ namespace yojimbo
             yojimbo_assert( ((BlockMessage*)message)->GetBlockSize() <= m_config.maxBlockSize );
         }
 
-        MeasureStream measureStream;
-		measureStream.SetContext( context );
-        measureStream.SetAllocator( &m_messageFactory->GetAllocator() );
-        message->SerializeInternal( measureStream );
-        entry->measuredBits = measureStream.GetBitsProcessed();
+        entry->measuredBits = measuredBits;
         m_counters[CHANNEL_COUNTER_MESSAGES_SENT]++;
         m_sendMessageId++;
     }
@@ -264,9 +281,6 @@ namespace yojimbo
         uint16_t previousMessageId = 0;
         int usedBits = ConservativeMessageHeaderBits;
         int giveUpCounter = 0;
-#ifdef YOJIMBO_DEBUG
-        const int maxBits = availableBits;
-#endif // YOJIMBO_DEBUG
 
         for ( int i = 0; i < messageLimit; ++i )
         {
@@ -284,8 +298,8 @@ namespace yojimbo
             if ( entry->block )
                 break;
 
-            // Increase your max packet size!
-            yojimbo_assert( entry->measuredBits <= uint32_t(maxBits) );
+            // Messages that are too large to fit in a packet are rejected in SendMessage()
+            yojimbo_assert( (m_config.packetBudget <= 0 || entry->measuredBits <= uint32_t(m_config.packetBudget * 8)) && entry->measuredBits <= uint32_t(m_maxPacketSize * 8) );
             
             if ( entry->timeLastSent + m_config.messageResendTime <= m_time && availableBits >= (int) entry->measuredBits )
             {                

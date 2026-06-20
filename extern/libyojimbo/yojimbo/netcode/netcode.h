@@ -1,5 +1,5 @@
 /*
-    netcode reference implementation
+    netcode
 
     Copyright © 2017 - 2024, Mas Bandwidth LLC
 
@@ -44,7 +44,7 @@
     || defined(alpha)   || defined(__alpha) || defined(__alpha__) \
     || defined(_M_ALPHA)                                          \
     || defined(ARM)     || defined(_ARM)    || defined(__arm__)   \
-    || defined(__aarch64__) 								      \
+    || defined(__aarch64__)                                       \
     || defined(WIN32)   || defined(_WIN32)  || defined(__WIN32__) \
     || defined(_WIN32_WCE) || defined(__NT__)                     \
     || defined(__MIPSEL__)
@@ -111,6 +111,14 @@ extern "C" {
 int netcode_init();
 
 void netcode_term();
+
+#ifndef NETCODE_PACKET_TAGGING
+#define NETCODE_PACKET_TAGGING 1
+#endif // #ifndef NETCODE_PACKET_TAGGING
+
+#if NETCODE_PACKET_TAGGING
+void netcode_enable_packet_tagging();
+#endif // #if NETCODE_PACKET_TAGGING
 
 struct netcode_address_t
 {

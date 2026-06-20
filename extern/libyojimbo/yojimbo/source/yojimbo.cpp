@@ -44,8 +44,11 @@ namespace yojimbo
 
 extern "C" int netcode_init();
 extern "C" int reliable_init();
+
 extern "C" void netcode_term();
 extern "C" void reliable_term();
+
+extern "C" int netcode_enable_packet_tagging();
 
 #define NETCODE_OK 1
 #define RELIABLE_OK 1
@@ -61,6 +64,11 @@ bool InitializeYojimbo()
         return false;
 
     return sodium_init() != -1;
+}
+
+void EnablePacketTagging()
+{
+    netcode_enable_packet_tagging();
 }
 
 void ShutdownYojimbo()

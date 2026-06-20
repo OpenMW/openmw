@@ -102,6 +102,7 @@ namespace yojimbo
         CHANNEL_ERROR_BLOCKS_DISABLED,                          ///< The channel received a packet containing data for blocks, but this channel is configured to disable blocks. See ChannelConfig::disableBlocks.
         CHANNEL_ERROR_FAILED_TO_SERIALIZE,                      ///< Serialize read failed for a message sent to this channel. Check your message serialize functions, one of them is returning false on serialize read. This can also be caused by a desync in message read and write.
         CHANNEL_ERROR_OUT_OF_MEMORY,                            ///< The channel tried to allocate some memory but couldn't.
+        CHANNEL_ERROR_MESSAGE_TOO_LARGE,                        ///< The user tried to send a message that is too large to ever fit into a packet for this channel. Large data should be sent as a block message instead. This will assert out in development, but in production it sets this error on the channel.
     };
 
     /// Helper function to convert a channel error to a user friendly string.
@@ -116,6 +117,7 @@ namespace yojimbo
             case CHANNEL_ERROR_OUT_OF_MEMORY:           return "out of memory";
             case CHANNEL_ERROR_BLOCKS_DISABLED:         return "blocks disabled";
             case CHANNEL_ERROR_FAILED_TO_SERIALIZE:     return "failed to serialize";
+            case CHANNEL_ERROR_MESSAGE_TOO_LARGE:       return "message too large";
             default:
                 yojimbo_assert( false );
                 return "(unknown)";
@@ -132,7 +134,7 @@ namespace yojimbo
             Channel constructor.
          */
 
-        Channel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int channelIndex, double time );
+        Channel( Allocator & allocator, MessageFactory & messageFactory, const ChannelConfig & config, int maxPacketSize, int channelIndex, double time );
 
         /**
             Channel destructor.
@@ -255,6 +257,7 @@ namespace yojimbo
     protected:
 
         const ChannelConfig m_config;                                                   ///< Channel configuration data.
+        const int m_maxPacketSize;                                                      ///< The maximum packet size in bytes (from ConnectionConfig::maxPacketSize). Used to detect messages that are too large to ever fit into a packet.
         Allocator * m_allocator;                                                        ///< Allocator for allocations matching life cycle of this channel.
         int m_channelIndex;                                                             ///< The channel index in [0,numChannels-1].
         double m_time;                                                                  ///< The current time.

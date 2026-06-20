@@ -102,7 +102,7 @@ namespace yojimbo
 
         /**
             Is the client connected to a server?
-            This is true once a client successfully finishes connection negotiatio, and connects to a server. It is false while connecting to a server.
+            This is true once a client successfully finishes connection negotiation, and connects to a server. It is false while connecting to a server.
             @returns true if the client is connected to a server.
          */
 

@@ -188,7 +188,7 @@ endif()
 
 add_subdirectory(smhasher)
 
-add_subdirectory(libyojimbo/yojimbo)
+add_subdirectory(libyojimbo)
 
 if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 

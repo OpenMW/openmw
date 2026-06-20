@@ -63,6 +63,8 @@ namespace yojimbo
 
         uint64_t GetClientId( int clientIndex ) const;
 
+        const uint8_t * GetClientUserData( int clientIndex ) const;
+
         netcode_address_t * GetClientAddress( int clientIndex ) const;
 
         int GetNumConnectedClients() const;

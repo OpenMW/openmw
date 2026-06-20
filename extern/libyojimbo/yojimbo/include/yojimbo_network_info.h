@@ -36,7 +36,13 @@ namespace yojimbo
 
     struct NetworkInfo
     {
-        float RTT;                                  ///< Round trip time estimate (milliseconds).
+        float RTT;                                  ///< Round trip time estimate (milliseconds). Exponentially smoothed average tracking most recent RTT value.
+        float minRTT;                               ///< Minimum RTT seen over the last n samples (see rtt_history_size in reliable config). This is a more stable and accurate RTT value under typical Wi-Fi jitter.
+        float maxRTT;                               ///< Maximum RTT seen over the last n samples. 
+        float averageRTT;                           ///< Average RTT seen over the last n samples.
+        float averageJitter;                        ///< Average jitter relative to min RTT over the last n samples.
+        float maxJitter;                            ///< Max jitter relative to min RTT seen over the last n samples.
+        float stddevJitter;                         ///< One standard deviation of jitter relative to average RTT over the last n samples.
         float packetLoss;                           ///< Packet loss percent.
         float sentBandwidth;                        ///< Sent bandwidth (kbps).
         float receivedBandwidth;                    ///< Received bandwidth (kbps).
