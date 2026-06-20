@@ -225,7 +225,7 @@ CUSTOM, PLAYER: useInterface.lua
 CUSTOM: unload.lua
 CUSTOM: customdata.lua
 )X");
-            mCfg.init(std::move(cfg), false);
+            mCfg.init(std::move(cfg));
         }
 
         int getId(VFS::Path::NormalizedView path) const
@@ -668,7 +668,7 @@ CUSTOM, NPC: loadSave2.lua
 NPC: loadSave1.lua
 CUSTOM: test1.lua
 )X");
-        mCfg.init(std::move(cfg), true);
+        mCfg.init(std::move(cfg), LuaUtil::ScriptsConfiguration::InitOptions{ .mRemap = true });
 
         LuaUtil::ScriptsContainer scripts2(&mLua, "Test");
         scripts2.setAutoStartConf(mCfg.getLocalConf(ESM::REC_NPC_, ESM::RefId(), ESM::RefNum()));
