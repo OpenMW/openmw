@@ -91,8 +91,6 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/physicssystem.hpp"
 
-#include "../mwsound/constants.hpp"
-
 #include "../mwnet/networkmanager.hpp"
 
 #include "actionteleport.hpp"
@@ -277,25 +275,34 @@ namespace MWWorld
         mScriptsEnabled = true;
         mSky = true;
 
-        if (!MWBase::Environment::get().getNetworkManager()->isServer())
+        const bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
+
+        if (!isServer)
         {
             // Rebuild player
             setupPlayer();
 
+            renderPlayer();
+            mRendering->getCamera()->reset();
+
+            // we don't want old weather to persist on a new game
+            // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
+            mWeatherManager.reset();
+            mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering.get(), mStore);
+        }
+
+        if (!bypass)
+        {
+            // set new game mark
+            mGlobalVariables[Globals::sCharGenState].setInteger(1);
+        }
+        else
+            mGlobalVariables[Globals::sCharGenState].setInteger(-1);
+
         MWBase::Environment::get().getLuaManager()->newGameStarted();
 
-        if (bypass && !mStartCell.empty())
+        if (!isServer)
         {
-            ESM::Position pos;
-            ESM::RefId cellId = findExteriorPosition(mStartCell, pos);
-            if (!cellId.empty())
-            {
-                // set new game mark
-                mGlobalVariables[Globals::sCharGenState].setInteger(1);
-            }
-            else
-                mGlobalVariables[Globals::sCharGenState].setInteger(-1);
-
             if (bypass && !mStartCell.empty())
             {
                 ESM::Position pos;
@@ -340,7 +347,6 @@ namespace MWWorld
                 {
                     // Make sure that we do not continue to play a Title music after a new game video.
                     MWBase::Environment::get().getSoundManager()->stopMusic();
-                    MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
                     MWBase::Environment::get().getWindowManager()->playVideo(video, true);
                 }
             }
@@ -351,23 +357,6 @@ namespace MWWorld
 
             MWBase::Environment::get().getWindowManager()->updatePlayer();
         }
-
-        if (!bypass)
-        {
-            std::string_view video = Fallback::Map::getString("Movies_New_Game");
-            if (!video.empty())
-            {
-                // Make sure that we do not continue to play a Title music after a new game video.
-                MWBase::Environment::get().getSoundManager()->stopMusic();
-                MWBase::Environment::get().getWindowManager()->playVideo(video, true);
-            }
-        }
-
-        // enable collision
-        if (!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
-
-        MWBase::Environment::get().getWindowManager()->updatePlayer();
         mTimeManager->setup(mGlobalVariables);
 
         // Initial seed.
