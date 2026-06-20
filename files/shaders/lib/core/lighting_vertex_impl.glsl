@@ -14,17 +14,20 @@ uniform float near;
 uniform vec2 screenRes;
 uniform vec3 gridSize;
 
-void doLighting(vec2 screenCoord, vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuseLight, out vec3 ambientLight, out vec3 specularLight, out vec3 shadowDiffuse, out vec3 shadowSpecular) {
-    vec3 viewDir = normalize(viewPos);
-    shininess = max(shininess, 1e-4);
-
+void directionalLighting(vec3 viewDir, vec3 viewNormal, float shininess, out vec3 diffuseLight, out vec3 ambientLight, out vec3 specularLight)
+{
     diffuseLight = vec3(0.0);
     ambientLight = vec3(0.0);
     specularLight = vec3(0.0);
-    shadowDiffuse = vec3(0.0);
-    shadowSpecular = vec3(0.0);
 
-    calcDirectionalLighting(sun, viewDir, viewNormal, shininess, shadowDiffuse, ambientLight, shadowSpecular);
+    calcDirectionalLighting(sun, viewDir, viewNormal, shininess, diffuseLight, ambientLight, specularLight);
+}
+
+void pointLighting(vec2 screenCoord, vec3 viewDir, vec3 viewPos, vec3 viewNormal, float shininess, out vec3 diffuseLight, out vec3 ambientLight, out vec3 specularLight)
+{
+    diffuseLight = vec3(0.0);
+    ambientLight = vec3(0.0);
+    specularLight = vec3(0.0);
 
 #if @simpleLighting || (@particle && !@particlePointLighting)
     return;

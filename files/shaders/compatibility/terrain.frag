@@ -22,10 +22,12 @@ varying float linearDepth;
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
+centroid varying vec3 shadedLighting;
+centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-centroid varying vec3 shadowDiffuseLighting;
-centroid varying vec3 shadowSpecularLighting;
+#else
+#include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -37,7 +39,7 @@ uniform float far;
 
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
-#include "lib/light/clamp.glsl"
+
 #include "lib/material/parallax.glsl"
 #include "fog.glsl"
 #include "compatibility/normals.glsl"
@@ -75,8 +77,8 @@ void main()
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
-    lighting = passLighting + shadowDiffuseLighting * shadowing;
-    specular = passSpecular + shadowSpecularLighting * shadowing;
+    lighting = mix(shadedLighting, passLighting, shadowing);
+    specular = mix(shadedSpecular, passSpecular, shadowing);
 #else
 #if @specularMap
     float shininess = 128.0; // TODO: make configurable
@@ -89,9 +91,9 @@ void main()
     doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
     specular = specularColor * specularLight;
+    clampLighting(lighting);
 #endif
 
-    clampLighting(lighting);
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
