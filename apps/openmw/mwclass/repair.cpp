@@ -82,7 +82,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Repair>* ref = ptr.get<ESM::Repair>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getOriginal();
     }
 
     bool Repair::hasItemHealth(const MWWorld::ConstPtr& ptr) const
@@ -104,7 +104,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
 
