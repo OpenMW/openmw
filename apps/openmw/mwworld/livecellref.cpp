@@ -100,7 +100,11 @@ namespace MWWorld
             mRef.setSoul(ESM::RefId());
         }
 
-        MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
+        const MWBase::Environment& environment = MWBase::Environment::get();
+        if (environment.hasClientLuaManager())
+            environment.getClientLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
+        else if (!environment.getLuaManager()->isAuthoritativeServer())
+            environment.getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
     }
 
     void LiveCellRefBase::saveImp(ESM::ObjectState& state) const
@@ -110,8 +114,14 @@ namespace MWWorld
         ConstPtr ptr(this);
 
         mData.write(state, mClass->getScript(ptr));
-        MWBase::Environment::get().getLuaManager()->saveLocalScripts(
-            Ptr(const_cast<LiveCellRefBase*>(this)), state.mLuaScripts);
+        const MWBase::Environment& environment = MWBase::Environment::get();
+        if (environment.hasClientLuaManager())
+            environment.getClientLuaManager()->saveLocalScripts(
+                Ptr(const_cast<LiveCellRefBase*>(this)), state.mLuaScripts);
+        else if (!environment.getLuaManager()->isAuthoritativeServer())
+            environment.getLuaManager()->saveLocalScripts(Ptr(const_cast<LiveCellRefBase*>(this)), state.mLuaScripts);
+        else
+            state.mLuaScripts.mScripts.clear();
 
         mClass->writeAdditionalState(ptr, state);
     }

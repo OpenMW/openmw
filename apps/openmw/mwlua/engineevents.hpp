@@ -14,8 +14,9 @@ namespace MWLua
     class EngineEvents
     {
     public:
-        explicit EngineEvents(GlobalScripts& globalScripts)
+        explicit EngineEvents(GlobalScripts& globalScripts, bool localScriptsEnabled)
             : mGlobalScripts(globalScripts)
+            , mLocalScriptsEnabled(localScriptsEnabled)
         {
         }
 
@@ -95,6 +96,7 @@ namespace MWLua
         class Visitor;
 
         GlobalScripts& mGlobalScripts;
+        bool mLocalScriptsEnabled;
         std::vector<Event> mQueue;
     };
 

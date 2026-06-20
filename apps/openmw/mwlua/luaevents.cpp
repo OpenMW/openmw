@@ -35,11 +35,23 @@ namespace MWLua
         mNewLocalEventBatch.clear();
     }
 
+    void LuaEvents::addLocalEvent(Local event)
+    {
+        if (!mLocalEventsEnabled)
+            return;
+        mNewLocalEventBatch.push_back(std::move(event));
+    }
+
     void LuaEvents::callEventHandlers()
     {
         for (const Global& e : mGlobalEventBatch)
             mGlobalScripts.receiveEvent(e.mEventName, e.mEventData);
         mGlobalEventBatch.clear();
+        if (!mLocalEventsEnabled)
+        {
+            mLocalEventBatch.clear();
+            return;
+        }
         for (const Local& e : mLocalEventBatch)
         {
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtr(e.mDest);

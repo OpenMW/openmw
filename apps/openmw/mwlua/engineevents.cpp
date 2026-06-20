@@ -20,8 +20,9 @@ namespace MWLua
     class EngineEvents::Visitor
     {
     public:
-        explicit Visitor(GlobalScripts& globalScripts)
+        explicit Visitor(GlobalScripts& globalScripts, bool localScriptsEnabled)
             : mGlobalScripts(globalScripts)
+            , mLocalScriptsEnabled(localScriptsEnabled)
         {
         }
 
@@ -158,7 +159,7 @@ namespace MWLua
 
         LocalScripts* getLocalScripts(const MWWorld::Ptr& ptr) const
         {
-            if (ptr.isEmpty())
+            if (!mLocalScriptsEnabled || ptr.isEmpty())
                 return nullptr;
             else
                 return ptr.getRefData().getLuaScripts();
@@ -167,12 +168,13 @@ namespace MWLua
         LocalScripts* getLocalScripts(ESM::RefNum id) const { return getLocalScripts(getPtr(id)); }
 
         GlobalScripts& mGlobalScripts;
+        bool mLocalScriptsEnabled;
         MWWorld::WorldModel* mWorldModel = MWBase::Environment::get().getWorldModel();
     };
 
     void EngineEvents::callEngineHandlers()
     {
-        Visitor vis(mGlobalScripts);
+        Visitor vis(mGlobalScripts, mLocalScriptsEnabled);
         for (const Event& event : mQueue)
             std::visit(vis, event);
         mQueue.clear();

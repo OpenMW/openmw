@@ -152,7 +152,7 @@ namespace MWLua
 
         // At the end of the next `synchronizedUpdate` drops script cache and reloads all scripts.
         // Calls `onSave` and `onLoad` for every script.
-        void reloadAllScripts() override { mReloadAllScriptsRequested = true; }
+        void reloadAllScripts() override;
 
         void handleConsoleCommand(
             const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
@@ -248,8 +248,8 @@ namespace MWLua
 
         MWWorld::Ptr mPlayer;
 
-        LuaEvents mLuaEvents{ mGlobalScripts, mMenuScripts };
-        EngineEvents mEngineEvents{ mGlobalScripts };
+        LuaEvents mLuaEvents{ mGlobalScripts, mMenuScripts, ownsClientScriptContexts() };
+        EngineEvents mEngineEvents{ mGlobalScripts, ownsClientScriptContexts() };
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
         std::vector<MWBase::LuaManager::InputEvent> mMenuInputEvents;
 

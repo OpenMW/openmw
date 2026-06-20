@@ -28,9 +28,10 @@ namespace MWLua
     class LuaEvents
     {
     public:
-        explicit LuaEvents(GlobalScripts& globalScripts, MenuScripts& menuScripts)
+        explicit LuaEvents(GlobalScripts& globalScripts, MenuScripts& menuScripts, bool localEventsEnabled)
             : mGlobalScripts(globalScripts)
             , mMenuScripts(menuScripts)
+            , mLocalEventsEnabled(localEventsEnabled)
         {
         }
 
@@ -48,7 +49,7 @@ namespace MWLua
 
         void addGlobalEvent(Global event) { mNewGlobalEventBatch.push_back(std::move(event)); }
         void addMenuEvent(Global event) { mMenuEvents.push_back(std::move(event)); }
-        void addLocalEvent(Local event) { mNewLocalEventBatch.push_back(std::move(event)); }
+        void addLocalEvent(Local event);
 
         void clear();
         void finalizeEventBatch();
@@ -62,6 +63,7 @@ namespace MWLua
     private:
         GlobalScripts& mGlobalScripts;
         MenuScripts& mMenuScripts;
+        bool mLocalEventsEnabled;
         std::vector<Global> mNewGlobalEventBatch;
         std::vector<Local> mNewLocalEventBatch;
         std::vector<Global> mGlobalEventBatch;
