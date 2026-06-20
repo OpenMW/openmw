@@ -203,7 +203,7 @@ namespace MWLua
             ingred.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["icon"] != sol::nil)
-            ingred.mIcon = rec["icon"];
+            ingred.mIcon = rec["icon"].get<std::string_view>();
         if (rec["weight"] != sol::nil)
             ingred.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
