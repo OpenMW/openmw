@@ -1091,15 +1091,20 @@ int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, b
 void CSMWorld::Data::loadFallbackEntries()
 {
     // Load default marker definitions, if game files do not have them for some reason
-    std::pair<std::string, std::string> staticMarkers[] = { std::make_pair("DivineMarker", "marker_divine.nif"),
-        std::make_pair("DoorMarker", "marker_arrow.nif"), std::make_pair("NorthMarker", "marker_north.nif"),
-        std::make_pair("TempleMarker", "marker_temple.nif"), std::make_pair("TravelMarker", "marker_travel.nif") };
+    static const std::pair<ESM::RefId, std::string_view> staticMarkers[] = {
+        { ESM::RefId::stringRefId("DivineMarker"), "marker_divine.nif" },
+        { ESM::RefId::stringRefId("DoorMarker"), "marker_arrow.nif" },
+        { ESM::RefId::stringRefId("NorthMarker"), "marker_north.nif" },
+        { ESM::RefId::stringRefId("TempleMarker"), "marker_temple.nif" },
+        { ESM::RefId::stringRefId("TravelMarker"), "marker_travel.nif" },
+    };
 
-    std::pair<std::string, std::string> doorMarkers[] = { std::make_pair("PrisonMarker", "marker_prison.nif") };
+    static const std::pair<ESM::RefId, std::string_view> doorMarkers[] = {
+        { ESM::RefId::stringRefId("PrisonMarker"), "marker_prison.nif" },
+    };
 
-    for (const auto& [id, model] : staticMarkers)
+    for (const auto& [refId, model] : staticMarkers)
     {
-        const ESM::RefId refId = ESM::RefId::stringRefId(id);
         if (mReferenceables.searchId(refId) == -1)
         {
             ESM::Static newMarker;
@@ -1113,9 +1118,8 @@ void CSMWorld::Data::loadFallbackEntries()
         }
     }
 
-    for (const auto& [id, model] : doorMarkers)
+    for (const auto& [refId, model] : doorMarkers)
     {
-        const ESM::RefId refId = ESM::RefId::stringRefId(id);
         if (mReferenceables.searchId(refId) == -1)
         {
             ESM::Door newMarker;
