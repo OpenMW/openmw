@@ -435,8 +435,9 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     // Checking for model
     if (container.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(container.mModel) == -1)
-        messages.add(id, "Model '" + container.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(container.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", container.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Checking for capacity (weight)
     if (container.mWeight < 0) // 0 is allowed

@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -50,7 +51,8 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mScript;
-        std::string mName, mModel;
+        std::string mName;
+        Path mModel;
 
         float mWeight; // Not sure, might be max total weight allowed?
         int32_t mFlags;
