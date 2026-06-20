@@ -508,6 +508,7 @@ OMW::Engine::~Engine()
     mLuaWorker = nullptr;
     mLuaManager = nullptr;
     mL10nManager = nullptr;
+    mEnvironment.clearLuaEventRouter();
     mNetworkManager = nullptr;
 
     mScriptContext = nullptr;
@@ -828,6 +829,7 @@ void OMW::Engine::prepareEngine()
     }
 
     mNetworkManager = std::make_unique<MWNet::NetworkManager>(networkRoleFromRuntimeRole(mRuntimeRole));
+    mEnvironment.setLuaEventRouter(mNetworkManager->getLuaEventRouter());
     mEnvironment.setNetworkManager(*mNetworkManager);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);

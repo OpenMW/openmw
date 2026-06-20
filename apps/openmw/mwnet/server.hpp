@@ -4,6 +4,9 @@
 #include "connectionbase.hpp"
 #include "networkmessages.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luaeventrouter.hpp"
+
 namespace MWNet
 {
     class ServerAdapter : public MWNet::BaseAdapter
@@ -97,17 +100,8 @@ namespace MWNet
                                         << verifiedMessage->eventName << " with data: " << verifiedMessage->eventData
                                         << ", of size: " << verifiedMessage->eventData.size();
 
-                    const auto& environment = MWBase::Environment::get();
-                    if (!environment.hasAuthoritativeLuaManager())
-                    {
-                        Log(Debug::Error) << "SERVER: dropping networked global event '" << verifiedMessage->eventName
-                                          << "' from client " << clientIndex
-                                          << " because authoritative Lua manager is not registered yet";
-                        return;
-                    }
-
-                    const auto luaMgr = environment.getAuthoritativeLuaManager();
-                    luaMgr->queueNetworkedGlobalEvent(verifiedMessage->eventName, verifiedMessage->eventData);
+                    MWBase::Environment::get().getLuaEventRouter()->receiveNetworkedGlobalEvent(
+                        clientIndex, verifiedMessage->eventName, verifiedMessage->eventData);
                 },
             };
 

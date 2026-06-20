@@ -12,6 +12,7 @@
 
 #include "client.hpp"
 #include "connectionbase.hpp"
+#include "luaeventrouter.hpp"
 #include "server.hpp"
 
 namespace MWNet
@@ -42,6 +43,7 @@ namespace MWNet
         Role mRole;
         bool mIsDedicatedServer = false;
         YojimboRuntime mYojimboRuntime;
+        LuaEventRouter mLuaEventRouter;
         std::unique_ptr<Server> mServer;
         std::unique_ptr<Client> mClient;
 
@@ -114,6 +116,8 @@ namespace MWNet
         }
 
         bool isDedicatedServer() const { return mIsDedicatedServer; }
+
+        MWBase::LuaEventRouter& getLuaEventRouter() { return mLuaEventRouter; }
 
         void queueMessage(const std::shared_ptr<MessageEntry> messageEntry)
         {

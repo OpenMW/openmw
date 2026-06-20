@@ -40,6 +40,7 @@ namespace MWBase
     class WindowManager;
     class StateManager;
     class LuaManager;
+    class LuaEventRouter;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -64,6 +65,7 @@ namespace MWBase
         LuaManager* mLuaManager = nullptr;
         LuaManager* mAuthoritativeLuaManager = nullptr;
         LuaManager* mClientLuaManager = nullptr;
+        LuaEventRouter* mLuaEventRouter = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
         L10n::Manager* mL10nManager = nullptr;
         MWNet::NetworkManager* mNetworkManager = nullptr;
@@ -106,6 +108,10 @@ namespace MWBase
         void setAuthoritativeLuaManager(LuaManager& value) { mAuthoritativeLuaManager = &value; }
 
         void setClientLuaManager(LuaManager& value) { mClientLuaManager = &value; }
+
+        void setLuaEventRouter(LuaEventRouter& value) { mLuaEventRouter = &value; }
+
+        void clearLuaEventRouter() { mLuaEventRouter = nullptr; }
 
         void setResourceSystem(Resource::ResourceSystem& value) { mResourceSystem = &value; }
 
@@ -153,6 +159,13 @@ namespace MWBase
             if (mClientLuaManager == nullptr)
                 throw std::logic_error("Client Lua manager is not registered");
             return mClientLuaManager;
+        }
+
+        Misc::NotNullPtr<LuaEventRouter> getLuaEventRouter() const
+        {
+            if (mLuaEventRouter == nullptr)
+                throw std::logic_error("Lua event router is not registered");
+            return mLuaEventRouter;
         }
 
         Misc::NotNullPtr<Resource::ResourceSystem> getResourceSystem() const { return mResourceSystem; }
