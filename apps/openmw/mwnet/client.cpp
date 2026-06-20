@@ -33,7 +33,7 @@ MWNet::Client::Client()
     Log(Debug::Info) << "Connection successful, Client id is" << mClientId << " on address " << addressString;
 }
 
-bool MWNet::Client::tick()
+bool MWNet::Client::tick(double tickStep)
 {
     if (mClient->ConnectionFailed())
     {
@@ -43,7 +43,7 @@ bool MWNet::Client::tick()
     double currentTime = yojimbo_time();
     if (mTime <= currentTime)
     {
-        updateConnection();
+        updateConnection(tickStep);
     }
     else
     {
@@ -53,14 +53,14 @@ bool MWNet::Client::tick()
     return true;
 }
 
-void MWNet::Client::updateConnection()
+void MWNet::Client::updateConnection(double tickStep)
 {
     if (!mClient->IsConnected() && !mClient->IsConnecting())
     {
         return;
     }
 
-    mTime += MWNet::TickRate;
+    mTime += tickStep;
     mClient->AdvanceTime(mTime);
     mClient->ReceivePackets();
     processIncomingMessages();

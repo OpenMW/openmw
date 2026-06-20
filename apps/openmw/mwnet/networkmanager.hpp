@@ -95,14 +95,14 @@ namespace MWNet
             Log(Debug::Info) << "NetworkManager " << roleName(mRole) << ": endpoints shut down";
         }
 
-        bool update()
+        bool update(double tickStep = MWNet::TickRate)
         {
             bool running = true;
 
             if (mServer)
-                running = mServer->tick() && running;
+                running = mServer->tick(tickStep) && running;
             if (mClient)
-                running = mClient->tick() && running;
+                running = mClient->tick(tickStep) && running;
 
             if (!running)
             {

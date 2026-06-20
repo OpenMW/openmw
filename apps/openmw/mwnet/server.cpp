@@ -34,7 +34,7 @@ MWNet::Server::Server()
     signal(SIGINT, server_interrupt_handler);
 }
 
-bool MWNet::Server::tick()
+bool MWNet::Server::tick(double tickStep)
 {
     if (quit)
     {
@@ -49,7 +49,7 @@ bool MWNet::Server::tick()
     double currentTime = yojimbo_time();
     if (mTime <= currentTime)
     {
-        updateConnection();
+        updateConnection(tickStep);
     }
     else
     {
@@ -59,9 +59,9 @@ bool MWNet::Server::tick()
     return true;
 }
 
-void MWNet::Server::updateConnection()
+void MWNet::Server::updateConnection(double tickStep)
 {
-    mTime += MWNet::TickRate;
+    mTime += tickStep;
     mServer->AdvanceTime(mTime);
     mServer->ReceivePackets();
     processIncomingMessages();

@@ -252,7 +252,16 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
                 ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
                 mInputManager->update(frametime, false);
             }
-            if (!mNetworkManager->update())
+            bool networkRunning = false;
+            if (isDedicatedServer)
+            {
+                // DedicatedServer frametime is the fixed dedicatedServerTickStep from the headless main loop.
+                const double dedicatedServerNetworkTickStep = frametime;
+                networkRunning = mNetworkManager->update(dedicatedServerNetworkTickStep);
+            }
+            else
+                networkRunning = mNetworkManager->update();
+            if (!networkRunning)
             {
                 mEnvironment.getStateManager()->requestQuit();
             }

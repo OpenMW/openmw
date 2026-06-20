@@ -19,7 +19,9 @@ namespace MWNet
     constexpr const int MaxSnapshotSize = 8 * 1024;
     constexpr const int MaxBlockSize = 10 * 1024;
     constexpr const uint8_t DefaultPrivateKey[yojimbo::KeyBytes] = { 0 };
-    constexpr const double TickRate = 1.0 / 60.0;
+    // Default endpoint tick step. DedicatedServer passes its fixed simulation step explicitly.
+    constexpr const int TickRateHz = 60;
+    constexpr const double TickRate = 1.0 / TickRateHz;
     constexpr const char* LocalHost("127.0.0.1");
 
     class BaseAdapter : public yojimbo::Adapter
@@ -53,13 +55,13 @@ namespace MWNet
         std::vector<std::shared_ptr<MessageEntry>> mMessageQueue;
         std::mutex mMessageQueueMutex;
 
-        virtual void updateConnection() = 0;
+        virtual void updateConnection(double tickStep) = 0;
         virtual void processOutgoingMessages() = 0;
         virtual void processIncomingMessages() = 0;
 
     public:
         virtual ~Connection() = default;
-        virtual bool tick() = 0;
+        virtual bool tick(double tickStep) = 0;
         virtual void clientConnected(const unsigned int clientIndex) {}
         virtual void clientDisconnected(const unsigned int clientIndex) {}
 
