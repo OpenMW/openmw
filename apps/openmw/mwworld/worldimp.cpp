@@ -1707,7 +1707,7 @@ namespace MWWorld
         MWWorld::Ptr focusObject;
         MWRender::RenderingManager::RayResult rayToObject;
 
-        bool ignoreTerrain = false;
+        const bool ignoreTerrain = !Settings::game().mTerrainObstructsFocus;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
