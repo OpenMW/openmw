@@ -148,8 +148,8 @@ namespace MWLua
             globalContext.mLuaEvents = &mLuaEvents;
             globalContext.mSerializer = mGlobalSerializer.get();
 
-            bool isServer = MWBase::Environment::get().getIsServer();
-            
+            const bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
+
             if (!isServer)
             {
                 for (const auto& [name, package] : initGlobalPackages(globalContext))
