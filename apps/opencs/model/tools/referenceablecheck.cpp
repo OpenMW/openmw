@@ -467,8 +467,9 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
 
     if (creature.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(creature.mModel) == -1)
-        messages.add(id, "Model '" + creature.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(creature.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", creature.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // stats checks
     if (creature.mData.mLevel <= 0)

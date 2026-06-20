@@ -656,7 +656,7 @@ namespace CSMWorld
         int index = mReferenceables.searchId(id);
         auto& creature = dynamic_cast<const Record<ESM::Creature>&>(mReferenceables.getRecord(index)).get();
 
-        data->reset_data(id, creature.mModel, true);
+        data->reset_data(id, creature.mModel.getOriginal(), true);
     }
 
     void ActorAdapter::markDirtyDependency(const ESM::RefId& dep)
