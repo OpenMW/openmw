@@ -86,10 +86,6 @@ namespace MWLua
         sol::table api(lua, sol::create);
         api["API_REVISION"] = Version::getLuaApiRevision(); // specified in CMakeLists.txt
         api["contentFiles"] = initContentFilesBindings(lua);
-        api["quit"] = [lua]() {
-            Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
-            MWBase::Environment::get().getStateManager()->requestQuit();
-        };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
             const auto netMan = MWBase::Environment::get().getNetworkManager();
             if (!netMan->isServer())
@@ -104,9 +100,7 @@ namespace MWLua
                     { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             }
         };
-        api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["sound"] = initCoreSoundBindings(context);
-        api["vfx"] = initCoreVfxBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)

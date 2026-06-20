@@ -50,10 +50,15 @@ namespace LuaUtil
         }
     }
 
-    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, bool remap)
+    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg)
+    {
+        init(std::move(cfg), InitOptions{});
+    }
+
+    void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg, InitOptions options)
     {
         std::vector<VFS::Path::Normalized> oldPaths;
-        if (remap)
+        if (options.mRemap)
         {
             for (ESM::LuaScriptCfg& script : mScripts)
                 oldPaths.emplace_back(std::move(script.mScriptPath));
@@ -68,7 +73,7 @@ namespace LuaUtil
         {
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
             bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
-            if ((!global && globalOnly) || (global && !globalOnly)) // Server/client scripts
+            if ((!global && options.mGlobalOnly) || (global && !options.mGlobalOnly)) // Server/client scripts
             {
                 skip[i] = true;
                 continue;
@@ -130,7 +135,7 @@ namespace LuaUtil
             }
         }
 
-        if (remap)
+        if (options.mRemap)
         {
             mScriptIdMapping.clear();
             for (size_t i = 0; i < oldPaths.size(); ++i)

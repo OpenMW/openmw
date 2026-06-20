@@ -1,9 +1,11 @@
 #ifndef ESMSERIALIZE_H_
 #define ESMSERIALIZE_H_
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <map>
+#include <vector>
 
 #include <osg/Vec3f>
 #include <serialize.h>
@@ -20,6 +22,32 @@ constexpr std::size_t MAX_LUADATA_SIZE = 1024 * 512;
 
 namespace serialize
 {
+    // yojimbo serializes C strings. Keep std::string conversion here so message
+    // definitions do not each grow their own slightly different char buffer ritual.
+    template <typename Stream>
+    bool serialize_std_string_internal(Stream& stream, std::string& value, std::size_t maxLength)
+    {
+        if (maxLength > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+            return false;
+
+        std::vector<char> buffer(maxLength, '\0');
+
+        if (Stream::IsWriting)
+        {
+            if (value.size() >= maxLength)
+                return false;
+            std::copy(value.begin(), value.end(), buffer.begin());
+        }
+
+        if (!serialize::serialize_string_internal(stream, buffer.data(), static_cast<int>(maxLength)))
+            return false;
+
+        if (Stream::IsReading)
+            value = buffer.data();
+
+        return true;
+    }
+
     // OSG::Vec3f
     template <typename Stream>
     bool serialize_vec3f_internal(Stream& stream, osg::Vec3f& vec3)
@@ -92,13 +120,15 @@ namespace serialize
         if (Stream::IsWriting)
         {
             std::string refIdString = refId.getRefIdString();
-            serialize_std_string_internal(stream, refIdString, MAX_STRING_LENGTH);
+            if (!serialize_std_string_internal(stream, refIdString, MAX_STRING_LENGTH))
+                return false;
         }
 
         if (Stream::IsReading)
         {
             std::string string;
-            serialize_std_string_internal(stream, string, MAX_STRING_LENGTH);
+            if (!serialize_std_string_internal(stream, string, MAX_STRING_LENGTH))
+                return false;
             refId = ESM::RefId::stringRefId(string);
         }
 

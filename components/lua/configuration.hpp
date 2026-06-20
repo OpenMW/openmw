@@ -21,7 +21,14 @@ namespace LuaUtil
     class ScriptsConfiguration
     {
     public:
-        void init(ESM::LuaScriptsCfg, bool);
+        struct InitOptions
+        {
+            bool mGlobalOnly = false;
+            bool mRemap = false;
+        };
+
+        void init(ESM::LuaScriptsCfg);
+        void init(ESM::LuaScriptsCfg, InitOptions options);
 
         size_t size() const { return mScripts.size(); }
         const ESM::LuaScriptCfg& operator[](size_t id) const { return mScripts[id]; }

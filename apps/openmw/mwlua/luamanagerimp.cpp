@@ -98,9 +98,9 @@ namespace MWLua
 
     void LuaManager::initConfiguration(bool reload)
     {
-        // We've probably broken hot-reloading?
-        bool globalOnly = MWBase::Environment::get().getNetworkManager()->isServer();
-        mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(), globalOnly);
+        const bool globalOnly = MWBase::Environment::get().getNetworkManager()->isServer();
+        mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(),
+            LuaUtil::ScriptsConfiguration::InitOptions{ .mGlobalOnly = globalOnly, .mRemap = reload });
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);
@@ -148,8 +148,8 @@ namespace MWLua
             globalContext.mLuaEvents = &mLuaEvents;
             globalContext.mSerializer = mGlobalSerializer.get();
 
-            bool isServer = MWBase::Environment::get().getIsServer();
-            
+            const bool isServer = MWBase::Environment::get().getNetworkManager()->isServer();
+
             if (!isServer)
             {
                 for (const auto& [name, package] : initGlobalPackages(globalContext))

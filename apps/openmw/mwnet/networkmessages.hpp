@@ -38,7 +38,8 @@ namespace MWNet
         template <typename Stream>
         bool Serialize(Stream& stream)
         {
-            serialize_std_string(stream, player, MAX_STRING_LENGTH);
+            if (!serialize::serialize_std_string_internal(stream, player, MAX_STRING_LENGTH))
+                return false;
             return true;
         }
 
@@ -55,7 +56,8 @@ namespace MWNet
         template <typename Stream>
         bool Serialize(Stream& stream)
         {
-            serialize_std_string(stream, scriptId, MAX_STRING_LENGTH);
+            if (!serialize::serialize_std_string_internal(stream, scriptId, MAX_STRING_LENGTH))
+                return false;
             return true;
         }
         YOJIMBO_VIRTUAL_SERIALIZE_FUNCTIONS()
@@ -99,7 +101,8 @@ namespace MWNet
         template <typename Stream>
         bool Serialize(Stream& stream)
         {
-            serialize_std_string(stream, eventName, MAX_STRING_LENGTH);
+            if (!serialize::serialize_std_string_internal(stream, eventName, MAX_STRING_LENGTH))
+                return false;
             serialize_lua_data(stream, eventData);
             return true;
         }
