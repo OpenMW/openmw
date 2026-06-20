@@ -822,11 +822,6 @@ namespace MWWorld
 
         mTimeManager->advanceTime(hours, mGlobalVariables);
 
-        if (!isServer)
-        {
-            updateSkyDate();
-        }
-
         if (!isServer && !incremental)
         {
             mRendering->notifyWorldSpaceChanged();
