@@ -904,9 +904,9 @@ namespace EsmTool
         if (!mData.mName.empty())
             std::cout << "  Name: " << mData.mName << std::endl;
         if (!mData.mModel.empty())
-            std::cout << "  Model: " << mData.mModel << std::endl;
+            std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         if (!mData.mIcon.empty())
-            std::cout << "  Icon: " << mData.mIcon << std::endl;
+            std::cout << "  Icon: " << mData.mIcon.getOriginal() << std::endl;
         if (!mData.mScript.empty())
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  Flags: " << lightFlags(mData.mData.mFlags) << std::endl;
