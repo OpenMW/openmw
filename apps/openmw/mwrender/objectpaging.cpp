@@ -92,7 +92,7 @@ namespace MWRender
                 case ESM::REC_ACTI:
                     return store.get<ESM::Activator>().searchStatic(id)->mModel.getNormalized();
                 case ESM::REC_DOOR:
-                    return store.get<ESM::Door>().searchStatic(id)->mModel;
+                    return store.get<ESM::Door>().searchStatic(id)->mModel.getNormalized();
                 case ESM::REC_CONT:
                     return store.get<ESM::Container>().searchStatic(id)->mModel.getNormalized();
                 case ESM::REC_STAT4:

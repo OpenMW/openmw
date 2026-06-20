@@ -561,8 +561,9 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
 
     if (door.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(door.mModel) == -1)
-        messages.add(id, "Model '" + door.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(door.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", door.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Door>(door, messages, id.toString());

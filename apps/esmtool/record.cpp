@@ -717,7 +717,7 @@ namespace EsmTool
     void Record<ESM::Door>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         if (!mData.mScript.empty())
             std::cout << "  Script: " << mData.mScript << std::endl;
         std::cout << "  OpenSound: " << mData.mOpenSound << std::endl;

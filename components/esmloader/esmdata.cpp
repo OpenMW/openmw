@@ -1,9 +1,10 @@
 #include "esmdata.hpp"
+
 #include "lessbyid.hpp"
-#include "record.hpp"
 
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadacti.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadgmst.hpp>
@@ -62,23 +63,14 @@ namespace EsmLoader
 
             return returnAs(std::forward<F>(f));
         }
-
-        std::string_view getModelView(const std::string& value)
-        {
-            return value;
-        }
-
-        std::string_view getModelView(const ESM::Path& value)
-        {
-            return value.getOriginal();
-        }
     }
 
     EsmData::~EsmData() {}
 
-    std::string_view getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type)
+    VFS::Path::NormalizedView getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type)
     {
-        return withStatic(refId, type, content, [](const auto& v) { return getModelView(v.mModel); });
+        return withStatic(
+            refId, type, content, [](const auto& v) -> VFS::Path::NormalizedView { return v.mModel.getNormalized(); });
     }
 
     ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, std::string_view id)
