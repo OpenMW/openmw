@@ -48,6 +48,88 @@ namespace LuaUtil
         {
             return std::isspace(static_cast<unsigned char>(c));
         }
+
+        constexpr ESM::LuaScriptCfg::Flags authoritativeFlags()
+        {
+            return ESM::LuaScriptCfg::sGlobal | ESM::LuaScriptCfg::sLoad;
+        }
+
+        constexpr ESM::LuaScriptCfg::Flags clientFlags()
+        {
+            return ESM::LuaScriptCfg::sPlayer | ESM::LuaScriptCfg::sMenu | ESM::LuaScriptCfg::sCustom;
+        }
+
+        bool hasLocalCategory(const ESM::LuaScriptCfg& script)
+        {
+            return !script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty();
+        }
+
+        bool hasAuthoritativeCategory(const ESM::LuaScriptCfg& script)
+        {
+            return script.mFlags & authoritativeFlags();
+        }
+
+        bool hasClientCategory(const ESM::LuaScriptCfg& script)
+        {
+            return (script.mFlags & clientFlags()) || hasLocalCategory(script);
+        }
+
+        enum class RuntimeAuthority
+        {
+            None,
+            Authoritative,
+            Client,
+        };
+
+        RuntimeAuthority getRuntimeAuthority(const ESM::LuaScriptCfg& script)
+        {
+            const bool authoritative = hasAuthoritativeCategory(script);
+            const bool client = hasClientCategory(script);
+            assert(!(authoritative && client));
+            if (authoritative)
+                return RuntimeAuthority::Authoritative;
+            if (client)
+                return RuntimeAuthority::Client;
+            return RuntimeAuthority::None;
+        }
+
+        void validateRuntimeCategories(const ESM::LuaScriptCfg& script)
+        {
+            const bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
+            if (global && (script.mFlags & clientFlags()))
+                throw std::runtime_error(
+                    std::string("Global script can not have local flags: ") + script.mScriptPath.value());
+            if (global && hasLocalCategory(script))
+                throw std::runtime_error(std::string("Global script can not have per-type and per-object configuration")
+                    + script.mScriptPath.value());
+            if (hasAuthoritativeCategory(script) && hasClientCategory(script))
+                throw std::runtime_error(std::string("Lua script can not mix authoritative and client-local categories: ")
+                    + script.mScriptPath.value());
+        }
+
+        void validateRuntimeCompatibility(const ESM::LuaScriptCfg& script, const ESM::LuaScriptCfg& oldScript)
+        {
+            const RuntimeAuthority authority = getRuntimeAuthority(script);
+            const RuntimeAuthority oldAuthority = getRuntimeAuthority(oldScript);
+            if (authority != RuntimeAuthority::None && oldAuthority != RuntimeAuthority::None
+                && authority != oldAuthority)
+                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath.value());
+        }
+
+        bool isAllowedByRuntimeFilter(
+            const ESM::LuaScriptCfg& script, ScriptsConfiguration::InitOptions::RuntimeFilter filter)
+        {
+            switch (filter)
+            {
+                case ScriptsConfiguration::InitOptions::RuntimeFilter::All:
+                    return true;
+                case ScriptsConfiguration::InitOptions::RuntimeFilter::AuthoritativeServer:
+                    return getRuntimeAuthority(script) == RuntimeAuthority::Authoritative;
+                case ScriptsConfiguration::InitOptions::RuntimeFilter::Client:
+                    return getRuntimeAuthority(script) == RuntimeAuthority::Client;
+            }
+            return false;
+        }
     }
 
     void ScriptsConfiguration::init(ESM::LuaScriptsCfg cfg)
@@ -72,24 +154,12 @@ namespace LuaUtil
         for (int i = 0; i < static_cast<int>(cfg.mScripts.size()); ++i)
         {
             const ESM::LuaScriptCfg& script = cfg.mScripts[i];
-            bool global = script.mFlags & ESM::LuaScriptCfg::sGlobal;
-            if ((!global && options.mGlobalOnly) || (global && !options.mGlobalOnly)) // Server/client scripts
-            {
-                skip[i] = true;
-                continue;
-            }
-            if (global && (script.mFlags & ~ESM::LuaScriptCfg::sMerge) != ESM::LuaScriptCfg::sGlobal)
-                throw std::runtime_error(
-                    std::string("Global script can not have local flags: ") + script.mScriptPath.value());
-            if (global && (!script.mTypes.empty() || !script.mRecords.empty() || !script.mRefs.empty()))
-                throw std::runtime_error(std::string("Global script can not have per-type and per-object configuration")
-                    + script.mScriptPath.value());
+            validateRuntimeCategories(script);
             auto [it, inserted] = mPathToIndex.emplace(script.mScriptPath, i);
             if (inserted)
                 continue;
             ESM::LuaScriptCfg& oldScript = cfg.mScripts[it->second];
-            if (global != bool(oldScript.mFlags & ESM::LuaScriptCfg::sGlobal))
-                throw std::runtime_error(std::string("Flags mismatch for ") + script.mScriptPath.value());
+            validateRuntimeCompatibility(script, oldScript);
             if (script.mFlags & ESM::LuaScriptCfg::sMerge)
             {
                 oldScript.mFlags |= (script.mFlags & ~ESM::LuaScriptCfg::sMerge);
@@ -98,6 +168,7 @@ namespace LuaUtil
                 oldScript.mTypes.insert(oldScript.mTypes.end(), script.mTypes.begin(), script.mTypes.end());
                 oldScript.mRecords.insert(oldScript.mRecords.end(), script.mRecords.begin(), script.mRecords.end());
                 oldScript.mRefs.insert(oldScript.mRefs.end(), script.mRefs.begin(), script.mRefs.end());
+                validateRuntimeCategories(oldScript);
                 skip[i] = true;
             }
             else
@@ -107,7 +178,7 @@ namespace LuaUtil
         // Filter duplicates
         for (size_t i = 0; i < cfg.mScripts.size(); ++i)
         {
-            if (!skip[i])
+            if (!skip[i] && isAllowedByRuntimeFilter(cfg.mScripts[i], options.mRuntimeFilter))
                 mScripts.push_back(std::move(cfg.mScripts[i]));
         }
 

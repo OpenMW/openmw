@@ -23,7 +23,14 @@ namespace LuaUtil
     public:
         struct InitOptions
         {
-            bool mGlobalOnly = false;
+            enum class RuntimeFilter
+            {
+                All,
+                AuthoritativeServer,
+                Client,
+            };
+
+            RuntimeFilter mRuntimeFilter = RuntimeFilter::All;
             bool mRemap = false;
         };
 

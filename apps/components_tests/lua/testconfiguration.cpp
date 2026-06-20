@@ -144,6 +144,48 @@ namespace
         EXPECT_ERROR(conf.init(cfg), "Flags mismatch for script1.lua");
     }
 
+    TEST(LuaConfigurationTest, RuntimeFilters)
+    {
+        ESM::LuaScriptsCfg cfg;
+        LuaUtil::parseOMWScripts(cfg, R"X(
+            GLOBAL: global.lua
+            LOAD: load.lua
+            PLAYER: player.lua
+            CUSTOM: custom.lua
+            MENU: menu.lua
+            NPC: local.lua
+            : unused.lua
+        )X");
+
+        LuaUtil::ScriptsConfiguration conf;
+        using RuntimeFilter = LuaUtil::ScriptsConfiguration::InitOptions::RuntimeFilter;
+
+        conf.init(
+            cfg, LuaUtil::ScriptsConfiguration::InitOptions{ .mRuntimeFilter = RuntimeFilter::AuthoritativeServer });
+        ASSERT_EQ(conf.size(), 2);
+        EXPECT_EQ(conf[0].mScriptPath, VFS::Path::Normalized("global.lua"));
+        EXPECT_EQ(conf[1].mScriptPath, VFS::Path::Normalized("load.lua"));
+        EXPECT_FALSE(conf.findId(VFS::Path::Normalized("custom.lua")).has_value());
+
+        conf.init(cfg, LuaUtil::ScriptsConfiguration::InitOptions{ .mRuntimeFilter = RuntimeFilter::Client });
+        ASSERT_EQ(conf.size(), 4);
+        EXPECT_EQ(conf[0].mScriptPath, VFS::Path::Normalized("player.lua"));
+        EXPECT_EQ(conf[1].mScriptPath, VFS::Path::Normalized("custom.lua"));
+        EXPECT_EQ(conf[2].mScriptPath, VFS::Path::Normalized("menu.lua"));
+        EXPECT_EQ(conf[3].mScriptPath, VFS::Path::Normalized("local.lua"));
+        ASSERT_EQ(conf.findId(VFS::Path::Normalized("custom.lua")), 1);
+        EXPECT_TRUE(conf.isCustomScript(1));
+    }
+
+    TEST(LuaConfigurationTest, RuntimeFiltersRejectMixedAuthority)
+    {
+        ESM::LuaScriptsCfg cfg;
+        LuaUtil::parseOMWScripts(cfg, "LOAD, PLAYER: mixed.lua");
+
+        LuaUtil::ScriptsConfiguration conf;
+        EXPECT_ERROR(conf.init(std::move(cfg)), "Lua script can not mix authoritative and client-local categories");
+    }
+
     TEST(LuaConfigurationTest, Serialization)
     {
         sol::state lua;

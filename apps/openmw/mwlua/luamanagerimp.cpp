@@ -97,9 +97,11 @@ namespace MWLua
 
     void LuaManager::initConfiguration(bool reload)
     {
-        const bool globalOnly = isAuthoritativeServer();
+        const auto runtimeFilter = getRuntimeMode() == MWBase::LuaManager::RuntimeMode::AuthoritativeServer
+            ? LuaUtil::ScriptsConfiguration::InitOptions::RuntimeFilter::AuthoritativeServer
+            : LuaUtil::ScriptsConfiguration::InitOptions::RuntimeFilter::Client;
         mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg(),
-            LuaUtil::ScriptsConfiguration::InitOptions{ .mGlobalOnly = globalOnly, .mRemap = reload });
+            LuaUtil::ScriptsConfiguration::InitOptions{ .mRuntimeFilter = runtimeFilter, .mRemap = reload });
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);
