@@ -810,7 +810,7 @@ void OMW::Engine::prepareEngine()
     if (isDedicatedServer)
     {
         Log(Debug::Info) << "DedicatedServer headless startup: renderer/window/UI/audio/input disabled";
-        Log(Debug::Info) << "DedicatedServer enabled subsystems: network server, world data, scripts, Lua";
+        Log(Debug::Info) << "DedicatedServer enabled subsystems: network server, world data, global Lua";
     }
 
     mNetworkManager = std::make_unique<MWNet::NetworkManager>(networkRoleFromRuntimeRole(mRuntimeRole));
