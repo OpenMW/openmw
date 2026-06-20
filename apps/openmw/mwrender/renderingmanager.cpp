@@ -934,7 +934,7 @@ namespace MWRender
     };
 
     osg::ref_ptr<osgUtil::IntersectionVisitor> RenderingManager::getIntersectionVisitor(
-        osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors,
+        osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors, bool ignoreTerrain,
         std::span<const MWWorld::Ptr> ignoreList)
     {
         if (!mIntersectionVisitor)
@@ -965,25 +965,27 @@ namespace MWRender
             mask &= ~(Mask_Player);
         if (ignoreActors)
             mask &= ~(Mask_Actor | Mask_Player);
+        if (ignoreTerrain)
+            mask &= ~(Mask_Terrain);
 
         mIntersectionVisitor->setTraversalMask(mask);
         return mIntersectionVisitor;
     }
 
     RenderingManager::RayResult RenderingManager::castRay(const osg::Vec3f& origin, const osg::Vec3f& dest,
-        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
+        bool ignorePlayer, bool ignoreActors, bool ignoreTerrain, std::span<const MWWorld::Ptr> ignoreList)
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(
             new osgUtil::LineSegmentIntersector(osgUtil::LineSegmentIntersector::MODEL, origin, dest));
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
-        mRootNode->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors, ignoreList));
+        mRootNode->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors, ignoreTerrain, ignoreList));
 
         return getIntersectionResult(intersector, mIntersectionVisitor, ignoreList);
     }
 
     RenderingManager::RayResult RenderingManager::castCameraToViewportRay(
-        const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors)
+        const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors, bool ignoreTerrain)
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector(new osgUtil::LineSegmentIntersector(
             osgUtil::LineSegmentIntersector::PROJECTION, nX * 2.f - 1.f, nY * (-2.f) + 1.f));
@@ -997,7 +999,7 @@ namespace MWRender
         intersector->setEnd(end);
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
-        mViewer->getCamera()->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
+        mViewer->getCamera()->accept(*getIntersectionVisitor(intersector, ignorePlayer, ignoreActors, ignoreTerrain));
 
         return getIntersectionResult(intersector, mIntersectionVisitor);
     }
