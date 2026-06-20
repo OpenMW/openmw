@@ -383,7 +383,7 @@ namespace MWLua
 
         // HACK: Disable input bindings completely due to server things
         player["getControlSwitch"] = [](const Object& object, std::string_view key) {
-            if (MWBase::Environment::get().getNetworkManager()->isServer())
+            if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
             {
                 Log(Debug::Warning) << "getControlSwitch called on server, returning false";
                 return false;
@@ -396,7 +396,7 @@ namespace MWLua
             }
         };
         player["setControlSwitch"] = [](const Object& object, std::string_view key, bool v) {
-            if (MWBase::Environment::get().getNetworkManager()->isServer())
+            if (MWBase::Environment::get().getNetworkManager()->isDedicatedServer())
             {
                 Log(Debug::Warning) << "setControlSwitch called on server! Not implemented!";
                 return;

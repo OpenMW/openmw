@@ -3,7 +3,9 @@
 #include <cerrno>
 #include <chrono>
 #include <future>
+#include <stdexcept>
 #include <system_error>
+#include <thread>
 
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
@@ -90,12 +92,39 @@
 namespace
 {
 
-    enum NetType
+    constexpr int dedicatedServerTickRate = 20;
+    constexpr std::chrono::milliseconds dedicatedServerTickInterval{ 50 };
+    constexpr double dedicatedServerTickStep = 1.0 / dedicatedServerTickRate;
+
+    const char* runtimeRoleName(OMW::RuntimeRole role)
     {
-        Host = 0,
-        Client = 1,
-        Server = 2,
-    };
+        switch (role)
+        {
+            case OMW::RuntimeRole::Host:
+                return "Host";
+            case OMW::RuntimeRole::Client:
+                return "Client";
+            case OMW::RuntimeRole::DedicatedServer:
+                return "DedicatedServer";
+        }
+
+        throw std::logic_error("Unhandled runtime role");
+    }
+
+    MWNet::NetworkManager::Role networkRoleFromRuntimeRole(OMW::RuntimeRole role)
+    {
+        switch (role)
+        {
+            case OMW::RuntimeRole::Host:
+                return MWNet::NetworkManager::Role::Host;
+            case OMW::RuntimeRole::Client:
+                return MWNet::NetworkManager::Role::Client;
+            case OMW::RuntimeRole::DedicatedServer:
+                return MWNet::NetworkManager::Role::DedicatedServer;
+        }
+
+        throw std::logic_error("Unhandled runtime role");
+    }
 
     void checkSDLError(int ret)
     {
@@ -199,23 +228,40 @@ void OMW::Engine::executeLocalScripts()
 
 bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 {
-    const osg::Timer_t frameStart = mViewer->getStartTick();
     const osg::Timer* const timer = osg::Timer::instance();
-    osg::Stats* const stats = mViewer->getViewerStats();
+    const bool isDedicatedServer = mEnvironment.getNetworkManager()->isDedicatedServer();
+    const osg::Timer_t frameStart = isDedicatedServer ? timer->tick() : mViewer->getStartTick();
+    osg::Stats* stats = nullptr;
+    if (isDedicatedServer)
+    {
+        if (!mHeadlessStats)
+            mHeadlessStats = new osg::Stats("DedicatedServer");
+        stats = mHeadlessStats.get();
+    }
+    else
+        stats = mViewer->getViewerStats();
 
     mEnvironment.setFrameDuration(frametime);
 
     try
     {
-        const bool isServer = mEnvironment.getNetworkManager()->isServer();
         // update input
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
                 mInputManager->update(frametime, false);
             }
-            if (!mNetworkManager->update())
+            bool networkRunning = false;
+            if (isDedicatedServer)
+            {
+                // DedicatedServer frametime is the fixed dedicatedServerTickStep from the headless main loop.
+                const double dedicatedServerNetworkTickStep = frametime;
+                networkRunning = mNetworkManager->update(dedicatedServerNetworkTickStep);
+            }
+            else
+                networkRunning = mNetworkManager->update();
+            if (!networkRunning)
             {
                 mEnvironment.getStateManager()->requestQuit();
             }
@@ -226,7 +272,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         // changing widget textures (fixed in MyGUI 3.3.2), and destroyed widgets will not be deleted (not fixed yet,
         // https://github.com/MyGUI/mygui/issues/21)
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -264,7 +310,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                if (!isServer && !mWindowManager->containsMode(MWGui::GM_MainMenu))
+                if (!isDedicatedServer && !mWindowManager->containsMode(MWGui::GM_MainMenu))
                 {
                     if (mWorld->getScriptsEnabled())
                     {
@@ -282,7 +328,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
                 {
                     double hours = (frametime * mWorld->getTimeManager()->getGameTimeScale()) / 3600.0;
                     mWorld->advanceTime(hours, true);
-                    if (!isServer)
+                    if (!isDedicatedServer)
                     {
                         mWorld->rechargeItems(frametime, true);
                     }
@@ -292,7 +338,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update mechanics
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -312,7 +358,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update physics
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -325,7 +371,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update world
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
 
@@ -338,7 +384,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         // update GUI
         {
-            if (!isServer)
+            if (!isDedicatedServer)
             {
                 ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
                 mWindowManager->update(frametime);
@@ -373,9 +419,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         stats->setAttribute(frameNumber, "StringRefId Count", static_cast<double>(ESM::StringRefId::totalCount()));
     }
 
-    const bool isServer = mEnvironment.getNetworkManager()->isServer();
-
-    if (!isServer)
+    if (!isDedicatedServer)
     {
 
         mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
@@ -393,7 +437,7 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
     // if there is a separate Lua thread, it starts the update now
     mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
 
-    if (!isServer)
+    if (!isDedicatedServer)
     {
         mViewer->renderingTraversals();
     }
@@ -412,6 +456,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mStereoManager(nullptr)
     , mSkipMenu(false)
     , mUseSound(true)
+    , mSDLInitialized(false)
     , mCompileAll(false)
     , mCompileAllDialogue(false)
     , mWarningsMode(1)
@@ -420,7 +465,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mGrab(true)
     , mExportFonts(false)
     , mRandomSeed(0)
-    , mNetType(0)
+    , mRuntimeRole(RuntimeRole::Host)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
     , mGlMaxTextureImageUnits(0)
@@ -449,6 +494,7 @@ OMW::Engine::~Engine()
     mLuaWorker = nullptr;
     mLuaManager = nullptr;
     mL10nManager = nullptr;
+    mNetworkManager = nullptr;
 
     mScriptContext = nullptr;
 
@@ -467,7 +513,13 @@ OMW::Engine::~Engine()
         mWindow = nullptr;
     }
 
-    SDL_Quit();
+    if (mSDLInitialized)
+    {
+        Log(Debug::Info) << "Shutting down SDL subsystems";
+        SDL_Quit();
+    }
+    else if (mRuntimeRole == RuntimeRole::DedicatedServer)
+        Log(Debug::Info) << "DedicatedServer shutdown: SDL/video/input were not initialized";
 
     Log(Debug::Info) << "Quitting peacefully.";
 }
@@ -753,13 +805,21 @@ void OMW::Engine::setWindowIcon()
 
 void OMW::Engine::prepareEngine()
 {
-    mNetworkManager = std::make_unique<MWNet::NetworkManager>(mNetType == NetType::Server);
+    const bool isDedicatedServer = mRuntimeRole == RuntimeRole::DedicatedServer;
+    Log(Debug::Info) << "Preparing engine for runtime role: " << runtimeRoleName(mRuntimeRole);
+    if (isDedicatedServer)
+    {
+        Log(Debug::Info) << "DedicatedServer headless startup: renderer/window/UI/audio/input disabled";
+        Log(Debug::Info) << "DedicatedServer enabled subsystems: network server, world data, global Lua";
+    }
+
+    mNetworkManager = std::make_unique<MWNet::NetworkManager>(networkRoleFromRuntimeRole(mRuntimeRole));
     mEnvironment.setNetworkManager(*mNetworkManager);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
     osg::ref_ptr<osg::Group> rootNode = nullptr;
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         const bool stereoEnabled
             = Settings::stereo().mStereoEnabled || osg::DisplaySettings::instance().get()->getStereo();
@@ -778,7 +838,7 @@ void OMW::Engine::prepareEngine()
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(
         mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
         mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
@@ -792,7 +852,7 @@ void OMW::Engine::prepareEngine()
     mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
     mUnrefQueue = std::make_unique<SceneUtil::UnrefQueue>();
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(mWorkQueue,
             new SceneUtil::WriteScreenshotToFileOperation(mCfgMgr.getScreenshotPath(),
@@ -816,7 +876,7 @@ void OMW::Engine::prepareEngine()
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         const auto keybinderUser = mCfgMgr.getUserConfigPath() / "input_v3.xml";
         bool keybinderUserExists = std::filesystem::exists(keybinderUser);
@@ -899,7 +959,8 @@ void OMW::Engine::prepareEngine()
         return nullptr;
     });
 
-    mWindowManager->setStore(mWorld->getStore());
+    if (!isDedicatedServer)
+        mWindowManager->setStore(mWorld->getStore());
 
     // Load translation data
     mTranslationDataStorage.setEncoder(mEncoder.get());
@@ -929,7 +990,7 @@ void OMW::Engine::prepareEngine()
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
     mLuaManager->initPreLoad();
 
-    Loading::Listener listener = mNetType == NetType::Server
+    Loading::Listener listener = isDedicatedServer
         ? Loading::Listener()
         : *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
     Loading::AsyncListener asyncListener(listener);
@@ -937,7 +998,7 @@ void OMW::Engine::prepareEngine()
     auto dataLoading = std::async(std::launch::async,
         [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), &asyncListener); });
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         if (!mSkipMenu)
         {
@@ -957,13 +1018,15 @@ void OMW::Engine::prepareEngine()
     listener.loadingOff();
 
     mWorld->init(mMaxRecastLogLevel, mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
-    mEnvironment.setWorldScene(mWorld->getWorldScene());
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
+        mEnvironment.setWorldScene(mWorld->getWorldScene());
+    if (!isDedicatedServer)
     {
         mWorld->setupPlayer();
     }
     mWorld->setRandomSeed(mRandomSeed);
-    mWindowManager->initUI();
+    if (!isDedicatedServer)
+        mWindowManager->initUI();
     mLuaManager->initPostLoad();
 
     // scripts
@@ -990,8 +1053,10 @@ void OMW::Engine::prepareEngine()
 void OMW::Engine::go()
 {
     assert(!mContentFiles.empty());
+    const bool isDedicatedServer = mRuntimeRole == RuntimeRole::DedicatedServer;
+    Log(Debug::Info) << "Runtime role selected: " << runtimeRoleName(mRuntimeRole);
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         Log(Debug::Info) << "OSG version: " << osgGetVersion();
         SDL_version sdlVersion;
@@ -1002,7 +1067,7 @@ void OMW::Engine::go()
 
     Misc::Rng::init(mRandomSeed);
 
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         Settings::ShaderManager::get().load(mCfgMgr.getUserConfigPath() / "shaders.yaml");
     }
@@ -1012,19 +1077,22 @@ void OMW::Engine::go()
     // Create encoder
     mEncoder = std::make_unique<ToUTF8::Utf8Encoder>(mEncoding);
 
-    // Setup viewer
-    mViewer = new osgViewer::Viewer;
-    mViewer->setReleaseContextAtEndOfFrameHint(false);
+    if (!isDedicatedServer)
+    {
+        // Setup viewer
+        mViewer = new osgViewer::Viewer;
+        mViewer->setReleaseContextAtEndOfFrameHint(false);
 
-    // Do not try to outsmart the OS thread scheduler (see bug #4785).
-    mViewer->setUseConfigureAffinity(false);
+        // Do not try to outsmart the OS thread scheduler (see bug #4785).
+        mViewer->setUseConfigureAffinity(false);
+    }
 
     mEnvironment.setFrameRateLimit(Settings::video().mFramerateLimit);
 
     prepareEngine();
 
     std::ofstream stats;
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
 #ifdef _WIN32
         const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
@@ -1060,8 +1128,9 @@ void OMW::Engine::go()
             Resource::collectStatistics(*mViewer);
     }
 
-    if (mNetType == NetType::Server)
+    if (isDedicatedServer)
     {
+        Log(Debug::Info) << "DedicatedServer startup: creating headless game state";
         mStateManager->newGame(true);
     }
     // Start the game
@@ -1088,32 +1157,58 @@ void OMW::Engine::go()
         mStateManager->newGame(!mNewGame);
     }
 
-    if (mNetType != NetType::Server && !mStartupScript.empty()
+    if (!isDedicatedServer && !mStartupScript.empty()
         && mStateManager->getState() == MWState::StateManager::State_Running)
     {
         mWindowManager->executeInConsole(mStartupScript);
     }
 
-    // Start the main rendering loop
+    // Start the main engine loop
     MWWorld::DateTimeManager& timeManager = *mWorld->getTimeManager();
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
     const std::chrono::steady_clock::duration maxSimulationInterval(std::chrono::milliseconds(200));
-    while (!mViewer->done() && !mStateManager->hasQuitRequest())
+    unsigned int frameNumber = 0;
+    unsigned long long dedicatedServerTickCount = 0;
+    std::chrono::steady_clock::time_point nextDedicatedServerTick;
+    if (isDedicatedServer)
     {
-        const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
-                              std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
-                              .count()
-            * timeManager.getSimulationTimeScale();
+        nextDedicatedServerTick = std::chrono::steady_clock::now();
+        Log(Debug::Info) << "DedicatedServer main loop starting: " << dedicatedServerTickRate
+                         << " Hz tick cadence (" << dedicatedServerTickInterval.count() << " ms)";
+    }
+    else
+        Log(Debug::Info) << "Interactive main loop starting";
 
-        mViewer->advance(timeManager.getRenderingSimulationTime());
+    while ((isDedicatedServer || !mViewer->done()) && !mStateManager->hasQuitRequest())
+    {
+        double dt = dedicatedServerTickStep;
+        if (isDedicatedServer)
+        {
+            std::this_thread::sleep_until(nextDedicatedServerTick);
+            ++frameNumber;
+        }
+        else
+        {
+            dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+                     std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
+                     .count()
+                * timeManager.getSimulationTimeScale();
 
-        const unsigned frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+            mViewer->advance(timeManager.getRenderingSimulationTime());
+            frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        }
 
         if (!frame(frameNumber, static_cast<float>(dt)))
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+            if (isDedicatedServer)
+                nextDedicatedServerTick = std::chrono::steady_clock::now() + dedicatedServerTickInterval;
+            else
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
+        if (isDedicatedServer)
+            ++dedicatedServerTickCount;
+
         timeManager.updateIsPaused();
         if (!timeManager.isPaused())
         {
@@ -1136,20 +1231,36 @@ void OMW::Engine::go()
             }
         }
 
-        frameRateLimiter.limit();
+        if (isDedicatedServer)
+        {
+            nextDedicatedServerTick += dedicatedServerTickInterval;
+            const std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+            if (nextDedicatedServerTick < now)
+                nextDedicatedServerTick = now;
+        }
+        else
+            frameRateLimiter.limit();
     }
 
+    if (isDedicatedServer)
+        Log(Debug::Info) << "DedicatedServer shutdown tick summary: " << dedicatedServerTickCount
+                         << " ticks at configured " << dedicatedServerTickRate << " Hz";
+
+    if (mStateManager->hasQuitRequest())
+        Log(Debug::Info) << "Main loop exiting: quit requested";
+    else if (isDedicatedServer)
+        Log(Debug::Info) << "DedicatedServer main loop exiting";
+    else
+        Log(Debug::Info) << "Main loop exiting: viewer requested shutdown";
+
     mLuaWorker->join();
+    Log(Debug::Info) << "Lua worker shutdown complete";
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
-    if (mNetType != NetType::Server)
+    if (!isDedicatedServer)
     {
         Settings::ShaderManager::get().save();
-    }
-    else if (mNetType == NetType::Host)
-    {
-        kill(mServerPid, SIGABRT);
     }
     mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
 }
@@ -1209,62 +1320,31 @@ void OMW::Engine::setRandomSeed(unsigned int seed)
     mRandomSeed = seed;
 }
 
-void OMW::Engine::setNetType(const unsigned int netType)
+void OMW::Engine::setRuntimeRole(RuntimeRole role)
 {
-    if (mServerPid == 0 && netType == NetType::Host)
+    mRuntimeRole = role;
+    Log(Debug::Info) << "Runtime role: " << runtimeRoleName(mRuntimeRole);
+
+    switch (mRuntimeRole)
     {
-        mNetType = NetType::Server;
-        return;
-    }
-    bool doSDL = false;
-    switch (netType)
-    {
-        case NetType::Host:
-            doSDL = true;
-            mNetType = netType;
+        case RuntimeRole::Host:
+        case RuntimeRole::Client:
             break;
-        case NetType::Client:
-            doSDL = true;
-            mNetType = netType;
-            break;
-        case NetType::Server:
-            mNetType = netType;
-            break;
-        default:
-            Log(Debug::Warning) << "Invalid netType " << netType << ", defaulting to host";
-            mNetType = NetType::Host;
+        case RuntimeRole::DedicatedServer:
+            return;
     }
 
-    if (doSDL)
-    {
-        SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
+    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
 
-        Uint32 flags
-            = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR;
-        if (SDL_WasInit(flags) == 0)
+    Uint32 flags
+        = SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_SENSOR;
+    if (SDL_WasInit(flags) == 0)
+    {
+        SDL_SetMainReady();
+        if (SDL_Init(flags) != 0)
         {
-            SDL_SetMainReady();
-            if (SDL_Init(flags) != 0)
-            {
-                throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
-            }
+            throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
         }
     }
-}
-
-void OMW::Engine::setServerPid(const unsigned int netType)
-{
-    if (netType != NetType::Host)
-    {
-        return;
-    }
-
-    const pid_t serverPid = fork();
-
-    if (serverPid == -1)
-    {
-        throw std::logic_error("Failed to fork server process");
-    }
-
-    mServerPid = serverPid;
+    mSDLInitialized = true;
 }

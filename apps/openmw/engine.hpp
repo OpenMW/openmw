@@ -10,6 +10,7 @@
 #include <components/settings/settings.hpp>
 #include <components/translation/translation.hpp>
 
+#include <osg/Stats>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
@@ -122,6 +123,13 @@ struct SDL_Window;
 
 namespace OMW
 {
+    enum class RuntimeRole
+    {
+        Host,
+        Client,
+        DedicatedServer,
+    };
+
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine
     {
@@ -150,6 +158,7 @@ namespace OMW
         std::vector<std::string> mArchives;
         std::filesystem::path mResDir;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
+        osg::ref_ptr<osg::Stats> mHeadlessStats;
         osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
         osg::ref_ptr<SceneUtil::AsyncScreenCaptureOperation> mScreenCaptureOperation;
         osg::ref_ptr<SceneUtil::SelectDepthFormatOperation> mSelectDepthFormatOperation;
@@ -162,6 +171,7 @@ namespace OMW
 
         bool mSkipMenu;
         bool mUseSound;
+        bool mSDLInitialized;
         bool mCompileAll;
         bool mCompileAllDialogue;
         int mWarningsMode;
@@ -175,8 +185,7 @@ namespace OMW
 
         bool mExportFonts;
         unsigned int mRandomSeed;
-        unsigned int mNetType;
-        pid_t mServerPid;
+        RuntimeRole mRuntimeRole;
         Debug::Level mMaxRecastLogLevel = Debug::Error;
 
         Compiler::Extensions mExtensions;
@@ -267,9 +276,7 @@ namespace OMW
 
         void setRandomSeed(unsigned int seed);
 
-        void setNetType(const unsigned int netType);
-
-        void setServerPid(const unsigned int netType);
+        void setRuntimeRole(RuntimeRole role);
 
         void setRecastMaxLogLevel(Debug::Level value) { mMaxRecastLogLevel = value; }
     };

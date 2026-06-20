@@ -55,6 +55,10 @@ Command line options
       --resources arg (=resources)          set resources directory
       --help                                print help message
       --version                             print version information and quit
+      --host                                run as host (default when no runtime
+                                            role is specified)
+      --client                              run as client
+      --dedicated-server                    run as dedicated server
       --data arg (=data)                    set data directories (later directories
                                             have higher priority)
       --data-local arg                      set local data directory (highest
@@ -62,10 +66,6 @@ Command line options
       --fallback-archive arg (=fallback-archive)
                                             set fallback BSA archives (later
                                             archives have higher priority)
-      --net-type arg (=0)                   set networking type, eg whether this 
-                                            instance of openmw is a server, client,
-                                            or both. 0 is mixed, 1 is client-only, 
-                                            2 is server-only.
       --start arg                           set initial cell
       --content arg                         content file(s): esm/esp, or
                                             omwgame/omwaddon/omwscripts

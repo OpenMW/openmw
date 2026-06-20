@@ -9,11 +9,6 @@ void server_interrupt_handler(int)
 
 MWNet::Server::Server()
 {
-    if (!InitializeYojimbo())
-    {
-        throw std::logic_error("error: failed to initialize Yojimbo!\n");
-    }
-
     mAdapter = std::make_unique<MWNet::ServerAdapter>(*this);
 
     mServer = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,
@@ -39,7 +34,7 @@ MWNet::Server::Server()
     signal(SIGINT, server_interrupt_handler);
 }
 
-bool MWNet::Server::tick()
+bool MWNet::Server::tick(double tickStep)
 {
     if (quit)
     {
@@ -54,7 +49,7 @@ bool MWNet::Server::tick()
     double currentTime = yojimbo_time();
     if (mTime <= currentTime)
     {
-        updateConnection();
+        updateConnection(tickStep);
     }
     else
     {
@@ -64,9 +59,9 @@ bool MWNet::Server::tick()
     return true;
 }
 
-void MWNet::Server::updateConnection()
+void MWNet::Server::updateConnection(double tickStep)
 {
-    mTime += MWNet::TickRate;
+    mTime += tickStep;
     mServer->AdvanceTime(mTime);
     mServer->ReceivePackets();
     processIncomingMessages();

@@ -33,7 +33,7 @@ namespace MWLua
             if (ptr.getCellRef().getRefId() == "player")
             {
                 const auto& netMan = MWBase::Environment::get().getNetworkManager();
-                if (!netMan->isServer())
+                if (!netMan->isDedicatedServer())
                 {
                 }
                 else

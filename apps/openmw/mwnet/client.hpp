@@ -111,7 +111,7 @@ namespace MWNet
                 },
             };
 
-        void updateConnection() override;
+        void updateConnection(double tickStep) override;
 
         void processIncomingMessages() override;
 
@@ -122,7 +122,7 @@ namespace MWNet
     public:
         Client();
 
-        bool tick() override;
+        bool tick(double tickStep) override;
     };
 }
 

@@ -89,3 +89,20 @@ venv/
 ## operating system files
 .DS_Store
 Thumbs.db
+/LINUX_BUILD
+/MP_DOCS
+/SDL
+/mygui
+/openmw-0.51.0-Linux-64Bit
+/openmw-0.52.0-Linux-64Bit
+/.clangd
+/DEHARDCODE_CHARACTER_CONTROLLER.md
+/PLANNED_BRANCHES.md
+/RUNTIME_MOD_RELOAD_PLAN.md
+/STEAMDECK_PERF_INVESTIGATION.md
+/fix_unbound.md
+/multi_distro_test.sh
+/oblivion-ini-report.md
+/steamdeck-hidapi-fix.patch
+/vcpkg-x64-linux-dynamic.7z
+/water_helpers.lua
