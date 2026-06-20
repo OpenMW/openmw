@@ -12,9 +12,9 @@ namespace MWNet
         const MessageId messageType;
 
         virtual ~MessageEntry() = default;
-        MessageEntry(ChannelId channelName, MessageId messageType)
-            : channelName(channelName)
-            , messageType(messageType)
+        MessageEntry(ChannelId channel, MessageId type)
+            : channelName(channel)
+            , messageType(type)
         {
         }
     };
@@ -24,10 +24,10 @@ namespace MWNet
         const std::string eventName;
         const LuaUtil::BinaryData eventData;
 
-        GlobalEventDataMessageEntry(const std::string& eventName, const LuaUtil::BinaryData& eventData)
+        GlobalEventDataMessageEntry(const std::string& name, const LuaUtil::BinaryData& data)
             : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::GLOBAL_EVENT_QUEUED)
-            , eventName(eventName)
-            , eventData(eventData)
+            , eventName(name)
+            , eventData(data)
         {
         }
     };
@@ -40,12 +40,12 @@ namespace MWNet
         const MWLua::GObject actor;
 
         UseOrActivationMessageEntry(
-            const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const bool isActivation, const bool force = false)
+            const MWWorld::Ptr& objectPtr, const MWWorld::Ptr& actorPtr, const bool activation, const bool forced = false)
             : MessageEntry(ChannelId::EVENTSQUEUE, MessageId::USE_OR_ACTIVATE_REQUEST)
-            , isActivation(isActivation)
-            , force(force)
-            , object(MWLua::GObject(object))
-            , actor(MWLua::GObject(actor))
+            , isActivation(activation)
+            , force(forced)
+            , object(MWLua::GObject(objectPtr))
+            , actor(MWLua::GObject(actorPtr))
         {
         }
     };
@@ -54,8 +54,8 @@ namespace MWNet
     {
         const unsigned int clientId;
 
-        ServerMessageEntry(ChannelId channelName, MessageId messageType, uint client = -1)
-            : MessageEntry(channelName, messageType)
+        ServerMessageEntry(ChannelId channel, MessageId type, uint client = -1)
+            : MessageEntry(channel, type)
             , clientId(client)
         {
         }
