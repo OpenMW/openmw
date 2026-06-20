@@ -1751,7 +1751,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                MWBase::Environment::get().getLuaManager()->reloadAllScripts();
+                MWBase::Environment::get().reloadAllLuaManagersAuthoritativeFirst();
                 runtime.getContext().report("All Lua scripts are reloaded");
             }
         };

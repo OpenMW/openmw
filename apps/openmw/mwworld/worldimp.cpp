@@ -218,7 +218,9 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
-        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
+
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.contentFilesLoaded(); });
 
         fillGlobalVariables();
 
@@ -299,7 +301,8 @@ namespace MWWorld
         else
             mGlobalVariables[Globals::sCharGenState].setInteger(-1);
 
-        MWBase::Environment::get().getLuaManager()->newGameStarted();
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.newGameStarted(); });
 
         if (!isDedicatedServer)
         {
@@ -2250,14 +2253,16 @@ namespace MWWorld
             mNavigator->removeAgent(getPathfindingAgentBounds(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
-            MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(getPlayerPtr());
+            MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+                [&](MWBase::LuaManager& luaManager) { luaManager.objectRemovedFromScene(getPlayerPtr()); });
 
             mPlayer->set(player);
         }
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
-        MWBase::Environment::get().getLuaManager()->setupPlayer(ptr);
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [&](MWBase::LuaManager& luaManager) { luaManager.setupPlayer(ptr); });
     }
 
     void World::renderPlayer()

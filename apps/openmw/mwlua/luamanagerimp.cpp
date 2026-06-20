@@ -203,15 +203,15 @@ namespace MWLua
 
     void LuaManager::loadPermanentStorage(const std::filesystem::path& userConfigPath)
     {
-        mPlayerStorage.setActive(true);
-        mGlobalStorage.setActive(true);
+        mPlayerStorage.setActive(ownsClientScriptContexts());
+        mGlobalStorage.setActive(ownsAuthoritativeScriptContexts());
         const auto globalPath = userConfigPath / "global_storage.bin";
         const auto playerPath = userConfigPath / "player_storage.bin";
 
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
-            if (std::filesystem::exists(globalPath))
+            if (ownsAuthoritativeScriptContexts() && std::filesystem::exists(globalPath))
                 mGlobalStorage.load(view.sol(), globalPath);
-            if (std::filesystem::exists(playerPath))
+            if (ownsClientScriptContexts() && std::filesystem::exists(playerPath))
                 mPlayerStorage.load(view.sol(), playerPath);
         });
     }
@@ -219,9 +219,10 @@ namespace MWLua
     void LuaManager::savePermanentStorage(const std::filesystem::path& userConfigPath)
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
-            if (mGlobalScriptsStarted)
+            if (ownsAuthoritativeScriptContexts() && mGlobalScriptsStarted)
                 mGlobalStorage.save(view.sol(), userConfigPath / "global_storage.bin");
-            mPlayerStorage.save(view.sol(), userConfigPath / "player_storage.bin");
+            if (ownsClientScriptContexts())
+                mPlayerStorage.save(view.sol(), userConfigPath / "player_storage.bin");
         });
     }
 
@@ -372,6 +373,7 @@ namespace MWLua
 
         if (isAuthoritativeServer())
         {
+            applyDelayedActions();
             return;
         }
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();

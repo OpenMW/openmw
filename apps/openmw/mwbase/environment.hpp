@@ -163,6 +163,12 @@ namespace MWBase
             return &mClientLuaManager->get();
         }
 
+        Misc::NotNullPtr<LuaManager> getLuaManagerForGlobalScripts() const;
+
+        void forEachLuaManagerAuthoritativeFirst(const std::function<void(LuaManager&)>& callback) const;
+
+        void reloadAllLuaManagersAuthoritativeFirst() const;
+
         Misc::NotNullPtr<LuaEventRouter> getLuaEventRouter() const
         {
             if (mLuaEventRouter == nullptr)

@@ -55,7 +55,7 @@ namespace MWLua
         api["toggleMWScript"] = []() { MWBase::Environment::get().getWorld()->toggleScripts(); };
         api["isMWScriptEnabled"] = []() { return MWBase::Environment::get().getWorld()->getScriptsEnabled(); };
 
-        api["reloadLua"] = []() { MWBase::Environment::get().getLuaManager()->reloadAllScripts(); };
+        api["reloadLua"] = [context]() { context.mLuaManager->reloadAllScripts(); };
 
         api["NAV_MESH_RENDER_MODE"]
             = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Settings::NavMeshRenderMode>(view,

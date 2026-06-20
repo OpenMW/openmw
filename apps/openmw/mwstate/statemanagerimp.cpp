@@ -77,12 +77,14 @@ void MWState::StateManager::cleanup(bool force)
         mLastSavegame.clear();
 
         mState = State_NoGame;
-        MWBase::Environment::get().getLuaManager()->noGame();
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.noGame(); });
     }
     else
     {
         // TODO: do we need this cleanup?
-        MWBase::Environment::get().getLuaManager()->clear();
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.clear(); });
     }
 }
 
@@ -186,7 +188,8 @@ void MWState::StateManager::newGame(bool bypass)
         MWBase::Environment::get().getWorld()->startNewGame(bypass);
 
         mState = State_Running;
-        MWBase::Environment::get().getLuaManager()->gameLoaded();
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.gameLoaded(); });
 
         if (!isDedicatedServer)
         {
@@ -219,18 +222,21 @@ void MWState::StateManager::newGame(bool bypass)
 void MWState::StateManager::endGame()
 {
     mState = State_Ended;
-    MWBase::Environment::get().getLuaManager()->gameEnded();
+    MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+        [](MWBase::LuaManager& luaManager) { luaManager.gameEnded(); });
 }
 
 void MWState::StateManager::resumeGame()
 {
     mState = State_Running;
-    MWBase::Environment::get().getLuaManager()->gameLoaded();
+    MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+        [](MWBase::LuaManager& luaManager) { luaManager.gameLoaded(); });
 }
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)
 {
-    MWBase::Environment::get().getLuaManager()->applyDelayedActions();
+    MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+        [](MWBase::LuaManager& luaManager) { luaManager.applyDelayedActions(); });
 
     MWState::Character* character = getCurrentCharacter();
 
@@ -308,7 +314,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
 
         size_t recordCount = 1 // saved game header
             + MWBase::Environment::get().getJournal()->countSavedGameRecords()
-            + MWBase::Environment::get().getLuaManager()->countSavedGameRecords()
+            + MWBase::Environment::get().getLuaManagerForGlobalScripts()->countSavedGameRecords()
             + MWBase::Environment::get().getWorld()->countSavedGameRecords()
             + MWBase::Environment::get().getScriptManager()->getGlobalScripts().countSavedGameRecords()
             + MWBase::Environment::get().getDialogueManager()->countSavedGameRecords()
@@ -334,7 +340,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         MWBase::Environment::get().getDialogueManager()->write(writer, listener);
         // LuaManager::write should be called before World::write because world also saves
         // local scripts that depend on LuaManager.
-        MWBase::Environment::get().getLuaManager()->write(writer, listener);
+        MWBase::Environment::get().getLuaManagerForGlobalScripts()->write(writer, listener);
         MWBase::Environment::get().getWorld()->write(writer, listener);
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().write(writer, listener);
         MWBase::Environment::get().getMechanicsManager()->write(writer, listener);
@@ -487,7 +493,8 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
         reader.setContentFileMapping(&contentFileMap);
-        MWBase::Environment::get().getLuaManager()->setContentFileMapping(contentFileMap);
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [&contentFileMap](MWBase::LuaManager& luaManager) { luaManager.setContentFileMapping(contentFileMap); });
 
         ESM::ActorIdConverter actorIdConverter;
         if (version <= ESM::MaxActorIdSaveGameFormatVersion)
@@ -600,7 +607,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                     break;
 
                 case ESM::REC_LUAM:
-                    MWBase::Environment::get().getLuaManager()->readRecord(reader, n.toInt());
+                    MWBase::Environment::get().getLuaManagerForGlobalScripts()->readRecord(reader, n.toInt());
                     break;
 
                 default:
@@ -672,7 +679,8 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         // But make sure the flag is cleared anyway in case it was set from an earlier game.
         MWBase::Environment::get().getWorldScene()->markCellAsUnchanged();
 
-        MWBase::Environment::get().getLuaManager()->gameLoaded();
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [](MWBase::LuaManager& luaManager) { luaManager.gameLoaded(); });
         for (int actorId : actorIdConverter.mGraveyard)
         {
             auto mapped = actorIdConverter.mMappings.find(actorId);

@@ -126,20 +126,6 @@ namespace
         throw std::logic_error("Unhandled runtime role");
     }
 
-    MWBase::LuaManager::RuntimeMode luaRuntimeModeFromRuntimeRole(OMW::RuntimeRole role)
-    {
-        switch (role)
-        {
-            case OMW::RuntimeRole::Host:
-            case OMW::RuntimeRole::Client:
-                return MWBase::LuaManager::RuntimeMode::Client;
-            case OMW::RuntimeRole::DedicatedServer:
-                return MWBase::LuaManager::RuntimeMode::AuthoritativeServer;
-        }
-
-        throw std::logic_error("Unhandled runtime role");
-    }
-
     void checkSDLError(int ret)
     {
         if (ret != 0)
@@ -240,6 +226,14 @@ void OMW::Engine::executeLocalScripts()
     }
 }
 
+void OMW::Engine::forEachLuaManagerAuthoritativeFirst(const std::function<void(MWLua::LuaManager&)>& callback)
+{
+    if (mAuthoritativeLuaManager)
+        callback(*mAuthoritativeLuaManager);
+    if (mClientLuaManager)
+        callback(*mClientLuaManager);
+}
+
 bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 {
     const osg::Timer* const timer = osg::Timer::instance();
@@ -308,7 +302,10 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
             ScopedProfile<UserStatsType::LuaSyncUpdate> profile(frameStart, frameNumber, *timer, *stats);
             // Should be called after input manager update and before any change to the game world.
             // It applies to the game world queued changes from the previous frame.
-            mLuaManager->synchronizedUpdate();
+            if (mAuthoritativeLuaManager)
+                mAuthoritativeLuaManager->synchronizedUpdate();
+            if (mClientLuaManager)
+                mClientLuaManager->synchronizedUpdate();
         }
 
         // update game state
@@ -428,7 +425,10 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
         mMechanicsManager->reportStats(frameNumber, *stats);
         mWorld->reportStats(frameNumber, *stats);
-        mLuaManager->reportStats(frameNumber, *stats);
+        if (mClientLuaManager)
+            mClientLuaManager->reportStats(frameNumber, *stats);
+        else if (mAuthoritativeLuaManager)
+            mAuthoritativeLuaManager->reportStats(frameNumber, *stats);
 
         stats->setAttribute(frameNumber, "StringRefId Count", static_cast<double>(ESM::StringRefId::totalCount()));
     }
@@ -448,15 +448,23 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
         }
     }
 
-    // if there is a separate Lua thread, it starts the update now
-    mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
+    if (mAuthoritativeLuaManager)
+    {
+        ScopedProfile<UserStatsType::Lua> profile(frameStart, frameNumber, *timer, *stats);
+        mAuthoritativeLuaManager->update();
+    }
+
+    // if there is a separate client Lua thread, it starts the update now
+    if (mLuaWorker)
+        mLuaWorker->allowUpdate(frameStart, frameNumber, *stats);
 
     if (!isDedicatedServer)
     {
         mViewer->renderingTraversals();
     }
 
-    mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
+    if (mLuaWorker)
+        mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
 
     return true;
 }
@@ -506,7 +514,8 @@ OMW::Engine::~Engine()
     mInputManager = nullptr;
     mStateManager = nullptr;
     mLuaWorker = nullptr;
-    mLuaManager = nullptr;
+    mClientLuaManager = nullptr;
+    mAuthoritativeLuaManager = nullptr;
     mL10nManager = nullptr;
     mEnvironment.clearLuaEventRouter();
     mNetworkManager = nullptr;
@@ -886,17 +895,20 @@ void OMW::Engine::prepareEngine()
     mL10nManager->setPreferredLocales(Settings::general().mPreferredLocales, Settings::general().mGmstOverridesL10n);
     mEnvironment.setL10nManager(*mL10nManager);
 
-    mLuaManager = std::make_unique<MWLua::LuaManager>(
-        mVFS.get(), mResDir / "lua_libs", luaRuntimeModeFromRuntimeRole(mRuntimeRole));
-    mEnvironment.setLuaManager(*mLuaManager);
-    switch (mLuaManager->getRuntimeMode())
+    if (mRuntimeRole == RuntimeRole::Host || mRuntimeRole == RuntimeRole::DedicatedServer)
     {
-        case MWBase::LuaManager::RuntimeMode::AuthoritativeServer:
-            mEnvironment.setAuthoritativeLuaManager(*mLuaManager);
-            break;
-        case MWBase::LuaManager::RuntimeMode::Client:
-            mEnvironment.setClientLuaManager(*mLuaManager);
-            break;
+        mAuthoritativeLuaManager = std::make_unique<MWLua::LuaManager>(
+            mVFS.get(), mResDir / "lua_libs", MWBase::LuaManager::RuntimeMode::AuthoritativeServer);
+        mEnvironment.setAuthoritativeLuaManager(*mAuthoritativeLuaManager);
+        if (mRuntimeRole == RuntimeRole::DedicatedServer)
+            mEnvironment.setLuaManager(*mAuthoritativeLuaManager);
+    }
+    if (mRuntimeRole == RuntimeRole::Host || mRuntimeRole == RuntimeRole::Client)
+    {
+        mClientLuaManager = std::make_unique<MWLua::LuaManager>(
+            mVFS.get(), mResDir / "lua_libs", MWBase::LuaManager::RuntimeMode::Client);
+        mEnvironment.setClientLuaManager(*mClientLuaManager);
+        mEnvironment.setLuaManager(*mClientLuaManager);
     }
 
     // Create input and UI first to set up a bootstrapping environment for
@@ -1013,8 +1025,9 @@ void OMW::Engine::prepareEngine()
     mDialogueManager = std::make_unique<MWDialogue::DialogueManager>(mExtensions, mTranslationDataStorage);
     mEnvironment.setDialogueManager(*mDialogueManager);
 
-    mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
-    mLuaManager->initPreLoad();
+    forEachLuaManagerAuthoritativeFirst(
+        [&](MWLua::LuaManager& luaManager) { luaManager.loadPermanentStorage(mCfgMgr.getUserConfigPath()); });
+    forEachLuaManagerAuthoritativeFirst([](MWLua::LuaManager& luaManager) { luaManager.initPreLoad(); });
 
     Loading::Listener listener = isDedicatedServer
         ? Loading::Listener()
@@ -1053,7 +1066,7 @@ void OMW::Engine::prepareEngine()
     mWorld->setRandomSeed(mRandomSeed);
     if (!isDedicatedServer)
         mWindowManager->initUI();
-    mLuaManager->initPostLoad();
+    forEachLuaManagerAuthoritativeFirst([](MWLua::LuaManager& luaManager) { luaManager.initPostLoad(); });
 
     // scripts
     if (mCompileAll)
@@ -1071,8 +1084,9 @@ void OMW::Engine::prepareEngine()
                              << 100 * static_cast<double>(result.second) / result.first << "%)";
     }
 
-    // starts a separate lua thread if "lua num threads" > 0
-    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager);
+    // starts a separate client Lua thread if "lua num threads" > 0
+    if (mClientLuaManager)
+        mLuaWorker = std::make_unique<MWLua::Worker>(*mClientLuaManager);
 }
 
 // Initialise and enter main loop.
@@ -1279,8 +1293,11 @@ void OMW::Engine::go()
     else
         Log(Debug::Info) << "Main loop exiting: viewer requested shutdown";
 
-    mLuaWorker->join();
-    Log(Debug::Info) << "Lua worker shutdown complete";
+    if (mLuaWorker)
+    {
+        mLuaWorker->join();
+        Log(Debug::Info) << "Lua worker shutdown complete";
+    }
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
@@ -1288,7 +1305,8 @@ void OMW::Engine::go()
     {
         Settings::ShaderManager::get().save();
     }
-    mLuaManager->savePermanentStorage(mCfgMgr.getUserConfigPath());
+    forEachLuaManagerAuthoritativeFirst(
+        [&](MWLua::LuaManager& luaManager) { luaManager.savePermanentStorage(mCfgMgr.getUserConfigPath()); });
 }
 
 void OMW::Engine::setCompileAll(bool all)
