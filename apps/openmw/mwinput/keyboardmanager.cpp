@@ -60,7 +60,7 @@ namespace MWInput
 
         if (!consumed)
         {
-            MWBase::Environment::get().getLuaManager()->inputEvent(
+            MWBase::Environment::get().getClientLuaManager()->inputEvent(
                 { MWBase::LuaManager::InputEvent::KeyPressed, arg.keysym });
         }
 
@@ -75,7 +75,7 @@ namespace MWInput
         if (!mBindingsManager->isDetectingBindingState())
             mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(kc));
         mBindingsManager->keyReleased(arg);
-        MWBase::Environment::get().getLuaManager()->inputEvent(
+        MWBase::Environment::get().getClientLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::KeyReleased, arg.keysym });
     }
 }

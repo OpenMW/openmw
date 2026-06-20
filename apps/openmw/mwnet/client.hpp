@@ -63,7 +63,7 @@ namespace MWNet
                       if (!activationMessage->object.ptr().getRefData().activate())
                           return;
 
-                      MWBase::LuaManager* luaMan = MWBase::Environment::get().getLuaManager();
+                      MWBase::LuaManager* luaMan = MWBase::Environment::get().getClientLuaManager();
                       if (activationMessage->isActivation)
                       {
                           luaMan->addActivationAction(activationMessage->object.ptr(), activationMessage->actor.ptr());

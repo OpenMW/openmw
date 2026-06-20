@@ -57,7 +57,7 @@ namespace MWInput
 
     void ActionManager::executeAction(int action)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::Action, action });
+        MWBase::Environment::get().getClientLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::Action, action });
         const auto inputManager = MWBase::Environment::get().getInputManager();
         const auto windowManager = MWBase::Environment::get().getWindowManager();
         // trigger action activated

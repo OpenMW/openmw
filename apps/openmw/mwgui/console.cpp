@@ -232,7 +232,7 @@ namespace MWGui
 
         if (!mConsoleMode.empty() || (command.size() >= 3 && std::string_view(command).substr(0, 3) == "lua"))
         {
-            MWBase::Environment::get().getLuaManager()->handleConsoleCommand(mConsoleMode, command, mPtr);
+            MWBase::Environment::get().getClientLuaManager()->handleConsoleCommand(mConsoleMode, command, mPtr);
             return;
         }
 

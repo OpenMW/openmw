@@ -228,7 +228,7 @@ namespace MWGui
             return;
 
         size_t previousPos = mLuaProfiler->getVScrollPosition();
-        mLuaProfiler->setCaption(MWBase::Environment::get().getLuaManager()->formatResourceUsageStats());
+        mLuaProfiler->setCaption(MWBase::Environment::get().getClientLuaManager()->formatResourceUsageStats());
         mLuaProfiler->setVScrollPosition(std::min(previousPos, mLuaProfiler->getVScrollRange() - 1));
     }
 

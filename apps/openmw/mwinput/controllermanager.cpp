@@ -130,7 +130,7 @@ namespace MWInput
         if (!Settings::input().mEnableController || mBindingsManager->isDetectingBindingState())
             return;
 
-        MWBase::Environment::get().getLuaManager()->inputEvent(
+        MWBase::Environment::get().getClientLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::ControllerPressed, arg.button });
 
         mJoystickLastUsed = true;
@@ -180,7 +180,7 @@ namespace MWInput
 
         if (Settings::input().mEnableController)
         {
-            MWBase::Environment::get().getLuaManager()->inputEvent(
+            MWBase::Environment::get().getClientLuaManager()->inputEvent(
                 { MWBase::LuaManager::InputEvent::ControllerReleased, arg.button });
         }
 
@@ -602,16 +602,16 @@ namespace MWInput
 
     void ControllerManager::touchpadMoved(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchMoved, arg });
+        MWBase::Environment::get().getClientLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchMoved, arg });
     }
 
     void ControllerManager::touchpadPressed(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchPressed, arg });
+        MWBase::Environment::get().getClientLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchPressed, arg });
     }
 
     void ControllerManager::touchpadReleased(int deviceId, const SDLUtil::TouchEvent& arg)
     {
-        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchReleased, arg });
+        MWBase::Environment::get().getClientLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::TouchReleased, arg });
     }
 }

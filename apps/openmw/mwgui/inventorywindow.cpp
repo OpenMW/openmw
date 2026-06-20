@@ -704,7 +704,7 @@ namespace MWGui
                     mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
 
-            MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
+            MWBase::Environment::get().getClientLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
         }
         else
         {

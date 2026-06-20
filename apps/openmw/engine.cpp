@@ -887,6 +887,15 @@ void OMW::Engine::prepareEngine()
     mLuaManager = std::make_unique<MWLua::LuaManager>(
         mVFS.get(), mResDir / "lua_libs", luaRuntimeModeFromRuntimeRole(mRuntimeRole));
     mEnvironment.setLuaManager(*mLuaManager);
+    switch (mLuaManager->getRuntimeMode())
+    {
+        case MWBase::LuaManager::RuntimeMode::AuthoritativeServer:
+            mEnvironment.setAuthoritativeLuaManager(*mLuaManager);
+            break;
+        case MWBase::LuaManager::RuntimeMode::Client:
+            mEnvironment.setClientLuaManager(*mLuaManager);
+            break;
+    }
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so

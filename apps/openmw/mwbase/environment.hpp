@@ -4,6 +4,7 @@
 #include <components/misc/notnullptr.hpp>
 
 #include <memory>
+#include <stdexcept>
 
 namespace Resource
 {
@@ -61,6 +62,8 @@ namespace MWBase
         InputManager* mInputManager = nullptr;
         StateManager* mStateManager = nullptr;
         LuaManager* mLuaManager = nullptr;
+        LuaManager* mAuthoritativeLuaManager = nullptr;
+        LuaManager* mClientLuaManager = nullptr;
         Resource::ResourceSystem* mResourceSystem = nullptr;
         L10n::Manager* mL10nManager = nullptr;
         MWNet::NetworkManager* mNetworkManager = nullptr;
@@ -97,7 +100,12 @@ namespace MWBase
 
         void setStateManager(StateManager& value) { mStateManager = &value; }
 
+        // Transitional default accessor for systems that still operate on the only current Lua runtime.
         void setLuaManager(LuaManager& value) { mLuaManager = &value; }
+
+        void setAuthoritativeLuaManager(LuaManager& value) { mAuthoritativeLuaManager = &value; }
+
+        void setClientLuaManager(LuaManager& value) { mClientLuaManager = &value; }
 
         void setResourceSystem(Resource::ResourceSystem& value) { mResourceSystem = &value; }
 
@@ -126,7 +134,26 @@ namespace MWBase
 
         Misc::NotNullPtr<StateManager> getStateManager() const { return mStateManager; }
 
+        bool hasAuthoritativeLuaManager() const { return mAuthoritativeLuaManager != nullptr; }
+
+        bool hasClientLuaManager() const { return mClientLuaManager != nullptr; }
+
+        // Transitional default accessor for systems that still operate on the only current Lua runtime.
         Misc::NotNullPtr<LuaManager> getLuaManager() const { return mLuaManager; }
+
+        Misc::NotNullPtr<LuaManager> getAuthoritativeLuaManager() const
+        {
+            if (mAuthoritativeLuaManager == nullptr)
+                throw std::logic_error("Authoritative Lua manager is not registered");
+            return mAuthoritativeLuaManager;
+        }
+
+        Misc::NotNullPtr<LuaManager> getClientLuaManager() const
+        {
+            if (mClientLuaManager == nullptr)
+                throw std::logic_error("Client Lua manager is not registered");
+            return mClientLuaManager;
+        }
 
         Misc::NotNullPtr<Resource::ResourceSystem> getResourceSystem() const { return mResourceSystem; }
 

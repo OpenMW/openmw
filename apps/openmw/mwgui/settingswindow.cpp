@@ -1028,7 +1028,7 @@ namespace MWGui
     {
         // Save user settings
         Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
-        MWBase::Environment::get().getLuaManager()->savePermanentStorage(mCfgMgr.getUserConfigPath());
+        MWBase::Environment::get().getClientLuaManager()->savePermanentStorage(mCfgMgr.getUserConfigPath());
         MWBase::Environment::get().getInputManager()->saveBindings();
     }
 

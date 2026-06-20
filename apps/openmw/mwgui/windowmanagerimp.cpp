@@ -1078,7 +1078,7 @@ namespace MWGui
         }
 
         MWBase::LuaManager::ActorControls* playerControls
-            = MWBase::Environment::get().getLuaManager()->getActorControls(player);
+            = MWBase::Environment::get().getClientLuaManager()->getActorControls(player);
         bool triedToMove = playerControls
             && (playerControls->mMovement != 0 || playerControls->mSideMovement != 0 || playerControls->mJump);
         if (mMessageBoxManager && triedToMove && playerCls.getEncumbrance(player) > playerCls.getCapacity(player))
@@ -1357,7 +1357,7 @@ namespace MWGui
         // Re-apply any controller-specific window changes.
         reapplyActiveControllerWindow();
 
-        MWBase::Environment::get().getLuaManager()->viewportResized(x, y);
+        MWBase::Environment::get().getClientLuaManager()->viewportResized(x, y);
 
         // TODO: check if any windows are now off-screen and move them back if so
     }
@@ -1436,7 +1436,7 @@ namespace MWGui
         mKeyboardNavigation->restoreFocus(mode);
 
         updateVisible();
-        MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
+        MWBase::Environment::get().getClientLuaManager()->uiModeChanged(arg);
 
         if (Settings::gui().mControllerMenus)
         {
@@ -1491,7 +1491,7 @@ namespace MWGui
             {
                 mGuiModes.pop_back();
                 mGuiModeStates[mode].update(false);
-                MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+                MWBase::Environment::get().getClientLuaManager()->uiModeChanged(MWWorld::Ptr());
             }
         }
 
@@ -1539,7 +1539,7 @@ namespace MWGui
         }
 
         updateVisible();
-        MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
+        MWBase::Environment::get().getClientLuaManager()->uiModeChanged(MWWorld::Ptr());
     }
 
     void WindowManager::goToJail(int days)

@@ -183,7 +183,7 @@ namespace MWDialogue
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
                     callback->addResponse({}, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
-                    MWBase::Environment::get().getLuaManager()->onDialogueResponse(mActor, *info, dialogue);
+                    MWBase::Environment::get().getClientLuaManager()->onDialogueResponse(mActor, *info, dialogue);
                     executeScript(info->mResultScript, mActor);
                     mLastTopic = dialogue.mId;
 
@@ -313,7 +313,7 @@ namespace MWDialogue
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
             callback->addResponse(title, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
-            MWBase::Environment::get().getLuaManager()->onDialogueResponse(mActor, *info, dialogue);
+            MWBase::Environment::get().getClientLuaManager()->onDialogueResponse(mActor, *info, dialogue);
 
             if (dialogue.mType == ESM::Dialogue::Topic)
             {
@@ -484,7 +484,7 @@ namespace MWDialogue
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
                     callback->addResponse({}, Interpreter::fixDefinesDialog(text, interpreterContext));
-                    MWBase::Environment::get().getLuaManager()->onDialogueResponse(mActor, *info, *dialogue);
+                    MWBase::Environment::get().getClientLuaManager()->onDialogueResponse(mActor, *info, *dialogue);
 
                     if (dialogue->mType == ESM::Dialogue::Topic)
                     {
@@ -614,7 +614,7 @@ namespace MWDialogue
 
             callback->addResponse(gmsts.find("sServiceRefusal")->mValue.getString(),
                 Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
-            MWBase::Environment::get().getLuaManager()->onDialogueResponse(mActor, *info, dialogue);
+            MWBase::Environment::get().getClientLuaManager()->onDialogueResponse(mActor, *info, dialogue);
 
             executeScript(info->mResultScript, mActor);
             return true;
@@ -658,7 +658,7 @@ namespace MWDialogue
                 sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(info->mSound)));
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
-            MWBase::Environment::get().getLuaManager()->onDialogueResponse(actor, *info, *dial);
+            MWBase::Environment::get().getClientLuaManager()->onDialogueResponse(actor, *info, *dial);
         }
         return info != nullptr;
     }

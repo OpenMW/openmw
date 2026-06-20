@@ -140,7 +140,7 @@ namespace MWInput
             mBindingsManager->mouseReleased(arg, id);
         }
 
-        MWBase::Environment::get().getLuaManager()->inputEvent(
+        MWBase::Environment::get().getClientLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::MouseButtonReleased, arg.button });
     }
 
@@ -153,7 +153,7 @@ namespace MWInput
         }
 
         input->setJoystickLastUsed(false);
-        MWBase::Environment::get().getLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
+        MWBase::Environment::get().getClientLuaManager()->inputEvent({ MWBase::LuaManager::InputEvent::MouseWheel,
             MWBase::LuaManager::InputEvent::WheelChange{ arg.x, arg.y } });
     }
 
@@ -189,7 +189,7 @@ namespace MWInput
         {
             mBindingsManager->mousePressed(arg, id);
         }
-        MWBase::Environment::get().getLuaManager()->inputEvent(
+        MWBase::Environment::get().getClientLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });
     }
 
