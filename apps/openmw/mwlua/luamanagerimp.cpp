@@ -150,7 +150,7 @@ namespace MWLua
 
             const bool isDedicatedServer = MWBase::Environment::get().getNetworkManager()->isDedicatedServer();
 
-            if (!isDedicatedServer)
+            if (isDedicatedServer)
             {
                 for (const auto& [name, package] : initGlobalPackages(globalContext))
                     mGlobalScripts.addPackage(name, package);
