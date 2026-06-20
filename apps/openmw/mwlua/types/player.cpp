@@ -382,7 +382,7 @@ namespace MWLua
                 }));
 
         // HACK: Disable input bindings completely due to server things
-        player["getControlSwitch"] = [](const Object& player, std::string_view key) {
+        player["getControlSwitch"] = [](const Object& object, std::string_view key) {
             if (MWBase::Environment::get().getNetworkManager()->isServer())
             {
                 Log(Debug::Warning) << "getControlSwitch called on server, returning false";
@@ -391,11 +391,11 @@ namespace MWLua
             else
             {
                 MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-                verifyPlayer(player);
+                verifyPlayer(object);
                 return input->getControlSwitch(key);
             }
         };
-        player["setControlSwitch"] = [](const Object& player, std::string_view key, bool v) {
+        player["setControlSwitch"] = [](const Object& object, std::string_view key, bool v) {
             if (MWBase::Environment::get().getNetworkManager()->isServer())
             {
                 Log(Debug::Warning) << "setControlSwitch called on server! Not implemented!";
@@ -404,8 +404,8 @@ namespace MWLua
             else
             {
                 MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-                verifyPlayer(player);
-                if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                verifyPlayer(object);
+                if (dynamic_cast<const LObject*>(&object) && !dynamic_cast<const SelfObject*>(&object))
                     throw std::runtime_error("Only player and global scripts can toggle control switches.");
                 input->toggleControlSwitch(key, v);
             }
