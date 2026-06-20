@@ -355,7 +355,7 @@ namespace MWGui
             const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
                 spell->mEffects.mList.front().mData.mEffectID);
             const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
-                VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+                effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS());
             mSpellImage->setSpellIcon(iconPath);
         }
         else

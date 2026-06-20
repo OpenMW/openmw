@@ -216,7 +216,7 @@ namespace MWGui
     void EditEffectDialog::setMagicEffect(const ESM::MagicEffect* effect)
     {
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
-            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS()));
+            effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS()));
 
         mEffectName->setCaption(effect->mName);
 

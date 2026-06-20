@@ -960,7 +960,7 @@ namespace MWGui
         const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
         const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
-            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+            effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");

@@ -1615,12 +1615,12 @@ namespace MWMechanics
                                     = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
 
                                 if (mAnimation->getNode("Bip01 L Hand"))
-                                    mAnimation->addEffect(
-                                        castStaticModel.value(), "", false, "Bip01 L Hand", effect->mParticle);
+                                    mAnimation->addEffect(castStaticModel.value(), "", false, "Bip01 L Hand",
+                                        effect->mParticle.getOriginal());
 
                                 if (mAnimation->getNode("Bip01 R Hand"))
-                                    mAnimation->addEffect(
-                                        castStaticModel.value(), "", false, "Bip01 R Hand", effect->mParticle);
+                                    mAnimation->addEffect(castStaticModel.value(), "", false, "Bip01 R Hand",
+                                        effect->mParticle.getOriginal());
                             }
                             // first effect used for casting animation
                             const ESM::ENAMstruct& firstEffect = effects->front().mData;

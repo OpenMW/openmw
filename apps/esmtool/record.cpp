@@ -979,9 +979,9 @@ namespace EsmTool
         int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mId);
         std::cout << "  Index: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
-        std::cout << "  Icon: " << mData.mIcon << std::endl;
+        std::cout << "  Icon: " << mData.mIcon.getOriginal() << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
-        std::cout << "  Particle Texture: " << mData.mParticle << std::endl;
+        std::cout << "  Particle Texture: " << mData.mParticle.getOriginal() << std::endl;
         if (!mData.mCasting.empty())
             std::cout << "  Casting Static: " << mData.mCasting << std::endl;
         if (!mData.mCastSound.empty())

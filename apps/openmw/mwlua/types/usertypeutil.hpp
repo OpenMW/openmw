@@ -11,19 +11,6 @@
 
 #include <concepts>
 
-namespace
-{
-    inline VFS::Path::NormalizedView getNormalized(const ESM::Path& value)
-    {
-        return value.getNormalized();
-    }
-
-    inline VFS::Path::Normalized getNormalized(std::string_view value)
-    {
-        return VFS::Path::toNormalized(value);
-    }
-}
-
 namespace MWLua::Types
 {
     template <class Type, class M>
@@ -163,7 +150,7 @@ namespace MWLua::Types
         if constexpr (RecordType<T>::isMutable)
             type["icon"] = sol::property(
                 [vfs](const T& mutRec) -> std::string {
-                    return Misc::ResourceHelpers::correctIconPath(getNormalized(mutRec.find().mIcon), *vfs);
+                    return Misc::ResourceHelpers::correctIconPath(mutRec.find().mIcon.getNormalized(), *vfs);
                 },
                 [](T& mutRec, std::string_view path) {
                     auto& recordValue = mutRec.find();
@@ -171,7 +158,7 @@ namespace MWLua::Types
                 });
         else
             type["icon"] = sol::readonly_property([vfs](const T& rec) -> std::string {
-                return Misc::ResourceHelpers::correctIconPath(getNormalized(rec.mIcon), *vfs);
+                return Misc::ResourceHelpers::correctIconPath(rec.mIcon.getNormalized(), *vfs);
             });
     }
 

@@ -66,7 +66,7 @@ namespace MWMechanics
             else
                 areaStatic = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_DefaultArea"));
 
-            const std::string& texture = effect->mParticle;
+            const std::string& texture = effect->mParticle.getOriginal();
 
             if (effectInfo.mData.mArea <= 0)
             {
@@ -509,7 +509,7 @@ namespace MWMechanics
             if (animation)
             {
                 animation->addEffect(
-                    castStaticModel.value(), effect->mId.getRefIdString(), false, {}, effect->mParticle);
+                    castStaticModel.value(), effect->mId.getRefIdString(), false, {}, effect->mParticle.getOriginal());
             }
             else
             {
@@ -538,7 +538,8 @@ namespace MWMechanics
                     scale *= npcScaleVec.z();
                 }
                 scale = std::max(scale, 1.f);
-                MWBase::Environment::get().getWorld()->spawnEffect(castStaticModel, effect->mParticle, pos, scale);
+                MWBase::Environment::get().getWorld()->spawnEffect(
+                    castStaticModel, effect->mParticle.getOriginal(), pos, scale);
             }
 
             if (animation && !mCaster.getClass().isActor())
@@ -584,8 +585,8 @@ namespace MWMechanics
             {
                 const VFS::Path::Normalized castStaticModel
                     = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
-                anim->addEffect(
-                    castStaticModel.value(), magicEffect.mId.getRefIdString(), loop, {}, magicEffect.mParticle);
+                anim->addEffect(castStaticModel.value(), magicEffect.mId.getRefIdString(), loop, {},
+                    magicEffect.mParticle.getOriginal());
             }
         }
     }
