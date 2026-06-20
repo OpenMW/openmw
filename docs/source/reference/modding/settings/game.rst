@@ -17,9 +17,10 @@ Game Settings
         - No clues are provided which is the default Morrowind behaviour.
       * - 1
         - The background of the tool tip for the object is highlighted in the colour specified by the colour background owned setting in the GUI Settings Section.
-          The crosshair is not visible if crosshair is false.
       * - 2
         - The crosshair is the colour of the colour crosshair owned setting in the GUI Settings section.
+          The crosshair is not visible if crosshair is false.
+          No clues are provided than the object is owned when a GUI window is open.
       * - 3
         - Both the tool tip background and the crosshair are coloured.
 
