@@ -171,6 +171,7 @@ namespace OMW
 
         bool mSkipMenu;
         bool mUseSound;
+        bool mSDLInitialized;
         bool mCompileAll;
         bool mCompileAllDialogue;
         int mWarningsMode;

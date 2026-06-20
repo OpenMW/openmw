@@ -442,6 +442,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mStereoManager(nullptr)
     , mSkipMenu(false)
     , mUseSound(true)
+    , mSDLInitialized(false)
     , mCompileAll(false)
     , mCompileAllDialogue(false)
     , mWarningsMode(1)
@@ -479,6 +480,7 @@ OMW::Engine::~Engine()
     mLuaWorker = nullptr;
     mLuaManager = nullptr;
     mL10nManager = nullptr;
+    mNetworkManager = nullptr;
 
     mScriptContext = nullptr;
 
@@ -497,7 +499,13 @@ OMW::Engine::~Engine()
         mWindow = nullptr;
     }
 
-    SDL_Quit();
+    if (mSDLInitialized)
+    {
+        Log(Debug::Info) << "Shutting down SDL subsystems";
+        SDL_Quit();
+    }
+    else if (mRuntimeRole == RuntimeRole::DedicatedServer)
+        Log(Debug::Info) << "DedicatedServer shutdown: SDL/video/input were not initialized";
 
     Log(Debug::Info) << "Quitting peacefully.";
 }
@@ -783,13 +791,21 @@ void OMW::Engine::setWindowIcon()
 
 void OMW::Engine::prepareEngine()
 {
+    const bool isDedicatedServer = mRuntimeRole == RuntimeRole::DedicatedServer;
+    Log(Debug::Info) << "Preparing engine for runtime role: " << runtimeRoleName(mRuntimeRole);
+    if (isDedicatedServer)
+    {
+        Log(Debug::Info) << "DedicatedServer headless startup: renderer/window/UI/audio/input disabled";
+        Log(Debug::Info) << "DedicatedServer enabled subsystems: network server, world data, scripts, Lua";
+    }
+
     mNetworkManager = std::make_unique<MWNet::NetworkManager>(networkRoleFromRuntimeRole(mRuntimeRole));
     mEnvironment.setNetworkManager(*mNetworkManager);
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
     osg::ref_ptr<osg::Group> rootNode = nullptr;
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         const bool stereoEnabled
             = Settings::stereo().mStereoEnabled || osg::DisplaySettings::instance().get()->getStereo();
@@ -808,7 +824,7 @@ void OMW::Engine::prepareEngine()
 
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(
         mVFS.get(), Settings::cells().mCacheExpiryDelay, &mEncoder.get()->getStatelessEncoder());
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
         mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
@@ -822,7 +838,7 @@ void OMW::Engine::prepareEngine()
     mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
     mUnrefQueue = std::make_unique<SceneUtil::UnrefQueue>();
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(mWorkQueue,
             new SceneUtil::WriteScreenshotToFileOperation(mCfgMgr.getScreenshotPath(),
@@ -846,7 +862,7 @@ void OMW::Engine::prepareEngine()
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         const auto keybinderUser = mCfgMgr.getUserConfigPath() / "input_v3.xml";
         bool keybinderUserExists = std::filesystem::exists(keybinderUser);
@@ -929,7 +945,7 @@ void OMW::Engine::prepareEngine()
         return nullptr;
     });
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
         mWindowManager->setStore(mWorld->getStore());
 
     // Load translation data
@@ -960,7 +976,7 @@ void OMW::Engine::prepareEngine()
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
     mLuaManager->initPreLoad();
 
-    Loading::Listener listener = mRuntimeRole == RuntimeRole::DedicatedServer
+    Loading::Listener listener = isDedicatedServer
         ? Loading::Listener()
         : *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
     Loading::AsyncListener asyncListener(listener);
@@ -968,7 +984,7 @@ void OMW::Engine::prepareEngine()
     auto dataLoading = std::async(std::launch::async,
         [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), &asyncListener); });
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         if (!mSkipMenu)
         {
@@ -988,14 +1004,14 @@ void OMW::Engine::prepareEngine()
     listener.loadingOff();
 
     mWorld->init(mMaxRecastLogLevel, mViewer, std::move(rootNode), mWorkQueue.get(), *mUnrefQueue);
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
         mEnvironment.setWorldScene(mWorld->getWorldScene());
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         mWorld->setupPlayer();
     }
     mWorld->setRandomSeed(mRandomSeed);
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
         mWindowManager->initUI();
     mLuaManager->initPostLoad();
 
@@ -1023,8 +1039,10 @@ void OMW::Engine::prepareEngine()
 void OMW::Engine::go()
 {
     assert(!mContentFiles.empty());
+    const bool isDedicatedServer = mRuntimeRole == RuntimeRole::DedicatedServer;
+    Log(Debug::Info) << "Runtime role selected: " << runtimeRoleName(mRuntimeRole);
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         Log(Debug::Info) << "OSG version: " << osgGetVersion();
         SDL_version sdlVersion;
@@ -1035,7 +1053,7 @@ void OMW::Engine::go()
 
     Misc::Rng::init(mRandomSeed);
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         Settings::ShaderManager::get().load(mCfgMgr.getUserConfigPath() / "shaders.yaml");
     }
@@ -1045,7 +1063,7 @@ void OMW::Engine::go()
     // Create encoder
     mEncoder = std::make_unique<ToUTF8::Utf8Encoder>(mEncoding);
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         // Setup viewer
         mViewer = new osgViewer::Viewer;
@@ -1060,7 +1078,7 @@ void OMW::Engine::go()
     prepareEngine();
 
     std::ofstream stats;
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
 #ifdef _WIN32
         const auto* statsFile = _wgetenv(L"OPENMW_OSG_STATS_FILE");
@@ -1096,8 +1114,9 @@ void OMW::Engine::go()
             Resource::collectStatistics(*mViewer);
     }
 
-    if (mRuntimeRole == RuntimeRole::DedicatedServer)
+    if (isDedicatedServer)
     {
+        Log(Debug::Info) << "DedicatedServer startup: creating headless game state";
         mStateManager->newGame(true);
     }
     // Start the game
@@ -1124,7 +1143,7 @@ void OMW::Engine::go()
         mStateManager->newGame(!mNewGame);
     }
 
-    if (mRuntimeRole != RuntimeRole::DedicatedServer && !mStartupScript.empty()
+    if (!isDedicatedServer && !mStartupScript.empty()
         && mStateManager->getState() == MWState::StateManager::State_Running)
     {
         mWindowManager->executeInConsole(mStartupScript);
@@ -1135,14 +1154,15 @@ void OMW::Engine::go()
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
     const std::chrono::steady_clock::duration maxSimulationInterval(std::chrono::milliseconds(200));
     unsigned int frameNumber = 0;
-    while ((mRuntimeRole == RuntimeRole::DedicatedServer || !mViewer->done()) && !mStateManager->hasQuitRequest())
+    Log(Debug::Info) << (isDedicatedServer ? "DedicatedServer main loop starting" : "Interactive main loop starting");
+    while ((isDedicatedServer || !mViewer->done()) && !mStateManager->hasQuitRequest())
     {
         const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
                               std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
                               .count()
             * timeManager.getSimulationTimeScale();
 
-        if (mRuntimeRole != RuntimeRole::DedicatedServer)
+        if (!isDedicatedServer)
         {
             mViewer->advance(timeManager.getRenderingSimulationTime());
             frameNumber = mViewer->getFrameStamp()->getFrameNumber();
@@ -1180,11 +1200,19 @@ void OMW::Engine::go()
         frameRateLimiter.limit();
     }
 
+    if (mStateManager->hasQuitRequest())
+        Log(Debug::Info) << "Main loop exiting: quit requested";
+    else if (isDedicatedServer)
+        Log(Debug::Info) << "DedicatedServer main loop exiting";
+    else
+        Log(Debug::Info) << "Main loop exiting: viewer requested shutdown";
+
     mLuaWorker->join();
+    Log(Debug::Info) << "Lua worker shutdown complete";
 
     // Save user settings
     Settings::Manager::saveUser(mCfgMgr.getUserConfigPath() / "settings.cfg");
-    if (mRuntimeRole != RuntimeRole::DedicatedServer)
+    if (!isDedicatedServer)
     {
         Settings::ShaderManager::get().save();
     }
@@ -1272,4 +1300,5 @@ void OMW::Engine::setRuntimeRole(RuntimeRole role)
             throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
         }
     }
+    mSDLInitialized = true;
 }

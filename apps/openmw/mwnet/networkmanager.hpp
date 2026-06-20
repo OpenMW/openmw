@@ -23,30 +23,59 @@ namespace MWNet
         };
 
     private:
+        Role mRole;
         bool mIsDedicatedServer = false;
         std::unique_ptr<Server> mServer;
         std::unique_ptr<Client> mClient;
 
-    public:
-        NetworkManager(Role role)
+        static const char* roleName(Role role)
         {
             switch (role)
             {
                 case Role::Host:
-                    Log(Debug::Info) << "Host mode: starting authoritative server and local client endpoints in-process";
+                    return "Host";
+                case Role::Client:
+                    return "Client";
+                case Role::DedicatedServer:
+                    return "DedicatedServer";
+            }
+
+            throw std::logic_error("Unhandled network role");
+        }
+
+    public:
+        NetworkManager(Role role)
+            : mRole(role)
+        {
+            Log(Debug::Info) << "NetworkManager role: " << roleName(mRole);
+            switch (role)
+            {
+                case Role::Host:
+                    Log(Debug::Info)
+                        << "NetworkManager Host: creating authoritative server and local client endpoints in-process";
                     // The current transport still uses localhost yojimbo endpoints; threading and protocol separation
                     // are intentionally left for later networking work.
                     mServer = std::make_unique<MWNet::Server>();
                     mClient = std::make_unique<MWNet::Client>();
                     break;
                 case Role::Client:
+                    Log(Debug::Info) << "NetworkManager Client: creating client endpoint";
                     mClient = std::make_unique<MWNet::Client>();
                     break;
                 case Role::DedicatedServer:
                     mIsDedicatedServer = true;
+                    Log(Debug::Info) << "NetworkManager DedicatedServer: creating server endpoint only";
                     mServer = std::make_unique<MWNet::Server>();
                     break;
             }
+        }
+
+        ~NetworkManager()
+        {
+            Log(Debug::Info) << "NetworkManager " << roleName(mRole) << ": shutting down endpoints";
+            mClient = nullptr;
+            mServer = nullptr;
+            Log(Debug::Info) << "NetworkManager " << roleName(mRole) << ": endpoints shut down";
         }
 
         bool update()
@@ -60,6 +89,8 @@ namespace MWNet
 
             if (!running)
             {
+                Log(Debug::Warning) << "NetworkManager " << roleName(mRole)
+                                    << ": endpoint tick failed; shutting down transport";
                 ShutdownYojimbo();
                 return false;
             }
