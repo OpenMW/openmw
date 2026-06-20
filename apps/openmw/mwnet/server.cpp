@@ -9,11 +9,6 @@ void server_interrupt_handler(int)
 
 MWNet::Server::Server()
 {
-    if (!InitializeYojimbo())
-    {
-        throw std::logic_error("error: failed to initialize Yojimbo!\n");
-    }
-
     mAdapter = std::make_unique<MWNet::ServerAdapter>(*this);
 
     mServer = std::make_unique<yojimbo::Server>(yojimbo::GetDefaultAllocator(), MWNet::DefaultPrivateKey,

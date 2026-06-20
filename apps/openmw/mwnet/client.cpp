@@ -5,11 +5,6 @@ MWNet::Client::Client()
     : mAddress(MWNet::LocalHost, 0)
     , mDestination(MWNet::LocalHost, MWNet::DefaultServerPort)
 {
-    if (!InitializeYojimbo())
-    {
-        throw std::logic_error("error: failed to initialize Yojimbo!\n");
-    }
-
     mAdapter = std::make_unique<MWNet::ClientAdapter>(*this);
 
     mClient = std::make_unique<yojimbo::Client>(yojimbo::GetDefaultAllocator(), mAddress, mConfig, *mAdapter, 0.0);

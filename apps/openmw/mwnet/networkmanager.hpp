@@ -4,6 +4,10 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/serialization.hpp>
 
+#include <yojimbo.h>
+
+#include <stdexcept>
+
 #include "../mwbase/environment.hpp"
 
 #include "client.hpp"
@@ -23,8 +27,21 @@ namespace MWNet
         };
 
     private:
+        class YojimboRuntime
+        {
+        public:
+            YojimboRuntime()
+            {
+                if (!InitializeYojimbo())
+                    throw std::logic_error("error: failed to initialize Yojimbo!\n");
+            }
+
+            ~YojimboRuntime() { ShutdownYojimbo(); }
+        };
+
         Role mRole;
         bool mIsDedicatedServer = false;
+        YojimboRuntime mYojimboRuntime;
         std::unique_ptr<Server> mServer;
         std::unique_ptr<Client> mClient;
 
@@ -90,8 +107,7 @@ namespace MWNet
             if (!running)
             {
                 Log(Debug::Warning) << "NetworkManager " << roleName(mRole)
-                                    << ": endpoint tick failed; shutting down transport";
-                ShutdownYojimbo();
+                                    << ": endpoint tick failed; transport will shut down with NetworkManager";
                 return false;
             }
             return true;
