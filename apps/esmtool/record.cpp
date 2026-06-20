@@ -1279,10 +1279,10 @@ namespace EsmTool
         // No names on VFX bolts
         if (!mData.mName.empty())
             std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Model: " << mData.mModel << std::endl;
+        std::cout << "  Model: " << mData.mModel.getOriginal() << std::endl;
         // No icons on VFX bolts or magic bolts
         if (!mData.mIcon.empty())
-            std::cout << "  Icon: " << mData.mIcon << std::endl;
+            std::cout << "  Icon: " << mData.mIcon.getOriginal() << std::endl;
         if (!mData.mScript.empty())
             std::cout << "  Script: " << mData.mScript << std::endl;
         if (!mData.mEnchant.empty())

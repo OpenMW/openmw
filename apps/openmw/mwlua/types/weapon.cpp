@@ -35,7 +35,7 @@ namespace
         if (rec["model"] != sol::nil)
             weapon.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            weapon.mIcon = rec["icon"];
+            weapon.mIcon = rec["icon"].get<std::string_view>();
         if (rec["enchant"] != sol::nil)
         {
             std::string_view enchantId = rec["enchant"].get<std::string_view>();
@@ -134,7 +134,7 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon.getNormalized(), *vfs);
         });
         record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mEnchant; });
         record["mwscript"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mScript; });

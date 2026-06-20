@@ -1823,7 +1823,10 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return toQString(record.get().mModel); }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return QString::fromStdString(record.get().mModel.getOriginal());
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {

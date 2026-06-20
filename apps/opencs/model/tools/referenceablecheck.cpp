@@ -49,19 +49,6 @@ namespace ESM
     struct Race;
 }
 
-namespace
-{
-    std::string_view getOriginal(const std::string& value)
-    {
-        return value;
-    }
-
-    std::string_view getOriginal(const ESM::Path& value)
-    {
-        return value.getOriginal();
-    }
-}
-
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(const CSMWorld::RefIdData& referenceable,
     const CSMWorld::IdCollection<ESM::Race>& races, const CSMWorld::IdCollection<ESM::Class>& classes,
     const CSMWorld::IdCollection<ESM::Faction>& faction, const CSMWorld::IdCollection<ESM::Script>& scripts,
@@ -955,18 +942,18 @@ void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
     // checking for model
     if (someItem.mModel.empty())
         messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(getOriginal(someItem.mModel)) == -1)
-        messages.add(someID, std::format("Model '{}' does not exist", getOriginal(someItem.mModel)), "",
+    else if (mModels.searchId(someItem.mModel.getOriginal()) == -1)
+        messages.add(someID, std::format("Model '{}' does not exist", someItem.mModel.getOriginal()), "",
             CSMDoc::Message::Severity_Error);
 
     // checking for icon
     if (someItem.mIcon.empty())
         messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mIcons.searchId(getOriginal(someItem.mIcon)) == -1)
+    else if (mIcons.searchId(someItem.mIcon.getOriginal()) == -1)
     {
-        std::string ddsIcon(getOriginal(someItem.mIcon));
+        std::string ddsIcon(someItem.mIcon.getOriginal());
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
-            messages.add(someID, std::format("Icon '{}' does not exist", getOriginal(someItem.mIcon)), "",
+            messages.add(someID, std::format("Icon '{}' does not exist", someItem.mIcon.getOriginal()), "",
                 CSMDoc::Message::Severity_Error);
     }
 
@@ -992,18 +979,18 @@ void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
     // checking for model
     if (someItem.mModel.empty())
         messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(getOriginal(someItem.mModel)) == -1)
-        messages.add(someID, std::format("Model '{}' does not exist", getOriginal(someItem.mModel)), "",
+    else if (mModels.searchId(someItem.mModel.getOriginal()) == -1)
+        messages.add(someID, std::format("Model '{}' does not exist", someItem.mModel.getOriginal()), "",
             CSMDoc::Message::Severity_Error);
 
     // checking for icon
     if (someItem.mIcon.empty())
         messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mIcons.searchId(getOriginal(someItem.mIcon)) == -1)
+    else if (mIcons.searchId(someItem.mIcon.getOriginal()) == -1)
     {
-        std::string ddsIcon(getOriginal(someItem.mIcon));
+        std::string ddsIcon(someItem.mIcon.getOriginal());
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
-            messages.add(someID, std::format("Icon '{}' does not exist", getOriginal(someItem.mIcon)), "",
+            messages.add(someID, std::format("Icon '{}' does not exist", someItem.mIcon.getOriginal()), "",
                 CSMDoc::Message::Severity_Error);
     }
 }
