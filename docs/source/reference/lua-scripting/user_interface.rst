@@ -135,3 +135,4 @@ Example
 
          PLAYER: scripts/clock.lua
 
+For Morrowind-themed UI examples, visit `MWUI Interface <./interface_mwui.html#examples>`_.

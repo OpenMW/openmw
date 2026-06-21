@@ -61,7 +61,7 @@ Properties
     - How to arrange the children in the cross axis.
   * - gap
     - number (0)
-    - The pixel gap between children in the main axis.
+    - The pixel gap between children.
   * - wrap
     - bool (false)
     - | If true, children will wrap to the next row (or column) when they exceed the main axis size.
@@ -131,3 +131,141 @@ External
   * - stretch
     - float (0)
     - | Stretches the child to a percentage of the Flex's cross axis size.
+
+Examples
+-------
+
+Horizontal Wrapping Flex with Gap
+^^^^^^^^^^^^^^^^^^^^^
+This example demonstrates creating a horizontal flex widget that incorporate wrap and gap usage. A basic white image texture is used for visual demonstration.
+
+.. tab-set::
+
+   .. tab-item:: scripts/flex-example.lua
+
+      .. code-block:: lua
+
+         local ui = require('openmw.ui')
+         local util = require('openmw.util')
+  
+         ui.create({
+          layer = "Windows",
+          type = ui.TYPE.Flex,
+          props = {
+            autoSize = false, -- Wrapping doesn't work with autoSize
+            horizontal = true,
+            wrap = true,
+            gap = 20,
+            position = util.vector2(100, 100),
+            size = util.vector2(220, 400),
+          },
+          content = ui.content({
+            {
+              type = ui.TYPE.Image,
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(100, 100)
+              }
+            },
+            {
+              type = ui.TYPE.Image,
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(100, 100)
+              }
+            },
+            {
+              type = ui.TYPE.Image,
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(100, 100)
+              }
+            }
+          })
+        })
+
+   .. tab-item:: flex-example.omwscripts
+
+      .. code-block::
+
+         PLAYER: scripts/flex-example.lua
+
+   .. tab-item:: Result
+
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-horizontal-wrap-gap.webp
+         :alt: Example of a horizontal wrapping flex with gap
+
+Vertical Flex with Arrangement and Stretch
+^^^^^^^^^^^^^^^^^^^^^
+This example demonstrates creating a vertical flex widget that incorporates arrange and stretch usage. A basic white image texture is used for visual demonstration. The arrangement prop will arrange the flex children on their cross axis. In the case of a vertical flex, arrange will be on the horizontal axis.
+
+The second flex child has an external stretch property set. It is set to *1* so that it takes up 100% of the available space on that cross axis. Setting it to 0.5, for example, would size the width of that widget to be 50% of the available space on the cross axis.
+
+.. tab-set::
+
+   .. tab-item:: scripts/flex-example.lua
+
+      .. code-block:: lua
+
+        local ui = require('openmw.ui')
+        local util = require('openmw.util')
+
+        ui.create({
+          layer = "Windows",
+          type = ui.TYPE.Flex,
+          props = {
+            gap = 20,
+            arrange = ui.ALIGNMENT.Center,
+            position = util.vector2(100, 100),
+            size = util.vector2(220, 400),
+          },
+          content = ui.content({
+            {
+              type = ui.TYPE.Image,
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(50, 100)
+              }
+            },
+            {
+              type = ui.TYPE.Image,
+              external = {
+                stretch = 1
+              },
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(0, 25)
+              }
+            },
+            {
+              type = ui.TYPE.Image,
+              props = {
+                resource = ui.texture({
+                  path = "white"
+                }),
+                size = util.vector2(50, 100)
+              }
+            }
+          })
+        })
+
+   .. tab-item:: flex-example.omwscripts
+
+      .. code-block::
+
+         PLAYER: scripts/flex-example.lua
+
+   .. tab-item:: Result
+
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-vertical-arrange-stretch.webp
+         :alt: Example of a vertical flex with arrangement and stretch
