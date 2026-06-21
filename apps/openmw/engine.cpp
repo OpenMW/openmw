@@ -511,11 +511,12 @@ OMW::Engine::~Engine()
     mWorld = nullptr;
     mStereoManager = nullptr;
     mSoundManager = nullptr;
-    mInputManager = nullptr;
-    mStateManager = nullptr;
-    mLuaWorker = nullptr;
-    mClientLuaManager = nullptr;
-    mAuthoritativeLuaManager = nullptr;
+        mInputManager = nullptr;
+        mStateManager = nullptr;
+        mLuaWorker = nullptr;
+        mEnvironment.clearLuaManagers();
+        mClientLuaManager = nullptr;
+        mAuthoritativeLuaManager = nullptr;
     mL10nManager = nullptr;
     mEnvironment.clearLuaEventRouter();
     mNetworkManager = nullptr;

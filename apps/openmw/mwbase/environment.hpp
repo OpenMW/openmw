@@ -111,6 +111,13 @@ namespace MWBase
 
         void setClientLuaManager(LuaManager& value) { mClientLuaManager = std::ref(value); }
 
+        void clearLuaManagers()
+        {
+            mLuaManager.reset();
+            mAuthoritativeLuaManager.reset();
+            mClientLuaManager.reset();
+        }
+
         void setLuaEventRouter(LuaEventRouter& value) { mLuaEventRouter = &value; }
 
         void clearLuaEventRouter() { mLuaEventRouter = nullptr; }
