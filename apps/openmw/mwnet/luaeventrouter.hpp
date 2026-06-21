@@ -12,6 +12,8 @@ namespace MWNet
     public:
         void receiveNetworkedGlobalEvent(
             unsigned int clientIndex, const std::string& eventName, const std::string& eventData) override;
+
+        void sendGlobalEventToAuthoritativeRuntime(std::string eventName, std::string eventData) override;
     };
 }
 

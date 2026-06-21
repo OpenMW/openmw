@@ -1,8 +1,6 @@
 #include "corebindings.hpp"
 
-#include <apps/openmw/mwnet/networkmanager.hpp>
 #include <chrono>
-#include <memory>
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
@@ -16,9 +14,9 @@
 #include <components/version/version.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luaeventrouter.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwnet/messageentry.hpp"
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -87,18 +85,12 @@ namespace MWLua
         api["API_REVISION"] = Version::getLuaApiRevision(); // specified in CMakeLists.txt
         api["contentFiles"] = initContentFilesBindings(lua);
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            const auto netMan = MWBase::Environment::get().getNetworkManager();
-            if (!netMan->isDedicatedServer())
-            {
-                const auto globalEventMessage = std::make_shared<MWNet::GlobalEventDataMessageEntry>(
-                    std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer));
-                netMan->queueMessage(globalEventMessage);
-            }
+            LuaUtil::BinaryData serialized = LuaUtil::serialize(eventData, context.mSerializer);
+            if (context.isAuthoritative())
+                context.mLuaEvents->addGlobalEvent({ std::move(eventName), std::move(serialized) });
             else
-            {
-                context.mLuaEvents->addGlobalEvent(
-                    { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
-            }
+                MWBase::Environment::get().getLuaEventRouter()->sendGlobalEventToAuthoritativeRuntime(
+                    std::move(eventName), std::move(serialized));
         };
         api["sound"] = initCoreSoundBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
@@ -165,8 +157,12 @@ namespace MWLua
             if (context.mType != Context::Menu)
             {
                 api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-                    context.mLuaEvents->addGlobalEvent(
-                        { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+                    LuaUtil::BinaryData serialized = LuaUtil::serialize(eventData, context.mSerializer);
+                    if (context.isAuthoritative())
+                        context.mLuaEvents->addGlobalEvent({ std::move(eventName), std::move(serialized) });
+                    else
+                        MWBase::Environment::get().getLuaEventRouter()->sendGlobalEventToAuthoritativeRuntime(
+                            std::move(eventName), std::move(serialized));
                 };
                 api["sound"]
                     = context.cachePackage("openmw_core_sound", [context]() { return initCoreSoundBindings(context); });
@@ -178,8 +174,12 @@ namespace MWLua
                     {
                         throw std::logic_error("Can't send global events when no game is loaded");
                     }
-                    context.mLuaEvents->addGlobalEvent(
-                        { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+                    LuaUtil::BinaryData serialized = LuaUtil::serialize(eventData, context.mSerializer);
+                    if (context.isAuthoritative())
+                        context.mLuaEvents->addGlobalEvent({ std::move(eventName), std::move(serialized) });
+                    else
+                        MWBase::Environment::get().getLuaEventRouter()->sendGlobalEventToAuthoritativeRuntime(
+                            std::move(eventName), std::move(serialized));
                 };
             }
         }

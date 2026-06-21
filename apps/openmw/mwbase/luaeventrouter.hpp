@@ -13,6 +13,8 @@ namespace MWBase
         virtual void receiveNetworkedGlobalEvent(
             unsigned int clientIndex, const std::string& eventName, const std::string& eventData)
             = 0;
+
+        virtual void sendGlobalEventToAuthoritativeRuntime(std::string eventName, std::string eventData) = 0;
     };
 }
 

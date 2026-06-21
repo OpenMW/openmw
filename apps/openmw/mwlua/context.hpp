@@ -32,6 +32,11 @@ namespace MWLua
         ObjectLists* mObjectLists = nullptr;
         LuaEvents* mLuaEvents = nullptr;
 
+        bool isAuthoritative() const
+        {
+            return mType == Global || mType == Load;
+        }
+
         std::string_view typeName() const
         {
             switch (mType)

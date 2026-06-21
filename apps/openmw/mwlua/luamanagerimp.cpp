@@ -124,6 +124,8 @@ namespace MWLua
             {
                 Context loadContext = commonContext;
                 loadContext.mType = Context::Load;
+                loadContext.mSerializer = mGlobalSerializer.get();
+                loadContext.mLuaEvents = &mLuaEvents;
 
                 for (const auto& [name, package] : initLoadPackages(loadContext))
                     mLoadScripts.addPackage(name, package);
