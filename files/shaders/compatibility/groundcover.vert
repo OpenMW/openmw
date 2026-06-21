@@ -31,13 +31,13 @@ varying vec3 passViewPos;
 #else
 centroid varying vec3 shadedLighting;
 centroid varying vec3 passLighting;
+#include "lib/light/clamp.glsl"
 #endif
 
 varying vec3 passNormal;
 
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
-#include "lib/light/clamp.glsl"
 #include "lib/view/depth.glsl"
 
 uniform float osg_SimulationTime;
