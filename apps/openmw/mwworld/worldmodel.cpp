@@ -117,7 +117,7 @@ namespace MWWorld
             CellStore* const cellStore = &emplaceCellStore(id, std::move(cell), store, readers, cells);
             exteriors.emplace(location, cellStore);
             if (created && triggerEvent)
-                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
+                MWBase::Environment::get().getLuaManagerForGlobalScripts()->exteriorCreated(*cellStore);
             return cellStore;
         }
     }

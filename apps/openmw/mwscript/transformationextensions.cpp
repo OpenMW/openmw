@@ -439,7 +439,8 @@ namespace MWScript
 
                 bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
                 ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
-                MWBase::Environment::get().getLuaManager()->objectTeleported(ptr);
+                MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+                    [&](MWBase::LuaManager& luaManager) { luaManager.objectTeleported(ptr); });
             }
         };
 
@@ -496,7 +497,8 @@ namespace MWScript
                 world->rotateObject(ptr, rot);
                 bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
                 ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
-                MWBase::Environment::get().getLuaManager()->objectTeleported(ptr);
+                MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+                    [&](MWBase::LuaManager& luaManager) { luaManager.objectTeleported(ptr); });
             }
         };
 

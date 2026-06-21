@@ -76,7 +76,8 @@ namespace MWWorld
                 .getActiveSpells()
                 .purgeEffect(actor, ESM::MagicEffect::WaterWalking);
 
-        MWBase::Environment::get().getLuaManager()->objectTeleported(teleported);
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [&](MWBase::LuaManager& luaManager) { luaManager.objectTeleported(teleported); });
     }
 
     void ActionTeleport::getFollowers(

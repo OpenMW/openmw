@@ -138,7 +138,8 @@ namespace
         if (!model.empty())
             ptr.getClass().insertObject(ptr, model, rotation, physics);
 
-        MWBase::Environment::get().getLuaManager()->objectAddedToScene(ptr);
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [&](MWBase::LuaManager& luaManager) { luaManager.objectAddedToScene(ptr); });
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const MWPhysics::PhysicsSystem& physics,
@@ -385,7 +386,8 @@ namespace MWWorld
             }
             else
                 ptr.mRef->mData.mPhysicsPostponed = false;
-            MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
+            MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+                [&](MWBase::LuaManager& luaManager) { luaManager.objectRemovedFromScene(ptr); });
         }
 
         const auto cellX = cell->getCell()->getGridX();
@@ -1061,7 +1063,8 @@ namespace MWWorld
         // They're still stopped when the cell is unloaded
         // or if the player moves away far from the object's position.
         // Todd Howard, Who art in Bethesda, hallowed be Thy name.
-        MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
+        MWBase::Environment::get().forEachLuaManagerAuthoritativeFirst(
+            [&](MWBase::LuaManager& luaManager) { luaManager.objectRemovedFromScene(ptr); });
         if (const auto object = mPhysics->getObject(ptr))
         {
             if (object->getShapeInstance()->mVisualCollisionType == Resource::VisualCollisionType::None)
