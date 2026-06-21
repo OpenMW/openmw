@@ -483,9 +483,9 @@ namespace Nif
         NiNode::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            mMode = nif->get<uint16_t>() & 0x7;
+            mMode = static_cast<BillboardMode>(nif->get<uint16_t>() & 0x7);
         else
-            mMode = (mFlags >> 5) & 0x3;
+            mMode = static_cast<BillboardMode>((mFlags >> 5) & 0x3);
     }
 
     void NiDefaultAVObjectPalette::read(NIFStream* nif)
