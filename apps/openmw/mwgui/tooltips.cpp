@@ -121,7 +121,7 @@ namespace MWGui
                     tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true, checkOwned());
 
                 MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
                 position(tooltipPosition, tooltipSize, viewSize);
