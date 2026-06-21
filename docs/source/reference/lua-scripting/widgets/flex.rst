@@ -269,3 +269,139 @@ The second flex child has an external stretch property set. It is set to *1* so 
 
       .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-vertical-arrange-stretch.webp
          :alt: Example of a vertical flex with arrangement and stretch
+
+Flex With Grow Children
+^^^^^^^^^^^^^^^^^^^^^
+The example below will demonstrate using text with additional children to "grow" to fill up any remaining space on that flex axis track. Review the _Result_ tab to see the visual outcome of using the grow property. Because it is the only child with grow set, it will take up all remaining space not used by the text widget.
+
+This example uses the `MWUI Interface <./../interface_mwui.html>`_. to style widgets in Morrowind's UI style.
+
+.. tab-set::
+
+   .. tab-item:: scripts/flex-example.lua
+
+      .. code-block:: lua
+
+        local ui = require("openmw.ui");
+        local util = require('openmw.util')
+        local mwui = require('openmw.interfaces').MWUI
+
+        ui.create({
+          layer = "Windows",
+          template = mwui.templates.boxTransparentThick,
+          props = {
+              position = util.vector2(100, 100)
+          },
+          content = ui.content({
+              {
+                type = ui.TYPE.Flex,
+                props = {
+                  gap = 20,
+                  horizontal = true,
+                  size = util.vector2(500, 150)
+                },
+                content = ui.content({
+                  {
+                    template = mwui.templates.textNormal,
+                    type = ui.TYPE.Text,
+                    props = {
+                      textSize = 20,
+                      text = "Hello, World!"
+                    }
+                  },
+                  {
+                    external = {
+                      grow = 1
+                    },
+                    type = ui.TYPE.Image,
+                    props = {
+                      size = util.vector2(0, 20),
+                      resource = ui.texture({ path = "white" })
+                    }
+                  }
+                })
+              }
+          })
+        })
+
+   .. tab-item:: flex-example.omwscripts
+
+      .. code-block::
+
+         PLAYER: scripts/flex-example.lua
+
+   .. tab-item:: Result
+
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-grow-example-1.png
+         :alt: Example of a horizontal flex with a growing child
+
+To better understand how the external grow property works, another example is provided below with two white-image widgets both with grow set to "1". Because they are on the same track (there is only one track as *wrap* is not enabled), they will add up the total "grow" value (to be "2") and then their individual grow values are divided by that total to determine how much of the remaining space they will take. In this case, both widgets have the same grow value, so they will each take up 50% of the remaining space on that track.
+
+.. tab-set::
+
+   .. tab-item:: scripts/flex-example.lua
+
+      .. code-block:: lua
+
+        local ui = require("openmw.ui");
+        local util = require('openmw.util')
+        local mwui = require('openmw.interfaces').MWUI
+
+        ui.create({
+          layer = "Windows",
+          template = mwui.templates.boxTransparentThick,
+          props = {
+              position = util.vector2(100, 100)
+          },
+          content = ui.content({
+              {
+                type = ui.TYPE.Flex,
+                props = {
+                  gap = 20,
+                  horizontal = true,
+                  size = util.vector2(500, 150)
+                },
+                content = ui.content({
+                  {
+                    template = mwui.templates.textNormal,
+                    type = ui.TYPE.Text,
+                    props = {
+                      textSize = 20,
+                      text = "Hello, World!"
+                    }
+                  },
+                  {
+                    external = {
+                      grow = 1
+                    },
+                    type = ui.TYPE.Image,
+                    props = {
+                      size = util.vector2(0, 20),
+                      resource = ui.texture({ path = "white" })
+                    }
+                  },
+                  {
+                    external = {
+                      grow = 1
+                    },
+                    type = ui.TYPE.Image,
+                    props = {
+                      size = util.vector2(0, 20),
+                      resource = ui.texture({ path = "white" })
+                    }
+                  }
+                })
+              }
+          })
+        })
+
+   .. tab-item:: flex-example.omwscripts
+
+      .. code-block::
+
+         PLAYER: scripts/flex-example.lua
+
+   .. tab-item:: Result
+
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-grow-example-2.png
+         :alt: Example of a horizontal flex with two growing children
