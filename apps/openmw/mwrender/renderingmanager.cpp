@@ -1341,7 +1341,8 @@ namespace MWRender
                 lightManager->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
                     Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
 
-                configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
+                if (MWMechanics::getPlayer().isInCell())
+                    configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
                 if (it->second == "max lights" || it->second == "clustered lighting"
                     || it->second == "particle point lighting")
