@@ -130,7 +130,7 @@ namespace MWLua
                 for (const auto& [name, package] : initLoadPackages(loadContext))
                     mLoadScripts.addPackage(name, package);
 
-                mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mPlayerStorage));
+                mLoadScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initLoadPackage(view, &mGlobalStorage));
             }
 
             LuaUtil::LuaStorage::initLuaBindings(view);
@@ -505,19 +505,25 @@ namespace MWLua
 
     void LuaManager::newGameStarted()
     {
-        mGlobalStorage.setActive(true);
         mInputEvents.clear();
-        mGlobalScripts.addAutoStartedScripts();
-        mGlobalScriptsStarted = true;
+        if (ownsAuthoritativeScriptContexts())
+        {
+            mGlobalStorage.setActive(true);
+            mGlobalScripts.addAutoStartedScripts();
+            mGlobalScriptsStarted = true;
+        }
         mNewGameStarted = true;
     }
 
     void LuaManager::gameLoaded()
     {
-        mGlobalStorage.setActive(true);
-        if (!mGlobalScriptsStarted)
-            mGlobalScripts.addAutoStartedScripts();
-        mGlobalScriptsStarted = true;
+        if (ownsAuthoritativeScriptContexts())
+        {
+            mGlobalStorage.setActive(true);
+            if (!mGlobalScriptsStarted)
+                mGlobalScripts.addAutoStartedScripts();
+            mGlobalScriptsStarted = true;
+        }
         if (ownsClientScriptContexts())
             mMenuScripts.stateChanged();
     }
@@ -861,6 +867,12 @@ namespace MWLua
         MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
 
         mConfiguration.read(reader);
+
+        if (!ownsAuthoritativeScriptContexts())
+        {
+            reader.skipRecord();
+            return;
+        }
 
         // TODO: don't execute scripts right away, it will be necessary in multiplayer where global storage requires
         // initialization. For now just set global storage as active slightly before it would be set by gameLoaded()
