@@ -31,7 +31,6 @@ varying vec3 passViewPos;
 #else
 centroid varying vec3 shadedLighting;
 centroid varying vec3 passLighting;
-#include "lib/light/clamp.glsl"
 #endif
 
 varying vec3 passNormal;
