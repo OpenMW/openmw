@@ -71,50 +71,61 @@ namespace NifOsg
 
     osg::Matrixd AutoTransform::computeMatrix(const osg::NodeVisitor* nv) const
     {
-        osg::Quat rotation = mRotation;
-
         const osg::CullStack* cs = nv ? nv->asCullStack() : nullptr;
         if (cs)
         {
-            const osg::Quat invBaseRotation = mBaseRotation.inverse();
+            osg::Matrixd mat = computeMatrixForFrame(cs->getEyeLocal(), cs->getLookVectorLocal(), cs->getUpLocal());
+            mRotation = mat.getRotate();
+            return mat;
+        }
 
-            if (mMode == Mode::RigidFaceCamera)
+        osg::Matrixd matrix;
+        matrix.makeScale(mScale, mScale, mScale);
+        matrix.postMultRotate(mRotation);
+        matrix.postMultTranslate(_matrix.getTrans());
+        return matrix;
+    }
+
+    osg::Matrixd AutoTransform::computeMatrixForFrame(
+        const osg::Vec3d& eye, const osg::Vec3d& look, const osg::Vec3d& up) const
+    {
+        osg::Quat rotation = mBaseRotation;
+        const osg::Quat invBaseRotation = mBaseRotation.inverse();
+
+        if (mMode == Mode::RigidFaceCamera)
+        {
+            osg::Vec3d forward = -look;
+            osg::Vec3d upNorm = up;
+            forward.normalize();
+            upNorm.normalize();
+            osg::Vec3d right = upNorm ^ forward;
+            upNorm = forward ^ right;
+
+            const osg::Vec3d relRight = invBaseRotation * right;
+            const osg::Vec3d relUp = invBaseRotation * upNorm;
+            const osg::Vec3d relForward = invBaseRotation * forward;
+
+            osg::Matrixd mat(relRight.x(), relRight.y(), relRight.z(), 0.0, relUp.x(), relUp.y(), relUp.z(), 0.0,
+                relForward.x(), relForward.y(), relForward.z(), 0.0, 0.0, 0.0, 0.0, 1.0);
+
+            rotation = mat.getRotate() * mBaseRotation;
+        }
+        else if (mMode == Mode::RotateAboutUp)
+        {
+            const osg::Vec3d relDelta = invBaseRotation * (eye - _matrix.getTrans());
+
+            const double norm = std::sqrt(relDelta.x() * relDelta.x() + relDelta.z() * relDelta.z());
+            if (norm > 1e-12)
             {
-                osg::Vec3d forward = -cs->getLookVectorLocal();
-                osg::Vec3d up = cs->getUpLocal();
-                forward.normalize();
-                up.normalize();
-                osg::Vec3d right = up ^ forward;
-                up = forward ^ right;
+                const double xNorm = relDelta.x() / norm;
+                const double zNorm = relDelta.z() / norm;
 
-                const osg::Vec3d relRight = invBaseRotation * right;
-                const osg::Vec3d relUp = invBaseRotation * up;
-                const osg::Vec3d relForward = invBaseRotation * forward;
-
-                osg::Matrixd mat(relRight.x(), relRight.y(), relRight.z(), 0.0, relUp.x(), relUp.y(), relUp.z(), 0.0,
-                    relForward.x(), relForward.y(), relForward.z(), 0.0, 0.0, 0.0, 0.0, 1.0);
+                osg::Matrixd mat(
+                    zNorm, 0.0, -xNorm, 0.0, 0.0, 1.0, 0.0, 0.0, xNorm, 0.0, zNorm, 0.0, 0.0, 0.0, 0.0, 1.0);
 
                 rotation = mat.getRotate() * mBaseRotation;
             }
-            else if (mMode == Mode::RotateAboutUp)
-            {
-                const osg::Vec3d relDelta = invBaseRotation * (cs->getEyeLocal() - _matrix.getTrans());
-
-                const double norm = std::sqrt(relDelta.x() * relDelta.x() + relDelta.z() * relDelta.z());
-                if (norm > 1e-12)
-                {
-                    const double xNorm = relDelta.x() / norm;
-                    const double zNorm = relDelta.z() / norm;
-
-                    osg::Matrixd mat(
-                        zNorm, 0.0, -xNorm, 0.0, 0.0, 1.0, 0.0, 0.0, xNorm, 0.0, zNorm, 0.0, 0.0, 0.0, 0.0, 1.0);
-
-                    rotation = mat.getRotate() * mBaseRotation;
-                }
-            }
         }
-
-        mRotation = rotation;
 
         osg::Matrixd matrix;
         matrix.makeScale(mScale, mScale, mScale);

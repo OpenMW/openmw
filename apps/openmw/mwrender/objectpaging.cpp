@@ -29,6 +29,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/nifosg/autotransform.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -169,9 +170,7 @@ namespace MWRender
         public:
             bool mActiveGrid = false;
             LODRange mDistances = { 0.f, 0.f };
-            osg::Vec3f mViewVector;
             osg::Node::NodeMask mCopyMask = ~0u;
-            mutable std::vector<const osg::Node*> mNodePath;
 
             CopyOp(bool activeGrid, osg::Node::NodeMask copyMask)
                 : mActiveGrid(activeGrid)
@@ -245,7 +244,24 @@ namespace MWRender
                     return n;
                 }
 
-                mNodePath.push_back(node);
+                if (!mActiveGrid)
+                {
+                    if (const auto* autoTransform = dynamic_cast<const NifOsg::AutoTransform*>(node))
+                    {
+                        osg::MatrixTransform* n = new osg::MatrixTransform();
+                        n->setMatrix(autoTransform->computeMatrix(nullptr));
+
+                        for (unsigned int i = 0; i < autoTransform->getNumChildren(); ++i)
+                            if (osg::Node* clonedChild = operator()(autoTransform->getChild(i)))
+                                n->addChild(clonedChild);
+
+                        n->setDataVariance(osg::Object::STATIC);
+
+                        handleCallbacks(node, n);
+
+                        return n;
+                    }
+                }
 
                 osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
                 if (!mActiveGrid)
@@ -253,12 +269,11 @@ namespace MWRender
                 cloned->setUserDataContainer(nullptr);
                 cloned->setName("");
 
-                mNodePath.pop_back();
-
                 handleCallbacks(node, cloned);
 
                 return cloned;
             }
+
             void handleCallbacks(const osg::Node* node, osg::Node* cloned) const
             {
                 for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
@@ -833,11 +848,8 @@ namespace MWRender
                 // BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES | osg::CopyOp::DEEP_COPY_DRAWABLES
                                           : osg::CopyOp::DEEP_COPY_NODES);
-                copyop.mNodePath.push_back(trans);
                 copyop.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
-                copyop.mViewVector = (viewPoint - worldCenter);
                 copyop.copy(cnode, trans);
-                copyop.mNodePath.pop_back();
 
                 if (activeGrid)
                 {

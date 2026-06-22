@@ -27,6 +27,7 @@ namespace NifOsg
         virtual bool computeWorldToLocalMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
 
         osg::Matrixd computeMatrix(const osg::NodeVisitor* nv) const;
+        osg::Matrixd computeMatrixForFrame(const osg::Vec3d& eye, const osg::Vec3d& look, const osg::Vec3d& up) const;
 
         void setRotation(const osg::Quat& rotation);
         void setRotation(const Nif::Matrix3& rotation);
