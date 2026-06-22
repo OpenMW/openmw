@@ -57,7 +57,7 @@ end
 
 local function playMagicEffectVfx(mgef, staticId, target, allowEffectLoop)
     local static = types.Static.records[staticId]
-    if static.model then
+    if static and static.model then
         local eventParams = {
             model = static.model,
             options = {
