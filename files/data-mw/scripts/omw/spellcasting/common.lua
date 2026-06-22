@@ -135,6 +135,5 @@ end
 return {
     playMagicEffects = playMagicEffects,
     getMagicRecord = getMagicRecord,
-    findActiveSpell = findActiveSpell,
     filterByIndex = filterByIndex,
 }
