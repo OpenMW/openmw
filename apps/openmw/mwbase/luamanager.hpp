@@ -109,7 +109,7 @@ namespace MWBase
         virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
         virtual void viewportResized(int width, int height) = 0;
         virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
-        virtual void applyMagicEffects(const ESM::RefId& id, const MWWorld::Ptr& caster, const ESM::RefNum& item,
+        virtual void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
             const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool stackable)
             = 0;
 

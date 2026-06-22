@@ -53,17 +53,15 @@ local function playMagicEffects(target, type, effects, allowEffectLoop)
         local mgef = core.magic.effects.records[effect.id]
         local school = core.stats.Skill.record(mgef.school).school
 
-        local sound = mgef[type..'Sound']
-        if not sound or sound == '' then sound = school[type..'Sound'] end
+        local sound = mgef[type..'Sound'] or school[type..'Sound']
         if sound and not addedSounds[sound] then
             addedSounds[sound] = true
             core.sendGlobalEvent('PlaySound3d', {sound = sound, position = target})
         end
 
-        local static = mgef[type..'Static']
+        local static = mgef[type..'Static'] or ('vfx_default'..type)
         local loop = mgef.continuousVfx and allowEffectLoop
 
-        if not static or static == '' then static = 'vfx_default'..type end
         if not addedStatic[static] then
             addedStatic[static] = true
             local static = types.Static.records[static]

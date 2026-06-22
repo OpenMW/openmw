@@ -35,6 +35,9 @@ local function isAllowedToOpen(player)
 end
 
 local function findActor(recordId)
+    if not recordId then
+        return nil
+    end
     for _, actor in pairs(nearby.actors) do
         if actor.recordId == recordId then
             return actor

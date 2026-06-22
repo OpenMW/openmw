@@ -728,8 +728,7 @@ namespace MWLua
         };
 
         // types.Actor.activeSpells(o):add(id, spellid, effects, options)
-        activeSpellsT["add"]
-            = [context](const ActorActiveSpells& spells, const sol::table& options) -> sol::optional<std::string> {
+        activeSpellsT["add"] = [context](const ActorActiveSpells& spells, const sol::table& options) {
             if (spells.isLObject())
                 throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
             if (auto* store = spells.getStore())
@@ -812,9 +811,9 @@ namespace MWLua
                     });
                 }
 
-                return params.getActiveSpellId().serializeText();
+                return params.getActiveSpellId();
             }
-            return sol::nullopt;
+            return ESM::RefId();
         };
 
         // pairs(types.Actor.activeEffects(o))

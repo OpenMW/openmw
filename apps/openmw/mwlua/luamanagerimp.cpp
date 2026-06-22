@@ -520,7 +520,7 @@ namespace MWLua
         });
     }
 
-    void LuaManager::applyMagicEffects(const ESM::RefId& id, const MWWorld::Ptr& caster, const ESM::RefNum& item,
+    void LuaManager::applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
         const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool stackable)
     {
         if (!target.isEmpty())
