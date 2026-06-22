@@ -38,16 +38,6 @@ namespace CSMWorld
 
     std::string getStringId(ESM::RefId value);
 
-    inline QString toQString(const std::string& value)
-    {
-        return QString::fromStdString(value);
-    }
-
-    inline QString toQString(const ESM::Path& value)
-    {
-        return QString::fromStdString(value.getOriginal());
-    }
-
     /// \note Shares ID with VarValueColumn. A table can not have both.
     template <typename ESXRecordT>
     struct FloatValueColumn : public Column<ESXRecordT>
@@ -762,7 +752,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mTexture.c_str());
+            return QString::fromStdString(record.get().mTexture.getOriginal());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -1832,7 +1822,10 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return toQString(record.get().mModel); }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return QString::fromStdString(record.get().mModel.getOriginal());
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
@@ -2146,8 +2139,9 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(
-                (this->mColumnId == Columns::ColumnId_Icon ? record.get().mIcon : record.get().mParticle).c_str());
+            return QString::fromStdString(
+                (this->mColumnId == Columns::ColumnId_Icon ? record.get().mIcon : record.get().mParticle)
+                    .getOriginal());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

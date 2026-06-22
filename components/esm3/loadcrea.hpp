@@ -9,9 +9,10 @@
 #include "spelllist.hpp"
 #include "transport.hpp"
 
-#include "components/esm/attr.hpp"
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/attr.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -79,8 +80,8 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mScript;
-        std::string mModel;
         std::string mName;
+        Path mModel;
         ESM::RefId mOriginal; // Base creature that this is a modification of
 
         InventoryList mInventory;

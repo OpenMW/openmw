@@ -52,7 +52,7 @@ namespace MWLua
             repair.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["icon"] != sol::nil)
-            repair.mIcon = rec["icon"];
+            repair.mIcon = rec["icon"].get<std::string_view>();
         if (rec["maxCondition"] != sol::nil)
             repair.mData.mUses = rec["maxCondition"];
         if (rec["value"] != sol::nil)

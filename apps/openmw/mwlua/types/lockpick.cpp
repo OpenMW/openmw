@@ -52,7 +52,7 @@ namespace MWLua
             pick.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["icon"] != sol::nil)
-            pick.mIcon = rec["icon"];
+            pick.mIcon = rec["icon"].get<std::string_view>();
         if (rec["maxCondition"] != sol::nil)
             pick.mData.mUses = rec["maxCondition"];
         if (rec["value"] != sol::nil)

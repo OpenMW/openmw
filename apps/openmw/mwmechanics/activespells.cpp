@@ -431,7 +431,7 @@ namespace MWMechanics
             if (animation && !reflectStatic->mModel.empty())
             {
                 const VFS::Path::Normalized reflectStaticModel
-                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(reflectStatic->mModel));
+                    = Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel.getNormalized());
                 animation->addEffect(reflectStaticModel, ESM::MagicEffect::Reflect.getValue(), false);
             }
             caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);

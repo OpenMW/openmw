@@ -888,7 +888,7 @@ namespace MWGui
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
         widget->setUserString("ImageTexture_BirthSignImage",
-            Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(sign->mTexture), *vfs));
+            Misc::ResourceHelpers::correctTexturePath(sign->mTexture.getNormalized(), *vfs));
         widget->setUserString("Caption_BirthSignName", sign->mName);
         widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
@@ -960,7 +960,7 @@ namespace MWGui
         const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
         const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
-            VFS::Path::toNormalized(effect->mIcon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+            effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");

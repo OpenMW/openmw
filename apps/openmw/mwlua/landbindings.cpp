@@ -11,6 +11,7 @@
 #include <components/esm/util.hpp>
 #include <components/esmterrain/storage.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -113,18 +114,18 @@ namespace MWLua
                 = getTextureAt(landData->mTextures, land->getPlugin(), correctedPos, static_cast<float>(cellSize));
 
             // Need to check for 0, 0 so that we can safely subtract 1 later, as per documentation on UniqueTextureId
-            if (textureId.first != 0)
-            {
-                const MWWorld::Store<ESM::LandTexture>& textureStore = store.get<ESM::LandTexture>();
-                const std::string* textureString = textureStore.search(textureId.first - 1, textureId.second);
-                if (!textureString)
-                    return values;
+            if (textureId.first == 0)
+                return values;
 
-                values.push_back(sol::make_object<std::string>(lua, *textureString));
-                const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
-                if (textureId.second >= 0 && static_cast<size_t>(textureId.second) < contentList.size())
-                    values.push_back(sol::make_object<std::string>(lua, contentList[textureId.second]));
-            }
+            const ESM::Path* const texturePath
+                = store.get<ESM::LandTexture>().search(textureId.first - 1, textureId.second);
+            if (texturePath == nullptr)
+                return values;
+
+            values.push_back(sol::make_object<std::string>(lua, texturePath->getOriginal()));
+            const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
+            if (textureId.second >= 0 && static_cast<size_t>(textureId.second) < contentList.size())
+                values.push_back(sol::make_object<std::string>(lua, contentList[textureId.second]));
 
             return values;
         };

@@ -469,7 +469,7 @@ namespace MWClass
         models.push_back(getModel(ptr));
 
         if (!npc->mBase->mModel.empty())
-            models.push_back(npc->mBase->mModel);
+            models.push_back(npc->mBase->mModel.getOriginal());
 
         if (!npc->mBase->mHead.empty())
         {

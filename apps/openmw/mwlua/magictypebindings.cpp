@@ -497,9 +497,9 @@ namespace MWLua
     {
         auto effect = Types::initFromTemplate<ESM::MagicEffect>(rec);
         if (rec["icon"] != sol::nil)
-            effect.mIcon = rec["icon"];
+            effect.mIcon = rec["icon"].get<std::string_view>();
         if (rec["particle"] != sol::nil)
-            effect.mParticle = rec["particle"];
+            effect.mParticle = rec["particle"].get<std::string_view>();
         setFlagProperty(rec, "continuousVfx", effect.mData.mFlags, ESM::MagicEffect::ContinuousVfx);
         addPropertyFromTable(rec, "areaSound", effect.mAreaSound);
         addPropertyFromTable(rec, "boltSound", effect.mBoltSound);

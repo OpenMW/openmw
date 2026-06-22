@@ -1,7 +1,7 @@
 #include "referenceablecheck.hpp"
 
-#include <memory>
-#include <stddef.h>
+#include <cstddef>
+#include <format>
 
 #include <apps/opencs/model/doc/messages.hpp>
 #include <apps/opencs/model/prefs/category.hpp>
@@ -312,8 +312,9 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
 
     if (activator.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(activator.mModel) == -1)
-        messages.add(id, "Model '" + activator.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(activator.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", activator.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Activator>(activator, messages, id.toString());
@@ -421,8 +422,9 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     // Checking for model
     if (container.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(container.mModel) == -1)
-        messages.add(id, "Model '" + container.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(container.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", container.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Checking for capacity (weight)
     if (container.mWeight < 0) // 0 is allowed
@@ -452,8 +454,9 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
 
     if (creature.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(creature.mModel) == -1)
-        messages.add(id, "Model '" + creature.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(creature.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", creature.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // stats checks
     if (creature.mData.mLevel <= 0)
@@ -545,8 +548,9 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
 
     if (door.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(door.mModel) == -1)
-        messages.add(id, "Model '" + door.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(door.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", door.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Door>(door, messages, id.toString());
@@ -867,8 +871,9 @@ void CSMTools::ReferenceableCheckStage::staticCheck(
 
     if (staticElement.mModel.empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(staticElement.mModel) == -1)
-        messages.add(id, "Model '" + staticElement.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(staticElement.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", staticElement.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 }
 
 // final check
@@ -937,17 +942,19 @@ void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
     // checking for model
     if (someItem.mModel.empty())
         messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(someItem.mModel) == -1)
-        messages.add(someID, "Model '" + someItem.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(someItem.mModel.getOriginal()) == -1)
+        messages.add(someID, std::format("Model '{}' does not exist", someItem.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // checking for icon
     if (someItem.mIcon.empty())
         messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mIcons.searchId(someItem.mIcon) == -1)
+    else if (mIcons.searchId(someItem.mIcon.getOriginal()) == -1)
     {
-        std::string ddsIcon = someItem.mIcon;
+        std::string ddsIcon(someItem.mIcon.getOriginal());
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
-            messages.add(someID, "Icon '" + someItem.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, std::format("Icon '{}' does not exist", someItem.mIcon.getOriginal()), "",
+                CSMDoc::Message::Severity_Error);
     }
 
     if (enchantable && someItem.mData.mEnchant < 0)
@@ -972,17 +979,19 @@ void CSMTools::ReferenceableCheckStage::inventoryItemCheck(
     // checking for model
     if (someItem.mModel.empty())
         messages.add(someID, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mModels.searchId(someItem.mModel) == -1)
-        messages.add(someID, "Model '" + someItem.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mModels.searchId(someItem.mModel.getOriginal()) == -1)
+        messages.add(someID, std::format("Model '{}' does not exist", someItem.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // checking for icon
     if (someItem.mIcon.empty())
         messages.add(someID, "Icon is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mIcons.searchId(someItem.mIcon) == -1)
+    else if (mIcons.searchId(someItem.mIcon.getOriginal()) == -1)
     {
-        std::string ddsIcon = someItem.mIcon;
+        std::string ddsIcon(someItem.mIcon.getOriginal());
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
-            messages.add(someID, "Icon '" + someItem.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, std::format("Icon '{}' does not exist", someItem.mIcon.getOriginal()), "",
+                CSMDoc::Message::Severity_Error);
     }
 }
 

@@ -380,7 +380,7 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::LandTexture>::Store() = default;
 
-    const std::string* Store<ESM::LandTexture>::search(std::uint32_t index, int plugin) const
+    const ESM::Path* Store<ESM::LandTexture>::search(std::uint32_t index, int plugin) const
     {
         auto mapping = mMappings.find(PluginIndex{ plugin, index });
         if (mapping == mMappings.end())

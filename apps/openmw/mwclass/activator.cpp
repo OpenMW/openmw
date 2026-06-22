@@ -146,7 +146,7 @@ namespace MWClass
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, iter.mModel))
+            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, iter.mModel.getOriginal()))
             {
                 creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
                 break;

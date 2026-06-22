@@ -20,7 +20,7 @@ namespace MWLua
         if (rec["model"] != sol::nil)
             potion.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            potion.mIcon = rec["icon"];
+            potion.mIcon = rec["icon"].get<std::string_view>();
         if (rec["mwscript"] != sol::nil)
         {
             std::string_view scriptId = rec["mwscript"].get<std::string_view>();

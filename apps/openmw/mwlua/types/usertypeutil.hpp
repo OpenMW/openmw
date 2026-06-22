@@ -150,7 +150,7 @@ namespace MWLua::Types
         if constexpr (RecordType<T>::isMutable)
             type["icon"] = sol::property(
                 [vfs](const T& mutRec) -> std::string {
-                    return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(mutRec.find().mIcon), *vfs);
+                    return Misc::ResourceHelpers::correctIconPath(mutRec.find().mIcon.getNormalized(), *vfs);
                 },
                 [](T& mutRec, std::string_view path) {
                     auto& recordValue = mutRec.find();
@@ -158,7 +158,7 @@ namespace MWLua::Types
                 });
         else
             type["icon"] = sol::readonly_property([vfs](const T& rec) -> std::string {
-                return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
+                return Misc::ResourceHelpers::correctIconPath(rec.mIcon.getNormalized(), *vfs);
             });
     }
 

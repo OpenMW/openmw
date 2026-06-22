@@ -133,13 +133,13 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNOCString("FNAM", mName);
         EsmIRDTstruct bin;
         toBinary(mData, bin);
         esm.writeNamedComposite("IRDT", bin);
         esm.writeHNOCRefId("SCRI", mScript);
-        esm.writeHNOCString("ITEX", mIcon);
+        esm.writeHNOCString("ITEX", mIcon.getOriginal());
     }
 
     void Ingredient::blank()

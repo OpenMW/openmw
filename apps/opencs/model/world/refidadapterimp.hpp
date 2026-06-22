@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <map>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -208,7 +207,7 @@ namespace CSMWorld
             data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         if (column == mModel.mModel)
-            return QString::fromUtf8(record.get().mModel.c_str());
+            return QString::fromStdString(record.get().mModel.getOriginal());
 
         if (column == mModel.mPersistence)
             return (record.get().mRecordFlags & ESM::FLAG_Persistent) != 0;
@@ -357,7 +356,7 @@ namespace CSMWorld
             data.getRecord(RefIdData::LocalIndex(index, BaseRefIdAdapter<RecordT>::getType())));
 
         if (column == mInventory.mIcon)
-            return QString::fromUtf8(record.get().mIcon.c_str());
+            return QString::fromStdString(record.get().mIcon.getOriginal());
 
         if (column == mInventory.mWeight)
             return record.get().mData.mWeight;

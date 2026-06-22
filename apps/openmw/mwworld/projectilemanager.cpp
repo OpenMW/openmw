@@ -63,7 +63,7 @@
 namespace
 {
     ESM::EffectList getMagicBoltData(std::vector<ESM::RefId>& projectileIDs, std::set<ESM::RefId>& sounds, float& speed,
-        std::string& texture, std::string& sourceName, const ESM::RefId& id)
+        VFS::Path::NormalizedView& texture, std::string& sourceName, const ESM::RefId& id)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         const ESM::EffectList* effects;
@@ -122,7 +122,7 @@ namespace
             const ESM::MagicEffect* magicEffect
                 = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
                     effects->mList.begin()->mData.mEffectID);
-            texture = magicEffect->mParticle;
+            texture = magicEffect->mParticle.getNormalized();
         }
 
         // insert a VFX_Multiple projectile if there are multiple projectile effects
@@ -215,7 +215,8 @@ namespace MWWorld
     };
 
     void ProjectileManager::createModel(State& state, VFS::Path::NormalizedView model, const osg::Vec3f& pos,
-        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, const std::string& texture)
+        const osg::Quat& orient, bool rotate, bool createLight, osg::Vec4 lightDiffuseColor,
+        VFS::Path::NormalizedView texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
@@ -247,8 +248,7 @@ namespace MWWorld
                 attachTo->accept(findVisitor);
                 if (findVisitor.mFoundNode)
                     mResourceSystem->getSceneManager()->getInstance(
-                        Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(weapon->mModel)),
-                        findVisitor.mFoundNode);
+                        Misc::ResourceHelpers::correctMeshPath(weapon->mModel.getNormalized()), findVisitor.mFoundNode);
             }
         }
 
@@ -280,7 +280,7 @@ namespace MWWorld
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);
 
-        MWRender::overrideFirstRootTexture(VFS::Path::toNormalized(texture), mResourceSystem, *projectile);
+        MWRender::overrideFirstRootTexture(texture, mResourceSystem, *projectile);
     }
 
     void ProjectileManager::update(State& state, float duration)
@@ -317,7 +317,7 @@ namespace MWWorld
         MWBase::Environment::get().getWorldModel()->registerPtr(caster);
         state.mCaster = caster.getCellRef().getRefNum();
 
-        std::string texture;
+        VFS::Path::NormalizedView texture;
 
         state.mEffects = getMagicBoltData(
             state.mIdMagic, state.mSoundIds, state.mSpeed, texture, state.mSourceName, state.mSpellId);
@@ -332,7 +332,8 @@ namespace MWWorld
             return;
         }
 
-        MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), state.mIdMagic.at(0));
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+        MWWorld::ManualRef ref(esmStore, state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 
         osg::Vec4 lightDiffuseColor = getMagicBoltLightDiffuseColor(state.mEffects);
@@ -353,8 +354,8 @@ namespace MWWorld
         // shape
         if (state.mIdMagic.size() > 1)
         {
-            model = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(
-                MWBase::Environment::get().getESMStore()->get<ESM::Weapon>().find(state.mIdMagic[1])->mModel));
+            model = Misc::ResourceHelpers::correctMeshPath(
+                esmStore.get<ESM::Weapon>().find(state.mIdMagic[1])->mModel.getNormalized());
         }
         state.mProjectileId = mPhysics->addProjectile(caster, pos, model, true);
         state.mToDelete = false;
@@ -751,7 +752,7 @@ namespace MWWorld
             state.mCaster = esm.mCaster;
             state.mToDelete = false;
             state.mItem = esm.mItem;
-            std::string texture;
+            VFS::Path::NormalizedView texture;
 
             try
             {

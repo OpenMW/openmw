@@ -47,7 +47,7 @@ namespace ESM
         }
         else
         {
-            esm.writeHNCString("MODL", mModel);
+            esm.writeHNCString("MODL", mModel.getOriginal());
         }
     }
 

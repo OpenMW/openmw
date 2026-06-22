@@ -81,7 +81,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Apparatus>* ref = ptr.get<ESM::Apparatus>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getOriginal();
     }
 
     MWGui::ToolTipInfo Apparatus::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
@@ -91,7 +91,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);

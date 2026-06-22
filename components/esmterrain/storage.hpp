@@ -26,6 +26,11 @@ namespace ESM
 namespace VFS
 {
     class Manager;
+
+    namespace Path
+    {
+        class Normalized;
+    }
 }
 
 namespace ESMTerrain
@@ -80,7 +85,7 @@ namespace ESMTerrain
 
         // Not implemented in this class, because we need different Store implementations for game and editor
         virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
-        virtual const std::string* getLandTexture(std::uint16_t index, int plugin) = 0;
+        virtual const VFS::Path::Normalized* getLandTexture(std::uint16_t index, int plugin) = 0;
 
         // Not implemented in this class because requires ESMStore
         virtual const ESM4::LandTexture* getEsm4LandTexture(ESM::RefId ltexId) const { return nullptr; }
