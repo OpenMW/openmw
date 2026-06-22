@@ -44,6 +44,37 @@ local function getMagicRecord(id)
 
 end
 
+local function getMagicEffectSound(mgef, type)
+    local sound = mgef[type..'Sound']
+    if not sound and mgef.school then
+        local skill = core.stats.Skill.record(mgef.school)
+        if skill and skill.school then
+            return skill.school[type..'Sound']
+        end
+    end
+    return sound
+end
+
+local function playMagicEffectVfx(mgef, staticId, target, allowEffectLoop)
+    local static = types.Static.records[staticId]
+    if static.model then
+        local eventParams = {
+            model = static.model,
+            options = {
+                vfxId = mgef.id,
+                particleTextureOverride = mgef.particle,
+                loop = mgef.continuousVfx and allowEffectLoop,
+            }
+        }
+        if Actor.objectIsInstance(target) then
+            target:sendEvent('AddVfx', eventParams)
+        else
+            eventParams.position = target.position
+            core.sendGlobalEvent('SpawnVfx', eventParams)
+        end
+    end
+end
+
 local function playMagicEffects(target, type, effects, allowEffectLoop)
     local addedStatic = {}
     local addedSounds = {}
@@ -51,38 +82,19 @@ local function playMagicEffects(target, type, effects, allowEffectLoop)
         -- MagicEffectWithParams includes its mgef record directly as effect.effect
         -- But ActiveSpellEffect does not so we need to use the id instead.
         local mgef = core.magic.effects.records[effect.id]
-        local school = core.stats.Skill.record(mgef.school).school
 
-        local sound = mgef[type..'Sound'] or school[type..'Sound']
+        local sound = getMagicEffectSound(mgef, type)
         if sound and not addedSounds[sound] then
             addedSounds[sound] = true
             core.sendGlobalEvent('PlaySound3d', {sound = sound, position = target})
         end
 
-        local static = mgef[type..'Static'] or ('vfx_default'..type)
-        local loop = mgef.continuousVfx and allowEffectLoop
-
-        if not addedStatic[static] then
-            addedStatic[static] = true
-            local static = types.Static.records[static]
-            local model = static and static.model or nil
-            if model then
-                local eventParams = {
-                    model = model,
-                    options = {
-                        vfxId = mgef.id,
-                        particleTextureOverride = mgef.particle,
-                        loop = loop,
-                    }
-                }
-                if Actor.objectIsInstance(target) then
-                    target:sendEvent('AddVfx', eventParams)
-                else
-                    eventParams.position = target.position
-                    core.sendGlobalEvent('SpawnVfx', eventParams)
-                end
-            end
+        local staticId = mgef[type..'Static'] or ('vfx_default'..type)
+        if not addedStatic[staticId] then
+            addedStatic[staticId] = true
+            playMagicEffectVfx(mgef, staticId, target, allowEffectLoop)
         end
+
         if not Actor.objectIsInstance(target) then
             target:sendEvent('AddGlow', {
                 color = mgef.color,

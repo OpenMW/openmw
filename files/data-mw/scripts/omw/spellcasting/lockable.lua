@@ -104,16 +104,16 @@ local function onApplyMagicEffects(options)
         animation.addGlow(self, {color = mgef.color, duration = 1.5})
     end
 
-    if #playEffects > 0 then
-        common.playMagicEffects(self, 'hit', playEffects)
-    end
-
     local crimeActor = options.caster
     if not options.noVanillaCompatibleCrime then
         crimeActor = nearby.players[1]
     end
     if unlockAttempt and crimeActor then
         unlockAttempted(crimeActor)
+    end
+
+    if #playEffects > 0 then
+        common.playMagicEffects(self, 'hit', playEffects)
     end
 end
 
