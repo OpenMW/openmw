@@ -38,7 +38,6 @@ varying vec3 passNormal;
 
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
-#include "lib/light/clamp.glsl"
 #include "lib/view/depth.glsl"
 
 uniform float osg_SimulationTime;
