@@ -103,15 +103,6 @@ local function playMagicEffects(target, type, effects, allowEffectLoop)
         end
     end
 end
-
-local function findActiveSpell(target, activeSpellId)
-    for k, v in pairs(Actor.activeSpells(target)) do
-        if v.activeSpellId == activeSpellId then
-            return v
-        end
-    end
-end
-
 local function targetIsValid(target)
         -- Spells can only be inflicted on Actors and Lockables.
     return target ~= nil and (Actor.objectIsInstance(target) or Lockable.objectIsInstance(target))

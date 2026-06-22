@@ -19,7 +19,7 @@ I.SpellCasting.addApplyMagicEffectsHandler(function(options)
 end)
 
 local function onPlayOnHitEffects(options)
-    local aSpell = common.findActiveSpell(self, options.activeSpellId)
+    local aSpell = Actor.activeSpells(self):getByActiveSpellId(options.activeSpellId)
     if aSpell then
         common.playMagicEffects(self, 'hit', aSpell.effects, true)
     end

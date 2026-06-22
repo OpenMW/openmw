@@ -707,6 +707,20 @@ namespace MWLua
             return false;
         };
 
+        // types.Actor.activeSpells(o):getByActiveSpellId(id)
+        activeSpellsT["getByActiveSpellId"]
+            = [](const ActorActiveSpells& activeSpells, const std::string_view idStr) -> sol::optional<ActiveSpell> {
+            if (auto* store = activeSpells.getStore())
+            {
+                auto it = store->getActiveSpellById(ESM::RefId::deserializeText(idStr));
+                if (it != store->end())
+                {
+                    return ActiveSpell{ activeSpells.mActor, *it };
+                }
+            }
+            return sol::nullopt;
+        };
+
         // types.Actor.activeSpells(o):remove(id)
         activeSpellsT["remove"] = [context](const ActorActiveSpells& spells, std::string_view idStr) {
             if (spells.isLObject())
