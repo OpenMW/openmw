@@ -1,6 +1,7 @@
 #include "autotransform.hpp"
 
 #include <cmath>
+
 #include <osg/CullStack>
 
 namespace NifOsg
@@ -89,47 +90,58 @@ namespace NifOsg
     osg::Matrixd AutoTransform::computeMatrixForFrame(
         const osg::Vec3d& eye, const osg::Vec3d& look, const osg::Vec3d& up) const
     {
-        osg::Quat rotation = mBaseRotation;
+        osg::Matrixd mat;
+
         const osg::Quat invBaseRotation = mBaseRotation.inverse();
 
-        if (mMode == Mode::RigidFaceCamera)
+        if (mMode == Mode::AlwaysFaceCamera || mMode == Mode::RigidFaceCamera)
         {
-            osg::Vec3d forward = -look;
-            osg::Vec3d upNorm = up;
-            forward.normalize();
-            upNorm.normalize();
-            osg::Vec3d right = upNorm ^ forward;
-            upNorm = forward ^ right;
+            const osg::Vec3d relForward = invBaseRotation * look;
+            const osg::Vec3d relUp = invBaseRotation * up;
+            const osg::Vec3d relRight = invBaseRotation * (up ^ look);
 
-            const osg::Vec3d relRight = invBaseRotation * right;
-            const osg::Vec3d relUp = invBaseRotation * upNorm;
-            const osg::Vec3d relForward = invBaseRotation * forward;
+            if (mMode == Mode::AlwaysFaceCamera)
+            {
+                const double norm = std::sqrt(relUp.y() * relUp.y() + relRight.y() * relRight.y());
+                if (norm > 1e-6)
+                {
+                    const double cosTheta = relUp.y() / norm;
+                    const double sinTheta = -relRight.y() / norm;
+                    const double m00 = -relRight.x() * cosTheta - relUp.x() * sinTheta;
+                    const double m01 = -relRight.y() * cosTheta - relUp.y() * sinTheta;
+                    const double m02 = -relRight.z() * cosTheta - relUp.z() * sinTheta;
+                    const double m10 = relUp.x() * cosTheta - relRight.x() * sinTheta;
+                    const double m11 = relUp.y() * cosTheta - relRight.y() * sinTheta;
+                    const double m12 = relUp.z() * cosTheta - relRight.z() * sinTheta;
+                    const double m20 = -relForward.x();
+                    const double m21 = -relForward.y();
+                    const double m22 = -relForward.z();
 
-            osg::Matrixd mat(relRight.x(), relRight.y(), relRight.z(), 0.0, relUp.x(), relUp.y(), relUp.z(), 0.0,
-                relForward.x(), relForward.y(), relForward.z(), 0.0, 0.0, 0.0, 0.0, 1.0);
-
-            rotation = mat.getRotate() * mBaseRotation;
+                    mat.set(m00, m01, m02, 0.0, m10, m11, m12, 0.0, m20, m21, m22, 0.0, 0.0, 0.0, 0.0, 1.0);
+                }
+            }
+            else // Mode::RigidFaceCamera
+            {
+                mat.set(relRight.x(), relRight.y(), relRight.z(), 0.0, relUp.x(), relUp.y(), relUp.z(), 0.0,
+                    relForward.x(), relForward.y(), relForward.z(), 0.0, 0.0, 0.0, 0.0, 1.0);
+            }
         }
         else if (mMode == Mode::RotateAboutUp)
         {
             const osg::Vec3d relDelta = invBaseRotation * (eye - _matrix.getTrans());
-
             const double norm = std::sqrt(relDelta.x() * relDelta.x() + relDelta.z() * relDelta.z());
             if (norm > 1e-12)
             {
                 const double xNorm = relDelta.x() / norm;
                 const double zNorm = relDelta.z() / norm;
 
-                osg::Matrixd mat(
-                    zNorm, 0.0, -xNorm, 0.0, 0.0, 1.0, 0.0, 0.0, xNorm, 0.0, zNorm, 0.0, 0.0, 0.0, 0.0, 1.0);
-
-                rotation = mat.getRotate() * mBaseRotation;
+                mat.set(zNorm, 0.0, -xNorm, 0.0, 0.0, 1.0, 0.0, 0.0, xNorm, 0.0, zNorm, 0.0, 0.0, 0.0, 0.0, 1.0);
             }
         }
 
         osg::Matrixd matrix;
         matrix.makeScale(mScale, mScale, mScale);
-        matrix.postMultRotate(rotation);
+        matrix.postMultRotate(mat.getRotate() * mBaseRotation);
         matrix.postMultTranslate(_matrix.getTrans());
 
         return matrix;

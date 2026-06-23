@@ -598,10 +598,18 @@ namespace NifOsg
                 auto billboard = static_cast<const Nif::NiBillboardNode*>(nifNode);
                 using Mode = Nif::NiBillboardNode::BillboardMode;
 
-                if (billboard->mMode == Mode::RotateAboutUp || billboard->mMode == Mode::BSRotateAboutUp)
+                if (billboard->mMode == Mode::AlwaysFaceCamera)
+                    node = new NifOsg::AutoTransform(billboard->mTransform, AutoTransform::Mode::AlwaysFaceCamera);
+                else if (billboard->mMode == Mode::RotateAboutUp || billboard->mMode == Mode::BSRotateAboutUp)
                     node = new NifOsg::AutoTransform(billboard->mTransform, AutoTransform::Mode::RotateAboutUp);
+                else if (billboard->mMode == Mode::RigidFaceCamera)
+                    node = new NifOsg::AutoTransform(billboard->mTransform, AutoTransform::Mode::RigidFaceCamera);
                 else
+                {
+                    Log(Debug::Warning) << "Unhandled billboard mode " << static_cast<int>(billboard->mMode)
+                                        << " in record " << nifNode->mRecordIndex;
                     node = new NifOsg::AutoTransform(billboard->mTransform);
+                }
 
                 dataVariance = osg::Object::DYNAMIC;
             }
