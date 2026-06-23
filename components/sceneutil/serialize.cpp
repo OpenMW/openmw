@@ -134,6 +134,16 @@ namespace SceneUtil
                 "osg::Object osg::Node osg::Group osg::Transform osg::MatrixTransform NifOsg::MatrixTransform "
                 "NifOsg::AutoTransform")
         {
+            using ModeSerializer = osgDB::EnumSerializer<NifOsg::AutoTransform, NifOsg::AutoTransform::Mode, void>;
+            osg::ref_ptr<ModeSerializer> serializer
+                = new ModeSerializer("Mode", NifOsg::AutoTransform::Mode::RigidFaceCamera,
+                    &NifOsg::AutoTransform::getMode, &NifOsg::AutoTransform::setMode);
+
+            serializer->add("AlwaysFaceCamera", NifOsg::AutoTransform::Mode::AlwaysFaceCamera);
+            serializer->add("RotateAboutUp", NifOsg::AutoTransform::Mode::RotateAboutUp);
+            serializer->add("RigidFaceCamera", NifOsg::AutoTransform::Mode::RigidFaceCamera);
+
+            addSerializer(serializer.get(), osgDB::BaseSerializer::RW_ENUM);
         }
     };
 
