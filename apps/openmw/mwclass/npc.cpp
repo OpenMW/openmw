@@ -801,25 +801,11 @@ namespace MWClass
         {
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
-
             const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            const GMST& gmst = getGmst();
-
             int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             if (Misc::Rng::roll0to99(prng) < chance)
                 MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("hit"));
-
-            // Check for knockdown
-            float agilityTerm
-                = stats.getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->mValue.getFloat();
-            float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                    * gmst.iKnockDownOddsMult->mValue.getInteger() * 0.01f
-                + gmst.iKnockDownOddsBase->mValue.getInteger();
-            if (hasHealthDamage && agilityTerm <= healthDamage && knockdownTerm <= Misc::Rng::roll0to99(prng))
-                stats.setKnockedDown(true);
-            else
-                stats.setHitRecovery(true); // Is this supposed to always occur?
         }
 
         if (hasHealthDamage && healthDamage > 0.0f)

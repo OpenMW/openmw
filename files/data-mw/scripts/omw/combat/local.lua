@@ -175,6 +175,17 @@ local function setDamage(attack, what, damage)
     attack.damage[what] = damage
 end
 
+local function hasDamage(attack)
+    if attack.damage then
+        for _, v in pairs(attack.damage) do
+            if v >= 0.001 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function applyArmor(attack)
     local healthDamage = getDamage(attack, 'health')
     if healthDamage > 0 then
@@ -269,6 +280,7 @@ end
 
 local function onHit(data)
     if data.successful and not godMode() then
+        local rawHealthDamage = getDamage(data, 'health')
         if not data.ignoreArmor then
             I.Combat.applyArmor(data)
         end
@@ -281,6 +293,21 @@ local function onHit(data)
             end
             if data.hitPos then
                 I.Combat.spawnBloodEffect(data.hitPos)
+            end
+        end
+        if hasDamage(data) then
+            local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
+            local knockdownTerm = (
+                Actor.stats.attributes.agility(self).modified
+                * core.getGMST('iKnockDownOddsMult')
+                * 0.01
+                + core.getGMST('iKnockDownOddsBase')
+            )
+            local roll = math.random(0,99)
+            if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
+                Actor._setKnockedDown(self, true)
+            else
+                Actor._setHitRecovery(self, true)
             end
         end
     elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
