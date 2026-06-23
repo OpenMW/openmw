@@ -18,6 +18,7 @@ namespace Settings
         using WithIndex::WithIndex;
 
         SettingValue<bool> mCrosshair{ mIndex, "HUD", "crosshair" };
+        SettingValue<bool> mMouseEmulationCursor{ mIndex, "HUD", "mouse emulation cursor" };
     };
 }
 

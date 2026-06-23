@@ -280,6 +280,8 @@ namespace MWGui
 
         void update(float duration);
 
+        void updateMouseEmulationCursor();
+
         /**
          * Fetches a GMST string from the store, if there is no setting with the given
          * ID or it is not a string the default string is returned.

@@ -14,6 +14,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -92,6 +93,7 @@ namespace MWGui
         getWidget(mWeaponSpellBox, "WeaponSpellName");
 
         getWidget(mCrosshair, "Crosshair");
+        getWidget(mMouseEmulationCursor, "MouseEmulationCursor");
 
         mLocalMapZoom = 0.5f;
 
@@ -468,6 +470,17 @@ namespace MWGui
         {
             mCrosshair->changeWidgetSkin("HUD_Crosshair");
         }
+    }
+
+    void HUD::setMouseEmulationCursorVisible(bool visible)
+    {
+        mMouseEmulationCursor->setVisible(visible);
+    }
+
+    void HUD::setMouseEmulationCursorPosition(int left, int top)
+    {
+        mMouseEmulationCursor->setPosition(
+            left - mMouseEmulationCursor->getWidth() / 2, top - mMouseEmulationCursor->getHeight() / 2);
     }
 
     void HUD::setHmsVisible(bool visible)

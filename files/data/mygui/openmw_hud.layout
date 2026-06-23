@@ -114,6 +114,9 @@
 
     </Widget>
 
+    <!-- Mouse Emulation Cursor -->
+    <Widget type="ImageBox" layer="Notification" skin="HUD_MouseEmulationCursor" position="0 0 15 15" align="Center Center" name="MouseEmulationCursor"/>
+
     <!-- Drowning bar -->
     <Widget type="Widget" layer="DrowningBar" position="0 0 300 200" name="DrowningBar" align="Center Top">
         <Property key="Visible" value="false"/>

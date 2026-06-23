@@ -167,6 +167,7 @@ MaxLightsTooltip: "Domyślnie: 16\nMaksymalna liczba świateł na obiekt.\n\nNis
 MenuHelpDelay: "Opóźnienie pomocy w menu"
 MenuTransparency: "Przezroczystość menu"
 MouseAndKeyboard: "Mysz i klawiatura"
+MouseEmulationCursor: "Kursor emulujący mysz"
 ParticlePointLighting: "Oświetlenie punktowe cząsteczek"
 ParticlePointLightingTooltip: "Umożliwia oświetlanie systemów cząsteczek przez światła punktowe."
 PostProcessing: "Post-processing"
