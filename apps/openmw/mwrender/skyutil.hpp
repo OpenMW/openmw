@@ -98,6 +98,29 @@ namespace MWRender
             Unspecified
         };
 
+        static constexpr unsigned int phaseToInt(Phase phase)
+        {
+            switch (phase)
+            {
+                case Phase::New:
+                    return 0;
+                case Phase::WaxingCrescent:
+                case Phase::WaningCrescent:
+                    return 1;
+                case Phase::FirstQuarter:
+                case Phase::ThirdQuarter:
+                    return 2;
+                case Phase::WaxingGibbous:
+                case Phase::WaningGibbous:
+                    return 3;
+                case Phase::Full:
+                    return 4;
+                case Phase::Unspecified:
+                    return 0;
+            }
+            return 0;
+        }
+
         float mRotationFromHorizon;
         float mRotationFromNorth;
         Phase mPhase;
