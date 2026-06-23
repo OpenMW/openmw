@@ -96,9 +96,13 @@ namespace NifOsg
 
         if (mMode == Mode::AlwaysFaceCamera || mMode == Mode::RigidFaceCamera)
         {
-            const osg::Vec3d relForward = invBaseRotation * look;
-            const osg::Vec3d relUp = invBaseRotation * up;
-            const osg::Vec3d relRight = invBaseRotation * (up ^ look);
+            osg::Vec3d relForward = invBaseRotation * look;
+            osg::Vec3d relUp = invBaseRotation * up;
+            relForward.normalize();
+            osg::Vec3d relRight = relUp ^ relForward;
+            relRight.normalize();
+            relUp = relForward ^ relRight;
+            relUp.normalize();
 
             if (mMode == Mode::AlwaysFaceCamera)
             {
