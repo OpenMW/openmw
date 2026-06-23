@@ -659,6 +659,8 @@ namespace MWGui
         else
             setCursorVisible(!gameMode);
 
+        updateMouseEmulationCursor();
+
         if (gameMode)
             setKeyFocusWidget(nullptr);
 
@@ -1060,6 +1062,8 @@ namespace MWGui
 
         if (mInventoryTabsOverlay && mInventoryTabsOverlay->isVisible())
             mInventoryTabsOverlay->onFrame(frameDuration);
+
+        updateMouseEmulationCursor();
 
         if (!gameRunning)
             return;
@@ -1921,6 +1925,24 @@ namespace MWGui
     bool WindowManager::getCursorVisible()
     {
         return mCursorVisible && mCursorActive;
+    }
+
+    void WindowManager::updateMouseEmulationCursor()
+    {
+        if (!mHud)
+            return;
+
+        bool mouseEmulation = MWBase::Environment::get().getInputManager()->joystickLastUsed()
+            && MWBase::Environment::get().getInputManager()->isGamepadGuiCursorEnabled();
+
+        bool showCursor = mouseEmulation && Settings::hud().mMouseEmulationCursor && getCursorVisible();
+        mHud->setMouseEmulationCursorVisible(showCursor);
+
+        if (showCursor)
+        {
+            MyGUI::IntPoint pos = MyGUI::InputManager::getInstance().getMousePosition();
+            mHud->setMouseEmulationCursorPosition(pos.left, pos.top);
+        }
     }
 
     void WindowManager::trackWindow(Layout* layout, const WindowSettingValues& settings)

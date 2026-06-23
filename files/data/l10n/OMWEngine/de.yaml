@@ -166,6 +166,7 @@ MaxLightsTooltip: "Standard: 16\nMaximale Anzahl von Lichtquellen, die ein Objek
 MenuHelpDelay: "Verzögerung des Hilfe-Menüs"
 MenuTransparency: "Menü-Transparenz"
 MouseAndKeyboard: "Maus/Tastatur"
+MouseEmulationCursor: "Mausemulationszeiger"
 ParticlePointLighting: "Partikel-Punktlichtbeleuchtung"
 ParticlePointLightingTooltip: "Ermöglicht die Beleuchtung von Partikelsystemen durch Punktlichter."
 PostProcessing: "Post-Processing"

@@ -167,6 +167,7 @@ MaxLightsTooltip: "Förvalt: 16\nMaximalt antal ljuskällor per objekt.\n\nEtt l
 MenuHelpDelay: "Menyhjälp, fördröjning" #Unsure in what context this goes
 MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"
+MouseEmulationCursor: "Musemuleringsmarkör"
 ParticlePointLighting: "Partikelpunktljus"
 ParticlePointLightingTooltip: "Gör att partikelsystem kan bli belysta av punktljus."
 PostProcessing: "Efterbehandling (post processing)"

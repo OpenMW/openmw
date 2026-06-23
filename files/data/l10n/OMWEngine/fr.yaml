@@ -167,6 +167,7 @@ MaxLightsTooltip: "valeur par défaut: 16\nNombre maximum de sources lumineuses 
 MenuHelpDelay: "Délai d'affichage du menu d'aide"
 MenuTransparency: "Transparence des menus"
 MouseAndKeyboard: "Souris/Clavier"
+MouseEmulationCursor: "Curseur d'émulation de souris"
 ParticlePointLighting: "Éclairage par point des particules"
 ParticlePointLightingTooltip: "Authorise les systèmes de particular a être éclairés par l'éclairage par points."
 PostProcessing: "Post-traitement"

@@ -49,6 +49,9 @@ namespace MWGui
         void setCrosshairVisible(bool visible);
         void setCrosshairOwned(bool owned);
 
+        void setMouseEmulationCursorVisible(bool visible);
+        void setMouseEmulationCursorPosition(int left, int top);
+
         void onFrame(float dt) override;
 
         void setCellName(const std::string& cellName);
@@ -75,6 +78,7 @@ namespace MWGui
         MyGUI::Button* mMinimapButton = nullptr;
         MyGUI::ScrollView* mMinimap = nullptr;
         MyGUI::ImageBox* mCrosshair = nullptr;
+        MyGUI::ImageBox* mMouseEmulationCursor = nullptr;
         MyGUI::TextBox* mCellNameBox = nullptr;
         MyGUI::TextBox* mWeaponSpellBox = nullptr;
         MyGUI::Widget *mDrowningBar = nullptr, *mDrowningFrame = nullptr, *mDrowningFlash = nullptr;

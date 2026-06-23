@@ -167,6 +167,7 @@ MaxLightsTooltip: "Default: 16\nMaximum number of lights per object.\n\nA low nu
 MenuHelpDelay: "Menu Help Delay"
 MenuTransparency: "Menu Transparency"
 MouseAndKeyboard: "Mouse/Keyboard"
+MouseEmulationCursor: "Mouse Emulation Cursor"
 ParticlePointLighting: "Particle Point Lighting"
 ParticlePointLightingTooltip: "Allows particle systems to be lit by point lights."
 PostProcessing: "Post Processing"
