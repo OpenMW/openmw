@@ -619,7 +619,6 @@ namespace Shader
 
     void ShaderManager::setGlobalDefines(DefineMap& globalDefines)
     {
-        std::lock_guard<std::mutex> lock(mMutex);
         mGlobalDefines = globalDefines;
         // clear out linked dependencies - changing defines may make them obsolete
         for (const auto& [pair, program] : mPrograms)
