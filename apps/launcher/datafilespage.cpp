@@ -165,9 +165,6 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
     mDirectoryPicker.setupUi(mDirectoryPickerDialog);
     setObjectName("DataFilesPage");
 
-    // Enable drag-and-drop for directory list
-    ui.directoryListWidget->setAcceptDrops(true);
-    ui.directoryListWidget->setDragDropMode(QAbstractItemView::DropOnly);
     ui.directoryListWidget->installEventFilter(this);
 
     mSelector = new ContentSelectorView::ContentSelector(ui.contentSelectorWidget, /*showOMWScripts=*/true);
