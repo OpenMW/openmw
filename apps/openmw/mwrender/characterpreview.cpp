@@ -145,10 +145,6 @@ namespace MWRender
 
     class CharacterPreviewRTTNode : public SceneUtil::RTTNode
     {
-        static constexpr float fovYDegrees = 12.3f;
-        static constexpr float znear = 4.0f;
-        static constexpr float zfar = 10000.f;
-
     public:
         CharacterPreviewRTTNode(uint32_t sizeX, uint32_t sizeY)
             : RTTNode(sizeX, sizeY, Settings::video().mAntialiasing, false, 0,
@@ -205,6 +201,10 @@ namespace MWRender
         osg::Matrixf mViewMatrix;
         osg::ref_ptr<osg::StateSet> mCameraStateset;
         float mAspectRatio;
+
+        static constexpr float fovYDegrees = 12.3f;
+        static constexpr float znear = 4.0f;
+        static constexpr float zfar = 10000.f;
     };
 
     CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
@@ -231,6 +231,8 @@ namespace MWRender
                 .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
                 .mLightFadeStart = Settings::shaders().mLightFadeStart,
                 .mLightRadiusMultiplier = Settings::shaders().mLightRadiusMultiplier,
+                .mClusteredGridSize = { 1, 1, 1 },
+                .mClusteredWorkGroupSize = 1,
             },
             resourceSystem);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
@@ -256,8 +258,10 @@ namespace MWRender
         // TODO: Clean up this mess of loose uniforms that shaders depend on.
         // turn off sky blending
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));
+        stateset->addUniform(new osg::Uniform("near", CharacterPreviewRTTNode::znear));
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
-        stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
+        stateset->addUniform(
+            new osg::Uniform("screenRes", osg::Vec2f{ static_cast<float>(sizeX), static_cast<float>(sizeY) }));
 
         stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
 
