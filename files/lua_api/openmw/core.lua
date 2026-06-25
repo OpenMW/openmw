@@ -1441,7 +1441,7 @@
 ---
 -- Data for a celestial body in the current sky.
 -- @type CelestialBody
--- @field #string name The body's name (`Masser` or `Secunda`).
+-- @field #string name The body's name. For Morrowind, "Masser" or "Secunda".
 -- @field #number phase One of @{#CELESTIAL_PHASE}.
 -- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
 -- @field #boolean isVisible Whether the body is currently above the horizon and visible for the time of day.
