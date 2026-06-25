@@ -496,7 +496,7 @@ namespace MWLua
                 "SetKnockedDownAction");
         };
 
-        actor["getKnockedDown"] = [context](const Object& object) {
+        actor["getKnockedDown"] = [](const Object& object) {
             const MWWorld::Ptr ptr = object.ptr();
             ptr.getClass().getCreatureStats(ptr).getKnockedDown();
         };
@@ -512,7 +512,7 @@ namespace MWLua
                 "SetHitRecoveryAction");
         };
 
-        actor["getHitRecovery"] = [context](const Object& object) {
+        actor["getHitRecovery"] = [](const Object& object) {
             const MWWorld::Ptr ptr = object.ptr();
             ptr.getClass().getCreatureStats(ptr).getHitRecovery();
         };
