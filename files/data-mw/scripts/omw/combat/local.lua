@@ -317,9 +317,11 @@ local function onHit(data)
                 I.Combat.spawnBloodEffect(data.hitPos)
             end
         end
-        I.Combat.applyKnockdown(data, rawHealthDamage)
-        if not Actor.getKnockedDown(self) then
-            I.Combat.applyHitRecovery(data)
+        if not data.ignoreStagger then
+          I.Combat.applyKnockdown(data, rawHealthDamage)
+          if not Actor.getKnockedDown(self) then
+              I.Combat.applyHitRecovery(data)
+          end
         end
     elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
         core.sound.playSound3d('miss', self)
