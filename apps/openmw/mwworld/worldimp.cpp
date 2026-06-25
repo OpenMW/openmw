@@ -831,6 +831,11 @@ namespace MWWorld
         return mRendering->skyGetSecundaPhase();
     }
 
+    std::vector<MWWorld::CelestialBody> World::getCurrentCelestialBodies() const
+    {
+        return mWeatherManager->getCurrentCelestialBodies(getTimeStamp());
+    }
+
     void World::setMoonColour(bool red)
     {
         mRendering->skySetMoonColour(red);

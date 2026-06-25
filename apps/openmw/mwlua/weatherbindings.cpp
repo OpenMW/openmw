@@ -256,6 +256,13 @@ namespace MWLua
         // Provide access to the store.
         api["records"] = WeatherStore{};
 
+        using Phase = MWRender::MoonState::Phase;
+        api["CELESTIAL_PHASE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Phase>(lua,
+            { { "Full", Phase::Full }, { "WaningGibbous", Phase::WaningGibbous },
+                { "ThirdQuarter", Phase::ThirdQuarter }, { "WaningCrescent", Phase::WaningCrescent },
+                { "New", Phase::New }, { "WaxingCrescent", Phase::WaxingCrescent },
+                { "FirstQuarter", Phase::FirstQuarter }, { "WaxingGibbous", Phase::WaxingGibbous } }));
+
         api["getCurrent"] = overloadForActiveCell(
             []() -> const MWWorld::Weather* { return &MWBase::Environment::get().getWorld()->getCurrentWeather(); });
         api["getNext"] = overloadForActiveCell(
@@ -275,6 +282,20 @@ namespace MWLua
         api["getCurrentSunPercentage"] = overloadWeatherGetter(&MWBase::World::getSunPercentage);
         api["getCurrentWindSpeed"] = overloadWeatherGetter(&MWBase::World::getWindSpeed);
         api["getCurrentStormDirection"] = overloadWeatherGetter(&MWBase::World::getStormDirection);
+        api["getCurrentCelestialBodies"] = overloadForActiveCell([lua]() {
+            sol::table result(lua, sol::create);
+            for (const MWWorld::CelestialBody& celestialBody :
+                MWBase::Environment::get().getWorld()->getCurrentCelestialBodies())
+            {
+                sol::table body(lua, sol::create);
+                body["name"] = celestialBody.mName;
+                body["phase"] = celestialBody.mPhase;
+                body["phaseValue"] = celestialBody.mPhaseValue;
+                body["isVisible"] = celestialBody.mIsVisible;
+                result.add(LuaUtil::makeReadOnly(body));
+            }
+            return LuaUtil::makeReadOnly(result);
+        });
 
         return LuaUtil::makeReadOnly(api);
     }

@@ -5,6 +5,8 @@
 #include <map>
 #include <span>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include <osg/Vec4f>
 
@@ -41,6 +43,14 @@ namespace Fallback
 namespace MWWorld
 {
     class TimeStamp;
+
+    struct CelestialBody
+    {
+        std::string_view mName;
+        MWRender::MoonState::Phase mPhase;
+        unsigned int mPhaseValue;
+        bool mIsVisible;
+    };
 
     enum NightDayMode
     {
@@ -359,6 +369,8 @@ namespace MWWorld
         float getSunPercentage(float hour) const;
 
         float getSunVisibility() const;
+
+        std::vector<CelestialBody> getCurrentCelestialBodies(const TimeStamp& time) const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 
