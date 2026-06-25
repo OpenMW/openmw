@@ -289,14 +289,15 @@ local function applyKnockdown(attack, rawHealthDamage)
         )
         local roll = math.random(0,99)
         if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
-            return true
+            Actor.setKnockedDown(self, true)
         end
     end
-    return false
 end
 
 local function applyHitRecovery(attack)
-    return hasDamage(attack)
+    if hasDamage(attack) then
+        Actor.setHitRecovery(self, true)
+    end
 end
 
 local function onHit(data)
@@ -316,15 +317,9 @@ local function onHit(data)
                 I.Combat.spawnBloodEffect(data.hitPos)
             end
         end
-        local wasKnockedDown = I.Combat.applyKnockdown(data, rawHealthDamage)
-        if wasKnockedDown then
-            Actor._setKnockedDown(self, true)
-        end
-        if not wasKnockedDown then
-            local wasHitRecovery = I.Combat.applyHitRecovery(data)
-            if wasHitRecovery then
-                Actor._setHitRecovery(self, true)
-            end
+        I.Combat.applyKnockdown(data, rawHealthDamage)
+        if not Actor.getKnockedDown(self) then
+            I.Combat.applyHitRecovery(data)
         end
     elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
         core.sound.playSound3d('miss', self)
