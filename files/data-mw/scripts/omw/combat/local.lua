@@ -278,6 +278,27 @@ local function spawnBloodEffect(position)
     })
 end
 
+local function applyKnockdown(attack, rawHealthDamage)
+    if hasDamage(attack) then
+        local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
+        local knockdownTerm = (
+            Actor.stats.attributes.agility(self).modified
+            * core.getGMST('iKnockDownOddsMult')
+            * 0.01
+            + core.getGMST('iKnockDownOddsBase')
+        )
+        local roll = math.random(0,99)
+        if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
+            return true
+        end
+    end
+    return false
+end
+
+local function applyHitRecovery(attack)
+    return hasDamage(attack)
+end
+
 local function onHit(data)
     if data.successful and not godMode() then
         local rawHealthDamage = getDamage(data, 'health')
@@ -295,18 +316,13 @@ local function onHit(data)
                 I.Combat.spawnBloodEffect(data.hitPos)
             end
         end
-        if hasDamage(data) then
-            local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
-            local knockdownTerm = (
-                Actor.stats.attributes.agility(self).modified
-                * core.getGMST('iKnockDownOddsMult')
-                * 0.01
-                + core.getGMST('iKnockDownOddsBase')
-            )
-            local roll = math.random(0,99)
-            if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
-                Actor._setKnockedDown(self, true)
-            else
+        local wasKnockedDown = I.Combat.applyKnockdown(data, rawHealthDamage)
+        if wasKnockedDown then
+            Actor._setKnockedDown(self, true)
+        end
+        if not wasKnockedDown then
+            local wasHitRecovery = I.Combat.applyHitRecovery(data)
+            if wasHitRecovery then
                 Actor._setHitRecovery(self, true)
             end
         end
@@ -322,6 +338,8 @@ local interface = auxUtil.shallowCopy(I.Combat)
 interface.adjustDamageForArmor = function(damage, actor) return adjustDamageForArmor(damage, actor or self) end
 interface.adjustDamageForDifficulty = function(attack, defendant) return adjustDamageForDifficulty(attack, defendant or self) end
 interface.applyArmor = applyArmor
+interface.applyKnockdown = applyKnockdown
+interface.applyHitRecovery = applyHitRecovery
 interface.getArmorRating = function(actor) return getArmorRating(actor or self) end
 interface.getArmorSkill = getArmorSkill
 interface.getSkillAdjustedArmorRating = function(item, actor) return getSkillAdjustedArmorRating(item, actor or self) end
