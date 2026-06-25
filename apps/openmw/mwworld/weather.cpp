@@ -602,8 +602,8 @@ namespace MWWorld
 
     std::vector<CelestialBody> WeatherManager::getCurrentCelestialBodies(const TimeStamp& time) const
     {
-        const auto makeBody = [](std::string_view name, const MoonModel& model, const TimeStamp& time) {
-            const MWRender::MoonState state = model.calculateState(time);
+        const auto makeBody = [](std::string_view name, const MoonModel& model, const TimeStamp& timestamp) {
+            const MWRender::MoonState state = model.calculateState(timestamp);
             return CelestialBody{ name, state.mPhase, MWRender::MoonState::phaseToInt(state.mPhase),
                 state.mMoonAlpha > 0.f };
         };
