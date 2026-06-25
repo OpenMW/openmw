@@ -1424,6 +1424,34 @@
 --     end
 -- end
 
+--- `core.weather.CELESTIAL_PHASE`
+-- @type CELESTIAL_PHASE
+-- @field [parent=#CELESTIAL_PHASE] #number Full
+-- @field [parent=#CELESTIAL_PHASE] #number WaningGibbous
+-- @field [parent=#CELESTIAL_PHASE] #number ThirdQuarter
+-- @field [parent=#CELESTIAL_PHASE] #number WaningCrescent
+-- @field [parent=#CELESTIAL_PHASE] #number New
+-- @field [parent=#CELESTIAL_PHASE] #number WaxingCrescent
+-- @field [parent=#CELESTIAL_PHASE] #number FirstQuarter
+-- @field [parent=#CELESTIAL_PHASE] #number WaxingGibbous
+
+--- Celestial phases.
+-- @field [parent=#Weather] #CELESTIAL_PHASE CELESTIAL_PHASE
+
+---
+-- Data for a celestial body in the current sky.
+-- @type CelestialBody
+-- @field #string name The body's name (`Masser` or `Secunda`).
+-- @field #number phase One of @{#CELESTIAL_PHASE}.
+-- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
+-- @field #boolean isVisible Whether the body is currently above the horizon and visible for the time of day.
+
+---
+-- Get all celestial bodies in the current sky.
+-- @function [parent=#Weather] getCurrentCelestialBodies
+-- @param #Cell cell The cell to get celestial bodies for.
+-- @return #list<#CelestialBody> Can be nil if the cell is inactive or has no sky.
+
 ---
 -- Get the current weather
 -- @function [parent=#Weather] getCurrent
