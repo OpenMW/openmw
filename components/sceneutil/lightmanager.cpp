@@ -133,6 +133,15 @@ namespace SceneUtil
         }
     };
 
+    LightManagerCullCallback::LightManagerCullCallback(const LightSettings& settings)
+        : mGridSizeX(settings.mClusteredGridSize.x())
+        , mGridSizeY(settings.mClusteredGridSize.y())
+        , mGridSizeZ(settings.mClusteredGridSize.z())
+        , mNumClusters(mGridSizeX * mGridSizeY * mGridSizeZ)
+        , mWorkGroupSize(settings.mClusteredWorkGroupSize)
+    {
+    }
+
     void LightManagerCullCallback::operator()(LightManager* node, osgUtil::CullVisitor* cv)
     {
         if (!(cv->getTraversalMask() & node->getLightingMask()))
@@ -361,7 +370,7 @@ namespace SceneUtil
 
         setUpdateCallback(new LightManagerUpdateCallback);
 
-        mCullCallback = new LightManagerCullCallback;
+        mCullCallback = new LightManagerCullCallback(settings);
         addCullCallback(mCullCallback);
 
         static bool hasLoggedWarnings = false;

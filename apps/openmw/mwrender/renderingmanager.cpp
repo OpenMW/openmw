@@ -34,6 +34,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/stateupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -82,6 +83,43 @@
 #include "util.hpp"
 #include "vismask.hpp"
 #include "water.hpp"
+
+namespace
+{
+    struct LightManagerUpdateVisitor : public osg::NodeVisitor
+    {
+        LightManagerUpdateVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+            setNodeMaskOverride(~0u);
+        }
+
+        void apply(osg::Node& node) override
+        {
+            if (auto* rtt = dynamic_cast<SceneUtil::RTTNode*>(&node))
+            {
+                for (const auto& [_, vdd] : rtt->getViewDependentDataMap())
+                {
+                    traverse(*vdd->mCamera.get());
+                }
+            }
+
+            traverse(node);
+        }
+
+        void apply(osg::Group& node) override
+        {
+            if (auto* lm = dynamic_cast<SceneUtil::LightManager*>(&node))
+            {
+                lm->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
+                    Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
+                lm->updateMaxLights(Settings::shaders().mMaxLights);
+                lm->enableClustered(Settings::shaders().mClusteredLighting);
+            }
+            traverse(node);
+        }
+    };
+}
 
 namespace MWRender
 {
@@ -1336,11 +1374,6 @@ namespace MWRender
                     || it->second == "light fade start" || it->second == "max lights"
                     || it->second == "clustered lighting" || it->second == "particle point lighting"))
             {
-                auto* lightManager = getLightRoot();
-
-                lightManager->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
-                    Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
-
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
@@ -1349,11 +1382,11 @@ namespace MWRender
                 {
                     mViewer->stopThreading();
 
-                    lightManager->updateMaxLights(Settings::shaders().mMaxLights);
-                    lightManager->enableClustered(Settings::shaders().mClusteredLighting);
+                    LightManagerUpdateVisitor visitor;
+                    mViewer->getSceneData()->accept(visitor);
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-                    for (const auto& [name, key] : lightManager->getLightDefines())
+                    for (const auto& [name, key] : getLightRoot()->getLightDefines())
                         defines[name] = key;
                     defines["particlePointLighting"] = Settings::shaders().mParticlePointLighting ? "1" : "0";
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);

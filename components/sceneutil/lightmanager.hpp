@@ -164,6 +164,8 @@ namespace SceneUtil
         float mMaximumLightDistance = Constants::CellSizeInUnits;
         float mLightFadeStart = 0;
         float mLightRadiusMultiplier = 1;
+        osg::Vec3i mClusteredGridSize = { 16, 8, 24 };
+        int mClusteredWorkGroupSize = 512;
     };
 
     class LightManagerCullCallback;
@@ -284,6 +286,8 @@ namespace SceneUtil
         : public SceneUtil::NodeCallback<LightManagerCullCallback, LightManager*, osgUtil::CullVisitor*>
     {
     public:
+        LightManagerCullCallback(const LightSettings& settings = LightSettings{});
+
         void operator()(LightManager* node, osgUtil::CullVisitor* cv);
 
         void reset() { mCache.clear(); }
@@ -307,12 +311,13 @@ namespace SceneUtil
 
         std::unordered_map<osg::Camera*, ViewData> mCache;
 
-        const int mGridSizeX = 16;
-        const int mGridSizeY = 8;
-        const int mGridSizeZ = 24;
-        const int mNumClusters = mGridSizeX * mGridSizeY * mGridSizeZ;
+        const int mGridSizeX;
+        const int mGridSizeY;
+        const int mGridSizeZ;
+        const int mNumClusters;
+        const int mWorkGroupSize;
+
         const int mMaxLightsPerCluster = 512;
-        const int mWorkGroupSize = 512;
     };
 
     /// To receive lighting, objects must be decorated by a LightListCallback. Light list callbacks must be added via

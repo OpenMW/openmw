@@ -38,6 +38,16 @@ namespace SceneUtil
     ///     source type GL_UNSIGNED_INT. Default wrap is CLAMP_TO_EDGE and filter LINEAR.
     class RTTNode : public osg::Node
     {
+        struct ViewDependentData
+        {
+            osg::ref_ptr<osg::Camera> mCamera;
+            osg::ref_ptr<osg::Texture> mColorTexture;
+            osg::ref_ptr<osg::Texture> mDepthTexture;
+            unsigned int mFrameNumber = 0;
+        };
+
+        using ViewDependentDataMap = std::map<osgUtil::CullVisitor*, std::shared_ptr<ViewDependentData>>;
+
     public:
         enum class StereoAwareness
         {
@@ -81,6 +91,10 @@ namespace SceneUtil
         void setColorBufferInternalFormat(GLint internalFormat);
         void setDepthBufferInternalFormat(GLint internalFormat);
 
+        /// Returns view dependent data
+        /// @note This is not thread safe and is only going to be safe to use when threading is stopped
+        const ViewDependentDataMap& getViewDependentDataMap() const { return mViewDependentDataMap; }
+
     protected:
         bool shouldDoPerViewMapping();
         bool shouldDoTextureArray();
@@ -90,17 +104,9 @@ namespace SceneUtil
 
     private:
         friend class CreateTextureViewsCallback;
-        struct ViewDependentData
-        {
-            osg::ref_ptr<osg::Camera> mCamera;
-            osg::ref_ptr<osg::Texture> mColorTexture;
-            osg::ref_ptr<osg::Texture> mDepthTexture;
-            unsigned int mFrameNumber = 0;
-        };
 
         ViewDependentData* getViewDependentData(osgUtil::CullVisitor* cv);
 
-        typedef std::map<osgUtil::CullVisitor*, std::shared_ptr<ViewDependentData>> ViewDependentDataMap;
         ViewDependentDataMap mViewDependentDataMap;
         uint32_t mTextureWidth;
         uint32_t mTextureHeight;
