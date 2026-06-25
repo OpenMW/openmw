@@ -157,6 +157,32 @@
 -- @param #number stance
 
 ---
+-- Sets whether the actor is knocked down.
+-- Available in global and local scripts. Can only be used on self in local scripts.
+-- @function [parent=#Actor] setKnockedDown
+-- @param openmw.core#GameObject actor
+-- @param #boolean value
+
+---
+-- Is the actor knocked down.
+-- @function [parent=#Actor] getKnockedDown
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
+-- Sets whether the actor is in hit recovery.
+-- Available in global and local scripts. Can only be used on self in local scripts.
+-- @function [parent=#Actor] setHitRecovery
+-- @param openmw.core#GameObject actor
+-- @param #boolean value
+
+---
+-- Is the actor in hit recovery.
+-- @function [parent=#Actor] getHitRecovery
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
 -- Returns `true` if the item is equipped on the actor.
 -- @function [parent=#Actor] hasEquipped
 -- @param openmw.core#GameObject actor

@@ -278,7 +278,7 @@ local function spawnBloodEffect(position)
     })
 end
 
-local function applyKnockdown(attack, rawHealthDamage)
+local function applyKnockedDown(attack, rawHealthDamage)
     if hasDamage(attack) then
         local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
         local knockdownTerm = (
@@ -318,7 +318,7 @@ local function onHit(data)
             end
         end
         if not data.ignoreStagger then
-          I.Combat.applyKnockdown(data, rawHealthDamage)
+          I.Combat.applyKnockedDown(data, rawHealthDamage)
           if not Actor.getKnockedDown(self) then
               I.Combat.applyHitRecovery(data)
           end
@@ -335,7 +335,7 @@ local interface = auxUtil.shallowCopy(I.Combat)
 interface.adjustDamageForArmor = function(damage, actor) return adjustDamageForArmor(damage, actor or self) end
 interface.adjustDamageForDifficulty = function(attack, defendant) return adjustDamageForDifficulty(attack, defendant or self) end
 interface.applyArmor = applyArmor
-interface.applyKnockdown = applyKnockdown
+interface.applyKnockedDown = applyKnockedDown
 interface.applyHitRecovery = applyHitRecovery
 interface.getArmorRating = function(actor) return getArmorRating(actor or self) end
 interface.getArmorSkill = getArmorSkill

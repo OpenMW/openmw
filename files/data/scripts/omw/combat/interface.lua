@@ -32,6 +32,7 @@ local onHitHandlers = {}
 -- @field [parent=#AttackInfo] openmw.util#Vector3 hitPos (Optional) Where on the victim the attack is landing. Used to spawn blood effects. Blood effects are skipped if nil.
 -- @field [parent=#AttackInfo] #boolean ignoreArmor (Optional) Whether to ignore armor.
 -- @field [parent=#AttackInfo] #boolean ignoreDifficulty (Optional) Whether to ignore difficulty scaling.
+-- @field [parent=#AttackInfo] #boolean ignoreStagger (Optional) Whether to ignore stagger (knockdown and hit recovery).
 -- @field [parent=#AttackInfo] #boolean muteSound (Optional) If true, does not play miss or damage sounds.
 return {
     --- Basic combat interface
@@ -88,6 +89,19 @@ return {
         -- @function [parent=#Combat] applyArmor
         -- @param #Attack attack
         applyArmor = function(attack) end,
+
+        --- Applies knockdown to the character. Depends on the actor's agility,
+        --- the unmodified attack damage, and a random roll.
+        -- @function [parent=#Combat] applyKnockedDown
+        -- @param #Attack attack
+        -- @param #number rawHealthDamage The health damage caused by the attack before armor reduction.
+        applyKnockedDown = function(attack, rawHealthDamage) end,
+
+        --- Applies hit recovery to the character. Always applies if the attack caused any damage,
+        --- but will be ignored if the actor is in many animation states.
+        -- @function [parent=#Combat] applyHitRecovery
+        -- @param #Attack attack
+        applyHitRecovery = function(attack) end,
 
         --- Computes this character's armor rating.
         -- Note that this interface function is read by the engine to update the UI.
