@@ -1184,78 +1184,78 @@ void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitSt
 
 bool Launcher::DataFilesPage::eventFilter(QObject* obj, QEvent* event)
 {
-    if (obj == ui.directoryListWidget)
+    if (obj != ui.directoryListWidget)
+        return QWidget::eventFilter(obj, event);
+
+    if (event->type() == QEvent::DragEnter || event->type() == QEvent::DragMove)
     {
-        if (event->type() == QEvent::DragEnter || event->type() == QEvent::DragMove)
+        auto* dragDropEvent = static_cast<QDropEvent*>(event);
+        const QMimeData* mimeData = dragDropEvent->mimeData();
+
+        // may be dragging multiple files and folders together
+        if (mimeData->hasUrls())
         {
-            auto* dragDropEvent = static_cast<QDropEvent*>(event);
-            const QMimeData* mimeData = dragDropEvent->mimeData();
-
-            // may be dragging multiple files and folders together
-            if (mimeData->hasUrls())
+            for (const QUrl& url : mimeData->urls())
             {
-                for (const QUrl& url : mimeData->urls())
+                if (!url.isLocalFile())
+                    continue;
+
+                QFileInfo fileInfo(url.toLocalFile());
+
+                // accept if any of it is a folder
+                if (fileInfo.isDir())
                 {
-                    if (!url.isLocalFile())
-                        continue;
-
-                    QFileInfo fileInfo(url.toLocalFile());
-
-                    // accept if any of it is a folder
-                    if (fileInfo.isDir())
-                    {
-                        dragDropEvent->acceptProposedAction();
-                        return true;
-                    }
+                    dragDropEvent->acceptProposedAction();
+                    return true;
                 }
             }
         }
-        else if (event->type() == QEvent::Drop)
+    }
+    else if (event->type() == QEvent::Drop)
+    {
+        QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
+        const QMimeData* mimeData = dropEvent->mimeData();
+
+        // may be dragging multiple files and folders together
+        if (mimeData->hasUrls())
         {
-            QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-            const QMimeData* mimeData = dropEvent->mimeData();
+            QStringList droppedDirs;
 
-            // may be dragging multiple files and folders together
-            if (mimeData->hasUrls())
+            for (const QUrl& url : mimeData->urls())
             {
-                QStringList droppedDirs;
+                if (!url.isLocalFile())
+                    continue;
 
-                for (const QUrl& url : mimeData->urls())
+                QString path = url.toLocalFile();
+                QFileInfo fileInfo(path);
+
+                // only append folders
+                if (fileInfo.isDir())
                 {
-                    if (!url.isLocalFile())
-                        continue;
+                    QString canonicalPath = fileInfo.canonicalFilePath();
 
-                    QString path = url.toLocalFile();
-                    QFileInfo fileInfo(path);
-
-                    // only append folders
-                    if (fileInfo.isDir())
+                    if (ui.directoryListWidget->findItems(canonicalPath, Qt::MatchFixedString).isEmpty())
                     {
-                        QString canonicalPath = fileInfo.canonicalFilePath();
-
-                        if (ui.directoryListWidget->findItems(canonicalPath, Qt::MatchFixedString).isEmpty())
-                        {
-                            droppedDirs.append(canonicalPath);
-                        }
+                        droppedDirs.append(canonicalPath);
                     }
                 }
-
-                if (!droppedDirs.isEmpty())
-                {
-                    for (const QString& dirPath : droppedDirs)
-                    {
-                        ui.directoryListWidget->addItem(dirPath);
-                        auto* item = ui.directoryListWidget->item(ui.directoryListWidget->count() - 1);
-                        item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ dirPath }));
-                        mNewDataDirs.push_back(dirPath);
-                    }
-
-                    refreshDataFilesView();
-                }
-
-                dropEvent->acceptProposedAction();
-                return true;
             }
+
+            if (!droppedDirs.isEmpty())
+            {
+                for (const QString& dirPath : droppedDirs)
+                {
+                    ui.directoryListWidget->addItem(dirPath);
+                    auto* item = ui.directoryListWidget->item(ui.directoryListWidget->count() - 1);
+                    item->setData(Qt::UserRole, QVariant::fromValue(Config::SettingValue{ dirPath }));
+                    mNewDataDirs.push_back(dirPath);
+                }
+
+                refreshDataFilesView();
+            }
+
+            dropEvent->acceptProposedAction();
+            return true;
         }
     }
 
