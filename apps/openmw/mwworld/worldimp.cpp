@@ -1707,14 +1707,17 @@ namespace MWWorld
         MWWorld::Ptr focusObject;
         MWRender::RenderingManager::RayResult rayToObject;
 
+        const bool ignoreTerrain = !Settings::game().mTerrainObstructsFocus;
+
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
+            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer, false, ignoreTerrain);
         }
         else
-            rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
+            rayToObject
+                = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer, false, ignoreTerrain);
 
         focusObject = rayToObject.mHitObject;
         if (focusObject.isEmpty() && rayToObject.mHitRefnum.isSet())
@@ -1727,10 +1730,10 @@ namespace MWWorld
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
+        bool ignorePlayer, bool ignoreActors, bool ignoreTerrain, std::span<const MWWorld::Ptr> ignoreList)
     {
         MWRender::RenderingManager::RayResult rayRes
-            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreList);
+            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreTerrain, ignoreList);
         res.mHit = rayRes.mHit;
         res.mHitPos = rayRes.mHitPointWorld;
         res.mHitNormal = rayRes.mHitNormalWorld;
@@ -1905,7 +1908,7 @@ namespace MWWorld
         const float maxDist = 200.f;
 
         MWRender::RenderingManager::RayResult result
-            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
+            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true, false);
 
         CellStore* cell = getPlayerPtr().getCell();
 
@@ -1934,7 +1937,7 @@ namespace MWWorld
     {
         const float maxDist = 200.f;
         MWRender::RenderingManager::RayResult result
-            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
+            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true, false);
 
         if (result.mHit)
         {
@@ -2038,7 +2041,7 @@ namespace MWWorld
 
         float len = 1000000.0;
 
-        MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig + dir * len, true, true);
+        MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig + dir * len, true, true, false);
         if (result.mHit)
             pos.pos[2] = result.mHitPointWorld.z();
 
@@ -2920,7 +2923,8 @@ namespace MWWorld
                         * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
                     const osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
                     const osg::Vec3f dest = origin + direction * getMaxActivationDistance();
-                    const MWRender::RenderingManager::RayResult result = mRendering->castRay(origin, dest, true, true);
+                    const MWRender::RenderingManager::RayResult result
+                        = mRendering->castRay(origin, dest, true, true, false);
                     if (result.mHit)
                         target = result.mHitObject;
                 }

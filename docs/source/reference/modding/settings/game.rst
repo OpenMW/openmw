@@ -502,3 +502,12 @@ Game Settings
    .. math::
 
    	\text{new value} = 0.0001 \cdot (\text{soul magnitude})^3 + 2 \cdot (\text{soul magnitude})
+
+.. omw-setting::
+   :title: terrain obstructs focus
+   :type: boolean
+   :range: true, false
+   :default: false
+
+   If enabled, focused object selection will account for terrain.
+   The default behavior matches Morrowind, allowing objects partially or totally submerged in terrain to gain focus.
