@@ -1,6 +1,30 @@
 0.52.0
 ------
 
+    Bug #9052: Clamped per-vertex sunlight is slightly brighter than it should be
+    Bug #9083: GetCastPenalty returns positive values
+    Bug #9094: Editor: Script verifier jumps to wrong line when word wrapping affects the script
+    Bug #9099: Canceling werewolf claw mode shouldn't play a sound
+    Bug #9101: Can still animate the player character via the sneak button when paralyzed
+    Bug #9128: New game intro video is unskippable after clicking
+    Bug #9137: ToggleAI state should not be reset when a save is loaded
+    Bug #9138: Flickering on non-shader water ripples
+    Bug #9142: Minimap should be zoomed out
+    Bug #9146: ActorActiveSpells:add shows enemy health bar when adding healing effect on self
+    Bug #9147: ActorActiveSpells:add does not update spell icons if game is paused
+    Bug #9149: Sensible mouse scrolling steps should be used for settings menu sliders
+    Bug #9157: Show owned doesn't work in Menu Mode
+    Feature #5712: Editor: Ensure content file order matches launcher order
+    Feature #6900: Clustered forward rendering
+    Feature #9033: Controller joystick mouse emulation mode indicator circle
+    Feature #9053: Make the light radius multiplier affect the fadeout radius
+    Feature #9090: Add a setting for 3rd person camera max distance
+    Feature #9122: Viewport resize engine handler
+    Feature #9123: Flex Widget Gap and Wrap Properties
+    Feature #9129: Lua-attached VFX transformations
+    Feature #9151: Implement RCN extra data flag
+    Task #9084: cell:getAll() adds cell data to the save file
+    Task #9116: element.content["name"] causes an error if it doesn't exist
 
 0.51.0
 ------
