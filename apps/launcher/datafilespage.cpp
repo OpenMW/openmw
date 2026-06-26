@@ -1226,8 +1226,7 @@ bool Launcher::DataFilesPage::eventFilter(QObject* obj, QEvent* event)
                 if (!url.isLocalFile())
                     continue;
 
-                QString path = url.toLocalFile();
-                QFileInfo fileInfo(path);
+                QFileInfo fileInfo(url.toLocalFile());
 
                 // only append folders
                 if (fileInfo.isDir())
