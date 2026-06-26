@@ -1232,8 +1232,7 @@ bool Launcher::DataFilesPage::eventFilter(QObject* obj, QEvent* event)
                     // only append folders
                     if (fileInfo.isDir())
                     {
-                        QDir dir(path);
-                        QString canonicalPath = dir.canonicalPath();
+                        QString canonicalPath = fileInfo.canonicalFilePath();
 
                         if (ui.directoryListWidget->findItems(canonicalPath, Qt::MatchFixedString).isEmpty())
                         {
