@@ -277,6 +277,9 @@ namespace Nif
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->read(mLookAtFlags);
+        else
+            mLookAtFlags = (mFlags >> 4) & 7;
+
         mLookAt.read(nif);
     }
 

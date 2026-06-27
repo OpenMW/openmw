@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include <osg/Texture2D>
+#include <osg/observer_ptr>
 
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
@@ -26,6 +27,7 @@ namespace osgParticle
 
 namespace SceneUtil
 {
+    class CopyOp;
     class MorphGeometry;
 }
 
@@ -418,6 +420,27 @@ namespace NifOsg
         int mFlags{ 0 };
 
         float getPercent(float time) const;
+    };
+
+    class LookAtController : public SceneUtil::NodeCallback<LookAtController, NifOsg::MatrixTransform*>,
+                             public SceneUtil::Controller
+    {
+    public:
+        LookAtController(const Nif::NiLookAtController& ctrl);
+        LookAtController() = default;
+        LookAtController(const LookAtController& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, LookAtController)
+
+        void operator()(NifOsg::MatrixTransform*, osg::NodeVisitor*);
+
+        void setTarget(osg::Group* target);
+
+        void remapTargets(const SceneUtil::CopyOp& copyop) override;
+
+    private:
+        uint16_t mFlags{ 0 };
+        osg::observer_ptr<osg::Group> mTarget;
     };
 
 }

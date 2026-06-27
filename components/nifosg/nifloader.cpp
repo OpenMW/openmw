@@ -331,6 +331,9 @@ namespace NifOsg
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<unsigned int, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
+        // This is used to queue look-at controllers whose target nodes may not have been created yet.
+        mutable std::vector<std::pair<unsigned int, osg::ref_ptr<LookAtController>>> mLookAtQueue;
+
         void loadKf(Nif::FileView nif, SceneUtil::KeyframeHolder& target) const
         {
             const Nif::NiSequenceStreamHelper* seq = nullptr;
@@ -456,6 +459,9 @@ namespace NifOsg
 
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
+
+            // Resolve look-at controller targets now that all nodes are loaded.
+            handleQueuedLookAtControllers(created, nif);
 
             RemoveLodOverlapVisitor removeLodOverlaps;
             created->accept(removeLodOverlaps);
@@ -1048,6 +1054,19 @@ namespace NifOsg
                     node->addUpdateCallback(callback);
                     isAnimated = true;
                 }
+                else if (ctrl->mRecordType == Nif::RC_NiLookAtController)
+                {
+                    const auto lookatctrl = static_cast<const Nif::NiLookAtController*>(ctrl.getPtr());
+                    if (lookatctrl->mLookAt.empty())
+                        continue;
+
+                    osg::ref_ptr<LookAtController> callback(new LookAtController(*lookatctrl));
+                    setupController(lookatctrl, callback, animflags);
+                    node->addUpdateCallback(callback);
+                    isAnimated = true;
+
+                    mLookAtQueue.emplace_back(lookatctrl->mLookAt->mRecordIndex, callback);
+                }
                 else if (ctrl->mRecordType == Nif::RC_NiGeomMorpherController
                     || ctrl->mRecordType == Nif::RC_NiParticleSystemController
                     || ctrl->mRecordType == Nif::RC_NiBSPArrayController || ctrl->mRecordType == Nif::RC_NiUVController)
@@ -1408,6 +1427,26 @@ namespace NifOsg
                 emitterNode->accept(disableOptimizer);
             }
             mEmitterQueue.clear();
+        }
+
+        void handleQueuedLookAtControllers(osg::Group* rootNode, Nif::FileView nif)
+        {
+            for (const auto& [recordIndex, controller] : mLookAtQueue)
+            {
+                FindGroupByRecordIndex findTargetNode(recordIndex);
+                rootNode->accept(findTargetNode);
+                osg::Group* targetNode = findTargetNode.mFound;
+                if (!targetNode)
+                {
+                    Log(Debug::Warning) << "NIFFile Warning: Failed to find look-at target node (node record index "
+                                        << recordIndex << "). File: " << nif.getFilename();
+                    continue;
+                }
+
+                controller->setTarget(targetNode);
+                targetNode->setDataVariance(osg::Object::DYNAMIC);
+            }
+            mLookAtQueue.clear();
         }
 
         void handleParticleSystem(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,

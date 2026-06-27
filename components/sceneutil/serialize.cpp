@@ -242,6 +242,7 @@ namespace SceneUtil
                 "NifOsg::StaticBoundingBoxCallback",
                 "NifOsg::GeomMorpherController",
                 "NifOsg::UpdateMorphGeometry",
+                "NifOsg::LookAtController",
                 "NifOsg::UVController",
                 "NifOsg::VisController",
                 "osgMyGUI::Drawable",
