@@ -81,6 +81,10 @@ struct PacketListFree
 
 VideoState::VideoState()
     : mAudioFactory(nullptr)
+    , mTexture(nullptr)
+    , mStagingImage(nullptr)
+    , mImageIsStaged(false)
+    , mStagingMutex()
     , format_ctx(nullptr)
     , video_ctx(nullptr)
     , audio_ctx(nullptr)
@@ -292,6 +296,7 @@ void VideoState::video_display(VideoPicture *vp)
 {
     if(this->video_ctx->width != 0 && this->video_ctx->height != 0)
     {
+        std::lock_guard lock(mStagingMutex);
         if (!mTexture.get())
         {
             mTexture = new osg::Texture2D;
@@ -301,12 +306,25 @@ void VideoState::video_display(VideoPicture *vp)
             mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
         }
 
-        osg::ref_ptr<osg::Image> image = new osg::Image;
+        if (!mStagingImage)
+            mStagingImage = new osg::Image;
+        if (mStagingImage->data() == nullptr || mStagingImage->s() != vp->rgbaFrame->width
+            || mStagingImage->t() != vp->rgbaFrame->height || mStagingImage->r() != 1)
+        {
+            auto size = av_image_get_buffer_size(
+                AV_PIX_FMT_RGBA, vp->rgbaFrame->width, vp->rgbaFrame->height, alignof(uint8_t));
 
-        image->setImage(this->video_ctx->width, this->video_ctx->height,
-                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, vp->rgbaFrame->data[0], osg::Image::NO_DELETE);
+            uint8_t* buffer = new uint8_t[size];
+            mStagingImage->setImage(this->video_ctx->width, this->video_ctx->height, 1, GL_RGBA, GL_RGBA,
+                GL_UNSIGNED_BYTE, buffer, osg::Image::USE_NEW_DELETE, alignof(uint8_t));
+        }
 
-        mTexture->setImage(image);
+        av_image_copy_to_buffer(mStagingImage->data(), mStagingImage->getImageSizeInBytes(), vp->rgbaFrame->data,
+            vp->rgbaFrame->linesize, (AVPixelFormat)vp->rgbaFrame->format, vp->rgbaFrame->width, vp->rgbaFrame->height,
+            alignof(uint8_t));
+        mStagingImage->dirty();
+
+        mImageIsStaged = true;
     }
 }
 
@@ -651,6 +669,18 @@ bool VideoState::update()
 {
     this->video_refresh();
     return !this->mVideoEnded;
+}
+
+void VideoState::commitFrame()
+{
+    std::lock_guard lock(mStagingMutex);
+    if (mImageIsStaged)
+    {
+        osg::ref_ptr<osg::Image> otherImage = mTexture->getImage();
+        mTexture->setImage(mStagingImage);
+        mStagingImage = otherImage;
+        mImageIsStaged = false;
+    }
 }
 
 

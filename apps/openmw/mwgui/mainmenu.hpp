@@ -35,6 +35,7 @@ namespace MWGui
     public:
         MenuVideo(const VFS::Manager* vfs);
         void resize(int w, int h);
+        void commitFrame();
         ~MenuVideo();
     };
 
@@ -52,6 +53,8 @@ namespace MWGui
         bool onControllerButtonEvent(const SDL_ControllerButtonEvent& arg) override;
 
         void setVisible(bool visible) override;
+
+        void onFrame(float) override;
 
         bool exit() override;
 

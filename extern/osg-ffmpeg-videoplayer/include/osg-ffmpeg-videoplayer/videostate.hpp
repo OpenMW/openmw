@@ -14,6 +14,7 @@
 
 namespace osg
 {
+    class Image;
     class Texture2D;
 }
 
@@ -142,6 +143,8 @@ struct VideoState {
 
     bool update();
 
+    void commitFrame();
+
     static void video_thread_loop(VideoState *is);
     static void decode_thread_loop(VideoState *is);
 
@@ -167,6 +170,9 @@ struct VideoState {
     static int64_t istream_seek(void *user_data, int64_t offset, int whence);
 
     osg::ref_ptr<osg::Texture2D> mTexture;
+    osg::ref_ptr<osg::Image> mStagingImage;
+    bool mImageIsStaged;
+    std::mutex mStagingMutex;
 
     MovieAudioFactory* mAudioFactory;
     std::unique_ptr<MovieAudioDecoder> mAudioDecoder;

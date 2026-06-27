@@ -78,6 +78,12 @@ namespace MWGui
         mVideo->setVisible(true);
     }
 
+    void MenuVideo::commitFrame()
+    {
+        if (mVideo)
+            mVideo->commitFrame();
+    }
+
     MenuVideo::~MenuVideo()
     {
         mRunning = false;
@@ -271,6 +277,12 @@ namespace MWGui
             }
             mBackground->setVisible(true);
         }
+    }
+
+    void MainMenu::onFrame(float)
+    {
+        if (mVideo)
+            mVideo->commitFrame();
     }
 
     bool MainMenu::exit()

@@ -61,6 +61,8 @@ namespace Video
         /// @return Returns true if the video is still playing, false if we have reached the end of the video stream.
         bool update();
 
+        void commitFrame();
+
         /// Stop the currently playing video, if a video is playing.
         void close();
 
