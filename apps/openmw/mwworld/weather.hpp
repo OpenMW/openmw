@@ -44,7 +44,7 @@ namespace MWWorld
 {
     class TimeStamp;
 
-    struct CelestialBody
+    struct Moon
     {
         std::string_view mName;
         MWRender::MoonState::Phase mPhase;
@@ -370,7 +370,7 @@ namespace MWWorld
 
         float getSunVisibility() const;
 
-        std::vector<CelestialBody> getCurrentCelestialBodies(const TimeStamp& time) const;
+        std::vector<Moon> getCurrentMoons(const TimeStamp& time) const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 

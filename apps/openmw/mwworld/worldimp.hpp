@@ -332,7 +332,7 @@ namespace MWWorld
 
         int getSecundaPhase() const override;
 
-        std::vector<MWWorld::CelestialBody> getCurrentCelestialBodies() const override;
+        std::vector<MWWorld::Moon> getCurrentMoons() const override;
 
         void setMoonColour(bool red) override;
 

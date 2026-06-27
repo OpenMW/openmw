@@ -257,7 +257,7 @@ namespace MWLua
         api["records"] = WeatherStore{};
 
         using Phase = MWRender::MoonState::Phase;
-        api["CELESTIAL_PHASE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Phase>(lua,
+        api["MOON_PHASE"] = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, Phase>(lua,
             { { "Full", Phase::Full }, { "WaningGibbous", Phase::WaningGibbous },
                 { "ThirdQuarter", Phase::ThirdQuarter }, { "WaningCrescent", Phase::WaningCrescent },
                 { "New", Phase::New }, { "WaxingCrescent", Phase::WaxingCrescent },
@@ -282,17 +282,16 @@ namespace MWLua
         api["getCurrentSunPercentage"] = overloadWeatherGetter(&MWBase::World::getSunPercentage);
         api["getCurrentWindSpeed"] = overloadWeatherGetter(&MWBase::World::getWindSpeed);
         api["getCurrentStormDirection"] = overloadWeatherGetter(&MWBase::World::getStormDirection);
-        api["getCurrentCelestialBodies"] = overloadForActiveCell([lua]() {
+        api["getCurrentMoons"] = overloadForActiveCell([lua]() {
             sol::table result(lua, sol::create);
-            for (const MWWorld::CelestialBody& celestialBody :
-                MWBase::Environment::get().getWorld()->getCurrentCelestialBodies())
+            for (const MWWorld::Moon& moon : MWBase::Environment::get().getWorld()->getCurrentMoons())
             {
-                sol::table body(lua, sol::create);
-                body["name"] = celestialBody.mName;
-                body["phase"] = celestialBody.mPhase;
-                body["phaseValue"] = celestialBody.mPhaseValue;
-                body["isVisible"] = celestialBody.mIsVisible;
-                result.add(LuaUtil::makeReadOnly(body));
+                sol::table moonTable(lua, sol::create);
+                moonTable["name"] = moon.mName;
+                moonTable["phase"] = moon.mPhase;
+                moonTable["phaseValue"] = moon.mPhaseValue;
+                moonTable["isVisible"] = moon.mIsVisible;
+                result.add(LuaUtil::makeReadOnly(moonTable));
             }
             return LuaUtil::makeReadOnly(result);
         });

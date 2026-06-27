@@ -1424,33 +1424,33 @@
 --     end
 -- end
 
---- `core.weather.CELESTIAL_PHASE`
--- @type CELESTIAL_PHASE
--- @field [parent=#CELESTIAL_PHASE] #number Full
--- @field [parent=#CELESTIAL_PHASE] #number WaningGibbous
--- @field [parent=#CELESTIAL_PHASE] #number ThirdQuarter
--- @field [parent=#CELESTIAL_PHASE] #number WaningCrescent
--- @field [parent=#CELESTIAL_PHASE] #number New
--- @field [parent=#CELESTIAL_PHASE] #number WaxingCrescent
--- @field [parent=#CELESTIAL_PHASE] #number FirstQuarter
--- @field [parent=#CELESTIAL_PHASE] #number WaxingGibbous
+--- `core.weather.MOON_PHASE`
+-- @type MOON_PHASE
+-- @field [parent=#MOON_PHASE] #number Full
+-- @field [parent=#MOON_PHASE] #number WaningGibbous
+-- @field [parent=#MOON_PHASE] #number ThirdQuarter
+-- @field [parent=#MOON_PHASE] #number WaningCrescent
+-- @field [parent=#MOON_PHASE] #number New
+-- @field [parent=#MOON_PHASE] #number WaxingCrescent
+-- @field [parent=#MOON_PHASE] #number FirstQuarter
+-- @field [parent=#MOON_PHASE] #number WaxingGibbous
 
---- Celestial phases.
--- @field [parent=#Weather] #CELESTIAL_PHASE CELESTIAL_PHASE
+--- Moon phases.
+-- @field [parent=#Weather] #MOON_PHASE MOON_PHASE
 
 ---
--- Data for a celestial body in the current sky.
--- @type CelestialBody
--- @field #string name The body's name. For Morrowind, "Masser" or "Secunda".
--- @field #number phase One of @{#CELESTIAL_PHASE}.
+-- Data for a moon in the current sky.
+-- @type Moon
+-- @field #string name The moon's name. For Morrowind, "Masser" or "Secunda".
+-- @field #number phase One of @{#MOON_PHASE}.
 -- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
--- @field #boolean isVisible Whether the body is currently above the horizon and visible for the time of day.
+-- @field #boolean isVisible Whether the moon is currently above the horizon and visible for the time of day.
 
 ---
--- Get all celestial bodies in the current sky.
--- @function [parent=#Weather] getCurrentCelestialBodies
--- @param #Cell cell The cell to get celestial bodies for.
--- @return #list<#CelestialBody> Can be nil if the cell is inactive or has no sky.
+-- Get all moons in the current sky.
+-- @function [parent=#Weather] getCurrentMoons
+-- @param #Cell cell The cell to get moons for.
+-- @return #list<#Moon> Can be nil if the cell is inactive or has no sky.
 
 ---
 -- Get the current weather
