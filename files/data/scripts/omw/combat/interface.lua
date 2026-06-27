@@ -90,18 +90,12 @@ return {
         -- @param #Attack attack
         applyArmor = function(attack) end,
 
-        --- Applies knockdown to the character. Depends on the actor's agility,
+        --- Applies stagger (knockdown or hit recovery) to the character. Depends on the actor's agility,
         --- the unmodified attack damage, and a random roll.
-        -- @function [parent=#Combat] applyKnockedDown
+        -- @function [parent=#Combat] applyStagger
         -- @param #Attack attack
         -- @param #number rawHealthDamage The health damage caused by the attack before armor reduction.
-        applyKnockedDown = function(attack, rawHealthDamage) end,
-
-        --- Applies hit recovery to the character. Always applies if the attack caused any damage,
-        --- but will be ignored if the actor is in many animation states.
-        -- @function [parent=#Combat] applyHitRecovery
-        -- @param #Attack attack
-        applyHitRecovery = function(attack) end,
+        applyStagger = function(attack, rawHealthDamage) end,
 
         --- Computes this character's armor rating.
         -- Note that this interface function is read by the engine to update the UI.

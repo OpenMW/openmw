@@ -278,7 +278,7 @@ local function spawnBloodEffect(position)
     })
 end
 
-local function applyKnockedDown(attack, rawHealthDamage)
+local function applyStagger(attack, rawHealthDamage)
     if hasDamage(attack) then
         local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
         local knockdownTerm = (
@@ -290,13 +290,9 @@ local function applyKnockedDown(attack, rawHealthDamage)
         local roll = math.random(0,99)
         if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
             Actor.setKnockedDown(self, true)
+        else
+            Actor.setHitRecovery(self, true)
         end
-    end
-end
-
-local function applyHitRecovery(attack)
-    if hasDamage(attack) then
-        Actor.setHitRecovery(self, true)
     end
 end
 
@@ -318,10 +314,7 @@ local function onHit(data)
             end
         end
         if not data.ignoreStagger then
-          I.Combat.applyKnockedDown(data, rawHealthDamage)
-          if not Actor.getKnockedDown(self) then
-              I.Combat.applyHitRecovery(data)
-          end
+            I.Combat.applyStagger(data, rawHealthDamage)
         end
     elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
         core.sound.playSound3d('miss', self)
@@ -335,8 +328,7 @@ local interface = auxUtil.shallowCopy(I.Combat)
 interface.adjustDamageForArmor = function(damage, actor) return adjustDamageForArmor(damage, actor or self) end
 interface.adjustDamageForDifficulty = function(attack, defendant) return adjustDamageForDifficulty(attack, defendant or self) end
 interface.applyArmor = applyArmor
-interface.applyKnockedDown = applyKnockedDown
-interface.applyHitRecovery = applyHitRecovery
+interface.applyStagger = applyStagger
 interface.getArmorRating = function(actor) return getArmorRating(actor or self) end
 interface.getArmorSkill = getArmorSkill
 interface.getSkillAdjustedArmorRating = function(item, actor) return getSkillAdjustedArmorRating(item, actor or self) end
