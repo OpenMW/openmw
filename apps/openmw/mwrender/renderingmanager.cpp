@@ -86,8 +86,9 @@
 
 namespace
 {
-    struct LightManagerUpdateVisitor : public osg::NodeVisitor
+    class LightManagerUpdateVisitor : public osg::NodeVisitor
     {
+    public:
         LightManagerUpdateVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
@@ -111,13 +112,24 @@ namespace
         {
             if (auto* lm = dynamic_cast<SceneUtil::LightManager*>(&node))
             {
-                lm->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
-                    Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
-                lm->updateMaxLights(Settings::shaders().mMaxLights);
-                lm->enableClustered(Settings::shaders().mClusteredLighting);
+                if (mDoThreadSafeOpsOnly)
+                {
+                    lm->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
+                        Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
+                }
+                else
+                {
+                    lm->updateMaxLights(Settings::shaders().mMaxLights);
+                    lm->enableClustered(Settings::shaders().mClusteredLighting);
+                }
             }
             traverse(node);
         }
+
+        void setDoThreadSafeOpsOnly(bool doThreadSafeOpsOnly) { mDoThreadSafeOpsOnly = doThreadSafeOpsOnly; }
+
+    private:
+        bool mDoThreadSafeOpsOnly = true;
     };
 }
 
@@ -1379,12 +1391,15 @@ namespace MWRender
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
+                LightManagerUpdateVisitor visitor;
+                mViewer->getSceneData()->accept(visitor);
+
                 if (it->second == "max lights" || it->second == "clustered lighting"
                     || it->second == "particle point lighting")
                 {
                     mViewer->stopThreading();
 
-                    LightManagerUpdateVisitor visitor;
+                    visitor.setDoThreadSafeOpsOnly(false);
                     mViewer->getSceneData()->accept(visitor);
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
