@@ -498,7 +498,7 @@ namespace MWLua
 
         actor["getKnockedDown"] = [](const Object& object) {
             const MWWorld::Ptr ptr = object.ptr();
-            ptr.getClass().getCreatureStats(ptr).getKnockedDown();
+            return ptr.getClass().getCreatureStats(ptr).getKnockedDown();
         };
 
         actor["setHitRecovery"] = [context](const Object& object, bool value) {
@@ -514,7 +514,7 @@ namespace MWLua
 
         actor["getHitRecovery"] = [](const Object& object) {
             const MWWorld::Ptr ptr = object.ptr();
-            ptr.getClass().getCreatureStats(ptr).getHitRecovery();
+            return ptr.getClass().getCreatureStats(ptr).getHitRecovery();
         };
 
         addActorStatsBindings(actor, context);

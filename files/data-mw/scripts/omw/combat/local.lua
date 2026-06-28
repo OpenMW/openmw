@@ -279,7 +279,7 @@ local function spawnBloodEffect(position)
 end
 
 local function applyStagger(attack, rawHealthDamage)
-    if hasDamage(attack) then
+    if hasDamage(attack) and attack.attacker ~= nil then
         local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
         local knockdownTerm = (
             Actor.stats.attributes.agility(self).modified
