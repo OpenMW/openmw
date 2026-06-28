@@ -1444,7 +1444,7 @@
 -- @field #string name The moon's name. For Morrowind, "Masser" or "Secunda".
 -- @field #number phase One of @{#MOON_PHASE}.
 -- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
--- @field #boolean isVisible Whether the moon is currently above the horizon and visible for the time of day.
+-- @field #number alpha The alpha of the moon between 0 and 1. 0 when the moon is not visible in the sky.
 
 ---
 -- Get all moons in the current sky.

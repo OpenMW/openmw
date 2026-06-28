@@ -604,7 +604,7 @@ namespace MWWorld
     {
         const auto makeMoon = [](std::string_view name, const MoonModel& model, const TimeStamp& timestamp) {
             const MWRender::MoonState state = model.calculateState(timestamp);
-            return Moon{ name, state.mPhase, MWRender::MoonState::phaseToInt(state.mPhase), state.mMoonAlpha > 0.f };
+            return Moon{ name, state.mPhase, MWRender::MoonState::phaseToInt(state.mPhase), state.mMoonAlpha };
         };
 
         return { makeMoon("Masser", mMasser, time), makeMoon("Secunda", mSecunda, time) };
