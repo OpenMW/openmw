@@ -57,9 +57,12 @@ namespace MWMechanics
     /// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
     void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength);
 
+    int getFightTerm(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+    float getFightDispositionBias(float disposition);
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
-
     float getAggroDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs);
+    bool isAggressionCapable(const MWWorld::Ptr& actor);
+    bool isAggressive(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
 
     // Cursed distance calculation used for combat proximity and hit checks in Morrowind
     float getDistanceToBounds(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);

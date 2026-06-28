@@ -547,6 +547,27 @@ namespace MWMechanics
         }
     }
 
+    int getFightTerm(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    {
+        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+        int disposition = actor.getClass().isNpc() ? mechanicsManager->getDerivedDisposition(actor) : 50;
+        int fight = actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Fight).getModified()
+            + static_cast<int>(
+                getFightDistanceBias(actor, target) + getFightDispositionBias(static_cast<float>(disposition)));
+
+        return fight;
+    }
+
+    float getFightDispositionBias(float disposition)
+    {
+        static const float fFightDispMult = MWBase::Environment::get()
+                                                .getESMStore()
+                                                ->get<ESM::GameSetting>()
+                                                .find("fFightDispMult")
+                                                ->mValue.getFloat();
+        return ((50.f - disposition) * fFightDispMult);
+    }
+
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
     {
         osg::Vec3f pos1(actor1.getRefData().getPosition().asVec3());
@@ -573,6 +594,50 @@ namespace MWMechanics
         if (canActorMoveByZAxis(actor))
             return distanceIgnoreZ(lhs, rhs);
         return distance(lhs, rhs);
+    }
+
+    bool isAggressionCapable(const MWWorld::Ptr& actor)
+    {
+        // Immobile creatures can enter combat, but are never aggressive
+        if (!actor.getClass().isMobile(actor))
+            return false;
+
+        const MWWorld::Class& actorClass = actor.getClass();
+        MagicEffects magEffects = actorClass.getCreatureStats(actor).getMagicEffects();
+
+        // Actor isn't aggressive if a calm effect is active, as it would cause combat to cycle on/off
+        // when combat is activated here and then canceled by the calm effect
+        if ((actorClass.isNpc() && magEffects.getOrDefault(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0)
+            || (!actorClass.isNpc() && magEffects.getOrDefault(ESM::MagicEffect::CalmCreature).getMagnitude() > 0))
+            return false;
+
+        return true;
+    }
+
+    bool isAggressive(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    {
+        // If already in combat with target, consider aggressive
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat(target))
+            return true;
+
+        if (!isAggressionCapable(actor))
+            return false;
+
+        // Aggression is easier if the target is a werewolf
+        int fight = getFightTerm(actor, target);
+        if (actor.getClass().isNpc() && target.getClass().isNpc())
+        {
+            if (target.getClass().getNpcStats(target).isWerewolf()
+                || (target == getPlayer()
+                    && MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sPCKnownWerewolf)))
+            {
+                const ESM::GameSetting* iWerewolfFightMod
+                    = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("iWerewolfFightMod");
+                fight += iWerewolfFightMod->mValue.getInteger();
+            }
+        }
+
+        return (fight >= 100);
     }
 
     float getDistanceToBounds(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
