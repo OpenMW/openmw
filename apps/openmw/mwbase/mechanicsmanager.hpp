@@ -253,8 +253,6 @@ namespace MWBase
 
         virtual void clear() = 0;
 
-        virtual bool isAggressive(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
-
         /// Resurrects the player if necessary
         virtual void resurrect(const MWWorld::Ptr& ptr) = 0;
 

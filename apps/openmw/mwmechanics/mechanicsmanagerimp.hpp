@@ -190,8 +190,6 @@ namespace MWMechanics
 
         void clear() override;
 
-        bool isAggressive(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
-
         void resurrect(const MWWorld::Ptr& ptr) override;
 
         bool isCastingSpell(const MWWorld::Ptr& ptr) const override;
