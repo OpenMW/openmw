@@ -290,7 +290,7 @@ namespace MWLua
                 moonTable["name"] = moon.mName;
                 moonTable["phase"] = moon.mPhase;
                 moonTable["phaseValue"] = moon.mPhaseValue;
-                moonTable["alpha"] = moon.alpha;
+                moonTable["alpha"] = moon.mAlpha;
                 result.add(LuaUtil::makeReadOnly(moonTable));
             }
             return LuaUtil::makeReadOnly(result);

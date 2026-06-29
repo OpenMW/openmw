@@ -49,7 +49,7 @@ namespace MWWorld
         std::string_view mName;
         MWRender::MoonState::Phase mPhase;
         unsigned int mPhaseValue;
-        float alpha;
+        float mAlpha;
     };
 
     enum NightDayMode
