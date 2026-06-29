@@ -224,6 +224,9 @@ namespace MWMechanics
         if (cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
             return true; // Don't bother with dead actors
 
+        if (!actor.getClass().isMobile(actor))
+            return false; // Don't bother with immobile creatures
+
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
 
