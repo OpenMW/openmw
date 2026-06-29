@@ -112,24 +112,24 @@ namespace
         {
             if (auto* lm = dynamic_cast<SceneUtil::LightManager*>(&node))
             {
-                if (mDoThreadSafeOpsOnly)
-                {
-                    lm->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
-                        Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
-                }
-                else
+                if (mDoThreadUnsafeOps)
                 {
                     lm->updateMaxLights(Settings::shaders().mMaxLights);
                     lm->enableClustered(Settings::shaders().mClusteredLighting);
                 }
+
+                lm->processChangedSettings(Settings::shaders().mLightRadiusMultiplier,
+                    Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
+
+                return;
             }
             traverse(node);
         }
 
-        void setDoThreadSafeOpsOnly(bool doThreadSafeOpsOnly) { mDoThreadSafeOpsOnly = doThreadSafeOpsOnly; }
+        void setDoThreadUnsafeOps(bool doThreadUnsafeOps) { mDoThreadUnsafeOps = doThreadUnsafeOps; }
 
     private:
-        bool mDoThreadSafeOpsOnly = true;
+        bool mDoThreadUnsafeOps = false;
     };
 }
 
@@ -1392,15 +1392,16 @@ namespace MWRender
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
 
                 LightManagerUpdateVisitor visitor;
-                mViewer->getSceneData()->accept(visitor);
+                bool lightManagersUpdated = false;
 
                 if (it->second == "max lights" || it->second == "clustered lighting"
                     || it->second == "particle point lighting")
                 {
                     mViewer->stopThreading();
 
-                    visitor.setDoThreadSafeOpsOnly(false);
+                    visitor.setDoThreadUnsafeOps(true);
                     mViewer->getSceneData()->accept(visitor);
+                    lightManagersUpdated = true;
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                     for (const auto& [name, key] : getLightRoot()->getLightDefines())
@@ -1412,6 +1413,9 @@ namespace MWRender
 
                     mViewer->startThreading();
                 }
+
+                if (!lightManagersUpdated)
+                    mViewer->getSceneData()->accept(visitor);
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {
