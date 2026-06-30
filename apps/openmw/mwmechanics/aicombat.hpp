@@ -34,7 +34,6 @@ namespace MWMechanics
         float mAttackRange;
         bool mCombatMove;
         bool mRotateMove;
-        osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
         std::unique_ptr<Action> mCurrentAction;
         float mActionCooldown;

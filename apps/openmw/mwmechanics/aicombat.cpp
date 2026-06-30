@@ -34,9 +34,6 @@ namespace
     // chooses an attack depending on probability to avoid uniformity
     std::string_view chooseBestAttack(const ESM::Weapon* weapon);
 
-    osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target,
-        const osg::Vec3f& vLastTargetPos, float duration, int weapType, float strength);
-
     bool hitAttemptMatchesTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
         ESM::RefNum hitNum = actor.getClass().getCreatureStats(actor).getHitAttemptActor();
@@ -134,6 +131,8 @@ namespace MWMechanics
 
         if (!storage.isFleeing())
         {
+            bool isRangedCombat = false;
+
             if (storage.mCurrentAction.get()) // need to wait to init action with its attack range
             {
                 // Update every frame. UpdateLOS uses a timer, so the LOS check does not happen every frame.
@@ -147,7 +146,7 @@ namespace MWMechanics
                     characterController.getSupportedMovementDirections(), targetReachedTolerance);
                 if (isTargetReached)
                     storage.mReadyToAttack = true;
-                bool isRangedCombat = false;
+
                 storage.mCurrentAction->getCombatRange(isRangedCombat);
                 if (!isRangedCombat && storage.mShouldApproach && storage.mReadyToAttack)
                 {
@@ -167,9 +166,19 @@ namespace MWMechanics
             storage.updateCombatMove(duration);
             storage.mRotateMove = false;
             if (storage.mReadyToAttack)
+            {
+                MWBase::World* world = MWBase::Environment::get().getWorld();
+                const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+                const osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+                const osg::Vec3f targetRelativePos = world->aimToTarget(actor, target, isRangedCombat);
+                storage.mMovement.mRotation[0] = getXAngleToDir(targetRelativePos);
+                // using targetRelativePos results in spastic movements since the head is animated
+                storage.mMovement.mRotation[2] = getZAngleToDir(targetPos - actorPos);
                 updateActorsMovement(actor, duration, storage);
-            if (storage.mRotateMove)
-                return false;
+                if (storage.mRotateMove)
+                    return false;
+            }
+
             storage.updateAttack(actor, characterController);
         }
         else
@@ -269,25 +278,6 @@ namespace MWMechanics
         float distToTarget = getDistanceToBounds(actor, target);
 
         storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
-
-        if (isRangedCombat)
-        {
-            // rotate actor taking into account target movement direction and projectile speed
-            osg::Vec3f vAimDir = AimDirToMovingTarget(actor, target, storage.mLastTargetPos, AI_REACTION_TIME,
-                (weapon ? weapon->mData.mType : 0), storage.mStrength);
-
-            storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-            storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
-        }
-        else
-        {
-            osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target, false);
-            storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-            storage.mMovement.mRotation[2] = getZAngleToDir(
-                (vTargetPos - vActorPos)); // using vAimDir results in spastic movements since the head is animated
-        }
-
-        storage.mLastTargetPos = vTargetPos;
 
         if (storage.mReadyToAttack)
         {
@@ -532,7 +522,6 @@ namespace MWMechanics
         , mAttackRange(0.0f)
         , mCombatMove(false)
         , mRotateMove(false)
-        , mLastTargetPos(0, 0, 0)
         , mCell(nullptr)
         , mCurrentAction()
         , mActionCooldown(0.0f)
@@ -765,73 +754,6 @@ namespace
                 return "chop";
         }
         return MWMechanics::CharacterController::getRandomAttackType();
-    }
-
-    osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target,
-        const osg::Vec3f& vLastTargetPos, float duration, int weapType, float strength)
-    {
-        float projSpeed;
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-
-        // get projectile speed (depending on weapon type)
-        if (MWMechanics::getWeaponType(weapType)->mWeaponClass == ESM::WeaponType::Thrown)
-        {
-            static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
-            static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();
-
-            projSpeed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
-        }
-        else if (weapType != 0)
-        {
-            static float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->mValue.getFloat();
-            static float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
-
-            projSpeed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * strength;
-        }
-        else // weapType is 0 ==> it's a target spell projectile
-        {
-            projSpeed = gmst.find("fTargetSpellMaxSpeed")->mValue.getFloat();
-        }
-
-        // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be
-        // the same
-
-        osg::Vec3f vTargetPos = target.getRefData().getPosition().asVec3();
-        osg::Vec3f vDirToTarget = MWBase::Environment::get().getWorld()->aimToTarget(actor, target, true);
-        float distToTarget = vDirToTarget.length();
-
-        osg::Vec3f vTargetMoveDir = vTargetPos - vLastTargetPos;
-        vTargetMoveDir /= duration; // |vTargetMoveDir| is target real speed in units/sec now
-
-        osg::Vec3f vPerpToDir = vDirToTarget ^ osg::Vec3f(0, 0, 1); // cross product
-
-        vPerpToDir.normalize();
-        osg::Vec3f vDirToTargetNormalized = vDirToTarget;
-        vDirToTargetNormalized.normalize();
-
-        // dot product
-        float velPerp = vTargetMoveDir * vPerpToDir;
-        float velDir = vTargetMoveDir * vDirToTargetNormalized;
-
-        // time to collision between target and projectile
-        float tCollision;
-
-        float projVelDirSquared = projSpeed * projSpeed - velPerp * velPerp;
-        if (projVelDirSquared > 0)
-        {
-            osg::Vec3f vTargetMoveDirNormalized = vTargetMoveDir;
-            vTargetMoveDirNormalized.normalize();
-
-            float projDistDiff = vDirToTarget * vTargetMoveDirNormalized; // dot product
-            projDistDiff = std::sqrt(distToTarget * distToTarget - projDistDiff * projDistDiff);
-
-            tCollision = projDistDiff / (std::sqrt(projVelDirSquared) - velDir);
-        }
-        else
-            tCollision = 0; // speed of projectile is not enough to reach moving target
-
-        return vDirToTarget + vTargetMoveDir * tCollision;
     }
 
 }
