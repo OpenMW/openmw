@@ -29,6 +29,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/nifosg/autotransform.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -167,12 +168,9 @@ namespace MWRender
         class CopyOp : public osg::CopyOp
         {
         public:
-            bool mOptimizeBillboards = true;
             bool mActiveGrid = false;
             LODRange mDistances = { 0.f, 0.f };
-            osg::Vec3f mViewVector;
             osg::Node::NodeMask mCopyMask = ~0u;
-            mutable std::vector<const osg::Node*> mNodePath;
 
             CopyOp(bool activeGrid, osg::Node::NodeMask copyMask)
                 : mActiveGrid(activeGrid)
@@ -246,7 +244,24 @@ namespace MWRender
                     return n;
                 }
 
-                mNodePath.push_back(node);
+                if (!mActiveGrid)
+                {
+                    if (const auto* autoTransform = dynamic_cast<const NifOsg::AutoTransform*>(node))
+                    {
+                        osg::MatrixTransform* n = new osg::MatrixTransform();
+                        n->setMatrix(autoTransform->computeMatrix(nullptr));
+
+                        for (unsigned int i = 0; i < autoTransform->getNumChildren(); ++i)
+                            if (osg::Node* clonedChild = operator()(autoTransform->getChild(i)))
+                                n->addChild(clonedChild);
+
+                        n->setDataVariance(osg::Object::STATIC);
+
+                        handleCallbacks(node, n);
+
+                        return n;
+                    }
+                }
 
                 osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
                 if (!mActiveGrid)
@@ -254,28 +269,16 @@ namespace MWRender
                 cloned->setUserDataContainer(nullptr);
                 cloned->setName("");
 
-                mNodePath.pop_back();
-
                 handleCallbacks(node, cloned);
 
                 return cloned;
             }
+
             void handleCallbacks(const osg::Node* node, osg::Node* cloned) const
             {
                 for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr;
                      callback = callback->getNestedCallback())
                 {
-                    if (callback->className() == std::string_view("BillboardCallback"))
-                    {
-                        if (mOptimizeBillboards)
-                        {
-                            handleBillboard(cloned);
-                            continue;
-                        }
-                        else
-                            cloned->setDataVariance(osg::Object::DYNAMIC);
-                    }
-
                     if (node->getCullCallback()->getNestedCallback())
                     {
                         osg::Callback* clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
@@ -285,45 +288,6 @@ namespace MWRender
                     else
                         cloned->addCullCallback(const_cast<osg::Callback*>(callback));
                 }
-            }
-            void handleBillboard(osg::Node* node) const
-            {
-                osg::Transform* transform = node->asTransform();
-                if (!transform)
-                    return;
-                osg::MatrixTransform* matrixTransform = transform->asMatrixTransform();
-                if (!matrixTransform)
-                    return;
-
-                osg::Matrix worldToLocal = osg::Matrix::identity();
-                for (auto pathNode : mNodePath)
-                    if (const osg::Transform* t = pathNode->asTransform())
-                        t->computeWorldToLocalMatrix(worldToLocal, nullptr);
-                worldToLocal = osg::Matrix::orthoNormal(worldToLocal);
-
-                osg::Matrix billboardMatrix;
-                osg::Vec3f viewVector = -(mViewVector + worldToLocal.getTrans());
-                viewVector.normalize();
-                osg::Vec3f right = viewVector ^ osg::Vec3f(0, 0, 1);
-                right.normalize();
-                osg::Vec3f up = right ^ viewVector;
-                up.normalize();
-                billboardMatrix.makeLookAt(osg::Vec3f(0, 0, 0), viewVector, up);
-                billboardMatrix.invert(billboardMatrix);
-
-                const osg::Matrix& oldMatrix = matrixTransform->getMatrix();
-                float mag[3]; // attempt to preserve scale
-                for (int i = 0; i < 3; ++i)
-                    mag[i] = static_cast<float>(std::sqrt(oldMatrix(0, i) * oldMatrix(0, i)
-                        + oldMatrix(1, i) * oldMatrix(1, i) + oldMatrix(2, i) * oldMatrix(2, i)));
-                osg::Matrix newMatrix;
-                worldToLocal.setTrans(0, 0, 0);
-                newMatrix *= worldToLocal;
-                newMatrix.preMult(billboardMatrix);
-                newMatrix.preMultScale(osg::Vec3f(mag[0], mag[1], mag[2]));
-                newMatrix.setTrans(oldMatrix.getTrans());
-
-                matrixTransform->setMatrix(newMatrix);
             }
             osg::Drawable* operator()(const osg::Drawable* drawable) const override
             {
@@ -884,12 +848,8 @@ namespace MWRender
                 // BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES | osg::CopyOp::DEEP_COPY_DRAWABLES
                                           : osg::CopyOp::DEEP_COPY_NODES);
-                copyop.mOptimizeBillboards = (size > 1 / 4.f);
-                copyop.mNodePath.push_back(trans);
                 copyop.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
-                copyop.mViewVector = (viewPoint - worldCenter);
                 copyop.copy(cnode, trans);
-                copyop.mNodePath.pop_back();
 
                 if (activeGrid)
                 {

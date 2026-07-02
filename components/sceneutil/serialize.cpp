@@ -3,6 +3,7 @@
 #include <osgDB/ObjectWrapper>
 #include <osgDB/Registry>
 
+#include <components/nifosg/autotransform.hpp>
 #include <components/nifosg/fog.hpp>
 #include <components/nifosg/matrixtransform.hpp>
 
@@ -125,6 +126,27 @@ namespace SceneUtil
         }
     };
 
+    class AutoTransformSerializer : public osgDB::ObjectWrapper
+    {
+    public:
+        AutoTransformSerializer()
+            : osgDB::ObjectWrapper(createInstanceFunc<NifOsg::AutoTransform>, "NifOsg::AutoTransform",
+                "osg::Object osg::Node osg::Group osg::Transform osg::MatrixTransform NifOsg::MatrixTransform "
+                "NifOsg::AutoTransform")
+        {
+            using ModeSerializer = osgDB::EnumSerializer<NifOsg::AutoTransform, NifOsg::AutoTransform::Mode, void>;
+            osg::ref_ptr<ModeSerializer> serializer
+                = new ModeSerializer("Mode", NifOsg::AutoTransform::Mode::RigidFaceCamera,
+                    &NifOsg::AutoTransform::getMode, &NifOsg::AutoTransform::setMode);
+
+            serializer->add("AlwaysFaceCamera", NifOsg::AutoTransform::Mode::AlwaysFaceCamera);
+            serializer->add("RotateAboutUp", NifOsg::AutoTransform::Mode::RotateAboutUp);
+            serializer->add("RigidFaceCamera", NifOsg::AutoTransform::Mode::RigidFaceCamera);
+
+            addSerializer(serializer.get(), osgDB::BaseSerializer::RW_ENUM);
+        }
+    };
+
     class FogSerializer : public osgDB::ObjectWrapper
     {
     public:
@@ -178,6 +200,7 @@ namespace SceneUtil
             mgr->addWrapper(new LightManagerSerializer);
             mgr->addWrapper(new CameraRelativeTransformSerializer);
             mgr->addWrapper(new MatrixTransformSerializer);
+            mgr->addWrapper(new AutoTransformSerializer);
             mgr->addWrapper(new FogSerializer);
             mgr->addWrapper(new TextureTypeSerializer);
 
@@ -207,7 +230,6 @@ namespace SceneUtil
                 "SceneUtil::TextKeyMapHolder",
                 "Shader::AddedState",
                 "Shader::RemovedAlphaFunc",
-                "NifOsg::BillboardCallback",
                 "NifOsg::FlipController",
                 "NifOsg::KeyframeController",
                 "NifOsg::Emitter",
