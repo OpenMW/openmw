@@ -23,7 +23,8 @@ return {
             auxUtil.callEventHandlers(applyMagicEffectsHandlers, options)
         end,
 
-        --- Add a new applyMagicEffects handler for this actor
+        --- Add a new applyMagicEffects handler for this actor. Receives as its options the parameters that were passed to @{#applyMagicEffects}.
+        -- If `applyMagicEffects` is invoked as the result of spell reflection, an `isReflect` parameter will be added to the options and set to true.
         -- @function [parent=#SpellCasting] addApplyMagicEffectsHandler
         -- @param #function handler The handler.
         addApplyMagicEffectsHandler = function(handler)
