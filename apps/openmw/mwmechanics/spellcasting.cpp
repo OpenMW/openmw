@@ -197,8 +197,8 @@ namespace MWMechanics
             indexes.push_back(enam.mIndex);
         }
 
-        MWBase::Environment::get().getLuaManager()->applyMagicEffects(
-            mId, mCaster, mItem, target, indexes, mScriptedSpell, mFlags & ESM::ActiveSpells::Flag_Stackable);
+        MWBase::Environment::get().getLuaManager()->applyMagicEffects(mId, mCaster, mItem, target, indexes,
+            mScriptedSpell, false, mFlags & ESM::ActiveSpells::Flag_Stackable, false);
 
         if (!exploded)
             explodeSpell(effects, target, range);

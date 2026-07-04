@@ -119,7 +119,8 @@ namespace MWLua
         void onDialogueResponse(
             const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record) override;
         void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item, const MWWorld::Ptr& target,
-            const std::vector<int>& effects, bool ignoreReflect, bool stackable) override;
+            const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption, bool stackable,
+            bool isReflect) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 

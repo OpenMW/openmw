@@ -521,7 +521,8 @@ namespace MWLua
     }
 
     void LuaManager::applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
-        const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool stackable)
+        const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
+        bool stackable, bool isReflect)
     {
         if (!target.isEmpty())
         {
@@ -538,7 +539,9 @@ namespace MWLua
                 data["target"] = LObject(target);
                 data["effects"] = luaEffects;
                 data["ignoreReflect"] = ignoreReflect;
+                data["ignoreSpellAbsorption"] = ignoreSpellAbsorption;
                 data["stackable"] = stackable;
+                data["isReflect"] = isReflect;
                 sendLocalEvent(target, "ApplyMagicEffects", data);
             });
         }
