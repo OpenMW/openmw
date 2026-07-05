@@ -60,6 +60,8 @@
 namespace
 {
 
+    const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
+
     std::string_view getBestAttack(const ESM::Weapon* weapon)
     {
         int slash = weapon->mData.mSlash[0] + weapon->mData.mSlash[1];
@@ -1503,18 +1505,6 @@ namespace MWMechanics
             }
         }
 
-        if (isWerewolf)
-        {
-            const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
-            if (isRunning() && !world->isSwimming(mPtr) && mWeaponType == ESM::Weapon::None)
-            {
-                if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
-                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            }
-            else
-                sndMgr->stopSound3D(mPtr, wolfRun);
-        }
-
         float complete = 0.f;
         bool animPlaying = false;
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
@@ -1970,6 +1960,7 @@ namespace MWMechanics
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         const MWWorld::Class& cls = mPtr.getClass();
         osg::Vec3f movement(0.f, 0.f, 0.f);
+        bool isMoving = false;
         float speed = 0.f;
 
         updateMagicEffects();
@@ -2011,8 +2002,7 @@ namespace MWMechanics
 
             // Force Jump Logic
 
-            bool isMoving
-                = (std::abs(movementSettings.mPosition[0]) > .5 || std::abs(movementSettings.mPosition[1]) > .5);
+            isMoving = (std::abs(movementSettings.mPosition[0]) > .5 || std::abs(movementSettings.mPosition[1]) > .5);
             if (!inwater && !flying)
             {
                 // Force Jump
@@ -2508,6 +2498,36 @@ namespace MWMechanics
         mSkipAnim = false;
 
         mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
+
+        // Werewolf running sound logic
+        if (isPlayer)
+        {
+            bool playWolfRun = false;
+            if (movement != osg::Vec3f() && isMoving && mHitState == CharState_None)
+            {
+                if (mWeaponType == ESM::Weapon::None || mUpperBodyState == UpperBodyState::Unequipping)
+                {
+                    const NpcStats& stats = cls.getNpcStats(mPtr);
+                    if (stats.isWerewolf() && !stats.isDead())
+                    {
+                        const bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+                        const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+                        playWolfRun = running && !sneaking && !world->isSwimming(mPtr);
+                    }
+                }
+            }
+
+            if (playWolfRun)
+            {
+                if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
+                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+            }
+            else
+            {
+                if (sndMgr->getSoundPlaying(mPtr, wolfRun))
+                    sndMgr->stopSound3D(mPtr, wolfRun);
+            }
+        }
     }
 
     void CharacterController::persistAnimationState() const
