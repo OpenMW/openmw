@@ -82,6 +82,15 @@
 -- @usage
 -- content.ingredients.records.MyIngredient = { template = content.ingredients.records['ingred_ectoplasm_01'], name = 'Soylent', effects = { { id = 'vampirism' } } }
 
+--- @{#LevCreatureContent}: Levelled creature manipulation.
+-- @field [parent=#content] #LevCreatureContent levelledCreatures
+
+---
+-- A mutable list of all @{openmw.types#LevelledCreature}s.
+-- @field [parent=#LevCreatureContent] #list<openmw.types#LevelledCreature> records
+-- @usage
+-- content.levelledCreatures.records.MyLevCreature = { calculateFromAllLevels = true, chanceNone = 0.5, creatures = { { id = 'scrib', level = 1 }, { id = 'fargoth', level = 2 } } }
+
 --- @{#LightContent}: Light manipulation.
 -- @field [parent=#content] #LightContent lights
 
