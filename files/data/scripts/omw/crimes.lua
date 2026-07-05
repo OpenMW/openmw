@@ -1,5 +1,59 @@
 local types = require('openmw.types')
+local world = require('openmw.world')
 local I = require('openmw.interfaces')
+
+local function isAllowedToOpen(player, lockable)
+    -- Lockables are always allowed when their global variable is 1
+    if lockable.globalVariable then
+        if world.mwscript.getGlobalVariables()[lockable.globalVariable] == 1 then
+            return true
+        end
+    end
+
+    local owner = lockable.owner
+    local isOwned = false
+    local isFactionOwned = false
+    if owner.recordId and owner.recordId ~= player.recordId then
+        isOwned = true
+    end
+
+    local faction = owner.factionId
+    if faction then
+        local rank = types.NPC.getFactionRank(player, owner.factionId)
+        if rank == 0 then
+            -- Not in faction.
+            isFactionOwned = true
+        else
+            isFactionOwned = rank < (owner.factionRank or 0)
+        end
+    end
+
+    return not(isFactionOwned or isOwned)
+end
+
+local function findOwner(object)
+    if not object or not object.owner.recordId then
+        return nil
+    end
+    for _, actor in pairs(world.activeActors) do
+        if actor.recordId == object.owner.recordId then
+            return actor
+        end
+    end
+end
+
+local function unlockAttempted(data)
+    local player = data.player
+    local lockable = data.lockable
+    if not isAllowedToOpen(player, lockable) then
+        I.Crimes.commitCrime(player, {
+            player = player,
+            type = types.Player.OFFENSE_TYPE.Trespassing,
+            faction = lockable.owner.factionId,
+            victim = findOwner(lockable),
+        })
+    end
+end
 
 ---
 -- Table with information needed to commit crimes.
@@ -60,5 +114,6 @@ return {
     },
     eventHandlers = {
         CommitCrime = function(data) I.Crimes.commitCrime(data.player, data) end,
+        UnlockAttempted = function(data) unlockAttempted(data) end
     }
 }

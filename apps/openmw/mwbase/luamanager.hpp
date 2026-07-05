@@ -111,7 +111,8 @@ namespace MWBase
         virtual void savePermanentStorage(const std::filesystem::path& userConfigPath) = 0;
         virtual void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item,
             const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
-            bool stackable, bool isReflect) = 0;
+            bool stackable, bool isReflect)
+            = 0;
 
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,

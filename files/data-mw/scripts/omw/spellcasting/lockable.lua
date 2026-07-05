@@ -1,7 +1,6 @@
 local types = require('openmw.types')
 local animation = require('openmw.animation')
 local Lockable = types.Lockable
-local NPC = types.NPC
 local Player = types.Player
 local core = require('openmw.core')
 local self = require('openmw.self')
@@ -10,48 +9,11 @@ local nearby = require('openmw.nearby')
 local auxUtil = require('openmw_aux.util')
 local l10n = core.l10n('OMWEngine')
 
-local function isAllowedToOpen(player)
-    local owner = self.object.owner
-    local isOwned = false
-    local isFactionOwned = false
-    if owner.recordId and owner.recordId ~= player.recordId then
-        isOwned = true
-    end
-
-    local faction = owner.factionId
-    if faction then
-        local rank = NPC.getFactionRank(player, owner.factionId)
-        if rank == 0 then
-            -- Not in faction.
-            isFactionOwned = true
-        else
-            isFactionOwned = rank < (owner.factionRank or 0)
-        end
-    end
-
-    -- TODO: global variables
-
-    return not(isFactionOwned or isOwned)
-end
-
-local function findActor(recordId)
-    if not recordId then
-        return nil
-    end
-    for _, actor in pairs(nearby.actors) do
-        if actor.recordId == recordId then
-            return actor
-        end
-    end
-end
-
 local function unlockAttempted(actor)
-    if Player.objectIsInstance(actor) and not isAllowedToOpen(actor) then
-        core.sendGlobalEvent('CommitCrime',{
+    if Player.objectIsInstance(actor) then
+        core.sendGlobalEvent('UnlockAttempted',{
             player = actor,
-            type = Player.OFFENSE_TYPE.Trespassing,
-            faction = self.object.owner.factionId,
-            victim = findActor(self.object.owner.recordId),
+            lockable = self.object,
         })
     end
 end
