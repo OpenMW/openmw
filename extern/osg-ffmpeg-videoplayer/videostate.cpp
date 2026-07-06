@@ -297,14 +297,6 @@ void VideoState::video_display(VideoPicture *vp)
     if(this->video_ctx->width != 0 && this->video_ctx->height != 0)
     {
         std::lock_guard lock(mStagingMutex);
-        if (!mTexture.get())
-        {
-            mTexture = new osg::Texture2D;
-            mTexture->setDataVariance(osg::Object::DYNAMIC);
-            mTexture->setResizeNonPowerOfTwoHint(false);
-            mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-            mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-        }
 
         if (!mStagingImage)
             mStagingImage = new osg::Image;
@@ -324,7 +316,19 @@ void VideoState::video_display(VideoPicture *vp)
             alignof(uint8_t));
         mStagingImage->dirty();
 
-        mImageIsStaged = true;
+        
+        if (!mTexture.get())
+        {
+            mTexture = new osg::Texture2D;
+            mTexture->setDataVariance(osg::Object::DYNAMIC);
+            mTexture->setResizeNonPowerOfTwoHint(false);
+            mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+            mTexture->setImage(mStagingImage);
+            mStagingImage = nullptr;
+        }
+        else
+            mImageIsStaged = true;
     }
 }
 
