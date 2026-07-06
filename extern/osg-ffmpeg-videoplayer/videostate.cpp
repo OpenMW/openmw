@@ -316,7 +316,6 @@ void VideoState::video_display(VideoPicture *vp)
             alignof(uint8_t));
         mStagingImage->dirty();
 
-        
         if (!mTexture.get())
         {
             mTexture = new osg::Texture2D;
@@ -686,7 +685,6 @@ void VideoState::commitFrame()
         mImageIsStaged = false;
     }
 }
-
 
 int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 {
