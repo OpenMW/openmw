@@ -81,6 +81,70 @@ namespace
         void apply(osg::Drawable& node) override { traverse(node); }
     };
 
+    struct RemoveLodOverlapVisitor : public osg::NodeVisitor
+    {
+        RemoveLodOverlapVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::LOD& lod) override
+        {
+            traverse(lod);
+
+            // NiLODNode only uses the last child with a compatible range, osg::LOD uses all of them
+            // We must remove overlaps
+            std::vector<std::vector<Nif::NiLODNode::LODRange>> ranges;
+            for (unsigned int i = 0; i < lod.getNumRanges(); ++i)
+            {
+                Nif::NiLODNode::LODRange newRange{ lod.getMinRange(i), lod.getMaxRange(i) };
+                for (std::vector<Nif::NiLODNode::LODRange>& rangeVec : ranges)
+                {
+                    std::vector<Nif::NiLODNode::LODRange> newRangeVec;
+                    newRangeVec.reserve(rangeVec.size());
+
+                    for (const Nif::NiLODNode::LODRange& existing : rangeVec)
+                    {
+                        if (existing.mMinRange >= newRange.mMinRange && existing.mMaxRange <= newRange.mMaxRange)
+                            continue;
+
+                        if (existing.mMinRange >= newRange.mMinRange && existing.mMinRange < newRange.mMaxRange)
+                            newRangeVec.push_back({ newRange.mMaxRange, existing.mMaxRange });
+                        else if (existing.mMaxRange > newRange.mMinRange && existing.mMaxRange <= newRange.mMaxRange)
+                            newRangeVec.push_back({ existing.mMinRange, newRange.mMinRange });
+                        else if (existing.mMinRange < newRange.mMinRange && existing.mMaxRange > newRange.mMaxRange)
+                        {
+                            newRangeVec.push_back({ existing.mMinRange, newRange.mMinRange });
+                            newRangeVec.push_back({ newRange.mMaxRange, existing.mMaxRange });
+                        }
+                        else
+                            newRangeVec.push_back(existing);
+                    }
+                    rangeVec = std::move(newRangeVec);
+                }
+                ranges.push_back({ newRange });
+            }
+
+            std::vector<osg::ref_ptr<osg::Node>> originalChildren;
+            originalChildren.reserve(lod.getNumChildren());
+            for (unsigned int i = 0; i < lod.getNumChildren(); ++i)
+                originalChildren.push_back(lod.getChild(i));
+
+            lod.removeChildren(0, lod.getNumChildren());
+
+            unsigned int originalChildIndex = 0;
+            for (const auto& rangeVec : ranges)
+            {
+                for (const auto& range : rangeVec)
+                {
+                    if (range.mMinRange < range.mMaxRange && originalChildIndex < originalChildren.size())
+                        lod.addChild(originalChildren[originalChildIndex], range.mMinRange, range.mMaxRange);
+                }
+                originalChildIndex++;
+            }
+        }
+    };
+
     void getAllNiNodes(const Nif::NiAVObject* node, std::vector<int>& outIndices)
     {
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
@@ -392,6 +456,9 @@ namespace NifOsg
 
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
+
+            RemoveLodOverlapVisitor removeLodOverlaps;
+            created->accept(removeLodOverlaps);
 
             if (nif.getUseSkinning())
             {
