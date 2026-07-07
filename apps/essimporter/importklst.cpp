@@ -16,7 +16,8 @@ namespace ESSImport
         }
 
         mWerewolfKills = 0;
-        esm.getHNOT(mWerewolfKills, "VTNI");
+        esm.getHNOT(mWerewolfKills, "INTV");
+        esm.getHNOT(mWerewolfKills, "VTNI"); // Not standard spec, but covers an MWSE bug
     }
 
 }
