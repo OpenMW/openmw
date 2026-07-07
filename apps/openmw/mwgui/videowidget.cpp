@@ -72,6 +72,11 @@ namespace MWGui
         return mPlayer->update();
     }
 
+    void VideoWidget::commitFrame()
+    {
+        mPlayer->commitFrame();
+    }
+
     void VideoWidget::stop()
     {
         mPlayer->close();
