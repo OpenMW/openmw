@@ -124,7 +124,7 @@ local function next(self, index)
     index = index + 1
     local v = rawget(self, index)
     if v then
-        return index + 1, v
+        return index, v
     end
 end
 
