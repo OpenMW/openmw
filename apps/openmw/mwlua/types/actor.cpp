@@ -485,6 +485,38 @@ namespace MWLua
                 "HitAction");
         };
 
+        actor["setKnockedDown"] = [context](const Object& object, bool value) {
+            if (!object.isGObject() && !object.isSelfObject())
+                throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
+            context.mLuaManager->addAction(
+                [obj = Object(object), value] {
+                    const MWWorld::Ptr ptr = obj.ptr();
+                    ptr.getClass().getCreatureStats(ptr).setKnockedDown(value);
+                },
+                "SetKnockedDownAction");
+        };
+
+        actor["getKnockedDown"] = [](const Object& object) {
+            const MWWorld::Ptr ptr = object.ptr();
+            return ptr.getClass().getCreatureStats(ptr).getKnockedDown();
+        };
+
+        actor["setHitRecovery"] = [context](const Object& object, bool value) {
+            if (!object.isGObject() && !object.isSelfObject())
+                throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
+            context.mLuaManager->addAction(
+                [obj = Object(object), value] {
+                    const MWWorld::Ptr ptr = obj.ptr();
+                    ptr.getClass().getCreatureStats(ptr).setHitRecovery(value);
+                },
+                "SetHitRecoveryAction");
+        };
+
+        actor["getHitRecovery"] = [](const Object& object) {
+            const MWWorld::Ptr ptr = object.ptr();
+            return ptr.getClass().getCreatureStats(ptr).getHitRecovery();
+        };
+
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }

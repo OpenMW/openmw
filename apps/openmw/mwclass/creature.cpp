@@ -406,19 +406,13 @@ namespace MWClass
         if (!object.empty())
             stats.setLastHitObject(object);
 
-        bool hasDamage = false;
-        bool hasHealthDamage = false;
-        float healthDamage = 0.f;
         for (auto& [stat, damage] : damages)
         {
             if (damage < 0.001f)
                 continue;
-            hasDamage = true;
 
             if (stat == "health")
             {
-                hasHealthDamage = true;
-                healthDamage = damage;
                 MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
                 health.setCurrent(health.getCurrent() - damage);
                 stats.setHealth(health);
@@ -434,24 +428,6 @@ namespace MWClass
                 MWMechanics::DynamicStat<float> magicka(getCreatureStats(ptr).getMagicka());
                 magicka.setCurrent(magicka.getCurrent() - damage);
                 stats.setMagicka(magicka);
-            }
-        }
-
-        if (hasDamage)
-        {
-            if (!attacker.isEmpty())
-            {
-                // Check for knockdown
-                float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                    * getGmst().fKnockDownMult->mValue.getFloat();
-                float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                        * getGmst().iKnockDownOddsMult->mValue.getInteger() * 0.01f
-                    + getGmst().iKnockDownOddsBase->mValue.getInteger();
-                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                if (hasHealthDamage && agilityTerm <= healthDamage && knockdownTerm <= Misc::Rng::roll0to99(prng))
-                    stats.setKnockedDown(true);
-                else
-                    stats.setHitRecovery(true); // Is this supposed to always occur?
             }
         }
     }
