@@ -85,15 +85,16 @@ namespace MWLua
                 = [](LuaUtil::InputAction::Registry& registry, std::string_view key) { return registry[key]; };
             {
                 auto pairs = [](LuaUtil::InputAction::Registry& self) {
-                    auto next = [](LuaUtil::InputAction::Registry& registry, std::string_view key)
+                    auto next = [](LuaUtil::InputAction::Registry& registry, sol::optional<std::string_view> key)
                         -> sol::optional<std::tuple<std::string, LuaUtil::InputAction::Info>> {
-                        std::optional<std::string> nextKey(registry.nextKey(key));
+                        std::optional<std::string> nextKey(
+                            key.has_value() ? registry.nextKey(*key) : registry.firstKey());
                         if (!nextKey.has_value())
                             return sol::nullopt;
                         else
                             return std::make_tuple(*nextKey, registry[*nextKey].value());
                     };
-                    return std::make_tuple(next, self, self.firstKey());
+                    return std::make_tuple(next, self, sol::nil);
                 };
                 inputActions[sol::meta_function::pairs] = pairs;
             }
@@ -123,15 +124,16 @@ namespace MWLua
                 = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key) { return registry[key]; };
             {
                 auto pairs = [](LuaUtil::InputTrigger::Registry& self) {
-                    auto next = [](LuaUtil::InputTrigger::Registry& registry, std::string_view key)
+                    auto next = [](LuaUtil::InputTrigger::Registry& registry, sol::optional<std::string_view> key)
                         -> sol::optional<std::tuple<std::string, LuaUtil::InputTrigger::Info>> {
-                        std::optional<std::string> nextKey(registry.nextKey(key));
+                        std::optional<std::string> nextKey(
+                            key.has_value() ? registry.nextKey(*key) : registry.firstKey());
                         if (!nextKey.has_value())
                             return sol::nullopt;
                         else
                             return std::make_tuple(*nextKey, registry[*nextKey].value());
                     };
-                    return std::make_tuple(next, self, self.firstKey());
+                    return std::make_tuple(next, self, sol::nil);
                 };
                 inputTriggers[sol::meta_function::pairs] = pairs;
             }
