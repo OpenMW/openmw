@@ -309,14 +309,10 @@ namespace MWWorld
     template <>
     const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
 
-    template <class T, class = std::void_t<>>
-    struct HasRecordId : std::false_type
-    {
-    };
-
     template <class T>
-    struct HasRecordId<T, std::void_t<decltype(T::sRecordId)>> : std::true_type
+    concept HasRecordId = requires
     {
+        T::sRecordId;
     };
 }
 

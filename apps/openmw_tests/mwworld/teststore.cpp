@@ -346,7 +346,7 @@ TYPED_TEST_P(StoreTest, delete_test)
 template <typename T>
 static unsigned int hasSameRecordId(const MWWorld::Store<T>& store, ESM::RecNameInts recName)
 {
-    if constexpr (MWWorld::HasRecordId<T>::value)
+    if constexpr (MWWorld::HasRecordId<T>)
     {
         return T::sRecordId == recName ? 1 : 0;
     }
@@ -359,7 +359,7 @@ static unsigned int hasSameRecordId(const MWWorld::Store<T>& store, ESM::RecName
 template <typename T>
 static void testRecNameIntCount(const MWWorld::Store<T>& store, const MWWorld::ESMStore::StoreTuple& stores)
 {
-    if constexpr (MWWorld::HasRecordId<T>::value)
+    if constexpr (MWWorld::HasRecordId<T>)
     {
         const unsigned int recordIdCount
             = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
@@ -441,7 +441,7 @@ namespace
         const int index = 3;
         const std::string stringId = "foobar";
         decltype(RecordType::mId) refId;
-        if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
+        if constexpr (ESM::HasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
         else if constexpr (std::is_same_v<RecordType, ESM::Cell>)
         {
@@ -467,10 +467,10 @@ namespace
 
             record.mId = refId;
 
-            if constexpr (ESM::hasStringId<RecordType>)
+            if constexpr (ESM::HasStringId<RecordType>)
                 record.mStringId = stringId;
 
-            if constexpr (ESM::hasIndex<RecordType>)
+            if constexpr (ESM::HasIndex<RecordType>)
                 record.mIndex = index;
 
             if constexpr (std::is_same_v<RecordType, ESM::Global>)
@@ -497,7 +497,7 @@ namespace
                 ASSERT_NE(texture, nullptr);
                 return;
             }
-            else if constexpr (ESM::hasIndex<RecordType>)
+            else if constexpr (ESM::HasIndex<RecordType>)
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);
@@ -507,16 +507,26 @@ namespace
         }
     }
 
-    static_assert(ESM::hasStringId<ESM::Dialogue>);
+    static_assert(ESM::HasStringId<ESM::Dialogue>);
 
-    template <class T, class = std::void_t<>>
-    struct HasSaveFunction : std::false_type
+    template <class T>
+    concept CanSave = requires(T& record, ESM::ESMWriter& writer)
+    {
+        record.save(writer, bool());
+    };
+
+    template <class T>
+    struct HasSaveFunction : std::bool_constant<CanSave<T>>
     {
     };
 
     template <class T>
-    struct HasSaveFunction<T, std::void_t<decltype(std::declval<T>().save(std::declval<ESM::ESMWriter&>(), bool()))>>
-        : std::true_type
+    struct HasId : std::bool_constant<ESM::HasId<T>>
+    {
+    };
+
+    template <class T>
+    struct HasModel : std::bool_constant<ESM::HasModel<T>>
     {
     };
 
@@ -573,9 +583,9 @@ namespace
     };
 
     using RecordTypes = typename ToRecordTypes<MWWorld::ESMStore::StoreTuple>::Type;
-    using RecordTypesWithId = typename FilterTypes<ESM::HasId, RecordTypes>::Type;
+    using RecordTypesWithId = typename FilterTypes<HasId, RecordTypes>::Type;
     using RecordTypesWithSave = typename FilterTypes<HasSaveFunction, RecordTypesWithId>::Type;
-    using RecordTypesWithModel = typename FilterTypes<ESM::HasModel, RecordTypesWithSave>::Type;
+    using RecordTypesWithModel = typename FilterTypes<HasModel, RecordTypesWithSave>::Type;
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 

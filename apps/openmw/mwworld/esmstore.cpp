@@ -268,7 +268,7 @@ namespace MWWorld
             auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
 
             ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
-            if constexpr (HasRecordId<T>::value)
+            if constexpr (HasRecordId<T>)
             {
                 if constexpr (ESM::isESM4Rec(T::sRecordId))
                 {
