@@ -155,10 +155,10 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mModelMale;
-        std::string mModelMaleWorld;
-        std::string mModelFemale;
-        std::string mModelFemaleWorld;
+        ESM::Path mModelMale;
+        ESM::Path mModelMaleWorld;
+        ESM::Path mModelFemale;
+        ESM::Path mModelFemaleWorld;
         std::string mText;
         std::string mIconMale;
         std::string mMiniIconMale;

@@ -182,7 +182,7 @@ namespace MWClass
             return {};
         if (data.mTraits->mIsTES4)
             return data.mTraits->mModel.getOriginal();
-        return data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
+        return data.mIsFemale ? data.mRace->mModelFemale.getOriginal() : data.mRace->mModelMale.getOriginal();
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const

@@ -60,9 +60,9 @@ namespace MWRender
     static std::string_view chooseTes4EquipmentModel(const Record* rec, bool isFemale)
     {
         if (isFemale && !rec->mModelFemale.empty())
-            return rec->mModelFemale;
+            return rec->mModelFemale.getOriginal();
         else if (!isFemale && !rec->mModelMale.empty())
-            return rec->mModelMale;
+            return rec->mModelMale.getOriginal();
         else
             return rec->mModel.getOriginal();
     }
@@ -176,7 +176,7 @@ namespace MWRender
             if (covers & ~usedParts)
             {
                 usedParts |= covers;
-                insertPart(isFemale ? arma->mModelFemale : arma->mModelMale);
+                insertPart(isFemale ? arma->mModelFemale.getOriginal() : arma->mModelMale.getOriginal());
             }
         }
 
