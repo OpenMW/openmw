@@ -219,11 +219,11 @@ namespace MWClass
             return heavyDown;
     }
 
-    const std::string& Armor::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Armor::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Armor::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

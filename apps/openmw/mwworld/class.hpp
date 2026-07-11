@@ -260,7 +260,7 @@ namespace MWWorld
         virtual float getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable = false) const;
         ///< @return combined armor rating of this actor
 
-        virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
+        virtual VFS::Path::NormalizedView getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
         ///< Return name of inventory icon.
 
         virtual ESM::RefId getEnchantment(const MWWorld::ConstPtr& ptr) const;

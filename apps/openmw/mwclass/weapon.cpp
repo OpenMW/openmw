@@ -134,11 +134,11 @@ namespace MWClass
         return MWMechanics::getWeaponType(type)->mSoundIdDown;
     }
 
-    const std::string& Weapon::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Weapon::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Weapon::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

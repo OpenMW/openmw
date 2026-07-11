@@ -42,7 +42,7 @@ namespace MWClass
         const ESM::RefId& getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the put down sound Id
 
-        const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::NormalizedView getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of inventory icon.
 
         std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
