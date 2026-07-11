@@ -64,7 +64,7 @@ namespace MWRender
         else if (!isFemale && !rec->mModelMale.empty())
             return rec->mModelMale;
         else
-            return rec->mModel;
+            return rec->mModel.getOriginal();
     }
 
     void ESM4NpcAnimation::updatePartsTES4(const ESM4::Npc& traits)
@@ -82,7 +82,7 @@ namespace MWRender
         {
             const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
             if (const ESM4::Hair* hair = store->get<ESM4::Hair>().search(traits.mHair))
-                insertPart(hair->mModel);
+                insertPart(hair->mModel.getOriginal());
             else
                 Log(Debug::Error) << "Hair not found: " << ESM::RefId(traits.mHair);
         }
@@ -108,7 +108,7 @@ namespace MWRender
                 continue;
             }
             if (usedHeadPartTypes.emplace(part->mType).second)
-                insertPart(part->mModel);
+                insertPart(part->mModel.getOriginal());
         }
     }
 

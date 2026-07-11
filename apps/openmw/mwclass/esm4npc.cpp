@@ -181,7 +181,7 @@ namespace MWClass
         if (data.mTraits == nullptr)
             return {};
         if (data.mTraits->mIsTES4)
-            return data.mTraits->mModel;
+            return data.mTraits->mModel.getOriginal();
         return data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
     }
 

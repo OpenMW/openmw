@@ -5,10 +5,10 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <type_traits>
 
 #include <components/debug/writeflags.hpp>
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/path.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm/typetraits.hpp>
 #include <components/esm4/reader.hpp>
@@ -163,7 +163,7 @@ namespace EsmTool
             if constexpr (ESM4::hasY<T>)
                 std::cout << "\n  Y: " << value.mY;
             if constexpr (ESM::hasModel<T>)
-                std::cout << "\n  Model: " << value.mModel;
+                std::cout << "\n  Model: " << value.mModel.getOriginal();
             if constexpr (ESM4::hasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
             if constexpr (ESM4::hasKf<T>)

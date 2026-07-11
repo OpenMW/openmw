@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -167,7 +168,7 @@ namespace ESM4
         ESM::FormId mPickUpSound;
         ESM::FormId mDropSound;
 
-        std::string mModel; // FIXME: for OpenCS
+        ESM::Path mModel; // FIXME: for OpenCS
 
         float mBoundRadius;
 

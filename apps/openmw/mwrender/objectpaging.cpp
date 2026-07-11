@@ -1,5 +1,6 @@
 #include "objectpaging.hpp"
 
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -13,6 +14,7 @@
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <components/esm/path.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -78,10 +80,9 @@ namespace MWRender
         template <typename Record>
         VFS::Path::Normalized getEsm4Model(const Record& record)
         {
-            if (MWClass::ESM4Impl::isMarkerModel(record->mModel))
+            if (MWClass::ESM4Impl::isMarkerModel(record->mModel.getOriginal()))
                 return {};
-            else
-                return record->mModel;
+            return record->mModel.getNormalized();
         }
 
         VFS::Path::Normalized getModel(int type, ESM::RefId id, const MWWorld::ESMStore& store)
