@@ -71,7 +71,7 @@ namespace MWClass
         return true;
     }
 
-    std::string_view Light::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Light::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Light>(ptr);
     }

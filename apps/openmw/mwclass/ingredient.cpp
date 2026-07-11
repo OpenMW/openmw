@@ -40,7 +40,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Ingredient::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Ingredient>(ptr);
     }

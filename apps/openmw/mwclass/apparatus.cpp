@@ -36,7 +36,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Apparatus::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Apparatus>(ptr);
     }

@@ -44,7 +44,7 @@ namespace MWClass
         VFS::Path::NormalizedView getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of inventory icon.
 
-        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::NormalizedView getModel(const MWWorld::ConstPtr& ptr) const override;
 
         std::unique_ptr<MWWorld::Action> use(const MWWorld::Ptr& ptr, bool force = false) const override;
         ///< Generate action for using via inventory menu (default implementation: return a

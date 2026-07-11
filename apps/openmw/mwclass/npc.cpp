@@ -434,7 +434,7 @@ namespace MWClass
         return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
-    std::string_view Npc::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Npc::getModel(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
         const VFS::Path::NormalizedView model = [&]() -> VFS::Path::NormalizedView {
@@ -448,7 +448,7 @@ namespace MWClass
         if (!model.value().starts_with(prefix.value()))
             throw std::runtime_error(std::format("NPC {} model path does not start with \"{}\": {}",
                 ref->mRef.getRefId().toDebugString(), prefix.value(), model.value()));
-        return model.value().substr(prefix.value().size());
+        return VFS::Path::NormalizedView(model.value().substr(prefix.value().size()).data());
     }
 
     VFS::Path::Normalized Npc::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
@@ -462,26 +462,26 @@ namespace MWClass
         return Settings::models().mBaseanim.get();
     }
 
-    void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
+    void Npc::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         const auto& esmStore = MWBase::Environment::get().getESMStore();
         models.push_back(getModel(ptr));
 
         if (!npc->mBase->mModel.empty())
-            models.push_back(npc->mBase->mModel.getOriginal());
+            models.push_back(npc->mBase->mModel.getNormalized());
 
         if (!npc->mBase->mHead.empty())
         {
             const ESM::BodyPart* head = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHead);
             if (head)
-                models.push_back(head->mModel.getOriginal());
+                models.push_back(head->mModel.getNormalized());
         }
         if (!npc->mBase->mHair.empty())
         {
             const ESM::BodyPart* hair = esmStore->get<ESM::BodyPart>().search(npc->mBase->mHair);
             if (hair)
-                models.push_back(hair->mModel.getOriginal());
+                models.push_back(hair->mModel.getNormalized());
         }
 
         bool female = (npc->mBase->mFlags & ESM::NPC::Female);
@@ -504,8 +504,8 @@ namespace MWClass
                                 : partRef.mMale;
 
                             const ESM::BodyPart* part = esmStore->get<ESM::BodyPart>().search(partname);
-                            if (part && !part->mModel.getOriginal().empty())
-                                models.push_back(part->mModel.getOriginal());
+                            if (part && !part->mModel.empty())
+                                models.push_back(part->mModel.getNormalized());
                         }
                     };
                     if (equipped->getType() == ESM::Clothing::sRecordId)
@@ -520,7 +520,7 @@ namespace MWClass
                     }
                     else
                     {
-                        std::string_view model = equipped->getClass().getModel(*equipped);
+                        const VFS::Path::NormalizedView model = equipped->getClass().getModel(*equipped);
                         if (!model.empty())
                             models.push_back(model);
                     }
@@ -535,8 +535,8 @@ namespace MWClass
                 = MWRender::NpcAnimation::getBodyParts(race->mId, female, false, false);
             for (const ESM::BodyPart* part : parts)
             {
-                if (part && !part->mModel.getOriginal().empty())
-                    models.push_back(part->mModel.getOriginal());
+                if (part && !part->mModel.empty())
+                    models.push_back(part->mModel.getNormalized());
             }
         }
     }

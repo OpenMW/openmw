@@ -42,7 +42,7 @@ namespace MWClass
         return false;
     }
 
-    std::string_view BodyPart::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView BodyPart::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::BodyPart>(ptr);
     }

@@ -306,16 +306,16 @@ namespace MWWorld
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
 
-    std::string_view Class::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Class::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return {};
     }
 
     VFS::Path::Normalized Class::getCorrectedModel(const MWWorld::ConstPtr& ptr) const
     {
-        std::string_view model = getModel(ptr);
+        const VFS::Path::NormalizedView model = getModel(ptr);
         if (!model.empty())
-            return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(model));
+            return Misc::ResourceHelpers::correctMeshPath(model);
         return {};
     }
 
@@ -324,9 +324,9 @@ namespace MWWorld
         return false;
     }
 
-    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<std::string_view>& models) const
+    void Class::getModelsToPreload(const ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const
     {
-        std::string_view model = getModel(ptr);
+        const VFS::Path::NormalizedView model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
     }
