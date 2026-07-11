@@ -1055,8 +1055,9 @@ namespace MWMechanics
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
                 if (soundgen == "left" || soundgen == "right")
                 {
-                    sndMgr->playSound3D(
-                        mPtr, sound, volume, pitch, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+                    if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
+                        sndMgr->playSound3D(
+                            mPtr, sound, volume, pitch, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
                 }
                 else
                 {
@@ -2520,7 +2521,7 @@ namespace MWMechanics
             if (playWolfRun)
             {
                 if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
-                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Foot, MWSound::PlayMode::Loop);
             }
             else
             {
