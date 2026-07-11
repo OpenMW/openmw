@@ -133,6 +133,28 @@ namespace MWLua
                   return element;
               };
 
+        api["getElements"] = [menu](sol::this_state thisState, sol::optional<std::string_view> layer) {
+            sol::table res(thisState, sol::create);
+            size_t index = 1;
+            LuaUi::Element::forEachShared(menu, [&](const std::shared_ptr<LuaUi::Element>& element) {
+                if ((element->mState != LuaUi::Element::Created && element->mState != LuaUi::Element::Update)
+                    || element->mRoot == nullptr)
+                    return;
+
+                MyGUI::ILayer* layerNode = nullptr;
+                for (LuaUi::WidgetExtension* ext = element->mRoot; ext != nullptr && layerNode == nullptr;
+                     ext = ext->getParent())
+                    layerNode = ext->widget()->getLayer();
+
+                if (layer.has_value() && (layerNode == nullptr || std::string_view(layerNode->getName()) != *layer))
+                    return;
+
+                if (layerNode != nullptr)
+                    res[index++] = element;
+            });
+            return res;
+        };
+
         api["updateAll"] = [luaManager = context.mLuaManager, menu]() {
             LuaUi::Element::forEach(menu, [](LuaUi::Element* e) {
                 if (e->mState == LuaUi::Element::Created)
