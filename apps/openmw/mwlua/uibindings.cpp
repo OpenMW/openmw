@@ -311,6 +311,20 @@ namespace MWLua
     {
         if (context.initializeOnce("openmw_ui_usertypes"))
         {
+            auto textureResource = context.sol().new_usertype<LuaUi::TextureResource>("TextureResource");
+            textureResource[sol::meta_function::to_string] = [](const LuaUi::TextureResource& resource) {
+                return "TextureResource[" + std::string(resource.mPath.value()) + "]";
+            };
+            textureResource["path"] = sol::readonly_property([](const LuaUi::TextureResource& resource) {
+                return std::string(resource.mPath.value());
+            });
+            textureResource["offset"] = sol::readonly_property([](const LuaUi::TextureResource& resource) {
+                return resource.mOffset;
+            });
+            textureResource["size"] = sol::readonly_property([](const LuaUi::TextureResource& resource) {
+                return resource.mSize;
+            });
+
             auto uiElement = context.sol().new_usertype<LuaUi::Element>("UiElement");
             uiElement[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
                 std::stringstream res;
