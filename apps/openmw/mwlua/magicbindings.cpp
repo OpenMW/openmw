@@ -671,8 +671,6 @@ namespace MWLua
 
         // types.Actor.spells(o):canUsePower()
         spellsT["canUsePower"] = [](const ActorSpells& spells, const sol::object& spellOrId) -> bool {
-            if (spells.mActor.isLObject())
-                throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
             auto* spell = toSpell(spellOrId);
             if (auto* store = spells.getStore())
                 return store->canUsePower(spell);
