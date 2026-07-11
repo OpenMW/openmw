@@ -315,6 +315,9 @@
 ---
 -- A texture ready to be used by UI widgets
 -- @type TextureResource
+-- @field #string path Path to the texture file
+-- @field openmw.util#Vector2 offset Offset of this resource in the texture. (0, 0) by default
+-- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default. 0 means the whole texture size is used.
 
 ---
 -- Table with arguments passed to ui.texture.
