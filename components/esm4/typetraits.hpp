@@ -46,6 +46,30 @@ namespace ESM4
     };
 
     template <class T>
+    concept HasModelMale = requires
+    {
+        T::mModelMale;
+    };
+
+    template <class T>
+    concept HasModelMaleWorld = requires
+    {
+        T::mModelMaleWorld;
+    };
+
+    template <class T>
+    concept HasModelFemale = requires
+    {
+        T::mModelFemale;
+    };
+
+    template <class T>
+    concept HasModelFemaleWorld = requires
+    {
+        T::mModelFemaleWorld;
+    };
+
+    template <class T>
     concept HasNif = requires
     {
         T::mNif;

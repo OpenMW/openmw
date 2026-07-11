@@ -164,6 +164,14 @@ namespace EsmTool
                 std::cout << "\n  Y: " << value.mY;
             if constexpr (ESM::HasModel<T>)
                 std::cout << "\n  Model: " << value.mModel.getOriginal();
+            if constexpr (ESM4::HasModelMale<T>)
+                std::cout << "\n  ModelMale: " << value.mModelMale;
+            if constexpr (ESM4::HasModelMaleWorld<T>)
+                std::cout << "\n  ModelMaleWorld: " << value.mModelMaleWorld;
+            if constexpr (ESM4::HasModelFemale<T>)
+                std::cout << "\n  ModelFemale: " << value.mModelFemale;
+            if constexpr (ESM4::HasModelFemaleWorld<T>)
+                std::cout << "\n  ModelFemaleWorld: " << value.mModelFemaleWorld;
             if constexpr (ESM4::HasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
             if constexpr (ESM4::HasKf<T>)
