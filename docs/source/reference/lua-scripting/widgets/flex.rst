@@ -272,7 +272,7 @@ The second flex child has an external stretch property set. It is set to *1* so 
 
 Flex With Grow Children
 ^^^^^^^^^^^^^^^^^^^^^
-The example below will demonstrate using text with additional children to "grow" to fill up any remaining space on that flex axis track. Review the _Result_ tab to see the visual outcome of using the grow property. Because it is the only child with grow set, it will take up all remaining space not used by the text widget.
+The example below will demonstrate using text with additional children to "grow" to fill up any remaining space on that flex axis track. Review the *Result* tab to see the visual outcome of using the grow property. Because it is the only child with grow set, it will take up all remaining space not used by the text widget.
 
 This example uses the `MWUI Interface <./../interface_mwui.html>`_. to style widgets in Morrowind's UI style.
 
