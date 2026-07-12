@@ -140,11 +140,11 @@ namespace MWClass
         return sound;
     }
 
-    const std::string& Light::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Light::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     bool Light::hasToolTip(const MWWorld::ConstPtr& ptr) const

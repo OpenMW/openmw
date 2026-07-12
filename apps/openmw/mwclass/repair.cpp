@@ -78,11 +78,11 @@ namespace MWClass
         return val;
     }
 
-    const std::string& Repair::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Repair::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Repair>* ref = ptr.get<ESM::Repair>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     bool Repair::hasItemHealth(const MWWorld::ConstPtr& ptr) const

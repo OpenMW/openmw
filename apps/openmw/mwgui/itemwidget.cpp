@@ -106,16 +106,16 @@ namespace MWGui
         mText->setCaption(getCountString(count));
     }
 
-    void ItemWidget::setIcon(const std::string& icon)
+    void ItemWidget::setIcon(VFS::Path::NormalizedView icon)
     {
         if (mCurrentIcon != icon)
         {
             mCurrentIcon = icon;
 
             if (mItemShadow)
-                mItemShadow->setImageTexture(icon);
+                mItemShadow->setImageTexture(icon.value());
             if (mItem)
-                mItem->setImageTexture(icon);
+                mItem->setImageTexture(icon.value());
         }
     }
 
@@ -137,11 +137,11 @@ namespace MWGui
     void ItemWidget::setIcon(const MWWorld::Ptr& ptr)
     {
         constexpr VFS::Path::NormalizedView defaultIcon("default icon.tga");
-        std::string_view icon = ptr.getClass().getInventoryIcon(ptr);
+        VFS::Path::NormalizedView icon = ptr.getClass().getInventoryIcon(ptr);
         if (icon.empty())
-            icon = defaultIcon.value();
+            icon = defaultIcon;
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        std::string invIcon = Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(icon), *vfs);
+        VFS::Path::Normalized invIcon = Misc::ResourceHelpers::correctIconPath(icon, *vfs);
         if (!vfs->exists(invIcon))
         {
             Log(Debug::Error) << "Failed to open image: '" << invIcon << "' not found, falling back to '"
@@ -218,7 +218,7 @@ namespace MWGui
         setIcon(ptr);
     }
 
-    void SpellWidget::setSpellIcon(std::string_view icon)
+    void SpellWidget::setSpellIcon(VFS::Path::NormalizedView icon)
     {
         if (mFrame && !mCurrentFrame.empty())
         {
@@ -229,9 +229,9 @@ namespace MWGui
         {
             mCurrentIcon = icon;
             if (mItemShadow)
-                mItemShadow->setImageTexture(icon);
+                mItemShadow->setImageTexture(icon.value());
             if (mItem)
-                mItem->setImageTexture(icon);
+                mItem->setImageTexture(icon.value());
         }
     }
 

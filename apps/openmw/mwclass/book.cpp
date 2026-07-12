@@ -96,11 +96,11 @@ namespace MWClass
         return var;
     }
 
-    const std::string& Book::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Book::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Book::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

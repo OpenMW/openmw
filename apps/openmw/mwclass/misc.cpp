@@ -125,11 +125,11 @@ namespace MWClass
         return soundMisc;
     }
 
-    const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

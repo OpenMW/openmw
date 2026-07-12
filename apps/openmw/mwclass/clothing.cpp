@@ -139,11 +139,11 @@ namespace MWClass
         return clothsDown;
     }
 
-    const std::string& Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Clothing::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

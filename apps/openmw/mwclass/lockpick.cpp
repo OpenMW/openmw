@@ -89,11 +89,11 @@ namespace MWClass
         return sound;
     }
 
-    const std::string& Lockpick::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Lockpick::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Lockpick>* ref = ptr.get<ESM::Lockpick>();
 
-        return ref->mBase->mIcon.getOriginal();
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Lockpick::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
