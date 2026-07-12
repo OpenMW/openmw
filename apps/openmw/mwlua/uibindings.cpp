@@ -18,6 +18,14 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+namespace sol
+{
+    template <>
+    struct is_automagical<LuaUi::Layer> : std::false_type
+    {
+    };
+}
+
 namespace MWLua
 {
     namespace
