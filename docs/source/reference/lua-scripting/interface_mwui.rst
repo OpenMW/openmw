@@ -7,11 +7,11 @@ Interface MWUI
    :file: generated_html/scripts_omw_mwui_init.html
 
 Examples
--------
+--------
 The following examples demonstrate how to use the MWUI interface to create Morrowind-themed UI elements.
 
 Basic Window
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^
 This example utilizes the ``boxTransparentThick`` template and thus uses the `Container <./widgets/container.html>`_ widget type as the base of the window. Because the container sizes itself to fit its contents, we'll provide a generic child widget (in the ``content`` table property) that has no additional content and simply exists to give the container something to size itself to.
 
 The transparency of the black background will match the transparency setting that is set in your game settings.
