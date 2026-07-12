@@ -7,6 +7,17 @@ local vfs = require('openmw.vfs')
 local world = require('openmw.world')
 local I = require('openmw.interfaces')
 
+local function initPlayer(player)
+    player = player or world.players[1]
+    player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
+    coroutine.yield()
+    return player
+end
+
+testing.setSetupLocalTest(function(player)
+    initPlayer(player)
+end)
+
 testing.registerGlobalTest('crash in lua coroutine when accessing type (#8757)', function()
     local co = coroutine.wrap(function()
         testing.expectEqual(tostring(world.players[1].type), 'Player')
@@ -234,13 +245,6 @@ testing.registerGlobalTest('memory limit', function()
     testing.expectEqual(err, 'not enough memory')
 end)
 
-local function initPlayer()
-    local player = world.players[1]
-    player:teleport('', util.vector3(4096, 4096, 1745), util.transform.identity)
-    coroutine.yield()
-    return player
-end
-
 testing.registerGlobalTest('vfs', function()
     local file = 'test_vfs_dir/lines.txt'
     local nosuchfile = 'test_vfs_dir/nosuchfile'
@@ -314,38 +318,18 @@ testing.registerGlobalTest('record model property', function()
     testing.expectEqual(types.NPC.record(player).model, 'meshes/basicplayer.dae')
 end)
 
-local function registerPlayerTest(name)
-    testing.registerGlobalTest(name, function()
-        local player = initPlayer()
-        testing.runLocalTest(player, name)
-    end)
-end
-
-registerPlayerTest('player yaw rotation')
-registerPlayerTest('player pitch rotation')
-registerPlayerTest('player pitch and yaw rotation')
-registerPlayerTest('player rotation')
-registerPlayerTest('player forward running')
-registerPlayerTest('player diagonal walking')
-registerPlayerTest('findPath')
-registerPlayerTest('findPath with checkpoints')
-registerPlayerTest('findRandomPointAroundCircle')
-registerPlayerTest('castNavigationRay')
-registerPlayerTest('findNearestNavMeshPosition')
-registerPlayerTest('player memory limit')
-
-testing.registerGlobalTest('player weapon attack', function()
+testing.registerGlobalTest('player with equipped weapon on attack should damage health of other actors', function()
     local player = initPlayer()
     world.createObject('basic_dagger1h', 1):moveInto(player)
-    testing.runLocalTest(player, 'player weapon attack')
+    testing.runLocalTest(player, 'player with equipped weapon on attack should damage health of other actors')
 end)
 
-testing.registerGlobalTest('load while teleporting - init player', function()
+testing.registerGlobalTestStep('load while teleporting - init player', function()
     local player = world.players[1]
     player:teleport('Museum of Wonders', util.vector3(0, -1500, 111), util.transform.rotateZ(math.rad(180)))
 end)
 
-testing.registerGlobalTest('load while teleporting - teleport', function()
+testing.registerGlobalTestStep('load while teleporting - teleport', function()
     local player = world.players[1]
     local landracer = world.createObject('landracer')
     landracer:teleport(player.cell, player.position + util.vector3(0, 500, 0))
@@ -358,14 +342,14 @@ testing.registerGlobalTest('load while teleporting - teleport', function()
     landracer:teleport(player.cell, player.position)
 end)
 
-testing.registerGlobalTest('nan float', function()
+testing.registerGlobalTest('world.setGameTimeScale should not accept nan', function()
     local nan = 0.0 / 0.0
     local ok, err = pcall(function() world.setGameTimeScale(nan) end)
     testing.expectEqual(ok, false)
     testing.expectEqual(err, 'Value must be a finite number')
 end)
 
-testing.registerGlobalTest('nan vector', function()
+testing.registerGlobalTest('weather.stormDirection should not accept a vector with a nan component', function()
     local nan = 0.0 / 0.0
     local ok, err = pcall(function() core.weather.records[1].stormDirection = util.vector3(nan, nan, nan) end)
     testing.expectEqual(ok, false)
