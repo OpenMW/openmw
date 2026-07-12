@@ -54,35 +54,45 @@ local armorSlots = {
     Actor.EQUIPMENT_SLOT.CarriedLeft,
 }
 
-local function getArmorSkill(item)
-    if not item or not Armor.objectIsInstance(item) then
+local function asRecord(itemOrId)
+    if not itemOrId then return end
+    if type(itemOrId) == 'string' then
+        return Armor.records[itemOrId]
+    elseif itemOrId.__type.name == 'ESM::Armor' then
+        return itemOrId
+    end
+    return Armor.records[itemOrId.recordId]
+end
+
+local function getArmorSkill(itemOrId)
+    local item = asRecord(itemOrId)
+    if not item then
         return 'unarmored'
     end
-    local record = Armor.record(item)
-    local weightGmst = armorTypeGmst[record.type]
+    local weightGmst = armorTypeGmst[item.type]
     local epsilon = 0.0005
-    if record.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
+    if item.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
         return 'lightarmor'
-    elseif record.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
+    elseif item.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
         return 'mediumarmor'
     else
         return 'heavyarmor'
     end
 end
 
-local function getSkillAdjustedArmorRating(item, actor)
-    local record = Armor.record(item)
+local function getSkillAdjustedArmorRating(itemOrId, actor)
+    local item = asRecord(itemOrId)
     local skillid = I.Combat.getArmorSkill(item)
     local skill = getSkill(actor, skillid)
-    if record.weight == 0 then
-        return record.baseArmor
+    if item.weight == 0 then
+        return item.baseArmor
     end
-    return record.baseArmor * skill / core.getGMST('iBaseArmorSkill')
+    return item.baseArmor * skill / core.getGMST('iBaseArmorSkill')
 end
 
 local function getEffectiveArmorRating(item, actor)
     local record = Armor.record(item)
-    local rating = getSkillAdjustedArmorRating(item, actor)
+    local rating = getSkillAdjustedArmorRating(record, actor)
     if record.health and record.health ~= 0 then
         rating = rating * (types.Item.itemData(item).condition / record.health)
     end
@@ -331,7 +341,7 @@ interface.applyArmor = applyArmor
 interface.applyStagger = applyStagger
 interface.getArmorRating = function(actor) return getArmorRating(actor or self) end
 interface.getArmorSkill = getArmorSkill
-interface.getSkillAdjustedArmorRating = function(item, actor) return getSkillAdjustedArmorRating(item, actor or self) end
+interface.getSkillAdjustedArmorRating = function(itemOrId, actor) return getSkillAdjustedArmorRating(itemOrId, actor or self) end
 interface.getEffectiveArmorRating = function(item, actor) return getEffectiveArmorRating(item, actor or self) end
 interface.spawnBloodEffect = spawnBloodEffect
 interface.pickRandomArmor = function(actor) return pickRandomArmor(actor or self) end
