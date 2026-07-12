@@ -884,7 +884,7 @@ namespace MWMechanics
 
     bool MechanicsManager::isAllowedToUse(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target, MWWorld::Ptr& victim)
     {
-        if (target.isEmpty())
+        if (target.isEmpty() || target == ptr)
             return true;
 
         const MWWorld::CellRef& cellref = target.getCellRef();
