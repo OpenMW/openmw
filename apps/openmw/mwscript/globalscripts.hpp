@@ -6,7 +6,6 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -55,7 +54,7 @@ namespace MWScript
     class GlobalScripts
     {
         const MWWorld::ESMStore& mStore;
-        std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> mScripts;
+        std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>> mScripts;
 
     public:
         GlobalScripts(const MWWorld::ESMStore& store);
@@ -64,7 +63,7 @@ namespace MWScript
 
         void removeScript(const ESM::RefId& name);
 
-        const std::unordered_map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>& getScripts() const { return mScripts; }
+        const std::map<ESM::RefId, std::shared_ptr<GlobalScriptDesc>>& getScripts() const { return mScripts; }
 
         bool isRunning(const ESM::RefId& name) const;
 
