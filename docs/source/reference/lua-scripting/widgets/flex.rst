@@ -282,7 +282,7 @@ This example uses the `MWUI Interface <./../interface_mwui.html>`_. to style wid
 
       .. code-block:: lua
 
-        local ui = require("openmw.ui");
+        local ui = require('openmw.ui')
         local util = require('openmw.util')
         local mwui = require('openmw.interfaces').MWUI
 
@@ -343,7 +343,7 @@ To better understand how the external grow property works, another example is pr
 
       .. code-block:: lua
 
-        local ui = require("openmw.ui");
+        local ui = require('openmw.ui')
         local util = require('openmw.util')
         local mwui = require('openmw.interfaces').MWUI
 
