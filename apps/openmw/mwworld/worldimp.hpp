@@ -332,6 +332,8 @@ namespace MWWorld
 
         int getSecundaPhase() const override;
 
+        std::vector<MWWorld::Moon> getCurrentMoons() const override;
+
         void setMoonColour(bool red) override;
 
         void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) override;

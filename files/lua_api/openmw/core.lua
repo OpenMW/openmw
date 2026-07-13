@@ -1424,6 +1424,34 @@
 --     end
 -- end
 
+--- `core.weather.MOON_PHASE`
+-- @type MOON_PHASE
+-- @field [parent=#MOON_PHASE] #number Full
+-- @field [parent=#MOON_PHASE] #number WaningGibbous
+-- @field [parent=#MOON_PHASE] #number ThirdQuarter
+-- @field [parent=#MOON_PHASE] #number WaningCrescent
+-- @field [parent=#MOON_PHASE] #number New
+-- @field [parent=#MOON_PHASE] #number WaxingCrescent
+-- @field [parent=#MOON_PHASE] #number FirstQuarter
+-- @field [parent=#MOON_PHASE] #number WaxingGibbous
+
+--- Moon phases.
+-- @field [parent=#Weather] #MOON_PHASE MOON_PHASE
+
+---
+-- Data for a moon in the current sky.
+-- @type Moon
+-- @field #string name The moon's name. For Morrowind, "Masser" or "Secunda".
+-- @field #number phase One of @{#MOON_PHASE}.
+-- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
+-- @field #number alpha The alpha of the moon between 0 and 1. 0 when the moon is not visible in the sky.
+
+---
+-- Get all moons in the current sky.
+-- @function [parent=#Weather] getCurrentMoons
+-- @param #Cell cell The cell to get moons for.
+-- @return #list<#Moon> Can be nil if the cell is inactive or has no sky.
+
 ---
 -- Get the current weather
 -- @function [parent=#Weather] getCurrent

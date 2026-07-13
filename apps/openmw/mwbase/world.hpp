@@ -95,6 +95,7 @@ namespace MWWorld
     class Cell;
     class DateTimeManager;
     class Weather;
+    struct Moon;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }
@@ -238,6 +239,8 @@ namespace MWBase
         virtual int getMasserPhase() const = 0;
 
         virtual int getSecundaPhase() const = 0;
+
+        virtual std::vector<MWWorld::Moon> getCurrentMoons() const = 0;
 
         virtual void setMoonColour(bool red) = 0;
 

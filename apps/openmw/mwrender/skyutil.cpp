@@ -932,27 +932,7 @@ namespace MWRender
 
     unsigned int Moon::getPhaseInt() const
     {
-        switch (mPhase)
-        {
-            case MoonState::Phase::New:
-                return 0;
-            case MoonState::Phase::WaxingCrescent:
-                return 1;
-            case MoonState::Phase::WaningCrescent:
-                return 1;
-            case MoonState::Phase::FirstQuarter:
-                return 2;
-            case MoonState::Phase::ThirdQuarter:
-                return 2;
-            case MoonState::Phase::WaxingGibbous:
-                return 3;
-            case MoonState::Phase::WaningGibbous:
-                return 3;
-            case MoonState::Phase::Full:
-                return 4;
-            default:
-                return 0;
-        }
+        return MoonState::phaseToInt(mPhase);
     }
 
     void Moon::setPhase(const MoonState::Phase& phase)

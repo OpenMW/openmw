@@ -600,6 +600,16 @@ namespace MWWorld
             return 0.0f;
     }
 
+    std::vector<Moon> WeatherManager::getCurrentMoons(const TimeStamp& time) const
+    {
+        const auto makeMoon = [](std::string_view name, const MoonModel& model, const TimeStamp& timestamp) {
+            const MWRender::MoonState state = model.calculateState(timestamp);
+            return Moon{ name, state.mPhase, MWRender::MoonState::phaseToInt(state.mPhase), state.mMoonAlpha };
+        };
+
+        return { makeMoon("Masser", mMasser, time), makeMoon("Secunda", mSecunda, time) };
+    }
+
     WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store)
         : mStore(store)
         , mRendering(rendering)
