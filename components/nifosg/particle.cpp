@@ -662,9 +662,10 @@ namespace NifOsg
         osg::Vec3f relativePos = particle->getPosition() - mPositionInParticleSpace;
         float xDotProduct = relativePos * mXVectorInParticleSpace;
         float yDotProduct = relativePos * mYVectorInParticleSpace;
-        if (-mExtents.x() * 0.5f > xDotProduct || mExtents.x() * 0.5f < xDotProduct)
+        // NB: extent components are intentionally swapped
+        if (-mExtents.y() * 0.5f > xDotProduct || mExtents.y() * 0.5f < xDotProduct)
             return;
-        if (-mExtents.y() * 0.5f > yDotProduct || mExtents.y() * 0.5f < yDotProduct)
+        if (-mExtents.x() * 0.5f > yDotProduct || mExtents.x() * 0.5f < yDotProduct)
             return;
 
         // Deflect the particle
