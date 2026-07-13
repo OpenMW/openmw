@@ -6,6 +6,7 @@
 
 #include "apps/openmw/mwbase/environment.hpp"
 
+#include <components/esm/path.hpp>
 #include <components/misc/finitevalues.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -13,6 +14,26 @@
 
 namespace MWLua::Types
 {
+    template <class Type, class M>
+    struct Getter
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec) -> const M& { return accessor(rec); };
+        }
+    };
+
+    template <class Type>
+    struct Getter<Type, ESM::Path>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec) -> std::string_view { return accessor(rec).getOriginal(); };
+        }
+    };
+
     template <class Type, class M>
     struct Setter
     {
@@ -55,6 +76,16 @@ namespace MWLua::Types
         }
     };
 
+    template <class Type>
+    struct Setter<Type, ESM::Path>
+    {
+        template <class Accessor>
+        auto operator()(Accessor&& accessor) const
+        {
+            return [=](Type& rec, std::string_view value) { accessor(rec) = value; };
+        }
+    };
+
     template <class T>
     struct RecordType
     {
@@ -83,13 +114,14 @@ namespace MWLua::Types
             return (record.*....*members);
         };
         using MemberType = std::remove_cvref_t<std::invoke_result_t<decltype(getter), const Type&>>;
+        auto getProp = Getter<Type, MemberType>{}(std::move(getter));
         if constexpr (RecordType<Type>::isMutable)
-            type[key] = sol::property(std::move(getter), Setter<Type, MemberType>{}([=](Type& rec) -> MemberType& {
+            type[key] = sol::property(std::move(getProp), Setter<Type, MemberType>{}([=](Type& rec) -> MemberType& {
                 Record& record = rec.find();
                 return (record.*....*members);
             }));
         else
-            type[key] = sol::readonly_property(std::move(getter));
+            type[key] = sol::readonly_property(std::move(getProp));
     }
 
     template <class Type, class Flag, class... Member>

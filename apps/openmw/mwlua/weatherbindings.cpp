@@ -21,18 +21,6 @@
 #include "context.hpp"
 #include "object.hpp"
 
-namespace sol
-{
-    template <>
-    struct is_automagical<MWWorld::TimeOfDayInterpolator<float>> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<MWWorld::TimeOfDayInterpolator<osg::Vec4f>> : std::false_type
-    {
-    };
-}
-
 namespace
 {
     class WeatherStore
@@ -119,6 +107,22 @@ namespace
         interT["night"] = sol::property([](const T& inter) { return Color::fromVec(inter.getNightValue()); },
             [](T& inter, const Color& value) { inter.setNightValue(value.toVec()); });
     }
+}
+
+namespace sol
+{
+    template <>
+    struct is_automagical<MWWorld::TimeOfDayInterpolator<float>> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<MWWorld::TimeOfDayInterpolator<osg::Vec4f>> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<WeatherStore> : std::false_type
+    {
+    };
 }
 
 namespace MWLua

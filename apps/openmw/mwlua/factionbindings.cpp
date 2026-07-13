@@ -37,6 +37,10 @@ namespace sol
     {
     };
     template <>
+    struct is_automagical<FactionRank> : std::false_type
+    {
+    };
+    template <>
     struct is_automagical<MWWorld::Store<FactionRank>> : std::false_type
     {
     };
