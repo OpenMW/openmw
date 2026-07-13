@@ -54,7 +54,7 @@ The transparency of the black background will match the transparency setting tha
          :alt: Example of a window created using the boxTransparentThick template
 
 Window With Text
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 Similar to the above example, a window will be rendered with text all styled in Morrowind's UI style. We'll continue to use a blank child widget to force the window to size itself for this example.
 
 .. tab-set::
