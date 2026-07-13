@@ -5,10 +5,10 @@
 #include <array>
 #include <fstream>
 #include <iostream>
-#include <type_traits>
 
 #include <components/debug/writeflags.hpp>
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/path.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm/typetraits.hpp>
 #include <components/esm4/reader.hpp>
@@ -146,33 +146,41 @@ namespace EsmTool
                 return;
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
-            if constexpr (ESM::hasId<T>)
+            if constexpr (ESM::HasId<T>)
                 std::cout << "\n  Id: " << value.mId;
-            if constexpr (ESM4::hasFlags<T>)
+            if constexpr (ESM4::HasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
-            if constexpr (ESM4::hasParent<T>)
+            if constexpr (ESM4::HasParent<T>)
                 std::cout << "\n  Parent: " << value.mParent;
-            if constexpr (ESM4::hasEditorId<T>)
+            if constexpr (ESM4::HasEditorId<T>)
                 std::cout << "\n  EditorId: " << value.mEditorId;
-            if constexpr (ESM4::hasFullName<T>)
+            if constexpr (ESM4::HasFullName<T>)
                 std::cout << "\n  FullName: " << value.mFullName;
-            if constexpr (ESM4::hasCellFlags<T>)
+            if constexpr (ESM4::HasCellFlags<T>)
                 std::cout << "\n  CellFlags: " << WriteCellFlags{ value.mCellFlags };
-            if constexpr (ESM4::hasX<T>)
+            if constexpr (ESM4::HasX<T>)
                 std::cout << "\n  X: " << value.mX;
-            if constexpr (ESM4::hasY<T>)
+            if constexpr (ESM4::HasY<T>)
                 std::cout << "\n  Y: " << value.mY;
-            if constexpr (ESM::hasModel<T>)
-                std::cout << "\n  Model: " << value.mModel;
-            if constexpr (ESM4::hasNif<T>)
+            if constexpr (ESM::HasModel<T>)
+                std::cout << "\n  Model: " << value.mModel.getOriginal();
+            if constexpr (ESM4::HasModelMale<T>)
+                std::cout << "\n  ModelMale: " << value.mModelMale.getOriginal();
+            if constexpr (ESM4::HasModelMaleWorld<T>)
+                std::cout << "\n  ModelMaleWorld: " << value.mModelMaleWorld.getOriginal();
+            if constexpr (ESM4::HasModelFemale<T>)
+                std::cout << "\n  ModelFemale: " << value.mModelFemale.getOriginal();
+            if constexpr (ESM4::HasModelFemaleWorld<T>)
+                std::cout << "\n  ModelFemaleWorld: " << value.mModelFemaleWorld.getOriginal();
+            if constexpr (ESM4::HasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
-            if constexpr (ESM4::hasKf<T>)
+            if constexpr (ESM4::HasKf<T>)
                 std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
-            if constexpr (ESM4::hasType<T>)
+            if constexpr (ESM4::HasType<T>)
                 std::cout << "\n  Type: " << value.mType;
-            if constexpr (ESM4::hasValue<T>)
+            if constexpr (ESM4::HasValue<T>)
                 std::cout << "\n  Value: " << value.mValue;
-            if constexpr (ESM4::hasData<T>)
+            if constexpr (ESM4::HasData<T>)
                 std::cout << "\n  Data: " << WriteData(value.mData);
             std::cout << '\n';
         }

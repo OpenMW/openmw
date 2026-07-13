@@ -44,7 +44,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Weapon::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Weapon::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Weapon>(ptr);
     }

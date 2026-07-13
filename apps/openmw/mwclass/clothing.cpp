@@ -40,7 +40,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Clothing::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Clothing::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Clothing>(ptr);
     }

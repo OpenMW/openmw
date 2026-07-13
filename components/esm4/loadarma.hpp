@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 #include "actor.hpp" // BodyTemplate
 
@@ -48,8 +49,8 @@ namespace ESM4
 
         std::string mEditorId;
 
-        std::string mModelMale;
-        std::string mModelFemale;
+        ESM::Path mModelMale;
+        ESM::Path mModelFemale;
 
         ESM::FormId mTextureMale;
         ESM::FormId mTextureFemale;

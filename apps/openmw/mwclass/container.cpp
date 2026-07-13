@@ -127,7 +127,7 @@ namespace MWClass
         physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string_view Container::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Container::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Container>(ptr);
     }

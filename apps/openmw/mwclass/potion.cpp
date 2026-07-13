@@ -40,7 +40,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Potion::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Potion::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Potion>(ptr);
     }

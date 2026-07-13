@@ -106,12 +106,12 @@ namespace MWClass
 
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override { return {}; }
 
-        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override
+        VFS::Path::NormalizedView getModel(const MWWorld::ConstPtr& ptr) const override
         {
-            std::string_view model = getClassModel<Record>(ptr);
+            const VFS::Path::NormalizedView model = getClassModel<Record>(ptr);
 
             // TODO: There should be a better way to hide markers
-            if (ESM4Impl::isMarkerModel(model) || ESM4Impl::isLodModel(model))
+            if (ESM4Impl::isMarkerModel(model.value()) || ESM4Impl::isLodModel(model.value()))
                 return {};
 
             return model;

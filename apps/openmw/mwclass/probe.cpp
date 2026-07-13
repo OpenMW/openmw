@@ -39,7 +39,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Probe::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Probe::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Probe>(ptr);
     }

@@ -175,14 +175,14 @@ namespace MWClass
         return getCustomData(ptr).mIsFemale;
     }
 
-    std::string_view ESM4Npc::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView ESM4Npc::getModel(const MWWorld::ConstPtr& ptr) const
     {
         const ESM4NpcCustomData& data = getCustomData(ptr);
         if (data.mTraits == nullptr)
             return {};
         if (data.mTraits->mIsTES4)
-            return data.mTraits->mModel;
-        return data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
+            return data.mTraits->mModel.getNormalized();
+        return data.mIsFemale ? data.mRace->mModelFemale.getNormalized() : data.mRace->mModelMale.getNormalized();
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const

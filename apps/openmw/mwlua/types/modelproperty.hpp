@@ -10,33 +10,28 @@
 
 #include "../contentbindings.hpp"
 
-#include <type_traits>
-
 namespace MWLua
 {
-    namespace ModelPropertyImpl
+    template <class T>
+    struct ModelPropertyImpl
     {
-        template <class T>
-        std::string getMeshPath(const T& recordValue)
+        std::string operator()(const T& recordValue) const
         {
-            if constexpr (std::is_same_v<decltype(recordValue.mModel), ESM::Path>)
-                return Misc::ResourceHelpers::correctMeshPath(recordValue.mModel.getNormalized()).value();
-            else
-                return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(recordValue.mModel)).value();
+            return Misc::ResourceHelpers::correctMeshPath(recordValue.mModel.getNormalized()).value();
         }
-    }
+    };
 
     template <class T>
     void addModelProperty(sol::usertype<T>& recordType)
     {
-        recordType["model"] = sol::readonly_property(&ModelPropertyImpl::getMeshPath<T>);
+        recordType["model"] = sol::readonly_property(ModelPropertyImpl<T>{});
     }
 
     template <class T>
     void addMutableModelProperty(sol::usertype<MutableRecord<T>>& recordType)
     {
         recordType["model"] = sol::property(
-            [](const MutableRecord<T>& mutRec) -> std::string { return ModelPropertyImpl::getMeshPath(mutRec.find()); },
+            [](const MutableRecord<T>& mutRec) -> std::string { return ModelPropertyImpl<T>{}(mutRec.find()); },
             [](MutableRecord<T>& mutRec, std::string_view path) {
                 T& recordValue = mutRec.find();
                 recordValue.mModel = Misc::ResourceHelpers::meshPathForESM3(path);

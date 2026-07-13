@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -47,7 +48,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mModel;
+        ESM::Path mModel;
 
         std::uint8_t mData;
         std::uint32_t mType;

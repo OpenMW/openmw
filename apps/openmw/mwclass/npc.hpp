@@ -85,7 +85,8 @@ namespace MWClass
             const MWWorld::Ptr& attacker, bool successful,
             const MWMechanics::DamageSourceType sourceType) const override;
 
-        void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const override;
+        void getModelsToPreload(
+            const MWWorld::ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const override;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 
@@ -131,7 +132,7 @@ namespace MWClass
 
         ESM::RefId getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
 
-        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::NormalizedView getModel(const MWWorld::ConstPtr& ptr) const override;
 
         VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const override;
 

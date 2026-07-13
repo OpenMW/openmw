@@ -59,7 +59,7 @@ namespace MWWorld
             return true;
         }
 
-        std::vector<std::string_view>& mOut;
+        std::vector<VFS::Path::NormalizedView>& mOut;
     };
 
     /// Worker thread item: preload models in a cell.
@@ -108,7 +108,7 @@ namespace MWWorld
 
             VFS::Path::Normalized mesh;
             VFS::Path::Normalized kfname;
-            for (std::string_view path : mMeshes)
+            for (VFS::Path::NormalizedView path : mMeshes)
             {
                 if (mAbort)
                     break;
@@ -116,7 +116,7 @@ namespace MWWorld
                 try
                 {
                     const VFS::Manager& vfs = *mSceneManager->getVFS();
-                    mesh = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(path));
+                    mesh = Misc::ResourceHelpers::correctMeshPath(path);
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, &vfs);
 
                     if (!vfs.exists(mesh))
@@ -150,7 +150,7 @@ namespace MWWorld
         bool mIsExterior;
         ESM::ExteriorCellLocation mCellLocation;
         ESM::RefId mCellId;
-        std::vector<std::string_view> mMeshes;
+        std::vector<VFS::Path::NormalizedView> mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;
         Resource::KeyframeManager* mKeyframeManager;

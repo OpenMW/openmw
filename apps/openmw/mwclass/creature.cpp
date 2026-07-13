@@ -183,14 +183,15 @@ namespace MWClass
         objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
-    std::string_view Creature::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Creature::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Creature>(ptr);
     }
 
-    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
+    void Creature::getModelsToPreload(
+        const MWWorld::ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const
     {
-        std::string_view model = getModel(ptr);
+        VFS::Path::NormalizedView model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
 
@@ -620,13 +621,13 @@ namespace MWClass
 
         if (sounds.empty())
         {
-            const std::string_view model = getModel(ptr);
+            const VFS::Path::NormalizedView model = getModel(ptr);
             if (!model.empty())
             {
                 for (const ESM::Creature& creature : store.get<ESM::Creature>())
                 {
                     if (creature.mId != ourId && creature.mOriginal != ourId && !creature.mModel.empty()
-                        && Misc::StringUtils::ciEqual(model, creature.mModel.getOriginal()))
+                        && model == creature.mModel.getNormalized())
                     {
                         const ESM::RefId& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();

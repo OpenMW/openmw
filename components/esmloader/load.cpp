@@ -5,6 +5,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm/typetraits.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -30,7 +31,6 @@
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -64,21 +64,11 @@ namespace EsmLoader
             std::map<std::pair<int, int>, std::size_t> mByPosition;
         };
 
-        template <class T, class = std::void_t<>>
-        struct HasId : std::false_type
-        {
-        };
-
         template <class T>
-        struct HasId<T, std::void_t<decltype(T::mId)>> : std::true_type
-        {
-        };
+        concept NotHasId = !ESM::HasId<T>;
 
-        template <class T>
-        constexpr bool hasId = HasId<T>::value;
-
-        template <class T>
-        auto loadRecord(ESM::ESMReader& reader, Records<T>& records) -> std::enable_if_t<hasId<T>>
+        template <ESM::HasId T>
+        void loadRecord(ESM::ESMReader& reader, Records<T>& records)
         {
             T record;
             bool deleted = false;
@@ -88,8 +78,8 @@ namespace EsmLoader
             records.emplace_back(deleted, std::move(record));
         }
 
-        template <class T>
-        auto loadRecord(ESM::ESMReader& reader, Records<T>& records) -> std::enable_if_t<!hasId<T>>
+        template <NotHasId T>
+        void loadRecord(ESM::ESMReader& reader, Records<T>& records)
         {
             T record;
             bool deleted = false;

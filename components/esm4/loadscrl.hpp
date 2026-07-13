@@ -32,6 +32,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -51,7 +52,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mModel;
+        ESM::Path mModel;
         std::string mText;
 
         ESM::FormId mPickUpSound;
