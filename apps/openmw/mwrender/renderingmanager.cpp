@@ -390,7 +390,6 @@ namespace MWRender
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         NifOsg::Loader::setSoftEffectEnabled(Settings::shaders().mSoftParticles);
-        Nif::Reader::setLoadUnsupportedFiles(Settings::models().mLoadUnsupportedNifFiles);
 
         mStateUpdater->setFogEnd(mViewDistance);
 
