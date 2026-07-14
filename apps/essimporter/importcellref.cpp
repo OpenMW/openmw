@@ -100,6 +100,8 @@ namespace ESSImport
         }
 
         // unsure at which point between FGTN and CHRD
+        if (esm.isNextSub("PRDT"))
+            esm.skipHSub(); // Combat target tracking coordinates?
         if (esm.isNextSub("PWPC"))
             esm.skipHSub();
         if (esm.isNextSub("PWPS"))
