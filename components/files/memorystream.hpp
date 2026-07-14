@@ -10,20 +10,20 @@ namespace Files
     {
         MemBuf(char const* buffer, size_t size)
             // a streambuf isn't specific to istreams, so we need a non-const pointer :/
-            : bufferStart(const_cast<char*>(buffer))
-            , bufferEnd(bufferStart + size)
+            : mBufferStart(const_cast<char*>(buffer))
+            , mBufferEnd(mBufferStart + size)
         {
-            this->setg(bufferStart, bufferStart, bufferEnd);
+            this->setg(mBufferStart, mBufferStart, mBufferEnd);
         }
 
         pos_type seekoff(off_type off, std::ios_base::seekdir dir, std::ios_base::openmode which) override
         {
             if (dir == std::ios_base::cur)
-                setg(bufferStart, gptr() + off, bufferEnd);
+                setg(mBufferStart, gptr() + off, mBufferEnd);
             else
-                setg(bufferStart, (dir == std::ios_base::beg ? bufferStart : bufferEnd) + off, bufferEnd);
+                setg(mBufferStart, (dir == std::ios_base::beg ? mBufferStart : mBufferEnd) + off, mBufferEnd);
 
-            return gptr() - bufferStart;
+            return gptr() - mBufferStart;
         }
 
         pos_type seekpos(pos_type pos, std::ios_base::openmode which) override
@@ -32,8 +32,8 @@ namespace Files
         }
 
     protected:
-        char* bufferStart;
-        char* bufferEnd;
+        char* mBufferStart;
+        char* mBufferEnd;
     };
 
     /// @brief A variant of std::istream that reads from a constant in-memory buffer.
