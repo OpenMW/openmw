@@ -122,24 +122,20 @@ namespace
         // class bonus
         const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
 
-        for (int attribute : npcClass->mData.mAttribute)
+        for (const ESM::RefId& id : npcClass->mData.mAttribute)
         {
-            if (attribute >= 0 && attribute < ESM::Attribute::Length)
-            {
-                auto id = ESM::Attribute::indexToRefId(attribute);
+            if (!id.empty())
                 creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
-            }
         }
 
         // skill bonus
         for (const ESM::Attribute& attribute : attributes)
         {
             float modifierSum = 0;
-            int attributeIndex = ESM::Attribute::refIdToIndex(attribute.mId);
 
             for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                if (skill.mData.mAttribute != attributeIndex)
+                if (skill.mData.mAttribute != attribute.mId)
                     continue;
 
                 // is this a minor or major skill?
@@ -171,8 +167,7 @@ namespace
         else if (npcClass->mData.mSpecialization == ESM::Class::Stealth)
             multiplier += 1;
 
-        if (std::find(npcClass->mData.mAttribute.begin(), npcClass->mData.mAttribute.end(),
-                ESM::Attribute::refIdToIndex(ESM::Attribute::Endurance))
+        if (std::find(npcClass->mData.mAttribute.begin(), npcClass->mData.mAttribute.end(), ESM::Attribute::Endurance)
             != npcClass->mData.mAttribute.end())
             multiplier += 1;
 
@@ -339,9 +334,8 @@ namespace MWClass
                     data->mNpcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)))
                         .setBase(ref->mBase->mNpdt.mSkills[i]);
 
-                for (size_t i = 0; i < ref->mBase->mNpdt.mAttributes.size(); ++i)
-                    data->mNpcStats.setAttribute(
-                        ESM::Attribute::indexToRefId(static_cast<int>(i)), ref->mBase->mNpdt.mAttributes[i]);
+                for (const auto& [attribute, value] : ref->mBase->mNpdt.mAttributes)
+                    data->mNpcStats.setAttribute(attribute, value);
 
                 data->mNpcStats.setHealth(ref->mBase->mNpdt.mHealth);
                 data->mNpcStats.setMagicka(ref->mBase->mNpdt.mMana);

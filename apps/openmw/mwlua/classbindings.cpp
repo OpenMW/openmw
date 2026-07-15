@@ -31,9 +31,8 @@ namespace MWLua
         classT["description"]
             = sol::readonly_property([](const ESM::Class& rec) -> std::string_view { return rec.mDescription; });
 
-        classT["attributes"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
-            return createReadOnlyRefIdTable(lua, rec.mData.mAttribute, ESM::Attribute::indexToRefId);
-        });
+        classT["attributes"] = sol::readonly_property(
+            [lua](const ESM::Class& rec) -> sol::table { return createReadOnlyRefIdTable(lua, rec.mData.mAttribute); });
         classT["majorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
             return createReadOnlyRefIdTable(
                 lua, rec.mData.mSkills, [](const auto& pair) { return ESM::Skill::indexToRefId(pair[1]); });

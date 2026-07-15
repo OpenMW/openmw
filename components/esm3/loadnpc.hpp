@@ -2,6 +2,7 @@
 #define OPENMW_ESM_NPC_H
 
 #include <array>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -79,8 +80,8 @@ namespace ESM
 
         struct NPDTstruct52
         {
+            std::map<ESM::RefId, unsigned char> mAttributes;
             int16_t mLevel;
-            std::array<unsigned char, Attribute::Length> mAttributes;
 
             // mSkill can grow up to 200, it must be unsigned
             std::array<unsigned char, Skill::Length> mSkills;
@@ -88,6 +89,8 @@ namespace ESM
             uint16_t mHealth, mMana, mFatigue;
             unsigned char mDisposition, mReputation, mRank;
             int32_t mGold;
+
+            unsigned char getAttribute(ESM::RefId) const;
         }; // 52 bytes
 
         unsigned char mNpdtType;

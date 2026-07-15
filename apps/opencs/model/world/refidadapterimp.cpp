@@ -952,8 +952,12 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
-        return static_cast<int>(npcStruct.mAttributes[subRowIndex]);
+    else if (subColIndex == 1)
+    {
+        const ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+        if (!attribute.empty())
+            return static_cast<int>(npcStruct.getAttribute(attribute));
+    }
     return QVariant(); // throw an exception here?
 }
 
@@ -965,8 +969,9 @@ void CSMWorld::NpcAttributesRefIdAdapter::setNestedData(
     ESM::NPC npc = record.get();
     ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt;
 
-    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
-        npcStruct.mAttributes[subRowIndex] = static_cast<unsigned char>(value.toInt());
+    const ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+    if (subColIndex == 1 && !attribute.empty())
+        npcStruct.mAttributes[attribute] = static_cast<unsigned char>(value.toInt());
     else
         return; // throw an exception here?
 
@@ -1280,8 +1285,12 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
-        return creature.mData.mAttributes[subRowIndex];
+    else if (subColIndex == 1)
+    {
+        const ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+        if (!attribute.empty())
+            return creature.mData.getAttribute(attribute);
+    }
     return QVariant(); // throw an exception here?
 }
 
@@ -1291,10 +1300,11 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
     Record<ESM::Creature>& record
         = static_cast<Record<ESM::Creature>&>(data.getRecord(RefIdData::LocalIndex(row, UniversalId::Type_Creature)));
 
-    if (subColIndex == 1 && subRowIndex >= 0 && subRowIndex < ESM::Attribute::Length)
+    const ESM::RefId attribute = ESM::Attribute::indexToRefId(subRowIndex);
+    if (subColIndex == 1 && !attribute.empty())
     {
         ESM::Creature creature = record.get();
-        creature.mData.mAttributes[subRowIndex] = value.toInt();
+        creature.mData.mAttributes[attribute] = value.toInt();
         record.setModified(creature);
     }
     // throw an exception here?

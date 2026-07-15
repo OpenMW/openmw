@@ -87,7 +87,7 @@ namespace MWLua
             return res;
         });
         factionT["attributes"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
-            return createReadOnlyRefIdTable(lua, rec.mData.mAttribute, ESM::Attribute::indexToRefId);
+            return createReadOnlyRefIdTable(lua, rec.mData.mAttribute);
         });
         factionT["skills"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
             return createReadOnlyRefIdTable(lua, rec.mData.mSkills, ESM::Skill::indexToRefId);

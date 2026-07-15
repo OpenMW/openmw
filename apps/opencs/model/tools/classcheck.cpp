@@ -50,11 +50,11 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
-    std::map<int, int> attributeCount;
+    std::map<ESM::RefId, int> attributeCount;
     for (size_t i = 0; i < classRecord.mData.mAttribute.size(); ++i)
     {
-        int attribute = classRecord.mData.mAttribute[i];
-        if (attribute == -1)
+        ESM::RefId attribute = classRecord.mData.mAttribute[i];
+        if (attribute.empty())
             messages.add(id, "Attribute #" + std::to_string(i) + " is not set", {}, CSMDoc::Message::Severity_Error);
         else
         {

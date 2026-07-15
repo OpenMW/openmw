@@ -479,7 +479,7 @@ namespace MWGui
             std::vector<ESM::RefId> attributes = mCreateClassDialog->getFavoriteAttributes();
             assert(attributes.size() >= createdClass.mData.mAttribute.size());
             for (size_t i = 0; i < createdClass.mData.mAttribute.size(); ++i)
-                createdClass.mData.mAttribute[i] = ESM::Attribute::refIdToIndex(attributes[i]);
+                createdClass.mData.mAttribute[i] = attributes[i];
 
             std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();

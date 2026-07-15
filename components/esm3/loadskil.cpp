@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/attr.hpp>
 #include <components/misc/concepts.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
@@ -38,7 +39,33 @@ namespace ESM
     const SkillId Skill::Speechcraft("Speechcraft");
     const SkillId Skill::HandToHand("HandToHand");
 
-    template <Misc::SameAsWithoutCvref<Skill::SKDTstruct> T>
+    namespace
+    {
+        struct EsmSKDTstruct
+        {
+            int32_t mAttribute;
+            int32_t mSpecialization;
+            float mUseValue[4];
+        };
+
+        void toBinary(const Skill::SKDTstruct& src, EsmSKDTstruct& dst)
+        {
+            dst.mAttribute = ESM::Attribute::refIdToIndex(src.mAttribute);
+            dst.mSpecialization = src.mSpecialization;
+            for (std::size_t i = 0; i < std::size(dst.mUseValue); ++i)
+                dst.mUseValue[i] = src.mUseValue[i];
+        }
+
+        void fromBinary(const EsmSKDTstruct& src, Skill::SKDTstruct& dst)
+        {
+            dst.mAttribute = ESM::Attribute::indexToRefId(src.mAttribute);
+            dst.mSpecialization = src.mSpecialization;
+            for (std::size_t i = 0; i < std::size(dst.mUseValue); ++i)
+                dst.mUseValue[i] = src.mUseValue[i];
+        }
+    }
+
+    template <Misc::SameAsWithoutCvref<EsmSKDTstruct> T>
     void decompose(T&& v, const auto& f)
     {
         f(v.mAttribute, v.mSpecialization, v.mUseValue);
@@ -62,9 +89,13 @@ namespace ESM
                     hasIndex = true;
                     break;
                 case fourCC("SKDT"):
-                    esm.getSubComposite(mData);
+                {
+                    EsmSKDTstruct data;
+                    esm.getSubComposite(data);
                     hasData = true;
+                    fromBinary(data, mData);
                     break;
+                }
                 case fourCC("DESC"):
                     mDescription = esm.getHString();
                     break;
@@ -85,14 +116,16 @@ namespace ESM
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
         esm.writeHNT("INDX", refIdToIndex(mId));
-        esm.writeNamedComposite("SKDT", mData);
+        EsmSKDTstruct data;
+        toBinary(mData, data);
+        esm.writeNamedComposite("SKDT", data);
         esm.writeHNOString("DESC", mDescription);
     }
 
     void Skill::blank()
     {
         mRecordFlags = 0;
-        mData.mAttribute = 0;
+        mData.mAttribute = {};
         mData.mSpecialization = 0;
         mData.mUseValue[0] = mData.mUseValue[1] = mData.mUseValue[2] = mData.mUseValue[3] = 1.0;
         mDescription.clear();

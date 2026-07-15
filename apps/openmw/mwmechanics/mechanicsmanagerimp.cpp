@@ -127,8 +127,8 @@ namespace MWMechanics
         for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i))).setBase(player->mNpdt.mSkills[i]);
 
-        for (size_t i = 0; i < player->mNpdt.mAttributes.size(); ++i)
-            npcStats.setAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i)), player->mNpdt.mSkills[i]);
+        for (const auto& [attribute, value] : player->mNpdt.mAttributes)
+            npcStats.setAttribute(attribute, value);
 
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
@@ -179,9 +179,8 @@ namespace MWMechanics
         {
             const ESM::Class* playerClass = esmStore.get<ESM::Class>().find(player->mClass);
 
-            for (int attribute : playerClass->mData.mAttribute)
+            for (const ESM::RefId& id : playerClass->mData.mAttribute)
             {
-                ESM::RefId id = ESM::Attribute::indexToRefId(attribute);
                 if (!id.empty())
                     creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
             }

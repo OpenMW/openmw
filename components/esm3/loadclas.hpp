@@ -36,7 +36,7 @@ namespace ESM
 
         struct CLDTstruct
         {
-            std::array<int32_t, 2> mAttribute; // Attributes that get class bonus
+            std::array<ESM::RefId, 2> mAttribute; // Attributes that get class bonus
             int32_t mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
             std::array<std::array<int32_t, 2>, 5> mSkills; // Minor and major skills.
             int32_t mIsPlayable; // 0x0001 - Playable class

@@ -5,6 +5,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/attr.hpp>
+
 namespace ESM
 {
     int32_t& Faction::FADTstruct::getSkill(size_t index, bool)
@@ -38,7 +40,10 @@ namespace ESM
     void Faction::FADTstruct::load(ESMReader& esm)
     {
         esm.getSubHeader();
-        esm.getT(mAttribute);
+        int32_t attributes[2];
+        esm.getT(attributes);
+        mAttribute[0] = ESM::Attribute::indexToRefId(attributes[0]);
+        mAttribute[1] = ESM::Attribute::indexToRefId(attributes[1]);
         for (auto& rank : mRankData)
             rank.load(esm);
         esm.getT(mSkills);
@@ -50,7 +55,8 @@ namespace ESM
     void Faction::FADTstruct::save(ESMWriter& esm) const
     {
         esm.startSubRecord("FADT");
-        esm.writeT(mAttribute);
+        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[0]));
+        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[1]));
         for (const auto& rank : mRankData)
             rank.save(esm);
         esm.writeT(mSkills);
@@ -153,7 +159,7 @@ namespace ESM
     {
         mRecordFlags = 0;
         mName.clear();
-        mData.mAttribute.fill(0);
+        mData.mAttribute.fill({});
         mData.mIsHidden = 0;
 
         for (size_t i = 0; i < mData.mRankData.size(); ++i)

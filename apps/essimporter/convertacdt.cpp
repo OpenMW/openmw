@@ -27,11 +27,12 @@ namespace ESSImport
             cStats.mDynamic[writeIndex].mMod = 0.f;
             cStats.mDynamic[writeIndex].mCurrent = acdt.mDynamic[i][0];
         }
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            cStats.mAttributes[i].mBase = acdt.mAttributes[i][1];
-            cStats.mAttributes[i].mMod = 0.f;
-            cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
+            auto& attribute = cStats.mAttributes[ESM::Attribute::indexToRefId(i)];
+            attribute.mBase = acdt.mAttributes[i][1];
+            attribute.mMod = 0.f;
+            attribute.mCurrent = acdt.mAttributes[i][0];
         }
         cStats.mGoldPool = acdt.mGoldPool;
         cStats.mTalkedTo = (acdt.mFlags & TalkedToPlayer) != 0;

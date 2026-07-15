@@ -462,11 +462,10 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     if (creature.mData.mLevel <= 0)
         messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
 
-    for (size_t i = 0; i < creature.mData.mAttributes.size(); ++i)
+    for (const auto& [attribute, value] : creature.mData.mAttributes)
     {
-        if (creature.mData.mAttributes[i] < 0)
-            messages.add(id, ESM::Attribute::indexToRefId(static_cast<int>(i)).toDebugString() + " is negative", {},
-                CSMDoc::Message::Severity_Warning);
+        if (value < 0)
+            messages.add(id, attribute.toDebugString() + " is negative", {}, CSMDoc::Message::Severity_Warning);
     }
 
     if (creature.mData.mCombat < 0)

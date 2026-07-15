@@ -59,8 +59,13 @@ namespace ESM
         mLevelProgress = 0;
         esm.getHNOT(mLevelProgress, "LPRO");
 
-        mSkillIncrease.fill(0);
-        esm.getHNOT(mSkillIncrease, "INCR");
+        mSkillIncrease.clear();
+        if (esm.isNextSub("INCR"))
+        {
+            esm.getSubHeader();
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+                esm.getT(mSkillIncrease[ESM::Attribute::indexToRefId(i)]);
+        }
 
         mSpecIncreases.fill(0);
         esm.getHNOT(mSpecIncreases, "SPEC");
@@ -119,7 +124,7 @@ namespace ESM
             esm.writeHNT("LPRO", mLevelProgress);
 
         bool saveSkillIncreases = false;
-        for (int32_t increase : mSkillIncrease)
+        for (const auto& [id, increase] : mSkillIncrease)
         {
             if (increase != 0)
             {
@@ -128,7 +133,18 @@ namespace ESM
             }
         }
         if (saveSkillIncreases)
-            esm.writeHNT("INCR", mSkillIncrease);
+        {
+            esm.startSubRecord("INCR");
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                int32_t increase = 0;
+                const auto it = mSkillIncrease.find(ESM::Attribute::indexToRefId(i));
+                if (it != mSkillIncrease.end())
+                    increase = it->second;
+                esm.writeT(increase);
+            }
+            esm.endRecord("INCR");
+        }
 
         if (mSpecIncreases[0] != 0 || mSpecIncreases[1] != 0 || mSpecIncreases[2] != 0)
             esm.writeHNT("SPEC", mSpecIncreases);
@@ -152,7 +168,7 @@ namespace ESM
         mReputation = 0;
         mWerewolfKills = 0;
         mLevelProgress = 0;
-        mSkillIncrease.fill(0);
+        mSkillIncrease.clear();
         mSpecIncreases.fill(0);
         mTimeToStartDrowning = 20;
         mCrimeId = -1;

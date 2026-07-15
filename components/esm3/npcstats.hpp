@@ -39,7 +39,7 @@ namespace ESM
         int32_t mReputation;
         int32_t mWerewolfKills;
         int32_t mLevelProgress;
-        std::array<int32_t, ESM::Attribute::Length> mSkillIncrease;
+        std::map<ESM::RefId, int32_t> mSkillIncrease;
         std::array<int32_t, 3> mSpecIncreases;
         std::vector<ESM::RefId> mUsedIds;
         float mTimeToStartDrowning;

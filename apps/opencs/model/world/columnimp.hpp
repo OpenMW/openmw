@@ -10,6 +10,7 @@
 #include <osg/Math>
 
 #include <apps/opencs/model/world/cell.hpp>
+#include <components/esm/attr.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddial.hpp>
@@ -296,13 +297,16 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mAttribute; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return ESM::Attribute::refIdToIndex(record.get().mData.mAttribute);
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mAttribute = data.toInt();
+            record2.mData.mAttribute = ESM::Attribute::indexToRefId(data.toInt());
 
             record.setModified(record2);
         }
@@ -371,13 +375,16 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mAttribute[mIndex]; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return ESM::Attribute::refIdToIndex(record.get().mData.mAttribute[mIndex]);
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mAttribute[mIndex] = data.toInt();
+            record2.mData.mAttribute[mIndex] = ESM::Attribute::indexToRefId(data.toInt());
 
             record.setModified(record2);
         }

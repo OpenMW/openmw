@@ -505,8 +505,8 @@ namespace MWMechanics
 
     void CreatureStats::writeState(ESM::CreatureStats& state) const
     {
-        for (size_t i = 0; i < state.mAttributes.size(); ++i)
-            getAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i))).writeState(state.mAttributes[i]);
+        for (const auto& [attribute, value] : mAttributes)
+            value.writeState(state.mAttributes[attribute]);
 
         for (size_t i = 0; i < state.mDynamic.size(); ++i)
             mDynamic[i].writeState(state.mDynamic[i]);
@@ -560,8 +560,8 @@ namespace MWMechanics
     {
         if (!state.mMissingACDT)
         {
-            for (size_t i = 0; i < state.mAttributes.size(); ++i)
-                mAttributes[ESM::Attribute::indexToRefId(static_cast<int>(i))].readState(state.mAttributes[i]);
+            for (const auto& [attribute, value] : state.mAttributes)
+                mAttributes[attribute].readState(value);
 
             for (size_t i = 0; i < state.mDynamic.size(); ++i)
                 mDynamic[i].readState(state.mDynamic[i]);

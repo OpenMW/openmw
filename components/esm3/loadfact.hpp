@@ -49,7 +49,7 @@ namespace ESM
         struct FADTstruct
         {
             // Which attributes we like
-            std::array<int32_t, 2> mAttribute;
+            std::array<ESM::RefId, 2> mAttribute;
 
             std::array<RankData, 10> mRankData;
 

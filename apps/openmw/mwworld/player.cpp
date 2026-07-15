@@ -70,8 +70,8 @@ namespace MWWorld
 
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
             mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i))).getModified();
-        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i))).getModified();
+        for (const auto& [attribute, value] : stats.getAttributes())
+            mSaveAttributes[attribute] = value.getModified();
     }
 
     void Player::restoreStats()
@@ -88,12 +88,11 @@ namespace MWWorld
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
-        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
+        for (const auto& [id, saved] : mSaveAttributes)
         {
-            auto id = ESM::Attribute::indexToRefId(static_cast<int>(i));
             auto attribute = npcStats.getAttribute(id);
             attribute.restore(attribute.getDamage());
-            attribute.setModifier(mSaveAttributes[i] - attribute.getBase());
+            attribute.setModifier(saved - attribute.getBase());
             npcStats.setAttribute(id, attribute);
         }
     }
@@ -268,7 +267,7 @@ namespace MWWorld
         mLastKnownExteriorPosition = osg::Vec3f(0, 0, 0);
 
         mSaveSkills.fill(0.f);
-        mSaveAttributes.fill(0.f);
+        mSaveAttributes.clear();
 
         mMarkedPosition.pos[0] = 0;
         mMarkedPosition.pos[1] = 0;
@@ -303,8 +302,7 @@ namespace MWWorld
         else
             player.mHasMark = false;
 
-        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-            player.mSaveAttributes[i] = mSaveAttributes[i];
+        player.mSaveAttributes = mSaveAttributes;
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
             player.mSaveSkills[i] = mSaveSkills[i];
 
@@ -351,8 +349,7 @@ namespace MWWorld
                 reader.mActorIdConverter->mMappings.emplace(
                     player.mObject.mCreatureStats.mActorId, mPlayer.mRef.getRefNum());
 
-            for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-                mSaveAttributes[i] = player.mSaveAttributes[i];
+            mSaveAttributes = player.mSaveAttributes;
             for (size_t i = 0; i < mSaveSkills.size(); ++i)
                 mSaveSkills[i] = player.mSaveSkills[i];
 

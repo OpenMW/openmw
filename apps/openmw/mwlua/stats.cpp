@@ -708,9 +708,8 @@ namespace MWLua
                 return nullptr;
             return &*rec.mSchool;
         });
-        skillT["attribute"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string {
-            return ESM::Attribute::indexToRefId(rec.mData.mAttribute).serializeText();
-        });
+        skillT["attribute"]
+            = sol::readonly_property([](const ESM::Skill& rec) -> ESM::RefId { return rec.mData.mAttribute; });
         skillT["skillGain"] = sol::readonly_property([lua](const ESM::Skill& rec) -> sol::table {
             sol::table res(lua, sol::create);
             int index = 1;

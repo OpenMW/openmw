@@ -81,7 +81,7 @@ namespace ESM
 
         struct SKDTstruct
         {
-            int32_t mAttribute; // see defs.hpp
+            ESM::RefId mAttribute; // see defs.hpp
             int32_t mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
             float mUseValue[4]; // How much skill improves through use. Meaning
                                 // of each field depends on what skill this

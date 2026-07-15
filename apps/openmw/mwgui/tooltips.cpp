@@ -826,8 +826,7 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
-        const ESM::Attribute* attr
-            = store.get<ESM::Attribute>().find(ESM::Attribute::indexToRefId(skill->mData.mAttribute));
+        const ESM::Attribute* attr = store.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
