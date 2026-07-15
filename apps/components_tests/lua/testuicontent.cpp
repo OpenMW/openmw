@@ -47,13 +47,13 @@ namespace
             sol::state_view& sol = state.sol();
             sol["makeContent"] = mNew;
             EXPECT_NO_THROW(sol.safe_script(R"(
-                local content = makeContent({ {}, {}, {} })
+                local content = makeContent({ { name = 'a' }, { name = 'b' }, { name = 'c' } })
                 content:insert(2, { name = 'inserted' })
                 assert(#content == 4, 'Not inserted')
-                local inserted = content:indexOf('inserted')
-                local index = content:indexOf(content[inserted])
-                assert(index ~= nil, 'Failed to find inserted')
-                assert(index == 2, 'Inserted at the wrong index')
+                assert(content:indexOf('a') == 1, 'Wrong index for a')
+                assert(content:indexOf('inserted') == 2, 'Wrong index for inserted')
+                assert(content:indexOf('b') == 3, 'Wrong index for b')
+                assert(content:indexOf('c') == 4, 'Wrong index for c')
                 )"));
         });
     }

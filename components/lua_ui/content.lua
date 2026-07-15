@@ -42,13 +42,13 @@ local methods = {
         validateContentChild(value)
         for i = #self, index, -1 do
             rawset(self, i + 1, rawget(self, i))
-            local name = rawget(self, i + 1)
-            if name then
+            local name = rawget(self, i + 1).name
+            if type(name) == 'string' then
                 self.__nameIndex[name] = i + 1
             end
         end
         rawset(self, index, value)
-        if value.name then
+        if type(value.name) == 'string' then
             self.__nameIndex[value.name] = index
         end
     end,
@@ -103,7 +103,7 @@ local function assign(self, index, value)
         self.__nameIndex[oldName] = nil
     end
     rawset(self, index, value)
-    if value.name then
+    if type(value.name) == 'string' then
         self.__nameIndex[value.name] = index
     end
 end
