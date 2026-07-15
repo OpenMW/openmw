@@ -379,30 +379,35 @@ namespace CSVRender
     void SceneWidget::setLighting(LightingMode mode)
     {
         int index = 0;
+        osg::Vec4f ambient(mDefaultAmbient);
+        osg::Vec4f diffuse(1.f, 1.f, 1.f, 1.f);
+
+        // FIXME: this doesn't match the engine
+        // Should be set from UnpagedWorldspaceWidget::update()
+        osg::Vec4f position = osg::Vec4f(0.f, 0.f, 1.f, 0.f);
+
         switch (mode)
         {
             case LightingMode::Day:
-                mSunLight->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
-                mSunLight->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-                mSunLight->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-                mStateUpdater->setAmbientColor(
-                    mHasDefaultAmbient ? mDefaultAmbient : osg::Vec4f(0.7f, 0.7f, 0.7f, 1.f));
+                if (!mHasDefaultAmbient)
+                    ambient = osg::Vec4f(0.7f, 0.7f, 0.7f, 1.f);
                 break;
             case LightingMode::Night:
-                mSunLight->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
-                mSunLight->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-                mSunLight->setDiffuse(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
-                mStateUpdater->setAmbientColor(
-                    mHasDefaultAmbient ? mDefaultAmbient : osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
+                diffuse = osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f);
+                if (!mHasDefaultAmbient)
+                    ambient = osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f);
                 index = mIsExterior ? 1 : 0;
                 break;
             case LightingMode::Bright:
-                mSunLight->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
-                mSunLight->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-                mSunLight->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-                mStateUpdater->setAmbientColor(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+                ambient = osg::Vec4f(1.f, 1.f, 1.f, 1.f);
                 break;
         }
+
+        mSunLight->setPosition(position);
+        mSunLight->setDiffuse(diffuse);
+        mSunLight->setSpecular(diffuse);
+        mSunLight->setAmbient(ambient);
+        mStateUpdater->setAmbientColor(ambient);
 
         DayNightSwitchVisitor visitor(index);
         mRootNode->accept(visitor);
