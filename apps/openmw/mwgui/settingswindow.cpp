@@ -117,6 +117,21 @@ namespace
             box->setIndexSelected(MyGUI::ITEM_NONE);
     }
 
+    void updateAnisotropyComboBox(MyGUI::ComboBox* box)
+    {
+        const int anisotropy = Settings::general().mAnisotropy;
+        if (anisotropy <= 1)
+            box->setIndexSelected(0);
+        else if (anisotropy <= 2)
+            box->setIndexSelected(1);
+        else if (anisotropy <= 4)
+            box->setIndexSelected(2);
+        else if (anisotropy <= 8)
+            box->setIndexSelected(3);
+        else
+            box->setIndexSelected(4);
+    }
+
     void updateSliderLabel(MyGUI::ScrollBar* scroller, MyGUI::TextBox* textBox,
         const std::vector<icu::UnicodeString>& argNames, const std::vector<icu::Formattable>& args)
     {
@@ -250,6 +265,7 @@ namespace MWGui
         getWidget(mVSyncModeList, "VSyncModeList");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
+        getWidget(mAnisotropy, "Anisotropy");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mKeyboardSwitch, "KeyboardButton");
@@ -298,6 +314,7 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mTextureFilteringButton->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
+        mAnisotropy->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onAnisotropyChanged);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterRefractionButton->eventMouseButtonClick
@@ -356,6 +373,7 @@ namespace MWGui
 
         mTextureFilteringButton->setCaptionWithReplacing(
             textureFilteringToStr(Settings::general().mTextureMipmap, Settings::general().mTextureMinFilter));
+        updateAnisotropyComboBox(mAnisotropy);
 
         int waterTextureSize = Settings::water().mRttSize;
         if (waterTextureSize >= 512)
@@ -676,6 +694,37 @@ namespace MWGui
                 break;
             default:
                 Log(Debug::Warning) << "Unexpected texture filtering option pos " << pos;
+                break;
+        }
+
+        apply();
+    }
+
+    void SettingsWindow::onAnisotropyChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        auto& generalSettings = Settings::general();
+        switch (pos)
+        {
+            case 0:
+                generalSettings.mAnisotropy.set(0);
+                break;
+            case 1:
+                generalSettings.mAnisotropy.set(2);
+                break;
+            case 2:
+                generalSettings.mAnisotropy.set(4);
+                break;
+            case 3:
+                generalSettings.mAnisotropy.set(8);
+                break;
+            case 4:
+                generalSettings.mAnisotropy.set(16);
+                break;
+            default:
+                Log(Debug::Warning) << "Unexpected anisotropy option pos " << pos;
                 break;
         }
 
