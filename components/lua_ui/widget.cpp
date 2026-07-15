@@ -329,8 +329,8 @@ namespace LuaUi
         if (padding.is<LuaUtil::Vec4>())
         {
             const LuaUtil::Vec4 value = padding.as<LuaUtil::Vec4>();
-            mPadding = osg::Vec4i(static_cast<int>(value.w()), static_cast<int>(value.x()),
-                static_cast<int>(value.y()), static_cast<int>(value.z()));
+            mPadding = osg::Vec4i(static_cast<int>(value.w()), static_cast<int>(value.x()), static_cast<int>(value.y()),
+                static_cast<int>(value.z()));
         }
         else if (padding != sol::nil)
             throw std::logic_error("Property \"padding\" must be a util.vector4");
