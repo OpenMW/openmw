@@ -10,10 +10,10 @@ namespace LuaUi
 {
     void LuaTileRect::_setAlign(const MyGUI::IntSize& /*oldSize*/)
     {
-        const int left = mPadding.left;
-        const int top = mPadding.top;
-        const int width = std::max(0, mCroppedParent->getWidth() - mPadding.left - mPadding.right);
-        const int height = std::max(0, mCroppedParent->getHeight() - mPadding.top - mPadding.bottom);
+        const int left = mPadding.w();
+        const int top = mPadding.x();
+        const int width = std::max(0, mCroppedParent->getWidth() - mPadding.w() - mPadding.z());
+        const int height = std::max(0, mCroppedParent->getHeight() - mPadding.x() - mPadding.y());
 
         mCoord.set(left, top, width, height);
         mTileSize = mSetTileSize;
@@ -75,8 +75,7 @@ namespace LuaUi
 
         WidgetExtension::updateProperties();
 
-        mTileRect->updatePadding(MyGUI::IntRect(static_cast<int>(mPadding.x()), static_cast<int>(mPadding.y()),
-            static_cast<int>(mPadding.z()), static_cast<int>(mPadding.w())));
+        mTileRect->updatePadding(mPadding);
         mTileRect->_setAlign(widget()->getSize());
     }
 

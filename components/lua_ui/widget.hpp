@@ -162,8 +162,8 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
-        // top, right, bottom, left padding in pixels
-        osg::Vec4 mPadding;
+        // left, top, right, bottom padding in pixels
+        osg::Vec4i mPadding;
 
         bool mPropagateEvents;
         bool mVisible; // used to implement updateVisible

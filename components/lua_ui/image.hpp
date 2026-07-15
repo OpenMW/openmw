@@ -18,11 +18,12 @@ namespace LuaUi
         void _setAlign(const MyGUI::IntSize& oldSize) override;
 
         void updateSize(MyGUI::IntSize tileSize) { mSetTileSize = tileSize; }
-        void updatePadding(const MyGUI::IntRect& padding) { mPadding = padding; }
+        void updatePadding(const osg::Vec4i& padding) { mPadding = padding; }
 
     protected:
         MyGUI::IntSize mSetTileSize;
-        MyGUI::IntRect mPadding{ 0, 0, 0, 0 };
+        // top, right, bottom, left
+        osg::Vec4i mPadding{ 0, 0, 0, 0 };
     };
 
     class LuaImage : public MyGUI::ImageBox, public WidgetExtension

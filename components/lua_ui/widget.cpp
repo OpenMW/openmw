@@ -1,4 +1,5 @@
 #include "widget.hpp"
+#include "components/lua/utilpackage.hpp"
 #include "components/lua_ui/util.hpp"
 #include "element.hpp"
 
@@ -323,33 +324,16 @@ namespace LuaUi
 
     void WidgetExtension::parsePadding()
     {
-        mPadding = osg::Vec4();
+        mPadding = osg::Vec4i();
         sol::object padding = propertyValue("padding", sol::object(mLua, sol::in_place, sol::lua_nil));
-        if (padding.is<double>() || padding.is<float>() || padding.is<int>())
+        if (padding.is<LuaUtil::Vec4>())
         {
-            float value = padding.as<float>();
-            mPadding = osg::Vec4(value, value, value, value);
-        }
-        else if (padding.is<sol::table>())
-        {
-            sol::table table = padding.as<sol::table>();
-            sol::optional<float> left = table.get<sol::optional<float>>("left");
-            sol::optional<float> top = table.get<sol::optional<float>>("top");
-            sol::optional<float> right = table.get<sol::optional<float>>("right");
-            sol::optional<float> bottom = table.get<sol::optional<float>>("bottom");
-
-            if (!left.has_value() && !top.has_value() && !right.has_value() && !bottom.has_value())
-            {
-                left = table.get<sol::optional<float>>(1);
-                top = table.get<sol::optional<float>>(2);
-                right = table.get<sol::optional<float>>(3);
-                bottom = table.get<sol::optional<float>>(4);
-            }
-
-            mPadding = osg::Vec4(left.value_or(0.f), top.value_or(0.f), right.value_or(0.f), bottom.value_or(0.f));
+            const LuaUtil::Vec4 value = padding.as<LuaUtil::Vec4>();
+            mPadding = osg::Vec4i(static_cast<int>(value.w()), static_cast<int>(value.x()),
+                static_cast<int>(value.y()), static_cast<int>(value.z()));
         }
         else if (padding != sol::nil)
-            throw std::logic_error("Property \"padding\" must be either a number or a table");
+            throw std::logic_error("Property \"padding\" must be a util.vector4");
     }
 
     void WidgetExtension::updateChildrenCoord()
@@ -372,14 +356,14 @@ namespace LuaUi
 
     MyGUI::IntPoint WidgetExtension::getContentOffset() const
     {
-        return MyGUI::IntPoint(static_cast<int>(mPadding.x()), static_cast<int>(mPadding.y()));
+        return MyGUI::IntPoint(mPadding.x(), mPadding.y());
     }
 
     MyGUI::IntSize WidgetExtension::getContentSize() const
     {
         MyGUI::IntSize fullSize = calculateSize();
-        return MyGUI::IntSize(std::max(0, fullSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
-            std::max(0, fullSize.height - static_cast<int>(mPadding.y() + mPadding.w())));
+        return MyGUI::IntSize(std::max(0, fullSize.width - (mPadding.x() + mPadding.z())),
+            std::max(0, fullSize.height - (mPadding.y() + mPadding.w())));
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize() const
