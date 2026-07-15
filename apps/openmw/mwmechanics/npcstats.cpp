@@ -175,15 +175,14 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
     const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
 
     float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
-    int index = ESM::Skill::refIdToIndex(skill->mId);
     for (const auto& skills : npcClass.mData.mSkills)
     {
-        if (skills[0] == index)
+        if (skills[0] == skill->mId)
         {
             typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
             break;
         }
-        else if (skills[1] == index)
+        else if (skills[1] == skill->mId)
         {
             typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
             break;
@@ -341,9 +340,8 @@ bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int ra
 
     std::vector<int> skills;
 
-    for (int index : faction.mData.mSkills)
+    for (const ESM::RefId& id : faction.mData.mSkills)
     {
-        ESM::RefId id = ESM::Skill::indexToRefId(index);
         if (!id.empty())
             skills.push_back(static_cast<int>(getSkill(id).getBase()));
     }
@@ -426,12 +424,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     state.mCrimeDispositionModifier = mCrimeDispositionModifier;
 
     for (const auto& [id, value] : mSkills)
-    {
-        // TODO extend format
-        auto index = ESM::Skill::refIdToIndex(id);
-        assert(index >= 0);
-        value.writeState(state.mSkills[static_cast<size_t>(index)]);
-    }
+        value.writeState(state.mSkills[id]);
 
     state.mIsWerewolf = mIsWerewolf;
 
@@ -483,13 +476,8 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mDisposition = state.mDisposition;
     mCrimeDispositionModifier = state.mCrimeDispositionModifier;
 
-    for (size_t i = 0; i < state.mSkills.size(); ++i)
-    {
-        // TODO extend format
-        ESM::RefId id = ESM::Skill::indexToRefId(static_cast<int>(i));
-        assert(!id.empty());
-        mSkills[id].readState(state.mSkills[i]);
-    }
+    for (const auto& [id, value] : state.mSkills)
+        mSkills[id].readState(value);
 
     mIsWerewolf = state.mIsWerewolf;
 

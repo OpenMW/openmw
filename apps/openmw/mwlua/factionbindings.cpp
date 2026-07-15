@@ -90,7 +90,7 @@ namespace MWLua
             return createReadOnlyRefIdTable(lua, rec.mData.mAttribute);
         });
         factionT["skills"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Faction& rec) {
-            return createReadOnlyRefIdTable(lua, rec.mData.mSkills, ESM::Skill::indexToRefId);
+            return createReadOnlyRefIdTable(lua, rec.mData.mSkills);
         });
         auto rankT = lua.new_usertype<FactionRank>("ESM3_FactionRank");
         rankT[sol::meta_function::to_string] = [](const FactionRank& rec) -> std::string {

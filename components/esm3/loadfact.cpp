@@ -6,15 +6,16 @@
 #include "esmwriter.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
-    int32_t& Faction::FADTstruct::getSkill(size_t index, bool)
+    ESM::RefId& Faction::FADTstruct::getSkill(size_t index, bool)
     {
         return mSkills.at(index);
     }
 
-    int32_t Faction::FADTstruct::getSkill(size_t index, bool) const
+    ESM::RefId Faction::FADTstruct::getSkill(size_t index, bool) const
     {
         return mSkills.at(index);
     }
@@ -46,7 +47,10 @@ namespace ESM
         mAttribute[1] = ESM::Attribute::indexToRefId(attributes[1]);
         for (auto& rank : mRankData)
             rank.load(esm);
-        esm.getT(mSkills);
+        int32_t skills[7];
+        esm.getT(skills);
+        for (std::size_t i = 0; i < std::size(skills); ++i)
+            mSkills[i] = ESM::Skill::indexToRefId(skills[i]);
         esm.getT(mIsHidden);
         if (mIsHidden > 1)
             esm.fail("Unknown flag!");
@@ -59,7 +63,11 @@ namespace ESM
         esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[1]));
         for (const auto& rank : mRankData)
             rank.save(esm);
-        esm.writeT(mSkills);
+        for (const ESM::RefId& id : mSkills)
+        {
+            int32_t skill = ESM::Skill::refIdToIndex(id);
+            esm.writeT(skill);
+        }
         esm.writeT(mIsHidden);
         esm.endRecord("FADT");
     }
@@ -171,7 +179,7 @@ namespace ESM
             mRanks[i].clear();
         }
 
-        mData.mSkills.fill(0);
+        mData.mSkills.fill({});
 
         mReactions.clear();
     }

@@ -638,9 +638,9 @@ namespace MWGui
                         text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
                         text += "\n#{fontcolourhtml=normal}";
                         bool firstSkill = true;
-                        for (int id : faction->mData.mSkills)
+                        for (const ESM::RefId& id : faction->mData.mSkills)
                         {
-                            const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(id));
+                            const ESM::Skill* skill = store.get<ESM::Skill>().search(id);
                             if (skill)
                             {
                                 if (!firstSkill)

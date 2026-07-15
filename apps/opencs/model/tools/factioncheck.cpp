@@ -65,17 +65,17 @@ void CSMTools::FactionCheckStage::perform(int stage, CSMDoc::Messages& messages)
     }
 
     // test for non-unique skill
-    std::map<int, int> skills; // ID, number of occurrences
+    std::map<ESM::RefId, int> skills; // ID, number of occurrences
 
-    for (int skill : faction.mData.mSkills)
-        if (skill != -1)
+    for (const ESM::RefId& skill : faction.mData.mSkills)
+        if (!skill.empty())
             ++skills[skill];
 
     for (auto& skill : skills)
         if (skill.second > 1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToRefId(skill.first).toString() + " is listed more than once",
-                "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Skill " + skill.first.toString() + " is listed more than once", "",
+                CSMDoc::Message::Severity_Error);
         }
 
     /// \todo check data members that can't be edited in the table view

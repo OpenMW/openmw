@@ -56,19 +56,19 @@ namespace ESM
                     if (mObject.mNpcStats.mIsWerewolf)
                         mObject.mCreatureStats.mAttributes[id] = attribute;
                 }
-                for (size_t i = 0; i < std::size(mSaveSkills); ++i)
+                for (int i = 0; i < ESM::Skill::Length; ++i)
                 {
                     StatState<float> skill;
                     skill.load(esm, intFallback);
                     if (clearModified)
                         skill.mMod = 0.f;
-                    mSaveSkills[i] = skill.mBase + skill.mMod - skill.mDamage;
+                    const ESM::RefId id = ESM::Skill::indexToRefId(i);
+                    mSaveSkills[id] = skill.mBase + skill.mMod - skill.mDamage;
                     if (mObject.mNpcStats.mIsWerewolf)
                     {
-                        constexpr int acrobatics = 20;
-                        if (i == acrobatics)
-                            mSetWerewolfAcrobatics = mObject.mNpcStats.mSkills[i].mBase != skill.mBase;
-                        mObject.mNpcStats.mSkills[i] = skill;
+                        if (id == ESM::Skill::Acrobatics)
+                            mSetWerewolfAcrobatics = mObject.mNpcStats.mSkills[id].mBase != skill.mBase;
+                        mObject.mNpcStats.mSkills[id] = skill;
                     }
                 }
             }
@@ -80,7 +80,10 @@ namespace ESM
             esm.getHNT(saveAttributes, "WWAT");
             for (int i = 0; i < ESM::Attribute::Length; ++i)
                 mSaveAttributes[ESM::Attribute::indexToRefId(i)] = saveAttributes[i];
-            esm.getHNT(mSaveSkills, "WWSK");
+            float saveSkills[ESM::Skill::Length];
+            esm.getHNT(saveSkills, "WWSK");
+            for (int i = 0; i < ESM::Skill::Length; ++i)
+                mSaveSkills[ESM::Skill::indexToRefId(i)] = saveSkills[i];
         }
     }
 
@@ -118,8 +121,17 @@ namespace ESM
             else
                 saveAttributes[i] = 0.f;
         }
+        float saveSkills[ESM::Skill::Length];
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            const auto it = mSaveSkills.find(ESM::Skill::indexToRefId(i));
+            if (it != mSaveSkills.end())
+                saveSkills[i] = it->second;
+            else
+                saveSkills[i] = 0.f;
+        }
         esm.writeHNT("WWAT", saveAttributes);
-        esm.writeHNT("WWSK", mSaveSkills);
+        esm.writeHNT("WWSK", saveSkills);
     }
 
 }

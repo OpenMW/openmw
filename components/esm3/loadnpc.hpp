@@ -81,16 +81,16 @@ namespace ESM
         struct NPDTstruct52
         {
             std::map<ESM::RefId, unsigned char> mAttributes;
-            int16_t mLevel;
-
             // mSkill can grow up to 200, it must be unsigned
-            std::array<unsigned char, Skill::Length> mSkills;
+            std::map<ESM::RefId, unsigned char> mSkills;
+            int16_t mLevel;
 
             uint16_t mHealth, mMana, mFatigue;
             unsigned char mDisposition, mReputation, mRank;
             int32_t mGold;
 
             unsigned char getAttribute(ESM::RefId) const;
+            unsigned char getSkill(ESM::RefId) const;
         }; // 52 bytes
 
         unsigned char mNpdtType;

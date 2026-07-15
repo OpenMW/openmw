@@ -601,9 +601,9 @@ namespace EsmTool
         std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization) << " ("
                   << mData.mData.mSpecialization << ")" << std::endl;
         for (const auto& skills : mData.mData.mSkills)
-            std::cout << "  Minor Skill: " << skillLabel(skills[0]) << " (" << skills[0] << ")" << std::endl;
+            std::cout << "  Minor Skill: " << skills[0] << std::endl;
         for (const auto& skills : mData.mData.mSkills)
-            std::cout << "  Major Skill: " << skillLabel(skills[1]) << " (" << skills[1] << ")" << std::endl;
+            std::cout << "  Major Skill: " << skills[1] << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 
@@ -741,9 +741,9 @@ namespace EsmTool
         std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
         for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
             std::cout << "  Attribute" << (i + 1) << ": " << mData.mData.mAttribute[i] << std::endl;
-        for (int skill : mData.mData.mSkills)
-            if (skill != -1)
-                std::cout << "  Skill: " << skillLabel(skill) << " (" << skill << ")" << std::endl;
+        for (const ESM::RefId& skill : mData.mData.mSkills)
+            if (!skill.empty())
+                std::cout << "  Skill: " << skill << std::endl;
         for (size_t i = 0; i != mData.mData.mRankData.size(); i++)
             if (!mData.mRanks[i].empty())
             {
@@ -1057,9 +1057,8 @@ namespace EsmTool
                 std::cout << "    " << attribute << ": " << int(value) << std::endl;
 
             std::cout << "  Skills:" << std::endl;
-            for (size_t i = 0; i != mData.mNpdt.mSkills.size(); i++)
-                std::cout << "    " << skillLabel(static_cast<int>(i)) << ": " << int(mData.mNpdt.mSkills[i])
-                          << std::endl;
+            for (const auto& [skill, value] : mData.mNpdt.mSkills)
+                std::cout << "    " << skill << ": " << int(value) << std::endl;
 
             std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
             std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
@@ -1148,9 +1147,8 @@ namespace EsmTool
 
         for (const auto& bonus : mData.mData.mBonus)
             // Not all races have 7 skills.
-            if (bonus.mSkill != -1)
-                std::cout << "  Skill: " << skillLabel(bonus.mSkill) << " (" << bonus.mSkill << ") = " << bonus.mBonus
-                          << std::endl;
+            if (!bonus.mSkill.empty())
+                std::cout << "  Skill: " << bonus.mSkill << " = " << bonus.mBonus << std::endl;
 
         for (const auto& power : mData.mPowers.mList)
             std::cout << "  Power: " << power << std::endl;

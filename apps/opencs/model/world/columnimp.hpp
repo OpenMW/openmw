@@ -410,8 +410,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromStdString(
-                ESM::Skill::indexToRefId(record.get().mData.getSkill(mIndex, mMajor)).getRefIdString());
+            return QString::fromStdString(record.get().mData.getSkill(mIndex, mMajor).getRefIdString());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -420,7 +419,7 @@ namespace CSMWorld
             {
                 ESXRecordT record2 = record.get();
 
-                record2.mData.getSkill(mIndex, mMajor) = static_cast<int>(*index);
+                record2.mData.getSkill(mIndex, mMajor) = ESM::Skill::indexToRefId(static_cast<int>(*index));
 
                 record.setModified(record2);
             }

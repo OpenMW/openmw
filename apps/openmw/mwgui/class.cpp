@@ -312,8 +312,8 @@ namespace MWGui
 
         for (size_t i = 0; i < currentClass->mData.mSkills.size(); ++i)
         {
-            ESM::RefId minor = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][0]);
-            ESM::RefId major = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][1]);
+            const ESM::RefId& minor = currentClass->mData.mSkills[i][0];
+            const ESM::RefId& major = currentClass->mData.mSkills[i][1];
             mMinorSkill[i]->setSkillId(minor);
             mMajorSkill[i]->setSkillId(major);
             ToolTips::createSkillToolTip(mMinorSkill[i], minor);

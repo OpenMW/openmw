@@ -348,7 +348,7 @@ QVariant CSMWorld::BookRefIdAdapter::getData(const RefIdColumn* column, const Re
         return record.get().mData.mIsScroll;
 
     if (column == mSkill)
-        return record.get().mData.mSkillId;
+        return ESM::Skill::refIdToIndex(record.get().mData.mSkillId);
 
     if (column == mText)
         return QString::fromUtf8(record.get().mText.c_str());
@@ -367,7 +367,7 @@ void CSMWorld::BookRefIdAdapter::setData(
     if (column == mBookType)
         book.mData.mIsScroll = value.toInt();
     else if (column == mSkill)
-        book.mData.mSkillId = value.toInt();
+        book.mData.mSkillId = ESM::Skill::indexToRefId(value.toInt());
     else if (column == mText)
         book.mText = value.toString().toUtf8().data();
     else
@@ -1036,13 +1036,14 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData(
 
     const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt;
 
-    if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
+    const ESM::RefId skill = ESM::Skill::indexToRefId(subRowIndex);
+    if (skill.empty())
         throw std::runtime_error("index out of range");
 
     if (subColIndex == 0)
         return subRowIndex;
     else if (subColIndex == 1)
-        return static_cast<int>(npcStruct.mSkills[subRowIndex]);
+        return static_cast<int>(npcStruct.getSkill(skill));
     else
         return QVariant(); // throw an exception here?
 }
@@ -1055,11 +1056,12 @@ void CSMWorld::NpcSkillsRefIdAdapter::setNestedData(
     ESM::NPC npc = record.get();
     ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt;
 
-    if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
+    const ESM::RefId skill = ESM::Skill::indexToRefId(subRowIndex);
+    if (skill.empty())
         throw std::runtime_error("index out of range");
 
     if (subColIndex == 1)
-        npcStruct.mSkills[subRowIndex] = static_cast<unsigned char>(value.toInt());
+        npcStruct.mSkills[skill] = static_cast<unsigned char>(value.toInt());
     else
         return; // throw an exception here?
 

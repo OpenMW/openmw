@@ -30,7 +30,7 @@ namespace ESM
             for (int i = 0; i < Attribute::Length; ++i)
                 dst.mAttributes[i] = src.getAttribute(ESM::Attribute::indexToRefId(i));
             for (int i = 0; i < Skill::Length; ++i)
-                dst.mSkills[i] = src.mSkills[i];
+                dst.mSkills[i] = src.getSkill(ESM::Skill::indexToRefId(i));
             dst.mHealth = src.mHealth;
             dst.mMana = src.mMana;
             dst.mFatigue = src.mFatigue;
@@ -47,7 +47,7 @@ namespace ESM
             for (int i = 0; i < Attribute::Length; ++i)
                 dst.mAttributes.emplace(ESM::Attribute::indexToRefId(i), src.mAttributes[i]);
             for (int i = 0; i < Skill::Length; ++i)
-                dst.mSkills[i] = src.mSkills[i];
+                dst.mSkills.emplace(ESM::Skill::indexToRefId(i), src.mSkills[i]);
             dst.mHealth = src.mHealth;
             dst.mMana = src.mMana;
             dst.mFatigue = src.mFatigue;
@@ -276,7 +276,7 @@ namespace ESM
     {
         mNpdt.mLevel = 0;
         mNpdt.mAttributes.clear();
-        mNpdt.mSkills.fill(0);
+        mNpdt.mSkills.clear();
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;
@@ -301,6 +301,14 @@ namespace ESM
     {
         const auto it = mAttributes.find(id);
         if (it == mAttributes.end())
+            return 0;
+        return it->second;
+    }
+
+    unsigned char NPC::NPDTstruct52::getSkill(ESM::RefId id) const
+    {
+        const auto it = mSkills.find(id);
+        if (it == mSkills.end())
             return 0;
         return it->second;
     }

@@ -68,8 +68,8 @@ namespace MWWorld
     {
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
-        for (size_t i = 0; i < mSaveSkills.size(); ++i)
-            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i))).getModified();
+        for (const auto& [skill, value] : stats.getSkills())
+            mSaveSkills[skill] = value.getModified();
         for (const auto& [attribute, value] : stats.getAttributes())
             mSaveAttributes[attribute] = value.getModified();
     }
@@ -82,11 +82,11 @@ namespace MWWorld
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
         creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
-        for (size_t i = 0; i < mSaveSkills.size(); ++i)
+        for (const auto& [id, saved] : mSaveSkills)
         {
-            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)));
+            auto& skill = npcStats.getSkill(id);
             skill.restore(skill.getDamage());
-            skill.setModifier(mSaveSkills[i] - skill.getBase());
+            skill.setModifier(saved - skill.getBase());
         }
         for (const auto& [id, saved] : mSaveAttributes)
         {
@@ -266,7 +266,7 @@ namespace MWWorld
         mPreviousItems.clear();
         mLastKnownExteriorPosition = osg::Vec3f(0, 0, 0);
 
-        mSaveSkills.fill(0.f);
+        mSaveSkills.clear();
         mSaveAttributes.clear();
 
         mMarkedPosition.pos[0] = 0;
@@ -303,8 +303,7 @@ namespace MWWorld
             player.mHasMark = false;
 
         player.mSaveAttributes = mSaveAttributes;
-        for (size_t i = 0; i < mSaveSkills.size(); ++i)
-            player.mSaveSkills[i] = mSaveSkills[i];
+        player.mSaveSkills = mSaveSkills;
 
         player.mPreviousItems = mPreviousItems;
 
@@ -350,8 +349,7 @@ namespace MWWorld
                     player.mObject.mCreatureStats.mActorId, mPlayer.mRef.getRefNum());
 
             mSaveAttributes = player.mSaveAttributes;
-            for (size_t i = 0; i < mSaveSkills.size(); ++i)
-                mSaveSkills[i] = player.mSaveSkills[i];
+            mSaveSkills = player.mSaveSkills;
 
             if (player.mObject.mNpcStats.mIsWerewolf)
             {

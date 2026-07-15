@@ -219,7 +219,7 @@ namespace MWWorld
             setting.mMod = 0;
         if (npcStats)
         {
-            for (auto& skill : npcStats->mSkills)
+            for (auto& [id, skill] : npcStats->mSkills)
                 skill.mMod = 0.f;
         }
     }

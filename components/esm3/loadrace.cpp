@@ -4,6 +4,7 @@
 #include "esmwriter.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
@@ -43,7 +44,9 @@ namespace ESM
         esm.getSubHeader();
         for (auto& bonus : mBonus)
         {
-            esm.getT(bonus.mSkill);
+            int32_t skill;
+            esm.getT(skill);
+            bonus.mSkill = ESM::Skill::indexToRefId(skill);
             esm.getT(bonus.mBonus);
         }
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -60,7 +63,8 @@ namespace ESM
         esm.startSubRecord("RADT");
         for (const auto& bonus : mBonus)
         {
-            esm.writeT(bonus.mSkill);
+            int32_t skill = ESM::Skill::refIdToIndex(bonus.mSkill);
+            esm.writeT(skill);
             esm.writeT(bonus.mBonus);
         }
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -150,7 +154,7 @@ namespace ESM
 
         for (auto& bonus : mData.mBonus)
         {
-            bonus.mSkill = -1;
+            bonus.mSkill = {};
             bonus.mBonus = 0;
         }
 

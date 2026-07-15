@@ -140,12 +140,11 @@ namespace
 
                 // is this a minor or major skill?
                 float add = 0.2f;
-                int index = ESM::Skill::refIdToIndex(skill.mId);
                 for (const auto& skills : npcClass->mData.mSkills)
                 {
-                    if (skills[0] == index)
+                    if (skills[0] == skill.mId)
                         add = 0.5;
-                    if (skills[1] == index)
+                    if (skills[1] == skill.mId)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -203,7 +202,7 @@ namespace
 
             for (const auto& skills : npcClass->mData.mSkills)
             {
-                ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
+                const ESM::RefId& id = skills[i];
                 if (!id.empty())
                 {
                     npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
@@ -219,16 +218,15 @@ namespace
             int raceBonus = 0;
             int specBonus = 0;
 
-            int index = ESM::Skill::refIdToIndex(skill.mId);
             auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                [&](const auto& bonus) { return bonus.mSkill == index; });
+                [&](const auto& bonus) { return bonus.mSkill == skill.mId; });
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
             for (const auto& skills : npcClass->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), index) != skills.end())
+                if (std::find(skills.begin(), skills.end(), skill.mId) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;
@@ -330,9 +328,8 @@ namespace MWClass
             {
                 gold = ref->mBase->mNpdt.mGold;
 
-                for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
-                    data->mNpcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)))
-                        .setBase(ref->mBase->mNpdt.mSkills[i]);
+                for (const auto& [skill, value] : ref->mBase->mNpdt.mSkills)
+                    data->mNpcStats.getSkill(skill).setBase(value);
 
                 for (const auto& [attribute, value] : ref->mBase->mNpdt.mAttributes)
                     data->mNpcStats.setAttribute(attribute, value);

@@ -29,8 +29,8 @@ namespace ESSImport
             out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             out.mObject.mNpcStats.mSkillIncrease[ESM::Attribute::indexToRefId(i)] = pcdt.mPNAM.mSkillIncreases[i];
-        for (size_t i = 0; i < out.mObject.mNpcStats.mSkills.size(); ++i)
-            out.mObject.mNpcStats.mSkills[i].mProgress = pcdt.mPNAM.mSkillProgress[i];
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+            out.mObject.mNpcStats.mSkills[ESM::Skill::indexToRefId(i)].mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
         if (pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_WeaponDrawn)

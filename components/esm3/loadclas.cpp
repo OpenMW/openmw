@@ -4,6 +4,7 @@
 
 #include <components/esm/attr.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/misc/concepts.hpp>
 
 #include "esmreader.hpp"
@@ -32,7 +33,10 @@ namespace ESM
             dst.mAttribute[1] = ESM::Attribute::refIdToIndex(src.mAttribute[1]);
             dst.mSpecialization = src.mSpecialization;
             for (std::size_t i = 0; i < src.mSkills.size(); ++i)
-                dst.mSkills[i] = src.mSkills[i];
+            {
+                dst.mSkills[i][0] = ESM::Skill::refIdToIndex(src.mSkills[i][0]);
+                dst.mSkills[i][1] = ESM::Skill::refIdToIndex(src.mSkills[i][1]);
+            }
             dst.mIsPlayable = src.mIsPlayable;
             dst.mServices = src.mServices;
         }
@@ -43,7 +47,10 @@ namespace ESM
             dst.mAttribute[1] = ESM::Attribute::indexToRefId(src.mAttribute[1]);
             dst.mSpecialization = src.mSpecialization;
             for (std::size_t i = 0; i < src.mSkills.size(); ++i)
-                dst.mSkills[i] = src.mSkills[i];
+            {
+                dst.mSkills[i][0] = ESM::Skill::indexToRefId(src.mSkills[i][0]);
+                dst.mSkills[i][1] = ESM::Skill::indexToRefId(src.mSkills[i][1]);
+            }
             dst.mIsPlayable = src.mIsPlayable;
             dst.mServices = src.mServices;
         }
@@ -55,12 +62,12 @@ namespace ESM
         f(v.mAttribute, v.mSpecialization, v.mSkills, v.mIsPlayable, v.mServices);
     }
 
-    int32_t& Class::CLDTstruct::getSkill(int index, bool major)
+    ESM::RefId& Class::CLDTstruct::getSkill(int index, bool major)
     {
         return mSkills.at(index)[major ? 1 : 0];
     }
 
-    int32_t Class::CLDTstruct::getSkill(int index, bool major) const
+    ESM::RefId Class::CLDTstruct::getSkill(int index, bool major) const
     {
         return mSkills.at(index)[major ? 1 : 0];
     }
@@ -141,6 +148,6 @@ namespace ESM
         mData.mServices = 0;
 
         for (auto& skills : mData.mSkills)
-            skills.fill(0);
+            skills.fill({});
     }
 }

@@ -41,8 +41,8 @@ namespace ESM
         esm.getHNOT(mCrimeDispositionModifier, "DISM");
 
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
-        for (auto& skill : mSkills)
-            skill.load(esm, intFallback);
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+            mSkills[ESM::Skill::indexToRefId(i)].load(esm, intFallback);
 
         mIsWerewolf = false;
         esm.getHNOT(mIsWerewolf, "WOLF");
@@ -105,8 +105,14 @@ namespace ESM
         if (mCrimeDispositionModifier)
             esm.writeHNT("DISM", mCrimeDispositionModifier);
 
-        for (const auto& skill : mSkills)
-            skill.save(esm);
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            const auto it = mSkills.find(ESM::Skill::indexToRefId(i));
+            if (it != mSkills.end())
+                it->second.save(esm);
+            else
+                StatState<float>{}.save(esm);
+        }
 
         if (mIsWerewolf)
             esm.writeHNT("WOLF", mIsWerewolf);
