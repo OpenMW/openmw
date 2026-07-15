@@ -19,12 +19,15 @@ local function unlockAttempted(actor)
 end
 
 local function onApplyMagicEffects(options)
+    assert(options.id)
     local record = common.getMagicRecord(options.id)
+    assert(record)
     local effects = common.filterByIndex(record.effects, options.effects)
 
-    -- Lockables are only affected by Lock/Unlock spells
-    -- Lock state from global scripts, so we need to use events to affect lock state.
-    -- This gives a 1 frame delay, so to keep track of the current lock state we have to track it locally
+    -- Lockables are only affected by Lock/Unlock spells, so we ignore all other effects.
+    -- Lock state can only be changed from global scripts, so we need to use events to affect lock state.
+    -- This gives a 1 frame delay, so for spells with multiple lock/unlock effects we need to track the state
+    -- locally for later effects to see the correct lock state.
     local lockLevel = Lockable.getLockLevel(self)
     local isLocked = Lockable.isLocked(self)
     local playEffects = {}
@@ -59,11 +62,6 @@ local function onApplyMagicEffects(options)
                 core.sound.playSound3d('Open Lock Fail', self)
             end
         end
-    end
-
-    for _, effect in pairs(playEffects) do
-        local mgef = core.magic.effects.records[effect.id]
-        animation.addGlow(self, {color = mgef.color, duration = 1.5})
     end
 
     local crimeActor = options.caster

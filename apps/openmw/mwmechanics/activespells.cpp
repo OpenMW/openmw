@@ -415,7 +415,7 @@ namespace MWMechanics
             if (removedSpell)
                 break;
         }
-        if (reflectedEffects.size() > 0)
+        if (!reflectedEffects.empty())
         {
             const ESM::Static* reflectStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
                 ESM::RefId::stringRefId("VFX_Reflect"));

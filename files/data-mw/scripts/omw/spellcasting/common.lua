@@ -40,7 +40,7 @@ local function getMagicRecord(id)
         return record
     end
 
-    print('Warning: No such spell: '..tostring(id))
+    print('Warning: No such magic item: '..tostring(id))
 
 end
 

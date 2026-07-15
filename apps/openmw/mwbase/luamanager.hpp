@@ -11,7 +11,7 @@
 #include <osg/Quat>
 #include <osg/Vec3f>
 
-#include "components/esm3/refnum.hpp"
+#include <components/esm3/refnum.hpp>
 #include <components/sdlutil/events.hpp>
 
 #include "../mwmechanics/attacktype.hpp"
