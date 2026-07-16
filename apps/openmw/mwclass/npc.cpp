@@ -1181,15 +1181,6 @@ namespace MWClass
                 return (name == "left") ? npcParts.mFootWaterLeft : npcParts.mFootWaterRight;
             if (world->isOnGround(ptr))
             {
-                if (getNpcStats(ptr).isWerewolf()
-                    && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
-                {
-                    int weaponType = ESM::Weapon::None;
-                    MWMechanics::getActiveWeapon(ptr, &weaponType);
-                    if (weaponType == ESM::Weapon::None)
-                        return ESM::RefId();
-                }
-
                 const MWWorld::InventoryStore& inv = Npc::getInventoryStore(ptr);
                 MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
