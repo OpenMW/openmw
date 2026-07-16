@@ -1,7 +1,5 @@
 #include "activespells.hpp"
 
-#include <optional>
-
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -17,12 +15,12 @@
 #include <components/settings/values.hpp>
 
 #include "actorutil.hpp"
-#include "apps/openmw/mwbase/luamanager.hpp"
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "spelleffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -31,7 +29,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/worldmodel.hpp"
 
 namespace

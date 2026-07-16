@@ -36,7 +36,7 @@ local function onApplyMagicEffects(options)
         if effect.id == core.magic.EFFECT_TYPE.Lock then
             playEffects[#playEffects + 1] = effect
             local magnitude = auxUtil.random(effect.magnitudeMin, effect.magnitudeMax)
-            if magnitude >= lockLevel or not isLocked then
+            if magnitude > lockLevel or not isLocked then
                 lockLevel = magnitude
                 isLocked = true
                 core.sendGlobalEvent('Lock', {target = self, magnitude = magnitude})
@@ -79,7 +79,7 @@ end
 
 return {
     eventHandlers = {
-        ApplyMagicEffects =  onApplyMagicEffects,
+        ApplyMagicEffects = onApplyMagicEffects,
         AddGlow = function(options) animation.addGlow(self, options) end,
     },
 }

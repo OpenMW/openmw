@@ -9,6 +9,7 @@
 #include <components/misc/strings/format.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -19,8 +20,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/animation.hpp"
-
-#include "../mwbase/luamanager.hpp"
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
