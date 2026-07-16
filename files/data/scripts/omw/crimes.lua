@@ -5,7 +5,8 @@ local I = require('openmw.interfaces')
 local function isAllowedToOpen(player, lockable)
     -- Lockables are always allowed when their global variable is 1
     if lockable.globalVariable then
-        if world.mwscript.getGlobalVariables()[lockable.globalVariable] == 1 then
+        local value = world.mwscript.getGlobalVariables()[lockable.globalVariable]
+        if value and value >= 1 then
             return true
         end
     end
