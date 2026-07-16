@@ -160,8 +160,7 @@ namespace MWInput
             {
                 if (auto* ext = dynamic_cast<LuaUi::WidgetExtension*>(widget))
                 {
-                    ext->mouseWheel(widget, static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), arg.preciseX,
-                        arg.preciseY);
+                    ext->mouseWheel(widget, mGuiCursorX, mGuiCursorY, arg.preciseX, arg.preciseY);
                     break;
                 }
                 widget = widget->getParent();
