@@ -135,9 +135,9 @@ External
 Examples
 --------
 
-Horizontal Wrapping Flex with Gap
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This example demonstrates creating a horizontal flex widget that incorporates wrap and gap usage. A basic white image texture is used for visual demonstration.
+Wrapping Widgets Onto Multiple Rows
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This example demonstrates creating a horizontal flex widget that incorporates wrap and gap usage. Wrap allows the child widgets to flow onto multiple rows when there is not enough space in the main axis. A basic white image texture is used for visual demonstration.
 
 .. tab-set::
 
@@ -201,8 +201,8 @@ This example demonstrates creating a horizontal flex widget that incorporates wr
       .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-horizontal-wrap-gap.webp
          :alt: Example of a horizontal wrapping flex with gap
 
-Vertical Flex with Arrangement and Stretch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Arranging Column Children and Stretching Width Along the Cross-Axis
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This example demonstrates creating a vertical flex widget that incorporates arrange and stretch usage. A basic white image texture is used for visual demonstration. The arrangement prop will arrange the flex children on their cross axis. In the case of a vertical flex, arrange will be on the horizontal axis.
 
 The second flex child has an external stretch property set. It is set to *1* so that it takes up 100% of the available space on that cross axis. Setting it to 0.5, for example, would size the width of that widget to be 50% of the available space on the cross axis.
@@ -270,8 +270,8 @@ The second flex child has an external stretch property set. It is set to *1* so 
       .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-vertical-arrange-stretch.webp
          :alt: Example of a vertical flex with arrangement and stretch
 
-Flex With Grow Children
-^^^^^^^^^^^^^^^^^^^^^^^
+Distributing Remaining Space to Child Widgets
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The example below will demonstrate using text with additional children to "grow" to fill up any remaining space on that flex axis track. Review the *Result* tab to see the visual outcome of using the grow property. Because it is the only child with grow set, it will take up all remaining space not used by the text widget.
 
 This example uses the `MWUI Interface <./../interface_mwui.html>`_ to style widgets in Morrowind's UI style.
