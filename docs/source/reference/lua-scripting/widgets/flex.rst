@@ -137,7 +137,7 @@ Examples
 
 Wrapping Widgets Onto Multiple Rows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This example demonstrates creating a horizontal flex widget that incorporates wrap and gap usage. Wrap allows the child widgets to flow onto multiple rows when there is not enough space in the main axis. A basic white image texture is used for visual demonstration.
+This example demonstrates creating a horizontal flex widget that incorporates wrap, gap, and alignment usage. Wrap allows the child widgets to flow onto multiple rows when there is not enough space in the main axis. Further, incorporating the _align_ prop on the Flex widget will align the child widgets on the main axis (horizontal axis in this example) for each row. A basic white image texture is used for visual demonstration and its color is modified to differentiate the three child widgets.
 
 .. tab-set::
 
@@ -148,44 +148,60 @@ This example demonstrates creating a horizontal flex widget that incorporates wr
          local ui = require('openmw.ui')
          local util = require('openmw.util')
   
-         ui.create({
+        ui.create({
           layer = "Windows",
-          type = ui.TYPE.Flex,
+          type = ui.TYPE.Image,
           props = {
-            autoSize = false, -- Wrapping doesn't work with autoSize
-            horizontal = true,
-            wrap = true,
-            gap = 20,
-            position = util.vector2(100, 100),
-            size = util.vector2(220, 400),
+            resource = ui.texture({
+              path = "white"
+            }),
+            color = util.color.rgb(0, 0, 0),
+            size = util.vector2(300, 250),
+            position = util.vector2(100, 100)
           },
           content = ui.content({
             {
-              type = ui.TYPE.Image,
+              type = ui.TYPE.Flex,
               props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(100, 100)
-              }
-            },
-            {
-              type = ui.TYPE.Image,
-              props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(100, 100)
-              }
-            },
-            {
-              type = ui.TYPE.Image,
-              props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(100, 100)
-              }
+                autoSize = false, -- Wrapping doesn't work with autoSize
+                horizontal = true,
+                wrap = true,
+                gap = 20,
+                relativeSize = util.vector2(1, 1),
+                align = ui.ALIGNMENT.Center,
+              },
+              content = ui.content({
+                {
+                  type = ui.TYPE.Image,
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0, 0.4, 1),
+                    size = util.vector2(100, 100)
+                  }
+                },
+                {
+                  type = ui.TYPE.Image,
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0.4, 0, 0),
+                    size = util.vector2(100, 100)
+                  }
+                },
+                {
+                  type = ui.TYPE.Image,
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0, 0.4, 0),
+                    size = util.vector2(100, 100)
+                  }
+                }
+              })
             }
           })
         })
@@ -198,8 +214,8 @@ This example demonstrates creating a horizontal flex widget that incorporates wr
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-horizontal-wrap-gap.webp
-         :alt: Example of a horizontal wrapping flex with gap
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/ui-wrapping-gap-alignment.webp
+         :alt: Example of a horizontal wrapping flex with gap and alignment
 
 Arranging Column Children and Stretching Width Along the Cross-Axis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -218,43 +234,58 @@ The second flex child has an external stretch property set. It is set to *1* so 
 
         ui.create({
           layer = "Windows",
-          type = ui.TYPE.Flex,
+          type = ui.TYPE.Image,
           props = {
-            gap = 20,
-            arrange = ui.ALIGNMENT.Center,
-            position = util.vector2(100, 100),
-            size = util.vector2(220, 400),
+            resource = ui.texture({
+              path = "white"
+            }),
+            color = util.color.rgb(0, 0, 0),
+            size = util.vector2(300, 260),
+            position = util.vector2(100, 100)
           },
           content = ui.content({
             {
-              type = ui.TYPE.Image,
+              type = ui.TYPE.Flex,
               props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(50, 100)
-              }
-            },
-            {
-              type = ui.TYPE.Image,
-              external = {
-                stretch = 1
+                gap = 20,
+                arrange = ui.ALIGNMENT.Center,
+                relativeSize = util.vector2(1, 1),
               },
-              props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(0, 25)
-              }
-            },
-            {
-              type = ui.TYPE.Image,
-              props = {
-                resource = ui.texture({
-                  path = "white"
-                }),
-                size = util.vector2(50, 100)
-              }
+              content = ui.content({
+                {
+                  type = ui.TYPE.Image,
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0, 0.4, 1),
+                    size = util.vector2(50, 100)
+                  }
+                },
+                {
+                  type = ui.TYPE.Image,
+                  external = {
+                    stretch = 1
+                  },
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0.4, 0, 0),
+                    size = util.vector2(0, 25)
+                  }
+                },
+                {
+                  type = ui.TYPE.Image,
+                  props = {
+                    resource = ui.texture({
+                      path = "white"
+                    }),
+                    color = util.color.rgb(0, 0.4, 0),
+                    size = util.vector2(50, 100)
+                  }
+                }
+              })
             }
           })
         })
@@ -267,7 +298,7 @@ The second flex child has an external stretch property set. It is set to *1* so 
 
    .. tab-item:: Result
 
-      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/flex-vertical-arrange-stretch.webp
+      .. figure:: https://gitlab.com/nox7/openmw-docs/-/raw/ui-docs-images/docs/source/reference/lua-scripting/_static/vertical-flex-arrange-grow.webp
          :alt: Example of a vertical flex with arrangement and stretch
 
 Distributing Remaining Space to Child Widgets
@@ -290,37 +321,37 @@ This example uses the `MWUI Interface <./../interface_mwui.html>`_ to style widg
           layer = "Windows",
           template = mwui.templates.boxTransparentThick,
           props = {
-              position = util.vector2(100, 100)
+            position = util.vector2(100, 100)
           },
           content = ui.content({
-              {
-                type = ui.TYPE.Flex,
-                props = {
-                  gap = 20,
-                  horizontal = true,
-                  size = util.vector2(500, 150)
-                },
-                content = ui.content({
-                  {
-                    template = mwui.templates.textNormal,
-                    type = ui.TYPE.Text,
-                    props = {
-                      textSize = 20,
-                      text = "Hello, World!"
-                    }
-                  },
-                  {
-                    external = {
-                      grow = 1
-                    },
-                    type = ui.TYPE.Image,
-                    props = {
-                      size = util.vector2(0, 20),
-                      resource = ui.texture({ path = "white" })
-                    }
+            {
+              type = ui.TYPE.Flex,
+              props = {
+                gap = 20,
+                horizontal = true,
+                size = util.vector2(500, 150)
+              },
+              content = ui.content({
+                {
+                  template = mwui.templates.textNormal,
+                  type = ui.TYPE.Text,
+                  props = {
+                    textSize = 20,
+                    text = "Hello, World!"
                   }
-                })
-              }
+                },
+                {
+                  external = {
+                    grow = 1
+                  },
+                  type = ui.TYPE.Image,
+                  props = {
+                    size = util.vector2(0, 20),
+                    resource = ui.texture({ path = "white" })
+                  }
+                }
+              })
+            }
           })
         })
 
