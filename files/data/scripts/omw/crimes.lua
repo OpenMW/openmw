@@ -6,7 +6,7 @@ local function isAllowedToOpen(player, lockable)
     -- Lockables are always allowed when their global variable is 1
     if lockable.globalVariable then
         local value = world.mwscript.getGlobalVariables()[lockable.globalVariable]
-        if value and value >= 1 then
+        if value and value ~= 0 then
             return true
         end
     end
