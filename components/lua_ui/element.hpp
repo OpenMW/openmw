@@ -1,6 +1,8 @@
 #ifndef OPENMW_LUAUI_ELEMENT
 #define OPENMW_LUAUI_ELEMENT
 
+#include <map>
+#include <memory>
 #include <vector>
 
 #include "widget.hpp"
@@ -18,6 +20,14 @@ namespace LuaUi
             auto& container = menu ? sMenuElements : sGameElements;
             for (auto& [_, element] : container)
                 callback(element.get());
+        }
+
+        template <class Callback>
+        static void forEachShared(bool menu, Callback callback)
+        {
+            auto& container = menu ? sMenuElements : sGameElements;
+            for (auto& [_, element] : container)
+                callback(element);
         }
 
         static const std::vector<std::string_view>& allLayoutProperties();

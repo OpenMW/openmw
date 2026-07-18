@@ -101,6 +101,15 @@
 -- @return #Element
 
 ---
+-- Returns currently rendered Lua UI root Elements in this Lua context.
+-- If `layer` is provided, only Elements attached to that layer are returned.
+-- Note: this returns Elements created with `ui.create`. It does not return native engine UI widgets or child layouts
+-- that are not separate Elements.
+-- @function [parent=#ui] getElements
+-- @param #string layer Optional layer name
+-- @return #list<#Element>
+
+---
 -- Adds a settings page to main menu setting's Scripts tab.
 -- @function [parent=#ui] registerSettingsPage
 -- @param #SettingsPageOptions page
