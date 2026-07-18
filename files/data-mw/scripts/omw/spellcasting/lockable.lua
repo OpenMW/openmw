@@ -7,7 +7,7 @@ local self = require('openmw.self')
 local common = require('scripts.omw.spellcasting.common')
 local nearby = require('openmw.nearby')
 local auxUtil = require('openmw_aux.util')
-local l10n = core.l10n('OMWEngine')
+local l10n = core.l10n('Mechanics')
 
 local function unlockAttempted(actor)
     if Player.objectIsInstance(actor) then

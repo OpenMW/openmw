@@ -3,7 +3,7 @@ local world = require('openmw.world')
 local I = require('openmw.interfaces')
 
 local function isAllowedToOpen(player, lockable)
-    -- Lockables are always allowed when their global variable is 1
+    -- Lockables are always allowed when their global variable is non-zero
     if lockable.globalVariable then
         local value = world.mwscript.getGlobalVariables()[lockable.globalVariable]
         if value and value ~= 0 then
@@ -20,7 +20,7 @@ local function isAllowedToOpen(player, lockable)
 
     local faction = owner.factionId
     if faction then
-        local rank = types.NPC.getFactionRank(player, owner.factionId)
+        local rank = types.NPC.getFactionRank(player, faction)
         if rank == 0 then
             -- Not in faction.
             isFactionOwned = true
