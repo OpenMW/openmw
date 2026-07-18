@@ -64,6 +64,18 @@ Engine handler is a function defined by a script, that can be called by the engi
     - Object is activated by an actor.
   * - onNewExterior(cell)
     - A new exterior cell not defined by a content file has been generated.
+  * - onDropped(object, actor, position, rotation)
+    - | An object was dropped by an actor. For players, this is triggered when
+      | they drop an item from their inventory, but not when placing it on
+      | a surface. ``rotation`` is a ``util.Transform``.
+      | The position and rotation parameters describe the object's location before 
+      | being snapped to the ground.
+  * - onPlaced(object, actor, position, rotation)
+    - | An object was placed by a player actor. This is triggered when
+      | dropping an item and placing it on a surface. ``rotation`` is a
+      | ``util.Transform``.
+      | The position and rotation parameters describe the object's location before 
+      | being snapped to the ground.
 
 **Only for local scripts**
 
