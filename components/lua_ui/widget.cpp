@@ -324,13 +324,13 @@ namespace LuaUi
 
     void WidgetExtension::parsePadding()
     {
-        mPadding = osg::Vec4i();
+        mPadding = Padding();
         sol::object padding = propertyValue("padding", sol::object(mLua, sol::in_place, sol::lua_nil));
         if (padding.is<LuaUtil::Vec4>())
         {
             const LuaUtil::Vec4 value = padding.as<LuaUtil::Vec4>();
-            mPadding = osg::Vec4i(static_cast<int>(value.w()), static_cast<int>(value.x()), static_cast<int>(value.y()),
-                static_cast<int>(value.z()));
+            mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
+                static_cast<int>(value.w()) };
         }
         else if (padding != sol::nil)
             throw std::logic_error("Property \"padding\" must be a util.vector4");
@@ -356,14 +356,14 @@ namespace LuaUi
 
     MyGUI::IntPoint WidgetExtension::getContentOffset() const
     {
-        return MyGUI::IntPoint(mPadding.x(), mPadding.y());
+        return MyGUI::IntPoint(mPadding.mLeft, mPadding.mTop);
     }
 
     MyGUI::IntSize WidgetExtension::getContentSize() const
     {
         MyGUI::IntSize fullSize = calculateSize();
-        return MyGUI::IntSize(std::max(0, fullSize.width - (mPadding.x() + mPadding.z())),
-            std::max(0, fullSize.height - (mPadding.y() + mPadding.w())));
+        return MyGUI::IntSize(std::max(0, fullSize.width - (mPadding.mLeft + mPadding.mRight)),
+            std::max(0, fullSize.height - (mPadding.mTop + mPadding.mBottom)));
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize() const

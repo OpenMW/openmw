@@ -6,6 +6,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_TileRect.h>
 
+#include "padding.hpp"
 #include "widget.hpp"
 
 namespace LuaUi
@@ -18,12 +19,11 @@ namespace LuaUi
         void _setAlign(const MyGUI::IntSize& oldSize) override;
 
         void updateSize(MyGUI::IntSize tileSize) { mSetTileSize = tileSize; }
-        void updatePadding(const osg::Vec4i& padding) { mPadding = padding; }
+        void updatePadding(const Padding& padding) { mPadding = padding; }
 
     protected:
         MyGUI::IntSize mSetTileSize;
-        // top, right, bottom, left
-        osg::Vec4i mPadding{ 0, 0, 0, 0 };
+        Padding mPadding;
     };
 
     class LuaImage : public MyGUI::ImageBox, public WidgetExtension

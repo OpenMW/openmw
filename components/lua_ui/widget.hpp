@@ -10,6 +10,7 @@
 
 #include <components/lua/asyncpackage.hpp>
 
+#include "padding.hpp"
 #include "properties.hpp"
 
 namespace LuaUi
@@ -162,8 +163,7 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
-        // left, top, right, bottom padding in pixels
-        osg::Vec4i mPadding;
+        Padding mPadding;
 
         bool mPropagateEvents;
         bool mVisible; // used to implement updateVisible

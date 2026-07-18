@@ -72,12 +72,12 @@ namespace LuaUi
         if (mAutoSize)
         {
             const MyGUI::IntSize contentSize(
-                std::max(0, normalSize.width - static_cast<int>(mPadding.x() + mPadding.z())),
-                std::max(0, normalSize.height - static_cast<int>(mPadding.y() + mPadding.w())));
+                std::max(0, normalSize.width - (mPadding.mLeft + mPadding.mRight)),
+                std::max(0, normalSize.height - (mPadding.mTop + mPadding.mBottom)));
             mEditBox->setSize(contentSize);
             int targetHeight = mMultiline ? mEditBox->getTextSize().height : mEditBox->getFontHeight();
             normalSize.height
-                = std::max(normalSize.height, targetHeight + static_cast<int>(mPadding.y() + mPadding.w()));
+                = std::max(normalSize.height, targetHeight + mPadding.mTop + mPadding.mBottom);
         }
         return normalSize;
     }
