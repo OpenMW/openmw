@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <format>
 
 #include <osg/AlphaFunc>
 #include <osg/Capability>
@@ -597,12 +598,8 @@ namespace Resource
             const bool isColladaFile = ext == "dae";
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(std::string(ext));
             if (!reader)
-            {
-                std::stringstream errormsg;
-                errormsg << "Error loading " << normalizedFilename << ": no readerwriter for '" << ext << "' found"
-                         << std::endl;
-                throw std::runtime_error(errormsg.str());
-            }
+                throw std::runtime_error(
+                    std::format("Error loading {}: no readerwriter for '{}' found", normalizedFilename.value(), ext));
 
             osg::ref_ptr<osgDB::Options> options(new osgDB::Options);
             // Set a ReadFileCallback so that image files referenced in the model are read from our virtual file system
@@ -617,12 +614,8 @@ namespace Resource
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(model, options);
             if (!result.success())
-            {
-                std::stringstream errormsg;
-                errormsg << "Error loading " << normalizedFilename << ": " << result.message() << " code "
-                         << result.status() << std::endl;
-                throw std::runtime_error(errormsg.str());
-            }
+                throw std::runtime_error(std::format("Error loading {}: {} code {}", normalizedFilename.value(),
+                    result.message(), static_cast<int>(result.status())));
 
             // Recognize and hide collision node
             unsigned int hiddenNodeMask = 0;
