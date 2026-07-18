@@ -146,11 +146,13 @@ namespace MWLua
                      ext = ext->getParent())
                     layerNode = ext->widget()->getLayer();
 
-                if (layer.has_value() && (layerNode == nullptr || std::string_view(layerNode->getName()) != *layer))
+                if (!layerNode)
                     return;
 
-                if (layerNode != nullptr)
-                    res[index++] = element;
+                if (layer.has_value() && layerNode->getName() != *layer)
+                    return;
+
+                res[index++] = element;
             });
             return res;
         };
