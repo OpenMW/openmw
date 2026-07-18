@@ -3,7 +3,10 @@
 
 #include <variant>
 
+#include <osg/Vec3f>
+
 #include <components/esm3/cellref.hpp> // defines RefNum that is used as a unique id
+#include <components/lua/utilpackage.hpp>
 
 #include "../mwworld/cellstore.hpp"
 
@@ -84,8 +87,22 @@ namespace MWLua
             ESM::RefNum mActor;
             int mDays;
         };
+        struct OnDropped
+        {
+            ESM::RefNum mObject;
+            ESM::RefNum mActor;
+            osg::Vec3f mPosition;
+            LuaUtil::TransformQ mRotation;
+        };
+        struct OnPlaced
+        {
+            ESM::RefNum mObject;
+            ESM::RefNum mActor;
+            osg::Vec3f mPosition;
+            LuaUtil::TransformQ mRotation;
+        };
         using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported,
-            OnAnimationTextKey, OnAnimationEnded, OnSkillUse, OnSkillLevelUp, OnJailTimeServed>;
+            OnAnimationTextKey, OnAnimationEnded, OnSkillUse, OnSkillLevelUp, OnJailTimeServed, OnDropped, OnPlaced>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

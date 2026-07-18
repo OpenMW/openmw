@@ -526,6 +526,22 @@ namespace MWLua
         mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object), force });
     }
 
+    void LuaManager::objectDropped(
+        const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
+    {
+        MWBase::Environment::get().getWorldModel()->registerPtr(object);
+        mEngineEvents.addToQueue(
+            EngineEvents::OnDropped{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+    }
+
+    void LuaManager::objectPlaced(
+        const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position, const osg::Quat& rotation)
+    {
+        MWBase::Environment::get().getWorldModel()->registerPtr(object);
+        mEngineEvents.addToQueue(
+            EngineEvents::OnPlaced{ getId(object), getId(actor), position, LuaUtil::asTransform(rotation) });
+    }
+
     void LuaManager::animationTextKey(const MWWorld::Ptr& actor, const std::string& key)
     {
         auto pos = key.find(": ");

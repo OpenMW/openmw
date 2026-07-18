@@ -7,6 +7,8 @@
 #include <variant>
 
 #include <SDL_events.h>
+#include <osg/Quat>
+#include <osg/Vec3f>
 
 #include "../mwgui/mode.hpp"
 #include "../mwmechanics/attacktype.hpp"
@@ -72,6 +74,12 @@ namespace MWBase
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectTeleported(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
+        virtual void objectDropped(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position,
+            const osg::Quat& rotation)
+            = 0;
+        virtual void objectPlaced(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position,
+            const osg::Quat& rotation)
+            = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) = 0;
         virtual void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) = 0;
