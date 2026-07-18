@@ -24,14 +24,14 @@ namespace NifOsg
         void setMode(Mode mode) { mMode = mode; }
         Mode getMode() const { return mMode; }
 
-        virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
-        virtual bool computeWorldToLocalMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
+        bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
+        bool computeWorldToLocalMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override;
 
         osg::Matrixd computeMatrix(const osg::NodeVisitor* nv) const;
         osg::Matrixd computeMatrixForFrame(const osg::Vec3d& eye, const osg::Vec3d& look, const osg::Vec3d& up) const;
 
-        void setRotation(const osg::Quat& rotation);
-        void setRotation(const Nif::Matrix3& rotation);
+        void setRotation(const osg::Quat& rotation) override;
+        void setRotation(const Nif::Matrix3& rotation) override;
 
     private:
         Mode mMode;
