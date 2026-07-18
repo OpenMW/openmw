@@ -153,16 +153,11 @@ namespace
         int i = 0;
         for (const ESM::IndexedENAMstruct& effect : effects.mList)
         {
-            int effectIdx = ESM::MagicEffect::refIdToIndex(effect.mData.mEffectID);
-            int skillIdx = ESM::Skill::refIdToIndex(effect.mData.mSkill);
-            int attributeIdx = ESM::Attribute::refIdToIndex(effect.mData.mAttribute);
-            std::cout << "  Effect[" << i << "]: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")"
-                      << std::endl;
-            if (skillIdx != -1)
-                std::cout << "    Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
-            if (attributeIdx != -1)
-                std::cout << "    Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")"
-                          << std::endl;
+            std::cout << "  Effect[" << i << "]: " << effect.mData.mEffectID << std::endl;
+            if (!effect.mData.mSkill.empty())
+                std::cout << "    Skill: " << effect.mData.mSkill << std::endl;
+            if (!effect.mData.mAttribute.empty())
+                std::cout << "    Attribute: " << effect.mData.mAttribute << std::endl;
             std::cout << "    Range: " << rangeTypeLabel(effect.mData.mRange) << " (" << effect.mData.mRange << ")"
                       << std::endl;
             // Area is always zero if range type is "Self"
@@ -846,12 +841,9 @@ namespace EsmTool
             if (mData.mData.mEffectID[i].empty())
                 continue;
 
-            int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mData.mEffectID[i]);
-            int skillIdx = ESM::Skill::refIdToIndex(mData.mData.mSkills[i]);
-            int attributeIdx = ESM::Attribute::refIdToIndex(mData.mData.mAttributes[i]);
-            std::cout << "  Effect: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
-            std::cout << "  Skill: " << skillLabel(skillIdx) << " (" << skillIdx << ")" << std::endl;
-            std::cout << "  Attribute: " << attributeLabel(attributeIdx) << " (" << attributeIdx << ")" << std::endl;
+            std::cout << "  Effect: " << mData.mData.mEffectID[i] << std::endl;
+            std::cout << "  Skill: " << mData.mData.mSkills[i] << std::endl;
+            std::cout << "  Attribute: " << mData.mData.mAttributes[i] << std::endl;
         }
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
@@ -973,8 +965,7 @@ namespace EsmTool
     template <>
     void Record<ESM::MagicEffect>::print()
     {
-        int effectIdx = ESM::MagicEffect::refIdToIndex(mData.mId);
-        std::cout << "  Index: " << magicEffectLabel(effectIdx) << " (" << effectIdx << ")" << std::endl;
+        std::cout << "  Index: " << mData.mId << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Icon: " << mData.mIcon.getOriginal() << std::endl;
         std::cout << "  Flags: " << magicEffectFlags(mData.mData.mFlags) << std::endl;
@@ -1128,20 +1119,14 @@ namespace EsmTool
         std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
 
         std::cout << "  Male:" << std::endl;
-        for (int j = 0; j < ESM::Attribute::Length; ++j)
-        {
-            ESM::RefId id = ESM::Attribute::indexToRefId(j);
-            std::cout << "    " << id << ": " << mData.mData.getAttribute(id, true) << std::endl;
-        }
+        for (const auto& [id, values] : mData.mData.mAttributeValues)
+            std::cout << "    " << id << ": " << values.mMale << std::endl;
         std::cout << "    Height: " << mData.mData.mMaleHeight << std::endl;
         std::cout << "    Weight: " << mData.mData.mMaleWeight << std::endl;
 
         std::cout << "  Female:" << std::endl;
-        for (int j = 0; j < ESM::Attribute::Length; ++j)
-        {
-            ESM::RefId id = ESM::Attribute::indexToRefId(j);
-            std::cout << "    " << id << ": " << mData.mData.getAttribute(id, false) << std::endl;
-        }
+        for (const auto& [id, values] : mData.mData.mAttributeValues)
+            std::cout << "    " << id << ": " << values.mFemale << std::endl;
         std::cout << "    Height: " << mData.mData.mFemaleHeight << std::endl;
         std::cout << "    Weight: " << mData.mData.mFemaleWeight << std::endl;
 
@@ -1211,8 +1196,7 @@ namespace EsmTool
     template <>
     void Record<ESM::Skill>::print()
     {
-        int index = ESM::Skill::refIdToIndex(mData.mId);
-        std::cout << "  ID: " << skillLabel(index) << " (" << index << ")" << std::endl;
+        std::cout << "  ID: " << mData.mId << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Governing Attribute: " << mData.mData.mAttribute << std::endl;
         std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization) << " ("

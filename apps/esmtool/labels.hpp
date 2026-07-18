@@ -36,11 +36,8 @@ std::string_view ruleFunction(int idx);
 // and the indexes for referencing the types in other records in the
 // database.  Then a single label function could work for all types.
 
-std::string_view magicEffectLabel(int idx);
-std::string_view attributeLabel(int idx);
 std::string_view spellTypeLabel(int idx);
 std::string_view specializationLabel(int idx);
-std::string_view skillLabel(int idx);
 std::string_view apparatusTypeLabel(int idx);
 std::string_view rangeTypeLabel(int idx);
 std::string_view schoolLabel(int idx);
