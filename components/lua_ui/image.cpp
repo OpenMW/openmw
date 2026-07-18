@@ -10,12 +10,10 @@ namespace LuaUi
 {
     void LuaTileRect::_setAlign(const MyGUI::IntSize& /*oldSize*/)
     {
-        const int left = mPadding.mLeft;
-        const int top = mPadding.mTop;
         const int width = std::max(0, mCroppedParent->getWidth() - mPadding.mLeft - mPadding.mRight);
         const int height = std::max(0, mCroppedParent->getHeight() - mPadding.mTop - mPadding.mBottom);
 
-        mCoord.set(left, top, width, height);
+        mCoord.set(mPadding.mLeft, mPadding.mTop, width, height);
         mTileSize = mSetTileSize;
 
         // zero tilesize stands for not tiling
