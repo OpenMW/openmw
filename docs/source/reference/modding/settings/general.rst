@@ -15,7 +15,7 @@ General
 
    This setting's effect can be seen by finding locations with straight lines
    (striped rugs or Balmora cobblestones) radiating into the distance,
-   and adjusting the anisotropy slider.
+   and adjusting the anisotropy combo box.
 
 .. omw-setting::
    :title: screenshot format

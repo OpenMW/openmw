@@ -402,23 +402,20 @@
                             <UserString key="VStretch" value="false"/>
                             <UserString key="HStretch" value="false"/>
                         </Widget>
-                        <Widget type="ComboBox" align="Left Top" skin="MW_ComboBox" position="0 28 200 24" name="TextureFilteringButton">
+                        <Widget type="ComboBox" align="Left Top" skin="MW_ComboBox" position="0 22 200 24" name="TextureFilteringButton">
                             <Property key="AddItem" value="#{OMWEngine:TextureFilteringBilinear}"/>
                             <Property key="AddItem" value="#{OMWEngine:TextureFilteringTrilinear}"/>
                         </Widget>
 
-                        <Widget type="AutoSizedTextBox" skin="NormalText" position="0 58 200 18" name="AnisotropyLabel">
+                        <Widget type="AutoSizedTextBox" skin="NormalText" position="0 52 200 18" name="AnisotropyLabel">
                             <Property key="Caption" value="#{OMWEngine:Anisotropy}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 80 352 18" align="HStretch Top">
-                            <Property key="Range" value="17"/>
-                            <Property key="Page" value="1"/>
-                            <Property key="WheelPage" value="1"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="General"/>
-                            <UserString key="SettingName" value="anisotropy"/>
-                            <UserString key="SettingLabelWidget" value="AnisotropyLabel"/>
-                            <UserString key="SettingLabelCaption" value="AnisotropyValue"/>
+                        <Widget type="ComboBox" skin="MW_ComboBox" position="0 74 200 24" align="Left Top" name="Anisotropy">
+                            <Property key="AddItem" value="#{Interface:Off}"/>
+                            <Property key="AddItem" value="2x"/>
+                            <Property key="AddItem" value="4x"/>
+                            <Property key="AddItem" value="8x"/>
+                            <Property key="AddItem" value="16x"/>
                         </Widget>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" position="0 104 0 18" align="Left Top" name="RenderDistanceLabel">

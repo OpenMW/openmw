@@ -41,6 +41,7 @@ namespace MWGui
         MyGUI::ComboBox* mVSyncModeList;
         MyGUI::Button* mWindowBorderButton;
         MyGUI::ComboBox* mTextureFilteringButton;
+        MyGUI::ComboBox* mAnisotropy;
 
         MyGUI::Button* mWaterRefractionButton;
         MyGUI::Button* mSunlightScatteringButton;
@@ -80,6 +81,7 @@ namespace MWGui
         void onTabChanged(MyGUI::TabControl* sender, size_t index);
         void onOkButtonClicked(MyGUI::Widget* sender);
         void onTextureFilteringChanged(MyGUI::ComboBox* sender, size_t pos);
+        void onAnisotropyChanged(MyGUI::ComboBox* sender, size_t pos);
         void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onButtonToggled(MyGUI::Widget* sender);
         void onResolutionSelected(MyGUI::ListBox* sender, size_t index);
