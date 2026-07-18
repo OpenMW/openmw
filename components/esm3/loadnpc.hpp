@@ -1,7 +1,6 @@
 #ifndef OPENMW_ESM_NPC_H
 #define OPENMW_ESM_NPC_H
 
-#include <array>
 #include <map>
 #include <string>
 #include <vector>

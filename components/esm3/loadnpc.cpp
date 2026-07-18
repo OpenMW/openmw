@@ -1,5 +1,7 @@
 #include "loadnpc.hpp"
 
+#include <array>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 

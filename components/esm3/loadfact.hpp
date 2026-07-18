@@ -53,8 +53,7 @@ namespace ESM
 
             std::array<RankData, 10> mRankData;
 
-            std::array<ESM::RefId, 7> mSkills; // IDs of skills this faction require
-                                               // Each element will either contain an Skill index, or -1.
+            std::array<ESM::RefId, 7> mSkills; // IDs of skills this faction requires
 
             int32_t mIsHidden; // 1 - hidden from player
 
