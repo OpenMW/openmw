@@ -963,9 +963,6 @@ namespace MWGui
             if (zoomIn && mGlobalMapZoom > 4.f)
             {
                 mGlobalMapZoom = currentGlobalZoom;
-                mLocalMapZoom = currentMinLocalMapZoom;
-                onWorldButtonClicked(nullptr);
-                updateLocalMap();
                 return; // the zoom in is too big
             }
 
@@ -989,12 +986,6 @@ namespace MWGui
             if (zoomOut && mLocalMapZoom < currentMinLocalMapZoom)
             {
                 mLocalMapZoom = currentLocalZoom;
-
-                float zoomRatio = 4.f / mGlobalMapZoom;
-                mGlobalMapZoom = 4.f;
-                onWorldButtonClicked(nullptr);
-
-                zoomOnCursor(zoomRatio);
                 return; // the zoom out is too big, we switch to the global map
             }
 
