@@ -299,7 +299,11 @@ namespace MWMechanics
                 static const float fProjectileThrownStoreChance
                     = gmst.find("fProjectileThrownStoreChance")->mValue.getFloat();
                 if (Misc::Rng::rollProbability(world->getPrng()) < fProjectileThrownStoreChance / 100.f)
-                    victim.getClass().getContainerStore(victim).add(projectile, 1);
+                {
+                    // On point-blank hits the projectile is the attacker's live ammo stack -
+                    // adding it directly would duplicate its RefNum into the victim's inventory
+                    victim.getClass().getContainerStore(victim).add(projectile.getCellRef().getRefId(), 1);
+                }
             }
 
             MWBase::Environment::get().getLuaManager()->onHit(attacker, victim, weapon, projectile, 0, attackStrength,
