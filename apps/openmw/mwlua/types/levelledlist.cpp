@@ -294,4 +294,9 @@ namespace MWLua
         addItemUserType<ESM::ItemLevList>(lua, "ESM3_ItemLevelledList");
         return LuaUtil::makeReadOnly(lists);
     }
+
+    void addMutableItemLevListType(sol::state_view& lua)
+    {
+        addItemUserType<MutableRecord<ESM::ItemLevList>>(lua, "ESM3_MutableItemLevelledList");
+    }
 }

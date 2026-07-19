@@ -86,10 +86,19 @@
 -- @field [parent=#content] #LevCreatureContent levelledCreatures
 
 ---
--- A mutable list of all @{openmw.types#LevelledCreature}s.
--- @field [parent=#LevCreatureContent] #list<openmw.types#LevelledCreature> records
+-- A mutable list of all @{openmw.types#CreatureLevelledListRecord}s.
+-- @field [parent=#LevCreatureContent] #list<openmw.types#CreatureLevelledListRecord> records
 -- @usage
 -- content.levelledCreatures.records.MyLevCreature = { calculateFromAllLevels = true, chanceNone = 0.5, creatures = { { id = 'scrib', level = 1 }, { id = 'fargoth', level = 2 } } }
+
+--- @{#LevItemContent}: Levelled item manipulation.
+-- @field [parent=#content] #LevItemContent levelledItems
+
+---
+-- A mutable list of all @{openmw.types#ItemLevelledListRecord}s.
+-- @field [parent=#LevItemContent] #list<openmw.types#ItemLevelledListRecord> records
+-- @usage
+-- content.levelledItems.records.MyLevItem = { calculateForEach = true, calculateFromAllLevels = true, items = { { id = 'keening', level = 1 }, { id = 'sunder', level = 1 } } }
 
 --- @{#LightContent}: Light manipulation.
 -- @field [parent=#content] #LightContent lights
