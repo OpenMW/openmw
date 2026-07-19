@@ -75,6 +75,8 @@ namespace MWLua
     void addLevelledCreatureBindings(sol::table list, const Context& context);
     ESM::CreatureLevList tableToCreatureLevList(const sol::table& rec);
     void addMutableCreatureLevListType(sol::state_view& lua);
+    sol::table addLevelledItemBindings(const Context& context);
+    ESM::ItemLevList tableToItemLevList(const sol::table& rec);
 
     void addESM4DoorBindings(sol::table door, const Context& context);
     void addESM4TerminalBindings(sol::table term, const Context& context);

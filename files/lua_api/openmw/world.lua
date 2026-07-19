@@ -180,6 +180,7 @@
 -- * @{openmw.types#DoorRecord},
 -- * @{openmw.core#Enchantment},
 -- * @{openmw.types#IngredientRecord},
+-- * @{openmw.types#ItemLevelledListRecord},
 -- * @{openmw.types#LightRecord},
 -- * @{openmw.types#MiscellaneousRecord},
 -- * @{openmw.types#NpcRecord},
