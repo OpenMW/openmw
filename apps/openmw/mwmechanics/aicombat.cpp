@@ -672,14 +672,11 @@ namespace MWMechanics
 
                 const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-                std::string_view delayGmst = actor.getClass().isNpc() ? "fCombatDelayNPC" : "fCombatDelayCreature";
-                const float baseDelay = store.get<ESM::GameSetting>().find(delayGmst)->mValue.getFloat();
-
                 bool canShout = true;
                 ESM::RefId spellId = mCurrentAction->getSpell();
                 if (!spellId.empty())
                 {
-                    const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
+                    const ESM::Spell* spell = store.get<ESM::Spell>().find(spellId);
                     if (spell->mEffects.mList.empty() || spell->mEffects.mList[0].mData.mRange != ESM::RT_Target)
                         canShout = false;
                 }
@@ -694,7 +691,17 @@ namespace MWMechanics
                         MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
                     }
                 }
-                mAttackCooldown = std::min(baseDelay + 0.01f * Misc::Rng::roll0to99(prng), baseDelay + 0.9f);
+
+                if (mCurrentAction->getActionCooldown() > 0.f)
+                {
+                    mAttackCooldown = mCurrentAction->getActionCooldown();
+                }
+                else
+                {
+                    std::string_view delayGmst = actor.getClass().isNpc() ? "fCombatDelayNPC" : "fCombatDelayCreature";
+                    const float baseDelay = store.get<ESM::GameSetting>().find(delayGmst)->mValue.getFloat();
+                    mAttackCooldown = std::min(baseDelay + 0.01f * Misc::Rng::roll0to99(prng), baseDelay + 0.9f);
+                }
             }
             else
                 mAttackCooldown -= duration;
