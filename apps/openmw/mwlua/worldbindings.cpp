@@ -132,7 +132,7 @@ namespace MWLua
             = [cells3Store, cells4Store](const CellsStore&) { return cells3Store->getSize() + cells4Store->getSize(); };
         cells[sol::meta_function::index]
             = [cells3Store, cells4Store](const CellsStore&, size_t index) -> sol::optional<GCell> {
-            if (index > cells3Store->getSize() + cells3Store->getSize() || index == 0)
+            if (index > cells3Store->getSize() + cells4Store->getSize() || index == 0)
                 return sol::nullopt;
 
             index--; // Translate from Lua's 1-based indexing.
