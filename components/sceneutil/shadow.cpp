@@ -1,5 +1,7 @@
 #include "shadow.hpp"
 
+#include <limits>
+
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ShadowedScene>
 
@@ -48,8 +50,13 @@ namespace SceneUtil
         if (maximumShadowMapDistance > 0)
         {
             const float shadowFadeStart = settings.mShadowFadeStart;
-            mShadowSettings->setMaximumShadowMapDistance(maximumShadowMapDistance);
+            mShadowTechnique->setMaximumShadowMapDistance(maximumShadowMapDistance);
             mShadowTechnique->setShadowFadeStart(maximumShadowMapDistance * shadowFadeStart);
+        }
+        else
+        {
+            mShadowTechnique->setMaximumShadowMapDistance(std::numeric_limits<double>::max());
+            mShadowTechnique->setShadowFadeStart(std::numeric_limits<double>::max());
         }
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(settings.mMinimumLispsmNearFarRatio);
@@ -81,6 +88,16 @@ namespace SceneUtil
             mShadowTechnique->disableDebugHUD();
     }
 
+    void ShadowManager::setOutdoorShadowCastingMask(unsigned int mask)
+    {
+        mOutdoorShadowCastingMask = mask;
+    }
+
+    void ShadowManager::setIndoorShadowCastingMask(unsigned int mask)
+    {
+        mIndoorShadowCastingMask = mask;
+    }
+
     void ShadowManager::setupShaders(Shader::ShaderManager& shaderManager) const
     {
         mShadowTechnique->setupCastingShader(shaderManager);
@@ -88,9 +105,6 @@ namespace SceneUtil
 
     void ShadowManager::disableShadowsForStateSet(osg::StateSet& stateset) const
     {
-        if (!mEnableShadows)
-            return;
-
         osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
         fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
         *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();

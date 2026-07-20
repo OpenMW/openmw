@@ -82,6 +82,8 @@ namespace SceneUtil {
 
         virtual void setPolygonOffset(float factor, float units);
 
+        virtual void setMaximumShadowMapDistance(float distance);
+
         virtual void setShadowFadeStart(float shadowFadeStart);
 
         virtual void enableFrontFaceCulling();

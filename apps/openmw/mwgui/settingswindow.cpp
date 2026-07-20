@@ -132,6 +132,21 @@ namespace
             box->setIndexSelected(4);
     }
 
+    void updateShadowMapResolutionComboBox(MyGUI::ComboBox* box)
+    {
+        const int resolution = Settings::shadows().mShadowMapResolution;
+        if (resolution == 512)
+            box->setIndexSelected(0);
+        else if (resolution == 1024)
+            box->setIndexSelected(1);
+        else if (resolution == 2048)
+            box->setIndexSelected(2);
+        else if (resolution == 4096)
+            box->setIndexSelected(3);
+        else
+            box->setIndexSelected(MyGUI::ITEM_NONE);
+    }
+
     void updateSliderLabel(MyGUI::ScrollBar* scroller, MyGUI::TextBox* textBox,
         const std::vector<icu::UnicodeString>& argNames, const std::vector<icu::Formattable>& args)
     {
@@ -292,6 +307,7 @@ namespace MWGui
         getWidget(mClassicFalloffWidget, "ClassicFalloffWidget");
         getWidget(mMinimumBrightnessText, "MinimumBrightnessText");
         getWidget(mMinimumBrightnessScroll, "MinimumBrightnessScroll");
+        getWidget(mShadowMapResolution, "ShadowMapResolution");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -329,6 +345,9 @@ namespace MWGui
         mLightsResetButton->eventMouseButtonClick
             += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
         mMaxLights->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onMaxLightsChanged);
+
+        mShadowMapResolution->eventComboChangePosition
+            += MyGUI::newDelegate(this, &SettingsWindow::onShadowMapResolutionChanged);
 
         mWindowModeList->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWindowModeChanged);
         mVSyncModeList->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onVSyncModeChanged);
@@ -394,6 +413,8 @@ namespace MWGui
         mWobblyShoresButton->setEnabled(waterRefraction);
 
         updateMaxLightsComboBox(mMaxLights);
+
+        updateShadowMapResolutionComboBox(mShadowMapResolution);
 
         const Settings::WindowMode windowMode = Settings::video().mWindowMode;
         mWindowBorderButton->setEnabled(
@@ -725,6 +746,34 @@ namespace MWGui
                 break;
             default:
                 Log(Debug::Warning) << "Unexpected anisotropy option pos " << pos;
+                break;
+        }
+
+        apply();
+    }
+
+    void SettingsWindow::onShadowMapResolutionChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        auto& shadowSettings = Settings::shadows();
+        switch (pos)
+        {
+            case 0:
+                shadowSettings.mShadowMapResolution.set(512);
+                break;
+            case 1:
+                shadowSettings.mShadowMapResolution.set(1024);
+                break;
+            case 2:
+                shadowSettings.mShadowMapResolution.set(2048);
+                break;
+            case 3:
+                shadowSettings.mShadowMapResolution.set(4096);
+                break;
+            default:
+                Log(Debug::Warning) << "Unexpected shadow map resolution pos " << pos;
                 break;
         }
 

@@ -231,6 +231,23 @@ WindowModeWindowed: "Windowed"
 WindowModeWindowedFullscreen: "Windowed Fullscreen"
 WobblyShores: "Wobbly Shores"
 
+# Shadow settings
+EnableShadows: "Enable Shadows"
+EnableShadowsTooltip: "Enable or disable shadow rendering using shadow mapping. More realistic but may reduce performance."
+ActorShadows: "Enable Actor Shadows"
+ActorShadowsTooltip: "Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact."
+PlayerShadows: "Enable Player Shadows"
+PlayerShadowsTooltip: "Enable shadows exclusively for the player character. May have a very minor performance impact."
+TerrainShadows: "Enable Terrain Shadows"
+TerrainShadowsTooltip: "Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact."
+ObjectShadows: "Enable Object Shadows"
+ObjectShadowsTooltip: "Enable shadows for primarily inanimate objects. May have a significant performance impact."
+IndoorShadows: "Enable Indoor Shadows"
+IndoorShadowsTooltip: "Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting. Has no effect if actor/player shadows are not enabled."
+ShadowMapResolution: "Shadow Map Resolution"
+ShadowMapResolutionTooltip: "The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact."
+ShadowsMaxDistanceValue: "Shadow Distance Limit ({value, number, :: group-off})"
+ShadowsMaxDistanceTooltip: "The distance from the camera at which shadows completely disappear. Set to 0 to disable."
 
 # Controller button names
 

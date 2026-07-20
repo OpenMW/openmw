@@ -131,6 +131,26 @@ namespace
     private:
         bool mDoThreadUnsafeOps = false;
     };
+
+    unsigned int getIndoorShadowCastingMask()
+    {
+        unsigned int mask = MWRender::Mask_Scene;
+        if (Settings::shadows().mActorShadows)
+            mask |= MWRender::Mask_Actor;
+        if (Settings::shadows().mPlayerShadows)
+            mask |= MWRender::Mask_Player;
+        return mask;
+    }
+
+    unsigned int getOutdoorShadowCastingMask()
+    {
+        unsigned int mask = getIndoorShadowCastingMask();
+        if (Settings::shadows().mObjectShadows)
+            mask |= (MWRender::Mask_Object | MWRender::Mask_Static);
+        if (Settings::shadows().mTerrainShadows)
+            mask |= MWRender::Mask_Terrain;
+        return mask;
+    }
 }
 
 namespace MWRender
@@ -223,20 +243,8 @@ namespace MWRender
         sceneRoot->setNodeMask(Mask_Scene);
         sceneRoot->setName("Scene Root");
 
-        int shadowCastingTraversalMask = Mask_Scene;
-        if (Settings::shadows().mActorShadows)
-            shadowCastingTraversalMask |= Mask_Actor;
-        if (Settings::shadows().mPlayerShadows)
-            shadowCastingTraversalMask |= Mask_Player;
-
-        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
-        if (Settings::shadows().mObjectShadows)
-            shadowCastingTraversalMask |= (Mask_Object | Mask_Static);
-        if (Settings::shadows().mTerrainShadows)
-            shadowCastingTraversalMask |= Mask_Terrain;
-
-        mShadowManager = std::make_unique<SceneUtil::ShadowManager>(sceneRoot, mRootNode, shadowCastingTraversalMask,
-            indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static, Settings::shadows(),
+        mShadowManager = std::make_unique<SceneUtil::ShadowManager>(sceneRoot, mRootNode, getOutdoorShadowCastingMask(),
+            getIndoorShadowCastingMask(), Mask_Terrain | Mask_Object | Mask_Static, Settings::shadows(),
             mResourceSystem->getSceneManager()->getShaderManager());
 
         Shader::ShaderManager::DefineMap globalDefines = Shader::getDefaultDefines();
@@ -1418,6 +1426,21 @@ namespace MWRender
 
                 if (!lightManagersUpdated)
                     mViewer->getSceneData()->accept(visitor);
+            }
+            else if (it->first == "Shadows")
+            {
+                mViewer->stopThreading();
+
+                mShadowManager->setupShadowSettings(
+                    Settings::shadows(), mResourceSystem->getSceneManager()->getShaderManager());
+                mShadowManager->setIndoorShadowCastingMask(getIndoorShadowCastingMask());
+                mShadowManager->setOutdoorShadowCastingMask(getOutdoorShadowCastingMask());
+                if (mSky->isEnabled())
+                    mShadowManager->enableOutdoorMode();
+                else
+                    mShadowManager->enableIndoorMode(Settings::shadows());
+
+                mViewer->startThreading();
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {

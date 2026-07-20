@@ -36,6 +36,8 @@ namespace SceneUtil
         ~ShadowManager();
 
         void setupShadowSettings(const Settings::ShadowsCategory& settings, Shader::ShaderManager& shaderManager);
+        void setOutdoorShadowCastingMask(unsigned int mask);
+        void setIndoorShadowCastingMask(unsigned int mask);
 
         void setupShaders(Shader::ShaderManager& shaderManager) const;
 

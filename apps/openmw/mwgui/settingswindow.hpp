@@ -57,6 +57,8 @@ namespace MWGui
         MyGUI::Widget* mMinimumBrightnessText;
         MyGUI::Widget* mMinimumBrightnessScroll;
 
+        MyGUI::ComboBox* mShadowMapResolution;
+
         MyGUI::ComboBox* mPrimaryLanguage;
         MyGUI::ComboBox* mSecondaryLanguage;
         MyGUI::Button* mGmstOverridesL10n;
@@ -82,6 +84,7 @@ namespace MWGui
         void onOkButtonClicked(MyGUI::Widget* sender);
         void onTextureFilteringChanged(MyGUI::ComboBox* sender, size_t pos);
         void onAnisotropyChanged(MyGUI::ComboBox* sender, size_t pos);
+        void onShadowMapResolutionChanged(MyGUI::ComboBox* sender, size_t pos);
         void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onButtonToggled(MyGUI::Widget* sender);
         void onResolutionSelected(MyGUI::ListBox* sender, size_t index);

@@ -895,9 +895,33 @@ void SceneUtil::MWShadowTechnique::setPolygonOffset(float factor, float units)
     }
 }
 
+void MWShadowTechnique::setMaximumShadowMapDistance(float distance)
+{
+    if (_shadowedScene && _shadowedScene->getShadowSettings())
+        _shadowedScene->getShadowSettings()->setMaximumShadowMapDistance(distance);
+
+    for (auto& list : _uniforms)
+    {
+        for (auto& u : list)
+        {
+            if (u->getName() == "maximumShadowMapDistance")
+                u->set(distance);
+        }
+    }
+}
+
 void SceneUtil::MWShadowTechnique::setShadowFadeStart(float shadowFadeStart)
 {
     _shadowFadeStart = shadowFadeStart;
+
+    for (auto& list : _uniforms)
+    {
+        for (auto& u : list)
+        {
+            if (u->getName() == "shadowFadeStart")
+                u->set(shadowFadeStart);
+        }
+    }
 }
 
 void SceneUtil::MWShadowTechnique::enableFrontFaceCulling()
@@ -1364,6 +1388,16 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 OSG_INFO<<"Taking ShadowData from from of previous_sdl"<<std::endl;
                 sd = previous_sdl.front();
                 previous_sdl.erase(previous_sdl.begin());
+
+                osg::Vec2s textureSize = settings->getTextureSize();
+                const int w = textureSize.x();
+                const int h = textureSize.y();
+
+                if (sd->_texture->getTextureWidth() != w || sd->_texture->getTextureHeight() != h)
+                {
+                    sd->releaseGLObjects(nullptr);
+                    sd = new ShadowData(vdd);
+                }
             }
 
             osg::ref_ptr<osg::Camera> camera = sd->_camera;
