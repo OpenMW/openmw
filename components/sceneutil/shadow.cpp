@@ -52,8 +52,8 @@ namespace SceneUtil
         }
         else
         {
-            mShadowTechnique->setMaximumShadowMapDistance(std::numeric_limits<double>::max());
-            mShadowTechnique->setShadowFadeStart(std::numeric_limits<double>::max());
+            mShadowTechnique->setMaximumShadowMapDistance(std::numeric_limits<float>::max());
+            mShadowTechnique->setShadowFadeStart(std::numeric_limits<float>::max());
         }
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(settings.mMinimumLispsmNearFarRatio);
