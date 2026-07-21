@@ -1440,6 +1440,15 @@ namespace MWRender
                 else
                     mShadowManager->enableIndoorMode(Settings::shadows());
 
+                auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+
+                Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
+
+                for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
+                    defines[itr->first] = itr->second;
+
+                mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+
                 mViewer->startThreading();
             }
             else if (it->first == "Post Processing" && it->second == "enabled")

@@ -30,13 +30,10 @@ namespace SceneUtil
     {
         mEnableShadows = settings.mEnableShadows;
 
-        if (!mEnableShadows)
-        {
+        if (mEnableShadows)
+            mShadowTechnique->enableShadows();
+        else
             mShadowTechnique->disableShadows();
-            return;
-        }
-
-        mShadowTechnique->enableShadows();
 
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
@@ -82,7 +79,7 @@ namespace SceneUtil
 
         mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
 
-        if (settings.mEnableDebugHud)
+        if (mEnableShadows && settings.mEnableDebugHud)
             mShadowTechnique->enableDebugHUD();
         else
             mShadowTechnique->disableDebugHUD();
@@ -164,7 +161,7 @@ namespace SceneUtil
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines(const Settings::ShadowsCategory& settings) const
     {
-        if (!mEnableShadows)
+        if (!settings.mEnableShadows)
             return getShadowsDisabledDefines();
 
         Shader::ShaderManager::DefineMap definesWithShadows;
