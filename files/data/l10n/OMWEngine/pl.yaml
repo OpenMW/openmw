@@ -231,6 +231,25 @@ WindowModeWindowed: "W oknie"
 WindowModeWindowedFullscreen: "Pełny ekran w oknie"
 WobblyShores: "Falujące brzegi"
 
+# Shadow settings
+
+Shadows: "Cienie"
+EnableShadows: "Włącz cienie"
+EnableShadowsTooltip: "Włącz lub wyłącz renderowanie cieni za pomocą mapowania cieni. Bardziej realistyczne, ale może zmniejszyć wydajność."
+ActorShadows: "Włącz cienie aktorów"
+ActorShadowsTooltip: "Włącz cienie dla NPC oraz stworzeń oprócz postaci gracza. Może mieć niewielki wpływ na wydajność."
+PlayerShadows: "Włącz cienie gracza"
+PlayerShadowsTooltip: "Włącz cienie wyłącznie dla postaci gracza. Może mieć bardzo niewielki wpływ na wydajność."
+TerrainShadows: "Włącz cienie terenu"
+TerrainShadowsTooltip: "Włącz cienie dla terenu, w tym odległego terenu. Może mieć znaczący wpływ na wydajność i jakość cieni."
+ObjectShadows: "Włącz cienie obiektów"
+ObjectShadowsTooltip: "Włącz cienie dla głównie nieożywionych. Może mieć znaczący wpływ na wydajność."
+IndoorShadows: "Włącz cienie wewnątrz budynków"
+IndoorShadowsTooltip: "Z powodu ograniczeń danych Morrowind, tylko postacie mogą rzucać cienie wewnątrz budynków, co niektórych może rozpraszać. Nie ma efektu, jeśli cienie postaci/gracza nie są włączone."
+ShadowMapResolution: "Rozdzielczość mapy cieni"
+ShadowMapResolutionTooltip: "Rozdzielczość każdej indywidualnej mapy cieni. Jej zwiększenie znacznie poprawia jakość cieni, ale może mieć niewielki wpływ na wydajność."
+ShadowsMaxDistanceValue: "Limit odległości cieni ({value, number, :: group-off})"
+ShadowsMaxDistanceTooltip: "Dystans od kamery, przy której cienie całkowicie znikają. Ustaw na 0, aby wyłączyć."
 
 # Controller button names
 

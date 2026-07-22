@@ -232,6 +232,8 @@ WindowModeWindowedFullscreen: "Windowed Fullscreen"
 WobblyShores: "Wobbly Shores"
 
 # Shadow settings
+
+Shadows: "Shadows"
 EnableShadows: "Enable Shadows"
 EnableShadowsTooltip: "Enable or disable shadow rendering using shadow mapping. More realistic but may reduce performance."
 ActorShadows: "Enable Actor Shadows"
