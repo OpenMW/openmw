@@ -679,6 +679,7 @@ namespace MWWorld
             state.mBowId = projectile.mBowId;
             state.mVelocity = projectile.mVelocity;
             state.mAttackStrength = projectile.mAttackStrength;
+            state.mAttackWindUp = projectile.mAttackWindUp;
 
             state.save(writer);
 
@@ -717,6 +718,7 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
+            state.mAttackWindUp = esm.mAttackWindUp;
             state.mToDelete = false;
 
             VFS::Path::Normalized model;
