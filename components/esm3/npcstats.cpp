@@ -60,11 +60,11 @@ namespace ESM
         esm.getHNOT(mLevelProgress, "LPRO");
 
         mSkillIncrease.clear();
-        if (esm.isNextSub("INCR"))
+        std::array<int32_t, ESM::Attribute::Length> increases;
+        if (esm.getHNOT("INCR", increases))
         {
-            esm.getSubHeader();
             for (int i = 0; i < ESM::Attribute::Length; ++i)
-                esm.getT(mSkillIncrease[ESM::Attribute::indexToRefId(i)]);
+                mSkillIncrease[ESM::Attribute::indexToRefId(i)] = increases[i];
         }
 
         mSpecIncreases.fill(0);
