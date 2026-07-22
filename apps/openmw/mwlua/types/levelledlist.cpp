@@ -157,7 +157,8 @@ namespace MWLua
 
                 record["getRandomId"] = [](const List& rec, int level) -> ESM::RefId {
                     auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                    return MWMechanics::getLevelledItem(&rec, true, prng, level);
+                    constexpr bool creatureList = std::is_same_v<List, ESM::CreatureLevList>;
+                    return MWMechanics::getLevelledItem(&rec, creatureList, prng, level);
                 };
             }
         }

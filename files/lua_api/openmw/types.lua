@@ -880,7 +880,7 @@
 ---
 -- Picks a random id from the levelled list.
 -- @function [parent=#ItemLevelledListRecord] getRandomId
--- @param openmw.core#ItemLevelledListRecord listRecord The list
+-- @param #ItemLevelledListRecord listRecord The list
 -- @param #number MaxLvl The maximum level to select entries for
 -- @return #string An id
 
@@ -2593,7 +2593,7 @@
 ---
 -- Picks a random id from the levelled list.
 -- @function [parent=#CreatureLevelledListRecord] getRandomId
--- @param openmw.core#CreatureLevelledListRecord listRecord The list
+-- @param #CreatureLevelledListRecord listRecord The list
 -- @param #number MaxLvl The maximum level to select entries for
 -- @return #string An id
 
