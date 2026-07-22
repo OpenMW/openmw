@@ -10,6 +10,7 @@
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
+#include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"
@@ -651,6 +652,125 @@ namespace NifOsg
         node->setTranslation(mPath.interpKey(percent));
 
         traverse(node, nv);
+    }
+
+    LookAtController::LookAtController(const Nif::NiLookAtController& ctrl)
+        : mFlags(ctrl.mLookAtFlags)
+    {
+    }
+
+    LookAtController::LookAtController(const LookAtController& copy, const osg::CopyOp& copyop)
+        : SceneUtil::NodeCallback<LookAtController, NifOsg::MatrixTransform*>(copy, copyop)
+        , SceneUtil::Controller(copy)
+        , mFlags(copy.mFlags)
+        , mTarget(copy.mTarget)
+    {
+    }
+
+    void LookAtController::setTarget(osg::Group* target)
+    {
+        mTarget = target;
+    }
+
+    void LookAtController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
+    {
+        osg::ref_ptr<osg::Group> target;
+        if (!mTarget.lock(target))
+        {
+            traverse(node, nv);
+            return;
+        }
+
+        osg::MatrixList targetMats = target->getWorldMatrices();
+        if (targetMats.empty())
+        {
+            traverse(node, nv);
+            return;
+        }
+
+        const osg::NodePath& nodePath = nv->getNodePath();
+        const osg::Matrixf nodeWorldMat = osg::computeLocalToWorld(nodePath);
+        osg::Vec3f worldDir = targetMats.front().getTrans() - nodeWorldMat.getTrans();
+        float len = worldDir.length();
+        if (len < 1e-6f)
+        {
+            traverse(node, nv);
+            return;
+        }
+
+        worldDir /= len;
+
+        osg::Matrixf parentWorldInv;
+        if (nodePath.size() > 1)
+        {
+            osg::NodePath parentPath(nodePath.begin(), nodePath.end() - 1);
+            osg::Matrixf parentWorld = osg::computeLocalToWorld(parentPath);
+            if (!parentWorldInv.invert(parentWorld))
+            {
+                traverse(node, nv);
+                return;
+            }
+        }
+
+        // Build a constrained look-at rotation matrix.
+        // Which axis is "forward" depends on the flag; preferred up is world Z.
+        // Per MWSE: negate forward when flip is NOT set. No idea why.
+        osg::Vec3f forward = osg::Matrixf::transform3x3(worldDir, parentWorldInv);
+        forward.normalize();
+        if (!(mFlags & Nif::NiLookAtController::Flag_Flip))
+            forward = -forward;
+
+        osg::Vec3f up = osg::Matrixf::transform3x3(osg::Vec3f(0.f, 0.f, 1.f), parentWorldInv);
+        up.normalize();
+
+        osg::Vec3f left = up ^ forward;
+        float leftLen = left.length();
+        if (leftLen < 1e-6f)
+        {
+            traverse(node, nv);
+            return;
+        }
+
+        left /= leftLen;
+        up = forward ^ left;
+
+        osg::Vec3f rowX, rowY, rowZ;
+        if (mFlags & Nif::NiLookAtController::Flag_LookZAxis)
+        {
+            rowX = left;
+            rowY = up;
+            rowZ = forward;
+        }
+        else if (mFlags & Nif::NiLookAtController::Flag_LookYAxis)
+        {
+            rowX = forward ^ up;
+            rowY = forward;
+            rowZ = up;
+        }
+        else
+        {
+            rowX = forward;
+            rowY = left;
+            rowZ = up;
+        }
+
+        osg::Matrixf rotMat(rowX.x(), rowX.y(), rowX.z(), 0.0, rowY.x(), rowY.y(), rowY.z(), 0.0, rowZ.x(), rowZ.y(),
+            rowZ.z(), 0.0, 0.0, 0.0, 0.0, 1.0);
+
+        osg::Quat rotation;
+        rotation.set(rotMat);
+        node->setRotation(rotation);
+
+        traverse(node, nv);
+    }
+
+    void LookAtController::remapTargets(const SceneUtil::CopyOp& copyop)
+    {
+        if (!mTarget)
+            return;
+
+        if (osg::Node* clonedTarget = copyop.getClonedNode(mTarget.get()))
+            mTarget = clonedTarget->asGroup();
     }
 
 }

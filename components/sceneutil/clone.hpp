@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SCENEUTIL_CLONE_H
 
 #include <map>
+#include <vector>
 
 #include <osg/CopyOp>
 
@@ -14,6 +15,7 @@ namespace osgParticle
 
 namespace SceneUtil
 {
+    class Controller;
 
     /// @par Defines the cloning behaviour we need:
     /// * Assigns updated ParticleSystem pointers on cloned emitters and programs.
@@ -31,6 +33,10 @@ namespace SceneUtil
 
         osg::Node* operator()(const osg::Node* node) const override;
         osg::Drawable* operator()(const osg::Drawable* drawable) const override;
+        osg::Callback* operator()(const osg::Callback* callback) const override;
+
+        osg::Node* getClonedNode(const osg::Node* original) const;
+        void remapControllerTargets() const;
 
     private:
         // maps new pointers to their old pointers
@@ -38,6 +44,8 @@ namespace SceneUtil
         mutable std::map<osgParticle::ParticleProcessor*, const osgParticle::ParticleSystem*> mProcessorToOldPs;
         mutable std::map<osgParticle::ParticleSystemUpdater*, const osgParticle::ParticleSystem*> mUpdaterToOldPs;
         mutable std::map<const osgParticle::ParticleSystem*, osgParticle::ParticleSystem*> mOldPsToNewPs;
+        mutable std::map<const osg::Node*, osg::Node*> mClonedNodes;
+        mutable std::vector<Controller*> mControllersToRemap;
     };
 
 }
