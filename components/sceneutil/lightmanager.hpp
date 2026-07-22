@@ -305,7 +305,7 @@ namespace SceneUtil
             DoubleBuffer<osg::ref_ptr<osg::DispatchCompute>> mCullComputeNode;
             osg::ref_ptr<osg::ShaderStorageBufferBinding> mClusterSSBB;
 
-            float clusterFar = 1.f;
+            float mClusterFar = 1.f;
             size_t mLastFrameNumber = 0;
         };
 
