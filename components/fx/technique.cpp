@@ -24,15 +24,15 @@ namespace
 {
     struct ProxyTextureData
     {
-        osg::Texture::WrapMode wrap_s = osg::Texture::CLAMP_TO_EDGE;
-        osg::Texture::WrapMode wrap_t = osg::Texture::CLAMP_TO_EDGE;
-        osg::Texture::WrapMode wrap_r = osg::Texture::CLAMP_TO_EDGE;
-        osg::Texture::FilterMode min_filter = osg::Texture::LINEAR_MIPMAP_LINEAR;
-        osg::Texture::FilterMode mag_filter = osg::Texture::LINEAR;
-        osg::Texture::InternalFormatMode compression = osg::Texture::USE_IMAGE_DATA_FORMAT;
-        std::optional<int> source_format;
-        std::optional<int> source_type;
-        std::optional<int> internal_format;
+        osg::Texture::WrapMode mWrapS = osg::Texture::CLAMP_TO_EDGE;
+        osg::Texture::WrapMode mWrapT = osg::Texture::CLAMP_TO_EDGE;
+        osg::Texture::WrapMode mWrapR = osg::Texture::CLAMP_TO_EDGE;
+        osg::Texture::FilterMode mMinFilter = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        osg::Texture::FilterMode mMagFilter = osg::Texture::LINEAR;
+        osg::Texture::InternalFormatMode mCompression = osg::Texture::USE_IMAGE_DATA_FORMAT;
+        std::optional<int> mSourceFormat;
+        std::optional<int> mSourceType;
+        std::optional<int> mInternalFormat;
     };
 }
 
@@ -92,7 +92,7 @@ namespace Fx
     std::string Technique::getBlockWithLineDirective()
     {
         auto block = mLexer->getLastJumpBlock();
-        return std::format("\n#line {}\n{}\n", block.line + 1, block.content);
+        return std::format("\n#line {}\n{}\n", block.mLine + 1, block.mContent);
     }
 
     Technique::UniformMap::iterator Technique::findUniform(std::string_view name)
@@ -228,7 +228,7 @@ namespace Fx
         {
             expect<Lexer::Literal>();
 
-            auto key = std::get<Lexer::Literal>(mToken).value;
+            auto key = std::get<Lexer::Literal>(mToken).mValue;
 
             expect<Lexer::Equal>();
 
@@ -253,7 +253,7 @@ namespace Fx
             else if (key == "glsl_profile")
             {
                 expect<Lexer::String>();
-                mGLSLProfile = std::get<Lexer::String>(mToken).value;
+                mGLSLProfile = std::get<Lexer::String>(mToken).mValue;
             }
             else if (key == "glsl_extensions")
             {
@@ -291,7 +291,7 @@ namespace Fx
         {
             expect<Lexer::Literal>();
 
-            auto key = std::get<Lexer::Literal>(mToken).value;
+            auto key = std::get<Lexer::Literal>(mToken).mValue;
 
             expect<Lexer::Equal>();
 
@@ -425,28 +425,28 @@ namespace Fx
             expect<Lexer::Equal>();
 
             if (!is1D && key == "min_filter")
-                proxy.min_filter = parseFilterMode();
+                proxy.mMinFilter = parseFilterMode();
             else if (!is1D && key == "mag_filter")
-                proxy.mag_filter = parseFilterMode();
+                proxy.mMagFilter = parseFilterMode();
             else if (key == "wrap_s")
-                proxy.wrap_s = parseWrapMode();
+                proxy.mWrapS = parseWrapMode();
             else if (key == "wrap_t")
-                proxy.wrap_t = parseWrapMode();
+                proxy.mWrapT = parseWrapMode();
             else if (is3D && key == "wrap_r")
-                proxy.wrap_r = parseWrapMode();
+                proxy.mWrapR = parseWrapMode();
             else if (key == "compression")
-                proxy.compression = parseCompression();
+                proxy.mCompression = parseCompression();
             else if (key == "source_type")
-                proxy.source_type = parseSourceType();
+                proxy.mSourceType = parseSourceType();
             else if (key == "source_format")
-                proxy.source_format = parseSourceFormat();
+                proxy.mSourceFormat = parseSourceFormat();
             else if (key == "internal_format")
-                proxy.internal_format = parseInternalFormat();
+                proxy.mInternalFormat = parseInternalFormat();
             else if (key == "source")
             {
                 expect<Lexer::String>();
                 const osg::ref_ptr<osg::Image> image
-                    = mImageManager.getImage(VFS::Path::Normalized(std::get<Lexer::String>(mToken).value), is3D);
+                    = mImageManager.getImage(VFS::Path::Normalized(std::get<Lexer::String>(mToken).mValue), is3D);
                 if constexpr (is1D)
                 {
                     type = Types::SamplerType::Texture_1D;
@@ -469,24 +469,24 @@ namespace Fx
             expect<Lexer::SemiColon>();
         }
         if (!sampler)
-            error(std::format("{} '{}' requires a filename", T::repr, mBlockName));
+            error(std::format("{} '{}' requires a filename", T::mRepresentation, mBlockName));
 
         if (!is1D)
         {
-            sampler->setFilter(osg::Texture::MIN_FILTER, proxy.min_filter);
-            sampler->setFilter(osg::Texture::MAG_FILTER, proxy.mag_filter);
+            sampler->setFilter(osg::Texture::MIN_FILTER, proxy.mMinFilter);
+            sampler->setFilter(osg::Texture::MAG_FILTER, proxy.mMagFilter);
         }
         if (is3D)
-            sampler->setWrap(osg::Texture::WRAP_R, proxy.wrap_r);
-        sampler->setWrap(osg::Texture::WRAP_S, proxy.wrap_s);
-        sampler->setWrap(osg::Texture::WRAP_T, proxy.wrap_t);
-        sampler->setInternalFormatMode(proxy.compression);
-        if (proxy.internal_format.has_value())
-            sampler->setInternalFormat(proxy.internal_format.value());
-        if (proxy.source_type.has_value())
-            sampler->setSourceType(proxy.source_type.value());
-        if (proxy.internal_format.has_value())
-            sampler->setSourceFormat(proxy.internal_format.value());
+            sampler->setWrap(osg::Texture::WRAP_R, proxy.mWrapR);
+        sampler->setWrap(osg::Texture::WRAP_S, proxy.mWrapS);
+        sampler->setWrap(osg::Texture::WRAP_T, proxy.mWrapT);
+        sampler->setInternalFormatMode(proxy.mCompression);
+        if (proxy.mInternalFormat.has_value())
+            sampler->setInternalFormat(proxy.mInternalFormat.value());
+        if (proxy.mSourceType.has_value())
+            sampler->setSourceType(proxy.mSourceType.value());
+        if (proxy.mInternalFormat.has_value())
+            sampler->setSourceFormat(proxy.mInternalFormat.value());
         sampler->setName(std::string{ mBlockName });
         sampler->setResizeNonPowerOfTwoHint(false);
 
@@ -677,9 +677,9 @@ namespace Fx
         if (!std::holds_alternative<T>(mToken))
         {
             if (err.empty())
-                error(std::format("Expected {}", T::repr));
+                error(std::format("Expected {}", T::mRepresentation));
             else
-                error(std::format("{}. Expected {}", err, T::repr));
+                error(std::format("{}. Expected {}", err, T::mRepresentation));
         }
     }
 
@@ -690,9 +690,9 @@ namespace Fx
         if (!std::holds_alternative<T>(mToken) && !std::holds_alternative<T2>(mToken))
         {
             if (err.empty())
-                error(std::format("Expected {} or {}", T::repr, T2::repr));
+                error(std::format("Expected {} or {}", T::mRepresentation, T2::mRepresentation));
             else
-                error(std::format("{}. Expected {} or {}", err, T::repr, T2::repr));
+                error(std::format("{}. Expected {} or {}", err, T::mRepresentation, T2::mRepresentation));
         }
     }
 
@@ -754,13 +754,13 @@ namespace Fx
     template <class T>
     void Technique::parseBlock(bool named)
     {
-        mBlockName = T::repr;
+        mBlockName = T::mRepresentation;
 
         if (named)
         {
             expect<Lexer::Literal>("name is required for preceeding block declaration");
 
-            mBlockName = std::get<Lexer::Literal>(mToken).value;
+            mBlockName = std::get<Lexer::Literal>(mToken).mValue;
 
             if (isNext<Lexer::Open_Parenthesis>())
                 parseBlockHeader();
@@ -782,7 +782,7 @@ namespace Fx
         {
             expect<Lexer::Literal>();
 
-            data.emplace_back(std::get<Lexer::Literal>(mToken).value);
+            data.emplace_back(std::get<Lexer::Literal>(mToken).mValue);
 
             if (!isNext<TDelimeter>())
                 break;
@@ -812,29 +812,29 @@ namespace Fx
         {
             expect<Lexer::Literal>("invalid key in block header");
 
-            std::string_view key = std::get<Lexer::Literal>(mToken).value;
+            std::string_view key = std::get<Lexer::Literal>(mToken).mValue;
 
             expect<Lexer::Equal>();
 
             if (key == "target")
             {
                 expect<Lexer::Literal>();
-                pass->mTarget = std::get<Lexer::Literal>(mToken).value;
+                pass->mTarget = std::get<Lexer::Literal>(mToken).mValue;
             }
             else if (key == "rt1")
             {
                 expect<Lexer::Literal>();
-                pass->mRenderTargets[0] = std::get<Lexer::Literal>(mToken).value;
+                pass->mRenderTargets[0] = std::get<Lexer::Literal>(mToken).mValue;
             }
             else if (key == "rt2")
             {
                 expect<Lexer::Literal>();
-                pass->mRenderTargets[1] = std::get<Lexer::Literal>(mToken).value;
+                pass->mRenderTargets[1] = std::get<Lexer::Literal>(mToken).mValue;
             }
             else if (key == "rt3")
             {
                 expect<Lexer::Literal>();
-                pass->mRenderTargets[2] = std::get<Lexer::Literal>(mToken).value;
+                pass->mRenderTargets[2] = std::get<Lexer::Literal>(mToken).mValue;
             }
             else if (key == "blend")
             {
@@ -873,7 +873,7 @@ namespace Fx
 
     std::string_view Technique::asLiteral() const
     {
-        return std::get<Lexer::Literal>(mToken).value;
+        return std::get<Lexer::Literal>(mToken).mValue;
     }
 
     FlagsType Technique::parseFlags()
@@ -1073,7 +1073,7 @@ namespace Fx
     {
         expect<Lexer::String>();
 
-        return std::get<Lexer::String>(mToken).value;
+        return std::get<Lexer::String>(mToken).mValue;
     }
 
     float Technique::parseFloat()
@@ -1081,9 +1081,9 @@ namespace Fx
         mToken = mLexer->next();
 
         if (std::holds_alternative<Lexer::Float>(mToken))
-            return std::get<Lexer::Float>(mToken).value;
+            return std::get<Lexer::Float>(mToken).mValue;
         if (std::holds_alternative<Lexer::Integer>(mToken))
-            return static_cast<float>(std::get<Lexer::Integer>(mToken).value);
+            return static_cast<float>(std::get<Lexer::Integer>(mToken).mValue);
 
         error("expected float value");
     }
@@ -1092,7 +1092,7 @@ namespace Fx
     {
         expect<Lexer::Integer>();
 
-        return std::get<Lexer::Integer>(mToken).value;
+        return std::get<Lexer::Integer>(mToken).mValue;
     }
 
     template <class OSGVec, class T>

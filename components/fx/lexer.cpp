@@ -56,12 +56,12 @@ namespace Fx
             auto start = mHead;
             std::size_t level = 1;
 
-            mLastJumpBlock.line = mLine;
+            mLastJumpBlock.mLine = mLine;
 
             if (head() == '}')
             {
-                mLastJumpBlock.content = {};
-                return mLastJumpBlock.content;
+                mLastJumpBlock.mContent = {};
+                return mLastJumpBlock.mContent;
             }
 
             for (; mHead != mTail; advance())
@@ -109,7 +109,7 @@ namespace Fx
                     mHead--;
                     mLine--;
                     auto sv = std::string_view{ start, static_cast<std::string_view::size_type>(mHead + 1 - start) };
-                    mLastJumpBlock.content = sv;
+                    mLastJumpBlock.mContent = sv;
                     return sv;
                 }
             }
