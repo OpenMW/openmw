@@ -10,6 +10,7 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
@@ -196,6 +197,10 @@ namespace MWLua
             [lua = context.mLua](const ESM::Clothing& clothing) -> const ESM::Clothing* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(clothing);
+            },
+            [lua = context.mLua](const ESM::CreatureLevList& list) -> const ESM::CreatureLevList* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(list);
             },
             [lua = context.mLua](const ESM::Book& book) -> const ESM::Book* {
                 checkGameInitialized(lua);

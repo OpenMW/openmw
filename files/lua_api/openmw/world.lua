@@ -175,6 +175,7 @@
 -- * @{openmw.types#BookRecord},
 -- * @{openmw.types#ClothingRecord},
 -- * @{openmw.types#ContainerRecord},
+-- * @{openmw.types#CreatureLevelledListRecord},
 -- * @{openmw.types#CreatureRecord},
 -- * @{openmw.types#DoorRecord},
 -- * @{openmw.core#Enchantment},

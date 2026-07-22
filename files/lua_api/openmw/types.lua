@@ -2514,6 +2514,13 @@
 -- @type CreatureLevelledList
 
 ---
+-- Creates a @{#CreatureLevelledListRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#CreatureLevelledList] createRecordDraft
+-- @param #CreatureLevelledListRecord list A Lua table with the fields of a CreatureLevelledListRecord, with an optional field `template` that accepts a @{#CreatureLevelledListRecord} as a base.
+-- @return #CreatureLevelledListRecord A strongly typed LevelledCreature record.
+
+---
 -- A read-only list of all @{#CreatureLevelledListRecord}s in the world database.
 -- Implements [iterables#List](iterables.html#List) of #CreatureLevelledListRecord.
 -- @field [parent=#CreatureLevelledList] #list<#CreatureLevelledListRecord> records

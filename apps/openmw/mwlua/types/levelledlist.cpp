@@ -235,6 +235,7 @@ namespace MWLua
     void addLevelledCreatureBindings(sol::table list, const Context& context)
     {
         sol::state_view lua = context.sol();
+        list["createRecordDraft"] = tableToCreatureLevList;
         addLevelItemBindings<ESM::LevelledListBase::LevelItem>(lua, "ESM3_LevelledListItem");
         addRecordFunctionBinding<ESM::CreatureLevList>(list, context);
         addCreatureUserType<ESM::CreatureLevList>(lua, "ESM3_CreatureLevelledList");
