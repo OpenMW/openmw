@@ -393,16 +393,16 @@ namespace Gui
 
     typedef struct
     {
-        float u1; // appears unused, always 0
-        Point top_left;
-        Point top_right;
-        Point bottom_left;
-        Point bottom_right;
-        float width;
-        float height;
-        float kerningLeft;
-        float kerningRight;
-        float ascent;
+        float mUnknown; // appears unused, always 0
+        Point mTopLeft;
+        Point mTopRight;
+        Point mBottomLeft;
+        Point mBottomRight;
+        float mWidth;
+        float mHeight;
+        float mKerningLeft;
+        float mKerningRight;
+        float mAscent;
     } GlyphInfo;
 
     void FontLoader::loadBitmapFont(FontId fontId, const VFS::Path::Normalized& path, std::istream& stream)
@@ -630,22 +630,22 @@ namespace Gui
 
         for (unsigned i = 0; i < 256; i++)
         {
-            float x1 = data[i].top_left.x * width;
-            float y1 = data[i].top_left.y * height;
-            float w = data[i].top_right.x * width - x1;
-            float h = data[i].bottom_left.y * height - y1;
+            float x1 = data[i].mTopLeft.x * width;
+            float y1 = data[i].mTopLeft.y * height;
+            float w = data[i].mTopRight.x * width - x1;
+            float h = data[i].mBottomLeft.y * height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
             unsigned long unicodeVal = getUnicode(static_cast<unsigned char>(i), encoder, mEncoding);
             const std::string coord = MyGUI::utility::toString(x1) + " " + MyGUI::utility::toString(y1) + " "
                 + MyGUI::utility::toString(w) + " " + MyGUI::utility::toString(h);
-            float advance = data[i].width + data[i].kerningRight;
+            float advance = data[i].mWidth + data[i].mKerningRight;
             // Yes MyGUI, we really do want an advance of 0 sometimes, thank you.
-            if (advance == 0.f && data[i].width != 0.f)
+            if (advance == 0.f && data[i].mWidth != 0.f)
                 advance = std::numeric_limits<float>::min();
-            const std::string bearing = MyGUI::utility::toString(data[i].kerningLeft) + ' '
-                + MyGUI::utility::toString((fontSize - data[i].ascent));
-            const MyGUI::IntSize size(static_cast<int>(data[i].width), static_cast<int>(data[i].height));
+            const std::string bearing = MyGUI::utility::toString(data[i].mKerningLeft) + ' '
+                + MyGUI::utility::toString((fontSize - data[i].mAscent));
+            const MyGUI::IntSize size(static_cast<int>(data[i].mWidth), static_cast<int>(data[i].mHeight));
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);
