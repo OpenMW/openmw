@@ -354,7 +354,7 @@ local function renderPage(page, options)
         options.element.layout = layout
         options.element:update()
     else
-        options.element = ui.create(layout)
+        options.layout = layout
     end
 end
 

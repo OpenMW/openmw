@@ -16,6 +16,7 @@ namespace LuaUi
     };
     size_t scriptSettingsPageCount();
     ScriptSettingsPage scriptSettingsPageAt(size_t index);
+    void ensureScriptSettingsPage(size_t index);
     void attachPageAt(size_t index, LuaAdapter* adapter);
 }
 
