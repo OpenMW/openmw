@@ -7,6 +7,8 @@
 
 namespace MWWorld
 {
+    class CellStore;
+
     struct CellRefListBase
     {
     };
@@ -28,8 +30,8 @@ namespace MWWorld
         /// all methods are known.
         void load(ESM::CellRef& ref, bool deleted, const MWWorld::ESMStore& esmStore);
 
-        void load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore);
-        void load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore);
+        void load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore);
+        void load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore, CellStore& cellStore);
 
         LiveRef& insert(const LiveRef& item)
         {
