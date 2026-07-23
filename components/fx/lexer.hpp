@@ -30,8 +30,8 @@ namespace Fx
         public:
             struct Block
             {
-                std::size_t line;
-                std::string_view content;
+                std::size_t mLine;
+                std::string_view mContent;
             };
 
             Lexer(std::string_view buffer);

@@ -8,16 +8,16 @@ namespace SceneUtil
     struct MemoryBarrier : public osg::Drawable::DrawCallback
     {
         MemoryBarrier(GLbitfield barriers)
-            : _barriers(barriers)
+            : mBarriers(barriers)
         {
         }
 
         virtual void drawImplementation(osg::RenderInfo& renderInfo, const osg::Drawable* drawable) const
         {
             drawable->drawImplementation(renderInfo);
-            renderInfo.getState()->get<osg::GLExtensions>()->glMemoryBarrier(_barriers);
+            renderInfo.getState()->get<osg::GLExtensions>()->glMemoryBarrier(mBarriers);
         }
-        GLbitfield _barriers;
+        GLbitfield mBarriers;
     };
 }
 

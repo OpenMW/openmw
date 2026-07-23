@@ -202,9 +202,10 @@ namespace SceneUtil
             }
 
             // Ensure we rebuild the cluster grid only when the projection matrix changes
-            rebuildCluster = cache.clusterFar != clusterFar || cache.mProjection[frameId] != *cv->getProjectionMatrix();
+            if (cache.mClusterFar != clusterFar || cache.mProjection[frameId] != *cv->getProjectionMatrix())
+                rebuildCluster = true;
 
-            cache.clusterFar = clusterFar;
+            cache.mClusterFar = clusterFar;
             cache.mProjection[frameId] = *cv->getProjectionMatrix();
 
             if (rebuildCluster)
