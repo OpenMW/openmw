@@ -60,9 +60,8 @@ namespace MWLua
             sol::table res(lua, sol::create);
             for (const auto& skillBonus : rec.mData.mBonus)
             {
-                ESM::RefId skill = ESM::Skill::indexToRefId(skillBonus.mSkill);
-                if (!skill.empty())
-                    res[skill.serializeText()] = skillBonus.mBonus;
+                if (!skillBonus.mSkill.empty())
+                    res[skillBonus.mSkill] = skillBonus.mBonus;
             }
             return res;
         });

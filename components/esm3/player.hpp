@@ -30,8 +30,8 @@ namespace ESM
         int32_t mCurrentCrimeId;
         int32_t mPaidCrimeId;
 
-        float mSaveAttributes[Attribute::Length];
-        float mSaveSkills[Skill::Length];
+        std::map<ESM::RefId, float> mSaveAttributes;
+        std::map<ESM::RefId, float> mSaveSkills;
 
         std::map<ESM::RefId, ESM::RefId> mPreviousItems; // previous equipped items, needed for bound spells
 

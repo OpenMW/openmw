@@ -122,34 +122,29 @@ namespace
         // class bonus
         const ESM::Class* npcClass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
 
-        for (int attribute : npcClass->mData.mAttribute)
+        for (const ESM::RefId& id : npcClass->mData.mAttribute)
         {
-            if (attribute >= 0 && attribute < ESM::Attribute::Length)
-            {
-                auto id = ESM::Attribute::indexToRefId(attribute);
+            if (!id.empty())
                 creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
-            }
         }
 
         // skill bonus
         for (const ESM::Attribute& attribute : attributes)
         {
             float modifierSum = 0;
-            int attributeIndex = ESM::Attribute::refIdToIndex(attribute.mId);
 
             for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                if (skill.mData.mAttribute != attributeIndex)
+                if (skill.mData.mAttribute != attribute.mId)
                     continue;
 
                 // is this a minor or major skill?
                 float add = 0.2f;
-                int index = ESM::Skill::refIdToIndex(skill.mId);
                 for (const auto& skills : npcClass->mData.mSkills)
                 {
-                    if (skills[0] == index)
+                    if (skills[0] == skill.mId)
                         add = 0.5;
-                    if (skills[1] == index)
+                    if (skills[1] == skill.mId)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -171,8 +166,7 @@ namespace
         else if (npcClass->mData.mSpecialization == ESM::Class::Stealth)
             multiplier += 1;
 
-        if (std::find(npcClass->mData.mAttribute.begin(), npcClass->mData.mAttribute.end(),
-                ESM::Attribute::refIdToIndex(ESM::Attribute::Endurance))
+        if (std::find(npcClass->mData.mAttribute.begin(), npcClass->mData.mAttribute.end(), ESM::Attribute::Endurance)
             != npcClass->mData.mAttribute.end())
             multiplier += 1;
 
@@ -208,7 +202,7 @@ namespace
 
             for (const auto& skills : npcClass->mData.mSkills)
             {
-                ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
+                const ESM::RefId& id = skills[i];
                 if (!id.empty())
                 {
                     npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
@@ -224,16 +218,15 @@ namespace
             int raceBonus = 0;
             int specBonus = 0;
 
-            int index = ESM::Skill::refIdToIndex(skill.mId);
             auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                [&](const auto& bonus) { return bonus.mSkill == index; });
+                [&](const auto& bonus) { return bonus.mSkill == skill.mId; });
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
             for (const auto& skills : npcClass->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), index) != skills.end())
+                if (std::find(skills.begin(), skills.end(), skill.mId) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;
@@ -335,13 +328,11 @@ namespace MWClass
             {
                 gold = ref->mBase->mNpdt.mGold;
 
-                for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
-                    data->mNpcStats.getSkill(ESM::Skill::indexToRefId(static_cast<int>(i)))
-                        .setBase(ref->mBase->mNpdt.mSkills[i]);
+                for (const auto& [skill, value] : ref->mBase->mNpdt.mSkills)
+                    data->mNpcStats.getSkill(skill).setBase(value);
 
-                for (size_t i = 0; i < ref->mBase->mNpdt.mAttributes.size(); ++i)
-                    data->mNpcStats.setAttribute(
-                        ESM::Attribute::indexToRefId(static_cast<int>(i)), ref->mBase->mNpdt.mAttributes[i]);
+                for (const auto& [attribute, value] : ref->mBase->mNpdt.mAttributes)
+                    data->mNpcStats.setAttribute(attribute, value);
 
                 data->mNpcStats.setHealth(ref->mBase->mNpdt.mHealth);
                 data->mNpcStats.setMagicka(ref->mBase->mNpdt.mMana);

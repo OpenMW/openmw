@@ -479,7 +479,7 @@ namespace MWGui
             std::vector<ESM::RefId> attributes = mCreateClassDialog->getFavoriteAttributes();
             assert(attributes.size() >= createdClass.mData.mAttribute.size());
             for (size_t i = 0; i < createdClass.mData.mAttribute.size(); ++i)
-                createdClass.mData.mAttribute[i] = ESM::Attribute::refIdToIndex(attributes[i]);
+                createdClass.mData.mAttribute[i] = attributes[i];
 
             std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();
@@ -487,8 +487,8 @@ namespace MWGui
             assert(minorSkills.size() >= createdClass.mData.mSkills.size());
             for (size_t i = 0; i < createdClass.mData.mSkills.size(); ++i)
             {
-                createdClass.mData.mSkills[i][1] = ESM::Skill::refIdToIndex(majorSkills[i]);
-                createdClass.mData.mSkills[i][0] = ESM::Skill::refIdToIndex(minorSkills[i]);
+                createdClass.mData.mSkills[i][1] = majorSkills[i];
+                createdClass.mData.mSkills[i][0] = minorSkills[i];
             }
 
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(createdClass);

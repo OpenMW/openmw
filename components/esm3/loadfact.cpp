@@ -5,14 +5,17 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/esm/attr.hpp>
+#include <components/esm3/loadskil.hpp>
+
 namespace ESM
 {
-    int32_t& Faction::FADTstruct::getSkill(size_t index, bool)
+    ESM::RefId& Faction::FADTstruct::getSkill(size_t index, bool)
     {
         return mSkills.at(index);
     }
 
-    int32_t Faction::FADTstruct::getSkill(size_t index, bool) const
+    ESM::RefId Faction::FADTstruct::getSkill(size_t index, bool) const
     {
         return mSkills.at(index);
     }
@@ -38,10 +41,16 @@ namespace ESM
     void Faction::FADTstruct::load(ESMReader& esm)
     {
         esm.getSubHeader();
-        esm.getT(mAttribute);
+        int32_t attributes[2];
+        esm.getT(attributes);
+        mAttribute[0] = ESM::Attribute::indexToRefId(attributes[0]);
+        mAttribute[1] = ESM::Attribute::indexToRefId(attributes[1]);
         for (auto& rank : mRankData)
             rank.load(esm);
-        esm.getT(mSkills);
+        int32_t skills[7];
+        esm.getT(skills);
+        for (std::size_t i = 0; i < std::size(skills); ++i)
+            mSkills[i] = ESM::Skill::indexToRefId(skills[i]);
         esm.getT(mIsHidden);
         if (mIsHidden > 1)
             esm.fail("Unknown flag!");
@@ -50,10 +59,15 @@ namespace ESM
     void Faction::FADTstruct::save(ESMWriter& esm) const
     {
         esm.startSubRecord("FADT");
-        esm.writeT(mAttribute);
+        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[0]));
+        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[1]));
         for (const auto& rank : mRankData)
             rank.save(esm);
-        esm.writeT(mSkills);
+        for (const ESM::RefId& id : mSkills)
+        {
+            int32_t skill = ESM::Skill::refIdToIndex(id);
+            esm.writeT(skill);
+        }
         esm.writeT(mIsHidden);
         esm.endRecord("FADT");
     }
@@ -153,7 +167,7 @@ namespace ESM
     {
         mRecordFlags = 0;
         mName.clear();
-        mData.mAttribute.fill(0);
+        mData.mAttribute.fill({});
         mData.mIsHidden = 0;
 
         for (size_t i = 0; i < mData.mRankData.size(); ++i)
@@ -165,7 +179,7 @@ namespace ESM
             mRanks[i].clear();
         }
 
-        mData.mSkills.fill(0);
+        mData.mSkills.fill({});
 
         mReactions.clear();
     }

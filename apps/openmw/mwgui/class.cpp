@@ -305,15 +305,15 @@ namespace MWGui
         mSpecializationName->setCaption(MyGUI::UString(specName));
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-        mFavoriteAttribute[0]->setAttributeId(ESM::Attribute::indexToRefId(currentClass->mData.mAttribute[0]));
-        mFavoriteAttribute[1]->setAttributeId(ESM::Attribute::indexToRefId(currentClass->mData.mAttribute[1]));
+        mFavoriteAttribute[0]->setAttributeId(currentClass->mData.mAttribute[0]);
+        mFavoriteAttribute[1]->setAttributeId(currentClass->mData.mAttribute[1]);
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
         for (size_t i = 0; i < currentClass->mData.mSkills.size(); ++i)
         {
-            ESM::RefId minor = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][0]);
-            ESM::RefId major = ESM::Skill::indexToRefId(currentClass->mData.mSkills[i][1]);
+            const ESM::RefId& minor = currentClass->mData.mSkills[i][0];
+            const ESM::RefId& major = currentClass->mData.mSkills[i][1];
             mMinorSkill[i]->setSkillId(minor);
             mMajorSkill[i]->setSkillId(major);
             ToolTips::createSkillToolTip(mMinorSkill[i], minor);

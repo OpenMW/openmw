@@ -208,7 +208,7 @@ namespace MWWorld
             }
         }
         // Reset modifiers that were previously recalculated each frame
-        for (auto& attribute : creatureStats.mAttributes)
+        for (auto& [id, attribute] : creatureStats.mAttributes)
             attribute.mMod = 0.f;
         for (auto& dynamic : creatureStats.mDynamic)
         {
@@ -219,7 +219,7 @@ namespace MWWorld
             setting.mMod = 0;
         if (npcStats)
         {
-            for (auto& skill : npcStats->mSkills)
+            for (auto& [id, skill] : npcStats->mSkills)
                 skill.mMod = 0.f;
         }
     }

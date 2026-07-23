@@ -201,7 +201,7 @@ namespace ESSImport
             bool isDeleted = false;
 
             book.load(esm, isDeleted);
-            if (book.mData.mSkillId == -1)
+            if (book.mData.mSkillId.empty())
                 mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(book.mId);
 
             mRecords[book.mId] = book;

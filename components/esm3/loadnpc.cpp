@@ -1,5 +1,7 @@
 #include "loadnpc.hpp"
 
+#include <array>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -9,13 +11,56 @@ namespace ESM
 {
     namespace
     {
+        struct EsmNPDTstruct52
+        {
+            int16_t mLevel{};
+            std::array<unsigned char, Attribute::Length> mAttributes{};
+            std::array<unsigned char, Skill::Length> mSkills{};
+            uint16_t mHealth{}, mMana{}, mFatigue{};
+            unsigned char mDisposition{}, mReputation{}, mRank{};
+            int32_t mGold{};
+        };
+
         struct NPDTstruct12
         {
-            NPC::NPDTstruct52& mStruct;
+            EsmNPDTstruct52& mStruct;
         };
+
+        void toBinary(const NPC::NPDTstruct52& src, EsmNPDTstruct52& dst)
+        {
+            dst.mLevel = src.mLevel;
+            for (int i = 0; i < Attribute::Length; ++i)
+                dst.mAttributes[i] = src.getAttribute(ESM::Attribute::indexToRefId(i));
+            for (int i = 0; i < Skill::Length; ++i)
+                dst.mSkills[i] = src.getSkill(ESM::Skill::indexToRefId(i));
+            dst.mHealth = src.mHealth;
+            dst.mMana = src.mMana;
+            dst.mFatigue = src.mFatigue;
+            dst.mDisposition = src.mDisposition;
+            dst.mReputation = src.mReputation;
+            dst.mRank = src.mRank;
+            dst.mGold = src.mGold;
+        }
+
+        void fromBinary(const EsmNPDTstruct52& src, NPC::NPDTstruct52& dst)
+        {
+            dst.mLevel = src.mLevel;
+            dst.mAttributes.clear();
+            for (int i = 0; i < Attribute::Length; ++i)
+                dst.mAttributes.emplace(ESM::Attribute::indexToRefId(i), src.mAttributes[i]);
+            for (int i = 0; i < Skill::Length; ++i)
+                dst.mSkills.emplace(ESM::Skill::indexToRefId(i), src.mSkills[i]);
+            dst.mHealth = src.mHealth;
+            dst.mMana = src.mMana;
+            dst.mFatigue = src.mFatigue;
+            dst.mDisposition = src.mDisposition;
+            dst.mReputation = src.mReputation;
+            dst.mRank = src.mRank;
+            dst.mGold = src.mGold;
+        }
     }
 
-    template <Misc::SameAsWithoutCvref<NPC::NPDTstruct52> T>
+    template <Misc::SameAsWithoutCvref<EsmNPDTstruct52> T>
     void decompose(T&& v, const auto& f)
     {
         char padding1 = 0;
@@ -80,16 +125,18 @@ namespace ESM
                     mScript = esm.getRefId();
                     break;
                 case fourCC("NPDT"):
+                {
                     hasNpdt = true;
                     esm.getSubHeader();
-                    if (esm.getSubSize() == getCompositeSize(mNpdt))
+                    EsmNPDTstruct52 esmData;
+                    if (esm.getSubSize() == getCompositeSize(esmData))
                     {
                         mNpdtType = NPC_DEFAULT;
-                        esm.getComposite(mNpdt);
+                        esm.getComposite(esmData);
                     }
                     else
                     {
-                        NPDTstruct12 data{ mNpdt };
+                        NPDTstruct12 data{ esmData };
                         if (esm.getSubSize() == getCompositeSize(data))
                         {
                             mNpdtType = NPC_WITH_AUTOCALCULATED_STATS;
@@ -101,7 +148,9 @@ namespace ESM
                         else
                             esm.fail("NPC_NPDT must be 12 or 52 bytes long");
                     }
+                    fromBinary(esmData, mNpdt);
                     break;
+                }
                 case fourCC("FLAG"):
                     hasFlags = true;
                     int32_t flags;
@@ -166,13 +215,15 @@ namespace ESM
         esm.writeHNCRefId("KNAM", mHair);
         esm.writeHNOCRefId("SCRI", mScript);
 
+        EsmNPDTstruct52 data;
+        toBinary(mNpdt, data);
         if (mNpdtType == NPC_DEFAULT)
         {
-            esm.writeNamedComposite("NPDT", mNpdt);
+            esm.writeNamedComposite("NPDT", data);
         }
         else if (mNpdtType == NPC_WITH_AUTOCALCULATED_STATS)
         {
-            esm.writeNamedComposite("NPDT", NPDTstruct12{ const_cast<NPDTstruct52&>(mNpdt) });
+            esm.writeNamedComposite("NPDT", NPDTstruct12{ data });
         }
 
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
@@ -226,8 +277,8 @@ namespace ESM
     void NPC::blankNpdt()
     {
         mNpdt.mLevel = 0;
-        mNpdt.mAttributes.fill(0);
-        mNpdt.mSkills.fill(0);
+        mNpdt.mAttributes.clear();
+        mNpdt.mSkills.clear();
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;
@@ -246,5 +297,21 @@ namespace ESM
     const std::vector<Transport::Dest>& NPC::getTransport() const
     {
         return mTransport.mList;
+    }
+
+    unsigned char NPC::NPDTstruct52::getAttribute(ESM::RefId id) const
+    {
+        const auto it = mAttributes.find(id);
+        if (it == mAttributes.end())
+            return 0;
+        return it->second;
+    }
+
+    unsigned char NPC::NPDTstruct52::getSkill(ESM::RefId id) const
+    {
+        const auto it = mSkills.find(id);
+        if (it == mSkills.end())
+            return 0;
+        return it->second;
     }
 }

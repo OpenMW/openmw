@@ -40,14 +40,12 @@ namespace MWLua
             Types::addProperty(record, "enchant", &ESM::Book::mEnchant);
             Types::addProperty(record, "value", &ESM::Book::mData, &ESM::Book::BKDTstruct::mValue);
             Types::addProperty(record, "weight", &ESM::Book::mData, &ESM::Book::BKDTstruct::mWeight);
+            Types::addProperty(record, "skill", &ESM::Book::mData, &ESM::Book::BKDTstruct::mSkillId);
 
             const auto getScroll
                 = [](const T& rec) -> bool { return Types::RecordType<T>::asRecord(rec).mData.mIsScroll; };
             const auto getEnchant
                 = [](const T& rec) -> float { return Types::RecordType<T>::asRecord(rec).mData.mEnchant * 0.1f; };
-            const auto getSkill = [](const T& rec) -> ESM::RefId {
-                return ESM::Skill::indexToRefId(Types::RecordType<T>::asRecord(rec).mData.mSkillId);
-            };
             if constexpr (Types::RecordType<T>::isMutable)
             {
                 record["isScroll"] = sol::property(
@@ -55,15 +53,11 @@ namespace MWLua
                 record["enchantCapacity"] = sol::property(std::move(getEnchant), [](T& rec, Misc::FiniteFloat value) {
                     rec.find().mData.mEnchant = static_cast<int32_t>(std::round(value.mValue * 10));
                 });
-                record["skill"] = sol::property(std::move(getSkill), [](T& rec, std::string_view value) {
-                    rec.find().mData.mSkillId = ESM::Skill::refIdToIndex(ESM::RefId::deserializeText(value));
-                });
             }
             else
             {
                 record["isScroll"] = sol::readonly_property(std::move(getScroll));
                 record["enchantCapacity"] = sol::readonly_property(std::move(getEnchant));
-                record["skill"] = sol::readonly_property(std::move(getSkill));
             }
         }
     }
@@ -102,17 +96,7 @@ namespace MWLua
             book.mData.mIsScroll = rec["isScroll"] ? 1 : 0;
 
         if (rec["skill"] != sol::nil)
-        {
-            ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
-
-            book.mData.mSkillId = -1;
-            if (!skill.empty())
-            {
-                book.mData.mSkillId = ESM::Skill::refIdToIndex(skill);
-                if (book.mData.mSkillId == -1)
-                    throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
-            }
-        }
+            book.mData.mSkillId = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
 
         return book;
     }

@@ -36,16 +36,16 @@ namespace ESM
 
         struct CLDTstruct
         {
-            std::array<int32_t, 2> mAttribute; // Attributes that get class bonus
+            std::array<ESM::RefId, 2> mAttribute; // Attributes that get class bonus
             int32_t mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-            std::array<std::array<int32_t, 2>, 5> mSkills; // Minor and major skills.
+            std::array<std::array<ESM::RefId, 2>, 5> mSkills; // Minor and major skills.
             int32_t mIsPlayable; // 0x0001 - Playable class
             int32_t mServices;
 
-            int32_t& getSkill(int index, bool major);
+            ESM::RefId& getSkill(int index, bool major);
             ///< Throws an exception for invalid values of \a index.
 
-            int32_t getSkill(int index, bool major) const;
+            ESM::RefId getSkill(int index, bool major) const;
             ///< Throws an exception for invalid values of \a index.
         }; // 60 bytes
 

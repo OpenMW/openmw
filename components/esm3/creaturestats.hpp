@@ -32,7 +32,7 @@ namespace ESM
             TimeStamp mNextWorsening;
         };
 
-        std::array<StatState<float>, Attribute::Length> mAttributes;
+        std::map<ESM::RefId, StatState<float>> mAttributes;
         std::array<StatState<float>, 3> mDynamic;
 
         MagicEffects mMagicEffects;

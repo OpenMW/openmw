@@ -131,9 +131,8 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            for (size_t i = 0; i < ref->mBase->mData.mAttributes.size(); ++i)
-                data->mCreatureStats.setAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i)),
-                    static_cast<float>(ref->mBase->mData.mAttributes[i]));
+            for (const auto& [attribute, value] : ref->mBase->mData.mAttributes)
+                data->mCreatureStats.setAttribute(attribute, static_cast<float>(value));
             data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
             data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
             data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));
