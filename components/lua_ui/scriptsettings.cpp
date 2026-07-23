@@ -19,8 +19,6 @@ namespace LuaUi
             auto element = options.get_or<std::shared_ptr<LuaUi::Element>>("element", nullptr);
             if (name.empty())
                 Log(Debug::Warning) << "A script settings page has an empty name";
-            if (!element.get())
-                Log(Debug::Warning) << "A script settings page has no UI element assigned";
             return { std::move(name), std::move(searchHints), std::move(element) };
         }
     }
@@ -50,11 +48,28 @@ namespace LuaUi
         allPages.clear();
     }
 
+    void ensureScriptSettingsPage(size_t index)
+    {
+        if (index >= allPages.size())
+            return;
+
+        sol::table options = allPages[index];
+        auto element = options.get_or<std::shared_ptr<Element>>("element", nullptr);
+        if (!element)
+        {
+            auto layout = options.get<sol::table>("layout");
+            element = Element::make(std::move(layout), true, std::nullopt);
+            element->create();
+            options["element"] = std::move(element);
+        }
+    }
+
     void attachPageAt(size_t index, LuaAdapter* adapter)
     {
         adapter->detach();
         if (index < allPages.size())
         {
+            ensureScriptSettingsPage(index);
             ScriptSettingsPage page = parse(allPages[index]);
             if (page.mElement.get())
                 adapter->attach(page.mElement);
