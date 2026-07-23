@@ -113,8 +113,8 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
-    void Class::hit(const Ptr& ptr, float attackStrength, int type, const Ptr& victim, const osg::Vec3f& hitPosition,
-        bool success) const
+    void Class::hit(const Ptr& ptr, float attackStrength, float attackWindUp, int type, const Ptr& victim,
+        const osg::Vec3f& hitPosition, bool success) const
     {
         throw std::runtime_error("class cannot hit");
     }

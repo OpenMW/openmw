@@ -363,7 +363,7 @@ namespace MWWorld
     }
 
     void ProjectileManager::launchProjectile(const Ptr& actor, const ConstPtr& projectile, const osg::Vec3f& pos,
-        const osg::Quat& orient, const Ptr& bow, float speed, float attackStrength)
+        const osg::Quat& orient, const Ptr& bow, float speed, float attackStrength, float attackWindUp)
     {
         ProjectileState state;
         state.mCaster = actor.getCellRef().getRefNum();
@@ -372,6 +372,7 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
+        state.mAttackWindUp = attackWindUp;
 
         MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -567,8 +568,8 @@ namespace MWWorld
             if (projectile->getHitWater())
                 mRendering->emitWaterRipple(hitPosition);
 
-            MWMechanics::projectileHit(
-                caster, target, bow, projectileRef.getPtr(), hitPosition, projectileState.mAttackStrength);
+            MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), hitPosition,
+                projectileState.mAttackStrength, projectileState.mAttackWindUp);
             projectileState.mToDelete = true;
         }
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
@@ -678,6 +679,7 @@ namespace MWWorld
             state.mBowId = projectile.mBowId;
             state.mVelocity = projectile.mVelocity;
             state.mAttackStrength = projectile.mAttackStrength;
+            state.mAttackWindUp = projectile.mAttackWindUp;
 
             state.save(writer);
 
@@ -716,6 +718,7 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
+            state.mAttackWindUp = esm.mAttackWindUp;
             state.mToDelete = false;
 
             VFS::Path::Normalized model;

@@ -23,6 +23,7 @@ local onHitHandlers = {}
 -- @type AttackInfo
 -- @field [parent=#AttackInfo] #table damage A table mapping a stat name (health, fatigue, or magicka) to a number. For example, {health = 50, fatigue = 10} will cause 50 damage to health and 10 to fatigue (before adjusting for armor and difficulty). This field is ignored for failed attacks.
 -- @field [parent=#AttackInfo] #number strength A number between 0 and 1 representing the attack strength. This field is ignored for failed attacks.
+-- @field [parent=#AttackInfo] #number windUp A number that is -1 when there is no wind-up animation, or between 0 and 1 representing how far along the attack was in its wind-up phase.
 -- @field [parent=#AttackInfo] #boolean successful Whether the attack was successful or not.
 -- @field [parent=#AttackInfo] #AttackSourceType sourceType What class of attack this is.
 -- @field [parent=#AttackInfo] #AttackType type (Optional) Attack variant if applicable. For melee attacks this represents chop vs thrust vs slash. For unarmed creatures this implies which of its 3 possible attacks were used. For other attacks this field can be ignored.

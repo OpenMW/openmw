@@ -172,6 +172,7 @@ namespace MWMechanics
         int mWeaponType{ ESM::Weapon::None };
         std::string mCurrentWeapon;
 
+        float mAttackWindUp{ -1.f };
         float mAttackStrength{ -1.f };
         bool mReadyToHit{ false };
         MWWorld::Ptr mAttackVictim;
