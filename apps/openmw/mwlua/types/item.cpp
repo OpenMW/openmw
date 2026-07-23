@@ -28,5 +28,6 @@ namespace MWLua
         item["isCarriable"] = [](const Object& object) -> bool { return object.ptr().getClass().isItem(object.ptr()); };
 
         addItemDataBindings(item, context);
+        item["levelledItems"] = addLevelledItemBindings(context);
     }
 }

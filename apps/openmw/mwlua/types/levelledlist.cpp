@@ -119,30 +119,21 @@ namespace MWLua
         }
 
         template <class T>
-        void addCreatureUserType(sol::state_view& lua, std::string_view name)
+        void addLevListProps(sol::state_view& lua, sol::usertype<T>& record, std::string_view items)
         {
-            sol::usertype<T> record = lua.new_usertype<T>(name);
-
-            record[sol::meta_function::to_string] = [](const T& rec) -> std::string {
-                return std::format("ESM3_CreatureLevelledList[{}]", rec.mId.toDebugString());
-            };
-            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
-
-            Types::addFlagProperty(
-                record, "calculateFromAllLevels", ESM::CreatureLevList::AllLevels, &ESM::CreatureLevList::mFlags);
-
+            using List = Types::RecordType<T>::Record;
             const auto getChanceNone = [](const T& rec) -> float {
-                const ESM::CreatureLevList& list = Types::RecordType<T>::asRecord(rec);
+                const List& list = Types::RecordType<T>::asRecord(rec);
                 return std::clamp(list.mChanceNone / 100.f, 0.f, 1.f);
             };
             if constexpr (Types::RecordType<T>::isMutable)
             {
                 record["chanceNone"] = sol::property(std::move(getChanceNone), [](T& rec, float chance) {
-                    ESM::CreatureLevList& list = rec.find();
+                    List& list = rec.find();
                     list.mChanceNone = static_cast<unsigned char>(std::clamp(chance, 0.f, 1.f) * 100.f);
                 });
 
-                record["creatures"] = sol::property([](const T& rec) { return MutableLevelItemList{ rec }; },
+                record[items] = sol::property([](const T& rec) { return MutableLevelItemList{ rec }; },
                     [](T& rec, const sol::object& value) {
                         auto& list = rec.find();
                         if (value == sol::nil)
@@ -157,19 +148,35 @@ namespace MWLua
             {
                 record["chanceNone"] = sol::readonly_property(std::move(getChanceNone));
 
-                record["creatures"]
-                    = sol::readonly_property([lua = lua.lua_state()](const ESM::CreatureLevList& rec) -> sol::table {
-                          sol::table res(lua, sol::create);
-                          for (size_t i = 0; i < rec.mList.size(); ++i)
-                              res[LuaUtil::toLuaIndex(i)] = rec.mList[i];
-                          return res;
-                      });
+                record[items] = sol::readonly_property([lua = lua.lua_state()](const List& rec) -> sol::table {
+                    sol::table res(lua, sol::create);
+                    for (size_t i = 0; i < rec.mList.size(); ++i)
+                        res[LuaUtil::toLuaIndex(i)] = rec.mList[i];
+                    return res;
+                });
 
-                record["getRandomId"] = [](const ESM::CreatureLevList& rec, int level) -> ESM::RefId {
+                record["getRandomId"] = [](const List& rec, int level) -> ESM::RefId {
                     auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                    return MWMechanics::getLevelledItem(&rec, true, prng, level);
+                    constexpr bool creatureList = std::is_same_v<List, ESM::CreatureLevList>;
+                    return MWMechanics::getLevelledItem(&rec, creatureList, prng, level);
                 };
             }
+        }
+
+        template <class T>
+        void addCreatureUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string] = [](const T& rec) -> std::string {
+                return std::format("ESM3_CreatureLevelledList[{}]", rec.mId.toDebugString());
+            };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addFlagProperty(
+                record, "calculateFromAllLevels", ESM::CreatureLevList::AllLevels, &ESM::CreatureLevList::mFlags);
+
+            addLevListProps(lua, record, "creatures");
         }
 
         void setFlagProperty(const sol::table& rec, std::string_view key, int32_t& flags, int flag)
@@ -216,6 +223,23 @@ namespace MWLua
 
             addLevelItemBindings<MutableLevelItem>(lua, "ESM3_MutableLevelledListItem");
         }
+
+        template <class T>
+        void addItemUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string] = [](const T& rec) -> std::string {
+                return std::format("ESM3_ItemLevelledList[{}]", rec.mId.toDebugString());
+            };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addFlagProperty(
+                record, "calculateFromAllLevels", ESM::ItemLevList::AllLevels, &ESM::ItemLevList::mFlags);
+            Types::addFlagProperty(record, "calculateForEach", ESM::ItemLevList::Each, &ESM::ItemLevList::mFlags);
+
+            addLevListProps(lua, record, "items");
+        }
     }
 
     ESM::CreatureLevList tableToCreatureLevList(const sol::table& rec)
@@ -245,5 +269,35 @@ namespace MWLua
     {
         addLevelItemListBindings(lua);
         addCreatureUserType<MutableRecord<ESM::CreatureLevList>>(lua, "ESM3_MutableCreatureLevelledList");
+    }
+
+    ESM::ItemLevList tableToItemLevList(const sol::table& rec)
+    {
+        auto list = Types::initFromTemplate<ESM::ItemLevList>(rec);
+        if (rec["chanceNone"] != sol::nil)
+        {
+            float chance = rec["chanceNone"];
+            list.mChanceNone = static_cast<unsigned char>(std::clamp(chance, 0.f, 1.f) * 100.f);
+        }
+        if (rec["items"] != sol::nil)
+            list.mList = tableToLevelItemList(rec["items"]);
+        setFlagProperty(rec, "calculateFromAllLevels", list.mFlags, ESM::ItemLevList::AllLevels);
+        setFlagProperty(rec, "calculateForEach", list.mFlags, ESM::ItemLevList::Each);
+        return list;
+    }
+
+    sol::table addLevelledItemBindings(const Context& context)
+    {
+        sol::state_view lua = context.sol();
+        sol::table lists(lua, sol::create);
+        lists["createRecordDraft"] = tableToItemLevList;
+        addRecordFunctionBinding<ESM::ItemLevList>(lists, context);
+        addItemUserType<ESM::ItemLevList>(lua, "ESM3_ItemLevelledList");
+        return LuaUtil::makeReadOnly(lists);
+    }
+
+    void addMutableItemLevListType(sol::state_view& lua)
+    {
+        addItemUserType<MutableRecord<ESM::ItemLevList>>(lua, "ESM3_MutableItemLevelledList");
     }
 }

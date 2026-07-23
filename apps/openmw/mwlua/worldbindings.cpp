@@ -214,6 +214,10 @@ namespace MWLua
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(ingred);
             },
+            [lua = context.mLua](const ESM::ItemLevList& list) -> const ESM::ItemLevList* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(list);
+            },
             [lua = context.mLua](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(misc);

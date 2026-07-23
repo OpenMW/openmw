@@ -321,6 +321,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initLevItemBindings(sol::state_view& lua, MWWorld::Store<ESM::ItemLevList>& store)
+        {
+            addRecordStoreBindings<ESM::ItemLevList>(lua, &MWLua::tableToItemLevList);
+            addMutableItemLevListType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::ItemLevList>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initLightBindings(sol::state_view& lua, MWWorld::Store<ESM::Light>& store)
         {
             addRecordStoreBindings<ESM::Light>(lua, &MWLua::tableToLight);
@@ -447,6 +456,7 @@ namespace MWLua
         api["globals"] = initGlobalVariableBindings(lua, esmStore.getWritable<ESM::Global>());
         api["ingredients"] = initIngredientBindings(lua, esmStore.getWritable<ESM::Ingredient>());
         api["levelledCreatures"] = initLevCreatureBindings(lua, esmStore.getWritable<ESM::CreatureLevList>());
+        api["levelledItems"] = initLevItemBindings(lua, esmStore.getWritable<ESM::ItemLevList>());
         api["lights"] = initLightBindings(lua, esmStore.getWritable<ESM::Light>());
         api["lockpicks"] = initLockpickBindings(lua, esmStore.getWritable<ESM::Lockpick>());
         api["magicEffects"] = initMagicEffectBindings(lua, esmStore.getWritable<ESM::MagicEffect>());

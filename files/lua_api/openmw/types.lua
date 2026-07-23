@@ -841,6 +841,50 @@
 -- @field #number enchantmentCharge The item's current enchantment charge. Unenchanted items will always return a value of `nil`. Setting this to `nil` will reset the charge of the item.
 -- @field #string soul The recordId of the item's current soul. Items without soul will always return a value of `nil`. Setting this to `nil` will remove the soul from the item.
 
+
+--------------------------------------------------------------------------------
+-- @{#ItemLevelledList} functions
+-- @field [parent=#Item] #ItemLevelledList levelledItems
+
+---
+-- @type ItemLevelledList
+
+---
+-- Creates an @{#ItemLevelledListRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#ItemLevelledList] createRecordDraft
+-- @param #ItemLevelledListRecord list A Lua table with the fields of an ItemLevelledListRecord, with an optional field `template` that accepts an @{#ItemLevelledListRecord} as a base.
+-- @return #ItemLevelledListRecord A strongly typed LevelledItem record.
+
+---
+-- A read-only list of all @{#ItemLevelledListRecord}s in the world database.
+-- Implements [iterables#List](iterables.html#List) of #ItemLevelledListRecord.
+-- @field [parent=#ItemLevelledList] #list<#ItemLevelledListRecord> records
+-- @usage local record = types.Item.levelledItems.records['example_recordid']
+-- @usage local record = types.Item.levelledItems.records[1]
+
+---
+-- Returns the read-only @{#ItemLevelledListRecord} of a levelled item
+-- @function [parent=#ItemLevelledList] record
+-- @param #any objectOrRecordId
+-- @return #ItemLevelledListRecord
+
+---
+-- @type ItemLevelledListRecord
+-- @field #string id Record id
+-- @field #number chanceNone Chance this list won't spawn anything [0-1]
+-- @field #boolean calculateFromAllLevels Calculate from all levels <= player level, not just the closest below player
+-- @field #boolean calculateForEach Select a random item for each instance in a stack instead of creating a stack of one single item
+-- @field #list<#LevelledListItem> items
+
+---
+-- Picks a random id from the levelled list.
+-- @function [parent=#ItemLevelledListRecord] getRandomId
+-- @param #ItemLevelledListRecord listRecord The list
+-- @param #number MaxLvl The maximum level to select entries for
+-- @return #string An id
+
+
 --------------------------------------------------------------------------------
 -- @{#Creature} functions
 -- @field [parent=#types] #Creature Creature
@@ -2549,7 +2593,7 @@
 ---
 -- Picks a random id from the levelled list.
 -- @function [parent=#CreatureLevelledListRecord] getRandomId
--- @param openmw.core#CreatureLevelledListRecord listRecord The list
+-- @param #CreatureLevelledListRecord listRecord The list
 -- @param #number MaxLvl The maximum level to select entries for
 -- @return #string An id
 
