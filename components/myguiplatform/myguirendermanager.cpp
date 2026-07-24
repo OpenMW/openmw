@@ -3,7 +3,6 @@
 #include <MyGUI_Timer.h>
 
 #include <osg/Drawable>
-#include <osg/TexMat>
 #include <osg/Texture2D>
 
 #include <osgViewer/Viewer>

@@ -48,6 +48,7 @@
 #include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/stateupdater.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/shader/removedalphafunc.hpp>
 
 #include "../widget/scenetoolmode.hpp"
@@ -170,6 +171,9 @@ namespace CSVRender
         mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
         mRootNode->getOrCreateStateSet()->setMode(
             GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+
+        for (unsigned int i = 0; i < 10; ++i)
+            SceneUtil::setupTexMatForStateSet(*mRootNode->getOrCreateStateSet(), i, osg::Matrixf{});
 
         mView->getCamera()->setViewport(new osg::Viewport(0, 0, width(), height()));
 

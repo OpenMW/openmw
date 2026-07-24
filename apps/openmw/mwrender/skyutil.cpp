@@ -11,7 +11,6 @@
 #include <osg/Material>
 #include <osg/OcclusionQueryNode>
 #include <osg/PositionAttitudeTransform>
-#include <osg/TexMat>
 #include <osg/Transform>
 #include <osg/observer_ptr>
 
@@ -27,6 +26,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/texturetype.hpp>
 
 #include <components/fallback/fallback.hpp>
@@ -482,8 +482,7 @@ namespace MWRender
         stateset->setAttribute(
             createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
-        stateset->setTextureAttribute(0, texmat);
+        SceneUtil::setupTexMatForStateSet(*stateset, 0, osg::Matrixf{});
 
         stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -498,8 +497,7 @@ namespace MWRender
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
 
-        osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
-        texMat->setMatrix(mTexMat);
+        SceneUtil::setupTexMatForStateSet(*stateset, 0, mTexMat);
 
         stateset->getUniform("opacity")->set(mOpacity);
     }

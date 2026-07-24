@@ -5,6 +5,7 @@
 #include "lib/sky/passes.glsl"
 
 uniform int pass;
+uniform mat4 texMat0;
 
 varying vec4 passColor;
 varying vec2 diffuseMapUV;
@@ -15,7 +16,7 @@ void main()
     passColor = gl_Color;
 
     if (pass == PASS_CLOUDS)
-        diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+        diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
     else
         diffuseMapUV = gl_MultiTexCoord0.xy;
 }

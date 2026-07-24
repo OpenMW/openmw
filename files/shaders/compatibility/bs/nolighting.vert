@@ -19,6 +19,8 @@ varying float passFalloff;
 uniform bool useFalloff;
 uniform vec4 falloffParams;
 
+uniform mat4 texMat@diffuseMapUV;
+
 #include "lib/view/depth.glsl"
 
 #include "compatibility/vertexcolors.glsl"
@@ -34,7 +36,7 @@ void main(void)
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
 #if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
     passColor = gl_Color;
