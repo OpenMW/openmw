@@ -994,8 +994,9 @@ namespace MWMechanics
         }
 
         const MWBase::World* const world = MWBase::Environment::get().getWorld();
-        const bool knockedOutUnderwater
-            = (isKnockedOut && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
+        const bool isUnderwater = world->isUnderwater(ptr.getCell(), ptr.getRefData().getPosition().asVec3());
+        const bool walkingOnWater = world->isWalkingOnWater(ptr);
+        const bool knockedOutUnderwater = isKnockedOut && (isUnderwater || walkingOnWater);
         if ((world->isSubmerged(ptr) || knockedOutUnderwater)
             && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
