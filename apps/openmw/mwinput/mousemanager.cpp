@@ -127,7 +127,7 @@ namespace MWInput
         }
         else
         {
-            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            bool guiMode = mGuiCursorEnabled;
             guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX),
                           static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
                 && guiMode;
@@ -170,7 +170,7 @@ namespace MWInput
 
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
-            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+            guiMode = mGuiCursorEnabled;
             guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX),
                           static_cast<int>(mGuiCursorY), SDLUtil::sdlMouseButtonToMyGui(id))
                 && guiMode;

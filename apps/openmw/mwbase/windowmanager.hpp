@@ -192,6 +192,7 @@ namespace MWBase
 
         virtual void setCursorVisible(bool visible) = 0;
         virtual void setCursorActive(bool active) = 0;
+        virtual void setCursorInteractionEnabled(bool enabled) = 0;
         virtual void getMousePosition(int& x, int& y) = 0;
         virtual void getMousePosition(float& x, float& y) = 0;
         virtual void setDragDrop(bool dragDrop) = 0;

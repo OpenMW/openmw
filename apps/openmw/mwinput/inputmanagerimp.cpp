@@ -106,10 +106,6 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        mControllerManager->setGuiCursorEnabled(guiMode);
-        mMouseManager->setGuiCursorEnabled(guiMode);
-        mGyroManager->setGuiCursorEnabled(guiMode);
-        mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
 
@@ -129,6 +125,12 @@ namespace MWInput
 
     void InputManager::setCursorMode(MWBase::CursorMode mode)
     {
+        const bool guiCursorEnabled = mode != MWBase::CursorMode::Locked;
+        mControllerManager->setGuiCursorEnabled(guiCursorEnabled);
+        mMouseManager->setGuiCursorEnabled(guiCursorEnabled);
+        mGyroManager->setGuiCursorEnabled(guiCursorEnabled);
+        mMouseManager->setMouseLookEnabled(!guiCursorEnabled);
+        MWBase::Environment::get().getWindowManager()->setCursorInteractionEnabled(guiCursorEnabled);
         mMouseManager->setCursorMode(mode);
     }
 

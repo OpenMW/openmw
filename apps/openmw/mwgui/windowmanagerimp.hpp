@@ -327,6 +327,7 @@ namespace MWGui
 
         /// Call when mouse cursor or buttons are used.
         void setCursorActive(bool active) override;
+        void setCursorInteractionEnabled(bool enabled) override;
 
         /// Clear all savegame-specific data
         void clear() override;
@@ -490,6 +491,7 @@ namespace MWGui
         bool mHudEnabled;
         bool mCursorVisible;
         bool mCursorActive;
+        bool mCursorInteractionEnabled;
 
         int mPlayerBounty;
 
