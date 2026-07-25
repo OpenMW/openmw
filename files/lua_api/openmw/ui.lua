@@ -5,6 +5,31 @@
 -- @usage
 -- local ui = require('openmw.ui')
 
+--- Cursor capture modes.
+-- @type CursorMode
+-- @field CONFINED The cursor can move only within the OpenMW window.
+-- @field FREE The cursor can move outside the OpenMW window.
+-- @field LOCKED The cursor uses relative mouse input.
+
+--- Cursor capture modes.
+-- @field [parent=#ui] #CursorMode CursorMode
+
+--- Set how the mouse pointer is captured. Cursor visibility is controlled separately.
+-- @function [parent=#ui] setCursorMode
+-- @param #CursorMode mode
+
+--- Get the current mouse pointer capture mode.
+-- @function [parent=#ui] getCursorMode
+-- @return #CursorMode
+
+--- Set whether the mouse cursor is visible.
+-- @function [parent=#ui] setCursorVisibility
+-- @param #boolean visible
+
+--- Return whether the mouse cursor is visible.
+-- @function [parent=#ui] getCursorVisibility
+-- @return #boolean
+
 ---
 -- Widget types
 -- @field [parent=#ui] #TYPE TYPE

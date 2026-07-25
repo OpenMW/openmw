@@ -26,6 +26,13 @@ namespace MyGUI
 
 namespace MWBase
 {
+    enum class CursorMode
+    {
+        Confined,
+        Free,
+        Locked,
+    };
+
     /// \brief Interface for input manager (implemented in MWInput)
     class InputManager
     {
@@ -46,6 +53,9 @@ namespace MWBase
         virtual void update(float dt, bool disableControls, bool disableEvents = false) = 0;
 
         virtual void changeInputMode(bool guiMode) = 0;
+
+        virtual void setCursorMode(CursorMode mode) = 0;
+        virtual CursorMode getCursorMode() const = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 

@@ -15,6 +15,7 @@
 #include "luamanagerimp.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include <format>
@@ -82,6 +83,19 @@ namespace MWLua
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         sol::table api(lua, sol::create);
+        api["CursorMode"] = LuaUtil::makeStrictReadOnly(
+            LuaUtil::tableFromPairs<std::string_view, MWBase::CursorMode>(lua,
+                { { "CONFINED", MWBase::CursorMode::Confined }, { "FREE", MWBase::CursorMode::Free },
+                    { "LOCKED", MWBase::CursorMode::Locked } }));
+        api["setCursorMode"] = [luaManager = context.mLuaManager](MWBase::CursorMode mode) {
+            luaManager->addAction([mode] { MWBase::Environment::get().getInputManager()->setCursorMode(mode); });
+        };
+        api["getCursorMode"] = []() { return MWBase::Environment::get().getInputManager()->getCursorMode(); };
+        api["setCursorVisibility"] = [luaManager = context.mLuaManager](bool visible) {
+            luaManager->addAction(
+                [visible] { MWBase::Environment::get().getWindowManager()->setCursorVisible(visible); });
+        };
+        api["getCursorVisibility"] = [windowManager]() { return windowManager->getCursorVisible(); };
         api["_setHudVisibility"] = [luaManager = context.mLuaManager](bool state) {
             luaManager->addAction([state] { MWBase::Environment::get().getWindowManager()->setHudVisibility(state); });
         };

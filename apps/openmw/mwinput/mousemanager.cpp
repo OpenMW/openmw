@@ -33,6 +33,7 @@ namespace MWInput
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mCursorMode(MWBase::CursorMode::Free)
         , mLastWarpX(-1)
         , mLastWarpY(-1)
         , mMouseMoveX(0)
@@ -199,18 +200,16 @@ namespace MWInput
 
     void MouseManager::updateCursorMode()
     {
-        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-            && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
-
         bool wasRelative = mInputWrapper->getMouseRelative();
-        bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
+        bool isRelative = mCursorMode == MWBase::CursorMode::Locked;
 
-        // don't keep the pointer away from the window edge in gui mode
-        // stop using raw mouse motions and switch to system cursor movements
+        // Relative mode locks the cursor and disables mouse acceleration. The other
+        // modes use normal system cursor movement.
         mInputWrapper->setMouseRelative(isRelative);
 
-        // we let the mouse escape in the main menu
-        mInputWrapper->setGrabPointer(grab && (Settings::input().mGrabCursor || isRelative));
+        // Relative mode always confines the pointer. Confined mode does so without
+        // using relative input, while Free mode allows the pointer to leave the window.
+        mInputWrapper->setGrabPointer(mCursorMode != MWBase::CursorMode::Free);
 
         // we switched to non-relative mode, move our cursor to where the in-game
         // cursor is

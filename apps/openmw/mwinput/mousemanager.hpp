@@ -4,6 +4,8 @@
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
 
+#include "../mwbase/inputmanager.hpp"
+
 namespace SDLUtil
 {
     class InputWrapper;
@@ -22,6 +24,9 @@ namespace MWInput
 
         void updateCursorMode();
         void update(float dt);
+
+        void setCursorMode(MWBase::CursorMode mode) { mCursorMode = mode; }
+        MWBase::CursorMode getCursorMode() const { return mCursorMode; }
 
         void mouseMoved(const SDLUtil::MouseMotionEvent& arg) override;
         void mousePressed(const SDL_MouseButtonEvent& arg, Uint8 id) override;
@@ -49,6 +54,7 @@ namespace MWInput
         int mMouseWheel;
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        MWBase::CursorMode mCursorMode;
         float mLastWarpX;
         float mLastWarpY;
 

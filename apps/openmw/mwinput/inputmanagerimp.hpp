@@ -62,6 +62,9 @@ namespace MWInput
 
         void changeInputMode(bool guiMode) override;
 
+        void setCursorMode(MWBase::CursorMode mode) override;
+        MWBase::CursorMode getCursorMode() const override;
+
         void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 
         void setDragDrop(bool dragDrop) override;
