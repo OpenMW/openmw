@@ -298,27 +298,48 @@ namespace LuaUi
             assert(mRoot);
             if (mRoot->widget()->getTypeName() != widgetType(layout()))
             {
-                destroyRoot(mRoot);
-                WidgetExtension* parent = mRoot->getParent();
-                auto children = parent->children();
-                auto it = std::find(children.begin(), children.end(), mRoot);
-                assert(it != children.end());
-                try
+                // A root element can either be attached to another UI element or directly to a layer. Keep the
+                // parent information before destroying the old widget: mRoot is no longer valid afterwards.
+                WidgetExtension* oldRoot = mRoot;
+                WidgetExtension* parent = oldRoot->getParent();
+                if (parent == nullptr)
                 {
-                    mRoot = createWidget(layout(), true, 0);
-                    *it = mRoot;
+                    destroyRoot(oldRoot);
+                    try
+                    {
+                        mRoot = createWidget(layout(), true, 0);
+                    }
+                    catch (...)
+                    {
+                        mRoot = nullptr;
+                        mState = New;
+                        throw;
+                    }
                 }
-                catch (...)
+                else
                 {
-                    // Remove mRoot from its parent's children even if we couldn't replace it
-                    children.erase(it);
+                    auto children = parent->children();
+                    auto it = std::find(children.begin(), children.end(), oldRoot);
+                    assert(it != children.end());
+
+                    destroyRoot(oldRoot);
+                    try
+                    {
+                        mRoot = createWidget(layout(), true, 0);
+                        *it = mRoot;
+                    }
+                    catch (...)
+                    {
+                        // Remove the old root from its parent's children even if we couldn't replace it.
+                        children.erase(it);
+                        parent->setChildren(children);
+                        mRoot = nullptr;
+                        mState = New;
+                        throw;
+                    }
                     parent->setChildren(children);
-                    mRoot = nullptr;
-                    mState = New;
-                    throw;
+                    mRoot->updateCoord();
                 }
-                parent->setChildren(children);
-                mRoot->updateCoord();
             }
             else
             {
