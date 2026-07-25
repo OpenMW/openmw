@@ -2,6 +2,7 @@
 ------
 
     Bug #6117: Combat AI target selection should prefer closer targets
+    Bug #8134: Convert NiLODNode ranges so they don't overlap
     Bug #8323: Vvardenfell Animated Main Menu is skipping
     Bug #8822: Default interaction raycasts need to ignore terrain
     Bug #9023: Telvanni Guard is aggressive towards exhibition piece in Dwemer Museum
@@ -18,24 +19,36 @@
     Bug #9146: ActorActiveSpells:add shows enemy health bar when adding healing effect on self
     Bug #9147: ActorActiveSpells:add does not update spell icons if game is paused
     Bug #9149: Sensible mouse scrolling steps should be used for settings menu sliders
+    Bug #9154: Knockdown check uses damage after armor reduction
     Bug #9157: Show owned doesn't work in Menu Mode
     Bug #9170: NiPlanarCollider sometimes deflects particles that move away from it
     Bug #9173: Console keybind prevents typing Shift-modified characters for the bound key
     Bug #9179: OAAB - Articulating Animunculi Head spins in conversation, talks too often
+    Bug #9180: Actor.spells(actor):canUsePower errors if called on other actor from local script
     Feature #3602: Implement NiBillboardNode flags
     Feature #5712: Editor: Ensure content file order matches launcher order
     Feature #6900: Clustered forward rendering
+    Feature #6938: Support NiLookAtController
+    Feature #7586: Lua levelled item manipulation
     Feature #8241: Allow adding data directories to the launcher via dragging-and-dropping
     Feature #8948: Expose "corpses persist" flag to Lua
     Feature #9033: Controller joystick mouse emulation mode indicator circle
     Feature #9053: Make the light radius multiplier affect the fadeout radius
     Feature #9090: Add a setting for 3rd person camera max distance
+    Feature #9104: Wind-up strength hit parameter (as opposed to attack strength)
     Feature #9122: Viewport resize engine handler
     Feature #9123: Flex Widget Gap and Wrap Properties
     Feature #9129: Lua-attached VFX transformations
+    Feature #9144: Lua: GetMasserPhase and GetSecundaPhase equivalent
     Feature #9151: Implement RCN extra data flag
+    Feature #9201: MWSE ESS import fails with an SCPT size mismatch with >255 mods
+    Feature #9205: [Lua] Combat interface should accept records and record IDs
+    Feature #9206: Lua UI - Method to get all elements on a layer
+    Feature #9207: Lua TextureResource does not expose properties
+    Feature #9216: Exposed Lua engine handlers for dropping and placing objects
     Task #9084: cell:getAll() adds cell data to the save file
     Task #9116: element.content["name"] causes an error if it doesn't exist
+    Task #9222: Delay rendering settings Lua UI until the user actually views that settings page
 
 0.51.0
 ------
