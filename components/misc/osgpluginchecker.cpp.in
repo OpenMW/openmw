@@ -39,10 +39,16 @@ namespace Misc
         bool haveAllPlugins = true;
         for (std::string_view plugin : USED_OSG_PLUGIN_NAMES)
         {
-            std::string libraryName = osgDB::Registry::instance()->createLibraryNameForExtension(std::string{ plugin });
+            const std::string libraryName = osgDB::Registry::instance()->createLibraryNameForExtension(std::string{ plugin });
             if (osgDB::findLibraryFile(libraryName).empty())
             {
                 Log(Debug::Error) << "Missing OSG plugin: " << libraryName;
+                haveAllPlugins = false;
+                continue;
+            }
+            if (osgDB::Registry::instance()->loadLibrary(libraryName) == osgDB::Registry::NOT_LOADED)
+            {
+                Log(Debug::Error) << "Failed to load OSG plugin: " << libraryName;
                 haveAllPlugins = false;
             }
         }
