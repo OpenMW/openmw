@@ -338,7 +338,6 @@ namespace LuaUi
                         throw;
                     }
                     parent->setChildren(children);
-                    mRoot->updateCoord();
                 }
             }
             else
