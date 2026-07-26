@@ -299,7 +299,7 @@ namespace MWLua
                     }
                     else if (value.is<MutableFactionRanks>())
                     {
-                        const ESM::Faction& other = value.as<MutableFactionReactions>().mFaction.find();
+                        const ESM::Faction& other = value.as<MutableFactionRanks>().mFaction.find();
                         assert(other.mData.mRankData.size() == other.mRanks.size());
                         for (size_t i = 0; i < faction.mRanks.size(); ++i)
                         {
