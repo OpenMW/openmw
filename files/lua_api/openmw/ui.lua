@@ -7,8 +7,8 @@
 
 --- Cursor capture modes.
 -- @type CursorMode
--- @field CONFINED The cursor can move only within the OpenMW window. It interacts with UI widgets and does not rotate the camera.
--- @field FREE The cursor can move outside the OpenMW window. It interacts with UI widgets and does not rotate the camera.
+-- @field CONFINED The cursor can move only within the OpenMW window. It interacts with UI widgets, does not rotate the camera, and does not trigger gameplay mouse bindings.
+-- @field FREE The cursor can move outside the OpenMW window. It interacts with UI widgets, does not rotate the camera, and does not trigger gameplay mouse bindings.
 -- @field LOCKED The cursor uses relative mouse input, rotates the camera, and does not interact with UI widgets.
 
 --- Cursor capture modes.

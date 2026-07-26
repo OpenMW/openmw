@@ -135,8 +135,13 @@ namespace MWInput
             if (mBindingsManager->isDetectingBindingState())
                 return; // don't allow same mouseup to bind as initiated bind
 
-            mBindingsManager->setPlayerControlsEnabled(!guiMode);
-            mBindingsManager->mouseReleased(arg, id);
+            if (mGuiCursorEnabled)
+                mBindingsManager->setPlayerControlsEnabled(false);
+            else
+            {
+                mBindingsManager->setPlayerControlsEnabled(!guiMode);
+                mBindingsManager->mouseReleased(arg, id);
+            }
         }
 
         MWBase::Environment::get().getLuaManager()->inputEvent(
@@ -146,7 +151,7 @@ namespace MWInput
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent& arg)
     {
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
-        if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
+        if (mBindingsManager->isDetectingBindingState() || (!mGuiCursorEnabled && !input->controlsDisabled()))
         {
             mBindingsManager->mouseWheelMoved(arg);
         }
@@ -186,13 +191,18 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
-        mBindingsManager->setPlayerControlsEnabled(!guiMode);
-
-        // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
-        // Also do not trigger bindings when input controls are disabled, e.g. during save loading
-        if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+        if (mGuiCursorEnabled)
         {
-            mBindingsManager->mousePressed(arg, id);
+            mBindingsManager->setPlayerControlsEnabled(false);
+        }
+        else
+        {
+            mBindingsManager->setPlayerControlsEnabled(!guiMode);
+
+            // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
+            // Also do not trigger bindings when input controls are disabled, e.g. during save loading
+            if (!MWBase::Environment::get().getWindowManager()->isSettingsWindowVisible() && !input->controlsDisabled())
+                mBindingsManager->mousePressed(arg, id);
         }
         MWBase::Environment::get().getLuaManager()->inputEvent(
             { MWBase::LuaManager::InputEvent::MouseButtonPressed, arg.button });

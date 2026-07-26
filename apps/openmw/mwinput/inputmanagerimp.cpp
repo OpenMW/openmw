@@ -131,6 +131,7 @@ namespace MWInput
         mGyroManager->setGuiCursorEnabled(guiCursorEnabled);
         mMouseManager->setMouseLookEnabled(!guiCursorEnabled);
         MWBase::Environment::get().getWindowManager()->setCursorInteractionEnabled(guiCursorEnabled);
+        mBindingsManager->setPlayerControlsEnabled(!guiCursorEnabled);
         mMouseManager->setCursorMode(mode);
     }
 
