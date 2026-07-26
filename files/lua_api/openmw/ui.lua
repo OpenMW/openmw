@@ -23,11 +23,11 @@
 -- @return #CursorMode
 
 --- Set whether the mouse cursor is visible.
--- @function [parent=#ui] setCursorVisibility
+-- @function [parent=#ui] setCursorVisible
 -- @param #boolean visible
 
 --- Return whether the mouse cursor is visible.
--- @function [parent=#ui] getCursorVisibility
+-- @function [parent=#ui] getCursorVisible
 -- @return #boolean
 
 ---

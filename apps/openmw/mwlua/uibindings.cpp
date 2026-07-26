@@ -91,11 +91,11 @@ namespace MWLua
             luaManager->addAction([mode] { MWBase::Environment::get().getInputManager()->setCursorMode(mode); });
         };
         api["getCursorMode"] = []() { return MWBase::Environment::get().getInputManager()->getCursorMode(); };
-        api["setCursorVisibility"] = [luaManager = context.mLuaManager](bool visible) {
+        api["setCursorVisible"] = [luaManager = context.mLuaManager](bool visible) {
             luaManager->addAction(
                 [visible] { MWBase::Environment::get().getWindowManager()->setCursorVisible(visible); });
         };
-        api["getCursorVisibility"] = [windowManager]() { return windowManager->getCursorVisible(); };
+        api["getCursorVisible"] = [windowManager]() { return windowManager->getCursorVisible(); };
         api["_setHudVisibility"] = [luaManager = context.mLuaManager](bool state) {
             luaManager->addAction([state] { MWBase::Environment::get().getWindowManager()->setHudVisibility(state); });
         };
