@@ -33,6 +33,8 @@ namespace ESM
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
+
+        void blank();
     };
 
     struct Faction

@@ -49,6 +49,15 @@
 -- @usage
 -- content.enchantments.records.MyEnchantment = { type = content.enchantments.TYPE.CastOnUse, charge = 1, cost = 1, effects = { { id = 'FortifySkill', affectedSkill = 'enchant', duration = 5, magnitudeMin = 50, magnitudeMax = 100 } } }
 
+--- @{#FactionContent}: Faction manipulation.
+-- @field [parent=#content] #FactionContent factions
+
+---
+-- A mutable list of all @{openmw.core#FactionRecord}s.
+-- @field [parent=#FactionContent] #list<openmw.core#FactionRecord> records
+-- @usage
+-- content.factions.records.MyFaction = { name = 'Peons', hidden = false, reactions = { Hlaalu = -1, Telvanni = 1 }, attributes = { 'Luck', 'Willpower' }, skills = { 'Destruction', 'HeavyArmor' }, ranks = { { name = 'Peon' }, { name = 'Minion', attributeValues = { 50, 50 }, primarySkillValue = 100 } } }
+
 --- @{#GMSTContent}: GMST manipulation.
 -- @field [parent=#content] #GMSTContent gameSettings
 
