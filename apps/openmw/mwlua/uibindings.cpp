@@ -83,8 +83,8 @@ namespace MWLua
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         sol::table api(lua, sol::create);
-        api["CursorMode"] = LuaUtil::makeStrictReadOnly(
-            LuaUtil::tableFromPairs<std::string_view, MWBase::CursorMode>(lua,
+        api["CursorMode"]
+            = LuaUtil::makeStrictReadOnly(LuaUtil::tableFromPairs<std::string_view, MWBase::CursorMode>(lua,
                 { { "CONFINED", MWBase::CursorMode::Confined }, { "FREE", MWBase::CursorMode::Free },
                     { "LOCKED", MWBase::CursorMode::Locked } }));
         api["setCursorMode"] = [luaManager = context.mLuaManager](MWBase::CursorMode mode) {
