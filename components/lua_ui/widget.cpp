@@ -1,4 +1,5 @@
 #include "widget.hpp"
+#include "components/lua/utilpackage.hpp"
 #include "components/lua_ui/util.hpp"
 #include "element.hpp"
 
@@ -32,6 +33,7 @@ namespace LuaUi
         , mParent(nullptr)
         , mTemplateChild(false)
         , mElementRoot(false)
+        , mContentWidget(nullptr)
     {
     }
 
@@ -48,6 +50,11 @@ namespace LuaUi
     {
         // \todo might be more efficient to only register these if there are Lua callbacks
         registerEvents(mWidget);
+
+        mContentWidget = mWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(), MyGUI::Align::Default);
+        mContentWidget->setNeedMouseFocus(false);
+        mContentWidget->setNeedKeyFocus(false);
+        mContentWidget->setInheritsPick(true);
     }
 
     void WidgetExtension::deinitialize()
@@ -124,7 +131,7 @@ namespace LuaUi
         }
         ext->mParent = this;
         ext->mTemplateChild = false;
-        ext->widget()->attachToWidget(mSlot->widget());
+        ext->widget()->attachToWidget(mSlot->contentWidget());
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
@@ -286,6 +293,10 @@ namespace LuaUi
 
         if (oldCoord != newCoord)
             mWidget->setCoord(newCoord);
+
+        if (mContentWidget)
+            mContentWidget->setCoord(MyGUI::IntCoord(getContentOffset(), getContentSize()));
+
         updateChildrenCoord();
     }
 
@@ -308,6 +319,15 @@ namespace LuaUi
         mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
+        parsePadding();
+    }
+
+    void WidgetExtension::parsePadding()
+    {
+        mPadding = Padding();
+        const LuaUtil::Vec4 value = propertyValue("padding", LuaUtil::Vec4());
+        mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
+            static_cast<int>(value.w()) };
     }
 
     void WidgetExtension::updateChildrenCoord()
@@ -326,6 +346,18 @@ namespace LuaUi
             return mParent->templateScalingSize();
         else
             return mParent->childScalingSize();
+    }
+
+    MyGUI::IntPoint WidgetExtension::getContentOffset() const
+    {
+        return MyGUI::IntPoint(mPadding.mLeft, mPadding.mTop);
+    }
+
+    MyGUI::IntSize WidgetExtension::getContentSize() const
+    {
+        MyGUI::IntSize fullSize = calculateSize();
+        return MyGUI::IntSize(std::max(0, fullSize.width - (mPadding.mLeft + mPadding.mRight)),
+            std::max(0, fullSize.height - (mPadding.mTop + mPadding.mBottom)));
     }
 
     MyGUI::IntSize WidgetExtension::calculateSize() const
@@ -370,9 +402,14 @@ namespace LuaUi
         return newCoord;
     }
 
+    MyGUI::Widget* WidgetExtension::contentWidget() const
+    {
+        return mContentWidget;
+    }
+
     MyGUI::IntSize WidgetExtension::childScalingSize() const
     {
-        return mSlot->widget()->getSize();
+        return mSlot->getContentSize();
     }
 
     MyGUI::IntSize WidgetExtension::templateScalingSize() const
@@ -456,6 +493,7 @@ namespace LuaUi
             "pointer",
             "alpha",
             "inheritAlpha",
+            "padding",
         };
         return usedProps;
     }

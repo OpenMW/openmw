@@ -2,13 +2,18 @@
 
 #include <MyGUI_RenderManager.h>
 
+#include <algorithm>
+
 #include "resources.hpp"
 
 namespace LuaUi
 {
     void LuaTileRect::_setAlign(const MyGUI::IntSize& /*oldSize*/)
     {
-        mCoord.set(0, 0, mCroppedParent->getWidth(), mCroppedParent->getHeight());
+        const int width = std::max(0, mCroppedParent->getWidth() - mPadding.mLeft - mPadding.mRight);
+        const int height = std::max(0, mCroppedParent->getHeight() - mPadding.mTop - mPadding.mBottom);
+
+        mCoord.set(mPadding.mLeft, mPadding.mTop, width, height);
         mTileSize = mSetTileSize;
 
         // zero tilesize stands for not tiling
@@ -67,6 +72,12 @@ namespace LuaUi
         setColour(propertyValue("color", MyGUI::Colour(1, 1, 1, 1)));
 
         WidgetExtension::updateProperties();
+
+        mTileRect->updatePadding(mPadding);
+        // _setAlign() normally runs when the parent is resized. Padding changes only
+        // the TileRect's internal drawing area, so invoke the MyGUI hook explicitly to
+        // recalculate the padded rectangle and refresh the tiled image
+        mTileRect->_setAlign(widget()->getSize());
     }
 
     const std::vector<std::string_view>& LuaImage::allUsedProperties() const

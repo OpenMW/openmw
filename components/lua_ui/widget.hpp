@@ -10,6 +10,7 @@
 
 #include <components/lua/asyncpackage.hpp>
 
+#include "padding.hpp"
 #include "properties.hpp"
 
 namespace LuaUi
@@ -91,6 +92,11 @@ namespace LuaUi
         sol::object mouseEvent(LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize() const;
+        // Size available for content, i.e., parent size minus padding
+        MyGUI::IntSize getContentSize() const;
+        // Offset of content area relative to widget position, i.e., where the content area starts
+        MyGUI::IntPoint getContentOffset() const;
+        MyGUI::Widget* contentWidget() const;
         virtual MyGUI::IntSize childScalingSize() const;
         virtual MyGUI::IntSize templateScalingSize() const;
 
@@ -157,6 +163,7 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
+        Padding mPadding;
 
         bool mPropagateEvents;
         bool mVisible; // used to implement updateVisible
@@ -176,6 +183,7 @@ namespace LuaUi
         WidgetExtension* mParent;
         bool mTemplateChild;
         bool mElementRoot;
+        MyGUI::Widget* mContentWidget;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);
@@ -184,6 +192,7 @@ namespace LuaUi
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);
 
         void updateChildrenCoord();
+        void parsePadding();
 
         void keyPress(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char);
         void keyRelease(MyGUI::Widget*, MyGUI::KeyCode);

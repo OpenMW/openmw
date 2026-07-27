@@ -26,6 +26,8 @@ namespace LuaUi
 
     protected:
         MyGUI::IntSize calculateSize() const override;
+        MyGUI::IntCoord getTextRegion() const override;
+        MyGUI::IntSize getViewSize() const override;
     };
 }
 
