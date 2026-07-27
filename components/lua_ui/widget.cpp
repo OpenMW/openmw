@@ -325,15 +325,9 @@ namespace LuaUi
     void WidgetExtension::parsePadding()
     {
         mPadding = Padding();
-        sol::object padding = propertyValue("padding", sol::object(mLua, sol::in_place, sol::lua_nil));
-        if (padding.is<LuaUtil::Vec4>())
-        {
-            const LuaUtil::Vec4 value = padding.as<LuaUtil::Vec4>();
-            mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
-                static_cast<int>(value.w()) };
-        }
-        else if (padding != sol::nil)
-            throw std::logic_error("Property \"padding\" must be a util.vector4");
+        const LuaUtil::Vec4 value = propertyValue("padding", LuaUtil::Vec4());
+        mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
+            static_cast<int>(value.w()) };
     }
 
     void WidgetExtension::updateChildrenCoord()

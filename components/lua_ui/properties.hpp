@@ -74,24 +74,12 @@ namespace LuaUi
         auto propOptional = parseValue<T>(props, field, "Property");
         auto templateOptional = parseValue<T>(templateProps, field, "Template property");
 
-        if constexpr (std::is_same_v<T, sol::object>)
-        {
-            if (propOptional.has_value() && propOptional.value() != sol::nil)
-                return propOptional.value();
-            else if (templateOptional.has_value() && templateOptional.value() != sol::nil)
-                return templateOptional.value();
-            else
-                return defaultValue;
-        }
+        if (propOptional.has_value())
+            return propOptional.value();
+        else if (templateOptional.has_value())
+            return templateOptional.value();
         else
-        {
-            if (propOptional.has_value())
-                return propOptional.value();
-            else if (templateOptional.has_value())
-                return templateOptional.value();
-            else
-                return defaultValue;
-        }
+            return defaultValue;
     }
 
     template <typename T>
