@@ -74,6 +74,9 @@ namespace LuaUi
         WidgetExtension::updateProperties();
 
         mTileRect->updatePadding(mPadding);
+        // _setAlign() normally runs when the parent is resized. Padding changes only
+        // the TileRect's internal drawing area, so invoke the MyGUI hook explicitly to
+        // recalculate the padded rectangle and refresh the tiled image
         mTileRect->_setAlign(widget()->getSize());
     }
 
