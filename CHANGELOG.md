@@ -25,6 +25,7 @@
     Bug #9173: Console keybind prevents typing Shift-modified characters for the bound key
     Bug #9179: OAAB - Articulating Animunculi Head spins in conversation, talks too often
     Bug #9180: Actor.spells(actor):canUsePower errors if called on other actor from local script
+    Bug #9183: The number settings renderer resets input if entered value is outside of the specified min-max range
     Feature #3602: Implement NiBillboardNode flags
     Feature #5712: Editor: Ensure content file order matches launcher order
     Feature #6900: Clustered forward rendering

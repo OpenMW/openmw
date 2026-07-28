@@ -76,10 +76,10 @@ Table with the following optional fields:
     - Only allow integer values
   * - min
     - number (nil)
-    - If set, restricts setting values to numbers larger than min
+    - If set, entered values smaller than min are clamped to min
   * - max
     - number (nil)
-    - If set, restricts setting values to numbers smaller than max
+    - If set, entered values larger than max are clamped to max
 
 select
 ------
