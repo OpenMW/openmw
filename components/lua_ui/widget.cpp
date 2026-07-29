@@ -233,6 +233,12 @@ namespace LuaUi
             attachTemplate(mTemplateChildren[i]);
         }
         updateTemplate();
+
+        // Template children attach directly to this widget, while normal content is
+        // kept in mContentWidget to apply padding and clipping. Reattach the wrapper
+        // after templates so normal content remains the top-most sibling.
+        mContentWidget->detachFromWidget();
+        mContentWidget->attachToWidget(widget());
     }
 
     void WidgetExtension::updateTemplate()
