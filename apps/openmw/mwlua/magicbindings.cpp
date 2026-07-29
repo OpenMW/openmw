@@ -707,6 +707,20 @@ namespace MWLua
             return false;
         };
 
+        // types.Actor.activeSpells(o):getByActiveSpellId(id)
+        activeSpellsT["getByActiveSpellId"]
+            = [](const ActorActiveSpells& activeSpells, const std::string_view idStr) -> sol::optional<ActiveSpell> {
+            if (auto* store = activeSpells.getStore())
+            {
+                auto it = store->getActiveSpellById(ESM::RefId::deserializeText(idStr));
+                if (it != store->end())
+                {
+                    return ActiveSpell{ activeSpells.mActor, *it };
+                }
+            }
+            return sol::nullopt;
+        };
+
         // types.Actor.activeSpells(o):remove(id)
         activeSpellsT["remove"] = [context](const ActorActiveSpells& spells, std::string_view idStr) {
             if (spells.isLObject())
@@ -763,6 +777,7 @@ namespace MWLua
                 params.setFlag(ESM::ActiveSpells::Flag_Temporary);
                 if (stackable)
                     params.setFlag(ESM::ActiveSpells::Flag_Stackable);
+                params.setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
 
                 for (const ESM::IndexedENAMstruct& enam : enams)
                 {
@@ -809,7 +824,10 @@ namespace MWLua
                         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
                     });
                 }
+
+                return params.getActiveSpellId();
             }
+            return ESM::RefId();
         };
 
         // pairs(types.Actor.activeEffects(o))

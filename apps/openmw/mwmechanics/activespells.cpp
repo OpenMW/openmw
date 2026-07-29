@@ -1,7 +1,5 @@
 #include "activespells.hpp"
 
-#include <optional>
-
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -22,6 +20,7 @@
 #include "spelleffects.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -30,7 +29,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/worldmodel.hpp"
 
 namespace
@@ -378,7 +376,7 @@ namespace MWMechanics
     {
         const auto caster = MWBase::Environment::get().getWorldModel()->getPtr(spellIt->mCaster);
         bool removedSpell = false;
-        std::optional<ActiveSpellParams> reflected;
+        std::vector<int> reflectedEffects;
         for (auto it = spellIt->mEffects.begin(); it != spellIt->mEffects.end();)
         {
             if (it->mFlags & ESM::ActiveEffect::Flag_Remove && it->mTimeLeft <= 0.f
@@ -390,16 +388,7 @@ namespace MWMechanics
             auto result = applyMagicEffect(ptr, caster, *spellIt, *it, duration, context.mPlayNonLooping);
             if (result.mType == MagicApplicationResult::Type::REFLECTED)
             {
-                if (!reflected)
-                {
-                    if (Settings::game().mClassicReflectedAbsorbSpellsBehavior)
-                        reflected = { *spellIt, caster };
-                    else
-                        reflected = { *spellIt, ptr };
-                }
-                auto& reflectedEffect = reflected->mEffects.emplace_back(*it);
-                reflectedEffect.mFlags
-                    = ESM::ActiveEffect::Flag_Ignore_Reflect | ESM::ActiveEffect::Flag_Ignore_SpellAbsorption;
+                reflectedEffects.push_back(it->mEffectIndex);
                 it = spellIt->mEffects.erase(it);
             }
             else if (result.mType == MagicApplicationResult::Type::REMOVED)
@@ -423,7 +412,7 @@ namespace MWMechanics
             if (removedSpell)
                 break;
         }
-        if (reflected)
+        if (!reflectedEffects.empty())
         {
             const ESM::Static* reflectStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
                 ESM::RefId::stringRefId("VFX_Reflect"));
@@ -434,7 +423,9 @@ namespace MWMechanics
                     = Misc::ResourceHelpers::correctMeshPath(reflectStatic->mModel.getNormalized());
                 animation->addEffect(reflectStaticModel, ESM::MagicEffect::Reflect.getValue(), false);
             }
-            caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell(*reflected);
+            auto reflectCaster = Settings::game().mClassicReflectedAbsorbSpellsBehavior ? caster : ptr;
+            MWBase::Environment::get().getLuaManager()->applyMagicEffects(spellIt->mSourceSpellId, reflectCaster,
+                spellIt->mItem, caster, reflectedEffects, true, true, false, true);
         }
         if (removedSpell)
             return true;
@@ -475,7 +466,9 @@ namespace MWMechanics
 
     bool ActiveSpells::initParams(const MWWorld::Ptr& ptr, const ActiveSpellParams& params, UpdateContext& context)
     {
-        mSpells.emplace_back(params).setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
+        mSpells.emplace_back(params);
+        if (mSpells.back().getActiveSpellId().empty())
+            mSpells.back().setActiveSpellId(MWBase::Environment::get().getESMStore()->generateId());
         auto it = mSpells.end();
         --it;
         // We instantly apply the effect with a duration of 0 so continuous effects can be purged before truly applying

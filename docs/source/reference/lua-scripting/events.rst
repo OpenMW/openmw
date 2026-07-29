@@ -159,6 +159,13 @@ Example:
         core.sendGlobalEvent('ModifyItemCondition', {actor = self, item = item, amount = -1})
     end
 
+Spellcast events
+----------------
+
+**ApplyMagicEffects**
+
+Used by built-in scripts to apply effects on Lockables and other actors during spellcasting.
+
 UI events
 ---------
 

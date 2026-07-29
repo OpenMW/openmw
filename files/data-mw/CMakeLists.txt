@@ -34,6 +34,9 @@ set(BUILTIN_DATA_MW_FILES
     scripts/omw/music/music.lua
     scripts/omw/music/settings.lua
     scripts/omw/playerskillhandlers.lua
+    scripts/omw/spellcasting/common.lua
+    scripts/omw/spellcasting/local.lua
+    scripts/omw/spellcasting/lockable.lua
 )
 
 foreach (f ${BUILTIN_DATA_MW_FILES})

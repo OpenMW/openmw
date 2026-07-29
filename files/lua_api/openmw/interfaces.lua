@@ -34,6 +34,9 @@
 -- @field [parent=#interfaces] scripts.omw.skillhandlers#scripts.omw.skillhandlers SkillProgression
 
 ---
+-- @field [parent=#interfaces] scripts.omw.spellcasting.interface_local#scripts.omw.spellcasting.interface_local SpellCasting
+
+---
 -- @field [parent=#interfaces] scripts.omw.crimes#scripts.omw.crimes Crimes
 
 ---

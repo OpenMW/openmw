@@ -241,6 +241,16 @@ namespace MWLua
             return anim->getNode(bonename) != nullptr;
         };
 
+        api["addGlow"] = [context](const SelfObject& object, const sol::table& options) {
+            auto color = options.get<Misc::Color>("color");
+            auto duration = options.get<Misc::FiniteFloat>("duration");
+            context.mLuaManager->addAction(
+                [object = Object(object), color = color.toVec(), duration = duration] {
+                    MWRender::Animation* anim = getMutableAnimationOrThrow(object);
+                    anim->addSpellCastGlow(color, duration);
+                },
+                "addGlowAction");
+        };
         api["addVfx"] = [context](const SelfObject& object, std::string_view model, sol::optional<sol::table> options) {
             if (options)
             {

@@ -147,6 +147,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
     scripts/omw/settings/renderers.lua
+    scripts/omw/spellcasting/interface_local.lua
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua
     scripts/omw/mwui/filters.lua
