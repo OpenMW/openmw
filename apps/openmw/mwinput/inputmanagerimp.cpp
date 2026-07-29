@@ -140,6 +140,16 @@ namespace MWInput
         return mMouseManager->getCursorMode();
     }
 
+    void InputManager::setCursorPosition(const osg::Vec2f& position)
+    {
+        mMouseManager->setCursorPosition(position);
+    }
+
+    osg::Vec2f InputManager::getCursorPosition() const
+    {
+        return mMouseManager->getCursorPosition();
+    }
+
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
         mSensorManager->processChangedSettings(changed);

@@ -289,6 +289,24 @@ namespace MWInput
             static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
     }
 
+    void MouseManager::setCursorPosition(const osg::Vec2f& position)
+    {
+        const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        mGuiCursorX = std::clamp(position.x(), 0.f, static_cast<float>(viewSize.width - 1));
+        mGuiCursorY = std::clamp(position.y(), 0.f, static_cast<float>(viewSize.height - 1));
+        MyGUI::InputManager::getInstance().injectMouseMove(
+            static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+
+        if (!mInputWrapper->getMouseRelative())
+        {
+            mLastWarpX = mGuiCursorX;
+            mLastWarpY = mGuiCursorY;
+            warpMouse();
+        }
+
+        MWBase::Environment::get().getWindowManager()->setCursorActive(true);
+    }
+
     void MouseManager::warpMouse()
     {
         float guiUiScale = Settings::gui().mScalingFactor;

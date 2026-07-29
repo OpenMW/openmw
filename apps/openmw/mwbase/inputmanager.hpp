@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <SDL_gamecontroller.h>
+#include <osg/Vec2f>
 #include <cstdint>
 
 namespace Loading
@@ -56,6 +57,8 @@ namespace MWBase
 
         virtual void setCursorMode(CursorMode mode) = 0;
         virtual CursorMode getCursorMode() const = 0;
+        virtual void setCursorPosition(const osg::Vec2f& position) = 0;
+        virtual osg::Vec2f getCursorPosition() const = 0;
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 

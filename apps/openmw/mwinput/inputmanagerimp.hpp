@@ -64,6 +64,8 @@ namespace MWInput
 
         void setCursorMode(MWBase::CursorMode mode) override;
         MWBase::CursorMode getCursorMode() const override;
+        void setCursorPosition(const osg::Vec2f& position) override;
+        osg::Vec2f getCursorPosition() const override;
 
         void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 

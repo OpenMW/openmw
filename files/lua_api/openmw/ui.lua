@@ -22,6 +22,14 @@
 -- @function [parent=#ui] getCursorMode
 -- @return #CursorMode
 
+--- Set the cursor position in UI pixels. The position is clamped to the OpenMW window.
+-- @function [parent=#ui] setCursorPosition
+-- @param openmw.util#Vector2 position
+
+--- Return the cursor position in UI pixels.
+-- @function [parent=#ui] getCursorPosition
+-- @return openmw.util#Vector2
+
 --- Set whether the mouse cursor is visible.
 -- @function [parent=#ui] setCursorVisible
 -- @param #boolean visible
