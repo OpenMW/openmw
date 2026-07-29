@@ -6,9 +6,9 @@
 #include <osg/Fog>
 #include <osg/Texture2D>
 
-#include "components/sceneutil/texmat.hpp"
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
