@@ -125,6 +125,8 @@ namespace MWLua
                 return array.find(index - 1);
             };
             arrayT[sol::meta_function::new_index] = [](ClassStatArray& array, uint32_t index, std::string_view value) {
+                if (index == 0 || index > array.mSize)
+                    throw std::runtime_error("index out of range");
                 array.find(index - 1) = ESM::RefId::deserializeText(value);
             };
             arrayT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -140,9 +142,7 @@ namespace MWLua
             record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
             Types::addProperty(record, "name", &ESM::Class::mName);
             Types::addProperty(record, "description", &ESM::Class::mDescription);
-            Types::addFlagProperty(record, "isPlayable",
-                std::numeric_limits<decltype(ESM::Class::CLDTstruct::mIsPlayable)>::max(), &ESM::Class::mData,
-                &ESM::Class::CLDTstruct::mIsPlayable);
+            Types::addProperty(record, "isPlayable", &ESM::Class::mData, &ESM::Class::CLDTstruct::mIsPlayable);
             if constexpr (Types::RecordType<T>::isMutable)
             {
                 addClassStatArrayType(lua);

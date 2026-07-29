@@ -436,13 +436,13 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mIsPlayable != 0; }
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mIsPlayable; }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mIsPlayable = data.toInt();
+            record2.mData.mIsPlayable = data.toBool();
 
             record.setModified(record2);
         }

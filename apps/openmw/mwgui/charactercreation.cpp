@@ -473,7 +473,7 @@ namespace MWGui
             createdClass.mName = mCreateClassDialog->getName();
             createdClass.mDescription = mCreateClassDialog->getDescription();
             createdClass.mData.mSpecialization = mCreateClassDialog->getSpecializationId();
-            createdClass.mData.mIsPlayable = 0x1;
+            createdClass.mData.mIsPlayable = true;
             createdClass.mRecordFlags = 0;
 
             std::vector<ESM::RefId> attributes = mCreateClassDialog->getFavoriteAttributes();

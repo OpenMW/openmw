@@ -46,7 +46,7 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // A playable class should have a description
-    if (classRecord.mData.mIsPlayable != 0 && classRecord.mDescription.empty())
+    if (classRecord.mData.mIsPlayable && classRecord.mDescription.empty())
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
