@@ -18,7 +18,7 @@ void main(void)
     gl_ClipVertex = viewPos;
 
     if (useDiffuseMapForShadowAlpha)
-        diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
+        diffuseMapUV = (texMat0 * vec4(gl_MultiTexCoord0.xyz, 1.0)).xy;
     else
         diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
     if (colorMode == 2)
