@@ -418,9 +418,8 @@ namespace MWLua
                 = [](const T& rec) -> std::string { return "ESM3_Faction[" + rec.mId.toDebugString() + "]"; };
             record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
             Types::addProperty(record, "name", &ESM::Faction::mName);
-            Types::addFlagProperty(record, "hidden",
-                std::numeric_limits<decltype(ESM::Faction::FADTstruct::mIsHidden)>::max(), &ESM::Faction::mData,
-                &ESM::Faction::FADTstruct::mIsHidden);
+            Types::addFlagProperty(
+                record, "hidden", ESM::Faction::Hidden, &ESM::Faction::mData, &ESM::Faction::FADTstruct::mFlags);
 
             if constexpr (Types::RecordType<T>::isMutable)
             {
@@ -477,7 +476,12 @@ namespace MWLua
         if (rec["name"] != sol::nil)
             faction.mName = rec["name"];
         if (rec["hidden"] != sol::nil)
-            faction.mData.mIsHidden = rec["hidden"].get<bool>();
+        {
+            if (rec["hidden"])
+                faction.mData.mFlags |= ESM::Faction::Hidden;
+            else
+                faction.mData.mFlags &= ~ESM::Faction::Hidden;
+        }
         if (rec["ranks"] != sol::nil)
             setFromTable(faction.mRanks, faction.mData.mRankData, rec["ranks"]);
         if (rec["reactions"] != sol::nil)

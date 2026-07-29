@@ -48,6 +48,11 @@ namespace ESM
         std::string mName;
         RefId mId;
 
+        enum Flags
+        {
+            Hidden = 1
+        };
+
         struct FADTstruct
         {
             // Which attributes we like
@@ -57,7 +62,7 @@ namespace ESM
 
             std::array<ESM::RefId, 7> mSkills; // IDs of skills this faction requires
 
-            int32_t mIsHidden; // 1 - hidden from player
+            int32_t mFlags; // 1 - hidden from player
 
             ESM::RefId& getSkill(size_t index, bool ignored = false);
             ///< Throws an exception for invalid values of \a index.

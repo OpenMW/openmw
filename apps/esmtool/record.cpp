@@ -733,7 +733,7 @@ namespace EsmTool
     void Record<ESM::Faction>::print()
     {
         std::cout << "  Name: " << mData.mName << std::endl;
-        std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
+        std::cout << "  Flags: " << factionFlags(mData.mData.mFlags) << std::endl;
         for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
             std::cout << "  Attribute" << (i + 1) << ": " << mData.mData.mAttribute[i] << std::endl;
         for (const ESM::RefId& skill : mData.mData.mSkills)

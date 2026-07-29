@@ -14,6 +14,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -458,13 +459,18 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mIsHidden != 0; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return (record.get().mData.mFlags & ESM::Faction::Hidden) != 0;
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-
-            record2.mData.mIsHidden = data.toInt();
+            if (data.toInt())
+                record2.mData.mFlags |= ESM::Faction::Hidden;
+            else
+                record2.mData.mFlags &= ~ESM::Faction::Hidden;
 
             record.setModified(record2);
         }

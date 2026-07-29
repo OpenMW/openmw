@@ -9,6 +9,7 @@
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
@@ -546,6 +547,17 @@ std::string enchantmentFlags(int flags)
         properties += "Autocalc ";
     if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc))
         properties += "Invalid ";
+    properties += std::format("(0x{:08X})", flags);
+    return properties;
+}
+
+std::string factionFlags(int flags)
+{
+    std::string properties;
+    if (flags == 0)
+        properties += "[None] ";
+    if (flags & ESM::Faction::Hidden)
+        properties += "Hidden ";
     properties += std::format("(0x{:08X})", flags);
     return properties;
 }
