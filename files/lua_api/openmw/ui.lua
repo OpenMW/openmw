@@ -38,6 +38,10 @@
 -- @function [parent=#ui] getCursorVisible
 -- @return #boolean
 
+--- Override the cursor used by UI widgets. Pass `nil` to restore the cursor selected by the widget under the pointer.
+-- @function [parent=#ui] setCursor
+-- @param #CursorResource cursor
+
 ---
 -- Widget types
 -- @field [parent=#ui] #TYPE TYPE
@@ -373,5 +377,35 @@
 -- @field #string path Path to the texture file. Required
 -- @field openmw.util#Vector2 offset Offset of this resource in the texture. (0, 0) by default
 -- @field openmw.util#Vector2 size Size of the resource in the texture. (0, 0) by default. 0 means the whole texture size is used.
+
+---
+-- Register a hardware cursor backed by a texture in the virtual filesystem. Use the result as a widget's `props.cursor`, or pass it to @{openmw.ui#ui.setCursor} to override all widget cursors.
+-- @function [parent=#ui] cursor
+-- @param #CursorResourceOptions options
+-- @return #CursorResource
+-- @usage
+-- local ui = require('openmw.ui')
+-- local vector2 = require('openmw.util').vector2
+-- local hand = ui.cursor {
+--     path = 'textures/my_mod/hand.dds',
+--     size = vector2(32, 32),
+--     hotspot = vector2(2, 1),
+-- }
+-- local button = ui.create {
+--     type = ui.TYPE.Widget,
+--     props = { cursor = hand },
+-- }
+
+--- A hardware cursor ready to be used by Lua UI widgets.
+-- @type CursorResource
+-- @field #string path Path to the texture file
+-- @field openmw.util#Vector2 size Cursor size in pixels
+-- @field openmw.util#Vector2 hotspot Position in pixels within the cursor texture that tracks the mouse pointer
+
+--- Table with arguments passed to ui.cursor.
+-- @type CursorResourceOptions
+-- @field #string path Path to the cursor texture file. Required
+-- @field openmw.util#Vector2 size Size of the cursor in pixels. Required
+-- @field openmw.util#Vector2 hotspot Position in pixels within the cursor texture that tracks the mouse pointer. Required
 
 return nil

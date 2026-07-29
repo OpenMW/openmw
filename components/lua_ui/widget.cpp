@@ -2,6 +2,7 @@
 #include "components/lua/utilpackage.hpp"
 #include "components/lua_ui/util.hpp"
 #include "element.hpp"
+#include "resources.hpp"
 
 #include <SDL_events.h>
 #include <components/sdlutil/sdlmappings.hpp>
@@ -323,7 +324,8 @@ namespace LuaUi
         mVisible = propertyValue("visible", true);
         mWidget->setVisible(mVisible);
         mWidget->setNeedMouseFocus(!propertyValue("ignorePointerEvents", false));
-        mWidget->setPointer(propertyValue("pointer", std::string("arrow")));
+        CursorResource* cursor = propertyValue<CursorResource*>("cursor", nullptr);
+        mWidget->setPointer(cursor ? cursor->mName : "arrow");
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
         parsePadding();
@@ -498,7 +500,7 @@ namespace LuaUi
             "anchor",
             "visible",
             "ignorePointerEvents",
-            "pointer",
+            "cursor",
             "alpha",
             "inheritAlpha",
             "padding",

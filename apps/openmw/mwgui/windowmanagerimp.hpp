@@ -316,6 +316,10 @@ namespace MWGui
         void showSoulgemDialog(MWWorld::Ptr item) override;
 
         void changePointer(const std::string& name) override;
+        void createLuaCursor(const std::string& name, const std::string& path, int width, int height, int hotspotX,
+            int hotspotY) override;
+        void removeLuaCursor(const std::string& name) override;
+        void setLuaCursorOverride(const std::string& name) override;
 
         void setEnemy(const MWWorld::Ptr& enemy) override;
 
@@ -526,6 +530,7 @@ namespace MWGui
         void reapplyActiveControllerWindow();
 
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
+        std::string mLuaCursorOverride;
 
         std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
         void cleanupGarbage();

@@ -74,16 +74,27 @@ namespace SDLUtil
     void SDLCursorManager::_setGUICursor(std::string_view name)
     {
         auto it = mCursorMap.find(name);
+        if (it == mCursorMap.end())
+            it = mCursorMap.find("arrow");
         if (it != mCursorMap.end())
             SDL_SetCursor(it->second);
     }
 
-    void SDLCursorManager::createCursor(std::string_view name, int rotDegrees, osg::Image* image, Uint8 hotspotX,
-        Uint8 hotspotY, int cursorWidth, int cursorHeight)
+    void SDLCursorManager::createCursor(std::string_view name, int rotDegrees, osg::Image* image, int hotspotX,
+        int hotspotY, int cursorWidth, int cursorHeight)
     {
 #ifndef ANDROID
         _createCursorFromResource(name, rotDegrees, image, hotspotX, hotspotY, cursorWidth, cursorHeight);
 #endif
+    }
+
+    void SDLCursorManager::removeCursor(std::string_view name)
+    {
+        auto it = mCursorMap.find(name);
+        if (it == mCursorMap.end())
+            return;
+        SDL_FreeCursor(it->second);
+        mCursorMap.erase(it);
     }
 
     SDLUtil::SurfaceUniquePtr decompress(
@@ -128,7 +139,7 @@ namespace SDLUtil
     }
 
     void SDLCursorManager::_createCursorFromResource(std::string_view name, int rotDegrees, osg::Image* image,
-        Uint8 hotspotX, Uint8 hotspotY, int cursorWidth, int cursorHeight)
+        int hotspotX, int hotspotY, int cursorWidth, int cursorHeight)
     {
         if (mCursorMap.find(name) != mCursorMap.end())
             return;

@@ -293,6 +293,14 @@ namespace MWBase
 
         virtual void changePointer(const std::string& name) = 0;
 
+        /// Registers a hardware cursor using a texture from the virtual filesystem.
+        virtual void createLuaCursor(const std::string& name, const std::string& path, int width, int height,
+            int hotspotX, int hotspotY)
+            = 0;
+        virtual void removeLuaCursor(const std::string& name) = 0;
+        /// An empty name removes the override and restores widget-selected cursors.
+        virtual void setLuaCursorOverride(const std::string& name) = 0;
+
         virtual void setEnemy(const MWWorld::Ptr& enemy) = 0;
 
         virtual std::size_t getMessagesCount() const = 0;

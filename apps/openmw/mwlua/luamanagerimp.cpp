@@ -424,6 +424,8 @@ namespace MWLua
         mActionQueue.clear();
         mTeleportPlayerAction.reset();
         LuaUi::clearGameInterface();
+        for (const std::string& name : mUiResourceManager.cursorNames())
+            MWBase::Environment::get().getWindowManager()->removeLuaCursor(name);
         mUiResourceManager.clear();
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
@@ -923,6 +925,8 @@ namespace MWLua
         LuaUi::clearSettings();
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         MWBase::Environment::get().getL10nManager()->dropCache();
+        for (const std::string& name : mUiResourceManager.cursorNames())
+            MWBase::Environment::get().getWindowManager()->removeLuaCursor(name);
         mUiResourceManager.clear();
         mLua.dropScriptCache();
         mInputActions.clear(true);
