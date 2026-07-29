@@ -17,6 +17,8 @@ namespace SceneUtil
 
     void setupTexMatForStateSet(osg::StateSet& stateset, unsigned int texUnit, const osg::Matrixf& mat);
 
+    void initTexMatForStateSet(osg::StateSet& stateset);
+
 }
 
 #endif

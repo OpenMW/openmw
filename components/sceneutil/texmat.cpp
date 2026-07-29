@@ -17,4 +17,11 @@ namespace SceneUtil
         stateset.getOrCreateUniform(std::format("texMat{}", texUnit), osg::Uniform::FLOAT_MAT4)->set(mat);
     }
 
+    void initTexMatForStateSet(osg::StateSet& stateset)
+    {
+        constexpr unsigned int maxTexMat = 32;
+        for (unsigned int i = 0; i < maxTexMat; ++i)
+            setupTexMatForStateSet(stateset, i, osg::Matrixf{});
+    }
+
 }

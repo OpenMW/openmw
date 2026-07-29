@@ -403,8 +403,7 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
 
-        for (unsigned int i = 0; i < 10; ++i)
-            SceneUtil::setupTexMatForStateSet(*mRootNode->getOrCreateStateSet(), i, osg::Matrixf{});
+        SceneUtil::initTexMatForStateSet(*mViewer->getSceneData()->getOrCreateStateSet());
 
         mRootNode->getOrCreateStateSet()->setMode(
             GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);

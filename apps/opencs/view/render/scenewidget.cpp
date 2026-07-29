@@ -172,8 +172,7 @@ namespace CSVRender
         mRootNode->getOrCreateStateSet()->setMode(
             GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
 
-        for (unsigned int i = 0; i < 10; ++i)
-            SceneUtil::setupTexMatForStateSet(*mRootNode->getOrCreateStateSet(), i, osg::Matrixf{});
+        SceneUtil::initTexMatForStateSet(*mRootNode->getOrCreateStateSet());
 
         mView->getCamera()->setViewport(new osg::Viewport(0, 0, width(), height()));
 
