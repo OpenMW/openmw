@@ -120,39 +120,39 @@ void main(void)
 #endif
 
 #if @diffuseMap
-    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * vec4(gl_MultiTexCoord@diffuseMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @darkMap
-    darkMapUV = (texMat@darkMapUV * gl_MultiTexCoord@darkMapUV).xy;
+    darkMapUV = (texMat@darkMapUV * vec4(gl_MultiTexCoord@darkMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @detailMap
-    detailMapUV = (texMat@detailMapUV * gl_MultiTexCoord@detailMapUV).xy;
+    detailMapUV = (texMat@detailMapUV * vec4(gl_MultiTexCoord@detailMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @decalMap
-    decalMapUV = (texMat@decalMapUV * gl_MultiTexCoord@decalMapUV).xy;
+    decalMapUV = (texMat@decalMapUV * vec4(gl_MultiTexCoord@decalMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @emissiveMap
-    emissiveMapUV = (texMat@emissiveMapUV * gl_MultiTexCoord@emissiveMapUV).xy;
+    emissiveMapUV = (texMat@emissiveMapUV * vec4(gl_MultiTexCoord@emissiveMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @normalMap
-    normalMapUV = (texMat@normalMapUV * gl_MultiTexCoord@normalMapUV).xy;
+    normalMapUV = (texMat@normalMapUV * vec4(gl_MultiTexCoord@normalMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @bumpMap
-    bumpMapUV = (texMat@bumpMapUV * gl_MultiTexCoord@bumpMapUV).xy;
+    bumpMapUV = (texMat@bumpMapUV * vec4(gl_MultiTexCoord@bumpMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @specularMap
-    specularMapUV = (texMat@specularMapUV * gl_MultiTexCoord@specularMapUV).xy;
+    specularMapUV = (texMat@specularMapUV * vec4(gl_MultiTexCoord@specularMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @glossMap
-    glossMapUV = (texMat@glossMapUV * gl_MultiTexCoord@glossMapUV).xy;
+    glossMapUV = (texMat@glossMapUV * vec4(gl_MultiTexCoord@glossMapUV.xyz, 1.0)).xy;
 #endif
 
 #if !PER_PIXEL_LIGHTING

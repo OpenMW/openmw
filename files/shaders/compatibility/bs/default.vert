@@ -55,15 +55,15 @@ void main(void)
 #endif
 
 #if @diffuseMap
-    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * vec4(gl_MultiTexCoord@diffuseMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @emissiveMap
-    emissiveMapUV = (texMat@emissiveMapUV * gl_MultiTexCoord@emissiveMapUV).xy;
+    emissiveMapUV = (texMat@emissiveMapUV * vec4(gl_MultiTexCoord@emissiveMapUV.xyz, 1.0)).xy;
 #endif
 
 #if @normalMap
-    normalMapUV = (texMat@normalMapUV * gl_MultiTexCoord@normalMapUV).xy;
+    normalMapUV = (texMat@normalMapUV * vec4(gl_MultiTexCoord@normalMapUV.xyz, 1.0)).xy;
 #endif
 
 

@@ -36,7 +36,7 @@ void main(void)
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
 #if @diffuseMap
-    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * vec4(gl_MultiTexCoord@diffuseMapUV.xyz, 1.0)).xy;
 #endif
 
     passColor = gl_Color;
