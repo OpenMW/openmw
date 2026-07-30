@@ -31,6 +31,7 @@
 
 #include "glextensions.hpp"
 #include "shadowsbin.hpp"
+#include "lightmanager.hpp"
 
 // NOLINTBEGIN(readability-identifier-naming)
 
@@ -485,7 +486,7 @@ MWShadowTechnique::LightData::LightData(MWShadowTechnique::ViewDependentData* vd
 {
 }
 
-void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::Light* l, const osg::Matrixd& modelViewMatrix)
+void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const Light* l, const osg::Matrixd& modelViewMatrix)
 {
     lightMatrix = lm;
     light = l;
@@ -507,6 +508,7 @@ void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::L
             OSG_INFO<<"   new LightDir ="<<lightDir<<std::endl;
         }
     }
+#if 0
     else
     {
         OSG_INFO<<"   Positional light, lightPos="<<lightPos<<std::endl;
@@ -524,6 +526,7 @@ void MWShadowTechnique::LightData::setLightData(osg::RefMatrix* lm, const osg::L
         }
         lightPos3.set(lightPos.x()/lightPos.w(), lightPos.y()/lightPos.w(), lightPos.z()/lightPos.w());
     }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1585,40 +1588,36 @@ bool MWShadowTechnique::selectActiveLights(osgUtil::CullVisitor* cv, ViewDepende
 
     osg::Matrixd modelViewMatrix = *(cv->getModelViewMatrix());
 
-    osgUtil::PositionalStateContainer::AttrMatrixList& aml =
-        rs->getPositionalStateContainer()->getAttrMatrixList();
-
-
-    const ShadowSettings* settings = getShadowedScene()->getShadowSettings();
-
-    for(osgUtil::PositionalStateContainer::AttrMatrixList::reverse_iterator itr = aml.rbegin();
-        itr != aml.rend();
-        ++itr)
+    struct FindFirstLightManager : public osg::NodeVisitor
     {
-        const osg::Light* light = dynamic_cast<const osg::Light*>(itr->first.get());
-        if (light && light->getLightNum() >= 0)
+        FindFirstLightManager()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
-            // is LightNum matched to that defined in settings
-            if (settings && settings->getLightNum()>=0 && light->getLightNum()!=settings->getLightNum()) continue;
-
-            LightDataList::iterator pll_itr = pll.begin();
-            for(; pll_itr != pll.end(); ++pll_itr)
-            {
-                if ((*pll_itr)->light->getLightNum()==light->getLightNum()) break;
-            }
-
-            if (pll_itr==pll.end())
-            {
-                OSG_INFO<<"Light num "<<light->getLightNum()<<std::endl;
-                LightData* ld = new LightData(vdd);
-                ld->setLightData(itr->second.get(), light, modelViewMatrix);
-                pll.push_back(ld);
-            }
-            else
-            {
-                OSG_INFO<<"Light num "<<light->getLightNum()<<" already used, ignore light"<<std::endl;
-            }
+            setNodeMaskOverride(~0u);
         }
+
+        void apply(osg::Group& node) override
+        {
+            if (auto* lm = dynamic_cast<LightManager*>(&node))
+            {
+                mLightManager = lm;
+                mLocalToWorld = new osg::RefMatrix(osg::computeLocalToWorld(getNodePath()));
+                return;
+            }
+            traverse(node);
+        }
+        LightManager* mLightManager = nullptr;
+        osg::ref_ptr<osg::RefMatrix> mLocalToWorld;
+    };
+
+    FindFirstLightManager lightManagerFinder;
+
+    _shadowedScene->accept(lightManagerFinder);
+
+    if (lightManagerFinder.mLightManager && lightManagerFinder.mLightManager->getSunlight()) {
+        LightData* ld = new LightData(vdd);
+        ld->setLightData(lightManagerFinder.mLocalToWorld, lightManagerFinder.mLightManager->getSunlight(), modelViewMatrix);
+        pll.push_back(ld);
     }
 
     return !pll.empty();
@@ -1999,7 +1998,11 @@ bool MWShadowTechnique::computeShadowCameraSettings(Frustum& frustum, LightData&
         double minRatio = 0.0001;
         double zMin=zMax*minRatio;
 
+#if 0
         double fov = positionedLight.light->getSpotCutoff() * 2.0;
+#else
+        double fov = 180.0;
+#endif
         if(fov < 180.0)   // spotlight
         {
             projectionMatrix.makePerspective(fov, 1.0, zMin, zMax);

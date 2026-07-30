@@ -275,7 +275,7 @@ namespace MWRender
         dummyTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
         stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
 
-        osg::ref_ptr<osg::Light> light = new osg::Light;
+        osg::ref_ptr<SceneUtil::Light> light = new SceneUtil::Light;
         float diffuseR = Fallback::Map::getFloat("Inventory_DirectionalDiffuseR");
         float diffuseG = Fallback::Map::getFloat("Inventory_DirectionalDiffuseG");
         float diffuseB = Fallback::Map::getFloat("Inventory_DirectionalDiffuseB");

@@ -8,7 +8,6 @@
 #include <components/settings/settings.hpp>
 #include <components/vfs/pathutil.hpp>
 
-#include <osg/Light>
 #include <osg/ref_ptr>
 
 #include <osgUtil/IncrementalCompileOperation>
@@ -66,6 +65,7 @@ namespace SceneUtil
     class PerViewUniformStateUpdater;
     class SharedUniformStateUpdater;
     class StateUpdater;
+    class Light;
 }
 
 namespace DetourNavigator
@@ -139,7 +139,7 @@ namespace MWRender
         int skyGetSecundaPhase() const;
         void skySetMoonColour(bool red);
 
-        const osg::Vec4f& getSunLightPosition() const { return mSunLight->getPosition(); }
+        const osg::Vec4f& getSunLightPosition() const;
         void setSunDirection(const osg::Vec3f& direction);
         void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular, float sunVis);
         void setNight(bool isNight) { mNight = isNight; }
@@ -320,7 +320,7 @@ namespace MWRender
 
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
-        osg::ref_ptr<osg::Light> mSunLight;
+        osg::ref_ptr<SceneUtil::Light> mSunLight;
 
         DetourNavigator::Navigator& mNavigator;
         std::unique_ptr<NavMesh> mNavMesh;

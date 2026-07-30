@@ -1923,7 +1923,7 @@ namespace MWRender
                     mGlowLight = nullptr;
                 }
 
-                osg::ref_ptr<osg::Light> light(new osg::Light);
+                osg::ref_ptr<SceneUtil::Light> light(new SceneUtil::Light);
                 light->setDiffuse(osg::Vec4f(0, 0, 0, 0));
                 light->setSpecular(osg::Vec4f(0, 0, 0, 0));
                 light->setAmbient(osg::Vec4f(1.5f, 1.5f, 1.5f, 1.f));

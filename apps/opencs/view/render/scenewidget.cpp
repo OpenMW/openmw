@@ -21,7 +21,6 @@
 #include <osg/Geometry>
 #include <osg/GraphicsContext>
 #include <osg/Group>
-#include <osg/Light>
 #include <osg/Material>
 #include <osg/Matrix>
 #include <osg/PrimitiveSet>
@@ -149,7 +148,7 @@ namespace CSVRender
             = new SceneUtil::LightManager(SceneUtil::LightSettings{}, resourceSystem.get());
         lightMgr->setLightingMask(Mask_Lighting);
 
-        mSunLight = new osg::Light;
+        mSunLight = new SceneUtil::Light;
         mSunLight->setDiffuse(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setAmbient(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setSpecular(osg::Vec4f(0, 0, 0, 0));
