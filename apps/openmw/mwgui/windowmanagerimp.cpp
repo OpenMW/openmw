@@ -1393,6 +1393,7 @@ namespace MWGui
 
     void WindowManager::onCursorChange(std::string_view name)
     {
+        mMyGuiCursor = name;
         mCursorManager->cursorChanged(mLuaCursorOverride.empty() ? name : mLuaCursorOverride);
     }
 
@@ -1878,13 +1879,18 @@ namespace MWGui
         if (mLuaCursorOverride == name)
             mLuaCursorOverride.clear();
         mCursorManager->removeCursor(name);
-        onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
+        mCursorManager->cursorChanged(getCurrentCursorName());
     }
 
     void WindowManager::setLuaCursorOverride(const std::string& name)
     {
         mLuaCursorOverride = name;
-        onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
+        mCursorManager->cursorChanged(getCurrentCursorName());
+    }
+
+    std::string WindowManager::getCurrentCursorName() const
+    {
+        return mLuaCursorOverride.empty() ? mMyGuiCursor : mLuaCursorOverride;
     }
 
     void WindowManager::showSoulgemDialog(MWWorld::Ptr item)

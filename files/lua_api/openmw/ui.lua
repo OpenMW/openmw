@@ -42,6 +42,10 @@
 -- @function [parent=#ui] setCursor
 -- @param #CursorResource cursor
 
+--- Return the currently displayed Lua cursor resource, or `nil` when a native MyGUI cursor is displayed.
+-- @function [parent=#ui] getCursor
+-- @return #CursorResource cursor
+
 ---
 -- Widget types
 -- @field [parent=#ui] #TYPE TYPE

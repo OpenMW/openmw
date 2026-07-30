@@ -317,6 +317,9 @@ namespace MWLua
                 MWBase::Environment::get().getWindowManager()->setLuaCursorOverride(cursor ? (*cursor)->mName : "");
             });
         };
+        api["getCursor"] = [luaManager = context.mLuaManager, windowManager]() {
+            return luaManager->uiResourceManager()->findCursor(windowManager->getCurrentCursorName());
+        };
 
         api["screenSize"] = []() {
             return osg::Vec2f(

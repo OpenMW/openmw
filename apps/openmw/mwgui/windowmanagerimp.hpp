@@ -320,6 +320,7 @@ namespace MWGui
             int hotspotY) override;
         void removeLuaCursor(const std::string& name) override;
         void setLuaCursorOverride(const std::string& name) override;
+        std::string getCurrentCursorName() const override;
 
         void setEnemy(const MWWorld::Ptr& enemy) override;
 
@@ -531,6 +532,7 @@ namespace MWGui
 
         std::unique_ptr<SDLUtil::SDLCursorManager> mCursorManager;
         std::string mLuaCursorOverride;
+        std::string mMyGuiCursor;
 
         std::vector<std::unique_ptr<Layout>> mGarbageDialogs;
         void cleanupGarbage();

@@ -300,6 +300,7 @@ namespace MWBase
         virtual void removeLuaCursor(const std::string& name) = 0;
         /// An empty name removes the override and restores widget-selected cursors.
         virtual void setLuaCursorOverride(const std::string& name) = 0;
+        virtual std::string getCurrentCursorName() const = 0;
 
         virtual void setEnemy(const MWWorld::Ptr& enemy) = 0;
 

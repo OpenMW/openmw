@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -61,6 +62,16 @@ namespace LuaUi
             for (const auto& cursor : mCursors)
                 result.push_back(cursor->mName);
             return result;
+        }
+
+        std::shared_ptr<CursorResource> findCursor(std::string_view name) const
+        {
+            for (const auto& cursor : mCursors)
+            {
+                if (cursor->mName == name)
+                    return cursor;
+            }
+            return nullptr;
         }
 
         void clear()
