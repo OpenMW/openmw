@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <SDL_gamecontroller.h>
-#include <osg/Vec2f>
 #include <cstdint>
+#include <osg/Vec2f>
 
 namespace Loading
 {

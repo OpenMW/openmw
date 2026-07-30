@@ -298,21 +298,22 @@ namespace MWLua
 
             auto integral = [](float value) { return std::isfinite(value) && std::floor(value) == value; };
             if (!integral(data.mSize.x()) || !integral(data.mSize.y()) || !integral(data.mHotspot.x())
-                || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0
-                || data.mHotspot.x() < 0 || data.mHotspot.y() < 0 || data.mHotspot.x() >= data.mSize.x()
-                || data.mHotspot.y() >= data.mSize.y())
+                || !integral(data.mHotspot.y()) || data.mSize.x() <= 0 || data.mSize.y() <= 0 || data.mHotspot.x() < 0
+                || data.mHotspot.y() < 0 || data.mHotspot.x() >= data.mSize.x() || data.mHotspot.y() >= data.mSize.y())
                 throw std::logic_error("Invalid cursor size or hotspot");
 
             auto cursor = luaManager->uiResourceManager()->registerCursor(std::move(data));
             luaManager->addAction([cursor] {
-                MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName, std::string(cursor->mPath),
-                    static_cast<int>(cursor->mSize.x()), static_cast<int>(cursor->mSize.y()),
-                    static_cast<int>(cursor->mHotspot.x()), static_cast<int>(cursor->mHotspot.y()));
+                MWBase::Environment::get().getWindowManager()->createLuaCursor(cursor->mName,
+                    std::string(cursor->mPath), static_cast<int>(cursor->mSize.x()),
+                    static_cast<int>(cursor->mSize.y()), static_cast<int>(cursor->mHotspot.x()),
+                    static_cast<int>(cursor->mHotspot.y()));
             });
             return cursor;
         };
 
-        api["setCursor"] = [luaManager = context.mLuaManager](sol::optional<std::shared_ptr<LuaUi::CursorResource>> cursor) {
+        api["setCursor"] = [luaManager = context.mLuaManager](
+                               sol::optional<std::shared_ptr<LuaUi::CursorResource>> cursor) {
             luaManager->addAction([cursor = std::move(cursor)] {
                 MWBase::Environment::get().getWindowManager()->setLuaCursorOverride(cursor ? (*cursor)->mName : "");
             });
@@ -411,7 +412,8 @@ namespace MWLua
             };
             cursorResource["path"] = sol::readonly_property(
                 [](const LuaUi::CursorResource& resource) -> std::string_view { return resource.mPath; });
-            cursorResource["size"] = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mSize; });
+            cursorResource["size"]
+                = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mSize; });
             cursorResource["hotspot"]
                 = sol::readonly_property([](const LuaUi::CursorResource& resource) { return resource.mHotspot; });
 
