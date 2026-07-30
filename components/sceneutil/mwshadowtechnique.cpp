@@ -1593,7 +1593,6 @@ bool MWShadowTechnique::selectActiveLights(osgUtil::CullVisitor* cv, ViewDepende
         FindFirstLightManager()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
-            setNodeMaskOverride(~0u);
         }
 
         void apply(osg::Group& node) override
