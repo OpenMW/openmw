@@ -5,6 +5,7 @@ local ui = require('openmw.ui')
 local util = require('openmw.util')
 local async = require('openmw.async')
 local I = require('openmw.interfaces')
+local buttonScript = require('scripts.omw.input.button')
 
 local settingsGroup = 'SettingsOMWControls'
 
@@ -121,34 +122,31 @@ I.Settings.registerRenderer('inputBinding', function(id, set, arg)
     local binding = bindingSection:get(id)
     local label = bindingLabel(recording and recording.id == id, binding)
 
-    local recorder = {
-        template = I.MWUI.templates.textNormal,
-        props = {
-            text = label,
-        },
-        events = {
-            mouseClick = async:callback(function()
-                if recording ~= nil then return end
-                if binding ~= nil then bindingSection:set(id, nil) end
-                recording = {
-                    id = id,
-                    arg = arg,
-                    refresh = function() set(id) end,
-                }
-                recording.refresh()
-            end),
-        },
-    }
+    local recorder = async:callback(function()
+        if recording ~= nil then return end
+        if binding ~= nil then bindingSection:set(id, nil) end
+        recording = {
+            id = id,
+            arg = arg,
+            refresh = function() set(id) end,
+        }
+        recording.refresh()
+    end)
 
     local row = {
         type = ui.TYPE.Flex,
         props = {
             horizontal = true,
+            arrange = ui.ALIGNMENT.Center,
         },
         content = ui.content {
             name,
             { props = { size = util.vector2(10, 0) } },
-            recorder,
+            buttonScript{
+                text = label,
+                callback = recorder,
+                minimumSize = util.vector2(12, 16),
+            },
         },
     }
     local column = {
