@@ -156,6 +156,15 @@
 -- @usage local obj = world.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
 
 ---
+-- Returns all objects with the given record ID.
+-- @function [parent=#world] getObjectsByRecordId
+-- @param #string recordId Record ID
+-- @return list<openmw.core#GameObject>
+-- @usage for _, object in pairs(world.getObjectsByRecordId('TempleMarker')) do
+--   print(object.cell.name)
+-- end
+
+---
 -- Create a new instance of the given record.
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
 -- Note that dynamically created creatures, NPCs, and container inventories will not respawn.

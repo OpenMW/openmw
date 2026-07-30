@@ -418,17 +418,16 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
     }
 }
 
-std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
+std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, bool searchUnloaded)
 {
     std::vector<Ptr> result;
-    for (auto& [cellId, cellStore] : mCells)
-    {
+    const auto addFromStore = [&](MWWorld::CellStore& cellStore) {
         if (cellStore.getState() == CellStore::State_Unloaded)
             cellStore.preload();
         if (cellStore.getState() == CellStore::State_Preloaded)
         {
             if (!cellStore.hasId(id))
-                continue;
+                return;
             cellStore.load();
         }
         cellStore.forEach([&](const Ptr& ptr) {
@@ -436,6 +435,25 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
                 result.push_back(ptr);
             return true;
         });
+    };
+    for (auto& [cellId, cellStore] : mCells)
+        addFromStore(cellStore);
+
+    if (!searchUnloaded)
+        return result;
+
+    const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
+    for (auto iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+    {
+        if (mCells.contains(iter->mId))
+            continue;
+        addFromStore(insertCellStore(*iter));
+    }
+    for (auto iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+    {
+        if (mCells.contains(iter->mId))
+            continue;
+        addFromStore(insertCellStore(*iter));
     }
     return result;
 }
