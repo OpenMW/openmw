@@ -18,6 +18,7 @@
 #include <osgViewer/Renderer>
 #include <osgViewer/Viewer>
 
+#include <components/sceneutil/util.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "cachestats.hpp"
@@ -327,7 +328,9 @@ namespace Resource
 #endif
 
         mCamera->getOrCreateStateSet()->setGlobalDefaults();
-        mCamera->setRenderer(new osgViewer::Renderer(mCamera.get()));
+        osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
+        SceneUtil::disableFFPLightModelForRenderer(renderer);
+        mCamera->setRenderer(renderer);
         mCamera->setProjectionResizePolicy(osg::Camera::FIXED);
         mCamera->addChild(mSwitch);
     }
@@ -462,7 +465,9 @@ namespace Resource
         mCamera->setClearMask(0);
         mCamera->setAllowEventFocus(false);
 
-        mCamera->setRenderer(new osgViewer::Renderer(mCamera.get()));
+        osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
+        SceneUtil::disableFFPLightModelForRenderer(renderer);
+        mCamera->setRenderer(renderer);
     }
 
     namespace
