@@ -8,6 +8,9 @@
 #include <components/sdlutil/sdlmappings.hpp>
 #include <ranges>
 
+#include <MyGUI_InputManager.h>
+#include <MyGUI_PointerManager.h>
+
 namespace
 {
     // Arbitrary large number caps to prevent performance issues
@@ -35,6 +38,8 @@ namespace LuaUi
         , mTemplateChild(false)
         , mElementRoot(false)
         , mContentWidget(nullptr)
+        , mCursor("arrow")
+        , mHasCursor(false)
     {
     }
 
@@ -133,6 +138,7 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = false;
         ext->widget()->attachToWidget(mSlot->contentWidget());
+        ext->setInheritedCursor(mCursor);
     }
 
     void WidgetExtension::attachTemplate(WidgetExtension* ext)
@@ -140,6 +146,7 @@ namespace LuaUi
         ext->mParent = this;
         ext->mTemplateChild = true;
         ext->widget()->attachToWidget(widget());
+        ext->setInheritedCursor(mCursor);
     }
 
     void WidgetExtension::detachFromParent()
@@ -325,7 +332,11 @@ namespace LuaUi
         mWidget->setVisible(mVisible);
         mWidget->setNeedMouseFocus(!propertyValue("ignorePointerEvents", false));
         CursorResource* cursor = propertyValue<CursorResource*>("cursor", nullptr);
-        mWidget->setPointer(cursor ? cursor->mName : "arrow");
+        mHasCursor = cursor != nullptr;
+        if (mHasCursor)
+            mCursor = cursor->mName;
+        setInheritedCursor(mParent ? mParent->mCursor : "arrow");
+        refreshCursorIfHovered();
         mWidget->setAlpha(propertyValue("alpha", 1.f));
         mWidget->setInheritsAlpha(propertyValue("inheritAlpha", true));
         parsePadding();
@@ -337,6 +348,30 @@ namespace LuaUi
         const LuaUtil::Vec4 value = propertyValue("padding", LuaUtil::Vec4());
         mPadding = Padding{ static_cast<int>(value.x()), static_cast<int>(value.y()), static_cast<int>(value.z()),
             static_cast<int>(value.w()) };
+    }
+
+    void WidgetExtension::setInheritedCursor(const std::string& cursor)
+    {
+        if (!mHasCursor)
+            mCursor = cursor;
+        mWidget->setPointer(mCursor);
+        for (WidgetExtension* child : mTemplateChildren)
+            child->setInheritedCursor(mCursor);
+        for (WidgetExtension* child : mChildren)
+            child->setInheritedCursor(mCursor);
+    }
+
+    void WidgetExtension::refreshCursorIfHovered()
+    {
+        MyGUI::Widget* focused = MyGUI::InputManager::getInstance().getMouseFocusWidget();
+        for (MyGUI::Widget* widget = focused; widget != nullptr; widget = widget->getParent())
+        {
+            if (widget != mWidget)
+                continue;
+            if (WidgetExtension* extension = dynamic_cast<WidgetExtension*>(focused))
+                MyGUI::PointerManager::getInstance().setPointer(extension->mCursor);
+            return;
+        }
     }
 
     void WidgetExtension::updateChildrenCoord()

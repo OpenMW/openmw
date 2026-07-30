@@ -185,9 +185,13 @@ namespace LuaUi
         bool mTemplateChild;
         bool mElementRoot;
         MyGUI::Widget* mContentWidget;
+        std::string mCursor;
+        bool mHasCursor;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);
+        void setInheritedCursor(const std::string& cursor);
+        void refreshCursorIfHovered();
 
         WidgetExtension* findDeep(std::string_view name);
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);
