@@ -4,6 +4,14 @@
 uniform float skyBlendingStart;
 #endif
 
+struct Fog {
+    vec4 color;
+    float start;
+    float end;
+};
+
+uniform Fog fog;
+
 vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far)
 {
 #if @radialFog
@@ -12,14 +20,14 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float far
     float dist = abs(linearDist);
 #endif
 #if @exponentialFog
-    float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - gl_Fog.start/2.0) / (gl_Fog.end - gl_Fog.start/2.0));
+    float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - fog.start / 2.0) / (fog.end - fog.start / 2.0));
 #else
-    float fogValue = clamp((dist - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+    float fogValue = clamp((dist - fog.start) * (1.0 / (fog.end - fog.start)), 0.0, 1.0);
 #endif
 #ifdef ADDITIVE_BLENDING
     color.xyz *= 1.0 - fogValue;
 #else
-    color.xyz = mix(color.xyz, gl_Fog.color.xyz, fogValue);
+    color.xyz = mix(color.xyz, fog.color.xyz, fogValue);
 #endif
 
 #if @skyBlending

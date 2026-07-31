@@ -8,6 +8,7 @@
 #include "statesetupdater.hpp"
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 
@@ -126,9 +127,6 @@ namespace SceneUtil
 
     void StateUpdater::setDefaults(osg::StateSet* stateset)
     {
-        osg::Fog* fog = new osg::Fog;
-        fog->setMode(osg::Fog::LINEAR);
-        stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
         if (mWireframe)
         {
             osg::PolygonMode* polygonmode = new osg::PolygonMode;
@@ -142,10 +140,11 @@ namespace SceneUtil
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
     {
         configureSunAmbientOverride(mAmbientColor, stateset);
-        osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
-        fog->setColor(mFogColor);
-        fog->setStart(mFogStart);
-        fog->setEnd(mFogEnd);
+
+        SceneUtil::FogUniformController fog(*stateset);
+        fog.setColor(mFogColor);
+        fog.setStart(mFogStart);
+        fog.setEnd(mFogEnd);
     }
 
     void StateUpdater::setAmbientColor(const osg::Vec4f& col)

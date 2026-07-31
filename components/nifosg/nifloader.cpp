@@ -53,10 +53,12 @@
 #include <components/nif/texture.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/extradata.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/texturetype.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "autotransform.hpp"
 #include "fog.hpp"
@@ -2681,23 +2683,13 @@ namespace NifOsg
                     if (!fogprop->vertexAlpha() && fogprop->enabled())
                     {
                         osg::ref_ptr<NifOsg::Fog> fog = new NifOsg::Fog;
-                        fog->setMode(osg::Fog::LINEAR);
-                        fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
                         fog->setDepth(fogprop->mFogDepth);
-                        fog = shareAttribute(fog);
-                        stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
-                        // Intentionally ignoring radial fog flag
-                        // We don't really want to override the global setting
+                        fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
+                        node->addCullCallback(fog);
                     }
                     else
                     {
-                        osg::ref_ptr<osg::Fog> fog = new osg::Fog;
-                        // Shaders don't respect glDisable(GL_FOG)
-                        fog->setMode(osg::Fog::LINEAR);
-                        fog->setStart(10000000);
-                        fog->setEnd(10000000);
-                        fog = shareAttribute(fog);
-                        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+                        SceneUtil::FogUniformController{ *stateset }.disable();
                     }
                     break;
                 }

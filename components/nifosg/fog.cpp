@@ -1,31 +1,20 @@
 #include "fog.hpp"
 
-#include <osg/Matrix>
-#include <osg/State>
+#include <osgUtil/CullVisitor>
+
+#include <components/sceneutil/fog.hpp>
 
 namespace NifOsg
 {
 
-    Fog::Fog()
-        : osg::Fog()
+    void Fog::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-    }
-
-    Fog::Fog(const Fog& copy, const osg::CopyOp& copyop)
-        : osg::Fog(copy, copyop)
-        , mDepth(copy.mDepth)
-    {
-    }
-
-    void Fog::apply(osg::State& state) const
-    {
-        osg::Fog::apply(state);
-#ifdef OSG_GL_FIXED_FUNCTION_AVAILABLE
+        SceneUtil::FogUniformController fog{ *stateset };
         float fov, aspect, near, far;
-        state.getProjectionMatrix().getPerspective(fov, aspect, near, far);
-        glFogf(GL_FOG_START, near * mDepth + far * (1.f - mDepth));
-        glFogf(GL_FOG_END, far);
-#endif
+        nv->asCullVisitor()->getProjectionMatrix()->getPerspective(fov, aspect, near, far);
+        fog.setStart(near * mDepth + far * (1.f - mDepth));
+        fog.setEnd(far);
+        fog.setColor(mColor);
     }
 
 }
