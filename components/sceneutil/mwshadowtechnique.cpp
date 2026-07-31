@@ -3192,7 +3192,7 @@ osg::StateSet* MWShadowTechnique::prepareStateSetForRenderingShadow(ViewDependen
 
     stateset->clear();
 
-    stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+    stateset->setTextureAttribute(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
 
     for(const auto& uniform : _uniforms[traversalNumber % 2])
     {

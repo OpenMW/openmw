@@ -57,7 +57,7 @@ namespace
         osg::ref_ptr<osg::StateSet> stateset(new osg::StateSet);
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-        stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
+        stateset->setTextureAttribute(0, textures[0], osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
         depth->setWriteMask(false);
