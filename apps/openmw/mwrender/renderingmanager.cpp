@@ -5,7 +5,6 @@
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
-#include <osg/Light>
 #include <osg/Material>
 #include <osg/Matrix>
 #include <osg/UserDataContainer>
@@ -335,16 +334,12 @@ namespace MWRender
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
-        osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(Mask_Lighting);
-        mSunLight = new osg::Light;
-        source->setLight(mSunLight);
+        mSunLight = new SceneUtil::Light;
         mSunLight->setDiffuse(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setAmbient(osg::Vec4f(0, 0, 0, 1));
         mSunLight->setSpecular(osg::Vec4f(0, 0, 0, 0));
         mSunLight->setConstantAttenuation(1.f);
         sceneRoot->setSunlight(mSunLight);
-        sceneRoot->addChild(source);
 
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
@@ -559,6 +554,11 @@ namespace MWRender
 
         mPostProcessor->getStateUpdater()->setSunColor(diffuse);
         mPostProcessor->getStateUpdater()->setSunVis(sunVis);
+    }
+
+    const osg::Vec4f& RenderingManager::getSunLightPosition() const
+    {
+        return mSunLight->getPosition();
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f& direction)

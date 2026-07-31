@@ -254,7 +254,7 @@ namespace MWWorld
 
         if (createLight)
         {
-            osg::ref_ptr<osg::Light> projectileLight(new osg::Light);
+            osg::ref_ptr<SceneUtil::Light> projectileLight(new SceneUtil::Light);
             projectileLight->setAmbient(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
             projectileLight->setDiffuse(lightDiffuseColor);
             projectileLight->setSpecular(osg::Vec4(0.0f, 0.0f, 0.0f, 0.0f));

@@ -36,7 +36,6 @@ namespace SceneUtil
 
         mShadowTechnique->enableShadows();
 
-        mShadowSettings->setLightNum(0);
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
         const int numberOfShadowMapsPerLight = settings.mNumberOfShadowMaps;

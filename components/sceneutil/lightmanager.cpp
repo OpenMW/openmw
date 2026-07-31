@@ -58,7 +58,7 @@ namespace SceneUtil
 {
     static int sLightId = 0;
 
-    void configureStateSetSunOverride(const osg::Light* light, osg::StateSet* stateset, int mode)
+    void configureStateSetSunOverride(const Light* light, osg::StateSet* stateset, int mode)
     {
         stateset->addUniform(new osg::Uniform("sun.position", light->getPosition()), mode);
         stateset->addUniform(new osg::Uniform("sun.diffuse", light->getDiffuse()), mode);
@@ -516,12 +516,12 @@ namespace SceneUtil
         mLights.push_back(l);
     }
 
-    void LightManager::setSunlight(osg::ref_ptr<osg::Light> sun)
+    void LightManager::setSunlight(osg::ref_ptr<Light> sun)
     {
         mSun = sun;
     }
 
-    osg::ref_ptr<osg::Light> LightManager::getSunlight()
+    osg::ref_ptr<Light> LightManager::getSunlight()
     {
         return mSun;
     }
@@ -661,7 +661,7 @@ namespace SceneUtil
         mId = sLightId++;
 
         for (size_t i = 0; i < mLight.size(); ++i)
-            mLight[i] = new osg::Light(*copy.mLight[i].get(), copyop);
+            mLight[i] = new Light(*copy.mLight[i].get(), copyop);
     }
 
     void LightListCallback::operator()(osg::Node* node, osgUtil::CullVisitor* cv)

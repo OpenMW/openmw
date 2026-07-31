@@ -4,7 +4,6 @@
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Fog>
-#include <osg/LightSource>
 #include <osg/PolygonMode>
 #include <osg/Texture2D>
 
@@ -747,12 +746,11 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 8000000.0f));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{ 1, 1 }));
 
-        osg::ref_ptr<osg::Light> light = new osg::Light;
+        osg::ref_ptr<SceneUtil::Light> light = new SceneUtil::Light;
         light->setPosition(osg::Vec4(-0.3f, -0.3f, 0.7f, 0.f));
         light->setDiffuse(osg::Vec4(0.7f, 0.7f, 0.7f, 1.f));
         light->setAmbient(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
         light->setSpecular(osg::Vec4(0, 0, 0, 0));
-        light->setLightNum(0);
         light->setConstantAttenuation(1.f);
         light->setLinearAttenuation(0.f);
         light->setQuadraticAttenuation(0.f);

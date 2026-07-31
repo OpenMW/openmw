@@ -33,7 +33,6 @@ namespace osg
     class Group;
     class Camera;
     class Geometry;
-    class Light;
 }
 
 namespace osg
@@ -57,6 +56,7 @@ namespace SceneUtil
     class PerViewUniformStateUpdater;
     class SharedUniformStateUpdater;
     class StateUpdater;
+    class Light;
 }
 
 namespace CSVRender
@@ -86,7 +86,7 @@ namespace CSVRender
         CompositeOsgRenderer* mRenderer;
         osg::ref_ptr<osgViewer::View> mView;
         osg::ref_ptr<osg::Group> mRootNode;
-        osg::ref_ptr<osg::Light> mSunLight;
+        osg::ref_ptr<SceneUtil::Light> mSunLight;
 
         std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 

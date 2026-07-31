@@ -10,6 +10,7 @@
 #include <osg/NodeVisitor>
 #include <osgUtil/CullVisitor>
 #include <osgUtil/RenderStage>
+#include <osgViewer/Renderer>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -399,5 +400,15 @@ namespace SceneUtil
             return static_cast<const SceneUtil::TextureType*>(type)->getName();
 
         return texture.getName();
+    }
+
+    void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer)
+    {
+        renderer->getSceneView(0)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
+            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
+            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
+        renderer->getSceneView(1)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
+            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
+            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
     }
 }
