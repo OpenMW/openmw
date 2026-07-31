@@ -41,7 +41,7 @@ local buttonEvents = {
             ambient.playSound('menu click')
         end
     end),
-    mouseRelease = async:callback(function(_, layout)
+    mouseClick = async:callback(function(_, layout)
         if layout.userData then
             buttonPress(layout, false)
             layout.userData.callback()
