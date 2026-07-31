@@ -43,8 +43,12 @@ local buttonEvents = {
     end),
     mouseClick = async:callback(function(_, layout)
         if layout.userData then
-            buttonPress(layout, false)
             layout.userData.callback()
+        end
+    end),
+    mouseRelease = async:callback(function(_, layout)
+        if layout.userData then
+            buttonPress(layout, false)
         end
     end),
     focusGain = async:callback(function(_, layout)
