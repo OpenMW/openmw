@@ -4,7 +4,6 @@ local async = require('openmw.async')
 local core = require('openmw.core')
 local ambient = require('openmw.ambient')
 local ui = require('openmw.ui')
-local auxUi = require('openmw_aux.ui')
 
 local normalColor = util.color.commaString(core.getGMST("FontColor_color_normal"))
 local normalColorOver = util.color.commaString(core.getGMST('fontcolor_color_normal_over'))
@@ -66,6 +65,7 @@ local function newButton(options)
         text = options.text,
         callback = options.callback,
     }
+    assert(widget.callback)
 
     function widget:update()
         local textProps = widget.textContent[1].props
@@ -81,12 +81,6 @@ local function newButton(options)
             return normalColorOver
         end
         return normalColor
-    end
-
-    function widget:clicked()
-        if self.events and self.events.buttonCallback then
-            self.events.buttonCallback(nil, self.element.layout)
-        end
     end
 
     widget.textContent = ui.content{{
