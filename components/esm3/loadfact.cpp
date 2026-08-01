@@ -51,9 +51,7 @@ namespace ESM
         esm.getT(skills);
         for (std::size_t i = 0; i < std::size(skills); ++i)
             mSkills[i] = ESM::Skill::indexToRefId(skills[i]);
-        esm.getT(mIsHidden);
-        if (mIsHidden > 1)
-            esm.fail("Unknown flag!");
+        esm.getT(mFlags);
     }
 
     void Faction::FADTstruct::save(ESMWriter& esm) const
@@ -68,7 +66,7 @@ namespace ESM
             int32_t skill = ESM::Skill::refIdToIndex(id);
             esm.writeT(skill);
         }
-        esm.writeT(mIsHidden);
+        esm.writeT(mFlags);
         esm.endRecord("FADT");
     }
 
@@ -168,19 +166,25 @@ namespace ESM
         mRecordFlags = 0;
         mName.clear();
         mData.mAttribute.fill({});
-        mData.mIsHidden = 0;
+        mData.mFlags = 0;
 
         for (size_t i = 0; i < mData.mRankData.size(); ++i)
         {
-            mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
-            mData.mRankData[i].mPrimarySkill = mData.mRankData[i].mFavouredSkill = 0;
-            mData.mRankData[i].mFactReputation = 0;
-
+            mData.mRankData[i].blank();
             mRanks[i].clear();
         }
 
         mData.mSkills.fill({});
 
         mReactions.clear();
+    }
+
+    void RankData::blank()
+    {
+        mAttribute1 = 0;
+        mAttribute2 = 0;
+        mPrimarySkill = 0;
+        mFavouredSkill = 0;
+        mFactReputation = 0;
     }
 }

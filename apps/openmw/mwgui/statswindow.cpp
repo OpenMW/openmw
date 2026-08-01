@@ -593,7 +593,7 @@ namespace MWGui
             for (const auto& [factionId, factionRank] : mFactions)
             {
                 const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
-                if (faction->mData.mIsHidden == 1)
+                if (faction->mData.mFlags & ESM::Faction::Hidden)
                     continue;
 
                 if (firstFaction)
