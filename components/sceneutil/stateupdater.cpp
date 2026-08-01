@@ -141,10 +141,9 @@ namespace SceneUtil
     {
         configureSunAmbientOverride(mAmbientColor, stateset);
 
-        SceneUtil::FogUniformController fog(*stateset);
-        fog.setColor(mFogColor);
-        fog.setStart(mFogStart);
-        fog.setEnd(mFogEnd);
+        SceneUtil::setFogColor(*stateset, mFogColor);
+        SceneUtil::setFogStart(*stateset, mFogStart);
+        SceneUtil::setFogEnd(*stateset, mFogEnd);
     }
 
     void StateUpdater::setAmbientColor(const osg::Vec4f& col)

@@ -2689,7 +2689,7 @@ namespace NifOsg
                     }
                     else
                     {
-                        SceneUtil::FogUniformController{ *stateset }.disable();
+                        SceneUtil::disableFog(*stateset);
                     }
                     break;
                 }

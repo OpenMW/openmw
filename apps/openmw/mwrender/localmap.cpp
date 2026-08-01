@@ -735,7 +735,7 @@ namespace MWRender
         if (Stereo::getMultiview())
             Stereo::setMultiviewMatrices(stateset, { mProjectionMatrix, mProjectionMatrix });
 
-        SceneUtil::FogUniformController(*stateset).disable();
+        SceneUtil::disableFog(*stateset);
 
         // turn of sky blending
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));

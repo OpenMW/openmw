@@ -9,12 +9,11 @@ namespace NifOsg
 
     void Fog::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-        SceneUtil::FogUniformController fog{ *stateset };
         float fov, aspect, near, far;
         nv->asCullVisitor()->getProjectionMatrix()->getPerspective(fov, aspect, near, far);
-        fog.setStart(near * mDepth + far * (1.f - mDepth));
-        fog.setEnd(far);
-        fog.setColor(mColor);
+        SceneUtil::setFogStart(*stateset, near * mDepth + far * (1.f - mDepth));
+        SceneUtil::setFogEnd(*stateset, far);
+        SceneUtil::setFogColor(*stateset, mColor);
     }
 
 }

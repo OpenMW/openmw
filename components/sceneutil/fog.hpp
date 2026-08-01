@@ -10,22 +10,13 @@ namespace osg
 namespace SceneUtil
 {
 
-    class FogUniformController
-    {
-    public:
-        FogUniformController(osg::StateSet& stateset);
+    void setFogEnd(osg::StateSet& stateset, float end);
 
-        void setEnd(float end) const;
+    void setFogStart(osg::StateSet& stateset, float start);
 
-        void setStart(float start) const;
+    void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color);
 
-        void setColor(const osg::Vec4f& color);
-
-        void disable();
-
-    private:
-        osg::StateSet& mStateset;
-    };
+    void disableFog(osg::StateSet& stateset);
 
 }
 

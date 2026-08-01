@@ -5,31 +5,26 @@
 namespace SceneUtil
 {
 
-    FogUniformController::FogUniformController(osg::StateSet& stateset)
-        : mStateset(stateset)
+    void setFogEnd(osg::StateSet& stateset, float end)
     {
+        stateset.getOrCreateUniform("fog.end", osg::Uniform::FLOAT)->set(end);
     }
 
-    void FogUniformController::setEnd(float end) const
+    void setFogStart(osg::StateSet& stateset, float start)
     {
-        mStateset.getOrCreateUniform("fog.end", osg::Uniform::FLOAT)->set(end);
+        stateset.getOrCreateUniform("fog.start", osg::Uniform::FLOAT)->set(start);
     }
 
-    void FogUniformController::setStart(float start) const
+    void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color)
     {
-        mStateset.getOrCreateUniform("fog.start", osg::Uniform::FLOAT)->set(start);
+        stateset.getOrCreateUniform("fog.color", osg::Uniform::FLOAT_VEC4)->set(color);
     }
 
-    void FogUniformController::setColor(const osg::Vec4f& color)
-    {
-        mStateset.getOrCreateUniform("fog.color", osg::Uniform::FLOAT_VEC4)->set(color);
-    }
-
-    void FogUniformController::disable()
+    void disableFog(osg::StateSet& stateset)
     {
         constexpr float effectivelyDisabledFogDistance = 10000000.f;
-        setStart(effectivelyDisabledFogDistance);
-        setEnd(effectivelyDisabledFogDistance);
+        setFogStart(stateset, effectivelyDisabledFogDistance);
+        setFogEnd(stateset, effectivelyDisabledFogDistance);
     }
 
 }
