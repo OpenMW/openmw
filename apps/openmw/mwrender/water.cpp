@@ -254,7 +254,8 @@ namespace MWRender
             camera->addCullCallback(new InheritViewPointCallback);
             camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-            SceneUtil::disableFog(*camera->getOrCreateStateSet());
+            SceneUtil::disableFog(
+                *camera->getOrCreateStateSet(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);

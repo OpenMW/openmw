@@ -5,26 +5,29 @@
 namespace SceneUtil
 {
 
-    void setFogEnd(osg::StateSet& stateset, float end)
+    void setFogEnd(osg::StateSet& stateset, float end, osg::StateAttribute::OverrideValue value)
     {
-        stateset.getOrCreateUniform("fog.end", osg::Uniform::FLOAT)->set(end);
+        stateset.removeUniform("fog.end");
+        stateset.addUniform(new osg::Uniform("fog.end", end), value);
     }
 
-    void setFogStart(osg::StateSet& stateset, float start)
+    void setFogStart(osg::StateSet& stateset, float start, osg::StateAttribute::OverrideValue value)
     {
-        stateset.getOrCreateUniform("fog.start", osg::Uniform::FLOAT)->set(start);
+        stateset.removeUniform("fog.start");
+        stateset.addUniform(new osg::Uniform("fog.start", start), value);
     }
 
-    void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color)
+    void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color, osg::StateAttribute::OverrideValue value)
     {
-        stateset.getOrCreateUniform("fog.color", osg::Uniform::FLOAT_VEC4)->set(color);
+        stateset.removeUniform("fog.color");
+        stateset.addUniform(new osg::Uniform("fog.color", color), value);
     }
 
-    void disableFog(osg::StateSet& stateset)
+    void disableFog(osg::StateSet& stateset, osg::StateAttribute::OverrideValue value)
     {
         constexpr float effectivelyDisabledFogDistance = 10000000.f;
-        setFogStart(stateset, effectivelyDisabledFogDistance);
-        setFogEnd(stateset, effectivelyDisabledFogDistance);
+        setFogStart(stateset, effectivelyDisabledFogDistance, value);
+        setFogEnd(stateset, effectivelyDisabledFogDistance, value);
     }
 
 }

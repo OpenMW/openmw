@@ -249,7 +249,7 @@ namespace MWRender
 
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
-        SceneUtil::disableFog(*stateset);
+        SceneUtil::disableFog(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         // TODO: Clean up this mess of loose uniforms that shaders depend on.
         // turn off sky blending
