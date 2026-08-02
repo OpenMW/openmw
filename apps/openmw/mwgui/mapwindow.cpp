@@ -196,7 +196,7 @@ namespace MWGui
 
     MWGui::LocalMapBase::MapEntry& LocalMapBase::addMapEntry()
     {
-        const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
+        const int mapWidgetSize = static_cast<int>(getWidgetSize());
         MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>(
             "ImageBox", MyGUI::IntCoord(0, 0, mapWidgetSize, mapWidgetSize), MyGUI::Align::Top | MyGUI::Align::Left);
         map->setDepth(Local_MapLayer);
@@ -218,7 +218,7 @@ namespace MWGui
         mCompass = compass;
         mGrid = createRect({ 0, 0 }, cellDistance);
 
-        const int mapWidgetSize = Settings::map().mLocalMapWidgetSize;
+        const int mapWidgetSize = static_cast<int>(getWidgetSize());
         setCanvasSize(mLocalMap, mGrid, mapWidgetSize);
 
         mCompass->setDepth(Local_CompassLayer);
@@ -629,7 +629,8 @@ namespace MWGui
                 {
                     entry.mMapTexture = std::make_unique<MyGUIPlatform::OSGTexture>(texture);
                     entry.mMapWidget->setRenderItemTexture(entry.mMapTexture.get());
-                    entry.mMapWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+                    // The widget is Y-down, the RTT image is Y-up, so this UV is inverted
+                    entry.mMapWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
                     needRedraw = true;
                 }
                 else
@@ -642,7 +643,8 @@ namespace MWGui
                 {
                     entry.mFogTexture = std::make_unique<MyGUIPlatform::OSGTexture>(tex);
                     entry.mFogWidget->setRenderItemTexture(entry.mFogTexture.get());
-                    entry.mFogWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+                    // For inexplicable historical reasons the fog texture is Y-down so this UV is *not* inverted
+                    entry.mFogWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
                 }
                 else
                 {
@@ -1334,14 +1336,17 @@ namespace MWGui
     {
         if (!mGlobalMapTexture.get())
         {
+            // The generated unexplored map and explored map RTT images are Y-up so the UVs are inverted
+            // The unexplored map isn't saved so we *could* consider generating it the "right" way
+            // but mixing conventions for map images could make things confusing
             mGlobalMapTexture = std::make_unique<MyGUIPlatform::OSGTexture>(mGlobalMapRender->getBaseTexture());
             mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
-            mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+            mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
             mGlobalMapOverlayTexture
                 = std::make_unique<MyGUIPlatform::OSGTexture>(mGlobalMapRender->getOverlayTexture());
             mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
-            mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+            mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
             // Redraw children in proper order
             mGlobalMap->getParent()->_updateChilds();

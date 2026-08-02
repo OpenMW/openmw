@@ -77,6 +77,12 @@ namespace Compiler
                     mTolerantNames = tolerant;
                     return cont;
                 }
+                // These are reset when the newline is read, but they could have been re-enabled
+                if (mPutbackCode == S_newline)
+                {
+                    mTolerantNames = false;
+                    mExpectName = false;
+                }
                 return parser.parseSpecial(mPutbackCode, mPutbackLoc, *this);
             }
 

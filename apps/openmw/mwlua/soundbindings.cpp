@@ -1,6 +1,8 @@
 #include "soundbindings.hpp"
 #include "recordstore.hpp"
 
+#include "types/usertypeutil.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -9,6 +11,7 @@
 
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/pathutil.hpp>
 
 #include "luamanagerimp.hpp"
@@ -98,6 +101,41 @@ namespace
 
 namespace MWLua
 {
+    namespace
+    {
+        template <class T>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Sound[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "volume", &ESM::Sound::mData, &ESM::SOUNstruct::mVolume);
+            Types::addProperty(record, "minRange", &ESM::Sound::mData, &ESM::SOUNstruct::mMinRange);
+            Types::addProperty(record, "maxRange", &ESM::Sound::mData, &ESM::SOUNstruct::mMaxRange);
+
+            if constexpr (Types::RecordType<T>::isMutable)
+            {
+                record["fileName"] = sol::property(
+                    [](const T& mutRec) -> std::string {
+                        return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(mutRec.find().mSound));
+                    },
+                    [](T& mutRec, std::string_view path) {
+                        ESM::Sound& recordValue = mutRec.find();
+                        recordValue.mSound = Misc::ResourceHelpers::soundPathForESM3(path);
+                    });
+            }
+            else
+            {
+                record["fileName"] = sol::readonly_property([](const ESM::Sound& rec) -> std::string {
+                    return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound));
+                });
+            }
+        }
+    }
+
     sol::table initAmbientPackage(const Context& context)
     {
         sol::state_view lua = context.sol();
@@ -148,7 +186,7 @@ namespace MWLua
         api["say"]
             = [luaManager = context.mLuaManager](std::string_view fileName, sol::optional<std::string_view> text) {
                   MWBase::Environment::get().getSoundManager()->say(VFS::Path::Normalized(fileName));
-                  if (text)
+                  if (text && Settings::gui().mSubtitles)
                       luaManager->addUIMessage(*text);
               };
 
@@ -222,7 +260,7 @@ namespace MWLua
                          std::string_view fileName, const sol::object& object, sol::optional<std::string_view> text) {
             MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
             MWBase::Environment::get().getSoundManager()->say(ptr, VFS::Path::Normalized(fileName));
-            if (text)
+            if (text && Settings::gui().mSubtitles)
                 luaManager->addUIMessage(*text);
         };
         api["stopSay"] = [](const sol::object& object) {
@@ -237,20 +275,27 @@ namespace MWLua
         addRecordFunctionBinding<ESM::Sound>(api, context);
 
         // Sound record
-        auto soundT = lua.new_usertype<ESM::Sound>("ESM3_Sound");
-        soundT[sol::meta_function::to_string]
-            = [](const ESM::Sound& rec) -> std::string { return "ESM3_Sound[" + rec.mId.toDebugString() + "]"; };
-        soundT["id"] = sol::readonly_property([](const ESM::Sound& rec) { return rec.mId.serializeText(); });
-        soundT["volume"]
-            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mVolume; });
-        soundT["minRange"]
-            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMinRange; });
-        soundT["maxRange"]
-            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMaxRange; });
-        soundT["fileName"] = sol::readonly_property([](const ESM::Sound& rec) -> std::string {
-            return Misc::ResourceHelpers::correctSoundPath(VFS::Path::Normalized(rec.mSound)).value();
-        });
+        addUserType<ESM::Sound>(lua, "ESM3_Sound");
 
         return LuaUtil::makeReadOnly(api);
+    }
+
+    void addMutableSoundType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Sound>>(lua, "ESM3_MutableSound");
+    }
+
+    ESM::Sound tableToSound(const sol::table& rec)
+    {
+        auto sound = Types::initFromTemplate<ESM::Sound>(rec);
+        if (rec["volume"] != sol::nil)
+            sound.mData.mVolume = rec["volume"];
+        if (rec["minRange"] != sol::nil)
+            sound.mData.mMinRange = rec["minRange"];
+        if (rec["maxRange"] != sol::nil)
+            sound.mData.mMaxRange = rec["maxRange"];
+        if (rec["fileName"] != sol::nil)
+            sound.mSound = Misc::ResourceHelpers::soundPathForESM3(rec["fileName"].get<std::string_view>());
+        return sound;
     }
 }

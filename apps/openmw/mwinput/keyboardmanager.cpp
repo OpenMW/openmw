@@ -36,7 +36,8 @@ namespace MWInput
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)
         auto kc = SDLUtil::sdlKeyToMyGUI(arg.keysym.sym);
         if (mBindingsManager->getKeyBinding(A_Console) == arg.keysym.scancode
-            && MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            // HACK: allow upper case variant of console keybinding.
+            && (arg.keysym.mod & KMOD_SHIFT) == 0 && MWBase::Environment::get().getWindowManager()->isConsoleMode())
             SDL_StopTextInput();
 
         bool consumed = SDL_IsTextInputActive() && // Little trick to check if key is printable

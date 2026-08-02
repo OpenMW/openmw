@@ -16,22 +16,22 @@ namespace Bsa
     private:
         struct TextureChunkRecord
         {
-            uint32_t size = 0;
-            uint32_t packedSize = 0;
-            int64_t offset = 0;
-            uint16_t startMip = 0;
-            uint16_t endMip = 0;
+            uint32_t mSize = 0;
+            uint32_t mPackedSize = 0;
+            int64_t mOffset = 0;
+            uint16_t mStartMip = 0;
+            uint16_t mEndMip = 0;
         };
 
         struct FileRecord
         {
-            uint8_t unknownTex = 0;
-            uint16_t height = 0;
-            uint16_t width = 0;
-            uint8_t numMips = 0;
-            uint8_t DXGIFormat = 0;
-            uint16_t cubeMaps = 0;
-            std::vector<TextureChunkRecord> texturesChunks;
+            uint8_t mUnknownTex = 0;
+            uint16_t mHeight = 0;
+            uint16_t mWidth = 0;
+            uint8_t mNumMips = 0;
+            uint8_t mDXGIFormat = 0;
+            uint16_t mCubeMaps = 0;
+            std::vector<TextureChunkRecord> mTextureChunks;
         };
 
         uint32_t mVersion{ 0u };

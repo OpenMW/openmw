@@ -3,7 +3,10 @@
 
 #include <cstdint>
 #include <map>
+#include <span>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include <osg/Vec4f>
 
@@ -40,6 +43,14 @@ namespace Fallback
 namespace MWWorld
 {
     class TimeStamp;
+
+    struct Moon
+    {
+        std::string_view mName;
+        MWRender::MoonState::Phase mPhase;
+        unsigned int mPhaseValue;
+        float mAlpha;
+    };
 
     enum NightDayMode
     {
@@ -246,7 +257,8 @@ namespace MWWorld
 
         operator ESM::RegionWeatherState() const;
 
-        void setChances(const std::vector<uint8_t>& chances);
+        void setChances(std::span<const uint8_t> chances);
+        std::span<const uint8_t> getChances() const;
 
         void setWeather(int weatherID);
 
@@ -308,7 +320,8 @@ namespace MWWorld
          */
         void changeWeather(const ESM::RefId& regionID, const unsigned int weatherID);
         void changeWeather(const ESM::RefId& regionID, const ESM::RefId& weatherID);
-        void modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances);
+        void modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances);
+        std::span<const uint8_t> getRegionChances(const ESM::RefId& regionID) const;
         void playerTeleported(const ESM::RefId& playerRegion, bool isExterior);
 
         /**
@@ -356,6 +369,8 @@ namespace MWWorld
         float getSunPercentage(float hour) const;
 
         float getSunVisibility() const;
+
+        std::vector<Moon> getCurrentMoons(const TimeStamp& time) const;
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress);
 

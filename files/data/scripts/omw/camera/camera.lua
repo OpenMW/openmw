@@ -41,6 +41,7 @@ local MODE = camera.MODE
 local previewIfStandStill = false
 local showCrosshairInThirdPerson = false
 local slowViewChange = false
+local maxDistance = settings:get('maxDistance')
 
 local function updateSettings()
     previewIfStandStill = settings:get('previewIfStandStill')
@@ -56,6 +57,7 @@ local function updateSettings()
     move360.turnSpeed = settings:get('move360TurnSpeed')
     pov_auto_switch.enabled = settings:get('povAutoSwitch')
     slowViewChange = settings:get('slowViewChange')
+    maxDistance = settings:get('maxDistance')
 end
 
 local primaryMode
@@ -133,7 +135,6 @@ local function updateSmoothedSpeed(dt)
 end
 
 local minDistance = 30
-local maxDistance = 800
 
 local function zoom(delta)
     if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
@@ -162,6 +163,9 @@ local function updateStandingPreview()
     local mode = camera.getMode()
     if not previewIfStandStill or next(noStandingPreview)
         or mode == MODE.FirstPerson or mode == MODE.Static or mode == MODE.Vanity then
+        if third_person.standingPreview and mode == MODE.Preview then
+            camera.setMode(primaryMode)
+        end
         third_person.standingPreview = false
         return
     end

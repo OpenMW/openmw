@@ -89,21 +89,6 @@ namespace Settings
             return stream.str();
         }
 
-        std::string toString(SceneUtil::LightingMethod value)
-        {
-            switch (value)
-            {
-                case SceneUtil::LightingMethod::FFP:
-                    return "legacy";
-                case SceneUtil::LightingMethod::PerObjectUniform:
-                    return "shaders compatibility";
-                case SceneUtil::LightingMethod::SingleUBO:
-                    return "shaders";
-            }
-
-            throw std::invalid_argument("Invalid LightingMethod value: " + std::to_string(static_cast<int>(value)));
-        }
-
         int toInt(HrtfMode value)
         {
             switch (value)
@@ -493,11 +478,6 @@ namespace Settings
         setString(setting, category, value.print());
     }
 
-    void Manager::set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value)
-    {
-        setString(setting, category, toString(value));
-    }
-
     void Manager::set(std::string_view setting, std::string_view category, HrtfMode value)
     {
         setInt(setting, category, toInt(value));
@@ -544,19 +524,5 @@ namespace Settings
             return NavMeshRenderMode::UpdateFrequency;
 
         throw std::invalid_argument("Invalid navigation mesh rendering mode: " + std::string(value));
-    }
-
-    SceneUtil::LightingMethod parseLightingMethod(std::string_view value)
-    {
-        if (value == "legacy")
-            return SceneUtil::LightingMethod::FFP;
-        if (value == "shaders compatibility")
-            return SceneUtil::LightingMethod::PerObjectUniform;
-        if (value == "shaders")
-            return SceneUtil::LightingMethod::SingleUBO;
-
-        constexpr const char* fallback = "shaders compatibility";
-        Log(Debug::Warning) << "Unknown lighting method '" << value << "', returning fallback '" << fallback << "'";
-        return SceneUtil::LightingMethod::PerObjectUniform;
     }
 }

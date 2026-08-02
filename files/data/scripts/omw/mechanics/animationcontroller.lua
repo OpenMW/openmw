@@ -7,6 +7,16 @@ local function onPlayBlendedAnimation(groupname, options)
     auxUtil.callEventHandlers(playBlendedHandlers, groupname, options)
 end
 
+local animationEndedHandlers = {}
+local function onAnimationEnded(groupname, startKey, stopKey, time, completion)
+    auxUtil.callEventHandlers(animationEndedHandlers, groupname, {
+        startKey = startKey,
+        stopKey = stopKey,
+        time = time,
+        completion = completion,
+    })
+end
+
 local function playBlendedAnimation(groupname, options)
     onPlayBlendedAnimation(groupname, options)
     if options.skip then
@@ -38,6 +48,7 @@ end
 return {
     engineHandlers = { 
         _onPlayAnimation = playBlendedAnimation,
+        _onAnimationEnded = onAnimationEnded,
         _onAnimationTextKey = onAnimationTextKey,
         onUpdate = onUpdate,
     },
@@ -89,7 +100,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#AnimationController] #number version
-        version = 0,
+        version = 1,
         
         --- AnimationController Package
         -- @type Package
@@ -107,6 +118,22 @@ return {
         -- @param #function handler The handler.
         addPlayBlendedAnimationHandler = function(handler)
             playBlendedHandlers[#playBlendedHandlers + 1] = handler
+        end,
+
+        --- Add a new animationEnded handler for this actor
+        -- If `handler(groupname, info)` returns false, other handlers for
+        -- the call will be skipped. info is a table that contains information related to
+        -- the animation that ended and will contain the following fields:
+        --
+        --   * `time` - The absolute time in the animation when it was ended
+        --   * `completion` - The relative time (0-1) in the animation when it was ended
+        --   * `startKey` - The start key of the animation that ended
+        --   * `stopKey` - The stop key of the animation that ended
+        --
+        -- @function [parent=#AnimationController] addAnimationEndedHandler
+        -- @param #function handler The handler.
+        addAnimationEndedHandler = function(handler)
+            animationEndedHandlers[#animationEndedHandlers + 1] = handler
         end,
 
         --- Add a new text key handler for this actor

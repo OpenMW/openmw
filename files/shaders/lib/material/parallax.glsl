@@ -6,7 +6,7 @@
 
 vec2 getParallaxOffset(vec3 eyeDir, float height)
 {
-    return vec2(eyeDir.x, -eyeDir.y) * ( height * PARALLAX_SCALE + PARALLAX_BIAS );
+    return vec2(eyeDir.x, eyeDir.y) * ( height * PARALLAX_SCALE + PARALLAX_BIAS );
 }
 
 #endif

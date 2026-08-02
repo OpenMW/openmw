@@ -3,6 +3,11 @@ settingsPageDescription: "OpenMW camera settings."
 
 thirdPersonSettings: "Third Person Mode"
 
+maxDistance: "Maximum Camera Distance"
+maxDistanceDescription: |
+    How far the camera can zoom out. 
+    (default: 800 game units)
+
 viewOverShoulder: "View Over the Shoulder"
 viewOverShoulderDescription: |
     Controls third person view mode.

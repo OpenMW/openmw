@@ -3,6 +3,11 @@ settingsPageDescription: "OpenMW-Kameraeinstellungen"
 
 thirdPersonSettings: "Verfolgerperspektive"
 
+maxDistance: "Maximale Kameradistanz"
+maxDistanceDescription: |
+    Wie weit die Kamera herausgezoomt werden kann.
+    (Standard: 800 Spieleinheiten)
+
 viewOverShoulder: "Über-die-Schulter-Ansicht"
 viewOverShoulderDescription: |
     Beeinflusst die Verfolgerperspektive.

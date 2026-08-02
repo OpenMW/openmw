@@ -1,6 +1,7 @@
 #include "loadltex.hpp"
 
-#include "components/esm/defs.hpp"
+#include <components/esm/defs.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -43,11 +44,12 @@ namespace ESM
         if (!hasIndex)
             esm.fail("Missing INTV subrecord");
     }
+
     void LandTexture::save(ESMWriter& esm, bool isDeleted) const
     {
         esm.writeHNCRefId("NAME", mId);
         esm.writeHNT("INTV", mIndex);
-        esm.writeHNCString("DATA", mTexture);
+        esm.writeHNCString("DATA", mTexture.getOriginal());
 
         if (isDeleted)
         {

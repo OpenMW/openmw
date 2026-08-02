@@ -45,14 +45,10 @@ namespace SceneUtil
             osg::Matrixf mInvBindMatrix;
         };
 
-        using VertexWeight = std::pair<unsigned short, float>;
-        using VertexWeights = std::vector<VertexWeight>;
         using BoneWeight = std::pair<size_t, float>;
         using BoneWeights = std::vector<BoneWeight>;
 
         void setBoneInfo(std::vector<BoneInfo>&& bones);
-        // Convert influences in vertex and weight list per bone format
-        void setInfluences(const std::vector<VertexWeights>& influences);
         // Convert influences in bone and weight list per vertex format
         void setInfluences(const std::vector<BoneWeights>& influences);
 

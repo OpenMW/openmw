@@ -28,10 +28,10 @@ namespace NifOsg
         // Utility methods to transform the node and keep these components up-to-date.
         // The matrix's components should not be overridden manually or using preMult/postMult
         // unless you're sure you know what you are doing.
-        void setScale(float scale);
-        void setRotation(const osg::Quat& rotation);
-        void setRotation(const Nif::Matrix3& rotation);
-        void setTranslation(const osg::Vec3f& translation);
+        virtual void setScale(float scale);
+        virtual void setRotation(const osg::Quat& rotation);
+        virtual void setRotation(const Nif::Matrix3& rotation);
+        virtual void setTranslation(const osg::Vec3f& translation);
     };
 
 }

@@ -71,7 +71,7 @@ namespace MWClass
         return true;
     }
 
-    std::string_view Light::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Light::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Light>(ptr);
     }
@@ -140,11 +140,11 @@ namespace MWClass
         return sound;
     }
 
-    const std::string& Light::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Light::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getNormalized();
     }
 
     bool Light::hasToolTip(const MWWorld::ConstPtr& ptr) const
@@ -159,7 +159,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
 

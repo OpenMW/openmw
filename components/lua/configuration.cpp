@@ -16,14 +16,15 @@ namespace LuaUtil
 
     namespace
     {
-        const std::map<std::string, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
+        const std::map<std::string_view, ESM::LuaScriptCfg::Flags, std::less<>> flagsByName{
             { "GLOBAL", ESM::LuaScriptCfg::sGlobal },
             { "CUSTOM", ESM::LuaScriptCfg::sCustom },
             { "PLAYER", ESM::LuaScriptCfg::sPlayer },
             { "MENU", ESM::LuaScriptCfg::sMenu },
+            { "LOAD", ESM::LuaScriptCfg::sLoad },
         };
 
-        const std::map<std::string, ESM::RecNameInts, std::less<>> typeTagsByName{
+        const std::map<std::string_view, ESM::RecNameInts, std::less<>> typeTagsByName{
             { "ACTIVATOR", ESM::REC_ACTI },
             { "ARMOR", ESM::REC_ARMO },
             { "BOOK", ESM::REC_BOOK },

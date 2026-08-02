@@ -66,7 +66,7 @@ namespace MWLua
         controls["run"] = CONTROL(bool, mRun);
         controls["sneak"] = CONTROL(bool, mSneak);
         controls["jump"] = CONTROL(bool, mJump);
-        controls["use"] = CONTROL(int, mUse);
+        controls["use"] = CONTROL(MWMechanics::AttackType, mUse);
 #undef CONTROL
 
         sol::usertype<SelfObject> selfAPI
@@ -233,8 +233,8 @@ namespace MWLua
         lua->protectedCall(
             [&](LuaUtil::LuaView& view) { addPackage("openmw.self", sol::make_object(view.sol(), &mData)); });
         registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
-            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnSkillUse,
-            &mOnSkillLevelUp, &mOnJailTimeServed });
+            &mOnTeleportedHandlers, &mOnAnimationTextKeyHandlers, &mOnPlayAnimationHandlers, &mOnAnimationEndedHandlers,
+            &mOnSkillUse, &mOnSkillLevelUp, &mOnJailTimeServed });
     }
 
     void LocalScripts::setActive(bool active, bool callHandlers)

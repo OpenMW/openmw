@@ -71,11 +71,11 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNCString("FNAM", mName);
         esm.writeNamedComposite("AADT", mData);
         esm.writeHNOCRefId("SCRI", mScript);
-        esm.writeHNCString("ITEX", mIcon);
+        esm.writeHNCString("ITEX", mIcon.getOriginal());
     }
 
     void Apparatus::blank()

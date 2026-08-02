@@ -5,6 +5,7 @@
 #include <components/esm3/loadclot.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -33,7 +34,7 @@ namespace
         if (rec["model"] != sol::nil)
             clothing.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            clothing.mIcon = rec["icon"];
+            clothing.mIcon = rec["icon"].get<std::string_view>();
         if (rec["mwscript"] != sol::nil)
         {
             std::string_view scriptId = rec["mwscript"].get<std::string_view>();
@@ -48,7 +49,7 @@ namespace
         if (rec["enchantCapacity"] != sol::nil)
             clothing.mData.mEnchant = static_cast<int16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["weight"] != sol::nil)
-            clothing.mData.mWeight = rec["weight"];
+            clothing.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             clothing.mData.mValue = rec["value"];
         if (rec["type"] != sol::nil)
@@ -95,7 +96,7 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Clothing& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon.getNormalized(), *vfs);
         });
         record["enchant"] = sol::readonly_property([](const ESM::Clothing& rec) -> ESM::RefId { return rec.mEnchant; });
         record["mwscript"] = sol::readonly_property([](const ESM::Clothing& rec) -> ESM::RefId { return rec.mScript; });

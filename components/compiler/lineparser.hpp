@@ -43,7 +43,8 @@ namespace Compiler
         std::string mName;
         std::string mMemberName;
         bool mReferenceMember;
-        int mButtons;
+        std::vector<std::string> mPotentialButtons;
+        unsigned int mNumButtons{ 0 };
         std::string mExplicit;
         char mType;
         ExprParser mExprParser;

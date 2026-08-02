@@ -60,6 +60,16 @@ namespace
 
         return std::string_view::npos;
     }
+
+    std::string_view stripBaseDirectory(std::string_view dir, std::string_view resPath)
+    {
+        if (resPath.length() < dir.size() + 1 || !Misc::StringUtils::ciStartsWith(resPath, dir)
+            || VFS::Path::normalize(resPath[dir.size()]) != VFS::Path::separator)
+        {
+            throw std::runtime_error("Path should start with '" + std::string(dir) + "\\'");
+        }
+        return resPath.substr(dir.size() + 1);
+    }
 }
 
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
@@ -135,6 +145,14 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctIconPath(VFS::Path::Normaliz
     return correctResourcePath({ { icons } }, resPath, vfs, dds);
 }
 
+VFS::Path::Normalized Misc::ResourceHelpers::correctBigIconPath(
+    VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
+{
+    std::string name("b_");
+    name += resPath.filename().value();
+    return correctIconPath(VFS::Path::join(resPath.parent(), name), vfs);
+}
+
 VFS::Path::Normalized Misc::ResourceHelpers::correctBookartPath(
     VFS::Path::NormalizedView resPath, const VFS::Manager& vfs)
 {
@@ -176,7 +194,7 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctActorModelPath(
     if (!vfs->exists(kfname))
         return VFS::Path::Normalized(resPath);
 
-    return mdlname;
+    return VFS::Path::Normalized(std::move(mdlname));
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::correctMaterialPath(
@@ -205,13 +223,12 @@ VFS::Path::Normalized Misc::ResourceHelpers::correctMusicPath(VFS::Path::Normali
 
 std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath)
 {
-    constexpr std::string_view prefix = "meshes";
-    if (resPath.length() < prefix.size() + 1 || !Misc::StringUtils::ciStartsWith(resPath, prefix)
-        || (resPath[prefix.size()] != '/' && resPath[prefix.size()] != '\\'))
-    {
-        throw std::runtime_error("Path should start with 'meshes\\'");
-    }
-    return resPath.substr(prefix.size() + 1);
+    return stripBaseDirectory("meshes", resPath);
+}
+
+std::string_view Misc::ResourceHelpers::soundPathForESM3(std::string_view resPath)
+{
+    return stripBaseDirectory("sound", resPath);
 }
 
 VFS::Path::Normalized Misc::ResourceHelpers::correctSoundPath(

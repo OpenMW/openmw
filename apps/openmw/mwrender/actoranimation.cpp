@@ -105,7 +105,7 @@ namespace MWRender
             std::move(templateNode), mObjectRoot, bonefilter, found->second, mResourceSystem->getSceneManager());
     }
 
-    std::string ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const
+    VFS::Path::Normalized ActorAnimation::getShieldMesh(const MWWorld::ConstPtr& shield, bool female) const
     {
         const ESM::Armor* armor = shield.get<ESM::Armor>()->mBase;
         const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
@@ -129,9 +129,9 @@ namespace MWRender
                 {
                     const ESM::BodyPart* bodypart = partStore.search(*bodypartName);
                     if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
-                        return std::string();
-                    if (!bodypart->mModel.empty())
-                        return Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(bodypart->mModel)).value();
+                        return VFS::Path::Normalized();
+                    if (!bodypart->mModel.getNormalized().empty())
+                        return Misc::ResourceHelpers::correctMeshPath(bodypart->mModel.getNormalized());
                 }
             }
         }
@@ -420,7 +420,7 @@ namespace MWRender
         if (weapon == inv.end() || weapon->getType() != ESM::Weapon::sRecordId)
             return;
 
-        std::string_view mesh = weapon->getClass().getModel(*weapon);
+        const VFS::Path::NormalizedView mesh = weapon->getClass().getModel(*weapon);
         std::string_view boneName = getHolsteredWeaponBoneName(*weapon);
         if (mesh.empty() || boneName.empty())
             return;

@@ -29,11 +29,11 @@ namespace MWMechanics
         AiReactionTimer mReaction;
         float mTimerCombatMove;
         bool mReadyToAttack;
+        bool mShouldApproach{ true };
         bool mAttack;
         float mAttackRange;
         bool mCombatMove;
         bool mRotateMove;
-        osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
         std::unique_ptr<Action> mCurrentAction;
         float mActionCooldown;

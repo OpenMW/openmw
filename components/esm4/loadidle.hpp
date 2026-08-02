@@ -32,6 +32,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -46,7 +47,7 @@ namespace ESM4
         std::string mEditorId;
         std::string mCollision;
         std::string mEvent;
-        std::string mModel;
+        ESM::Path mModel;
 
         ESM::FormId mParent; // IDLE or AACT
         ESM::FormId mPrevious;

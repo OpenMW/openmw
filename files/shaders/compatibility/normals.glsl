@@ -4,7 +4,7 @@ mat3 generateTangentSpace(vec4 tangent, vec3 normal)
 {
     vec3 normalizedNormal = normalize(normal);
     vec3 normalizedTangent = normalize(tangent.xyz);
-    vec3 binormal = cross(normalizedTangent, normalizedNormal) * tangent.w;
+    vec3 binormal = cross(normalizedNormal, normalizedTangent) * tangent.w;
     return mat3(normalizedTangent, binormal, normalizedNormal);
 }
 

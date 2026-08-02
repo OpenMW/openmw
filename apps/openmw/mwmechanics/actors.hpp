@@ -164,7 +164,6 @@ namespace MWMechanics
         int getGreetingTimer(const MWWorld::Ptr& ptr) const;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;
-        bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
     private:
         std::map<ESM::RefId, int> mDeathCount;

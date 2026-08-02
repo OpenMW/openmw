@@ -41,6 +41,9 @@
   * - :doc:`SkillProgression </reference/lua-scripting/interface_skill_progression>`
     - |bdg-ctx-player|
     - Control, extend, and override skill progression of the player.
+  * - :doc:`SpellCasting </reference/lua-scripting/interface_spellcasting>`
+    - |bdg-ctx-local|
+    - Allows to control, extend, and override spell casting
   * - :doc:`UI </reference/lua-scripting/interface_ui>`
     - |bdg-ctx-player|
     - High-level UI modes interface. Allows to override parts of the interface.

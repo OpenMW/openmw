@@ -12,8 +12,12 @@ namespace ESM
     void CreatureStats::load(ESMReader& esm)
     {
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
-        for (auto& attribute : mAttributes)
-            attribute.load(esm, intFallback);
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        {
+            StatState<float> stat;
+            stat.load(esm, intFallback);
+            mAttributes.emplace(ESM::Attribute::indexToRefId(i), std::move(stat));
+        }
 
         for (auto& dynamic : mDynamic)
             dynamic.load(esm);
@@ -184,8 +188,14 @@ namespace ESM
 
     void CreatureStats::save(ESMWriter& esm) const
     {
-        for (const auto& attribute : mAttributes)
-            attribute.save(esm);
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        {
+            const auto it = mAttributes.find(ESM::Attribute::indexToRefId(i));
+            if (it != mAttributes.end())
+                it->second.save(esm);
+            else
+                StatState<float>{}.save(esm);
+        }
 
         for (const auto& dynamic : mDynamic)
             dynamic.save(esm);

@@ -332,6 +332,7 @@ namespace DetourNavigator
                                   << " changeType=" << it->mChangeType;
 
                 mWaiting.push(it);
+                ++mPostedCount;
             }
         }
 
@@ -443,6 +444,7 @@ namespace DetourNavigator
             result.mDb = mDbWorker->getStats();
         result.mCache = mNavMeshTilesCache.getStats();
         result.mDbGetTileHits = mDbGetTileHits.load(std::memory_order_relaxed);
+        result.mPosted = mPostedCount.load(std::memory_order_relaxed);
         return result;
     }
 

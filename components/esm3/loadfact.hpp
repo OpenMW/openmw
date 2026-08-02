@@ -33,6 +33,8 @@ namespace ESM
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
+
+        void blank();
     };
 
     struct Faction
@@ -46,22 +48,26 @@ namespace ESM
         std::string mName;
         RefId mId;
 
+        enum Flags
+        {
+            Hidden = 1
+        };
+
         struct FADTstruct
         {
             // Which attributes we like
-            std::array<int32_t, 2> mAttribute;
+            std::array<ESM::RefId, 2> mAttribute;
 
             std::array<RankData, 10> mRankData;
 
-            std::array<int32_t, 7> mSkills; // IDs of skills this faction require
-                                            // Each element will either contain an Skill index, or -1.
+            std::array<ESM::RefId, 7> mSkills; // IDs of skills this faction requires
 
-            int32_t mIsHidden; // 1 - hidden from player
+            int32_t mFlags; // 1 - hidden from player
 
-            int32_t& getSkill(size_t index, bool ignored = false);
+            ESM::RefId& getSkill(size_t index, bool ignored = false);
             ///< Throws an exception for invalid values of \a index.
 
-            int32_t getSkill(size_t index, bool ignored = false) const;
+            ESM::RefId getSkill(size_t index, bool ignored = false) const;
             ///< Throws an exception for invalid values of \a index.
 
             void load(ESMReader& esm);

@@ -10,9 +10,11 @@
 #include <osg/Math>
 
 #include <apps/opencs/model/world/cell.hpp>
+#include <components/esm/attr.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadltex.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -296,13 +298,16 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mAttribute; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return ESM::Attribute::refIdToIndex(record.get().mData.mAttribute);
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mAttribute = data.toInt();
+            record2.mData.mAttribute = ESM::Attribute::indexToRefId(data.toInt());
 
             record.setModified(record2);
         }
@@ -371,13 +376,16 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mAttribute[mIndex]; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return ESM::Attribute::refIdToIndex(record.get().mData.mAttribute[mIndex]);
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mAttribute[mIndex] = data.toInt();
+            record2.mData.mAttribute[mIndex] = ESM::Attribute::indexToRefId(data.toInt());
 
             record.setModified(record2);
         }
@@ -403,8 +411,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromStdString(
-                ESM::Skill::indexToRefId(record.get().mData.getSkill(mIndex, mMajor)).getRefIdString());
+            return QString::fromStdString(record.get().mData.getSkill(mIndex, mMajor).getRefIdString());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -413,7 +420,7 @@ namespace CSMWorld
             {
                 ESXRecordT record2 = record.get();
 
-                record2.mData.getSkill(mIndex, mMajor) = static_cast<int>(*index);
+                record2.mData.getSkill(mIndex, mMajor) = ESM::Skill::indexToRefId(static_cast<int>(*index));
 
                 record.setModified(record2);
             }
@@ -452,13 +459,18 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mIsHidden != 0; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return (record.get().mData.mFlags & ESM::Faction::Hidden) != 0;
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
-
-            record2.mData.mIsHidden = data.toInt();
+            if (data.toInt())
+                record2.mData.mFlags |= ESM::Faction::Hidden;
+            else
+                record2.mData.mFlags &= ~ESM::Faction::Hidden;
 
             record.setModified(record2);
         }
@@ -752,7 +764,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mTexture.c_str());
+            return QString::fromStdString(record.get().mTexture.getOriginal());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -1824,7 +1836,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mModel.c_str());
+            return QString::fromStdString(record.get().mModel.getOriginal());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
@@ -2139,8 +2151,9 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(
-                (this->mColumnId == Columns::ColumnId_Icon ? record.get().mIcon : record.get().mParticle).c_str());
+            return QString::fromStdString(
+                (this->mColumnId == Columns::ColumnId_Icon ? record.get().mIcon : record.get().mParticle)
+                    .getOriginal());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

@@ -50,11 +50,11 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
-    std::map<int, int> attributeCount;
+    std::map<ESM::RefId, int> attributeCount;
     for (size_t i = 0; i < classRecord.mData.mAttribute.size(); ++i)
     {
-        int attribute = classRecord.mData.mAttribute[i];
-        if (attribute == -1)
+        ESM::RefId attribute = classRecord.mData.mAttribute[i];
+        if (attribute.empty())
             messages.add(id, "Attribute #" + std::to_string(i) + " is not set", {}, CSMDoc::Message::Severity_Error);
         else
         {
@@ -71,16 +71,16 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
     }
 
     // test for non-unique skill
-    std::map<int, int> skills; // ID, number of occurrences
+    std::map<ESM::RefId, int> skills; // ID, number of occurrences
 
     for (const auto& s : classRecord.mData.mSkills)
-        for (int skill : s)
+        for (const ESM::RefId& skill : s)
             ++skills[skill];
 
     for (auto& skill : skills)
         if (skill.second > 1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToRefId(skill.first).toString() + " is listed more than once",
-                "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Skill " + skill.first.toString() + " is listed more than once", "",
+                CSMDoc::Message::Severity_Error);
         }
 }

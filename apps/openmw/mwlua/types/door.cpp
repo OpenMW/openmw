@@ -1,6 +1,5 @@
 #include "types.hpp"
-
-#include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include "../localscripts.hpp"
 
@@ -30,6 +29,49 @@ namespace sol
 
 namespace MWLua
 {
+    namespace
+    {
+        void addPropertyFromTable(const sol::table& rec, std::string_view key, ESM::RefId& value)
+        {
+            if (rec[key] != sol::nil)
+            {
+                std::string_view id = rec[key].get<std::string_view>();
+                value = ESM::RefId::deserializeText(id);
+            }
+        }
+
+        template <class T>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Door[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Door::mName);
+            Types::addModelProperty(record);
+            Types::addProperty(record, "mwscript", &ESM::Door::mScript);
+            Types::addProperty(record, "openSound", &ESM::Door::mOpenSound);
+            Types::addProperty(record, "closeSound", &ESM::Door::mCloseSound);
+        }
+    }
+
+    ESM::Door tableToDoor(const sol::table& rec)
+    {
+        auto door = Types::initFromTemplate<ESM::Door>(rec);
+
+        if (rec["name"] != sol::nil)
+            door.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            door.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        addPropertyFromTable(rec, "mwscript", door.mScript);
+        addPropertyFromTable(rec, "openSound", door.mOpenSound);
+        addPropertyFromTable(rec, "closeSound", door.mCloseSound);
+
+        return door;
+    }
+
     static const MWWorld::Ptr& doorPtr(const Object& o)
     {
         return verifyType(ESM::REC_DOOR, o.ptr());
@@ -38,6 +80,11 @@ namespace MWLua
     static const MWWorld::Ptr& door4Ptr(const Object& o)
     {
         return verifyType(ESM::REC_DOOR4, o.ptr());
+    }
+
+    void addMutableDoorType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Door>>(lua, "ESM3_MutableDoor");
     }
 
     void addDoorBindings(sol::table door, const Context& context)
@@ -49,6 +96,7 @@ namespace MWLua
                 { "Opening", MWWorld::DoorState::Opening },
                 { "Closing", MWWorld::DoorState::Closing },
             }));
+        door["createRecordDraft"] = tableToDoor;
         door["getDoorState"] = [](const Object& o) -> MWWorld::DoorState {
             const MWWorld::Ptr& ptr = doorPtr(o);
             return ptr.getClass().getDoorState(ptr);
@@ -68,8 +116,7 @@ namespace MWLua
             return doorIsIdle && !doorIsOpen;
         };
         door["activateDoor"] = [](const Object& o, sol::optional<bool> openState) {
-            bool allowChanges
-                = dynamic_cast<const GObject*>(&o) != nullptr || dynamic_cast<const SelfObject*>(&o) != nullptr;
+            bool allowChanges = o.isGObject() || o.isSelfObject();
             if (!allowChanges)
                 throw std::runtime_error("Can only be used in global scripts or in local scripts on self.");
 
@@ -94,7 +141,7 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(thisState, GCell{ &cell });
             else
                 return sol::make_object(thisState, LCell{ &cell });
@@ -102,18 +149,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Door>(door, context);
 
-        sol::usertype<ESM::Door> record = lua.new_usertype<ESM::Door>("ESM3_Door");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Door& rec) -> std::string { return "ESM3_Door[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Door& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Door& rec) -> ESM::RefId { return rec.mScript; });
-        record["openSound"] = sol::readonly_property(
-            [](const ESM::Door& rec) -> std::string { return rec.mOpenSound.serializeText(); });
-        record["closeSound"] = sol::readonly_property(
-            [](const ESM::Door& rec) -> std::string { return rec.mCloseSound.serializeText(); });
+        addUserType<ESM::Door>(lua, "ESM3_Door");
     }
 
     void addESM4DoorBindings(sol::table door, const Context& context)
@@ -129,7 +165,7 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            if (dynamic_cast<const GObject*>(&o))
+            if (o.isGObject())
                 return sol::make_object(lua, GCell{ &cell });
             else
                 return sol::make_object(lua, LCell{ &cell });

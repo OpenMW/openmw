@@ -141,7 +141,6 @@ namespace MWRender
         mHUDCamera->setAllowEventFocus(false);
         mHUDCamera->setViewport(0, 0, mWidth, mHeight);
         mHUDCamera->setNodeMask(Mask_RenderToTexture);
-        mHUDCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         mHUDCamera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         mHUDCamera->addChild(mCanvases[0]);
         mHUDCamera->addChild(mCanvases[1]);
@@ -647,7 +646,9 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    // FIXME: https://gitlab.com/OpenMW/openmw/-/work_items/9034
+                    std::string target = pass->getTarget();
+                    auto& renderTarget = technique->getRenderTargetsMap()[target];
                     subPass.mSize = renderTarget.mSize;
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
@@ -711,7 +712,8 @@ namespace MWRender
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
 
-        mRendering.getSkyManager()->setSunglare(sunglare);
+        if (mUsePostProcessing)
+            mRendering.getSkyManager()->setSunglare(sunglare);
 
         if (dirtyAttachments)
             mCanvases[frameId]->setDirtyAttachments(attachmentsToDirty);

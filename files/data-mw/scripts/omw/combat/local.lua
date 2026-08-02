@@ -54,35 +54,45 @@ local armorSlots = {
     Actor.EQUIPMENT_SLOT.CarriedLeft,
 }
 
-local function getArmorSkill(item)
-    if not item or not Armor.objectIsInstance(item) then
+local function asRecord(itemOrId)
+    if not itemOrId then return end
+    if type(itemOrId) == 'string' then
+        return Armor.records[itemOrId]
+    elseif itemOrId.__type.name == 'ESM::Armor' then
+        return itemOrId
+    end
+    return Armor.records[itemOrId.recordId]
+end
+
+local function getArmorSkill(itemOrId)
+    local item = asRecord(itemOrId)
+    if not item then
         return 'unarmored'
     end
-    local record = Armor.record(item)
-    local weightGmst = armorTypeGmst[record.type]
+    local weightGmst = armorTypeGmst[item.type]
     local epsilon = 0.0005
-    if record.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
+    if item.weight <= weightGmst * core.getGMST('fLightMaxMod') + epsilon then
         return 'lightarmor'
-    elseif record.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
+    elseif item.weight <= weightGmst * core.getGMST('fMedMaxMod') + epsilon then
         return 'mediumarmor'
     else
         return 'heavyarmor'
     end
 end
 
-local function getSkillAdjustedArmorRating(item, actor)
-    local record = Armor.record(item)
+local function getSkillAdjustedArmorRating(itemOrId, actor)
+    local item = asRecord(itemOrId)
     local skillid = I.Combat.getArmorSkill(item)
     local skill = getSkill(actor, skillid)
-    if record.weight == 0 then
-        return record.baseArmor
+    if item.weight == 0 then
+        return item.baseArmor
     end
-    return record.baseArmor * skill / core.getGMST('iBaseArmorSkill')
+    return item.baseArmor * skill / core.getGMST('iBaseArmorSkill')
 end
 
 local function getEffectiveArmorRating(item, actor)
     local record = Armor.record(item)
-    local rating = getSkillAdjustedArmorRating(item, actor)
+    local rating = getSkillAdjustedArmorRating(record, actor)
     if record.health and record.health ~= 0 then
         rating = rating * (types.Item.itemData(item).condition / record.health)
     end
@@ -175,6 +185,17 @@ local function setDamage(attack, what, damage)
     attack.damage[what] = damage
 end
 
+local function hasDamage(attack)
+    if attack.damage then
+        for _, v in pairs(attack.damage) do
+            if v >= 0.001 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function applyArmor(attack)
     local healthDamage = getDamage(attack, 'health')
     if healthDamage > 0 then
@@ -192,6 +213,9 @@ local function applyArmor(attack)
                 core.sendGlobalEvent('ModifyItemCondition', { actor = self, item = item, amount = diff })
             end
 
+            if attack.muteSound then
+                return
+            end
             if skillid == 'lightarmor' then
                 core.sound.playSound3d('Light Armor Hit', self)
             elseif skillid == 'mediumarmor' then
@@ -264,17 +288,45 @@ local function spawnBloodEffect(position)
     })
 end
 
+local function applyStagger(attack, rawHealthDamage)
+    if hasDamage(attack) and attack.attacker ~= nil then
+        local agilityTerm = Actor.stats.attributes.agility(self).modified * core.getGMST('fKnockDownMult')
+        local knockdownTerm = (
+            Actor.stats.attributes.agility(self).modified
+            * core.getGMST('iKnockDownOddsMult')
+            * 0.01
+            + core.getGMST('iKnockDownOddsBase')
+        )
+        local roll = math.random(0,99)
+        if rawHealthDamage > 0 and agilityTerm <= rawHealthDamage and knockdownTerm <= roll then
+            Actor.setKnockedDown(self, true)
+        else
+            Actor.setHitRecovery(self, true)
+        end
+    end
+end
+
 local function onHit(data)
     if data.successful and not godMode() then
-        I.Combat.applyArmor(data)
-        I.Combat.adjustDamageForDifficulty(data)
+        local rawHealthDamage = getDamage(data, 'health')
+        if not data.ignoreArmor then
+            I.Combat.applyArmor(data)
+        end
+        if not data.ignoreDifficulty then
+            I.Combat.adjustDamageForDifficulty(data)
+        end
         if getDamage(data, 'health') > 0 then
-            core.sound.playSound3d('Health Damage', self)
+            if not data.muteSound then
+                core.sound.playSound3d('Health Damage', self)
+            end
             if data.hitPos then
                 I.Combat.spawnBloodEffect(data.hitPos)
             end
         end
-    elseif data.attacker and Player.objectIsInstance(data.attacker) then
+        if not data.ignoreStagger then
+            I.Combat.applyStagger(data, rawHealthDamage)
+        end
+    elseif data.attacker and not data.muteSound and Player.objectIsInstance(data.attacker) then
         core.sound.playSound3d('miss', self)
     end
     Actor._onHit(self, data)
@@ -286,9 +338,10 @@ local interface = auxUtil.shallowCopy(I.Combat)
 interface.adjustDamageForArmor = function(damage, actor) return adjustDamageForArmor(damage, actor or self) end
 interface.adjustDamageForDifficulty = function(attack, defendant) return adjustDamageForDifficulty(attack, defendant or self) end
 interface.applyArmor = applyArmor
+interface.applyStagger = applyStagger
 interface.getArmorRating = function(actor) return getArmorRating(actor or self) end
 interface.getArmorSkill = getArmorSkill
-interface.getSkillAdjustedArmorRating = function(item, actor) return getSkillAdjustedArmorRating(item, actor or self) end
+interface.getSkillAdjustedArmorRating = function(itemOrId, actor) return getSkillAdjustedArmorRating(itemOrId, actor or self) end
 interface.getEffectiveArmorRating = function(item, actor) return getEffectiveArmorRating(item, actor or self) end
 interface.spawnBloodEffect = spawnBloodEffect
 interface.pickRandomArmor = function(actor) return pickRandomArmor(actor or self) end

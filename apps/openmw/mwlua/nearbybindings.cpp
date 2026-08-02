@@ -166,7 +166,7 @@ namespace MWLua
             }
 
             MWPhysics::RayCastingResult res;
-            MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, ignore);
+            MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, false, ignore);
             return res;
         };
         api["asyncCastRenderingRay"] = [context](const sol::table& callback, const osg::Vec3f& from,
@@ -180,7 +180,7 @@ namespace MWLua
             context.mLuaManager->addAction(
                 [context, ignore = std::move(ignore), callback = LuaUtil::Callback::fromLua(callback), from, to] {
                     MWPhysics::RayCastingResult res;
-                    MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, ignore);
+                    MWBase::Environment::get().getWorld()->castRenderingRay(res, from, to, false, false, false, ignore);
                     context.mLuaManager->queueCallback(
                         callback, sol::main_object(context.mLua->unsafeState(), sol::in_place, res));
                 });

@@ -206,6 +206,31 @@ namespace Nif
         }
     }
 
+    const NiNode* NiNode::findRootCollisionNode(bool recursive) const
+    {
+        // Yes, this search needs to be reversed
+        for (auto it = mChildren.crbegin(); it != mChildren.crend(); ++it)
+        {
+            const NiAVObjectPtr& child = *it;
+            if (child.empty())
+                continue;
+
+            if (child->mRecordType == Nif::RC_RootCollisionNode)
+                return static_cast<const NiNode*>(child.getPtr());
+
+            if (recursive)
+            {
+                const NiNode* childNode = dynamic_cast<const NiNode*>(child.getPtr());
+                if (!childNode)
+                    continue;
+                if (const NiNode* found = childNode->findRootCollisionNode(recursive))
+                    return found;
+            }
+        }
+
+        return nullptr;
+    }
+
     void NiGeometry::MaterialData::read(NIFStream* nif)
     {
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
@@ -483,9 +508,9 @@ namespace Nif
         NiNode::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            mMode = nif->get<uint16_t>() & 0x7;
+            mMode = static_cast<BillboardMode>(nif->get<uint16_t>() & 0x7);
         else
-            mMode = (mFlags >> 5) & 0x3;
+            mMode = static_cast<BillboardMode>((mFlags >> 5) & 0x3);
     }
 
     void NiDefaultAVObjectPalette::read(NIFStream* nif)

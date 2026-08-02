@@ -104,27 +104,27 @@ namespace Files
 
     std::vector<std::filesystem::path> LinuxPath::getInstallPaths() const
     {
-        std::vector<std::filesystem::path> paths;
         std::filesystem::path homePath = getUserHome();
-        if (!homePath.empty())
+        if (homePath.empty())
+            return {};
+
+        std::vector<std::filesystem::path> paths(Wine::getInstallPaths(homePath));
+        std::array steamPaths{
+            // Default (~/.steam/steam can be a symlink or a real directory)
+            homePath / ".steam/steam/steamapps/common/Morrowind",
+            // Snap
+            homePath / "snap/steam/common/.local/share/Steam/steamapps/common/Morrowind",
+            // Flatpak
+            homePath / ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Morrowind",
+        };
+        for (const std::filesystem::path& steam : steamPaths)
         {
-            std::filesystem::path wine = Wine::getInstallPath(homePath);
-            if (!wine.empty())
-                paths.emplace_back(std::move(wine));
-            std::array steamPaths{
-                // Default (~/.steam/steam can be a symlink or a real directory)
-                homePath / ".steam/steam/steamapps/common/Morrowind",
-                // Snap
-                homePath / "snap/steam/common/.local/share/Steam/steamapps/common/Morrowind",
-                // Flatpak
-                homePath / ".var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Morrowind",
-            };
-            for (const std::filesystem::path& steam : steamPaths)
-            {
-                if (std::filesystem::is_directory(steam))
-                    paths.emplace_back(steam);
-            }
+            if (std::filesystem::is_directory(steam))
+                paths.emplace_back(steam);
         }
+        std::ranges::sort(paths);
+        const auto [first, last] = std::ranges::unique(paths);
+        paths.erase(first, last);
         return paths;
     }
 

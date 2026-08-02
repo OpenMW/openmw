@@ -4,8 +4,10 @@
 #include <cstdint>
 #include <string>
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
+
 #include "effectlist.hpp"
 
 namespace ESM
@@ -40,7 +42,9 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mScript;
-        std::string mName, mModel, mIcon;
+        std::string mName;
+        Path mModel;
+        Path mIcon;
         EffectList mEffects;
 
         void load(ESMReader& esm, bool& isDeleted);

@@ -20,6 +20,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -667,7 +668,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
 
         case ESM::DialogueCondition::Function_ShouldAttack:
 
-            return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor, MWMechanics::getPlayer());
+            return MWMechanics::isAggressive(mActor, MWMechanics::getPlayer());
 
         case ESM::DialogueCondition::Function_Werewolf:
 
@@ -695,10 +696,8 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements(
 
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-    return stats.getAttribute(ESM::Attribute::indexToRefId(faction.mData.mAttribute[0])).getBase()
-        >= faction.mData.mRankData[rank].mAttribute1
-        && stats.getAttribute(ESM::Attribute::indexToRefId(faction.mData.mAttribute[1])).getBase()
-        >= faction.mData.mRankData[rank].mAttribute2;
+    return stats.getAttribute(faction.mData.mAttribute[0]).getBase() >= faction.mData.mRankData[rank].mAttribute1
+        && stats.getAttribute(faction.mData.mAttribute[1]).getBase() >= faction.mData.mRankData[rank].mAttribute2;
 }
 
 bool MWDialogue::Filter::hasFactionRankReputationRequirements(

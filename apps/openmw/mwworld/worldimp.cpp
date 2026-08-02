@@ -110,52 +110,6 @@ namespace MWWorld
 {
     namespace
     {
-        std::vector<std::pair<std::string_view, ESM::Variant>> generateDefaultGameSettings()
-        {
-            return {
-                // Companion (tribunal)
-                { "sCompanionShare", ESM::Variant("Companion Share") },
-                { "sCompanionWarningMessage", ESM::Variant("Warning message") },
-                { "sCompanionWarningButtonOne", ESM::Variant("Button 1") },
-                { "sCompanionWarningButtonTwo", ESM::Variant("Button 2") },
-                { "sProfitValue", ESM::Variant("Profit Value") },
-                { "sTeleportDisabled", ESM::Variant("Teleport disabled") },
-                { "sLevitateDisabled", ESM::Variant("Levitate disabled") },
-                // Missing in unpatched MW 1.0
-                { "sDifficulty", ESM::Variant("Difficulty") },
-                { "fDifficultyMult", ESM::Variant(5.f) },
-                { "sAuto_Run", ESM::Variant("Auto Run") },
-                { "sServiceRefusal", ESM::Variant("Service Refusal") },
-                { "sNeedOneSkill", ESM::Variant("Need one skill") },
-                { "sNeedTwoSkills", ESM::Variant("Need two skills") },
-                { "sEasy", ESM::Variant("Easy") },
-                { "sHard", ESM::Variant("Hard") },
-                { "sDeleteNote", ESM::Variant("Delete Note") },
-                { "sEditNote", ESM::Variant("Edit Note") },
-                { "sAdmireSuccess", ESM::Variant("Admire Success") },
-                { "sAdmireFail", ESM::Variant("Admire Fail") },
-                { "sIntimidateSuccess", ESM::Variant("Intimidate Success") },
-                { "sIntimidateFail", ESM::Variant("Intimidate Fail") },
-                { "sTauntSuccess", ESM::Variant("Taunt Success") },
-                { "sTauntFail", ESM::Variant("Taunt Fail") },
-                { "sBribeSuccess", ESM::Variant("Bribe Success") },
-                { "sBribeFail", ESM::Variant("Bribe Fail") },
-                { "fNPCHealthBarTime", ESM::Variant(5.f) },
-                { "fNPCHealthBarFade", ESM::Variant(1.f) },
-                { "fFleeDistance", ESM::Variant(3000.f) },
-                { "sMaxSale", ESM::Variant("Max Sale") },
-                { "sAnd", ESM::Variant("and") },
-                // Werewolf (BM)
-                { "fWereWolfRunMult", ESM::Variant(1.3f) },
-                { "fWereWolfSilverWeaponDamageMult", ESM::Variant(2.f) },
-                { "iWerewolfFightMod", ESM::Variant(100) },
-                { "iWereWolfFleeMod", ESM::Variant(100) },
-                { "iWereWolfLevelToAttack", ESM::Variant(20) },
-                { "iWereWolfBounty", ESM::Variant(1000) },
-                { "fCombatDistanceWerewolfMod", ESM::Variant(0.3f) },
-            };
-        }
-
         std::vector<std::pair<GlobalVariableName, ESM::Variant>> generateDefaultGlobals()
         {
             return {
@@ -174,23 +128,6 @@ namespace MWWorld
                 { Globals::sCrimeGoldTurnIn, ESM::Variant(0) },
                 { Globals::sPCHasTurnIn, ESM::Variant(0) },
             };
-        }
-
-        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultStatics()
-        {
-            return {
-                // Total conversions from SureAI lack marker records
-                { "divinemarker", "marker_divine.nif" },
-                { "doormarker", "marker_arrow.nif" },
-                { "northmarker", "marker_north.nif" },
-                { "templemarker", "marker_temple.nif" },
-                { "travelmarker", "marker_travel.nif" },
-            };
-        }
-
-        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultDoors()
-        {
-            return { { "prisonmarker", "marker_prison.nif" } };
         }
     }
 
@@ -281,6 +218,7 @@ namespace MWWorld
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+        MWBase::Environment::get().getLuaManager()->contentFilesLoaded();
 
         fillGlobalVariables();
 
@@ -538,18 +476,6 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        for (const auto& [id, value] : generateDefaultGameSettings())
-        {
-            if (mStore.get<ESM::GameSetting>().search(id) == nullptr)
-            {
-                ESM::GameSetting record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
         for (const auto& [name, value] : generateDefaultGlobals())
         {
             if (mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(name.getValue())) == nullptr)
@@ -557,30 +483,6 @@ namespace MWWorld
                 ESM::Global record;
                 record.mId = ESM::RefId::stringRefId(name.getValue());
                 record.mValue = value;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
-        for (const auto& [id, model] : generateDefaultStatics())
-        {
-            if (mStore.get<ESM::Static>().search(ESM::RefId::stringRefId(id)) == nullptr)
-            {
-                ESM::Static record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mModel = model;
-                record.mRecordFlags = 0;
-                mStore.insertStatic(record);
-            }
-        }
-
-        for (const auto& [id, model] : generateDefaultDoors())
-        {
-            if (mStore.get<ESM::Door>().search(ESM::RefId::stringRefId(id)) == nullptr)
-            {
-                ESM::Door record;
-                record.mId = ESM::RefId::stringRefId(id);
-                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
@@ -929,6 +831,11 @@ namespace MWWorld
         return mRendering->skyGetSecundaPhase();
     }
 
+    std::vector<MWWorld::Moon> World::getCurrentMoons() const
+    {
+        return mWeatherManager->getCurrentMoons(getTimeStamp());
+    }
+
     void World::setMoonColour(bool red)
     {
         mRendering->skySetMoonColour(red);
@@ -990,25 +897,32 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFocusObject()
     {
-        MWWorld::Ptr focusObject;
-
         if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
-            return focusObject;
+            return {};
 
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            && MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            focusObject = getFocusObject(getMaxActivationDistance() * 50, false);
-        else
+        float maxDistance;
+        const bool inGui = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        if (inGui)
         {
-            float activationDistance = getActivationDistancePlusTelekinesis();
-
-            focusObject = getFocusObject(activationDistance, true);
-
-            if (!focusObject.isEmpty() && !focusObject.getClass().allowTelekinesis(focusObject)
-                && mDistanceToFocusObject > getMaxActivationDistance()
-                && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                return nullptr;
+            if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+                return getFocusObject(getMaxActivationDistance() * 50, false);
+            static const int iMaxInfoDist = mStore.get<ESM::GameSetting>().find("iMaxInfoDist")->mValue.getInteger();
+            maxDistance = static_cast<float>(iMaxInfoDist);
         }
+        else
+            maxDistance = getMaxActivationDistance();
+
+        const MWWorld::Ptr player = mPlayer->getPlayer();
+        const float telekinesisMagnitude = player.getClass()
+                                               .getCreatureStats(player)
+                                               .getMagicEffects()
+                                               .getOrDefault(ESM::MagicEffect::Telekinesis)
+                                               .getMagnitude();
+        MWWorld::Ptr focusObject = getFocusObject(maxDistance + feetToGameUnits(telekinesisMagnitude), true);
+
+        if (!focusObject.isEmpty() && mDistanceToFocusObject > maxDistance
+            && !focusObject.getClass().allowTelekinesis(focusObject) && !inGui)
+            return {};
         return focusObject;
     }
 
@@ -1798,14 +1712,17 @@ namespace MWWorld
         MWWorld::Ptr focusObject;
         MWRender::RenderingManager::RayResult rayToObject;
 
+        const bool ignoreTerrain = !Settings::game().mTerrainObstructsFocus;
+
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer);
+            rayToObject = mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer, false, ignoreTerrain);
         }
         else
-            rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
+            rayToObject
+                = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer, false, ignoreTerrain);
 
         focusObject = rayToObject.mHitObject;
         if (focusObject.isEmpty() && rayToObject.mHitRefnum.isSet())
@@ -1818,10 +1735,10 @@ namespace MWWorld
     }
 
     bool World::castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-        bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList)
+        bool ignorePlayer, bool ignoreActors, bool ignoreTerrain, std::span<const MWWorld::Ptr> ignoreList)
     {
         MWRender::RenderingManager::RayResult rayRes
-            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreList);
+            = mRendering->castRay(from, to, ignorePlayer, ignoreActors, ignoreTerrain, ignoreList);
         res.mHit = rayRes.mHit;
         res.mHitPos = rayRes.mHitPointWorld;
         res.mHitNormal = rayRes.mHitNormalWorld;
@@ -1918,9 +1835,14 @@ namespace MWWorld
         mWeatherManager->changeWeather(region, id);
     }
 
-    void World::modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances)
+    void World::modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances)
     {
         mWeatherManager->modRegion(regionid, chances);
+    }
+
+    std::span<const uint8_t> World::getRegionWeatherChances(const ESM::RefId& regionid) const
+    {
+        return mWeatherManager->getRegionChances(regionid);
     }
 
     struct GetDoorMarkerVisitor
@@ -1991,7 +1913,7 @@ namespace MWWorld
         const float maxDist = 200.f;
 
         MWRender::RenderingManager::RayResult result
-            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
+            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true, false);
 
         CellStore* cell = getPlayerPtr().getCell();
 
@@ -2013,6 +1935,9 @@ namespace MWWorld
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
 
+        MWBase::Environment::get().getLuaManager()->objectPlaced(
+            dropped, getPlayerPtr(), pos.asVec3(), Misc::Convert::makeOsgQuat(pos.rot));
+
         return dropped;
     }
 
@@ -2020,7 +1945,7 @@ namespace MWWorld
     {
         const float maxDist = 200.f;
         MWRender::RenderingManager::RayResult result
-            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
+            = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true, false);
 
         if (result.mHit)
         {
@@ -2124,7 +2049,7 @@ namespace MWWorld
 
         float len = 1000000.0;
 
-        MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig + dir * len, true, true);
+        MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig + dir * len, true, true, false);
         if (result.mHit)
             pos.pos[2] = result.mHitPointWorld.z();
 
@@ -2134,6 +2059,10 @@ namespace MWWorld
 
         if (actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
+
+        MWBase::Environment::get().getLuaManager()->objectDropped(
+            dropped, actor, pos.asVec3(), Misc::Convert::makeOsgQuat(pos.rot));
+
         return dropped;
     }
 
@@ -3006,7 +2935,8 @@ namespace MWWorld
                         * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
                     const osg::Vec3f direction = orient * osg::Vec3f(0, 1, 0);
                     const osg::Vec3f dest = origin + direction * getMaxActivationDistance();
-                    const MWRender::RenderingManager::RayResult result = mRendering->castRay(origin, dest, true, true);
+                    const MWRender::RenderingManager::RayResult result
+                        = mRendering->castRay(origin, dest, true, true, false);
                     if (result.mHit)
                         target = result.mHitObject;
                 }
@@ -3044,9 +2974,9 @@ namespace MWWorld
             const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
             cast.cast(spell);
         }
-        else if (actor.getClass().hasInventoryStore(actor))
+        else
         {
-            MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+            MWWorld::ContainerStore& inv = actor.getClass().getContainerStore(actor);
             if (inv.getSelectedEnchantItem() != inv.end())
             {
                 const auto& itemPtr = *inv.getSelectedEnchantItem();
@@ -3056,7 +2986,7 @@ namespace MWWorld
     }
 
     void World::launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
-        const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength)
+        const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength, float attackWindUp)
     {
         // An initial position of projectile can be outside shooter's collision box, so any object between shooter and
         // launch position will be ignored. To avoid this issue, we should check for impact immediately before launch
@@ -3077,19 +3007,21 @@ namespace MWWorld
 
         if (result.mHit)
         {
-            MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
+            MWMechanics::projectileHit(
+                actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength, attackWindUp);
             return;
         }
 
         // Bail out if the launch position is underwater
         if (isUnderwater(MWMechanics::getPlayer().getCell(), worldPos))
         {
-            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength);
+            MWMechanics::projectileHit(actor, Ptr(), bow, projectile, worldPos, attackStrength, attackWindUp);
             mRendering->emitWaterRipple(worldPos);
             return;
         }
 
-        mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
+        mProjectileManager->launchProjectile(
+            actor, projectile, worldPos, orient, bow, speed, attackStrength, attackWindUp);
     }
 
     void World::launchMagicBolt(
@@ -3521,21 +3453,6 @@ namespace MWWorld
         // Original engine rounds size upward
         static const float unitsPerFoot = std::ceil(Constants::UnitsPerFoot);
         return feet * unitsPerFoot;
-    }
-
-    float World::getActivationDistancePlusTelekinesis()
-    {
-        float telekinesisRangeBonus = mPlayer->getPlayer()
-                                          .getClass()
-                                          .getCreatureStats(mPlayer->getPlayer())
-                                          .getMagicEffects()
-                                          .getOrDefault(ESM::MagicEffect::Telekinesis)
-                                          .getMagnitude();
-        telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
-
-        float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
-
-        return activationDistance;
     }
 
     MWWorld::Ptr World::getPlayerPtr()

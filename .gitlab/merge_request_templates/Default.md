@@ -1,35 +1,24 @@
 <!--
-Identify the issue number this MR fixes or relates to.
-Use "Closes #123" if it fixes the issue, or "Related to #123" if it references it.
+Identify the issue number this MR resolves or relates to.
+Use "Closes #NUMBER" if it resolves the issue, or "Related to #NUMBER" if it references it.
+If there is no relevant issue and your contribution contains user-facing changes, you should open one.
 -->
 
 Closes #
 
-## Description
-
 <!--
 Provide a description of your changes.
-Reasoning, approach, and any specific architectural decisions.
+Explain your reasoning, approach, and any specific architectural decisions.
+If applicable, provide steps and files required to reproduce the issue or test the feature.
 PLEASE: No LLM/AI generated descriptions. Write this yourself.
--->
 
-## Checklist
-
-<!--
-Mark as done if not applicable.
+If your contribution contains visual changes, provide screenshots, before/after comparisons, or videos.
 -->
 
 - [ ] I have read the [CONTRIBUTING guidelines](https://gitlab.com/OpenMW/openmw/-/blob/master/CONTRIBUTING.md)
-- [ ] My code builds and runs locally
-- [ ] I have included steps to replicate/confirm the changes below
-- [ ] I have attached necessary supporting files or assets
+- [ ] My code runs locally
+- [ ] My code passes CI on my fork
 
-## Steps to Test/Replicate
-
-1. ...
-2. ...
-3. ...
-
-## Outstanding TODOs / Questions
-
-- [ ] ...
+<!--
+List any remaining tasks or questions for the reviewers.
+-->

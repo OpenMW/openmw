@@ -5,6 +5,7 @@
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -34,7 +35,7 @@ namespace
         if (rec["model"] != sol::nil)
             weapon.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            weapon.mIcon = rec["icon"];
+            weapon.mIcon = rec["icon"].get<std::string_view>();
         if (rec["enchant"] != sol::nil)
         {
             std::string_view enchantId = rec["enchant"].get<std::string_view>();
@@ -69,15 +70,15 @@ namespace
                 throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
         }
         if (rec["weight"] != sol::nil)
-            weapon.mData.mWeight = rec["weight"];
+            weapon.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             weapon.mData.mValue = rec["value"];
         if (rec["health"] != sol::nil)
             weapon.mData.mHealth = rec["health"];
         if (rec["speed"] != sol::nil)
-            weapon.mData.mSpeed = rec["speed"];
+            weapon.mData.mSpeed = rec["speed"].get<Misc::FiniteFloat>();
         if (rec["reach"] != sol::nil)
-            weapon.mData.mReach = rec["reach"];
+            weapon.mData.mReach = rec["reach"].get<Misc::FiniteFloat>();
         if (rec["enchantCapacity"] != sol::nil)
             weapon.mData.mEnchant = static_cast<uint16_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
         if (rec["chopMinDamage"] != sol::nil)
@@ -133,7 +134,7 @@ namespace MWLua
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
         addModelProperty(record);
         record["icon"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon.getNormalized(), *vfs);
         });
         record["enchant"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mEnchant; });
         record["mwscript"] = sol::readonly_property([](const ESM::Weapon& rec) -> ESM::RefId { return rec.mScript; });

@@ -190,8 +190,6 @@ namespace MWMechanics
 
         void clear() override;
 
-        bool isAggressive(const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
-
         void resurrect(const MWWorld::Ptr& ptr) override;
 
         bool isCastingSpell(const MWWorld::Ptr& ptr) const override;
@@ -241,7 +239,6 @@ namespace MWMechanics
         int getGreetingTimer(const MWWorld::Ptr& ptr) const override;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const override;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const override;
-        bool isTurningToPlayer(const MWWorld::Ptr& ptr) const override;
         void fastForwardAi() const override;
 
     private:

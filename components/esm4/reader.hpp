@@ -35,6 +35,7 @@
 #include "loadtes4.hpp"
 
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 #include <components/files/istreamptr.hpp>
 
 namespace ToUTF8
@@ -358,6 +359,14 @@ namespace ESM4
         // Note: uses the string size from the subrecord header rather than checking null termination
         bool getZString(std::string& str) { return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, true); }
         bool getString(std::string& str) { return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream); }
+
+        bool getZString(ESM::Path& path)
+        {
+            std::string value;
+            const bool result = getZString(value);
+            path = std::move(value);
+            return result;
+        }
 
         bool getZeroTerminatedStringArray(std::vector<std::string>& values);
 

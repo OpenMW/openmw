@@ -108,14 +108,14 @@ namespace Files
 
     std::vector<std::filesystem::path> MacOsPath::getInstallPaths() const
     {
-        std::vector<std::filesystem::path> paths;
         std::filesystem::path homePath = getUserHome();
-        if (!homePath.empty())
-        {
-            std::filesystem::path wine = Wine::getInstallPath(homePath);
-            if (!wine.empty())
-                paths.emplace_back(std::move(wine));
-        }
+        if (homePath.empty())
+            return {};
+
+        std::vector<std::filesystem::path> paths(Wine::getInstallPaths(homePath));
+        std::ranges::sort(paths);
+        const auto [first, last] = std::ranges::unique(paths);
+        paths.erase(first, last);
         return paths;
     }
 

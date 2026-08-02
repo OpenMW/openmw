@@ -68,11 +68,11 @@ namespace CSMWorld
         return &getRecord(recordIndex);
     }
 
-    const std::string* IdCollection<ESM::LandTexture>::getLandTexture(std::uint16_t index, int plugin) const
+    const VFS::Path::Normalized* IdCollection<ESM::LandTexture>::getLandTexture(std::uint16_t index, int plugin) const
     {
         const Record<ESM::LandTexture>* record = searchRecord(index, plugin);
         if (record && !record->isDeleted())
-            return &record->get().mTexture;
+            return &record->get().mTexture.getNormalized();
         return nullptr;
     }
 

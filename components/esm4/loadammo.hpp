@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -63,7 +64,7 @@ namespace ESM4
         std::string mFullName;
         std::string mShortName;
         std::string mAbbrev;
-        std::string mModel;
+        ESM::Path mModel;
         std::string mText;
         std::string mIcon; // inventory
         std::string mMiniIcon; // inventory

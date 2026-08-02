@@ -218,7 +218,7 @@ namespace MWLua
                     return owner.serializeText();
             };
             auto setOwnerRecordId = [](const OwnerT& o, sol::optional<std::string_view> ownerId) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner only on self");
                 const MWWorld::Ptr& ptr = o.mObj.ptr();
 
@@ -244,7 +244,7 @@ namespace MWLua
             };
             auto setOwnerFactionId = [](const OwnerT& o, sol::optional<std::string> ownerId) {
                 ESM::RefId ownerFac;
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner faction only on self");
                 if (!ownerId)
                 {
@@ -266,7 +266,7 @@ namespace MWLua
                 return LuaUtil::toLuaIndex(rank);
             };
             auto setOwnerFactionRank = [](const OwnerT& o, sol::optional<int64_t> factionRank) {
-                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&o.mObj))
+                if (std::is_same_v<ObjectT, LObject> && !(o.mObj.isSelfObject()))
                     throw std::runtime_error("Local scripts can set an owner faction rank only on self");
                 int64_t rank = std::max<int64_t>(0, LuaUtil::fromLuaIndex(factionRank.value_or(0)));
                 o.mObj.ptr().getCellRef().setFactionRank(static_cast<int>(rank));
@@ -318,6 +318,13 @@ namespace MWLua
                 = sol::readonly_property([](const ObjectT& o) -> float { return o.ptr().getCellRef().getScale(); });
             objectT["rotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
                 return { toQuat(o.ptr().getRefData().getPosition(), o.ptr().getClass().isActor()) };
+            });
+            objectT["startingCell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
+                const MWWorld::Ptr& ptr = o.ptr();
+                MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
+                if (ptr.isInCell() && ptr.getCell() != &wm->getDraftCell())
+                    return Cell<ObjectT>{ ptr.getCell()->getOriginCell(ptr) };
+                return sol::nullopt;
             });
             objectT["startingPosition"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asVec3(); });

@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 #include "inventory.hpp" // InventoryItem
 
@@ -48,7 +49,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mModel;
+        ESM::Path mModel;
 
         float mBoundRadius;
         unsigned char mDataFlags;

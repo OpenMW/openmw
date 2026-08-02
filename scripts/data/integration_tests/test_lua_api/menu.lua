@@ -76,6 +76,7 @@ registerGlobalTest('commit crime')
 registerGlobalTest('record model property')
 registerGlobalTest('nan float', 'world.setGameTimeScale should not accept nan')
 registerGlobalTest('nan vector', 'weather.stormDirection should not accept a vector with a nan component')
+registerGlobalTest('load script generated static')
 
 registerGlobalTest('player yaw rotation', 'rotating player with controls.yawChange should change rotation')
 registerGlobalTest('player pitch rotation', 'rotating player with controls.pitchChange should change rotation')

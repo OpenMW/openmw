@@ -3,6 +3,9 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
+#include <components/lua/utilpackage.hpp>
+
+#include <osg/Vec3f>
 
 #include "object.hpp"
 
@@ -15,16 +18,9 @@ namespace MWLua
         GlobalScripts(LuaUtil::LuaState* lua)
             : LuaUtil::ScriptsContainer(lua, "Global")
         {
-            registerEngineHandlers({
-                &mObjectActiveHandlers,
-                &mActorActiveHandlers,
-                &mItemActiveHandlers,
-                &mNewGameHandlers,
-                &mPlayerAddedHandlers,
-                &mOnActivateHandlers,
-                &mOnUseItemHandlers,
-                &mOnNewExteriorHandlers,
-            });
+            registerEngineHandlers({ &mObjectActiveHandlers, &mActorActiveHandlers, &mItemActiveHandlers,
+                &mNewGameHandlers, &mPlayerAddedHandlers, &mOnActivateHandlers, &mOnUseItemHandlers,
+                &mOnNewExteriorHandlers, &mOnDroppedHandlers, &mOnPlacedHandlers });
         }
 
         void newGameStarted() { callEngineHandlers(mNewGameHandlers); }
@@ -35,6 +31,16 @@ namespace MWLua
         void onActivate(const GObject& obj, const GObject& actor)
         {
             callEngineHandlers(mOnActivateHandlers, obj, actor);
+        }
+        void onPlaced(
+            const GObject& obj, const GObject& actor, const osg::Vec3f& position, const LuaUtil::TransformQ& rotation)
+        {
+            callEngineHandlers(mOnPlacedHandlers, obj, actor, position, rotation);
+        }
+        void onDropped(
+            const GObject& obj, const GObject& actor, const osg::Vec3f& position, const LuaUtil::TransformQ& rotation)
+        {
+            callEngineHandlers(mOnDroppedHandlers, obj, actor, position, rotation);
         }
         void onUseItem(const GObject& obj, const GObject& actor, bool force)
         {
@@ -49,6 +55,8 @@ namespace MWLua
         EngineHandlerList mNewGameHandlers{ "onNewGame" };
         EngineHandlerList mPlayerAddedHandlers{ "onPlayerAdded" };
         EngineHandlerList mOnActivateHandlers{ "onActivate" };
+        EngineHandlerList mOnDroppedHandlers{ "onDropped" };
+        EngineHandlerList mOnPlacedHandlers{ "onPlaced" };
         EngineHandlerList mOnUseItemHandlers{ "_onUseItem" };
         EngineHandlerList mOnNewExteriorHandlers{ "onNewExterior" };
     };

@@ -44,6 +44,13 @@ namespace ESM
         {
             return std::tie(value.mType, value.mId);
         }
+
+        Path makePath(std::string&& value)
+        {
+            Path result;
+            result.set(std::move(value));
+            return result;
+        }
     }
 
     inline bool operator==(const ESM::ContItem& lhs, const ESM::ContItem& rhs)
@@ -76,6 +83,11 @@ namespace ESM
     {
         return stream << "ESM::QuickKeys::QuickKey {.mType = '" << static_cast<std::uint32_t>(value.mType)
                       << "', .mId = " << value.mId << "}";
+    }
+
+    inline bool operator==(const ESM::Path& lhs, const ESM::Path& rhs)
+    {
+        return lhs.getOriginal() == rhs.getOriginal();
     }
 
     namespace
@@ -621,8 +633,8 @@ namespace ESM
                 .mEnchant = generateRandomRefId(32),
                 .mScript = generateRandomRefId(32),
                 .mName = generateRandomString(32),
-                .mModel = generateRandomString(32),
-                .mIcon = generateRandomString(32),
+                .mModel = makePath(generateRandomString(32)),
+                .mIcon = makePath(generateRandomString(32)),
             };
 
             Weapon result;

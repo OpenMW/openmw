@@ -60,7 +60,6 @@ namespace Compiler
         , mCode(code)
         , mState(BeginState)
         , mReferenceMember(false)
-        , mButtons(0)
         , mType(0)
         , mExprParser(errorHandler, context, locals, literals)
         , mAllowExpression(allowExpression)
@@ -156,17 +155,27 @@ namespace Compiler
             }
 
             mName = name;
-            mButtons = 0;
 
             mState = MessageButtonState;
+            // Every message box button argument is essentially a string literal.
+            // Morrowind's console breaks if it encounters a special character
+            // that can't possibly start a string.
+            // It uses the last valid literal in the buffer for the rest of the buttons.
+            // ...Nope. Let's throw instead.
+            scanner.enableExpectName();
+            scanner.enableTolerantNames();
             return true;
         }
 
         if (mState == MessageButtonState)
         {
-            Generator::pushString(mCode, mLiterals, name);
-            mState = MessageButtonState;
-            ++mButtons;
+            mPotentialButtons.push_back(name);
+            // Replicate the fascinating behavior where, to determine the number of actual buttons,
+            // Morrowind counts the number of quoted arguments.
+            if (loc.mLiteral.size() >= 2 && loc.mLiteral.front() == '"' && loc.mLiteral.back() == '"')
+                ++mNumButtons;
+            // This might have been a string that started with a . or a -, restore this
+            scanner.enableExpectName();
             return true;
         }
 
@@ -244,9 +253,9 @@ namespace Compiler
             return false;
         }
 
-        if (mState == SetState)
+        if (mState == SetState || mState == MessageButtonState)
         {
-            // allow keywords to be used as variable names when assigning a value to a variable.
+            // Allow keywords to be used as variable names and as buttons.
             return parseName(loc.mLiteral, loc, scanner);
         }
 
@@ -451,7 +460,16 @@ namespace Compiler
 
         if (code == Scanner::S_newline && mState == MessageButtonState)
         {
-            Generator::message(mCode, mLiterals, mName, mButtons);
+            if (mNumButtons > 10)
+            {
+                getErrorHandler().warning("Only 10 message box buttons can be used", loc);
+                mNumButtons = 10;
+            }
+            for (unsigned int i = 0; i < mNumButtons; ++i)
+                Generator::pushString(mCode, mLiterals, mPotentialButtons[i]);
+            Generator::message(mCode, mLiterals, mName, mNumButtons);
+            mPotentialButtons.clear();
+            mNumButtons = 0;
             return false;
         }
 

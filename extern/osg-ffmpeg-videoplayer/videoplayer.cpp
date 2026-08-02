@@ -58,6 +58,12 @@ bool VideoPlayer::update ()
     return false;
 }
 
+void VideoPlayer::commitFrame()
+{
+    if (mState)
+        mState->commitFrame();
+}
+
 osg::ref_ptr<osg::Texture2D> VideoPlayer::getVideoTexture()
 {
     if (mState)

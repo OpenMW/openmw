@@ -2,16 +2,6 @@ Models Settings
 ###############
 
 .. omw-setting::
-   :title: load unsupported nif files
-   :type: boolean
-   :range: true, false
-   :default: false
-
-   Allows the engine to load arbitrary NIF files that appear valid.
-   Support is limited and experimental; enabling may cause crashes or memory issues.
-   Do not enable unless you understand the risks.
-
-.. omw-setting::
    :title: xbaseanim
    :type: string
    :default: meshes/xbase_anim.nif

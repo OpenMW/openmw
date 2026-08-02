@@ -131,9 +131,8 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            for (size_t i = 0; i < ref->mBase->mData.mAttributes.size(); ++i)
-                data->mCreatureStats.setAttribute(ESM::Attribute::indexToRefId(static_cast<int>(i)),
-                    static_cast<float>(ref->mBase->mData.mAttributes[i]));
+            for (const auto& [attribute, value] : ref->mBase->mData.mAttributes)
+                data->mCreatureStats.setAttribute(attribute, static_cast<float>(value));
             data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
             data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
             data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));
@@ -183,14 +182,15 @@ namespace MWClass
         objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
-    std::string_view Creature::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Creature::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Creature>(ptr);
     }
 
-    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const
+    void Creature::getModelsToPreload(
+        const MWWorld::ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const
     {
-        std::string_view model = getModel(ptr);
+        VFS::Path::NormalizedView model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
 
@@ -255,8 +255,8 @@ namespace MWClass
         return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
     }
 
-    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, int type, const MWWorld::Ptr& victim,
-        const osg::Vec3f& hitPosition, bool success) const
+    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, float attackWindUp, int type,
+        const MWWorld::Ptr& victim, const osg::Vec3f& hitPosition, bool success) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
@@ -288,7 +288,7 @@ namespace MWClass
         if (!success)
         {
             MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
-                0.0f, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
+                attackWindUp, 0.0f, false, hitPosition, false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -347,7 +347,7 @@ namespace MWClass
         MWMechanics::diseaseContact(victim, ptr);
 
         MWBase::Environment::get().getLuaManager()->onHit(ptr, victim, weapon, MWWorld::Ptr(), type, attackStrength,
-            damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
+            attackWindUp, damage, healthdmg, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Creature::onHit(const MWWorld::Ptr& ptr, const std::map<std::string, float>& damages, ESM::RefId object,
@@ -406,19 +406,13 @@ namespace MWClass
         if (!object.empty())
             stats.setLastHitObject(object);
 
-        bool hasDamage = false;
-        bool hasHealthDamage = false;
-        float healthDamage = 0.f;
         for (auto& [stat, damage] : damages)
         {
             if (damage < 0.001f)
                 continue;
-            hasDamage = true;
 
             if (stat == "health")
             {
-                hasHealthDamage = true;
-                healthDamage = damage;
                 MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
                 health.setCurrent(health.getCurrent() - damage);
                 stats.setHealth(health);
@@ -434,24 +428,6 @@ namespace MWClass
                 MWMechanics::DynamicStat<float> magicka(getCreatureStats(ptr).getMagicka());
                 magicka.setCurrent(magicka.getCurrent() - damage);
                 stats.setMagicka(magicka);
-            }
-        }
-
-        if (hasDamage)
-        {
-            if (!attacker.isEmpty())
-            {
-                // Check for knockdown
-                float agilityTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                    * getGmst().fKnockDownMult->mValue.getFloat();
-                float knockdownTerm = stats.getAttribute(ESM::Attribute::Agility).getModified()
-                        * getGmst().iKnockDownOddsMult->mValue.getInteger() * 0.01f
-                    + getGmst().iKnockDownOddsBase->mValue.getInteger();
-                auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                if (hasHealthDamage && agilityTerm <= healthDamage && knockdownTerm <= Misc::Rng::roll0to99(prng))
-                    stats.setKnockedDown(true);
-                else
-                    stats.setHitRecovery(true); // Is this supposed to always occur?
             }
         }
     }
@@ -644,13 +620,13 @@ namespace MWClass
 
         if (sounds.empty())
         {
-            const std::string_view model = getModel(ptr);
+            const VFS::Path::NormalizedView model = getModel(ptr);
             if (!model.empty())
             {
                 for (const ESM::Creature& creature : store.get<ESM::Creature>())
                 {
                     if (creature.mId != ourId && creature.mOriginal != ourId && !creature.mModel.empty()
-                        && Misc::StringUtils::ciEqual(model, creature.mModel))
+                        && model == creature.mModel.getNormalized())
                     {
                         const ESM::RefId& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();

@@ -268,8 +268,8 @@ namespace ESM
         esm.writeT(mData.mUnknown2);
         esm.endRecord("MEDT");
 
-        esm.writeHNOCString("ITEX", mIcon);
-        esm.writeHNOCString("PTEX", mParticle);
+        esm.writeHNOCString("ITEX", mIcon.getOriginal());
+        esm.writeHNOCString("PTEX", mParticle.getOriginal());
         esm.writeHNOCRefId("BSND", mBoltSound);
         esm.writeHNOCRefId("CSND", mCastSound);
         esm.writeHNOCRefId("HSND", mHitSound);
@@ -774,6 +774,8 @@ namespace ESM
         mData.mGreen = 0;
         mData.mBlue = 0;
         mData.mSpeed = 1;
+        mData.mUnknown1 = 0;
+        mData.mUnknown2 = 0;
 
         mIcon.clear();
         mParticle.clear();

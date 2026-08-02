@@ -1,6 +1,6 @@
 #include "journalviewmodel.hpp"
 
-#include <map>
+#include <unordered_map>
 
 #include <MyGUI_LanguageManager.h>
 
@@ -22,10 +22,10 @@ namespace MWGui
 
     struct JournalViewModelImpl : JournalViewModel
     {
-        using TopicSearch = MWDialogue::KeywordSearch<const MWDialogue::Topic*>;
-
         mutable bool mKeywordSearchLoaded;
-        mutable TopicSearch mKeywordSearch;
+        mutable MWDialogue::KeywordSearch mKeywordSearch;
+
+        mutable std::unordered_map<std::string, const MWDialogue::Topic*> mTopics;
 
         JournalViewModelImpl() { mKeywordSearchLoaded = false; }
 
@@ -36,6 +36,7 @@ namespace MWGui
         void unload() override
         {
             mKeywordSearch.clear();
+            mTopics.clear();
             mKeywordSearchLoaded = false;
         }
 
@@ -44,9 +45,15 @@ namespace MWGui
             if (!mKeywordSearchLoaded)
             {
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+                MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+                const Translation::Storage& translationStorage = windowManager.getTranslationDataStorage();
 
                 for (const auto& [_, topic] : journal->getTopics())
-                    mKeywordSearch.seed(topic.getName(), &topic);
+                {
+                    const std::string topicId = Misc::StringUtils::lowerCase(topic.getName());
+                    mTopics[topicId] = &topic;
+                    mKeywordSearch.seed(translationStorage.topicKeyword(topic.getName()), topicId);
+                }
 
                 mKeywordSearchLoaded = true;
             }
@@ -68,60 +75,56 @@ namespace MWGui
             BaseEntry(JournalViewModelImpl const* model, const EntryType& entry)
                 : mEntry(&entry)
                 , mModel(model)
-                , loaded(false)
             {
             }
 
             virtual ~BaseEntry() = default;
 
-            mutable bool loaded;
-            mutable std::string utf8text;
+            mutable bool mLoaded{ false };
+            mutable std::string mText;
 
-            // hyperlinks in @link# notation
-            mutable std::map<std::pair<size_t, size_t>, const MWDialogue::Topic*> mHyperLinks;
+            struct Token
+            {
+                size_t mStart;
+                size_t mEnd;
+                const MWDialogue::Topic* mTopic;
+            };
 
-            virtual std::string getText() const = 0;
+            mutable std::vector<Token> mTokens;
 
             void ensureLoaded() const
             {
-                if (!loaded)
+                if (!mLoaded)
                 {
+                    using namespace MWDialogue;
+
                     mModel->ensureKeyWordSearchLoaded();
+                    MWBase::WindowManager& windowManager = *MWBase::Environment::get().getWindowManager();
+                    const Translation::Storage& translationStorage = windowManager.getTranslationDataStorage();
 
-                    utf8text = getText();
+                    const std::string& text = mEntry->getText();
+                    mText.reserve(text.size());
 
-                    size_t posEnd = 0;
-                    for (;;)
+                    auto matches = mModel->mKeywordSearch.parseHyperText(text, translationStorage);
+                    mTokens.reserve(matches.size());
+
+                    // Generate the displayed text and a more convenient token list.
+                    // The matches we got provide positions in the original text and must be recalculated.
+                    KeywordSearch::Point pos = text.begin();
+                    for (const KeywordSearch::Match& token : matches)
                     {
-                        const size_t posBegin = utf8text.find('@');
-                        if (posBegin != std::string::npos)
-                            posEnd = utf8text.find('#', posBegin);
+                        const std::string_view displayName(token.getDisplayName());
+                        mText.append(pos, token.mBeg);
+                        mText.append(displayName);
+                        pos = token.mEnd;
 
-                        if (posBegin != std::string::npos && posEnd != std::string::npos)
-                        {
-                            std::string link = utf8text.substr(posBegin + 1, posEnd - posBegin - 1);
-                            const char specialPseudoAsteriskCharacter = 127;
-                            std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                            std::string_view topicName = MWBase::Environment::get()
-                                                             .getWindowManager()
-                                                             ->getTranslationDataStorage()
-                                                             .topicStandardForm(link);
-
-                            std::string displayName = link;
-                            while (displayName[displayName.size() - 1] == '*')
-                                displayName.erase(displayName.size() - 1, 1);
-
-                            utf8text.replace(posBegin, posEnd + 1 - posBegin, displayName);
-
-                            const MWDialogue::Topic* value = nullptr;
-                            if (mModel->mKeywordSearch.containsKeyword(topicName, value))
-                                mHyperLinks[std::make_pair(posBegin, posBegin + displayName.size())] = value;
-                        }
-                        else
-                            break;
+                        auto value = mModel->mTopics.find(token.mTopicId);
+                        if (value != mModel->mTopics.end())
+                            mTokens.emplace_back(mText.size() - displayName.size(), mText.size(), value->second);
                     }
+                    mText.append(pos, text.end());
 
-                    loaded = true;
+                    mLoaded = true;
                 }
             }
 
@@ -129,47 +132,23 @@ namespace MWGui
             {
                 ensureLoaded();
 
-                return utf8text;
+                return mText;
             }
 
             void visitSpans(std::function<void(const MWDialogue::Topic*, size_t, size_t)> visitor) const override
             {
                 ensureLoaded();
-                mModel->ensureKeyWordSearchLoaded();
 
-                if (mHyperLinks.size()
-                    && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
+                size_t i = 0;
+                for (const Token& token : mTokens)
                 {
-                    size_t formatted = 0; // points to the first character that is not laid out yet
-                    for (const auto& [range, topicId] : mHyperLinks)
-                    {
-                        if (formatted < range.first)
-                            visitor(0, formatted, range.first);
-                        visitor(topicId, range.first, range.second);
-                        formatted = range.second;
-                    }
-                    if (formatted < utf8text.size())
-                        visitor(0, formatted, utf8text.size());
+                    if (i < token.mStart)
+                        visitor(nullptr, i, token.mStart);
+                    visitor(token.mTopic, token.mStart, token.mEnd);
+                    i = token.mEnd;
                 }
-                else
-                {
-                    std::vector<TopicSearch::Match> matches;
-                    mModel->mKeywordSearch.highlightKeywords(utf8text.begin(), utf8text.end(), matches);
-
-                    std::string::const_iterator i = utf8text.begin();
-                    for (const TopicSearch::Match& match : matches)
-                    {
-                        if (i != match.mBeg)
-                            visitor(0, i - utf8text.begin(), match.mBeg - utf8text.begin());
-
-                        visitor(match.mValue, match.mBeg - utf8text.begin(), match.mEnd - utf8text.begin());
-
-                        i = match.mEnd;
-                    }
-
-                    if (i != utf8text.end())
-                        visitor(0, i - utf8text.begin(), utf8text.size());
-                }
+                if (i < mText.size())
+                    visitor(nullptr, i, mText.size());
             }
         };
 
@@ -207,18 +186,16 @@ namespace MWGui
 
         struct JournalEntryImpl : BaseEntry<MWDialogue::StampedJournalEntry, JournalEntry>
         {
-            mutable std::string timestamp_buffer;
+            mutable std::string mTimestamp;
 
             JournalEntryImpl(JournalViewModelImpl const* model, const MWDialogue::StampedJournalEntry& entry)
                 : BaseEntry(model, entry)
             {
             }
 
-            std::string getText() const override { return mEntry->getText(); }
-
             std::string_view timestamp() const override
             {
-                if (timestamp_buffer.empty())
+                if (mTimestamp.empty())
                 {
                     std::string dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
 
@@ -228,10 +205,10 @@ namespace MWGui
                        << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(mEntry->mMonth) << " ("
                        << dayStr << " " << (mEntry->mDay) << ')';
 
-                    timestamp_buffer = os.str();
+                    mTimestamp = os.str();
                 }
 
-                return timestamp_buffer;
+                return mTimestamp;
             }
         };
 
@@ -306,8 +283,6 @@ namespace MWGui
                 , mTopic(topic)
             {
             }
-
-            std::string getText() const override { return mEntry->getText(); }
 
             std::string_view source() const override { return mEntry->mActorName; }
         };

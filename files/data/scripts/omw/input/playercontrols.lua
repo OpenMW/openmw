@@ -1,4 +1,5 @@
 local core = require('openmw.core')
+local debug = require('openmw.debug')
 local input = require('openmw.input')
 local self = require('openmw.self')
 local storage = require('openmw.storage')
@@ -106,9 +107,12 @@ local function processMovement()
 end
 
 local function controlsAllowed()
-    return not core.isWorldPaused()
-        and Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls)
-        and not I.UI.getMode()
+    if core.isWorldPaused() then return false end
+    if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) then return false end
+    if I.UI.getMode() then return false end
+    if debug.isGodMode() then return true end
+    local paralysis = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Paralyze)
+    return paralysis.magnitude <= 0
 end
 
 local function movementAllowed()
@@ -171,11 +175,11 @@ local function processAttacking()
     -- for spell-casting, set controls.use to true for exactly one frame
     -- otherwise spell casting is attempted every frame while Use is true
     if Actor.getStance(self) == Actor.STANCE.Spell then
-        self.controls.use = startUse and 1 or 0
+        self.controls.use = startUse and self.ATTACK_TYPE.Any or self.ATTACK_TYPE.NoAttack
     elseif Actor.getStance(self) == Actor.STANCE.Weapon and input.getBooleanActionValue('Use') then
-        self.controls.use = 1
+        self.controls.use = self.ATTACK_TYPE.Any
     else
-        self.controls.use = 0
+        self.controls.use = self.ATTACK_TYPE.NoAttack
     end
     startUse = false
 end

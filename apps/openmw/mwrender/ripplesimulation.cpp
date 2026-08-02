@@ -71,9 +71,8 @@ namespace
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
         osg::ref_ptr<osg::Material> mat(new osg::Material);
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         mat->setColorMode(osg::Material::DIFFUSE);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
@@ -111,12 +110,12 @@ namespace MWRender
         mParticleSystem = new osgParticle::ParticleSystem;
 
         mParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
-        mParticleSystem->setAlignVectorX(osg::Vec3f(1, 0, 0));
-        mParticleSystem->setAlignVectorY(osg::Vec3f(0, 1, 0));
+        // Horizontal placement. Inverted vertically so that the UV uses Y-down convention
+        mParticleSystem->setAlignVectors(osg::Vec3f(1, 0, 0), osg::Vec3f(0, -1, 0));
 
         osgParticle::Particle& particleTemplate = mParticleSystem->getDefaultParticleTemplate();
         particleTemplate.setSizeRange(osgParticle::rangef(15, 180));
-        particleTemplate.setColorRange(osgParticle::rangev4(osg::Vec4f(1, 1, 1, 0.7f), osg::Vec4f(1, 1, 1, 0.7f)));
+        particleTemplate.setColorRange(osgParticle::rangev4(osg::Vec4f(0, 0, 0, 0.7f), osg::Vec4f(0, 0, 0, 0.7f)));
         particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 0.f));
         particleTemplate.setAngularVelocity(osg::Vec3f(0, 0, Fallback::Map::getFloat("Water_RippleRotSpeed")));
         particleTemplate.setLifeTime(Fallback::Map::getFloat("Water_RippleLifetime"));

@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SHADERS_H
 
-#include <components/sceneutil/lightingmethod.hpp>
 #include <components/settings/sanitizerimpl.hpp>
 #include <components/settings/settingvalue.hpp>
 
@@ -19,9 +18,9 @@ namespace Settings
     {
         using WithIndex::WithIndex;
 
-        SettingValue<bool> mForceShaders{ mIndex, "Shaders", "force shaders" };
         SettingValue<bool> mForcePerPixelLighting{ mIndex, "Shaders", "force per pixel lighting" };
         SettingValue<bool> mClampLighting{ mIndex, "Shaders", "clamp lighting" };
+        SettingValue<bool> mParticlePointLighting{ mIndex, "Shaders", "particle point lighting" };
         SettingValue<bool> mAutoUseObjectNormalMaps{ mIndex, "Shaders", "auto use object normal maps" };
         SettingValue<bool> mAutoUseObjectSpecularMaps{ mIndex, "Shaders", "auto use object specular maps" };
         SettingValue<bool> mAutoUseTerrainNormalMaps{ mIndex, "Shaders", "auto use terrain normal maps" };
@@ -31,11 +30,11 @@ namespace Settings
         SettingValue<std::string> mSpecularMapPattern{ mIndex, "Shaders", "specular map pattern" };
         SettingValue<std::string> mTerrainSpecularMapPattern{ mIndex, "Shaders", "terrain specular map pattern" };
         SettingValue<bool> mApplyLightingToEnvironmentMaps{ mIndex, "Shaders", "apply lighting to environment maps" };
-        SettingValue<SceneUtil::LightingMethod> mLightingMethod{ mIndex, "Shaders", "lighting method" };
+        SettingValue<bool> mClusteredLighting{ mIndex, "Shaders", "clustered lighting" };
         SettingValue<bool> mClassicFalloff{ mIndex, "Shaders", "classic falloff" };
         SettingValue<bool> mMatchSunlightToSun{ mIndex, "Shaders", "match sunlight to sun" };
-        SettingValue<float> mLightBoundsMultiplier{ mIndex, "Shaders", "light bounds multiplier",
-            makeClampSanitizerFloat(0, 5) };
+        SettingValue<float> mLightRadiusMultiplier{ mIndex, "Shaders", "light radius multiplier",
+            makeClampSanitizerFloat(1, 100) };
         SettingValue<float> mMaximumLightDistance{ mIndex, "Shaders", "maximum light distance",
             makeMaxSanitizerFloat(0) };
         SettingValue<float> mLightFadeStart{ mIndex, "Shaders", "light fade start", makeClampSanitizerFloat(0, 1) };

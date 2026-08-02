@@ -88,8 +88,9 @@ Ubuntu_GCC_preprocess:
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
     - ccache -svv
     - df -h
-    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then ~/.local/bin/gcovr --xml-pretty --exclude-unreachable-branches --gcov-ignore-parse-errors=negative_hits.warn_once_per_file --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
-    - ls | grep -v -e '^extern$' -e '^install$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then ~/.local/bin/gcovr --merge-mode-functions merge-use-line-max --xml-pretty --exclude-unreachable-branches --gcov-ignore-parse-errors=negative_hits.warn_once_per_file --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
+    # this line must be updated when artifacts are added or they'll be deleted, but if we get rid of it, we run out of disk space while archiving
+    - find * -type f | grep -v -e '^extern/' -e '^install/' -e 'CMakeCache\.txt$' -e '^components-tests.xml$' -e '^openmw-tests.xml$' -e '^openmw-cs-tests.xml$' | xargs rm -f
     - cd ..
     - df -h
     - du -sh build/
@@ -173,6 +174,7 @@ Ubuntu_GCC:
     CC: gcc
     CXX: g++
     CCACHE_SIZE: 3G
+    ARTIFACT_COMPRESSION_LEVEL: default
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -364,8 +366,8 @@ Ubuntu_GCC_tests_coverage:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
 
-.Ubuntu_Static_Deps:
-  extends: Ubuntu_Clang
+.Ubuntu_GCC_FetchContent_Static_Deps:
+  extends: Ubuntu_GCC
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -374,36 +376,19 @@ Ubuntu_GCC_tests_coverage:
         - "CI/**/*"
         - ".gitlab-ci.yml"
   cache:
-    key: Ubuntu_Static_Deps.ubuntu_24.04.v2
+    key: Ubuntu_GCC_FetchContent_Static_Deps.ubuntu_24.04.v2
     paths:
       - apt-cache/
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-static
+    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
-    CC: clang
-    CXX: clang++
+    CC: gcc
+    CXX: g++
     CXXFLAGS: -O0
   timeout: 3h
-
-.Ubuntu_Static_Deps_tests:
-  extends: .Ubuntu_Static_Deps
-  cache:
-    key: Ubuntu_Static_Deps_tests.ubuntu_24.04.v2
-  variables:
-    CCACHE_SIZE: 1G
-    BUILD_TESTS_ONLY: 1
-    CC: clang
-    CXX: clang++
-    CXXFLAGS: -O0
-  artifacts:
-    paths: []
-    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-    when: always
-    reports:
-      junit: build/*-tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -422,16 +407,29 @@ Ubuntu_Clang:
   extends: Ubuntu_Clang
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+    # Download 1.2.0 tag of clang_tidy_cache.py
+    - curl https://raw.githubusercontent.com/matus-chochlik/ctcache/e33c063ca6e52b48bcefbc45d46d8c150ffa81ca/src/ctcache/clang_tidy_cache.py -o /usr/local/bin/clang_tidy_cache.py
+    - chmod 0775 /usr/local/bin/clang_tidy_cache.py
   cache:
     key: Ubuntu_Clang_Tidy.ubuntu_24.04.v2
+    paths:
+      - apt-cache/
+      - ctcache/
+      - ccache/
   variables:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
     CI_CLANG_TIDY: 1
     CCACHE_BASEDIR: $CI_PROJECT_DIR
     CCACHE_DIR: $CI_PROJECT_DIR/ccache
+    CTCACHE_CLANG_TIDY: /usr/bin/clang-tidy-19
+    CTCACHE_SAVE_OUTPUT: 1
+    CTCACHE_DIR: $CI_PROJECT_DIR/ctcache
+
+    CMAKE_CXX_CLANG_TIDY: 'clang_tidy_cache.py;$CTCACHE_CLANG_TIDY'
   script:
     - mkdir -pv "${CCACHE_DIR}"
+    - mkdir -pv "${CTCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
     - mkdir -p build/extern build/apps/launcher build/apps/opencs build/apps/wizard
@@ -439,9 +437,9 @@ Ubuntu_Clang:
     - cp extern/.clang-tidy build/apps/launcher/
     - cp extern/.clang-tidy build/apps/opencs/
     - cp extern/.clang-tidy build/apps/wizard/
-    - cd build
-    - find . -name *.o -exec touch {} \;
-    - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
+    - clang_tidy_cache.py --zero-stats
+    - cmake --build build -- -j $(nproc) ${BUILD_TARGETS}
+    - clang_tidy_cache.py --show-stats
     - ccache -svv
   artifacts:
     paths:
@@ -481,20 +479,6 @@ Ubuntu_Clang_Tidy_other:
   variables:
     BUILD_TARGETS: components-tests bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
-
-.Ubuntu_Clang_tests:
-  extends: Ubuntu_Clang
-  cache:
-    key: Ubuntu_Clang_tests.ubuntu_24.04.v2
-  variables:
-    CCACHE_SIZE: 1G
-    BUILD_TESTS_ONLY: 1
-  artifacts:
-    paths: []
-    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
-    when: always
-    reports:
-      junit: build/*-tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -553,15 +537,12 @@ Ubuntu_GCC_integration_tests_asan:
   rules:
     - if: $CI_PROJECT_ID != "7107382"
       when: never
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: manual
+    # Merge request event rule is architecture-specific
+    # Unlike ARM64, AMD64 job is manual non-blocking as it's seldom useful
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule"
-  image: macos-15-xcode-16
+  image: macos-26-xcode-26
   tags:
     - saas-macos-medium-m1
-  cache:
-    paths:
-    - ccache/
   script:
     - CI/before_install.macos.sh
     - brew install ccache
@@ -572,7 +553,7 @@ Ubuntu_GCC_integration_tests_asan:
     - CI/before_script.macos.sh -C
     - CI/macos/build.sh
     - cd build
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${DMG_IDENTIFIER}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - brew install s3cmd
     - |
       if [[ -n "${AWS_ACCESS_KEY_ID}" ]]; then
@@ -594,24 +575,40 @@ Ubuntu_GCC_integration_tests_asan:
       - build/OpenMW-*.dmg
       - "**/CMakeCache.txt"
 
-macOS15_Xcode16_amd64:
+macOS26_Xcode26_amd64:
   extends: .MacOS
+  rules:
+    - !reference [.MacOS, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+      allow_failure: true
   cache:
-    key: macOS15_Xcode16_amd64.v2
+    key:
+      prefix: macOS26_Xcode26_amd64.v1
+      files:
+        - CI/macos/deps_versions.sh
+    paths:
+      - ccache/
   variables:
     CCACHE_SIZE: 3G
-    DMG_IDENTIFIER: amd64
     MACOS_AMD64: true
     HOMEBREW_NO_AUTO_UPDATE: 1
     HOMEBREW_NO_EMOJI: true
     HOMEBREW_NO_INSTALL_CLEANUP: true
 
-macOS15_Xcode16_arm64:
+macOS26_Xcode26_arm64:
   extends: .MacOS
+  rules:
+    - !reference [.MacOS, rules]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
-    key: macOS15_Xcode16_arm64.v2
+    key:
+      prefix: macOS26_Xcode26_arm64.v1
+      files:
+        - CI/macos/deps_versions.sh
+    paths:
+      - ccache/
   variables:
-    DMG_IDENTIFIER: arm64
     CCACHE_SIZE: 3G
     HOMEBREW_NO_AUTO_UPDATE: 1
     HOMEBREW_NO_EMOJI: true
@@ -824,46 +821,6 @@ macOS15_Xcode16_arm64:
   variables:
     CCACHE_SIZE: 2.5G
     targets: all
-
-.Windows_Ninja_Release:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    config: "Release"
-
-.Windows_Compress_And_Upload_Symbols_Ninja_Release:
-  extends:
-    - .Compress_And_Upload_Symbols_Base
-  needs:
-    - job: "Windows_Ninja_Release"
-      artifacts: true
-
-.Windows_Ninja_Release_MultiView:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    multiview: "-M"
-    config: "Release"
-
-.Windows_Compress_And_Upload_Symbols_Ninja_Release_MultiView:
-  extends:
-    - .Compress_And_Upload_Symbols_Base
-  needs:
-    - job: "Windows_Ninja_Release_MultiView"
-      artifacts: true
-
-.Windows_Ninja_Debug:
-  extends:
-    - .Windows_Ninja_Base
-  variables:
-    config: "Debug"
-
-.Windows_Compress_And_Upload_Symbols_Ninja_Debug:
-  extends:
-    - .Compress_And_Upload_Symbols_Base
-  needs:
-    - job: "Windows_Ninja_Debug"
-      artifacts: true
 
 .Windows_Ninja_RelWithDebInfo:
   extends:
@@ -1100,32 +1057,6 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
   # This is capped at 2h by GitLab for Windows Shared Runners
   timeout: 2h
 
-.Windows_MSBuild_Release:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    config: "Release"
-
-.Windows_Compress_And_Upload_Symbols_MSBuild_Release:
-  extends:
-    - .Compress_And_Upload_Symbols_Base
-  needs:
-    - job: "Windows_MSBuild_Release"
-      artifacts: true
-
-.Windows_MSBuild_Debug:
-  extends:
-    - .Windows_MSBuild_Base
-  variables:
-    config: "Debug"
-
-.Windows_Compress_And_Upload_Symbols_MSBuild_Debug:
-  extends:
-    - .Compress_And_Upload_Symbols_Base
-  needs:
-    - job: "Windows_MSBuild_Debug"
-      artifacts: true
-
 .Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
@@ -1284,40 +1215,3 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
       - "**/CMakeCache.txt"
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 1h30m
-
-.FindMissingMergeRequests:
-  image: python:latest
-  stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  cache:
-    key: FindMissingMergeRequests.v1
-    paths:
-      - .cache/pip
-  before_script:
-    - pip3 install --user --break-system-packages requests click discord_webhook
-  script:
-    - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
-
-.flatpak:
-    image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
-    stage: build
-    script:
-      - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
-      - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
-      - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
-      - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
-    cache:
-      key: flatpak
-      paths:
-        - ".flatpak-builder"
-    artifacts:
-      untracked: false
-      paths:
-        - "openmw.flatpak"
-        - "**/CMakeCache.txt"
-    # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-    # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
-    timeout: 4h

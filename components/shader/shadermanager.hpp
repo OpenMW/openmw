@@ -40,7 +40,7 @@ namespace Shader
         /// @param defines Define values that can be retrieved by the shader template.
         /// @param shaderType The type of shader (usually vertex or fragment shader).
         /// @note May return nullptr on failure.
-        /// @note Thread safe.
+        /// @note Thread safe, use getShaderInternal within the ShaderManager if you've already locked the mutex.
         osg::ref_ptr<osg::Shader> getShader(std::string templateName, const DefineMap& defines = {},
             std::optional<osg::Shader::Type> type = std::nullopt);
 
@@ -90,6 +90,8 @@ namespace Shader
         void triggerShaderReload();
 
     private:
+        osg::ref_ptr<osg::Shader> getShaderInternal(std::string templateName, const DefineMap& defines = {},
+            std::optional<osg::Shader::Type> type = std::nullopt);
         void getLinkedShaders(osg::ref_ptr<osg::Shader> shader, const std::vector<std::string>& linkedShaderNames,
             const DefineMap& defines);
         void addLinkedShaders(osg::ref_ptr<osg::Shader> shader, osg::ref_ptr<osg::Program> program);
@@ -139,6 +141,8 @@ namespace Shader
     bool parseDirectives(std::string& source, std::vector<std::string>& linkedShaderTemplateNames,
         const ShaderManager::DefineMap& defines, const ShaderManager::DefineMap& globalDefines,
         const std::string& templateName);
+
+    ShaderManager::DefineMap getDefaultDefines();
 }
 
 #endif

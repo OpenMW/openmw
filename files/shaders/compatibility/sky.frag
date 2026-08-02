@@ -39,8 +39,25 @@ void paintMoon(inout vec4 color)
     vec4 phase = texture2D(diffuseMap, diffuseMapUV);
     vec4 mask = texture2D(maskMap, diffuseMapUV);
 
-    vec4 blendedLayer = phase * moonBlend;
-    color = vec4(blendedLayer.xyz + atmosphereFade.xyz, atmosphereFade.a * mask.a);
+    // Morrowind does this in two passes
+
+    // First pass: moon shadow, normal blending (src alpha, 1 - src alpha)
+    // dst.rgb = mask.rgb * mask.a + dst.rgb * (1 - mask.a)
+    // Second pass: moon phase, additive blending (src alpha, 1)
+    // dst.rgb += phase.rgb * phase.a
+
+    // The same is doable in a single pass through premultiplied alpha blending
+    // color.rgb = mask.rgb * mask.a + phase.rgb * phase.a
+    // color.a = mask.a
+    // dst.rgb = color.rgb + dst.rgb * (1 - color.a)
+
+    vec3 maskTinted = mask.rgb * atmosphereFade.rgb;
+    float maskAlpha = mask.a * atmosphereFade.a;
+    vec3 phaseTinted = phase.rgb * moonBlend.rgb;
+    float phaseAlpha = phase.a * atmosphereFade.a;
+
+    color.rgb = maskTinted * maskAlpha + phaseTinted * phaseAlpha;
+    color.a = maskAlpha;
 }
 
 void paintSun(inout vec4 color)

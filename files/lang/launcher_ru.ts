@@ -576,6 +576,50 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Text file (*.txt)</source>
         <translation>Текстовый файл (*.txt)</translation>
     </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Открыть директорию</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Открыть %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Локальная директория конфигурации используется, потому что содержит openmw.cfg.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Локальная директория конфигурации используется, потому что содержит openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Глобальная директория конфигурации используется, потому что локальная директория не содержит openmw.cfg.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.
+Обычно это знак, что OpenMW установлен или упакован некорректно.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Глобальная директория конфигурации используется, потому что локальная директория не содержит openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Эта пользовательская директория конфигурации используется, потому что в %1 содержится строка config=%2.
+Лог-файлы и настройки, измененные через лаунчер и в игре, будут сохранены здесь.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Эта пользовательская директория конфигурации используется, потому что в %1 содержится строка config=%2.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -883,11 +927,9 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren&apos;t affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
                   Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-                  Affected objects will use shaders.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Обычно освещение не должно влиять на карты окружения, из-за чего объекты с картами окружения (в том числе объекты с рельефными текстурами) светятся в темноте.
                   Morrowind Code Patch предоставляет способ обойти эту проблему, применяя карты окружения перед применением освещения, аналогично этой опции.
-                  Объекты с картами окружения будут использовать шейдеры.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -1401,14 +1443,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Включить тени от ландшафта</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Освещение</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Способ освещения</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Звуковое устройство</translation>
     </message>
@@ -1441,24 +1475,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Формат снимков экрана</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind&apos;s lighting.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Задает способ обработки источников света.&lt;/p&gt;
-&lt;p&gt; &quot;Устаревший&quot; всегда использует 8 источников света на объект и выдает освещение, наиболее близкое к таковому в оригинальной игре.&lt;/p&gt;
-&lt;p&gt;&quot;Шейдеры (режим совместимости)&quot; убирает ограничение в 8 источников света. Этот режим также позволяет освещению влиять на анимированную траву. Рекомендуется использовать этот режим на устаревшем аппаратном обеспечении и с количеством источников света на объект около 8.&lt;/p&gt;
-&lt;p&gt; &quot;Шейдеры&quot; работает аналогично режиму &quot;Шейдеры (режим совместимости)&quot; но использует более современный подход, позволяющий использовать большее количество источников света с минимальным влиянием на производительность на современном аппаратном обеспечении.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Legacy</source>
-        <translation>Устаревший</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Шейдеры (режим совместимости)</translation>
-    </message>
-    <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
         <translation>Использовать в виде от третьего лица положение камеры, а не персонажа игрока для прослушивания звуков.</translation>
     </message>
@@ -1489,6 +1505,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Определяет силу эффекта Доплера. Нулевое значение означает, что эффект отключен полностью.&lt;/p&gt;&lt;p&gt;Эффект Доплера увеличивает или уменьшает высоту звуков в зависимости от скорости источника звука и слушателя.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Активные директории конфигурации</translation>
     </message>
 </context>
 </TS>

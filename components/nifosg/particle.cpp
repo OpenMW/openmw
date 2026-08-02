@@ -645,27 +645,31 @@ namespace NifOsg
 
     void PlanarCollider::operate(osgParticle::Particle* particle, double dt)
     {
+        const osg::Vec3 normal = mPlaneInParticleSpace.getNormal();
+
         // Does the particle in question move towards the collider?
-        float velDotProduct = particle->getVelocity() * mPlaneInParticleSpace.getNormal();
-        if (velDotProduct <= 0)
+        float distToPlane = mPlaneInParticleSpace.distance(particle->getPosition());
+        float velDotProduct = particle->getVelocity() * normal;
+        if (distToPlane * velDotProduct >= 0.0f)
             return;
 
-        // Does it intersect the collider's plane?
-        osg::BoundingSphere bs(particle->getPosition(), 0.f);
-        if (mPlaneInParticleSpace.intersect(bs) != 1)
+        // Would it cross the collider?
+        float nextDistToPlane = distToPlane + velDotProduct * static_cast<float>(dt);
+        if (distToPlane * nextDistToPlane > 0.0f)
             return;
 
         // Is it inside the collider's bounds?
         osg::Vec3f relativePos = particle->getPosition() - mPositionInParticleSpace;
         float xDotProduct = relativePos * mXVectorInParticleSpace;
         float yDotProduct = relativePos * mYVectorInParticleSpace;
-        if (-mExtents.x() * 0.5f > xDotProduct || mExtents.x() * 0.5f < xDotProduct)
+        // NB: extent components are intentionally swapped
+        if (-mExtents.y() * 0.5f > xDotProduct || mExtents.y() * 0.5f < xDotProduct)
             return;
-        if (-mExtents.y() * 0.5f > yDotProduct || mExtents.y() * 0.5f < yDotProduct)
+        if (-mExtents.x() * 0.5f > yDotProduct || mExtents.x() * 0.5f < yDotProduct)
             return;
 
         // Deflect the particle
-        osg::Vec3 reflectedVelocity = particle->getVelocity() - mPlaneInParticleSpace.getNormal() * (2 * velDotProduct);
+        osg::Vec3 reflectedVelocity = particle->getVelocity() - normal * (2 * velDotProduct);
         reflectedVelocity *= mBounceFactor;
         particle->setVelocity(reflectedVelocity);
     }

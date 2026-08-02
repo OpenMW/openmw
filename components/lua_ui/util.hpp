@@ -1,8 +1,10 @@
 #ifndef OPENMW_LUAUI_WIDGETLIST
 #define OPENMW_LUAUI_WIDGETLIST
 
+#include <sol/table.hpp>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace LuaUi
 {
@@ -12,6 +14,9 @@ namespace LuaUi
 
     void clearGameInterface();
     void clearMenuInterface();
+
+    bool warnUnused(std::vector<std::string>& warnings, sol::object table, const std::string& tableName,
+        const std::vector<std::string_view>& usedKeys, bool generateWarningStrings);
 }
 
 #endif // OPENMW_LUAUI_WIDGETLIST

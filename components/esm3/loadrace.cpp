@@ -4,29 +4,39 @@
 #include "esmwriter.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
     int32_t Race::RADTstruct::getAttribute(ESM::RefId attribute, bool male) const
     {
-        int index = ESM::Attribute::refIdToIndex(attribute);
-        if (index < 0)
+        const auto it = mAttributeValues.find(attribute);
+        if (it == mAttributeValues.end())
             return 0;
-        index *= 2;
-        if (!male)
-            index++;
-        return mAttributeValues[static_cast<size_t>(index)];
+        if (male)
+            return it->second.mMale;
+        return it->second.mFemale;
     }
 
     void Race::RADTstruct::setAttribute(ESM::RefId attribute, bool male, int32_t value)
     {
-        int index = ESM::Attribute::refIdToIndex(attribute);
-        if (index < 0)
-            return;
-        index *= 2;
-        if (!male)
-            index++;
-        mAttributeValues[static_cast<size_t>(index)] = value;
+        auto& values = mAttributeValues[attribute];
+        if (male)
+            values.mMale = value;
+        else
+            values.mFemale = value;
+    }
+
+    void Race::AttributeValues::load(ESMReader& esm)
+    {
+        esm.getT(mMale);
+        esm.getT(mFemale);
+    }
+
+    void Race::AttributeValues::save(ESMWriter& esm) const
+    {
+        esm.writeT(mMale);
+        esm.writeT(mFemale);
     }
 
     void Race::RADTstruct::load(ESMReader& esm)
@@ -34,10 +44,13 @@ namespace ESM
         esm.getSubHeader();
         for (auto& bonus : mBonus)
         {
-            esm.getT(bonus.mSkill);
+            int32_t skill;
+            esm.getT(skill);
+            bonus.mSkill = ESM::Skill::indexToRefId(skill);
             esm.getT(bonus.mBonus);
         }
-        esm.getT(mAttributeValues);
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
+            mAttributeValues[ESM::Attribute::indexToRefId(i)].load(esm);
         esm.getT(mMaleHeight);
         esm.getT(mFemaleHeight);
         esm.getT(mMaleWeight);
@@ -50,10 +63,18 @@ namespace ESM
         esm.startSubRecord("RADT");
         for (const auto& bonus : mBonus)
         {
-            esm.writeT(bonus.mSkill);
+            int32_t skill = ESM::Skill::refIdToIndex(bonus.mSkill);
+            esm.writeT(skill);
             esm.writeT(bonus.mBonus);
         }
-        esm.writeT(mAttributeValues);
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        {
+            const auto it = mAttributeValues.find(ESM::Attribute::indexToRefId(i));
+            if (it == mAttributeValues.end())
+                AttributeValues{}.save(esm);
+            else
+                it->second.save(esm);
+        }
         esm.writeT(mMaleHeight);
         esm.writeT(mFemaleHeight);
         esm.writeT(mMaleWeight);
@@ -133,11 +154,11 @@ namespace ESM
 
         for (auto& bonus : mData.mBonus)
         {
-            bonus.mSkill = -1;
+            bonus.mSkill = {};
             bonus.mBonus = 0;
         }
 
-        mData.mAttributeValues.fill(1);
+        mData.mAttributeValues.clear();
 
         mData.mMaleHeight = mData.mFemaleHeight = 1;
         mData.mMaleWeight = mData.mFemaleWeight = 1;

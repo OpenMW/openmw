@@ -16,7 +16,7 @@ namespace
         template <class Token>
         void test()
         {
-            const std::string content = std::string(Token::repr);
+            const std::string content = std::string(Token::mRepresentation);
             Lexer lexer(content);
 
             EXPECT_TRUE(std::holds_alternative<Token>(lexer.next()));
@@ -97,7 +97,7 @@ namespace
 
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<Float>(token));
-        EXPECT_FLOAT_EQ(std::get<Float>(token).value, 0.123f);
+        EXPECT_FLOAT_EQ(std::get<Float>(token).mValue, 0.123f);
     }
 
     TEST(LexerTest, float_with_alpha_prefix)
@@ -110,7 +110,7 @@ namespace
 
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<Float>(token));
-        EXPECT_FLOAT_EQ(std::get<Float>(token).value, 0.123f);
+        EXPECT_FLOAT_EQ(std::get<Float>(token).mValue, 0.123f);
     }
 
     TEST(LexerTest, float_with_numeric_prefix)
@@ -121,7 +121,7 @@ namespace
 
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<Float>(token));
-        EXPECT_FLOAT_EQ(std::get<Float>(token).value, 123.123f);
+        EXPECT_FLOAT_EQ(std::get<Float>(token).mValue, 123.123f);
     }
 
     TEST(LexerTest, int_should_not_be_float)
@@ -132,7 +132,7 @@ namespace
 
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<Integer>(token));
-        EXPECT_EQ(std::get<Integer>(token).value, 123);
+        EXPECT_EQ(std::get<Integer>(token).mValue, 123);
     }
 
     TEST(LexerTest, float_suffix_should_be_float)
@@ -143,7 +143,7 @@ namespace
 
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<Float>(token));
-        EXPECT_FLOAT_EQ(std::get<Float>(token).value, 123.f);
+        EXPECT_FLOAT_EQ(std::get<Float>(token).mValue, 123.f);
     }
 
     TEST(LexerTest, simple_string)
@@ -155,7 +155,7 @@ namespace
         auto token = lexer.next();
         EXPECT_TRUE(std::holds_alternative<String>(token));
 
-        std::string parsed = std::string(std::get<String>(token).value);
+        std::string parsed = std::string(std::get<String>(token).mValue);
         EXPECT_EQ("test string", parsed);
     }
 

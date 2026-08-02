@@ -82,6 +82,28 @@ GUI Settings
    If false, the controller works as a GUI mouse.
 
 .. omw-setting::
+   :title: controller trigger press
+   :type: int
+   :range: 1, 32767
+   :default: 30720
+
+   Sets how far the triggers (L2/R2) must be pulled before controller menus
+   recognize them as a button press. 
+   The default value is 15/16ths depressed.
+
+.. omw-setting::
+   :title: controller trigger release
+   :type: int
+   :range: 0, 32766
+   :default: 26624
+
+   Sets how far the triggers (L2/R2) must be released before their latch 
+   is reset and it can be pressed again in controller menus. 
+   This value must be less than controller trigger press. 
+   If it is not, it will be clamped to controller trigger press - 1.
+   The default value is 13/16ths depressed.
+
+.. omw-setting::
    :title: controller tooltips
    :type: boolean
    :range: true, false

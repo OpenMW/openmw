@@ -1,9 +1,5 @@
 #version 120
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
@@ -26,10 +22,12 @@ varying float linearDepth;
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
+centroid varying vec3 shadedLighting;
+centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-centroid varying vec3 shadowDiffuseLighting;
-centroid varying vec3 shadowSpecularLighting;
+#else
+#include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -37,9 +35,11 @@ varying vec3 passNormal;
 uniform vec2 screenRes;
 uniform float far;
 
+#include "lib/core/fragment.h.glsl"
+
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
-#include "lib/light/lighting.glsl"
+
 #include "lib/material/parallax.glsl"
 #include "fog.glsl"
 #include "compatibility/normals.glsl"
@@ -77,8 +77,8 @@ void main()
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
-    lighting = passLighting + shadowDiffuseLighting * shadowing;
-    specular = passSpecular + shadowSpecularLighting * shadowing;
+    lighting = mix(shadedLighting, passLighting, shadowing);
+    specular = mix(shadedSpecular, passSpecular, shadowing);
 #else
 #if @specularMap
     float shininess = 128.0; // TODO: make configurable
@@ -88,12 +88,12 @@ void main()
     vec3 specularColor = getSpecularColor().xyz;
 #endif
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
     specular = specularColor * specularLight;
+    clampLighting(lighting);
 #endif
 
-    clampLightingResult(lighting);
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);

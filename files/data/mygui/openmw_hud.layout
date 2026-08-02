@@ -3,10 +3,10 @@
 <MyGUI type="Layout">
     <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main" align="Stretch">
         <!-- Energy bars -->
-        <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="13 131 65 12" align="Left Bottom" name="EnemyHealth">
+        <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="12 132 65 12" align="Left Bottom" name="EnemyHealth">
             <Property key="Visible" value="false"/>
         </Widget>
-        <Widget type="Button" skin="" position="13 146 65 12" align="Left Bottom" name="HealthFrame">
+        <Widget type="Button" skin="" position="12 147 65 12" align="Left Bottom" name="HealthFrame">
             <UserString key="ToolTipType" value="Layout"/>
             <UserString key="ToolTipLayout" value="HealthToolTip"/>
             <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
@@ -14,7 +14,7 @@
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
-        <Widget type="Button" skin="" position="13 161 65 12" align="Left Bottom" name="MagickaFrame">
+        <Widget type="Button" skin="" position="12 162 65 12" align="Left Bottom" name="MagickaFrame">
             <UserString key="ToolTipType" value="Layout"/>
             <UserString key="ToolTipLayout" value="HealthToolTip"/>
             <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
@@ -22,7 +22,7 @@
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
-        <Widget type="Button" skin="" position="13 176 65 12" align="Left Bottom" name="FatigueFrame">
+        <Widget type="Button" skin="" position="12 177 65 12" align="Left Bottom" name="FatigueFrame">
             <UserString key="ToolTipType" value="Layout"/>
             <UserString key="ToolTipLayout" value="HealthToolTip"/>
             <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
@@ -32,16 +32,14 @@
         </Widget>
 
         <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->
-        <Widget type="TextBox" skin="SandText" position="13 118 270 24" name="WeaponSpellName" align="Left Bottom HStretch">
+        <Widget type="TextBox" skin="SandText" position="14 117 270 24" name="WeaponSpellName" align="Left Bottom HStretch">
             <Property key="Visible" value="false"/>
             <Property key="TextAlign" value="Left"/>
-            <Property key="TextShadow" value="true"/>
-            <Property key="TextShadowColour" value="0 0 0"/>
             <Property key="NeedMouse" value="false"/>
         </Widget>
 
         <!-- Equipped weapon box -->
-        <Widget type="Button" skin="" position="82 146 36 41" align="Left Bottom" name="WeapBox">
+        <Widget type="Button" skin="" position="81 147 36 41" align="Left Bottom" name="WeapBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
                 <Property key="NeedMouse" value="false"/>
                 <Widget type="Widget" skin="" position="2 2 32 32">
@@ -54,7 +52,7 @@
         </Widget>
 
         <!-- Selected spell box -->
-        <Widget type="Button" position="122 146 36 41" align="Left Bottom" name="SpellBox">
+        <Widget type="Button" position="121 147 36 41" align="Left Bottom" name="SpellBox">
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
                 <Widget type="Widget" skin="" position="2 2 32 32">
                     <Widget type="SpellWidget" skin="MW_ItemIconNoShadow" position="-5 -5 42 42" align="Left Top" name="SpellImage"/>
@@ -67,7 +65,7 @@
         </Widget>
 
         <!-- Sneak indicator box -->
-        <Widget type="Button" skin="" position="162 146 36 36" align="Left Bottom" name="SneakBox">
+        <Widget type="Button" skin="" position="161 147 36 36" align="Left Bottom" name="SneakBox">
             <Property key="Visible" value="false"/>
             <Widget type="Widget" skin="HUD_Box" position="0 0 36 36">
                 <Property key="NeedMouse" value="false"/>
@@ -79,20 +77,18 @@
         </Widget>
 
         <!-- Spell effects box -->
-        <Widget type="Widget" skin="HUD_Box_Transparent" position="199 168 20 20" align="Right Bottom" name="EffectBox">
+        <Widget type="Widget" skin="HUD_Box_Transparent" position="199 169 20 20" align="Right Bottom" name="EffectBox">
         </Widget>
 
         <!-- Cell name display when cell changes -->
-        <Widget type="TextBox" skin="SandText" position="0 89 288 24" name="CellName" align="Left Bottom HStretch">
+        <Widget type="TextBox" skin="SandText" position="0 87 285 24" name="CellName" align="Left Bottom HStretch">
             <Property key="Visible" value="false"/>
             <Property key="TextAlign" value="Right"/>
-            <Property key="TextShadow" value="true"/>
-            <Property key="TextShadowColour" value="0 0 0"/>
             <Property key="NeedMouse" value="false"/>
         </Widget>
 
         <!-- Map box -->
-        <Widget type="Widget" skin="" position="223 123 65 65" name="MiniMapBox" align="Right Bottom">
+        <Widget type="Widget" skin="" position="223 124 65 65" name="MiniMapBox" align="Right Bottom">
             <Widget type="Widget" skin="HUD_Box" position="0 0 65 65" align="Center">
 
                 <Widget type="ScrollView" skin="MW_MapView" position="2 2 61 61" align="Left Bottom" name="MiniMap">
@@ -113,6 +109,9 @@
         <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 27 27" align="Center Center" name="Crosshair"/>
 
     </Widget>
+
+    <!-- Mouse Emulation Cursor -->
+    <Widget type="ImageBox" layer="Notification" skin="HUD_MouseEmulationCursor" position="0 0 15 15" align="Center Center" name="MouseEmulationCursor"/>
 
     <!-- Drowning bar -->
     <Widget type="Widget" layer="DrowningBar" position="0 0 300 200" name="DrowningBar" align="Center Top">

@@ -1,6 +1,6 @@
 ---
--- Defines functions and types that are available in local, global and menu scripts.
--- @context global|menu|local|player
+-- Defines functions and types that are available in local, global, menu, and load scripts.
+-- @context global|menu|local|player|load
 -- @module core
 -- @usage local core = require('openmw.core')
 
@@ -11,53 +11,53 @@
 -- @field [parent=#core] #number API_REVISION
 
 ---
--- Terminates the game and quits to the OS. Should be used only for testing purposes.
+-- Terminates the game and quits to the OS. Should be used only for testing purposes. Not available in load scripts.
 -- @function [parent=#core] quit
 
 ---
--- Send an event to global scripts. Note: in menu scripts, errors if the game is not running (check @{openmw.menu#menu.getState})
+-- Send an event to global scripts. Note: in menu scripts, errors if the game is not running (check @{openmw.menu#menu.getState}.) Not available in load scripts.
 -- @function [parent=#core] sendGlobalEvent
 -- @param #string eventName
 -- @param eventData
 
 ---
 -- Simulation time in seconds.
--- The number of simulation seconds passed in the game world since starting a new game.
+-- The number of simulation seconds passed in the game world since starting a new game. Not available in load scripts.
 -- @function [parent=#core] getSimulationTime
 -- @return #number
 
 ---
--- The scale of simulation time relative to real time.
+-- The scale of simulation time relative to real time. Not available in load scripts.
 -- @function [parent=#core] getSimulationTimeScale
 -- @return #number
 
 ---
--- Game time in seconds.
+-- Game time in seconds. Not available in load scripts.
 -- @function [parent=#core] getGameTime
 -- @return #number
 
 ---
--- The scale of game time relative to simulation time.
+-- The scale of game time relative to simulation time. Not available in load scripts.
 -- @function [parent=#core] getGameTimeScale
 -- @return #number
 
 ---
--- Whether the world is paused.
+-- Whether the world is paused. Not available in load scripts.
 -- @function [parent=#core] isWorldPaused
 -- @return #boolean
 
 ---
--- Real time in seconds; starting point is not fixed (can be time since last reboot), use only for measuring intervals. For Unix time use `os.time()`.
+-- Real time in seconds; starting point is not fixed (can be time since last reboot), use only for measuring intervals. For Unix time use `os.time()`. Not available in load scripts.
 -- @function [parent=#core] getRealTime
 -- @return #number
 
 ---
--- Frame duration in seconds. Not available in global scripts.
+-- Frame duration in seconds. Not available in global or load scripts.
 -- @function [parent=#core] getRealFrameDuration
 -- @return #number
 
 ---
--- Get a game setting with given name (from GMST ESM records or from openmw.cfg).
+-- Get a game setting with given name (from GMST ESM records or from openmw.cfg). Not available in load scripts.
 -- @function [parent=#core] getGMST
 -- @param #string setting Setting name
 -- @return #any
@@ -166,6 +166,7 @@
 -- @field openmw.util#Vector3 position Object position.
 -- @field #number scale Object scale.
 -- @field openmw.util#Transform rotation Object rotation.
+-- @field #Cell startingCell The object's original cell. Returns nil if `cell` of the object is nil.
 -- @field openmw.util#Vector3 startingPosition The object original position
 -- @field openmw.util#Transform startingRotation The object original rotation
 -- @field #ObjectOwner owner Ownership information
@@ -371,7 +372,7 @@
 -- @field #boolean temporary If set, this spell effect is temporary and should end on its own. Either after a single application or after its duration has run out.
 -- @field #boolean affectsBaseValues If set, this spell affects the base values of affected stats, rather than modifying current values.
 -- @field #boolean stackable If set, this spell can be applied multiple times. If not set, the same spell can only be applied once from the same source (where source is determined by caster + item). In vanilla rules, consumables are stackable while spells and enchantments are not.
--- @field #number activeSpellId A number uniquely identifying this active spell within the affected actor's list of active spells.
+-- @field #string activeSpellId Uniquely identifies this active spell within the affected actor's list of active spells.
 -- @field #list<#ActiveSpellEffect> effects The active effects (@{#ActiveSpellEffect}) of this spell.
 
 ---
@@ -478,7 +479,7 @@
 -- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
 
 
---- @{#Land}: Functions for interacting with land data
+--- @{#Land}: Functions for interacting with land data. Not available in load scripts.
 -- @field [parent=#core] #Land land
 
 ---
@@ -500,7 +501,7 @@
 -- @return #nil, #string Plugin name or nil if failed to retrieve the texture
 
 
---- @{#Magic}: spells and spell effects
+--- @{#Magic}: spells and spell effects. Not available in load scripts.
 -- @field [parent=#core] #Magic magic
 
 
@@ -519,149 +520,149 @@
 
 --- `core.magic.EFFECT_TYPE`
 -- @type MagicEffectId
--- @field #number WaterBreathing "waterbreathing"
--- @field #number SwiftSwim "swiftswim"
--- @field #number WaterWalking "waterwalking"
--- @field #number Shield "shield"
--- @field #number FireShield "fireshield"
--- @field #number LightningShield "lightningshield"
--- @field #number FrostShield "frostshield"
--- @field #number Burden "burden"
--- @field #number Feather "feather"
--- @field #number Jump "jump"
--- @field #number Levitate "levitate"
--- @field #number SlowFall "slowfall"
--- @field #number Lock "lock"
--- @field #number Open "open"
--- @field #number FireDamage "firedamage"
--- @field #number ShockDamage "shockdamage"
--- @field #number FrostDamage "frostdamage"
--- @field #number DrainAttribute "drainattribute"
--- @field #number DrainHealth "drainhealth"
--- @field #number DrainMagicka "drainmagicka"
--- @field #number DrainFatigue "drainfatigue"
--- @field #number DrainSkill "drainskill"
--- @field #number DamageAttribute "damageattribute"
--- @field #number DamageHealth "damagehealth"
--- @field #number DamageMagicka "damagemagicka"
--- @field #number DamageFatigue "damagefatigue"
--- @field #number DamageSkill "damageskill"
--- @field #number Poison "poison"
--- @field #number WeaknessToFire "weaknesstofire"
--- @field #number WeaknessToFrost "weaknesstofrost"
--- @field #number WeaknessToShock "weaknesstoshock"
--- @field #number WeaknessToMagicka "weaknesstomagicka"
--- @field #number WeaknessToCommonDisease "weaknesstocommondisease"
--- @field #number WeaknessToBlightDisease "weaknesstoblightdisease"
--- @field #number WeaknessToCorprusDisease "weaknesstocorprusdisease"
--- @field #number WeaknessToPoison "weaknesstopoison"
--- @field #number WeaknessToNormalWeapons "weaknesstonormalweapons"
--- @field #number DisintegrateWeapon "disintegrateweapon"
--- @field #number DisintegrateArmor "disintegratearmor"
--- @field #number Invisibility "invisibility"
--- @field #number Chameleon "chameleon"
--- @field #number Light "light"
--- @field #number Sanctuary "sanctuary"
--- @field #number NightEye "nighteye"
--- @field #number Charm "charm"
--- @field #number Paralyze "paralyze"
--- @field #number Silence "silence"
--- @field #number Blind "blind"
--- @field #number Sound "sound"
--- @field #number CalmHumanoid "calmhumanoid"
--- @field #number CalmCreature "calmcreature"
--- @field #number FrenzyHumanoid "frenzyhumanoid"
--- @field #number FrenzyCreature "frenzycreature"
--- @field #number DemoralizeHumanoid "demoralizehumanoid"
--- @field #number DemoralizeCreature "demoralizecreature"
--- @field #number RallyHumanoid "rallyhumanoid"
--- @field #number RallyCreature "rallycreature"
--- @field #number Dispel "dispel"
--- @field #number Soultrap "soultrap"
--- @field #number Telekinesis "telekinesis"
--- @field #number Mark "mark"
--- @field #number Recall "recall"
--- @field #number DivineIntervention "divineintervention"
--- @field #number AlmsiviIntervention "almsiviintervention"
--- @field #number DetectAnimal "detectanimal"
--- @field #number DetectEnchantment "detectenchantment"
--- @field #number DetectKey "detectkey"
--- @field #number SpellAbsorption "spellabsorption"
--- @field #number Reflect "reflect"
--- @field #number CureCommonDisease "curecommondisease"
--- @field #number CureBlightDisease "cureblightdisease"
--- @field #number CureCorprusDisease "curecorprusdisease"
--- @field #number CurePoison "curepoison"
--- @field #number CureParalyzation "cureparalyzation"
--- @field #number RestoreAttribute "restoreattribute"
--- @field #number RestoreHealth "restorehealth"
--- @field #number RestoreMagicka "restoremagicka"
--- @field #number RestoreFatigue "restorefatigue"
--- @field #number RestoreSkill "restoreskill"
--- @field #number FortifyAttribute "fortifyattribute"
--- @field #number FortifyHealth "fortifyhealth"
--- @field #number FortifyMagicka "fortifymagicka"
--- @field #number FortifyFatigue "fortifyfatigue"
--- @field #number FortifySkill "fortifyskill"
--- @field #number FortifyMaximumMagicka "fortifymaximummagicka"
--- @field #number AbsorbAttribute "absorbattribute"
--- @field #number AbsorbHealth "absorbhealth"
--- @field #number AbsorbMagicka "absorbmagicka"
--- @field #number AbsorbFatigue "absorbfatigue"
--- @field #number AbsorbSkill "absorbskill"
--- @field #number ResistFire "resistfire"
--- @field #number ResistFrost "resistfrost"
--- @field #number ResistShock "resistshock"
--- @field #number ResistMagicka "resistmagicka"
--- @field #number ResistCommonDisease "resistcommondisease"
--- @field #number ResistBlightDisease "resistblightdisease"
--- @field #number ResistCorprusDisease "resistcorprusdisease"
--- @field #number ResistPoison "resistpoison"
--- @field #number ResistNormalWeapons "resistnormalweapons"
--- @field #number ResistParalysis "resistparalysis"
--- @field #number RemoveCurse "removecurse"
--- @field #number TurnUndead "turnundead"
--- @field #number SummonScamp "summonscamp"
--- @field #number SummonClannfear "summonclannfear"
--- @field #number SummonDaedroth "summondaedroth"
--- @field #number SummonDremora "summondremora"
--- @field #number SummonAncestralGhost "summonancestralghost"
--- @field #number SummonSkeletalMinion "summonskeletalminion"
--- @field #number SummonBonewalker "summonbonewalker"
--- @field #number SummonGreaterBonewalker "summongreaterbonewalker"
--- @field #number SummonBonelord "summonbonelord"
--- @field #number SummonWingedTwilight "summonwingedtwilight"
--- @field #number SummonHunger "summonhunger"
--- @field #number SummonGoldenSaint "summongoldensaint"
--- @field #number SummonFlameAtronach "summonflameatronach"
--- @field #number SummonFrostAtronach "summonfrostatronach"
--- @field #number SummonStormAtronach "summonstormatronach"
--- @field #number FortifyAttack "fortifyattack"
--- @field #number CommandCreature "commandcreature"
--- @field #number CommandHumanoid "commandhumanoid"
--- @field #number BoundDagger "bounddagger"
--- @field #number BoundLongsword "boundlongsword"
--- @field #number BoundMace "boundmace"
--- @field #number BoundBattleAxe "boundbattleaxe"
--- @field #number BoundSpear "boundspear"
--- @field #number BoundLongbow "boundlongbow"
--- @field #number ExtraSpell "extraspell"
--- @field #number BoundCuirass "boundcuirass"
--- @field #number BoundHelm "boundhelm"
--- @field #number BoundBoots "boundboots"
--- @field #number BoundShield "boundshield"
--- @field #number BoundGloves "boundgloves"
--- @field #number Corprus "corprus"
--- @field #number Vampirism "vampirism"
--- @field #number SummonCenturionSphere "summoncenturionsphere"
--- @field #number SunDamage "sundamage"
--- @field #number StuntedMagicka "stuntedmagicka"
--- @field #number SummonFabricant "summonfabricant"
--- @field #number SummonWolf "summonwolf"
--- @field #number SummonBear "summonbear"
--- @field #number SummonBonewolf "summonbonewolf"
--- @field #number SummonCreature04 "summoncreature04"
--- @field #number SummonCreature05 "summoncreature05"
+-- @field #string WaterBreathing "waterbreathing"
+-- @field #string SwiftSwim "swiftswim"
+-- @field #string WaterWalking "waterwalking"
+-- @field #string Shield "shield"
+-- @field #string FireShield "fireshield"
+-- @field #string LightningShield "lightningshield"
+-- @field #string FrostShield "frostshield"
+-- @field #string Burden "burden"
+-- @field #string Feather "feather"
+-- @field #string Jump "jump"
+-- @field #string Levitate "levitate"
+-- @field #string SlowFall "slowfall"
+-- @field #string Lock "lock"
+-- @field #string Open "open"
+-- @field #string FireDamage "firedamage"
+-- @field #string ShockDamage "shockdamage"
+-- @field #string FrostDamage "frostdamage"
+-- @field #string DrainAttribute "drainattribute"
+-- @field #string DrainHealth "drainhealth"
+-- @field #string DrainMagicka "drainmagicka"
+-- @field #string DrainFatigue "drainfatigue"
+-- @field #string DrainSkill "drainskill"
+-- @field #string DamageAttribute "damageattribute"
+-- @field #string DamageHealth "damagehealth"
+-- @field #string DamageMagicka "damagemagicka"
+-- @field #string DamageFatigue "damagefatigue"
+-- @field #string DamageSkill "damageskill"
+-- @field #string Poison "poison"
+-- @field #string WeaknessToFire "weaknesstofire"
+-- @field #string WeaknessToFrost "weaknesstofrost"
+-- @field #string WeaknessToShock "weaknesstoshock"
+-- @field #string WeaknessToMagicka "weaknesstomagicka"
+-- @field #string WeaknessToCommonDisease "weaknesstocommondisease"
+-- @field #string WeaknessToBlightDisease "weaknesstoblightdisease"
+-- @field #string WeaknessToCorprusDisease "weaknesstocorprusdisease"
+-- @field #string WeaknessToPoison "weaknesstopoison"
+-- @field #string WeaknessToNormalWeapons "weaknesstonormalweapons"
+-- @field #string DisintegrateWeapon "disintegrateweapon"
+-- @field #string DisintegrateArmor "disintegratearmor"
+-- @field #string Invisibility "invisibility"
+-- @field #string Chameleon "chameleon"
+-- @field #string Light "light"
+-- @field #string Sanctuary "sanctuary"
+-- @field #string NightEye "nighteye"
+-- @field #string Charm "charm"
+-- @field #string Paralyze "paralyze"
+-- @field #string Silence "silence"
+-- @field #string Blind "blind"
+-- @field #string Sound "sound"
+-- @field #string CalmHumanoid "calmhumanoid"
+-- @field #string CalmCreature "calmcreature"
+-- @field #string FrenzyHumanoid "frenzyhumanoid"
+-- @field #string FrenzyCreature "frenzycreature"
+-- @field #string DemoralizeHumanoid "demoralizehumanoid"
+-- @field #string DemoralizeCreature "demoralizecreature"
+-- @field #string RallyHumanoid "rallyhumanoid"
+-- @field #string RallyCreature "rallycreature"
+-- @field #string Dispel "dispel"
+-- @field #string Soultrap "soultrap"
+-- @field #string Telekinesis "telekinesis"
+-- @field #string Mark "mark"
+-- @field #string Recall "recall"
+-- @field #string DivineIntervention "divineintervention"
+-- @field #string AlmsiviIntervention "almsiviintervention"
+-- @field #string DetectAnimal "detectanimal"
+-- @field #string DetectEnchantment "detectenchantment"
+-- @field #string DetectKey "detectkey"
+-- @field #string SpellAbsorption "spellabsorption"
+-- @field #string Reflect "reflect"
+-- @field #string CureCommonDisease "curecommondisease"
+-- @field #string CureBlightDisease "cureblightdisease"
+-- @field #string CureCorprusDisease "curecorprusdisease"
+-- @field #string CurePoison "curepoison"
+-- @field #string CureParalyzation "cureparalyzation"
+-- @field #string RestoreAttribute "restoreattribute"
+-- @field #string RestoreHealth "restorehealth"
+-- @field #string RestoreMagicka "restoremagicka"
+-- @field #string RestoreFatigue "restorefatigue"
+-- @field #string RestoreSkill "restoreskill"
+-- @field #string FortifyAttribute "fortifyattribute"
+-- @field #string FortifyHealth "fortifyhealth"
+-- @field #string FortifyMagicka "fortifymagicka"
+-- @field #string FortifyFatigue "fortifyfatigue"
+-- @field #string FortifySkill "fortifyskill"
+-- @field #string FortifyMaximumMagicka "fortifymaximummagicka"
+-- @field #string AbsorbAttribute "absorbattribute"
+-- @field #string AbsorbHealth "absorbhealth"
+-- @field #string AbsorbMagicka "absorbmagicka"
+-- @field #string AbsorbFatigue "absorbfatigue"
+-- @field #string AbsorbSkill "absorbskill"
+-- @field #string ResistFire "resistfire"
+-- @field #string ResistFrost "resistfrost"
+-- @field #string ResistShock "resistshock"
+-- @field #string ResistMagicka "resistmagicka"
+-- @field #string ResistCommonDisease "resistcommondisease"
+-- @field #string ResistBlightDisease "resistblightdisease"
+-- @field #string ResistCorprusDisease "resistcorprusdisease"
+-- @field #string ResistPoison "resistpoison"
+-- @field #string ResistNormalWeapons "resistnormalweapons"
+-- @field #string ResistParalysis "resistparalysis"
+-- @field #string RemoveCurse "removecurse"
+-- @field #string TurnUndead "turnundead"
+-- @field #string SummonScamp "summonscamp"
+-- @field #string SummonClannfear "summonclannfear"
+-- @field #string SummonDaedroth "summondaedroth"
+-- @field #string SummonDremora "summondremora"
+-- @field #string SummonAncestralGhost "summonancestralghost"
+-- @field #string SummonSkeletalMinion "summonskeletalminion"
+-- @field #string SummonBonewalker "summonbonewalker"
+-- @field #string SummonGreaterBonewalker "summongreaterbonewalker"
+-- @field #string SummonBonelord "summonbonelord"
+-- @field #string SummonWingedTwilight "summonwingedtwilight"
+-- @field #string SummonHunger "summonhunger"
+-- @field #string SummonGoldenSaint "summongoldensaint"
+-- @field #string SummonFlameAtronach "summonflameatronach"
+-- @field #string SummonFrostAtronach "summonfrostatronach"
+-- @field #string SummonStormAtronach "summonstormatronach"
+-- @field #string FortifyAttack "fortifyattack"
+-- @field #string CommandCreature "commandcreature"
+-- @field #string CommandHumanoid "commandhumanoid"
+-- @field #string BoundDagger "bounddagger"
+-- @field #string BoundLongsword "boundlongsword"
+-- @field #string BoundMace "boundmace"
+-- @field #string BoundBattleAxe "boundbattleaxe"
+-- @field #string BoundSpear "boundspear"
+-- @field #string BoundLongbow "boundlongbow"
+-- @field #string ExtraSpell "extraspell"
+-- @field #string BoundCuirass "boundcuirass"
+-- @field #string BoundHelm "boundhelm"
+-- @field #string BoundBoots "boundboots"
+-- @field #string BoundShield "boundshield"
+-- @field #string BoundGloves "boundgloves"
+-- @field #string Corprus "corprus"
+-- @field #string Vampirism "vampirism"
+-- @field #string SummonCenturionSphere "summoncenturionsphere"
+-- @field #string SunDamage "sundamage"
+-- @field #string StuntedMagicka "stuntedmagicka"
+-- @field #string SummonFabricant "summonfabricant"
+-- @field #string SummonWolf "summonwolf"
+-- @field #string SummonBear "summonbear"
+-- @field #string SummonBonewolf "summonbonewolf"
+-- @field #string SummonCreature04 "summoncreature04"
+-- @field #string SummonCreature05 "summoncreature05"
 
 --- Possible @{#SpellType} values
 -- @field [parent=#Magic] #SpellType SPELL_TYPE
@@ -677,6 +678,13 @@
 
 --- @{#Spells}: Spells
 -- @field [parent=#Magic] #Spells spells
+
+---
+-- Creates a @{#Spell} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Spells] createRecordDraft
+-- @param #Spell spell A Lua table with the fields of a Spell, with an optional field `template` that accepts a @{#Spell} as a base.
+-- @return #Spell A strongly typed Spell record.
 
 --- List of all @{#Spell}s.
 -- @field [parent=#Spells] #list<#Spell> records A read-only list of all @{#Spell} records in the world database, may be indexed by recordId.
@@ -708,6 +716,13 @@
 --- @{#Enchantments}: Enchantments
 -- @field [parent=#Magic] #Enchantments enchantments
 
+---
+-- Creates an @{#Enchantment} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Enchantments] createRecordDraft
+-- @param #Enchantment enchantment A Lua table with the fields of an Enchantment, with an optional field `template` that accepts an @{#Enchantment} as a base.
+-- @return #Enchantment A strongly typed Enchantment record.
+
 --- A read-only list of all @{#Enchantment} records in the world database, may be indexed by recordId.
 -- Implements [iterables#List](iterables.html#List) and [iterables#Map](iterables.html#map-iterable) of #Enchantment.
 -- @field [parent=#Enchantments] #list<#Enchantment> records
@@ -738,6 +753,7 @@
 -- @field #string id Effect ID
 -- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
+-- @field #string description Localized description of the effect
 -- @field #string school Skill ID that is this effect's school
 -- @field #number baseCost
 -- @field openmw.util#Color color
@@ -757,6 +773,16 @@
 -- @field #string hitSound Identifier of the sound used on hit
 -- @field #string areaSound Identifier of the sound used for AOE spells
 -- @field #string boltSound Identifier of the projectile sound used for ranged spells
+-- @field #boolean hasAttribute True if the effect requires an attribute parameter
+-- @field #boolean hasSkill True if the effect requires a skill parameter
+-- @field #boolean onSelf True if the effect can be cast on self
+-- @field #boolean onTouch True if the effect can be cast on touch
+-- @field #boolean onTarget True if the effect can be cast on target
+-- @field #boolean unreflectable True if the effect cannot be reflected
+-- @field #boolean allowsSpellmaking True if the effect is available for spellmaking
+-- @field #boolean allowsEnchanting True if the effect is available for enchanting
+-- @field #boolean negativeLight True if the effect casts negative light
+-- @field #number speed Projectile speed
 
 
 ---
@@ -783,7 +809,7 @@
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
 
---- @{#Sound}: Sounds and Speech
+--- @{#Sound}: Sounds and Speech. Not available in load scripts.
 -- @field [parent=#core] #Sound sound
 
 ---
@@ -915,7 +941,7 @@
 --     print(sound.fileName)
 -- end
 
---- @{#Stats}: stats
+--- @{#Stats}: stats. Not available in load scripts.
 -- @field [parent=#core] #Stats stats
 
 
@@ -978,7 +1004,7 @@
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
 
---- @{#Dialogue}: Dialogue
+--- @{#Dialogue}: Dialogue. Not available in load scripts.
 -- @field [parent=#core] #Dialogue dialogue
 
 ---
@@ -1282,7 +1308,7 @@
 -- @field #number NotCell The player's cell name should not start with @{#DialogueInfoCondition.cellName}
 -- @field #number NotLocal A comparison to the speaker's @{#DialogueInfoCondition.variableName} local variable
 
---- @{#Regions}: Regions
+--- @{#Regions}: Regions. Not available in load scripts.
 -- @field [parent=#core] #Regions regions
 
 ---
@@ -1290,6 +1316,7 @@
 -- @field [parent=#Regions] #list<#RegionRecord> records
 -- @usage local record = core.regions.records['bitter coast region']
 -- @usage local record = core.regions.records[1]
+
 ---
 -- Region data record
 -- @type RegionRecord
@@ -1305,12 +1332,38 @@
 -- @usage print(region.weatherProbabilities["rain"])
 
 ---
+-- Set one weather probability entry for this region at runtime.
+-- Throws an error if `weatherId` is not a valid weather id.
+-- Value is clamped to the range [0, 100].
+-- Multiple calls modify the current runtime weather table.
+-- Keep total weather probabilities at 100 after modifications.
+--
+-- For a full table replacement, zero the current table first, then set the new values.
+-- @function [parent=#RegionRecord] setProbability
+-- @param self
+-- @param #string weatherId Weather id to modify.
+-- @param #number value New probability value.
+-- @usage region:setProbability('rain', 30)
+-- @usage
+-- for weatherId, _ in pairs(region.weatherProbabilities) do
+--     region:setProbability(weatherId, 0)
+-- end
+-- region:setProbability('clear', 70)
+-- region:setProbability('rain', 30)
+
+---
+-- Reset this region's runtime weather probabilities to defaults from the loaded records.
+-- @function [parent=#RegionRecord] resetProbability
+-- @param self
+-- @usage region:resetProbability()
+
+---
 -- Region sound reference
 -- @type RegionSoundRef
 -- @field #string soundId Sound record ID
 -- @field #number chance Multiplicative percentage used to determine whether to play the sound
 
---- @{#Factions}: Factions
+--- @{#Factions}: Factions. Not available in load scripts.
 -- @field [parent=#core] #Factions factions
 
 ---
@@ -1340,7 +1393,7 @@
 -- @field #number factionReputation Required amount of faction reputation to reach this rank.
 -- @field #number factionReaction (DEPRECATED) Returns the same as factionReputation.
 
---- @{#MWScripts}: MWScripts
+--- @{#MWScripts}: MWScripts. Not available in load scripts.
 -- @field [parent=#core] #MWScript mwscripts
 
 ---
@@ -1356,7 +1409,7 @@
 -- @field #string text MWScript content
 
 
---- @{#Weather}: Weather
+--- @{#Weather}: Weather. Not available in load scripts.
 -- @field [parent=#core] #Weather weather
 
 --- List of all @{#WeatherRecord}s.
@@ -1370,6 +1423,34 @@
 --         print(weather.name)
 --     end
 -- end
+
+--- `core.weather.MOON_PHASE`
+-- @type MOON_PHASE
+-- @field [parent=#MOON_PHASE] #number Full
+-- @field [parent=#MOON_PHASE] #number WaningGibbous
+-- @field [parent=#MOON_PHASE] #number ThirdQuarter
+-- @field [parent=#MOON_PHASE] #number WaningCrescent
+-- @field [parent=#MOON_PHASE] #number New
+-- @field [parent=#MOON_PHASE] #number WaxingCrescent
+-- @field [parent=#MOON_PHASE] #number FirstQuarter
+-- @field [parent=#MOON_PHASE] #number WaxingGibbous
+
+--- Moon phases.
+-- @field [parent=#Weather] #MOON_PHASE MOON_PHASE
+
+---
+-- Data for a moon in the current sky.
+-- @type Moon
+-- @field #string name The moon's name. For Morrowind, "Masser" or "Secunda".
+-- @field #number phase One of @{#MOON_PHASE}.
+-- @field #number phaseValue MWScript-compatible phase value: 0 new, 1 crescent, 2 quarter, 3 gibbous, or 4 full.
+-- @field #number alpha The alpha of the moon between 0 and 1. 0 when the moon is not visible in the sky.
+
+---
+-- Get all moons in the current sky.
+-- @function [parent=#Weather] getCurrentMoons
+-- @param #Cell cell The cell to get moons for.
+-- @return #list<#Moon> Can be nil if the cell is inactive or has no sky.
 
 ---
 -- Get the current weather

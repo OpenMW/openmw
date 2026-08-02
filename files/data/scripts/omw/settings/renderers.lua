@@ -95,10 +95,8 @@ return function(registerRenderer)
         local function validateNumber(text, argument)
             local number = tonumber(text)
             if not number then return end
-            if argument.min and number < argument.min then return end
-            if argument.max and number > argument.max then return end
             if argument.integer and math.floor(number) ~= number then return end
-            return number
+            return util.clamp(number, argument.min or -math.huge, argument.max or math.huge)
         end
         local defaultArgument = {
             disabled = false,
@@ -122,12 +120,7 @@ return function(registerRenderer)
                     focusLoss = async:callback(function()
                         if not lastInput then return end
                         local number = validateNumber(lastInput, argument)
-                        if not number then
-                            set(value)
-                        end
-                        if number and number ~= value then
-                            set(number)
-                        end
+                        set(number or value)
                     end),
                 },
             })

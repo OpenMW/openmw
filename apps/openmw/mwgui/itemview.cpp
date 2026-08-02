@@ -263,9 +263,6 @@ namespace MWGui
 
     void ItemView::updateControllerFocus(int prevFocus, int newFocus)
     {
-        MWBase::Environment::get().getWindowManager()->setCursorVisible(
-            !MWBase::Environment::get().getWindowManager()->getControllerTooltipVisible());
-
         if (!mItemCount)
             return;
 

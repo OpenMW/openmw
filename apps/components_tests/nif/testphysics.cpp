@@ -51,11 +51,7 @@ namespace Nif
 
         struct NifBhkRagdollTemplateTest : Test
         {
-            NifBhkRagdollTemplateTest()
-            {
-                Nif::Reader::setLoadUnsupportedFiles(true);
-                Nif::Reader::setWriteNifDebugLog(true);
-            }
+            NifBhkRagdollTemplateTest() { Nif::Reader::setWriteNifDebugLog(true); }
         };
 
         TEST_F(NifBhkRagdollTemplateTest, shouldParseRecord)

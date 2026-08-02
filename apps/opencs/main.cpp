@@ -63,6 +63,7 @@ int runApplication(int argc, char* argv[])
 
     Platform::Application application(argc, argv);
 
+    application.setDesktopFileName("org.openmw.cs");
     application.setWindowIcon(QIcon(":openmw-cs"));
 
     CS::Editor editor(argc, argv);

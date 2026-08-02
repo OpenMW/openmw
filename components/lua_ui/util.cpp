@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include <ranges>
+
 #include <MyGUI_FactoryManager.h>
 
 #include "adapter.hpp"
@@ -12,7 +14,6 @@
 #include "window.hpp"
 
 #include "element.hpp"
-#include "registerscriptsettings.hpp"
 
 namespace LuaUi
 {
@@ -54,5 +55,28 @@ namespace LuaUi
     {
         while (!Element::sMenuElements.empty())
             Element::erase(Element::sMenuElements.begin()->second.get());
+    }
+
+    bool warnUnused(std::vector<std::string>& warnings, sol::object object, const std::string& tableName,
+        const std::vector<std::string_view>& usedKeys, bool generateWarningStrings)
+    {
+        auto beginningSize = warnings.size();
+        if (!object.is<sol::table>())
+            return false;
+        sol::table table = object.as<sol::table>();
+        for (const auto& [key, value] : table)
+        {
+            if (!key.is<std::string>())
+                continue;
+            auto keyStr = key.as<std::string>();
+
+            if (std::ranges::find(usedKeys, keyStr) == usedKeys.end())
+            {
+                if (!generateWarningStrings)
+                    return true;
+                warnings.push_back("unused key '" + keyStr + "' in " + tableName);
+            }
+        }
+        return beginningSize != warnings.size();
     }
 }

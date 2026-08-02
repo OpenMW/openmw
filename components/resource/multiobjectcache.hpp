@@ -42,8 +42,8 @@ namespace Resource
     protected:
         typedef std::multimap<VFS::Path::Normalized, osg::ref_ptr<osg::Object>, std::less<>> ObjectCacheMap;
 
-        ObjectCacheMap _objectCache;
-        mutable std::mutex _objectCacheMutex;
+        ObjectCacheMap mObjectCache;
+        mutable std::mutex mObjectCacheMutex;
         std::size_t mGet = 0;
         std::size_t mHit = 0;
         std::size_t mExpired = 0;

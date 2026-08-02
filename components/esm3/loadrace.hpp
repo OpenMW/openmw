@@ -2,6 +2,7 @@
 #define OPENMW_ESM_RACE_H
 
 #include <array>
+#include <map>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -27,8 +28,17 @@ namespace ESM
 
         struct SkillBonus
         {
-            int32_t mSkill; // SkillEnum
+            ESM::RefId mSkill; // SkillEnum
             int32_t mBonus;
+        };
+
+        struct AttributeValues
+        {
+            int32_t mMale{};
+            int32_t mFemale{};
+
+            void load(ESMReader& esm);
+            void save(ESMWriter& esm) const;
         };
 
         enum Flags
@@ -43,7 +53,7 @@ namespace ESM
             std::array<SkillBonus, 7> mBonus;
 
             // Attribute values for male/female
-            std::array<int32_t, 16> mAttributeValues;
+            std::map<ESM::RefId, AttributeValues> mAttributeValues;
 
             // The actual eye level height (in game units) is (probably) given
             // as 'height' times 128. This has not been tested yet.

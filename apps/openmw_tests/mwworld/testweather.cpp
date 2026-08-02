@@ -9,6 +9,20 @@ namespace MWWorld
 {
     namespace
     {
+        TEST(MWWorldWeatherTest, moonPhasesHaveMwscriptCompatibleValues)
+        {
+            using Phase = MWRender::MoonState::Phase;
+
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::New), 0);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::WaxingCrescent), 1);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::WaningCrescent), 1);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::FirstQuarter), 2);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::ThirdQuarter), 2);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::WaxingGibbous), 3);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::WaningGibbous), 3);
+            EXPECT_EQ(MWRender::MoonState::phaseToInt(Phase::Full), 4);
+        }
+
         // MASSER PHASES
 
         TEST(MWWorldWeatherTest, masserPhasesFullToWaningGibbousAtCorrectTimes)

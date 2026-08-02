@@ -509,6 +509,12 @@ namespace Shader
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
+        return getShaderInternal(templateName, defines, type);
+    }
+
+    osg::ref_ptr<osg::Shader> ShaderManager::getShaderInternal(
+        std::string templateName, const ShaderManager::DefineMap& defines, std::optional<osg::Shader::Type> type)
+    {
         // TODO: Implement mechanism to switch to core or compatibility profile shaders.
         // This logic is temporary until core support is supported.
         if (getRootPrefix(templateName).empty())
@@ -562,9 +568,7 @@ namespace Shader
 
             mHotReloadManager->addShaderFiles(templateName, defines);
 
-            lock.unlock();
             getLinkedShaders(shader, linkedShaderNames, defines);
-            lock.lock();
 
             shaderIt = mShaders.insert(std::make_pair(std::make_pair(templateName, defines), shader)).first;
         }
@@ -619,7 +623,19 @@ namespace Shader
 
     void ShaderManager::setGlobalDefines(DefineMap& globalDefines)
     {
+        std::lock_guard<std::mutex> lock(mMutex);
         mGlobalDefines = globalDefines;
+        // clear out linked dependencies - changing defines may make them obsolete
+        for (const auto& [pair, program] : mPrograms)
+        {
+            for (unsigned int i = 0; i < program->getNumShaders();)
+            {
+                if (program->getShader(i) != pair.first && program->getShader(i) != pair.second)
+                    program->removeShader(program->getShader(i));
+                else
+                    ++i;
+            }
+        }
         for (const auto& [key, shader] : mShaders)
         {
             std::string templateId = key.first;
@@ -638,6 +654,11 @@ namespace Shader
             shader->setShaderSource(shaderSource);
 
             getLinkedShaders(shader, linkedShaderNames, defines);
+        }
+        for (const auto& [pair, program] : mPrograms)
+        {
+            addLinkedShaders(pair.first, program);
+            addLinkedShaders(pair.second, program);
         }
     }
 
@@ -673,7 +694,7 @@ namespace Shader
 
         for (auto& linkedShaderName : linkedShaderNames)
         {
-            auto linkedShader = getShader(linkedShaderName, defines, shader->getType());
+            auto linkedShader = getShaderInternal(linkedShaderName, defines, shader->getType());
             if (linkedShader)
                 mLinkedShaders[shader].emplace_back(linkedShader);
         }
@@ -743,4 +764,25 @@ namespace Shader
         mHotReloadManager->mTriggerReload = true;
     }
 
+    ShaderManager::DefineMap getDefaultDefines()
+    {
+        return {
+            { "forcePPL", "0" },
+            { "clamp", "1" },
+            { "preLightEnv", "0" },
+            { "radialFog", "0" },
+            { "exponentialFog", "0" },
+            { "reverseZ", "0" },
+            { "waterRefraction", "0" },
+            { "classicFalloff", "1" },
+            { "skyBlending", "0" },
+            { "disableNormals", "1" },
+            { "useGPUShader4", "0" },
+            { "useOVR_multiview", "0" },
+            { "distorionRTRatio", "0" },
+            { "numViews", "1" },
+            { "particle", "0" },
+            { "particlePointLighting", "1" },
+        };
+    }
 }

@@ -156,5 +156,19 @@ function aux_util.shallowCopy(table)
     return copy
 end
 
+--- Rolls a random integer between min and max.
+-- Equivalent to math.random with 2 parameters, but adds sanity checks for min < max, returning min whenever max <= min
+-- Only supports the 2 argument variant. Single argument variants should use math.random instead.
+-- @function [parent=#util] random
+-- @param #number min Minimum value (inclusive)
+-- @param #number max Maximum value (inclusive)
+-- @return #number a random number between min and max (inclusive), or min if max <= min
+function aux_util.random(min, max)
+    if max <= min then
+        return min
+    end
+    return math.random(min, max)
+end
+
 return aux_util
 

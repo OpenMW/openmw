@@ -73,6 +73,15 @@ namespace
         setCreatureFlag("isEssential", ESM::Creature::Essential);
         setCreatureFlag("isRespawning", ESM::Creature::Respawn);
 
+        if (rec["isPersistent"] != sol::nil)
+        {
+            bool persistent = rec["isPersistent"];
+            if (persistent)
+                crea.mRecordFlags |= ESM::FLAG_Persistent;
+            else
+                crea.mRecordFlags &= ~ESM::FLAG_Persistent;
+        }
+
         if (rec["bloodType"] != sol::nil)
             crea.mBloodType = rec["bloodType"].get<int>();
 
@@ -156,6 +165,8 @@ namespace MWLua
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Essential; });
         record["isRespawning"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> bool { return rec.mFlags & ESM::Creature::Respawn; });
+        record["isPersistent"] = sol::readonly_property(
+            [](const ESM::Creature& rec) -> bool { return rec.mRecordFlags & ESM::FLAG_Persistent; });
         record["bloodType"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mBloodType; });
 
         addActorServicesBindings<ESM::Creature>(record, context);

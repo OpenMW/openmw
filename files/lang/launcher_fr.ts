@@ -574,6 +574,49 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <source>Text file (*.txt)</source>
         <translation>Fichier texte (*.txt)</translation>
     </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Ouvrir le dossier</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Ouvrir %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Le dossier local de configuration est utilisé car il contient un fichier openmw.cfg. Les logs et préférences modifiées y seront sauvegardés.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Le dossier local de configuration est utilisé car il contient un fichier openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Les logs et préférences modifiées y seront sauvegardés.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Le dossier global de configuration est utilisé car le dossier courant ne contient pas de fichier openmw.cfg.
+Les logs et préférences modifiées y seront sauvegardés.
+C&apos;est un syndrome typique d&apos;une installation corrompue d&apos;OpenMW ou d&apos;un mauvais paquet.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Le dossier global de configuration est utilisé car le dossier courant ne contient pas de fichier openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Le dossier de configuration utilisateur est utilisé car %1 contient la ligne config=%2.
+Les logs et préférences modifiées y seront sauvegardés.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Le dossier de configuration utilisateur est utilisé car %1 contient la ligne config=%2.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -775,9 +818,8 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren&apos;t affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
                   Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-                  Affected objects will use shaders.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;En temps normal, les réflexions dues au placage d&apos;environnement (environment map) ne sont pas affectées par l&apos;éclairage de la scène. En conséquence, les objets affectés par le placage d&apos;environnement (et de relief) ont tendance à briller dans le noir. Le &quot;Morrowind Code Patch&quot; a, pour remédier à ça, inclus une option qui applique le placage d&apos;environnement (et de relief) avant d&apos;appliquer l&apos;éclairage. Cette option est son équivalent. Les objets affectés utilisent toujours les shaders.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;En temps normal, les réflexions dues au placage d&apos;environnement (environment map) ne sont pas affectées par l&apos;éclairage de la scène. En conséquence, les objets affectés par le placage d&apos;environnement (et de relief) ont tendance à briller dans le noir. Le &quot;Morrowind Code Patch&quot; a, pour remédier à ça, inclus une option qui applique le placage d&apos;environnement (et de relief) avant d&apos;appliquer l&apos;éclairage. Cette option est son équivalent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows MSAA to work with alpha-tested meshes, producing better-looking edges without pixelation. Can negatively impact performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1057,10 +1099,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cette option affiche l&apos;ombre des terrains. Elle peut avoir un impact faible sur les performances et la qualité des ombres.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Éclairage</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Infobulles</translation>
     </message>
@@ -1079,24 +1117,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effects of reflected Absorb spells are not mirrored - like in Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;L&apos;effet réfléchi des sorts d&apos;absorption n&apos;est pas appliqué, comme dans le moteur original.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind&apos;s lighting.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;body&gt;&lt;p&gt;Définit la gestion des sources lumineuses :&lt;/p&gt;
-&lt;p&gt;&quot;Traditionnelle&quot; Chaque objet est éclairé par 8 sources lumineuses. Cet méthode est la plus proche du jeu original.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (mode de compatibilité)&quot; supprime la limite des 8 sources lumineuses. Cette méthode permet d&apos;éclairer la végétation au sol. Ce choix est recommandé pour les ordinateurs plus anciens avec un nombre de sources lumineuses proche de 8.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders&quot; offre tous les bénéfices apportés par &quot;Shaders (mode de compatibilité)&quot;, mais utilise une approche moderne. Celle-ci permet, sur du matériel moderne, d&apos;augmenter le nombre de sources lumineuses par objet sans perte de performance.&quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Legacy</source>
-        <translation>Traditionnelle</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Shaders (mode de compatibilité)</translation>
     </message>
     <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
@@ -1315,10 +1335,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation>Ombre des terrains</translation>
     </message>
     <message>
-        <source>Lighting Method</source>
-        <translation>Méthode d&apos;illumination</translation>
-    </message>
-    <message>
         <source>Audio Device</source>
         <translation>Périphérique audio</translation>
     </message>
@@ -1477,6 +1493,10 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controle la puissance de l&apos;effet Doppler. La valeur zéro le désactivant complétement.&lt;/p&gt;&lt;p&gt;L&apos;effet Doppler augmente ou diminue la hauteur des sons relativement à la vélocité de leur source par rapport au joueur.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Dossier de configuration actif</translation>
     </message>
 </context>
 </TS>

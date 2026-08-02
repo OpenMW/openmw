@@ -47,7 +47,7 @@ namespace MWWorld
         MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 
         // Skill gain from books
-        ESM::RefId skill = ESM::Skill::indexToRefId(ref->mBase->mData.mSkillId);
+        const ESM::RefId& skill = ref->mBase->mData.mSkillId;
         if (!skill.empty() && !npcStats.hasBeenUsed(ref->mBase->mId))
         {
             MWBase::Environment::get().getLuaManager()->skillLevelUp(player, skill, "book");

@@ -6,6 +6,7 @@
 
 namespace SceneUtil
 {
+    class CopyOp;
 
     class ControllerSource
     {
@@ -40,6 +41,8 @@ namespace SceneUtil
     public:
         Controller();
         virtual ~Controller() {}
+
+        virtual void remapTargets(const CopyOp& copyop) {}
 
         bool hasInput() const;
 

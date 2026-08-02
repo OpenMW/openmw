@@ -9,6 +9,7 @@
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
 
+#include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
@@ -35,7 +36,23 @@ namespace SceneUtil
             mUpdaterToOldPs[cloned] = updater->getParticleSystem(0);
             return cloned;
         }
-        return osg::CopyOp::operator()(node);
+
+        osg::Node* cloned = osg::CopyOp::operator()(node);
+        if (cloned)
+            mClonedNodes[node] = cloned;
+
+        return cloned;
+    }
+
+    osg::Callback* CopyOp::operator()(const osg::Callback* callback) const
+    {
+        osg::Callback* cloned = osg::CopyOp::operator()(callback);
+        for (osg::Callback* cb = cloned; cb != nullptr; cb = cb->getNestedCallback())
+        {
+            if (auto* ctrl = dynamic_cast<Controller*>(cb))
+                mControllersToRemap.push_back(ctrl);
+        }
+        return cloned;
     }
 
     osg::Drawable* CopyOp::operator()(const osg::Drawable* drawable) const
@@ -96,6 +113,18 @@ namespace SceneUtil
         mOldPsToNewPs[partsys] = cloned;
 
         return cloned;
+    }
+
+    osg::Node* CopyOp::getClonedNode(const osg::Node* original) const
+    {
+        auto it = mClonedNodes.find(original);
+        return it != mClonedNodes.end() ? it->second : nullptr;
+    }
+
+    void CopyOp::remapControllerTargets() const
+    {
+        for (Controller* ctrl : mControllersToRemap)
+            ctrl->remapTargets(*this);
     }
 
 }

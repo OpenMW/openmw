@@ -62,7 +62,7 @@ namespace MWClass
         physics.addObject(ptr, VFS::Path::toNormalized(model), rotation, MWPhysics::CollisionType_World);
     }
 
-    std::string_view Activator::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Activator::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Activator>(ptr);
     }
@@ -140,30 +140,30 @@ namespace MWClass
     ESM::RefId Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
-        const std::string_view model = getModel(ptr);
+        const VFS::Path::NormalizedView model = getModel(ptr);
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        const ESM::RefId* creatureId = nullptr;
+        ESM::RefId creatureId;
 
         for (const ESM::Creature& iter : store.get<ESM::Creature>())
         {
-            if (!iter.mModel.empty() && Misc::StringUtils::ciEqual(model, iter.mModel))
+            if (!iter.mModel.empty() && model == iter.mModel.getNormalized())
             {
-                creatureId = !iter.mOriginal.empty() ? &iter.mOriginal : &iter.mId;
+                creatureId = !iter.mOriginal.empty() ? iter.mOriginal : iter.mId;
                 break;
             }
         }
 
-        int type = getSndGenTypeFromName(name);
+        const int type = getSndGenTypeFromName(name);
 
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        if (creatureId && !creatureId->empty())
+        if (!creatureId.empty())
         {
             std::vector<const ESM::SoundGenerator*> sounds;
             for (auto sound = store.get<ESM::SoundGenerator>().begin(); sound != store.get<ESM::SoundGenerator>().end();
                  ++sound)
             {
-                if (type == sound->mType && !sound->mCreature.empty() && (*creatureId == sound->mCreature))
+                if (type == sound->mType && !sound->mCreature.empty() && creatureId == sound->mCreature)
                     sounds.push_back(&*sound);
                 if (type == sound->mType && sound->mCreature.empty())
                     fallbacksounds.push_back(&*sound);

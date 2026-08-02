@@ -64,7 +64,7 @@ namespace CSMWorld
     public:
         const Record<ESM::LandTexture>* searchRecord(std::uint16_t index, int plugin) const;
 
-        const std::string* getLandTexture(std::uint16_t index, int plugin) const;
+        const VFS::Path::Normalized* getLandTexture(std::uint16_t index, int plugin) const;
 
         bool touchRecord(const ESM::RefId& id) override;
 

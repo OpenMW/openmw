@@ -35,6 +35,7 @@
 #include "actor.hpp" // AttributeValues, BodyTemplate
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -115,8 +116,8 @@ namespace ESM4
         std::string mEditorId;
         std::string mFullName;
         std::string mDesc;
-        std::string mModelMale; // TES5 skeleton (in TES4 skeleton is found in npc_)
-        std::string mModelFemale; // TES5 skeleton (in TES4 skeleton is found in npc_)
+        ESM::Path mModelMale; // TES5 skeleton (in TES4 skeleton is found in npc_)
+        ESM::Path mModelFemale; // TES5 skeleton (in TES4 skeleton is found in npc_)
 
         AttributeValues mAttribMale;
         AttributeValues mAttribFemale;

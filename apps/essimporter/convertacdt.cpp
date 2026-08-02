@@ -27,11 +27,12 @@ namespace ESSImport
             cStats.mDynamic[writeIndex].mMod = 0.f;
             cStats.mDynamic[writeIndex].mCurrent = acdt.mDynamic[i][0];
         }
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
-            cStats.mAttributes[i].mBase = acdt.mAttributes[i][1];
-            cStats.mAttributes[i].mMod = 0.f;
-            cStats.mAttributes[i].mCurrent = acdt.mAttributes[i][0];
+            auto& attribute = cStats.mAttributes[ESM::Attribute::indexToRefId(i)];
+            attribute.mBase = acdt.mAttributes[i][1];
+            attribute.mMod = 0.f;
+            attribute.mCurrent = acdt.mAttributes[i][0];
         }
         cStats.mGoldPool = acdt.mGoldPool;
         cStats.mTalkedTo = (acdt.mFlags & TalkedToPlayer) != 0;
@@ -47,9 +48,10 @@ namespace ESSImport
     {
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
-            npcStats.mSkills[i].mMod = 0.f;
-            npcStats.mSkills[i].mCurrent = static_cast<float>(actorData.mSkills[i][1]);
-            npcStats.mSkills[i].mBase = static_cast<float>(actorData.mSkills[i][0]);
+            auto& skill = npcStats.mSkills[ESM::Skill::indexToRefId(i)];
+            skill.mMod = 0.f;
+            skill.mCurrent = static_cast<float>(actorData.mSkills[i][1]);
+            skill.mBase = static_cast<float>(actorData.mSkills[i][0]);
         }
 
         npcStats.mTimeToStartDrowning = actorData.mACDT.mBreathMeter;

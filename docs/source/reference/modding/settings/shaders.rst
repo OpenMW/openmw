@@ -2,25 +2,27 @@ Shaders Settings
 ################
 
 .. omw-setting::
-   :title: force shaders
-   :type: boolean
-   :range: true, false
-   :default: false
-
-   Force rendering with shaders for all objects, even those that do not strictly need them.
-   Required if enhancements like shadows or reverse z are enabled.
-   May have a significant performance impact.
-
-.. omw-setting::
    :title: force per pixel lighting
    :type: boolean
    :range: true, false
    :default: false
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
-   Force per-pixel lighting on all shader objects.
-   Changes lighting behavior from the original MW engine.
-   Groundcover shaders and particles ignore this setting.
+   Force the use of per-pixel lighting.
+   By default, only bump- and normal-mapped objects use per-pixel lighting.
+   Enabling per-pixel lighting results in visual differences to the original engine
+   as certain lights in Morrowind rely on vertex lighting to look as intended.
+   Note that groundcover shaders and particle effects ignore this setting.
+
+.. omw-setting::
+   :title: particle point lighting
+   :type: boolean
+   :range: true, false
+   :default: true
+   :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
+
+   Allows particle systems to be lit by point lights. When disabled, particle systems will only be lit by the sun.
+   This feature is enabled by default in Morrowind, but disabling it can increase performance in particle dense scenes.
 
 .. omw-setting::
    :title: clamp lighting
@@ -28,9 +30,8 @@ Shaders Settings
    :range: true, false
    :default: true
 
-   Restrict lighting to a maximum of (1,1,1) on shader objects.
+   Cap lighting brightness at (1, 1, 1) to replicate Morrowind's rendering.
    Prevents overly bright or shifted colors but can dull lighting.
-   Terrain is always drawn with shaders to prevent seams.
 
 .. omw-setting::
    :title: auto use object normal maps
@@ -109,25 +110,30 @@ Shaders Settings
    Enable lighting effects on environment map reflections to prevent glowing in dark areas.
 
 .. omw-setting::
-   :title: lighting method
-   :type: string
-   :range: legacy | shaders compatibility | shaders
-   :default: shaders compatibility
+   :title: clustered lighting
+   :type: boolean
+   :range: true, false
+   :default: false
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights` :bdg-success:`Launcher > Settings > Visuals > Lighting`
 
-   Controls internal light source handling:
-   - `legacy`: fixed-function pipeline, max 8 lights per object.
-   - `shaders compatibility`: removes light limit, better attenuation, recommended for older hardware.
-   - `shaders`: modern lighting approach, higher light counts, better for modern GPUs.
+    Divides the screen into regions to assign lights, removing per-object light limits.
+
+    Classic falloff and max light options do not apply in this mode.
+
+    Enables point light specular highlights on the water plane when the water shader is enabled.
+
+   .. note::
+
+      It is highly recommended to use this with per-pixel lighting enabled as vertex lighting can cause light pop at screen edges.
 
 .. omw-setting::
-   :title: light bounds multiplier
+   :title: light radius multiplier
    :type: float32
-   :range: 0.0-5.0
-   :default: 1.65
+   :range: 1.0-100.0
+   :default: 1.75
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
-   Multiplier for point light bounding sphere radius, affecting light transition smoothness and performance.
+   Multiplier for point light radius. Larger values will increase the range of lights.
 
 .. omw-setting::
    :title: classic falloff
@@ -138,6 +144,10 @@ Shaders Settings
 
    Use traditional point light attenuation without early fade out.
    Reduces lighting seams but may darken the scene.
+
+   .. note::
+
+      This setting is only applicable when clustered lighting is disabled
 
 .. omw-setting::
    :title: match sunlight to sun
@@ -171,11 +181,14 @@ Shaders Settings
    :title: max lights
    :type: int
    :range: 2-64
-   :default: 8
+   :default: 16
    :location: :bdg-info:`In Game > Settings > Options > Video > Lights`
 
    Maximum lights affecting each object.
-   Too high values may reduce performance unless using 'shaders' method.
+
+   .. note::
+
+      This setting is only applicable when clustered lighting is disabled
 
 .. omw-setting::
    :title: minimum interior brightness
@@ -222,7 +235,7 @@ Shaders Settings
    :location: :bdg-success:`Launcher > Settings > Visuals > Shaders`
 
    Prevents rain and snow clipping through ceilings by using an extra render pass.
-   
+
    .. warning::
 
       Experimental and may cause visual oddities.

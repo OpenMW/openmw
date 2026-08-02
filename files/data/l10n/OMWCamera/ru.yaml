@@ -3,6 +3,9 @@ settingsPageDescription: "Настройки камеры OpenMW."
 
 thirdPersonSettings: "Режим от третьего лица"
 
+maxDistance: "Максимальное расстояние камеры"
+maxDistanceDescription: "Насколько далеко камера может быть от персонажа (по умолчанию: 800 ед.)."
+
 viewOverShoulder: "Взгляд через плечо"
 viewOverShoulderDescription: |
     Управляет режимом вида от третьего лица.

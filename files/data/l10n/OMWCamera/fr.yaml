@@ -3,6 +3,9 @@ settingsPageDescription: "Paramètres de la caméra d’OpenMW"
 
 thirdPersonSettings: "Vue à la troisième personne"
 
+maxDistance: "Distance maximale de la caméra"
+maxDistanceDescription: "Jusqu'où la caméra peut dézoomer (800 unités par défaut)"
+
 viewOverShoulder: "Vue par-dessus l’épaule"
 viewOverShoulderDescription: |
     Modifie la vue à la troisième personne.

@@ -306,15 +306,20 @@ namespace MWWorld
         return state;
     }
 
-    void RegionWeather::setChances(const std::vector<uint8_t>& chances)
+    void RegionWeather::setChances(std::span<const uint8_t> chances)
     {
-        mChances = chances;
+        mChances.assign(chances.begin(), chances.end());
 
         // Regional weather no longer supports the current type, select a new weather pattern.
         if ((static_cast<size_t>(mWeather) >= mChances.size()) || (mChances[mWeather] == 0))
         {
             chooseNewWeather();
         }
+    }
+
+    std::span<const uint8_t> RegionWeather::getChances() const
+    {
+        return mChances;
     }
 
     void RegionWeather::setWeather(int weatherID)
@@ -595,6 +600,16 @@ namespace MWWorld
             return 0.0f;
     }
 
+    std::vector<Moon> WeatherManager::getCurrentMoons(const TimeStamp& time) const
+    {
+        const auto makeMoon = [](std::string_view name, const MoonModel& model, const TimeStamp& timestamp) {
+            const MWRender::MoonState state = model.calculateState(timestamp);
+            return Moon{ name, state.mPhase, MWRender::MoonState::phaseToInt(state.mPhase), state.mMoonAlpha };
+        };
+
+        return { makeMoon("Masser", mMasser, time), makeMoon("Secunda", mSecunda, time) };
+    }
+
     WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::ESMStore& store)
         : mStore(store)
         , mRendering(rendering)
@@ -737,7 +752,7 @@ namespace MWWorld
         }
     }
 
-    void WeatherManager::modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances)
+    void WeatherManager::modRegion(const ESM::RefId& regionID, std::span<const uint8_t> chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:
@@ -753,6 +768,14 @@ namespace MWWorld
             it->second.setChances(chances);
             regionalWeatherChanged(it->first, it->second);
         }
+    }
+
+    std::span<const uint8_t> WeatherManager::getRegionChances(const ESM::RefId& regionID) const
+    {
+        auto it = mRegions.find(regionID);
+        if (it != mRegions.end())
+            return it->second.getChances();
+        return {};
     }
 
     void WeatherManager::playerTeleported(const ESM::RefId& playerRegion, bool isExterior)

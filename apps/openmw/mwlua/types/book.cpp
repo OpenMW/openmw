@@ -1,17 +1,15 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
+#include <components/misc/finitevalues.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
-#include <components/resource/resourcesystem.hpp>
-
-#include "apps/openmw/mwbase/environment.hpp"
 
 namespace sol
 {
@@ -21,25 +19,59 @@ namespace sol
     };
 }
 
-namespace
+namespace MWLua
 {
+    namespace
+    {
+        template <class T>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Book[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Book::mName);
+            Types::addModelProperty(record);
+            Types::addProperty(record, "mwscript", &ESM::Book::mScript);
+            Types::addIconProperty(record);
+            Types::addProperty(record, "text", &ESM::Book::mText);
+            Types::addProperty(record, "enchant", &ESM::Book::mEnchant);
+            Types::addProperty(record, "value", &ESM::Book::mData, &ESM::Book::BKDTstruct::mValue);
+            Types::addProperty(record, "weight", &ESM::Book::mData, &ESM::Book::BKDTstruct::mWeight);
+            Types::addProperty(record, "skill", &ESM::Book::mData, &ESM::Book::BKDTstruct::mSkillId);
+
+            const auto getScroll
+                = [](const T& rec) -> bool { return Types::RecordType<T>::asRecord(rec).mData.mIsScroll; };
+            const auto getEnchant
+                = [](const T& rec) -> float { return Types::RecordType<T>::asRecord(rec).mData.mEnchant * 0.1f; };
+            if constexpr (Types::RecordType<T>::isMutable)
+            {
+                record["isScroll"] = sol::property(
+                    std::move(getScroll), [](T& rec, bool value) { rec.find().mData.mIsScroll = value; });
+                record["enchantCapacity"] = sol::property(std::move(getEnchant), [](T& rec, Misc::FiniteFloat value) {
+                    rec.find().mData.mEnchant = static_cast<int32_t>(std::round(value.mValue * 10));
+                });
+            }
+            else
+            {
+                record["isScroll"] = sol::readonly_property(std::move(getScroll));
+                record["enchantCapacity"] = sol::readonly_property(std::move(getEnchant));
+            }
+        }
+    }
+
     // Populates a book struct from a Lua table.
     ESM::Book tableToBook(const sol::table& rec)
     {
-        ESM::Book book;
-        if (rec["template"] != sol::nil)
-            book = LuaUtil::cast<ESM::Book>(rec["template"]);
-        else
-        {
-            book.blank();
-            book.mData.mSkillId = -1;
-        }
+        auto book = Types::initFromTemplate<ESM::Book>(rec);
         if (rec["name"] != sol::nil)
             book.mName = rec["name"];
         if (rec["model"] != sol::nil)
             book.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         if (rec["icon"] != sol::nil)
-            book.mIcon = rec["icon"];
+            book.mIcon = rec["icon"].get<std::string_view>();
         if (rec["text"] != sol::nil)
             book.mText = rec["text"];
         if (rec["enchant"] != sol::nil)
@@ -49,38 +81,31 @@ namespace
         }
 
         if (rec["enchantCapacity"] != sol::nil)
-            book.mData.mEnchant = static_cast<int32_t>(std::round(rec["enchantCapacity"].get<float>() * 10));
+            book.mData.mEnchant
+                = static_cast<int32_t>(std::round(rec["enchantCapacity"].get<Misc::FiniteFloat>() * 10));
         if (rec["mwscript"] != sol::nil)
         {
             std::string_view scriptId = rec["mwscript"].get<std::string_view>();
             book.mScript = ESM::RefId::deserializeText(scriptId);
         }
         if (rec["weight"] != sol::nil)
-            book.mData.mWeight = rec["weight"];
+            book.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
         if (rec["value"] != sol::nil)
             book.mData.mValue = rec["value"];
         if (rec["isScroll"] != sol::nil)
             book.mData.mIsScroll = rec["isScroll"] ? 1 : 0;
 
         if (rec["skill"] != sol::nil)
-        {
-            ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
-
-            book.mData.mSkillId = -1;
-            if (!skill.empty())
-            {
-                book.mData.mSkillId = ESM::Skill::refIdToIndex(skill);
-                if (book.mData.mSkillId == -1)
-                    throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
-            }
-        }
+            book.mData.mSkillId = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
 
         return book;
     }
-}
 
-namespace MWLua
-{
+    void addMutableBookType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Book>>(lua, "ESM3_MutableBook");
+    }
+
     void addBookBindings(sol::table book, const Context& context)
     {
         sol::state_view lua = context.sol();
@@ -95,29 +120,7 @@ namespace MWLua
             skill[skillName] = skillName;
         }
 
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Book>(book, context);
-
-        sol::usertype<ESM::Book> record = lua.new_usertype<ESM::Book>("ESM3_Book");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mScript; });
-        record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
-        record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
-        record["enchant"] = sol::readonly_property([](const ESM::Book& rec) -> ESM::RefId { return rec.mEnchant; });
-        record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
-        record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
-        record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });
-        record["enchantCapacity"]
-            = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
-        record["skill"] = sol::readonly_property(
-            [](const ESM::Book& rec) -> ESM::RefId { return ESM::Skill::indexToRefId(rec.mData.mSkillId); });
+        addUserType<ESM::Book>(lua, "ESM3_Book");
     }
 }

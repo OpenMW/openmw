@@ -6,6 +6,7 @@
 #include <QString>
 
 #include <compare>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -19,11 +20,11 @@ class QObject;
 
 namespace
 {
-    std::string getEnumValue(const std::vector<std::pair<int, std::string>>& values, int index)
+    std::string_view getEnumValue(const std::vector<std::pair<int, std::string>>& values, int index)
     {
         if (index < 0 || index >= static_cast<int>(values.size()))
         {
-            return "";
+            return {};
         }
         return values[index].second;
     }
@@ -63,18 +64,17 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow(int sourceRow, const QModelIn
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent)
-    , mFilterTimer{ new QTimer(this) }
     , mSourceModel(nullptr)
 {
     setSortCaseSensitivity(Qt::CaseInsensitive);
 
-    mFilterTimer->setSingleShot(true);
+    mFilterTimer.setSingleShot(true);
     int intervalSetting = CSMPrefs::State::get()["ID Tables"]["filter-delay"].toInt();
-    mFilterTimer->setInterval(intervalSetting);
+    mFilterTimer.setInterval(intervalSetting);
 
     connect(&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, this,
         [this](const CSMPrefs::Setting* setting) { this->settingChanged(setting); });
-    connect(mFilterTimer.get(), &QTimer::timeout, this, [this]() { this->timerTimeout(); });
+    connect(&mFilterTimer, &QTimer::timeout, this, [this]() { this->timerTimeout(); });
 }
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex(const std::string& id, int column) const
@@ -97,7 +97,7 @@ void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel* model)
 void CSMWorld::IdTableProxyModel::setFilter(const std::shared_ptr<CSMFilter::Node>& filter)
 {
     mAwaitingFilter = filter;
-    mFilterTimer->start();
+    mFilterTimer.start();
 }
 
 bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
@@ -114,8 +114,8 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex& left, const QModel
 
     if (valuesIt != mEnumColumnCache.end())
     {
-        std::string first = getEnumValue(valuesIt->second, left.data().toInt());
-        std::string second = getEnumValue(valuesIt->second, right.data().toInt());
+        std::string_view first = getEnumValue(valuesIt->second, left.data().toInt());
+        std::string_view second = getEnumValue(valuesIt->second, right.data().toInt());
         return first < second;
     }
     return QSortFilterProxyModel::lessThan(left, right);
@@ -127,15 +127,6 @@ QString CSMWorld::IdTableProxyModel::getRecordId(int sourceRow) const
 
     int idColumn = mSourceModel->findColumnIndex(Columns::ColumnId_Id);
     return mSourceModel->data(mSourceModel->index(sourceRow, idColumn)).toString();
-}
-
-void CSMWorld::IdTableProxyModel::refreshFilter()
-{
-    if (mFilter)
-    {
-        updateColumnMap();
-        invalidateFilter();
-    }
 }
 
 void CSMWorld::IdTableProxyModel::timerTimeout()
@@ -154,25 +145,20 @@ void CSMWorld::IdTableProxyModel::settingChanged(const CSMPrefs::Setting* settin
 {
     if (*setting == "ID Tables/filter-delay")
     {
-        mFilterTimer->setInterval(setting->toInt());
+        mFilterTimer.setInterval(setting->toInt());
     }
 }
 
 void CSMWorld::IdTableProxyModel::sourceRowsInserted(const QModelIndex& parent, int /*start*/, int end)
 {
-    refreshFilter();
     if (!parent.isValid())
     {
         emit rowAdded(getRecordId(end).toUtf8().constData());
     }
 }
 
-void CSMWorld::IdTableProxyModel::sourceRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
-{
-    refreshFilter();
-}
+void CSMWorld::IdTableProxyModel::sourceRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/) {}
 
 void CSMWorld::IdTableProxyModel::sourceDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/)
 {
-    refreshFilter();
 }

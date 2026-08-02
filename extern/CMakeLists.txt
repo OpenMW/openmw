@@ -182,10 +182,8 @@ if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     if (UNIX)
         target_link_libraries(sqlite3 ${CMAKE_DL_LIBS})
     endif()
-    add_library(SQLite::SQLite3 ALIAS sqlite3)
 
-    set(SQLite3_INCLUDE_DIR ${sqlite3_SOURCE_DIR}/ PARENT_SCOPE)
-    set(SQLite3_LIBRARY sqlite3 PARENT_SCOPE)
+    add_library(SQLite3::SQLite3 ALIAS sqlite3)
 endif()
 
 add_subdirectory(smhasher)
@@ -286,8 +284,8 @@ if ((BUILD_COMPONENTS_TESTS OR BUILD_OPENCS_TESTS OR BUILD_OPENMW_TESTS) AND NOT
 
     include(FetchContent)
     FetchContent_Declare(googletest
-        URL https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip
-        URL_HASH SHA512=1479ea2f3172c622c0ca305f5b2bc45a42941221ec0ac7865e6d6d020ec4d008d952fc64e01a4c5138d7bed4148cf75596f25bb9e9044a98bbbf5662053ea11c
+        URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
+        URL_HASH SHA512=2712d6f6e7f38eb0c8d5ebba957588c70aff68ea433c7aa0b31bde8cacfbe47de908a6e5a99a021969da568f5075daa2c45fca602bbf56711d146d333b76562b
         SOURCE_DIR fetched/googletest
     )
     if (MSVC)

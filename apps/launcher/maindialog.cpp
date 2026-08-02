@@ -121,7 +121,7 @@ void Launcher::MainDialog::createPages()
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(this);
     mImportPage = new ImportPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mSettingsPage = new SettingsPage(mGameSettings, this);
+    mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, this);
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mDataFilesPage);

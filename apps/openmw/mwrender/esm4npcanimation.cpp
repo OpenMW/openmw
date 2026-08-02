@@ -60,11 +60,11 @@ namespace MWRender
     static std::string_view chooseTes4EquipmentModel(const Record* rec, bool isFemale)
     {
         if (isFemale && !rec->mModelFemale.empty())
-            return rec->mModelFemale;
+            return rec->mModelFemale.getOriginal();
         else if (!isFemale && !rec->mModelMale.empty())
-            return rec->mModelMale;
+            return rec->mModelMale.getOriginal();
         else
-            return rec->mModel;
+            return rec->mModel.getOriginal();
     }
 
     void ESM4NpcAnimation::updatePartsTES4(const ESM4::Npc& traits)
@@ -82,7 +82,7 @@ namespace MWRender
         {
             const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
             if (const ESM4::Hair* hair = store->get<ESM4::Hair>().search(traits.mHair))
-                insertPart(hair->mModel);
+                insertPart(hair->mModel.getOriginal());
             else
                 Log(Debug::Error) << "Hair not found: " << ESM::RefId(traits.mHair);
         }
@@ -108,7 +108,7 @@ namespace MWRender
                 continue;
             }
             if (usedHeadPartTypes.emplace(part->mType).second)
-                insertPart(part->mModel);
+                insertPart(part->mModel.getOriginal());
         }
     }
 
@@ -176,7 +176,7 @@ namespace MWRender
             if (covers & ~usedParts)
             {
                 usedParts |= covers;
-                insertPart(isFemale ? arma->mModelFemale : arma->mModelMale);
+                insertPart(isFemale ? arma->mModelFemale.getOriginal() : arma->mModelMale.getOriginal());
             }
         }
 

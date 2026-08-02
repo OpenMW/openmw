@@ -1,5 +1,7 @@
 #include "magiceffectcheck.hpp"
 
+#include <format>
+
 #include <apps/opencs/model/doc/messages.hpp>
 #include <apps/opencs/model/prefs/category.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
@@ -81,22 +83,23 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages& messa
     }
     else
     {
-        if (mIcons.searchId(effect.mIcon) == -1)
+        if (mIcons.searchId(effect.mIcon.getOriginal()) == -1)
         {
-            std::string ddsIcon = effect.mIcon;
+            std::string ddsIcon = effect.mIcon.getOriginal();
             if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsIcon) && mIcons.searchId(ddsIcon) != -1))
-                messages.add(id, "Icon '" + effect.mIcon + "' does not exist", "", CSMDoc::Message::Severity_Error);
+                messages.add(id, std::format("Icon '{}' does not exist", effect.mIcon.getOriginal()), "",
+                    CSMDoc::Message::Severity_Error);
         }
     }
 
     if (!effect.mParticle.empty())
     {
-        if (mTextures.searchId(effect.mParticle) == -1)
+        if (mTextures.searchId(effect.mParticle.getOriginal()) == -1)
         {
-            std::string ddsParticle = effect.mParticle;
+            std::string ddsParticle = effect.mParticle.getOriginal();
             if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsParticle) && mTextures.searchId(ddsParticle) != -1))
-                messages.add(id, "Particle texture '" + effect.mParticle + "' does not exist", "",
-                    CSMDoc::Message::Severity_Error);
+                messages.add(id, std::format("Particle texture '{}' does not exist", effect.mParticle.getOriginal()),
+                    "", CSMDoc::Message::Severity_Error);
         }
     }
 

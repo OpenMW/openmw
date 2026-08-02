@@ -77,24 +77,6 @@ namespace Config
 
         QString getResourcesVfs() const;
 
-        inline void removeDataDir(const QString& existingDir)
-        {
-            if (!existingDir.isEmpty())
-            {
-                // non-user settings can't be removed as we can't edit the openmw.cfg they're in
-                mDataDirs.erase(
-                    std::remove_if(mDataDirs.begin(), mDataDirs.end(),
-                        [&](const SettingValue& dir) { return isUserSetting(dir) && dir.value == existingDir; }),
-                    mDataDirs.end());
-            }
-        }
-
-        inline void addDataDir(const SettingValue& dir)
-        {
-            if (!dir.value.isEmpty())
-                mDataDirs.append(dir);
-        }
-
         inline QString getDataLocal() const { return mDataLocal; }
 
         bool hasMaster();

@@ -129,8 +129,8 @@ namespace MWGui
 
                 for (size_t i = 0; i < size; ++i)
                 {
-                    minorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][0]);
-                    majorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][1]);
+                    minorSkills[i] = cls->mData.mSkills[i][0];
+                    majorSkills[i] = cls->mData.mSkills[i][1];
                 }
 
                 configureSkills(majorSkills, minorSkills);

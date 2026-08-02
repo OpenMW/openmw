@@ -22,7 +22,7 @@ namespace MWRender
         }
 
     private:
-        std::array<osg::ref_ptr<osg::FrameBufferObject>, 2> mFBO;
-        std::array<osg::ref_ptr<osg::FrameBufferObject>, 2> mOriginalFBO;
+        std::array<osg::observer_ptr<osg::FrameBufferObject>, 2> mFBO;
+        std::array<osg::observer_ptr<osg::FrameBufferObject>, 2> mOriginalFBO;
     };
 }

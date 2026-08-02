@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 namespace ESM4
 {
@@ -45,7 +46,7 @@ namespace ESM4
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
-        std::string mModel;
+        ESM::Path mModel;
 
         std::uint8_t mIdleFlags;
         std::uint8_t mIdleCount;

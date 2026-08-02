@@ -40,6 +40,7 @@ I.Settings.registerGroup({
     permanentStorage = true,
     order = 0,
     settings = {
+        floatSetting('', 'maxDistance', 800),
         boolSetting('', 'viewOverShoulder', false),
         floatSetting('', 'shoulderOffsetX', 30),
         floatSetting('', 'shoulderOffsetY', -10),
@@ -74,6 +75,8 @@ local thirdPerson = storage.playerSection(thirdPersonGroup)
 local headBobbing = storage.playerSection(headBobbingGroup)
 
 local function updateViewOverShoulderDisabled()
+    I.Settings.updateRendererArgument(thirdPersonGroup, 'maxDistance', { min = 30, max = 2400 })
+
     local shoulderDisabled = not thirdPerson:get('viewOverShoulder')
     I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetX', { disabled = shoulderDisabled })
     I.Settings.updateRendererArgument(thirdPersonGroup, 'shoulderOffsetY', { disabled = shoulderDisabled })

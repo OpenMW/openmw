@@ -143,12 +143,17 @@ namespace
 
     class TestInterpreterContext : public Interpreter::Context
     {
+    public:
+        using Message = std::pair<std::string, std::vector<std::string>>;
+        using Messages = std::vector<Message>;
+
+    private:
         LocalVariables mLocals;
         std::map<ESM::RefId, GlobalVariables> mMembers;
-        std::vector<std::string> mMessages;
+        Messages mMessages;
 
     public:
-        const std::vector<std::string>& getMessages() { return mMessages; }
+        const Messages& getMessages() { return mMessages; }
 
         ESM::RefId getTarget() const override { return ESM::RefId(); }
 
@@ -166,7 +171,7 @@ namespace
 
         void messageBox(std::string_view message, const std::vector<std::string>& buttons) override
         {
-            mMessages.emplace_back(message);
+            mMessages.emplace_back(message, buttons);
         }
 
         void report(const std::string& message) override {}

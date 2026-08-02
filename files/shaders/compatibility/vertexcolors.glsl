@@ -36,3 +36,8 @@ vec4 getSpecularColor()
         return passColor;
     return gl_FrontMaterial.specular;
 }
+
+bool skipLighting()
+{
+    return getAmbientColor().xyz == vec3(0.0) && getDiffuseColor().xyz == vec3(0.0) && getSpecularColor().xyz == vec3(0.0);
+}

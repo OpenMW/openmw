@@ -50,10 +50,11 @@ void CSMTools::BodyPartCheckStage::perform(int stage, CSMDoc::Messages& messages
         messages.add(id, "Invalid type", "", CSMDoc::Message::Severity_Error);
 
     // Check MODL
-    if (bodyPart.mModel.empty())
+    if (bodyPart.mModel.getOriginal().empty())
         messages.add(id, "Model is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mMeshes.searchId(bodyPart.mModel) == -1)
-        messages.add(id, "Model '" + bodyPart.mModel + "' does not exist", "", CSMDoc::Message::Severity_Error);
+    else if (mMeshes.searchId(bodyPart.mModel.getOriginal()) == -1)
+        messages.add(id, std::format("Model '{}' does not exist", bodyPart.mModel.getOriginal()), "",
+            CSMDoc::Message::Severity_Error);
 
     // Check FNAM for skin body parts (for non-skin body parts it's meaningless)
     if (bodyPart.mData.mType == ESM::BodyPart::MT_Skin)

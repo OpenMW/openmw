@@ -54,7 +54,8 @@ namespace LuaUi
     void LuaTextEdit::updateCoord()
     {
         WidgetExtension::updateCoord();
-        mEditBox->setSize(widget()->getSize());
+        mEditBox->setPosition(getContentOffset());
+        mEditBox->setSize(getContentSize());
     }
 
     void LuaTextEdit::updateChildren()
@@ -70,10 +71,24 @@ namespace LuaUi
         MyGUI::IntSize normalSize = WidgetExtension::calculateSize();
         if (mAutoSize)
         {
-            mEditBox->setSize(normalSize);
+            const MyGUI::IntSize contentSize(std::max(0, normalSize.width - (mPadding.mLeft + mPadding.mRight)),
+                std::max(0, normalSize.height - (mPadding.mTop + mPadding.mBottom)));
+            mEditBox->setSize(contentSize);
             int targetHeight = mMultiline ? mEditBox->getTextSize().height : mEditBox->getFontHeight();
-            normalSize.height = std::max(normalSize.height, targetHeight);
+            normalSize.height = std::max(normalSize.height, targetHeight + mPadding.mTop + mPadding.mBottom);
         }
         return normalSize;
+    }
+
+    const std::vector<std::string_view>& LuaTextEdit::allUsedProperties() const
+    {
+        static std::vector<std::string_view> usedProps = std::invoke([this] {
+            std::vector<std::string_view> props = { "text", "textSize", "textColor", "wordWrap", "textAlignH",
+                "textAlignV", "multiline", "readOnly", "autoSize" };
+            auto baseProps = WidgetExtension::allUsedProperties();
+            props.insert(props.end(), baseProps.begin(), baseProps.end());
+            return props;
+        });
+        return usedProps;
     }
 }

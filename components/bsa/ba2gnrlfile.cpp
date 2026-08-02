@@ -21,14 +21,13 @@ namespace Bsa
     const uint32_t sInvalidOffset = std::numeric_limits<uint32_t>::max();
 
     BA2GNRLFile::FileRecord::FileRecord()
-        : size(0)
-        , offset(sInvalidOffset)
+        : mOffset(sInvalidOffset)
     {
     }
 
     bool BA2GNRLFile::FileRecord::isValid() const
     {
-        return offset != sInvalidOffset;
+        return mOffset != sInvalidOffset;
     }
 
     BA2GNRLFile::BA2GNRLFile() {}
@@ -49,9 +48,9 @@ namespace Bsa
             FileRecord file;
             uint32_t unknown;
             in.read(reinterpret_cast<char*>(&unknown), sizeof(uint32_t));
-            in.read(reinterpret_cast<char*>(&file.offset), sizeof(int64_t));
-            in.read(reinterpret_cast<char*>(&file.packedSize), sizeof(uint32_t));
-            in.read(reinterpret_cast<char*>(&file.size), sizeof(uint32_t));
+            in.read(reinterpret_cast<char*>(&file.mOffset), sizeof(int64_t));
+            in.read(reinterpret_cast<char*>(&file.mPackedSize), sizeof(uint32_t));
+            in.read(reinterpret_cast<char*>(&file.mSize), sizeof(uint32_t));
 
             uint32_t baadfood;
             in.read(reinterpret_cast<char*>(&baadfood), sizeof(uint32_t));
@@ -61,8 +60,8 @@ namespace Bsa
             mFolders[dirHash][{ nameHash, extHash }] = file;
 
             FileStruct fileStruct{};
-            fileStruct.mFileSize = file.size;
-            fileStruct.mOffset = file.offset;
+            fileStruct.mFileSize = file.mSize;
+            fileStruct.mOffset = file.mOffset;
             mFiles.push_back(fileStruct);
         }
     }
@@ -173,14 +172,14 @@ namespace Bsa
 
     Files::IStreamPtr BA2GNRLFile::getFile(const FileRecord& fileRecord)
     {
-        const uint32_t inputSize = fileRecord.packedSize ? fileRecord.packedSize : fileRecord.size;
-        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, inputSize);
-        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(fileRecord.size);
-        if (fileRecord.packedSize)
+        const uint32_t inputSize = fileRecord.mPackedSize ? fileRecord.mPackedSize : fileRecord.mSize;
+        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.mOffset, inputSize);
+        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(fileRecord.mSize);
+        if (fileRecord.mPackedSize)
         {
             std::vector<char> buffer(inputSize);
             streamPtr->read(buffer.data(), inputSize);
-            uLongf destSize = static_cast<uLongf>(fileRecord.size);
+            uLongf destSize = static_cast<uLongf>(fileRecord.mSize);
             int ec = ::uncompress(reinterpret_cast<Bytef*>(memoryStreamPtr->getRawData()), &destSize,
                 reinterpret_cast<Bytef*>(buffer.data()), static_cast<uLong>(buffer.size()));
 
@@ -189,7 +188,7 @@ namespace Bsa
         }
         else
         {
-            streamPtr->read(memoryStreamPtr->getRawData(), fileRecord.size);
+            streamPtr->read(memoryStreamPtr->getRawData(), fileRecord.mSize);
         }
         return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
     }

@@ -121,7 +121,7 @@ namespace MWGui
                     tooltipSize = createToolTip(info, checkOwned());
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getCellRef().getCount(), true, checkOwned());
 
                 MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
                 position(tooltipPosition, tooltipSize, viewSize);
@@ -826,8 +826,7 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
-        const ESM::Attribute* attr
-            = store.get<ESM::Attribute>().find(ESM::Attribute::indexToRefId(skill->mData.mAttribute));
+        const ESM::Attribute* attr = store.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
@@ -888,7 +887,7 @@ namespace MWGui
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
         widget->setUserString("ImageTexture_BirthSignImage",
-            Misc::ResourceHelpers::correctTexturePath(VFS::Path::toNormalized(sign->mTexture), *vfs));
+            Misc::ResourceHelpers::correctTexturePath(sign->mTexture.getNormalized(), *vfs));
         widget->setUserString("Caption_BirthSignName", sign->mName);
         widget->setUserString("Caption_BirthSignDescription", sign->mDescription);
 
@@ -959,10 +958,8 @@ namespace MWGui
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
-        std::string icon = effect->mIcon;
-        icon.insert(icon.rfind('\\') + 1, "b_");
-        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
-            VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+        const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
+            effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS());
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");

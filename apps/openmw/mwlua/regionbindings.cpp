@@ -1,6 +1,10 @@
 #include "regionbindings.hpp"
 #include "recordstore.hpp"
 
+#include <algorithm>
+#include <span>
+#include <stdexcept>
+
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/lua/luastate.hpp>
@@ -18,6 +22,17 @@ namespace sol
     struct is_automagical<ESM::Region::SoundRef> : std::false_type
     {
     };
+}
+
+namespace
+{
+    std::span<const uint8_t> getRegionWeatherChances(const ESM::Region& rec)
+    {
+        const auto chances = MWBase::Environment::get().getWorld()->getRegionWeatherChances(rec.mId);
+        if (!chances.empty())
+            return chances;
+        return rec.mData.mProbabilities;
+    }
 }
 
 namespace MWLua
@@ -50,13 +65,36 @@ namespace MWLua
 
         regionT["weatherProbabilities"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
-            for (size_t i = 0; i < rec.mData.mProbabilities.size(); ++i)
+            const auto chances = getRegionWeatherChances(rec);
+            for (size_t i = 0; i < chances.size(); ++i)
             {
                 const MWWorld::Weather* weather = MWBase::Environment::get().getWorld()->getWeather(i);
-                res[weather->mId.serializeText()] = rec.mData.mProbabilities[i];
+                if (weather != nullptr)
+                    res[weather->mId.serializeText()] = chances[i];
             }
             return LuaUtil::makeReadOnly(res);
         });
+        regionT["setProbability"] = [](const ESM::Region& rec, std::string_view weatherId, int value) {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            ESM::RefId id = ESM::RefId::deserializeText(weatherId);
+            const auto& allWeather = world->getAllWeather();
+            auto it = std::find_if(allWeather.begin(), allWeather.end(),
+                [id](const MWWorld::Weather& weather) { return weather.mId == id; });
+            if (it == allWeather.end())
+                throw std::runtime_error("Weather \"" + std::string(weatherId) + "\" not found");
+
+            const auto current = getRegionWeatherChances(rec);
+            std::vector<uint8_t> chances(current.begin(), current.end());
+            const size_t index = std::distance(allWeather.begin(), it);
+            if (chances.size() <= index)
+                chances.resize(index + 1, 0);
+            chances[index] = static_cast<uint8_t>(std::clamp(value, 0, 100));
+            world->modRegion(rec.mId, chances);
+        };
+        auto resetProbability = [](const ESM::Region& rec) {
+            MWBase::Environment::get().getWorld()->modRegion(rec.mId, rec.mData.mProbabilities);
+        };
+        regionT["resetProbability"] = resetProbability;
         regionT["sounds"] = sol::readonly_property([lua = lua.lua_state()](const ESM::Region& rec) {
             sol::table res(lua, sol::create);
             for (const auto& soundRef : rec.mSoundList)

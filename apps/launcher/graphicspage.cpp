@@ -217,9 +217,9 @@ QRect Launcher::GraphicsPage::getMaximumResolution()
     {
         QRect res = screen->geometry();
         if (res.width() > max.width())
-            max.setWidth(res.width());
+            max.setWidth(res.width() * screen->devicePixelRatio());
         if (res.height() > max.height())
-            max.setHeight(res.height());
+            max.setHeight(res.height() * screen->devicePixelRatio());
     }
     return max;
 }

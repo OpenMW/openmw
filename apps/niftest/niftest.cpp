@@ -144,7 +144,7 @@ bool readFile(
                 Nif::NIFFile file(VFS::Path::Normalized(Files::pathToUnicodeString(fullPath)));
                 Nif::Reader reader(file, nullptr);
                 if (vfs != nullptr)
-                    reader.parse(vfs->get(pathStr));
+                    reader.parse(vfs->get(VFS::Path::Normalized(pathStr)));
                 else
                     reader.parse(Files::openConstrainedFileStream(fullPath));
                 break;
@@ -152,7 +152,7 @@ bool readFile(
             case FileClass::Material:
             {
                 if (vfs != nullptr)
-                    Bgsm::parse(vfs->get(pathStr));
+                    Bgsm::parse(vfs->get(VFS::Path::Normalized(pathStr)));
                 else
                     Bgsm::parse(Files::openConstrainedFileStream(fullPath));
                 break;
@@ -272,7 +272,6 @@ int main(int argc, char** argv)
     if (!parseOptions(argc, argv, files, sources, writeDebugLog, quiet))
         return 1;
 
-    Nif::Reader::setLoadUnsupportedFiles(true);
     Nif::Reader::setWriteNifDebugLog(writeDebugLog);
 
     std::unique_ptr<VFS::Manager> vfs;

@@ -7,9 +7,16 @@
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/esm3/loaddoor.hpp>
+#include <components/esm3/loadench.hpp>
+#include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/finitevalues.hpp>
@@ -126,7 +133,7 @@ namespace MWLua
             = [cells3Store, cells4Store](const CellsStore&) { return cells3Store->getSize() + cells4Store->getSize(); };
         cells[sol::meta_function::index]
             = [cells3Store, cells4Store](const CellsStore&, size_t index) -> sol::optional<GCell> {
-            if (index > cells3Store->getSize() + cells3Store->getSize() || index == 0)
+            if (index > cells3Store->getSize() + cells4Store->getSize() || index == 0)
                 return sol::nullopt;
 
             index--; // Translate from Lua's 1-based indexing.
@@ -191,9 +198,25 @@ namespace MWLua
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(clothing);
             },
+            [lua = context.mLua](const ESM::CreatureLevList& list) -> const ESM::CreatureLevList* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(list);
+            },
             [lua = context.mLua](const ESM::Book& book) -> const ESM::Book* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(book);
+            },
+            [lua = context.mLua](const ESM::Enchantment& enchantment) -> const ESM::Enchantment* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(enchantment);
+            },
+            [lua = context.mLua](const ESM::Ingredient& ingred) -> const ESM::Ingredient* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(ingred);
+            },
+            [lua = context.mLua](const ESM::ItemLevList& list) -> const ESM::ItemLevList* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(list);
             },
             [lua = context.mLua](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
                 checkGameInitialized(lua);
@@ -202,6 +225,18 @@ namespace MWLua
             [lua = context.mLua](const ESM::Potion& potion) -> const ESM::Potion* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(potion);
+            },
+            [lua = context.mLua](const ESM::Probe& probe) -> const ESM::Probe* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(probe);
+            },
+            [lua = context.mLua](const ESM::Spell& spell) -> const ESM::Spell* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(spell);
+            },
+            [lua = context.mLua](const ESM::Static& stat) -> const ESM::Static* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(stat);
             },
             [lua = context.mLua](const ESM::NPC& npc) -> const ESM::NPC* {
                 checkGameInitialized(lua);
@@ -216,6 +251,10 @@ namespace MWLua
                 return MWBase::Environment::get().getESMStore()->insert(crea);
             },
             [lua = context.mLua](const ESM::Container& cont) -> const ESM::Container* {
+                checkGameInitialized(lua);
+                return MWBase::Environment::get().getESMStore()->insert(cont);
+            },
+            [lua = context.mLua](const ESM::Door& cont) -> const ESM::Door* {
                 checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(cont);
             },

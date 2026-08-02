@@ -8,7 +8,7 @@ makefile
 build*/
 prebuilt
 
-##windows build process
+## build process
 /deps
 /MSVC*
 

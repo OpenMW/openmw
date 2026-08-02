@@ -84,6 +84,24 @@ namespace MWLua
                 scripts->onConsume(LObject(consumable));
         }
 
+        void operator()(const OnDropped& event) const
+        {
+            MWWorld::Ptr obj = getPtr(event.mObject);
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (obj.isEmpty() || actor.isEmpty())
+                return;
+            mGlobalScripts.onDropped(GObject(obj), GObject(actor), event.mPosition, event.mRotation);
+        }
+
+        void operator()(const OnPlaced& event) const
+        {
+            MWWorld::Ptr obj = getPtr(event.mObject);
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (obj.isEmpty() || actor.isEmpty())
+                return;
+            mGlobalScripts.onPlaced(GObject(obj), GObject(actor), event.mPosition, event.mRotation);
+        }
+
         void operator()(const OnNewExterior& event) const { mGlobalScripts.onNewExterior(GCell{ &event.mCell }); }
 
         void operator()(const OnAnimationTextKey& event) const
@@ -93,6 +111,16 @@ namespace MWLua
                 return;
             if (auto* scripts = getLocalScripts(actor))
                 scripts->onAnimationTextKey(event.mGroupname, event.mKey);
+        }
+
+        void operator()(const OnAnimationEnded& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (actor.isEmpty())
+                return;
+            if (auto* scripts = getLocalScripts(actor))
+                scripts->onAnimationEnded(
+                    event.mGroupname, event.mStartKey, event.mStopKey, event.mTime, event.mCompletion);
         }
 
         void operator()(const OnSkillUse& event) const

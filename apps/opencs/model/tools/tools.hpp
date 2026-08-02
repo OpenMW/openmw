@@ -38,11 +38,11 @@ namespace CSMTools
         CSMDoc::Document& mDocument;
         CSMWorld::Data& mData;
         CSMDoc::Operation* mVerifierOperation;
-        CSMDoc::OperationHolder mVerifier;
+        CSMDoc::OperationHolder* mVerifier;
         SearchOperation* mSearchOperation;
-        CSMDoc::OperationHolder mSearch;
+        CSMDoc::OperationHolder* mSearch;
         MergeOperation* mMergeOperation;
-        CSMDoc::OperationHolder mMerge;
+        CSMDoc::OperationHolder* mMerge;
         std::map<int, ReportModel*> mReports;
         int mNextReportNumber;
         std::map<int, int> mActiveReports; // type, report number

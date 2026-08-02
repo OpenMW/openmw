@@ -37,7 +37,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Repair::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Repair::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Repair>(ptr);
     }
@@ -78,11 +78,11 @@ namespace MWClass
         return val;
     }
 
-    const std::string& Repair::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Repair::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Repair>* ref = ptr.get<ESM::Repair>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getNormalized();
     }
 
     bool Repair::hasItemHealth(const MWWorld::ConstPtr& ptr) const
@@ -104,7 +104,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
 

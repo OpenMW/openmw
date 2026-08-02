@@ -817,7 +817,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                return race.mData.mBonus[subRowIndex].mSkill; // can be -1
+                return ESM::Skill::refIdToIndex(race.mData.mBonus[subRowIndex].mSkill); // can be -1
             case 1:
                 return race.mData.mBonus[subRowIndex].mBonus;
             default:
@@ -836,7 +836,7 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0:
-                race.mData.mBonus[subRowIndex].mSkill = value.toInt();
+                race.mData.mBonus[subRowIndex].mSkill = ESM::Skill::indexToRefId(value.toInt());
                 break; // can be -1
             case 1:
                 race.mData.mBonus[subRowIndex].mBonus = value.toInt();

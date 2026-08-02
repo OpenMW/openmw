@@ -163,6 +163,7 @@ namespace MWMechanics
         std::string mCurrentHit;
 
         UpperBodyState mUpperBodyState{ UpperBodyState::None };
+        bool mResetIdleOnAttackEnd{ false };
 
         JumpingState mJumpState{ JumpState_None };
         std::string mCurrentJump;
@@ -171,6 +172,7 @@ namespace MWMechanics
         int mWeaponType{ ESM::Weapon::None };
         std::string mCurrentWeapon;
 
+        float mAttackWindUp{ -1.f };
         float mAttackStrength{ -1.f };
         bool mReadyToHit{ false };
         MWWorld::Ptr mAttackVictim;

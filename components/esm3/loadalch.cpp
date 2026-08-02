@@ -75,8 +75,8 @@ namespace ESM
             return;
         }
 
-        esm.writeHNCString("MODL", mModel);
-        esm.writeHNOCString("TEXT", mIcon);
+        esm.writeHNCString("MODL", mModel.getOriginal());
+        esm.writeHNOCString("TEXT", mIcon.getOriginal());
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("FNAM", mName);
         esm.writeNamedComposite("ALDT", mData);

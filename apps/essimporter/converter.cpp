@@ -467,6 +467,7 @@ namespace ESSImport
                 out.mBowId = ESM::RefId::stringRefId(pnam.mBowId.toString());
                 out.mVelocity = pnam.mVelocity;
                 out.mAttackStrength = pnam.mAttackStrength;
+                out.mAttackWindUp = -1;
 
                 esm.startRecord(ESM::REC_PROJ);
                 out.save(esm);

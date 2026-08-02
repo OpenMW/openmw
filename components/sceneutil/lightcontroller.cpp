@@ -36,7 +36,7 @@ namespace SceneUtil
         // if (time == mLastTime)
         //    return;
 
-        osg::Light* light = node->getLight(nv->getTraversalNumber());
+        SceneUtil::Light* light = node->getLight(nv->getTraversalNumber());
 
         if (mType == LT_Normal)
         {

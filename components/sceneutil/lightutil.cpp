@@ -1,7 +1,6 @@
 #include "lightutil.hpp"
 
 #include <osg/Group>
-#include <osg/Light>
 
 #include <osgParticle/ParticleSystem>
 
@@ -43,7 +42,7 @@ namespace
 namespace SceneUtil
 {
 
-    void configureLight(osg::Light* light, float radius, bool isExterior)
+    void configureLight(SceneUtil::Light* light, float radius, bool isExterior)
     {
         float quadraticAttenuation = 0.f;
         float linearAttenuation = 0.f;
@@ -116,7 +115,7 @@ namespace SceneUtil
         const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
-        osg::ref_ptr<osg::Light> light(new osg::Light);
+        osg::ref_ptr<SceneUtil::Light> light(new SceneUtil::Light);
         lightSource->setNodeMask(lightMask);
 
         // The minimum scene light radius is 16 in Morrowind

@@ -19,6 +19,7 @@
 
 #include "engineevents.hpp"
 #include "globalscripts.hpp"
+#include "loadscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
 #include "menuscripts.hpp"
@@ -40,8 +41,10 @@ namespace MWLua
         LuaManager(LuaManager&&) = delete;
         ~LuaManager();
 
-        // Called by engine.cpp when the environment is fully initialized.
-        void init();
+        // Called by engine.cpp as part of content file loading
+        void initPreLoad();
+        void contentFilesLoaded() override;
+        void initPostLoad();
 
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
         void savePermanentStorage(const std::filesystem::path& userConfigPath) override;
@@ -86,17 +89,24 @@ namespace MWLua
             mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
         }
         void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) override;
+        void objectDropped(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position,
+            const osg::Quat& rotation) override;
+        void objectPlaced(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, const osg::Vec3f& position,
+            const osg::Quat& rotation) override;
         void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) override;
         void playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
             const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
             std::string_view start, std::string_view stop, float startpoint, uint32_t loops,
             bool loopfallback) override;
+        void animationEnded(const MWWorld::Ptr& actor, std::string_view groupname, float time, float completion,
+            std::string_view startKey, std::string_view stopKey) override;
         void skillUse(const MWWorld::Ptr& actor, ESM::RefId skillId, int useType, float scale) override;
         void skillLevelUp(const MWWorld::Ptr& actor, ESM::RefId skillId, std::string_view source) override;
         void jailTimeServed(const MWWorld::Ptr& actor, int days) override;
         void onHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& weapon,
-            const MWWorld::Ptr& ammo, int attackType, float attackStrength, float damage, bool isHealth,
-            const osg::Vec3f& hitPos, bool successful, MWMechanics::DamageSourceType sourceType) override;
+            const MWWorld::Ptr& ammo, int attackType, float attackStrength, float attackWindUp, float damage,
+            bool isHealth, const osg::Vec3f& hitPos, bool successful,
+            MWMechanics::DamageSourceType sourceType) override;
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
@@ -104,7 +114,13 @@ namespace MWLua
         void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
         void uiModeChanged(const MWWorld::Ptr& arg) override;
+        void viewportResized(int width, int height) override;
         void actorDied(const MWWorld::Ptr& actor) override;
+        void onDialogueResponse(
+            const MWWorld::Ptr& actor, const ESM::DialInfo& info, const ESM::Dialogue& record) override;
+        void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item, const MWWorld::Ptr& target,
+            const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption, bool stackable,
+            bool isReflect) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
@@ -196,10 +212,11 @@ namespace MWLua
         std::map<std::string, sol::object> mLocalPackages;
         std::map<std::string, sol::object> mPlayerPackages;
 
+        LoadScripts mLoadScripts{ &mLua };
         MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
-        std::set<LocalScripts*> mActiveLocalScripts;
-        std::vector<LocalScripts*> mQueuedAutoStartedScripts;
+        std::set<LuaUtil::ScriptsContainerWeakPtr, std::less<>> mActiveLocalScripts;
+        std::vector<LuaUtil::ScriptsContainerWeakPtr> mQueuedAutoStartedScripts;
         ObjectLists mObjectLists;
 
         MWWorld::Ptr mPlayer;

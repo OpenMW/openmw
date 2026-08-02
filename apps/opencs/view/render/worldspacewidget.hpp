@@ -166,6 +166,7 @@ namespace CSVRender
         virtual void setEditLock(bool locked);
 
         CSMDoc::Document& getDocument();
+        const CSMDoc::Document& getDocument() const;
 
         /// \param elementMask Elements to be affected by the clear operation
         virtual void clearSelection(int elementMask) = 0;

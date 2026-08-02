@@ -560,17 +560,6 @@ namespace Nif
 
         // Get BCD version
         nif.read(mVersion);
-        // 4.0.0.0 is an older, practically identical version of the format.
-        // It's not used by Morrowind assets but Morrowind supports it.
-        static const std::array<uint32_t, 2> supportedVers = {
-            NIFStream::generateVersion(4, 0, 0, 0),
-            NIFFile::VER_MW,
-        };
-        const bool supportedVersion
-            = std::find(supportedVers.begin(), supportedVers.end(), mVersion) != supportedVers.end();
-
-        if (!supportedVersion && !sLoadUnsupportedFiles)
-            throw Nif::Exception("Unsupported NIF version: " + versionToString(mVersion), mFilename);
 
         const bool hasEndianness = mVersion >= NIFStream::generateVersion(20, 0, 0, 4);
         const bool hasUserVersion = mVersion >= NIFStream::generateVersion(10, 0, 1, 8);
@@ -709,6 +698,8 @@ namespace Nif
         // Determine which records are roots
         const std::uint32_t rootsCount = nif.get<uint32_t>();
         mRoots.reserve(rootsCount);
+        constexpr std::uint32_t maxDoesNotPointWarnings = 10;
+        std::uint32_t doesNotPointWarnings = 0;
         for (std::size_t i = 0; i < rootsCount; i++)
         {
             std::int32_t idx;
@@ -720,10 +711,17 @@ namespace Nif
             else
             {
                 mRoots.push_back(nullptr);
-                Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
-                                    << ". File: " << mFilename;
+                ++doesNotPointWarnings;
+                if (doesNotPointWarnings <= maxDoesNotPointWarnings)
+                {
+                    Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index "
+                                        << idx << ". File: " << mFilename;
+                }
             }
         }
+        if (doesNotPointWarnings > maxDoesNotPointWarnings)
+            Log(Debug::Warning) << "NIFFile Warning: " << doesNotPointWarnings - maxDoesNotPointWarnings
+                                << " more roots did not point to a record. File: " << mFilename;
 
         // Once parsing is done, do post-processing.
         for (const auto& record : mRecords)
@@ -735,13 +733,7 @@ namespace Nif
         mUseSkinning = skinning;
     }
 
-    std::atomic_bool Reader::sLoadUnsupportedFiles = false;
     std::atomic_bool Reader::sWriteNifDebugLog = false;
-
-    void Reader::setLoadUnsupportedFiles(bool load)
-    {
-        sLoadUnsupportedFiles = load;
-    }
 
     void Reader::setWriteNifDebugLog(bool value)
     {

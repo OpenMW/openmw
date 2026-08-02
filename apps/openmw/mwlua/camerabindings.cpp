@@ -65,9 +65,12 @@ namespace MWLua
         api["setExtraPitch"] = [camera](const FiniteFloat v) { camera->setExtraPitch(-v); };
         api["setExtraYaw"] = [camera](const FiniteFloat v) { camera->setExtraYaw(-v); };
         api["setExtraRoll"] = [camera](const FiniteFloat v) { camera->setExtraRoll(-v); };
+        api["setProjectionOffset"]
+            = [renderingManager](const osg::Vec2f& v) { renderingManager->setProjectionOffset(v); };
         api["getExtraPitch"] = [camera]() { return -camera->getExtraPitch(); };
         api["getExtraYaw"] = [camera]() { return -camera->getExtraYaw(); };
         api["getExtraRoll"] = [camera]() { return -camera->getExtraRoll(); };
+        api["getProjectionOffset"] = [renderingManager]() { return renderingManager->getProjectionOffset(); };
 
         api["getThirdPersonDistance"] = [camera]() { return camera->getCameraDistance(); };
         api["setPreferredThirdPersonDistance"]

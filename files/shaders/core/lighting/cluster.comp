@@ -1,0 +1,51 @@
+#version 430 core
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+#include "lib/light/bindings.glsl"
+
+uniform float near;
+uniform mat4 inverseProjectionMatrix;
+uniform vec3 gridSize;
+uniform vec2 screenRes;
+uniform float clusterFar;
+
+vec3 lineIntersectionWithZPlane(vec3 startPoint, vec3 endPoint, float zDistance)
+{
+    vec3 direction = endPoint - startPoint;
+    vec3 normal = vec3(0.0, 0.0, -1.0);
+
+    float t = (zDistance - dot(normal, startPoint)) / dot(normal, direction);
+    return startPoint + t * direction;
+}
+vec3 screenToView(vec2 screenCoord)
+{
+    vec4 ndc = vec4(screenCoord / screenRes * 2.0 - 1.0, -1.0, 1.0);
+
+    vec4 viewCoord = inverseProjectionMatrix * ndc;
+    viewCoord /= viewCoord.w;
+    return viewCoord.xyz;
+}
+
+void main()
+{
+    uint tileIndex = gl_WorkGroupID.x + (gl_WorkGroupID.y * uint(gridSize.x)) + (gl_WorkGroupID.z * uint(gridSize.x) * uint(gridSize.y));
+    vec2 tileSize = screenRes / ivec2(gridSize.xy);
+
+    vec2 minTile_screenspace = gl_WorkGroupID.xy * tileSize;
+    vec2 maxTile_screenspace = (gl_WorkGroupID.xy + 1) * tileSize;
+
+    vec3 minTile = screenToView(minTile_screenspace);
+    vec3 maxTile = screenToView(maxTile_screenspace);
+
+    float planeNear = near * pow(clusterFar / near, gl_WorkGroupID.z / gridSize.z);
+    float planeFar = near * pow(clusterFar / near, (gl_WorkGroupID.z + 1) / gridSize.z);
+
+    vec3 minPointNear = lineIntersectionWithZPlane(vec3(0, 0, 0), minTile, planeNear);
+    vec3 minPointFar = lineIntersectionWithZPlane(vec3(0, 0, 0), minTile, planeFar);
+    vec3 maxPointNear = lineIntersectionWithZPlane(vec3(0, 0, 0), maxTile, planeNear);
+    vec3 maxPointFar = lineIntersectionWithZPlane(vec3(0, 0, 0), maxTile, planeFar);
+
+    clusters[tileIndex].minPoint = vec4(min(minPointNear, minPointFar), 0.0);
+    clusters[tileIndex].maxPoint = vec4(max(maxPointNear, maxPointFar), 0.0);
+}

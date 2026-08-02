@@ -50,7 +50,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Miscellaneous::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Miscellaneous>(ptr);
     }
@@ -125,11 +125,11 @@ namespace MWClass
         return soundMisc;
     }
 
-    const std::string& Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Miscellaneous::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
@@ -151,7 +151,7 @@ namespace MWClass
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count)
             + MWGui::ToolTips::getSoulString(ptr.getCellRef());
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
 

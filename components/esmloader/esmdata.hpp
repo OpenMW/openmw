@@ -3,6 +3,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <string_view>
 #include <vector>
@@ -46,7 +47,7 @@ namespace EsmLoader
         ~EsmData();
     };
 
-    std::string_view getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type);
+    VFS::Path::NormalizedView getModel(const EsmData& content, const ESM::RefId& refId, ESM::RecNameInts type);
 
     ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, std::string_view id);
 }

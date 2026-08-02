@@ -4,7 +4,7 @@
 #include <exception>
 #include <vector>
 
-#include <QTimer>
+#include <QCoreApplication>
 
 #include <components/debug/debuglog.hpp>
 
@@ -55,21 +55,18 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation(State type, bool ordered, bool finalAlways)
+CSMDoc::Operation::Operation(State type, bool finalAlways)
     : mType(type)
     , mStages(std::vector<std::pair<Stage*, int>>())
     , mCurrentStage(mStages.begin())
     , mCurrentStep(0)
     , mCurrentStepTotal(0)
     , mTotalSteps(0)
-    , mOrdered(ordered)
     , mFinalAlways(finalAlways)
     , mError(false)
-    , mConnected(false)
     , mPrepared(false)
     , mDefaultSeverity(Message::Severity_Error)
 {
-    mTimer = new QTimer(this);
 }
 
 CSMDoc::Operation::~Operation()
@@ -80,18 +77,9 @@ CSMDoc::Operation::~Operation()
 
 void CSMDoc::Operation::run()
 {
-    mTimer->stop();
-
-    if (!mConnected)
-    {
-        connect(mTimer, &QTimer::timeout, this, &Operation::executeStage);
-        mConnected = true;
-    }
-
     mPrepared = false;
     mStart = std::chrono::steady_clock::now();
-
-    mTimer->start(0);
+    QMetaObject::invokeMethod(this, &Operation::executeStage, Qt::QueuedConnection);
 }
 
 void CSMDoc::Operation::appendStage(Stage* stage)
@@ -111,7 +99,7 @@ bool CSMDoc::Operation::hasError() const
 
 void CSMDoc::Operation::abort()
 {
-    if (!mTimer->isActive())
+    if (!mStart.has_value())
         return;
 
     mError = true;
@@ -138,6 +126,9 @@ void CSMDoc::Operation::executeStage()
 
     Messages messages(mDefaultSeverity);
 
+    const auto batchStart = std::chrono::steady_clock::now();
+    static constexpr auto batchBudget = std::chrono::milliseconds(33);
+
     while (mCurrentStage != mStages.end())
     {
         if (mCurrentStep >= mCurrentStage->second)
@@ -159,7 +150,9 @@ void CSMDoc::Operation::executeStage()
             }
 
             ++mCurrentStepTotal;
-            break;
+
+            if (std::chrono::steady_clock::now() - batchStart >= batchBudget)
+                break;
         }
     }
 
@@ -179,11 +172,18 @@ void CSMDoc::Operation::executeStage()
         }
 
         operationDone();
+        return;
     }
+
+    QMetaObject::invokeMethod(this, &Operation::executeStage, Qt::QueuedConnection);
 }
 
 void CSMDoc::Operation::operationDone()
 {
-    mTimer->stop();
     emit done(mType, mError);
+}
+
+void CSMDoc::Operation::cleanup()
+{
+    moveToThread(QCoreApplication::instance()->thread());
 }

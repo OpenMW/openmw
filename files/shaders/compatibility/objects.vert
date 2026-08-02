@@ -1,14 +1,9 @@
 #version 120
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
-
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
 
-#include "lib/core/vertex.h.glsl"
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
@@ -52,12 +47,13 @@ varying vec2 glossMapUV;
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
+centroid varying vec3 shadedLighting;
+centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-centroid varying vec3 shadowDiffuseLighting;
-centroid varying vec3 shadowSpecularLighting;
 uniform float emissiveMult;
 uniform float specStrength;
+#include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -65,11 +61,11 @@ varying vec3 passNormal;
 varying vec4 passTangent;
 #endif
 
+#include "lib/core/vertex.h.glsl"
+
 #include "vertexcolors.glsl"
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
-
-#include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
 
 #if @particleOcclusion
@@ -78,6 +74,8 @@ varying vec3 orthoDepthMapCoord;
 uniform mat4 depthSpaceMatrix;
 uniform mat4 osg_ViewMatrixInverse;
 #endif
+
+uniform vec2 screenRes;
 
 void main(void)
 {
@@ -148,13 +146,32 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(viewPos.xyz, viewNormal, gl_FrontMaterial.shininess, diffuseLight, ambientLight, specularLight, shadowDiffuseLighting, shadowSpecularLighting);
-    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
-    passSpecular = getSpecularColor().xyz * specularLight * specStrength;
-    clampLightingResult(passLighting);
-    shadowDiffuseLighting *= getDiffuseColor().xyz;
-    shadowSpecularLighting *= getSpecularColor().xyz * specStrength;
+    vec3 emissionColor = getEmissionColor().rgb;
+    if (skipLighting())
+    {
+        shadedLighting = passLighting = emissionColor * emissiveMult;
+        shadedSpecular = passSpecular = vec3(0.0);
+    }
+    else
+    {
+        // Handles edge case of off-screen vertices with clustered shading not being lit due to not mapping to any cluster
+        vec2 screenCoord = clamp(clipToScreen(gl_Position), vec2(0.0), screenRes - vec2(1.0));
+        float shininess = max(1e-4, gl_FrontMaterial.shininess);
+        vec3 viewDir = normalize(passViewPos);
+        vec3 diffuseColor = getDiffuseColor().rgb;
+        vec3 ambientColor = getAmbientColor().rgb;
+        vec3 specularColor = getSpecularColor().rgb;
+
+        vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
+        directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);
+        pointLighting(screenCoord, viewDir, passViewPos, viewNormal, shininess, pointDiffuse, pointAmbient, pointSpecular);
+        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * emissiveMult;
+        shadedSpecular = specularColor * pointSpecular * specStrength;
+        passLighting = shadedLighting + diffuseColor * sunDiffuse;
+        passSpecular = shadedSpecular + specularColor * sunSpecular * specStrength;
+    }
+    clampLighting(shadedLighting);
+    clampLighting(passLighting);
 #endif
 
 #if (@shadows_enabled)

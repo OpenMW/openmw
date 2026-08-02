@@ -1,14 +1,11 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include <components/esm3/loadrepa.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/util.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/resourcesystem.hpp>
-
-#include "apps/openmw/mwbase/environment.hpp"
 
 namespace sol
 {
@@ -20,26 +17,63 @@ namespace sol
 
 namespace MWLua
 {
+    namespace
+    {
+        template <class T>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Repair[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Repair::mName);
+            Types::addModelProperty(record);
+            Types::addProperty(record, "mwscript", &ESM::Repair::mScript);
+            Types::addIconProperty(record);
+            Types::addProperty(record, "maxCondition", &ESM::Repair::mData, &ESM::Repair::Data::mUses);
+            Types::addProperty(record, "value", &ESM::Repair::mData, &ESM::Repair::Data::mValue);
+            Types::addProperty(record, "weight", &ESM::Repair::mData, &ESM::Repair::Data::mWeight);
+            Types::addProperty(record, "quality", &ESM::Repair::mData, &ESM::Repair::Data::mQuality);
+        }
+    }
+
+    ESM::Repair tableToRepair(const sol::table& rec)
+    {
+        auto repair = Types::initFromTemplate<ESM::Repair>(rec);
+        if (rec["name"] != sol::nil)
+            repair.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            repair.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            repair.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+        if (rec["icon"] != sol::nil)
+            repair.mIcon = rec["icon"].get<std::string_view>();
+        if (rec["maxCondition"] != sol::nil)
+            repair.mData.mUses = rec["maxCondition"];
+        if (rec["value"] != sol::nil)
+            repair.mData.mValue = rec["value"];
+        if (rec["weight"] != sol::nil)
+            repair.mData.mWeight = rec["weight"].get<Misc::FiniteFloat>();
+        if (rec["quality"] != sol::nil)
+            repair.mData.mQuality = rec["quality"].get<Misc::FiniteFloat>();
+        return repair;
+    }
+
+    void addMutableRepairType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Repair>>(lua, "ESM3_MutableRepair");
+    }
+
     void addRepairBindings(sol::table repair, const Context& context)
     {
-        auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-
         addRecordFunctionBinding<ESM::Repair>(repair, context);
 
-        sol::usertype<ESM::Repair> record = context.sol().new_usertype<ESM::Repair>("ESM3_Repair");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Repair& rec) { return "ESM3_Repair[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Repair& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Repair& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["mwscript"] = sol::readonly_property([](const ESM::Repair& rec) -> ESM::RefId { return rec.mScript; });
-        record["icon"] = sol::readonly_property([vfs](const ESM::Repair& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
-        record["maxCondition"] = sol::readonly_property([](const ESM::Repair& rec) -> int { return rec.mData.mUses; });
-        record["value"] = sol::readonly_property([](const ESM::Repair& rec) -> int { return rec.mData.mValue; });
-        record["weight"] = sol::readonly_property([](const ESM::Repair& rec) -> float { return rec.mData.mWeight; });
-        record["quality"] = sol::readonly_property([](const ESM::Repair& rec) -> float { return rec.mData.mQuality; });
+        sol::state_view lua = context.sol();
+        addUserType<ESM::Repair>(lua, "ESM3_Repair");
     }
 }

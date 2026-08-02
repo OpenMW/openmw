@@ -4,8 +4,10 @@
 #include <cstdint>
 #include <string>
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
+
 #include "loadarmo.hpp"
 
 namespace ESM
@@ -52,7 +54,9 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mEnchant, mScript;
-        std::string mModel, mIcon, mName;
+        Path mModel;
+        Path mIcon;
+        std::string mName;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

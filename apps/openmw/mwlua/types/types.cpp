@@ -15,6 +15,7 @@ namespace MWLua
 
         constexpr std::string_view Activator = "Activator";
         constexpr std::string_view Armor = "Armor";
+        constexpr std::string_view BodyPart = "BodyPart";
         constexpr std::string_view Book = "Book";
         constexpr std::string_view Clothing = "Clothing";
         constexpr std::string_view Container = "Container";
@@ -64,6 +65,7 @@ namespace MWLua
             { ESM::REC_INTERNAL_MARKER, ObjectTypeName::Marker },
             { ESM::REC_ACTI, ObjectTypeName::Activator },
             { ESM::REC_ARMO, ObjectTypeName::Armor },
+            { ESM::REC_BODY, ObjectTypeName::BodyPart },
             { ESM::REC_BOOK, ObjectTypeName::Book },
             { ESM::REC_CLOT, ObjectTypeName::Clothing },
             { ESM::REC_CONT, ObjectTypeName::Container },
@@ -205,6 +207,7 @@ namespace MWLua
         addLockableBindings(
             addType(ObjectTypeName::Lockable, { ESM::REC_CONT, ESM::REC_DOOR, ESM::REC_CONT4, ESM::REC_DOOR4 }));
 
+        addBodyPartBindings(addType(ObjectTypeName::BodyPart, { ESM::REC_BODY }), context);
         addCreatureBindings(addType(ObjectTypeName::Creature, { ESM::REC_CREA }, ObjectTypeName::Actor), context);
         addNpcBindings(
             addType(ObjectTypeName::NPC, { ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_ }, ObjectTypeName::Actor), context);

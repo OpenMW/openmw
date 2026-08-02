@@ -6,6 +6,29 @@ Events
 Actor events
 ------------
 
+**DialogueResponse**
+
+This event is sent to the player's local script when an actor triggers a greeting, topic response, service refusal, or plays a voice line.
+It returns a lua table with the following fields:
+- ``actor``: The actor that responded.
+- ``type``: The type of ``DialogueRecord`` that triggered the event, can be ``"greeting"``, ``"journal"``, ``"persuasion"``, ``"topic"``, or ``"voice"``.
+- ``recordId``: The ID of the ``DialogueRecord``.
+- ``infoId``: The ID of the ``DialogueRecordInfo`` in question.
+
+.. code-block:: Lua
+
+    eventHandlers = {
+        DialogueResponse = function(e)
+            local topic = core.dialogue[e.type].records[e.recordId];
+            for _, info in pairs(topic.infos) do
+                if info.id == e.infoId then
+                    print(e.actor, 'said', info.text)
+                    return
+                end
+            end
+        end
+    }
+
 **Died**
 
 This event is sent to an actor's local script when that actor dies.
@@ -48,7 +71,7 @@ Modify the corresponding stat.
 .. code-block:: Lua
 
     -- Consume 10 magicka
-    actor:sendEvent('ModifyStat', {name = 'magicka', amount = -10})
+    actor:sendEvent('ModifyStat', {stat = 'magicka', amount = -10})
 
 **AddVfx**
 
@@ -135,6 +158,13 @@ Example:
         -- Note that actor should be included, if applicable, to allow forcibly unequipping items whose condition is reduced to 0
         core.sendGlobalEvent('ModifyItemCondition', {actor = self, item = item, amount = -1})
     end
+
+Spellcast events
+----------------
+
+**ApplyMagicEffects**
+
+Used by built-in scripts to apply effects on Lockables and other actors during spellcasting.
 
 UI events
 ---------

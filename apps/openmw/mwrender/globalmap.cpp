@@ -3,7 +3,6 @@
 #include <osg/Geometry>
 #include <osg/Group>
 #include <osg/Image>
-#include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 
 #include <osgDB/WriteFile>
@@ -365,7 +364,6 @@ namespace MWRender
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);
             stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-            stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
             if (mAlphaTexture)
@@ -383,10 +381,6 @@ namespace MWRender
                 geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
 
                 stateset->setTextureAttributeAndModes(1, mAlphaTexture, osg::StateAttribute::ON);
-                osg::ref_ptr<osg::TexEnvCombine> texEnvCombine = new osg::TexEnvCombine;
-                texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
-                texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-                stateset->setTextureAttributeAndModes(1, texEnvCombine);
             }
 
             camera->addChild(geom);

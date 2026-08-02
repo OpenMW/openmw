@@ -26,15 +26,37 @@ local function makeTestCoroutine(fn)
     end
 end
 
+local function loadTestFilter()
+    local hasTestConfig, testConfig = pcall(require, 'test_config')
+    if not hasTestConfig then
+        if not tostring(testConfig):find('module not found') then
+            error(testConfig)
+        end
+        return nil
+    end
+    if type(testConfig) ~= 'table' or (testConfig.filter ~= nil and type(testConfig.filter) ~= 'string') then
+        error('invalid test_config format, expected { filter = <string>? }, got ' .. tostring(testConfig))
+    end
+    return testConfig.filter
+end
+
+local testFilter = loadTestFilter()
+
+local function testNameMatchesFilter(name)
+    return testFilter == nil or name:find(testFilter) ~= nil
+end
+
 local function runTests(tests)
     for i, test in ipairs(tests) do
         local name, fn = unpack(test)
-        print('TEST_START', i, name)
-        local status, err = pcall(fn)
-        if status then
-            print('TEST_OK', i, name)
-        else
-            print('TEST_FAILED', i, name, err)
+        if testNameMatchesFilter(name) then
+            print('TEST_START', i, name)
+            local status, err = pcall(fn)
+            if status then
+                print('TEST_OK', i, name)
+            else
+                print('TEST_FAILED', i, name, err)
+            end
         end
     end
     core.quit()

@@ -10,7 +10,6 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -381,7 +380,7 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::LandTexture>::Store() = default;
 
-    const std::string* Store<ESM::LandTexture>::search(std::uint32_t index, int plugin) const
+    const ESM::Path* Store<ESM::LandTexture>::search(std::uint32_t index, int plugin) const
     {
         auto mapping = mMappings.find(PluginIndex{ plugin, index });
         if (mapping == mMappings.end())
@@ -952,27 +951,6 @@ namespace MWWorld
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
     }
 
-    void Store<ESM::GameSetting>::setUp()
-    {
-        auto addSetting = [&](const std::string& key, ESM::Variant value) {
-            auto id = ESM::RefId::stringRefId(key);
-            ESM::GameSetting setting;
-            setting.blank();
-            setting.mId = id;
-            setting.mValue = std::move(value);
-            auto [iter, inserted] = mStatic.insert_or_assign(id, std::move(setting));
-            if (inserted)
-                mShared.push_back(&iter->second);
-        };
-        for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
-            addSetting(key, ESM::Variant(value));
-        TypedDynamicStore<ESM::GameSetting>::setUp();
-    }
-
     // Attribute
     //=========================================================================
 
@@ -1021,26 +999,10 @@ namespace MWWorld
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
 
-    // Magic Effect
-    //=========================================================================
-
-    void Store<ESM::MagicEffect>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
-    {
-        for (ESM::MagicEffect* mgef : mShared)
-        {
-            std::string_view gmst = ESM::MagicEffect::refIdToGmstString(mgef->mId);
-            if (!gmst.empty())
-                mgef->mName = getGMSTString(settings, gmst);
-        }
-    }
-
     // Dialogue
     //=========================================================================
 
-    Store<ESM::Dialogue>::Store()
-        : mKeywordSearchModFlag(true)
-    {
-    }
+    Store<ESM::Dialogue>::Store() {}
 
     void Store<ESM::Dialogue>::setUp()
     {
@@ -1137,19 +1099,9 @@ namespace MWWorld
             list.push_back(dialogue->mId);
     }
 
-    const MWDialogue::KeywordSearch<int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
+    bool Store<ESM::Dialogue>::getKeywordSearchModFlag() const
     {
-        if (mKeywordSearchModFlag)
-        {
-            mKeywordSearch.clear();
-
-            for (const ESM::Dialogue& topic : *this)
-                mKeywordSearch.seed(topic.mStringId, 0 /*unused*/);
-
-            mKeywordSearchModFlag = false;
-        }
-
-        return mKeywordSearch;
+        return std::exchange(mKeywordSearchModFlag, false);
     }
 
     // ESM4 Cell

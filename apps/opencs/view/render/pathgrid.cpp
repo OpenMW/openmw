@@ -637,7 +637,6 @@ namespace CSVRender
         mDragGeometry->setVertexArray(vertices);
         mDragGeometry->setColorArray(colors, osg::Array::BIND_OVERALL);
         mDragGeometry->addPrimitiveSet(indices);
-        mDragGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
         mPathgridGroup->addChild(mDragGeometry);
     }

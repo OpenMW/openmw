@@ -1,6 +1,6 @@
 #include "types.hpp"
 
-#include "modelproperty.hpp"
+#include "usertypeutil.hpp"
 
 #include <components/esm3/loadacti.hpp>
 #include <components/lua/luastate.hpp>
@@ -15,16 +15,30 @@ namespace sol
     {
     };
 }
-namespace
+
+namespace MWLua
 {
+    namespace
+    {
+        template <class T>
+        void addUserType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Activator[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Activator::mName);
+            Types::addModelProperty(record);
+            Types::addProperty(record, "mwscript", &ESM::Activator::mScript);
+        }
+    }
+
     // Populates a activator struct from a Lua table.
     ESM::Activator tableToActivator(const sol::table& rec)
     {
-        ESM::Activator activator;
-        if (rec["template"] != sol::nil)
-            activator = LuaUtil::cast<ESM::Activator>(rec["template"]);
-        else
-            activator.blank();
+        auto activator = Types::initFromTemplate<ESM::Activator>(rec);
         if (rec["name"] != sol::nil)
             activator.mName = rec["name"];
         if (rec["model"] != sol::nil)
@@ -36,23 +50,17 @@ namespace
         }
         return activator;
     }
-}
 
-namespace MWLua
-{
+    void addMutableActivatorType(sol::state_view& lua)
+    {
+        addUserType<MutableRecord<ESM::Activator>>(lua, "ESM3_MutableActivator");
+    }
+
     void addActivatorBindings(sol::table activator, const Context& context)
     {
         activator["createRecordDraft"] = tableToActivator;
         addRecordFunctionBinding<ESM::Activator>(activator, context);
-
-        sol::usertype<ESM::Activator> record = context.sol().new_usertype<ESM::Activator>("ESM3_Activator");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Activator& rec) { return "ESM3_Activator[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mId.serializeText(); });
-        record["name"] = sol::readonly_property([](const ESM::Activator& rec) -> std::string { return rec.mName; });
-        addModelProperty(record);
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Activator& rec) -> ESM::RefId { return rec.mScript; });
+        sol::state_view lua = context.sol();
+        addUserType<ESM::Activator>(lua, "ESM3_Activator");
     }
 }

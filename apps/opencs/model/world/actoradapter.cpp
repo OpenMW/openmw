@@ -131,19 +131,20 @@ namespace CSMWorld
         return mFemale;
     }
 
-    std::string ActorAdapter::ActorData::getSkeleton() const
+    VFS::Path::Normalized ActorAdapter::ActorData::getSkeleton() const
     {
+        constexpr VFS::Path::NormalizedView meshes("meshes");
         if (mCreature || !mSkeletonOverride.empty())
-            return "meshes\\" + mSkeletonOverride;
+            return VFS::Path::join(meshes, mSkeletonOverride);
 
         bool beast = mRaceData ? mRaceData->isBeast() : false;
 
         if (beast)
-            return CSMPrefs::get()["Models"]["baseanimkna"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanimkna"].toString());
         else if (mFemale)
-            return CSMPrefs::get()["Models"]["baseanimfemale"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanimfemale"].toString());
         else
-            return CSMPrefs::get()["Models"]["baseanim"].toString();
+            return VFS::Path::toNormalized(CSMPrefs::get()["Models"]["baseanim"].toString());
     }
 
     ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
@@ -655,7 +656,7 @@ namespace CSMWorld
         int index = mReferenceables.searchId(id);
         auto& creature = dynamic_cast<const Record<ESM::Creature>&>(mReferenceables.getRecord(index)).get();
 
-        data->reset_data(id, creature.mModel, true);
+        data->reset_data(id, creature.mModel.getOriginal(), true);
     }
 
     void ActorAdapter::markDirtyDependency(const ESM::RefId& dep)

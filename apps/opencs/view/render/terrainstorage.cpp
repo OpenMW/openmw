@@ -41,7 +41,7 @@ namespace CSVRender
             land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
-    const std::string* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
+    const VFS::Path::Normalized* TerrainStorage::getLandTexture(std::uint16_t index, int plugin)
     {
         return mData.getLandTextures().getLandTexture(index, plugin);
     }

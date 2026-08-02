@@ -138,11 +138,12 @@ namespace MWWorld
         ///< success.
         /// (default implementation: throw an exception)
 
-        virtual void hit(const Ptr& ptr, float attackStrength, int type = -1, const Ptr& victim = Ptr(),
-            const osg::Vec3f& hitPosition = osg::Vec3f(), bool success = false) const;
+        virtual void hit(const Ptr& ptr, float attackStrength, float attackWindUp, int type = -1,
+            const Ptr& victim = Ptr(), const osg::Vec3f& hitPosition = osg::Vec3f(), bool success = false) const;
         ///< Execute a melee hit on the victim at hitPosition, using the current weapon. If the hit was successful,
         ///< apply damage and process corresponding events.
         /// \param attackStrength how long the attack was charged for, a value in 0-1 range.
+        /// \param attackWindUp how long the attack was winding up for, a value in 0-1 range.
         /// \param type - type of attack, one of the MWMechanics::CreatureStats::AttackType
         ///               enums. ignored for creature attacks.
         /// (default implementation: throw an exception)
@@ -260,7 +261,7 @@ namespace MWWorld
         virtual float getArmorRating(const MWWorld::Ptr& ptr, bool useLuaInterfaceIfAvailable = false) const;
         ///< @return combined armor rating of this actor
 
-        virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
+        virtual VFS::Path::NormalizedView getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
         ///< Return name of inventory icon.
 
         virtual ESM::RefId getEnchantment(const MWWorld::ConstPtr& ptr) const;
@@ -278,14 +279,15 @@ namespace MWWorld
 
         virtual int getServices(const MWWorld::ConstPtr& actor) const;
 
-        virtual std::string_view getModel(const MWWorld::ConstPtr& ptr) const;
+        virtual VFS::Path::NormalizedView getModel(const MWWorld::ConstPtr& ptr) const;
 
         virtual VFS::Path::Normalized getCorrectedModel(const MWWorld::ConstPtr& ptr) const;
 
         virtual bool useAnim() const;
         ///< Whether or not to use animated variant of model (default false)
 
-        virtual void getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string_view>& models) const;
+        virtual void getModelsToPreload(
+            const MWWorld::ConstPtr& ptr, std::vector<VFS::Path::NormalizedView>& models) const;
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 

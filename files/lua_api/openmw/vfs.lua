@@ -1,7 +1,7 @@
 ---
 -- Provides read-only access to data directories via VFS.
 -- Interface is very similar to "io" library.
--- @context global|menu|local|player
+-- @context global|menu|local|player|load
 -- @module vfs
 -- @usage local vfs = require('openmw.vfs')
 

@@ -3,12 +3,14 @@
 
 #include <functional>
 #include <map>
+#include <vector>
 
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
 
 #include <components/lua/asyncpackage.hpp>
 
+#include "padding.hpp"
 #include "properties.hpp"
 
 namespace LuaUi
@@ -21,6 +23,7 @@ namespace LuaUi
     class WidgetExtension
     {
     public:
+        using Warnings = std::vector<std::string>;
         WidgetExtension();
 
         virtual ~WidgetExtension() = default;
@@ -77,6 +80,8 @@ namespace LuaUi
         MyGUI::IntCoord calculateCoord() const;
 
         virtual bool isTextInput() { return false; }
+        bool collectWarnings(Warnings& warnings, int depth, bool generateWarningStrings) const;
+        std::string diagnosticName() const;
 
     protected:
         virtual void initialize();
@@ -87,6 +92,11 @@ namespace LuaUi
         sol::object mouseEvent(LuaUtil::LuaView& view, int left, int top, MyGUI::MouseButton button) const;
 
         MyGUI::IntSize parentSize() const;
+        // Size available for content, i.e., parent size minus padding
+        MyGUI::IntSize getContentSize() const;
+        // Offset of content area relative to widget position, i.e., where the content area starts
+        MyGUI::IntPoint getContentOffset() const;
+        MyGUI::Widget* contentWidget() const;
         virtual MyGUI::IntSize childScalingSize() const;
         virtual MyGUI::IntSize templateScalingSize() const;
 
@@ -120,8 +130,16 @@ namespace LuaUi
                 auto it = w->mCallbacks.find(name);
                 if (it != w->mCallbacks.end())
                 {
-                    sol::object res = it->second.call(argumentFactory(w), w->mLayout);
-                    shouldPropagate = res.is<bool>() && res.as<bool>();
+                    try
+                    {
+                        sol::object res = it->second.call(argumentFactory(w), w->mLayout);
+                        shouldPropagate = res.is<bool>() && res.as<bool>();
+                    }
+                    catch (const std::exception& e)
+                    {
+                        Log(Debug::Warning) << name << " event propagation has failed: " << e.what();
+                        shouldPropagate = false;
+                    }
                 }
                 if (w->mParent && w->mPropagateEvents && shouldPropagate)
                     w = w->mParent;
@@ -129,6 +147,10 @@ namespace LuaUi
                     w = nullptr;
             }
         }
+
+        bool collectUnusedWarnings(std::vector<std::string>& warnings, bool generateWarningStrings) const;
+
+        virtual const std::vector<std::string_view>& allUsedProperties() const;
 
         bool mForcePosition;
         bool mForceSize;
@@ -141,6 +163,7 @@ namespace LuaUi
         // negative position offset as a ratio of this widget's size
         // used in combination with relative coord to align the widget, e. g. center it
         MyGUI::FloatSize mAnchor;
+        Padding mPadding;
 
         bool mPropagateEvents;
         bool mVisible; // used to implement updateVisible
@@ -160,6 +183,7 @@ namespace LuaUi
         WidgetExtension* mParent;
         bool mTemplateChild;
         bool mElementRoot;
+        MyGUI::Widget* mContentWidget;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);
@@ -168,6 +192,7 @@ namespace LuaUi
         void findAll(std::string_view flagName, std::vector<WidgetExtension*>& result);
 
         void updateChildrenCoord();
+        void parsePadding();
 
         void keyPress(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char);
         void keyRelease(MyGUI::Widget*, MyGUI::KeyCode);

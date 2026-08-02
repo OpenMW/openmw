@@ -51,11 +51,8 @@ namespace MWMechanics
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(mSpellId);
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
-        if (actor.getClass().hasInventoryStore(actor))
-        {
-            MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
-            inv.setSelectedEnchantItem(inv.end());
-        }
+        MWWorld::ContainerStore& inv = actor.getClass().getContainerStore(actor);
+        inv.setSelectedEnchantItem(inv.end());
 
         const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(mSpellId);
         MWBase::Environment::get().getWorld()->preloadEffects(&spell->mEffects);
@@ -73,7 +70,7 @@ namespace MWMechanics
     void ActionEnchantedItem::prepare(const MWWorld::Ptr& actor)
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(ESM::RefId());
-        actor.getClass().getInventoryStore(actor).setSelectedEnchantItem(mItem);
+        actor.getClass().getContainerStore(actor).setSelectedEnchantItem(mItem);
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
     }
 
@@ -190,8 +187,7 @@ namespace MWMechanics
                     antiFleeRating = std::numeric_limits<float>::max();
                 }
             }
-            // TODO remove inventory store check, creatures should be able to use enchanted items they cannot equip
-            else if (hasInventoryStore && !it->getClass().getEnchantment(*it).empty())
+            else if (!it->getClass().getEnchantment(*it).empty())
             {
                 float rating = rateMagicItem(*it, actor, enemy);
                 if (rating > bestActionRating)
@@ -252,56 +248,6 @@ namespace MWMechanics
         return bestAction;
     }
 
-    float getBestActionRating(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
-    {
-        Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
-
-        float bestActionRating = 0.f;
-        // Default to hand-to-hand combat
-        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-        {
-            return bestActionRating;
-        }
-
-        if (actor.getClass().hasInventoryStore(actor))
-        {
-            MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateMagicItem(*it, actor, enemy);
-                if (rating > bestActionRating)
-                {
-                    bestActionRating = rating;
-                }
-            }
-
-            float bestArrowRating = rateAmmo(actor, enemy, ESM::Weapon::Arrow);
-
-            float bestBoltRating = rateAmmo(actor, enemy, ESM::Weapon::Bolt);
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
-                if (rating > bestActionRating)
-                {
-                    bestActionRating = rating;
-                }
-            }
-        }
-
-        for (const ESM::Spell* spell : spells)
-        {
-            float rating = rateSpell(spell, actor, enemy);
-            if (rating > bestActionRating)
-            {
-                bestActionRating = rating;
-            }
-        }
-
-        return bestActionRating;
-    }
-
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool minusZDist)
     {
         osg::Vec3f actor1Pos = actor1.getRefData().getPosition().asVec3();
@@ -337,9 +283,11 @@ namespace MWMechanics
             item = invStore.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
             if (item != invStore.end() && item.getType() == MWWorld::ContainerStore::Type_Weapon)
                 activeAmmo = *item;
-
-            if (invStore.getSelectedEnchantItem() != invStore.end())
-                selectedEnchItem = *invStore.getSelectedEnchantItem();
+        }
+        {
+            MWWorld::ContainerStore& store = actor.getClass().getContainerStore(actor);
+            if (store.getSelectedEnchantItem() != store.end())
+                selectedEnchItem = *store.getSelectedEnchantItem();
         }
 
         float dist = 1.0f;

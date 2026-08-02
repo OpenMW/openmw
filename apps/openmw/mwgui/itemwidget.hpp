@@ -1,6 +1,8 @@
 #ifndef OPENMW_MWGUI_ITEMWIDGET_H
 #define OPENMW_MWGUI_ITEMWIDGET_H
 
+#include <components/vfs/pathutil.hpp>
+
 #include <MyGUI_Widget.h>
 
 namespace MWWorld
@@ -36,7 +38,7 @@ namespace MWGui
         void setItem(const MWWorld::Ptr& ptr, ItemState state = None);
 
         // Set icon and frame manually
-        void setIcon(const std::string& icon);
+        void setIcon(VFS::Path::NormalizedView icon);
         void setIcon(const MWWorld::Ptr& ptr);
         void setFrame(const std::string& frame, const MyGUI::IntCoord& coord);
 
@@ -51,7 +53,7 @@ namespace MWGui
         MyGUI::ImageBox* mControllerBorder;
         MyGUI::TextBox* mText;
 
-        std::string mCurrentIcon;
+        VFS::Path::Normalized mCurrentIcon;
         std::string mCurrentFrame;
 
         static std::map<std::string, float> mScales;
@@ -61,7 +63,7 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(SpellWidget)
     public:
-        void setSpellIcon(std::string_view icon);
+        void setSpellIcon(VFS::Path::NormalizedView icon);
     };
 
 }

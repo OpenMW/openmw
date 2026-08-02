@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_CREA_H
 #define OPENMW_ESM_CREA_H
 
-#include <array>
+#include <map>
 #include <string>
 
 #include "aipackage.hpp"
@@ -9,9 +9,10 @@
 #include "spelllist.hpp"
 #include "transport.hpp"
 
-#include "components/esm/attr.hpp"
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/attr.hpp>
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -54,12 +55,12 @@ namespace ESM
 
         struct NPDTstruct
         {
+            std::map<ESM::RefId, int32_t> mAttributes;
             int32_t mType;
             // For creatures we obviously have to use ints, not shorts and
             // bytes like we use for NPCs.... this file format just makes so
             // much sense! (Still, _much_ easier to decode than the NIFs.)
             int32_t mLevel;
-            std::array<int32_t, Attribute::Length> mAttributes;
 
             int32_t mHealth, mMana, mFatigue; // Stats
             int32_t mSoul; // The creatures soul value (used with soul gems.)
@@ -68,6 +69,8 @@ namespace ESM
             int32_t mCombat, mMagic, mStealth;
             int32_t mAttack[6]; // AttackMin1, AttackMax1, ditto2, ditto3
             int32_t mGold;
+
+            int32_t getAttribute(ESM::RefId) const;
         }; // 96 byte
 
         NPDTstruct mData;
@@ -79,8 +82,8 @@ namespace ESM
 
         uint32_t mRecordFlags;
         RefId mId, mScript;
-        std::string mModel;
         std::string mName;
+        Path mModel;
         ESM::RefId mOriginal; // Base creature that this is a modification of
 
         InventoryList mInventory;

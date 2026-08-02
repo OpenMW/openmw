@@ -54,8 +54,6 @@ namespace CSVRender
 
         std::string getBodyPartMesh(const ESM::RefId& bodyPartId);
 
-        static const std::string MeshPrefix;
-
         ESM::RefId mId;
         CSMWorld::Data& mData;
         CSMWorld::ActorAdapter::ActorDataPtr mActorData;

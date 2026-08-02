@@ -95,6 +95,7 @@ namespace MWWorld
     class Cell;
     class DateTimeManager;
     class Weather;
+    struct Moon;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }
@@ -239,9 +240,12 @@ namespace MWBase
 
         virtual int getSecundaPhase() const = 0;
 
+        virtual std::vector<MWWorld::Moon> getCurrentMoons() const = 0;
+
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, std::span<const uint8_t> chances) = 0;
+        virtual std::span<const uint8_t> getRegionWeatherChances(const ESM::RefId& regionid) const = 0;
 
         virtual void changeToInteriorCell(
             std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
@@ -313,7 +317,7 @@ namespace MWBase
         virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
         virtual bool castRenderingRay(MWPhysics::RayCastingResult& res, const osg::Vec3f& from, const osg::Vec3f& to,
-            bool ignorePlayer, bool ignoreActors, std::span<const MWWorld::Ptr> ignoreList = {})
+            bool ignorePlayer, bool ignoreActors, bool ignoreTerrain, std::span<const MWWorld::Ptr> ignoreList = {})
             = 0;
 
         virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
@@ -476,7 +480,7 @@ namespace MWBase
             const osg::Vec3f& fallbackDirection, ESM::RefNum item)
             = 0;
         virtual void launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
-            const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength)
+            const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength, float attackWindUp)
             = 0;
         virtual void updateProjectilesCasters() = 0;
 

@@ -4,6 +4,8 @@
 #include <QCompleter>
 #include <QStringListModel>
 
+#include <components/files/configurationmanager.hpp>
+
 #include "ui_settingspage.h"
 
 namespace Config
@@ -18,7 +20,8 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        explicit SettingsPage(Config::GameSettings& gameSettings, QWidget* parent = nullptr);
+        explicit SettingsPage(const Files::ConfigurationManager& configurationManager,
+            Config::GameSettings& gameSettings, QWidget* parent = nullptr);
 
         bool loadSettings();
         void saveSettings();
@@ -35,8 +38,13 @@ namespace Launcher
         void slotShadowDistLimitToggled(bool checked);
         void slotDistantLandToggled(bool checked);
         void slotControllerMenusToggled(bool checked);
+        void slotOpenFile(QTreeWidgetItem* item);
 
     private:
+        void populateLoadedConfigs();
+
+        const Files::ConfigurationManager& mCfgMgr;
+
         Config::GameSettings& mGameSettings;
         QCompleter mCellNameCompleter;
         QStringListModel mCellNameCompleterModel;

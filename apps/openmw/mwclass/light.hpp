@@ -57,7 +57,7 @@ namespace MWClass
         const ESM::RefId& getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the put down sound Id
 
-        const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::NormalizedView getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of inventory icon.
 
         std::unique_ptr<MWWorld::Action> use(const MWWorld::Ptr& ptr, bool force = false) const override;
@@ -69,7 +69,7 @@ namespace MWClass
         float getRemainingUsageTime(const MWWorld::ConstPtr& ptr) const override;
         ///< Returns the remaining duration of the object.
 
-        std::string_view getModel(const MWWorld::ConstPtr& ptr) const override;
+        VFS::Path::NormalizedView getModel(const MWWorld::ConstPtr& ptr) const override;
 
         float getWeight(const MWWorld::ConstPtr& ptr) const override;
 

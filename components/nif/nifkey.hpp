@@ -38,9 +38,10 @@ namespace Nif
         T mValue{};
         T mInTan{};
         T mOutTan{};
-        float mTension;
-        float mContinuity;
-        float mBias;
+        float mA; // Coefficients based on the TCB parameters
+        float mB; // Only used by tangent calculations
+        float mC;
+        float mD;
     };
 
     template <typename T, T (NIFStream::*getValue)()>
@@ -151,11 +152,20 @@ namespace Nif
 
         static void readTCBKey(NIFStream& nif, TCBKey<T>& value)
         {
+            float tension;
+            float continuity;
+            float bias;
+
             nif.read(value.mTime);
             value.mValue = (nif.*getValue)();
-            nif.read(value.mTension);
-            nif.read(value.mContinuity);
-            nif.read(value.mBias);
+            nif.read(tension);
+            nif.read(continuity);
+            nif.read(bias);
+
+            value.mA = (1.f - tension) * (1.f - continuity) * (1.f + bias);
+            value.mB = (1.f - tension) * (1.f + continuity) * (1.f - bias);
+            value.mC = (1.f - tension) * (1.f + continuity) * (1.f + bias);
+            value.mD = (1.f - tension) * (1.f - continuity) * (1.f - bias);
         }
 
         template <typename U>
@@ -164,23 +174,32 @@ namespace Nif
             if (keys.size() <= 1)
                 return;
 
-            for (std::size_t i = 0; i < keys.size(); ++i)
             {
-                TCBKey<U>& curr = keys[i];
-                const TCBKey<U>* prev = (i == 0) ? nullptr : &keys[i - 1];
-                const TCBKey<U>* next = (i == keys.size() - 1) ? nullptr : &keys[i + 1];
-                const float prevLen = prev != nullptr && next != nullptr ? curr.mTime - prev->mTime : 1.f;
-                const float nextLen = prev != nullptr && next != nullptr ? next->mTime - curr.mTime : 1.f;
-                if (prevLen + nextLen == 0.f)
+                TCBKey<U>& first = keys[0];
+                const U delta = keys[1].mValue - first.mValue;
+                first.mInTan = delta * ((first.mA + first.mB) * 0.5f);
+                first.mOutTan = delta * ((first.mC + first.mD) * 0.5f);
+            }
+
+            for (std::size_t i = 1; i < keys.size() - 1; ++i)
+            {
+                const TCBKey<U>& prev = keys[i - 1];
+                const TCBKey<U>& next = keys[i + 1];
+                const float timeSpan = next.mTime - prev.mTime;
+                if (timeSpan == 0.f)
                     continue;
-                const float x = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f + curr.mBias);
-                const float y = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f - curr.mBias);
-                const float z = (1.f - curr.mTension) * (1.f + curr.mContinuity) * (1.f + curr.mBias);
-                const float w = (1.f - curr.mTension) * (1.f - curr.mContinuity) * (1.f - curr.mBias);
-                const U prevDelta = prev != nullptr ? curr.mValue - prev->mValue : next->mValue - curr.mValue;
-                const U nextDelta = next != nullptr ? next->mValue - curr.mValue : curr.mValue - prev->mValue;
-                curr.mInTan = (prevDelta * x + nextDelta * y) * prevLen / (prevLen + nextLen);
-                curr.mOutTan = (prevDelta * z + nextDelta * w) * nextLen / (prevLen + nextLen);
+                TCBKey<U>& key = keys[i];
+                const U prevDelta = key.mValue - prev.mValue;
+                const U nextDelta = next.mValue - key.mValue;
+                key.mInTan = (prevDelta * key.mA + nextDelta * key.mB) * ((key.mTime - prev.mTime) / timeSpan);
+                key.mOutTan = (prevDelta * key.mC + nextDelta * key.mD) * ((next.mTime - key.mTime) / timeSpan);
+            }
+
+            {
+                TCBKey<U>& last = keys.back();
+                const U delta = last.mValue - keys[keys.size() - 2].mValue;
+                last.mInTan = delta * ((last.mA + last.mB) * 0.5f);
+                last.mOutTan = delta * ((last.mC + last.mD) * 0.5f);
             }
         }
 

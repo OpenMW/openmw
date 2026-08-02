@@ -269,6 +269,11 @@ namespace MWWorld
         return mCustomData.get();
     }
 
+    bool RefData::hasCustomData() const
+    {
+        return mCustomData != nullptr;
+    }
+
     bool RefData::hasChanged() const
     {
         return mChanged || !mAnimationState.empty();

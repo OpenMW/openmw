@@ -40,7 +40,7 @@ namespace MWClass
         }
     }
 
-    std::string_view Clothing::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Clothing::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Clothing>(ptr);
     }
@@ -139,11 +139,11 @@ namespace MWClass
         return clothsDown;
     }
 
-    const std::string& Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Clothing::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
-        return ref->mBase->mIcon;
+        return ref->mBase->mIcon.getNormalized();
     }
 
     MWGui::ToolTipInfo Clothing::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const
@@ -153,7 +153,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
         std::string_view name = getName(ptr);
         info.caption = MyGUI::TextIterator::toTagsString(MyGUI::UString(name)) + MWGui::ToolTips::getCountString(count);
-        info.icon = ref->mBase->mIcon;
+        info.icon = ref->mBase->mIcon.getOriginal();
 
         std::string text;
 

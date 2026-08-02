@@ -1,9 +1,6 @@
 #version 120
-#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
-#if @useUBO
-    #extension GL_ARB_uniform_buffer_object : require
-#endif
+#pragma import_defines(FORCE_OPAQUE, DISTORTION)
 
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
@@ -71,13 +68,14 @@ uniform float distortionStrength;
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
+centroid varying vec3 shadedLighting;
+centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-centroid varying vec3 shadowDiffuseLighting;
-centroid varying vec3 shadowSpecularLighting;
 #else
 uniform float emissiveMult;
 uniform float specStrength;
+#include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -90,7 +88,6 @@ varying vec4 passTangent;
 #endif
 
 #include "lib/core/fragment.h.glsl"
-#include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"
@@ -217,8 +214,8 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     float shadowing = unshadowedLightRatio(-passViewPos.z);
     vec3 lighting, specular;
 #if !PER_PIXEL_LIGHTING
-    lighting = passLighting + shadowDiffuseLighting * shadowing;
-    specular = passSpecular + shadowSpecularLighting * shadowing;
+    lighting = mix(shadedLighting, passLighting, shadowing);
+    specular = mix(shadedSpecular, passSpecular, shadowing);
 #else
 #if @specularMap
     vec4 specTex = texture2D(specularMap, specularMapUV);
@@ -229,12 +226,14 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     vec3 specularColor = getSpecularColor().xyz;
 #endif
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
+
     lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
     specular = specularColor * specularLight * specStrength;
+    clampLighting(lighting);
 #endif
 
-    clampLightingResult(lighting);
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
 #if @envMap && !@preLightEnv

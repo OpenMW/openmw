@@ -64,6 +64,18 @@ Engine handler is a function defined by a script, that can be called by the engi
     - Object is activated by an actor.
   * - onNewExterior(cell)
     - A new exterior cell not defined by a content file has been generated.
+  * - onDropped(object, actor, position, rotation)
+    - | An object was dropped by an actor. For players, this is triggered when
+      | they drop an item from their inventory, but not when placing it on
+      | a surface. ``rotation`` is a ``util.Transform``.
+      | The position and rotation parameters describe the object's location before 
+      | being snapped to the ground.
+  * - onPlaced(object, actor, position, rotation)
+    - | An object was placed by a player actor. This is triggered when
+      | dropping an item and placing it on a surface. ``rotation`` is a
+      | ``util.Transform``.
+      | The position and rotation parameters describe the object's location before 
+      | being snapped to the ground.
 
 **Only for local scripts**
 
@@ -147,6 +159,9 @@ Engine handler is a function defined by a script, that can be called by the engi
       |     mode, command, selectedObject)
     - | User entered `command` in in-game console. Called if either
       | `mode` is not default or `command` starts with prefix `lua`.
+  * - onViewportResized(width, height)
+    - | Called when the game viewport is resized.
+      | Provides the new width and height of the viewport in pixels.
 
 **Only for local scripts attached to a player**
 
@@ -172,3 +187,13 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onStateChanged()
     - | Called whenever the current game changes
       | (i. e. the result of `getState <openmw_menu.html##(menu).getState>`_ changes)
+
+**Only for load scripts**
+
+|bdg-ctx-load|
+
+.. list-table::
+  :widths: 20 80
+
+  * - onContentFilesLoaded()
+    - | Called after all content files have been parsed, but before the main menu.

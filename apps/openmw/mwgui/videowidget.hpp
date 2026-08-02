@@ -41,6 +41,8 @@ namespace MWGui
         /// @return Is the video still playing?
         bool update();
 
+        void commitFrame();
+
         /// Return true if a video is currently playing and it has an audio stream.
         bool hasAudioStream();
 

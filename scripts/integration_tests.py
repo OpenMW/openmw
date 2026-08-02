@@ -21,6 +21,14 @@ parser.add_argument(
     "--workdir", type=str, default="integration_tests_output", help="directory for temporary files and logs"
 )
 parser.add_argument("--verbose", action='store_true', help="print all openmw output")
+parser.add_argument(
+    "--tests", nargs='+', default=None,
+    help="tests to run (directory names under scripts/data/integration_tests)",
+)
+parser.add_argument(
+    "--test_filter", type=str, default=None,
+    help="test cases to run (e.g. 'player.*running')",
+)
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
@@ -45,7 +53,22 @@ config_dir = work_dir / "config"
 userdata_dir = work_dir / "userdata"
 tests_dir = Path(__file__).resolve().parent / "data" / "integration_tests"
 testing_util_dir = tests_dir / "testing_util"
+test_config_dir = work_dir / "test_config"
 time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H.%M.%S")
+
+
+def lua_string_literal(value):
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return f'"{escaped}"'
+
+
+def write_test_config_module():
+    shutil.rmtree(test_config_dir, ignore_errors=True)
+    if not args.test_filter:
+        return
+    test_config_dir.mkdir(parents=True)
+    with open(test_config_dir / "test_config.lua", "w", encoding="utf-8") as stream:
+        stream.write(f"return {{ filter = {lua_string_literal(args.test_filter)} }}\n")
 
 
 def run_test(test_name):
@@ -66,6 +89,8 @@ def run_test(test_name):
                 f'user-data="{userdata_dir}"\n',
             )
         )
+        if args.test_filter:
+            omw_cfg.write(f'data="{test_config_dir}"\n')
         for path in content_paths:
             omw_cfg.write(f'content={path.name}\n')
         with open(test_dir / "openmw.cfg") as stream:
@@ -80,6 +105,7 @@ def run_test(test_name):
             "smooth animation transitions = true\n"
             "[Lua]\n"
             f"memory limit = {1024 * 1024 * 256}\n"
+            "lua profiler = true\n"
         )
     stdout_lines = list()
     test_success = True
@@ -145,15 +171,32 @@ def run_test(test_name):
         print(f"[  FAILED  ] {len(failed_tests)} tests, listed below:")
         for failed_test in failed_tests:
             print(f"[  FAILED  ] {failed_test}")
-    return len(failed_tests) == 0 and not fatal_errors
+    return len(failed_tests) == 0 and not fatal_errors, count
 
+
+all_suites = sorted(entry.name for entry in tests_dir.glob("test_*") if entry.is_dir())
+if args.tests:
+    unknown = [name for name in args.tests if name not in all_suites]
+    if unknown:
+        sys.exit(f"Unknown test suite(s): {', '.join(unknown)}")
+    suites_to_run = args.tests
+else:
+    suites_to_run = all_suites
+
+write_test_config_module()
 
 status = 0
-for entry in tests_dir.glob("test_*"):
-    if entry.is_dir():
-        if not run_test(entry.name):
-            status = -1
+total_count = 0
+for name in suites_to_run:
+    result, count = run_test(name)
+    total_count += count
+    if not result:
+        status = -1
+if args.test_filter and total_count == 0:
+    print(f"[  WARNING ] no tests matched --test_filter {args.test_filter!r}")
+    status = -1
 if status == 0:
     shutil.rmtree(config_dir, ignore_errors=True)
     shutil.rmtree(userdata_dir, ignore_errors=True)
+    shutil.rmtree(test_config_dir, ignore_errors=True)
 exit(status)

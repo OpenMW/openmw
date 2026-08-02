@@ -39,9 +39,9 @@ namespace SceneUtil
                 verts->push_back(osg::Vec3f(x2, y2, 0.f));
 
                 float u1 = x * texCoordStep;
-                float v1 = y * texCoordStep;
+                float v1 = textureRepeats - y * texCoordStep;
                 float u2 = u1 + texCoordStep;
-                float v2 = v1 + texCoordStep;
+                float v2 = v1 - texCoordStep;
 
                 texcoords->push_back(osg::Vec2f(u1, v2));
                 texcoords->push_back(osg::Vec2f(u1, v1));

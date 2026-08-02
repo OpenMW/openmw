@@ -360,7 +360,7 @@ void CSVWorld::ScriptSubView::highlightError(int line, int column)
     QTextCursor cursor = mEditor->textCursor();
 
     cursor.movePosition(QTextCursor::Start);
-    if (cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, line))
+    if (cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, line))
         cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, column);
 
     mEditor->setFocus();

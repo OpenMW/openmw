@@ -1,5 +1,6 @@
 #include "birthsigncheck.hpp"
 
+#include <format>
 #include <string>
 
 #include <apps/opencs/model/doc/messages.hpp>
@@ -51,11 +52,12 @@ void CSMTools::BirthsignCheckStage::perform(int stage, CSMDoc::Messages& message
 
     if (birthsign.mTexture.empty())
         messages.add(id, "Image is missing", "", CSMDoc::Message::Severity_Error);
-    else if (mTextures.searchId(birthsign.mTexture) == -1)
+    else if (mTextures.searchId(birthsign.mTexture.getOriginal()) == -1)
     {
-        std::string ddsTexture = birthsign.mTexture;
+        std::string ddsTexture = birthsign.mTexture.getOriginal();
         if (!(Misc::ResourceHelpers::changeExtensionToDds(ddsTexture) && mTextures.searchId(ddsTexture) != -1))
-            messages.add(id, "Image '" + birthsign.mTexture + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, std::format("Image '{}' does not exist", birthsign.mTexture.getOriginal()), "",
+                CSMDoc::Message::Severity_Error);
     }
 
     /// \todo check data members that can't be edited in the table view

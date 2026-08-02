@@ -3,9 +3,11 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <components/debug/debugging.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/l10n/qttranslations.hpp>
 #include <components/platform/application.hpp>
+#include <components/platform/platform.hpp>
 
 #include "mainwizard.hpp"
 
@@ -15,13 +17,15 @@
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
-int main(int argc, char* argv[])
+int runWizard(int argc, char* argv[])
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description description;
     Files::ConfigurationManager configurationManager;
     configurationManager.addCommonOptions(description);
     configurationManager.readConfiguration(variables, description, true);
+
+    Debug::setupLogging(configurationManager.getLogPath(), "Wizard");
 
     Platform::Application app(argc, argv);
 
@@ -51,4 +55,9 @@ int main(int argc, char* argv[])
 
     wizard.show();
     return app.exec();
+}
+
+int main(int argc, char* argv[])
+{
+    return Debug::wrapApplication(runWizard, argc, argv, "Wizard");
 }

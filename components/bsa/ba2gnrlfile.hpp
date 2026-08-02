@@ -16,9 +16,9 @@ namespace Bsa
         struct FileRecord
         {
             FileRecord();
-            uint32_t size;
-            uint32_t offset;
-            uint32_t packedSize = 0;
+            uint32_t mSize = 0;
+            uint32_t mOffset;
+            uint32_t mPackedSize = 0;
             bool isValid() const;
         };
 

@@ -71,4 +71,11 @@
         </BasisSkin>
     </Resource>
 
+    <!-- Defines mouse emulation cursor -->
+    <Resource type="AutoSizedResourceSkin" name="HUD_MouseEmulationCursor" texture="textures\omw_mouse_emulation_cursor.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    
 </MyGUI>

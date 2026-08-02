@@ -175,7 +175,7 @@ namespace
                 if (!mgef)
                 {
                     Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
-                                        << ": dropping invalid effect (index " << iter->mData.mEffectID << ")";
+                                        << ": dropping invalid effect (" << iter->mData.mEffectID << ")";
                     iter = spell.mEffects.mList.erase(iter);
                     changed = true;
                     continue;
@@ -268,7 +268,7 @@ namespace MWWorld
             auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
 
             ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
-            if constexpr (HasRecordId<T>::value)
+            if constexpr (HasRecordId<T>)
             {
                 if constexpr (ESM::isESM4Rec(T::sRecordId))
                 {
@@ -525,7 +525,6 @@ namespace MWWorld
             store->setUp();
 
         getWritable<ESM::Skill>().setUp(get<ESM::GameSetting>());
-        getWritable<ESM::MagicEffect>().setUp(get<ESM::GameSetting>());
         getWritable<ESM::Attribute>().setUp(get<ESM::GameSetting>());
         getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
@@ -691,7 +690,9 @@ namespace MWWorld
             + get<ESM::Activator>().getDynamicSize() + get<ESM::Miscellaneous>().getDynamicSize()
             + get<ESM::Weapon>().getDynamicSize() + get<ESM::CreatureLevList>().getDynamicSize()
             + get<ESM::ItemLevList>().getDynamicSize() + get<ESM::Creature>().getDynamicSize()
-            + get<ESM::Container>().getDynamicSize() + get<ESM::Light>().getDynamicSize();
+            + get<ESM::Container>().getDynamicSize() + get<ESM::Light>().getDynamicSize()
+            + get<ESM::Static>().getDynamicSize() + get<ESM::Door>().getDynamicSize()
+            + get<ESM::Probe>().getDynamicSize() + get<ESM::Ingredient>().getDynamicSize();
     }
 
     void ESMStore::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -718,6 +719,10 @@ namespace MWWorld
         get<ESM::Creature>().write(writer, progress);
         get<ESM::Container>().write(writer, progress);
         get<ESM::Light>().write(writer, progress);
+        get<ESM::Static>().write(writer, progress);
+        get<ESM::Door>().write(writer, progress);
+        get<ESM::Probe>().write(writer, progress);
+        get<ESM::Ingredient>().write(writer, progress);
     }
 
     bool ESMStore::readRecord(ESM::ESMReader& reader, uint32_t typeId)
@@ -743,6 +748,10 @@ namespace MWWorld
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
             case ESM::REC_LIGH:
+            case ESM::REC_STAT:
+            case ESM::REC_DOOR:
+            case ESM::REC_PROB:
+            case ESM::REC_INGR:
                 mStoreImp->mRecNameToStore[type]->read(reader, true);
                 return true;
 

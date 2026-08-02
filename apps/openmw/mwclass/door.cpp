@@ -95,7 +95,7 @@ namespace MWClass
         return true;
     }
 
-    std::string_view Door::getModel(const MWWorld::ConstPtr& ptr) const
+    VFS::Path::NormalizedView Door::getModel(const MWWorld::ConstPtr& ptr) const
     {
         return getClassModel<ESM::Door>(ptr);
     }

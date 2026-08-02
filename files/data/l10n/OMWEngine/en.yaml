@@ -67,7 +67,6 @@ TimePlayed: "Time Played"
 ActorsProcessingRange: "Actors Processing Range"
 ActorsProcessingRangeValue: "Actors Processing Range ({value, number, :: group-off})"
 Anisotropy: "Anisotropy"
-AnisotropyValue: "Anisotropy ({value})"
 Audio: "Audio"
 AudioEffects: "Effects"
 AudioFootsteps: "Footsteps"
@@ -80,6 +79,10 @@ CameraSensitivity: "Camera Sensitivity"
 CameraZoomIn: "Zoom Camera In"
 CameraZoomOut: "Zoom Camera Out"
 ChangeRequiresRestart: "This change requires a restart to take effect."
+ClampLighting: "Clamp Lighting"
+ClampLightingTooltip: |-
+    Cap lighting brightness at (1, 1, 1) to replicate Morrowind's rendering.
+    Prevents overly bright or shifted colors but can dull lighting.
 ClassicFalloff: "Classic Falloff"
 ClassicFalloffTooltip: |-
     Default: off
@@ -114,9 +117,7 @@ ForcePerPixelLighting: "Per-Pixel Lighting"
 ForcePerPixelLightingTooltip: |-
     Force the use of per-pixel lighting. By default, only bump- and normal-mapped objects use per-pixel lighting.
 
-    Only affects objects drawn with shaders.
-
-    Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended.
+    Enabling per-pixel lighting results in visual differences to the original engine as certain lights in Morrowind rely on vertex lighting to look as intended.
 
     Note that groundcover shaders and particle effects ignore this setting.
 FrameRateHint: "Hint: press F3 to show\nthe current frame rate."
@@ -129,22 +130,24 @@ InvertXAxis: "Invert X Axis"
 InvertYAxis: "Invert Y Axis"
 Language: "Language"
 LanguageNote: "Note: these settings do not affect strings from ESM files."
-LightingMethod: "Lighting Method"
-LightingMethodLegacy: "Legacy"
-LightingMethodShaders: "Shaders"
-LightingMethodShadersCompatibility: "Shaders (compatibility)"
-LightingResetToDefaults: "Resets to default values, would you like to continue? Changes to lighting method will require a restart."
+LightsClusteredLighting: "Clustered Lighting"
+LightingResetToDefaults: "Resets to default values, would you like to continue?"
 Lights: "Lights"
-LightsBoundingSphereMultiplier: "Bounding Sphere Multiplier"
-LightsBoundingSphereMultiplierValue: "Bounding Sphere Multiplier ({value, number, ::.00})"
-LightsBoundingSphereMultiplierTooltip: "Default: 1.65\nMultiplier for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."
+LightRadiusMultiplier: "Radius Multiplier"
+LightRadiusMultiplierValue: "Radius Multiplier ({value, number, ::.00})"
+LightRadiusMultiplierTooltip: "Default: 1.75\nMultiplier for point light radius. Larger values will increase the range of lights."
 LightsFadeStartMultiplier: "Fade Start Multiplier"
 LightsFadeStartMultiplierValue: "Fade Start Multiplier ({value, number, ::.00})"
 LightsFadeStartMultiplierTooltip: "Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value for quicker transitions."
-LightsLightingMethodTooltip: "Set the internal handling of light sources.\n\n
-    \"Legacy\" always uses 8 lights per object. It provides results most similar to Morrowind's lighting.\n\n
-    \"Shaders (compatibility)\" removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.\n\n
-    \"Shaders\" carries all of the benefits that \"Shaders (compatibility)\" does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware."
+LightsClusteredLightingTooltip:  |-
+    Enable clustered lighting.
+    Divides the screen into regions to assign lights, removing per-object light limits.
+
+    Classic falloff and max light options do not apply in this mode.
+
+    Enables point light specular highlights on the water plane when the water shader is enabled.
+
+    It is highly recommended to use this with per-pixel lighting enabled, as vertex lighting can cause light pop at screen edges.
 LightsMaximumDistance: "Maximum Light Distance"
 LightsMaximumDistanceValue: "Maximum Light Distance ({value, number, :: group-off})"
 LightsMaximumDistanceTooltip: "Default: 8192\nMaximum distance at which lights will appear (measured in units).\n\nSet this to 0 to use an unlimited distance."
@@ -159,10 +162,13 @@ MatchSunlightToSunTooltip: |-
     This option makes the sun light source's position match the sun's position.
 MaxLights: "Max Lights"
 MaxLightsValue: "Max Lights ({value, number, :: group-off})"
-MaxLightsTooltip: "Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."
+MaxLightsTooltip: "Default: 16\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see in Morrowind."
 MenuHelpDelay: "Menu Help Delay"
 MenuTransparency: "Menu Transparency"
 MouseAndKeyboard: "Mouse/Keyboard"
+MouseEmulationCursor: "Mouse Emulation Cursor"
+ParticlePointLighting: "Particle Point Lighting"
+ParticlePointLightingTooltip: "Allows particle systems to be lit by point lights."
 PostProcessing: "Post Processing"
 PostProcessingIsNotEnabled: "Postprocessor is not enabled"
 PostProcessingTooltip: "Tweaked via Post Processor HUD, see input bindings."

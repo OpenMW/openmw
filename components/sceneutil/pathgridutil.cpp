@@ -139,7 +139,6 @@ namespace SceneUtil
                 gridGeometry->addPrimitiveSet(pointIndices);
             if (!lineIndices->empty())
                 gridGeometry->addPrimitiveSet(lineIndices);
-            gridGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
 
         template <class T>
@@ -187,7 +186,6 @@ namespace SceneUtil
             wireframeGeometry->setVertexArray(vertices);
             wireframeGeometry->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
             wireframeGeometry->addPrimitiveSet(indices);
-            wireframeGeometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
         }
     }
 

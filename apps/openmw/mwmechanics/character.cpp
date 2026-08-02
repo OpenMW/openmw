@@ -60,6 +60,8 @@
 namespace
 {
 
+    const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
+
     std::string_view getBestAttack(const ESM::Weapon* weapon)
     {
         int slash = weapon->mData.mSlash[0] + weapon->mData.mSlash[1];
@@ -1053,8 +1055,9 @@ namespace MWMechanics
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
                 if (soundgen == "left" || soundgen == "right")
                 {
-                    sndMgr->playSound3D(
-                        mPtr, sound, volume, pitch, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+                    if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
+                        sndMgr->playSound3D(
+                            mPtr, sound, volume, pitch, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
                 }
                 else
                 {
@@ -1107,7 +1110,8 @@ namespace MWMechanics
             // and processing multiple hit keys for a single attack
             if (mReadyToHit)
             {
-                charClass.hit(mPtr, mAttackStrength, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                charClass.hit(
+                    mPtr, mAttackStrength, mAttackWindUp, attackType, mAttackVictim, mAttackHitPos, mAttackSuccess);
                 mReadyToHit = false;
             }
         }
@@ -1139,14 +1143,14 @@ namespace MWMechanics
                 prepareHit();
 
                 if (groupname == "attack1" || groupname == "swimattack1")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Chop, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
                 else if (groupname == "attack2" || groupname == "swimattack2")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Slash, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Slash, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
                 else if (groupname == "attack3" || groupname == "swimattack3")
-                    charClass.hit(
-                        mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
+                    charClass.hit(mPtr, mAttackStrength, mAttackWindUp, ESM::Weapon::AT_Thrust, mAttackVictim,
+                        mAttackHitPos, mAttackSuccess);
             }
         }
         else if (action == "shoot attach")
@@ -1156,7 +1160,7 @@ namespace MWMechanics
             // See notes for melee release above
             if (mReadyToHit)
             {
-                mAnimation->releaseArrow(mAttackStrength);
+                mAnimation->releaseArrow(mAttackStrength, mAttackWindUp);
                 mReadyToHit = false;
             }
         }
@@ -1253,6 +1257,7 @@ namespace MWMechanics
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         mAttackStrength = calculateWindUp();
+        mAttackWindUp = mAttackStrength;
         if (mAttackStrength == -1.f)
             mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
@@ -1328,14 +1333,7 @@ namespace MWMechanics
                     ammunition = ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ammotype;
                 // Cancel attack if we no longer have ammunition
                 if (!ammunition)
-                {
-                    if (mUpperBodyState == UpperBodyState::AttackWindUp)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mUpperBodyState = UpperBodyState::WeaponEquipped;
-                    }
                     setAttackingOrSpell(false);
-                }
             }
 
             MWWorld::ConstContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -1370,6 +1368,8 @@ namespace MWMechanics
 
         // If the current weapon type was changed in the middle of attack (e.g. by Equip console command or when bound
         // spell expires), we should force actor to the "weapon equipped" state, interrupt attack and update animations.
+        // Morrowind does this at the end of the attack (see #4646 and PR 1972).
+        // If we decide to cope with the resulting problems, the thrown weapon->H2H case below should be extended.
         if (isStillWeapon && mWeaponType != weaptype && mUpperBodyState > UpperBodyState::WeaponEquipped)
         {
             forcestateupdate = true;
@@ -1454,6 +1454,7 @@ namespace MWMechanics
                             mAnimation->showWeapons(false);
                             int equipMask = MWRender::BlendMask_All;
                             mUpperBodyState = UpperBodyState::Equipping;
+                            mResetIdleOnAttackEnd = true;
                             if (useShieldAnims && weaptype != ESM::Weapon::Spell)
                             {
                                 equipMask = equipMask | ~MWRender::BlendMask_LeftArm;
@@ -1464,7 +1465,7 @@ namespace MWMechanics
 
                             if (weaptype != ESM::Weapon::Spell || cls.isBipedal(mPtr))
                             {
-                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, true, 1.0f, "equip start",
+                                playBlendedAnimation(weapgroup, priorityWeapon, equipMask, false, 1.0f, "equip start",
                                     "equip stop", 0.0f, 0);
                             }
 
@@ -1484,7 +1485,7 @@ namespace MWMechanics
                         }
                     }
 
-                    if (isWerewolf)
+                    if (isWerewolf && weaptype != ESM::Weapon::None)
                     {
                         const MWWorld::ESMStore& store = world->getStore();
                         const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfEquip", prng);
@@ -1507,24 +1508,12 @@ namespace MWMechanics
             }
         }
 
-        if (isWerewolf)
-        {
-            const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
-            if (isRunning() && !world->isSwimming(mPtr) && mWeaponType == ESM::Weapon::None)
-            {
-                if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
-                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
-            }
-            else
-                sndMgr->stopSound3D(mPtr, wolfRun);
-        }
-
         float complete = 0.f;
         bool animPlaying = false;
         ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
         if (getAttackingOrSpell())
         {
-            bool resetIdle = true;
+            mResetIdleOnAttackEnd = true;
             if (mUpperBodyState == UpperBodyState::WeaponEquipped
                 && (mHitState == CharState_None || mHitState == CharState_Block))
             {
@@ -1562,12 +1551,12 @@ namespace MWMechanics
                         spellCastResult = world->startSpellCast(mPtr);
                     mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                    if (spellid.empty() && cls.hasInventoryStore(mPtr))
+                    if (spellid.empty())
                     {
-                        MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                        const MWWorld::ContainerStore& inv = cls.getContainerStore(mPtr);
                         if (inv.getSelectedEnchantItem() != inv.end())
                         {
-                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                            const MWWorld::ConstPtr& enchantItem = *inv.getSelectedEnchantItem();
                             spellid = enchantItem.getClass().getEnchantment(enchantItem);
                             isMagicItem = true;
                         }
@@ -1578,10 +1567,11 @@ namespace MWMechanics
                         world->breakInvisibility(mPtr);
                         // Enchanted items by default do not use casting animations
                         world->castSpell(mPtr);
-                        resetIdle = false;
                         // Spellcasting animation needs to "play" for at least one frame to reset the aiming factor
                         animPlaying = true;
                         mUpperBodyState = UpperBodyState::Casting;
+                        // But idle should not be reset
+                        mResetIdleOnAttackEnd = false;
                     }
                     // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to
                     // insufficient magicka. Used up powers are exempt from this from some reason.
@@ -1615,15 +1605,15 @@ namespace MWMechanics
                                     = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
 
                                 const VFS::Path::Normalized castStaticModel
-                                    = Misc::ResourceHelpers::correctMeshPath(VFS::Path::Normalized(castStatic->mModel));
+                                    = Misc::ResourceHelpers::correctMeshPath(castStatic->mModel.getNormalized());
 
                                 if (mAnimation->getNode("Bip01 L Hand"))
-                                    mAnimation->addEffect(
-                                        castStaticModel.value(), "", false, "Bip01 L Hand", effect->mParticle);
+                                    mAnimation->addEffect(castStaticModel.value(), "", false, "Bip01 L Hand",
+                                        effect->mParticle.getOriginal());
 
                                 if (mAnimation->getNode("Bip01 R Hand"))
-                                    mAnimation->addEffect(
-                                        castStaticModel.value(), "", false, "Bip01 R Hand", effect->mParticle);
+                                    mAnimation->addEffect(castStaticModel.value(), "", false, "Bip01 R Hand",
+                                        effect->mParticle.getOriginal());
                             }
                             // first effect used for casting animation
                             const ESM::ENAMstruct& firstEffect = effects->front().mData;
@@ -1662,10 +1652,6 @@ namespace MWMechanics
                                 startKey, stopKey, 0.0f, 0);
                             mUpperBodyState = UpperBodyState::Casting;
                         }
-                    }
-                    else
-                    {
-                        resetIdle = false;
                     }
                 }
                 else
@@ -1724,12 +1710,6 @@ namespace MWMechanics
                     playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, weapSpeed,
                         startKey, stopKey, 0.0f, 0);
                 }
-            }
-
-            // We should not break swim and sneak animations
-            if (resetIdle && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
-            {
-                resetCurrentIdleState();
             }
         }
 
@@ -1847,6 +1827,25 @@ namespace MWMechanics
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
 
+                // Skip Thrown->H2H idle transition (e.g., if we've run out of ammo)
+                // In Morrowind this isn't actually specific to this transition
+                // See the weapon->weapon mid-attack skip logic above
+                if (mUpperBodyState == UpperBodyState::AttackEnd)
+                {
+                    if (weapclass == ESM::WeaponType::Thrown && weaptype == ESM::Weapon::HandToHand)
+                    {
+                        forcestateupdate = true;
+                        mWeaponType = weaptype;
+                        mCurrentWeapon = getWeaponAnimation(mWeaponType);
+                        mAnimation->showWeapons(false);
+                    }
+                }
+                // We should not break swim and sneak animations
+                if (mResetIdleOnAttackEnd && mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
+                {
+                    resetCurrentIdleState();
+                }
+
                 mUpperBodyState = UpperBodyState::WeaponEquipped;
             }
             else if (mUpperBodyState == UpperBodyState::Unequipping)
@@ -1854,6 +1853,7 @@ namespace MWMechanics
                 if (animPlaying)
                     mAnimation->disable(mCurrentWeapon);
                 mUpperBodyState = UpperBodyState::None;
+                mWeaponType = ESM::Weapon::None;
             }
         }
 
@@ -1963,6 +1963,7 @@ namespace MWMechanics
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
         const MWWorld::Class& cls = mPtr.getClass();
         osg::Vec3f movement(0.f, 0.f, 0.f);
+        bool isMoving = false;
         float speed = 0.f;
 
         updateMagicEffects();
@@ -2004,8 +2005,7 @@ namespace MWMechanics
 
             // Force Jump Logic
 
-            bool isMoving
-                = (std::abs(movementSettings.mPosition[0]) > .5 || std::abs(movementSettings.mPosition[1]) > .5);
+            isMoving = (std::abs(movementSettings.mPosition[0]) > .5 || std::abs(movementSettings.mPosition[1]) > .5);
             if (!inwater && !flying)
             {
                 // Force Jump
@@ -2501,6 +2501,36 @@ namespace MWMechanics
         mSkipAnim = false;
 
         mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
+
+        // Werewolf running sound logic
+        if (isPlayer)
+        {
+            bool playWolfRun = false;
+            if (movement != osg::Vec3f() && isMoving && mHitState == CharState_None)
+            {
+                if (mWeaponType == ESM::Weapon::None || mUpperBodyState == UpperBodyState::Unequipping)
+                {
+                    const NpcStats& stats = cls.getNpcStats(mPtr);
+                    if (stats.isWerewolf() && !stats.isDead())
+                    {
+                        const bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+                        const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+                        playWolfRun = running && !sneaking && !world->isSwimming(mPtr);
+                    }
+                }
+            }
+
+            if (playWolfRun)
+            {
+                if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
+                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Foot, MWSound::PlayMode::Loop);
+            }
+            else
+            {
+                if (sndMgr->getSoundPlaying(mPtr, wolfRun))
+                    sndMgr->stopSound3D(mPtr, wolfRun);
+            }
+        }
     }
 
     void CharacterController::persistAnimationState() const
@@ -2711,7 +2741,7 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
-        if (mHitState != CharState_None)
+        if (mHitState != CharState_None || mDeathState != CharState_None)
             return true;
 
         if (Settings::game().mPlayerMovementIgnoresAnimation && mPtr == getPlayer())

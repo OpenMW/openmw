@@ -3,8 +3,9 @@
 
 #include <string>
 
-#include "components/esm/defs.hpp"
-#include "components/esm/refid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/path.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -51,8 +52,10 @@ namespace ESM
         LHDTstruct mData;
 
         uint32_t mRecordFlags;
-        std::string mModel, mIcon, mName;
         ESM::RefId mId, mSound, mScript;
+        std::string mName;
+        Path mModel;
+        Path mIcon;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

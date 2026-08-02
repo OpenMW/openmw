@@ -577,6 +577,50 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <source>Text file (*.txt)</source>
         <translation>Textfil (*.txt)</translation>
     </message>
+    <message>
+        <source>Open Directory</source>
+        <translation>Öppna katalog</translation>
+    </message>
+    <message>
+        <source>Open %1</source>
+        <translation>Öppna %1</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Lokal konfigurationskatalog används eftersom den innehåller en openmw.cfg.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>Local config directory used because it contains an openmw.cfg.</source>
+        <translation>Lokal konfigurationskatalog används eftersom den innehåller en openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.
+Logs and settings changed through the launcher and in-game will be saved here.
+This is typically a symptom of a broken OpenMW installation or bad package.</source>
+        <translation>Global konfigurationskatalog används eftersom den lokala konfigurationskatalogen inte innehöll en openmw.cfg.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.
+Det här är oftast ett symtom på en trasig OpenMW-installation eller ett dåligt paket.</translation>
+    </message>
+    <message>
+        <source>Global config directory used because local directory did not contain an openmw.cfg.</source>
+        <translation>Global konfigurationskatalog används eftersom den lokala konfigurationskatalogen inte innehöll en openmw.cfg.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.
+Logs and settings changed through the launcher and in-game will be saved here.</source>
+        <translation>Användarens konfigurationskatalog används eftersom %1 innehåller raden config=%2.
+Loggar och inställningar som ändras genom startaren och inne i spelet kommer sparas här.</translation>
+    </message>
+    <message>
+        <source>User config directory used because %1 contains the line config=%2.</source>
+        <translation>Användarens konfigurationskatalog används eftersom %1 innehåller raden config=%2.</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -663,7 +707,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stops combat with NPCs affected by Calm spells every frame -- like in Morrowind without the MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Avbryter strid med icke-spelbara figurer påverkade av &quot;Calm&quot;-besvjärjelser varje bildruta – såsom i Morrowind utan MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Avbryter strid med bifigurer påverkade av &quot;Calm&quot;-besvjärjelser varje bildruta – såsom i Morrowind utan MCP.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make the value of filled soul gems dependent only on soul magnitude.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -675,15 +719,15 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make stealing items from NPCs that were knocked down possible during combat.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör det möjligt att stjäla föremål från icke-spelbara figurer som är avsvimmade.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör det möjligt att stjäla föremål från bifigurer som är avsvimmade.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;When enabled, a navigation mesh is built in the background for world geometry to be used for pathfinding. When disabled only the path grid is used to build paths. Single-core CPU systems may have a big performance impact on existing interior location and moving across the exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn&apos;t know where to go when you stand behind that stone and cast a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Om aktiv kommer en en navigeringsmesh av världsgeometrin byggas i bakgrunden som används för pathfinding. Om inaktiv kommer endast pathgrid användas för att bygga vägar. Enkelkärnade processorer kan få kraftigt försämrad prestanda. Kan påverka prestandan på flerkärniga processorer något. Flerkärniga processorer kan ha olika fördröjning för att uppdatera navigeringsmesh. Förflyttning mellan externa världar och att gå in eller ut ur en plats producerar en uppdatering av navigeringsmesh. Icke-spelbara figurer kan inte hitta vägar innan navigeringsmesh har skapats runt om dem. Testa att inaktivera denna funktion om du vill ha en mer gammaldags AI som inte vet var den ska gå när du står bakom den där stenen och skjuter ett eldklot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a name=&quot;docs-internal-guid-f375b85a-7fff-02ff-a5af-c5cff63923c0&quot;/&gt;Om aktiv kommer en en navigeringsmesh av världsgeometrin byggas i bakgrunden som används för pathfinding. Om inaktiv kommer endast pathgrid användas för att bygga vägar. Enkelkärnade processorer kan få kraftigt försämrad prestanda. Kan påverka prestandan på flerkärniga processorer något. Flerkärniga processorer kan ha olika fördröjning för att uppdatera navigeringsmesh. Förflyttning mellan externa världar och att gå in eller ut ur en plats producerar en uppdatering av navigeringsmesh. bifigurer kan inte hitta vägar innan navigeringsmesh har skapats runt om dem. Testa att inaktivera denna funktion om du vill ha en mer gammaldags AI som inte vet var den ska gå när du står bakom den där stenen och skjuter ett eldklot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om aktiverat kommer icke-spelbara figurer göra undanmanövrar för att undvika kollisioner med andra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om aktiverat kommer bifigurer göra undanmanövrar för att undvika kollisioner med andra.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Don&apos;t use race weight in NPC movement speed calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -719,7 +763,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with &quot;turn to movement direction&quot; enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör spelarens och icke-spelbara figurers rörelser mjukare. Rekommenderas att användas tillsammans med &quot;vänd mot rörelseriktningen&quot; aktiverad.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gör spelarens och bifigurers rörelser mjukare. Rekommenderas att användas tillsammans med &quot;vänd mot rörelseriktningen&quot; aktiverad.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -727,7 +771,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character&apos;s body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Påverkar sido- och diagonalförflyttningar. Förflyttningar blir mer realistiska om aktiv.&lt;/p&gt;&lt;p&gt;Om aktiv kommer spelarrollfiguren vända underkroppen i rikting mot förflyttningen. Överkroppen vänds delvis. Huvudet pekar alltid dit kameran ser. I stidsläge fungerar det bara för diagonal förflyttning. Utanför strid ändrar inställningen förflyttningar rakt höger och vänster också. Inställningen vänder också hela kroppen upp eller ner vid simning enligt förflyttningsriktningen.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Påverkar sido- och diagonalförflyttningar. Förflyttningar blir mer realistiska om aktiv.&lt;/p&gt;&lt;p&gt;Om inaktiv kommer rollpersonen vända underkroppen i rikting mot förflyttningen. Överkroppen vänds delvis. Huvudet pekar alltid dit kameran ser. I stidsläge fungerar det bara för diagonal förflyttning. Utanför strid ändrar inställningen förflyttningar rakt höger och vänster också. Inställningen vänder också hela kroppen upp eller ner vid simning enligt förflyttningsriktningen.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered weapons (with quivers and scabbards), requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -776,11 +820,9 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren&apos;t affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
                   Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-                  Affected objects will use shaders.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normalt sett påverkas omgivningskartors reflektioner inte av ljus, vilket gör att omgivningskartor (och således så kallade bump mappade objekt) glöder i mörkret.
-                  Morrowind Code Patch inkluderar en inställning att kringå detta genom att lägga omgivningskartor före ljussättningen. Det här är motsvarigheten till den inställningen.
-                  Påverkade objekt kommer använda shaders.
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normalt påverkas inte omgivningskartor (så kallade environment maps) av ljussättningen, vilket gör att objekt med omgivningskartor (och således även objekt med bump mapping) lyser i mörkret.
+                  Morrowind Code Patch har ett alternativ som åtgärdar detta genom att applicera omgivningskartor före ljussättningen. Detta motsvarar det alternativet.
                   &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
@@ -903,7 +945,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, dialogue topics will have a different color if the topic is specific to the NPC you&apos;re talking to or the topic was previously seen. Color can be changed in settings.cfg.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till den icke-spelbara figur du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Om denna inställning är på kommer dialogämnen ha en annan färg om ämnet är specifikt till bifiguren du pratar med eller om ämnet redan har setts. Färger kan ändras i settings.cfg.&lt;/p&gt;&lt;p&gt;Förvalt är av.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Size of characters in game texts.</source>
@@ -1015,7 +1057,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktiverar skuggor för icke-spelbara figurer och varelser bortsett från spelarrollfiguren. Kan ha en liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktiverar skuggor för bifigurer och varelser bortsett från spelarrollpersonen. Kan ha en liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>512</source>
@@ -1039,7 +1081,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor exklusivt för spelarrollfiguren. Kan ha en mycket liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor exklusivt för spelarrollpersonen. Kan ha en mycket liten negativ prestandapåverkan.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -1062,10 +1104,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Aktivera skuggor för terräng, inklusive avlägsen terräng. Kan ha en signifikant negativ påverkan på prestanda och skuggkvalité.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>Lighting</source>
-        <translation>Ljussättning</translation>
-    </message>
-    <message>
         <source>Tooltip</source>
         <translation>Inforuta</translation>
     </message>
@@ -1086,26 +1124,8 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Effekter av reflekterade &quot;Absorb&quot;-besvärjelser speglas inte – såsom i Morrowind.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind&apos;s lighting.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Välj intern hantering av ljuskällor.&lt;/p&gt;
-&lt;p&gt; &quot;Gammaldags&quot; använder alltid max 8 ljuskällor per objekt och ger ljussättning likt ett gammaldags spel.&lt;/p&gt;
-&lt;p&gt;&quot;Shader (kompatibilitet)&quot; tar bort begränsningen med max 8 ljuskällor per objekt. Detta läge aktiverar också ljus på marktäckning. Rekommenderas för äldre hårdvara tillsammans med en ljusbegränsning nära 8.&lt;/p&gt;
-&lt;p&gt; &quot;Shader&quot; har alla fördelar som &quot;Shader (kompatibilitet)&quot; har, men med ett modernt förhållningssätt som möjliggör fler maximalt antal ljuskällor med liten eller ingen prestandaförlust på modern hårdvara.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
-    </message>
-    <message>
-        <source>Legacy</source>
-        <translation>Gammaldags</translation>
-    </message>
-    <message>
-        <source>Shaders (compatibility)</source>
-        <translation>Shader (kompatibilitet)</translation>
-    </message>
-    <message>
         <source>In third-person view, use the camera as the sound listener instead of the player character.</source>
-        <translation>Använd kameran som ljudlyssnare istället för spelarrollfiguren i tredjepersonsperspektivet.</translation>
+        <translation>Använd kameran som ljudlyssnare istället för spelarrollpersonen i tredjepersonsperspektivet.</translation>
     </message>
     <message>
         <source>Permanent Barter Disposition Changes</source>
@@ -1117,7 +1137,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>NPCs Avoid Collisions</source>
-        <translation>Icke-spelbara figurer undviker kollisioner</translation>
+        <translation>bifigurer undviker kollisioner</translation>
     </message>
     <message>
         <source>Soulgem Values Rebalance</source>
@@ -1292,7 +1312,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Enable Actor Shadows</source>
-        <translation>Aktivera rollfigurskuggor</translation>
+        <translation>Aktivera rollpersonskuggor</translation>
     </message>
     <message>
         <source>Fade Start Multiplier</source>
@@ -1321,10 +1341,6 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>Enable Terrain Shadows</source>
         <translation>Aktivera terrängskuggor</translation>
-    </message>
-    <message>
-        <source>Lighting Method</source>
-        <translation>Ljussättningsmetod</translation>
     </message>
     <message>
         <source>Audio Device</source>
@@ -1420,7 +1436,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Steal from Knocked out Actors in Combat</source>
-        <translation>Stjäl från avsvimmade rollfigurer i strid</translation>
+        <translation>Stjäl från avsvimmade figurer i strid</translation>
     </message>
     <message>
         <source>Factor Strength into Hand-to-Hand Combat</source>
@@ -1428,7 +1444,7 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage: damage is multiplied by Strength value divided by 40.&lt;/p&gt;&lt;p&gt;Can apply to all actors or only to non-werewolf actors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning styr om basegenskapen Strength (styrka) ska räknas in i skador från obeväpnade attacker: skadan multipliceras med värdet på Strength dividerat med 40.&lt;/p&gt;&lt;p&gt;Kan tillämpas på alla rollfigurer eller endast för rollfigurer som inte är varulvar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Denna inställning styr om basegenskapen Strength (styrka) ska räknas in i skador från obeväpnade attacker: skadan multipliceras med värdet på Strength dividerat med 40.&lt;/p&gt;&lt;p&gt;Kan tillämpas på alla rollpersoner eller endast för rollpersoner som inte är varulvar.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>Turn to Movement Direction</source>
@@ -1452,11 +1468,11 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     </message>
     <message>
         <source>Skip Menu and Generate Default Character</source>
-        <translation>Hoppa över meny och generera förinställd rollfigur</translation>
+        <translation>Hoppa över meny och generera förinställd rollperson</translation>
     </message>
     <message>
         <source>Start Default Character at</source>
-        <translation>Starta förinställd rollfigur vid</translation>
+        <translation>Starta förinställd rollperson vid</translation>
     </message>
     <message>
         <source>Run Script After Startup:</source>
@@ -1493,6 +1509,10 @@ de ordinarie fonterna i Morrowind. Bocka denna ruta om du ändå föredrar ordin
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls the strength of the Doppler effect. Zero means it is completely disabled.&lt;/p&gt;&lt;p&gt;The Doppler effect increases or decreases the pitch of sounds relative to the velocity of the sound source and the listener.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Kontrollerar styrkan på dopplereffekten. Noll innebär helt inaktiverat.&lt;/p&gt;&lt;p&gt;Dopplereffekten höjer eller sänker tonhöjden på ljud i förhållande till ljudkällans hastighet och lyssnaren.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+    </message>
+    <message>
+        <source>Active Config Directories</source>
+        <translation>Aktiva konfigurationskataloger</translation>
     </message>
 </context>
 </TS>

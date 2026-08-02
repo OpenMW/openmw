@@ -78,7 +78,7 @@ namespace Nif
         std::size_t numRoots() const { return mFile->mRoots.size(); }
 
         /// Get the name of the file
-        const std::string& getFilename() const { return mFile->mPath; }
+        const VFS::Path::Normalized& getFilename() const { return mFile->mPath; }
 
         const std::string& getHash() const { return mFile->mHash; }
 
@@ -155,8 +155,6 @@ namespace Nif
 
         /// Get the Bethesda version of the NIF format used
         std::uint32_t getBethVersion() const { return mBethVersion; }
-
-        static void setLoadUnsupportedFiles(bool load);
 
         static void setWriteNifDebugLog(bool load);
     };

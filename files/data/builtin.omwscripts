@@ -25,6 +25,7 @@ NPC,CREATURE: scripts/omw/ai.lua
 GLOBAL: scripts/omw/mechanics/globalcontroller.lua
 CREATURE, NPC, PLAYER: scripts/omw/mechanics/actorcontroller.lua
 NPC,CREATURE,PLAYER: scripts/omw/combat/interface.lua
+CREATURE, NPC, PLAYER: scripts/omw/spellcasting/interface_local.lua
 
 # User interface
 PLAYER: scripts/omw/ui.lua

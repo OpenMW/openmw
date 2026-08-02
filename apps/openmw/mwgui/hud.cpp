@@ -14,6 +14,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -92,6 +93,9 @@ namespace MWGui
         getWidget(mWeaponSpellBox, "WeaponSpellName");
 
         getWidget(mCrosshair, "Crosshair");
+        getWidget(mMouseEmulationCursor, "MouseEmulationCursor");
+
+        mLocalMapZoom = 0.5f;
 
         LocalMapBase::init(mMinimap, mCompass);
 
@@ -354,12 +358,8 @@ namespace MWGui
             // use the icon of the first effect
             const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
                 spell->mEffects.mList.front().mData.mEffectID);
-            std::string icon = effect->mIcon;
-            std::replace(icon.begin(), icon.end(), '/', '\\');
-            size_t slashPos = icon.rfind('\\');
-            icon.insert(slashPos + 1, "b_");
-            const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctIconPath(
-                VFS::Path::toNormalized(icon), *MWBase::Environment::get().getResourceSystem()->getVFS());
+            const VFS::Path::Normalized iconPath = Misc::ResourceHelpers::correctBigIconPath(
+                effect->mIcon.getNormalized(), *MWBase::Environment::get().getResourceSystem()->getVFS());
             mSpellImage->setSpellIcon(iconPath);
         }
         else
@@ -443,15 +443,20 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
 
         mWeapImage->setItem(MWWorld::Ptr());
-        std::string icon = (player.getClass().getNpcStats(player).isWerewolf()) ? "icons\\k\\tx_werewolf_hand.dds"
-                                                                                : "icons\\k\\stealth_handtohand.dds";
+
+        constexpr VFS::Path::NormalizedView werewolfHand("icons/k/tx_werewolf_hand.dds");
+        constexpr VFS::Path::NormalizedView stealthHandToHand("icons/k/stealth_handtohand.dds");
+
+        const VFS::Path::NormalizedView icon
+            = (player.getClass().getNpcStats(player).isWerewolf()) ? werewolfHand : stealthHandToHand;
+
         mWeapImage->setIcon(icon);
 
         mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "Layout");
         mWeapBox->setUserString("ToolTipLayout", "HandToHandToolTip");
         mWeapBox->setUserString("Caption_HandToHandText", itemName);
-        mWeapBox->setUserString("ImageTexture_HandToHandImage", icon);
+        mWeapBox->setUserString("ImageTexture_HandToHandImage", icon.value());
         mWeapBox->setUserData(MyGUI::Any::Null);
     }
 
@@ -470,6 +475,17 @@ namespace MWGui
         {
             mCrosshair->changeWidgetSkin("HUD_Crosshair");
         }
+    }
+
+    void HUD::setMouseEmulationCursorVisible(bool visible)
+    {
+        mMouseEmulationCursor->setVisible(visible);
+    }
+
+    void HUD::setMouseEmulationCursorPosition(int left, int top)
+    {
+        mMouseEmulationCursor->setPosition(
+            left - mMouseEmulationCursor->getWidth() / 2, top - mMouseEmulationCursor->getHeight() / 2);
     }
 
     void HUD::setHmsVisible(bool visible)

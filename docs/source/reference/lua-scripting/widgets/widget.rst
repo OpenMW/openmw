@@ -31,6 +31,10 @@ Properties
     - util.vector2 (0, 0)
     - | Offsets the widget's position by a fraction of its size.
       | Useful for centering or aligning to a corner.
+  * - padding
+    - util.vector4 (0, 0, 0, 0)
+    - | Adds inset spacing between the outer edge of the widget and its content.
+      | Components specify the left, top, right, and bottom insets in pixels, respectively.
   * - visible
     - boolean (true)
     - Defines if the widget is visible

@@ -33,6 +33,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/formid.hpp>
+#include <components/esm/path.hpp>
 
 #include "actor.hpp"
 #include "inventory.hpp"
@@ -182,7 +183,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        std::string mModel; // skeleton model (can be a marker in FO3/FONV)
+        ESM::Path mModel; // skeleton model (can be a marker in FO3/FONV)
 
         ESM::FormId mRace;
         ESM::FormId mClass;

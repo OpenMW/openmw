@@ -34,12 +34,12 @@ namespace ESM
         std::map<ESM::RefId, Faction> mFactions;
         int32_t mDisposition;
         int32_t mCrimeDispositionModifier;
-        std::array<StatState<float>, ESM::Skill::Length> mSkills;
+        std::map<ESM::RefId, StatState<float>> mSkills;
         int32_t mBounty;
         int32_t mReputation;
         int32_t mWerewolfKills;
         int32_t mLevelProgress;
-        std::array<int32_t, ESM::Attribute::Length> mSkillIncrease;
+        std::map<ESM::RefId, int32_t> mSkillIncrease;
         std::array<int32_t, 3> mSpecIncreases;
         std::vector<ESM::RefId> mUsedIds;
         float mTimeToStartDrowning;

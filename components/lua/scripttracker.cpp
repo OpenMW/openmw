@@ -13,7 +13,7 @@ namespace LuaUtil
 
     void ScriptTracker::onLoad(ScriptsContainer& container)
     {
-        mLoadedScripts.emplace(container.mThis, sMinLoadedFrames + mFrame);
+        mLoadedScripts.emplace(container.getWeakPointer(), sMinLoadedFrames + mFrame);
     }
 
     void ScriptTracker::unloadInactiveScripts(LuaView& lua)
@@ -25,7 +25,7 @@ namespace LuaUtil
             --toProcess;
             auto [ptr, ttl] = std::move(mLoadedScripts.front());
             mLoadedScripts.pop();
-            ScriptsContainer* container = *ptr.get();
+            ScriptsContainer* container = *ptr;
             // Object no longer exists, cease tracking
             if (!container)
                 continue;

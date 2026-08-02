@@ -1392,4 +1392,163 @@ namespace
 
         EXPECT_EQ(extentsUnassigned, true);
     }
+
+    TEST_F(TestBulletNifLoader, no_rcn_flag_with_immediate_rcn_uses_rcn_for_collision)
+    {
+        Nif::NiNode rcn;
+        init(rcn);
+        rcn.mRecordType = Nif::RC_RootCollisionNode;
+
+        mNiTriShape.mParents.push_back(&mNiNode);
+        rcn.mParents.push_back(&mNiNode);
+        mNiTriShape2.mParents.push_back(&rcn);
+
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&rcn) };
+        rcn.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
+
+        Nif::NIFFile file(testNif);
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, no_rcn_flag_with_nested_rcn_ignores_rcn_and_uses_all_for_collision)
+    {
+        Nif::NiNode rcn;
+        init(rcn);
+        rcn.mRecordType = Nif::RC_RootCollisionNode;
+
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode2.mParents.push_back(&mNiNode);
+        rcn.mParents.push_back(&mNiNode2);
+        mNiTriShape2.mParents.push_back(&rcn);
+
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiNode2) };
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn) };
+        rcn.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
+
+        Nif::NIFFile file(testNif);
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles1(new btTriangleMesh(false));
+        triangles1->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh1(new Resource::TriangleMeshShape(triangles1.release(), true));
+
+        std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
+        triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh1.release(), btVector3(1, 1, 1)));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh2.release(), btVector3(1, 1, 1)));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, rcn_flag_with_nested_rcn_uses_nested_rcn_for_collision)
+    {
+        Nif::NiNode rcn;
+        init(rcn);
+        rcn.mRecordType = Nif::RC_RootCollisionNode;
+
+        mNiStringExtraData.mData = "RCN";
+        mNiStringExtraData.mRecordType = Nif::RC_NiStringExtraData;
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
+
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode2.mParents.push_back(&mNiNode);
+        rcn.mParents.push_back(&mNiNode2);
+        mNiTriShape2.mParents.push_back(&rcn);
+
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiNode2) };
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn) };
+        rcn.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
+
+        Nif::NIFFile file(testNif);
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, rcn_flag_with_multiple_nested_rcns_uses_last_rcn)
+    {
+        Nif::NiNode rcn1;
+        init(rcn1);
+        rcn1.mRecordType = Nif::RC_RootCollisionNode;
+
+        Nif::NiNode rcn2;
+        init(rcn2);
+        rcn2.mRecordType = Nif::RC_RootCollisionNode;
+
+        mNiStringExtraData.mData = "RCN";
+        mNiStringExtraData.mRecordType = Nif::RC_NiStringExtraData;
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
+
+        mNiNode2.mParents.push_back(&mNiNode);
+        mNiNode3.mParents.push_back(&mNiNode);
+
+        rcn1.mParents.push_back(&mNiNode2);
+        mNiTriShape.mParents.push_back(&rcn1);
+
+        rcn2.mParents.push_back(&mNiNode3);
+        mNiTriShape2.mParents.push_back(&rcn2);
+
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiNode2), Nif::NiAVObjectPtr(&mNiNode3) };
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn1) };
+        mNiNode3.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&rcn2) };
+        rcn1.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        rcn2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape2) };
+
+        Nif::NIFFile file(testNif);
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::ScaledTriangleMeshShape(mesh.release(), btVector3(1, 1, 1)));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+
+        EXPECT_EQ(*result, expected);
+    }
 }

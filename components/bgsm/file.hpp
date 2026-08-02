@@ -144,6 +144,13 @@ namespace Bgsm
         std::string mSpecularMap;
         std::string mLightingMap;
         std::string mGlowMap;
+        std::string mGlassRoughnessScratchMap;
+        std::string mGlassDirtOverlayMap;
+        bool mGlassEnabled{ false };
+        osg::Vec3f mGlassFresnelColor;
+        float mGlassBlurScaleBase{ 0.f };
+        float mGlassBlurScaleFactor{ 1.f };
+        float mGlassRefractionScaleBase{ 0.f };
         bool mBlood;
         bool mEffectLighting;
         bool mFalloff;

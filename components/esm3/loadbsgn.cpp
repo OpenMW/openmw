@@ -58,7 +58,7 @@ namespace ESM
             return;
         }
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNOCString("TNAM", mTexture);
+        esm.writeHNOCString("TNAM", mTexture.getOriginal());
         esm.writeHNOCString("DESC", mDescription);
 
         mPowers.save(esm);

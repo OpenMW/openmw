@@ -39,6 +39,7 @@ namespace Debug
     {
         Cube,
         Cylinder,
+        Sphere,
         WireCube,
     };
 
@@ -64,6 +65,10 @@ namespace Debug
         {
             return { pos, dims, color, DrawShape::Cylinder };
         }
+        static DrawCall sphere(osg::Vec3f pos, osg::Vec3 dims = osg::Vec3(50., 50., 50.), osg::Vec3 color = colorWhite)
+        {
+            return { pos, dims, color, DrawShape::Sphere };
+        }
     };
 
     class DebugCustomDraw : public osg::Drawable
@@ -79,6 +84,7 @@ namespace Debug
 
         osg::ref_ptr<osg::Geometry> mCubeGeometry;
         osg::ref_ptr<osg::Geometry> mCylinderGeometry;
+        osg::ref_ptr<osg::Geometry> mSphereGeometry;
         osg::ref_ptr<osg::Geometry> mWireCubeGeometry;
 
         virtual void drawImplementation(osg::RenderInfo&) const override;
@@ -97,6 +103,7 @@ namespace Debug
         void drawCube(
             osg::Vec3f mPosition, osg::Vec3f mDims = osg::Vec3(50., 50., 50.), osg::Vec3f mColor = colorWhite);
         void drawCubeMinMax(osg::Vec3f min, osg::Vec3f max, osg::Vec3f mColor = colorWhite);
+        void drawSphere(osg::Vec3f position, float radius = 25., osg::Vec3f color = colorWhite);
         void addDrawCall(const DrawCall& draw);
         void addLine(const osg::Vec3& start, const osg::Vec3& end, const osg::Vec3 color = colorWhite);
 

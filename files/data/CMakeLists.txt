@@ -11,6 +11,7 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_center_h.dds
     textures/omw_menu_scroll_center_v.dds
     textures/omw_menu_icon_active.dds
+    textures/omw_mouse_emulation_cursor.dds
     textures/omw_psx_button_circle.dds
     textures/omw_psx_button_dpad.dds
     textures/omw_psx_button_square.dds
@@ -146,6 +147,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
     scripts/omw/settings/renderers.lua
+    scripts/omw/spellcasting/interface_local.lua
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua
     scripts/omw/mwui/filters.lua
@@ -158,6 +160,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/ui.lua
     scripts/omw/usehandlers.lua
     scripts/omw/worldeventhandlers.lua
+    scripts/omw/input/button.lua
     scripts/omw/input/settings.lua
     scripts/omw/input/playercontrols.lua
     scripts/omw/input/actionbindings.lua
