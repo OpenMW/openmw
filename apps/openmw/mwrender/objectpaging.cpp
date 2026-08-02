@@ -851,10 +851,7 @@ namespace MWRender
                 // BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES | osg::CopyOp::DEEP_COPY_DRAWABLES
                                           : osg::CopyOp::DEEP_COPY_NODES);
-                copyop.mOptimizeBillboards = (size > 1 / 4.f);
-                copyop.mNodePath.push_back(trans);
                 copyop.mDistances = lodDistances / ref.mScale;
-                copyop.mViewVector = (viewPoint - worldCenter);
                 copyop.copy(cnode, trans);
 
                 if (activeGrid)
