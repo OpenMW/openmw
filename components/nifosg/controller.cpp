@@ -311,7 +311,7 @@ namespace NifOsg
     {
         osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
         for (unsigned int unit : mTextureUnits)
-            stateset->setTextureAttributeAndModes(unit, texMat, osg::StateAttribute::ON);
+            stateset->setTextureAttribute(unit, texMat, osg::StateAttribute::ON);
     }
 
     void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)

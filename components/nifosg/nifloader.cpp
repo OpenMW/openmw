@@ -1149,10 +1149,10 @@ namespace NifOsg
             auto texUnit = static_cast<unsigned int>(boundTextures.size());
             if (stateset)
             {
-                stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                stateset->setTextureAttribute(texUnit, texture2d, osg::StateAttribute::ON);
                 osg::ref_ptr<SceneUtil::TextureType> textureType = new SceneUtil::TextureType(name);
                 textureType = shareAttribute(textureType);
-                stateset->setTextureAttributeAndModes(texUnit, textureType, osg::StateAttribute::ON);
+                stateset->setTextureAttribute(texUnit, textureType, osg::StateAttribute::ON);
             }
             boundTextures.emplace_back(uvSet);
             return texture2d;
@@ -1176,8 +1176,6 @@ namespace NifOsg
         {
             if (!boundTextures.empty())
             {
-                for (unsigned int i = 0; i < boundTextures.size(); ++i)
-                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                 boundTextures.clear();
             }
         }
@@ -2660,7 +2658,7 @@ namespace NifOsg
                             mat.setTrans(mat.getTrans() + uvTrans);
 
                             texMat->setMatrix(mat);
-                            stateset->setTextureAttributeAndModes(texUnit, texMat, osg::StateAttribute::ON);
+                            stateset->setTextureAttribute(texUnit, texMat, osg::StateAttribute::ON);
                         }
                     }
                     bool useFalloff = texprop->useFalloff();
