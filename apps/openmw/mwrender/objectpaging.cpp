@@ -1,6 +1,6 @@
 #include "objectpaging.hpp"
 
-#include <type_traits>
+#include <limits>
 #include <unordered_map>
 #include <vector>
 
@@ -677,6 +677,8 @@ namespace MWRender
         const float smallestDistanceToChunk = (size > 1 / 8.f) ? (size * cellSize) : 0.f;
         const float higherDistanceToChunk
             = activeGrid ? ((size < 1) ? 5 : 3) * cellSize * size + 1 : smallestDistanceToChunk + 1;
+        const LODRange lodDistances = activeGrid ? LODRange{ 0.f, std::numeric_limits<float>::max() }
+                                                 : LODRange{ smallestDistanceToChunk, higherDistanceToChunk };
 
         AnalyzeVisitor analyzeVisitor(copyMask);
         const float minSize = mMinSizeMergeFactor ? mMinSize * mMinSizeMergeFactor : mMinSize;
@@ -770,7 +772,7 @@ namespace MWRender
             const auto emplaced = nodes.emplace(std::move(cnode), InstanceList());
             if (emplaced.second)
             {
-                analyzeVisitor.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
+                analyzeVisitor.mDistances = lodDistances / ref.mScale;
                 const osg::Node* const nodePtr = emplaced.first->first.get();
                 // const-trickery required because there is no const version of NodeVisitor
                 const_cast<osg::Node*>(nodePtr)->accept(analyzeVisitor);
@@ -849,7 +851,7 @@ namespace MWRender
                 // BufferObjects of the original geometry. (ensured by needvbo() in optimizer.cpp)
                 copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES | osg::CopyOp::DEEP_COPY_DRAWABLES
                                           : osg::CopyOp::DEEP_COPY_NODES);
-                copyop.mDistances = LODRange{ smallestDistanceToChunk, higherDistanceToChunk } / ref.mScale;
+                copyop.mDistances = lodDistances / ref.mScale;
                 copyop.copy(cnode, trans);
 
                 if (activeGrid)
