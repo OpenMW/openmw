@@ -109,9 +109,8 @@ namespace MWLua
                             const size_t length = table.size();
                             for (uint32_t i = 0; i < numEffects; ++i)
                             {
-                                if (i >= length)
-                                    blankIndex(ingred.mData, i);
-                                else
+                                blankIndex(ingred.mData, i);
+                                if (i < length)
                                     setFromTable(ingred.mData, i, table[LuaUtil::toLuaIndex(i)]);
                             }
                         }
@@ -134,9 +133,8 @@ namespace MWLua
                           if (i == 0 || i > numEffects)
                               throw std::runtime_error("index out of range");
                           --i;
-                          if (value == sol::nil)
-                              blankIndex(ingred.mData, i);
-                          else
+                          blankIndex(ingred.mData, i);
+                          if (value != sol::nil)
                               setFromTable(ingred.mData, i, value.as<sol::lua_table>());
                       };
                 listType[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -214,9 +212,8 @@ namespace MWLua
             const size_t length = effects.size();
             for (uint32_t i = 0; i < numEffects; ++i)
             {
-                if (i >= length)
-                    blankIndex(ingred.mData, i);
-                else
+                blankIndex(ingred.mData, i);
+                if (i < length)
                     setFromTable(ingred.mData, i, effects[LuaUtil::toLuaIndex(i)]);
             }
         }
