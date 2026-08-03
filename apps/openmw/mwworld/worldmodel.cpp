@@ -418,10 +418,12 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
     }
 }
 
-std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, bool searchUnloaded)
+std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, ESM::RefId worldSpace, bool searchUnloaded)
 {
     std::vector<Ptr> result;
     const auto addFromStore = [&](MWWorld::CellStore& cellStore) {
+        if (!worldSpace.empty() && cellStore.getCell()->getWorldSpace() != worldSpace)
+            return;
         if (cellStore.getState() == CellStore::State_Unloaded)
             cellStore.preload();
         if (cellStore.getState() == CellStore::State_Preloaded)
@@ -443,17 +445,36 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, bool search
         return result;
 
     const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
-    for (auto iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+    if (worldSpace.empty() || worldSpace == ESM::Cell::sDefaultWorldspaceId)
     {
-        if (mCells.contains(iter->mId))
-            continue;
-        addFromStore(insertCellStore(*iter));
+        for (auto iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+        {
+            if (mCells.contains(iter->mId))
+                continue;
+            addFromStore(insertCellStore(*iter));
+        }
     }
-    for (auto iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+    if (worldSpace.empty())
     {
-        if (mCells.contains(iter->mId))
-            continue;
-        addFromStore(insertCellStore(*iter));
+        for (auto iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+        {
+            if (mCells.contains(iter->mId))
+                continue;
+            addFromStore(insertCellStore(*iter));
+        }
+    }
+    else if (worldSpace.is<ESM::StringRefId>() && !mCells.contains(worldSpace))
+    {
+        if (const ESM::Cell* cell = cells.search(worldSpace); cell != nullptr)
+            addFromStore(insertCellStore(*cell));
+    }
+    if (worldSpace.empty() || worldSpace.is<ESM::FormId>())
+    {
+        for (const ESM4::Cell& cell : mStore.get<ESM4::Cell>())
+        {
+            if (worldSpace.empty() || cell.mParent == worldSpace)
+                addFromStore(emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells));
+        }
     }
     return result;
 }

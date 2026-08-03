@@ -159,8 +159,9 @@
 -- Returns all objects with the given record ID.
 -- @function [parent=#world] getObjectsByRecordId
 -- @param #string recordId Record ID
+-- @param #string worldSpaceId (Optional) ID of the world space to search
 -- @return list<openmw.core#GameObject>
--- @usage for _, object in pairs(world.getObjectsByRecordId('TempleMarker')) do
+-- @usage for _, object in pairs(world.getObjectsByRecordId('TempleMarker', world.players[1].cell.worldSpaceId)) do
 --   print(object.cell.name)
 -- end
 

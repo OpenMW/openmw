@@ -95,7 +95,7 @@ namespace MWWorld
         /// @note name must be lower case
         void getExteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out);
 
-        std::vector<MWWorld::Ptr> getAll(ESM::RefId id, bool searchUnloaded = false);
+        std::vector<MWWorld::Ptr> getAll(ESM::RefId id, ESM::RefId worldSpace = {}, bool searchUnloaded = false);
 
         size_t countSavedGameRecords() const;
 
