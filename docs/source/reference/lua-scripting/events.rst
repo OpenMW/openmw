@@ -257,3 +257,12 @@ Unlock a container or door
 .. code-block:: Lua
 
     core.sendGlobalEvent('Unlock', {target = selected})
+
+**SetSaveState**
+
+Inverts whether or not an object will be written into the save. For script-spawned objects, this effectively means they are deleted after the game loads. For objects from content files, this will restore them to their original state upon loading.
+Use this as a means to easily reset **individual** objects. To reset all objects in a given cell instead, use `cell:getAll` and set `object.saveState` to `false` instead.
+
+.. code-block:: Lua
+
+   core.sendGlobalEvent('SetSaveState', { nearby.actors[#nearby.actors] = false })

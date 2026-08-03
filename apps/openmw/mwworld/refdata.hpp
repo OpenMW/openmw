@@ -146,6 +146,10 @@ namespace MWWorld
         bool hasChanged() const;
         ///< Has this RefData changed since it was originally loaded?
 
+        void setChanged(bool changed);
+        ///< Explicitly set the modified flag. Setting to false prevents this object from being
+        ///< written to save games (for objects originating from a content file).
+
         const ESM::AnimationState& getAnimationState() const;
         ESM::AnimationState& getAnimationState();
     };
