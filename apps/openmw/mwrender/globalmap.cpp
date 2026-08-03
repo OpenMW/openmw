@@ -14,6 +14,9 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+
+#include <components/shader/shadermanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
@@ -364,7 +367,10 @@ namespace MWRender
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);
             stateset->setTextureAttribute(0, texture, osg::StateAttribute::ON);
+            stateset->addUniform(new osg::Uniform("diffuseMap", 0));
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+            Shader::ShaderManager::DefineMap defines = { { { "alphaMap", "0" } } };
 
             if (mAlphaTexture)
             {
@@ -381,7 +387,14 @@ namespace MWRender
                 geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
 
                 stateset->setTextureAttribute(1, mAlphaTexture, osg::StateAttribute::ON);
+                stateset->addUniform(new osg::Uniform("alphaMap", 1));
+
+                defines["alphaMap"] = "1";
             }
+
+            auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
+
+            geom->getOrCreateStateSet()->setAttributeAndModes(shaderManager.getProgram("globalmap", defines));
 
             camera->addChild(geom);
         }
