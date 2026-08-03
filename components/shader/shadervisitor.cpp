@@ -54,6 +54,7 @@ namespace Shader
             , mUniforms(rhs.mUniforms)
             , mModes(rhs.mModes)
             , mAttributes(rhs.mAttributes)
+            , mTextureModes(rhs.mTextureModes)
         {
         }
 
@@ -80,6 +81,7 @@ namespace Shader
             setAttributeAndModes(attribute.get());
         }
 
+        void setTextureMode(unsigned int unit, osg::StateAttribute::GLMode mode) { mTextureModes[unit].emplace(mode); }
         void setTextureAttribute(int unit, osg::StateAttribute::TypeMemberPair typeMemberPair)
         {
             mTextureAttributes[unit].emplace(typeMemberPair);
@@ -95,6 +97,18 @@ namespace Shader
             setTextureAttribute(unit, attribute.get());
         }
 
+        void setTextureAttributeAndModes(unsigned int unit, const osg::StateAttribute* attribute)
+        {
+            setTextureAttribute(unit, attribute);
+            InterrogateModesHelper helper(this, unit);
+            attribute->getModeUsage(helper);
+        }
+        template <typename T>
+        void setTextureAttributeAndModes(unsigned int unit, osg::ref_ptr<T> attribute)
+        {
+            setTextureAttributeAndModes(unit, attribute.get());
+        }
+
         bool hasUniform(const std::string& name) { return mUniforms.count(name); }
         bool hasMode(osg::StateAttribute::GLMode mode) { return mModes.count(mode); }
         bool hasAttribute(const osg::StateAttribute::TypeMemberPair& typeMemberPair)
@@ -105,6 +119,14 @@ namespace Shader
         {
             return hasAttribute(osg::StateAttribute::TypeMemberPair(type, member));
         }
+        bool hasTextureMode(int unit, osg::StateAttribute::GLMode mode)
+        {
+            auto it = mTextureModes.find(unit);
+            if (it == mTextureModes.cend())
+                return false;
+
+            return it->second.count(mode);
+        }
 
         const std::set<osg::StateAttribute::TypeMemberPair>& getAttributes() { return mAttributes; }
         const std::unordered_map<unsigned int, std::set<osg::StateAttribute::TypeMemberPair>>& getTextureAttributes()
@@ -114,7 +136,8 @@ namespace Shader
 
         bool empty()
         {
-            return mUniforms.empty() && mModes.empty() && mAttributes.empty() && mTextureAttributes.empty();
+            return mUniforms.empty() && mModes.empty() && mAttributes.empty() && mTextureModes.empty()
+                && mTextureAttributes.empty();
         }
 
         META_Object(Shader, AddedState)
@@ -123,15 +146,20 @@ namespace Shader
         class InterrogateModesHelper : public osg::StateAttribute::ModeUsage
         {
         public:
-            InterrogateModesHelper(AddedState* tracker)
+            InterrogateModesHelper(AddedState* tracker, unsigned int textureUnit = 0)
                 : mTracker(tracker)
+                , mTextureUnit(textureUnit)
             {
             }
             void usesMode(osg::StateAttribute::GLMode mode) override { mTracker->setMode(mode); }
-            void usesTextureMode(osg::StateAttribute::GLMode mode) override {}
+            void usesTextureMode(osg::StateAttribute::GLMode mode) override
+            {
+                mTracker->setTextureMode(mTextureUnit, mode);
+            }
 
         private:
             AddedState* mTracker;
+            unsigned int mTextureUnit;
         };
 
         using ModeSet = std::unordered_set<osg::StateAttribute::GLMode>;
@@ -140,6 +168,7 @@ namespace Shader
         std::unordered_set<std::string> mUniforms;
         ModeSet mModes;
         AttributeSet mAttributes;
+        std::unordered_map<unsigned int, ModeSet> mTextureModes;
         std::unordered_map<unsigned int, AttributeSet> mTextureAttributes;
     };
 
@@ -287,6 +316,11 @@ namespace Shader
                 const osg::StateAttribute* attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
                 if (attr)
                 {
+                    // If textures ever get removed in createProgram, expand this to check we're operating on main
+                    // texture attribute list rather than the removed list
+                    if (addedState && addedState->hasTextureMode(unit, GL_TEXTURE_2D))
+                        continue;
+
                     const osg::Texture* texture = attr->asTexture();
                     if (texture)
                     {
@@ -374,8 +408,8 @@ namespace Shader
                     int unit = static_cast<int>(texAttributes.size());
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
-                    writableStateSet->setTextureAttribute(unit, normalMapTex, osg::StateAttribute::ON);
-                    writableStateSet->setTextureAttribute(unit,
+                    writableStateSet->setTextureAttributeAndModes(unit, normalMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(unit,
                         new SceneUtil::TextureType(normalHeight ? "normalHeightMap" : "normalMap"),
                         osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "normalMap";
@@ -419,8 +453,8 @@ namespace Shader
                     int unit = static_cast<int>(texAttributes.size());
                     if (!writableStateSet)
                         writableStateSet = getWritableStateSet(node);
-                    writableStateSet->setTextureAttribute(unit, specularMapTex, osg::StateAttribute::ON);
-                    writableStateSet->setTextureAttribute(
+                    writableStateSet->setTextureAttributeAndModes(unit, specularMapTex, osg::StateAttribute::ON);
+                    writableStateSet->setTextureAttributeAndModes(
                         unit, new SceneUtil::TextureType("specularMap"), osg::StateAttribute::ON);
                     mRequirements.back().mTextures[unit] = "specularMap";
                 }
@@ -913,6 +947,12 @@ namespace Shader
 
                 for (const auto& attribute : removedState->getAttributeList())
                     writableStateSet->setAttribute(attribute.second.first, attribute.second.second);
+
+                for (unsigned int unit = 0; unit < removedState->getTextureModeList().size(); ++unit)
+                {
+                    for (const auto& [mode, value] : removedState->getTextureModeList()[unit])
+                        writableStateSet->setTextureMode(unit, mode, value);
+                }
             }
         }
 

@@ -83,6 +83,7 @@ namespace SceneUtil
             removeTexture(stateset);
         else
         {
+            stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
             stateset->addUniform(new osg::Uniform("envMapColor", mColor));
         }
     }
@@ -90,6 +91,7 @@ namespace SceneUtil
     void GlowUpdater::removeTexture(osg::StateSet* stateset)
     {
         stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
+        stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
         stateset->removeUniform("envMapColor");
 
         osg::StateSet::TextureAttributeList& list = stateset->getTextureAttributeList();
@@ -229,8 +231,8 @@ namespace SceneUtil
             writableStateSet = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
             node->setStateSet(writableStateSet);
         }
-        writableStateSet->setTextureAttribute(texUnit, textures.front(), osg::StateAttribute::ON);
-        writableStateSet->setTextureAttribute(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttributeAndModes(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
         resourceSystem->getSceneManager()->recreateShaders(std::move(node));
 

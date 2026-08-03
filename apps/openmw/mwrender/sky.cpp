@@ -394,7 +394,7 @@ namespace MWRender
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        stateset->setTextureAttribute(0, raindropTex);
+        stateset->setTextureAttributeAndModes(0, raindropTex);
         stateset->setNestRenderBins(false);
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);

@@ -32,7 +32,7 @@ namespace MWRender
         constexpr osg::StateAttribute::OverrideValue modeOff = osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
         constexpr osg::StateAttribute::OverrideValue modeOn = osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE;
 
-        mStateSet->setTextureAttribute(0, dummyTexture);
+        mStateSet->setTextureAttributeAndModes(0, dummyTexture);
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::shaderStereoDefines(defines);
@@ -40,6 +40,9 @@ namespace MWRender
         mStateSet->setAttributeAndModes(new osg::BlendFunc, modeOff);
         mStateSet->setAttributeAndModes(shaderManager.getProgram("depthclipped", defines), modeOn);
         mStateSet->setAttributeAndModes(new SceneUtil::AutoDepth, modeOn);
+
+        for (unsigned int unit = 1; unit < 8; ++unit)
+            mStateSet->setTextureMode(unit, GL_TEXTURE_2D, modeOff);
     }
 
     void TransparentDepthBinCallback::drawImplementation(

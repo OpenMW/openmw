@@ -483,7 +483,7 @@ namespace MWRender
             createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
-        stateset->setTextureAttribute(0, texmat);
+        stateset->setTextureAttributeAndModes(0, texmat);
 
         stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -665,8 +665,8 @@ namespace MWRender
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        mGeom->getOrCreateStateSet()->setTextureAttribute(0, sunTex);
-        mGeom->getOrCreateStateSet()->setTextureAttribute(
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex);
+        mGeom->getOrCreateStateSet()->setTextureAttributeAndModes(
             0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         mGeom->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sun)));
 
@@ -675,8 +675,8 @@ namespace MWRender
         osg::StateSet* stateset = queryNode->getOrCreateStateSet();
         stateset->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
         stateset->setNestRenderBins(false);
-        stateset->setTextureAttribute(0, sunTex);
-        stateset->setTextureAttribute(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, sunTex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setAttributeAndModes(createUnlitMaterial());
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
 
@@ -808,8 +808,8 @@ namespace MWRender
 
         osg::StateSet* stateset = geom->getOrCreateStateSet();
 
-        stateset->setTextureAttribute(0, tex);
-        stateset->setTextureAttribute(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(0, tex);
+        stateset->setTextureAttributeAndModes(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
