@@ -187,7 +187,7 @@ namespace CSVRender
         waterTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         waterTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
-        mWaterGeometry->getStateSet()->setTextureAttribute(0, waterTexture, osg::StateAttribute::ON);
+        mWaterGeometry->getStateSet()->setTextureAttributeAndModes(0, waterTexture, osg::StateAttribute::ON);
 
         mWaterGroup->addChild(mWaterGeometry);
     }

@@ -211,19 +211,19 @@ namespace Terrain
                 }
             }
 
-            stateset->setTextureAttribute(0, it->mDiffuseMap);
+            stateset->setTextureAttributeAndModes(0, it->mDiffuseMap);
             stateset->addUniform(UniformCollection::value().mDiffuseMap);
 
             if (layerTileSize != 1.f)
-                stateset->setTextureAttribute(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
 
             if (!blendmaps.empty())
             {
                 osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
 
-                stateset->setTextureAttribute(1, blendmap.get());
+                stateset->setTextureAttributeAndModes(1, blendmap.get());
                 if (!esm4terrain)
-                    stateset->setTextureAttribute(1, BlendmapTexMat::value(blendmapScale));
+                    stateset->setTextureAttributeAndModes(1, BlendmapTexMat::value(blendmapScale));
                 stateset->addUniform(UniformCollection::value().mBlendMap);
             }
             if (isComposite)
@@ -238,7 +238,7 @@ namespace Terrain
 
                 if (it->mNormalMap)
                 {
-                    stateset->setTextureAttribute(2, it->mNormalMap);
+                    stateset->setTextureAttributeAndModes(2, it->mNormalMap);
                     stateset->addUniform(UniformCollection::value().mNormalMap);
 
                     // Special handling for red-green normal maps (e.g. BC5 or R8G8).

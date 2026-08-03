@@ -363,7 +363,7 @@ namespace MWRender
             depth->setWriteMask(false);
             osg::StateSet* stateset = geom->getOrCreateStateSet();
             stateset->setAttribute(depth);
-            stateset->setTextureAttribute(0, texture, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
             if (mAlphaTexture)
@@ -380,7 +380,7 @@ namespace MWRender
                 texcoords->push_back(osg::Vec2f(x2, y1));
                 geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
 
-                stateset->setTextureAttribute(1, mAlphaTexture, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(1, mAlphaTexture, osg::StateAttribute::ON);
             }
 
             camera->addChild(geom);

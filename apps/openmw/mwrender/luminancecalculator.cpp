@@ -61,13 +61,13 @@ namespace MWRender
 
             buffer.resolveSS = new osg::StateSet;
             buffer.resolveSS->setAttributeAndModes(mResolveProgram);
-            buffer.resolveSS->setTextureAttribute(0, buffer.luminanceProxyTex);
+            buffer.resolveSS->setTextureAttributeAndModes(0, buffer.luminanceProxyTex);
             buffer.resolveSS->addUniform(new osg::Uniform("luminanceSceneTex", 0));
             buffer.resolveSS->addUniform(new osg::Uniform("prevLuminanceSceneTex", 1));
         }
 
-        mBuffers[0].resolveSS->setTextureAttribute(1, mBuffers[1].luminanceTex);
-        mBuffers[1].resolveSS->setTextureAttribute(1, mBuffers[0].luminanceTex);
+        mBuffers[0].resolveSS->setTextureAttributeAndModes(1, mBuffers[1].luminanceTex);
+        mBuffers[1].resolveSS->setTextureAttributeAndModes(1, mBuffers[0].luminanceTex);
     }
 
     void LuminanceCalculator::compile()
@@ -105,7 +105,7 @@ namespace MWRender
 
         auto& buffer = mBuffers[frameId];
         buffer.sceneLumFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
-        buffer.sceneLumSS->setTextureAttribute(0, canvas.getSceneTexture(frameId));
+        buffer.sceneLumSS->setTextureAttributeAndModes(0, canvas.getSceneTexture(frameId));
         buffer.sceneLumSS->getUniform("scaling")->set(mScale);
 
         state.apply(buffer.sceneLumSS);
