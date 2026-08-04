@@ -21,6 +21,17 @@ namespace SceneUtil
     void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color,
         osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
 
+    void setFogDepth(
+        osg::StateSet& stateset, float depth, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
+
+    void updateFogEnd(osg::StateSet& stateset, float end);
+
+    void updateFogStart(osg::StateSet& stateset, float start);
+
+    void updateFogColor(osg::StateSet& stateset, const osg::Vec4f& color);
+
+    void updateFogDepth(osg::StateSet& stateset, float depth);
+
     void disableFog(osg::StateSet& stateset, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
 
 }

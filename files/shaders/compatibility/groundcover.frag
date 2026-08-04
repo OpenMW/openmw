@@ -25,6 +25,7 @@ varying vec2 normalMapUV;
 varying float euclideanDepth;
 varying float linearDepth;
 uniform vec2 screenRes;
+uniform float near;
 uniform float far;
 uniform float alphaRef;
 
@@ -80,7 +81,7 @@ void main()
 #endif
 
     gl_FragData[0].xyz *= lighting;
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
 
 #if !@disableNormals
     gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;

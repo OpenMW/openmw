@@ -135,15 +135,20 @@ namespace SceneUtil
         }
         else
             stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
+
+        SceneUtil::setFogColor(*stateset, mFogColor);
+        SceneUtil::setFogStart(*stateset, mFogStart);
+        SceneUtil::setFogEnd(*stateset, mFogEnd);
+        SceneUtil::setFogDepth(*stateset, -1.f);
     }
 
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
     {
         configureSunAmbientOverride(mAmbientColor, stateset);
 
-        SceneUtil::setFogColor(*stateset, mFogColor);
-        SceneUtil::setFogStart(*stateset, mFogStart);
-        SceneUtil::setFogEnd(*stateset, mFogEnd);
+        SceneUtil::updateFogColor(*stateset, mFogColor);
+        SceneUtil::updateFogStart(*stateset, mFogStart);
+        SceneUtil::updateFogEnd(*stateset, mFogEnd);
     }
 
     void StateUpdater::setAmbientColor(const osg::Vec4f& col)

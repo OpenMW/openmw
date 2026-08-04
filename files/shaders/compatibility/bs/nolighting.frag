@@ -53,7 +53,7 @@ void main()
 
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
 
 #if !defined(FORCE_OPAQUE) && @softParticles
     vec2 screenCoords = gl_FragCoord.xy / screenRes;

@@ -149,7 +149,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    autotransform nifloader controller particle matrixtransform fog
+    autotransform nifloader controller particle matrixtransform
     )
 
 add_component_dir (nifbullet

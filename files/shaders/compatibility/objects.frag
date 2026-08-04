@@ -244,7 +244,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
 
-    gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, far);
+    gl_FragData[0] = applyFogAtPos(gl_FragData[0], passViewPos, near, far);
 
 #if !defined(FORCE_OPAQUE) && @softParticles
     gl_FragData[0].a *= calcSoftParticleFade(

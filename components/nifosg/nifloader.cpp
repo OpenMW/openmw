@@ -61,7 +61,6 @@
 #include <components/sceneutil/visitor.hpp>
 
 #include "autotransform.hpp"
-#include "fog.hpp"
 #include "matrixtransform.hpp"
 #include "particle.hpp"
 
@@ -2682,10 +2681,8 @@ namespace NifOsg
                     // Vertex alpha mode appears to be broken
                     if (!fogprop->vertexAlpha() && fogprop->enabled())
                     {
-                        osg::ref_ptr<NifOsg::Fog> fog = new NifOsg::Fog;
-                        fog->setDepth(fogprop->mFogDepth);
-                        fog->setColor(osg::Vec4f(fogprop->mColour, 1.f));
-                        node->addCullCallback(fog);
+                        SceneUtil::setFogColor(*stateset, osg::Vec4f(fogprop->mColour, 1.f));
+                        SceneUtil::setFogDepth(*stateset, fogprop->mFogDepth);
                     }
                     else
                     {
