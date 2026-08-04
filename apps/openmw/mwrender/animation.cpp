@@ -1736,8 +1736,7 @@ namespace MWRender
             parentNode = found->second;
         }
 
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans = new SceneUtil::PositionAttitudeTransform;
-        osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform;
+        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform;
 
         osg::Matrix finalTransform;
 
@@ -1763,13 +1762,12 @@ namespace MWRender
             finalTransform *= (*transform);
         }
 
-        transformNode->setMatrix(finalTransform);
-        trans->addChild(transformNode);
+        trans->setMatrix(finalTransform);
 
         parentNode->addChild(trans);
 
         osg::ref_ptr<osg::Node> node
-            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), transformNode);
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
 
         if (useAmbientLight)
         {
