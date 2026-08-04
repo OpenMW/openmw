@@ -279,7 +279,7 @@ namespace
             }
         }
 
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
+        void apply(osg::MatrixTransform& node) override { apply(static_cast<osg::Group&>(node)); }
 
         void apply(osg::Geometry&) override {}
     };
@@ -323,7 +323,7 @@ namespace
             }
         }
 
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
+        void apply(osg::MatrixTransform& node) override { apply(static_cast<osg::Group&>(node)); }
 
         void apply(osg::Geometry&) override {}
 
@@ -366,7 +366,7 @@ namespace
             traverse(group);
         }
 
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
+        void apply(osg::MatrixTransform& node) override { apply(static_cast<osg::Group&>(node)); }
 
         void apply(osg::Geometry&) override {}
 
