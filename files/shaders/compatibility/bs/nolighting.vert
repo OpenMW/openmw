@@ -16,12 +16,14 @@ varying float euclideanDepth;
 varying float linearDepth;
 varying float passFalloff;
 
+centroid varying vec4 passColor;
+
 uniform bool useFalloff;
 uniform vec4 falloffParams;
 
 #include "lib/view/depth.glsl"
+#include "lib/material/vertexcolors.glsl"
 
-#include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_vertex.glsl"
 
 void main(void)

@@ -8,7 +8,6 @@
 #include <osg/ColorMask>
 #include <osg/Depth>
 #include <osg/Geometry>
-#include <osg/Material>
 #include <osg/OcclusionQueryNode>
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexMat>
@@ -90,22 +89,6 @@ namespace
 
 namespace MWRender
 {
-    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode)
-    {
-        osg::ref_ptr<osg::Material> mat = new osg::Material;
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        mat->setColorMode(colorMode);
-        return mat;
-    }
-
-    osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial()
-    {
-        return createUnlitMaterial(osg::Material::DIFFUSE);
-    }
-
     class SunUpdater : public SceneUtil::StateSetUpdater
     {
     public:
@@ -116,13 +99,14 @@ namespace MWRender
         {
         }
 
-        void setDefaults(osg::StateSet* stateset) override { stateset->setAttributeAndModes(createUnlitMaterial()); }
+        void setDefaults(osg::StateSet* stateset) override
+        {
+            stateset->addUniform(new osg::Uniform("opacity", mColor.a()));
+        }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
-            osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, mColor.a()));
-            mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(mColor.r(), mColor.g(), mColor.b(), 1));
+            stateset->getUniform("opacity")->set(mColor.a());
         }
     };
 
@@ -183,10 +167,9 @@ namespace MWRender
                 if (visibleRatio < fadeThreshold)
                 {
                     float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
-                    osg::ref_ptr<osg::Material> mat(createUnlitMaterial());
-                    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, fade * mGlareView));
                     stateset = new osg::StateSet;
-                    stateset->setAttributeAndModes(mat, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                    stateset->addUniform(new osg::Uniform("sunAlpha", fade * mGlareView),
+                        osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 }
                 else if (visibleRatio < 1.f)
                 {
@@ -276,12 +259,8 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
 
-                osg::ref_ptr<osg::Material> mat = createUnlitMaterial();
-
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, fade));
-                mat->setEmission(osg::Material::FRONT_AND_BACK, mColor);
-
-                stateset->setAttributeAndModes(mat);
+                stateset->addUniform(
+                    new osg::Uniform("diffuseColor", osg::Vec4f(mColor.x(), mColor.y(), mColor.z(), fade)));
 
                 cv->pushStateSet(stateset);
                 traverse(node, cv);
@@ -339,7 +318,6 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("maskMap", 1));
             stateset->setAttributeAndModes(
                 new osg::BlendFunc(osg::BlendFunc::ONE, osg::BlendFunc::ONE_MINUS_SRC_ALPHA), osg::StateAttribute::ON);
-            stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
@@ -417,15 +395,13 @@ namespace MWRender
 
     void AtmosphereUpdater::setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttributeAndModes(
-            createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Atmosphere)));
+        stateset->addUniform(new osg::Uniform("diffuseColor", mEmissionColor));
     }
 
     void AtmosphereUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
     {
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
+        stateset->getUniform("diffuseColor")->set(mEmissionColor);
     }
 
     AtmosphereNightUpdater::AtmosphereNightUpdater(Resource::ImageManager* imageManager)
@@ -479,9 +455,6 @@ namespace MWRender
 
     void CloudUpdater::setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttribute(
-            createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-
         osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
         stateset->setTextureAttribute(0, texmat);
 
@@ -489,19 +462,18 @@ namespace MWRender
 
         stateset->addUniform(new osg::Uniform("opacity", 1.f));
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Clouds)));
+        stateset->addUniform(new osg::Uniform("diffuseColor", mEmissionColor));
     }
 
     void CloudUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
         stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
-
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
         texMat->setMatrix(mTexMat);
 
         stateset->getUniform("opacity")->set(mOpacity);
+        stateset->getUniform("diffuseColor")->set(mEmissionColor);
     }
 
     class SkyStereoStatesetUpdater : public SceneUtil::StateSetUpdater
@@ -677,7 +649,6 @@ namespace MWRender
         stateset->setNestRenderBins(false);
         stateset->setTextureAttribute(0, sunTex);
         stateset->setTextureAttribute(0, new SceneUtil::TextureType("diffuseMap"), osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(createUnlitMaterial());
         stateset->addUniform(new osg::Uniform("pass", static_cast<int>(Pass::Sunflash_Query)));
 
         // Disable writing to the color buffer. We are using this geometry for visibility tests only.

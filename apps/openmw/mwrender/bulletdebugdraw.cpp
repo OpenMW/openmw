@@ -4,11 +4,12 @@
 
 #include <osg/Geometry>
 #include <osg/Group>
-#include <osg/Material>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/material.hpp>
+
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 #include <osg/ShapeDrawable>
@@ -69,8 +70,8 @@ namespace MWRender
                 osg::StateAttribute::ON);
             stateSet->setAttributeAndModes(new osg::PolygonOffset(
                 SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f, SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f));
-            osg::ref_ptr<osg::Material> material = new osg::Material;
-            material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+            osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
+            material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
             stateSet->setAttribute(material);
             mLinesGeometry->setStateSet(stateSet);
             mTrisGeometry->setStateSet(stateSet);

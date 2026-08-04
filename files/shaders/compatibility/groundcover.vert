@@ -46,6 +46,8 @@ uniform mat4 osg_ViewMatrix;
 uniform float windSpeed;
 uniform vec3 playerPos;
 
+centroid varying vec4 passColor;
+
 #if @groundcoverStompMode == 0
 #else
     #define STOMP 1
@@ -123,6 +125,8 @@ mat3 rotation3(in mat4 rot4)
 
 void main(void)
 {
+    Material material = getMaterial();
+
     vec3 position = aOffset.xyz;
     float scale = aOffset.w;
 
@@ -166,7 +170,7 @@ void main(void)
 #if PER_PIXEL_LIGHTING
     passViewPos = viewPos.xyz;
 #else
-    float shininess = max(1e-4, gl_FrontMaterial.shininess);
+    float shininess = max(1e-4, material.shininess);
     vec3 viewDir = viewPos.xyz / euclideanDepth;
 
     vec3 sunDiffuse, sunAmbient, unusedSpecular1, pointDiffuse, pointAmbient, unusedSpecular2;

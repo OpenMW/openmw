@@ -36,7 +36,6 @@
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/FrontFace>
-#include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 #include <osg/Stencil>
@@ -54,6 +53,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/extradata.hpp>
 #include <components/sceneutil/fog.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -1081,7 +1081,8 @@ namespace NifOsg
         }
 
         void handleMaterialControllers(const Nif::NiProperty* materialProperty,
-            SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial) const
+            SceneUtil::CompositeStateSetUpdater* composite, int animflags,
+            const SceneUtil::Material* baseMaterial) const
         {
             for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
@@ -1772,7 +1773,8 @@ namespace NifOsg
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
             // Some input geometry may not be used as is so it needs to be converted.
-            // Normals, tangents and bitangents use a special normal map-like format not equivalent to snorm8 or unorm8
+            // Normals, tangents and bitangents use a special normal map-like format not equivalent to snorm8 or
+            // unorm8
             auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
             // Vertices and UV sets may be half-precision.
             // OSG doesn't have a way to pass half-precision data at the moment.
@@ -2365,9 +2367,9 @@ namespace NifOsg
         }
 
         void handleShaderMaterialDrawableProperties(const Bgsm::MaterialFile* shaderMat,
-            osg::ref_ptr<osg::Material> mat, osg::Node& node, bool& hasSortAlpha) const
+            osg::ref_ptr<SceneUtil::Material> mat, osg::Node& node, bool& hasSortAlpha) const
         {
-            mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
+            mat->setAlpha(shaderMat->mTransparency);
             handleAlphaTesting(shaderMat->mAlphaTest, osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold, node);
             handleAlphaBlending(shaderMat->mAlphaBlend, shaderMat->mSourceBlendMode, shaderMat->mDestinationBlendMode,
                 true, hasSortAlpha, node);
@@ -2375,13 +2377,13 @@ namespace NifOsg
             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
             {
                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat);
-                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mEmittanceColor, 1.f));
-                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mSpecularColor, 1.f));
+                mat->setEmission(osg::Vec4f(bgsm->mEmittanceColor, 1.f));
+                mat->setSpecular(osg::Vec4f(bgsm->mSpecularColor, 1.f));
             }
             else if (shaderMat->mShaderType == Bgsm::ShaderType::Effect)
             {
                 auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat);
-                mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
+                mat->setEmission(osg::Vec4f(bgem->mEmittanceColor, 1.f));
                 if (bgem->mSoft && Loader::getSoftEffectEnabled())
                     SceneUtil::setupSoftEffect(
                         node, { .mSize = bgem->mSoftDepth, .mFalloffDepth = bgem->mSoftDepth, .mFalloff = true });
@@ -2542,8 +2544,8 @@ namespace NifOsg
                     handleDepthFlags(stateset, zprop->depthTest(), zprop->depthWrite());
                     break;
                 }
-                // OSG groups the material properties that NIFs have separate, so we have to parse them all again when
-                // one changed
+                // OSG groups the material properties that NIFs have separate, so we have to parse them all again
+                // when one changed
                 case Nif::RC_NiMaterialProperty:
                 case Nif::RC_NiVertexColorProperty:
                 case Nif::RC_NiSpecularProperty:
@@ -2709,8 +2711,8 @@ namespace NifOsg
             }
         };
 
-        // global sharing of State Attributes will reduce the number of GL calls as the osg::State will check by pointer
-        // to see if state is the same
+        // global sharing of State Attributes will reduce the number of GL calls as the osg::State will check by
+        // pointer to see if state is the same
         template <class Attribute>
         static Attribute* shareAttribute(const osg::ref_ptr<Attribute>& attr)
         {
@@ -2729,12 +2731,12 @@ namespace NifOsg
         {
             // Specular lighting is enabled by default, but there's a quirk...
             bool specEnabled = true;
-            osg::ref_ptr<osg::Material> mat(new osg::Material);
-            mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
+            osg::ref_ptr<SceneUtil::Material> mat(new SceneUtil::Material);
+            mat->setColorMode(hasVertexColors ? SceneUtil::ColorModes::AmbientAndDiffuse : SceneUtil::ColorModes::None);
 
             // NIF material defaults don't match OpenGL defaults
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-            mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+            mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
+            mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
 
             bool hasMatCtrl = false;
             bool hasSortAlpha = false;
@@ -2743,8 +2745,6 @@ namespace NifOsg
             auto setBinTraversal = [](osg::StateSet* ss) { ss->setRenderBinDetails(2, "TraversalOrderBin"); };
 
             auto lightmode = Nif::NiVertexColorProperty::LightMode::LightMode_EmiAmbDif;
-            float emissiveMult = 1.f;
-            float specStrength = 1.f;
 
             for (const Nif::NiProperty* property : properties)
             {
@@ -2762,16 +2762,16 @@ namespace NifOsg
                     {
                         const Nif::NiMaterialProperty* matprop = static_cast<const Nif::NiMaterialProperty*>(property);
 
-                        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mDiffuse, matprop->mAlpha));
-                        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mAmbient, 1.f));
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mEmissive, 1.f));
-                        emissiveMult = matprop->mEmissiveMult;
+                        mat->setDiffuse(osg::Vec4f(matprop->mDiffuse, matprop->mAlpha));
+                        mat->setAmbient(osg::Vec4f(matprop->mAmbient, 1.f));
+                        mat->setEmission(osg::Vec4f(matprop->mEmissive, 1.f));
+                        mat->setEmissiveMultiplier(matprop->mEmissiveMult);
 
-                        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mSpecular, 1.f));
+                        mat->setSpecular(osg::Vec4f(matprop->mSpecular, 1.f));
                         // NIFs may provide specular exponents way above OpenGL's limit.
                         // They can't be used properly, but we don't need OSG to constantly harass us about it.
                         float glossiness = std::clamp(matprop->mGlossiness, 0.f, 128.f);
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
+                        mat->setShininess(glossiness);
 
                         if (!matprop->mController.empty())
                         {
@@ -2791,12 +2791,12 @@ namespace NifOsg
                         {
                             case VertexMode::VertMode_SrcIgnore:
                             {
-                                mat->setColorMode(osg::Material::OFF);
+                                mat->setColorMode(SceneUtil::ColorModes::None);
                                 break;
                             }
                             case VertexMode::VertMode_SrcEmissive:
                             {
-                                mat->setColorMode(osg::Material::EMISSION);
+                                mat->setColorMode(SceneUtil::ColorModes::Emission);
                                 break;
                             }
                             case VertexMode::VertMode_SrcAmbDif:
@@ -2807,13 +2807,13 @@ namespace NifOsg
                                 {
                                     case LightMode::LightMode_Emissive:
                                     {
-                                        mat->setColorMode(osg::Material::OFF);
+                                        mat->setColorMode(SceneUtil::ColorModes::None);
                                         break;
                                     }
                                     case LightMode::LightMode_EmiAmbDif:
                                     default:
                                     {
-                                        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+                                        mat->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
                                         break;
                                     }
                                 }
@@ -2849,18 +2849,18 @@ namespace NifOsg
                             {
                                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
                                 specEnabled = false; // bgsm->mSpecularEnabled; TODO: PBR specular lighting
-                                specStrength = 1.f; // bgsm->mSpecularMult;
-                                emissiveMult = bgsm->mEmittanceMult;
+                                mat->setSpecularStrength(1.f); // bgsm->mSpecularMult;
+                                mat->setEmissiveMultiplier(bgsm->mEmittanceMult);
                             }
                             break;
                         }
-                        mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
-                        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
+                        mat->setAlpha(shaderprop->mAlpha);
+                        mat->setEmission(osg::Vec4f(shaderprop->mEmissive, 1.f));
+                        mat->setSpecular(osg::Vec4f(shaderprop->mSpecular, 1.f));
                         float glossiness = std::clamp(shaderprop->mGlossiness, 0.f, 128.f);
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
-                        emissiveMult = shaderprop->mEmissiveMult;
-                        specStrength = shaderprop->mSpecStrength;
+                        mat->setShininess(glossiness);
+                        mat->setEmissiveMultiplier(shaderprop->mEmissiveMult);
+                        mat->setSpecularStrength(shaderprop->mSpecStrength);
                         specEnabled = shaderprop->specular();
                         handleDecal(shaderprop->decal(), hasSortAlpha, *node);
                         break;
@@ -2892,17 +2892,17 @@ namespace NifOsg
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
             if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
             {
-                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-                mat->setShininess(osg::Material::FRONT_AND_BACK, 0.f);
-                specStrength = 1.f;
+                mat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+                mat->setShininess(0.f);
+                mat->setSpecularStrength(1.f);
             }
 
             if (lightmode == Nif::NiVertexColorProperty::LightMode::LightMode_Emissive)
             {
-                osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+                osg::Vec4f diffuse = mat->getDiffuse();
                 diffuse = osg::Vec4f(0, 0, 0, diffuse.a());
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
-                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f());
+                mat->setDiffuse(diffuse);
+                mat->setAmbient(osg::Vec4f());
             }
 
             // If we're told to use vertex colors but there are none to use, use a default color instead.
@@ -2910,38 +2910,30 @@ namespace NifOsg
             {
                 switch (mat->getColorMode())
                 {
-                    case osg::Material::AMBIENT:
-                        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+                    case SceneUtil::ColorModes::Ambient:
+                        mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
                         break;
-                    case osg::Material::AMBIENT_AND_DIFFUSE:
-                        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-                        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+                    case SceneUtil::ColorModes::AmbientAndDiffuse:
+                        mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
+                        mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
                         break;
-                    case osg::Material::EMISSION:
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
+                    case SceneUtil::ColorModes::Emission:
+                        mat->setEmission(osg::Vec4f(1, 1, 1, 1));
                         break;
                     default:
                         break;
                 }
-                mat->setColorMode(osg::Material::OFF);
+                mat->setColorMode(SceneUtil::ColorModes::None);
             }
 
-            if (hasMatCtrl || mat->getColorMode() != osg::Material::OFF
-                || mat->getEmission(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0, 0, 0, 1)
-                || mat->getDiffuse(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
-                || mat->getAmbient(osg::Material::FRONT_AND_BACK) != osg::Vec4f(1, 1, 1, 1)
-                || mat->getShininess(osg::Material::FRONT_AND_BACK) != 0
-                || mat->getSpecular(osg::Material::FRONT_AND_BACK) != osg::Vec4f(0.f, 0.f, 0.f, 0.f))
+            if (hasMatCtrl || mat->getColorMode() != SceneUtil::ColorModes::None
+                || mat->getEmission() != osg::Vec4f(0, 0, 0, 1) || mat->getDiffuse() != osg::Vec4f(1, 1, 1, 1)
+                || mat->getAmbient() != osg::Vec4f(1, 1, 1, 1) || mat->getShininess() != 0
+                || mat->getSpecular() != osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
                 mat = shareAttribute(mat);
                 node->getOrCreateStateSet()->setAttributeAndModes(mat, osg::StateAttribute::ON);
             }
-
-            if (emissiveMult != 1.f)
-                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
-
-            if (specStrength != 1.f)
-                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", specStrength));
 
             if (!mPushedSorter)
             {

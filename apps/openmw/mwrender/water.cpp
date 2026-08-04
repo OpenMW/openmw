@@ -8,7 +8,6 @@
 #include <osg/FrontFace>
 #include <osg/Geometry>
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/ViewportIndexed>
 
@@ -21,6 +20,7 @@
 
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/fog.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>

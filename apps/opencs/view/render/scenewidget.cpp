@@ -21,7 +21,6 @@
 #include <osg/Geometry>
 #include <osg/GraphicsContext>
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/Matrix>
 #include <osg/PrimitiveSet>
 #include <osg/StateAttribute>
@@ -47,6 +46,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/stateupdater.hpp>
 #include <components/shader/removedalphafunc.hpp>
 
@@ -178,11 +178,12 @@ namespace CSVRender
         mView->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mView->getCamera()->setName(Constants::SceneCamera);
 
-        osg::ref_ptr<osg::Material> defaultMat(new osg::Material);
-        defaultMat->setColorMode(osg::Material::OFF);
-        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        osg::ref_ptr<SceneUtil::Material> defaultMat(new SceneUtil::Material);
+        defaultMat->setColorMode(SceneUtil::ColorModes::None);
+        defaultMat->setAmbient(osg::Vec4f(1, 1, 1, 1));
+        defaultMat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
+        defaultMat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        defaultMat->apply(mView->getCamera()->getOrCreateStateSet());
         mView->getCamera()->getOrCreateStateSet()->setAttribute(defaultMat);
 
         mView->setSceneData(mRootNode);

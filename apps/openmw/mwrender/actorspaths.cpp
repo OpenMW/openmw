@@ -9,9 +9,10 @@
 #include <components/sceneutil/detourdebugdraw.hpp>
 
 #include <osg/LineWidth>
-#include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
+
+#include <components/sceneutil/material.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -24,8 +25,8 @@ namespace MWRender
     {
         osg::ref_ptr<osg::StateSet> makeGroupStateSet()
         {
-            osg::ref_ptr<osg::Material> material = new osg::Material;
-            material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+            osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
+            material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
 
             osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
             stateSet->setAttribute(material);

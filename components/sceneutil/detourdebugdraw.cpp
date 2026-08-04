@@ -6,10 +6,11 @@
 #include <osg/BlendFunc>
 #include <osg/Group>
 #include <osg/LineWidth>
-#include <osg/Material>
 #include <osg/PolygonOffset>
 
 #include <algorithm>
+
+#include <components/sceneutil/material.hpp>
 
 namespace
 {
@@ -111,8 +112,8 @@ namespace SceneUtil
 
     osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet()
     {
-        osg::ref_ptr<osg::Material> material = new osg::Material;
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
+        material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
 
         const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0f : -1.0f;
         const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0f : -1.0f;

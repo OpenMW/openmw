@@ -7,12 +7,13 @@
 
 namespace osg
 {
-    class Material;
     class AlphaFunc;
 }
 
 namespace SceneUtil
 {
+    class Material;
+
     /// renderbin which culls redundant state for shadow map rendering
     class ShadowsBin : public osgUtil::RenderBin
     {
@@ -51,7 +52,7 @@ namespace SceneUtil
             bool mAlphaBlendOverride;
             osg::AlphaFunc* mAlphaFunc;
             bool mAlphaFuncOverride;
-            osg::Material* mMaterial;
+            SceneUtil::Material* mMaterial;
             bool mMaterialOverride;
             bool mImportantState;
             bool needTexture() const;

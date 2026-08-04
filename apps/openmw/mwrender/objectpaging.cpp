@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <osg/LOD>
-#include <osg/Material>
 #include <osg/MatrixTransform>
 #include <osg/Sequence>
 #include <osg/Switch>
@@ -34,6 +33,7 @@
 #include <components/nifosg/autotransform.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -423,21 +423,21 @@ namespace MWRender
             }
             void apply(osg::Drawable& node) override
             {
-                osg::ref_ptr<osg::Material> m(new osg::Material);
+                osg::ref_ptr<SceneUtil::Material> m(new SceneUtil::Material);
                 osg::Vec4f color(
                     Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), 0.f);
                 color.normalize();
-                m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
-                m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
-                m->setColorMode(osg::Material::OFF);
-                m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(color));
+                m->setDiffuse(osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
+                m->setAmbient(osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
+                m->setColorMode(SceneUtil::ColorModes::None);
+                m->setEmission(osg::Vec4f(color));
                 osg::ref_ptr<osg::StateSet> stateset = node.getStateSet()
                     ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY)
                     : new osg::StateSet;
                 stateset->setAttribute(m);
-                stateset->addUniform(new osg::Uniform("colorMode", 0));
-                stateset->addUniform(new osg::Uniform("emissiveMult", 1.f));
-                stateset->addUniform(new osg::Uniform("specStrength", 1.f));
+                stateset->addUniform(new osg::Uniform("material.colorMode", 0));
+                stateset->addUniform(new osg::Uniform("material.emissiveMult", 1.f));
+                stateset->addUniform(new osg::Uniform("material.specularStrength", 1.f));
                 node.setStateSet(stateset);
             }
         };

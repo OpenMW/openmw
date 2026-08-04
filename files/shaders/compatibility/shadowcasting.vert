@@ -1,5 +1,7 @@
 #version 120
 
+#include "lib/material/struct.glsl"
+
 varying vec2 diffuseMapUV;
 
 varying float alphaPassthrough;
@@ -8,6 +10,8 @@ uniform int colorMode;
 uniform bool useTreeAnim;
 uniform bool useDiffuseMapForShadowAlpha = true;
 uniform bool alphaTestShadows = true;
+
+uniform Material material;
 
 void main(void)
 {
@@ -24,5 +28,5 @@ void main(void)
         alphaPassthrough = useTreeAnim ? 1.0 : gl_Color.a;
     else
         // This is uniform, so if it's too low, we might be able to put the position/clip vertex outside the view frustum and skip the fragment shader and rasteriser
-        alphaPassthrough = gl_FrontMaterial.diffuse.a;
+        alphaPassthrough = material.diffuse.a;
 }

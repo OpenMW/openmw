@@ -9,7 +9,6 @@
 #include <osg/ColorMaski>
 #include <osg/GLExtensions>
 #include <osg/Geometry>
-#include <osg/Material>
 #include <osg/Multisample>
 #include <osg/Texture>
 #include <osg/ValueObject>
@@ -23,6 +22,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/glextensions.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
@@ -144,8 +144,7 @@ namespace Shader
     };
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
-        : mColorMode(0)
-        , mMaterialOverridden(false)
+        : mMaterialOverridden(false)
         , mAlphaTestOverridden(false)
         , mAlphaBlendOverridden(false)
         , mAlphaFunc(GL_ALWAYS)
@@ -449,33 +448,8 @@ namespace Shader
                         if (it->second.second & osg::StateAttribute::OVERRIDE)
                             mRequirements.back().mMaterialOverridden = true;
 
-                        const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-
-                        int colorMode;
-                        switch (mat->getColorMode())
-                        {
-                            case osg::Material::OFF:
-                                colorMode = 0;
-                                break;
-                            case osg::Material::EMISSION:
-                                colorMode = 1;
-                                break;
-                            default:
-                            case osg::Material::AMBIENT_AND_DIFFUSE:
-                                colorMode = 2;
-                                break;
-                            case osg::Material::AMBIENT:
-                                colorMode = 3;
-                                break;
-                            case osg::Material::DIFFUSE:
-                                colorMode = 4;
-                                break;
-                            case osg::Material::SPECULAR:
-                                colorMode = 5;
-                                break;
-                        }
-
-                        mRequirements.back().mColorMode = colorMode;
+                        mRequirements.back().mMaterial
+                            = static_cast<const SceneUtil::Material*>(it->second.first.get());
                     }
                 }
                 else if (it->first.first == osg::StateAttribute::ALPHAFUNC)
@@ -584,8 +558,8 @@ namespace Shader
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
         defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
 
-        writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
-        addedState->addUniform("colorMode");
+        if (reqs.mMaterial)
+            reqs.mMaterial->apply(writableStateSet);
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
 

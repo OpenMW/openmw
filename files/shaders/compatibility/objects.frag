@@ -64,8 +64,11 @@ uniform float near;
 uniform float far;
 uniform float alphaRef;
 uniform float distortionStrength;
+uniform float alpha;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
+
+centroid varying vec4 passColor;
 
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 shadedLighting;
@@ -93,7 +96,7 @@ varying vec4 passTangent;
 #include "lib/util/distortion.glsl"
 
 #include "fog.glsl"
-#include "vertexcolors.glsl"
+#include "lib/material/vertexcolors.glsl"
 #include "shadows_fragment.glsl"
 #include "compatibility/normals.glsl"
 
@@ -117,6 +120,8 @@ void main()
     applyOcclusionDiscard(orthoDepthMapCoord, texture2D(orthoDepthMap, orthoDepthMapCoord.xy * 0.5 + 0.5).r);
 #endif
 
+    Material material = getMaterial();
+
     // only offset diffuse and normal maps for now, other textures are more likely to be using a completely different UV set
     vec2 offset = vec2(0.0);
 
@@ -135,7 +140,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV + offset);
 
 #if defined(DISTORTION) && DISTORTION
-    gl_FragData[0].a *= getDiffuseColor().a;
+    gl_FragData[0].a *= getDiffuseColor(material, passColor).a;
     gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, sampleOpaqueDepthTex(screenCoords / @distorionRTRatio).x);
     return;
 #endif
@@ -149,7 +154,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     gl_FragData[0] = vec4(1.0);
 #endif
 
-    vec4 diffuseColor = getDiffuseColor();
+    vec4 diffuseColor = getDiffuseColor(material, passColor);
     gl_FragData[0].a *= diffuseColor.a;
 
 #if @darkMap
@@ -222,14 +227,14 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
     float shininess = specTex.a * 255.0;
     vec3 specularColor = specTex.xyz;
 #else
-    float shininess = gl_FrontMaterial.shininess;
-    vec3 specularColor = getSpecularColor().xyz;
+    float shininess = material.shininess;
+    vec3 specularColor = getSpecularColor(material, passColor).xyz;
 #endif
     vec3 diffuseLight, ambientLight, specularLight;
 
     doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
 
-    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz * emissiveMult;
+    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor(material, passColor).xyz * ambientLight + getEmissionColor(material, passColor).xyz * emissiveMult;
     specular = specularColor * specularLight * specStrength;
     clampLighting(lighting);
 #endif
@@ -263,6 +268,9 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
     gl_FragData[0].a = 1.0;
+#else
+    // Apply overridden fade value, usually from actor fade
+    gl_FragData[0].a *= alpha;
 #endif
 
 #if !defined(FORCE_OPAQUE) && !@disableNormals

@@ -4,7 +4,6 @@
 #include <limits>
 
 #include <osg/BlendFunc>
-#include <osg/Material>
 #include <osg/Matrix>
 #include <osg/MatrixTransform>
 #include <osg/Switch>
@@ -444,21 +443,12 @@ namespace MWRender
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
 
-            // FIXME: overriding diffuse/ambient/emissive colors
-            osg::Material* material = new osg::Material;
-            material->setColorMode(osg::Material::OFF);
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, mAlpha));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-            stateset->setAttributeAndModes(material, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            stateset->addUniform(
-                new osg::Uniform("colorMode", 0), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("alpha", mAlpha));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
         {
-            osg::Material* material
-                = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);
+            stateset->getUniform("alpha")->set(mAlpha);
         }
 
     private:

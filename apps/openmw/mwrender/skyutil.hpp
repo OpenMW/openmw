@@ -1,7 +1,6 @@
 #ifndef OPENMW_MWRENDER_SKYUTIL_H
 #define OPENMW_MWRENDER_SKYUTIL_H
 
-#include <osg/Material>
 #include <osg/Matrixf>
 #include <osg/Texture2D>
 #include <osg/Transform>
@@ -11,6 +10,7 @@
 #include <osgParticle/Shooter>
 
 #include <components/esm/refid.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
@@ -127,9 +127,6 @@ namespace MWRender
         float mShadowBlend;
         float mMoonAlpha;
     };
-
-    osg::ref_ptr<osg::Material> createAlphaTrackingUnlitMaterial();
-    osg::ref_ptr<osg::Material> createUnlitMaterial(osg::Material::ColorMode colorMode = osg::Material::OFF);
 
     class OcclusionCallback
     {

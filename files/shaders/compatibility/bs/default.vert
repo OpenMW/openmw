@@ -28,10 +28,12 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 #include "lib/view/depth.glsl"
+#include "lib/material/vertexcolors.glsl"
 
-#include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
+
+centroid varying vec4 passColor;
 
 void main(void)
 {

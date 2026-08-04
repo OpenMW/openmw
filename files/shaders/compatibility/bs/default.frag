@@ -41,20 +41,24 @@ uniform float distortionStrength;
 #include "lib/material/alpha.glsl"
 #include "lib/util/distortion.glsl"
 #include "lib/light/clamp.glsl"
+#include "lib/material/vertexcolors.glsl"
 
-#include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_fragment.glsl"
 #include "compatibility/fog.glsl"
 #include "compatibility/normals.glsl"
 
+centroid varying vec4 passColor;
+
 void main()
 {
+    Material material = getMaterial();
+
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
 
 #if defined(DISTORTION) && DISTORTION
     vec2 screenCoords = gl_FragCoord.xy / (screenRes * @distorionRTRatio);
-    gl_FragData[0].a *= getDiffuseColor().a;
+    gl_FragData[0].a *= getDiffuseColor(material, passColor).a;
     gl_FragData[0] = applyDistortion(gl_FragData[0], distortionStrength, gl_FragCoord.z, sampleOpaqueDepthTex(screenCoords).x);
 
     return;
@@ -65,12 +69,12 @@ void main()
     gl_FragData[0] = vec4(1.0);
 #endif
 
-    vec4 diffuseColor = getDiffuseColor();
+    vec4 diffuseColor = getDiffuseColor(material, passColor);
     if (!useTreeAnim)
         gl_FragData[0].a *= diffuseColor.a;
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
-    vec3 specularColor = getSpecularColor().xyz;
+    vec3 specularColor = getSpecularColor(material, passColor).xyz;
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
     vec3 normal = normalTex.xyz * 2.0 - 1.0;
@@ -85,10 +89,10 @@ void main()
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, material.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     vec3 diffuse = diffuseColor.xyz * diffuseLight;
-    vec3 ambient = getAmbientColor().xyz * ambientLight;
-    vec3 emission = getEmissionColor().xyz * emissiveMult;
+    vec3 ambient = getAmbientColor(material, passColor).xyz * ambientLight;
+    vec3 emission = getEmissionColor(material, passColor).xyz * emissiveMult;
 #if @emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
