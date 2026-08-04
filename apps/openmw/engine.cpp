@@ -952,6 +952,7 @@ void OMW::Engine::go()
 
     // Setup viewer
     mViewer = new osgViewer::Viewer;
+    mViewer->getCamera()->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
     SceneUtil::disableFFPLightModelForRenderer(static_cast<osgViewer::Renderer*>(mViewer->getCamera()->getRenderer()));
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
