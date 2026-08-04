@@ -1737,6 +1737,7 @@ namespace MWRender
         }
 
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans = new SceneUtil::PositionAttitudeTransform;
+        osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform;
 
         osg::Matrix finalTransform;
 
@@ -1762,14 +1763,13 @@ namespace MWRender
             finalTransform *= (*transform);
         }
 
-        trans->setScale(finalTransform.getScale());
-        trans->setAttitude(finalTransform.getRotate());
-        trans->setPosition(finalTransform.getTrans());
+        transformNode->setMatrix(finalTransform);
+        trans->addChild(transformNode);
 
         parentNode->addChild(trans);
 
         osg::ref_ptr<osg::Node> node
-            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), trans);
+            = mResourceSystem->getSceneManager()->getInstance(VFS::Path::toNormalized(model), transformNode);
 
         if (useAmbientLight)
         {
