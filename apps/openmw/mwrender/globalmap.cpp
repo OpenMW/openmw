@@ -244,7 +244,7 @@ namespace MWRender
     };
 
     GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
-        : mRoot(root)
+        : mRoot(new osg::Group)
         , mWorkQueue(workQueue)
         , mWidth(0)
         , mHeight(0)
@@ -253,6 +253,22 @@ namespace MWRender
         , mMinY(0)
         , mMaxY(0)
     {
+        root->addChild(mRoot);
+
+        // Bind a dummy alpha texture at top of map subgraph
+        osg::ref_ptr<osg::Image> fallbackImage = new osg::Image;
+        fallbackImage->allocateImage(1, 1, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
+        *fallbackImage->data(0, 0) = 0xFF;
+
+        osg::ref_ptr<osg::Texture2D> dummyTex = new osg::Texture2D(fallbackImage);
+        dummyTex->setWrap(osg::Texture2D::WRAP_S, osg::Texture2D::REPEAT);
+        dummyTex->setWrap(osg::Texture2D::WRAP_T, osg::Texture2D::REPEAT);
+        dummyTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::NEAREST);
+        dummyTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);
+        dummyTex->setInternalFormat(GL_ALPHA);
+
+        mRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("alphaMap", 1));
+        mRoot->getOrCreateStateSet()->setTextureAttribute(1, dummyTex);
     }
 
     GlobalMap::~GlobalMap()
@@ -370,8 +386,6 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("diffuseMap", 0));
             stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
-            Shader::ShaderManager::DefineMap defines = { { { "alphaMap", "0" } } };
-
             if (mAlphaTexture)
             {
                 osg::ref_ptr<osg::Vec2Array> texcoords = new osg::Vec2Array;
@@ -387,14 +401,11 @@ namespace MWRender
                 geom->setTexCoordArray(1, texcoords, osg::Array::BIND_PER_VERTEX);
 
                 stateset->setTextureAttribute(1, mAlphaTexture, osg::StateAttribute::ON);
-                stateset->addUniform(new osg::Uniform("alphaMap", 1));
-
-                defines["alphaMap"] = "1";
             }
 
             auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
 
-            geom->getOrCreateStateSet()->setAttributeAndModes(shaderManager.getProgram("globalmap", defines));
+            geom->getOrCreateStateSet()->setAttributeAndModes(shaderManager.getProgram("globalmap"));
 
             camera->addChild(geom);
         }
