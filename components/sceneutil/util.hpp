@@ -126,7 +126,7 @@ namespace SceneUtil
     // It may be set as a state attribute or it may come from the used texture's name
     const std::string& getTextureType(const osg::StateSet& stateset, const osg::Texture& texture, unsigned int texUnit);
 
-    void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer);
+    void disableFFPStateForRenderer(osgViewer::Renderer* renderer);
 }
 
 #endif

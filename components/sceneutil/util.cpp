@@ -400,7 +400,7 @@ namespace SceneUtil
         return texture.getName();
     }
 
-    void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer)
+    void disableFFPStateForRenderer(osgViewer::Renderer* renderer)
     {
         auto disableFFPState = [](osgUtil::SceneView* sceneView) {
             sceneView->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
@@ -408,7 +408,7 @@ namespace SceneUtil
                 | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
             sceneView->getGlobalStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
             sceneView->getGlobalStateSet()->removeAttribute(osg::StateAttribute::TEXENV);
-            sceneView->getGlobalStateSet()->removeTextureMode(0, GL_TEXTURE_2D);
+            sceneView->getGlobalStateSet()->removeTextureAttribute(0, osg::StateAttribute::TEXENV);
         };
 
         disableFFPState(renderer->getSceneView(0));
