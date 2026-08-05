@@ -47,6 +47,7 @@
 #include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/material.hpp>
+#include <components/sceneutil/serialize.hpp>
 #include <components/sceneutil/stateupdater.hpp>
 #include <components/shader/removedalphafunc.hpp>
 
@@ -115,6 +116,8 @@ namespace CSVRender
         : QWidget(parent, f)
         , mRootNode(nullptr)
     {
+        SceneUtil::registerSerializers(false);
+
         mView = new osgViewer::View;
 
         mWidget = new osgQOpenGLWidget(this);
@@ -183,7 +186,8 @@ namespace CSVRender
         defaultMat->setAmbient(osg::Vec4f(1, 1, 1, 1));
         defaultMat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
         defaultMat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        defaultMat->apply(mView->getCamera()->getOrCreateStateSet());
+        defaultMat->apply(mRootNode->getOrCreateStateSet());
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("alpha", 1.f));
         mView->getCamera()->getOrCreateStateSet()->setAttribute(defaultMat);
 
         mView->setSceneData(mRootNode);

@@ -1659,9 +1659,9 @@ namespace NifOsg
                     osg::Array::BIND_PER_VERTEX);
             }
 
-            // osg::Material properties are handled here for two reasons:
+            // SceneUtil::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
-            // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
+            // - there are 3 "overlapping" nif properties that all affect the SceneUtil::Material, handling them
             //   above the actual renderable would be tedious.
             std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);

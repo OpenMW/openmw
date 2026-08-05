@@ -23,6 +23,7 @@
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/waterutil.hpp>
 
 #include "../../model/world/cell.hpp"
@@ -188,6 +189,8 @@ namespace CSVRender
         waterTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
         mWaterGeometry->getStateSet()->setTextureAttribute(0, waterTexture, osg::StateAttribute::ON);
+
+        mData.getResourceSystem()->getSceneManager()->recreateShaders(mWaterGeometry);
 
         mWaterGroup->addChild(mWaterGeometry);
     }

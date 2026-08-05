@@ -32,7 +32,7 @@ namespace SceneUtil
 
         Material(const Material& other, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_StateAttribute(State, Material, osg::StateAttribute::MATERIAL)
+        META_StateAttribute(SceneUtil, Material, osg::StateAttribute::MATERIAL)
 
         void apply(osg::State& state) const override;
 
