@@ -47,7 +47,6 @@ namespace MWRender
         osg::ref_ptr<osg::Vec3Array> mLinesVertices;
         osg::ref_ptr<osg::Vec3Array> mTrisVertices;
         osg::ref_ptr<osg::Vec4Array> mLinesColors;
-        osg::ref_ptr<osg::Vec4Array> mTrisColors;
         osg::ref_ptr<osg::DrawArrays> mLinesDrawArrays;
         osg::ref_ptr<osg::DrawArrays> mTrisDrawArrays;
 

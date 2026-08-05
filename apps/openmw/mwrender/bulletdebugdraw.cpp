@@ -45,7 +45,6 @@ namespace MWRender
             mLinesVertices = new osg::Vec3Array;
             mTrisVertices = new osg::Vec3Array;
             mLinesColors = new osg::Vec4Array;
-            mTrisColors = new osg::Vec4Array;
 
             mLinesDrawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
             mTrisDrawArrays = new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES);
@@ -60,8 +59,9 @@ namespace MWRender
             mTrisGeometry->setUseDisplayList(false);
             mTrisGeometry->setVertexArray(mTrisVertices);
             mTrisGeometry->setDataVariance(osg::Object::DYNAMIC);
-            mTrisGeometry->setColorArray(mTrisColors);
-            mTrisGeometry->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+            osg::ref_ptr<osg::Vec4Array> triColors = new osg::Vec4Array;
+            triColors->push_back({ 1, 1, 1, 1 });
+            mTrisGeometry->setColorArray(triColors, osg::Array::BIND_OVERALL);
             mTrisGeometry->addPrimitiveSet(mTrisDrawArrays);
 
             mParentNode->addChild(mLinesGeometry);
@@ -104,7 +104,6 @@ namespace MWRender
             mTrisGeometry = nullptr;
             mTrisVertices = nullptr;
             mTrisDrawArrays = nullptr;
-            mTrisColors = nullptr;
         }
     }
 
@@ -120,7 +119,6 @@ namespace MWRender
             mLinesVertices->clear();
             mTrisVertices->clear();
             mLinesColors->clear();
-            mTrisColors->clear();
             mShapesRoot->removeChildren(0, mShapesRoot->getNumChildren());
             mWorld->debugDrawWorld();
             showCollisions();
@@ -129,7 +127,6 @@ namespace MWRender
             mLinesVertices->dirty();
             mTrisVertices->dirty();
             mLinesColors->dirty();
-            mTrisColors->dirty();
             mLinesGeometry->dirtyBound();
             mTrisGeometry->dirtyBound();
         }
@@ -170,10 +167,6 @@ namespace MWRender
     void DebugDrawer::drawTriangle(
         const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar)
     {
-        mTrisColors->push_back({ 1, 1, 1, 1 });
-        mTrisColors->push_back({ 1, 1, 1, 1 });
-        mTrisColors->push_back({ 1, 1, 1, 1 });
-
         mTrisVertices->push_back(Misc::Convert::toOsg(v0));
         mTrisVertices->push_back(Misc::Convert::toOsg(v1));
         mTrisVertices->push_back(Misc::Convert::toOsg(v2));
