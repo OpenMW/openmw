@@ -170,11 +170,9 @@ namespace MWRender
     void DebugDrawer::drawTriangle(
         const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar)
     {
-        osg::Vec4 c(color.x(), color.y(), color.z(), 1.f);
-
-        mTrisColors->push_back(c);
-        mTrisColors->push_back(c);
-        mTrisColors->push_back(c);
+        mTrisColors->push_back({ 1, 1, 1, 1 });
+        mTrisColors->push_back({ 1, 1, 1, 1 });
+        mTrisColors->push_back({ 1, 1, 1, 1 });
 
         mTrisVertices->push_back(Misc::Convert::toOsg(v0));
         mTrisVertices->push_back(Misc::Convert::toOsg(v1));
