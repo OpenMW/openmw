@@ -76,8 +76,6 @@ centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
 #else
-uniform float emissiveMult;
-uniform float specStrength;
 #include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
@@ -234,8 +232,8 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 
     doLighting(gl_FragCoord.xy, passViewPos, viewNormal, shininess, shadowing, diffuseLight, ambientLight, specularLight);
 
-    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor(material, passColor).xyz * ambientLight + getEmissionColor(material, passColor).xyz * emissiveMult;
-    specular = specularColor * specularLight * specStrength;
+    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor(material, passColor).xyz * ambientLight + getEmissionColor(material, passColor).xyz * material.emissiveMult;
+    specular = specularColor * specularLight * material.specStrength;
     clampLighting(lighting);
 #endif
 

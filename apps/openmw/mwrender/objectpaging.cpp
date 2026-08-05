@@ -429,15 +429,13 @@ namespace MWRender
                 color.normalize();
                 m->setDiffuse(osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
                 m->setAmbient(osg::Vec4f(0.1f, 0.1f, 0.1f, 1.f));
-                m->setVertexColorMode(SceneUtil::VertexColorModes::None);
                 m->setEmission(osg::Vec4f(color));
+                m->setVertexColorMode(SceneUtil::VertexColorModes::None);
                 osg::ref_ptr<osg::StateSet> stateset = node.getStateSet()
                     ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY)
                     : new osg::StateSet;
                 stateset->setAttribute(m);
-                stateset->addUniform(new osg::Uniform("material.vertexColorMode", 0));
-                stateset->addUniform(new osg::Uniform("material.emissiveMult", 1.f));
-                stateset->addUniform(new osg::Uniform("material.specularStrength", 1.f));
+                m->updateStateSet(stateset);
                 node.setStateSet(stateset);
             }
         };

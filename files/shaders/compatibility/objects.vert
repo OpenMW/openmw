@@ -51,8 +51,6 @@ centroid varying vec3 shadedLighting;
 centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-uniform float emissiveMult;
-uniform float specStrength;
 #include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
@@ -153,7 +151,7 @@ void main(void)
     vec3 emissionColor = getEmissionColor(material, passColor).rgb;
     if (skipLighting(material, passColor))
     {
-        shadedLighting = passLighting = emissionColor * emissiveMult;
+        shadedLighting = passLighting = emissionColor * material.emissiveMult;
         shadedSpecular = passSpecular = vec3(0.0);
     }
     else
@@ -169,10 +167,10 @@ void main(void)
         vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
         directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);
         pointLighting(screenCoord, viewDir, passViewPos, viewNormal, shininess, pointDiffuse, pointAmbient, pointSpecular);
-        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * emissiveMult;
-        shadedSpecular = specularColor * pointSpecular * specStrength;
+        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * material.emissiveMult;
+        shadedSpecular = specularColor * pointSpecular * material.specStrength;
         passLighting = shadedLighting + diffuseColor * sunDiffuse;
-        passSpecular = shadedSpecular + specularColor * sunSpecular * specStrength;
+        passSpecular = shadedSpecular + specularColor * sunSpecular * material.specStrength;
     }
     clampLighting(shadedLighting);
     clampLighting(passLighting);

@@ -1,5 +1,5 @@
-#ifndef LIB_MATERIAL_MATERIAL
-#define LIB_MATERIAL_MATERIAL
+#ifndef LIB_MATERIAL_STRUCT
+#define LIB_MATERIAL_STRUCT
 
 struct Material
 {

@@ -32,8 +32,6 @@ uniform vec2 screenRes;
 uniform float near;
 uniform float far;
 uniform float alphaRef;
-uniform float emissiveMult;
-uniform float specStrength;
 uniform bool useTreeAnim;
 uniform float distortionStrength;
 
@@ -92,12 +90,12 @@ void main()
     doLighting(gl_FragCoord.xy, passViewPos, viewNormal, material.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     vec3 diffuse = diffuseColor.xyz * diffuseLight;
     vec3 ambient = getAmbientColor(material, passColor).xyz * ambientLight;
-    vec3 emission = getEmissionColor(material, passColor).xyz * emissiveMult;
+    vec3 emission = getEmissionColor(material, passColor).xyz * material.emissiveMult;
 #if @emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
 #endif
     vec3 lighting = diffuse + ambient + emission;
-    vec3 specular = specularColor * specularLight * specStrength;
+    vec3 specular = specularColor * specularLight * material.specStrength;
 
     clampLighting(lighting);
 
