@@ -10,7 +10,7 @@ struct Material
     float shininess;
     float emissiveMult;
     float specStrength;
-    int colorMode;
+    int vertexColorMode;
 };
 
 #endif

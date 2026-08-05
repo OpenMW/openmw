@@ -83,7 +83,7 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
     mMarkerNode->getOrCreateStateSet()->setRenderBinDetails(11, "RenderBin");
     osg::ref_ptr<SceneUtil::Material> mat = new SceneUtil::Material;
-    mat->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+    mat->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
     mMarkerNode->getOrCreateStateSet()->setAttribute(mat);
 
     mMarkerNode->setUserData(new CellMarkerTag(this));

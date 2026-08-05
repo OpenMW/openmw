@@ -74,7 +74,7 @@ namespace
         mat->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setEmission(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
         mat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        mat->setColorMode(SceneUtil::ColorModes::Diffuse);
+        mat->setVertexColorMode(SceneUtil::VertexColorModes::Diffuse);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
         node->setStateSet(stateset);

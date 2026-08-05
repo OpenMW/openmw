@@ -420,7 +420,7 @@ namespace Terrain
             material->setEmission(osg::Vec4f(0, 0, 1, 1));
             material->setDiffuse(osg::Vec4f(0, 0, 0, 1));
             material->setAmbient(osg::Vec4f(0, 0, 0, 1));
-            material->apply(stateSet);
+            material->updateStateSet(stateSet);
             stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
             stateSet->setRenderBinDetails(100, "RenderBin");
             return stateSet;

@@ -5,28 +5,28 @@
 
 vec4 getEmissionColor(Material material, vec4 passColor)
 {
-    if (material.colorMode == ColorMode_Emission)
+    if (material.vertexColorMode == ColorMode_Emission)
         return passColor;
     return material.emission;
 }
 
 vec4 getAmbientColor(Material material, vec4 passColor)
 {
-    if (material.colorMode == ColorMode_AmbientAndDiffuse || material.colorMode == ColorMode_Ambient)
+    if (material.vertexColorMode == ColorMode_AmbientAndDiffuse || material.vertexColorMode == ColorMode_Ambient)
         return passColor;
     return material.ambient;
 }
 
 vec4 getDiffuseColor(Material material, vec4 passColor)
 {
-    if (material.colorMode == ColorMode_AmbientAndDiffuse || material.colorMode == ColorMode_Diffuse)
+    if (material.vertexColorMode == ColorMode_AmbientAndDiffuse || material.vertexColorMode == ColorMode_Diffuse)
         return passColor;
     return material.diffuse;
 }
 
 vec4 getSpecularColor(Material material, vec4 passColor)
 {
-    if (material.colorMode == ColorMode_Specular)
+    if (material.vertexColorMode == ColorMode_Specular)
         return passColor;
     return material.specular;
 }

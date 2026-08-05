@@ -69,8 +69,8 @@ namespace Terrain
 
         osg::StateSet* stateSet = borderGroup->getOrCreateStateSet();
         osg::ref_ptr<SceneUtil::Material> material(new SceneUtil::Material);
-        material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
-        material->apply(stateSet);
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
+        material->updateStateSet(stateSet);
         stateSet->setAttribute(material);
 
         osg::PolygonMode* polygonmode = new osg::PolygonMode;

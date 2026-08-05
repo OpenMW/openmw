@@ -71,7 +71,7 @@ namespace MWRender
             stateSet->setAttributeAndModes(new osg::PolygonOffset(
                 SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f, SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f));
             osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
-            material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+            material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
             stateSet->setAttribute(material);
             mLinesGeometry->setStateSet(stateSet);
             mTrisGeometry->setStateSet(stateSet);

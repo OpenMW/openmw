@@ -15,7 +15,7 @@ namespace osg
 
 namespace SceneUtil
 {
-    enum class ColorModes : std::int32_t
+    enum class VertexColorModes : std::int32_t
     {
         None = 0,
         Emission = 1,
@@ -36,7 +36,7 @@ namespace SceneUtil
 
         void apply(osg::State& state) const override;
 
-        void apply(osg::StateSet* stateset) const;
+        void updateStateSet(osg::StateSet* stateset) const;
 
         int compare(const StateAttribute& sa) const override;
 
@@ -79,9 +79,9 @@ namespace SceneUtil
             mEmission[3] = clamped;
         }
 
-        void setColorMode(ColorModes mode) { mColorMode = mode; }
+        void setVertexColorMode(VertexColorModes mode) { mVertexColorMode = mode; }
 
-        ColorModes getColorMode() const { return mColorMode; }
+        VertexColorModes getVertexColorMode() const { return mVertexColorMode; }
 
     private:
         osg::Vec4f mDiffuse;
@@ -91,7 +91,7 @@ namespace SceneUtil
         float mShininess = 0.0;
         float mEmissiveMult = 1.0;
         float mSpecularStrength = 1.0;
-        ColorModes mColorMode = ColorModes::None;
+        VertexColorModes mVertexColorMode = VertexColorModes::None;
     };
 
 }

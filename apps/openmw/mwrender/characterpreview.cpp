@@ -239,11 +239,11 @@ namespace MWRender
         stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         osg::ref_ptr<SceneUtil::Material> defaultMat(new SceneUtil::Material);
-        defaultMat->setColorMode(SceneUtil::ColorModes::None);
+        defaultMat->setVertexColorMode(SceneUtil::VertexColorModes::None);
         defaultMat->setAmbient(osg::Vec4f(1, 1, 1, 1));
         defaultMat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
         defaultMat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        defaultMat->apply(stateset);
+        defaultMat->updateStateSet(stateset);
         stateset->setAttribute(defaultMat);
 
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);

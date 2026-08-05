@@ -19,13 +19,13 @@ namespace SceneUtil
         , mShininess(other.mShininess)
         , mEmissiveMult(other.mEmissiveMult)
         , mSpecularStrength(other.mSpecularStrength)
-        , mColorMode(other.mColorMode)
+        , mVertexColorMode(other.mVertexColorMode)
     {
     }
 
     void Material::apply(osg::State& state) const {}
 
-    void Material::apply(osg::StateSet* stateset) const
+    void Material::updateStateSet(osg::StateSet* stateset) const
     {
         stateset->getOrCreateUniform("material.diffuse", osg::Uniform::FLOAT_VEC4)->set(mDiffuse);
         stateset->getOrCreateUniform("material.ambient", osg::Uniform::FLOAT_VEC4)->set(mAmbient);
@@ -34,7 +34,8 @@ namespace SceneUtil
         stateset->getOrCreateUniform("material.shininess", osg::Uniform::FLOAT)->set(mShininess);
         stateset->getOrCreateUniform("material.emissiveMult", osg::Uniform::FLOAT)->set(mEmissiveMult);
         stateset->getOrCreateUniform("material.specStrength", osg::Uniform::FLOAT)->set(mSpecularStrength);
-        stateset->getOrCreateUniform("material.colorMode", osg::Uniform::INT)->set(static_cast<int>(mColorMode));
+        stateset->getOrCreateUniform("material.vertexColorMode", osg::Uniform::INT)
+            ->set(static_cast<int>(mVertexColorMode));
     }
 
     int Material::compare(const StateAttribute& sa) const
@@ -47,7 +48,7 @@ namespace SceneUtil
         COMPARE_StateAttribute_Parameter(mShininess);
         COMPARE_StateAttribute_Parameter(mEmissiveMult);
         COMPARE_StateAttribute_Parameter(mSpecularStrength);
-        COMPARE_StateAttribute_Parameter(mColorMode);
+        COMPARE_StateAttribute_Parameter(mVertexColorMode);
 
         return 0;
     }
@@ -56,7 +57,7 @@ namespace SceneUtil
     {
         return (mDiffuse == other.mDiffuse && mAmbient == other.mAmbient && mSpecular == other.mSpecular
             && mEmission == other.mEmission && mShininess == other.mShininess && mEmissiveMult == other.mEmissiveMult
-            && mSpecularStrength == other.mSpecularStrength && mColorMode == other.mColorMode);
+            && mSpecularStrength == other.mSpecularStrength && mVertexColorMode == other.mVertexColorMode);
     }
 
 }

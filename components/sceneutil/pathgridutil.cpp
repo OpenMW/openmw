@@ -216,7 +216,7 @@ namespace SceneUtil
         }
 
         osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
-        material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
         gridGeometry->getOrCreateStateSet()->setAttribute(material);
 
         return gridGeometry;

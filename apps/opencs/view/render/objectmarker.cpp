@@ -114,7 +114,7 @@ namespace CSVRender
                 = static_cast<SceneUtil::Material*>(state->getAttribute(osg::StateAttribute::MATERIAL));
             osg::Vec4f emis = mat->getEmission();
             mat->setEmission(emis / 4);
-            mat->apply(state);
+            mat->updateStateSet(state);
             mOriginalColors.emplace(name, emis);
         }
 
@@ -301,7 +301,7 @@ namespace CSVRender
 
             SceneUtil::Material* mat = static_cast<SceneUtil::Material*>(matAttr);
             mat->setEmission(mOriginalColors[materialNodeName]);
-            mat->apply(state);
+            mat->updateStateSet(state);
 
             mLastHighlightedNodes.emplace(std::make_pair(matNode->getName(), mat));
         }

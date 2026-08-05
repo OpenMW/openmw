@@ -214,22 +214,23 @@ namespace SceneUtil
                               &SceneUtil::Material::getSpecularStrength, &SceneUtil::Material::setSpecularStrength),
                 osgDB::BaseSerializer::RW_FLOAT);
 
-            using ColorModeSerializer = osgDB::EnumSerializer<SceneUtil::Material, SceneUtil::ColorModes, void>;
+            using ColorModeSerializer = osgDB::EnumSerializer<SceneUtil::Material, SceneUtil::VertexColorModes, void>;
 
-            osg::ref_ptr<ColorModeSerializer> colorModeSerializer = new ColorModeSerializer("ColorMode",
-                SceneUtil::ColorModes::None, &SceneUtil::Material::getColorMode, &SceneUtil::Material::setColorMode);
+            osg::ref_ptr<ColorModeSerializer> colorModeSerializer
+                = new ColorModeSerializer("VertexColorMode", SceneUtil::VertexColorModes::None,
+                    &SceneUtil::Material::getVertexColorMode, &SceneUtil::Material::setVertexColorMode);
 
-            colorModeSerializer->add("None", SceneUtil::ColorModes::None);
+            colorModeSerializer->add("None", SceneUtil::VertexColorModes::None);
 
-            colorModeSerializer->add("Emission", SceneUtil::ColorModes::Emission);
+            colorModeSerializer->add("Emission", SceneUtil::VertexColorModes::Emission);
 
-            colorModeSerializer->add("AmbientAndDiffuse", SceneUtil::ColorModes::AmbientAndDiffuse);
+            colorModeSerializer->add("AmbientAndDiffuse", SceneUtil::VertexColorModes::AmbientAndDiffuse);
 
-            colorModeSerializer->add("Ambient", SceneUtil::ColorModes::Ambient);
+            colorModeSerializer->add("Ambient", SceneUtil::VertexColorModes::Ambient);
 
-            colorModeSerializer->add("Diffuse", SceneUtil::ColorModes::Diffuse);
+            colorModeSerializer->add("Diffuse", SceneUtil::VertexColorModes::Diffuse);
 
-            colorModeSerializer->add("Specular", SceneUtil::ColorModes::Specular);
+            colorModeSerializer->add("Specular", SceneUtil::VertexColorModes::Specular);
 
             addSerializer(colorModeSerializer);
         }

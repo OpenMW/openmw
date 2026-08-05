@@ -15,7 +15,7 @@ void main()
     vec4 viewPos = modelToView(gl_Vertex);
     gl_ClipVertex = viewPos;
 
-    if (material.colorMode == 2)
+    if (material.vertexColorMode == ColorMode_AmbientAndDiffuse)
         alphaPassthrough = gl_Color.a;
     else
         alphaPassthrough = material.diffuse.a;

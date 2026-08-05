@@ -2732,7 +2732,8 @@ namespace NifOsg
             // Specular lighting is enabled by default, but there's a quirk...
             bool specEnabled = true;
             osg::ref_ptr<SceneUtil::Material> mat(new SceneUtil::Material);
-            mat->setColorMode(hasVertexColors ? SceneUtil::ColorModes::AmbientAndDiffuse : SceneUtil::ColorModes::None);
+            mat->setVertexColorMode(
+                hasVertexColors ? SceneUtil::VertexColorModes::AmbientAndDiffuse : SceneUtil::VertexColorModes::None);
 
             // NIF material defaults don't match OpenGL defaults
             mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
@@ -2791,12 +2792,12 @@ namespace NifOsg
                         {
                             case VertexMode::VertMode_SrcIgnore:
                             {
-                                mat->setColorMode(SceneUtil::ColorModes::None);
+                                mat->setVertexColorMode(SceneUtil::VertexColorModes::None);
                                 break;
                             }
                             case VertexMode::VertMode_SrcEmissive:
                             {
-                                mat->setColorMode(SceneUtil::ColorModes::Emission);
+                                mat->setVertexColorMode(SceneUtil::VertexColorModes::Emission);
                                 break;
                             }
                             case VertexMode::VertMode_SrcAmbDif:
@@ -2807,13 +2808,13 @@ namespace NifOsg
                                 {
                                     case LightMode::LightMode_Emissive:
                                     {
-                                        mat->setColorMode(SceneUtil::ColorModes::None);
+                                        mat->setVertexColorMode(SceneUtil::VertexColorModes::None);
                                         break;
                                     }
                                     case LightMode::LightMode_EmiAmbDif:
                                     default:
                                     {
-                                        mat->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+                                        mat->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
                                         break;
                                     }
                                 }
@@ -2908,25 +2909,25 @@ namespace NifOsg
             // If we're told to use vertex colors but there are none to use, use a default color instead.
             if (!hasVertexColors)
             {
-                switch (mat->getColorMode())
+                switch (mat->getVertexColorMode())
                 {
-                    case SceneUtil::ColorModes::Ambient:
+                    case SceneUtil::VertexColorModes::Ambient:
                         mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
                         break;
-                    case SceneUtil::ColorModes::AmbientAndDiffuse:
+                    case SceneUtil::VertexColorModes::AmbientAndDiffuse:
                         mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
                         mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
                         break;
-                    case SceneUtil::ColorModes::Emission:
+                    case SceneUtil::VertexColorModes::Emission:
                         mat->setEmission(osg::Vec4f(1, 1, 1, 1));
                         break;
                     default:
                         break;
                 }
-                mat->setColorMode(SceneUtil::ColorModes::None);
+                mat->setVertexColorMode(SceneUtil::VertexColorModes::None);
             }
 
-            if (hasMatCtrl || mat->getColorMode() != SceneUtil::ColorModes::None
+            if (hasMatCtrl || mat->getVertexColorMode() != SceneUtil::VertexColorModes::None
                 || mat->getEmission() != osg::Vec4f(0, 0, 0, 1) || mat->getDiffuse() != osg::Vec4f(1, 1, 1, 1)
                 || mat->getAmbient() != osg::Vec4f(1, 1, 1, 1) || mat->getShininess() != 0
                 || mat->getSpecular() != osg::Vec4f(0.f, 0.f, 0.f, 0.f))

@@ -472,7 +472,7 @@ namespace NifOsg
             osg::Vec4f diffuse = mat->getDiffuse();
             diffuse.a() = value;
             mat->setDiffuse(diffuse);
-            mat->apply(stateset);
+            mat->updateStateSet(stateset);
         }
     }
 
@@ -546,7 +546,7 @@ namespace NifOsg
                     mat->setAmbient(ambient);
                 }
             }
-            mat->apply(stateset);
+            mat->updateStateSet(stateset);
         }
     }
 

@@ -559,7 +559,7 @@ namespace Shader
         defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
 
         if (reqs.mMaterial)
-            reqs.mMaterial->apply(writableStateSet);
+            reqs.mMaterial->updateStateSet(writableStateSet);
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
 

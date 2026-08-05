@@ -74,7 +74,7 @@ namespace SceneUtil
         material->setEmission(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         material->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, alpha));
         material->setAmbient(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        material->setColorMode(SceneUtil::ColorModes::None);
+        material->setVertexColorMode(SceneUtil::VertexColorModes::None);
         stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
 
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);

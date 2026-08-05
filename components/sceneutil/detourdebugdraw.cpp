@@ -113,7 +113,7 @@ namespace SceneUtil
     osg::ref_ptr<osg::StateSet> makeDetourGroupStateSet()
     {
         osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
-        material->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
 
         const float polygonOffsetFactor = SceneUtil::AutoDepth::isReversed() ? 1.0f : -1.0f;
         const float polygonOffsetUnits = SceneUtil::AutoDepth::isReversed() ? 1.0f : -1.0f;

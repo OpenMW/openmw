@@ -403,7 +403,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::Material> mat = new SceneUtil::Material;
         mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
         mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
-        mat->setColorMode(SceneUtil::ColorModes::AmbientAndDiffuse);
+        mat->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
         stateset->setAttributeAndModes(mat);
 
         osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
