@@ -8,6 +8,7 @@ local auxUtil = require('openmw_aux.util')
 local common = require('scripts.omw.spellcasting.common')
 
 I.Projectiles.addOnProjectileHitHandler(I.Projectiles.TYPES.Magic, function(projectile, hitResult)
+    if not hitResult.hit then return end
     assert(projectile.spellCast)
     local spellCast = projectile.spellCast
     local target = hitResult.hitObject

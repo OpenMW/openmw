@@ -44,7 +44,9 @@ return {
         --- Add new projectile hit handler.
         -- If `handler(projectile, hitResult)` returns false, other handlers for the same projectile
         -- will be skipped. Two handler parameters are a @{#ProjectileInfo} and a @{openmw.nearby#RayCastingResult},
-        -- respectively
+        -- respectively. Note that in the current revision hitResult.hit will always be true. In later interface revisions, when
+        -- lua-spawned projectiles are introduced, hitResult.hit may be false to indicate to scripts that a lua-spawned
+        -- projectile was despawned, and should therefore be checked anyway.
         -- @function [parent=#Projectiles] addOnProjectileHitHandler
         -- @param #function handler The handler.
         -- @param #string type The type of projectile to handle (see @{#ProjectileInfo.type})

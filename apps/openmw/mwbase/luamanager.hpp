@@ -114,7 +114,7 @@ namespace MWBase
             bool stackable, bool isReflect)
             = 0;
         virtual void magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
-            const MWWorld::Ptr& victim, const osg::Vec3f& position, bool hit)
+            const MWWorld::Ptr& victim, const osg::Vec3f& position, const osg::Vec3f& normal)
             = 0;
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,

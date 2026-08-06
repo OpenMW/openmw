@@ -548,14 +548,15 @@ namespace MWLua
     }
 
     void LuaManager::magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
-        const MWWorld::Ptr& victim, const osg::Vec3f& position, bool hit)
+        const MWWorld::Ptr& victim, const osg::Vec3f& position, const osg::Vec3f& normal)
     {
         mLua.protectedCall([&](LuaUtil::LuaView& view) {
             sol::table projectile = view.newTable();
             sol::table hitResult = view.newTable();
             sol::table spellcast = view.newTable();
-            hitResult["hit"] = hit;
+            hitResult["hit"] = true;
             hitResult["hitPos"] = position;
+            hitResult["hitNormal"] = normal;
             if (!victim.isEmpty())
                 hitResult["hitObject"] = LObject(victim);
             spellcast["id"] = spellId.serializeText();

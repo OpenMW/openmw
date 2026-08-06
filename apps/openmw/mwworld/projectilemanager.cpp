@@ -598,8 +598,14 @@ namespace MWWorld
             assert(target != caster);
 
             auto hitPos = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
+            auto hitNormal = Misc::Convert::makeOsgVec3f(projectile->getHitNormal());
+            if (active)
+            {
+                hitNormal = projectile->velocity();
+                hitNormal.normalize();
+            }
             MWBase::Environment::get().getLuaManager()->magicProjectileHit(
-                magicBoltState.mSpellId, caster, magicBoltState.mItem, target, hitPos, true);
+                magicBoltState.mSpellId, caster, magicBoltState.mItem, target, hitPos, hitNormal);
 
             magicBoltState.mToDelete = true;
         }
