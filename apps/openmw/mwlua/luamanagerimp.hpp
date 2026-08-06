@@ -121,8 +121,8 @@ namespace MWLua
         void applyMagicEffects(ESM::RefId id, const MWWorld::Ptr& caster, ESM::RefNum item, const MWWorld::Ptr& target,
             const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption, bool stackable,
             bool isReflect) override;
-        void magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item, const MWWorld::Ptr& victim,
-            const osg::Vec3f& position, bool hit) override;
+        void magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
+            const MWWorld::Ptr& victim, const osg::Vec3f& position, bool hit) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
