@@ -168,6 +168,16 @@ namespace MWLua
         api["activeActors"] = GObjectList{ objectLists->getActorsInScene() };
         api["players"] = GObjectList{ objectLists->getPlayers() };
 
+        api["getObjectsInRange"] = [](osg::Vec3f position, Misc::FiniteFloat range) -> GObjectList {
+            std::vector<MWWorld::Ptr> objects;
+            MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(position, range, objects);
+            GObjectList objList;
+            objList.mIds = std::make_shared<std::vector<ObjectId>>();
+            objList.mIds->reserve(objects.size());
+            for (const auto& object : objects)
+                objList.mIds->push_back(getId(object));
+            return objList;
+        };
         api["createObject"] = [lua = context.mLua](std::string_view recordId, sol::optional<int> count) -> GObject {
             checkGameInitialized(lua);
             MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), ESM::RefId::deserializeText(recordId));

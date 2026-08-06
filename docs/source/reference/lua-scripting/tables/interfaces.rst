@@ -35,6 +35,9 @@
   * - :doc:`MWUI </reference/lua-scripting/interface_mwui>`
     - |bdg-ctx-menu| |bdg-ctx-player|
     - Morrowind-style UI templates.
+  * - :doc:`Projectiles </reference/lua-scripting/interface_projectiles>`
+    - |bdg-ctx-global|
+    - Allows to alter behavior of projectiles
   * - :doc:`Settings </reference/lua-scripting/interface_settings>`
     - |bdg-ctx-global| |bdg-ctx-menu| |bdg-ctx-player| 
     - Save, display and track changes of setting values.

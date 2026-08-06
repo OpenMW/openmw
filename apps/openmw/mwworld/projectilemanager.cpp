@@ -59,6 +59,7 @@
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/projectile.hpp"
+#include "apps/openmw/mwbase/luamanager.hpp"
 
 namespace
 {
@@ -572,7 +573,7 @@ namespace MWWorld
                 projectileState.mAttackStrength, projectileState.mAttackWindUp);
             projectileState.mToDelete = true;
         }
-        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)
@@ -596,22 +597,9 @@ namespace MWWorld
 
             assert(target != caster);
 
-            MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
-            cast.mId = magicBoltState.mSpellId;
-            cast.mSourceName = magicBoltState.mSourceName;
-            cast.mItem = magicBoltState.mItem;
-            // Grab original effect list so the indices are correct
-            const ESM::EffectList* effects;
-            if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(magicBoltState.mSpellId))
-                effects = &spell->mEffects;
-            else
-            {
-                MWWorld::ManualRef ref(esmStore, magicBoltState.mSpellId);
-                const MWWorld::Ptr& ptr = ref.getPtr();
-                effects = &esmStore.get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr))->mEffects;
-            }
-            cast.inflict(target, *effects, ESM::RT_Target);
+            auto hitPos = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
+            MWBase::Environment::get().getLuaManager()->magicProjectileHit(
+                magicBoltState.mSpellId, caster, magicBoltState.mItem, target, hitPos, true);
 
             magicBoltState.mToDelete = true;
         }

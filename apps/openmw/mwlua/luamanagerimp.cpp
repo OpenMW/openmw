@@ -547,6 +547,29 @@ namespace MWLua
         }
     }
 
+    void LuaManager::magicProjectileHit(ESM::RefId spellId, const MWWorld::Ptr& caster, ESM::RefNum item,
+        const MWWorld::Ptr& victim, const osg::Vec3f& position, bool hit)
+    {
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table projectile = view.newTable();
+            sol::table hitResult = view.newTable();
+            sol::table spellcast = view.newTable();
+            hitResult["hit"] = hit;
+            hitResult["hitPos"] = position;
+            if (!victim.isEmpty())
+                hitResult["hitObject"] = LObject(victim);
+            spellcast["id"] = spellId.serializeText();
+            if (!caster.isEmpty())
+                spellcast["caster"] = LObject(caster);
+            if (item.isSet())
+                spellcast["item"] = LObject(item);
+            projectile["type"] = "Magic";
+            projectile["spellCast"] = spellcast;
+
+            mGlobalScripts.onProjectileHit(projectile, hitResult);
+        });
+    }
+
     void LuaManager::useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);

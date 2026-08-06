@@ -22,6 +22,9 @@
 -- @field [parent=#interfaces] scripts.omw.mwui.init#scripts.omw.mwui.init MWUI
 
 ---
+-- @field [parent=#interfaces] scripts.omw.mechanics.projectiles#scripts.omw.mechanics.projectiles MWUI
+
+---
 -- @field [parent=#interfaces] scripts.omw.settings.player#scripts.omw.settings.player Settings
 
 ---
