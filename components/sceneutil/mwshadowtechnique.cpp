@@ -931,13 +931,10 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
     for (int alphaFunc = GL_NEVER; alphaFunc <= GL_ALWAYS; ++alphaFunc)
     {
         auto& program = _castingPrograms[alphaFunc - GL_NEVER];
-        program = new osg::Program();
-        program->addShader(castingVertexShader);
-        program->addShader(shaderManager.getShader("shadowcasting.frag", { {"alphaFunc", std::to_string(alphaFunc)},
-                                                                                    {"alphaToCoverage", "0"},
-                                                                                    {"adjustCoverage", "1"},
-                                                                                    {"useGPUShader4", useGPUShader4}
-                                                                                  }));
+        program = shaderManager.getProgram(castingVertexShader,
+            shaderManager.getShader("shadowcasting.frag",
+                { { "alphaFunc", std::to_string(alphaFunc) }, { "alphaToCoverage", "0" }, { "adjustCoverage", "1" },
+                    { "useGPUShader4", useGPUShader4 } }));
     }
 }
 

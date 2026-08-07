@@ -81,6 +81,11 @@ namespace SceneUtil
             mShadowTechnique->disableDebugHUD();
     }
 
+    void ShadowManager::setupShaders(Shader::ShaderManager& shaderManager) const
+    {
+        mShadowTechnique->setupCastingShader(shaderManager);
+    }
+
     void ShadowManager::disableShadowsForStateSet(osg::StateSet& stateset) const
     {
         if (!mEnableShadows)
@@ -130,7 +135,6 @@ namespace SceneUtil
         mShadowSettings = mShadowedScene->getShadowSettings();
         setupShadowSettings(settings, shaderManager);
 
-        mShadowTechnique->setupCastingShader(shaderManager);
         mShadowTechnique->setWorldMask(worldMask);
 
         enableOutdoorMode();

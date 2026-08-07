@@ -270,6 +270,9 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
+        // Only set up the shadow casting shaders once our global defines have been set
+        mShadowManager->setupShaders(mResourceSystem->getSceneManager()->getShaderManager());
+
         mNavMesh = std::make_unique<NavMesh>(mRootNode, mWorkQueue, Settings::navigator().mEnableNavMeshRender,
             Settings::navigator().mNavMeshRenderMode);
         mActorsPaths = std::make_unique<ActorsPaths>(mRootNode, Settings::navigator().mEnableAgentsPathsRender);
