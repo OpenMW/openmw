@@ -24,8 +24,8 @@ vec4 applyFogAtDist(vec4 color, float euclideanDist, float linearDist, float nea
     float start = fog.start;
     float end = fog.end;
 
-    if (fog.depth >= 0) {
-        start = near * fog.depth + far * (1.f - fog.depth);
+    if (fog.depth >= 0.0) {
+        start = near * fog.depth + far * (1.0 - fog.depth);
         end = far;
     }
 
