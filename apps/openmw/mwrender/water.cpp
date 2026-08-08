@@ -20,6 +20,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
@@ -253,14 +254,8 @@ namespace MWRender
             camera->addCullCallback(new InheritViewPointCallback);
             camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-            // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
-            // assign large value to effectively turn off fog
-            // shaders don't respect glDisable(GL_FOG)
-            osg::ref_ptr<osg::Fog> fog(new osg::Fog);
-            fog->setStart(10000000);
-            fog->setEnd(10000000);
-            camera->getOrCreateStateSet()->setAttributeAndModes(
-                fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+            SceneUtil::disableFog(
+                *camera->getOrCreateStateSet(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);

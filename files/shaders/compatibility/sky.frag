@@ -6,8 +6,11 @@ uniform int pass;
 uniform sampler2D diffuseMap;
 uniform sampler2D maskMap;      // PASS_MOON
 uniform float opacity;          // PASS_CLOUDS, PASS_ATMOSPHERE_NIGHT
+uniform vec2 screenRes;
 uniform vec4 moonBlend;         // PASS_MOON
 uniform vec4 atmosphereFade;    // PASS_MOON
+
+#include "fog.glsl"
 
 varying vec2 diffuseMapUV;
 varying vec4 passColor;
@@ -31,7 +34,7 @@ void paintClouds(inout vec4 color)
     color.xyz = clamp(color.xyz * gl_FrontMaterial.emission.xyz, 0.0, 1.0);
 
     // ease transition between clear color and atmosphere/clouds
-    color = mix(vec4(gl_Fog.color.xyz, color.a), color, passColor.a);
+    color = mix(vec4(fog.color.xyz, color.a), color, passColor.a);
 }
 
 void paintMoon(inout vec4 color)
