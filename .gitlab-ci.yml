@@ -512,6 +512,18 @@ Ubuntu_Clang_tests_Debug:
     - CI/run_integration_tests.sh
   after_script:
     - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
+    - mkdir -p integration_tests_output
+    - if [[ -f /tmp/openmw-crash.log ]]; then cp -v /tmp/openmw-crash.log integration_tests_output/; fi
+  artifacts:
+    name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
+    when: always
+    expire_in: 1 day
+    paths:
+      - integration_tests_output/*.log
+      - integration_tests_output/config/*.log
+      - integration_tests_output/config/*.cfg
+      - integration_tests_output/config/*.yaml
+      - integration_tests_output/userdata/screenshots/
 
 Ubuntu_Clang_integration_tests:
   extends: .Ubuntu_integration_tests_base
