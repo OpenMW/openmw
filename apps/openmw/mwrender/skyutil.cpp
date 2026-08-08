@@ -168,7 +168,7 @@ namespace MWRender
                 {
                     float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
                     stateset = new osg::StateSet;
-                    stateset->addUniform(new osg::Uniform("sunAlpha", fade * mGlareView),
+                    stateset->addUniform(new osg::Uniform("opacity", fade * mGlareView),
                         osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
                 }
                 else if (visibleRatio < 1.f)
