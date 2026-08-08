@@ -260,11 +260,11 @@ namespace
 
         void apply(osg::Node& node) override { traverse(node); }
 
-        void apply(osg::Group& group) override
+        void apply(osg::MatrixTransform& node) override
         {
-            traverse(group);
+            traverse(node);
 
-            osg::Callback* callback = group.getUpdateCallback();
+            osg::Callback* callback = node.getUpdateCallback();
             if (callback)
             {
                 // We should remove empty transformation nodes and finished callbacks here
@@ -272,14 +272,12 @@ namespace
                 if (vfxCallback)
                 {
                     if (vfxCallback->mFinished)
-                        mToRemove.emplace_back(group.asNode(), group.getParent(0));
+                        mToRemove.emplace_back(node.asNode(), node.getParent(0));
                     else
                         mHasMagicEffects = true;
                 }
             }
         }
-
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
 
         void apply(osg::Geometry&) override {}
     };
@@ -304,11 +302,11 @@ namespace
 
         void apply(osg::Node& node) override { traverse(node); }
 
-        void apply(osg::Group& group) override
+        void apply(osg::MatrixTransform& node) override
         {
-            traverse(group);
+            traverse(node);
 
-            osg::Callback* callback = group.getUpdateCallback();
+            osg::Callback* callback = node.getUpdateCallback();
             if (callback)
             {
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
@@ -316,14 +314,12 @@ namespace
                 {
                     bool toRemove = mEffectId == "" || vfxCallback->mParams.mEffectId == mEffectId;
                     if (toRemove)
-                        mToRemove.emplace_back(group.asNode(), group.getParent(0));
+                        mToRemove.emplace_back(node.asNode(), node.getParent(0));
                     else
                         mHasMagicEffects = true;
                 }
             }
         }
-
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
 
         void apply(osg::Geometry&) override {}
 
@@ -349,9 +345,9 @@ namespace
 
         void apply(osg::Node& node) override { traverse(node); }
 
-        void apply(osg::Group& group) override
+        void apply(osg::MatrixTransform& node) override
         {
-            osg::Callback* callback = group.getUpdateCallback();
+            osg::Callback* callback = node.getUpdateCallback();
             if (callback)
             {
                 MWRender::UpdateVfxCallback* vfxCallback = dynamic_cast<MWRender::UpdateVfxCallback*>(callback);
@@ -363,10 +359,8 @@ namespace
                     }
                 }
             }
-            traverse(group);
+            traverse(node);
         }
-
-        void apply(osg::MatrixTransform& node) override { traverse(node); }
 
         void apply(osg::Geometry&) override {}
 
@@ -1736,7 +1730,7 @@ namespace MWRender
             parentNode = found->second;
         }
 
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans = new SceneUtil::PositionAttitudeTransform;
+        osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform;
 
         osg::Matrix finalTransform;
 
@@ -1762,9 +1756,7 @@ namespace MWRender
             finalTransform *= (*transform);
         }
 
-        trans->setScale(finalTransform.getScale());
-        trans->setAttitude(finalTransform.getRotate());
-        trans->setPosition(finalTransform.getTrans());
+        trans->setMatrix(finalTransform);
 
         parentNode->addChild(trans);
 
