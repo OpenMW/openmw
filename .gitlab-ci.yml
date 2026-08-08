@@ -501,6 +501,7 @@ Ubuntu_Clang_tests_Debug:
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
     EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
+    ENABLE_DEBUG_ARCHIVES: 1
   cache:
     paths:
       - .cache/pip
@@ -530,7 +531,7 @@ Ubuntu_Clang_integration_tests:
   needs:
     - Ubuntu_Clang
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v3
+    key: Ubuntu_Clang_integration_tests.ubuntu_24.04.v4
   variables:
     OPENMW_DEPS: openmw-integration-tests
 
@@ -539,7 +540,7 @@ Ubuntu_GCC_integration_tests_asan:
   needs:
     - Ubuntu_GCC_asan
   cache:
-    key: Ubuntu_GCC_integration_tests_asan.ubuntu_24.04.v2
+    key: Ubuntu_GCC_integration_tests_asan.ubuntu_24.04.v3
   variables:
     OPENMW_DEPS: openmw-integration-tests libasan
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
