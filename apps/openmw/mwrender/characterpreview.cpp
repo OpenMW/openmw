@@ -134,8 +134,6 @@ namespace MWRender
                         newStateSet = new osg::StateSet(*stateset, osg::CopyOp::SHALLOW_COPY);
                         node.setStateSet(newStateSet);
                     }
-                    // Disable noBlendAlphaEnv
-                    newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                     newStateSet->setDefine("FORCE_OPAQUE", "0", osg::StateAttribute::ON);
                 }
             }
@@ -273,7 +271,7 @@ namespace MWRender
         // This might clash with a shadow map, so make sure it doesn't cast shadows
         dummyTexture->setShadowComparison(true);
         dummyTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-        stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
+        stateset->setTextureAttribute(7, dummyTexture, osg::StateAttribute::ON);
 
         osg::ref_ptr<SceneUtil::Light> light = new SceneUtil::Light;
         float diffuseR = Fallback::Map::getFloat("Inventory_DirectionalDiffuseR");

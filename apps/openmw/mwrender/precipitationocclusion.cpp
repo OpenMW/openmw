@@ -30,7 +30,7 @@ namespace
     private:
         void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->setTextureAttributeAndModes(3, mDepthTexture);
+            stateset->setTextureAttribute(3, mDepthTexture);
             stateset->addUniform(new osg::Uniform("orthoDepthMap", 3));
             stateset->addUniform(new osg::Uniform("depthSpaceMatrix", mDepthSpaceMatrix));
         }
@@ -65,7 +65,7 @@ namespace
         {
             stateset->addUniform(new osg::Uniform("projectionMatrix", osg::Matrixf()));
             stateset->setAttributeAndModes(mProgram, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            stateset->setTextureAttributeAndModes(0, mDummyTexture);
+            stateset->setTextureAttribute(0, mDummyTexture);
             stateset->setRenderBinDetails(
                 osg::StateSet::OPAQUE_BIN, "RenderBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
         }
