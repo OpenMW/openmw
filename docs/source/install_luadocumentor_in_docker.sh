@@ -33,7 +33,7 @@ PATH=$PATH:~/luarocks/bin
 echo "Install openmwluadocumentor"
 git clone https://gitlab.com/openmw/openmw-luadocumentor.git
 cd openmw-luadocumentor
-git checkout 220e52608f1f278c31c81ac772ec0a26b42dc551
+git checkout 542006fceec9f0cc2a53cc9c7b06ce185f20237b
 luarocks make luarocks/openmwluadocumentor-0.2.1-1.rockspec
 cd ~
 rm -r openmw-luadocumentor
