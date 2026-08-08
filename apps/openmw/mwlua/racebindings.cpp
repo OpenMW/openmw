@@ -65,14 +65,20 @@ namespace
         const std::array<ESM::Race::SkillBonus, 7>& find() const { return mRace.find().mData.mBonus; }
     };
 
+    enum class HeightWeight
+    {
+        Height,
+        Weight
+    };
+
     struct RaceHeightWeight
     {
         MWLua::MutableRecord<ESM::Race> mRace;
-        bool mHeight;
+        HeightWeight mType;
 
-        static float get(const ESM::Race& race, bool height, bool male)
+        static float get(const ESM::Race& race, HeightWeight type, bool male)
         {
-            if (height)
+            if (type == HeightWeight::Height)
             {
                 if (male)
                     return race.mData.mMaleHeight;
@@ -83,11 +89,11 @@ namespace
             return race.mData.mFemaleWeight;
         }
 
-        static void set(ESM::Race& race, bool height, bool male, float value)
+        static void set(ESM::Race& race, HeightWeight type, bool male, float value)
         {
             if (value < 0.1f || value > 2.f)
                 throw std::runtime_error("value must be in the range 0.1-2.0");
-            if (height)
+            if (type == HeightWeight::Height)
             {
                 if (male)
                     race.mData.mMaleHeight = value;
@@ -103,9 +109,9 @@ namespace
             }
         }
 
-        float get(bool male) const { return get(mRace.find(), mHeight, male); }
+        float get(bool male) const { return get(mRace.find(), mType, male); }
 
-        void set(bool male, float value) { set(mRace.find(), mHeight, male, value); }
+        void set(bool male, float value) { set(mRace.find(), mType, male, value); }
     };
 }
 
@@ -156,19 +162,19 @@ namespace MWLua
             }
         }
 
-        void setHWFromTable(ESM::Race& race, bool height, const sol::object& value)
+        void setHWFromTable(ESM::Race& race, HeightWeight type, const sol::object& value)
         {
             if (value.is<RaceHeightWeight>())
             {
                 const auto& other = value.as<RaceHeightWeight>();
-                RaceHeightWeight::set(race, height, true, other.get(true));
-                RaceHeightWeight::set(race, height, false, other.get(false));
+                RaceHeightWeight::set(race, type, true, other.get(true));
+                RaceHeightWeight::set(race, type, false, other.get(false));
             }
             else
             {
                 auto table = value.as<sol::lua_table>();
-                RaceHeightWeight::set(race, height, true, table.get_or("male", 0.f));
-                RaceHeightWeight::set(race, height, false, table.get_or("female", 0.f));
+                RaceHeightWeight::set(race, type, true, table.get_or("male", 1.f));
+                RaceHeightWeight::set(race, type, false, table.get_or("female", 1.f));
             }
         }
 
@@ -285,19 +291,19 @@ namespace MWLua
             {
                 record["height"] = sol::property(
                     [](const MutableRecord<ESM::Race>& rec) {
-                        return RaceHeightWeight{ rec, true };
+                        return RaceHeightWeight{ rec, HeightWeight::Height };
                     },
                     [](MutableRecord<ESM::Race>& rec, const sol::object& value) {
                         ESM::Race& race = rec.find();
-                        setHWFromTable(race, true, value);
+                        setHWFromTable(race, HeightWeight::Height, value);
                     });
                 record["weight"] = sol::property(
                     [](const MutableRecord<ESM::Race>& rec) {
-                        return RaceHeightWeight{ rec, false };
+                        return RaceHeightWeight{ rec, HeightWeight::Weight };
                     },
                     [](MutableRecord<ESM::Race>& rec, const sol::object& value) {
                         ESM::Race& race = rec.find();
-                        setHWFromTable(race, false, value);
+                        setHWFromTable(race, HeightWeight::Weight, value);
                     });
                 auto hwT = lua.new_usertype<RaceHeightWeight>("ESM3_MutableRaceHeightWeight");
                 hwT["male"] = sol::property(
@@ -550,7 +556,7 @@ namespace MWLua
         if (rec["name"] != sol::nil)
             race.mName = rec["name"];
         if (rec["description"] != sol::nil)
-            race.mName = rec["description"];
+            race.mDescription = rec["description"];
         if (rec["spells"] != sol::nil)
             setSpellsFromTable(race, rec["spells"]);
         if (rec["skills"] != sol::nil)
@@ -558,9 +564,9 @@ namespace MWLua
         setFlagProperty(rec, "isPlayable", race.mData.mFlags, ESM::Race::Playable);
         setFlagProperty(rec, "isBeast", race.mData.mFlags, ESM::Race::Beast);
         if (rec["height"] != sol::nil)
-            setHWFromTable(race, true, rec["height"]);
+            setHWFromTable(race, HeightWeight::Height, rec["height"]);
         if (rec["weight"] != sol::nil)
-            setHWFromTable(race, false, rec["weight"]);
+            setHWFromTable(race, HeightWeight::Weight, rec["weight"]);
         if (rec["attributes"] != sol::nil)
             setAttributesFromTable(race, rec["attributes"]);
         return race;
