@@ -65,7 +65,7 @@ void CSMDoc::Runner::start(bool delayed)
         path = dir.absoluteFilePath(path);
 
         mStartup = new QTemporaryFile(this);
-        static_cast<void>(mStartup->open());
+        mStartup->open();
 
         {
             QTextStream stream(mStartup);
