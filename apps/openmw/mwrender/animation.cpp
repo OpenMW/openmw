@@ -1887,7 +1887,7 @@ namespace MWRender
             mTransparencyUpdater = nullptr;
         }
         if (mExtraLightSource)
-            mExtraLightSource->setActorFade(mAlpha);
+            mExtraLightSource->setActorFade(actorFade);
     }
 
     void Animation::setLightEffect(float effect)
