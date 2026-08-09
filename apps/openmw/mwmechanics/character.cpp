@@ -2881,10 +2881,12 @@ namespace MWMechanics
     {
         if (!mAnimation)
             return;
+
+        float alpha = 1.f;
+
         // We should take actor's invisibility in account
         if (mPtr.getClass().isActor())
         {
-            float alpha = 1.f;
             if (mPtr.getClass()
                     .getCreatureStats(mPtr)
                     .getMagicEffects()
@@ -2905,12 +2907,10 @@ namespace MWMechanics
             {
                 alpha *= std::clamp(1.f - chameleon / 100.f, 0.25f, 0.75f);
             }
-
-            visibility = std::min(visibility, alpha);
         }
 
         // TODO: implement a dithering shader rather than just change object transparency.
-        mAnimation->setAlpha(visibility);
+        mAnimation->setAlpha(visibility, alpha);
     }
 
     std::string_view CharacterController::getMovementBasedAttackType() const

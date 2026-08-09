@@ -329,10 +329,9 @@ namespace NifOsg
     {
     private:
         FloatInterpolator mData;
-        osg::ref_ptr<const SceneUtil::Material> mBaseMaterial;
 
     public:
-        AlphaController(const Nif::NiAlphaController* ctrl, const SceneUtil::Material* baseMaterial);
+        AlphaController(const Nif::NiAlphaController* ctrl);
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 

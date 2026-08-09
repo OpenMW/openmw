@@ -436,8 +436,7 @@ namespace NifOsg
 
     AlphaController::AlphaController() {}
 
-    AlphaController::AlphaController(const Nif::NiAlphaController* ctrl, const SceneUtil::Material* baseMaterial)
-        : mBaseMaterial(baseMaterial)
+    AlphaController::AlphaController(const Nif::NiAlphaController* ctrl)
     {
         if (!ctrl->mInterpolator.empty())
         {
@@ -452,14 +451,12 @@ namespace NifOsg
         : StateSetUpdater(copy, copyop)
         , Controller(copy)
         , mData(copy.mData)
-        , mBaseMaterial(copy.mBaseMaterial)
     {
     }
 
     void AlphaController::setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttribute(static_cast<SceneUtil::Material*>(mBaseMaterial->clone(osg::CopyOp::DEEP_COPY_ALL)),
-            osg::StateAttribute::ON);
+        stateset->addUniform(new osg::Uniform("alpha", 1.f));
     }
 
     void AlphaController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
@@ -467,12 +464,7 @@ namespace NifOsg
         if (hasInput())
         {
             float value = mData.interpKey(getInputValue(nv));
-            SceneUtil::Material* mat
-                = static_cast<SceneUtil::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            osg::Vec4f diffuse = mat->getDiffuse();
-            diffuse.a() = value;
-            mat->setDiffuse(diffuse);
-            mat->updateStateSet(stateset);
+            stateset->getUniform("alpha")->set(value);
         }
     }
 

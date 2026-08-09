@@ -258,6 +258,7 @@ namespace MWRender
         stateset->addUniform(
             new osg::Uniform("screenRes", osg::Vec2f{ static_cast<float>(sizeX), static_cast<float>(sizeY) }));
         stateset->addUniform(new osg::Uniform("alpha", 1.f));
+        stateset->addUniform(new osg::Uniform("actorFade", 1.f));
 
         osg::ref_ptr<osg::Texture2D> dummyTexture = new osg::Texture2D();
         dummyTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);

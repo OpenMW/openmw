@@ -1081,8 +1081,7 @@ namespace NifOsg
         }
 
         void handleMaterialControllers(const Nif::NiProperty* materialProperty,
-            SceneUtil::CompositeStateSetUpdater* composite, int animflags,
-            const SceneUtil::Material* baseMaterial) const
+            SceneUtil::CompositeStateSetUpdater* composite, int animflags, SceneUtil::Material* baseMaterial) const
         {
             for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
@@ -1101,7 +1100,11 @@ namespace NifOsg
                             << " in " << mFilename << ": " << alphactrl->mInterpolator->mRecordName;
                         continue;
                     }
-                    osg::ref_ptr<AlphaController> osgctrl = new AlphaController(alphactrl, baseMaterial);
+                    // AlphaControllers hand off opacity control via dedicated uniforms, not through overriding diffuse
+                    osg::Vec4f opaqueDiffuse = baseMaterial->getDiffuse();
+                    opaqueDiffuse.a() = 1.f;
+                    baseMaterial->setDiffuse(opaqueDiffuse);
+                    osg::ref_ptr<AlphaController> osgctrl = new AlphaController(alphactrl);
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }

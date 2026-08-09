@@ -427,12 +427,17 @@ namespace MWRender
     class TransparencyUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        TransparencyUpdater(const float alpha)
-            : mAlpha(alpha)
+        TransparencyUpdater(float actorFade, float alpha)
+            : mActorFade(actorFade)
+            , mAlpha(alpha)
         {
         }
 
-        void setAlpha(const float alpha) { mAlpha = alpha; }
+        void setAlpha(float actorFade, float alpha)
+        {
+            mActorFade = actorFade;
+            mAlpha = alpha;
+        }
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
@@ -444,14 +449,17 @@ namespace MWRender
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
 
             stateset->addUniform(new osg::Uniform("alpha", mAlpha));
+            stateset->addUniform(new osg::Uniform("actorFade", mActorFade));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
         {
+            stateset->getUniform("actorFade")->set(mActorFade);
             stateset->getUniform("alpha")->set(mAlpha);
         }
 
     private:
+        float mActorFade;
         float mAlpha;
     };
 
@@ -1854,22 +1862,22 @@ namespace MWRender
             return found->second;
     }
 
-    void Animation::setAlpha(float alpha)
+    void Animation::setAlpha(float actorFade, float alpha)
     {
-        if (alpha == mAlpha || !mObjectRoot)
+        if (actorFade * alpha == mAlpha || !mObjectRoot)
             return;
-        mAlpha = alpha;
+        mAlpha = actorFade * alpha;
 
         // TODO: we use it to fade actors away too, but it would be nice to have a dithering shader instead.
-        if (alpha != 1.f)
+        if (mAlpha != 1.f)
         {
             if (mTransparencyUpdater == nullptr)
             {
-                mTransparencyUpdater = new TransparencyUpdater(alpha);
+                mTransparencyUpdater = new TransparencyUpdater(actorFade, alpha);
                 mObjectRoot->addCullCallback(mTransparencyUpdater);
             }
             else
-                mTransparencyUpdater->setAlpha(alpha);
+                mTransparencyUpdater->setAlpha(actorFade, alpha);
         }
         else
         {
@@ -1877,7 +1885,7 @@ namespace MWRender
             mTransparencyUpdater = nullptr;
         }
         if (mExtraLightSource)
-            mExtraLightSource->setActorFade(alpha);
+            mExtraLightSource->setActorFade(mAlpha);
     }
 
     void Animation::setLightEffect(float effect)

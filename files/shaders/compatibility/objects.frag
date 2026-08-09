@@ -65,6 +65,7 @@ uniform float far;
 uniform float alphaRef;
 uniform float distortionStrength;
 uniform float alpha;
+uniform float actorFade;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
 
@@ -153,7 +154,7 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #endif
 
     vec4 diffuseColor = getDiffuseColor(material, passColor);
-    gl_FragData[0].a *= diffuseColor.a;
+    gl_FragData[0].a *= diffuseColor.a * alpha * actorFade;
 
 #if @darkMap
     gl_FragData[0] *= texture2D(darkMap, darkMapUV);
@@ -266,9 +267,6 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
     gl_FragData[0].a = 1.0;
-#else
-    // Apply overridden fade value, usually from actor fade
-    gl_FragData[0].a *= alpha;
 #endif
 
 #if !defined(FORCE_OPAQUE) && !@disableNormals

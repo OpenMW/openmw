@@ -355,6 +355,7 @@ namespace MWRender
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("alpha", 1.f));
+        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("actorFade", 1.f));
 
         resourceSystem->getSceneManager()->setUpNormalsRTForStateSet(sceneRoot->getOrCreateStateSet(), true);
 
