@@ -29,6 +29,16 @@ namespace MWLua
 
         void finishUpdate(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
+        // Starts incremental garbage collection on the Lua thread. Runs in small
+        // steps until finishGc() is called or a full collection cycle completes.
+        // Without a Lua thread, does the configured amount of GC synchronously
+        // instead.
+        void gc();
+
+        // Stops garbage collection, waiting only for the step in flight. Must be
+        // called before the main thread touches the Lua state again.
+        void finishGc();
+
         void join();
 
     private:
@@ -47,6 +57,8 @@ namespace MWLua
         std::mutex mMutex;
         std::condition_variable mCV;
         std::optional<UpdateRequest> mUpdateRequest;
+        bool mGcRequest = false;
+        bool mGcInProgress = false;
         bool mJoinRequest = false;
         std::optional<std::thread> mThread;
     };
