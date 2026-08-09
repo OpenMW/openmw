@@ -241,6 +241,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightSource> mExtraLightSource;
 
         float mAlpha;
+        float mActorFade;
 
         mutable std::map<std::string, float, std::less<>> mAnimVelocities;
 

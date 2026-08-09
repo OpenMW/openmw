@@ -554,6 +554,7 @@ namespace MWRender
         , mBodyPitchRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
+        , mActorFade(1.f)
         , mPlayScriptedOnly(false)
         , mRequiresBoneMap(false)
     {
@@ -1692,7 +1693,7 @@ namespace MWRender
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
         mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_Lighting, exterior);
-        mExtraLightSource->setActorFade(mAlpha);
+        mExtraLightSource->setActorFade(mActorFade);
     }
 
     void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
@@ -1866,12 +1867,13 @@ namespace MWRender
 
     void Animation::setAlpha(float actorFade, float alpha)
     {
-        if (actorFade * alpha == mAlpha || !mObjectRoot)
+        if ((alpha == mAlpha && actorFade == mActorFade) || !mObjectRoot)
             return;
-        mAlpha = actorFade * alpha;
+        mAlpha = alpha;
+        mActorFade = actorFade;
 
         // TODO: we use it to fade actors away too, but it would be nice to have a dithering shader instead.
-        if (mAlpha != 1.f)
+        if (mAlpha != 1.f && mActorFade != 1.f)
         {
             if (mTransparencyUpdater == nullptr)
             {
