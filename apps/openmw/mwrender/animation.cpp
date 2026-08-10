@@ -443,7 +443,7 @@ namespace MWRender
         void setDefaults(osg::StateSet* stateset) override
         {
             osg::BlendFunc* blendfunc(new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON);
 
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
