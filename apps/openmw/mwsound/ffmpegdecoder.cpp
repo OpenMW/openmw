@@ -227,6 +227,28 @@ namespace MWSound
         return dec;
     }
 
+    namespace
+    {
+        AVStream** findAudioStream(AVFormatContext& ctx)
+        {
+            for (unsigned j = 0; j < ctx.nb_streams; j++)
+                if (ctx.streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+                    return &ctx.streams[j];
+            return nullptr;
+        }
+
+        bool hasCompleteAudioParameters(const AVStream& stream)
+        {
+            const AVCodecParameters& par = *stream.codecpar;
+#if OPENMW_FFMPEG_5_OR_GREATER
+            const int channels = par.ch_layout.nb_channels;
+#else
+            const int channels = par.channels;
+#endif
+            return par.codec_id != AV_CODEC_ID_NONE && par.sample_rate > 0 && channels > 0;
+        }
+    }
+
     void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
@@ -248,17 +270,18 @@ namespace MWSound
 
         AVFormatContextPtr formatCtxPtr(std::exchange(formatCtx, nullptr));
 
-        if (avformat_find_stream_info(formatCtxPtr.get(), nullptr) < 0)
-            throw std::runtime_error("Failed to find stream info");
+        AVStream** stream = findAudioStream(*formatCtxPtr);
 
-        AVStream** stream = nullptr;
-        for (size_t j = 0; j < formatCtxPtr->nb_streams; j++)
+        // The demuxers for Morrowind's formats fill the codec parameters from the
+        // file header during avformat_open_input, so skip avformat_find_stream_info:
+        // it scans packets across the whole file for duration and bitrate estimates
+        // that nothing here reads, costing several milliseconds per wav on the
+        // thread that starts the sound (#4880).
+        if (stream == nullptr || !hasCompleteAudioParameters(**stream))
         {
-            if (formatCtxPtr->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
-            {
-                stream = &formatCtxPtr->streams[j];
-                break;
-            }
+            if (avformat_find_stream_info(formatCtxPtr.get(), nullptr) < 0)
+                throw std::runtime_error("Failed to find stream info");
+            stream = findAudioStream(*formatCtxPtr);
         }
 
         if (stream == nullptr)
