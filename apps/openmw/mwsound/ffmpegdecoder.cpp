@@ -15,6 +15,8 @@
 #include <libavutil/channel_layout.h>
 #endif
 
+#include "headcache.hpp"
+
 namespace MWSound
 {
     void AVIOContextDeleter::operator()(AVIOContext* ptr) const
@@ -319,7 +321,19 @@ namespace MWSound
     void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
-        mDataStream = mResourceMgr->get(fname);
+        bool cached = false;
+        if (mHeadCache != nullptr)
+        {
+            if (std::shared_ptr<const HeadBuffer> buffer = mHeadCache->lookup(fname))
+            {
+                mDataStream = makeHeadStream(std::move(buffer), *mResourceMgr);
+                cached = true;
+            }
+            else
+                mDataStream = makeRecordingStream(mResourceMgr->get(fname));
+        }
+        else
+            mDataStream = mResourceMgr->get(fname);
 
         AVIOContextPtr ioCtx;
         AVFormatContextPtr formatCtxPtr;
@@ -346,6 +360,10 @@ namespace MWSound
 
         if (!opened && !openContext(fname.value().data(), nullptr, false, ioCtx, formatCtxPtr, stream))
             throw std::runtime_error("Failed to open input");
+
+        // Opening is done, so the bytes it read are exactly the prefix the next open of this file needs.
+        if (mHeadCache != nullptr && !cached)
+            mHeadCache->insert(fname, *mDataStream);
 
         const AVCodec* codec = avcodec_find_decoder((*stream)->codecpar->codec_id);
         if (codec == nullptr)
@@ -584,7 +602,7 @@ namespace MWSound
         return static_cast<std::size_t>(mNextPts * mCodecCtx->sample_rate) - delay;
     }
 
-    FFmpegDecoder::FFmpegDecoder(const VFS::Manager* vfs)
+    FFmpegDecoder::FFmpegDecoder(const VFS::Manager* vfs, HeadCache* headCache)
         : SoundDecoder(vfs)
         , mStream(nullptr)
         , mFrameSize(0)
@@ -600,6 +618,7 @@ namespace MWSound
         , mDataBuf(nullptr)
         , mFrameData(nullptr)
         , mDataBufLen(0)
+        , mHeadCache(headCache)
     {
         memset(&mPacket, 0, sizeof(mPacket));
 

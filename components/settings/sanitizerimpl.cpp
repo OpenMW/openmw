@@ -188,6 +188,11 @@ namespace Settings
         return std::make_unique<Clamp<int>>(min, max);
     }
 
+    std::unique_ptr<Sanitizer<std::size_t>> makeClampSanitizerSize(std::size_t min, std::size_t max)
+    {
+        return std::make_unique<Clamp<std::size_t>>(min, max);
+    }
+
     std::unique_ptr<Sanitizer<float>> makeClampStrictMaxSanitizerFloat(float min, float max)
     {
         return std::make_unique<ClampStrictMax<float>>(min, max);

@@ -42,6 +42,7 @@ namespace MWSound
     class SoundBase;
     class Sound;
     class Stream;
+    class HeadCache;
 
     using SoundPtr = Misc::ObjectPtr<Sound>;
     using StreamPtr = Misc::ObjectPtr<Stream>;
@@ -49,6 +50,8 @@ namespace MWSound
     class SoundManager : public MWBase::SoundManager
     {
         const VFS::Manager* mVFS;
+
+        std::unique_ptr<HeadCache> mHeadCache;
 
         std::unique_ptr<SoundOutput> mOutput;
 
@@ -153,6 +156,7 @@ namespace MWSound
 
     protected:
         DecoderPtr getDecoder();
+        DecoderPtr getStreamDecoder();
         friend class OpenALOutput;
 
         void stopSound(SoundBuffer* sfx, const MWWorld::ConstPtr& ptr);

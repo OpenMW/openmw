@@ -35,6 +35,8 @@ extern "C"
 
 namespace MWSound
 {
+    class HeadCache;
+
     struct AVIOContextDeleter
     {
         void operator()(AVIOContext* ptr) const;
@@ -124,11 +126,14 @@ namespace MWSound
         FFmpegDecoder(const FFmpegDecoder& rhs);
 
     public:
-        explicit FFmpegDecoder(const VFS::Manager* vfs);
+        explicit FFmpegDecoder(const VFS::Manager* vfs, HeadCache* headCache);
 
         virtual ~FFmpegDecoder();
 
         friend class SoundManager;
+
+    private:
+        HeadCache* mHeadCache;
     };
 }
 

@@ -27,6 +27,7 @@
 
 #include "constants.hpp"
 #include "ffmpegdecoder.hpp"
+#include "headcache.hpp"
 #include "openaloutput.hpp"
 #include "sound.hpp"
 #include "soundbuffer.hpp"
@@ -101,6 +102,14 @@ namespace MWSound
 
             return volume;
         }
+
+        std::unique_ptr<HeadCache> makeHeadCache(const VFS::Manager& vfs)
+        {
+            const std::size_t sizeMb = Settings::sound().mHeadCacheSize;
+            if (sizeMb == 0)
+                return nullptr;
+            return std::make_unique<HeadCache>(vfs, sizeMb * 1024 * 1024);
+        }
     }
 
     // For combining PlayMode and Type flags
@@ -111,6 +120,7 @@ namespace MWSound
 
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
+        , mHeadCache(makeHeadCache(*vfs))
         , mOutput(std::make_unique<OpenALOutput>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*mOutput)
@@ -170,14 +180,21 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return std::make_shared<FFmpegDecoder>(mVFS);
+        return std::make_shared<FFmpegDecoder>(mVFS, nullptr);
+    }
+
+    // Only streamed sounds take the head cache: a buffered sound is decoded whole at play time and
+    // stays decoded in SoundBufferPool, so a cached head would only be read after the pool unloads it.
+    DecoderPtr SoundManager::getStreamDecoder()
+    {
+        return std::make_shared<FFmpegDecoder>(mVFS, mHeadCache.get());
     }
 
     DecoderPtr SoundManager::loadVoice(VFS::Path::NormalizedView voicefile)
     {
         try
         {
-            DecoderPtr decoder = getDecoder();
+            DecoderPtr decoder = getStreamDecoder();
             decoder->open(Misc::ResourceHelpers::correctSoundPath(voicefile, *decoder->mResourceMgr));
             return decoder;
         }
@@ -264,7 +281,7 @@ namespace MWSound
 
         Log(Debug::Info) << "Playing \"" << filename << "\"";
 
-        DecoderPtr decoder = getDecoder();
+        DecoderPtr decoder = getStreamDecoder();
         try
         {
             decoder->open(filename);
