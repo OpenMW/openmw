@@ -115,18 +115,10 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
-        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-        {
-            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
+        std::unique_ptr<MWWorld::Action> werewolfAction = getWerewolfRefusalAction(actor);
+        if (werewolfAction)
+            return werewolfAction;
 
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
-            if (sound)
-                action->setSound(sound->mId);
-
-            return action;
-        }
         return std::make_unique<MWWorld::NullAction>();
     }
 

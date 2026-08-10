@@ -825,18 +825,9 @@ namespace MWClass
             return std::make_unique<MWWorld::ActionTalk>(actor);
 
         // Werewolfs can't activate NPCs
-        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-        {
-            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfNPC", prng);
-
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
-            if (sound)
-                action->setSound(sound->mId);
-
-            return action;
-        }
+        std::unique_ptr<MWWorld::Action> werewolfAction = getWerewolfRefusalAction(actor);
+        if (werewolfAction)
+            return werewolfAction;
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         const MWMechanics::AiSequence& aiSequence = stats.getAiSequence();

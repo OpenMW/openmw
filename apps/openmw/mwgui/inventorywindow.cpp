@@ -834,6 +834,13 @@ namespace MWGui
         if (playerStats.isParalyzed() || playerStats.getKnockedDown() || playerStats.isDead())
             return;
 
+        std::unique_ptr<MWWorld::Action> werewolfAction = object.getClass().getWerewolfRefusalAction(player);
+        if (werewolfAction)
+        {
+            werewolfAction->execute(player);
+            return;
+        }
+
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
         // add to player inventory
