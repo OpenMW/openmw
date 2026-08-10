@@ -217,7 +217,7 @@
 -- v1 * x         -- multiplication by a number
 -- v1 / x         -- division by a number
 -- v1.zyz, v1.yx  -- swizzle with standard fields
--- v1.w1y, v1.z0z -- swizzle with 0/1 constant
+-- v1.x1y, v1.z0z -- swizzle with 0/1 constant
 -- v1['0xy']      -- swizzle with 0/1 constant starting with 0 or 1
 
 ---
