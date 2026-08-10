@@ -1873,7 +1873,7 @@ namespace MWRender
         mActorFade = actorFade;
 
         // TODO: we use it to fade actors away too, but it would be nice to have a dithering shader instead.
-        if (mAlpha != 1.f && mActorFade != 1.f)
+        if (mAlpha != 1.f || mActorFade != 1.f)
         {
             if (mTransparencyUpdater == nullptr)
             {
