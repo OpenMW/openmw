@@ -79,6 +79,11 @@ namespace MWSound
         // init has succeeded on it. Throws when handed any other stream.
         void insert(VFS::Path::NormalizedView name, const std::istream& stream);
 
+        // Checks without changing LRU order.
+        bool contains(VFS::Path::NormalizedView name) const;
+
+        bool full() const;
+
     private:
         using LruIt = std::list<std::shared_ptr<const HeadBuffer>>::iterator;
 
@@ -87,7 +92,7 @@ namespace MWSound
 
         const VFS::Manager& mVfs;
         const std::size_t mMaxBytes;
-        std::mutex mMutex;
+        mutable std::mutex mMutex;
         // The buffer lives in the list so a lookup reaches it through the map
         // once; the map value is the list iterator that keeps it there.
         std::list<std::shared_ptr<const HeadBuffer>> mLru;

@@ -226,6 +226,18 @@ namespace MWSound
         insert(name, std::move(head), std::move(suffix), suffixStart, fileSize);
     }
 
+    bool HeadCache::contains(VFS::Path::NormalizedView name) const
+    {
+        const std::lock_guard lock(mMutex);
+        return mEntries.contains(name);
+    }
+
+    bool HeadCache::full() const
+    {
+        const std::lock_guard lock(mMutex);
+        return mMaxBytes - mBytes < static_cast<std::size_t>(2 * sMaxHeadBytes);
+    }
+
     void HeadCache::insert(VFS::Path::NormalizedView name, std::vector<char>&& head, std::vector<char>&& suffix,
         std::streamoff suffixStart, std::streamoff fileSize)
     {

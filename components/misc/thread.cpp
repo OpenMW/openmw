@@ -32,7 +32,9 @@ namespace Misc
 {
     void setCurrentThreadIdlePriority()
     {
-        if (SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST))
+        // Background mode also lowers I/O priority.
+        if (SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_LOWEST)
+            && SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN))
             Log(Debug::Verbose) << "Using idle priority for thread=" << std::this_thread::get_id();
         else
             Log(Debug::Warning) << "Failed to set idle priority for thread=" << std::this_thread::get_id() << ": "
@@ -57,6 +59,24 @@ namespace Misc
         else
             Log(Debug::Warning) << "Failed to set idle priority for thread=" << std::this_thread::get_id() << ": "
                                 << std::generic_category().message(errno);
+    }
+}
+
+#elif defined(__APPLE__)
+
+#include <pthread/qos.h>
+
+namespace Misc
+{
+    void setCurrentThreadIdlePriority()
+    {
+        // Background QoS also throttles I/O.
+        const int result = pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0);
+        if (result == 0)
+            Log(Debug::Verbose) << "Using idle priority for thread=" << std::this_thread::get_id();
+        else
+            Log(Debug::Warning) << "Failed to set idle priority for thread=" << std::this_thread::get_id() << ": "
+                                << std::generic_category().message(result);
     }
 }
 

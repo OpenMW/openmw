@@ -87,12 +87,23 @@ Sound Settings
    :title: head cache size
    :type: int
    :range: 0 to 4095
-   :default: 32
+   :default: 96
 
    This setting determines the size of the sound head cache in megabytes.
-   The cache keeps the beginning of recently played music and voice files in
-   memory so that playing them again does not wait for storage. Set to 0 to
-   disable.
+   The cache keeps the beginning of recently played sounds in memory so that
+   playing them does not wait for storage. Set to 0 to disable.
+
+
+.. omw-setting::
+   :title: warm sounds
+   :type: boolean
+   :range: true, false
+   :default: true
+
+   Fill the head cache in the background for music and spontaneous voice
+   lines. Trades background disk reads for stall-free first starts; disable
+   to minimise background disk activity. Has no effect when the head cache is
+   disabled.
 
 
 .. omw-setting::
