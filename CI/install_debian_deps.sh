@@ -72,14 +72,19 @@ declare -rA GROUPED_DEPS=(
     libboost-program-options1.83.0
     libboost-system1.83.0
     libbullet3.24
+    libbullet3.24t64-dbgsym
+    libc6-dbg
     libcollada-dom2.5-dp0
     libicu74
     libjpeg8
     libluajit-5.1-2
     liblz4-1
     libmyguiengine3debian1v5
+    libmyguiengine3debian1v5-dbgsym
     libopenal1
     libopenscenegraph161
+    libopenscenegraph161-dbgsym
+    libopenthreads21-dbgsym
     libpng16-16
     libqt6opengl6
     librecast1
@@ -145,6 +150,28 @@ done
 while true; do
   add-apt-repository -y ppa:openmw/staging && break
 done
+
+if [[ "${ENABLE_DEBUG_ARCHIVES:-}" ]]; then
+  apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends ubuntu-dbgsym-keyring >/dev/null
+
+  codename="$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+
+  cat > /etc/apt/sources.list.d/ddebs.list <<EOF
+deb http://ddebs.ubuntu.com ${codename} main universe
+deb http://ddebs.ubuntu.com ${codename}-updates main universe
+EOF
+
+  for file in \
+      "/etc/apt/sources.list.d/openmw-ubuntu-openmw-${codename}.sources" \
+      "/etc/apt/sources.list.d/openmw-ubuntu-openmw-daily-${codename}.sources" \
+      "/etc/apt/sources.list.d/openmw-ubuntu-staging-${codename}.sources"; do
+    sed -i 's,^Components: main$,Components: main main/debug,' "${file}"
+  done
+
+  while true; do
+    apt-get update -yqq && break
+  done
+fi
 
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
 apt list --installed
