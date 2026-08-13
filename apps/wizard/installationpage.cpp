@@ -250,8 +250,7 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
 {
     installProgressLabel->setText(tr("Installation failed!"));
 
-    logTextEdit->appendHtml(
-        tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text.toHtmlEscaped()));
+    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text.toHtmlEscaped()));
     logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details.toHtmlEscaped()));
 
     Log(Debug::Error) << "Error: " << qUtf8Printable(text);
