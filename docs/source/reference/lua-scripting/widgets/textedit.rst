@@ -34,6 +34,9 @@ Properties
   * - visible
     - boolean (true)
     - Defines if the widget is visible
+  * - ignorePointerEvents
+    - boolean (false)
+    - Defines whether the widget participates in pointer events or pointer hit detection.
   * - propagateEvents
     - boolean (true)
     - Allows base widget events to propagate to the widget's parent.
