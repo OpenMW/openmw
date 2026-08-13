@@ -476,7 +476,7 @@ void Launcher::SettingsPage::populateLoadedConfigs()
 
         QTreeWidgetItem* configItem = new QTreeWidgetItem(configsList);
         configItem->setText(0, configPath);
-        configItem->setToolTip(0, toolTipText);
+        configItem->setToolTip(0, Qt::convertFromPlainText(toolTipText));
         configItem->setExpanded(true);
 
         QUrl directoryUrl = QUrl::fromLocalFile(configPath);
