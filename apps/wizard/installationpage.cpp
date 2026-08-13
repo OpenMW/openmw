@@ -16,6 +16,7 @@ Wizard::InstallationPage::InstallationPage(QWidget* parent, Config::GameSettings
     mWizard = qobject_cast<MainWizard*>(parent);
 
     setupUi(this);
+    installProgressLabel->setTextFormat(Qt::PlainText);
 
     mFinished = false;
 
@@ -170,7 +171,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
             name = QStringLiteral("Bloodmoon");
             break;
     }
-    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name));
+    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name.toHtmlEscaped()));
     Log(Debug::Info) << "Attempting to install component " << qUtf8Printable(name) << ".";
 
     QMessageBox msgBox(this);
@@ -179,7 +180,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     msgBox.setText(
         QObject::tr("Select a valid %1 installation media.<br><b>Hint</b>: make sure that it contains at least one "
                     "<b>.cab</b> file.")
-            .arg(name));
+            .arg(name.toHtmlEscaped()));
     msgBox.exec();
 
     const QString path
@@ -249,8 +250,9 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
 {
     installProgressLabel->setText(tr("Installation failed!"));
 
-    logTextEdit->appendHtml(tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text));
-    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details));
+    logTextEdit->appendHtml(
+        tr("<p><br/><span style=\"color:red;\"><b>Error: %1</b></p>").arg(text.toHtmlEscaped()));
+    logTextEdit->appendHtml(tr("<p><span style=\"color:red;\"><b>%1</b></p>").arg(details.toHtmlEscaped()));
 
     Log(Debug::Error) << "Error: " << qUtf8Printable(text);
     Log(Debug::Error) << qUtf8Printable(details);
@@ -264,7 +266,7 @@ void Wizard::InstallationPage::installationError(const QString& text, const QStr
         tr("<html><head/><body><p><b>The Wizard has encountered an error</b></p>"
            "<p>The error reported was:</p><p>%1</p>"
            "<p>Press &quot;Show Details...&quot; for more information.</p></body></html>")
-            .arg(text));
+            .arg(text.toHtmlEscaped()));
 
     msgBox.setDetailedText(details);
     msgBox.exec();

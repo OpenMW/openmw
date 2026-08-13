@@ -123,6 +123,7 @@ QWidget* CSVWorld::NotEditableSubDelegate::createEditor(
     QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QLabel* label = new QLabel(parent);
+    label->setTextFormat(Qt::PlainText);
     label->setTextInteractionFlags(Qt::TextSelectableByMouse);
     return label;
 }

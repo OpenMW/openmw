@@ -105,6 +105,7 @@ CSVWorld::TableBottomBox::TableBottomBox(const CreatorFactoryBase& creatorFactor
     connect(mLayout, &QStackedLayout::currentChanged, this, &TableBottomBox::currentWidgetChanged);
 
     mStatus = new QLabel;
+    mStatus->setTextFormat(Qt::PlainText);
 
     mStatusBar = new QStatusBar(this);
 

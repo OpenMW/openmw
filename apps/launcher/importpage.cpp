@@ -103,7 +103,7 @@ void Launcher::ImportPage::on_importerButton_clicked()
                 tr("<html><head/><body><p><b>Could not open or create %1 for writing </b></p>"
                    "<p>Please make sure you have the right permissions "
                    "and try again.</p></body></html>")
-                    .arg(file.fileName()));
+                    .arg(file.fileName().toHtmlEscaped()));
             msgBox.exec();
             return;
         }

@@ -459,7 +459,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             auto emptyIcon = QIcon(pixmap);
             item->setIcon(emptyIcon);
         }
-        item->setToolTip(tooltip.join('\n'));
+        item->setToolTip(Qt::convertFromPlainText(tooltip.join('\n')));
     }
     progressBar.setValue(progressBar.maximum());
     mSelector->sortFiles();
@@ -1007,7 +1007,7 @@ bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
     msgBox.setWindowTitle(tr("Delete Content List"));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text));
+    msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text.toHtmlEscaped()));
 
     QAbstractButton* deleteButton = msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
 
