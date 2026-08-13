@@ -26,6 +26,11 @@ namespace LuaUtil
     public:
         ScriptsContainerWeakPtr(const ScriptsContainerWeakPtr&) = default;
         ScriptsContainerWeakPtr(ScriptsContainerWeakPtr&&) = default;
+        // Declaring the constructors above deletes these, which would keep the type out of
+        // a vector.
+        ScriptsContainerWeakPtr& operator=(const ScriptsContainerWeakPtr&) = default;
+        ScriptsContainerWeakPtr& operator=(ScriptsContainerWeakPtr&&) = default;
+
         explicit ScriptsContainerWeakPtr(ScriptsContainerLifetime ptr)
             : mWeakPtr(std::move(ptr))
         {
@@ -39,16 +44,6 @@ namespace LuaUtil
             return nullptr;
         }
     };
-
-    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, const ScriptsContainerWeakPtr& rhs)
-    {
-        return *lhs <=> *rhs;
-    }
-
-    inline auto operator<=>(const ScriptsContainerWeakPtr& lhs, ScriptsContainer* rhs)
-    {
-        return *lhs <=> rhs;
-    }
 
     // ScriptsContainer is a base class for all scripts containers (LocalScripts,
     // GlobalScripts, PlayerScripts, etc). Each script runs in a separate sandbox.

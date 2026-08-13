@@ -223,7 +223,9 @@ namespace MWLua
         LoadScripts mLoadScripts{ &mLua };
         MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
-        std::set<LuaUtil::ScriptsContainerWeakPtr, std::less<>> mActiveLocalScripts;
+        // Walked four times a frame, inserted into rarely, so a sorted vector beats a set here.
+        // Sorted by container address; a duplicate would dispatch its handlers twice.
+        std::vector<LuaUtil::ScriptsContainerWeakPtr> mActiveLocalScripts;
         std::vector<LuaUtil::ScriptsContainerWeakPtr> mQueuedAutoStartedScripts;
         ObjectLists mObjectLists;
 
