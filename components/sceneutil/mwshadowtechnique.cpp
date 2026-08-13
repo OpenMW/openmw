@@ -900,12 +900,13 @@ void MWShadowTechnique::setMaximumShadowMapDistance(float distance)
     if (_shadowedScene && _shadowedScene->getShadowSettings())
         _shadowedScene->getShadowSettings()->setMaximumShadowMapDistance(distance);
 
+    osg::ref_ptr<osg::Uniform> newDistance = new osg::Uniform("maximumShadowMapDistance", distance);
     for (auto& list : _uniforms)
     {
         for (auto& u : list)
         {
             if (u->getName() == "maximumShadowMapDistance")
-                u->set(distance);
+                u = newDistance;
         }
     }
 }
@@ -914,12 +915,13 @@ void SceneUtil::MWShadowTechnique::setShadowFadeStart(float shadowFadeStart)
 {
     _shadowFadeStart = shadowFadeStart;
 
+    osg::ref_ptr<osg::Uniform> newFadeStart = new osg::Uniform("shadowFadeStart", shadowFadeStart);
     for (auto& list : _uniforms)
     {
         for (auto& u : list)
         {
             if (u->getName() == "shadowFadeStart")
-                u->set(shadowFadeStart);
+                u = newFadeStart;
         }
     }
 }

@@ -1429,8 +1429,6 @@ namespace MWRender
             }
             else if (it->first == "Shadows")
             {
-                mViewer->stopThreading();
-
                 mShadowManager->setupShadowSettings(
                     Settings::shadows(), mResourceSystem->getSceneManager()->getShaderManager());
                 mShadowManager->setIndoorShadowCastingMask(getIndoorShadowCastingMask());
@@ -1441,15 +1439,23 @@ namespace MWRender
                     mShadowManager->enableIndoorMode(Settings::shadows());
 
                 auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-
                 Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
-
+                bool definesChanged = false;
                 for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
-                    defines[itr->first] = itr->second;
+                {
+                    if (defines[itr->first] != itr->second)
+                    {
+                        defines[itr->first] = itr->second;
+                        definesChanged = true;
+                    }
+                }
 
-                mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
-
-                mViewer->startThreading();
+                if (definesChanged)
+                {
+                    mViewer->stopThreading();
+                    mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
+                    mViewer->startThreading();
+                }
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {
