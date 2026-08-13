@@ -26,7 +26,6 @@ namespace LuaUtil
     public:
         ScriptsContainerWeakPtr(const ScriptsContainerWeakPtr&) = default;
         ScriptsContainerWeakPtr(ScriptsContainerWeakPtr&&) = default;
-
         explicit ScriptsContainerWeakPtr(ScriptsContainerLifetime ptr)
             : mWeakPtr(std::move(ptr))
         {
@@ -187,7 +186,8 @@ namespace LuaUtil
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
         // Informs that new frame is started. Needed to track Lua instruction count per frame.
-        void statsNextFrame();
+        // Only bumps a counter; the averages decay lazily when next written or read.
+        void statsNextFrame() { ++mStatsFrame; }
 
         struct ScriptStats
         {
@@ -281,6 +281,7 @@ namespace LuaUtil
             std::map<int64_t, sol::main_protected_function> mTemporaryCallbacks;
             VFS::Path::Normalized mPath;
             ScriptStats mStats;
+            int64_t mStatsFrame = 0; // frame mStats was last brought up to date
 
             ~Script();
         };
@@ -355,6 +356,9 @@ namespace LuaUtil
         int64_t mTemporaryCallbackCounter = 0;
 
         std::map<int, int64_t> mRemovedScriptsMemoryUsage;
+        int64_t mStatsFrame = 0;
+
+        float decayedInstructionCount(const Script& script) const;
         ScriptsContainerLifetime mThis; // used by LuaState to track ownership of memory allocations
 
         ScriptTracker* mTracker;
