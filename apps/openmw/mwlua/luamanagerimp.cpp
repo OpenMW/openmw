@@ -412,6 +412,8 @@ namespace MWLua
         mInputActions.clear();
         mInputTriggers.clear();
         mQueuedAutoStartedScripts.clear();
+        // Before the collections below, so the dropped tables are what they collect.
+        clearObjectCaches(mLua.unsafeState());
         for (int i = 0; i < 5; ++i)
             lua_gc(mLua.unsafeState(), LUA_GCCOLLECT, 0);
     }

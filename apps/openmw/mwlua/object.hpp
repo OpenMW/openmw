@@ -83,6 +83,54 @@ namespace MWLua
     {
         Obj mObj;
     };
+
+    // Repeated pushes of the same object return one userdata instead of allocating per access.
+    int pushCachedObject(lua_State* state, const LObject& value);
+    int pushCachedObject(lua_State* state, const GObject& value);
+    int pushCachedObject(lua_State* state, const LCell& value);
+    int pushCachedObject(lua_State* state, const GCell& value);
+
+    // Must be called when the world is torn down: the Lua state survives it.
+    void clearObjectCaches(lua_State* state);
+}
+
+namespace sol
+{
+    namespace stack
+    {
+        template <>
+        struct unqualified_pusher<MWLua::LObject>
+        {
+            static int push(lua_State* state, const MWLua::LObject& value)
+            {
+                return MWLua::pushCachedObject(state, value);
+            }
+        };
+        template <>
+        struct unqualified_pusher<MWLua::GObject>
+        {
+            static int push(lua_State* state, const MWLua::GObject& value)
+            {
+                return MWLua::pushCachedObject(state, value);
+            }
+        };
+        template <>
+        struct unqualified_pusher<MWLua::LCell>
+        {
+            static int push(lua_State* state, const MWLua::LCell& value)
+            {
+                return MWLua::pushCachedObject(state, value);
+            }
+        };
+        template <>
+        struct unqualified_pusher<MWLua::GCell>
+        {
+            static int push(lua_State* state, const MWLua::GCell& value)
+            {
+                return MWLua::pushCachedObject(state, value);
+            }
+        };
+    }
 }
 
 #endif // MWLUA_OBJECT_H
