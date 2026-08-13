@@ -48,8 +48,8 @@ return {
         -- lua-spawned projectiles are introduced, hitResult.hit may be false to indicate to scripts that a lua-spawned
         -- projectile was despawned, and should therefore be checked anyway.
         -- @function [parent=#Projectiles] addOnProjectileHitHandler
-        -- @param #function handler The handler.
         -- @param #string type The type of projectile to handle (see @{#ProjectileInfo.type})
+        -- @param #function handler The handler.
         addOnProjectileHitHandler = function(type, handler)
             assert(type)
             onProjectileHitHandlers[type] = onProjectileHitHandlers[type] or {}

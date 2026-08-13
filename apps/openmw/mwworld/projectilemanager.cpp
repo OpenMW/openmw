@@ -41,6 +41,7 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -59,7 +60,6 @@
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/projectile.hpp"
-#include "apps/openmw/mwbase/luamanager.hpp"
 
 namespace
 {

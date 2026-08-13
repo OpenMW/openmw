@@ -9,7 +9,7 @@ local Ingredient = types.Ingredient
 local Lockable = types.Lockable
 local Potion = types.Potion
 local Weapon = types.Weapon
-local l10n = core.l10n('OMWEngine')
+local l10n = core.l10n('Mechanics')
 
 local common = {}
 
@@ -177,9 +177,8 @@ function common.inflict(spellCast, target, range)
     end
 
     local record, type = common.getMagicRecord(spellCast.id)
-
     local effectsWithParams = common.filterByRange(record.effects, range)
-    if #effectsWithParams == 0 or not common.targetIsValid(target) then
+    if #effectsWithParams == 0 then
         return
     end
     if type == Ingredient then
