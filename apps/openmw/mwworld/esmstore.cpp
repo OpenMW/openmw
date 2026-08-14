@@ -783,7 +783,7 @@ namespace MWWorld
             throw std::runtime_error("Invalid player record (race or class unavailable");
     }
 
-    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const ESM::RefId& id) const
+    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(ESM::RefId id, bool autoCalc) const
     {
         auto result = mSpellListCache.find(id);
         std::shared_ptr<MWMechanics::SpellList> ptr;
@@ -792,7 +792,7 @@ namespace MWWorld
         if (!ptr)
         {
             int type = find(id);
-            ptr = std::make_shared<MWMechanics::SpellList>(id, type);
+            ptr = std::make_shared<MWMechanics::SpellList>(id, type, autoCalc);
             if (result != mSpellListCache.end())
                 result->second = ptr;
             else

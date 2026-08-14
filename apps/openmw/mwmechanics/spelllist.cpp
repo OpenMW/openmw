@@ -14,14 +14,16 @@
 
 namespace
 {
+    constexpr int sAutoCalc = ESM::REC_NPC_ + 1;
+
     template <class T>
-    const std::vector<ESM::RefId> getSpellList(const ESM::RefId& id)
+    const std::vector<ESM::RefId>& getSpellList(ESM::RefId id)
     {
         return MWBase::Environment::get().getESMStore()->get<T>().find(id)->mSpells.mList;
     }
 
     template <class T>
-    bool withBaseRecord(const ESM::RefId& id, const std::function<bool(std::vector<ESM::RefId>&)>& function)
+    bool withBaseRecord(ESM::RefId id, auto&& function)
     {
         T copy = *MWBase::Environment::get().getESMStore()->get<T>().find(id);
         bool changed = function(copy.mSpells.mList);
@@ -29,30 +31,32 @@ namespace
             MWBase::Environment::get().getESMStore()->overrideRecord(copy);
         return changed;
     }
+
+    bool withBaseRecord(ESM::RefId id, int type, std::vector<ESM::RefId>& spells, auto&& function)
+    {
+        switch (type)
+        {
+            case ESM::REC_CREA:
+                return withBaseRecord<ESM::Creature>(id, function);
+            case ESM::REC_NPC_:
+                return withBaseRecord<ESM::NPC>(id, function);
+            case sAutoCalc:
+                return function(spells);
+            default:
+                throw std::logic_error("failed to update base record for " + id.toDebugString());
+        }
+    }
 }
 
 namespace MWMechanics
 {
-    SpellList::SpellList(const ESM::RefId& id, int type)
+    SpellList::SpellList(ESM::RefId id, int type, bool autoCalc)
         : mId(id)
-        , mType(type)
+        , mType(autoCalc ? sAutoCalc : type)
     {
     }
 
-    bool SpellList::withBaseRecord(const std::function<bool(std::vector<ESM::RefId>&)>& function)
-    {
-        switch (mType)
-        {
-            case ESM::REC_CREA:
-                return ::withBaseRecord<ESM::Creature>(mId, function);
-            case ESM::REC_NPC_:
-                return ::withBaseRecord<ESM::NPC>(mId, function);
-            default:
-                throw std::logic_error("failed to update base record for " + mId.toDebugString());
-        }
-    }
-
-    const std::vector<ESM::RefId> SpellList::getSpells() const
+    const std::vector<ESM::RefId>& SpellList::getSpells() const
     {
         switch (mType)
         {
@@ -60,20 +64,24 @@ namespace MWMechanics
                 return getSpellList<ESM::Creature>(mId);
             case ESM::REC_NPC_:
                 return getSpellList<ESM::NPC>(mId);
+            case sAutoCalc:
+                return mSpells;
             default:
                 throw std::logic_error("failed to get spell list for " + mId.toDebugString());
         }
     }
 
-    const ESM::Spell* SpellList::getSpell(const ESM::RefId& id)
+    void SpellList::setAutoCalc(const std::vector<const ESM::Spell*> spells)
     {
-        return MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(id);
+        assert(mType == sAutoCalc);
+        for (const ESM::Spell* spell : spells)
+            mSpells.push_back(spell->mId);
     }
 
     void SpellList::add(const ESM::Spell* spell)
     {
         auto& id = spell->mId;
-        bool changed = withBaseRecord([&](auto& spells) {
+        bool changed = withBaseRecord(mId, mType, mSpells, [&](auto& spells) {
             for (const auto& it : spells)
             {
                 if (id == it)
@@ -92,7 +100,7 @@ namespace MWMechanics
     void SpellList::remove(const ESM::Spell* spell)
     {
         auto& id = spell->mId;
-        bool changed = withBaseRecord([&](auto& spells) {
+        bool changed = withBaseRecord(mId, mType, mSpells, [&](auto& spells) {
             for (auto it = spells.begin(); it != spells.end(); it++)
             {
                 if (id == *it)
@@ -112,7 +120,7 @@ namespace MWMechanics
 
     void SpellList::removeAll(const std::vector<ESM::RefId>& ids)
     {
-        bool changed = withBaseRecord([&](auto& spells) {
+        bool changed = withBaseRecord(mId, mType, mSpells, [&](auto& spells) {
             const auto it = std::remove_if(spells.begin(), spells.end(), [&](const auto& spell) {
                 const auto isSpell = [&](const auto& id) { return spell == id; };
                 return ids.end() != std::find_if(ids.begin(), ids.end(), isSpell);
@@ -124,11 +132,12 @@ namespace MWMechanics
         });
         if (changed)
         {
+            const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Spell>();
             for (auto listener : mListeners)
             {
                 for (auto& id : ids)
                 {
-                    const auto spell = getSpell(id);
+                    const auto spell = store.find(id);
                     listener->removeSpell(spell);
                 }
             }
@@ -137,7 +146,7 @@ namespace MWMechanics
 
     void SpellList::clear()
     {
-        bool changed = withBaseRecord([](auto& spells) {
+        bool changed = withBaseRecord(mId, mType, mSpells, [](auto& spells) {
             if (spells.empty())
                 return false;
             spells.clear();

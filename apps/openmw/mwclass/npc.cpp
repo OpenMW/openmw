@@ -248,9 +248,9 @@ namespace
 
         if (!spellsInitialised)
         {
-            std::vector<ESM::RefId> spells
+            std::vector<const ESM::Spell*> spells
                 = MWMechanics::autoCalcNpcSpells(npcStats.getSkills(), npcStats.getAttributes(), race);
-            npcStats.getSpells().addAllToInstance(spells);
+            npcStats.getSpells().addAutoCalc(spells);
         }
     }
 }
@@ -320,7 +320,8 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
-            bool spellsInitialised = data->mNpcStats.getSpells().setSpells(ref->mBase->mId);
+            const bool spellsInitialised
+                = data->mNpcStats.getSpells().setSpells(ref->mBase->mId, ref->mBase->mFlags & ESM::NPC::Autocalc);
 
             // creature stats
             int gold = 0;
@@ -1251,10 +1252,19 @@ namespace MWClass
 
         customData.mInventoryStore.readState(npcState.mInventory);
         customData.mNpcStats.readState(npcState.mNpcStats);
-        bool spellsInitialised = customData.mNpcStats.getSpells().setSpells(ptr.get<ESM::NPC>()->mBase->mId);
+        const ESM::NPC* base = ptr.get<ESM::NPC>()->mBase;
+        const bool autoCalc = base->mFlags & ESM::NPC::Autocalc;
+        const bool spellsInitialised = customData.mNpcStats.getSpells().setSpells(base->mId, autoCalc);
         if (spellsInitialised)
             customData.mNpcStats.getSpells().clear();
         customData.mNpcStats.readState(npcState.mCreatureStats);
+        if (!spellsInitialised && autoCalc)
+        {
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(base->mRace);
+            std::vector<const ESM::Spell*> spells = MWMechanics::autoCalcNpcSpells(
+                customData.mNpcStats.getSkills(), customData.mNpcStats.getAttributes(), race);
+            customData.mNpcStats.getSpells().addAutoCalc(spells);
+        }
     }
 
     void Npc::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const

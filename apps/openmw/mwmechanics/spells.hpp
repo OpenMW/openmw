@@ -8,6 +8,8 @@
 
 #include "../mwworld/timestamp.hpp"
 
+#include <components/esm3/loadspel.hpp>
+
 #include "spelllist.hpp"
 
 namespace ESM
@@ -105,9 +107,10 @@ namespace MWMechanics
         void readState(const ESM::SpellState& state, CreatureStats* creatureStats);
         void writeState(ESM::SpellState& state) const;
 
-        bool setSpells(const ESM::RefId& id);
+        bool setSpells(ESM::RefId id, bool autoCalc = false);
 
         void addAllToInstance(const std::vector<ESM::RefId>& spells);
+        void addAutoCalc(const std::vector<const ESM::Spell*>& spells);
     };
 }
 
