@@ -1,39 +1,56 @@
 How to contribute to OpenMW
 =======================
 
-Not sure what to do with all your free time? Pick out a task from here:
+Non-Coding
+=======================
 
-https://gitlab.com/OpenMW/openmw/issues
+If you are not able to contribute by coding, ou can also help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
 
-Currently, we are focused on completing the MW game experience and general polishing. Features out of this scope may be approved in some cases, but you should probably start a discussion first.
+Other contribution options:
+
+- [Testing OpenMW](https://wiki.openmw.org/index.php?title=Testing)
+- [Testing Morrowind Mods](https://wiki.openmw.org/index.php?title=Mod_Testing_Guidelines)
+- [Researching Morrowind's formulas](https://wiki.openmw.org/index.php?title=Research)
+
+Coding
+=======================
+
+To help contribute to the OpenMW codebase:
+
+1. Register on GitLab
+1. Fork the [OpenMW repository](https://gitlab.com/OpenMW/openmw) on GitLab
+1. Clone your fork locally
+1. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
+1. Make sure your build of OpenMW does run
+1. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) and especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards). Also this rest of this document.
+1. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. ([The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
+
+Ideally before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
+
+Currently, we are focused on completing the Morrowind game experience and general polishing. Features out of this scope may be approved in some cases, but you should start a discussion first.
 
 Note:
 * Issues that have the 'Future' label are usually out of the current scope of the project. Corresponding submissions are unlikely to be merged or even properly reviewed.
 * Newly reported bugs should be attempted to be reproduced on the latest code and on the latest available stable release. Both can be found [here](https://openmw.org/downloads/).
 * Often, it's best to start a discussion about possible solutions before you jump into coding, especially for larger features.
 
-Aside from coding, you can also help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
-
-There are various [Tools](https://wiki.openmw.org/index.php?title=Tools) to facilitate testing/development.
-
 Merge request guidelines
 =======================
 
-To facilitate the review process, your merge request description should include the following, if applicable:
+To help facilitate the review process, your merge request description should include the following, if applicable:
 
 * A link back to the bug report or discussion that prompted the change.
 * Summary of the changes made.
 * Reasoning / motivation behind the change.
 * What testing you have carried out to verify the change.
 
-Furthermore, we advise to:
+Further guidelines/recommendations:
 
 * Avoid stuffing unrelated commits into one merge request. As a rule of thumb, each feature and each bugfix should go into a separate MR, unless they are closely related or dependent upon each other. Small merge requests are easier to review and are less likely to require further changes before we can merge them. A "mega" merge request with lots of unrelated commits in it is likely to get held up in review for a long time.
-* Feel free to submit incomplete merge requests. Even if the work cannot be merged yet, merge requests are a great place to collect early feedback. Just make sure to mark it as [draft](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/).
-* If you plan on contributing often, please read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) on our wiki, especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards).
+* Feel free to submit incomplete merge requests as drafts. Even if the work cannot be merged yet, merge requests are a great place to collect early feedback. Just make sure to mark it as [draft](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/).
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 * Reference the bug / feature ticket(s) in your commit message or merge request description (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your merge request's description includes 'Fixes #123', that issue will automatically be closed when your commit is merged.
-* When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
+* When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs. Only do rebases when there is a reason to (related changes or the MR is for build pipeline changes).
 
 Guidelines for original engine "fixes"
 =================================
@@ -43,7 +60,7 @@ From time to time, you may be tempted to "fix" what you think was a "bug" in the
 Unfortunately, the definition of what is a "bug" is not so clear. Consider that your "bug" is actually a feature unless proven otherwise:
 
 * We have no way of knowing what the original developers really intended (short of asking them, good luck with that).
-* What may seem like an illogical mechanic can actually be part of an attempt to balance the game. 
+* What may seem like an illogical mechanic can actually be part of an attempt to balance the game.
 * Many people will actually <i>like</i> these "bugs" because that is what they remember the game for.
 * Exploits may be part of the fun of an open-world game - they reward knowledge with power. There are too many of them to plug them all, anyway.
 
@@ -84,10 +101,10 @@ Functionality review
 
 1. Ask for missing information or clarifications. Compare against the project's design goals and roadmap.
 2. Check if the automated tests are passing. If they are not, make the MR author aware of the issue and potentially quote the error line. If the error appears unrelated to the MR and/or the master branch is failing with the same error, our CI might be broken and needs to be fixed independently of any open MRs. Raise this issue on one of the following resources:
-   * Our [forums](https://forum.openmw.org/)
    * [Discord](https://discord.com/servers/openmw-260439894298460160)
    * [IRC](https://web.libera.chat/#openmw)
    * [Issue tracker](https://gitlab.com/OpenMW/openmw/-/issues)
+   * Our [forums](https://forum.openmw.org/)
 
 3. Make sure that the new code has been tested thoroughly, either by asking the author or, preferably, testing yourself. In a complex project like OpenMW, it is easy to make mistakes, typos, etc. Therefore, prefer testing all code changes, no matter how trivial they look. When you have tested a MR that no one has tested so far, post a comment letting us know.
 4. On long-running MRs, request the author to update its description with the current state or a checklist of things left to do.
@@ -117,5 +134,5 @@ The master branch should always be in a working state that is not worse than the
 Other resources
 ===============
 
-[GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
-
+1. [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
+1. [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.
