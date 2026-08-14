@@ -24,13 +24,6 @@ namespace LuaUtil
         ScriptsContainerLifetime mWeakPtr;
 
     public:
-        ScriptsContainerWeakPtr(const ScriptsContainerWeakPtr&) = default;
-        ScriptsContainerWeakPtr(ScriptsContainerWeakPtr&&) = default;
-        // Declaring the constructors above deletes these, which would keep the type out of
-        // a vector.
-        ScriptsContainerWeakPtr& operator=(const ScriptsContainerWeakPtr&) = default;
-        ScriptsContainerWeakPtr& operator=(ScriptsContainerWeakPtr&&) = default;
-
         explicit ScriptsContainerWeakPtr(ScriptsContainerLifetime ptr)
             : mWeakPtr(std::move(ptr))
         {
@@ -180,8 +173,7 @@ namespace LuaUtil
         // because they can not be stored in saves. I.e. loading a saved game will not fully restore the state.
         void setupUnsavableTimer(TimerType type, double time, int scriptId, sol::main_protected_function callback);
 
-        // Informs that new frame is started. Needed to track Lua instruction count per frame.
-        // Only bumps a counter; the averages decay lazily when next written or read.
+        // decayedInstructionCount applies deferred decay.
         void statsNextFrame() { ++mStatsFrame; }
 
         struct ScriptStats

@@ -1,11 +1,14 @@
 #include "object.hpp"
 
+#include <limits>
+
 namespace MWLua
 {
     namespace
     {
-        // Index in the low 32 bits, content file from bit 33, so the pair is exact as a double.
-        // Generated objects have a negative content file and so land on negative keys.
+        // Lua number keys use packed doubles.
+        static_assert(std::numeric_limits<double>::digits >= 53);
+
         constexpr double packId(const ObjectId& id)
         {
             return static_cast<double>(
@@ -21,8 +24,7 @@ namespace MWLua
             SlotCount
         };
 
-        // Registry keys. An address rather than a cached luaL_ref, so a second Lua state gets
-        // its own tables instead of reusing a reference number that means something else there.
+        // Registry-local keys avoid cross-state references.
         const char sSlotKeys[SlotCount] = {};
 
         void* slotKey(CacheSlot slot)
@@ -36,15 +38,12 @@ namespace MWLua
             lua_rawget(state, LUA_REGISTRYINDEX);
             if (lua_istable(state, -1))
                 return;
-            lua_pop(state, 1); // nil: this state has not pushed this type yet
-            lua_newtable(state); // the cache
-            lua_newtable(state); // its metatable
-            lua_pushstring(state, "v");
-            lua_setfield(state, -2, "__mode"); // weak values: unreferenced objects still collect
-            lua_setmetatable(state, -2);
-            lua_pushlightuserdata(state, slotKey(slot));
-            lua_pushvalue(state, -2);
-            lua_rawset(state, LUA_REGISTRYINDEX);
+            lua_pop(state, 1);
+
+            sol::table cache = sol::table::create(state);
+            cache[sol::metatable_key] = sol::table::create_with(state, "__mode", "v");
+            sol::state_view(state).registry().raw_set(sol::lightuserdata_value(slotKey(slot)), cache);
+            cache.push();
         }
 
         void pushKey(lua_State* state, double key)
@@ -52,8 +51,7 @@ namespace MWLua
             lua_pushnumber(state, key);
         }
 
-        // Cells have no packable id, so they key on the store address as light userdata.
-        // Safe only because clearObjectCaches runs before an address can be reused.
+        // Cell addresses stay unique until cache clearing.
         void pushKey(lua_State* state, const MWWorld::CellStore* key)
         {
             lua_pushlightuserdata(state, const_cast<MWWorld::CellStore*>(key));
@@ -100,15 +98,11 @@ namespace MWLua
         return pushCached(state, value, GlobalCells, value.mStore);
     }
 
-    // The Lua state outlives the world, so stale entries would still be here when the allocator
-    // hands a new cell the address of a dead one.
+    // Prevent reused cell addresses from aliasing.
     void clearObjectCaches(lua_State* state)
     {
+        sol::table registry = sol::state_view(state).registry();
         for (int slot = 0; slot < SlotCount; ++slot)
-        {
-            lua_pushlightuserdata(state, slotKey(static_cast<CacheSlot>(slot)));
-            lua_pushnil(state);
-            lua_rawset(state, LUA_REGISTRYINDEX);
-        }
+            registry.raw_set(sol::lightuserdata_value(slotKey(static_cast<CacheSlot>(slot))), sol::nil);
     }
 }

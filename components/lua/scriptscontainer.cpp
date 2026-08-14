@@ -829,7 +829,6 @@ namespace LuaUtil
         {
             for (auto& [id, script] : data->mScripts)
             {
-                // Computed and dropped: reading must not write. The next writer applies it.
                 stats[id].mAvgInstructionCount += decayedInstructionCount(script);
                 stats[id].mMemoryUsage += script.mStats.mMemoryUsage;
             }

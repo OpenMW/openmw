@@ -84,13 +84,13 @@ namespace MWLua
         Obj mObj;
     };
 
-    // Repeated pushes of the same object return one userdata instead of allocating per access.
+    // Reuse userdata across equivalent pushes.
     int pushCachedObject(lua_State* state, const LObject& value);
     int pushCachedObject(lua_State* state, const GObject& value);
     int pushCachedObject(lua_State* state, const LCell& value);
     int pushCachedObject(lua_State* state, const GCell& value);
 
-    // Must be called when the world is torn down: the Lua state survives it.
+    // Forget world-bound cache entries.
     void clearObjectCaches(lua_State* state);
 }
 
