@@ -8,8 +8,8 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 * Version: 0.52.0
 * License: GPLv3 (see [LICENSE](https://gitlab.com/OpenMW/openmw/-/raw/master/LICENSE) for more information)
 * Website: https://www.openmw.org
-* IRC: #openmw on irc.libera.chat
-* Discord: https://discord.gg/bWuqq2e
+* IRC: #openmw on irc.libera.chat [https://web.libera.chat/#openmw](https://web.libera.chat/#openmw)
+* Discord: [https://discord.com/servers/openmw-260439894298460160](https://discord.com/servers/openmw-260439894298460160)
 
 
 Font Licenses:
@@ -28,16 +28,8 @@ Getting Started
 ---------------
 
 * [Installation instructions](https://openmw.readthedocs.io/en/latest/manuals/installation/index.html)
-* [How to contribute](./CONTRIBUTING.md)
-* [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
+* [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - please read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug.
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
-
-Community
-----------
-
-* [Discord](https://discord.com/servers/openmw-260439894298460160)
-* [IRC](https://web.libera.chat/#openmw)
-* [Official forums](https://forum.openmw.org/)
 
 The data path
 -------------
@@ -114,3 +106,8 @@ Command line options
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
       --random-seed arg (=<impl defined>)   seed value for random number generator
+
+Contributing
+---------
+
+OpenMW is always looking for new contributions. [See here on how to contribute](./CONTRIBUTING.md)
