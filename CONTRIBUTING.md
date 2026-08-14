@@ -4,7 +4,7 @@ How to contribute to OpenMW
 Non-Coding
 =======================
 
-If you are not able to contribute by coding, ou can also help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
+If you are not able to contribute by coding, you can also help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
 
 Other contribution options:
 
