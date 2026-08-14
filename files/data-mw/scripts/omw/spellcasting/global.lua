@@ -113,7 +113,7 @@ local function explodeSpell(spellCast, options)
     if maxArea <= 0 then return end
 
     -- Get all objects within maxArea
-    local objectsInRange = world.getObjectsInRange(position, maxArea * math.ceil(common.UnitsPerFoot))
+    local objectsInRange = world.getObjectsInRange(position, maxArea * common.UnitsPerFoot)
     local eventOptions = auxUtil.shallowCopy(spellCast)
 
     -- For each object compute each effect in range and apply

@@ -13,7 +13,8 @@ local l10n = core.l10n('Mechanics')
 
 local common = {}
 
-common.UnitsPerFoot = 21.33333333
+-- Note: The real value is 21.33333333, but vanilla does ceil() making the effective value 22
+common.UnitsPerFoot = 22
 
 -- Translate the given ID into a magic record, meaning a record with an .effects member.
 -- For example, if id is the record ID of an armor, this will find the corresponding ESM3_Enchantment record
@@ -110,8 +111,10 @@ function common.playMagicEffects(target, type, effects, allowEffectLoop)
     end
 end
 function common.targetIsValid(target)
-        -- Spells can only be inflicted on Actors and Lockables.
-    return target ~= nil and (Actor.objectIsInstance(target) or Lockable.objectIsInstance(target))
+    if not target then return false end
+    -- Spells can only be inflicted on Actors in processing range, and Lockables.
+    local isValidActor = Actor.objectIsInstance(target) and Actor.isInActorsProcessingRange(target)
+    return isValidActor or Lockable.objectIsInstance(target)
 end
 
 local lockableEffects = {
