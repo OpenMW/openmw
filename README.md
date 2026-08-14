@@ -27,13 +27,17 @@ Pre-existing modifications created for the original Morrowind engine can be hit-
 Getting Started
 ---------------
 
-* [Official forums](https://forum.openmw.org/)
 * [Installation instructions](https://openmw.readthedocs.io/en/latest/manuals/installation/index.html)
-* [Build from source](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
-* [Testing the game](https://wiki.openmw.org/index.php?title=Testing)
-* [How to contribute](https://wiki.openmw.org/index.php?title=Contribution_Wanted)
+* [How to contribute](./CONTRIBUTING.md)
 * [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
+
+Community
+----------
+
+* [Discord](https://discord.com/servers/openmw-260439894298460160)
+* [IRC](https://web.libera.chat/#openmw)
+* [Official forums](https://forum.openmw.org/)
 
 The data path
 -------------
