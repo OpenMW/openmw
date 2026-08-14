@@ -13,6 +13,7 @@
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <deque>
+#include <map>
 #include <memory>
 #include <span>
 #include <unordered_map>
@@ -363,6 +364,7 @@ namespace MWRender
         bool mNight = false;
         osg::Vec2f mProjectionOffset;
         const MWWorld::GroundcoverStore& mGroundCoverStore;
+        std::map<std::string, std::string> mAppliedShadowDefines;
 
         void operator=(const RenderingManager&);
         RenderingManager(const RenderingManager&);

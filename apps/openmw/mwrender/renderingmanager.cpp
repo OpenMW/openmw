@@ -248,11 +248,11 @@ namespace MWRender
             mResourceSystem->getSceneManager()->getShaderManager());
 
         Shader::ShaderManager::DefineMap globalDefines = Shader::getDefaultDefines();
-        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
+        mAppliedShadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
 
-        for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
-            globalDefines[itr->first] = itr->second;
+        for (const auto& [key, value] : mAppliedShadowDefines)
+            globalDefines[key] = value;
 
         globalDefines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
         globalDefines["clamp"] = Settings::shaders().mClampLighting ? "1" : "0";
@@ -1438,23 +1438,18 @@ namespace MWRender
                 else
                     mShadowManager->enableIndoorMode(Settings::shadows());
 
-                auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                 Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
-                bool definesChanged = false;
-                for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
+                if (mAppliedShadowDefines != shadowDefines)
                 {
-                    if (defines[itr->first] != itr->second)
-                    {
-                        defines[itr->first] = itr->second;
-                        definesChanged = true;
-                    }
-                }
-
-                if (definesChanged)
-                {
+                    auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+                    for (const auto& [key, value] : mAppliedShadowDefines)
+                        defines.erase(key);
+                    for (const auto& [key, value] : shadowDefines)
+                        defines[key] = value;
                     mViewer->stopThreading();
                     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
                     mViewer->startThreading();
+                    mAppliedShadowDefines = shadowDefines;
                 }
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
