@@ -527,6 +527,16 @@ namespace Resource
         return mOpaqueDepthTex[frame % 2];
     }
 
+    void SceneManager::setOpaqueColorTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong)
+    {
+        mOpaqueColorTex = { texturePing, texturePong };
+    }
+
+    osg::ref_ptr<osg::Texture> SceneManager::getOpaqueColorTex(size_t frame)
+    {
+        return mOpaqueColorTex[frame % 2];
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types

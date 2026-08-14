@@ -314,13 +314,18 @@ namespace MWRender
 
         mPerViewUniformStateUpdater = new SceneUtil::PerViewUniformStateUpdater(mResourceSystem->getSceneManager(),
             mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
-                Shader::ShaderManager::Slot::OpaqueDepthTexture));
+                Shader::ShaderManager::Slot::OpaqueDepthTexture),
+            mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
+                Shader::ShaderManager::Slot::OpaqueColorTexture));
         rootNode->addCullCallback(mPerViewUniformStateUpdater);
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
+        resourceSystem->getSceneManager()->setOpaqueColorTex(
+            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueColor, 0),
+            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueColor, 1));
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
 
@@ -731,18 +736,25 @@ namespace MWRender
         }
         mCamera->update(dt, paused);
 
-        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
+        float fogStart = mFog->getFogStart(false);
+        float fogEnd = mFog->getFogEnd(false);
+        osg::Vec4f fogColor = mFog->getFogColor(false);
 
-        float fogStart = mFog->getFogStart(isUnderwater);
-        float fogEnd = mFog->getFogEnd(isUnderwater);
-        osg::Vec4f fogColor = mFog->getFogColor(isUnderwater);
+        float fogUnderWaterStart = mFog->getFogStart(true);
+        float fogUnderWaterEnd = mFog->getFogEnd(true);
+        osg::Vec4f fogUnderWaterColor = mFog->getFogColor(true);
 
         mStateUpdater->setFogStart(fogStart);
         mStateUpdater->setFogEnd(fogEnd);
+        mStateUpdater->setUnderWaterFogStart(fogUnderWaterStart);
+        mStateUpdater->setUnderWaterFogEnd(fogUnderWaterEnd);
+        mStateUpdater->setUnderWaterFogColor(fogUnderWaterColor);
         setFogColor(fogColor);
 
         auto world = MWBase::Environment::get().getWorld();
         const auto& stateUpdater = mPostProcessor->getStateUpdater();
+
+        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
 
         stateUpdater->setFogRange(fogStart, fogEnd);
         stateUpdater->setNearFar(mNearClip, mViewDistance);
@@ -806,6 +818,7 @@ namespace MWRender
     {
         mWater->setEnabled(enabled);
         mSky->setWaterEnabled(enabled);
+        mStateUpdater->setWaterEnabled(enabled);
 
         mPostProcessor->getStateUpdater()->setIsWaterEnabled(enabled);
     }
@@ -815,6 +828,7 @@ namespace MWRender
         mWater->setCullCallback(mTerrain->getHeightCullCallback(height, Mask_Water));
         mWater->setHeight(height);
         mSky->setWaterHeight(height);
+        mStateUpdater->setWaterHeight(height);
 
         mPostProcessor->getStateUpdater()->setWaterHeight(height);
     }

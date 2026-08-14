@@ -13,23 +13,6 @@ vec4 sampleReflectionMap(vec2 uv)
     return texture(reflectionMap, vec3((uv), gl_ViewID_OVR));
 }
 
-#if @waterRefraction
-
-uniform sampler2DArray refractionMap;
-uniform sampler2DArray refractionDepthMap;
-
-vec4 sampleRefractionMap(vec2 uv)
-{
-    return texture(refractionMap, vec3((uv), gl_ViewID_OVR));
-}
-
-float sampleRefractionDepthMap(vec2 uv)
-{
-    return texture(refractionDepthMap, vec3((uv), gl_ViewID_OVR)).x;
-}
-
-#endif
-
 uniform sampler2DArray lastShader;
 
 vec4 samplerLastShader(vec2 uv)
@@ -47,8 +30,14 @@ vec3 sampleSkyColor(vec2 uv)
 #endif
 
 uniform sampler2DArray opaqueDepthTex;
+uniform sampler2DArray opaqueColorTex;
 
 vec4 sampleOpaqueDepthTex(vec2 uv)
 {
     return texture(opaqueDepthTex, vec3((uv), gl_ViewID_OVR));
+}
+
+vec4 sampleOpaqueColorTex(vec2 uv)
+{
+    return texture(opaqueColorTex, vec3((uv), gl_ViewID_OVR));
 }

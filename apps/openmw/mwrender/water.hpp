@@ -44,7 +44,6 @@ namespace Fallback
 namespace MWRender
 {
 
-    class Refraction;
     class Reflection;
     class RippleSimulation;
     class RainSettingsUpdater;
@@ -64,7 +63,6 @@ namespace MWRender
 
         std::unique_ptr<RippleSimulation> mSimulation;
 
-        osg::ref_ptr<Refraction> mRefraction;
         osg::ref_ptr<Reflection> mReflection;
         osg::ref_ptr<Ripples> mRipples;
 

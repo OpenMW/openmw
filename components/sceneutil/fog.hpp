@@ -21,6 +21,15 @@ namespace SceneUtil
     void setFogColor(osg::StateSet& stateset, const osg::Vec4f& color,
         osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
 
+    void setUnderWaterFogEnd(
+        osg::StateSet& stateset, float end, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
+
+    void setUnderWaterFogStart(
+        osg::StateSet& stateset, float start, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
+
+    void setUnderWaterFogColor(osg::StateSet& stateset, const osg::Vec4f& color,
+        osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
+
     void setFogDepth(
         osg::StateSet& stateset, float depth, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON);
 
@@ -29,6 +38,12 @@ namespace SceneUtil
     void updateFogStart(osg::StateSet& stateset, float start);
 
     void updateFogColor(osg::StateSet& stateset, const osg::Vec4f& color);
+
+    void updateUnderWaterFogEnd(osg::StateSet& stateset, float end);
+
+    void updateUnderWaterFogStart(osg::StateSet& stateset, float start);
+
+    void updateUnderWaterFogColor(osg::StateSet& stateset, const osg::Vec4f& color);
 
     void updateFogDepth(osg::StateSet& stateset, float depth);
 

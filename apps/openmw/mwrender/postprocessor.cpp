@@ -32,12 +32,14 @@
 #include "../mwgui/postprocessorhud.hpp"
 
 #include "distortion.hpp"
+#include "opaqueblit.hpp"
 #include "pingpongcull.hpp"
 #include "renderbin.hpp"
 #include "renderingmanager.hpp"
 #include "sky.hpp"
 #include "transparentpass.hpp"
 #include "vismask.hpp"
+#include "waterawaretransparentbin.hpp"
 
 namespace
 {
@@ -151,7 +153,20 @@ namespace MWRender
         mTransparentDepthPostPass
             = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(),
                 Settings::postProcessing().mTransparentPostpass);
-        osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
+        mOpaqueColorResolve = new OpaqueColorBinCallback;
+        osg::ref_ptr<osgUtil::RenderBin> opaqueResolveBin
+            = new osgUtil::RenderBin(osgUtil::RenderBin::SORT_FRONT_TO_BACK);
+        opaqueResolveBin->setDrawCallback(mOpaqueColorResolve);
+        osgUtil::RenderBin::addRenderBinPrototype("OpaqueResolve", opaqueResolveBin);
+
+        osg::ref_ptr<osg::Node> opaqueResolveNode = new osg::Node;
+        opaqueResolveNode->setCullingActive(false);
+        opaqueResolveNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OpaqueResolve, "OpaqueResolve");
+        rootNode->addChild(opaqueResolveNode);
+
+        osg::ref_ptr<WaterAwareTransparentBin> transparentBin = new WaterAwareTransparentBin(mOpaqueColorResolve);
+        transparentBin->setDrawCallback(mTransparentDepthPostPass);
+        osgUtil::RenderBin::addRenderBinPrototype("DepthSortedBin", transparentBin);
 
         osg::ref_ptr<osgUtil::RenderBin> distortionRenderBin
             = new osgUtil::RenderBin(osgUtil::RenderBin::SORT_BACK_TO_FRONT);
@@ -305,6 +320,9 @@ namespace MWRender
         mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
         mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
         mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
+        mOpaqueColorResolve->mFbo[frameId] = mFbos[frameId][FBO_Primary];
+        mOpaqueColorResolve->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
+        mOpaqueColorResolve->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
 
         mDistortionCallback->setFBO(mFbos[frameId][FBO_Distortion], frameId);
         mDistortionCallback->setOriginalFBO(mFbos[frameId][FBO_Primary], frameId);
@@ -480,6 +498,7 @@ namespace MWRender
         setupDepth(textures[Tex_Depth]);
         setupDepth(textures[Tex_OpaqueDepth]);
         textures[Tex_OpaqueDepth]->setName("opaqueTexMap");
+        textures[Tex_OpaqueColor]->setName("opaqueTexColorMap");
 
         auto& fbos = mFbos[frameId];
 
@@ -536,17 +555,12 @@ namespace MWRender
         fbos[FBO_OpaqueDepth] = new osg::FrameBufferObject;
         fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::PACKED_DEPTH_STENCIL_BUFFER,
             Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueDepth]));
+        fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+            Stereo::createMultiviewCompatibleAttachment(textures[Tex_OpaqueColor]));
 
         fbos[FBO_Distortion] = new osg::FrameBufferObject;
         fbos[FBO_Distortion]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
             Stereo::createMultiviewCompatibleAttachment(textures[Tex_Distortion]));
-
-#ifdef __APPLE__
-        if (textures[Tex_OpaqueDepth])
-            fbos[FBO_OpaqueDepth]->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER,
-                osg::FrameBufferAttachment(new osg::RenderBuffer(textures[Tex_OpaqueDepth]->getTextureWidth(),
-                    textures[Tex_OpaqueDepth]->getTextureHeight(), textures[Tex_Scene]->getInternalFormat())));
-#endif
 
         mCanvases[frameId]->dirty();
     }

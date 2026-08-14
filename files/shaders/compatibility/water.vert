@@ -13,6 +13,7 @@ uniform vec3 playerPos;
 
 varying vec3 worldPos;
 varying vec2 rippleMapUV;
+varying vec3 passViewPos;
 
 void main(void)
 {
@@ -24,6 +25,7 @@ void main(void)
     rippleMapUV = (worldPos.xy - playerPos.xy + (@rippleMapSize * @rippleMapWorldScale / 2.0)) / @rippleMapSize / @rippleMapWorldScale;
 
     vec4 viewPos = modelToView(gl_Vertex);
+    passViewPos = viewPos.xyz;
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
 
     setupShadowCoords(viewPos, normalize((gl_NormalMatrix * gl_Normal).xyz));

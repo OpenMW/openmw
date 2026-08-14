@@ -576,8 +576,8 @@ namespace Terrain
     void QuadTreeWorld::loadCell(int x, int y)
     {
         // fallback behavior only for undefined cells (every other is already handled in quadtree)
-        float dummy;
-        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5f, y + 0.5f), mWorldspace, dummy, dummy))
+        const ESM::ExteriorCellLocation cellLocation(x, y, mWorldspace);
+        if (mChunkManager && !mStorage->hasData(cellLocation))
             TerrainGrid::loadCell(x, y);
         else
             World::loadCell(x, y);
@@ -586,8 +586,8 @@ namespace Terrain
     void QuadTreeWorld::unloadCell(int x, int y)
     {
         // fallback behavior only for undefined cells (every other is already handled in quadtree)
-        float dummy;
-        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5f, y + 0.5f), mWorldspace, dummy, dummy))
+        const ESM::ExteriorCellLocation cellLocation(x, y, mWorldspace);
+        if (mChunkManager && !mStorage->hasData(cellLocation))
             TerrainGrid::unloadCell(x, y);
         else
             World::unloadCell(x, y);

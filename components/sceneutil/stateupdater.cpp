@@ -14,9 +14,11 @@
 
 namespace SceneUtil
 {
-    PerViewUniformStateUpdater::PerViewUniformStateUpdater(Resource::SceneManager* sceneManager, int opaqueTextureUnit)
+    PerViewUniformStateUpdater::PerViewUniformStateUpdater(
+        Resource::SceneManager* sceneManager, int opaqueTextureUnit, int opaqueColorTextureUnit)
         : mSceneManager(sceneManager)
         , mOpaqueTextureUnit(opaqueTextureUnit)
+        , mOpaqueColorTextureUnit(opaqueColorTextureUnit)
     {
     }
 
@@ -40,6 +42,9 @@ namespace SceneUtil
         if (mOpaqueTextureUnit > 0)
             stateset->setTextureAttribute(mOpaqueTextureUnit,
                 mSceneManager->getOpaqueDepthTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
+        if (mOpaqueColorTextureUnit > 0)
+            stateset->setTextureAttribute(mOpaqueColorTextureUnit,
+                mSceneManager->getOpaqueColorTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
     }
 
     void PerViewUniformStateUpdater::applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv)
@@ -85,6 +90,7 @@ namespace SceneUtil
         stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
         stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
         stateset->addUniform(new osg::Uniform("isReflection", false));
+        stateset->addUniform(new osg::Uniform("isUnderwater", false));
         stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
         stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
         stateset->addUniform(new osg::Uniform("useTreeAnim", false));
@@ -139,7 +145,13 @@ namespace SceneUtil
         SceneUtil::setFogColor(*stateset, mFogColor);
         SceneUtil::setFogStart(*stateset, mFogStart);
         SceneUtil::setFogEnd(*stateset, mFogEnd);
+        SceneUtil::setUnderWaterFogColor(*stateset, mUnderWaterFogColor);
+        SceneUtil::setUnderWaterFogStart(*stateset, mUnderWaterFogStart);
+        SceneUtil::setUnderWaterFogEnd(*stateset, mUnderWaterFogEnd);
         SceneUtil::setFogDepth(*stateset, -1.f);
+
+        stateset->addUniform(new osg::Uniform("waterHeight", mWaterHeight));
+        stateset->addUniform(new osg::Uniform("waterEnabled", mWaterEnabled));
     }
 
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
@@ -149,6 +161,12 @@ namespace SceneUtil
         SceneUtil::updateFogColor(*stateset, mFogColor);
         SceneUtil::updateFogStart(*stateset, mFogStart);
         SceneUtil::updateFogEnd(*stateset, mFogEnd);
+        SceneUtil::updateUnderWaterFogColor(*stateset, mUnderWaterFogColor);
+        SceneUtil::updateUnderWaterFogStart(*stateset, mUnderWaterFogStart);
+        SceneUtil::updateUnderWaterFogEnd(*stateset, mUnderWaterFogEnd);
+
+        stateset->getUniform("waterHeight")->set(mWaterHeight);
+        stateset->getUniform("waterEnabled")->set(mWaterEnabled);
     }
 
     void StateUpdater::setAmbientColor(const osg::Vec4f& col)
@@ -169,6 +187,31 @@ namespace SceneUtil
     void StateUpdater::setFogEnd(float end)
     {
         mFogEnd = end;
+    }
+
+    void StateUpdater::setUnderWaterFogColor(const osg::Vec4f& col)
+    {
+        mUnderWaterFogColor = col;
+    }
+
+    void StateUpdater::setUnderWaterFogStart(float start)
+    {
+        mUnderWaterFogStart = start;
+    }
+
+    void StateUpdater::setUnderWaterFogEnd(float end)
+    {
+        mUnderWaterFogEnd = end;
+    }
+
+    void StateUpdater::setWaterHeight(float waterHeight)
+    {
+        mWaterHeight = waterHeight;
+    }
+
+    void StateUpdater::setWaterEnabled(bool enabled)
+    {
+        mWaterEnabled = enabled;
     }
 
     void StateUpdater::setWireframe(bool wireframe)
