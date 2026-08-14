@@ -18,12 +18,12 @@ Coding
 To help contribute to the OpenMW codebase:
 
 1. Register on GitLab
-1. Fork the [OpenMW repository](https://gitlab.com/OpenMW/openmw) on GitLab
-1. Clone your fork locally
-1. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
-1. Make sure your build of OpenMW does run
-1. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) and especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards). Also this rest of this document.
-1. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. ([The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
+2. Fork the [OpenMW repository](https://gitlab.com/OpenMW/openmw) on GitLab
+3. Clone your fork locally
+4. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
+5. Make sure your build of OpenMW does run
+6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) and especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards). Also this rest of this document.
+7. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. ([The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
 Ideally before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
 
@@ -134,5 +134,5 @@ The master branch should always be in a working state that is not worse than the
 Other resources
 ===============
 
-1. [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
-1. [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.
+- [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
+- [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.
