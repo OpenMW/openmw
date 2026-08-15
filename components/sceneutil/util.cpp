@@ -402,11 +402,8 @@ namespace SceneUtil
 
     void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer)
     {
-        renderer->getSceneView(0)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
-        renderer->getSceneView(1)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
+        constexpr unsigned options = osgUtil::SceneView::NO_SCENEVIEW_LIGHT;
+        renderer->getSceneView(0)->setDefaults(options);
+        renderer->getSceneView(1)->setDefaults(options);
     }
 }
