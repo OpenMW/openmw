@@ -25,7 +25,6 @@ namespace Settings
         SettingValue<int> mRainRippleDetail{ mIndex, "Water", "rain ripple detail", makeClampSanitizerInt(0, 2) };
         SettingValue<float> mSmallFeatureCullingPixelSize{ mIndex, "Water", "small feature culling pixel size",
             makeMaxStrictSanitizerFloat(0) };
-        SettingValue<float> mRefractionScale{ mIndex, "Water", "refraction scale", makeClampSanitizerFloat(0, 1) };
         SettingValue<bool> mSunlightScattering{ mIndex, "Water", "sunlight scattering" };
         SettingValue<bool> mWobblyShores{ mIndex, "Water", "wobbly shores" };
     };
