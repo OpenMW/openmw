@@ -30,8 +30,6 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 
     bool isUnderWater = false;
 
-    float factor = 1.0;
-
     if (waterEnabled) {
         vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
         bool cameraBelowWater = cameraPos.z <= waterHeight;
@@ -39,21 +37,10 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
             isUnderWater = true;
         } else {
             vec3 worldPos = (osg_ViewMatrixInverse * vec4(pos, 1)).xyz;
-            float bias = (cameraBelowWater) ? -5.0 : 5.0;
+            const float bias = 5.0;
 
             if (!isReflection)
                 isUnderWater = worldPos.z < waterHeight - bias;
-            else if (cameraPos.z < waterHeight)
-                isUnderWater = worldPos.z > waterHeight + bias;
-
-            if (isUnderWater) {
-                float waterDepth = dist * clamp((waterHeight - worldPos.z) / (cameraPos.z - worldPos.z), 0.0, 1.0);
-                const float DEPTH_FADE = 0.15;
-                const float VISIBILITY = 2500.0;
-                float depthCorrection = sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE);
-                factor = DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepth / VISIBILITY) + 0.5 * depthCorrection + 0.5;
-                factor = clamp(factor, 0.0, 1.0);
-            }
         }
     }
 
@@ -72,8 +59,6 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
     float fogValue = clamp((dist - start) * (1.0 / (end - start)), 0.0, 1.0);
 #endif
 
-    fogValue *= factor;
-
 #ifdef ADDITIVE_BLENDING
     color.xyz *= 1.0 - fogValue;
 #else
@@ -81,6 +66,7 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 #endif
 
 #if @skyBlending
+if (!isUnderWater && !isReflection) {
     float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
     fadeValue *= fadeValue;
 #ifdef ADDITIVE_BLENDING
@@ -88,6 +74,7 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 #else
     color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
 #endif
+}
 #endif
 
     return color;
