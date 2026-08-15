@@ -499,6 +499,8 @@ namespace MWRender
             tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
             tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
             tex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
+            tex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::NEAREST);
+            tex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::NEAREST);
         };
 
         setupDepth(textures[Tex_Depth]);

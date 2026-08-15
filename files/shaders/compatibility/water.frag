@@ -87,6 +87,23 @@ uniform vec2 screenRes;
 
 uniform DirectionalLight sun;
 
+bool hasOpaqueGeometry(vec2 coords)
+{
+#if @reverseZ
+    const float clearDepth = 0.0;
+#else
+    const float clearDepth = 1.0;
+#endif
+    vec2 halfTexel = vec2(0.5) / screenRes;
+    float backgroundDepth = abs(sampleOpaqueDepthTex(coords - halfTexel).r - clearDepth);
+    backgroundDepth = min(backgroundDepth,
+        abs(sampleOpaqueDepthTex(coords + vec2(halfTexel.x, -halfTexel.y)).r - clearDepth));
+    backgroundDepth = min(backgroundDepth,
+        abs(sampleOpaqueDepthTex(coords + vec2(-halfTexel.x, halfTexel.y)).r - clearDepth));
+    backgroundDepth = min(backgroundDepth, abs(sampleOpaqueDepthTex(coords + halfTexel).r - clearDepth));
+    return backgroundDepth > 0.0;
+}
+
 void main(void)
 {
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
@@ -184,23 +201,9 @@ void main(void)
     vec2 refractionCoords = screenCoords - screenCoordsOffset;
     vec3 refraction = sampleOpaqueColorTex(refractionCoords).rgb;
 
-    // Fade out refraction, preventing distant cells with no terrain to not bleed the horizon
-    if (cameraPos.z >= waterHeight) {
-        const float backgroundFadeStart = 40000;
-        const float backgroundFadeEnd = backgroundFadeStart * 1.2;
-        vec2 texel = vec2(1.0) / screenRes;
-        float backgroundDepth = max(depthSample, depthSampleDistorted);
-        backgroundDepth = max(backgroundDepth,
-            linearizeDepth(sampleOpaqueDepthTex(refractionCoords + vec2(texel.x, 0.0)).r, near, far));
-        backgroundDepth = max(backgroundDepth,
-            linearizeDepth(sampleOpaqueDepthTex(refractionCoords - vec2(texel.x, 0.0)).r, near, far));
-        backgroundDepth = max(backgroundDepth,
-            linearizeDepth(sampleOpaqueDepthTex(refractionCoords + vec2(0.0, texel.y)).r, near, far));
-        backgroundDepth = max(backgroundDepth,
-            linearizeDepth(sampleOpaqueDepthTex(refractionCoords - vec2(0.0, texel.y)).r, near, far));
-        float backgroundVisibility = 1.0 - smoothstep(backgroundFadeStart, backgroundFadeEnd, backgroundDepth);
-        refraction = mix(fog.underWaterColor.rgb, refraction, backgroundVisibility);
-    }
+    // Use underwater fog where the opaque buffer has no geometry
+    if (cameraPos.z >= waterHeight && !hasOpaqueGeometry(refractionCoords))
+        refraction = fog.underWaterColor.rgb;
 
 #if @sunlightScattering
     vec3 scatterNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
