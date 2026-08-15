@@ -8,11 +8,11 @@ uniform float skyBlendingStart;
 
 struct Fog {
     vec4 color;
-    vec4 underWaterColor;
+    vec4 underwaterColor;
     float start;
-    float underWaterStart;
+    float underwaterStart;
     float end;
-    float underWaterEnd;
+    float underwaterEnd;
     float depth;
 };
 
@@ -62,11 +62,11 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
         }
     }
 
-    vec4 fogColor = isUnderWater ? fog.underWaterColor : fog.color;
+    vec4 fogColor = isUnderWater ? fog.underwaterColor : fog.color;
     if (useWaterDepthFog)
         fogColor.rgb = WATER_COLOR * length(sun.ambient.xyz);
-    float start = isUnderWater ? fog.underWaterStart : fog.start;
-    float end = isUnderWater ? fog.underWaterEnd : fog.end;
+    float start = isUnderWater ? fog.underwaterStart : fog.start;
+    float end = isUnderWater ? fog.underwaterEnd : fog.end;
 
     if (fog.depth >= 0.0) {
         start = near * fog.depth + far * (1.0 - fog.depth);

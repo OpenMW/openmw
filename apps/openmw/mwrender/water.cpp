@@ -561,7 +561,7 @@ namespace MWRender
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
             stateset->setTextureAttribute(1, mReflection->getColorTexture(cv), osg::StateAttribute::ON);
-            stateset->setTextureAttribute(2,
+            stateset->setTextureAttribute(mOpaqueColorTextureUnit,
                 mResourceSystem->getSceneManager()->getOpaqueColorTex(cv->getTraversalNumber()),
                 osg::StateAttribute::ON);
             stateset->setTextureAttribute(mOpaqueDepthTextureUnit,
