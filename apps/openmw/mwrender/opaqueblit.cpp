@@ -43,7 +43,9 @@ namespace MWRender
         }
         else
         {
+            (msaaFbo ? msaaFbo : fbo)->apply(state, osg::FrameBufferObject::READ_FRAMEBUFFER);
             opaqueFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            glReadBuffer(GL_COLOR_ATTACHMENT0);
             ext->glBlitFramebuffer(0, 0, colorTex->getTextureWidth(), colorTex->getTextureHeight(), 0, 0,
                 colorTex->getTextureWidth(), colorTex->getTextureHeight(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
                 GL_NEAREST);
