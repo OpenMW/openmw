@@ -181,13 +181,24 @@ void main(void)
     waterDepthDistorted = mix(waterDepthDistorted, realWaterDepth, min(surfaceDepth / REFR_FOG_DISTORT_DISTANCE, 1.0));
 
     // refraction
-    vec3 refraction = sampleOpaqueColorTex(screenCoords - screenCoordsOffset).rgb;
+    vec2 refractionCoords = screenCoords - screenCoordsOffset;
+    vec3 refraction = sampleOpaqueColorTex(refractionCoords).rgb;
 
     // Fade out refraction, preventing distant cells with no terrain to not bleed the horizon
     if (cameraPos.z >= waterHeight) {
         const float backgroundFadeStart = 40000;
         const float backgroundFadeEnd = backgroundFadeStart * 1.2;
-        float backgroundVisibility = 1.0 - smoothstep(backgroundFadeStart, backgroundFadeEnd, max(depthSample, depthSampleDistorted));
+        vec2 texel = vec2(1.0) / screenRes;
+        float backgroundDepth = max(depthSample, depthSampleDistorted);
+        backgroundDepth = max(backgroundDepth,
+            linearizeDepth(sampleOpaqueDepthTex(refractionCoords + vec2(texel.x, 0.0)).r, near, far));
+        backgroundDepth = max(backgroundDepth,
+            linearizeDepth(sampleOpaqueDepthTex(refractionCoords - vec2(texel.x, 0.0)).r, near, far));
+        backgroundDepth = max(backgroundDepth,
+            linearizeDepth(sampleOpaqueDepthTex(refractionCoords + vec2(0.0, texel.y)).r, near, far));
+        backgroundDepth = max(backgroundDepth,
+            linearizeDepth(sampleOpaqueDepthTex(refractionCoords - vec2(0.0, texel.y)).r, near, far));
+        float backgroundVisibility = 1.0 - smoothstep(backgroundFadeStart, backgroundFadeEnd, backgroundDepth);
         refraction = mix(fog.underWaterColor.rgb, refraction, backgroundVisibility);
     }
 

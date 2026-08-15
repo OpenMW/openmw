@@ -289,8 +289,6 @@ namespace MWRender
     private:
         void updateTextureFiltering();
         void updateAmbient();
-        void setFogColor(const osg::Vec4f& color);
-
         struct WorldspaceChunkMgr
         {
             std::unique_ptr<Terrain::World> mTerrain;

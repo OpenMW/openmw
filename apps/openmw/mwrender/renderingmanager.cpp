@@ -744,17 +744,19 @@ namespace MWRender
         float fogUnderWaterEnd = mFog->getFogEnd(true);
         osg::Vec4f fogUnderWaterColor = mFog->getFogColor(true);
 
+        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
+
+        mStateUpdater->setFogColor(fogColor);
         mStateUpdater->setFogStart(fogStart);
         mStateUpdater->setFogEnd(fogEnd);
         mStateUpdater->setUnderWaterFogStart(fogUnderWaterStart);
         mStateUpdater->setUnderWaterFogEnd(fogUnderWaterEnd);
         mStateUpdater->setUnderWaterFogColor(fogUnderWaterColor);
-        setFogColor(fogColor);
+
+        mViewer->getCamera()->setClearColor(isUnderwater ? fogUnderWaterColor : fogColor);
 
         auto world = MWBase::Environment::get().getWorld();
         const auto& stateUpdater = mPostProcessor->getStateUpdater();
-
-        bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
 
         stateUpdater->setFogRange(fogStart, fogEnd);
         stateUpdater->setNearFar(mNearClip, mViewDistance);
@@ -1273,13 +1275,6 @@ namespace MWRender
 
         mPostProcessor->getStateUpdater()->setAmbientColor(color);
         mStateUpdater->setAmbientColor(color);
-    }
-
-    void RenderingManager::setFogColor(const osg::Vec4f& color)
-    {
-        mViewer->getCamera()->setClearColor(color);
-
-        mStateUpdater->setFogColor(color);
     }
 
     RenderingManager::WorldspaceChunkMgr& RenderingManager::getWorldspaceChunkMgr(ESM::RefId worldspace)
