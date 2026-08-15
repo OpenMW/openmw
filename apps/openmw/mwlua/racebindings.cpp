@@ -173,8 +173,8 @@ namespace MWLua
             else
             {
                 auto table = value.as<sol::lua_table>();
-                RaceHeightWeight::set(race, type, true, table.get_or("male", 1.f));
-                RaceHeightWeight::set(race, type, false, table.get_or("female", 1.f));
+                RaceHeightWeight::set(race, type, true, table.get_or("male", Misc::FiniteFloat(1.f)));
+                RaceHeightWeight::set(race, type, false, table.get_or("female", Misc::FiniteFloat(1.f)));
             }
         }
 
@@ -409,17 +409,20 @@ namespace MWLua
                     else
                         throw std::runtime_error(std::format("cannot add more than {} skill bonuses", bonuses.size()));
                 };
-                skillsT[sol::meta_function::pairs] = [&](sol::this_state ts, const RaceSkills&) {
-                    return sol::as_function([index = size_t{}](const RaceSkills& skills) mutable
-                        -> std::pair<std::optional<ESM::RefId>, std::optional<int>> {
+                skillsT[sol::meta_function::pairs] = [&](sol::this_state ts, const RaceSkills& obj) {
+                    return std::make_tuple(sol::as_function([index = size_t{}](const RaceSkills& skills) mutable
+                                               -> std::pair<std::optional<ESM::RefId>, std::optional<int>> {
                         const auto& bonuses = skills.find();
-                        for (; index < bonuses.size(); ++index)
+                        while (index < bonuses.size())
                         {
-                            if (!bonuses[index].mSkill.empty())
-                                return { bonuses[index].mSkill, bonuses[index].mBonus };
+                            const auto& bonus = bonuses[index];
+                            ++index;
+                            if (!bonus.mSkill.empty())
+                                return { bonus.mSkill, bonus.mBonus };
                         }
                         return { {}, {} };
-                    });
+                    }),
+                        obj, sol::nil);
                 };
 
                 record["attributes"]
