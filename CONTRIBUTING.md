@@ -2,30 +2,30 @@ How to contribute to OpenMW
 =======================
 
 Non-Coding
-=======================
+==============
 
-If you are not able to contribute by coding, you can also help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
+You can help by triaging the issues list. Check for unconfirmed bugs and try to reproduce them on your end, working out any details that may be necessary. Check for bugs that do not conform to [Bug Reporting Guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) and improve them to do so!
 
-Other contribution options:
+Other non-coding options include:
 
 - [Testing OpenMW](https://wiki.openmw.org/index.php?title=Testing)
 - [Testing Morrowind Mods](https://wiki.openmw.org/index.php?title=Mod_Testing_Guidelines)
 - [Researching Morrowind's formulas](https://wiki.openmw.org/index.php?title=Research)
 
 Coding
-=======================
+========
 
-To help contribute to the OpenMW codebase:
+To contribute code to OpenMW:
 
 1. Register on GitLab
 2. Fork the [OpenMW repository](https://gitlab.com/OpenMW/openmw) on GitLab
 3. Clone your fork locally
 4. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
-5. Make sure your build of OpenMW does run
-6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference) and especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards). Also this rest of this document.
-7. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. ([The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
+5. Make sure your build of OpenMW runs
+6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
+7. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
-Ideally before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
+Ideally before you start coding reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
 
 Currently, we are focused on completing the Morrowind game experience and general polishing. Features out of this scope may be approved in some cases, but you should start a discussion first.
 
@@ -37,20 +37,21 @@ Note:
 Merge request guidelines
 =======================
 
-To help facilitate the review process, your merge request description should include the following, if applicable:
+To facilitate the review process, your merge request description should include the following, if applicable:
 
 * A link back to the bug report or discussion that prompted the change.
 * Summary of the changes made.
 * Reasoning / motivation behind the change.
 * What testing you have carried out to verify the change.
 
-Further guidelines/recommendations:
+Furthermore, we advise to:
 
 * Avoid stuffing unrelated commits into one merge request. As a rule of thumb, each feature and each bugfix should go into a separate MR, unless they are closely related or dependent upon each other. Small merge requests are easier to review and are less likely to require further changes before we can merge them. A "mega" merge request with lots of unrelated commits in it is likely to get held up in review for a long time.
 * Feel free to submit incomplete merge requests as drafts. Even if the work cannot be merged yet, merge requests are a great place to collect early feedback. Just make sure to mark it as [draft](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/).
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 * Reference the bug / feature ticket(s) in your commit message or merge request description (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your merge request's description includes 'Fixes #123', that issue will automatically be closed when your commit is merged.
-* When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs. Only do rebases when there is a reason to (related changes or the MR is for build pipeline changes).
+* When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
+* Don't rebase for no good reason. Some good reasons include squashing the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
 
 Guidelines for original engine "fixes"
 =================================
@@ -134,5 +135,5 @@ The master branch should always be in a working state that is not worse than the
 Other resources
 ===============
 
-- [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
-- [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.
+* [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
+* [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.

@@ -8,9 +8,8 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 * Version: 0.52.0
 * License: GPLv3 (see [LICENSE](https://gitlab.com/OpenMW/openmw/-/raw/master/LICENSE) for more information)
 * Website: https://www.openmw.org
-* IRC: #openmw on irc.libera.chat [https://web.libera.chat/#openmw](https://web.libera.chat/#openmw)
-* Discord: [https://discord.com/servers/openmw-260439894298460160](https://discord.com/servers/openmw-260439894298460160)
-
+* IRC: [#openmw on irc.libera.chat](https://web.libera.chat/#openmw)
+* Discord: [official server](https://discord.com/servers/openmw-260439894298460160)
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see [files/data/fonts/DejaVuFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DejaVuFontLicense.txt) for more information)
@@ -28,8 +27,14 @@ Getting Started
 ---------------
 
 * [Installation instructions](https://openmw.readthedocs.io/en/latest/manuals/installation/index.html)
-* [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - please read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug.
+* [Build from source](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
+* [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
+
+Contributing
+---------
+
+Not sure what to do with all your free time? OpenMW is always looking for new contributions. [See here on how to contribute](./CONTRIBUTING.md)
 
 The data path
 -------------
@@ -106,8 +111,3 @@ Command line options
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
       --random-seed arg (=<impl defined>)   seed value for random number generator
-
-Contributing
----------
-
-OpenMW is always looking for new contributions. [See here on how to contribute](./CONTRIBUTING.md)
