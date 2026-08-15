@@ -193,8 +193,9 @@ namespace MWLua
                 throw std::runtime_error("FormId expected, got " + std::string(formIdStr) + "; use core.getFormId");
             return GObject(*refId.getIf<ESM::FormId>());
         };
-        api["getObjectsByRecordId"] = [](sol::this_state thisState, std::string_view serializedId,
-                                          std::optional<std::string_view> worldSpace) -> sol::table {
+        api["getObjectsByRecordId"]
+            = [](sol::this_state thisState, std::string_view serializedId, std::optional<std::string_view> worldSpace,
+                  std::optional<bool> loadedOnly) -> sol::table {
             ESM::RefId id = ESM::RefId::deserializeText(serializedId);
             sol::table objects(thisState, sol::create);
             if (id.empty())
@@ -206,7 +207,9 @@ namespace MWLua
                 if (worldSpaceId.empty())
                     return objects;
             }
-            std::vector<MWWorld::Ptr> ptrs = MWBase::Environment::get().getWorldModel()->getAll(id, worldSpaceId, true);
+            const bool searchUnloaded = !loadedOnly.value_or(false);
+            std::vector<MWWorld::Ptr> ptrs
+                = MWBase::Environment::get().getWorldModel()->getAll(id, worldSpaceId, searchUnloaded);
             for (const MWWorld::Ptr& ptr : ptrs)
                 objects.add(GObject(ptr));
             return objects;

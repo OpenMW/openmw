@@ -472,6 +472,8 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, ESM::RefId 
     {
         for (const ESM4::Cell& cell : mStore.get<ESM4::Cell>())
         {
+            if (mCells.contains(cell.mId))
+                continue;
             if (worldSpace.empty() || cell.mParent == worldSpace)
                 addFromStore(emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells));
         }
