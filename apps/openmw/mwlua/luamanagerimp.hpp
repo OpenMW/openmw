@@ -60,6 +60,12 @@ namespace MWLua
         // The parallelism can be turned off in the settings.
         void update();
 
+        // \brief Performs one incremental garbage collection step.
+        //
+        // Returns true if the step finished a collection cycle. Touches the Lua state:
+        // never run concurrently with anything else that does.
+        bool gcStep(int steps);
+
         // \brief Executes latency-critical and scene graph related Lua logic.
         //
         // Called by engine.cpp from the main thread between InputManager and MechanicsManager updates.

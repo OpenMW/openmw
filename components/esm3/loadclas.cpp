@@ -23,7 +23,7 @@ namespace ESM
             std::array<int32_t, 2> mAttribute;
             int32_t mSpecialization;
             std::array<std::array<int32_t, 2>, 5> mSkills;
-            int32_t mIsPlayable;
+            char mIsPlayable;
             int32_t mServices;
         };
 
@@ -59,7 +59,8 @@ namespace ESM
     template <Misc::SameAsWithoutCvref<EsmCLDTstruct> T>
     void decompose(T&& v, const auto& f)
     {
-        f(v.mAttribute, v.mSpecialization, v.mSkills, v.mIsPlayable, v.mServices);
+        char padding[] = { 0, 0, 0 };
+        f(v.mAttribute, v.mSpecialization, v.mSkills, v.mIsPlayable, padding, v.mServices);
     }
 
     ESM::RefId& Class::CLDTstruct::getSkill(int index, bool major)
@@ -96,8 +97,6 @@ namespace ESM
                     EsmCLDTstruct data;
                     esm.getSubComposite(data);
                     fromBinary(data, mData);
-                    if (mData.mIsPlayable > 1)
-                        esm.fail("Unknown bool value");
                     hasData = true;
                     break;
                 }

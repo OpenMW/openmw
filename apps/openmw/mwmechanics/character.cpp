@@ -473,15 +473,11 @@ namespace MWMechanics
         {
             if (!mCurrentWeapon.empty())
                 mAnimation->disable(mCurrentWeapon);
-            if (mUpperBodyState > UpperBodyState::WeaponEquipped)
+            if (mUpperBodyState != UpperBodyState::None)
             {
                 mUpperBodyState = UpperBodyState::WeaponEquipped;
                 if (mWeaponType > ESM::Weapon::None)
                     mAnimation->showWeapons(true);
-            }
-            else if (mUpperBodyState < UpperBodyState::WeaponEquipped)
-            {
-                mUpperBodyState = UpperBodyState::None;
             }
         }
 

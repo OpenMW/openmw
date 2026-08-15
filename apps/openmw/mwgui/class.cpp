@@ -259,8 +259,7 @@ namespace MWGui
         std::vector<std::pair<ESM::RefId, std::string>> items; // class id, class name
         for (const ESM::Class& classInfo : store.get<ESM::Class>())
         {
-            bool playable = (classInfo.mData.mIsPlayable != 0);
-            if (!playable) // Only display playable classes
+            if (!classInfo.mData.mIsPlayable) // Only display playable classes
                 continue;
 
             if (store.get<ESM::Class>().isDynamic(classInfo.mId))

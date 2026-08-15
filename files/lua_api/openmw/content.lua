@@ -28,6 +28,15 @@
 -- @usage
 -- content.books.records.MyBook = { template = content.books.records['bk_lustyargonianmaid'], text = content.books.records['bk_BoethiahPillowBook'].text }
 
+--- @{#ClassContent}: Class manipulation.
+-- @field [parent=#content] #ClassContent classes
+
+---
+-- A mutable list of all @{openmw.types#ClassRecord}s.
+-- @field [parent=#ClassContent] #list<openmw.types#ClassRecord> records
+-- @usage
+-- content.classes.records.MyClass = { name = 'Nightbonk', template = content.classes.records['Nightblade'], majorSkills = { 'BluntWeapon', 'Mysticism', 'Illusion', 'Alteration', 'Sneak' } }
+
 --- @{#DoorContent}: Door manipulation.
 -- @field [parent=#content] #DoorContent doors
 

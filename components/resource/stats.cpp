@@ -454,6 +454,11 @@ namespace Resource
             }
         }
 
+        osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
+        SceneUtil::disableFFPStateForRenderer(renderer);
+        mCamera->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+        mCamera->setRenderer(renderer);
+
         mCamera->setGraphicsContext(context);
 
         mCamera->setRenderOrder(osg::Camera::POST_RENDER, 11);
@@ -465,11 +470,6 @@ namespace Resource
         // only clear the depth buffer
         mCamera->setClearMask(0);
         mCamera->setAllowEventFocus(false);
-
-        osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
-        SceneUtil::disableFFPStateForRenderer(renderer);
-        mCamera->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
-        mCamera->setRenderer(renderer);
     }
 
     namespace

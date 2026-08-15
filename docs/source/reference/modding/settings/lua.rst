@@ -72,3 +72,8 @@ Lua Settings
 
    Lua garbage collector steps per frame.
    Higher values allow more memory to be freed per frame.
+   With a separate Lua thread (see :ref:`lua num threads`), the garbage collector
+   runs there in small increments while the main thread does not use the Lua
+   state; this setting only controls whether collection happens at all
+   (0 disables it). Without a separate thread, it is the amount of garbage
+   collection performed each frame.
