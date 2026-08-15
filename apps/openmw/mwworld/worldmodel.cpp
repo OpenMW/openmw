@@ -120,6 +120,13 @@ namespace MWWorld
                 MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
             return cellStore;
         }
+
+        ESM::RefId getWorldSpace(const ESM4::Cell& cell)
+        {
+            if (cell.mCellFlags & ESM4::CELL_Interior)
+                return cell.mId;
+            return cell.mParent;
+        }
     }
 }
 
@@ -474,7 +481,7 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, ESM::RefId 
         {
             if (mCells.contains(cell.mId))
                 continue;
-            if (worldSpace.empty() || cell.mParent == worldSpace)
+            if (worldSpace.empty() || getWorldSpace(cell) == worldSpace)
                 addFromStore(emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells));
         }
     }
