@@ -23,7 +23,7 @@ To contribute code to OpenMW:
 4. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
 5. Make sure your build of OpenMW runs
 6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
-7. Find an issue to work on on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/) that interests you. [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
+7. Find an issue that interests you on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/). [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
 Ideally before you start coding reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
 
