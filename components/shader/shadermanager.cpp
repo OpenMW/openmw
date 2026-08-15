@@ -13,6 +13,8 @@
 #include <unordered_map>
 
 #include <osg/Program>
+#include <osg/Uniform>
+#include <osg/buffered_value>
 #include <osgViewer/Viewer>
 
 #include <components/debug/debuglog.hpp>
@@ -575,8 +577,92 @@ namespace Shader
         return shaderIt->second;
     }
 
-    osg::ref_ptr<osg::Program> ShaderManager::getProgram(
-        const std::string& templateName, const DefineMap& defines, const osg::Program* programTemplate)
+    class SamplerProgram : public osg::Program
+    {
+    public:
+        SamplerProgram() = default;
+        explicit SamplerProgram(const ShaderManager::SamplerBindingMap& samplers);
+        SamplerProgram(
+            const ShaderManager::SamplerBindingMap& samplers, const osg::Program& other, const osg::CopyOp& copyop);
+        SamplerProgram(const SamplerProgram& other, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        META_Object(Shader, SamplerProgram)
+
+        bool hasSamplers(const ShaderManager::SamplerBindingMap& samplers) const;
+
+        void apply(osg::State& state) const override;
+
+        void resizeGLObjectBuffers(unsigned int maxSize) override;
+
+    private:
+        std::vector<osg::ref_ptr<osg::Uniform>> mSamplers;
+        mutable osg::buffered_value<const PerContextProgram*> mApplied;
+    };
+
+    SamplerProgram::SamplerProgram(const ShaderManager::SamplerBindingMap& samplers)
+    {
+        for (const auto& [name, unit] : samplers)
+            mSamplers.emplace_back(new osg::Uniform(name.c_str(), unit));
+    }
+
+    SamplerProgram::SamplerProgram(
+        const ShaderManager::SamplerBindingMap& samplers, const osg::Program& other, const osg::CopyOp& copyop)
+        : osg::Program(other, copyop)
+    {
+        for (const auto& [name, index] : other.getUniformBlockBindingList())
+            addBindUniformBlock(name, index);
+        for (const auto& [name, unit] : samplers)
+            mSamplers.emplace_back(new osg::Uniform(name.c_str(), unit));
+    }
+
+    SamplerProgram::SamplerProgram(const SamplerProgram& other, const osg::CopyOp& copyop)
+        : SamplerProgram({}, other, copyop)
+    {
+        mSamplers = other.mSamplers;
+    }
+
+    bool SamplerProgram::hasSamplers(const ShaderManager::SamplerBindingMap& samplers) const
+    {
+        if (mSamplers.size() != samplers.size())
+            return false;
+        for (const osg::ref_ptr<osg::Uniform>& sampler : mSamplers)
+        {
+            int unit = -1;
+            sampler->get(unit);
+            const auto it = samplers.find(sampler->getName());
+            if (it == samplers.end() || it->second != unit)
+                return false;
+        }
+        return true;
+    }
+
+    void SamplerProgram::apply(osg::State& state) const
+    {
+        const PerContextProgram* pcp = getPCP(state);
+        const bool relink = pcp->needsLink();
+
+        osg::Program::apply(state);
+
+        if (state.getLastAppliedProgramObject() != pcp)
+            return;
+
+        const PerContextProgram*& applied = mApplied[state.getContextID()];
+        if (applied == pcp && !relink)
+            return;
+
+        for (const osg::ref_ptr<osg::Uniform>& sampler : mSamplers)
+            pcp->apply(*sampler);
+        applied = pcp;
+    }
+
+    void SamplerProgram::resizeGLObjectBuffers(unsigned int maxSize)
+    {
+        osg::Program::resizeGLObjectBuffers(maxSize);
+        mApplied.resize(maxSize);
+    }
+
+    osg::ref_ptr<osg::Program> ShaderManager::getProgram(const std::string& templateName, const DefineMap& defines,
+        const osg::Program* programTemplate, const SamplerBindingMap& samplers)
     {
         auto vert = getShader(templateName + ".vert", defines);
         auto frag = getShader(templateName + ".frag", defines);
@@ -584,11 +670,12 @@ namespace Shader
         if (!vert || !frag)
             throw std::runtime_error("failed initializing shader: " + templateName);
 
-        return getProgram(std::move(vert), std::move(frag), programTemplate);
+        return getProgram(std::move(vert), std::move(frag), programTemplate, samplers);
     }
 
     osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader,
-        osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate)
+        osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate,
+        const SamplerBindingMap& samplers)
     {
         std::lock_guard<std::mutex> lock(mMutex);
         ProgramMap::iterator found = mPrograms.find(std::make_pair(vertexShader, fragmentShader));
@@ -596,15 +683,17 @@ namespace Shader
         {
             if (!programTemplate)
                 programTemplate = mProgramTemplate;
-            osg::ref_ptr<osg::Program> program
-                = programTemplate ? cloneProgram(programTemplate) : osg::ref_ptr<osg::Program>(new osg::Program);
+            osg::ref_ptr<SamplerProgram> program = programTemplate
+                ? new SamplerProgram(samplers, *programTemplate, osg::CopyOp::SHALLOW_COPY)
+                : new SamplerProgram(samplers);
             program->addShader(vertexShader);
             program->addShader(fragmentShader);
             addLinkedShaders(vertexShader, program);
             addLinkedShaders(fragmentShader, program);
-
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }
+        else
+            assert(static_cast<SamplerProgram*>(found->second.get())->hasSamplers(samplers));
         return found->second;
     }
 
