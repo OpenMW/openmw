@@ -20,10 +20,14 @@ namespace Stereo
 
 namespace MWRender
 {
+    class Water;
+
     class TransparentDepthBinCallback : public osgUtil::RenderBin::DrawCallback
     {
     public:
         TransparentDepthBinCallback(Shader::ShaderManager& shaderManager, bool postPass);
+
+        void setWater(const Water* water) { mWater = water; }
 
         void drawImplementation(
             osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override;
@@ -37,6 +41,7 @@ namespace MWRender
     private:
         osg::ref_ptr<osg::StateSet> mStateSet;
         bool mPostPass;
+        const Water* mWater = nullptr;
     };
 
 }

@@ -468,6 +468,11 @@ namespace MWRender
         return mWaterNode->getPosition();
     }
 
+    osg::Drawable* Water::getDrawable() const
+    {
+        return mWaterGeom.get();
+    }
+
     void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     {
         osg::ref_ptr<osg::StateSet> stateset

@@ -39,6 +39,7 @@
 #include "sky.hpp"
 #include "transparentpass.hpp"
 #include "vismask.hpp"
+#include "water.hpp"
 #include "waterawaretransparentbin.hpp"
 
 namespace
@@ -164,10 +165,6 @@ namespace MWRender
         opaqueResolveNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OpaqueResolve, "OpaqueResolve");
         rootNode->addChild(opaqueResolveNode);
 
-        osg::ref_ptr<WaterAwareTransparentBin> transparentBin = new WaterAwareTransparentBin(mOpaqueColorResolve);
-        transparentBin->setDrawCallback(mTransparentDepthPostPass);
-        osgUtil::RenderBin::addRenderBinPrototype("DepthSortedBin", transparentBin);
-
         osg::ref_ptr<osgUtil::RenderBin> distortionRenderBin
             = new osgUtil::RenderBin(osgUtil::RenderBin::SORT_BACK_TO_FRONT);
         // This is silly to have to do, but if nothing is drawn then the drawcallback is never called and the distortion
@@ -235,6 +232,15 @@ namespace MWRender
 
         if (mUsePostProcessing)
             enable();
+    }
+
+    void PostProcessor::setupTransparentBin(const Water* water)
+    {
+        mTransparentDepthPostPass->setWater(water);
+        osg::ref_ptr<WaterAwareTransparentBin> transparentBin
+            = new WaterAwareTransparentBin(mOpaqueColorResolve, water);
+        transparentBin->setDrawCallback(mTransparentDepthPostPass);
+        osgUtil::RenderBin::addRenderBinPrototype("DepthSortedBin", transparentBin);
     }
 
     PostProcessor::~PostProcessor()

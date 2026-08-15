@@ -1,5 +1,7 @@
 #include "transparentpass.hpp"
 
+#include "water.hpp"
+
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/Material>
@@ -14,7 +16,6 @@
 #include <components/stereo/stereomanager.hpp>
 
 #include "vismask.hpp"
-#include "waterawaretransparentbin.hpp"
 
 namespace MWRender
 {
@@ -95,7 +96,7 @@ namespace MWRender
             if (rl->_drawable->getNodeMask() == Mask_ParticleSystem)
                 continue;
 
-            if (isWaterSurface(*rl))
+            if (mWater && rl->_drawable.get() == mWater->getDrawable())
                 continue;
 
             if (ss->getAttribute(osg::StateAttribute::MATERIAL))

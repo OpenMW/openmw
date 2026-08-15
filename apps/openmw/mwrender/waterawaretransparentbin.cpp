@@ -1,12 +1,10 @@
 #include "waterawaretransparentbin.hpp"
 
-#include <algorithm>
-
 #include <osg/BoundingSphere>
-#include <osg/StateSet>
 #include <osgUtil/RenderStage>
 
 #include "opaqueblit.hpp"
+#include "water.hpp"
 
 namespace
 {
@@ -14,12 +12,6 @@ namespace
     {
         const osg::Matrixd localToWorld = *leaf->_modelview * inverseView;
         return osg::Vec3d(leaf->_drawable->getBound().center()) * localToWorld;
-    }
-
-    void sortLeavesBackToFront(osgUtil::RenderBin::RenderLeafList& leaves)
-    {
-        std::stable_sort(leaves.begin(), leaves.end(),
-            [](const auto* left, const auto* right) { return left->_depth > right->_depth; });
     }
 
     void drawLeaves(
@@ -35,26 +27,17 @@ namespace
 
 namespace MWRender
 {
-    bool isWaterSurface(const osgUtil::RenderLeaf& leaf)
-    {
-        for (const osgUtil::StateGraph* stateGraph = leaf._parent; stateGraph; stateGraph = stateGraph->_parent)
-        {
-            const osg::StateSet* stateSet = stateGraph->getStateSet();
-            if (stateSet && stateSet->getUniform("waterSurface"))
-                return true;
-        }
-        return false;
-    }
-
-    WaterAwareTransparentBin::WaterAwareTransparentBin(OpaqueColorBinCallback* opaqueColorResolve)
+    WaterAwareTransparentBin::WaterAwareTransparentBin(OpaqueColorBinCallback* opaqueColorResolve, const Water* water)
         : osgUtil::RenderBin(osgUtil::RenderBin::SORT_BACK_TO_FRONT)
         , mOpaqueColorResolve(opaqueColorResolve)
+        , mWater(water)
     {
     }
 
     WaterAwareTransparentBin::WaterAwareTransparentBin(const WaterAwareTransparentBin& rhs, const osg::CopyOp& copyop)
         : osgUtil::RenderBin(rhs, copyop)
         , mOpaqueColorResolve(rhs.mOpaqueColorResolve)
+        , mWater(rhs.mWater)
     {
     }
 
@@ -66,31 +49,15 @@ namespace MWRender
         mWaterLeaves.clear();
         mAboveWaterLeaves.clear();
 
-        const osgUtil::RenderLeaf* waterLeaf = nullptr;
-        for (const auto& leaf : _renderLeafList)
-        {
-            if (isWaterSurface(*leaf))
-            {
-                waterLeaf = leaf;
-                break;
-            }
-        }
-
-        if (!waterLeaf)
-        {
-            mCameraUnderwater = false;
-            mAboveWaterLeaves = _renderLeafList;
-            sortLeavesBackToFront(mAboveWaterLeaves);
-            return;
-        }
-
         const osg::Matrixd inverseView = osg::Matrixd::inverse(*getStage()->getInitialViewMatrix());
-        const double waterHeight = worldCenter(waterLeaf, inverseView).z();
+        const double waterHeight = mWater->getHeight();
         const osg::Vec3d cameraPosition = osg::Vec3d() * inverseView;
+
         mCameraUnderwater = cameraPosition.z() < waterHeight;
-        for (const auto& leaf : _renderLeafList)
+
+        for (osgUtil::RenderLeaf* leaf : _renderLeafList)
         {
-            if (isWaterSurface(*leaf))
+            if (leaf->_drawable.get() == mWater->getDrawable())
                 mWaterLeaves.push_back(leaf);
             else if (worldCenter(leaf, inverseView).z() < waterHeight)
                 mUnderwaterLeaves.push_back(leaf);
@@ -98,9 +65,12 @@ namespace MWRender
                 mAboveWaterLeaves.push_back(leaf);
         }
 
-        sortLeavesBackToFront(mUnderwaterLeaves);
-        sortLeavesBackToFront(mWaterLeaves);
-        sortLeavesBackToFront(mAboveWaterLeaves);
+        if (mWaterLeaves.empty())
+        {
+            mCameraUnderwater = false;
+            mUnderwaterLeaves.clear();
+            mAboveWaterLeaves = _renderLeafList;
+        }
     }
 
     void WaterAwareTransparentBin::drawImplementation(osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)

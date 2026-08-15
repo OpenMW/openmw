@@ -6,16 +6,15 @@
 namespace MWRender
 {
     class OpaqueColorBinCallback;
-
-    bool isWaterSurface(const osgUtil::RenderLeaf& leaf);
+    class Water;
 
     class WaterAwareTransparentBin : public osgUtil::RenderBin
     {
     public:
-        explicit WaterAwareTransparentBin(OpaqueColorBinCallback* opaqueColorResolve);
+        WaterAwareTransparentBin(OpaqueColorBinCallback* opaqueColorResolve, const Water* water);
         WaterAwareTransparentBin(const WaterAwareTransparentBin& rhs, const osg::CopyOp& copyop);
 
-        osg::Object* cloneType() const override { return new WaterAwareTransparentBin(mOpaqueColorResolve); }
+        osg::Object* cloneType() const override { return new WaterAwareTransparentBin(mOpaqueColorResolve, mWater); }
         osg::Object* clone(const osg::CopyOp& copyop) const override
         {
             return new WaterAwareTransparentBin(*this, copyop);
@@ -30,6 +29,7 @@ namespace MWRender
         osgUtil::RenderBin::RenderLeafList mWaterLeaves;
         osgUtil::RenderBin::RenderLeafList mAboveWaterLeaves;
         bool mCameraUnderwater = false;
+        const Water* mWater;
     };
 }
 

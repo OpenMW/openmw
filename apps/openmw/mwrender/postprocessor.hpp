@@ -49,6 +49,7 @@ namespace Shader
 namespace MWRender
 {
     class RenderingManager;
+    class Water;
     class PingPongCull;
     class PingPongCanvas;
     class TransparentDepthBinCallback;
@@ -104,6 +105,8 @@ namespace MWRender
             RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs);
 
         ~PostProcessor();
+
+        void setupTransparentBin(const Water* water);
 
         void traverse(osg::NodeVisitor& nv) override;
 

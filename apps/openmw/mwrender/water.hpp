@@ -15,6 +15,7 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
+    class Drawable;
     class Geometry;
     class Node;
     class Callback;
@@ -116,6 +117,10 @@ namespace MWRender
         void update(float dt, bool paused);
 
         osg::Vec3d getPosition() const;
+
+        float getHeight() const { return mTop; }
+
+        osg::Drawable* getDrawable() const;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 
