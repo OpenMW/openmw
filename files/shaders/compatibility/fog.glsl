@@ -1,3 +1,5 @@
+#include "lib/light/struct.glsl"
+
 #if @skyBlending
 #include "lib/core/fragment.h.glsl"
 
@@ -19,6 +21,9 @@ uniform float waterHeight;
 uniform bool waterEnabled;
 uniform bool isReflection;
 uniform mat4 osg_ViewMatrixInverse;
+uniform DirectionalLight sun;
+
+const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 
 vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist, float near, float far)
 {
@@ -29,6 +34,8 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 #endif
 
     bool isUnderWater = false;
+    bool useWaterDepthFog = false;
+    float underwaterFogFactor = 1.0;
 
     if (waterEnabled) {
         vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
@@ -41,10 +48,23 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 
             if (!isReflection)
                 isUnderWater = worldPos.z < waterHeight - bias;
+
+            if (isUnderWater) {
+                useWaterDepthFog = true;
+                const float visibility = 2500.0;
+                const float depthFade = 0.15;
+                float waterDepth = dist * clamp((waterHeight - worldPos.z) / (cameraPos.z - worldPos.z), 0.0, 1.0);
+                float depthCorrection = sqrt(1.0 + 4.0 * depthFade * depthFade);
+                underwaterFogFactor = depthFade * depthFade
+                    / (-0.5 * depthCorrection + 0.5 - waterDepth / visibility) + 0.5 * depthCorrection + 0.5;
+                underwaterFogFactor = clamp(underwaterFogFactor, 0.0, 1.0);
+            }
         }
     }
 
     vec4 fogColor = isUnderWater ? fog.underWaterColor : fog.color;
+    if (useWaterDepthFog)
+        fogColor.rgb = WATER_COLOR * length(sun.ambient.xyz);
     float start = isUnderWater ? fog.underWaterStart : fog.start;
     float end = isUnderWater ? fog.underWaterEnd : fog.end;
 
@@ -58,6 +78,8 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 #else
     float fogValue = clamp((dist - start) * (1.0 / (end - start)), 0.0, 1.0);
 #endif
+    if (useWaterDepthFog)
+        fogValue = underwaterFogFactor;
 
 #ifdef ADDITIVE_BLENDING
     color.xyz *= 1.0 - fogValue;

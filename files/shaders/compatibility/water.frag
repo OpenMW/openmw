@@ -40,8 +40,6 @@ const float REFR_FOG_DISTORT_DISTANCE = 3000.0;    // at what distance refractio
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
 
-const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
-
 #if @wobblyShores
 const float WOBBLY_SHORE_FADE_DISTANCE = 6200.0;   // fade out wobbly shores to mask precision errors, the effect is almost impossible to see at a distance
 #endif
@@ -84,8 +82,6 @@ uniform vec2 screenRes;
 
 #include "shadows_fragment.glsl"
 #include "fog.glsl"
-
-uniform DirectionalLight sun;
 
 bool hasOpaqueGeometry(vec2 coords)
 {
@@ -200,10 +196,15 @@ void main(void)
     // refraction
     vec2 refractionCoords = screenCoords - screenCoordsOffset;
     vec3 refraction = sampleOpaqueColorTex(refractionCoords).rgb;
+    vec3 rawRefraction = refraction;
+
+    // brighten up the refraction underwater
+    if (cameraPos.z < waterHeight)
+        refraction = clamp(refraction * 1.5, 0.0, 1.0);
 
     // Use underwater fog where the opaque buffer has no geometry
     if (cameraPos.z >= waterHeight && !hasOpaqueGeometry(refractionCoords))
-        refraction = fog.underWaterColor.rgb;
+        refraction = waterColor;
 
 #if @sunlightScattering
     vec3 scatterNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
@@ -241,7 +242,7 @@ void main(void)
     float fuzzFactor = min(1.0, 1000.0 / surfaceDepth) * viewFactor;
     shoreOffset *= fuzzFactor;
     shoreOffset = clamp(mix(shoreOffset, 1.0, clamp(linearDepth / WOBBLY_SHORE_FADE_DISTANCE, 0.0, 1.0)), 0.0, 1.0);
-    gl_FragData[0].rgb = mix(refraction, gl_FragData[0].rgb, shoreOffset);
+    gl_FragData[0].rgb = mix(rawRefraction, gl_FragData[0].rgb, shoreOffset);
 #endif
 
 #if @radialFog
