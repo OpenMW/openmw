@@ -25,7 +25,7 @@ To contribute code to OpenMW:
 6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
 7. Find an issue that interests you on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/). [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
-Ideally before you start coding reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
+Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
 
 Currently, we are focused on completing the Morrowind game experience and general polishing. Features out of this scope may be approved in some cases, but you should start a discussion first.
 
@@ -47,11 +47,11 @@ To facilitate the review process, your merge request description should include 
 Furthermore, we advise to:
 
 * Avoid stuffing unrelated commits into one merge request. As a rule of thumb, each feature and each bugfix should go into a separate MR, unless they are closely related or dependent upon each other. Small merge requests are easier to review and are less likely to require further changes before we can merge them. A "mega" merge request with lots of unrelated commits in it is likely to get held up in review for a long time.
-* Feel free to submit incomplete merge requests as drafts. Even if the work cannot be merged yet, merge requests are a great place to collect early feedback. Just make sure to mark it as [draft](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/).
+* Feel free to submit incomplete merge requests as [drafts](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/). Even if the work cannot be merged yet, merge requests are a great place to collect early feedback.
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 * Reference the bug / feature ticket(s) in your commit message or merge request description (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your merge request's description includes 'Fixes #123', that issue will automatically be closed when your commit is merged.
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
-* Don't rebase for no good reason. Some good reasons include squashing the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
+* Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
 
 Guidelines for original engine "fixes"
 =================================
@@ -136,4 +136,4 @@ Other resources
 ===============
 
 * [GitHub blog - how to write the perfect pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/)
-* [Tools](https://wiki.openmw.org/index.php?title=Tools) that help facilitate testing/development.
+* [Tools](https://wiki.openmw.org/index.php?title=Tools) that facilitate testing/development.

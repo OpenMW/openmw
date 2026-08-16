@@ -34,7 +34,7 @@ Getting Started
 Contributing
 ---------
 
-Not sure what to do with all your free time? OpenMW is always looking for new contributions. [See here on how to contribute](./CONTRIBUTING.md)
+Not sure what to do with all your free time? OpenMW is always looking for new contributions. [See here for how to contribute.](./CONTRIBUTING.md)
 
 The data path
 -------------
