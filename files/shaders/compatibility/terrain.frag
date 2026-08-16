@@ -100,7 +100,8 @@ void main()
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
 
 #if !@disableNormals && @writeNormals
-    gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
+    // Terrain normals are now additively blended the same way as terrain color is, thus using color's alpha.
+    gl_FragData[1] = vec4(viewNormal * 0.5 + 0.5, gl_FragData[0].a);
 #endif
 
     applyShadowDebugOverlay();

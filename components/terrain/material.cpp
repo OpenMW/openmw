@@ -1,7 +1,6 @@
 #include "material.hpp"
 
 #include <osg/BlendFunc>
-#include <osg/Capability>
 #include <osg/Depth>
 #include <osg/Fog>
 #include <osg/TexMat>
@@ -196,8 +195,6 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                if (sceneManager->getSupportsNormalsRT())
-                    stateset->setAttribute(new osg::Disablei(GL_BLEND, 1));
                 stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
@@ -262,7 +259,7 @@ namespace Terrain
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = parallax ? "1" : "0";
-                defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
+                defineMap["writeNormals"] = "1";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
