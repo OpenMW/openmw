@@ -17,7 +17,7 @@ Coding
 
 To contribute code to OpenMW:
 
-1. Register on GitLab
+1. Register on GitLab. You must register so you can eventually raise a Merge Request (MR). You can wait to do this when you are ready to raise an MR.
 2. Fork the [OpenMW repository](https://gitlab.com/OpenMW/openmw) on GitLab
 3. Clone your fork locally
 4. [Build OpenMW by setting up a development environment](https://wiki.openmw.org/index.php?title=Development_Environment_Setup)
@@ -25,7 +25,7 @@ To contribute code to OpenMW:
 6. Read the [Developer Reference](https://wiki.openmw.org/index.php?title=Developer_Reference), especially the [Policies and Standards](https://wiki.openmw.org/index.php?title=Policies_and_Standards), and the rest of this document.
 7. Find an issue that interests you on the [issue tracker](https://gitlab.com/OpenMW/openmw/-/issues/). [The ones tagged "Beginner"](https://gitlab.com/OpenMW/openmw/-/issues/?scope=all&utf8=✓&state=opened&label_name=Beginner) may be good starting points.
 
-Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw) in the development channel to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
+Ideally, before you start coding, reach out on [Discord](https://discord.com/servers/openmw-260439894298460160)/[IRC](https://web.libera.chat/#openmw)/Matrix #openmw-space:openmw.org in the development channel (all three are bridged to each other) to discuss the issue and your plan of attack. Alternatively, begin the discussion in the GitLab issue itself.
 
 Currently, we are focused on completing the Morrowind game experience and general polishing. Features out of this scope may be approved in some cases, but you should start a discussion first.
 
@@ -37,21 +37,13 @@ Note:
 Merge request guidelines
 =======================
 
-To facilitate the review process, your merge request description should include the following, if applicable:
-
-* A link back to the bug report or discussion that prompted the change.
-* Summary of the changes made.
-* Reasoning / motivation behind the change.
-* What testing you have carried out to verify the change.
-
-Furthermore, we advise to:
-
+* Reference the bug / feature ticket(s) in your commit message or merge request description (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your merge request's description includes 'Fixes #123', that issue will automatically be closed when your commit is merged.
 * Avoid stuffing unrelated commits into one merge request. As a rule of thumb, each feature and each bugfix should go into a separate MR, unless they are closely related or dependent upon each other. Small merge requests are easier to review and are less likely to require further changes before we can merge them. A "mega" merge request with lots of unrelated commits in it is likely to get held up in review for a long time.
 * Feel free to submit incomplete merge requests as [drafts](https://docs.gitlab.com/ee/user/project/merge_requests/drafts/). Even if the work cannot be merged yet, merge requests are a great place to collect early feedback.
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
-* Reference the bug / feature ticket(s) in your commit message or merge request description (e.g. 'Bug #123') to make it easier to keep track of what we changed for what reason. Our bugtracker will show those commits next to the ticket. If your merge request's description includes 'Fixes #123', that issue will automatically be closed when your commit is merged.
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
 * Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
+* Review threads should be resolved by the thread author so the thread author can confirm that their concerns have been adequately dealt with. This rule does not apply to threads strictly using [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be resolved by the MR author.
 
 Guidelines for original engine "fixes"
 =================================
@@ -95,7 +87,7 @@ We welcome any help in reviewing open MRs. You don't need to be a developer to c
 
 This review process is divided into two sections because complaining about code or style issues hardly makes sense until the functionality of the MR is deemed OK. Anyone can help with the **functionality review** while most parts of the **code review** require you to have programming experience.
 
-In addition to the checklist below, make sure to check that the **merge request guidelines** (first half of this document) were followed.
+In addition to the checklist below, make sure to check that the **merge request guidelines** were followed.
 
 Functionality review
 ============

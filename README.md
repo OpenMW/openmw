@@ -10,6 +10,8 @@ OpenMW also comes with OpenMW-CS, a replacement for Bethesda's Construction Set.
 * Website: https://www.openmw.org
 * IRC: [#openmw on irc.libera.chat](https://web.libera.chat/#openmw)
 * Discord: [official server](https://discord.com/servers/openmw-260439894298460160)
+* Matrix #openmw-space:openmw.org
+* _Note_: IRC/Discord/Matrix are bridged to each other.
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see [files/data/fonts/DejaVuFontLicense.txt](https://gitlab.com/OpenMW/openmw/-/raw/master/files/data/fonts/DejaVuFontLicense.txt) for more information)
