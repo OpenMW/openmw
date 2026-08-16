@@ -741,20 +741,20 @@ namespace MWRender
         float fogEnd = mFog->getFogEnd(false);
         osg::Vec4f fogColor = mFog->getFogColor(false);
 
-        float fogUnderWaterStart = mFog->getFogStart(true);
-        float fogUnderWaterEnd = mFog->getFogEnd(true);
-        osg::Vec4f fogUnderWaterColor = mFog->getFogColor(true);
+        float fogUnderwaterStart = mFog->getFogStart(true);
+        float fogUnderwaterEnd = mFog->getFogEnd(true);
+        osg::Vec4f fogUnderwaterColor = mFog->getFogColor(true);
 
         bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
 
         mStateUpdater->setFogColor(fogColor);
         mStateUpdater->setFogStart(fogStart);
         mStateUpdater->setFogEnd(fogEnd);
-        mStateUpdater->setUnderWaterFogStart(fogUnderWaterStart);
-        mStateUpdater->setUnderWaterFogEnd(fogUnderWaterEnd);
-        mStateUpdater->setUnderWaterFogColor(fogUnderWaterColor);
+        mStateUpdater->setUnderwaterFogStart(fogUnderwaterStart);
+        mStateUpdater->setUnderwaterFogEnd(fogUnderwaterEnd);
+        mStateUpdater->setUnderwaterFogColor(fogUnderwaterColor);
 
-        mViewer->getCamera()->setClearColor(isUnderwater ? fogUnderWaterColor : fogColor);
+        mViewer->getCamera()->setClearColor(isUnderwater ? fogUnderwaterColor : fogColor);
 
         auto world = MWBase::Environment::get().getWorld();
         const auto& stateUpdater = mPostProcessor->getStateUpdater();

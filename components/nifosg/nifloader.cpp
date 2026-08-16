@@ -2680,6 +2680,7 @@ namespace NifOsg
                     if (!fogprop->vertexAlpha() && fogprop->enabled())
                     {
                         SceneUtil::setFogColor(*stateset, osg::Vec4f(fogprop->mColour, 1.f));
+                        SceneUtil::setUnderwaterFogColor(*stateset, osg::Vec4f(fogprop->mColour, 1.f));
                         SceneUtil::setFogDepth(*stateset, fogprop->mFogDepth);
                     }
                     else

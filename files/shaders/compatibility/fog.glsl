@@ -33,7 +33,7 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
     float dist = abs(linearDist);
 #endif
 
-    bool isUnderWater = false;
+    bool isUnderwater = false;
     bool useWaterDepthFog = false;
     float underwaterFogFactor = 1.0;
 
@@ -41,15 +41,15 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
         vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
         bool cameraBelowWater = cameraPos.z <= waterHeight;
         if (cameraBelowWater) {
-            isUnderWater = true;
+            isUnderwater = true;
         } else {
             vec3 worldPos = (osg_ViewMatrixInverse * vec4(pos, 1)).xyz;
             const float bias = 5.0;
 
             if (!isReflection)
-                isUnderWater = worldPos.z < waterHeight - bias;
+                isUnderwater = worldPos.z < waterHeight - bias;
 
-            if (isUnderWater) {
+            if (isUnderwater) {
                 useWaterDepthFog = true;
                 const float visibility = 2500.0;
                 const float depthFade = 0.15;
@@ -62,16 +62,18 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
         }
     }
 
-    vec4 fogColor = isUnderWater ? fog.underwaterColor : fog.color;
-    if (useWaterDepthFog)
-        fogColor.rgb = WATER_COLOR * length(sun.ambient.xyz);
-    float start = isUnderWater ? fog.underwaterStart : fog.start;
-    float end = isUnderWater ? fog.underwaterEnd : fog.end;
+    vec4 fogColor = isUnderwater ? fog.underwaterColor : fog.color;
+    float start = isUnderwater ? fog.underwaterStart : fog.start;
+    float end = isUnderwater ? fog.underwaterEnd : fog.end;
 
     if (fog.depth >= 0.0) {
         start = near * fog.depth + far * (1.0 - fog.depth);
         end = far;
+        useWaterDepthFog = false;
     }
+
+    if (useWaterDepthFog)
+        fogColor.rgb = WATER_COLOR * length(sun.ambient.xyz);
 
 #if @exponentialFog
     float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - start / 2.0) / (end - start / 2.0));
@@ -88,7 +90,7 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 #endif
 
 #if @skyBlending
-if (!isUnderWater && !isReflection) {
+if (!isUnderwater && !isReflection) {
     float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
     fadeValue *= fadeValue;
 #ifdef ADDITIVE_BLENDING

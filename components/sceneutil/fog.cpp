@@ -29,19 +29,19 @@ namespace SceneUtil
         stateset.addUniform(new osg::Uniform("fog.depth", depth), value);
     }
 
-    void setUnderWaterFogEnd(osg::StateSet& stateset, float end, osg::StateAttribute::OverrideValue value)
+    void setUnderwaterFogEnd(osg::StateSet& stateset, float end, osg::StateAttribute::OverrideValue value)
     {
         stateset.removeUniform("fog.underwaterEnd");
         stateset.addUniform(new osg::Uniform("fog.underwaterEnd", end), value);
     }
 
-    void setUnderWaterFogStart(osg::StateSet& stateset, float start, osg::StateAttribute::OverrideValue value)
+    void setUnderwaterFogStart(osg::StateSet& stateset, float start, osg::StateAttribute::OverrideValue value)
     {
         stateset.removeUniform("fog.underwaterStart");
         stateset.addUniform(new osg::Uniform("fog.underwaterStart", start), value);
     }
 
-    void setUnderWaterFogColor(
+    void setUnderwaterFogColor(
         osg::StateSet& stateset, const osg::Vec4f& color, osg::StateAttribute::OverrideValue value)
     {
         stateset.removeUniform("fog.underwaterColor");
@@ -63,17 +63,17 @@ namespace SceneUtil
         stateset.getUniform("fog.color")->set(color);
     }
 
-    void updateUnderWaterFogEnd(osg::StateSet& stateset, float end)
+    void updateUnderwaterFogEnd(osg::StateSet& stateset, float end)
     {
         stateset.getUniform("fog.underwaterEnd")->set(end);
     }
 
-    void updateUnderWaterFogStart(osg::StateSet& stateset, float start)
+    void updateUnderwaterFogStart(osg::StateSet& stateset, float start)
     {
         stateset.getUniform("fog.underwaterStart")->set(start);
     }
 
-    void updateUnderWaterFogColor(osg::StateSet& stateset, const osg::Vec4f& color)
+    void updateUnderwaterFogColor(osg::StateSet& stateset, const osg::Vec4f& color)
     {
         stateset.getUniform("fog.underwaterColor")->set(color);
     }
@@ -88,6 +88,8 @@ namespace SceneUtil
         constexpr float effectivelyDisabledFogDistance = 10000000.f;
         setFogStart(stateset, effectivelyDisabledFogDistance, value);
         setFogEnd(stateset, effectivelyDisabledFogDistance, value);
+        setUnderwaterFogStart(stateset, effectivelyDisabledFogDistance, value);
+        setUnderwaterFogEnd(stateset, effectivelyDisabledFogDistance, value);
         setFogDepth(stateset, -1.f, value);
     }
 

@@ -95,11 +95,11 @@ namespace SceneUtil
 
         void setFogEnd(float end);
 
-        void setUnderWaterFogColor(const osg::Vec4f& col);
+        void setUnderwaterFogColor(const osg::Vec4f& col);
 
-        void setUnderWaterFogStart(float start);
+        void setUnderwaterFogStart(float start);
 
-        void setUnderWaterFogEnd(float end);
+        void setUnderwaterFogEnd(float end);
 
         void setWireframe(bool wireframe);
         bool getWireframe() const;
@@ -113,9 +113,9 @@ namespace SceneUtil
         osg::Vec4f mFogColor;
         float mFogStart = 0.f;
         float mFogEnd = 0.f;
-        osg::Vec4f mUnderWaterFogColor;
-        float mUnderWaterFogStart = 0.f;
-        float mUnderWaterFogEnd = 0.f;
+        osg::Vec4f mUnderwaterFogColor;
+        float mUnderwaterFogStart = 0.f;
+        float mUnderwaterFogEnd = 0.f;
         bool mWireframe = false;
         float mWaterHeight = 0.f;
         bool mWaterEnabled = false;

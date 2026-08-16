@@ -144,9 +144,9 @@ namespace SceneUtil
         SceneUtil::setFogColor(*stateset, mFogColor);
         SceneUtil::setFogStart(*stateset, mFogStart);
         SceneUtil::setFogEnd(*stateset, mFogEnd);
-        SceneUtil::setUnderWaterFogColor(*stateset, mUnderWaterFogColor);
-        SceneUtil::setUnderWaterFogStart(*stateset, mUnderWaterFogStart);
-        SceneUtil::setUnderWaterFogEnd(*stateset, mUnderWaterFogEnd);
+        SceneUtil::setUnderwaterFogColor(*stateset, mUnderwaterFogColor);
+        SceneUtil::setUnderwaterFogStart(*stateset, mUnderwaterFogStart);
+        SceneUtil::setUnderwaterFogEnd(*stateset, mUnderwaterFogEnd);
         SceneUtil::setFogDepth(*stateset, -1.f);
 
         stateset->addUniform(new osg::Uniform("waterHeight", mWaterHeight));
@@ -160,9 +160,9 @@ namespace SceneUtil
         SceneUtil::updateFogColor(*stateset, mFogColor);
         SceneUtil::updateFogStart(*stateset, mFogStart);
         SceneUtil::updateFogEnd(*stateset, mFogEnd);
-        SceneUtil::updateUnderWaterFogColor(*stateset, mUnderWaterFogColor);
-        SceneUtil::updateUnderWaterFogStart(*stateset, mUnderWaterFogStart);
-        SceneUtil::updateUnderWaterFogEnd(*stateset, mUnderWaterFogEnd);
+        SceneUtil::updateUnderwaterFogColor(*stateset, mUnderwaterFogColor);
+        SceneUtil::updateUnderwaterFogStart(*stateset, mUnderwaterFogStart);
+        SceneUtil::updateUnderwaterFogEnd(*stateset, mUnderwaterFogEnd);
 
         stateset->getUniform("waterHeight")->set(mWaterHeight);
         stateset->getUniform("waterEnabled")->set(mWaterEnabled);
@@ -188,19 +188,19 @@ namespace SceneUtil
         mFogEnd = end;
     }
 
-    void StateUpdater::setUnderWaterFogColor(const osg::Vec4f& col)
+    void StateUpdater::setUnderwaterFogColor(const osg::Vec4f& col)
     {
-        mUnderWaterFogColor = col;
+        mUnderwaterFogColor = col;
     }
 
-    void StateUpdater::setUnderWaterFogStart(float start)
+    void StateUpdater::setUnderwaterFogStart(float start)
     {
-        mUnderWaterFogStart = start;
+        mUnderwaterFogStart = start;
     }
 
-    void StateUpdater::setUnderWaterFogEnd(float end)
+    void StateUpdater::setUnderwaterFogEnd(float end)
     {
-        mUnderWaterFogEnd = end;
+        mUnderwaterFogEnd = end;
     }
 
     void StateUpdater::setWaterHeight(float waterHeight)
