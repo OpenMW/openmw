@@ -101,7 +101,12 @@ namespace Resource
                 return mWarningImage;
             }
 
-            const std::string ext(Misc::getFileExtension(path.value()));
+            std::string ext(Misc::getFileExtension(path.value()));
+
+            // Non-standard, but Morrowind supports this
+            if (ext == "targa")
+                ext = "tga";
+
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
             if (!reader)
             {
