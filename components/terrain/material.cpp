@@ -1,6 +1,7 @@
 #include "material.hpp"
 
 #include <osg/BlendFunc>
+#include <osg/Capability>
 #include <osg/Depth>
 #include <osg/Fog>
 #include <osg/TexMat>
@@ -195,6 +196,8 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+                // This pass needs normals-buffer blending.
+                stateset->setAttribute(new osg::Enablei(GL_BLEND, 1));
                 stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
