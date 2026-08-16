@@ -1375,6 +1375,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
         }
 #endif
 
+        const bool debug = settings->getDebugDraw();
+
         // 4. For each light/shadow map
         for (unsigned int sm_i=0; sm_i<numShadowMapsPerLight; ++sm_i)
         {
@@ -1391,7 +1393,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 sd = previous_sdl.front();
                 previous_sdl.erase(previous_sdl.begin());
 
-                osg::Vec2s textureSize = settings->getTextureSize();
+                osg::Vec2s textureSize = debug ? osg::Vec2s(512, 512) : settings->getTextureSize();
                 const int w = textureSize.x();
                 const int h = textureSize.y();
 
@@ -1407,7 +1409,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             camera->setProjectionMatrix(projectionMatrix);
             camera->setViewMatrix(viewMatrix);
 
-            if (settings->getDebugDraw())
+            if (debug)
             {
                 camera->getViewport()->x() = pos_x;
                 pos_x += static_cast<unsigned int>(camera->getViewport()->width()) + 40;
