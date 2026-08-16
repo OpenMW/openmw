@@ -191,8 +191,12 @@ namespace MWLua
                 const size_t length = table.size();
                 race.mPowers.mList.reserve(length);
                 for (size_t i = 0; i < length; ++i)
-                    race.mPowers.mList.push_back(
-                        ESM::RefId::deserializeText(table.get<std::string_view>(LuaUtil::toLuaIndex(i))));
+                {
+                    const ESM::RefId spell
+                        = ESM::RefId::deserializeText(table.get<std::string_view>(LuaUtil::toLuaIndex(i)));
+                    if (!spell.empty())
+                        race.mPowers.mList.push_back(spell);
+                }
             }
         }
 
@@ -224,6 +228,9 @@ namespace MWLua
                     else
                         race.mData.mBonus[i] = {};
                 }
+                if (it != table.end())
+                    throw std::runtime_error(
+                        std::format("cannot add more than {} skill bonuses", race.mData.mBonus.size()));
             }
         }
 
