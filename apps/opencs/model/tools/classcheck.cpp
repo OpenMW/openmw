@@ -73,9 +73,10 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
     // test for non-unique skill
     std::map<ESM::RefId, int> skills; // ID, number of occurrences
 
-    for (const auto& s : classRecord.mData.mSkills)
-        for (const ESM::RefId& skill : s)
-            ++skills[skill];
+    for (const ESM::RefId& skill : classRecord.mData.mMinorSkills)
+        ++skills[skill];
+    for (const ESM::RefId& skill : classRecord.mData.mMajorSkills)
+        ++skills[skill];
 
     for (auto& skill : skills)
         if (skill.second > 1)

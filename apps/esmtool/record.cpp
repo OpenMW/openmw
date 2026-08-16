@@ -595,10 +595,10 @@ namespace EsmTool
             std::cout << "  Attribute" << (i + 1) << ": " << mData.mData.mAttribute[i] << std::endl;
         std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization) << " ("
                   << mData.mData.mSpecialization << ")" << std::endl;
-        for (const auto& skills : mData.mData.mSkills)
-            std::cout << "  Minor Skill: " << skills[0] << std::endl;
-        for (const auto& skills : mData.mData.mSkills)
-            std::cout << "  Major Skill: " << skills[1] << std::endl;
+        for (const ESM::RefId& skill : mData.mData.mMinorSkills)
+            std::cout << "  Minor Skill: " << skill << std::endl;
+        for (const ESM::RefId& skill : mData.mData.mMajorSkills)
+            std::cout << "  Major Skill: " << skill << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 

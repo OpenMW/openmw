@@ -10,8 +10,8 @@
 namespace
 {
     constexpr size_t sAttributeCount = std::tuple_size_v<decltype(ESM::Class::CLDTstruct::mAttribute)>;
-    constexpr size_t sMajorSkillCount = std::tuple_size_v<decltype(ESM::Class::CLDTstruct::mSkills)>;
-    constexpr size_t sMinorSkillCount = std::tuple_size_v<decltype(ESM::Class::CLDTstruct::mSkills)>;
+    constexpr size_t sMajorSkillCount = std::tuple_size_v<decltype(ESM::Class::CLDTstruct::mMajorSkills)>;
+    constexpr size_t sMinorSkillCount = std::tuple_size_v<decltype(ESM::Class::CLDTstruct::mMinorSkills)>;
 
     ESM::RefId& getAttribute(ESM::Class& c, size_t index)
     {
@@ -19,11 +19,11 @@ namespace
     }
     ESM::RefId& getMinorSkill(ESM::Class& c, size_t index)
     {
-        return c.mData.mSkills.at(index)[0];
+        return c.mData.mMinorSkills.at(index);
     }
     ESM::RefId& getMajorSkill(ESM::Class& c, size_t index)
     {
-        return c.mData.mSkills.at(index)[1];
+        return c.mData.mMajorSkills.at(index);
     }
 
     using ClassStatMapper = ESM::RefId& (*)(ESM::Class&, size_t);
@@ -164,10 +164,10 @@ namespace MWLua
                     return createReadOnlyRefIdTable(lua, rec.mData.mAttribute);
                 });
                 record["majorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
-                    return createReadOnlyRefIdTable(lua, rec.mData.mSkills, [](const auto& pair) { return pair[1]; });
+                    return createReadOnlyRefIdTable(lua, rec.mData.mMajorSkills);
                 });
                 record["minorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
-                    return createReadOnlyRefIdTable(lua, rec.mData.mSkills, [](const auto& pair) { return pair[0]; });
+                    return createReadOnlyRefIdTable(lua, rec.mData.mMinorSkills);
                 });
                 record["specialization"] = sol::readonly_property([](const ESM::Class& rec) -> std::string_view {
                     return ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization);

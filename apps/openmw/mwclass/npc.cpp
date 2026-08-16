@@ -106,6 +106,11 @@ namespace
         return i + 1.f;
     }
 
+    bool contains(const auto& array, ESM::RefId id)
+    {
+        return std::find(array.begin(), array.end(), id) != array.end();
+    }
+
     void autoCalculateAttributes(const ESM::NPC* npc, const ESM::Race* race, MWMechanics::CreatureStats& creatureStats)
     {
         // race bonus
@@ -138,13 +143,10 @@ namespace
 
                 // is this a minor or major skill?
                 float add = 0.2f;
-                for (const auto& skills : npcClass->mData.mSkills)
-                {
-                    if (skills[0] == skill.mId)
-                        add = 0.5;
-                    if (skills[1] == skill.mId)
-                        add = 1.0;
-                }
+                if (contains(npcClass->mData.mMajorSkills, skill.mId))
+                    add = 1.0;
+                else if (contains(npcClass->mData.mMinorSkills, skill.mId))
+                    add = 0.5;
                 modifierSum += add;
             }
             creatureStats.setAttribute(attribute.mId,
@@ -192,18 +194,15 @@ namespace
 
         unsigned int level = npcStats.getLevel();
 
-        for (int i = 0; i < 2; ++i)
+        for (const auto& id : npcClass->mData.mMinorSkills)
         {
-            int bonus = (i == 0) ? 10 : 25;
-
-            for (const auto& skills : npcClass->mData.mSkills)
-            {
-                const ESM::RefId& id = skills[i];
-                if (!id.empty())
-                {
-                    npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
-                }
-            }
+            if (!id.empty())
+                npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + 10);
+        }
+        for (const auto& id : npcClass->mData.mMajorSkills)
+        {
+            if (!id.empty())
+                npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + 25);
         }
 
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
@@ -219,15 +218,9 @@ namespace
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
-            for (const auto& skills : npcClass->mData.mSkills)
-            {
-                // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), skill.mId) != skills.end())
-                {
-                    majorMultiplier = 1.0f;
-                    break;
-                }
-            }
+            // is this a minor or major skill?
+            if (contains(npcClass->mData.mMinorSkills, skill.mId) || contains(npcClass->mData.mMajorSkills, skill.mId))
+                majorMultiplier = 1.0f;
 
             // is this skill in the same Specialization as the class?
             if (skill.mData.mSpecialization == npcClass->mData.mSpecialization)

@@ -309,10 +309,10 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
+    void StatsWindow::configureSkills(std::span<const ESM::RefId> major, std::span<const ESM::RefId> minor)
     {
-        mMajorSkills = major;
-        mMinorSkills = minor;
+        mMajorSkills.assign(major.begin(), major.end());
+        mMinorSkills.assign(minor.begin(), minor.end());
 
         // Update misc skills with the remaining skills not in major or minor
         std::set<ESM::RefId> skillSet;

@@ -48,7 +48,7 @@ namespace MWGui
         void setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
-        void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;
+        void configureSkills(std::span<const ESM::RefId> major, std::span<const ESM::RefId> minor) override;
 
         void onFrame(float duration);
 

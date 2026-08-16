@@ -32,10 +32,10 @@ namespace ESM
             dst.mAttribute[0] = ESM::Attribute::refIdToIndex(src.mAttribute[0]);
             dst.mAttribute[1] = ESM::Attribute::refIdToIndex(src.mAttribute[1]);
             dst.mSpecialization = src.mSpecialization;
-            for (std::size_t i = 0; i < src.mSkills.size(); ++i)
+            for (std::size_t i = 0; i < dst.mSkills.size(); ++i)
             {
-                dst.mSkills[i][0] = ESM::Skill::refIdToIndex(src.mSkills[i][0]);
-                dst.mSkills[i][1] = ESM::Skill::refIdToIndex(src.mSkills[i][1]);
+                dst.mSkills[i][0] = ESM::Skill::refIdToIndex(src.mMinorSkills[i]);
+                dst.mSkills[i][1] = ESM::Skill::refIdToIndex(src.mMajorSkills[i]);
             }
             dst.mIsPlayable = src.mIsPlayable;
             dst.mServices = src.mServices;
@@ -48,8 +48,8 @@ namespace ESM
             dst.mSpecialization = src.mSpecialization;
             for (std::size_t i = 0; i < src.mSkills.size(); ++i)
             {
-                dst.mSkills[i][0] = ESM::Skill::indexToRefId(src.mSkills[i][0]);
-                dst.mSkills[i][1] = ESM::Skill::indexToRefId(src.mSkills[i][1]);
+                dst.mMinorSkills[i] = ESM::Skill::indexToRefId(src.mSkills[i][0]);
+                dst.mMajorSkills[i] = ESM::Skill::indexToRefId(src.mSkills[i][1]);
             }
             dst.mIsPlayable = src.mIsPlayable;
             dst.mServices = src.mServices;
@@ -65,12 +65,16 @@ namespace ESM
 
     ESM::RefId& Class::CLDTstruct::getSkill(int index, bool major)
     {
-        return mSkills.at(index)[major ? 1 : 0];
+        if (major)
+            return mMajorSkills.at(index);
+        return mMinorSkills.at(index);
     }
 
     ESM::RefId Class::CLDTstruct::getSkill(int index, bool major) const
     {
-        return mSkills.at(index)[major ? 1 : 0];
+        if (major)
+            return mMajorSkills.at(index);
+        return mMinorSkills.at(index);
     }
 
     void Class::load(ESMReader& esm, bool& isDeleted)
@@ -146,7 +150,7 @@ namespace ESM
         mData.mIsPlayable = 0;
         mData.mServices = 0;
 
-        for (auto& skills : mData.mSkills)
-            skills.fill({});
+        mData.mMinorSkills.fill({});
+        mData.mMajorSkills.fill({});
     }
 }

@@ -167,6 +167,25 @@ void MWMechanics::NpcStats::setFactionReputation(const ESM::RefId& faction, int 
     mFactionReputation[faction] = value;
 }
 
+namespace
+{
+    float getTypeFactor(ESM::RefId id, const ESM::Class& npcClass)
+    {
+        const auto& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        for (const auto& skill : npcClass.mData.mMinorSkills)
+        {
+            if (skill == id)
+                return gmst.find("fMinorSkillBonus")->mValue.getFloat();
+        }
+        for (const auto& skill : npcClass.mData.mMajorSkills)
+        {
+            if (skill == id)
+                return gmst.find("fMajorSkillBonus")->mValue.getFloat();
+        }
+        return gmst.find("fMiscSkillBonus")->mValue.getFloat();
+    }
+}
+
 float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ESM::Class& npcClass) const
 {
     float progressRequirement = 1.f + getSkill(id).getBase();
@@ -174,20 +193,7 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
     const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
     const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
 
-    float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
-    for (const auto& skills : npcClass.mData.mSkills)
-    {
-        if (skills[0] == skill->mId)
-        {
-            typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
-            break;
-        }
-        else if (skills[1] == skill->mId)
-        {
-            typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
-            break;
-        }
-    }
+    const float typeFactor = getTypeFactor(id, npcClass);
 
     progressRequirement *= typeFactor;
 

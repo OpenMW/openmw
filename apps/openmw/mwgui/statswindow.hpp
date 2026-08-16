@@ -31,7 +31,7 @@ namespace MWGui
         void setValue(std::string_view id, const std::string& value) override;
         void setValue(std::string_view id, int value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
-        void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;
+        void configureSkills(std::span<const ESM::RefId> major, std::span<const ESM::RefId> minor) override;
 
         void setReputation(int reputation)
         {
