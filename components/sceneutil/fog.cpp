@@ -91,6 +91,8 @@ namespace SceneUtil
         setUnderwaterFogStart(stateset, effectivelyDisabledFogDistance, value);
         setUnderwaterFogEnd(stateset, effectivelyDisabledFogDistance, value);
         setFogDepth(stateset, -1.f, value);
+
+        stateset.addUniform(new osg::Uniform("waterEnabled", false), value);
     }
 
 }
