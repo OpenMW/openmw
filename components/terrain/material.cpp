@@ -262,7 +262,6 @@ namespace Terrain
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = parallax ? "1" : "0";
-                defineMap["writeNormals"] = "1";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
