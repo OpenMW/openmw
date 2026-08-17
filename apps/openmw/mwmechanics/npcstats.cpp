@@ -256,7 +256,7 @@ void MWMechanics::NpcStats::updateHealth()
     setHealth(floor(0.5f * (strength + endurance)));
 }
 
-int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const
+int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::RefId attribute) const
 {
     auto it = mSkillIncreases.find(attribute);
     if (it == mSkillIncreases.end() || it->second == 0)
@@ -270,7 +270,7 @@ int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::Attribu
     return MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(gmst.str())->mValue.getInteger();
 }
 
-int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const
+int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::RefId attribute) const
 {
     auto it = mSkillIncreases.find(attribute);
     if (it == mSkillIncreases.end())
@@ -278,7 +278,7 @@ int MWMechanics::NpcStats::getSkillIncreasesForAttribute(ESM::Attribute::Attribu
     return it->second;
 }
 
-void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute, int increases)
+void MWMechanics::NpcStats::setSkillIncreasesForAttribute(ESM::RefId attribute, int increases)
 {
     if (increases == 0)
         mSkillIncreases.erase(attribute);

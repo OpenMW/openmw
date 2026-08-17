@@ -7,14 +7,14 @@
 
 namespace ESM
 {
-    const Attribute::AttributeID Attribute::Strength("Strength");
-    const Attribute::AttributeID Attribute::Intelligence("Intelligence");
-    const Attribute::AttributeID Attribute::Willpower("Willpower");
-    const Attribute::AttributeID Attribute::Agility("Agility");
-    const Attribute::AttributeID Attribute::Speed("Speed");
-    const Attribute::AttributeID Attribute::Endurance("Endurance");
-    const Attribute::AttributeID Attribute::Personality("Personality");
-    const Attribute::AttributeID Attribute::Luck("Luck");
+    const RefId Attribute::Strength(ESM::StringRefId("Strength"));
+    const RefId Attribute::Intelligence(ESM::StringRefId("Intelligence"));
+    const RefId Attribute::Willpower(ESM::StringRefId("Willpower"));
+    const RefId Attribute::Agility(ESM::StringRefId("Agility"));
+    const RefId Attribute::Speed(ESM::StringRefId("Speed"));
+    const RefId Attribute::Endurance(ESM::StringRefId("Endurance"));
+    const RefId Attribute::Personality(ESM::StringRefId("Personality"));
+    const RefId Attribute::Luck(ESM::StringRefId("Luck"));
 
     static const RefId sAttributes[Attribute::Length] = {
         Attribute::Strength,
@@ -52,5 +52,14 @@ namespace ESM
     void Attribute::save(ESMWriter& esm, bool isDeleted) const
     {
         throw std::runtime_error("Attribute saving not yet implemented");
+    }
+
+    void Attribute::blank()
+    {
+        mId = {};
+        mName.clear();
+        mDescription.clear();
+        mIcon.clear();
+        mWerewolfValue = {};
     }
 }

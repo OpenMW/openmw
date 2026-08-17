@@ -25,6 +25,7 @@
 
 #include "objectvariant.hpp"
 #include "recordstore.hpp"
+#include "types/usertypeutil.hpp"
 
 namespace
 {
@@ -76,8 +77,7 @@ namespace MWLua
             if (prop == "progress")
                 stats.setLevelProgress(LuaUtil::cast<int>(value));
             else if (prop == "skillIncreasesForAttribute")
-                stats.setSkillIncreasesForAttribute(
-                    *std::get<ESM::RefId>(index).getIf<ESM::StringRefId>(), LuaUtil::cast<int>(value));
+                stats.setSkillIncreasesForAttribute(std::get<ESM::RefId>(index), LuaUtil::cast<int>(value));
             else if (prop == "skillIncreasesForSpecialization")
                 stats.setSkillIncreasesForSpecialization(
                     static_cast<ESM::Class::Specialization>(std::get<int>(index)), LuaUtil::cast<int>(value));
@@ -93,7 +93,7 @@ namespace MWLua
             {
             }
 
-            sol::object get(const Context& context, ESM::StringRefId attributeId) const
+            sol::object get(const Context& context, ESM::RefId attributeId) const
             {
                 if (!mObject.ptr().getClass().isNpc())
                     return sol::nil;
@@ -104,7 +104,7 @@ namespace MWLua
                     });
             }
 
-            void set(const Context& context, ESM::StringRefId attributeId, const sol::object& value) const
+            void set(const Context& context, ESM::RefId attributeId, const sol::object& value) const
             {
                 const auto& ptr = mObject.ptr();
                 if (!ptr.getClass().isNpc())
@@ -508,6 +508,21 @@ namespace MWLua
                 stats.setReputation(intValue);
             }
         };
+
+        template <class T>
+        void addAttributeType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Attribute[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Attribute::mName);
+            Types::addProperty(record, "description", &ESM::Attribute::mDescription);
+            Types::addIconProperty(record);
+            Types::addProperty(record, "werewolfValue", &ESM::Attribute::mWerewolfValue);
+        }
     }
 }
 
@@ -671,18 +686,7 @@ namespace MWLua
         statsApi["Attribute"] = LuaUtil::makeReadOnly(attributes);
         statsApi["Attribute"][sol::metatable_key][sol::meta_function::to_string] = ESM::Attribute::getRecordType;
 
-        auto attributeT = lua.new_usertype<ESM::Attribute>("Attribute");
-        attributeT[sol::meta_function::to_string]
-            = [](const ESM::Attribute& rec) { return "ESM3_Attribute[" + rec.mId.toDebugString() + "]"; };
-        attributeT["id"] = sol::readonly_property(
-            [](const ESM::Attribute& rec) -> std::string { return ESM::RefId{ rec.mId }.serializeText(); });
-        attributeT["name"]
-            = sol::readonly_property([](const ESM::Attribute& rec) -> std::string_view { return rec.mName; });
-        attributeT["description"]
-            = sol::readonly_property([](const ESM::Attribute& rec) -> std::string_view { return rec.mDescription; });
-        attributeT["icon"] = sol::readonly_property([vfs](const ESM::Attribute& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
+        addAttributeType<ESM::Attribute>(lua, "Attribute");
 
         sol::table skills(lua, sol::create);
         addRecordFunctionBinding<ESM::Skill>(skills, context);
@@ -735,5 +739,24 @@ namespace MWLua
             [](const ESM::MagicSchool& rec) -> std::string { return rec.mHitSound.serializeText(); });
 
         return LuaUtil::makeReadOnly(statsApi);
+    }
+
+    ESM::Attribute tableToAttribute(const sol::table& rec)
+    {
+        auto attribute = Types::initFromTemplate<ESM::Attribute>(rec);
+        if (rec["description"] != sol::nil)
+            attribute.mDescription = rec["description"];
+        if (rec["icon"] != sol::nil)
+            attribute.mIcon = rec["icon"].get<std::string_view>();
+        if (rec["name"] != sol::nil)
+            attribute.mName = rec["name"];
+        if (rec["werewolfValue"] != sol::nil)
+            attribute.mWerewolfValue = rec["werewolfValue"].get<Misc::FiniteFloat>();
+        return attribute;
+    }
+
+    void addMutableAttributeType(sol::state_view& lua)
+    {
+        addAttributeType<MutableRecord<ESM::Attribute>>(lua, "ESM3_MutableAttribute");
     }
 }

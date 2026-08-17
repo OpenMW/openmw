@@ -90,9 +90,9 @@ namespace MWMechanics
         int getLevelProgress() const;
         void setLevelProgress(int progress);
 
-        int getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const;
-        int getSkillIncreasesForAttribute(ESM::Attribute::AttributeID attribute) const;
-        void setSkillIncreasesForAttribute(ESM::Attribute::AttributeID, int increases);
+        int getLevelupAttributeMultiplier(ESM::RefId attribute) const;
+        int getSkillIncreasesForAttribute(ESM::RefId attribute) const;
+        void setSkillIncreasesForAttribute(ESM::RefId, int increases);
 
         int getSkillIncreasesForSpecialization(ESM::Class::Specialization spec) const;
         void setSkillIncreasesForSpecialization(ESM::Class::Specialization spec, int increases);

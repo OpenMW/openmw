@@ -1,5 +1,40 @@
 local content = require('openmw.content')
 
+local function generateAttributes()
+    local gmsts = content.gameSettings.records
+    local attributes = content.attributes.records
+    local function getString(key)
+        local v = gmsts[key]
+        if type(v) ~= 'string' or v == '' then
+            return key
+        end
+        return v
+    end
+
+    local values = {
+        { id = 'Strength', name = 'sAttributeStrength', description = 'sStrDesc', icon = 'icons/k/attribute_strength.dds', werewolf = 'fWerewolfStrength' },
+        { id = 'Intelligence', name = 'sAttributeIntelligence', description = 'sIntDesc', icon = 'icons/k/attribute_int.dds', werewolf = 'fWerewolfIntellegence' },
+        { id = 'Willpower', name = 'sAttributeWillpower', description = 'sWilDesc', icon = 'icons/k/attribute_wilpower.dds', werewolf = 'fWerewolfWillpower' },
+        { id = 'Agility', name = 'sAttributeAgility', description = 'sAgiDesc', icon = 'icons/k/attribute_agility.dds', werewolf = 'fWerewolfAgility' },
+        { id = 'Speed', name = 'sAttributeSpeed', description = 'sSpdDesc', icon = 'icons/k/attribute_speed.dds', werewolf = 'fWerewolfSpeed' },
+        { id = 'Endurance', name = 'sAttributeEndurance', description = 'sEndDesc', icon = 'icons/k/attribute_endurance.dds', werewolf = 'fWerewolfEndurance' },
+        { id = 'Personality', name = 'sAttributePersonality', description = 'sPerDesc', icon = 'icons/k/attribute_personality.dds', werewolf = 'fWerewolfPersonality' },
+        { id = 'Luck', name = 'sAttributeLuck', description = 'sLucDesc', icon = 'icons/k/attribute_luck.dds', werewolf = 'fWerewolfLuck' },
+    }
+    for _, value in pairs(values) do
+        local werewolfValue = gmsts[value.werewolf]
+        if type(werewolfValue) ~= 'number' then
+            werewolfValue = 0
+        end
+        attributes[value.id] = {
+            name = getString(value.name),
+            description = getString(value.description),
+            icon = value.icon,
+            werewolfValue = werewolfValue,
+        }
+    end
+end
+
 local function generateDefaultStatics()
     local statics = {
         -- Total conversions from SureAI lack marker records
@@ -100,6 +135,7 @@ end
 return {
     engineHandlers = {
         onContentFilesLoaded = function()
+            generateAttributes()
             generateDefaultDoors()
             generateDefaultGMSTs()
             generateDefaultStatics()

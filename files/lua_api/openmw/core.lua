@@ -984,6 +984,7 @@
 -- @field #string name Human-readable name
 -- @field #string description Human-readable description
 -- @field #string icon VFS path to the icon
+-- @field #number werewolfValue Value for werewolf players
 
 ---
 -- @type SkillRecord

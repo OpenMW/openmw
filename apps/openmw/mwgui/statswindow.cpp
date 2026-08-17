@@ -57,7 +57,7 @@ namespace MWGui
             box->setUserString("ToolTipLayout", "AttributeToolTip");
             box->setUserString("Caption_AttributeName", attribute.mName);
             box->setUserString("Caption_AttributeDescription", attribute.mDescription);
-            box->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
+            box->setUserString("ImageTexture_AttributeImage", attribute.mIcon.getNormalized());
             coord.top += coord.height;
             auto* name = box->createWidget<MyGUI::TextBox>("SandText", { 0, 0, 160, 18 }, alignment);
             name->setNeedMouseFocus(false);

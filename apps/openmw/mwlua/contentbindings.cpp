@@ -28,6 +28,7 @@
 #include "magictypebindings.hpp"
 #include "racebindings.hpp"
 #include "soundbindings.hpp"
+#include "stats.hpp"
 #include "types/modelproperty.hpp"
 #include "types/types.hpp"
 
@@ -285,6 +286,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initAttributeBindings(sol::state_view& lua, MWWorld::Store<ESM::Attribute>& store)
+        {
+            addRecordStoreBindings<ESM::Attribute>(lua, &MWLua::tableToAttribute);
+            addMutableAttributeType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Attribute>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initBookBindings(sol::state_view& lua, MWWorld::Store<ESM::Book>& store)
         {
             addRecordStoreBindings<ESM::Book>(lua, &MWLua::tableToBook);
@@ -494,6 +504,7 @@ namespace MWLua
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
         api["apparatuses"] = initApparatusBindings(lua, esmStore.getWritable<ESM::Apparatus>());
+        api["attributes"] = initAttributeBindings(lua, esmStore.getWritable<ESM::Attribute>());
         api["books"] = initBookBindings(lua, esmStore.getWritable<ESM::Book>());
         api["classes"] = initClassBindings(lua, esmStore.getWritable<ESM::Class>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());

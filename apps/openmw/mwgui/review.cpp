@@ -94,7 +94,7 @@ namespace MWGui
             widget->setUserString("ToolTipLayout", "AttributeToolTip");
             widget->setUserString("Caption_AttributeName", attribute.mName);
             widget->setUserString("Caption_AttributeDescription", attribute.mDescription);
-            widget->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
+            widget->setUserString("ImageTexture_AttributeImage", attribute.mIcon.getNormalized());
             widget->setAttributeId(attribute.mId);
             widget->setAttributeValue(Widgets::MWAttribute::AttributeValue());
             coord.top += coord.height;

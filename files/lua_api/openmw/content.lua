@@ -33,6 +33,15 @@
 -- @usage
 -- content.apparatuses.records.BetterAlembic = { template = content.apparatuses.records.MyAlembic, quality = 10 }
 
+--- @{#AttributeContent}: Attribute manipulation.
+-- @field [parent=#content] #AttributeContent attributes
+
+---
+-- A mutable list of all @{openmw.core#AttributeRecord}s.
+-- @field [parent=#AttributeContent] #list<openmw.core#AttributeRecord> records
+-- @usage
+-- content.attributes.records.MyAttribute = { name = 'Toddhood', description = 'n% of the power to reach Bethesda.', werewolfValue = 100 }
+
 --- @{#BookContent}: Book manipulation.
 -- @field [parent=#content] #BookContent books
 
