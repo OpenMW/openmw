@@ -4,11 +4,17 @@
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadnpc.hpp>
+#include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -771,6 +777,308 @@ namespace ESM
             EXPECT_EQ(result.mLandData->mTextures, record.mLandData->mTextures);
             EXPECT_EQ(result.mLandData->mColours, record.mLandData->mColours);
             EXPECT_EQ(result.mLandData->mDataLoaded, record.mLandData->mDataLoaded);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, bookShouldNotChange)
+        {
+            Book record = {
+                .mData = {
+                    .mSkillId = Skill::Alchemy,
+                    .mWeight = 1,
+                    .mValue = 2,
+                    .mIsScroll = true,
+                    .mEnchant = 3,
+                },
+                .mName = generateRandomString(32),
+                .mModel = makePath(generateRandomString(32)),
+                .mIcon = makePath(generateRandomString(32)),
+                .mText = generateRandomString(100),
+                .mId = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mEnchant = generateRandomRefId(32),
+            };
+
+            Book result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mSkillId, record.mData.mSkillId);
+            EXPECT_EQ(result.mData.mWeight, record.mData.mWeight);
+            EXPECT_EQ(result.mData.mValue, record.mData.mValue);
+            EXPECT_EQ(result.mData.mIsScroll, record.mData.mIsScroll);
+            EXPECT_EQ(result.mData.mEnchant, record.mData.mEnchant);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mIcon, record.mIcon);
+            EXPECT_EQ(result.mText, record.mText);
+            EXPECT_EQ(result.mRecordFlags, record.mRecordFlags);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mEnchant, record.mEnchant);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, classShouldNotChange)
+        {
+            Class record = {
+                .mName = generateRandomString(32),
+                .mDescription = generateRandomString(100),
+                .mId = generateRandomRefId(32),
+                .mData = {
+                    .mAttribute = { Attribute::Agility, Attribute::Luck },
+                    .mSpecialization = Class::Magic,
+                    .mMinorSkills = { Skill::Acrobatics, Skill::Athletics, Skill::Alchemy, Skill::Armorer, Skill::Alteration },
+                    .mMajorSkills = { Skill::Axe, Skill::Block, Skill::BluntWeapon, Skill::Conjuration, Skill::Destruction },
+                    .mIsPlayable = true,
+                    .mServices = NPC::Services::AllItems,
+                },
+            };
+
+            Class result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mDescription, record.mDescription);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mAttribute, record.mData.mAttribute);
+            EXPECT_EQ(result.mData.mSpecialization, record.mData.mSpecialization);
+            EXPECT_EQ(result.mData.mMinorSkills, record.mData.mMinorSkills);
+            EXPECT_EQ(result.mData.mMajorSkills, record.mData.mMajorSkills);
+            EXPECT_EQ(result.mData.mIsPlayable, record.mData.mIsPlayable);
+            EXPECT_EQ(result.mData.mServices, record.mData.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, creatureShouldNotChange)
+        {
+            Creature record = {
+                .mData = {
+                    .mAttributes = {
+                        { Attribute::Agility, 1 },
+                        { Attribute::Endurance, 2 },
+                        { Attribute::Intelligence, 3 },
+                        { Attribute::Luck, 4 },
+                        { Attribute::Personality, 5 },
+                        { Attribute::Speed, 6 },
+                        { Attribute::Strength, 7 },
+                        { Attribute::Willpower, 8 }
+                    },
+                    .mType = Creature::Daedra,
+                    .mLevel = 1,
+                    .mHealth = 2,
+                    .mMana = 3,
+                    .mFatigue = 4,
+                    .mSoul = 5,
+                    .mCombat = 6,
+                    .mMagic = 7,
+                    .mStealth = 8,
+                    .mAttack = { 9, 10, 11, 12, 13, 14 },
+                    .mGold = 15,
+                },
+                .mBloodType = 16,
+                .mFlags = Creature::Base | Creature::Walks,
+                .mScale = 1,
+                .mId = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mName = generateRandomString(32),
+                .mModel = makePath(generateRandomString(32)),
+                .mOriginal = generateRandomRefId(32),
+                .mAiData = {
+                    .mHello = 17,
+                    .mFight = 18,
+                    .mFlee = 19,
+                    .mAlarm = 20,
+                    .mServices = NPC::Services::MagicItems,
+                },
+            };
+
+            Creature result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mData.mAttributes, record.mData.mAttributes);
+            EXPECT_EQ(result.mData.mType, record.mData.mType);
+            EXPECT_EQ(result.mData.mLevel, record.mData.mLevel);
+            EXPECT_EQ(result.mData.mHealth, record.mData.mHealth);
+            EXPECT_EQ(result.mData.mMana, record.mData.mMana);
+            EXPECT_EQ(result.mData.mFatigue, record.mData.mFatigue);
+            EXPECT_EQ(result.mData.mSoul, record.mData.mSoul);
+            EXPECT_EQ(result.mData.mCombat, record.mData.mCombat);
+            EXPECT_EQ(result.mData.mMagic, record.mData.mMagic);
+            EXPECT_EQ(result.mData.mStealth, record.mData.mStealth);
+            for (size_t i = 0; i < std::size(result.mData.mAttack); ++i)
+                EXPECT_EQ(result.mData.mAttack[i], record.mData.mAttack[i]);
+            EXPECT_EQ(result.mData.mGold, record.mData.mGold);
+            EXPECT_EQ(result.mBloodType, record.mBloodType);
+            EXPECT_EQ(result.mFlags, record.mFlags);
+            EXPECT_EQ(result.mScale, record.mScale);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mOriginal, record.mOriginal);
+            EXPECT_EQ(result.mAiData.mHello, record.mAiData.mHello);
+            EXPECT_EQ(result.mAiData.mFight, record.mAiData.mFight);
+            EXPECT_EQ(result.mAiData.mFlee, record.mAiData.mFlee);
+            EXPECT_EQ(result.mAiData.mAlarm, record.mAiData.mAlarm);
+            EXPECT_EQ(result.mAiData.mServices, record.mAiData.mServices);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, factionShouldNotChange)
+        {
+            RankData rankData = {
+                .mAttribute1 = 1,
+                .mAttribute2 = 2,
+                .mPrimarySkill = 3,
+                .mFavouredSkill = 4,
+                .mFactReputation = 5,
+            };
+            Faction record = {
+                .mName = generateRandomString(32),
+                .mId = generateRandomRefId(32),
+                .mData = {
+                    .mAttribute = { Attribute::Willpower, Attribute::Endurance },
+                    .mRankData = {
+                        rankData, rankData, rankData, rankData, rankData, rankData, rankData, rankData, rankData, rankData
+                    },
+                    .mSkills = { Skill::Acrobatics, Skill::Athletics, Skill::Alchemy, {}, {}, {}, {} },
+                    .mFlags = Faction::Flags::Hidden,
+                },
+                .mRanks = { generateRandomString(32), {}, {}, {}, {}, {}, {}, {}, {}, {} },
+            };
+
+            Faction result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mAttribute, record.mData.mAttribute);
+            for (size_t i = 0; i < result.mData.mRankData.size(); ++i)
+            {
+                EXPECT_EQ(result.mData.mRankData[i].mAttribute1, record.mData.mRankData[i].mAttribute1);
+                EXPECT_EQ(result.mData.mRankData[i].mAttribute2, record.mData.mRankData[i].mAttribute2);
+                EXPECT_EQ(result.mData.mRankData[i].mPrimarySkill, record.mData.mRankData[i].mPrimarySkill);
+                EXPECT_EQ(result.mData.mRankData[i].mFavouredSkill, record.mData.mRankData[i].mFavouredSkill);
+                EXPECT_EQ(result.mData.mRankData[i].mFactReputation, record.mData.mRankData[i].mFactReputation);
+            }
+            EXPECT_EQ(result.mData.mSkills, record.mData.mSkills);
+            EXPECT_EQ(result.mData.mFlags, record.mData.mFlags);
+            EXPECT_EQ(result.mRanks, record.mRanks);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, npcShouldNotChange)
+        {
+            NPC record = {
+                .mNpdtType = NPC::NPC_DEFAULT,
+                .mNpdt = {
+                    .mAttributes = {
+                        { Attribute::Agility, 1 },
+                        { Attribute::Endurance, 2 },
+                        { Attribute::Intelligence, 3 },
+                        { Attribute::Luck, 4 },
+                        { Attribute::Personality, 5 },
+                        { Attribute::Speed, 6 },
+                        { Attribute::Strength, 7 },
+                        { Attribute::Willpower, 8 }
+                    },
+                    .mSkills = {
+                        { Skill::Acrobatics, 125 }
+                    },
+                    .mLevel = 1,
+                    .mHealth = 2,
+                    .mMana = 3,
+                    .mFatigue = 4,
+                    .mDisposition = 5,
+                    .mReputation = 6,
+                    .mRank = 7,
+                    .mGold = 8,
+                },
+                .mBloodType = 16,
+                .mFlags = NPC::Base,
+                .mAiData = {
+                    .mHello = 17,
+                    .mFight = 18,
+                    .mFlee = 19,
+                    .mAlarm = 20,
+                    .mServices = NPC::Services::MagicItems,
+                },
+                .mId = generateRandomRefId(32),
+                .mRace = generateRandomRefId(32),
+                .mClass = generateRandomRefId(32),
+                .mFaction = generateRandomRefId(32),
+                .mScript = generateRandomRefId(32),
+                .mName = generateRandomString(32),
+                .mModel = makePath(generateRandomString(32)),
+                .mHair = generateRandomRefId(32),
+                .mHead = generateRandomRefId(32),
+            };
+
+            NPC result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            EXPECT_EQ(result.mNpdt.mAttributes, record.mNpdt.mAttributes);
+            for (const auto& [skill, value] : record.mNpdt.mSkills)
+                EXPECT_EQ(result.mNpdt.getSkill(skill), value);
+            EXPECT_EQ(result.mNpdt.mLevel, record.mNpdt.mLevel);
+            EXPECT_EQ(result.mNpdt.mHealth, record.mNpdt.mHealth);
+            EXPECT_EQ(result.mNpdt.mMana, record.mNpdt.mMana);
+            EXPECT_EQ(result.mNpdt.mFatigue, record.mNpdt.mFatigue);
+            EXPECT_EQ(result.mNpdt.mDisposition, record.mNpdt.mDisposition);
+            EXPECT_EQ(result.mNpdt.mReputation, record.mNpdt.mReputation);
+            EXPECT_EQ(result.mNpdt.mRank, record.mNpdt.mRank);
+            EXPECT_EQ(result.mNpdt.mGold, record.mNpdt.mGold);
+            EXPECT_EQ(result.mBloodType, record.mBloodType);
+            EXPECT_EQ(result.mFlags, record.mFlags);
+            EXPECT_EQ(result.mAiData.mHello, record.mAiData.mHello);
+            EXPECT_EQ(result.mAiData.mFight, record.mAiData.mFight);
+            EXPECT_EQ(result.mAiData.mFlee, record.mAiData.mFlee);
+            EXPECT_EQ(result.mAiData.mAlarm, record.mAiData.mAlarm);
+            EXPECT_EQ(result.mAiData.mServices, record.mAiData.mServices);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mRace, record.mRace);
+            EXPECT_EQ(result.mClass, record.mClass);
+            EXPECT_EQ(result.mFaction, record.mFaction);
+            EXPECT_EQ(result.mScript, record.mScript);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mModel, record.mModel);
+            EXPECT_EQ(result.mHair, record.mHair);
+            EXPECT_EQ(result.mHead, record.mHead);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, raceShouldNotChange)
+        {
+            Race record = {
+                .mData = {
+                    .mBonus = { { { .mSkill = Skill::Athletics, .mBonus = 10 }, {}, {}, {}, {}, {}, {} } },
+                    .mAttributeValues = { { Attribute::Endurance, { .mMale = 1, .mFemale = 2 } } },
+                    .mMaleHeight = 1.f,
+                    .mFemaleHeight = 1.1f,
+                    .mMaleWeight = 1.2f,
+                    .mFemaleWeight = 1.3f,
+                    .mFlags = Race::Flags::Playable,
+                },
+                .mName = generateRandomString(32),
+                .mDescription = generateRandomString(100),
+                .mId = generateRandomRefId(32),
+            };
+
+            Race result;
+            saveAndLoadRecord(record, GetParam(), result);
+
+            for (size_t i = 0; i < result.mData.mBonus.size(); ++i)
+            {
+                EXPECT_EQ(result.mData.mBonus[i].mSkill, record.mData.mBonus[i].mSkill);
+                EXPECT_EQ(result.mData.mBonus[i].mBonus, record.mData.mBonus[i].mBonus);
+            }
+            for (const auto& [attribute, value] : record.mData.mAttributeValues)
+            {
+                EXPECT_EQ(result.mData.getAttribute(attribute, true), value.mMale);
+                EXPECT_EQ(result.mData.getAttribute(attribute, false), value.mFemale);
+            }
+            EXPECT_EQ(result.mData.mMaleHeight, record.mData.mMaleHeight);
+            EXPECT_EQ(result.mData.mFemaleHeight, record.mData.mFemaleHeight);
+            EXPECT_EQ(result.mData.mMaleWeight, record.mData.mMaleWeight);
+            EXPECT_EQ(result.mData.mFemaleWeight, record.mData.mFemaleWeight);
+            EXPECT_EQ(result.mData.mFlags, record.mData.mFlags);
+            EXPECT_EQ(result.mName, record.mName);
+            EXPECT_EQ(result.mDescription, record.mDescription);
+            EXPECT_EQ(result.mId, record.mId);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));

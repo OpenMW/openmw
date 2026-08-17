@@ -41,33 +41,61 @@ namespace ESM
     void Faction::FADTstruct::load(ESMReader& esm)
     {
         esm.getSubHeader();
-        int32_t attributes[2];
-        esm.getT(attributes);
-        mAttribute[0] = ESM::Attribute::indexToRefId(attributes[0]);
-        mAttribute[1] = ESM::Attribute::indexToRefId(attributes[1]);
-        for (auto& rank : mRankData)
-            rank.load(esm);
-        int32_t skills[7];
-        esm.getT(skills);
-        for (std::size_t i = 0; i < std::size(skills); ++i)
-            mSkills[i] = ESM::Skill::indexToRefId(skills[i]);
-        esm.getT(mFlags);
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
+        {
+            int32_t attributes[2];
+            esm.getT(attributes);
+            mAttribute[0] = ESM::Attribute::indexToRefId(attributes[0]);
+            mAttribute[1] = ESM::Attribute::indexToRefId(attributes[1]);
+            for (auto& rank : mRankData)
+                rank.load(esm);
+            int32_t skills[7];
+            esm.getT(skills);
+            for (std::size_t i = 0; i < std::size(skills); ++i)
+                mSkills[i] = ESM::Skill::indexToRefId(skills[i]);
+            esm.getT(mFlags);
+        }
+        else
+        {
+            for (auto& rank : mRankData)
+                rank.load(esm);
+            esm.getT(mFlags);
+            for (size_t i = 0; i < mAttribute.size() && esm.isNextSub("ATTR"); ++i)
+                mAttribute[i] = esm.getRefId();
+            for (size_t i = 0; i < mSkills.size() && esm.isNextSub("SKIL"); ++i)
+                mSkills[i] = esm.getRefId();
+        }
     }
 
     void Faction::FADTstruct::save(ESMWriter& esm) const
     {
-        esm.startSubRecord("FADT");
-        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[0]));
-        esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[1]));
-        for (const auto& rank : mRankData)
-            rank.save(esm);
-        for (const ESM::RefId& id : mSkills)
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
-            int32_t skill = ESM::Skill::refIdToIndex(id);
-            esm.writeT(skill);
+            esm.startSubRecord("FADT");
+            esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[0]));
+            esm.writeT(ESM::Attribute::refIdToIndex(mAttribute[1]));
+            for (const auto& rank : mRankData)
+                rank.save(esm);
+            for (const ESM::RefId& id : mSkills)
+            {
+                int32_t skill = ESM::Skill::refIdToIndex(id);
+                esm.writeT(skill);
+            }
+            esm.writeT(mFlags);
+            esm.endRecord("FADT");
         }
-        esm.writeT(mFlags);
-        esm.endRecord("FADT");
+        else
+        {
+            esm.startSubRecord("FADT");
+            for (const auto& rank : mRankData)
+                rank.save(esm);
+            esm.writeT(mFlags);
+            esm.endRecord("FADT");
+            for (const ESM::RefId& id : mAttribute)
+                esm.writeHNOCRefId("ATTR", id);
+            for (const ESM::RefId& id : mSkills)
+                esm.writeHNOCRefId("SKIL", id);
+        }
     }
 
     void Faction::load(ESMReader& esm, bool& isDeleted)

@@ -63,6 +63,12 @@ namespace ESM
         f(v.mAttribute, v.mSpecialization, v.mSkills, v.mIsPlayable, padding, v.mServices);
     }
 
+    template <Misc::SameAsWithoutCvref<Class::CLDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mSpecialization, v.mIsPlayable, v.mServices);
+    }
+
     ESM::RefId& Class::CLDTstruct::getSkill(int index, bool major)
     {
         if (major)
@@ -98,9 +104,22 @@ namespace ESM
                     break;
                 case fourCC("CLDT"):
                 {
-                    EsmCLDTstruct data;
-                    esm.getSubComposite(data);
-                    fromBinary(data, mData);
+                    if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
+                    {
+                        EsmCLDTstruct data;
+                        esm.getSubComposite(data);
+                        fromBinary(data, mData);
+                    }
+                    else
+                    {
+                        esm.getSubComposite(mData);
+                        for (RefId& id : mData.mAttribute)
+                            id = esm.getHNRefId("ATTR");
+                        for (RefId& id : mData.mMajorSkills)
+                            id = esm.getHNRefId("MASK");
+                        for (RefId& id : mData.mMinorSkills)
+                            id = esm.getHNRefId("MISK");
+                    }
                     hasData = true;
                     break;
                 }
@@ -133,9 +152,22 @@ namespace ESM
         }
 
         esm.writeHNOCString("FNAM", mName);
-        EsmCLDTstruct data;
-        toBinary(mData, data);
-        esm.writeNamedComposite("CLDT", data);
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
+        {
+            EsmCLDTstruct data;
+            toBinary(mData, data);
+            esm.writeNamedComposite("CLDT", data);
+        }
+        else
+        {
+            esm.writeNamedComposite("CLDT", mData);
+            for (const ESM::RefId& id : mData.mAttribute)
+                esm.writeHNRefId("ATTR", id);
+            for (const ESM::RefId& id : mData.mMajorSkills)
+                esm.writeHNRefId("MASK", id);
+            for (const ESM::RefId& id : mData.mMinorSkills)
+                esm.writeHNRefId("MISK", id);
+        }
         esm.writeHNOString("DESC", mDescription);
     }
 

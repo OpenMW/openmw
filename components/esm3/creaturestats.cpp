@@ -11,12 +11,23 @@ namespace ESM
 
     void CreatureStats::load(ESMReader& esm)
     {
-        const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
-            StatState<float> stat;
-            stat.load(esm, intFallback);
-            mAttributes.emplace(ESM::Attribute::indexToRefId(i), std::move(stat));
+            const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                StatState<float> stat;
+                stat.load(esm, intFallback);
+                mAttributes.emplace(ESM::Attribute::indexToRefId(i), std::move(stat));
+            }
+        }
+        else
+        {
+            while (esm.isNextSub("ATTR"))
+            {
+                ESM::RefId attribute = esm.getRefId();
+                mAttributes[attribute].load(esm);
+            }
         }
 
         for (auto& dynamic : mDynamic)
@@ -188,13 +199,25 @@ namespace ESM
 
     void CreatureStats::save(ESMWriter& esm) const
     {
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
-            const auto it = mAttributes.find(ESM::Attribute::indexToRefId(i));
-            if (it != mAttributes.end())
-                it->second.save(esm);
-            else
-                StatState<float>{}.save(esm);
+            // This branch is only used in tests. It probably shouldn't exist.
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                const auto it = mAttributes.find(ESM::Attribute::indexToRefId(i));
+                if (it != mAttributes.end())
+                    it->second.save(esm);
+                else
+                    StatState<float>{}.save(esm);
+            }
+        }
+        else
+        {
+            for (const auto& [attribute, value] : mAttributes)
+            {
+                esm.writeHNRefId("ATTR", attribute);
+                value.save(esm);
+            }
         }
 
         for (const auto& dynamic : mDynamic)

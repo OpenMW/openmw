@@ -41,6 +41,12 @@ namespace ESM
         f(v.mWeight, v.mValue, v.mIsScroll, v.mSkillId, v.mEnchant);
     }
 
+    template <Misc::SameAsWithoutCvref<Book::BKDTstruct> T>
+    void decompose(T&& v, const auto& f)
+    {
+        f(v.mWeight, v.mValue, v.mIsScroll, v.mEnchant);
+    }
+
     void Book::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -65,9 +71,17 @@ namespace ESM
                     break;
                 case fourCC("BKDT"):
                 {
-                    EsmBKDTstruct data;
-                    esm.getSubComposite(data);
-                    fromBinary(data, mData);
+                    if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
+                    {
+                        EsmBKDTstruct data;
+                        esm.getSubComposite(data);
+                        fromBinary(data, mData);
+                    }
+                    else
+                    {
+                        esm.getSubComposite(mData);
+                        mData.mSkillId = esm.getHNORefId("SKIL");
+                    }
                     hasData = true;
                     break;
                 }
@@ -110,9 +124,17 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel.getOriginal());
         esm.writeHNOCString("FNAM", mName);
-        EsmBKDTstruct data;
-        toBinary(mData, data);
-        esm.writeNamedComposite("BKDT", data);
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
+        {
+            EsmBKDTstruct data;
+            toBinary(mData, data);
+            esm.writeNamedComposite("BKDT", data);
+        }
+        else
+        {
+            esm.writeNamedComposite("BKDT", mData);
+            esm.writeHNORefId("SKIL", mData.mSkillId);
+        }
         esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon.getOriginal());
         esm.writeHNOString("TEXT", mText);

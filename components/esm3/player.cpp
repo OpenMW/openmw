@@ -73,7 +73,7 @@ namespace ESM
                 }
             }
         }
-        else
+        else if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
             mSetWerewolfAcrobatics = false;
             float saveAttributes[ESM::Attribute::Length];
@@ -84,6 +84,26 @@ namespace ESM
             esm.getHNT(saveSkills, "WWSK");
             for (int i = 0; i < ESM::Skill::Length; ++i)
                 mSaveSkills[ESM::Skill::indexToRefId(i)] = saveSkills[i];
+        }
+        else
+        {
+            mSetWerewolfAcrobatics = false;
+            while (esm.isNextSub("WWAT"))
+            {
+                esm.getSubHeader();
+                float value;
+                esm.getT(value);
+                ESM::RefId attribute = esm.getRefId(esm.getSubSize() - sizeof(value));
+                mSaveAttributes[attribute] = value;
+            }
+            while (esm.isNextSub("WWSK"))
+            {
+                esm.getSubHeader();
+                float value;
+                esm.getT(value);
+                ESM::RefId skill = esm.getRefId(esm.getSubSize() - sizeof(value));
+                mSaveSkills[skill] = value;
+            }
         }
     }
 
@@ -111,27 +131,47 @@ namespace ESM
             esm.writeHNRefId("BOUN", bound);
             esm.writeHNRefId("PREV", prev);
         }
-
-        float saveAttributes[ESM::Attribute::Length];
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        if (esm.getFormatVersion() <= MaxFixedStatsFormatVersion)
         {
-            const auto it = mSaveAttributes.find(ESM::Attribute::indexToRefId(i));
-            if (it != mSaveAttributes.end())
-                saveAttributes[i] = it->second;
-            else
-                saveAttributes[i] = 0.f;
+            // This branch is only used in tests. It probably shouldn't exist.
+            float saveAttributes[ESM::Attribute::Length];
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                const auto it = mSaveAttributes.find(ESM::Attribute::indexToRefId(i));
+                if (it != mSaveAttributes.end())
+                    saveAttributes[i] = it->second;
+                else
+                    saveAttributes[i] = 0.f;
+            }
+            float saveSkills[ESM::Skill::Length];
+            for (int i = 0; i < ESM::Skill::Length; ++i)
+            {
+                const auto it = mSaveSkills.find(ESM::Skill::indexToRefId(i));
+                if (it != mSaveSkills.end())
+                    saveSkills[i] = it->second;
+                else
+                    saveSkills[i] = 0.f;
+            }
+            esm.writeHNT("WWAT", saveAttributes);
+            esm.writeHNT("WWSK", saveSkills);
         }
-        float saveSkills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        else
         {
-            const auto it = mSaveSkills.find(ESM::Skill::indexToRefId(i));
-            if (it != mSaveSkills.end())
-                saveSkills[i] = it->second;
-            else
-                saveSkills[i] = 0.f;
+            for (const auto& [id, value] : mSaveAttributes)
+            {
+                esm.startSubRecord("WWAT");
+                esm.writeT(value);
+                esm.writeHRefId(id);
+                esm.endRecord("WWAT");
+            }
+            for (const auto& [id, value] : mSaveSkills)
+            {
+                esm.startSubRecord("WWSK");
+                esm.writeT(value);
+                esm.writeHRefId(id);
+                esm.endRecord("WWSK");
+            }
         }
-        esm.writeHNT("WWAT", saveAttributes);
-        esm.writeHNT("WWSK", saveSkills);
     }
 
 }
