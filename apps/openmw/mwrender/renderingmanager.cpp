@@ -659,7 +659,9 @@ namespace MWRender
         }
         else if (mode == Render_Water)
         {
-            return mWater->toggle();
+            const bool enabled = mWater->toggle();
+            mStateUpdater->setWaterEnabled(enabled);
+            return enabled;
         }
         else if (mode == Render_Scene)
         {
