@@ -19,6 +19,7 @@ struct Fog {
 uniform Fog fog;
 uniform float waterHeight;
 uniform bool waterEnabled;
+uniform bool waterSurface;
 uniform bool isReflection;
 uniform mat4 osg_ViewMatrixInverse;
 uniform DirectionalLight sun;
@@ -42,12 +43,11 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
         bool cameraBelowWater = cameraPos.z < waterHeight;
         if (cameraBelowWater) {
             isUnderwater = true;
-        } else {
+        }
+        else if (!isReflection && !waterSurface) {
             vec3 worldPos = (osg_ViewMatrixInverse * vec4(pos, 1)).xyz;
-            const float bias = 5.0;
 
-            if (!isReflection)
-                isUnderwater = worldPos.z < waterHeight - bias;
+            isUnderwater = worldPos.z < waterHeight;
 
             if (isUnderwater) {
                 useWaterDepthFog = true;

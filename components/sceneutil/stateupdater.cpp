@@ -151,6 +151,7 @@ namespace SceneUtil
 
         stateset->addUniform(new osg::Uniform("waterHeight", mWaterHeight));
         stateset->addUniform(new osg::Uniform("waterEnabled", mWaterEnabled));
+        stateset->addUniform(new osg::Uniform("waterSurface", false));
     }
 
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
