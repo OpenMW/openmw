@@ -43,7 +43,7 @@ Merge request guidelines
 * Make sure each of your changes has a clear objective. Unnecessary changes may lead to merge conflicts, clutter the commit history and slow down review. Code formatting 'fixes' should be avoided, unless you were already changing that particular line anyway.
 * When pulling changes from master, prefer rebase over merge. Consider using a merge if there are conflicts or for long-running MRs.
 * Don't rebase without a good reason. Some good reasons include cleaning up the commit history, resolving merge conflicts, and pulling in related changes or build pipeline changes.
-* Review threads should be resolved by the thread author so the thread author can confirm that their concerns have been adequately dealt with. This rule does not apply to threads strictly using [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be resolved by the MR author.
+* Review threads should be resolved by the thread author so that they can confirm that their concerns have been adequately dealt with. This rule does not apply to threads strictly using [suggested code changes](https://docs.gitlab.com/user/project/merge_requests/reviews/suggestions/)—if applied, they can be resolved by the MR author.
 
 Guidelines for original engine "fixes"
 =================================
