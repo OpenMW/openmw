@@ -19,7 +19,7 @@ namespace SceneUtil
 
     void initTexMatForStateSet(osg::StateSet& stateset)
     {
-        constexpr unsigned int maxTexMat = 32;
+        constexpr unsigned int maxTexMat = 10;
         for (unsigned int i = 0; i < maxTexMat; ++i)
             setupTexMatForStateSet(stateset, i, osg::Matrixf{});
     }
