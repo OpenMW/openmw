@@ -148,7 +148,7 @@ void main(void)
     float sunFade = length(sun.ambient.xyz);
 
     // fresnel
-    float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
+    float ior = (cameraPos.z>=0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
 
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
@@ -199,11 +199,11 @@ void main(void)
     vec3 rawRefraction = refraction;
 
     // brighten up the refraction underwater
-    if (cameraPos.z < waterHeight)
+    if (cameraPos.z < 0)
         refraction = clamp(refraction * 1.5, 0.0, 1.0);
 
     // Use underwater fog where the opaque buffer has no geometry
-    if (cameraPos.z >= waterHeight && !hasOpaqueGeometry(refractionCoords))
+    if (cameraPos.z >= 0 && !hasOpaqueGeometry(refractionCoords))
         refraction = waterColor;
 
 #if @sunlightScattering

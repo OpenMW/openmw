@@ -39,7 +39,7 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
 
     if (waterEnabled) {
         vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
-        bool cameraBelowWater = cameraPos.z <= waterHeight;
+        bool cameraBelowWater = cameraPos.z < waterHeight;
         if (cameraBelowWater) {
             isUnderwater = true;
         } else {

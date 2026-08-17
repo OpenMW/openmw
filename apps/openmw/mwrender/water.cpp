@@ -196,7 +196,7 @@ namespace MWRender
                 float diff = fudge - cv->getEyeLocal().z();
                 osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
 
-                if (cv->getEyeLocal().z() > 0)
+                if (cv->getEyeLocal().z() >= 0)
                     modelViewMatrix->preMultTranslate(osg::Vec3f(0, 0, -diff));
                 else
                     modelViewMatrix->preMultTranslate(osg::Vec3f(0, 0, diff));
