@@ -70,6 +70,8 @@ namespace MWClass
             const MWWorld::Ptr& attacker, bool successful,
             const MWMechanics::DamageSourceType sourceType) const override;
 
+        std::string_view getWerewolfRefusalSoundId() const override { return "WolfCreature"; }
+
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 

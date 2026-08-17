@@ -90,6 +90,8 @@ namespace MWClass
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 
+        std::string_view getWerewolfRefusalSoundId() const override { return "WolfNPC"; }
+
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
