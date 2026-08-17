@@ -98,6 +98,8 @@ namespace MWRender
 
         bool toggle();
 
+        bool isVisible() const { return mEnabled && mToggled; }
+
         bool isUnderwater(const osg::Vec3f& pos) const;
 
         /// adds an emitter, position will be tracked automatically using its scene node

@@ -660,7 +660,7 @@ namespace MWRender
         else if (mode == Render_Water)
         {
             const bool enabled = mWater->toggle();
-            mStateUpdater->setWaterEnabled(enabled);
+            mStateUpdater->setWaterEnabled(mWater->isVisible());
             return enabled;
         }
         else if (mode == Render_Scene)
@@ -823,7 +823,7 @@ namespace MWRender
     {
         mWater->setEnabled(enabled);
         mSky->setWaterEnabled(enabled);
-        mStateUpdater->setWaterEnabled(enabled);
+        mStateUpdater->setWaterEnabled(mWater->isVisible());
 
         mPostProcessor->getStateUpdater()->setIsWaterEnabled(enabled);
     }
