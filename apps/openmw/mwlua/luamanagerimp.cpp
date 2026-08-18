@@ -558,12 +558,12 @@ namespace MWLua
             hitResult["hitPos"] = position;
             hitResult["hitNormal"] = normal;
             if (!victim.isEmpty())
-                hitResult["hitObject"] = LObject(victim);
+                hitResult["hitObject"] = GObject(victim);
             spellcast["id"] = spellId.serializeText();
             if (!caster.isEmpty())
-                spellcast["caster"] = LObject(caster);
+                spellcast["caster"] = GObject(caster);
             if (item.isSet())
-                spellcast["item"] = LObject(item);
+                spellcast["item"] = GObject(item);
             projectile["type"] = "Magic";
             projectile["spellCast"] = spellcast;
 

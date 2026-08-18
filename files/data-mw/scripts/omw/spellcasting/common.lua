@@ -5,6 +5,7 @@ local Actor = types.Actor
 local Armor = types.Armor
 local Book = types.Book
 local Clothing = types.Clothing
+local Container = types.Container
 local Ingredient = types.Ingredient
 local Lockable = types.Lockable
 local Potion = types.Potion
@@ -110,11 +111,23 @@ function common.playMagicEffects(target, type, effects, allowEffectLoop)
         end
     end
 end
+
+local function isLockable(target)
+    if Lockable.objectIsInstance(target) then
+        if Container.objectIsInstance(target) then
+            local record = Container.records[target.recordId]
+            return record and not record.isOrganic
+        end
+        return true
+    end
+    return false
+end
+
 function common.targetIsValid(target)
     if not target then return false end
     -- Spells can only be inflicted on Actors in processing range, and Lockables.
     local isValidActor = Actor.objectIsInstance(target) and Actor.isInActorsProcessingRange(target)
-    return isValidActor or Lockable.objectIsInstance(target)
+    return isValidActor or isLockable(target)
 end
 
 local lockableEffects = {

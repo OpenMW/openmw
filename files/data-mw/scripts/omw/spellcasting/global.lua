@@ -12,7 +12,7 @@ I.Projectiles.addOnProjectileHitHandler(I.Projectiles.TYPES.Magic, function(proj
     assert(projectile.spellCast)
     local spellCast = projectile.spellCast
     local target = hitResult.hitObject
-    local haveValidTarget = target and (Actor.objectIsInstance(target) or Lockable.objectIsInstance(target))
+    local haveValidTarget = common.targetIsValid(target)
 
     if haveValidTarget then
         I.SpellCasting.inflict(spellCast, target, core.magic.RANGE.Target)
