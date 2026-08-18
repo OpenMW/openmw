@@ -170,7 +170,7 @@ namespace MWLua
 
             ai.erasePackagesIf([&](auto& entry) {
                 auto result = LuaUtil::call(callback, entry);
-                if (result == sol::type::nil || result.return_count() == 0)
+                if (result.get_type() == sol::type::nil || result.return_count() == 0)
                     return false;
 
                 bool keep = result.template get<bool>();
