@@ -177,17 +177,17 @@ namespace DetourNavigator
         const auto startTilePosition = getTilePosition(mSettings.mRecast, start);
         const auto endTilePosition = getTilePosition(mSettings.mRecast, end);
 
-        mRecastMeshManager.addChangedTile(startTilePosition, ChangeType::add);
+        mRecastMeshManager.addChangedTile(startTilePosition);
 
         if (startTilePosition != endTilePosition)
-            mRecastMeshManager.addChangedTile(endTilePosition, ChangeType::add);
+            mRecastMeshManager.addChangedTile(endTilePosition);
     }
 
     void NavMeshManager::removeOffMeshConnections(const ObjectId id)
     {
         const auto changedTiles = mOffMeshConnectionsManager.remove(id);
         for (const auto& tile : changedTiles)
-            mRecastMeshManager.addChangedTile(tile, ChangeType::update);
+            mRecastMeshManager.addChangedTile(tile);
     }
 
     void NavMeshManager::update(const osg::Vec3f& playerPosition, const UpdateGuard* guard)

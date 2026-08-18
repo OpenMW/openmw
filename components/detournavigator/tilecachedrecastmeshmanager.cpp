@@ -12,6 +12,7 @@
 
 #include <boost/geometry/geometry.hpp>
 
+#include <algorithm>
 #include <limits>
 
 namespace DetourNavigator
@@ -87,7 +88,7 @@ namespace DetourNavigator
                 getTilesPositions(getIntersection(mRange, objectRange), [&](const TilePosition& v) {
                     if (!isInTilesPositionsRange(range, v))
                     {
-                        addChangedTile(v, ChangeType::remove);
+                        addChangedTile(v);
                         changed = true;
                     }
                 });
@@ -95,7 +96,7 @@ namespace DetourNavigator
                 getTilesPositions(getIntersection(range, objectRange), [&](const TilePosition& v) {
                     if (!isInTilesPositionsRange(mRange, v))
                     {
-                        addChangedTile(v, ChangeType::add);
+                        addChangedTile(v);
                         changed = true;
                     }
                 });
@@ -153,6 +154,7 @@ namespace DetourNavigator
         mObjects.clear();
         mWater.clear();
         mHeightfields.clear();
+        mReportedTiles.clear();
         mCache.clear();
     }
 
@@ -183,8 +185,7 @@ namespace DetourNavigator
             mObjectIndex.insert(makeObjectIndexValue(range, dataPtr));
             mRevision = revision;
         }
-        getTilesPositions(
-            getIntersection(range, mRange), [&](const TilePosition& v) { addChangedTile(v, ChangeType::add); });
+        getTilesPositions(getIntersection(range, mRange), [&](const TilePosition& v) { addChangedTile(v); });
         return true;
     }
 
@@ -219,19 +220,14 @@ namespace DetourNavigator
         }
         if (newRange == oldRange)
         {
-            getTilesPositions(getIntersection(newRange, mRange),
-                [&](const TilePosition& v) { addChangedTile(v, ChangeType::update); });
+            getTilesPositions(getIntersection(newRange, mRange), [&](const TilePosition& v) { addChangedTile(v); });
         }
         else
         {
-            getTilesPositions(getIntersection(newRange, mRange), [&](const TilePosition& v) {
-                const ChangeType changeType
-                    = isInTilesPositionsRange(oldRange, v) ? ChangeType::update : ChangeType::add;
-                addChangedTile(v, changeType);
-            });
+            getTilesPositions(getIntersection(newRange, mRange), [&](const TilePosition& v) { addChangedTile(v); });
             getTilesPositions(getIntersection(oldRange, mRange), [&](const TilePosition& v) {
                 if (!isInTilesPositionsRange(newRange, v))
-                    addChangedTile(v, ChangeType::remove);
+                    addChangedTile(v);
             });
         }
         return true;
@@ -250,8 +246,7 @@ namespace DetourNavigator
             mObjects.erase(it);
             ++mRevision;
         }
-        getTilesPositions(
-            getIntersection(range, mRange), [&](const TilePosition& v) { addChangedTile(v, ChangeType::remove); });
+        getTilesPositions(getIntersection(range, mRange), [&](const TilePosition& v) { addChangedTile(v); });
     }
 
     void TileCachedRecastMeshManager::addWater(
@@ -279,7 +274,7 @@ namespace DetourNavigator
                 mInfiniteWater = it;
             mRevision = revision;
         }
-        addChangedTiles(range, ChangeType::add);
+        addChangedTiles(range);
     }
 
     void TileCachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
@@ -298,7 +293,7 @@ namespace DetourNavigator
             mWater.erase(it);
             ++mRevision;
         }
-        addChangedTiles(range, ChangeType::remove);
+        addChangedTiles(range);
     }
 
     void TileCachedRecastMeshManager::addHeightfield(
@@ -327,7 +322,7 @@ namespace DetourNavigator
                 mInfiniteHeightfield = it;
             mRevision = revision;
         }
-        addChangedTiles(range, ChangeType::add);
+        addChangedTiles(range);
     }
 
     void TileCachedRecastMeshManager::removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard)
@@ -346,7 +341,7 @@ namespace DetourNavigator
             mHeightfields.erase(it);
             ++mRevision;
         }
-        addChangedTiles(range, ChangeType::remove);
+        addChangedTiles(range);
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(
@@ -418,24 +413,55 @@ namespace DetourNavigator
         }
     }
 
-    void TileCachedRecastMeshManager::addChangedTile(const TilePosition& tilePosition, const ChangeType changeType)
+    void TileCachedRecastMeshManager::addChangedTile(const TilePosition& tilePosition)
     {
-        auto tile = mChangedTiles.find(tilePosition);
-        if (tile == mChangedTiles.end())
-            mChangedTiles.emplace(tilePosition, changeType);
-        else
-            tile->second = changeType == ChangeType::remove ? changeType : tile->second;
+        mChangedTiles.push_back(tilePosition);
     }
 
     std::map<osg::Vec2i, ChangeType> TileCachedRecastMeshManager::takeChangedTiles(const UpdateGuard* guard)
     {
+        std::map<osg::Vec2i, ChangeType> result;
         {
             const MaybeLockGuard lock(mMutex, guard);
-            for (const auto& [tilePosition, changeType] : mChangedTiles)
+            std::sort(mChangedTiles.begin(), mChangedTiles.end());
+            mChangedTiles.erase(std::unique(mChangedTiles.begin(), mChangedTiles.end()), mChangedTiles.end());
+            mReportedTilesBuffer.clear();
+            mReportedTilesBuffer.reserve(mReportedTiles.size() + mChangedTiles.size());
+            auto reported = mReportedTiles.cbegin();
+            for (const TilePosition& tilePosition : mChangedTiles)
+            {
+                while (reported != mReportedTiles.cend() && *reported < tilePosition)
+                {
+                    mReportedTilesBuffer.push_back(*reported);
+                    ++reported;
+                }
+                const bool wasReported = reported != mReportedTiles.cend() && *reported == tilePosition;
+                if (wasReported)
+                    ++reported;
                 if (const auto it = mCache.find(tilePosition); it != mCache.end())
                     ++it->second.mVersion.mRevision;
+
+                ChangeType changeType = ChangeType::remove;
+                bool hasInput = false;
+                if (isInTilesPositionsRange(mRange, tilePosition))
+                {
+                    const auto query = makeIndexQuery(tilePosition);
+                    hasInput = mWaterIndex.qbegin(query) != mWaterIndex.qend()
+                        || mHeightfieldIndex.qbegin(query) != mHeightfieldIndex.qend()
+                        || mObjectIndex.qbegin(query) != mObjectIndex.qend();
+                }
+                if (hasInput)
+                {
+                    mReportedTilesBuffer.push_back(tilePosition);
+                    changeType = wasReported ? ChangeType::update : ChangeType::add;
+                }
+                result.emplace(tilePosition, changeType);
+            }
+            mReportedTilesBuffer.insert(mReportedTilesBuffer.end(), reported, mReportedTiles.cend());
+            mReportedTiles.swap(mReportedTilesBuffer);
+            mChangedTiles.clear();
         }
-        return std::move(mChangedTiles);
+        return result;
     }
 
     TileCachedRecastMeshManagerStats TileCachedRecastMeshManager::getStats() const
@@ -535,10 +561,9 @@ namespace DetourNavigator
         return std::move(builder).create(version);
     }
 
-    void TileCachedRecastMeshManager::addChangedTiles(
-        const std::optional<TilesPositionsRange>& range, ChangeType changeType)
+    void TileCachedRecastMeshManager::addChangedTiles(const std::optional<TilesPositionsRange>& range)
     {
         if (range.has_value())
-            getTilesPositions(*range, [&](const TilePosition& v) { addChangedTile(v, changeType); });
+            getTilesPositions(*range, [&](const TilePosition& v) { addChangedTile(v); });
     }
 }

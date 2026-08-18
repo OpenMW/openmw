@@ -26,6 +26,7 @@
 #include <mutex>
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 namespace DetourNavigator
 {
@@ -75,7 +76,7 @@ namespace DetourNavigator
 
         void reportNavMeshChange(const TilePosition& tilePosition, Version recastMeshVersion, Version navMeshVersion);
 
-        void addChangedTile(const TilePosition& tilePosition, ChangeType changeType);
+        void addChangedTile(const TilePosition& tilePosition);
 
         std::map<osg::Vec2i, ChangeType> takeChangedTiles(const UpdateGuard* guard);
 
@@ -137,7 +138,9 @@ namespace DetourNavigator
         std::map<osg::Vec2i, HeightfieldData> mHeightfields;
         std::map<osg::Vec2i, HeightfieldData>::const_iterator mInfiniteHeightfield = mHeightfields.end();
         boost::geometry::index::rtree<HeightfieldIndexValue, boost::geometry::index::linear<4>> mHeightfieldIndex;
-        std::map<osg::Vec2i, ChangeType> mChangedTiles;
+        std::vector<TilePosition> mChangedTiles;
+        std::vector<TilePosition> mReportedTiles;
+        std::vector<TilePosition> mReportedTilesBuffer;
         std::map<TilePosition, CachedTile> mCache;
         std::size_t mGeneration = 0;
         std::size_t mRevision = 0;
@@ -161,7 +164,7 @@ namespace DetourNavigator
 
         inline std::shared_ptr<RecastMesh> makeMesh(const TilePosition& tilePosition) const;
 
-        inline void addChangedTiles(const std::optional<TilesPositionsRange>& range, ChangeType changeType);
+        inline void addChangedTiles(const std::optional<TilesPositionsRange>& range);
     };
 }
 
