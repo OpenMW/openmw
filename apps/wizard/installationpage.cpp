@@ -171,7 +171,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
             name = QStringLiteral("Bloodmoon");
             break;
     }
-    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name.toHtmlEscaped()));
+    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name));
     Log(Debug::Info) << "Attempting to install component " << qUtf8Printable(name) << ".";
 
     QMessageBox msgBox(this);
@@ -180,7 +180,7 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
     msgBox.setText(
         QObject::tr("Select a valid %1 installation media.<br><b>Hint</b>: make sure that it contains at least one "
                     "<b>.cab</b> file.")
-            .arg(name.toHtmlEscaped()));
+            .arg(name));
     msgBox.exec();
 
     const QString path

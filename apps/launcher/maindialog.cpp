@@ -153,7 +153,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
                 tr("<br><b>Could not create directory %0</b><br><br>"
                    "%1<br>")
                     .arg(Files::pathToQString(userConfigDir).toHtmlEscaped())
-                    .arg(QString::fromLocal8Bit(ec.message().c_str()).toHtmlEscaped()));
+                    .arg(QString::fromStdString(ec.message()).toHtmlEscaped()));
             return FirstRunDialogResultFailure;
         }
     }
@@ -491,7 +491,7 @@ bool Launcher::MainDialog::writeSettings()
                 tr("<br><b>Could not create directory %0</b><br><br>"
                    "%1<br>")
                     .arg(Files::pathToQString(userPath).toHtmlEscaped())
-                    .arg(QString::fromLocal8Bit(ec.message().c_str()).toHtmlEscaped()));
+                    .arg(QString::fromStdString(ec.message()).toHtmlEscaped()));
             return false;
         }
     }
