@@ -79,9 +79,14 @@ local function onApplyMagicEffects(options)
     end
 end
 
+local ApplyMagicEffectsHandler = nil
+if not isOrganic then
+    ApplyMagicEffectsHandler = onApplyMagicEffects
+end
+
 return {
     eventHandlers = {
-        ApplyMagicEffects = not isOrganic and onApplyMagicEffects,
+        ApplyMagicEffects = ApplyMagicEffectsHandler,
         AddGlow = function(options) animation.addGlow(self, options) end,
     },
 }
