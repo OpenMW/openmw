@@ -793,6 +793,7 @@ namespace ESM
                 .mModel = makePath(generateRandomString(32)),
                 .mIcon = makePath(generateRandomString(32)),
                 .mText = generateRandomString(100),
+                .mRecordFlags = 0,
                 .mId = generateRandomRefId(32),
                 .mScript = generateRandomRefId(32),
                 .mEnchant = generateRandomRefId(32),
@@ -819,6 +820,7 @@ namespace ESM
         TEST_P(Esm3SaveLoadRecordTest, classShouldNotChange)
         {
             Class record = {
+                .mRecordFlags = 0,
                 .mName = generateRandomString(32),
                 .mDescription = generateRandomString(100),
                 .mId = generateRandomRefId(32),
@@ -875,11 +877,14 @@ namespace ESM
                 .mBloodType = 16,
                 .mFlags = Creature::Base | Creature::Walks,
                 .mScale = 1,
+                .mRecordFlags = 0,
                 .mId = generateRandomRefId(32),
                 .mScript = generateRandomRefId(32),
                 .mName = generateRandomString(32),
                 .mModel = makePath(generateRandomString(32)),
                 .mOriginal = generateRandomRefId(32),
+                .mInventory{},
+                .mSpells{},
                 .mAiData = {
                     .mHello = 17,
                     .mFight = 18,
@@ -887,6 +892,8 @@ namespace ESM
                     .mAlarm = 20,
                     .mServices = NPC::Services::MagicItems,
                 },
+                .mAiPackage{},
+                .mTransport{},
             };
 
             Creature result;
@@ -930,6 +937,7 @@ namespace ESM
                 .mFactReputation = 5,
             };
             Faction record = {
+                .mRecordFlags = 0,
                 .mName = generateRandomString(32),
                 .mId = generateRandomRefId(32),
                 .mData = {
@@ -940,6 +948,7 @@ namespace ESM
                     .mSkills = { Skill::Acrobatics, Skill::Athletics, Skill::Alchemy, {}, {}, {}, {} },
                     .mFlags = Faction::Flags::Hidden,
                 },
+                .mReactions{},
                 .mRanks = { generateRandomString(32), {}, {}, {}, {}, {}, {}, {}, {}, {} },
             };
 
@@ -991,6 +1000,8 @@ namespace ESM
                 },
                 .mBloodType = 16,
                 .mFlags = NPC::Base,
+                .mInventory{},
+                .mSpells{},
                 .mAiData = {
                     .mHello = 17,
                     .mFight = 18,
@@ -998,6 +1009,9 @@ namespace ESM
                     .mAlarm = 20,
                     .mServices = NPC::Services::MagicItems,
                 },
+                .mTransport{},
+                .mAiPackage{},
+                .mRecordFlags = 0,
                 .mId = generateRandomRefId(32),
                 .mRace = generateRandomRefId(32),
                 .mClass = generateRandomRefId(32),
@@ -1053,9 +1067,11 @@ namespace ESM
                     .mFemaleWeight = 1.3f,
                     .mFlags = Race::Flags::Playable,
                 },
+                .mRecordFlags = 0,
                 .mName = generateRandomString(32),
                 .mDescription = generateRandomString(100),
                 .mId = generateRandomRefId(32),
+                .mPowers{},
             };
 
             Race result;
