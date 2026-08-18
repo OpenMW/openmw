@@ -6,6 +6,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/path.hpp"
 #include "components/esm/refid.hpp"
 
 namespace ESM
@@ -13,8 +14,6 @@ namespace ESM
 
     class ESMReader;
     class ESMWriter;
-
-    using SkillId = StringRefId;
 
     struct MagicSchool
     {
@@ -45,7 +44,7 @@ namespace ESM
         static std::string_view getRecordType() { return "Skill"; }
 
         uint32_t mRecordFlags;
-        SkillId mId;
+        RefId mId;
 
         //! Enum that defines the index into SKDTstruct::mUseValue for all vanilla skill uses
         enum UseType
@@ -83,45 +82,45 @@ namespace ESM
         {
             ESM::RefId mAttribute; // see defs.hpp
             int32_t mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
-            float mUseValue[4]; // How much skill improves through use. Meaning
-                                // of each field depends on what skill this
-                                // is. See UseType above
+            std::array<float, 4> mUseValue; // How much skill improves through use. Meaning
+                                            // of each field depends on what skill this
+                                            // is. See UseType above
         }; // Total size: 24 bytes
         SKDTstruct mData;
 
         std::string mDescription;
         std::string mName;
-        std::string mIcon;
+        Path mIcon;
         float mWerewolfValue{};
         std::optional<MagicSchool> mSchool;
 
-        static const SkillId Block;
-        static const SkillId Armorer;
-        static const SkillId MediumArmor;
-        static const SkillId HeavyArmor;
-        static const SkillId BluntWeapon;
-        static const SkillId LongBlade;
-        static const SkillId Axe;
-        static const SkillId Spear;
-        static const SkillId Athletics;
-        static const SkillId Enchant;
-        static const SkillId Destruction;
-        static const SkillId Alteration;
-        static const SkillId Illusion;
-        static const SkillId Conjuration;
-        static const SkillId Mysticism;
-        static const SkillId Restoration;
-        static const SkillId Alchemy;
-        static const SkillId Unarmored;
-        static const SkillId Security;
-        static const SkillId Sneak;
-        static const SkillId Acrobatics;
-        static const SkillId LightArmor;
-        static const SkillId ShortBlade;
-        static const SkillId Marksman;
-        static const SkillId Mercantile;
-        static const SkillId Speechcraft;
-        static const SkillId HandToHand;
+        static const RefId Block;
+        static const RefId Armorer;
+        static const RefId MediumArmor;
+        static const RefId HeavyArmor;
+        static const RefId BluntWeapon;
+        static const RefId LongBlade;
+        static const RefId Axe;
+        static const RefId Spear;
+        static const RefId Athletics;
+        static const RefId Enchant;
+        static const RefId Destruction;
+        static const RefId Alteration;
+        static const RefId Illusion;
+        static const RefId Conjuration;
+        static const RefId Mysticism;
+        static const RefId Restoration;
+        static const RefId Alchemy;
+        static const RefId Unarmored;
+        static const RefId Security;
+        static const RefId Sneak;
+        static const RefId Acrobatics;
+        static const RefId LightArmor;
+        static const RefId ShortBlade;
+        static const RefId Marksman;
+        static const RefId Mercantile;
+        static const RefId Speechcraft;
+        static const RefId HandToHand;
         static constexpr int Length = 27;
 
         void load(ESMReader& esm, bool& isDeleted);

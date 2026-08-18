@@ -529,7 +529,8 @@ namespace MWGui
                     "Caption_SkillDescription", skill->mDescription);
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Caption_SkillAttribute",
                     "#{sGoverningAttribute}: " + MyGUI::TextIterator::toTagsString(attr->mName));
-                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ImageTexture_SkillImage", skill->mIcon);
+                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
+                    "ImageTexture_SkillImage", skill->mIcon.getNormalized());
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Range_SkillProgress", "100");
             }
 

@@ -213,6 +213,15 @@
 -- @usage
 -- content.repairs.records.MyRepair = { template = content.repairs.records['hammer_repair'], name = 'Hammer Time' }
 
+--- @{#SkillContent}: Skill manipulation.
+-- @field [parent=#content] #SkillContent skills
+
+---
+-- A mutable list of all @{openmw.core#SkillRecord}s.
+-- @field [parent=#SkillContent] #list<openmw.core#SkillRecord> records
+-- @usage
+-- content.skills.records.MySkill = { name = 'C++', werewolfValue = 0, attribute = 'MyAttribute', specialization = 'magic' }
+
 --- @{#SpellContent}: Spell manipulation.
 -- @field [parent=#content] #SpellContent spells
 

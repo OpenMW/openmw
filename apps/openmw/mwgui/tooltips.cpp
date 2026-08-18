@@ -834,7 +834,7 @@ namespace MWGui
         widget->setUserString("Caption_SkillNoProgressDescription", skill->mDescription);
         widget->setUserString("Caption_SkillNoProgressAttribute",
             "#{sGoverningAttribute}: " + MyGUI::TextIterator::toTagsString(attr->mName));
-        widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon);
+        widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon.getNormalized());
     }
 
     void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, ESM::RefId attributeId)

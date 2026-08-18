@@ -210,7 +210,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         ESM::Skill record;
-        record.mId = *ESM::Skill::indexToRefId(i).getIf<ESM::SkillId>();
+        record.mId = ESM::Skill::indexToRefId(i);
         record.blank();
 
         getData().getSkills().add(record);

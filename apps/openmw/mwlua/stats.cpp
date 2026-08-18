@@ -58,10 +58,37 @@ namespace
         }
         return sol::make_object(context.mLua->unsafeState(), getter(obj.ptr()));
     }
+
+    struct MutableMagicSchool
+    {
+        MWLua::MutableRecord<ESM::Skill> mSkill;
+
+        ESM::MagicSchool& find() { return mSkill.find().mSchool.value(); }
+
+        const ESM::MagicSchool& find() const { return mSkill.find().mSchool.value(); }
+    };
+
+    struct MutableSkillGain
+    {
+        MWLua::MutableRecord<ESM::Skill> mSkill;
+
+        std::array<float, 4>& find() { return mSkill.find().mData.mUseValue; }
+
+        const std::array<float, 4>& find() const { return mSkill.find().mData.mUseValue; }
+    };
 }
 
 namespace MWLua
 {
+    template <>
+    struct Types::RecordType<MutableMagicSchool>
+    {
+        using Record = ESM::MagicSchool;
+        constexpr static bool isMutable = true;
+
+        static const Record& asRecord(const MutableMagicSchool& rec) { return rec.find(); }
+    };
+
     namespace
     {
         static void setCreatureValue(Index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
@@ -523,6 +550,163 @@ namespace MWLua
             Types::addIconProperty(record);
             Types::addProperty(record, "werewolfValue", &ESM::Attribute::mWerewolfValue);
         }
+
+        template <class T>
+        void addSchoolType(sol::state_view& lua, std::string_view name)
+        {
+            auto record = lua.new_usertype<T>(name);
+            Types::addProperty(record, "name", &ESM::MagicSchool::mName);
+            Types::addProperty(record, "areaSound", &ESM::MagicSchool::mAreaSound);
+            Types::addProperty(record, "boltSound", &ESM::MagicSchool::mBoltSound);
+            Types::addProperty(record, "castSound", &ESM::MagicSchool::mCastSound);
+            Types::addProperty(record, "failureSound", &ESM::MagicSchool::mFailureSound);
+            Types::addProperty(record, "hitSound", &ESM::MagicSchool::mHitSound);
+            Types::addProperty(record, "autoCalcMax", &ESM::MagicSchool::mAutoCalcMax);
+            if constexpr (!Types::RecordType<T>::isMutable)
+            {
+                record[sol::meta_function::to_string]
+                    = [](const ESM::MagicSchool& rec) { return "ESM3_MagicSchool[" + rec.mName + "]"; };
+            }
+        }
+
+        int32_t getSpecialization(std::string_view id)
+        {
+            for (int32_t i = ESM::Class::Combat; i <= ESM::Class::Stealth; ++i)
+            {
+                if (ESM::Class::specializationIndexToLuaId[i] == id)
+                    return i;
+            }
+            throw std::runtime_error("invalid specialization");
+        }
+
+        void setSchoolFromTable(ESM::Skill& skill, const sol::object& value)
+        {
+            if (value == sol::nil)
+            {
+                skill.mSchool.reset();
+            }
+            else if (value.is<MutableMagicSchool>())
+            {
+                const MutableMagicSchool& other = value.as<MutableMagicSchool>();
+                skill.mSchool = other.find();
+            }
+            else
+            {
+                auto table = value.as<sol::lua_table>();
+                ESM::MagicSchool& school = skill.mSchool.emplace();
+                school.mName = table.get_or<std::string_view>("name", {});
+                school.mAreaSound = ESM::RefId::deserializeText(table.get_or<std::string_view>("areaSound", {}));
+                school.mBoltSound = ESM::RefId::deserializeText(table.get_or<std::string_view>("boltSound", {}));
+                school.mCastSound = ESM::RefId::deserializeText(table.get_or<std::string_view>("castSound", {}));
+                school.mFailureSound = ESM::RefId::deserializeText(table.get_or<std::string_view>("failureSound", {}));
+                school.mHitSound = ESM::RefId::deserializeText(table.get_or<std::string_view>("hitSound", {}));
+                school.mAutoCalcMax = table.get_or("autoCalcMax", 0);
+            }
+        }
+
+        void setSkillGainFromTable(ESM::Skill& skill, const sol::object& value)
+        {
+            if (value == sol::nil)
+            {
+                skill.mData.mUseValue.fill(0.f);
+            }
+            else if (value.is<MutableSkillGain>())
+            {
+                const auto& other = value.as<MutableSkillGain>().find();
+                for (size_t i = 0; i < skill.mData.mUseValue.size(); ++i)
+                    skill.mData.mUseValue[i] = other[i];
+            }
+            else
+            {
+                auto table = value.as<sol::lua_table>();
+                const size_t length = table.size();
+                skill.mData.mUseValue.fill(0.f);
+                for (size_t i = 0; i < skill.mData.mUseValue.size() && i < length; ++i)
+                    skill.mData.mUseValue[i] = table.get<Misc::FiniteFloat>(LuaUtil::toLuaIndex(i));
+            }
+        }
+
+        template <class T>
+        void addSkillType(sol::state_view& lua, std::string_view name)
+        {
+            sol::usertype<T> record = lua.new_usertype<T>(name);
+
+            record[sol::meta_function::to_string]
+                = [](const T& rec) -> std::string { return "ESM3_Skill[" + rec.mId.toDebugString() + "]"; };
+            record["id"] = sol::readonly_property([](const T& rec) -> ESM::RefId { return rec.mId; });
+
+            Types::addProperty(record, "name", &ESM::Skill::mName);
+            Types::addProperty(record, "description", &ESM::Skill::mDescription);
+            Types::addIconProperty(record);
+            Types::addProperty(record, "werewolfValue", &ESM::Skill::mWerewolfValue);
+            Types::addProperty(record, "attribute", &ESM::Skill::mData, &ESM::Skill::SKDTstruct::mAttribute);
+
+            if constexpr (Types::RecordType<T>::isMutable)
+            {
+                record["specialization"] = sol::property(
+                    [](const MutableRecord<ESM::Skill>& rec) -> std::string_view {
+                        return ESM::Class::specializationIndexToLuaId.at(rec.find().mData.mSpecialization);
+                    },
+                    [](MutableRecord<ESM::Skill>& rec, std::string_view value) {
+                        ESM::Skill& skill = rec.find();
+                        skill.mData.mSpecialization = getSpecialization(value);
+                    });
+                record["school"] = sol::property(
+                    [](const MutableRecord<ESM::Skill>& rec) -> std::optional<MutableMagicSchool> {
+                        const ESM::Skill& skill = rec.find();
+                        if (skill.mSchool)
+                            return MutableMagicSchool{ rec };
+                        return {};
+                    },
+                    [](MutableRecord<ESM::Skill>& rec, const sol::object& value) {
+                        setSchoolFromTable(rec.find(), value);
+                    });
+                record["skillGain"]
+                    = sol::property([](const MutableRecord<ESM::Skill>& rec) { return MutableSkillGain{ rec }; },
+                        [](MutableRecord<ESM::Skill>& rec, const sol::object& value) {
+                            setSkillGainFromTable(rec.find(), value);
+                        });
+                addSchoolType<MutableMagicSchool>(lua, "ESM3_MutableMagicSchool");
+
+                auto gainT = lua.new_usertype<MutableSkillGain>("ESM3_MutableSkillGain");
+                gainT[sol::meta_function::length] = [](const MutableSkillGain& array) { return array.find().size(); };
+                gainT[sol::meta_function::index]
+                    = [](const MutableSkillGain& array, uint32_t index) -> std::optional<float> {
+                    const auto& values = array.find();
+                    if (index == 0 || index > values.size())
+                        return {};
+                    return values[index - 1];
+                };
+                gainT[sol::meta_function::new_index]
+                    = [](MutableSkillGain& array, uint32_t index, Misc::FiniteFloat value) {
+                          auto& values = array.find();
+                          if (index == 0 || index > values.size())
+                              throw std::runtime_error("index out of range");
+                          values[index - 1] = value;
+                      };
+                gainT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+                gainT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+            }
+            else
+            {
+                record["specialization"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view {
+                    return ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization);
+                });
+                record["school"] = sol::readonly_property([](const ESM::Skill& rec) -> const ESM::MagicSchool* {
+                    if (!rec.mSchool)
+                        return nullptr;
+                    return &*rec.mSchool;
+                });
+                record["skillGain"] = sol::readonly_property([lua](const ESM::Skill& rec) -> sol::table {
+                    sol::table res(lua, sol::create);
+                    int index = 1;
+                    for (float skillGain : rec.mData.mUseValue)
+                        res[index++] = skillGain;
+                    return res;
+                });
+                addSchoolType<ESM::MagicSchool>(lua, "MagicSchool");
+            }
+        }
     }
 }
 
@@ -566,6 +750,10 @@ namespace sol
     };
     template <>
     struct is_automagical<MWLua::AIStat> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<MutableMagicSchool> : std::false_type
     {
     };
 }
@@ -679,7 +867,6 @@ namespace MWLua
     {
         sol::state_view lua = context.sol();
         sol::table statsApi(lua, sol::create);
-        auto* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         sol::table attributes(lua, sol::create);
         addRecordFunctionBinding<ESM::Attribute>(attributes, context);
@@ -693,50 +880,7 @@ namespace MWLua
         statsApi["Skill"] = LuaUtil::makeReadOnly(skills);
         statsApi["Skill"][sol::metatable_key][sol::meta_function::to_string] = ESM::Skill::getRecordType;
 
-        auto skillT = lua.new_usertype<ESM::Skill>("Skill");
-        skillT[sol::meta_function::to_string]
-            = [](const ESM::Skill& rec) { return "ESM3_Skill[" + rec.mId.toDebugString() + "]"; };
-        skillT["id"] = sol::readonly_property(
-            [](const ESM::Skill& rec) -> std::string { return ESM::RefId{ rec.mId }.serializeText(); });
-        skillT["name"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mName; });
-        skillT["description"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mDescription; });
-        skillT["specialization"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view {
-            return ESM::Class::specializationIndexToLuaId.at(rec.mData.mSpecialization);
-        });
-        skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
-            return Misc::ResourceHelpers::correctIconPath(VFS::Path::toNormalized(rec.mIcon), *vfs);
-        });
-        skillT["school"] = sol::readonly_property([](const ESM::Skill& rec) -> const ESM::MagicSchool* {
-            if (!rec.mSchool)
-                return nullptr;
-            return &*rec.mSchool;
-        });
-        skillT["attribute"]
-            = sol::readonly_property([](const ESM::Skill& rec) -> ESM::RefId { return rec.mData.mAttribute; });
-        skillT["skillGain"] = sol::readonly_property([lua](const ESM::Skill& rec) -> sol::table {
-            sol::table res(lua, sol::create);
-            int index = 1;
-            for (auto skillGain : rec.mData.mUseValue)
-                res[index++] = skillGain;
-            return res;
-        });
-
-        auto schoolT = lua.new_usertype<ESM::MagicSchool>("MagicSchool");
-        schoolT[sol::meta_function::to_string]
-            = [](const ESM::MagicSchool& rec) { return "ESM3_MagicSchool[" + rec.mName + "]"; };
-        schoolT["name"]
-            = sol::readonly_property([](const ESM::MagicSchool& rec) -> std::string_view { return rec.mName; });
-        schoolT["areaSound"] = sol::readonly_property(
-            [](const ESM::MagicSchool& rec) -> std::string { return rec.mAreaSound.serializeText(); });
-        schoolT["boltSound"] = sol::readonly_property(
-            [](const ESM::MagicSchool& rec) -> std::string { return rec.mBoltSound.serializeText(); });
-        schoolT["castSound"] = sol::readonly_property(
-            [](const ESM::MagicSchool& rec) -> std::string { return rec.mCastSound.serializeText(); });
-        schoolT["failureSound"] = sol::readonly_property(
-            [](const ESM::MagicSchool& rec) -> std::string { return rec.mFailureSound.serializeText(); });
-        schoolT["hitSound"] = sol::readonly_property(
-            [](const ESM::MagicSchool& rec) -> std::string { return rec.mHitSound.serializeText(); });
+        addSkillType<ESM::Skill>(lua, "Skill");
 
         return LuaUtil::makeReadOnly(statsApi);
     }
@@ -758,5 +902,32 @@ namespace MWLua
     void addMutableAttributeType(sol::state_view& lua)
     {
         addAttributeType<MutableRecord<ESM::Attribute>>(lua, "ESM3_MutableAttribute");
+    }
+
+    ESM::Skill tableToSkill(const sol::table& rec)
+    {
+        auto skill = Types::initFromTemplate<ESM::Skill>(rec);
+        if (rec["description"] != sol::nil)
+            skill.mDescription = rec["description"];
+        if (rec["name"] != sol::nil)
+            skill.mName = rec["name"];
+        if (rec["icon"] != sol::nil)
+            skill.mIcon = rec["icon"].get<std::string_view>();
+        if (rec["werewolfValue"] != sol::nil)
+            skill.mWerewolfValue = rec["werewolfValue"].get<Misc::FiniteFloat>();
+        if (rec["attribute"] != sol::nil)
+            skill.mData.mAttribute = ESM::RefId::deserializeText(rec["attribute"].get<std::string_view>());
+        if (rec["specialization"] != sol::nil)
+            skill.mData.mSpecialization = getSpecialization(rec["specialization"].get<std::string_view>());
+        if (rec["school"] != sol::nil)
+            setSchoolFromTable(skill, rec["school"]);
+        if (rec["skillGain"] != sol::nil)
+            setSkillGainFromTable(skill, rec["skillGain"]);
+        return skill;
+    }
+
+    void addMutableSkillType(sol::state_view& lua)
+    {
+        addSkillType<MutableRecord<ESM::Skill>>(lua, "ESM3_MutableSkill");
     }
 }

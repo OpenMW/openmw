@@ -996,6 +996,7 @@
 -- @field #MagicSchoolData school Optional magic school
 -- @field #string attribute The id of the skill's governing attribute
 -- @field #table skillGain Table of the 4 possible skill gain values. See [SkillProgression#SkillUseType](interface_skill_progression.html#SkillUseType).
+-- @field #number werewolfValue Value for werewolf players
 
 ---
 -- @type MagicSchoolData
@@ -1005,6 +1006,7 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
+-- @field #number autoCalcMax Maximum number of spells of this school to auto calculate
 
 --- @{#Dialogue}: Dialogue. Not available in load scripts.
 -- @field [parent=#core] #Dialogue dialogue

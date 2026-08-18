@@ -459,6 +459,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initSkillBindings(sol::state_view& lua, MWWorld::Store<ESM::Skill>& store)
+        {
+            addRecordStoreBindings<ESM::Skill>(lua, &MWLua::tableToSkill);
+            addMutableSkillType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Skill>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initSpellBindings(sol::state_view& lua, MWWorld::Store<ESM::Spell>& store)
         {
             addRecordStoreBindings<ESM::Spell>(lua, &MWLua::tableToSpell);
@@ -523,6 +532,7 @@ namespace MWLua
         api["probes"] = initProbeBindings(lua, esmStore.getWritable<ESM::Probe>());
         api["races"] = initRaceBindings(lua, esmStore.getWritable<ESM::Race>());
         api["repairs"] = initRepairBindings(lua, esmStore.getWritable<ESM::Repair>());
+        api["skills"] = initSkillBindings(lua, esmStore.getWritable<ESM::Skill>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());
         api["sounds"] = initSoundBindings(lua, esmStore.getWritable<ESM::Sound>());
