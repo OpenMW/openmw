@@ -20,5 +20,5 @@ void main()
     else
         alphaPassthrough = gl_FrontMaterial.diffuse.a;
 
-    diffuseMapUV = (texMat0 * vec4(gl_MultiTexCoord0.xyz, 1.0)).xy;
+    diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
 }

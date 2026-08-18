@@ -16,7 +16,7 @@ void main()
     passColor = gl_Color;
 
     if (pass == PASS_CLOUDS)
-        diffuseMapUV = (texMat0 * vec4(gl_MultiTexCoord0.xyz, 1.0)).xy;
+        diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
     else
         diffuseMapUV = gl_MultiTexCoord0.xy;
 }
