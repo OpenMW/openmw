@@ -4,6 +4,7 @@ local Actor = types.Actor
 local Armor = types.Armor
 local Book = types.Book
 local Clothing = types.Clothing
+local Container = types.Container
 local Ingredient = types.Ingredient
 local Lockable = types.Lockable
 local Potion = types.Potion
@@ -103,9 +104,20 @@ local function playMagicEffects(target, type, effects, allowEffectLoop)
         end
     end
 end
+
+local function isOrganicContainer(target)
+    if Container.objectIsInstance(target) then
+        local record = Container.records[target.recordId]
+        return record and record.isOrganic
+    end
+    return false
+end
+
 local function targetIsValid(target)
-        -- Spells can only be inflicted on Actors and Lockables.
-    return target ~= nil and (Actor.objectIsInstance(target) or Lockable.objectIsInstance(target))
+    if not target then return false end
+    -- Spells can only be inflicted on Actors in processing range, and Lockables.
+    local isValidActor = Actor.objectIsInstance(target) and Actor.isInActorsProcessingRange(target)
+    return isValidActor or (Lockable.objectIsInstance(target) and not isOrganicContainer(target))
 end
 
 
@@ -136,4 +148,5 @@ return {
     playMagicEffects = playMagicEffects,
     getMagicRecord = getMagicRecord,
     filterByIndex = filterByIndex,
+    isOrganicContainer = isOrganicContainer,
 }
