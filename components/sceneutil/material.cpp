@@ -5,8 +5,16 @@
 #include <osg/Uniform>
 namespace SceneUtil
 {
-    Material::Material()
+    Material::Material(const MaterialConfig& config)
         : osg::StateAttribute()
+        , mDiffuse(config.mDiffuse)
+        , mAmbient(config.mAmbient)
+        , mSpecular(config.mSpecular)
+        , mEmission(config.mEmission)
+        , mShininess(config.mShininess)
+        , mEmissiveMult(config.mEmissiveMult)
+        , mSpecularStrength(config.mSpecularStrength)
+        , mVertexColorMode(config.mVertexColorMode)
     {
     }
 

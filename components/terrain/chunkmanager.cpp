@@ -51,7 +51,8 @@ namespace Terrain
     {
         mMultiPassRoot = new osg::StateSet;
         mMultiPassRoot->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-        osg::ref_ptr<SceneUtil::Material> material(new SceneUtil::Material);
+        osg::ref_ptr<SceneUtil::Material> material(
+            new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse }));
         material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
         material->updateStateSet(mMultiPassRoot);
         mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);

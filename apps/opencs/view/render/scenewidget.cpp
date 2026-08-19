@@ -182,10 +182,6 @@ namespace CSVRender
         mView->getCamera()->setName(Constants::SceneCamera);
 
         osg::ref_ptr<SceneUtil::Material> defaultMat(new SceneUtil::Material);
-        defaultMat->setVertexColorMode(SceneUtil::VertexColorModes::None);
-        defaultMat->setAmbient(osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         defaultMat->updateStateSet(mRootNode->getOrCreateStateSet());
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("alpha", 1.f));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("actorFade", 1.f));

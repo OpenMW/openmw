@@ -25,8 +25,8 @@ namespace MWRender
     {
         osg::ref_ptr<osg::StateSet> makeGroupStateSet()
         {
-            osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
-            material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
+            osg::ref_ptr<SceneUtil::Material> material
+                = new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse });
 
             osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet;
             stateSet->setAttribute(material);

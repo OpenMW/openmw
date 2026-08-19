@@ -25,10 +25,22 @@ namespace SceneUtil
         Specular = 5,
     };
 
+    struct MaterialConfig
+    {
+        osg::Vec4f mDiffuse = { 1, 1, 1, 1 };
+        osg::Vec4f mAmbient = { 1, 1, 1, 1 };
+        osg::Vec4f mSpecular = { 0, 0, 0, 0 };
+        osg::Vec4f mEmission = { 0, 0, 0, 1 };
+        float mShininess = 0.0;
+        float mEmissiveMult = 1.0;
+        float mSpecularStrength = 1.0;
+        VertexColorModes mVertexColorMode = VertexColorModes::None;
+    };
+
     class Material : public osg::StateAttribute
     {
     public:
-        Material();
+        Material(const MaterialConfig& config = MaterialConfig{});
 
         Material(const Material& other, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 

@@ -2926,10 +2926,9 @@ namespace NifOsg
                 mat->setVertexColorMode(SceneUtil::VertexColorModes::None);
             }
 
-            if (hasMatCtrl || mat->getVertexColorMode() != SceneUtil::VertexColorModes::None
-                || mat->getEmission() != osg::Vec4f(0, 0, 0, 1) || mat->getDiffuse() != osg::Vec4f(1, 1, 1, 1)
-                || mat->getAmbient() != osg::Vec4f(1, 1, 1, 1) || mat->getShininess() != 0
-                || mat->getSpecular() != osg::Vec4f(0.f, 0.f, 0.f, 0.f))
+            static const SceneUtil::Material defaultMat{};
+
+            if (hasMatCtrl || *mat != defaultMat)
             {
                 mat = shareAttribute(mat);
                 node->getOrCreateStateSet()->setAttributeAndModes(mat, osg::StateAttribute::ON);
