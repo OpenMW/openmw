@@ -227,42 +227,125 @@ namespace MWSound
         return dec;
     }
 
+    namespace
+    {
+        AVStream** findAudioStream(AVFormatContext& ctx)
+        {
+            for (unsigned j = 0; j < ctx.nb_streams; j++)
+                if (ctx.streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+                    return &ctx.streams[j];
+            return nullptr;
+        }
+
+        bool hasCompleteAudioParameters(const AVStream& stream)
+        {
+            const AVCodecParameters& par = *stream.codecpar;
+#if OPENMW_FFMPEG_5_OR_GREATER
+            const int channels = par.ch_layout.nb_channels;
+#else
+            const int channels = par.channels;
+#endif
+            return par.codec_id != AV_CODEC_ID_NONE && par.sample_rate > 0 && channels > 0;
+        }
+
+        const AVInputFormat* guessFormat(VFS::Path::NormalizedView fname)
+        {
+            const auto ext = fname.extension();
+            if (ext == "wav")
+                return av_find_input_format("wav");
+            if (ext == "mp3")
+                return av_find_input_format("mp3");
+            if (ext == "ogg" || ext == "opus")
+                return av_find_input_format("ogg");
+            if (ext == "flac")
+                return av_find_input_format("flac");
+            return nullptr;
+        }
+    }
+
+    bool FFmpegDecoder::openContext(const char* name, const AVInputFormat* fmt, bool limitProbe, AVIOContextPtr& ioCtx,
+        AVFormatContextPtr& formatCtx, AVStream**& stream)
+    {
+        // A real IO buffer is required: with a named input format the demuxer
+        // reads through it directly, and a zero-size buffer fails the open
+        // (the probed path tolerates it, which hid this).
+        constexpr int ioBufferSize = 8192;
+        unsigned char* ioBuffer = static_cast<unsigned char*>(av_malloc(ioBufferSize));
+        if (ioBuffer == nullptr)
+            throw std::runtime_error("Failed to allocate AVIO buffer");
+        ioCtx.reset(avio_alloc_context(ioBuffer, ioBufferSize, 0, this, readPacket, writePacket, seek));
+        if (ioCtx == nullptr)
+        {
+            av_freep(&ioBuffer);
+            throw std::runtime_error("Failed to allocate AVIO context");
+        }
+
+        AVFormatContext* ctx = avformat_alloc_context();
+        if (ctx == nullptr)
+            throw std::runtime_error("Failed to allocate context");
+
+        ctx->pb = ioCtx.get();
+        if (limitProbe)
+        {
+            ctx->probesize = 65536;
+            // Microseconds of media; must cover a few frames so formats that
+            // fill parameters from a decoded frame (mp3) complete under the cap.
+            ctx->max_analyze_duration = 200000;
+        }
+
+        // avformat_open_input frees the user supplied AVFormatContext on failure
+        if (avformat_open_input(&ctx, name, fmt, nullptr) != 0)
+            return false;
+
+        formatCtx.reset(std::exchange(ctx, nullptr));
+
+        stream = findAudioStream(*formatCtx);
+
+        // The demuxers for Morrowind's formats fill the codec parameters from the
+        // file header during avformat_open_input, so skip avformat_find_stream_info:
+        // it scans packets across the whole file for duration and bitrate estimates
+        // that nothing here reads, costing several milliseconds per wav on the
+        // thread that starts the sound (#4880).
+        if (stream == nullptr || !hasCompleteAudioParameters(**stream))
+        {
+            if (avformat_find_stream_info(formatCtx.get(), nullptr) < 0)
+                return false;
+            stream = findAudioStream(*formatCtx);
+        }
+
+        return stream != nullptr;
+    }
+
     void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
         mDataStream = mResourceMgr->get(fname);
 
-        AVIOContextPtr ioCtx(avio_alloc_context(nullptr, 0, 0, this, readPacket, writePacket, seek));
-        if (ioCtx == nullptr)
-            throw std::runtime_error("Failed to allocate AVIO context");
-
-        AVFormatContext* formatCtx = avformat_alloc_context();
-        if (formatCtx == nullptr)
-            throw std::runtime_error("Failed to allocate context");
-
-        formatCtx->pb = ioCtx.get();
-
-        // avformat_open_input frees user supplied AVFormatContext on failure
-        if (avformat_open_input(&formatCtx, fname.value().data(), nullptr, nullptr) != 0)
-            throw std::runtime_error("Failed to open input");
-
-        AVFormatContextPtr formatCtxPtr(std::exchange(formatCtx, nullptr));
-
-        if (avformat_find_stream_info(formatCtxPtr.get(), nullptr) < 0)
-            throw std::runtime_error("Failed to find stream info");
-
+        AVIOContextPtr ioCtx;
+        AVFormatContextPtr formatCtxPtr;
         AVStream** stream = nullptr;
-        for (size_t j = 0; j < formatCtxPtr->nb_streams; j++)
+
+        // Naming the demuxer from the extension lets avformat_open_input skip
+        // content probing, and the probe caps bound the scan for formats whose
+        // header leaves parameters incomplete (mp3 gets sample rate and channel
+        // count from the first decoded frame). Mislabelled files fail this
+        // attempt and take the probed path below.
+        bool opened = false;
+        if (const AVInputFormat* fmt = guessFormat(fname))
         {
-            if (formatCtxPtr->streams[j]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+            // Lenient demuxers (mp3) can accept mislabelled data and produce a
+            // stream with empty parameters; that counts as a failed attempt too.
+            opened = openContext(fname.value().data(), fmt, true, ioCtx, formatCtxPtr, stream)
+                && hasCompleteAudioParameters(**stream);
+            if (!opened)
             {
-                stream = &formatCtxPtr->streams[j];
-                break;
+                mDataStream->clear();
+                mDataStream->seekg(0);
             }
         }
 
-        if (stream == nullptr)
-            throw std::runtime_error("No audio streams");
+        if (!opened && !openContext(fname.value().data(), nullptr, false, ioCtx, formatCtxPtr, stream))
+            throw std::runtime_error("Failed to open input");
 
         const AVCodec* codec = avcodec_find_decoder((*stream)->codecpar->codec_id);
         if (codec == nullptr)

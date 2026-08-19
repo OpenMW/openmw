@@ -198,6 +198,11 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
 
     try
     {
+        // Stop the background GC started at the previous frame's end.
+        // Input handling can run Lua (the menu key does), so the state
+        // must not be collected from this point on.
+        mLuaWorker->finishGc();
+
         // update input
         {
             ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
@@ -355,6 +360,10 @@ bool OMW::Engine::frame(unsigned frameNumber, float frametime)
     mViewer->renderingTraversals();
 
     mLuaWorker->finishUpdate(frameStart, frameNumber, *stats);
+
+    // The Lua state is unused until the next frame starts: the worker collects
+    // garbage through the frame tail and the framerate-limiter sleep.
+    mLuaWorker->gc();
 
     return true;
 }

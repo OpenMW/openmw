@@ -141,7 +141,7 @@ add_component_dir (sceneutil
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     detourdebugdraw navmesh agentpath animblendrules shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
     screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon clearcolor
-    cullsafeboundsvisitor keyframe nodecallback textkeymap glextensions
+    cullsafeboundsvisitor keyframe nodecallback textkeymap glextensions fog
     )
 
 add_component_dir (nif
@@ -149,7 +149,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifosg
-    autotransform nifloader controller particle matrixtransform fog
+    autotransform nifloader controller particle matrixtransform
     )
 
 add_component_dir (nifbullet

@@ -15,6 +15,7 @@
 #include <components/files/memorystream.hpp>
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/rtt.hpp>
@@ -734,12 +735,7 @@ namespace MWRender
         if (Stereo::getMultiview())
             Stereo::setMultiviewMatrices(stateset, { mProjectionMatrix, mProjectionMatrix });
 
-        // assign large value to effectively turn off fog
-        // shaders don't respect glDisable(GL_FOG)
-        osg::ref_ptr<osg::Fog> fog(new osg::Fog);
-        fog->setStart(10000000);
-        fog->setEnd(10000000);
-        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+        SceneUtil::disableFog(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         // turn of sky blending
         stateset->addUniform(new osg::Uniform("far", 10000000.0f));

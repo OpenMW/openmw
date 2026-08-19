@@ -4,7 +4,6 @@
 #include <osgDB/Registry>
 
 #include <components/nifosg/autotransform.hpp>
-#include <components/nifosg/fog.hpp>
 #include <components/nifosg/matrixtransform.hpp>
 
 #include <components/sceneutil/morphgeometry.hpp>
@@ -147,19 +146,6 @@ namespace SceneUtil
         }
     };
 
-    class FogSerializer : public osgDB::ObjectWrapper
-    {
-    public:
-        FogSerializer()
-            : osgDB::ObjectWrapper(
-                createInstanceFunc<osg::Fog>, "NifOsg::Fog", "osg::Object osg::StateAttribute osg::Fog NifOsg::Fog")
-        {
-            addSerializer(new osgDB::PropByValSerializer<NifOsg::Fog, float>(
-                              "Depth", 1.f, &NifOsg::Fog::getDepth, &NifOsg::Fog::setDepth),
-                osgDB::BaseSerializer::RW_FLOAT);
-        }
-    };
-
     class TextureTypeSerializer : public osgDB::ObjectWrapper
     {
     public:
@@ -201,7 +187,6 @@ namespace SceneUtil
             mgr->addWrapper(new CameraRelativeTransformSerializer);
             mgr->addWrapper(new MatrixTransformSerializer);
             mgr->addWrapper(new AutoTransformSerializer);
-            mgr->addWrapper(new FogSerializer);
             mgr->addWrapper(new TextureTypeSerializer);
 
             // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of

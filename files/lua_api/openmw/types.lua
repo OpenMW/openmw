@@ -889,7 +889,7 @@
 -- @function [parent=#ItemLevelledListRecord] getRandomId
 -- @param #ItemLevelledListRecord listRecord The list
 -- @param #number MaxLvl The maximum level to select entries for
--- @return #string An id
+-- @return #string An id (can be nil if the chanceNone roll succeeds, or if no entry is at or below the given level)
 
 
 --------------------------------------------------------------------------------
@@ -2602,7 +2602,7 @@
 -- @function [parent=#CreatureLevelledListRecord] getRandomId
 -- @param #CreatureLevelledListRecord listRecord The list
 -- @param #number MaxLvl The maximum level to select entries for
--- @return #string An id
+-- @return #string An id (can be nil if the chanceNone roll succeeds, or if no entry is at or below the given level)
 
 ---
 -- @type LevelledListItem

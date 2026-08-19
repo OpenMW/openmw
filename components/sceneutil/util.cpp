@@ -83,7 +83,6 @@ namespace SceneUtil
             removeTexture(stateset);
         else
         {
-            stateset->setTextureMode(mTexUnit, GL_TEXTURE_2D, osg::StateAttribute::ON);
             stateset->addUniform(new osg::Uniform("envMapColor", mColor));
         }
     }
@@ -91,7 +90,6 @@ namespace SceneUtil
     void GlowUpdater::removeTexture(osg::StateSet* stateset)
     {
         stateset->removeTextureAttribute(mTexUnit, osg::StateAttribute::TEXTURE);
-        stateset->removeTextureMode(mTexUnit, GL_TEXTURE_2D);
         stateset->removeUniform("envMapColor");
 
         osg::StateSet::TextureAttributeList& list = stateset->getTextureAttributeList();
@@ -231,8 +229,8 @@ namespace SceneUtil
             writableStateSet = new osg::StateSet(*node->getStateSet(), osg::CopyOp::SHALLOW_COPY);
             node->setStateSet(writableStateSet);
         }
-        writableStateSet->setTextureAttributeAndModes(texUnit, textures.front(), osg::StateAttribute::ON);
-        writableStateSet->setTextureAttributeAndModes(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttribute(texUnit, textures.front(), osg::StateAttribute::ON);
+        writableStateSet->setTextureAttribute(texUnit, new TextureType("envMap"), osg::StateAttribute::ON);
         writableStateSet->addUniform(new osg::Uniform("envMapColor", glowColor));
         resourceSystem->getSceneManager()->recreateShaders(std::move(node));
 
@@ -404,11 +402,8 @@ namespace SceneUtil
 
     void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer)
     {
-        renderer->getSceneView(0)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
-        renderer->getSceneView(1)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
+        constexpr unsigned options = osgUtil::SceneView::NO_SCENEVIEW_LIGHT;
+        renderer->getSceneView(0)->setDefaults(options);
+        renderer->getSceneView(1)->setDefaults(options);
     }
 }

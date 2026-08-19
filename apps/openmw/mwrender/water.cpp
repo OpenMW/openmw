@@ -20,6 +20,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
@@ -253,14 +254,8 @@ namespace MWRender
             camera->addCullCallback(new InheritViewPointCallback);
             camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-            // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
-            // assign large value to effectively turn off fog
-            // shaders don't respect glDisable(GL_FOG)
-            osg::ref_ptr<osg::Fog> fog(new osg::Fog);
-            fog->setStart(10000000);
-            fog->setEnd(10000000);
-            camera->getOrCreateStateSet()->setAttributeAndModes(
-                fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+            SceneUtil::disableFog(
+                *camera->getOrCreateStateSet(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);
@@ -598,7 +593,7 @@ namespace MWRender
         controller->setSource(std::make_shared<SceneUtil::FrameTimeSource>());
         node->setUpdateCallback(controller);
 
-        stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
+        stateset->setTextureAttribute(0, textures[0], osg::StateAttribute::ON);
 
         // use a shader to render the simple water, ensuring that fog is applied per pixel as required.
         // this could be removed if a more detailed water mesh, using some sort of paging solution, is implemented.
@@ -623,7 +618,7 @@ namespace MWRender
         void setDefaults(osg::StateSet* stateset) override
         {
             stateset->addUniform(new osg::Uniform("normalMap", 0));
-            stateset->setTextureAttributeAndModes(0, mNormalMap, osg::StateAttribute::ON);
+            stateset->setTextureAttribute(0, mNormalMap, osg::StateAttribute::ON);
             stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
             stateset->setAttributeAndModes(mProgram, osg::StateAttribute::ON);
 
@@ -652,16 +647,16 @@ namespace MWRender
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-            stateset->setTextureAttributeAndModes(1, mReflection->getColorTexture(cv), osg::StateAttribute::ON);
+            stateset->setTextureAttribute(1, mReflection->getColorTexture(cv), osg::StateAttribute::ON);
 
             if (mRefraction)
             {
-                stateset->setTextureAttributeAndModes(2, mRefraction->getColorTexture(cv), osg::StateAttribute::ON);
-                stateset->setTextureAttributeAndModes(3, mRefraction->getDepthTexture(cv), osg::StateAttribute::ON);
+                stateset->setTextureAttribute(2, mRefraction->getColorTexture(cv), osg::StateAttribute::ON);
+                stateset->setTextureAttribute(3, mRefraction->getDepthTexture(cv), osg::StateAttribute::ON);
             }
             if (mRipples)
             {
-                stateset->setTextureAttributeAndModes(4, mRipples->getColorTexture(), osg::StateAttribute::ON);
+                stateset->setTextureAttribute(4, mRipples->getColorTexture(), osg::StateAttribute::ON);
             }
             stateset->getUniform("nodePosition")->set(osg::Vec3f(mWater->getPosition()));
         }

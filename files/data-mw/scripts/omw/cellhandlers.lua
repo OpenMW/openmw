@@ -41,7 +41,7 @@ local function spawnFish(cell)
     if (spawnCount <= 5) then -- spawn a number of random creatures selected from the list
         while(spawnCount > 0) do
             local id = list:getRandomId(level)
-            if (id ~= '') then
+            if id then
                 local ref = world.createObject(id)
                 ref:teleport(cell, getRandomPosition(cellX, cellY))
             end
@@ -49,7 +49,7 @@ local function spawnFish(cell)
         end
     else -- spawn a horde of a single creature selected from the list
         local id = list:getRandomId(level)
-        if (id ~= '') then
+        if id then
             local basePos = getRandomPosition(cellX, cellY)
             while(spawnCount > 0) do
                 local ref = world.createObject(id)

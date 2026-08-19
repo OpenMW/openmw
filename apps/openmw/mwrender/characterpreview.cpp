@@ -17,6 +17,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/fog.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/rtt.hpp>
@@ -134,8 +135,6 @@ namespace MWRender
                         newStateSet = new osg::StateSet(*stateset, osg::CopyOp::SHALLOW_COPY);
                         node.setStateSet(newStateSet);
                     }
-                    // Disable noBlendAlphaEnv
-                    newStateSet->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
                     newStateSet->setDefine("FORCE_OPAQUE", "0", osg::StateAttribute::ON);
                 }
             }
@@ -248,12 +247,7 @@ namespace MWRender
 
         SceneUtil::ShadowManager::instance().disableShadowsForStateSet(*stateset);
 
-        // assign large value to effectively turn off fog
-        // shaders don't respect glDisable(GL_FOG)
-        osg::ref_ptr<osg::Fog> fog(new osg::Fog);
-        fog->setStart(10000000);
-        fog->setEnd(10000000);
-        stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+        SceneUtil::disableFog(*stateset, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         // TODO: Clean up this mess of loose uniforms that shaders depend on.
         // turn off sky blending
@@ -273,7 +267,7 @@ namespace MWRender
         // This might clash with a shadow map, so make sure it doesn't cast shadows
         dummyTexture->setShadowComparison(true);
         dummyTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
-        stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
+        stateset->setTextureAttribute(7, dummyTexture, osg::StateAttribute::ON);
 
         osg::ref_ptr<SceneUtil::Light> light = new SceneUtil::Light;
         float diffuseR = Fallback::Map::getFloat("Inventory_DirectionalDiffuseR");

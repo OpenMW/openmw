@@ -3,6 +3,7 @@
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -12,6 +13,7 @@
 #include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
+#include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadrepa.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/loadspel.hpp>
@@ -19,9 +21,11 @@
 #include <components/fallback/fallback.hpp>
 #include <components/lua/util.hpp>
 
+#include "classbindings.hpp"
 #include "context.hpp"
 #include "factionbindings.hpp"
 #include "magictypebindings.hpp"
+#include "racebindings.hpp"
 #include "soundbindings.hpp"
 #include "types/modelproperty.hpp"
 #include "types/types.hpp"
@@ -279,6 +283,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initClassBindings(sol::state_view& lua, MWWorld::Store<ESM::Class>& store)
+        {
+            addRecordStoreBindings<ESM::Class>(lua, &MWLua::tableToClass);
+            addMutableClassType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Class>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initDoorBindings(sol::state_view& lua, MWWorld::Store<ESM::Door>& store)
         {
             addRecordStoreBindings<ESM::Door>(lua, &MWLua::tableToDoor);
@@ -407,6 +420,15 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initRaceBindings(sol::state_view& lua, MWWorld::Store<ESM::Race>& store)
+        {
+            addRecordStoreBindings<ESM::Race>(lua, &MWLua::tableToRace);
+            addMutableRaceType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Race>{ store };
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initRepairBindings(sol::state_view& lua, MWWorld::Store<ESM::Repair>& store)
         {
             addRecordStoreBindings<ESM::Repair>(lua, &MWLua::tableToRepair);
@@ -461,6 +483,7 @@ namespace MWLua
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
         api["books"] = initBookBindings(lua, esmStore.getWritable<ESM::Book>());
+        api["classes"] = initClassBindings(lua, esmStore.getWritable<ESM::Class>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
         api["enchantments"] = initEnchantmentBindings(lua, esmStore.getWritable<ESM::Enchantment>());
         api["factions"] = initFactionBindings(lua, esmStore.getWritable<ESM::Faction>());
@@ -475,6 +498,7 @@ namespace MWLua
         api["miscs"] = initMiscBindings(lua, esmStore.getWritable<ESM::Miscellaneous>());
         api["potions"] = initPotionBindings(lua, esmStore.getWritable<ESM::Potion>());
         api["probes"] = initProbeBindings(lua, esmStore.getWritable<ESM::Probe>());
+        api["races"] = initRaceBindings(lua, esmStore.getWritable<ESM::Race>());
         api["repairs"] = initRepairBindings(lua, esmStore.getWritable<ESM::Repair>());
         api["spells"] = initSpellBindings(lua, esmStore.getWritable<ESM::Spell>());
         api["statics"] = initStaticBindings(lua, esmStore.getWritable<ESM::Static>());

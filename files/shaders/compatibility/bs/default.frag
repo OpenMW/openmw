@@ -29,6 +29,7 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 uniform vec2 screenRes;
+uniform float near;
 uniform float far;
 uniform float alphaRef;
 uniform float emissiveMult;
@@ -98,7 +99,7 @@ void main()
 
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     // having testing & blending isn't enough - we need to write an opaque pixel to be opaque

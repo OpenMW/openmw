@@ -364,7 +364,6 @@ namespace MWRender
         depth->setWriteMask(false);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth);
         mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-        mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
         mMoonScriptColor = Fallback::Map::getColour("Moons_Script_Color");
 
@@ -394,7 +393,7 @@ namespace MWRender
         raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        stateset->setTextureAttributeAndModes(0, raindropTex);
+        stateset->setTextureAttribute(0, raindropTex);
         stateset->setNestRenderBins(false);
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);

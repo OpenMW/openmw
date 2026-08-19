@@ -213,9 +213,6 @@ namespace MWLua
 
     void LuaManager::update()
     {
-        if (const int steps = Settings::lua().mGcStepsPerFrame; steps > 0)
-            lua_gc(mLua.unsafeState(), LUA_GCSTEP, steps);
-
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
@@ -277,6 +274,11 @@ namespace MWLua
 
             mScriptTracker.unloadInactiveScripts(lua);
         });
+    }
+
+    bool LuaManager::gcStep(int steps)
+    {
+        return lua_gc(mLua.unsafeState(), LUA_GCSTEP, steps) == 1;
     }
 
     void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)

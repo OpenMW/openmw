@@ -142,18 +142,9 @@ namespace MWClass
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return std::make_unique<MWWorld::NullAction>();
 
-        if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
-        {
-            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-            auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfContainer", prng);
-
-            std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::FailedAction>("#{sWerewolfRefusal}");
-            if (sound)
-                action->setSound(sound->mId);
-
-            return action;
-        }
+        std::unique_ptr<MWWorld::Action> werewolfAction = getWerewolfRefusalAction(actor);
+        if (werewolfAction)
+            return werewolfAction;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
