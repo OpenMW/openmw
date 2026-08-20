@@ -15,6 +15,7 @@
 #include <components/esm/typetraits.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/readerscache.hpp>
 #include <components/esm3/typetraits.hpp>
 #include <components/esm4/common.hpp>
 #include <components/esm4/reader.hpp>
@@ -882,5 +883,82 @@ namespace
         const ESM::Dialogue* dialogue = esmStore.get<ESM::Dialogue>().search(ESM::RefId::stringRefId("dialogue"));
         ASSERT_NE(dialogue, nullptr);
         EXPECT_THAT(dialogue->mInfo, ElementsAre(HasIdEqualTo("info0"), HasIdEqualTo("info2")));
+    }
+
+    void saveCell(ESM::ESMWriter& writer, const ESM::Cell& cell, std::span<const ESM::CellRef> refs)
+    {
+        writer.startRecord(ESM::REC_CELL);
+        cell.save(writer);
+        for (const ESM::CellRef& ref : refs)
+            ref.save(writer);
+        writer.endRecord(ESM::REC_CELL);
+    }
+
+    ESM::CellRef makeRef(std::uint32_t index, std::string_view id)
+    {
+        ESM::CellRef ref;
+        ref.blank();
+        ref.mRefNum.mIndex = index;
+        ref.mRefNum.mContentFile = 0;
+        ref.mRefID = ESM::RefId::stringRefId(id);
+        return ref;
+    }
+
+    TEST(MWWorldStoreTest, shouldIndexRefCellsExteriorsFirst)
+    {
+        const std::filesystem::path path = TestingOpenMW::outputFilePath("test_ref_cells.esm");
+        {
+            ESM::Cell interior;
+            interior.blank();
+            interior.mName = "room";
+            interior.mData.mFlags = ESM::Cell::Interior;
+            ESM::Cell exterior;
+            exterior.blank();
+            exterior.mData.mX = 1;
+            exterior.mData.mY = 2;
+
+            // validateRecords() needs one class and one race.
+            ESM::Class cls;
+            cls.blank();
+            cls.mId = ESM::RefId::stringRefId("class");
+            ESM::Race race;
+            race.blank();
+            race.mId = ESM::RefId::stringRefId("race");
+
+            std::ofstream stream(path, std::ios::binary);
+            ESM::ESMWriter writer;
+            writer.setFormatVersion(ESM::CurrentContentFormatVersion);
+            writer.save(stream);
+            writer.startRecord(ESM::REC_CLAS);
+            cls.save(writer);
+            writer.endRecord(ESM::REC_CLAS);
+            writer.startRecord(ESM::REC_RACE);
+            race.save(writer);
+            writer.endRecord(ESM::REC_RACE);
+            saveCell(writer, interior, std::array{ makeRef(1, "chair") });
+            saveCell(writer, exterior, std::array{ makeRef(2, "chair"), makeRef(3, "chair"), makeRef(4, "rock") });
+            writer.close();
+        }
+
+        ESM::ReadersCache readers;
+        MWWorld::ESMStore esmStore;
+        {
+            ESM::ReadersCache::BusyItem reader = readers.get(0);
+            reader->setIndex(0);
+            reader->open(path);
+            ESM::Dialogue* dialogue = nullptr;
+            esmStore.load(*reader, &dummyListener, dialogue);
+        }
+        esmStore.setUp();
+        esmStore.validateRecords(readers);
+
+        const ESM::RefId chair = ESM::RefId::stringRefId("chair");
+        EXPECT_EQ(esmStore.getRefCount(chair), 3);
+        const std::span<const ESM::Cell* const> cells = esmStore.getRefCells(chair);
+        ASSERT_EQ(cells.size(), 2u);
+        EXPECT_TRUE(cells[0]->isExterior());
+        EXPECT_FALSE(cells[1]->isExterior());
+        EXPECT_EQ(esmStore.getRefCells(ESM::RefId::stringRefId("rock")).size(), 1u);
+        EXPECT_TRUE(esmStore.getRefCells(ESM::RefId::stringRefId("missing")).empty());
     }
 }
