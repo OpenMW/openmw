@@ -144,8 +144,7 @@ namespace Shader
     };
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
-        : mMaterialOverridden(false)
-        , mAlphaTestOverridden(false)
+        : mAlphaTestOverridden(false)
         , mAlphaBlendOverridden(false)
         , mAlphaFunc(GL_ALWAYS)
         , mAlphaRef(1.0)
@@ -441,16 +440,8 @@ namespace Shader
                     continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
-                    // This should probably be moved out of ShaderRequirements and be applied directly now it's a
-                    // uniform instead of a define
-                    if (!mRequirements.back().mMaterialOverridden || it->second.second & osg::StateAttribute::PROTECTED)
-                    {
-                        if (it->second.second & osg::StateAttribute::OVERRIDE)
-                            mRequirements.back().mMaterialOverridden = true;
-
-                        mRequirements.back().mMaterial
-                            = static_cast<const SceneUtil::Material*>(it->second.first.get());
-                    }
+                    static_cast<const SceneUtil::Material*>(it->second.first.get())
+                        ->setStateSet(writableStateSet, it->second.second);
                 }
                 else if (it->first.first == osg::StateAttribute::ALPHAFUNC)
                 {
@@ -557,12 +548,7 @@ namespace Shader
         defineMap["diffuseParallax"] = reqs.mDiffuseHeight ? "1" : "0";
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
         defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
-
-        if (reqs.mMaterial)
-            reqs.mMaterial->updateStateSet(writableStateSet);
-
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
-
         defineMap["additiveBlending"] = reqs.mAdditiveBlending ? "1" : "0";
 
         osg::ref_ptr<osg::StateSet> removedState;

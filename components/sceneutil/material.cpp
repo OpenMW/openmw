@@ -19,6 +19,19 @@ namespace SceneUtil
 
     void Material::apply(osg::State& state) const {}
 
+    void Material::setStateSet(osg::StateSet* stateset, osg::StateAttribute::OverrideValue value) const
+    {
+        stateset->addUniform(new osg::Uniform("material.diffuse", mConfig.mDiffuse), value);
+        stateset->addUniform(new osg::Uniform("material.ambient", mConfig.mAmbient), value);
+        stateset->addUniform(new osg::Uniform("material.specular", mConfig.mSpecular), value);
+        stateset->addUniform(new osg::Uniform("material.emission", mConfig.mEmission), value);
+        stateset->addUniform(new osg::Uniform("material.shininess", mConfig.mShininess), value);
+        stateset->addUniform(new osg::Uniform("material.emissiveMult", mConfig.mEmissiveMult), value);
+        stateset->addUniform(new osg::Uniform("material.specStrength", mConfig.mSpecularStrength), value);
+        stateset->addUniform(
+            new osg::Uniform("material.vertexColorMode", static_cast<int>(mConfig.mVertexColorMode)), value);
+    }
+
     void Material::updateStateSet(osg::StateSet* stateset) const
     {
         stateset->getOrCreateUniform("material.diffuse", osg::Uniform::FLOAT_VEC4)->set(mConfig.mDiffuse);

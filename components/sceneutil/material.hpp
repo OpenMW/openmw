@@ -50,6 +50,9 @@ namespace SceneUtil
 
         void updateStateSet(osg::StateSet* stateset) const;
 
+        void setStateSet(
+            osg::StateSet* stateset, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON) const;
+
         int compare(const StateAttribute& sa) const override;
 
         bool operator==(const Material& other) const;

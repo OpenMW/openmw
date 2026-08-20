@@ -89,9 +89,6 @@ namespace Shader
             // <texture stage, texture name>
             std::map<int, std::string> mTextures;
 
-            const SceneUtil::Material* mMaterial = nullptr;
-
-            bool mMaterialOverridden;
             bool mAlphaTestOverridden;
             bool mAlphaBlendOverridden;
 
