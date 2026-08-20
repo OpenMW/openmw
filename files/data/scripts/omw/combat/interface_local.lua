@@ -58,7 +58,7 @@ return {
         -- @field [parent=#Combat] #number version
         version = 4,
 
-        --- Add new onHit handler for this actor
+        --- (Local) Add new onHit handler for this actor
         -- If `handler(attack)` returns false, other handlers for
         -- the call will be skipped. Where attack is the same @{#AttackInfo} passed to #Combat.onHit
         -- @function [parent=#Combat] addOnHitHandler
@@ -67,46 +67,46 @@ return {
             onHitHandlers[#onHitHandlers + 1] = handler
         end,
 
-        --- Calculates the character's armor rating and adjusts damage accordingly.
+        --- (Local, Global) Calculates the character's armor rating and adjusts damage accordingly.
         -- Note that this function only adjusts the number, use #Combat.applyArmor
         -- to include other side effects.
         -- @function [parent=#Combat] adjustDamageForArmor
         -- @param #number Damage The numeric damage to adjust
-        -- @param openmw.core#GameObject actor (Optional) The actor to calculate the armor rating for. Defaults to self.
+        -- @param openmw.core#GameObject actor The actor to calculate the armor rating for. In local contexts, this parameter is optional and defaults to self
         -- @return #number Damage adjusted for armor
         adjustDamageForArmor = function(damage, actor) return damage end,
 
-        --- Calculates a difficulty multiplier based on the current difficulty settings
+        --- (Local, Global) Calculates a difficulty multiplier based on the current difficulty settings
         -- and adjusts damage accordingly. Has no effect if both this actor and the
         -- attacker are NPCs, or if both are Players.
         -- @function [parent=#Combat] adjustDamageForDifficulty
         -- @param #Attack attack The attack to adjust
-        -- @param openmw.core#GameObject defendant (Optional) The defendant to make the difficulty adjustment for. Defaults to self.
+        -- @param openmw.core#GameObject defendant The defendant to make the difficulty adjustment for. In local contexts, this parameter is optional and defaults to self
         adjustDamageForDifficulty = function(attack, defendant) end,
 
-        --- Applies this character's armor to the attack. Adjusts damage, reduces item
+        --- (Local) Applies this character's armor to the attack. Adjusts damage, reduces item
         -- condition accordingly, progresses armor skill, and plays the armor appropriate
         -- hit sound.
         -- @function [parent=#Combat] applyArmor
         -- @param #Attack attack
         applyArmor = function(attack) end,
 
-        --- Applies stagger (knockdown or hit recovery) to the character. Depends on the actor's agility,
+        --- (Local) Applies stagger (knockdown or hit recovery) to the character. Depends on the actor's agility,
         --- the unmodified attack damage, and a random roll.
         -- @function [parent=#Combat] applyStagger
         -- @param #Attack attack
         -- @param #number rawHealthDamage The health damage caused by the attack before armor reduction.
         applyStagger = function(attack, rawHealthDamage) end,
 
-        --- Computes this character's armor rating.
+        --- (Local, Global) Computes this character's armor rating.
         -- Note that this interface function is read by the engine to update the UI.
         -- This function can still be overridden same as any other interface, but must not call any functions or interfaces that modify anything.
         -- @function [parent=#Combat] getArmorRating
-        -- @param openmw.core#GameObject actor (Optional) The actor to calculate the armor rating for. Defaults to self.
+        -- @param openmw.core#GameObject actor The actor to calculate the armor rating for. In local contexts, this parameter is optional and defaults to self
         -- @return #number
         getArmorRating = function(actor) return 0 end,
 
-        --- Computes this item's armor skill.
+        --- (Local, Global) Computes this item's armor skill.
         -- You can override this to return any skill you wish (including non-armor skills, if you so wish).
         -- Note that this interface function is read by the engine to update the UI.
         -- This function can still be overridden same as any other interface, but must not call any functions or interfaces that modify anything.
@@ -115,36 +115,36 @@ return {
         -- @return #string The armor skill identifier, or unarmored if the item was nil or not an instance of @{openmw.types#Armor}. Can return nil if unimplemented.
         getArmorSkill = function(itemOrId) return nil end,
 
-        --- Computes the armor rating of a single piece of @{openmw.types#Armor}, adjusted for skill
+        --- (Local, Global) Computes the armor rating of a single piece of @{openmw.types#Armor}, adjusted for skill
         -- Note that this interface function is read by the engine to update the UI.
         -- This function can still be overridden same as any other interface, but must not call any functions or interfaces that modify anything.
         -- @function [parent=#Combat] getSkillAdjustedArmorRating
         -- @param openmw.core#GameObject item The item, Armor record, or Armor record ID
-        -- @param openmw.core#GameObject actor (Optional) The actor, defaults to self
+        -- @param openmw.core#GameObject actor The actor. In local contexts, this parameter is optional and defaults to self
         -- @return #number
         getSkillAdjustedArmorRating = function(itemOrId, actor) return 0 end,
 
-        --- Computes the effective armor rating of a single piece of @{openmw.types#Armor}, adjusted for skill and item condition
+        --- (Local, Global) Computes the effective armor rating of a single piece of @{openmw.types#Armor}, adjusted for skill and item condition
         -- @function [parent=#Combat] getEffectiveArmorRating
         -- @param openmw.core#GameObject item The item
-        -- @param openmw.core#GameObject actor (Optional) The actor, defaults to self
+        -- @param openmw.core#GameObject actor The actor. In local contexts, this parameter is optional and defaults to self
         -- @return #number
         getEffectiveArmorRating = function(item, actor) return 0 end,
 
-        --- Spawns a random blood effect at the given position
+        --- (Local) Spawns a random blood effect at the given position
         -- @function [parent=#Combat] spawnBloodEffect
         -- @param openmw.util#Vector3 position
         spawnBloodEffect = function(position) end,
 
-        --- Hit this actor. Normally called as Hit event from the attacking actor, with the same parameters.
+        --- (Local) Hit this actor. Normally called as Hit event from the attacking actor, with the same parameters.
         -- @function [parent=#Combat] onHit
         -- @param #AttackInfo attackInfo
         onHit = function(attackInfo) auxUtil.callEventHandlers(onHitHandlers, attackInfo) end,
 
-        --- Picks a random armor slot and returns the item equipped in that slot.
+        --- (Local, Global) Picks a random armor slot and returns the item equipped in that slot.
         -- Used to pick which armor to damage / skill to increase when hit during combat.
         -- @function [parent=#Combat] pickRandomArmor
-        -- @param openmw.core#GameObject actor (Optional) The actor to pick armor from, defaults to self
+        -- @param openmw.core#GameObject actor The actor to pick armor from. In local contexts, this parameter is optional and defaults to self
         -- @return openmw.core#GameObject The armor equipped in the chosen slot. nil if nothing was equipped in that slot.
         pickRandomArmor = function(actor) return nil end,
 
