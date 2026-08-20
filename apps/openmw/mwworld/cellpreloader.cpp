@@ -397,7 +397,17 @@ namespace MWWorld
         else if (contains(mTerrainPreloadPositions, positions, 128.f))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
+        {
+            const bool sameGrids = std::ranges::equal(mTerrainPreloadPositions, positions,
+                [](const PositionCellGrid& l, const PositionCellGrid& r) { return l.mCellBounds == r.mCellBounds; });
+            if (!sameGrids)
+            {
+                mTerrainPreloadItem->abort();
+                // Do not record the aborted target as loaded in updateCache.
+                mTerrainPreloadPositions.clear();
+            }
             return;
+        }
         else
         {
             if (mTerrainViews.size() > positions.size())
