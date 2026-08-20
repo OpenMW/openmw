@@ -470,7 +470,7 @@ namespace MWRender
 
     osg::Drawable* Water::getDrawable() const
     {
-        return mWaterGeom.get();
+        return mWaterGeom;
     }
 
     void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
