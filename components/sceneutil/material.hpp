@@ -54,56 +54,49 @@ namespace SceneUtil
 
         bool operator==(const Material& other) const;
 
-        void setDiffuse(const osg::Vec4f& diffuse) { mDiffuse = diffuse; }
+        void setDiffuse(const osg::Vec4f& diffuse) { mConfig.mDiffuse = diffuse; }
 
-        osg::Vec4f getDiffuse() const { return mDiffuse; }
+        osg::Vec4f getDiffuse() const { return mConfig.mDiffuse; }
 
-        void setAmbient(const osg::Vec4f& ambient) { mAmbient = ambient; }
+        void setAmbient(const osg::Vec4f& ambient) { mConfig.mAmbient = ambient; }
 
-        osg::Vec4f getAmbient() const { return mAmbient; }
+        osg::Vec4f getAmbient() const { return mConfig.mAmbient; }
 
-        void setSpecular(const osg::Vec4f& specular) { mSpecular = specular; }
+        void setSpecular(const osg::Vec4f& specular) { mConfig.mSpecular = specular; }
 
-        osg::Vec4f getSpecular() const { return mSpecular; }
+        osg::Vec4f getSpecular() const { return mConfig.mSpecular; }
 
-        void setEmission(const osg::Vec4f& emission) { mEmission = emission; }
+        void setEmission(const osg::Vec4f& emission) { mConfig.mEmission = emission; }
 
-        osg::Vec4f getEmission() const { return mEmission; }
+        osg::Vec4f getEmission() const { return mConfig.mEmission; }
 
-        void setShininess(float shininess) { mShininess = shininess; }
+        void setShininess(float shininess) { mConfig.mShininess = shininess; }
 
-        float getShininess() const { return mShininess; }
+        float getShininess() const { return mConfig.mShininess; }
 
-        void setEmissiveMultiplier(float mult) { mEmissiveMult = mult; }
+        void setEmissiveMultiplier(float mult) { mConfig.mEmissiveMult = mult; }
 
-        float getEmissiveMultiplier() const { return mEmissiveMult; }
+        float getEmissiveMultiplier() const { return mConfig.mEmissiveMult; }
 
-        void setSpecularStrength(float strength) { mSpecularStrength = strength; }
+        void setSpecularStrength(float strength) { mConfig.mSpecularStrength = strength; }
 
-        float getSpecularStrength() const { return mSpecularStrength; }
+        float getSpecularStrength() const { return mConfig.mSpecularStrength; }
 
         void setAlpha(float alpha)
         {
             float clamped = std::clamp(alpha, 0.f, 1.f);
-            mDiffuse[3] = clamped;
-            mAmbient[3] = clamped;
-            mSpecular[3] = clamped;
-            mEmission[3] = clamped;
+            mConfig.mDiffuse[3] = clamped;
+            mConfig.mAmbient[3] = clamped;
+            mConfig.mSpecular[3] = clamped;
+            mConfig.mEmission[3] = clamped;
         }
 
-        void setVertexColorMode(VertexColorModes mode) { mVertexColorMode = mode; }
+        void setVertexColorMode(VertexColorModes mode) { mConfig.mVertexColorMode = mode; }
 
-        VertexColorModes getVertexColorMode() const { return mVertexColorMode; }
+        VertexColorModes getVertexColorMode() const { return mConfig.mVertexColorMode; }
 
     private:
-        osg::Vec4f mDiffuse;
-        osg::Vec4f mAmbient;
-        osg::Vec4f mSpecular;
-        osg::Vec4f mEmission;
-        float mShininess = 0.0;
-        float mEmissiveMult = 1.0;
-        float mSpecularStrength = 1.0;
-        VertexColorModes mVertexColorMode = VertexColorModes::None;
+        MaterialConfig mConfig;
     };
 
 }
