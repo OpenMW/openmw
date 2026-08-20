@@ -2,8 +2,11 @@
 ------
 
     Bug #6117: Combat AI target selection should prefer closer targets
+    Bug #7176: Post-processing normals are too imprecise for reflection effects
+    Bug #7776: Combat AI movement is not very responsive
     Bug #8134: Convert NiLODNode ranges so they don't overlap
     Bug #8323: Vvardenfell Animated Main Menu is skipping
+    Bug #8813: Water walking actors don't drown when getting knocked out
     Bug #8822: Default interaction raycasts need to ignore terrain
     Bug #9023: Telvanni Guard is aggressive towards exhibition piece in Dwemer Museum
     Bug #9052: Clamped per-vertex sunlight is slightly brighter than it should be
@@ -12,6 +15,7 @@
     Bug #9099: Canceling werewolf claw mode shouldn't play a sound
     Bug #9101: Can still animate the player character via the sneak button when paralyzed
     Bug #9128: New game intro video is unskippable after clicking
+    Bug #9130: openmw.content issues with ingredient templates
     Bug #9134: Trackpad scrolling not working properly on macOS in interfaces/menus
     Bug #9137: ToggleAI state should not be reset when a save is loaded
     Bug #9138: Flickering on non-shader water ripples
@@ -25,11 +29,20 @@
     Bug #9173: Console keybind prevents typing Shift-modified characters for the bound key
     Bug #9179: OAAB - Articulating Animunculi Head spins in conversation, talks too often
     Bug #9180: Actor.spells(actor):canUsePower errors if called on other actor from local script
+    Bug #9183: The number settings renderer resets input if entered value is outside of the specified min-max range
+    Bug #9223: Sun reflection in interiors
+    Bug #9230: Crash in element:update() after replacing element.layout
+    Bug #9236: Empty input.getKeyName result in inputBinding makes it unclickable
+    Bug #9247: Position incorrectly uses minutes
+    Bug #9249: Player can still pickup/move items through menu mode even though their character is a werewolf
+    Bug #9252: Poor LOD range selection during active grid object paging
+    Bug #9258: Trying to ready your character for spellcasting or attacking before getting knocked down may break spellcasting/attacking
     Feature #3602: Implement NiBillboardNode flags
     Feature #5712: Editor: Ensure content file order matches launcher order
     Feature #6900: Clustered forward rendering
     Feature #6938: Support NiLookAtController
     Feature #7586: Lua levelled item manipulation
+    Feature #7743: Lua UI - Add padding property
     Feature #8241: Allow adding data directories to the launcher via dragging-and-dropping
     Feature #8948: Expose "corpses persist" flag to Lua
     Feature #9033: Controller joystick mouse emulation mode indicator circle
@@ -40,12 +53,15 @@
     Feature #9123: Flex Widget Gap and Wrap Properties
     Feature #9129: Lua-attached VFX transformations
     Feature #9144: Lua: GetMasserPhase and GetSecundaPhase equivalent
+    Feature #9148: Handlers for applying magic effects
     Feature #9151: Implement RCN extra data flag
     Feature #9201: MWSE ESS import fails with an SCPT size mismatch with >255 mods
     Feature #9205: [Lua] Combat interface should accept records and record IDs
     Feature #9206: Lua UI - Method to get all elements on a layer
     Feature #9207: Lua TextureResource does not expose properties
     Feature #9216: Exposed Lua engine handlers for dropping and placing objects
+    Feature #9253: Allow Lua to mark objects as unmodified
+    Task #9043: Parallelize Lua GC
     Task #9084: cell:getAll() adds cell data to the save file
     Task #9116: element.content["name"] causes an error if it doesn't exist
     Task #9222: Delay rendering settings Lua UI until the user actually views that settings page
