@@ -12,23 +12,34 @@
 
 namespace MWLua
 {
-    static const MWState::Character* findCharacter(std::string_view characterDir)
+    namespace
     {
-        MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
-        for (auto it = manager->characterBegin(); it != manager->characterEnd(); ++it)
-            if (it->getPath().filename() == characterDir)
-                return &*it;
-        return nullptr;
-    }
-
-    static const MWState::Slot* findSlot(const MWState::Character* character, std::string_view slotName)
-    {
-        if (!character)
+        const MWState::Character* findCharacter(std::string_view characterDir)
+        {
+            MWBase::StateManager* manager = MWBase::Environment::get().getStateManager();
+            for (auto it = manager->characterBegin(); it != manager->characterEnd(); ++it)
+                if (it->getPath().filename() == characterDir)
+                    return &*it;
             return nullptr;
-        for (const MWState::Slot& slot : *character)
-            if (slot.mPath.filename() == slotName)
-                return &slot;
-        return nullptr;
+        }
+
+        const MWState::Slot* findSlot(const MWState::Character* character, std::string_view slotName)
+        {
+            if (!character)
+                return nullptr;
+            for (const MWState::Slot& slot : *character)
+                if (slot.mPath.filename() == slotName)
+                    return &slot;
+            return nullptr;
+        }
+
+        bool shouldBypass(const sol::optional<sol::table>& options)
+        {
+            if (options.has_value())
+                return options->get_or("bypass", false);
+
+            return false;
+        }
     }
 
     sol::table initMenuPackage(const Context& context)
@@ -46,7 +57,9 @@ namespace MWLua
 
         api["getState"] = []() -> int { return MWBase::Environment::get().getStateManager()->getState(); };
 
-        api["newGame"] = []() { MWBase::Environment::get().getStateManager()->requestNewGame(); };
+        api["newGame"] = [](const sol::optional<sol::table>& options) {
+            MWBase::Environment::get().getStateManager()->requestNewGame(shouldBypass(options));
+        };
 
         api["loadGame"] = [](std::string_view dir, std::string_view slotName) {
             const MWState::Character* character = findCharacter(dir);

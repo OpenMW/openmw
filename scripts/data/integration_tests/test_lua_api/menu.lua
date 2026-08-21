@@ -2,6 +2,11 @@
 local matchers = require('matchers')
 local menu = require('openmw.menu')
 
+testing.setSetupGlobalTest(function()
+    menu.newGame({bypass = true})
+    coroutine.yield()
+end)
+
 testing.registerMenuTest('save and load', function()
     menu.newGame()
     coroutine.yield()
@@ -52,46 +57,6 @@ testing.registerMenuTest('load while teleporting', function()
 
     menu.deleteGame(' - 1', 'load_while_teleporting.omwsave')
 end)
-
-local function registerGlobalTest(name, description)
-   testing.registerMenuTest(description or name, function()
-       menu.newGame()
-       coroutine.yield()
-       testing.runGlobalTest(name)
-   end)
-end
-
-registerGlobalTest('crash in lua coroutine when accessing type (#8757)')
-registerGlobalTest('timers')
-registerGlobalTest('teleport')
-registerGlobalTest('getGMST')
-registerGlobalTest('MWScript')
-registerGlobalTest('record stores')
-registerGlobalTest('record creation')
-registerGlobalTest('UTF-8 characters')
-registerGlobalTest('UTF-8 strings')
-registerGlobalTest('memory limit')
-registerGlobalTest('vfs')
-registerGlobalTest('commit crime')
-registerGlobalTest('record model property')
-registerGlobalTest('nan float', 'world.setGameTimeScale should not accept nan')
-registerGlobalTest('nan vector', 'weather.stormDirection should not accept a vector with a nan component')
-registerGlobalTest('load script generated static')
-
-registerGlobalTest('player yaw rotation', 'rotating player with controls.yawChange should change rotation')
-registerGlobalTest('player pitch rotation', 'rotating player with controls.pitchChange should change rotation')
-registerGlobalTest('player pitch and yaw rotation', 'rotating player with controls.pitchChange and controls.yawChange should change rotation')
-registerGlobalTest('player rotation', 'rotating player should not lead to nan rotation')
-registerGlobalTest('player forward running')
-registerGlobalTest('player diagonal walking')
-registerGlobalTest('findPath')
-registerGlobalTest('findPath with checkpoints')
-registerGlobalTest('findRandomPointAroundCircle')
-registerGlobalTest('castNavigationRay')
-registerGlobalTest('findNearestNavMeshPosition')
-registerGlobalTest('player memory limit')
-registerGlobalTest('player weapon attack', 'player with equipped weapon on attack should damage health of other actors')
-registerGlobalTest('mwscript magic interactions')
 
 return {
     engineHandlers = {
