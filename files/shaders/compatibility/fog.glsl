@@ -26,7 +26,7 @@ uniform DirectionalLight sun;
 
 const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 
-vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist, float near, float far)
+void computeFog(vec3 pos, float euclideanDist, float linearDist, float near, float far, out float colorScale, out vec3 colorOffset)
 {
 #if @radialFog
     float dist = euclideanDist;
@@ -34,26 +34,22 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
     float dist = abs(linearDist);
 #endif
 
-    bool isUnderwater = false;
+    bool cameraBelowWater = false;
     bool useWaterDepthFog = false;
     float underwaterFogFactor = 1.0;
+    float waterDepth = 0.0;
 
     if (waterEnabled) {
         vec3 cameraPos = osg_ViewMatrixInverse[3].xyz;
-        bool cameraBelowWater = cameraPos.z < waterHeight;
-        if (cameraBelowWater) {
-            isUnderwater = true;
-        }
-        else if (!isReflection && !waterSurface) {
+        cameraBelowWater = cameraPos.z < waterHeight;
+        if (!cameraBelowWater && !isReflection && !waterSurface) {
             vec3 worldPos = (osg_ViewMatrixInverse * vec4(pos, 1)).xyz;
 
-            isUnderwater = worldPos.z < waterHeight;
-
-            if (isUnderwater) {
+            if (worldPos.z < waterHeight) {
                 useWaterDepthFog = true;
                 const float visibility = 2500.0;
-                const float depthFade = 0.15;
-                float waterDepth = dist * clamp((waterHeight - worldPos.z) / (cameraPos.z - worldPos.z), 0.0, 1.0);
+                const float depthFade = 0.25;
+                waterDepth = dist * clamp((waterHeight - worldPos.z) / (cameraPos.z - worldPos.z), 0.0, 1.0);
                 float depthCorrection = sqrt(1.0 + 4.0 * depthFade * depthFade);
                 underwaterFogFactor = depthFade * depthFade
                     / (-0.5 * depthCorrection + 0.5 - waterDepth / visibility) + 0.5 * depthCorrection + 0.5;
@@ -62,9 +58,9 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
         }
     }
 
-    vec4 fogColor = isUnderwater ? fog.underwaterColor : fog.color;
-    float start = isUnderwater ? fog.underwaterStart : fog.start;
-    float end = isUnderwater ? fog.underwaterEnd : fog.end;
+    vec4 fogColor = cameraBelowWater ? fog.underwaterColor : fog.color;
+    float start = cameraBelowWater ? fog.underwaterStart : fog.start;
+    float end = cameraBelowWater ? fog.underwaterEnd : fog.end;
 
     if (fog.depth >= 0.0) {
         start = near * fog.depth + far * (1.0 - fog.depth);
@@ -73,34 +69,45 @@ vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist,
     }
 
     if (useWaterDepthFog)
-        fogColor.rgb = WATER_COLOR * length(sun.ambient.xyz);
+        dist -= waterDepth;
 
 #if @exponentialFog
     float fogValue = 1.0 - exp(-2.0 * max(0.0, dist - start / 2.0) / (end - start / 2.0));
 #else
     float fogValue = clamp((dist - start) * (1.0 / (end - start)), 0.0, 1.0);
 #endif
-    if (useWaterDepthFog)
-        fogValue = underwaterFogFactor;
-
+    colorScale = 1.0 - fogValue;
 #ifdef ADDITIVE_BLENDING
-    color.xyz *= 1.0 - fogValue;
+    colorOffset = vec3(0.0);
 #else
-    color.xyz = mix(color.xyz, fogColor.xyz, fogValue);
+    colorOffset = fogColor.xyz * fogValue;
 #endif
+
+    if (useWaterDepthFog) {
+        colorScale *= 1.0 - underwaterFogFactor;
+#ifndef ADDITIVE_BLENDING
+        colorOffset += WATER_COLOR * length(sun.ambient.xyz) * underwaterFogFactor * (1.0 - fogValue);
+#endif
+    }
 
 #if @skyBlending
-if (!isUnderwater && !isReflection) {
-    float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
-    fadeValue *= fadeValue;
-#ifdef ADDITIVE_BLENDING
-    color.xyz *= fadeValue;
-#else
-    color.xyz = mix(sampleSkyColor(gl_FragCoord.xy / screenRes), color.xyz, fadeValue);
+    if (!cameraBelowWater && !isReflection) {
+        float fadeValue = clamp((far - dist) / (far - skyBlendingStart), 0.0, 1.0);
+        fadeValue *= fadeValue;
+        colorScale *= fadeValue;
+#ifndef ADDITIVE_BLENDING
+        colorOffset = colorOffset * fadeValue + sampleSkyColor(gl_FragCoord.xy / screenRes) * (1.0 - fadeValue);
+#endif
+    }
 #endif
 }
-#endif
 
+vec4 applyFogAtDist(vec4 color, vec3 pos, float euclideanDist, float linearDist, float near, float far)
+{
+    float colorScale;
+    vec3 colorOffset;
+    computeFog(pos, euclideanDist, linearDist, near, far, colorScale, colorOffset);
+    color.xyz = color.xyz * colorScale + colorOffset;
     return color;
 }
 

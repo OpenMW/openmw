@@ -34,6 +34,7 @@ const float SPEC_HARDNESS = 256.0;                 // specular highlights hardne
 const float SPEC_BUMPINESS = 5.0;                  // surface bumpiness boost for specular
 const float SPEC_BRIGHTNESS = 1.5;                 // boosts the brightness of the specular highlights
 
+const float VISIBILITY = 2500.0;
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
 const float REFR_FOG_DISTORT_DISTANCE = 3000.0;    // at what distance refraction fog will be calculated using real water depth instead of distorted depth (prevents splotchy shores)
 
@@ -90,13 +91,12 @@ bool hasOpaqueGeometry(vec2 coords)
 #else
     const float clearDepth = 1.0;
 #endif
-    vec2 halfTexel = vec2(0.5) / screenRes;
-    float backgroundDepth = abs(sampleOpaqueDepthTex(coords - halfTexel).r - clearDepth);
-    backgroundDepth = min(backgroundDepth,
-        abs(sampleOpaqueDepthTex(coords + vec2(halfTexel.x, -halfTexel.y)).r - clearDepth));
-    backgroundDepth = min(backgroundDepth,
-        abs(sampleOpaqueDepthTex(coords + vec2(-halfTexel.x, halfTexel.y)).r - clearDepth));
-    backgroundDepth = min(backgroundDepth, abs(sampleOpaqueDepthTex(coords + halfTexel).r - clearDepth));
+    vec2 texel = vec2(1.0) / screenRes;
+    float backgroundDepth = 1.0;
+    for (int y = -1; y <= 1; ++y)
+        for (int x = -1; x <= 1; ++x)
+            backgroundDepth = min(backgroundDepth,
+                abs(sampleOpaqueDepthTex(coords + vec2(float(x), float(y)) * texel).r - clearDepth));
     return backgroundDepth > 0.0;
 }
 
@@ -147,6 +147,16 @@ void main(void)
 
     float sunFade = length(sun.ambient.xyz);
 
+#if @radialFog
+    float radialDepth = distance(position.xyz, cameraPos);
+#else
+    float radialDepth = 0.0;
+#endif
+
+    float fogScale;
+    vec3 fogOffset;
+    computeFog(passViewPos, radialDepth, linearDepth, near, far, fogScale, fogOffset);
+
     // fresnel
     float ior = (cameraPos.z>=0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
@@ -166,7 +176,7 @@ void main(void)
     refractionCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH, 0.0, 1.0);
 #endif
     // reflection
-    vec3 reflection = sampleReflectionMap(screenCoords + reflectionCoordsOffset).rgb;
+    vec3 reflection = sampleReflectionMap(screenCoords + reflectionCoordsOffset).rgb * fogScale + fogOffset;
 
     vec3 waterColor = WATER_COLOR * sunFade;
 
@@ -199,9 +209,14 @@ void main(void)
     if (cameraPos.z < 0)
         refraction = clamp(refraction * 1.5, 0.0, 1.0);
 
-    // Use underwater fog where the opaque buffer has no geometry
-    if (cameraPos.z >= 0 && !hasOpaqueGeometry(refractionCoords))
-        refraction = waterColor;
+    if (cameraPos.z >= 0)
+    {
+        vec3 deepWaterColor = waterColor * fogScale + fogOffset;
+        if (!hasOpaqueGeometry(refractionCoords))
+            refraction = deepWaterColor;
+        else
+            refraction = mix(refraction, deepWaterColor, clamp(realWaterDepth / VISIBILITY - 1.0, 0.0, 1.0));
+    }
 
 #if @sunlightScattering
     vec3 scatterNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
@@ -212,7 +227,7 @@ void main(void)
     float scatterLambert = max(dot(sunWorldDir, scatterNormal) * 0.7 + 0.3, 0.0);
     float scatterReflectAngle = max(dot(reflect(sunWorldDir, scatterNormal), viewDir) * 2.0 - 1.2, 0.0);
     float lightScatter = scatterLambert * scatterReflectAngle * SCATTER_AMOUNT * sunFade * sunSpec.a * max(1.0 - exp(-sunHeight), 0.0);
-    refraction = mix(refraction, scatterColour, lightScatter);
+    refraction = mix(refraction, scatterColour * fogScale + fogOffset, lightScatter);
 #endif
 
     gl_FragData[0].rgb = mix(refraction, reflection, fresnel);
@@ -223,7 +238,7 @@ void main(void)
     vec3 pointSpecular = doSpecularLighting(gl_FragCoord.xy, (gl_ModelViewMatrix * vec4(position.xyz, 1.0)).xyz, normalize(gl_NormalMatrix * specNormal));
     pointSpecular *= SPEC_BRIGHTNESS;
 
-    gl_FragData[0].rgb += specular * sunSpec.rgb + rainSpecular + pointSpecular;
+    gl_FragData[0].rgb += (specular * sunSpec.rgb + rainSpecular + pointSpecular) * fogScale;
 
 #if @wobblyShores
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
@@ -237,14 +252,6 @@ void main(void)
     shoreOffset = clamp(mix(shoreOffset, 1.0, clamp(linearDepth / WOBBLY_SHORE_FADE_DISTANCE, 0.0, 1.0)), 0.0, 1.0);
     gl_FragData[0].rgb = mix(rawRefraction, gl_FragData[0].rgb, shoreOffset);
 #endif
-
-#if @radialFog
-    float radialDepth = distance(position.xyz, cameraPos);
-#else
-    float radialDepth = 0.0;
-#endif
-
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], passViewPos, radialDepth, linearDepth, near, far);
 
 #if !@disableNormals
     gl_FragData[1].rgb = normalize(gl_NormalMatrix * normal) * 0.5 + 0.5;
