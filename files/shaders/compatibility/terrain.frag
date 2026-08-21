@@ -36,6 +36,9 @@ uniform vec2 screenRes;
 uniform float near;
 uniform float far;
 
+uniform mat4 texMat0;
+uniform mat4 texMat1;
+
 #include "lib/core/fragment.h.glsl"
 
 #include "lib/material/vertexcolors.glsl"
@@ -51,7 +54,7 @@ void main()
 {
     Material material = getMaterial();
 
-    vec2 adjustedUV = (gl_TextureMatrix[0] * vec4(uv, 0.0, 1.0)).xy;
+    vec2 adjustedUV = (texMat0 * vec4(uv, 0.0, 1.0)).xy;
 
 #if @parallax
     float height = texture2D(normalMap, adjustedUV).a;
@@ -64,7 +67,7 @@ void main()
     gl_FragData[0].a *= diffuseColor.a;
 
 #if @blendMap
-    vec2 blendMapUV = (gl_TextureMatrix[1] * vec4(uv, 0.0, 1.0)).xy;
+    vec2 blendMapUV = (texMat1 * vec4(uv, 0.0, 1.0)).xy;
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
@@ -103,8 +106,9 @@ void main()
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
 
-#if !@disableNormals && @writeNormals
-    gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
+#if !@disableNormals
+    // Terrain normals are now additively blended the same way as terrain color is, thus using color's alpha.
+    gl_FragData[1] = vec4(viewNormal * 0.5 + 0.5, gl_FragData[0].a);
 #endif
 
     applyShadowDebugOverlay();

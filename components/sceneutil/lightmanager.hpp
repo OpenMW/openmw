@@ -304,6 +304,8 @@ namespace SceneUtil
         using LightSourceViewBoundCollection = std::vector<LightSourceViewBound>;
         std::map<osg::observer_ptr<osg::Camera>, LightSourceViewBoundCollection> mLightsInViewSpace;
 
+        std::map<std::pair<const osg::RefMatrix*, std::vector<int>>, osg::ref_ptr<osg::StateSet>> mLightListStateSets;
+
         size_t mLightingMask;
 
         osg::ref_ptr<Light> mSun;

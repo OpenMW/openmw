@@ -9,7 +9,6 @@
 #include <osg/Matrixf>
 #include <osg/Sequence>
 #include <osg/Switch>
-#include <osg/TexMat>
 #include <osg/ValueObject>
 
 #include <yaml-cpp/yaml.h>
@@ -57,6 +56,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/texturetype.hpp>
 #include <components/sceneutil/visitor.hpp>
 
@@ -2651,7 +2651,6 @@ namespace NifOsg
                         attachExternalTexture("diffuseMap", VFS::Path::toNormalized(texprop->mSourceTexture),
                             texprop->wrapS(), texprop->wrapT(), uvSet, stateset, boundTextures);
                         {
-                            osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
                             // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
                             // TODO: verify
                             osg::Vec3f uvOrigin(0.5f, 0.5f, 0.f);
@@ -2663,8 +2662,7 @@ namespace NifOsg
                             mat.preMultTranslate(-uvOrigin);
                             mat.setTrans(mat.getTrans() + uvTrans);
 
-                            texMat->setMatrix(mat);
-                            stateset->setTextureAttribute(texUnit, texMat, osg::StateAttribute::ON);
+                            SceneUtil::setupTexMatForStateSet(*stateset, texUnit, mat);
                         }
                     }
                     bool useFalloff = texprop->useFalloff();

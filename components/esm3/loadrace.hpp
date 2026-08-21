@@ -29,7 +29,7 @@ namespace ESM
         struct SkillBonus
         {
             ESM::RefId mSkill; // SkillEnum
-            int32_t mBonus;
+            int32_t mBonus = 0;
         };
 
         struct AttributeValues

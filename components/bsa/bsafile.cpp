@@ -66,7 +66,7 @@ BSAFile::Hash getHash(const std::string& name)
         temp = (((unsigned)(name[i])) << (off & 0x1F));
         sum ^= temp;
         n = temp & 0x1F;
-        sum = (sum << (32 - n)) | (sum >> n); // binary "rotate right"
+        sum = std::rotr(sum, n); // binary "rotate right"
         off += 8;
     }
     hash.mHigh = sum;

@@ -9,6 +9,8 @@ local nearby = require('openmw.nearby')
 local auxUtil = require('openmw_aux.util')
 local l10n = core.l10n('Mechanics')
 
+local isOrganic = common.isOrganicContainer(self)
+
 local function unlockAttempted(actor)
     if Player.objectIsInstance(actor) then
         core.sendGlobalEvent('UnlockAttempted',{
@@ -77,9 +79,14 @@ local function onApplyMagicEffects(options)
     end
 end
 
+local ApplyMagicEffectsHandler = nil
+if not isOrganic then
+    ApplyMagicEffectsHandler = onApplyMagicEffects
+end
+
 return {
     eventHandlers = {
-        ApplyMagicEffects = onApplyMagicEffects,
+        ApplyMagicEffects = ApplyMagicEffectsHandler,
         AddGlow = function(options) animation.addGlow(self, options) end,
     },
 }

@@ -27,6 +27,10 @@ varying float linearDepth;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+uniform mat4 texMat@diffuseMapUV;
+uniform mat4 texMat@emissiveMapUV;
+uniform mat4 texMat@normalMapUV;
+
 #include "lib/view/depth.glsl"
 #include "lib/material/vertexcolors.glsl"
 
@@ -53,15 +57,15 @@ void main(void)
 #endif
 
 #if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
 #if @emissiveMap
-    emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
+    emissiveMapUV = (texMat@emissiveMapUV * gl_MultiTexCoord@emissiveMapUV).xy;
 #endif
 
 #if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+    normalMapUV = (texMat@normalMapUV * gl_MultiTexCoord@normalMapUV).xy;
 #endif
 
 

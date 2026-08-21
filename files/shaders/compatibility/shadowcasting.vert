@@ -12,6 +12,7 @@ uniform bool useDiffuseMapForShadowAlpha = true;
 uniform bool alphaTestShadows = true;
 uniform float alpha;
 uniform float actorFade;
+uniform mat4 texMat0;
 
 void main(void)
 {
@@ -23,7 +24,7 @@ void main(void)
     gl_ClipVertex = viewPos;
 
     if (useDiffuseMapForShadowAlpha)
-        diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+        diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
     else
         diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
     if (material.vertexColorMode == ColorMode_AmbientAndDiffuse)

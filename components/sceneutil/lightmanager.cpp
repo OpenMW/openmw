@@ -503,6 +503,7 @@ namespace SceneUtil
 
         mLights.clear();
         mLightsInViewSpace.clear();
+        mLightListStateSets.clear();
     }
 
     void LightManager::addLight(LightSource* lightSource, const osg::Matrixf& worldMat, size_t frameNum)
@@ -529,6 +530,15 @@ namespace SceneUtil
     osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(
         const LightList& lightList, size_t frameNum, const osg::RefMatrix* viewMatrix)
     {
+        std::vector<int> lightIds;
+        lightIds.reserve(lightList.size());
+        for (const LightSourceViewBound* light : lightList)
+            lightIds.push_back(light->mLightSource->getId());
+
+        auto [found, inserted] = mLightListStateSets.try_emplace(std::make_pair(viewMatrix, std::move(lightIds)));
+        if (!inserted)
+            return found->second;
+
         osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
         osg::ref_ptr<osg::Uniform> data = generateLightBufferUniform();
 
@@ -550,6 +560,7 @@ namespace SceneUtil
         stateset->addUniform(data);
         stateset->addUniform(new osg::Uniform("PointLightCount", static_cast<int>(lightList.size())));
 
+        found->second = stateset;
         return stateset;
     }
 

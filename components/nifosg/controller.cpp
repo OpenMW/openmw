@@ -1,7 +1,6 @@
 #include "controller.hpp"
 
 #include <osg/MatrixTransform>
-#include <osg/TexMat>
 #include <osg/Texture2D>
 
 #include <osgAnimation/Bone>
@@ -12,6 +11,7 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/texmat.hpp>
 
 #include "matrixtransform.hpp"
 
@@ -309,9 +309,8 @@ namespace NifOsg
 
     void UVController::setDefaults(osg::StateSet* stateset)
     {
-        osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
         for (unsigned int unit : mTextureUnits)
-            stateset->setTextureAttribute(unit, texMat, osg::StateAttribute::ON);
+            SceneUtil::setupTexMatForStateSet(*stateset, unit, osg::Matrixf{});
     }
 
     void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
@@ -333,11 +332,7 @@ namespace NifOsg
 
             // setting once is enough because all other texture units share the same TexMat (see setDefaults).
             if (!mTextureUnits.empty())
-            {
-                osg::TexMat* texMat = static_cast<osg::TexMat*>(
-                    stateset->getTextureAttribute(*mTextureUnits.begin(), osg::StateAttribute::TEXMAT));
-                texMat->setMatrix(mat);
-            }
+                SceneUtil::setupTexMatForStateSet(*stateset, *mTextureUnits.begin(), mat);
         }
     }
 

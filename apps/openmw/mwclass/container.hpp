@@ -52,6 +52,8 @@ namespace MWClass
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
         ///< \return name or ID; can return an empty string.
 
+        std::string_view getWerewolfRefusalSoundId() const override { return "WolfContainer"; }
+
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 

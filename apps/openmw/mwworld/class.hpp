@@ -155,6 +155,12 @@ namespace MWWorld
         /// actor responsible for the attack. \a successful specifies if the hit is
         /// successful or not. \a sourceType classifies the damage source.
 
+        virtual std::string_view getWerewolfRefusalSoundId() const { return {}; }
+        ///< Return the refusal sound to be played when a werewolf activates an object of the class
+
+        std::unique_ptr<Action> getWerewolfRefusalAction(const Ptr& actor) const;
+        ///< Generate werewolf refusal action, if applicable
+
         virtual std::unique_ptr<Action> activate(const Ptr& ptr, const Ptr& actor) const;
         ///< Generate action for activation (default implementation: return a null action).
 
