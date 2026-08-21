@@ -92,7 +92,7 @@ local function setSkillProperties()
                 failureSound = 'Spell Failure ' .. school,
                 hitSound = school .. ' hit',
                 name = getString('sSchool' .. school),
-                autoCalcMax = asNumber('iAutoSpell' .. school .. 'Max'),
+                autoCalcMax = asNumber(gmsts['iAutoSpell' .. school .. 'Max']),
             }
         end
     end
