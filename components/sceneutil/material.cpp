@@ -19,17 +19,22 @@ namespace SceneUtil
 
     void Material::apply(osg::State& state) const {}
 
-    void Material::setStateSet(osg::StateSet* stateset, osg::StateAttribute::OverrideValue value) const
+    void Material::setStateSet(osg::StateSet* stateset, osg::StateAttribute::OverrideValue overrideValue) const
     {
-        stateset->addUniform(new osg::Uniform("material.diffuse", mConfig.mDiffuse), value);
-        stateset->addUniform(new osg::Uniform("material.ambient", mConfig.mAmbient), value);
-        stateset->addUniform(new osg::Uniform("material.specular", mConfig.mSpecular), value);
-        stateset->addUniform(new osg::Uniform("material.emission", mConfig.mEmission), value);
-        stateset->addUniform(new osg::Uniform("material.shininess", mConfig.mShininess), value);
-        stateset->addUniform(new osg::Uniform("material.emissiveMult", mConfig.mEmissiveMult), value);
-        stateset->addUniform(new osg::Uniform("material.specStrength", mConfig.mSpecularStrength), value);
-        stateset->addUniform(
-            new osg::Uniform("material.vertexColorMode", static_cast<int>(mConfig.mVertexColorMode)), value);
+        auto addOrUpdate = [&](const char* name, osg::Uniform::Type type, const auto& value) {
+            osg::Uniform* uniform = stateset->getOrCreateUniform(name, type);
+            uniform->set(value);
+            stateset->addUniform(uniform, overrideValue);
+        };
+
+        addOrUpdate("material.diffuse", osg::Uniform::FLOAT_VEC4, mConfig.mDiffuse);
+        addOrUpdate("material.ambient", osg::Uniform::FLOAT_VEC4, mConfig.mAmbient);
+        addOrUpdate("material.specular", osg::Uniform::FLOAT_VEC4, mConfig.mSpecular);
+        addOrUpdate("material.emission", osg::Uniform::FLOAT_VEC4, mConfig.mEmission);
+        addOrUpdate("material.shininess", osg::Uniform::FLOAT, mConfig.mShininess);
+        addOrUpdate("material.emissiveMult", osg::Uniform::FLOAT, mConfig.mEmissiveMult);
+        addOrUpdate("material.specStrength", osg::Uniform::FLOAT, mConfig.mSpecularStrength);
+        addOrUpdate("material.vertexColorMode", osg::Uniform::INT, static_cast<int>(mConfig.mVertexColorMode));
     }
 
     void Material::updateStateSet(osg::StateSet* stateset) const

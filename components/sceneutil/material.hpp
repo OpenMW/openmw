@@ -51,7 +51,7 @@ namespace SceneUtil
         void updateStateSet(osg::StateSet* stateset) const;
 
         void setStateSet(
-            osg::StateSet* stateset, osg::StateAttribute::OverrideValue value = osg::StateAttribute::ON) const;
+            osg::StateSet* stateset, osg::StateAttribute::OverrideValue overrideValue = osg::StateAttribute::ON) const;
 
         int compare(const StateAttribute& sa) const override;
 
