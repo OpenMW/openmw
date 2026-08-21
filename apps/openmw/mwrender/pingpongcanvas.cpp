@@ -63,6 +63,12 @@ namespace MWRender
         osg::Geometry::drawImplementation(renderInfo);
     }
 
+    void PingPongCanvas::resizeGLObjectBuffers(unsigned int maxSize)
+    {
+        osg::Geometry::resizeGLObjectBuffers(maxSize);
+        mEmptyUniformStacks.resize(maxSize);
+    }
+
     static void attachCloneOfTemplate(
         osg::FrameBufferObject* fbo, osg::Camera::BufferComponent component, osg::Texture* tex)
     {
@@ -70,9 +76,27 @@ namespace MWRender
         fbo->setAttachment(component, Stereo::createMultiviewCompatibleAttachment(clone));
     }
 
+    static void cacheEmptyUniformStacks(osg::State::UniformMap& uniformMap, osg::State::UniformMap& cache)
+    {
+        for (auto it = uniformMap.begin(); it != uniformMap.end();)
+        {
+            if (!it->second.uniformVec.empty())
+            {
+                ++it;
+                continue;
+            }
+
+            cache.insert(uniformMap.extract(it++));
+        }
+    }
+
     void PingPongCanvas::drawImplementation(osg::RenderInfo& renderInfo) const
     {
         osg::State& state = *renderInfo.getState();
+        auto& uniformMap = const_cast<osg::State::UniformMap&>(state.getUniformMap());
+        auto& emptyUniformStacks = mEmptyUniformStacks[state.getContextID()];
+        uniformMap.merge(emptyUniformStacks);
+        emptyUniformStacks.clear();
         osg::GLExtensions* ext = state.get<osg::GLExtensions>();
 
         size_t frameId = state.getFrameStamp()->getFrameNumber() % 2;
@@ -115,6 +139,7 @@ namespace MWRender
                 state.popStateSet();
             }
 
+            cacheEmptyUniformStacks(uniformMap, emptyUniformStacks);
             return;
         }
 
@@ -352,6 +377,7 @@ namespace MWRender
             bindDestinationFbo();
         }
 
+        cacheEmptyUniformStacks(uniformMap, emptyUniformStacks);
         mDirtyAttachments.clear();
     }
 }
