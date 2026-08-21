@@ -69,7 +69,11 @@ void main()
         sampleOpaqueDepthTex(screenCoords).x,
         particleSize,
         particleFade,
-        softFalloffDepth
+        softFalloffDepth,
+        waterEnabled,
+        isReflection,
+        waterHeight,
+        osg_ViewMatrixInverse
     );
 #endif
 
