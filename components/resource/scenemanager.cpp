@@ -147,7 +147,7 @@ namespace
             if (stateSet)
             {
                 if (osg::Material* material
-                    = static_cast<osg::Material*>(stateSet->getAttribute(osg::StateAttribute::MATERIAL)))
+                    = dynamic_cast<osg::Material*>(stateSet->getAttribute(osg::StateAttribute::MATERIAL)))
                     stateSet->setAttribute(new SceneUtil::Material({
                         .mDiffuse = material->getDiffuse(osg::Material::FRONT_AND_BACK),
                         .mAmbient = material->getAmbient(osg::Material::FRONT_AND_BACK),
