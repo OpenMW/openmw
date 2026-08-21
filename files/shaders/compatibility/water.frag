@@ -151,20 +151,22 @@ void main(void)
     float ior = (cameraPos.z>=0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = clamp(fresnel_dielectric(viewDir, normal, ior), 0.0, 1.0);
 
-    vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
-#if @waterRefraction
+    vec2 reflectionCoordsOffset = normal.xy * REFL_BUMP;
+    vec2 refractionCoordsOffset = vec2(0.0);
     float depthSample = linearizeDepth(sampleOpaqueDepthTex(screenCoords).r, near, far);
     float surfaceDepth = linearizeDepth(gl_FragCoord.z, near, far);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
-    float depthSampleDistorted = linearizeDepth(sampleOpaqueDepthTex(screenCoords - screenCoordsOffset).r, near, far);
-    float waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
+
+#if @waterRefraction
+    refractionCoordsOffset = reflectionCoordsOffset;
+    float depthSampleDistorted = linearizeDepth(sampleOpaqueDepthTex(screenCoords - refractionCoordsOffset).r, near, far);
     // Don't sample refraction from above water
     if (depthSampleDistorted <= surfaceDepth)
-        screenCoordsOffset = vec2(0.0);
-    screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH, 0.0, 1.0);
+        refractionCoordsOffset = vec2(0.0);
+    refractionCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH, 0.0, 1.0);
 #endif
     // reflection
-    vec3 reflection = sampleReflectionMap(screenCoords + screenCoordsOffset).rgb;
+    vec3 reflection = sampleReflectionMap(screenCoords + reflectionCoordsOffset).rgb;
 
     vec3 waterColor = WATER_COLOR * sunFade;
 
@@ -186,17 +188,12 @@ void main(void)
     vec3 rainSpecular = abs(rainRipple.w)*mix(skyColorEstimate, vec3(1.0), 0.05)*0.5;
     float waterTransparency = clamp(fresnel * 6.0 + specular, 0.0, 1.0);
 
-#if @waterRefraction
-    depthSampleDistorted = linearizeDepth(sampleOpaqueDepthTex(screenCoords - screenCoordsOffset).r, near, far);
-    waterDepthDistorted = max(depthSampleDistorted - surfaceDepth, 0.0);
-
-    // fade to realWaterDepth at a distance to compensate for physically inaccurate depth calculation
-    waterDepthDistorted = mix(waterDepthDistorted, realWaterDepth, min(surfaceDepth / REFR_FOG_DISTORT_DISTANCE, 1.0));
-
-    // refraction
-    vec2 refractionCoords = screenCoords - screenCoordsOffset;
-    vec3 refraction = sampleOpaqueColorTex(refractionCoords).rgb;
+    vec3 refraction = waterColor;
     vec3 rawRefraction = refraction;
+
+    vec2 refractionCoords = screenCoords - refractionCoordsOffset;
+    refraction = sampleOpaqueColorTex(refractionCoords).rgb;
+    rawRefraction = refraction;
 
     // brighten up the refraction underwater
     if (cameraPos.z < 0)
@@ -222,17 +219,13 @@ void main(void)
     gl_FragData[0].a = 1.0;
     // no alpha here, so make sure raindrop ripple specularity gets properly subdued
     rainSpecular *= waterTransparency;
-#else
-    gl_FragData[0].rgb = mix(waterColor, reflection, (1.0 + fresnel) * 0.5);
-    gl_FragData[0].a = waterTransparency;
-#endif
 
     vec3 pointSpecular = doSpecularLighting(gl_FragCoord.xy, (gl_ModelViewMatrix * vec4(position.xyz, 1.0)).xyz, normalize(gl_NormalMatrix * specNormal));
     pointSpecular *= SPEC_BRIGHTNESS;
 
     gl_FragData[0].rgb += specular * sunSpec.rgb + rainSpecular + pointSpecular;
 
-#if @waterRefraction && @wobblyShores
+#if @wobblyShores
     // wobbly water: hard-fade into refraction texture at extremely low depth, with a wobble based on normal mapping
     vec3 normalShoreRippleRain = texture2D(normalMap,normalCoords(UV, 2.0, 2.7, -1.0*waterTimer,  0.05,  0.1,  normal3)).rgb - 0.5
                                + texture2D(normalMap,normalCoords(UV, 2.0, 2.7,      waterTimer,  0.04, -0.13, normal4)).rgb - 0.5;
