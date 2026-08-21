@@ -197,8 +197,8 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                if (sceneManager->getSupportsNormalsRT())
-                    stateset->setAttribute(new osg::Disablei(GL_BLEND, 1));
+                // This pass needs normals-buffer blending.
+                stateset->setAttribute(new osg::Enablei(GL_BLEND, 1));
                 stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
@@ -263,7 +263,6 @@ namespace Terrain
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = parallax ? "1" : "0";
-                defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 
