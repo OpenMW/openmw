@@ -440,6 +440,8 @@ namespace Shader
                     continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
                     static_cast<const SceneUtil::Material*>(it->second.first.get())
                         ->setStateSet(writableStateSet, it->second.second);
                 }
