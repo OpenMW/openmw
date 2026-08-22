@@ -88,8 +88,12 @@ namespace MWMechanics
 
         for (const auto& it : summonMapToGameSetting)
         {
-            summonMap[it.first] = ESM::RefId::stringRefId(
-                MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(it.second)->mValue.getString());
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+            const ESM::GameSetting* gmst = store.get<ESM::GameSetting>().search(it.second);
+            if (gmst)
+                summonMap[it.first] = ESM::RefId::stringRefId(gmst->mValue.getString());
+            else
+                Log(Debug::Error) << "Could not find summoned creature ID for effect " << it.first;
         }
         return summonMap;
     }
