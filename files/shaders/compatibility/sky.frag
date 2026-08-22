@@ -9,6 +9,7 @@ uniform float opacity;          // PASS_CLOUDS, PASS_ATMOSPHERE_NIGHT
 uniform vec2 screenRes;
 uniform vec4 moonBlend;         // PASS_MOON
 uniform vec4 atmosphereFade;    // PASS_MOON
+uniform vec4 diffuseColor;
 
 #include "fog.glsl"
 
@@ -17,7 +18,7 @@ varying vec4 passColor;
 
 void paintAtmosphere(inout vec4 color)
 {
-    color = gl_FrontMaterial.emission;
+    color = diffuseColor;
     color.a *= passColor.a;
 }
 
@@ -31,7 +32,7 @@ void paintClouds(inout vec4 color)
 {
     color = texture2D(diffuseMap, diffuseMapUV);
     color.a *= passColor.a * opacity;
-    color.xyz = clamp(color.xyz * gl_FrontMaterial.emission.xyz, 0.0, 1.0);
+    color.xyz = clamp(color.xyz * diffuseColor.xyz, 0.0, 1.0);
 
     // ease transition between clear color and atmosphere/clouds
     color = mix(vec4(fog.color.xyz, color.a), color, passColor.a);
@@ -66,13 +67,12 @@ void paintMoon(inout vec4 color)
 void paintSun(inout vec4 color)
 {
     color = texture2D(diffuseMap, diffuseMapUV);
-    color.a *= gl_FrontMaterial.diffuse.a;
+    color.a *= opacity;
 }
 
 void paintSunglare(inout vec4 color)
 {
-    color = gl_FrontMaterial.emission;
-    color.a = gl_FrontMaterial.diffuse.a;
+    color = diffuseColor;
 }
 
 void processSunflashQuery()

@@ -61,8 +61,6 @@ centroid varying vec3 shadedLighting;
 centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-uniform float emissiveMult;
-uniform float specStrength;
 #include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
@@ -73,7 +71,7 @@ varying vec4 passTangent;
 
 #include "lib/core/vertex.h.glsl"
 
-#include "vertexcolors.glsl"
+#include "lib/material/vertexcolors.glsl"
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
 #include "lib/view/depth.glsl"
@@ -87,8 +85,12 @@ uniform mat4 osg_ViewMatrixInverse;
 
 uniform vec2 screenRes;
 
+centroid varying vec4 passColor;
+
 void main(void)
 {
+    Material material = getMaterial();
+
 #if @particleOcclusion
     mat4 model = osg_ViewMatrixInverse * gl_ModelViewMatrix;
     orthoDepthMapCoord = ((depthSpaceMatrix * model) * vec4(gl_Vertex.xyz, 1.0)).xyz;
@@ -156,29 +158,29 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    vec3 emissionColor = getEmissionColor().rgb;
-    if (skipLighting())
+    vec3 emissionColor = getEmissionColor(material, passColor).rgb;
+    if (skipLighting(material, passColor))
     {
-        shadedLighting = passLighting = emissionColor * emissiveMult;
+        shadedLighting = passLighting = emissionColor * material.emissiveMult;
         shadedSpecular = passSpecular = vec3(0.0);
     }
     else
     {
         // Handles edge case of off-screen vertices with clustered shading not being lit due to not mapping to any cluster
         vec2 screenCoord = clamp(clipToScreen(gl_Position), vec2(0.0), screenRes - vec2(1.0));
-        float shininess = max(1e-4, gl_FrontMaterial.shininess);
+        float shininess = max(1e-4, material.shininess);
         vec3 viewDir = normalize(passViewPos);
-        vec3 diffuseColor = getDiffuseColor().rgb;
-        vec3 ambientColor = getAmbientColor().rgb;
-        vec3 specularColor = getSpecularColor().rgb;
+        vec3 diffuseColor = getDiffuseColor(material, passColor).rgb;
+        vec3 ambientColor = getAmbientColor(material, passColor).rgb;
+        vec3 specularColor = getSpecularColor(material, passColor).rgb;
 
         vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
         directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);
         pointLighting(screenCoord, viewDir, passViewPos, viewNormal, shininess, pointDiffuse, pointAmbient, pointSpecular);
-        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * emissiveMult;
-        shadedSpecular = specularColor * pointSpecular * specStrength;
+        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * material.emissiveMult;
+        shadedSpecular = specularColor * pointSpecular * material.specStrength;
         passLighting = shadedLighting + diffuseColor * sunDiffuse;
-        passSpecular = shadedSpecular + specularColor * sunSpecular * specStrength;
+        passSpecular = shadedSpecular + specularColor * sunSpecular * material.specStrength;
     }
     clampLighting(shadedLighting);
     clampLighting(passLighting);

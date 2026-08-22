@@ -5,7 +5,6 @@
 #include <osg/AutoTransform>
 #include <osg/GL>
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/StateAttribute>
 #include <osg/StateSet>
 #include <osg/Vec3f>
@@ -14,6 +13,7 @@
 #include <osgText/TextBase>
 
 #include <components/misc/constants.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include <apps/opencs/model/world/cellcoordinates.hpp>
 #include <apps/opencs/view/render/mask.hpp>
@@ -82,8 +82,8 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->setAutoScaleToScreen(true);
     mMarkerNode->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
     mMarkerNode->getOrCreateStateSet()->setRenderBinDetails(11, "RenderBin");
-    osg::ref_ptr<osg::Material> mat = new osg::Material;
-    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    osg::ref_ptr<SceneUtil::Material> mat
+        = new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse });
     mMarkerNode->getOrCreateStateSet()->setAttribute(mat);
 
     mMarkerNode->setUserData(new CellMarkerTag(this));

@@ -32,10 +32,12 @@ uniform mat4 texMat@emissiveMapUV;
 uniform mat4 texMat@normalMapUV;
 
 #include "lib/view/depth.glsl"
+#include "lib/material/vertexcolors.glsl"
 
-#include "compatibility/vertexcolors.glsl"
 #include "compatibility/shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
+
+centroid varying vec4 passColor;
 
 void main(void)
 {

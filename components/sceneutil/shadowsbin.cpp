@@ -1,10 +1,13 @@
 #include "shadowsbin.hpp"
+
+#include <unordered_set>
+
 #include <osg/AlphaFunc>
-#include <osg/Material>
 #include <osg/Program>
 #include <osg/StateSet>
 #include <osgUtil/StateGraph>
-#include <unordered_set>
+
+#include <components/sceneutil/material.hpp>
 
 using namespace osgUtil;
 
@@ -33,10 +36,10 @@ namespace
         accumulateState(currentValue, newValue, isOverride, flags);
     }
 
-    inline bool materialNeedShadows(osg::Material* m)
+    inline bool materialNeedShadows(SceneUtil::Material* m)
     {
         // I'm pretty sure this needs to check the colour mode - vertex colours might override this value.
-        return m->getDiffuse(osg::Material::FRONT).a() > 0.5;
+        return m->getDiffuse().a() > 0.5;
     }
 }
 
@@ -91,8 +94,8 @@ namespace SceneUtil
             if (found != attributes.end())
             {
                 const osg::StateSet::RefAttributePair& rap = found->second;
-                accumulateState(
-                    state.mMaterial, static_cast<osg::Material*>(rap.first.get()), state.mMaterialOverride, rap.second);
+                accumulateState(state.mMaterial, static_cast<SceneUtil::Material*>(rap.first.get()),
+                    state.mMaterialOverride, rap.second);
                 if (state.mMaterial && !materialNeedShadows(state.mMaterial))
                     state.mMaterial = nullptr;
             }

@@ -1,6 +1,5 @@
 #include "chunkmanager.hpp"
 
-#include <osg/Material>
 #include <osg/Texture2D>
 
 #include <osgUtil/IncrementalCompileOperation>
@@ -8,8 +7,8 @@
 #include <components/esm/util.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
-
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include "compositemaprenderer.hpp"
 #include "material.hpp"
@@ -52,8 +51,10 @@ namespace Terrain
     {
         mMultiPassRoot = new osg::StateSet;
         mMultiPassRoot->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-        osg::ref_ptr<osg::Material> material(new osg::Material);
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> material(
+            new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse }));
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
+        material->updateStateSet(mMultiPassRoot);
         mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
     }
 

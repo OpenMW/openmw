@@ -6,6 +6,10 @@
 namespace osg
 {
     class Camera;
+}
+
+namespace SceneUtil
+{
     class Material;
 }
 
@@ -34,7 +38,7 @@ namespace CSVRender
         std::unordered_map<std::string, osg::Vec4f> mOriginalColors;
         std::vector<std::string> mSelectionHistory;
         std::string mLastHitNode;
-        std::unordered_map<std::string, osg::Material*> mLastHighlightedNodes;
+        std::unordered_map<std::string, SceneUtil::Material*> mLastHighlightedNodes;
         float mMarkerScale;
         int mSubMode;
 

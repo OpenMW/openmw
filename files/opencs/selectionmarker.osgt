@@ -98,13 +98,13 @@ osg::Group {
                             GL_CULL_FACE ON 
                           }
                           AttributeList 1 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 17 
-                              Ambient TRUE Front 0.8 0.123281 0.11568 1 Back 0.8 0.123281 0.11568 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.8 0.123281 0.11568 1 Back 0.8 0.123281 0.11568 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.8 0.123281 0.11568 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.8 0.123281 0.11568 1 
+                              Shininess 0 
                             }
                             Value OFF 
                           }
@@ -1149,13 +1149,13 @@ osg::Group {
                             GL_CULL_FACE ON 
                           }
                           AttributeList 1 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 30 
-                              Ambient TRUE Front 0.0512699 0.38982 0.8 1 Back 0.0512699 0.38982 0.8 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.0512699 0.38982 0.8 1 Back 0.0512699 0.38982 0.8 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.0512699 0.38982 0.8 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.0512699 0.38982 0.8 1 
+                              Shininess 0 
                             }
                             Value OFF 
                           }
@@ -2200,13 +2200,13 @@ osg::Group {
                             GL_CULL_FACE ON 
                           }
                           AttributeList 1 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 43 
-                              Ambient TRUE Front 0.190456 0.8 0.229407 1 Back 0.190456 0.8 0.229407 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.190456 0.8 0.229407 1 Back 0.190456 0.8 0.229407 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.190456 0.8 0.229407 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.190456 0.8 0.229407 1 
+                              Shininess 0 
                             }
                             Value OFF 
                           }
@@ -3472,13 +3472,13 @@ osg::Group {
                             GL_BLEND ON 
                           }
                           AttributeList 3 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 63 
-                              Ambient TRUE Front 0.05127 0.38982 0.8 1 Back 0.05127 0.38982 0.8 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.05127 0.38982 0.8 1 Back 0.05127 0.38982 0.8 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.05127 0.38982 0.8 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.05127 0.38982 0.8 1 
+                              Shininess 0 
                             }
                             Value OFF 
                             osg::BlendFunc {
@@ -3644,13 +3644,13 @@ osg::Group {
                             GL_BLEND ON 
                           }
                           AttributeList 3 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 78 
-                              Ambient TRUE Front 0.190456 0.8 0.229407 1 Back 0.190456 0.8 0.229407 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.190456 0.8 0.229407 1 Back 0.190456 0.8 0.229407 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.190456 0.8 0.229407 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.190456 0.8 0.229407 1 
+                              Shininess 0 
                             }
                             Value OFF 
                             osg::BlendFunc {
@@ -4251,13 +4251,13 @@ osg::Group {
                             GL_BLEND ON 
                           }
                           AttributeList 3 {
-                            osg::Material {
+                            SceneUtil::Material {
                               UniqueID 105 
-                              Ambient TRUE Front 0.8 0.123281 0.11568 1 Back 0.8 0.123281 0.11568 1 
-                              Diffuse TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Specular TRUE Front 0 0 0 1 Back 0 0 0 1 
-                              Emission TRUE Front 0.8 0.123281 0.11568 1 Back 0.8 0.123281 0.11568 1 
-                              Shininess TRUE Front 0 Back 0 
+                              Ambient 0.8 0.123281 0.11568 1 
+                              Diffuse 0 0 0 1 
+                              Specular 0 0 0 1 
+                              Emission 0.8 0.123281 0.11568 1 
+                              Shininess 0 
                             }
                             Value OFF 
                             osg::BlendFunc {

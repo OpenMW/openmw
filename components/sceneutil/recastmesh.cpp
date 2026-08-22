@@ -5,11 +5,11 @@
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/recastmeshbuilder.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include <RecastDebugDraw.h>
 
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/PolygonOffset>
 
 #include <algorithm>

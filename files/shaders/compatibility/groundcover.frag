@@ -44,8 +44,12 @@ varying vec3 passNormal;
 #include "fog.glsl"
 #include "compatibility/normals.glsl"
 
+centroid varying vec4 passColor;
+
 void main()
 {
+    Material material = getMaterial();
+
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
 #else
@@ -75,7 +79,7 @@ void main()
     lighting = mix(shadedLighting, passLighting, shadowing);
 #else
     vec3 diffuseLight, ambientLight, specularLight;
-    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, gl_FrontMaterial.shininess, shadowing, diffuseLight, ambientLight, specularLight);
+    doLighting(gl_FragCoord.xy, passViewPos, viewNormal, material.shininess, shadowing, diffuseLight, ambientLight, specularLight);
     lighting = diffuseLight + ambientLight;
     clampLighting(lighting);
 #endif

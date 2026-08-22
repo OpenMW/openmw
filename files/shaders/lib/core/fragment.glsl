@@ -3,6 +3,7 @@
 #include "lib/core/fragment.h.glsl"
 
 uniform sampler2D reflectionMap;
+uniform Material material;
 
 vec4 sampleReflectionMap(vec2 uv)
 {
@@ -46,4 +47,9 @@ uniform sampler2D opaqueDepthTex;
 vec4 sampleOpaqueDepthTex(vec2 uv)
 {
     return texture2D(opaqueDepthTex, uv);
+}
+
+Material getMaterial()
+{
+    return material;
 }

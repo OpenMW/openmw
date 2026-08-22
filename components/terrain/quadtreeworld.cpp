@@ -1,6 +1,5 @@
 #include "quadtreeworld.hpp"
 
-#include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/ShapeDrawable>
 #include <osgUtil/CullVisitor>
@@ -12,6 +11,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "chunkmanager.hpp"
@@ -416,10 +416,11 @@ namespace Terrain
             stateSet->setAttributeAndModes(
                 new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE),
                 osg::StateAttribute::ON);
-            osg::ref_ptr<osg::Material> material = new osg::Material;
-            material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 1, 1));
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0, 0, 0, 1));
+            osg::ref_ptr<SceneUtil::Material> material = new SceneUtil::Material;
+            material->setEmission(osg::Vec4f(0, 0, 1, 1));
+            material->setDiffuse(osg::Vec4f(0, 0, 0, 1));
+            material->setAmbient(osg::Vec4f(0, 0, 0, 1));
+            material->updateStateSet(stateSet);
             stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
             stateSet->setRenderBinDetails(100, "RenderBin");
             return stateSet;
