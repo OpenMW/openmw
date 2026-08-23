@@ -567,7 +567,7 @@ namespace MWLua
             if (item.isSet())
                 spellcast["item"] = GObject(item);
             projectile["type"] = "Magic";
-            projectile["spellCast"] = spellcast;
+            projectile["userData"] = spellcast;
 
             mGlobalScripts.onProjectileHit(projectile, hitResult);
         });

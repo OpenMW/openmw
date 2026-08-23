@@ -9,8 +9,8 @@ local common = require('scripts.omw.spellcasting.common')
 
 I.Projectiles.addOnProjectileHitHandler(I.Projectiles.TYPES.Magic, function(projectile, hitResult)
     if not hitResult.hit then return end
-    assert(projectile.spellCast)
-    local spellCast = projectile.spellCast
+    assert(projectile.userData and projectile.userData.id)
+    local spellCast = projectile.userData
     local target = hitResult.hitObject
     local haveValidTarget = common.targetIsValid(target)
 

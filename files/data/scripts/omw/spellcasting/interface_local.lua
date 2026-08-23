@@ -40,7 +40,7 @@ return {
             applyMagicEffectsHandlers[#applyMagicEffectsHandlers+1] = handler
         end,
 
-        --- (Local and Global) Explodes a spell at the given location, with
+        --- (Local and Global) Explodes a spell at the given location
         -- @function [parent=#SpellCasting] explodeSpell
         -- @param #SpellCastInfo spellCast The spell info
         -- @param #table options Explosion options
