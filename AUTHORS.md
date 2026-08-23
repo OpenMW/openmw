@@ -240,6 +240,7 @@ Programmers
     Tess (tescoShoppah)
     thegriglat
     Thomas Luppi (Digmaster)
+    Thomas Portal (OursCodeur)
     Tim Hagberg (hazardMan)
     tlmullis
     trav

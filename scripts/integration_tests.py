@@ -29,6 +29,10 @@ parser.add_argument(
     "--test_filter", type=str, default=None,
     help="test cases to run (e.g. 'player.*running')",
 )
+parser.add_argument(
+    "--list_tests", action='store_true',
+    help="print test names instead of running them",
+)
 args = parser.parse_args()
 
 example_suite_dir = Path(args.example_suite).resolve()
@@ -64,16 +68,24 @@ def lua_string_literal(value):
 
 def write_test_config_module():
     shutil.rmtree(test_config_dir, ignore_errors=True)
-    if not args.test_filter:
-        return
     test_config_dir.mkdir(parents=True)
+    fields = []
+    if args.test_filter:
+        fields.append(f"filter = {lua_string_literal(args.test_filter)}")
+    if args.list_tests:
+        fields.append("list = true")
     with open(test_config_dir / "test_config.lua", "w", encoding="utf-8") as stream:
-        stream.write(f"return {{ filter = {lua_string_literal(args.test_filter)} }}\n")
+        stream.write(f"return {{ {', '.join(fields)} }}\n")
+
+
+def parse_test_name(status, line):
+    return line.split(status)[1].strip().split("\t", maxsplit=1)
 
 
 def run_test(test_name):
     start = time.time()
-    print(f'[----------] Running tests from {test_name}')
+    if not args.list_tests:
+        print(f'[----------] Running tests from {test_name}')
     shutil.rmtree(config_dir, ignore_errors=True)
     config_dir.mkdir()
     shutil.copyfile(example_suite_dir / "settings.cfg", config_dir / "settings.cfg")
@@ -89,8 +101,7 @@ def run_test(test_name):
                 f'user-data="{userdata_dir}"\n',
             )
         )
-        if args.test_filter:
-            omw_cfg.write(f'data="{test_config_dir}"\n')
+        omw_cfg.write(f'data="{test_config_dir}"\n')
         for path in content_paths:
             omw_cfg.write(f'content={path.name}\n')
         with open(test_dir / "openmw.cfg") as stream:
@@ -134,16 +145,20 @@ def run_test(test_name):
                 stdout_lines.append(line)
             if "Quit requested by a Lua script" in line:
                 quit_requested = True
+            elif "TEST_FOUND" in line:
+                _, name = parse_test_name("TEST_FOUND", line)
+                count += 1
+                print(name)
             elif "TEST_START" in line:
                 test_start = time.time()
-                number, name = line.split("TEST_START")[1].strip().split("\t", maxsplit=1)
+                number, name = parse_test_name("TEST_START", line)
                 running_test_number = int(number)
                 running_test_name = name
                 count += 1
                 print(f"[ RUN      ] {running_test_name}")
             elif "TEST_OK" in line:
                 duration = (time.time() - test_start) * 1000
-                number, name = line.split("TEST_OK")[1].strip().split("\t", maxsplit=1)
+                number, name = parse_test_name("TEST_OK", line)
                 assert running_test_number == int(number)
                 print(f"[       OK ] {running_test_name} ({duration:.3f} ms)")
             elif "TEST_FAILED" in line:
@@ -153,6 +168,9 @@ def run_test(test_name):
                 print(error)
                 print(f"[  FAILED  ] {running_test_name} ({duration:.3f} ms)")
                 failed_tests.append(running_test_name)
+            elif "TEST_ERROR" in line:
+                message = line.split("TEST_ERROR")[1].strip()
+                fatal_errors.append(f"test framework error: {message}")
         process.wait(5)
         if not quit_requested:
             fatal_errors.append("unexpected termination")
@@ -162,9 +180,10 @@ def run_test(test_name):
         shutil.copyfile(config_dir / "openmw.log", work_dir / f"{test_name}.{time_str}.log")
     if fatal_errors and not args.verbose:
         sys.stdout.writelines(stdout_lines)
-    total_duration = (time.time() - start) * 1000
-    print(f'\n[----------] {count} tests from {test_name} ({total_duration:.3f} ms total)')
-    print(f"[  PASSED  ] {count - len(failed_tests)} tests.")
+    if not args.list_tests:
+        total_duration = (time.time() - start) * 1000
+        print(f'\n[----------] {count} tests from {test_name} ({total_duration:.3f} ms total)')
+        print(f"[  PASSED  ] {count - len(failed_tests)} tests.")
     if fatal_errors:
         print(f"[  FAILED  ] fatal error: {'; '.join(fatal_errors)}")
     if failed_tests:

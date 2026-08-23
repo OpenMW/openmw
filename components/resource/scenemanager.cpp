@@ -8,6 +8,7 @@
 #include <osg/Capability>
 #include <osg/ColorMaski>
 #include <osg/Group>
+#include <osg/Material>
 #include <osg/Node>
 #include <osg/UserDataContainer>
 
@@ -129,6 +130,56 @@ namespace
 
     private:
         unsigned int mMask;
+    };
+
+    class ReplaceMaterialVisitor : public osg::NodeVisitor
+    {
+    public:
+        ReplaceMaterialVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::Node& node) override
+        {
+            osg::StateSet* stateSet = node.getStateSet();
+
+            if (stateSet)
+            {
+                if (osg::Material* material
+                    = dynamic_cast<osg::Material*>(stateSet->getAttribute(osg::StateAttribute::MATERIAL)))
+                    stateSet->setAttribute(new SceneUtil::Material({
+                        .mDiffuse = material->getDiffuse(osg::Material::FRONT_AND_BACK),
+                        .mAmbient = material->getAmbient(osg::Material::FRONT_AND_BACK),
+                        .mSpecular = material->getSpecular(osg::Material::FRONT_AND_BACK),
+                        .mEmission = material->getEmission(osg::Material::FRONT_AND_BACK),
+                        .mShininess = material->getShininess(osg::Material::FRONT_AND_BACK),
+                        .mVertexColorMode = fromOSGColorMode(material->getColorMode()),
+                    }));
+            };
+
+            traverse(node);
+        }
+
+    private:
+        SceneUtil::VertexColorModes fromOSGColorMode(osg::Material::ColorMode mode)
+        {
+            switch (mode)
+            {
+                case osg::Material::AMBIENT:
+                    return SceneUtil::VertexColorModes::Ambient;
+                case osg::Material::DIFFUSE:
+                    return SceneUtil::VertexColorModes::Diffuse;
+                case osg::Material::SPECULAR:
+                    return SceneUtil::VertexColorModes::Specular;
+                case osg::Material::EMISSION:
+                    return SceneUtil::VertexColorModes::Emission;
+                case osg::Material::AMBIENT_AND_DIFFUSE:
+                    return SceneUtil::VertexColorModes::AmbientAndDiffuse;
+                default:
+                    return SceneUtil::VertexColorModes::None;
+            }
+        }
     };
 }
 
@@ -641,6 +692,9 @@ namespace Resource
             SceneUtil::ReplaceDepthVisitor replaceDepthVisitor;
             node->accept(replaceDepthVisitor);
 
+            ReplaceMaterialVisitor replaceMaterialVisitor;
+            node->accept(replaceMaterialVisitor);
+
             for (osg::Node* foundRigNode : rigFinder.mFoundNodes)
             {
                 if (foundRigNode->libraryName() == std::string_view("osgAnimation"))
@@ -698,8 +752,6 @@ namespace Resource
                     }
                 }
 
-                node->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
-                node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1, 1, 1, 1)));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));

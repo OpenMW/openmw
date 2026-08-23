@@ -136,7 +136,8 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/local.lua
     scripts/omw/console/player.lua
     scripts/omw/console/menu.lua
-    scripts/omw/combat/interface.lua
+    scripts/omw/combat/interface_global.lua
+    scripts/omw/combat/interface_local.lua
     scripts/omw/mechanics/actorcontroller.lua
     scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/globalcontroller.lua

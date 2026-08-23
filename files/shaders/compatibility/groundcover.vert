@@ -13,10 +13,12 @@ attribute vec3 aRotation;
 
 #if @diffuseMap
 varying vec2 diffuseMapUV;
+uniform mat4 texMat@diffuseMapUV;
 #endif
 
 #if @normalMap
 varying vec2 normalMapUV;
+uniform mat4 texMat@normalMapUV;
 #endif
 
 // Other shaders respect forcePPL, but legacy groundcover mods were designed to work with vertex lighting.
@@ -45,6 +47,8 @@ uniform mat4 osg_ViewMatrixInverse;
 uniform mat4 osg_ViewMatrix;
 uniform float windSpeed;
 uniform vec3 playerPos;
+
+centroid varying vec4 passColor;
 
 #if @groundcoverStompMode == 0
 #else
@@ -123,6 +127,8 @@ mat3 rotation3(in mat4 rot4)
 
 void main(void)
 {
+    Material material = getMaterial();
+
     vec3 position = aOffset.xyz;
     float scale = aOffset.w;
 
@@ -156,17 +162,17 @@ void main(void)
 #endif
 
 #if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
 #if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+    normalMapUV = (texMat@normalMapUV * gl_MultiTexCoord@normalMapUV).xy;
 #endif
 
 #if PER_PIXEL_LIGHTING
     passViewPos = viewPos.xyz;
 #else
-    float shininess = max(1e-4, gl_FrontMaterial.shininess);
+    float shininess = max(1e-4, material.shininess);
     vec3 viewDir = viewPos.xyz / euclideanDepth;
 
     vec3 sunDiffuse, sunAmbient, unusedSpecular1, pointDiffuse, pointAmbient, unusedSpecular2;

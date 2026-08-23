@@ -4,11 +4,11 @@
 #include <osg/Capability>
 #include <osg/Depth>
 #include <osg/Fog>
-#include <osg/TexMat>
 #include <osg/Texture2D>
 
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -20,13 +20,13 @@ namespace
     class BlendmapTexMat
     {
     public:
-        static const osg::ref_ptr<osg::TexMat>& value(const int blendmapScale)
+        static const osg::ref_ptr<osg::Uniform>& value(const int blendmapScale)
         {
             static BlendmapTexMat instance;
             return instance.get(static_cast<float>(blendmapScale));
         }
 
-        const osg::ref_ptr<osg::TexMat>& get(const float blendmapScale)
+        const osg::ref_ptr<osg::Uniform>& get(const float blendmapScale)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             auto texMat = mTexMatMap.find(blendmapScale);
@@ -42,26 +42,26 @@ namespace
                 // blendmap, apparently.
                 matrix.preMultTranslate(osg::Vec3f(1.0f / blendmapScale / 4.0f, -1.0f / blendmapScale / 4.0f, 0.f));
 
-                texMat = mTexMatMap.emplace(blendmapScale, new osg::TexMat(matrix)).first;
+                texMat = mTexMatMap.emplace(blendmapScale, SceneUtil::createTexMatUniform(1, matrix)).first;
             }
             return texMat->second;
         }
 
     private:
         std::mutex mMutex;
-        std::map<float, osg::ref_ptr<osg::TexMat>> mTexMatMap;
+        std::map<float, osg::ref_ptr<osg::Uniform>> mTexMatMap;
     };
 
     class LayerTexMat
     {
     public:
-        static const osg::ref_ptr<osg::TexMat>& value(const float layerTileSize)
+        static const osg::ref_ptr<osg::Uniform>& value(const float layerTileSize)
         {
             static LayerTexMat instance;
             return instance.get(layerTileSize);
         }
 
-        const osg::ref_ptr<osg::TexMat>& get(const float layerTileSize)
+        const osg::ref_ptr<osg::Uniform>& get(const float layerTileSize)
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             auto texMat = mTexMatMap.find(layerTileSize);
@@ -69,7 +69,8 @@ namespace
             {
                 texMat = mTexMatMap
                              .insert(std::make_pair(layerTileSize,
-                                 new osg::TexMat(osg::Matrix::scale(osg::Vec3f(layerTileSize, layerTileSize, 1.f)))))
+                                 SceneUtil::createTexMatUniform(
+                                     0, osg::Matrix::scale(osg::Vec3f(layerTileSize, layerTileSize, 1.f)))))
                              .first;
             }
             return texMat->second;
@@ -77,7 +78,7 @@ namespace
 
     private:
         std::mutex mMutex;
-        std::map<float, osg::ref_ptr<osg::TexMat>> mTexMatMap;
+        std::map<float, osg::ref_ptr<osg::Uniform>> mTexMatMap;
     };
 
     class EqualDepth
@@ -196,8 +197,8 @@ namespace Terrain
             if (!blendmaps.empty())
             {
                 stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-                if (sceneManager->getSupportsNormalsRT())
-                    stateset->setAttribute(new osg::Disablei(GL_BLEND, 1));
+                // This pass needs normals-buffer blending.
+                stateset->setAttribute(new osg::Enablei(GL_BLEND, 1));
                 stateset->setRenderBinDetails(firstLayer ? 0 : 1, "RenderBin");
                 if (!firstLayer)
                 {
@@ -215,7 +216,7 @@ namespace Terrain
             stateset->addUniform(UniformCollection::value().mDiffuseMap);
 
             if (layerTileSize != 1.f)
-                stateset->setTextureAttribute(0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+                stateset->addUniform(LayerTexMat::value(layerTileSize));
 
             if (!blendmaps.empty())
             {
@@ -223,7 +224,7 @@ namespace Terrain
 
                 stateset->setTextureAttribute(1, blendmap.get());
                 if (!esm4terrain)
-                    stateset->setTextureAttribute(1, BlendmapTexMat::value(blendmapScale));
+                    stateset->addUniform(BlendmapTexMat::value(blendmapScale));
                 stateset->addUniform(UniformCollection::value().mBlendMap);
             }
             if (isComposite)
@@ -262,7 +263,6 @@ namespace Terrain
                 defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = parallax ? "1" : "0";
-                defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 defineMap["reconstructNormalZ"] = reconstructNormalZ ? "1" : "0";
                 Stereo::shaderStereoDefines(defineMap);
 

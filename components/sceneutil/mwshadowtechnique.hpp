@@ -25,7 +25,6 @@
 #include <string>
 
 #include <osg/Camera>
-#include <osg/Material>
 #include <osg/MatrixTransform>
 #include <osg/PolygonOffset>
 

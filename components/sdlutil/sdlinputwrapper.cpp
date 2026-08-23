@@ -450,6 +450,11 @@ namespace SDLUtil
             packEvt.zrel = zrel;
             packEvt.z = mMouseZ;
             packEvt.type = SDL_MOUSEWHEEL;
+
+#if SDL_VERSION_ATLEAST(2, 26, 0)
+            packEvt.x = evt.wheel.mouseX * mScaleX;
+            packEvt.y = evt.wheel.mouseY * mScaleY;
+#endif
         }
         else
         {

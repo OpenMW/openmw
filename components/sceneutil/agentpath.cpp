@@ -2,10 +2,9 @@
 
 #include "detourdebugdraw.hpp"
 
-#include <osg/Material>
-
 #include <components/detournavigator/recastparams.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include <algorithm>
 

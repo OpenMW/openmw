@@ -38,7 +38,7 @@ Specular Mapping
 The RGB channels of the specular map are used as the specular color.
 The alpha channel specifies shininess in range [0, 255].
 If a specular map is used, it will override the shininess and specular color
-set in the NiMaterialProperty / osg::Material.
+set in the NiMaterialProperty / SceneUtil::Material.
 
 Morrowind format NIF files do not support normal maps or specular maps.
 In order to use them anyway, see the next section.

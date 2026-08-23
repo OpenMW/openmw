@@ -1,28 +1,37 @@
 #version 120
 
+#include "lib/core/vertex.h.glsl"
+#include "lib/material/colormodes.glsl"
+
 varying vec2 diffuseMapUV;
 
 varying float alphaPassthrough;
 
-uniform int colorMode;
 uniform bool useTreeAnim;
 uniform bool useDiffuseMapForShadowAlpha = true;
 uniform bool alphaTestShadows = true;
+uniform float alpha;
+uniform float actorFade;
+uniform mat4 texMat0;
 
 void main(void)
 {
+    Material material = getMaterial();
+
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
 
     if (useDiffuseMapForShadowAlpha)
-        diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+        diffuseMapUV = (texMat0 * gl_MultiTexCoord0).xy;
     else
         diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
-    if (colorMode == 2)
+    if (material.vertexColorMode == ColorMode_AmbientAndDiffuse)
         alphaPassthrough = useTreeAnim ? 1.0 : gl_Color.a;
     else
         // This is uniform, so if it's too low, we might be able to put the position/clip vertex outside the view frustum and skip the fragment shader and rasteriser
-        alphaPassthrough = gl_FrontMaterial.diffuse.a;
+        alphaPassthrough = material.diffuse.a;
+
+    alphaPassthrough *= actorFade * alpha;
 }

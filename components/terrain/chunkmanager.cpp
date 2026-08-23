@@ -1,6 +1,5 @@
 #include "chunkmanager.hpp"
 
-#include <osg/Material>
 #include <osg/Texture2D>
 
 #include <osgUtil/IncrementalCompileOperation>
@@ -8,8 +7,8 @@
 #include <components/esm/util.hpp>
 #include <components/resource/objectcache.hpp>
 #include <components/resource/scenemanager.hpp>
-
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include "compositemaprenderer.hpp"
 #include "material.hpp"
@@ -52,8 +51,10 @@ namespace Terrain
     {
         mMultiPassRoot = new osg::StateSet;
         mMultiPassRoot->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-        osg::ref_ptr<osg::Material> material(new osg::Material);
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> material(
+            new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse }));
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
+        material->updateStateSet(mMultiPassRoot);
         mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
     }
 
@@ -122,19 +123,19 @@ namespace Terrain
         if (chunkSize > mMaxCompGeometrySize)
         {
             createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(chunkSize / 4.f, chunkSize / 4.f),
-                osg::Vec4f(
-                    texCoords.x() + texCoords.z() / 2.f, texCoords.y(), texCoords.z() / 2.f, texCoords.w() / 2.f),
-                compositeMap);
-            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(-chunkSize / 4.f, chunkSize / 4.f),
-                osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z() / 2.f, texCoords.w() / 2.f), compositeMap);
-            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(chunkSize / 4.f, -chunkSize / 4.f),
                 osg::Vec4f(texCoords.x() + texCoords.z() / 2.f, texCoords.y() + texCoords.w() / 2.f,
                     texCoords.z() / 2.f, texCoords.w() / 2.f),
                 compositeMap);
-            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(-chunkSize / 4.f, -chunkSize / 4.f),
+            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(-chunkSize / 4.f, chunkSize / 4.f),
                 osg::Vec4f(
                     texCoords.x(), texCoords.y() + texCoords.w() / 2.f, texCoords.z() / 2.f, texCoords.w() / 2.f),
                 compositeMap);
+            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(chunkSize / 4.f, -chunkSize / 4.f),
+                osg::Vec4f(
+                    texCoords.x() + texCoords.z() / 2.f, texCoords.y(), texCoords.z() / 2.f, texCoords.w() / 2.f),
+                compositeMap);
+            createCompositeMapGeometry(chunkSize / 2.f, chunkCenter + osg::Vec2f(-chunkSize / 4.f, -chunkSize / 4.f),
+                osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z() / 2.f, texCoords.w() / 2.f), compositeMap);
         }
         else
         {

@@ -6,12 +6,39 @@
 #include <components/nifosg/autotransform.hpp>
 #include <components/nifosg/matrixtransform.hpp>
 
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/texturetype.hpp>
+
+namespace
+{
+#define MATERIAL_FUNC(PROP, TYPE)                                                                                      \
+    static bool check##PROP(const SceneUtil::Material& attr)                                                           \
+    {                                                                                                                  \
+        return true;                                                                                                   \
+    }                                                                                                                  \
+    static bool read##PROP(osgDB::InputStream& is, SceneUtil::Material& attr)                                          \
+    {                                                                                                                  \
+        TYPE value;                                                                                                    \
+        is >> value;                                                                                                   \
+        attr.set##PROP(value);                                                                                         \
+        return true;                                                                                                   \
+    }                                                                                                                  \
+    static bool write##PROP(osgDB::OutputStream& os, const SceneUtil::Material& attr)                                  \
+    {                                                                                                                  \
+        os << attr.get##PROP();                                                                                        \
+        return true;                                                                                                   \
+    }
+
+    MATERIAL_FUNC(Ambient, osg::Vec4f)
+    MATERIAL_FUNC(Diffuse, osg::Vec4f)
+    MATERIAL_FUNC(Specular, osg::Vec4f)
+    MATERIAL_FUNC(Emission, osg::Vec4f)
+}
 
 namespace SceneUtil
 {
@@ -156,6 +183,59 @@ namespace SceneUtil
         }
     };
 
+    class MaterialSerializer : public osgDB::ObjectWrapper
+    {
+    public:
+        MaterialSerializer()
+            : osgDB::ObjectWrapper(createInstanceFunc<SceneUtil::Material>, "SceneUtil::Material",
+                "osg::Object osg::StateAttribute SceneUtil::Material")
+        {
+            addSerializer(
+                new osgDB::UserSerializer<SceneUtil::Material>("Ambient", &checkAmbient, &readAmbient, &writeAmbient));
+
+            addSerializer(
+                new osgDB::UserSerializer<SceneUtil::Material>("Diffuse", &checkDiffuse, &readDiffuse, &writeDiffuse));
+
+            addSerializer(new osgDB::UserSerializer<SceneUtil::Material>(
+                "Specular", &checkSpecular, &readSpecular, &writeSpecular));
+
+            addSerializer(new osgDB::UserSerializer<SceneUtil::Material>(
+                "Emission", &checkEmission, &readEmission, &writeEmission));
+
+            addSerializer(new osgDB::PropByValSerializer<SceneUtil::Material, float>(
+                              "Shininess", 0.f, &SceneUtil::Material::getShininess, &SceneUtil::Material::setShininess),
+                osgDB::BaseSerializer::RW_FLOAT);
+
+            addSerializer(new osgDB::PropByValSerializer<SceneUtil::Material, float>("EmissiveMultiplier", 1.f,
+                              &SceneUtil::Material::getEmissiveMultiplier, &SceneUtil::Material::setEmissiveMultiplier),
+                osgDB::BaseSerializer::RW_FLOAT);
+
+            addSerializer(new osgDB::PropByValSerializer<SceneUtil::Material, float>("SpecularStrength", 1.f,
+                              &SceneUtil::Material::getSpecularStrength, &SceneUtil::Material::setSpecularStrength),
+                osgDB::BaseSerializer::RW_FLOAT);
+
+            using ColorModeSerializer = osgDB::EnumSerializer<SceneUtil::Material, SceneUtil::VertexColorModes, void>;
+
+            osg::ref_ptr<ColorModeSerializer> colorModeSerializer
+                = new ColorModeSerializer("VertexColorMode", SceneUtil::VertexColorModes::None,
+                    &SceneUtil::Material::getVertexColorMode, &SceneUtil::Material::setVertexColorMode);
+
+            colorModeSerializer->add("None", SceneUtil::VertexColorModes::None);
+
+            colorModeSerializer->add("Emission", SceneUtil::VertexColorModes::Emission);
+
+            colorModeSerializer->add("AmbientAndDiffuse", SceneUtil::VertexColorModes::AmbientAndDiffuse);
+
+            colorModeSerializer->add("Ambient", SceneUtil::VertexColorModes::Ambient);
+
+            colorModeSerializer->add("Diffuse", SceneUtil::VertexColorModes::Diffuse);
+
+            colorModeSerializer->add("Specular", SceneUtil::VertexColorModes::Specular);
+
+            addSerializer(colorModeSerializer);
+        }
+    };
+
     osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
     {
         return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -171,7 +251,7 @@ namespace SceneUtil
         }
     };
 
-    void registerSerializers()
+    void registerSerializers(bool skipGeometry)
     {
         static bool done = false;
         if (!done)
@@ -188,11 +268,15 @@ namespace SceneUtil
             mgr->addWrapper(new MatrixTransformSerializer);
             mgr->addWrapper(new AutoTransformSerializer);
             mgr->addWrapper(new TextureTypeSerializer);
+            mgr->addWrapper(new MaterialSerializer);
 
-            // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of
-            // vertex data that would make the file large and hard to read.
-            mgr->removeWrapper(mgr->findWrapper("osg::Geometry"));
-            mgr->addWrapper(new GeometrySerializer);
+            if (skipGeometry)
+            {
+                // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of
+                // vertex data that would make the file large and hard to read.
+                mgr->removeWrapper(mgr->findWrapper("osg::Geometry"));
+                mgr->addWrapper(new GeometrySerializer);
+            }
 
             // ignore the below for now to avoid warning spam
             const char* ignore[] = {

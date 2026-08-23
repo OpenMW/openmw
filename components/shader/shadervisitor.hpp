@@ -9,6 +9,11 @@ namespace Resource
     class ImageManager;
 }
 
+namespace SceneUtil
+{
+    class Material;
+}
+
 namespace Shader
 {
 
@@ -84,9 +89,6 @@ namespace Shader
             // <texture stage, texture name>
             std::map<int, std::string> mTextures;
 
-            int mColorMode;
-
-            bool mMaterialOverridden;
             bool mAlphaTestOverridden;
             bool mAlphaBlendOverridden;
 

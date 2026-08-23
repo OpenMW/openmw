@@ -37,6 +37,8 @@ namespace SceneUtil
 
         void setupShadowSettings(const Settings::ShadowsCategory& settings, Shader::ShaderManager& shaderManager);
 
+        void setupShaders(Shader::ShaderManager& shaderManager) const;
+
         void disableShadowsForStateSet(osg::StateSet& stateset) const;
 
         Shader::ShaderManager::DefineMap getShadowDefines(const Settings::ShadowsCategory& settings) const;

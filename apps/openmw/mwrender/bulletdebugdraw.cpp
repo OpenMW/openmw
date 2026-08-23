@@ -4,11 +4,12 @@
 
 #include <osg/Geometry>
 #include <osg/Group>
-#include <osg/Material>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/material.hpp>
+
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 #include <osg/ShapeDrawable>
@@ -58,6 +59,9 @@ namespace MWRender
             mTrisGeometry->setUseDisplayList(false);
             mTrisGeometry->setVertexArray(mTrisVertices);
             mTrisGeometry->setDataVariance(osg::Object::DYNAMIC);
+            osg::ref_ptr<osg::Vec4Array> triColors = new osg::Vec4Array;
+            triColors->push_back({ 1, 1, 1, 1 });
+            mTrisGeometry->setColorArray(triColors, osg::Array::BIND_OVERALL);
             mTrisGeometry->addPrimitiveSet(mTrisDrawArrays);
 
             mParentNode->addChild(mLinesGeometry);
@@ -69,8 +73,8 @@ namespace MWRender
                 osg::StateAttribute::ON);
             stateSet->setAttributeAndModes(new osg::PolygonOffset(
                 SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f, SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f));
-            osg::ref_ptr<osg::Material> material = new osg::Material;
-            material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+            osg::ref_ptr<SceneUtil::Material> material
+                = new SceneUtil::Material({ .mVertexColorMode = SceneUtil::VertexColorModes::AmbientAndDiffuse });
             stateSet->setAttribute(material);
             mLinesGeometry->setStateSet(stateSet);
             mTrisGeometry->setStateSet(stateSet);

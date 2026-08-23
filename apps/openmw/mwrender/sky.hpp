@@ -17,7 +17,6 @@ namespace osg
 {
     class Group;
     class Node;
-    class Material;
     class PositionAttitudeTransform;
     class Camera;
 }
@@ -36,6 +35,7 @@ namespace Resource
 namespace SceneUtil
 {
     class RTTNode;
+    class Material;
 }
 
 namespace MWRender

@@ -961,7 +961,8 @@ void OMW::Engine::go()
 
     // Setup viewer
     mViewer = new osgViewer::Viewer;
-    SceneUtil::disableFFPLightModelForRenderer(static_cast<osgViewer::Renderer*>(mViewer->getCamera()->getRenderer()));
+    mViewer->getCamera()->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+    SceneUtil::disableFFPStateForRenderer(static_cast<osgViewer::Renderer*>(mViewer->getCamera()->getRenderer()));
     mViewer->setReleaseContextAtEndOfFrameHint(false);
 
     // Do not try to outsmart the OS thread scheduler (see bug #4785).

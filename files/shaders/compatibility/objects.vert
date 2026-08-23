@@ -6,42 +6,52 @@
 
 #if @diffuseMap
 varying vec2 diffuseMapUV;
+uniform mat4 texMat@diffuseMapUV;
 #endif
 
 #if @darkMap
 varying vec2 darkMapUV;
+uniform mat4 texMat@darkMapUV;
 #endif
 
 #if @detailMap
 varying vec2 detailMapUV;
+uniform mat4 texMat@detailMapUV;
 #endif
 
 #if @decalMap
 varying vec2 decalMapUV;
+uniform mat4 texMat@decalMapUV;
 #endif
 
 #if @emissiveMap
 varying vec2 emissiveMapUV;
+uniform mat4 texMat@emissiveMapUV;
 #endif
 
 #if @normalMap
 varying vec2 normalMapUV;
+uniform mat4 texMat@normalMapUV;
 #endif
 
 #if @envMap
 varying vec2 envMapUV;
+uniform mat4 texMat@envMapUV;
 #endif
 
 #if @bumpMap
 varying vec2 bumpMapUV;
+uniform mat4 texMat@bumpMapUV;
 #endif
 
 #if @specularMap
 varying vec2 specularMapUV;
+uniform mat4 texMat@specularMapUV;
 #endif
 
 #if @glossMap
 varying vec2 glossMapUV;
+uniform mat4 texMat@glossMapUV;
 #endif
 
 #define PER_PIXEL_LIGHTING (@normalMap || @specularMap || @forcePPL)
@@ -51,8 +61,6 @@ centroid varying vec3 shadedLighting;
 centroid varying vec3 shadedSpecular;
 centroid varying vec3 passLighting;
 centroid varying vec3 passSpecular;
-uniform float emissiveMult;
-uniform float specStrength;
 #include "lib/light/clamp.glsl"
 #endif
 varying vec3 passViewPos;
@@ -63,7 +71,7 @@ varying vec4 passTangent;
 
 #include "lib/core/vertex.h.glsl"
 
-#include "vertexcolors.glsl"
+#include "lib/material/vertexcolors.glsl"
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
 #include "lib/view/depth.glsl"
@@ -77,8 +85,12 @@ uniform mat4 osg_ViewMatrixInverse;
 
 uniform vec2 screenRes;
 
+centroid varying vec4 passColor;
+
 void main(void)
 {
+    Material material = getMaterial();
+
 #if @particleOcclusion
     mat4 model = osg_ViewMatrixInverse * gl_ModelViewMatrix;
     orthoDepthMapCoord = ((depthSpaceMatrix * model) * vec4(gl_Vertex.xyz, 1.0)).xyz;
@@ -110,65 +122,65 @@ void main(void)
 #endif
 
 #if @diffuseMap
-    diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
+    diffuseMapUV = (texMat@diffuseMapUV * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
 #if @darkMap
-    darkMapUV = (gl_TextureMatrix[@darkMapUV] * gl_MultiTexCoord@darkMapUV).xy;
+    darkMapUV = (texMat@darkMapUV * gl_MultiTexCoord@darkMapUV).xy;
 #endif
 
 #if @detailMap
-    detailMapUV = (gl_TextureMatrix[@detailMapUV] * gl_MultiTexCoord@detailMapUV).xy;
+    detailMapUV = (texMat@detailMapUV * gl_MultiTexCoord@detailMapUV).xy;
 #endif
 
 #if @decalMap
-    decalMapUV = (gl_TextureMatrix[@decalMapUV] * gl_MultiTexCoord@decalMapUV).xy;
+    decalMapUV = (texMat@decalMapUV * gl_MultiTexCoord@decalMapUV).xy;
 #endif
 
 #if @emissiveMap
-    emissiveMapUV = (gl_TextureMatrix[@emissiveMapUV] * gl_MultiTexCoord@emissiveMapUV).xy;
+    emissiveMapUV = (texMat@emissiveMapUV * gl_MultiTexCoord@emissiveMapUV).xy;
 #endif
 
 #if @normalMap
-    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+    normalMapUV = (texMat@normalMapUV * gl_MultiTexCoord@normalMapUV).xy;
 #endif
 
 #if @bumpMap
-    bumpMapUV = (gl_TextureMatrix[@bumpMapUV] * gl_MultiTexCoord@bumpMapUV).xy;
+    bumpMapUV = (texMat@bumpMapUV * gl_MultiTexCoord@bumpMapUV).xy;
 #endif
 
 #if @specularMap
-    specularMapUV = (gl_TextureMatrix[@specularMapUV] * gl_MultiTexCoord@specularMapUV).xy;
+    specularMapUV = (texMat@specularMapUV * gl_MultiTexCoord@specularMapUV).xy;
 #endif
 
 #if @glossMap
-    glossMapUV = (gl_TextureMatrix[@glossMapUV] * gl_MultiTexCoord@glossMapUV).xy;
+    glossMapUV = (texMat@glossMapUV * gl_MultiTexCoord@glossMapUV).xy;
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    vec3 emissionColor = getEmissionColor().rgb;
-    if (skipLighting())
+    vec3 emissionColor = getEmissionColor(material, passColor).rgb;
+    if (skipLighting(material, passColor))
     {
-        shadedLighting = passLighting = emissionColor * emissiveMult;
+        shadedLighting = passLighting = emissionColor * material.emissiveMult;
         shadedSpecular = passSpecular = vec3(0.0);
     }
     else
     {
         // Handles edge case of off-screen vertices with clustered shading not being lit due to not mapping to any cluster
         vec2 screenCoord = clamp(clipToScreen(gl_Position), vec2(0.0), screenRes - vec2(1.0));
-        float shininess = max(1e-4, gl_FrontMaterial.shininess);
+        float shininess = max(1e-4, material.shininess);
         vec3 viewDir = normalize(passViewPos);
-        vec3 diffuseColor = getDiffuseColor().rgb;
-        vec3 ambientColor = getAmbientColor().rgb;
-        vec3 specularColor = getSpecularColor().rgb;
+        vec3 diffuseColor = getDiffuseColor(material, passColor).rgb;
+        vec3 ambientColor = getAmbientColor(material, passColor).rgb;
+        vec3 specularColor = getSpecularColor(material, passColor).rgb;
 
         vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
         directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);
         pointLighting(screenCoord, viewDir, passViewPos, viewNormal, shininess, pointDiffuse, pointAmbient, pointSpecular);
-        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * emissiveMult;
-        shadedSpecular = specularColor * pointSpecular * specStrength;
+        shadedLighting = diffuseColor * pointDiffuse + ambientColor * (pointAmbient + sunAmbient) + emissionColor * material.emissiveMult;
+        shadedSpecular = specularColor * pointSpecular * material.specStrength;
         passLighting = shadedLighting + diffuseColor * sunDiffuse;
-        passSpecular = shadedSpecular + specularColor * sunSpecular * specStrength;
+        passSpecular = shadedSpecular + specularColor * sunSpecular * material.specStrength;
     }
     clampLighting(shadedLighting);
     clampLighting(passLighting);

@@ -4,7 +4,6 @@
 #include <sstream>
 
 #include <osg/Depth>
-#include <osg/Material>
 #include <osg/PolygonOffset>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Texture2D>
@@ -18,6 +17,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/material.hpp>
 
 #include "vismask.hpp"
 
@@ -70,11 +70,11 @@ namespace
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
-        osg::ref_ptr<osg::Material> mat(new osg::Material);
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
-        mat->setColorMode(osg::Material::DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> mat(new SceneUtil::Material);
+        mat->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+        mat->setEmission(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+        mat->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        mat->setVertexColorMode(SceneUtil::VertexColorModes::Diffuse);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
         node->setStateSet(stateset);
