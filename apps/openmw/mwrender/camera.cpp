@@ -337,6 +337,17 @@ namespace MWRender
         mPosition = pos;
     }
 
+    void Camera::attachTo(const MWWorld::Ptr& ptr)
+    {
+        mTrackingPtr = ptr;
+        if (mMode == Mode::Static)
+            return;
+        // Scripts read position before the first update.
+        mTrackedPosition = ptr.getRefData().getPosition().asVec3();
+        mTrackedPosition.z() += mHeight;
+        mPosition = mTrackedPosition;
+    }
+
     void Camera::setAnimation(NpcAnimation* anim)
     {
         mAnimation = anim;

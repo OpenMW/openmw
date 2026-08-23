@@ -39,7 +39,7 @@ namespace MWRender
         ~Camera();
 
         /// Attach camera to object
-        void attachTo(const MWWorld::Ptr& ptr) { mTrackingPtr = ptr; }
+        void attachTo(const MWWorld::Ptr& ptr);
         MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
