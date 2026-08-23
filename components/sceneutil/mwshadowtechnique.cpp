@@ -630,6 +630,21 @@ void MWShadowTechnique::ShadowData::releaseGLObjects(osg::State* state) const
     _camera->releaseGLObjects(state);
 }
 
+void MWShadowTechnique::ShadowData::updateTextureSize()
+{
+    const ShadowSettings* settings = _viewDependentData->getViewDependentShadowMap()->getShadowedScene()->getShadowSettings();
+
+    const osg::Vec2s textureSize = settings->getDebugDraw() ? osg::Vec2s(512, 512) : settings->getTextureSize();
+    if (_texture->getTextureWidth() == textureSize.x() || _texture->getTextureHeight() == textureSize.y())
+        return;
+
+    _texture->setTextureSize(textureSize.x(), textureSize.y());
+    _texture->dirtyTextureObject();
+    _camera->dirtyAttachmentMap();
+
+    _camera->setViewport(0, 0, textureSize.x(), textureSize.y());
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Frustum
@@ -1393,15 +1408,8 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 sd = previous_sdl.front();
                 previous_sdl.erase(previous_sdl.begin());
 
-                osg::Vec2s textureSize = debug ? osg::Vec2s(512, 512) : settings->getTextureSize();
-                const int w = textureSize.x();
-                const int h = textureSize.y();
-
-                if (sd->_texture->getTextureWidth() != w || sd->_texture->getTextureHeight() != h)
-                {
-                    sd->releaseGLObjects(nullptr);
-                    sd = new ShadowData(vdd);
-                }
+                if (!debug)
+                    sd->updateTextureSize();
             }
 
             osg::ref_ptr<osg::Camera> camera = sd->_camera;

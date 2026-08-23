@@ -194,6 +194,8 @@ namespace SceneUtil {
 
             virtual void releaseGLObjects(osg::State* = 0) const;
 
+            void updateTextureSize();
+
             ViewDependentData*                  _viewDependentData;
 
             unsigned int                        _textureUnit;
