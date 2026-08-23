@@ -29,7 +29,7 @@ I.Projectiles.addOnProjectileHitHandler(I.Projectiles.TYPES.Magic, function(proj
                 static = "VFX_DefaultArea"
             end
             core.sendGlobalEvent('SpawnVfx', {
-                model = types.Static.record(static).model,
+                model = types.Static.records[static].model,
                 position = hitResult.hitPos,
                 options = { particleTextureOverride = mgef.particle }
             })
@@ -56,14 +56,14 @@ local function explodeEffect(position, effect)
         areaStatic = "VFX_DefaultArea"
     end
 
-    world.vfx.spawn(types.Static.record(areaStatic).model, position, {
+    world.vfx.spawn(types.Static.records[areaStatic].model, position, {
         particleTextureOverride = mgef.particle,
         scale = effect.area * 2,
     })
 
     local areaSound = mgef.areaSound
     if areaSound == nil or areaSound == "" then
-        local school = core.stats.Skill.record(mgef.school).school
+        local school = core.stats.Skill.records[mgef.school].school
         areaSound = school.areaSound
     end
     core.sendGlobalEvent('PlaySound3d', {sound = areaSound, position = position})
@@ -99,7 +99,7 @@ local function explodeSpell(spellCast, options)
     local maxArea = 0
     -- First generate a list of applicable effects and compute maxArea
     for _, effect in pairs(effects) do
-        if effect.area > 0 and (casterIsActor or not effect.casterLinked) then
+        if effect.area > 0 and (casterIsActor or not effect.effect.casterLinked) then
             applicableEffects[#applicableEffects + 1] = effect
             maxArea = math.max(effect.area, maxArea)
             explodeEffect(position, effect)

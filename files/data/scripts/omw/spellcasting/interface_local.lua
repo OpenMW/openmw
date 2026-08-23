@@ -47,7 +47,7 @@ return {
         --
         --   * `position` - @{openmw.util#vector3} world position of the explosion
         --   * `range` - @{openmw.core#SpellRange} Which effects (self, touch, target) to consider. If not set, all effects with aoe will explode.
-        --   * `ignore` - @{#list<#string>} List of unique ids (see @{openmw.core#GameObject.id}) of objects to be ignored by aoe.
+        --   * `ignore` - @{#set<#string>} Set of unique ids (see @{openmw.core#GameObject.id}) of objects to be ignored by aoe.
         explodeSpell = function(spellCast, options)
             core.sendGlobalEvent('ExplodeSpell', {spellCast = spellCast, options = options})
         end,

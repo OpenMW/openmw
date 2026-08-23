@@ -32,18 +32,18 @@ function common.getMagicRecord(id)
 
     -- Enchanted items
     for _, enchantable in ipairs({ Armor, Weapon, Clothing, Book }) do
-        record = enchantable.record(id)
+        record = enchantable.records[id]
         if record and record.enchant then
             return core.magic.enchantments.records[record.enchant], core.magic.enchantments
         end
     end
 
     -- Try potion/ingredient
-    record = Potion.record(id)
+    record = Potion.records[id]
     if record then
         return record, Potion
     end
-    record = Ingredient.record(id)
+    record = Ingredient.records[id]
     if record then
         return record, Ingredient
     end
@@ -55,7 +55,7 @@ end
 function common.getMagicEffectSound(mgef, type)
     local sound = mgef[type..'Sound']
     if not sound and mgef.school then
-        local skill = core.stats.Skill.record(mgef.school)
+        local skill = core.stats.Skill.records[mgef.school]
         if skill and skill.school then
             return skill.school[type..'Sound']
         end
@@ -133,14 +133,22 @@ local lockableEffects = {
     [core.magic.EFFECT_TYPE.Open] = true,
 }
 
+function common.isLockableEffect(effectId)
+    -- Note: Calling functions need to compare false to false, not false to nil
+    -- so it's important that non-lockable effects return false and not nil
+    return lockableEffects[effectId] == true
+end
+
 function common.filterApplicableEffects(indexes, effects, target)
     local applicableIndexes = {}
     local isLockable = types.Lockable.objectIsInstance(target)
-    for i = #indexes, 1, -1 do
-        local effect = effects[indexes[i] + 1]
-        local isLockableEffect = lockableEffects[effect.id] == true
-        if isLockableEffect == isLockable then
-            applicableIndexes[#applicableIndexes+1] = indexes[i]
+
+    for _, index in ipairs(indexes) do
+        -- Engine indexes are 0-indexes, so we have to add 1 to make them lua-compatible
+        local effect = effects[index + 1]
+
+        if common.isLockableEffect(effect.id) == isLockable then
+            applicableIndexes[#applicableIndexes+1] = index
         end
     end
     return applicableIndexes
@@ -209,7 +217,7 @@ function common.inflict(spellCast, target, range)
     local recastable = false
     for _, enam in pairs(effectsWithParams) do
         recastable = recastable or not enam.effect.nonRecastable
-        if casterIsActor or not enam.casterLinked then
+        if casterIsActor or not enam.effect.casterLinked then
             effects[#effects+1] = enam.index
         end
     end
