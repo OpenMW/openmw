@@ -106,27 +106,31 @@ namespace SDLUtil
 #if defined(ANDROID) || defined(OPENMW_GL4ES_MANUAL_INIT)
         int major = 1;
         int minor = 1;
-        char* ver = getenv("OPENMW_GLES_VERSION");
-
-        if (ver && (strcmp(ver, "2") == 0 || strcmp(ver, "20") == 0))
+ 
+        if (const char* const version_env = getenv("OPENMW_GLES_VERSION"))
         {
-            major = 2;
-            minor = 0;
-        }
-        else if (ver && (strcmp(ver, "3") == 0 || strcmp(ver, "30") == 0))
-        {
-            major = 3;
-            minor = 0;
-        }
-        else if (ver && strcmp(ver, "31") == 0)
-        {
-            major = 3;
-            minor = 1;
-        }
-        else if (ver && strcmp(ver, "32") == 0)
-        {
-            major = 3;
-            minor = 2;
+            const std::string_view version(version_env);
+            
+            if (version == "2" || version == "20")
+            {
+                major = 2;
+                minor = 0;
+            }
+            else if (version == "3" || version == "30")
+            {
+                major = 3;
+                minor = 0;
+            }
+            else if (version == "31")
+            {
+                major = 3;
+                minor = 1;
+            }
+            else if (version == "32")
+            {
+                major = 3;
+                minor = 2;
+            }
         }
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
