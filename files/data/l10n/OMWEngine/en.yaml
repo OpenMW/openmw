@@ -234,8 +234,6 @@ WobblyShores: "Wobbly Shores"
 # Shadow settings
 
 Shadows: "Shadows"
-EnableShadows: "Enable Shadows"
-EnableShadowsTooltip: "Enable or disable shadow rendering using shadow mapping. More realistic but may reduce performance."
 ActorShadows: "Enable Actor Shadows"
 ActorShadowsTooltip: "Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact."
 PlayerShadows: "Enable Player Shadows"

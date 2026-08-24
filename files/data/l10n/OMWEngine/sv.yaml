@@ -234,8 +234,6 @@ WobblyShores: "Vaggande stränder"
 # Shadow settings
 
 Shadows: "Skuggor"
-EnableShadows: "Aktivera skuggor"
-EnableShadowsTooltip: "Aktivera eller inaktivera skuggrendering med skuggmappning. Mer realistiskt men kan minska prestandan."
 ActorShadows: "Aktivera skuggor för bifigurer"
 ActorShadowsTooltip: "Aktiverar skuggor för bifigurer och varelser bortsett från spelarrollpersonen. Kan ha en liten negativ prestandapåverkan."
 PlayerShadows: "Aktivera skuggor för spelaren"

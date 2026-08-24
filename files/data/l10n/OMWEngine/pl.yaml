@@ -234,8 +234,6 @@ WobblyShores: "Falujące brzegi"
 # Shadow settings
 
 Shadows: "Cienie"
-EnableShadows: "Włącz cienie"
-EnableShadowsTooltip: "Włącz lub wyłącz renderowanie cieni za pomocą mapowania cieni. Bardziej realistyczne, ale może zmniejszyć wydajność."
 ActorShadows: "Włącz cienie aktorów"
 ActorShadowsTooltip: "Włącz cienie dla NPC oraz stworzeń oprócz postaci gracza. Może mieć niewielki wpływ na wydajność."
 PlayerShadows: "Włącz cienie gracza"

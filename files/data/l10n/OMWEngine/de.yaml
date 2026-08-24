@@ -234,8 +234,6 @@ WobblyShores: "Wabbelige Uferlinien"
 # Shadow settings
 
 Shadows: "Schatten"
-EnableShadows: "Schatten aktivieren"
-EnableShadowsTooltip: "Schatten-Rendering mittels Shadow-Mapping aktivieren oder deaktivieren. Realistischer, kann aber die Leistung beeinträchtigen."
 ActorShadows: "Schatten für Akteure aktivieren"
 ActorShadowsTooltip: "Schatten für NPCs und Kreaturen neben dem Spielercharakter aktivieren. Kann geringfügige Auswirkungen auf die Leistung haben."
 PlayerShadows: "Schatten für Spieler aktivieren"

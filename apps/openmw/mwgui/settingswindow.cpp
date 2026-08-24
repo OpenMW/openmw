@@ -144,7 +144,10 @@ namespace
         else if (resolution == 4096)
             box->setIndexSelected(3);
         else
-            box->setIndexSelected(MyGUI::ITEM_NONE);
+        {
+            box->addItem(std::to_string(resolution), resolution);
+            box->setIndexSelected(4);
+        }
     }
 
     void updateSliderLabel(MyGUI::ScrollBar* scroller, MyGUI::TextBox* textBox,
@@ -307,6 +310,10 @@ namespace MWGui
         getWidget(mClassicFalloffWidget, "ClassicFalloffWidget");
         getWidget(mMinimumBrightnessText, "MinimumBrightnessText");
         getWidget(mMinimumBrightnessScroll, "MinimumBrightnessScroll");
+        getWidget(mActorShadowsButton, "ActorShadowsButton");
+        getWidget(mPlayerShadowsButton, "PlayerShadowsButton");
+        getWidget(mTerrainShadowsButton, "TerrainShadowsButton");
+        getWidget(mObjectShadowsButton, "ObjectShadowsButton");
         getWidget(mShadowMapResolution, "ShadowMapResolution");
 
 #ifndef WIN32
@@ -346,6 +353,13 @@ namespace MWGui
             += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
         mMaxLights->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onMaxLightsChanged);
 
+        mActorShadowsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadowsButtonClicked);
+        mPlayerShadowsButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onShadowsButtonClicked);
+        mTerrainShadowsButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onShadowsButtonClicked);
+        mObjectShadowsButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onShadowsButtonClicked);
         mShadowMapResolution->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onShadowMapResolutionChanged);
 
@@ -752,7 +766,15 @@ namespace MWGui
         apply();
     }
 
-    void SettingsWindow::onShadowMapResolutionChanged(MyGUI::ComboBox* /*sender*/, size_t pos)
+    void SettingsWindow::onShadowsButtonClicked(MyGUI::Widget* /*sender*/)
+    {
+        auto& shadowSettings = Settings::shadows();
+        shadowSettings.mEnableShadows.set(shadowSettings.mActorShadows || shadowSettings.mPlayerShadows
+            || shadowSettings.mTerrainShadows || shadowSettings.mObjectShadows);
+        apply();
+    }
+
+    void SettingsWindow::onShadowMapResolutionChanged(MyGUI::ComboBox* sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
@@ -772,6 +794,13 @@ namespace MWGui
             case 3:
                 shadowSettings.mShadowMapResolution.set(4096);
                 break;
+            case 4:
+            {
+                int* resolution = sender->getItemDataAt<int>(4);
+                if (resolution)
+                    shadowSettings.mShadowMapResolution.set(*resolution);
+                break;
+            }
             default:
                 Log(Debug::Warning) << "Unexpected shadow map resolution pos " << pos;
                 break;

@@ -234,8 +234,6 @@ WobblyShores: "Rivages vacillants"
 # Shadow settings
 
 Shadows: "Ombres"
-EnableShadows: "Activer les ombres"
-EnableShadowsTooltip: "Activer ou désactiver le rendu des ombres à l'aide de cartes d'ombres. Plus réaliste mais peut réduire les performances."
 ActorShadows: "Ombre des PNJ/créatures"
 ActorShadowsTooltip: "Cette option affiche l'ombre des PNJ et des créatures. Elle peut avoir un impact faible sur les performances."
 PlayerShadows: "Ombre du personnage joueur"

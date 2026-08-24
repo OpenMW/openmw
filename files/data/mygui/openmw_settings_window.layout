@@ -808,27 +808,10 @@
                         <Property key="Caption" value=" #{OMWEngine:Shadows} "/>
 
                         <Widget type="VBox" position_real="0 0 1 1" align="Stretch">
-
                             <Widget type="HBox" align="Stretch">
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
-                                <Widget type="AutoSizedButton" skin="MW_Button" name="EnableShadowsButton">
-                                    <UserString key="SettingCategory" value="Shadows"/>
-                                    <UserString key="SettingName" value="enable shadows"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
-                                </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText">
-                                    <Property key="Caption" value="#{OMWEngine:EnableShadows}"/>
-                                    <UserString key="ToolTipType" value="Layout"/>
-                                    <UserString key="ToolTipLayout" value="TextToolTip"/>
-                                    <UserString key="Caption_Text" value="#{OMWEngine:EnableShadowsTooltip}"/>
-                                </Widget>
-                            </Widget>
-
-                            <Widget type="HBox" align="Stretch">
-                                <UserString key="HStretch" value="true"/>
-                                <UserString key="VStretch" value="false"/>
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="ActorShadowsButton">
                                     <UserString key="SettingCategory" value="Shadows"/>
                                     <UserString key="SettingName" value="actor shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
@@ -844,7 +827,7 @@
                             <Widget type="HBox" align="Stretch">
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="PlayerShadowsButton">
                                     <UserString key="SettingCategory" value="Shadows"/>
                                     <UserString key="SettingName" value="player shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
@@ -860,7 +843,7 @@
                             <Widget type="HBox" align="Stretch">
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="TerrainShadowsButton">
                                     <UserString key="SettingCategory" value="Shadows"/>
                                     <UserString key="SettingName" value="terrain shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
@@ -876,7 +859,7 @@
                             <Widget type="HBox" align="Stretch">
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
-                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                <Widget type="AutoSizedButton" skin="MW_Button" name="ObjectShadowsButton">
                                     <UserString key="SettingCategory" value="Shadows"/>
                                     <UserString key="SettingName" value="object shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
