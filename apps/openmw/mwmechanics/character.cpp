@@ -900,12 +900,13 @@ namespace MWMechanics
     {
         std::string result;
         bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+        const bool isSpell = mWeaponType == ESM::Weapon::Spell;
 
         if (isSwimming)
-            result = chooseRandomGroup("swimattack");
+            result = isSpell ? "swimattack1" : chooseRandomGroup("swimattack");
 
         if (!isSwimming || !mAnimation->hasAnimation(result))
-            result = chooseRandomGroup("attack");
+            result = isSpell ? "attack1" : chooseRandomGroup("attack");
 
         return result;
     }
@@ -1616,17 +1617,7 @@ namespace MWMechanics
 
                             std::string startKey;
                             std::string stopKey;
-                            if (isRandomAttackAnimation(mCurrentWeapon))
-                            {
-                                startKey = "start";
-                                stopKey = "stop";
-                                if (mCanCast)
-                                    world->castSpell(mPtr,
-                                        mCastingScriptedSpell); // No "release" text key to use, so cast immediately
-                                mCastingScriptedSpell = false;
-                                mCanCast = false;
-                            }
-                            else
+                            if (!isRandomAttackAnimation(mCurrentWeapon))
                             {
                                 switch (firstEffect.mRange)
                                 {
@@ -1643,7 +1634,28 @@ namespace MWMechanics
 
                                 startKey = mAttackType + " start";
                                 stopKey = mAttackType + " stop";
+
+                                if (!cls.isBipedal(mPtr))
+                                {
+                                    const float startTime
+                                        = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + startKey);
+                                    const float stopTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + stopKey);
+                                    if (startTime == -1.f || stopTime < startTime)
+                                        mCurrentWeapon = chooseRandomAttackAnimation();
+                                }
                             }
+
+                            if (isRandomAttackAnimation(mCurrentWeapon))
+                            {
+                                startKey = "start";
+                                stopKey = "stop";
+                                if (mCanCast)
+                                    world->castSpell(mPtr,
+                                        mCastingScriptedSpell); // No "release" text key to use, so cast immediately
+                                mCastingScriptedSpell = false;
+                                mCanCast = false;
+                            }
+
                             playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, 1,
                                 startKey, stopKey, 0.0f, 0);
                             mUpperBodyState = UpperBodyState::Casting;
