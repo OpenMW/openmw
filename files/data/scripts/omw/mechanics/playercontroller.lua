@@ -51,7 +51,7 @@ return {
 
     eventHandlers = {
         ShowMessage = function(data)
-            if data.message then ui.showMessage(data.message) end
+            if data.message then ui.showMessage(data.message, { showInDialogue = data.showInDialogue }) end
         end
     },
 }
