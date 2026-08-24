@@ -139,6 +139,13 @@
 -- @return #table
 
 ---
+-- Find all objects within a given range of a world position
+-- @function [parent=#world] getObjectsInRange
+-- @param openmw.util#Vector3 position The world position
+-- @param #number range The range
+-- @return #list<openmw.core#GameObject>
+
+---
 -- Return an object by RefNum/FormId.
 -- Note: the function always returns @{openmw.core#GameObject} and doesn't validate that
 -- the object exists in the game world. If it doesn't exist or not yet loaded to memory),

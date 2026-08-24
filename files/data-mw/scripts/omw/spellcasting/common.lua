@@ -8,6 +8,7 @@ local Clothing = types.Clothing
 local Container = types.Container
 local Ingredient = types.Ingredient
 local Lockable = types.Lockable
+local Player = types.Player
 local Potion = types.Potion
 local Weapon = types.Weapon
 local l10n = core.l10n('Mechanics')
@@ -221,8 +222,10 @@ function common.inflict(spellCast, target, range)
             effects[#effects+1] = enam.index
         end
     end
-    if casterIsActor and targetIsActor and not recastable and Actor.activeSpells(target):isSpellActive(spellCast.id) then
-        spellCast.caster:sendEvent('ShowMessage', { message = l10n'MagicCannotRecast' })
+    if targetIsActor and not recastable and Actor.activeSpells(target):isSpellActive(spellCast.id) then
+        if casterIsActor and Player.objectIsInstance(spellCast.caster) then
+            spellCast.caster:sendEvent('ShowMessage', { message = l10n'MagicCannotRecast' })
+        end
         return
     end
     effects = common.filterApplicableEffects(effects, record.effects, target)
