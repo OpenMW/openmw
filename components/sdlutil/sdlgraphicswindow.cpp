@@ -106,11 +106,11 @@ namespace SDLUtil
 #if defined(ANDROID) || defined(OPENMW_GL4ES_MANUAL_INIT)
         int major = 1;
         int minor = 1;
- 
+
         if (const char* const version_env = getenv("OPENMW_GLES_VERSION"))
         {
             const std::string_view version(version_env);
-            
+
             if (version == "2" || version == "20")
             {
                 major = 2;
