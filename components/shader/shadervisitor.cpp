@@ -658,15 +658,13 @@ namespace Shader
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
             shaderPrefix = mDefaultShaderPrefix;
 
-        auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
+        ShaderManager::SamplerBindingMap samplers;
+        for (const auto& [unit, name] : reqs.mTextures)
+            samplers[name] = unit;
+
+        auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate, samplers);
         writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
         addedState->setAttributeAndModes(std::move(program));
-
-        for (const auto& [unit, name] : reqs.mTextures)
-        {
-            writableStateSet->addUniform(new osg::Uniform(name.c_str(), unit), osg::StateAttribute::ON);
-            addedState->addUniform(name);
-        }
 
         if (!addedState->empty())
         {
