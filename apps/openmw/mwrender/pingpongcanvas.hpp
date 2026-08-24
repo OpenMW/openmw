@@ -6,7 +6,9 @@
 
 #include <osg/FrameBufferObject>
 #include <osg/Geometry>
+#include <osg/State>
 #include <osg/Texture2D>
+#include <osg/buffered_value>
 
 #include <components/fx/technique.hpp>
 
@@ -28,6 +30,8 @@ namespace MWRender
         void drawGeometry(osg::RenderInfo& renderInfo) const;
 
         void drawImplementation(osg::RenderInfo& renderInfo) const override;
+
+        void resizeGLObjectBuffers(unsigned int maxSize) override;
 
         void dirty() { mDirty = true; }
 
@@ -80,6 +84,7 @@ namespace MWRender
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
         mutable std::shared_ptr<LuminanceCalculator> mLuminanceCalculator;
+        mutable osg::buffered_object<osg::State::UniformMap> mEmptyUniformStacks;
     };
 }
 
