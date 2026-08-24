@@ -108,12 +108,12 @@ namespace SDLUtil
         int minor = 1;
         char* ver = getenv("OPENMW_GLES_VERSION");
 
-        if (ver && strcmp(ver, "20") == 0)
+        if (ver && (strcmp(ver, "2") == 0 || strcmp(ver, "20") == 0))
         {
             major = 2;
             minor = 0;
         }
-        else if (ver && strcmp(ver, "30") == 0)
+        else if (ver && (strcmp(ver, "3") == 0 || strcmp(ver, "30") == 0))
         {
             major = 3;
             minor = 0;
