@@ -312,7 +312,7 @@ namespace MWWorld
 
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
-        std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const ESM::RefId& id) const;
+        std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(ESM::RefId id, bool autoCalc) const;
     };
     template <>
     const ESM::Cell* ESMStore::insert<ESM::Cell>(const ESM::Cell& cell);

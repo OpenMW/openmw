@@ -1,16 +1,13 @@
 #ifndef GAME_MWMECHANICS_SPELLLIST_H
 #define GAME_MWMECHANICS_SPELLLIST_H
 
-#include <functional>
-#include <map>
-#include <set>
-#include <string>
 #include <vector>
 
-#include <components/esm3/loadspel.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
+    struct Spell;
     struct SpellState;
 }
 
@@ -30,17 +27,13 @@ namespace MWMechanics
     ///       saving and loading the game might reapply the cured disease depending on which instance was cured.
     class SpellList
     {
+        std::vector<Spells*> mListeners;
+        std::vector<ESM::RefId> mSpells;
         ESM::RefId mId;
         const int mType;
-        std::vector<Spells*> mListeners;
-
-        bool withBaseRecord(const std::function<bool(std::vector<ESM::RefId>&)>& function);
 
     public:
-        SpellList(const ESM::RefId& id, int type);
-
-        /// Get spell from ID, throws exception if not found
-        static const ESM::Spell* getSpell(const ESM::RefId& id);
+        SpellList(ESM::RefId id, int type, bool autoCalc);
 
         void add(const ESM::Spell* spell);
         ///< Adding a spell that is already listed in *this is a no-op.
@@ -58,7 +51,9 @@ namespace MWMechanics
 
         void updateListener(Spells* before, Spells* after);
 
-        const std::vector<ESM::RefId> getSpells() const;
+        const std::vector<ESM::RefId>& getSpells() const;
+
+        void setAutoCalc(const std::vector<const ESM::Spell*>& spells);
     };
 }
 

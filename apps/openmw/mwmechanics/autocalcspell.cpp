@@ -16,17 +16,19 @@
 
 namespace MWMechanics
 {
-
-    struct SchoolCaps
+    namespace
     {
-        int mCount;
-        int mLimit;
-        bool mReachedLimit;
-        int mMinCost;
-        ESM::RefId mWeakestSpell;
-    };
+        struct SchoolCaps
+        {
+            const ESM::Spell* mWeakestSpell = nullptr;
+            int mCount = 0;
+            int mLimit = 0;
+            int mMinCost = std::numeric_limits<int>::max();
+            bool mReachedLimit = false;
+        };
+    }
 
-    std::vector<ESM::RefId> autoCalcNpcSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
+    std::vector<const ESM::Spell*> autoCalcNpcSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
         const std::map<ESM::RefId, AttributeValue>& actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
@@ -40,15 +42,12 @@ namespace MWMechanics
             if (!skill.mSchool)
                 continue;
             SchoolCaps caps;
-            caps.mCount = 0;
             caps.mLimit = skill.mSchool->mAutoCalcMax;
             caps.mReachedLimit = skill.mSchool->mAutoCalcMax <= 0;
-            caps.mMinCost = std::numeric_limits<int>::max();
-            caps.mWeakestSpell = ESM::RefId();
             schoolCaps[skill.mId] = caps;
         }
 
-        std::vector<ESM::RefId> selectedSpells;
+        std::vector<const ESM::Spell*> selectedSpells;
 
         const MWWorld::Store<ESM::Spell>& spells = MWBase::Environment::get().getESMStore()->get<ESM::Spell>();
 
@@ -85,7 +84,7 @@ namespace MWMechanics
             if (calcAutoCastChance(&spell, actorSkills, actorAttributes, school) < fAutoSpellChance)
                 continue;
 
-            selectedSpells.push_back(spell.mId);
+            selectedSpells.push_back(&spell);
 
             if (cap.mReachedLimit)
             {
@@ -94,9 +93,8 @@ namespace MWMechanics
                     selectedSpells.erase(found);
 
                 cap.mMinCost = std::numeric_limits<int>::max();
-                for (const ESM::RefId& testSpellName : selectedSpells)
+                for (const ESM::Spell* testSpell : selectedSpells)
                 {
-                    const ESM::Spell* testSpell = spells.find(testSpellName);
                     int testSpellCost = MWMechanics::calcSpellCost(*testSpell);
 
                     // int testSchool;
@@ -115,7 +113,7 @@ namespace MWMechanics
                         testSpellCost < cap.mMinCost)
                     {
                         cap.mMinCost = testSpellCost;
-                        cap.mWeakestSpell = testSpell->mId;
+                        cap.mWeakestSpell = testSpell;
                     }
                 }
             }
@@ -127,7 +125,7 @@ namespace MWMechanics
 
                 if (spellCost < cap.mMinCost)
                 {
-                    cap.mWeakestSpell = spell.mId;
+                    cap.mWeakestSpell = &spell;
                     cap.mMinCost = spellCost;
                 }
             }
