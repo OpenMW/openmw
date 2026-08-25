@@ -84,7 +84,8 @@ namespace SceneUtil
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
-        stateset->setRenderBinDetails(renderBin, "RenderBin");
+        stateset->addUniform(new osg::Uniform("waterSurface", true));
+        stateset->setRenderBinDetails(renderBin, "DepthSortedBin");
 
         return stateset;
     }

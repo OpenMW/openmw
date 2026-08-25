@@ -25,7 +25,8 @@ namespace SceneUtil
     class PerViewUniformStateUpdater final : public StateSetUpdater
     {
     public:
-        PerViewUniformStateUpdater(Resource::SceneManager* sceneManager, int opaqueTextureUnit = -1);
+        PerViewUniformStateUpdater(
+            Resource::SceneManager* sceneManager, int opaqueTextureUnit = -1, int opaqueColorTextureUnit = -1);
 
         void setDefaults(osg::StateSet* stateset) override;
 
@@ -50,6 +51,7 @@ namespace SceneUtil
 
         Resource::SceneManager* mSceneManager;
         int mOpaqueTextureUnit = -1;
+        int mOpaqueColorTextureUnit = -1;
     };
 
     class SharedUniformStateUpdater : public StateSetUpdater
@@ -93,15 +95,30 @@ namespace SceneUtil
 
         void setFogEnd(float end);
 
+        void setUnderwaterFogColor(const osg::Vec4f& col);
+
+        void setUnderwaterFogStart(float start);
+
+        void setUnderwaterFogEnd(float end);
+
         void setWireframe(bool wireframe);
         bool getWireframe() const;
+
+        void setWaterHeight(float waterHeight);
+
+        void setWaterEnabled(bool enabled);
 
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
         float mFogStart = 0.f;
         float mFogEnd = 0.f;
+        osg::Vec4f mUnderwaterFogColor;
+        float mUnderwaterFogStart = 0.f;
+        float mUnderwaterFogEnd = 0.f;
         bool mWireframe = false;
+        float mWaterHeight = 0.f;
+        bool mWaterEnabled = false;
     };
 }
 

@@ -20,7 +20,11 @@ float calcSoftParticleFade(
     float depth,
     float size,
     bool fade,
-    float softFalloffDepth
+    float softFalloffDepth,
+    bool waterEnabled,
+    bool isReflection,
+    float waterHeight,
+    mat4 viewMatrixInverse
     )
 {
     float euclidianDepth = length(viewPos);
@@ -42,7 +46,22 @@ float calcSoftParticleFade(
     }
 
     const float shift = 0.845;
-    return shift * pow(clamp(delta/falloff, 0.0, 1.0), contrast) * viewBias;
+    float particleFade = shift * pow(clamp(delta/falloff, 0.0, 1.0), contrast) * viewBias;
+
+    // Treat the water plane as a virtual occluder
+    // The water plane will nver write to the depth buffer and may or may not have been rendered yet
+    if (waterEnabled && !isReflection)
+    {
+        vec3 cameraPos = viewMatrixInverse[3].xyz;
+        vec3 worldPos = (viewMatrixInverse * vec4(viewPos, 1.0)).xyz;
+        float cameraSide = cameraPos.z >= waterHeight ? 1.0 : -1.0;
+        float waterDistance = cameraSide * (worldPos.z - waterHeight);
+        float waterFadeDistance = max(size, 0.001);
+
+        particleFade *= smoothstep(0.0, waterFadeDistance, waterDistance);
+    }
+
+    return particleFade;
 }
 
 #endif

@@ -271,8 +271,6 @@ namespace MWGui
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterRefractionButton, "WaterRefractionButton");
-        getWidget(mSunlightScatteringButton, "SunlightScatteringButton");
-        getWidget(mWobblyShoresButton, "WobblyShoresButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
@@ -317,8 +315,6 @@ namespace MWGui
         mAnisotropy->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onAnisotropyChanged);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
-        mWaterRefractionButton->eventMouseButtonClick
-            += MyGUI::newDelegate(this, &SettingsWindow::onRefractionButtonClicked);
         mWaterTextureSize->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition
@@ -388,10 +384,6 @@ namespace MWGui
 
         const int waterRainRippleDetail = Settings::water().mRainRippleDetail;
         mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
-
-        const bool waterRefraction = Settings::water().mRefraction;
-        mSunlightScatteringButton->setEnabled(waterRefraction);
-        mWobblyShoresButton->setEnabled(waterRefraction);
 
         updateMaxLightsComboBox(mMaxLights);
 
@@ -521,14 +513,6 @@ namespace MWGui
                 break;
             }
         }
-    }
-
-    void SettingsWindow::onRefractionButtonClicked(MyGUI::Widget* /*sender*/)
-    {
-        const bool refractionEnabled = Settings::water().mRefraction;
-
-        mSunlightScatteringButton->setEnabled(refractionEnabled);
-        mWobblyShoresButton->setEnabled(refractionEnabled);
     }
 
     void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* /*sender*/, size_t pos)

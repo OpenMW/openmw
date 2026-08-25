@@ -124,8 +124,10 @@ namespace Resource
         bool isClusteredLightingSupported() const;
 
         void setOpaqueDepthTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
+        void setOpaqueColorTex(osg::ref_ptr<osg::Texture> texturePing, osg::ref_ptr<osg::Texture> texturePong);
 
         osg::ref_ptr<osg::Texture> getOpaqueDepthTex(size_t frame);
+        osg::ref_ptr<osg::Texture> getOpaqueColorTex(size_t frame);
 
         void loadSelectionMarker(
             osg::ref_ptr<osg::Group> parentNode, const char* markerData, long long markerSize) const;
@@ -233,6 +235,7 @@ namespace Resource
         std::string mNormalHeightMapPattern;
         std::string mSpecularMapPattern;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
+        std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueColorTex;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
 

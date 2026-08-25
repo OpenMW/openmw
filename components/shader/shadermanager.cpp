@@ -820,6 +820,9 @@ namespace Shader
             case Slot::OpaqueDepthTexture:
                 slotDescr = "opaque depth texture";
                 break;
+            case Slot::OpaqueColorTexture:
+                slotDescr = "opaque color texture";
+                break;
             case Slot::SkyTexture:
                 slotDescr = "sky RTT";
                 break;

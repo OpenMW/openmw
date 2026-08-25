@@ -28,15 +28,14 @@ uniform mat4 texMat@normalMapUV;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#if PER_PIXEL_LIGHTING
-varying vec3 passViewPos;
-#else
+#if !PER_PIXEL_LIGHTING
 centroid varying vec3 shadedLighting;
 centroid varying vec3 passLighting;
 #include "lib/light/clamp.glsl"
 #endif
 
 varying vec3 passNormal;
+varying vec3 passViewPos;
 
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
@@ -140,7 +139,7 @@ void main(void)
     vec4 worldPos = osg_ViewMatrixInverse * gl_ModelViewMatrix * displacedVertex;
     worldPos.xy += groundcoverDisplacement(worldPos.xyz, gl_Vertex.z);
     vec4 viewPos = osg_ViewMatrix * worldPos;
-
+    passViewPos = viewPos.xyz;
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
 

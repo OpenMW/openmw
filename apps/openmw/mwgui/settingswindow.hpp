@@ -44,8 +44,6 @@ namespace MWGui
         MyGUI::ComboBox* mAnisotropy;
 
         MyGUI::Button* mWaterRefractionButton;
-        MyGUI::Button* mSunlightScatteringButton;
-        MyGUI::Button* mWobblyShoresButton;
         MyGUI::ComboBox* mWaterTextureSize;
         MyGUI::ComboBox* mWaterReflectionDetail;
         MyGUI::ComboBox* mWaterRainRippleDetail;
@@ -89,7 +87,6 @@ namespace MWGui
         void onResolutionCancel();
         void highlightCurrentResolution();
 
-        void onRefractionButtonClicked(MyGUI::Widget* sender);
         void onWaterTextureSizeChanged(MyGUI::ComboBox* sender, size_t pos);
         void onWaterReflectionDetailChanged(MyGUI::ComboBox* sender, size_t pos);
         void onWaterRainRippleDetailChanged(MyGUI::ComboBox* sender, size_t pos);

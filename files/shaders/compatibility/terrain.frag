@@ -104,7 +104,7 @@ void main()
 
     gl_FragData[0].xyz = gl_FragData[0].xyz * lighting + specular;
 
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], passViewPos, euclideanDepth, linearDepth, near, far);
 
 #if !@disableNormals
     // Terrain normals are now additively blended the same way as terrain color is, thus using color's alpha.

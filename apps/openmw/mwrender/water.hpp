@@ -15,6 +15,7 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
+    class Drawable;
     class Geometry;
     class Node;
     class Callback;
@@ -44,7 +45,6 @@ namespace Fallback
 namespace MWRender
 {
 
-    class Refraction;
     class Reflection;
     class RippleSimulation;
     class RainSettingsUpdater;
@@ -64,7 +64,6 @@ namespace MWRender
 
         std::unique_ptr<RippleSimulation> mSimulation;
 
-        osg::ref_ptr<Refraction> mRefraction;
         osg::ref_ptr<Reflection> mReflection;
         osg::ref_ptr<Ripples> mRipples;
 
@@ -99,6 +98,8 @@ namespace MWRender
 
         bool toggle();
 
+        bool isVisible() const { return mEnabled && mToggled; }
+
         bool isUnderwater(const osg::Vec3f& pos) const;
 
         /// adds an emitter, position will be tracked automatically using its scene node
@@ -118,6 +119,10 @@ namespace MWRender
         void update(float dt, bool paused);
 
         osg::Vec3d getPosition() const;
+
+        float getHeight() const { return mTop; }
+
+        osg::Drawable* getDrawable() const;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 

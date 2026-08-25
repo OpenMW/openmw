@@ -30,7 +30,6 @@ uniform float far;
 uniform float alphaRef;
 
 #if PER_PIXEL_LIGHTING
-varying vec3 passViewPos;
 #include "lib/light/clamp.glsl"
 #else
 centroid varying vec3 shadedLighting;
@@ -38,6 +37,7 @@ centroid varying vec3 passLighting;
 #endif
 
 varying vec3 passNormal;
+varying vec3 passViewPos;
 
 #include "shadows_fragment.glsl"
 #include "lib/material/alpha.glsl"
@@ -85,7 +85,7 @@ void main()
 #endif
 
     gl_FragData[0].xyz *= lighting;
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, near, far);
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], passViewPos, euclideanDepth, linearDepth, near, far);
 
 #if !@disableNormals
     gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;

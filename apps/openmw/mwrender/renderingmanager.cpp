@@ -318,19 +318,25 @@ namespace MWRender
 
         mPerViewUniformStateUpdater = new SceneUtil::PerViewUniformStateUpdater(mResourceSystem->getSceneManager(),
             mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
-                Shader::ShaderManager::Slot::OpaqueDepthTexture));
+                Shader::ShaderManager::Slot::OpaqueDepthTexture),
+            mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
+                Shader::ShaderManager::Slot::OpaqueColorTexture));
         rootNode->addCullCallback(mPerViewUniformStateUpdater);
 
         mPostProcessor = new PostProcessor(*this, viewer, mRootNode, resourceSystem->getVFS());
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
+        resourceSystem->getSceneManager()->setOpaqueColorTex(
+            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueColor, 0),
+            mPostProcessor->getTexture(PostProcessor::Tex_OpaqueColor, 1));
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
         resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
 
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
             sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation());
+        mPostProcessor->setupTransparentBin(mWater.get());
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 
@@ -656,7 +662,9 @@ namespace MWRender
         }
         else if (mode == Render_Water)
         {
-            return mWater->toggle();
+            const bool enabled = mWater->toggle();
+            mStateUpdater->setWaterEnabled(mWater->isVisible());
+            return enabled;
         }
         else if (mode == Render_Scene)
         {
@@ -734,15 +742,24 @@ namespace MWRender
         }
         mCamera->update(dt, paused);
 
+        float fogStart = mFog->getFogStart(false);
+        float fogEnd = mFog->getFogEnd(false);
+        osg::Vec4f fogColor = mFog->getFogColor(false);
+
+        float fogUnderwaterStart = mFog->getFogStart(true);
+        float fogUnderwaterEnd = mFog->getFogEnd(true);
+        osg::Vec4f fogUnderwaterColor = mFog->getFogColor(true);
+
         bool isUnderwater = mWater->isUnderwater(mCamera->getPosition());
 
-        float fogStart = mFog->getFogStart(isUnderwater);
-        float fogEnd = mFog->getFogEnd(isUnderwater);
-        osg::Vec4f fogColor = mFog->getFogColor(isUnderwater);
-
+        mStateUpdater->setFogColor(fogColor);
         mStateUpdater->setFogStart(fogStart);
         mStateUpdater->setFogEnd(fogEnd);
-        setFogColor(fogColor);
+        mStateUpdater->setUnderwaterFogStart(fogUnderwaterStart);
+        mStateUpdater->setUnderwaterFogEnd(fogUnderwaterEnd);
+        mStateUpdater->setUnderwaterFogColor(fogUnderwaterColor);
+
+        mViewer->getCamera()->setClearColor(isUnderwater ? fogUnderwaterColor : fogColor);
 
         auto world = MWBase::Environment::get().getWorld();
         const auto& stateUpdater = mPostProcessor->getStateUpdater();
@@ -809,6 +826,7 @@ namespace MWRender
     {
         mWater->setEnabled(enabled);
         mSky->setWaterEnabled(enabled);
+        mStateUpdater->setWaterEnabled(mWater->isVisible());
 
         mPostProcessor->getStateUpdater()->setIsWaterEnabled(enabled);
     }
@@ -818,6 +836,7 @@ namespace MWRender
         mWater->setCullCallback(mTerrain->getHeightCullCallback(height, Mask_Water));
         mWater->setHeight(height);
         mSky->setWaterHeight(height);
+        mStateUpdater->setWaterHeight(height);
 
         mPostProcessor->getStateUpdater()->setWaterHeight(height);
     }
@@ -1262,13 +1281,6 @@ namespace MWRender
 
         mPostProcessor->getStateUpdater()->setAmbientColor(color);
         mStateUpdater->setAmbientColor(color);
-    }
-
-    void RenderingManager::setFogColor(const osg::Vec4f& color)
-    {
-        mViewer->getCamera()->setClearColor(color);
-
-        mStateUpdater->setFogColor(color);
     }
 
     RenderingManager::WorldspaceChunkMgr& RenderingManager::getWorldspaceChunkMgr(ESM::RefId worldspace)

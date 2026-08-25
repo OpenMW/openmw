@@ -260,7 +260,11 @@ vec2 screenCoords = gl_FragCoord.xy / screenRes;
         sampleOpaqueDepthTex(screenCoords).x,
         particleSize,
         particleFade,
-        softFalloffDepth
+        softFalloffDepth,
+        waterEnabled,
+        isReflection,
+        waterHeight,
+        osg_ViewMatrixInverse
     );
 #endif
 

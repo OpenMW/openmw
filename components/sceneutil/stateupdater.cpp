@@ -14,9 +14,11 @@
 
 namespace SceneUtil
 {
-    PerViewUniformStateUpdater::PerViewUniformStateUpdater(Resource::SceneManager* sceneManager, int opaqueTextureUnit)
+    PerViewUniformStateUpdater::PerViewUniformStateUpdater(
+        Resource::SceneManager* sceneManager, int opaqueTextureUnit, int opaqueColorTextureUnit)
         : mSceneManager(sceneManager)
         , mOpaqueTextureUnit(opaqueTextureUnit)
+        , mOpaqueColorTextureUnit(opaqueColorTextureUnit)
     {
     }
 
@@ -40,6 +42,9 @@ namespace SceneUtil
         if (mOpaqueTextureUnit > 0)
             stateset->setTextureAttribute(mOpaqueTextureUnit,
                 mSceneManager->getOpaqueDepthTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
+        if (mOpaqueColorTextureUnit > 0)
+            stateset->setTextureAttribute(mOpaqueColorTextureUnit,
+                mSceneManager->getOpaqueColorTex(nv->getTraversalNumber()), osg::StateAttribute::ON);
     }
 
     void PerViewUniformStateUpdater::applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv)
@@ -139,7 +144,14 @@ namespace SceneUtil
         SceneUtil::setFogColor(*stateset, mFogColor);
         SceneUtil::setFogStart(*stateset, mFogStart);
         SceneUtil::setFogEnd(*stateset, mFogEnd);
+        SceneUtil::setUnderwaterFogColor(*stateset, mUnderwaterFogColor);
+        SceneUtil::setUnderwaterFogStart(*stateset, mUnderwaterFogStart);
+        SceneUtil::setUnderwaterFogEnd(*stateset, mUnderwaterFogEnd);
         SceneUtil::setFogDepth(*stateset, -1.f);
+
+        stateset->addUniform(new osg::Uniform("waterHeight", mWaterHeight));
+        stateset->addUniform(new osg::Uniform("waterEnabled", mWaterEnabled));
+        stateset->addUniform(new osg::Uniform("waterSurface", false));
     }
 
     void StateUpdater::apply(osg::StateSet* stateset, osg::NodeVisitor*)
@@ -149,6 +161,12 @@ namespace SceneUtil
         SceneUtil::updateFogColor(*stateset, mFogColor);
         SceneUtil::updateFogStart(*stateset, mFogStart);
         SceneUtil::updateFogEnd(*stateset, mFogEnd);
+        SceneUtil::updateUnderwaterFogColor(*stateset, mUnderwaterFogColor);
+        SceneUtil::updateUnderwaterFogStart(*stateset, mUnderwaterFogStart);
+        SceneUtil::updateUnderwaterFogEnd(*stateset, mUnderwaterFogEnd);
+
+        stateset->getUniform("waterHeight")->set(mWaterHeight);
+        stateset->getUniform("waterEnabled")->set(mWaterEnabled);
     }
 
     void StateUpdater::setAmbientColor(const osg::Vec4f& col)
@@ -169,6 +187,31 @@ namespace SceneUtil
     void StateUpdater::setFogEnd(float end)
     {
         mFogEnd = end;
+    }
+
+    void StateUpdater::setUnderwaterFogColor(const osg::Vec4f& col)
+    {
+        mUnderwaterFogColor = col;
+    }
+
+    void StateUpdater::setUnderwaterFogStart(float start)
+    {
+        mUnderwaterFogStart = start;
+    }
+
+    void StateUpdater::setUnderwaterFogEnd(float end)
+    {
+        mUnderwaterFogEnd = end;
+    }
+
+    void StateUpdater::setWaterHeight(float waterHeight)
+    {
+        mWaterHeight = waterHeight;
+    }
+
+    void StateUpdater::setWaterEnabled(bool enabled)
+    {
+        mWaterEnabled = enabled;
     }
 
     void StateUpdater::setWireframe(bool wireframe)
