@@ -104,8 +104,8 @@ namespace SDLUtil
         SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
 
 #if defined(ANDROID) || defined(OPENMW_GL4ES_MANUAL_INIT)
-        int major = 1;
-        int minor = 1;
+        int major = 2;
+        int minor = 0;
 
         if (const char* const version_env = getenv("OPENMW_GLES_VERSION"))
         {
@@ -116,7 +116,7 @@ namespace SDLUtil
                 major = 2;
                 minor = 0;
             }
-            else if (version == "3" || version == "30")
+            else if (version == "30")
             {
                 major = 3;
                 minor = 0;
@@ -126,7 +126,7 @@ namespace SDLUtil
                 major = 3;
                 minor = 1;
             }
-            else if (version == "32")
+            else if (version == "3" || version == "32")
             {
                 major = 3;
                 minor = 2;
