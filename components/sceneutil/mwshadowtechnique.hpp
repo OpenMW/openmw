@@ -82,6 +82,8 @@ namespace SceneUtil {
 
         virtual void setPolygonOffset(float factor, float units);
 
+        virtual void setMaximumShadowMapDistance(float distance);
+
         virtual void setShadowFadeStart(float shadowFadeStart);
 
         virtual void enableFrontFaceCulling();
@@ -191,6 +193,8 @@ namespace SceneUtil {
             ShadowData(ViewDependentData* vdd);
 
             virtual void releaseGLObjects(osg::State* = 0) const;
+
+            void updateTextureSize();
 
             ViewDependentData*                  _viewDependentData;
 

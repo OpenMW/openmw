@@ -231,6 +231,23 @@ WindowModeWindowed: "Fönster"
 WindowModeWindowedFullscreen: "Helskärm i fönsterläge"
 WobblyShores: "Vaggande stränder"
 
+# Shadow settings
+
+Shadows: "Skuggor"
+ActorShadows: "Aktivera skuggor för bifigurer"
+ActorShadowsTooltip: "Aktiverar skuggor för bifigurer och varelser bortsett från spelarrollpersonen. Kan ha en liten negativ prestandapåverkan."
+PlayerShadows: "Aktivera skuggor för spelaren"
+PlayerShadowsTooltip: "Aktivera skuggor exklusivt för spelarrollpersonen. Kan ha en mycket liten negativ prestandapåverkan."
+TerrainShadows: "Aktivera skuggor för terräng"
+TerrainShadowsTooltip: "Aktivera skuggor för terräng, inklusive avlägsen terräng. Kan ha en signifikant negativ påverkan på prestanda och skuggkvalité."
+ObjectShadows: "Aktivera skuggor för objekt"
+ObjectShadowsTooltip: "Aktivera skuggor för huvudsakligen icke-rörliga objekt. Kan ha en signifikant negativ prestandapåverkan."
+IndoorShadows: "Aktivera skuggor inomhus"
+IndoorShadowsTooltip: "På grund av begränsningar med Morrowinds data kan endast figurer ge ifrån sig skuggor inomhus, vilket vissa kan tycka vara distraherande. Har ingen effekt om figur/spelarskuggor inte är aktiverat."
+ShadowMapResolution: "Upplösning för skuggkarta"
+ShadowMapResolutionTooltip: "Upplösningen för varje individuell skuggkarta. Ökning av den ökar skuggkvalitén signifikant, men kan ha en lättare negativ prestandapåverkan."
+ShadowsMaxDistanceValue: "Maxavstånd för skuggor ({value, number, :: group-off})"
+ShadowsMaxDistanceTooltip: "Avståndet från kameran vid vilken skuggor helt försvinner. Sätt till 0 för att inaktivera."
 
 # Controller button names
 

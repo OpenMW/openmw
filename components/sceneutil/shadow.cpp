@@ -1,5 +1,7 @@
 #include "shadow.hpp"
 
+#include <limits>
+
 #include <osgShadow/ShadowSettings>
 #include <osgShadow/ShadowedScene>
 
@@ -28,13 +30,10 @@ namespace SceneUtil
     {
         mEnableShadows = settings.mEnableShadows;
 
-        if (!mEnableShadows)
-        {
+        if (mEnableShadows)
+            mShadowTechnique->enableShadows();
+        else
             mShadowTechnique->disableShadows();
-            return;
-        }
-
-        mShadowTechnique->enableShadows();
 
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
@@ -48,8 +47,13 @@ namespace SceneUtil
         if (maximumShadowMapDistance > 0)
         {
             const float shadowFadeStart = settings.mShadowFadeStart;
-            mShadowSettings->setMaximumShadowMapDistance(maximumShadowMapDistance);
+            mShadowTechnique->setMaximumShadowMapDistance(maximumShadowMapDistance);
             mShadowTechnique->setShadowFadeStart(maximumShadowMapDistance * shadowFadeStart);
+        }
+        else
+        {
+            mShadowTechnique->setMaximumShadowMapDistance(std::numeric_limits<float>::max());
+            mShadowTechnique->setShadowFadeStart(std::numeric_limits<float>::max());
         }
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(settings.mMinimumLispsmNearFarRatio);
@@ -75,10 +79,20 @@ namespace SceneUtil
 
         mShadowSettings->setMultipleShadowMapHint(osgShadow::ShadowSettings::CASCADED);
 
-        if (settings.mEnableDebugHud)
+        if (mEnableShadows && settings.mEnableDebugHud)
             mShadowTechnique->enableDebugHUD();
         else
             mShadowTechnique->disableDebugHUD();
+    }
+
+    void ShadowManager::setOutdoorShadowCastingMask(unsigned int mask)
+    {
+        mOutdoorShadowCastingMask = mask;
+    }
+
+    void ShadowManager::setIndoorShadowCastingMask(unsigned int mask)
+    {
+        mIndoorShadowCastingMask = mask;
     }
 
     void ShadowManager::setupShaders(Shader::ShaderManager& shaderManager) const
@@ -88,9 +102,6 @@ namespace SceneUtil
 
     void ShadowManager::disableShadowsForStateSet(osg::StateSet& stateset) const
     {
-        if (!mEnableShadows)
-            return;
-
         osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
         fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
         *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();
@@ -150,7 +161,7 @@ namespace SceneUtil
 
     Shader::ShaderManager::DefineMap ShadowManager::getShadowDefines(const Settings::ShadowsCategory& settings) const
     {
-        if (!mEnableShadows)
+        if (!settings.mEnableShadows)
             return getShadowsDisabledDefines();
 
         Shader::ShaderManager::DefineMap definesWithShadows;

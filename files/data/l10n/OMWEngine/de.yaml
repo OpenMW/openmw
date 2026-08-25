@@ -231,6 +231,23 @@ WindowModeWindowedFullscreen: "Fenster in Vollbildgröße"
 # More fitting translations of "wobbly" are welcome
 WobblyShores: "Wabbelige Uferlinien"
 
+# Shadow settings
+
+Shadows: "Schatten"
+ActorShadows: "Schatten für Akteure aktivieren"
+ActorShadowsTooltip: "Schatten für NPCs und Kreaturen neben dem Spielercharakter aktivieren. Kann geringfügige Auswirkungen auf die Leistung haben."
+PlayerShadows: "Schatten für Spieler aktivieren"
+PlayerShadowsTooltip: "Schatten ausschließlich für den Spielercharakter aktivieren. Kann sehr geringfügige Auswirkungen auf die Leistung haben."
+TerrainShadows: "Schatten für Gelände aktivieren"
+TerrainShadowsTooltip: "Schatten für das Gelände inklusive ferner Geländeteile aktivieren. Kann erhebliche Auswirkungen auf die Leistung und Schattenqualität haben."
+ObjectShadows: "Schatten für Objekte aktivieren"
+ObjectShadowsTooltip: "Schatten für hauptsächlich unbelebte Objekte aktivieren. Kann erhebliche Auswirkungen auf die Leistung haben."
+IndoorShadows: "Schatten in Innenräumen aktivieren"
+IndoorShadowsTooltip: "Aufgrund von Einschränkungen der Spieldaten von Morrowind können in Innenräumen nur Akteure Schatten werfen, was von einigen als störend empfunden werden könnte. Hat keine Wirkung, wenn Akteur- oder Spielerschatten nicht aktiviert sind."
+ShadowMapResolution: "Schattenauflösung"
+ShadowMapResolutionTooltip: "Die Auflösung jeder einzelnen Shadow-Map. Eine Erhöhung verbessert die Schattenqualität erheblich, kann aber geringfügige Auswirkungen auf die Leistung haben."
+ShadowsMaxDistanceValue: "Schatten-Distanzlimit ({value, number, :: group-off})"
+ShadowsMaxDistanceTooltip: "Die Entfernung von der Kamera, bei der Schatten vollständig verschwinden. Auf 0 setzen, um zu deaktivieren."
 
 # Controller button names
 

@@ -231,6 +231,23 @@ WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
 WobblyShores: "Rivages vacillants"
 
+# Shadow settings
+
+Shadows: "Ombres"
+ActorShadows: "Ombre des PNJ/créatures"
+ActorShadowsTooltip: "Cette option affiche l'ombre des PNJ et des créatures. Elle peut avoir un impact faible sur les performances."
+PlayerShadows: "Ombre du personnage joueur"
+PlayerShadowsTooltip: "Cette option affiche l'ombre du personnage joueur. Elle pourrait avoir un impact très faible sur les performances."
+TerrainShadows: "Ombre des terrains"
+TerrainShadowsTooltip: "Cette option affiche l'ombre des terrains. Elle peut avoir un impact faible sur les performances et la qualité des ombres."
+ObjectShadows: "Ombre des objets"
+ObjectShadowsTooltip: "Cette option affiche l'ombre des objets. Elle peut avoir un impact significatif sur les performances."
+IndoorShadows: "Ombres en intérieur"
+IndoorShadowsTooltip: "À cause de certaines limitations avec les données de Morrowind, seuls les personnages et les créatures peuvent projeter une ombre en intérieur, ceci peut déconcerter certains joueurs. Cette option n'a aucun effet si les ombres des PNJ/créatures et du personnage joueur n'ont pas été activées."
+ShadowMapResolution: "Résolution des cartes d'ombres"
+ShadowMapResolutionTooltip: "La résolution de chaque carte d'ombre. Augmenter cette valeur de façon importante augmente la qualité des ombres, mais peut impliquer un impact mineur sur les performances."
+ShadowsMaxDistanceValue: "Limite de distance des ombres ({value, number, :: group-off})"
+ShadowsMaxDistanceTooltip: "Distance à la caméra à partir de laquelle les ombres disparaissent entièrement. Réglez sur 0 pour désactiver."
 
 # Controller button names
 
