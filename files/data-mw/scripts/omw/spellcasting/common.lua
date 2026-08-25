@@ -178,10 +178,6 @@ function common.filterByIndex(effects, filter)
     return effectsByIndex
 end
 
-function common.breakInvisibility(actor)
-    Actor.activeEffects(actor):remove(core.magic.EFFECT_TYPE.Invisibility)
-end
-
 function common.filterByRange(effects, range)
     if not range or not effects then return effects end
 

@@ -24,10 +24,7 @@ I.Projectiles.addOnProjectileHitHandler(I.Projectiles.TYPES.Magic, function(proj
         if not (effect.area > 0 or haveValidTarget) then
             -- Non-aoe effects spawn a magical orb when the magic bolt misses
             local mgef = effect.effect
-            local static = mgef.areaStatic
-            if static == nil or static == "" then
-                static = "VFX_DefaultArea"
-            end
+            local static = mgef.areaStatic or "VFX_DefaultArea"
             core.sendGlobalEvent('SpawnVfx', {
                 model = types.Static.records[static].model,
                 position = hitResult.hitPos,
@@ -51,21 +48,14 @@ end)
 
 local function explodeEffect(position, effect)
     local mgef = effect.effect
-    local areaStatic = mgef.areaStatic
-    if areaStatic == nil or areaStatic == "" then
-        areaStatic = "VFX_DefaultArea"
-    end
+    local areaStatic = mgef.areaStatic or "VFX_DefaultArea"
 
     world.vfx.spawn(types.Static.records[areaStatic].model, position, {
         particleTextureOverride = mgef.particle,
         scale = effect.area * 2,
     })
 
-    local areaSound = mgef.areaSound
-    if areaSound == nil or areaSound == "" then
-        local school = core.stats.Skill.records[mgef.school].school
-        areaSound = school.areaSound
-    end
+    local areaSound = mgef.areaSound or core.stats.Skill.records[mgef.school].school.areaSound
     core.sendGlobalEvent('PlaySound3d', {sound = areaSound, position = position})
 end
 
