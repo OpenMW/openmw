@@ -71,7 +71,7 @@ namespace MWMechanics
         }
     }
 
-    void SpellList::setAutoCalc(const std::vector<const ESM::Spell*> spells)
+    void SpellList::setAutoCalc(const std::vector<const ESM::Spell*>& spells)
     {
         assert(mType == sAutoCalc);
         for (const ESM::Spell* spell : spells)

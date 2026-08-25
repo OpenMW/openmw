@@ -53,7 +53,7 @@ namespace MWMechanics
 
         const std::vector<ESM::RefId>& getSpells() const;
 
-        void setAutoCalc(const std::vector<const ESM::Spell*> spells);
+        void setAutoCalc(const std::vector<const ESM::Spell*>& spells);
     };
 }
 
