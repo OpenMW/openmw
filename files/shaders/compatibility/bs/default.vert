@@ -10,14 +10,17 @@
 
 #if @diffuseMap
 varying vec2 diffuseMapUV;
+uniform mat4 texMat@diffuseMapUV;
 #endif
 
 #if @emissiveMap
 varying vec2 emissiveMapUV;
+uniform mat4 texMat@emissiveMapUV;
 #endif
 
 #if @normalMap
 varying vec2 normalMapUV;
+uniform mat4 texMat@normalMapUV;
 varying vec4 passTangent;
 #endif
 
@@ -26,10 +29,6 @@ varying float linearDepth;
 
 varying vec3 passViewPos;
 varying vec3 passNormal;
-
-uniform mat4 texMat@diffuseMapUV;
-uniform mat4 texMat@emissiveMapUV;
-uniform mat4 texMat@normalMapUV;
 
 #include "lib/view/depth.glsl"
 #include "lib/material/vertexcolors.glsl"
