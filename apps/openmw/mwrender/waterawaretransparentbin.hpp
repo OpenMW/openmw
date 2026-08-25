@@ -29,9 +29,6 @@ namespace MWRender
         void drawImplementation(osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override;
 
     private:
-        void drawClippedLeaf(osgUtil::RenderLeaf* leaf, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf* previous,
-            const osg::Plane& worldPlane, const osg::Matrixd& inverseView, bool decrementDynamicObjectCount);
-
         void drawLeavesWithClippedStraddlers(const osgUtil::RenderBin::RenderLeafList& leaves,
             const osgUtil::RenderBin::RenderLeafList& straddlingLeaves, osg::RenderInfo& renderInfo,
             osgUtil::RenderLeaf*& previous, const osg::Plane& worldPlane, const osg::Matrixd& inverseView,

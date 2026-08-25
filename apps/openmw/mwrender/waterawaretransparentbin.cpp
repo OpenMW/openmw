@@ -140,48 +140,30 @@ namespace MWRender
             nearSideLeaves, mStraddlingLeaves, renderInfo, previous, nearSidePlane, inverseView, true);
     }
 
-    void WaterAwareTransparentBin::drawClippedLeaf(osgUtil::RenderLeaf* leaf, osg::RenderInfo& renderInfo,
-        osgUtil::RenderLeaf* previous, const osg::Plane& worldPlane, const osg::Matrixd& inverseView,
-        bool decrementDynamicObjectCount)
-    {
-        osg::State& state = *renderInfo.getState();
-        if (state.getAbortRendering())
-            return;
-
-        osg::Plane localPlane = worldPlane;
-        const osg::Matrixd localToWorld = *leaf->_modelview * inverseView;
-        localPlane.transformProvidingInverse(localToWorld);
-
-        mClipStateSet->setAttributeAndModes(new osg::ClipPlane(1, localPlane),
-            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
-
-        osgUtil::StateGraph* stateGraph = leaf->_parent;
-        osgUtil::StateGraph clippedStateGraph(stateGraph, mClipStateSet);
-
-        const bool dynamic = leaf->_dynamic;
-        leaf->_parent = &clippedStateGraph;
-
-        if (!decrementDynamicObjectCount)
-            leaf->_dynamic = false;
-
-        leaf->render(renderInfo, previous);
-
-        leaf->_dynamic = dynamic;
-
-        if (stateGraph->_parent)
-            osgUtil::StateGraph::moveStateGraph(state, stateGraph, stateGraph->_parent);
-        else if (stateGraph->getStateSet())
-            state.popStateSet();
-
-        state.apply(stateGraph->getStateSet());
-        leaf->_parent = stateGraph;
-    }
-
     void WaterAwareTransparentBin::drawLeavesWithClippedStraddlers(const osgUtil::RenderBin::RenderLeafList& leaves,
         const osgUtil::RenderBin::RenderLeafList& straddlingLeaves, osg::RenderInfo& renderInfo,
         osgUtil::RenderLeaf*& previous, const osg::Plane& worldPlane, const osg::Matrixd& inverseView,
         bool decrementStraddlingDynamicObjects)
     {
+        if (leaves.empty() && straddlingLeaves.empty())
+            return;
+
+        osg::State& state = *renderInfo.getState();
+
+        osg::Plane viewPlane = worldPlane;
+        viewPlane.transformProvidingInverse(inverseView);
+        mClipStateSet->setAttributeAndModes(new osg::ClipPlane(1, viewPlane),
+            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+
+        if (previous)
+            osgUtil::StateGraph::moveToRootStateGraph(state, previous->_parent->_parent);
+
+        state.applyModelViewMatrix(osg::Matrixd::identity());
+        state.pushStateSet(mClipStateSet);
+        state.apply();
+
+        previous = nullptr;
+
         std::size_t leafIndex = 0;
         std::size_t straddlingIndex = 0;
 
@@ -193,17 +175,25 @@ namespace MWRender
 
             osgUtil::RenderLeaf* leaf;
             if (drawStraddling)
-            {
                 leaf = straddlingLeaves[straddlingIndex++];
-                drawClippedLeaf(leaf, renderInfo, previous, worldPlane, inverseView, decrementStraddlingDynamicObjects);
-            }
             else
-            {
                 leaf = leaves[leafIndex++];
-                leaf->render(renderInfo, previous);
-            }
 
+            const bool dynamic = leaf->_dynamic;
+            if (drawStraddling && !decrementStraddlingDynamicObjects)
+                leaf->_dynamic = false;
+
+            leaf->render(renderInfo, previous);
+
+            leaf->_dynamic = dynamic;
             previous = leaf;
         }
+
+        osgUtil::StateGraph::moveToRootStateGraph(state, previous->_parent->_parent);
+        state.popStateSet();
+        state.apply();
+
+        osgUtil::StateGraph::moveStateGraph(state, nullptr, previous->_parent->_parent);
+        state.apply(previous->_parent->getStateSet());
     }
 }
