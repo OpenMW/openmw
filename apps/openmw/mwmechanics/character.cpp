@@ -473,15 +473,11 @@ namespace MWMechanics
         {
             if (!mCurrentWeapon.empty())
                 mAnimation->disable(mCurrentWeapon);
-            if (mUpperBodyState > UpperBodyState::WeaponEquipped)
+            if (mUpperBodyState != UpperBodyState::None)
             {
                 mUpperBodyState = UpperBodyState::WeaponEquipped;
                 if (mWeaponType > ESM::Weapon::None)
                     mAnimation->showWeapons(true);
-            }
-            else if (mUpperBodyState < UpperBodyState::WeaponEquipped)
-            {
-                mUpperBodyState = UpperBodyState::None;
             }
         }
 
@@ -904,12 +900,13 @@ namespace MWMechanics
     {
         std::string result;
         bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
+        const bool isSpell = mWeaponType == ESM::Weapon::Spell;
 
         if (isSwimming)
-            result = chooseRandomGroup("swimattack");
+            result = isSpell ? "swimattack1" : chooseRandomGroup("swimattack");
 
         if (!isSwimming || !mAnimation->hasAnimation(result))
-            result = chooseRandomGroup("attack");
+            result = isSpell ? "attack1" : chooseRandomGroup("attack");
 
         return result;
     }
@@ -1620,17 +1617,7 @@ namespace MWMechanics
 
                             std::string startKey;
                             std::string stopKey;
-                            if (isRandomAttackAnimation(mCurrentWeapon))
-                            {
-                                startKey = "start";
-                                stopKey = "stop";
-                                if (mCanCast)
-                                    world->castSpell(mPtr,
-                                        mCastingScriptedSpell); // No "release" text key to use, so cast immediately
-                                mCastingScriptedSpell = false;
-                                mCanCast = false;
-                            }
-                            else
+                            if (!isRandomAttackAnimation(mCurrentWeapon))
                             {
                                 switch (firstEffect.mRange)
                                 {
@@ -1647,7 +1634,28 @@ namespace MWMechanics
 
                                 startKey = mAttackType + " start";
                                 stopKey = mAttackType + " stop";
+
+                                if (!cls.isBipedal(mPtr))
+                                {
+                                    const float startTime
+                                        = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + startKey);
+                                    const float stopTime = mAnimation->getTextKeyTime(mCurrentWeapon + ": " + stopKey);
+                                    if (startTime == -1.f || stopTime < startTime)
+                                        mCurrentWeapon = chooseRandomAttackAnimation();
+                                }
                             }
+
+                            if (isRandomAttackAnimation(mCurrentWeapon))
+                            {
+                                startKey = "start";
+                                stopKey = "stop";
+                                if (mCanCast)
+                                    world->castSpell(mPtr,
+                                        mCastingScriptedSpell); // No "release" text key to use, so cast immediately
+                                mCastingScriptedSpell = false;
+                                mCanCast = false;
+                            }
+
                             playBlendedAnimation(mCurrentWeapon, priorityWeapon, MWRender::BlendMask_All, false, 1,
                                 startKey, stopKey, 0.0f, 0);
                             mUpperBodyState = UpperBodyState::Casting;
@@ -2881,10 +2889,12 @@ namespace MWMechanics
     {
         if (!mAnimation)
             return;
+
+        float alpha = 1.f;
+
         // We should take actor's invisibility in account
         if (mPtr.getClass().isActor())
         {
-            float alpha = 1.f;
             if (mPtr.getClass()
                     .getCreatureStats(mPtr)
                     .getMagicEffects()
@@ -2905,12 +2915,10 @@ namespace MWMechanics
             {
                 alpha *= std::clamp(1.f - chameleon / 100.f, 0.25f, 0.75f);
             }
-
-            visibility = std::min(visibility, alpha);
         }
 
         // TODO: implement a dithering shader rather than just change object transparency.
-        mAnimation->setAlpha(visibility);
+        mAnimation->setAlpha(visibility, alpha);
     }
 
     std::string_view CharacterController::getMovementBasedAttackType() const

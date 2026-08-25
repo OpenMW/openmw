@@ -28,6 +28,15 @@
 -- @usage
 -- content.books.records.MyBook = { template = content.books.records['bk_lustyargonianmaid'], text = content.books.records['bk_BoethiahPillowBook'].text }
 
+--- @{#ClassContent}: Class manipulation.
+-- @field [parent=#content] #ClassContent classes
+
+---
+-- A mutable list of all @{openmw.types#ClassRecord}s.
+-- @field [parent=#ClassContent] #list<openmw.types#ClassRecord> records
+-- @usage
+-- content.classes.records.MyClass = { name = 'Nightbonk', template = content.classes.records['Nightblade'], majorSkills = { 'BluntWeapon', 'Mysticism', 'Illusion', 'Alteration', 'Sneak' } }
+
 --- @{#DoorContent}: Door manipulation.
 -- @field [parent=#content] #DoorContent doors
 
@@ -162,6 +171,15 @@
 -- @field [parent=#ProbeContent] #list<openmw.types#ProbeRecord> records
 -- @usage
 -- content.probes.records.MyProbe = { template = content.probes.records['probe_bent'], quality = 5, name = 'Alien Probe' }
+
+--- @{#RaceContent}: Race manipulation.
+-- @field [parent=#content] #RaceContent races
+
+---
+-- A mutable list of all @{openmw.types#RaceRecord}s.
+-- @field [parent=#RaceContent] #list<openmw.types#RaceRecord> records
+-- @usage
+-- content.races.records.MyRace = { template = content.races.records['wood elf'], name = 'Sheep Elf', height = { male = 2, female = 2 }, weight = { male = 2, female = 2 } }
 
 --- @{#RepairContent}: Repair item manipulation.
 -- @field [parent=#content] #RepairContent repairs

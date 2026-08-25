@@ -41,7 +41,7 @@ local function rotateByPitch(object, target)
     rotate(object, target, nil)
 end
 
-testing.registerLocalTest('player yaw rotation',
+testing.registerLocalTest('rotating player with controls.yawChange should change rotation',
     function()
         local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
         local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
@@ -61,7 +61,7 @@ testing.registerLocalTest('player yaw rotation',
         testing.expectEqualWithDelta(gamma2, initialGammaZYX, 0.05, 'Gamma rotation in ZYX convention should not change')
     end)
 
-testing.registerLocalTest('player pitch rotation',
+testing.registerLocalTest('rotating player with controls.pitchChange should change rotation',
     function()
         local initialAlphaXZ, initialGammaXZ = self.rotation:getAnglesXZ()
         local initialAlphaZYX, initialBetaZYX, initialGammaZYX = self.rotation:getAnglesZYX()
@@ -81,7 +81,7 @@ testing.registerLocalTest('player pitch rotation',
         testing.expectEqualWithDelta(gamma2, targetPitch, 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
-testing.registerLocalTest('player pitch and yaw rotation',
+testing.registerLocalTest('rotating player with controls.pitchChange and controls.yawChange should change rotation',
     function()
         local targetPitch = math.rad(-30)
         local targetYaw = math.rad(-60)
@@ -100,7 +100,7 @@ testing.registerLocalTest('player pitch and yaw rotation',
         testing.expectEqualWithDelta(gamma2, math.rad(-16), 0.05, 'Incorrect gamma rotation in ZYX convention')
     end)
 
-testing.registerLocalTest('player rotation',
+testing.registerLocalTest('rotating player should not lead to nan rotation',
     function()
         local rotation = math.sqrt(2)
         local endTime = core.getSimulationTime() + 3
@@ -266,7 +266,7 @@ testing.registerLocalTest('player memory limit',
         testing.expectEqual(err, 'not enough memory')
     end)
 
-testing.registerLocalTest('player weapon attack',
+testing.registerLocalTestStep('player with equipped weapon on attack should damage health of other actors',
     function()
         camera.setMode(camera.MODE.ThirdPerson)
 

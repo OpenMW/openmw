@@ -15,7 +15,7 @@ types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Magic, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.VanityMode, false)
 types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.ViewMode, false)
 
-testing.registerLocalTest('Player should be able to walk up stairs in Ebonheart docks (#4247)',
+testing.registerLocalTestStep('Player should be able to walk up stairs in Ebonheart docks (#4247)',
     function()
         local startPos = self.position
         local dest = util.vector3(20296, -102194, 73)
@@ -33,7 +33,7 @@ testing.registerLocalTest('Player should be able to walk up stairs in Ebonheart 
         testing.expectGreaterThan(self.position.z, dest.z, 'Final position, Z')
     end)
 
-testing.registerLocalTest('Guard in Imperial Prison Ship should find path (#7241)',
+testing.registerLocalTestStep('Guard in Imperial Prison Ship should find path (#7241)',
     function()
         local src = util.vector3(34.297367095947265625, 806.3817138671875, 109.278961181640625)
         local dst = util.vector3(90, -90, -88)
@@ -78,7 +78,7 @@ testing.registerLocalTest('Guard in Imperial Prison Ship should find path (#7241
         end
     end)
 
-testing.registerLocalTest('Player quest status should update and its journal entries should be accessible',
+testing.registerLocalTestStep('Player quest status should update and its journal entries should be accessible',
     function()
         testing.expectEqual(#types.Player.journal(self).topics, 0, 'Fresh player has more journal topics than zero')
         testing.expectEqual(#types.Player.journal(self).journalTextEntries, 0, 'Fresh player has more journal text entries than zero')

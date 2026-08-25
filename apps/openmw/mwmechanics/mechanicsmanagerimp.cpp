@@ -156,7 +156,8 @@ namespace MWMechanics
 
             for (const ESM::RefId& power : race->mPowers.mList)
             {
-                creatureStats.getSpells().add(power);
+                if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(power))
+                    creatureStats.getSpells().add(spell);
             }
         }
 
@@ -169,7 +170,8 @@ namespace MWMechanics
 
             for (const ESM::RefId& power : sign->mPowers.mList)
             {
-                creatureStats.getSpells().add(power);
+                if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(power))
+                    creatureStats.getSpells().add(spell);
             }
         }
 

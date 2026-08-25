@@ -3,9 +3,11 @@
 
 #include <filesystem>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 
 #include <components/esm/luascripts.hpp>
 #include <components/esm/refid.hpp>
@@ -162,7 +164,13 @@ namespace MWWorld
 
         std::unique_ptr<ESMStoreImp> mStoreImp;
 
-        std::unordered_map<ESM::RefId, int> mRefCount;
+        struct RefInfo
+        {
+            int mCount = 0;
+            std::vector<const ESM::Cell*> mCells;
+        };
+
+        std::unordered_map<ESM::RefId, RefInfo> mRefInfo;
 
         std::vector<StoreBase*> mStores;
         std::vector<DynamicStore*> mDynamicStores;
@@ -298,6 +306,9 @@ namespace MWWorld
 
         /// @return The number of instances defined in the base files. Excludes changes from the save file.
         int getRefCount(const ESM::RefId& id) const;
+
+        /// @return Cells defining the ref, exteriors first.
+        std::span<const ESM::Cell* const> getRefCells(const ESM::RefId& id) const;
 
         /// Actors with the same ID share spells, abilities, etc.
         /// @return The shared spell list to use for this actor and whether or not it has already been initialized.

@@ -24,8 +24,8 @@ uniform float alphaRef;
 
 #include "lib/core/fragment.h.glsl"
 #include "lib/material/alpha.glsl"
+#include "lib/material/vertexcolors.glsl"
 
-#include "compatibility/vertexcolors.glsl"
 #include "compatibility/fog.glsl"
 #include "compatibility/shadows_fragment.glsl"
 
@@ -37,8 +37,12 @@ uniform bool particleFade;
 uniform float softFalloffDepth;
 #endif
 
+centroid varying vec4 passColor;
+
 void main()
 {
+    Material material = getMaterial();
+
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
     gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, diffuseMapUV);
@@ -46,7 +50,7 @@ void main()
     gl_FragData[0] = vec4(1.0);
 #endif
 
-    gl_FragData[0] *= getDiffuseColor();
+    gl_FragData[0] *= getDiffuseColor(material, passColor);
 
     if (useFalloff)
         gl_FragData[0].a *= passFalloff;

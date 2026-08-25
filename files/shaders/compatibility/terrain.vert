@@ -22,14 +22,18 @@ centroid varying vec3 passSpecular;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-#include "vertexcolors.glsl"
+#include "lib/material/vertexcolors.glsl"
 #include "shadows_vertex.glsl"
 #include "compatibility/normals.glsl"
 
 #include "lib/view/depth.glsl"
 
+centroid varying vec4 passColor;
+
 void main(void)
 {
+    Material material = getMaterial();
+
     gl_Position = modelToClip(gl_Vertex);
 
     vec4 viewPos = modelToView(gl_Vertex);
@@ -53,12 +57,12 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    float shininess = max(1e-4, gl_FrontMaterial.shininess);
+    float shininess = max(1e-4, material.shininess);
     vec3 viewDir = passViewPos / euclideanDepth;
-    vec3 diffuseColor = getDiffuseColor().rgb;
-    vec3 ambientColor = getAmbientColor().rgb;
-    vec3 emissionColor = getEmissionColor().rgb;
-    vec3 specularColor = getSpecularColor().rgb;
+    vec3 diffuseColor = getDiffuseColor(material, passColor).rgb;
+    vec3 ambientColor = getAmbientColor(material, passColor).rgb;
+    vec3 emissionColor = getEmissionColor(material, passColor).rgb;
+    vec3 specularColor = getSpecularColor(material, passColor).rgb;
 
     vec3 sunDiffuse, sunAmbient, sunSpecular, pointDiffuse, pointAmbient, pointSpecular;
     directionalLighting(viewDir, viewNormal, shininess, sunDiffuse, sunAmbient, sunSpecular);

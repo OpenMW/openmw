@@ -4,13 +4,13 @@
 
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
-#include <osg/Material>
 #include <osg/Texture2D>
 #include <osg/Texture2DArray>
 
 #include <osgUtil/RenderStage>
 
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -101,9 +101,9 @@ namespace MWRender
 
             if (ss->getAttribute(osg::StateAttribute::MATERIAL))
             {
-                const osg::Material* mat
-                    = static_cast<const osg::Material*>(ss->getAttribute(osg::StateAttribute::MATERIAL));
-                if (mat->getDiffuse(osg::Material::FRONT).a() < 0.5)
+                const SceneUtil::Material* mat
+                    = static_cast<const SceneUtil::Material*>(ss->getAttribute(osg::StateAttribute::MATERIAL));
+                if (mat->getDiffuse().a() < 0.5)
                     continue;
             }
 

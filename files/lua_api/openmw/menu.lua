@@ -20,8 +20,14 @@
 -- @return #STATE
 
 ---
+-- A table of parameters for @{#menu.newGame}
+-- @type NewGameOptions
+-- @field #boolean bypass Skip new game video and character generation (default: false)
+
+---
 -- Start a new game
 -- @function [parent=#menu] newGame
+-- @param #NewGameOptions options An optional table with additional optional arguments
 
 ---
 -- Load the game from a save slot

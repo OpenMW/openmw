@@ -5,57 +5,100 @@ local M = {}
 
 local menuTestsOrder = {}
 local menuTests = {}
+local discoveredTests = {}
+local setupGlobalTest = function() end
 
 local globalTestsOrder = {}
 local globalTests = {}
 local globalTestRunner = nil
-local currentGlobalTest = nil
-local currentGlobalTestError = nil
+local currentGlobalTest = {}
+local setupLocalTest = function() end
+local discoveredLocalTests = {}
 
+local localTestsOrder = {}
 local localTests = {}
 local localTestRunner = nil
-local currentLocalTest = nil
-local currentLocalTestError = nil
+local currentLocalTest = {}
+
+local localDiscoveryTimeout = 10
+local globalDiscoveryTimeout = localDiscoveryTimeout + 10
+
+local function resumeChecked(co)
+    local ok, err = coroutine.resume(co)
+    if not ok then
+        print('TEST_ERROR', tostring(err))
+        core.quit()
+    end
+end
 
 local function makeTestCoroutine(fn)
     local co = coroutine.create(fn)
     return function()
         if coroutine.status(co) ~= 'dead' then
-            coroutine.resume(co)
+            resumeChecked(co)
         end
     end
 end
 
-local function loadTestFilter()
+local function waitForDiscovery(mailbox, timeout, request, errMsg)
+    mailbox.value = nil
+    request()
+    while mailbox.value == nil do
+        timeout = timeout - 1
+        if timeout == 0 then
+            error(errMsg)
+        end
+        coroutine.yield()
+    end
+    return mailbox.value
+end
+
+local function runRemoteTest(state, name, request)
+    state.name = name
+    state.error = nil
+    request()
+    while state.name do
+        coroutine.yield()
+    end
+    if state.error then
+        error(state.error, 0)
+    end
+end
+
+local function finishRemoteTest(state, data, eventName)
+    if data.name ~= state.name then
+        error(string.format('%s with incorrect name %s, expected %s', eventName, data.name, state.name), 2)
+    end
+    state.name = nil
+    state.error = data.errMsg
+end
+
+local function loadTestConfig()
     local hasTestConfig, testConfig = pcall(require, 'test_config')
     if not hasTestConfig then
         if not tostring(testConfig):find('module not found') then
             error(testConfig)
         end
-        return nil
+        return {}
     end
-    if type(testConfig) ~= 'table' or (testConfig.filter ~= nil and type(testConfig.filter) ~= 'string') then
-        error('invalid test_config format, expected { filter = <string>? }, got ' .. tostring(testConfig))
-    end
-    return testConfig.filter
+    return testConfig
 end
 
-local testFilter = loadTestFilter()
+local testConfig = loadTestConfig()
 
 local function testNameMatchesFilter(name)
-    return testFilter == nil or name:find(testFilter) ~= nil
+    return testConfig.filter == nil or name:find(testConfig.filter) ~= nil
 end
 
 local function runTests(tests)
     for i, test in ipairs(tests) do
-        local name, fn = unpack(test)
-        if testNameMatchesFilter(name) then
-            print('TEST_START', i, name)
-            local status, err = pcall(fn)
+        if testNameMatchesFilter(test.name) then
+            print('TEST_START', i, test.name)
+            local status, err = pcall(test.fn)
             if status then
-                print('TEST_OK', i, name)
+                print('TEST_OK', i, test.name)
             else
-                print('TEST_FAILED', i, name, err)
+                print('TEST_FAILED', i, test.name, err)
             end
         end
     end
@@ -64,68 +107,95 @@ end
 
 function M.makeUpdateMenu()
     return makeTestCoroutine(function()
-        print('Running menu tests...')
+        local menu = require('openmw.menu')
+        print('Discovering tests...')
+        menu.newGame({bypass = true})
+        coroutine.yield()
+        local tests = waitForDiscovery(discoveredTests, globalDiscoveryTimeout,
+            function() core.sendGlobalEvent('discoverTests') end,
+            'test discovery timed out: no testsDiscovered event from the global script')
+        print('Discovered', #tests, 'tests')
+        for _, name in ipairs(tests) do
+            if menuTests[name] then
+                error('discovered global/local test name collides with a menu test: ' .. name)
+            end
+            table.insert(menuTestsOrder, {
+                name = name,
+                fn = function()
+                    setupGlobalTest()
+                    M.runTest(name)
+                end,
+            })
+        end
+        if testConfig.list == true then
+            for i, t in ipairs(menuTestsOrder) do
+                if testNameMatchesFilter(t.name) then
+                    print('TEST_FOUND', i, t.name)
+                end
+            end
+            core.quit()
+            return
+        end
+        print('Running tests...')
         runTests(menuTestsOrder)
-    end)
-end
-
-function M.makeUpdateGlobal()
-    return makeTestCoroutine(function()
-        print('Running global tests...')
-        runTests(globalTestsOrder)
     end)
 end
 
 function M.registerMenuTest(name, fn)
     menuTests[name] = fn
-    table.insert(menuTestsOrder, {name, fn})
+    table.insert(menuTestsOrder, {name = name, fn = fn})
+end
+
+function M.setSetupGlobalTest(fn)
+    setupGlobalTest = fn
 end
 
 function M.runGlobalTest(name)
-    currentGlobalTest = name
-    currentGlobalTestError = nil
-    core.sendGlobalEvent('runGlobalTest', name)
-    while currentGlobalTest do
-        coroutine.yield()
-    end
-    if currentGlobalTestError then
-        error(currentGlobalTestError, 2)
-    end
+    runRemoteTest(currentGlobalTest, name, function() core.sendGlobalEvent('runGlobalTest', name) end)
+end
+
+function M.runTest(name)
+    runRemoteTest(currentGlobalTest, name, function() core.sendGlobalEvent('runTest', name) end)
 end
 
 function M.registerGlobalTest(name, fn)
     globalTests[name] = fn
-    table.insert(globalTestsOrder, {name, fn})
+    table.insert(globalTestsOrder, name)
+end
+
+function M.registerGlobalTestStep(name, fn)
+    globalTests[name] = fn
+end
+
+function M.setSetupLocalTest(fn)
+    setupLocalTest = fn
 end
 
 function M.updateGlobal()
     if globalTestRunner and coroutine.status(globalTestRunner) ~= 'dead' then
-        coroutine.resume(globalTestRunner)
+        resumeChecked(globalTestRunner)
     else
         globalTestRunner = nil
     end
 end
 
 function M.runLocalTest(obj, name)
-    currentLocalTest = name
-    currentLocalTestError = nil
-    obj:sendEvent('runLocalTest', name)
-    while currentLocalTest do
-        coroutine.yield()
-    end
-    if currentLocalTestError then
-        error(currentLocalTestError, 2)
-    end
+    runRemoteTest(currentLocalTest, name, function() obj:sendEvent('runLocalTest', name) end)
 end
 
 function M.registerLocalTest(name, fn)
+    localTests[name] = fn
+    table.insert(localTestsOrder, name)
+end
+
+function M.registerLocalTestStep(name, fn)
     localTests[name] = fn
 end
 
 function M.updateLocal()
     if localTestRunner and coroutine.status(localTestRunner) ~= 'dead' then
         if not core.isWorldPaused() then
-            coroutine.resume(localTestRunner)
+            resumeChecked(localTestRunner)
         end
     else
         localTestRunner = nil
@@ -208,18 +278,43 @@ end
 -- used only in menu scripts
 M.menuEventHandlers = {
     globalTestFinished = function(data)
-        if data.name ~= currentGlobalTest then
-            error(string.format('globalTestFinished with incorrect name %s, expected %s', data.name, currentGlobalTest), 2)
-        end
-        currentGlobalTest = nil
-        currentGlobalTestError = data.errMsg
+        finishRemoteTest(currentGlobalTest, data, 'globalTestFinished')
+    end,
+    testsDiscovered = function(data)
+        discoveredTests.value = data.tests
     end,
 }
 
 -- used only in global scripts
 M.globalEventHandlers = {
+    runTest = function(name)
+        local types = require('openmw.types')
+        local world = require('openmw.world')
+        local fn = globalTests[name]
+        if fn then
+            globalTestRunner = coroutine.create(function()
+                local status, err = pcall(fn)
+                if status then
+                    err = nil
+                end
+                types.Player.sendMenuEvent(world.players[1], 'globalTestFinished', {name=name, errMsg=err})
+            end)
+        else
+            globalTestRunner = coroutine.create(function()
+                local player = world.players[1]
+                local status, err = pcall(function()
+                    setupLocalTest(player)
+                    M.runLocalTest(player, name)
+                end)
+                if status then
+                    err = nil
+                end
+                types.Player.sendMenuEvent(world.players[1], 'globalTestFinished', {name=name, errMsg=err})
+            end)
+        end
+    end,
     runGlobalTest = function(name)
-        fn = globalTests[name]
+        local fn = globalTests[name]
         local types = require('openmw.types')
         local world = require('openmw.world')
         if not fn then
@@ -235,18 +330,39 @@ M.globalEventHandlers = {
         end)
     end,
     localTestFinished = function(data)
-        if data.name ~= currentLocalTest then
-            error(string.format('localTestFinished with incorrect name %s, expected %s', data.name, currentLocalTest), 2)
-        end
-        currentLocalTest = nil
-        currentLocalTestError = data.errMsg
+        finishRemoteTest(currentLocalTest, data, 'localTestFinished')
+    end,
+    discoverTests = function()
+        globalTestRunner = coroutine.create(function()
+            local types = require('openmw.types')
+            local world = require('openmw.world')
+            local localTestNames = waitForDiscovery(discoveredLocalTests, localDiscoveryTimeout,
+                function() world.players[1]:sendEvent('discoverLocalTests') end,
+                'local test discovery timed out: no localTestsDiscovered event from the local script')
+            for _, name in ipairs(localTestNames) do
+                if globalTests[name] then
+                    error('local test name collides with a global test/step: ' .. name)
+                end
+            end
+            local tests = {}
+            for _, name in ipairs(globalTestsOrder) do
+                table.insert(tests, name)
+            end
+            for _, name in ipairs(localTestNames) do
+                table.insert(tests, name)
+            end
+            types.Player.sendMenuEvent(world.players[1], 'testsDiscovered', {tests = tests})
+        end)
+    end,
+    localTestsDiscovered = function(data)
+        discoveredLocalTests.value = data.tests
     end,
 }
 
 -- used only in local scripts
 M.localEventHandlers = {
     runLocalTest = function(name)
-        fn = localTests[name]
+        local fn = localTests[name]
         if not fn then
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg='Local test is not found'})
             return
@@ -258,6 +374,9 @@ M.localEventHandlers = {
             end
             core.sendGlobalEvent('localTestFinished', {name=name, errMsg=err})
         end)
+    end,
+    discoverLocalTests = function()
+        core.sendGlobalEvent('localTestsDiscovered', {tests = localTestsOrder})
     end,
 }
 

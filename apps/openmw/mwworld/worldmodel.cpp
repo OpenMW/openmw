@@ -389,25 +389,12 @@ MWWorld::Ptr MWWorld::WorldModel::getPtrByRefId(const ESM::RefId& name)
     }
 
     // Now try the other cells
-    const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
-
-    for (auto iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+    for (const ESM::Cell* cell : mStore.getRefCells(name))
     {
-        if (mCells.contains(iter->mId))
+        if (mCells.contains(cell->mId))
             continue;
 
-        Ptr ptr = getPtrAndCache(name, insertCellStore(*iter));
-
-        if (!ptr.isEmpty())
-            return ptr;
-    }
-
-    for (auto iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
-    {
-        if (mCells.contains(iter->mId))
-            continue;
-
-        Ptr ptr = getPtrAndCache(name, insertCellStore(*iter));
+        Ptr ptr = getPtrAndCache(name, insertCellStore(*cell));
 
         if (!ptr.isEmpty())
             return ptr;

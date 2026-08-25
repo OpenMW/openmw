@@ -112,7 +112,11 @@ return {
         -- @function [parent=#AI] removePackages
         -- @param #string packageType (optional) The type of packages to remove.
         removePackages = function(packageType)
-            filterPackages(function(p) return packageType and p.type ~= packageType end)
+            if packageType == nil then
+                filterPackages(function() return false end)
+            else
+                filterPackages(function(p) return p.type ~= packageType end)
+            end
         end,
 
         --- Return the target of the active package if the package has given type

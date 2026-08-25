@@ -1,7 +1,6 @@
 #include "cellborder.hpp"
 
 #include <osg/Geometry>
-#include <osg/Material>
 #include <osg/PolygonMode>
 
 #include "world.hpp"
@@ -9,6 +8,7 @@
 #include <components/esm/util.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/terrain/storage.hpp>
 
 namespace Terrain
@@ -68,8 +68,9 @@ namespace Terrain
         borderGroup->addChild(border.get());
 
         osg::StateSet* stateSet = borderGroup->getOrCreateStateSet();
-        osg::ref_ptr<osg::Material> material(new osg::Material);
-        material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> material(new SceneUtil::Material);
+        material->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
+        material->updateStateSet(stateSet);
         stateSet->setAttribute(material);
 
         osg::PolygonMode* polygonmode = new osg::PolygonMode;

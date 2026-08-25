@@ -400,13 +400,17 @@ namespace SceneUtil
         return texture.getName();
     }
 
-    void disableFFPLightModelForRenderer(osgViewer::Renderer* renderer)
+    void disableFFPStateForRenderer(osgViewer::Renderer* renderer)
     {
-        renderer->getSceneView(0)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
-        renderer->getSceneView(1)->setDefaults(osgUtil::SceneView::COMPILE_GLOBJECTS_AT_INIT
-            | osgUtil::SceneView::APPLY_GLOBAL_DEFAULTS | osgUtil::SceneView::CLEAR_GLOBAL_STATESET
-            | osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
+        auto disableFFPState = [](osgUtil::SceneView* sceneView) {
+            sceneView->setDefaults(osgUtil::SceneView::NO_SCENEVIEW_LIGHT);
+            sceneView->getGlobalStateSet()->removeMode(GL_LIGHT0);
+            sceneView->getGlobalStateSet()->removeAttribute(osg::StateAttribute::LIGHTMODEL);
+            sceneView->getGlobalStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
+            sceneView->getGlobalStateSet()->removeAttribute(osg::StateAttribute::ALPHAFUNC);
+        };
+
+        disableFFPState(renderer->getSceneView(0));
+        disableFFPState(renderer->getSceneView(1));
     }
 }

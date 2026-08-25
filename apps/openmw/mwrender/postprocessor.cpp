@@ -485,8 +485,11 @@ namespace MWRender
             texture->dirtyTextureObject();
         }
 
+        // f16 normals: u8 isn't quite accurate enough even for opaque objects, but now we also
+        //  need to blend terrain normals, and it's additive, so now u8 rounding losses would pile up.
         textures[Tex_Normal]->setSourceFormat(GL_RGB);
-        textures[Tex_Normal]->setInternalFormat(GL_RGB);
+        textures[Tex_Normal]->setSourceType(GL_HALF_FLOAT);
+        textures[Tex_Normal]->setInternalFormat(GL_RGB16F);
 
         textures[Tex_Distortion]->setSourceFormat(GL_RGB);
         textures[Tex_Distortion]->setInternalFormat(GL_RGB);

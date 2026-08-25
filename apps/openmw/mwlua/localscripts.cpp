@@ -169,7 +169,11 @@ namespace MWLua
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
 
             ai.erasePackagesIf([&](auto& entry) {
-                bool keep = LuaUtil::call(callback, entry).template get<bool>();
+                auto result = LuaUtil::call(callback, entry);
+                if (result.get_type() == sol::type::nil || result.return_count() == 0)
+                    return false;
+
+                bool keep = result.template get<bool>();
                 return !keep;
             });
         };

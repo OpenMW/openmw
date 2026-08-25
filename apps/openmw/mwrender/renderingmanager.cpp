@@ -5,7 +5,6 @@
 #include <osg/ClipControl>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/Matrix>
 #include <osg/UserDataContainer>
 
@@ -32,10 +31,12 @@
 #include <components/sceneutil/cullsafeboundsvisitor.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/stateupdater.hpp>
+#include <components/sceneutil/texmat.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
@@ -270,6 +271,9 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
+        // Only set up the shadow casting shaders once our global defines have been set
+        mShadowManager->setupShaders(mResourceSystem->getSceneManager()->getShaderManager());
+
         mNavMesh = std::make_unique<NavMesh>(mRootNode, mWorkQueue, Settings::navigator().mEnableNavMeshRender,
             Settings::navigator().mNavMeshRenderMode);
         mActorsPaths = std::make_unique<ActorsPaths>(mRootNode, Settings::navigator().mEnableAgentsPathsRender);
@@ -349,15 +353,12 @@ namespace MWRender
 
         sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Material> defaultMat(new osg::Material);
-        defaultMat->setColorMode(osg::Material::OFF);
-        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+        osg::ref_ptr<SceneUtil::Material> defaultMat(new SceneUtil::Material);
+        defaultMat->updateStateSet(sceneRoot->getOrCreateStateSet());
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
-        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("emissiveMult", 1.f));
-        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
         sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
+        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("alpha", 1.f));
+        sceneRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("actorFade", 1.f));
 
         resourceSystem->getSceneManager()->setUpNormalsRTForStateSet(sceneRoot->getOrCreateStateSet(), true);
 
@@ -395,7 +396,7 @@ namespace MWRender
         mStateUpdater->setFogEnd(mViewDistance);
 
         // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
-        mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
+        mViewer->getSceneData()->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
         // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and
         // breaks things.
         mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
@@ -407,6 +408,8 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(new SceneUtil::AutoDepth, osg::StateAttribute::ON);
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
+
+        SceneUtil::initTexMatForStateSet(*mViewer->getSceneData()->getOrCreateStateSet());
 
         mRootNode->getOrCreateStateSet()->setMode(
             GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);

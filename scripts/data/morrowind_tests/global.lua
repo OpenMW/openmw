@@ -16,7 +16,7 @@ require('global_weather')
 
 return {
     engineHandlers = {
-        onUpdate = testing.makeUpdateGlobal(),
+        onUpdate = testing.updateGlobal,
     },
     eventHandlers = testing.globalEventHandlers,
 }

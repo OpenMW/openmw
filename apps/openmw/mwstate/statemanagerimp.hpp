@@ -13,16 +13,21 @@ namespace MWState
 {
     class StateManager : public MWBase::StateManager
     {
+    private:
+        struct NewGameRequest
+        {
+            bool mBypass;
+        };
+
         bool mQuitRequest;
         bool mAskLoadRecent;
-        bool mNewGameRequest = false;
+        std::optional<NewGameRequest> mNewGameRequest;
         std::optional<std::pair<const Character*, std::filesystem::path>> mLoadRequest;
         State mState;
         CharacterManager mCharacterManager;
         double mTimePlayed;
         std::filesystem::path mLastSavegame;
 
-    private:
         void cleanup(bool force = false);
 
         void printSavegameFormatError(const std::string& exceptionText, const std::string& messageBoxText);
@@ -42,7 +47,8 @@ namespace MWState
 
         void askLoadRecent() override;
 
-        void requestNewGame() override { mNewGameRequest = true; }
+        void requestNewGame(bool bypass) override { mNewGameRequest = NewGameRequest{ .mBypass = bypass }; }
+
         void requestLoad(const Character* character, const std::filesystem::path& filepath) override
         {
             mLoadRequest.emplace(character, filepath);

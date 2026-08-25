@@ -13,6 +13,7 @@
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -144,14 +145,16 @@ namespace
         void setDefaults(osg::StateSet* stateset) override
         {
             // need to create a deep copy of StateAttributes we will modify
-            osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            SceneUtil::Material* mat
+                = static_cast<SceneUtil::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
             stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
-            osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, mAlpha));
+            SceneUtil::Material* mat
+                = static_cast<SceneUtil::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            mat->setDiffuse(osg::Vec4f(0.f, 0.f, 0.f, mAlpha));
         }
 
     protected:
@@ -311,8 +314,6 @@ namespace MWRender
             atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight02.get(), mAtmosphereNightNode);
         else
             atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight01.get(), mAtmosphereNightNode);
-        atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(
-            createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         ModVertexAlphaVisitor modStars(ModVertexAlphaVisitor::Stars);
         atmosphereNight->accept(modStars);
@@ -399,10 +400,10 @@ namespace MWRender
         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
         stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-        osg::ref_ptr<osg::Material> mat = new osg::Material;
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+        osg::ref_ptr<SceneUtil::Material> mat = new SceneUtil::Material;
+        mat->setAmbient(osg::Vec4f(1, 1, 1, 1));
+        mat->setDiffuse(osg::Vec4f(1, 1, 1, 1));
+        mat->setVertexColorMode(SceneUtil::VertexColorModes::AmbientAndDiffuse);
         stateset->setAttributeAndModes(mat);
 
         osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();

@@ -26,17 +26,19 @@ namespace
     {
         ESM::RefNum mRefNum;
         std::size_t mRefID;
+        std::size_t mCellIndex;
 
-        Ref(ESM::RefNum refNum, std::size_t refID)
+        Ref(ESM::RefNum refNum, std::size_t refID, std::size_t cellIndex)
             : mRefNum(refNum)
             , mRefID(refID)
+            , mCellIndex(cellIndex)
         {
         }
     };
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<ESM::RefId>& refIDs,
+    void readRefs(const ESM::Cell& cell, std::size_t cellIndex, std::vector<Ref>& refs, std::vector<ESM::RefId>& refIDs,
         std::set<ESM::RefId>& keyIDs, ESM::ReadersCache& readers)
     {
         // TODO: we have many similar copies of this code.
@@ -50,13 +52,13 @@ namespace
             while (cell.getNextRef(*reader, ref, deleted))
             {
                 if (deleted)
-                    refs.emplace_back(ref.mRefNum, deletedRefID);
+                    refs.emplace_back(ref.mRefNum, deletedRefID, cellIndex);
                 else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum)
                     == cell.mMovedRefs.end())
                 {
                     if (!ref.mKey.empty())
                         keyIDs.insert(std::move(ref.mKey));
-                    refs.emplace_back(ref.mRefNum, refIDs.size());
+                    refs.emplace_back(ref.mRefNum, refIDs.size(), cellIndex);
                     refIDs.push_back(std::move(ref.mRefID));
                 }
             }
@@ -64,12 +66,12 @@ namespace
         for (const auto& [value, deleted] : cell.mLeasedRefs)
         {
             if (deleted)
-                refs.emplace_back(value.mRefNum, deletedRefID);
+                refs.emplace_back(value.mRefNum, deletedRefID, cellIndex);
             else
             {
                 if (!value.mKey.empty())
                     keyIDs.insert(std::move(value.mKey));
-                refs.emplace_back(value.mRefNum, refIDs.size());
+                refs.emplace_back(value.mRefNum, refIDs.size(), cellIndex);
                 refIDs.push_back(value.mRefID);
             }
         }
@@ -560,27 +562,42 @@ namespace MWWorld
     {
         // TODO: We currently need to read entire files here again.
         // We should consider consolidating or deferring this reading.
-        if (!mRefCount.empty())
+        if (!mRefInfo.empty())
             return;
         std::vector<Ref> refs;
         std::set<ESM::RefId> keyIDs;
         std::vector<ESM::RefId> refIDs;
         const Store<ESM::Cell>& cells = get<ESM::Cell>();
-        for (auto it = cells.intBegin(); it != cells.intEnd(); ++it)
-            readRefs(*it, refs, refIDs, keyIDs, readers);
-        for (auto it = cells.extBegin(); it != cells.extEnd(); ++it)
-            readRefs(*it, refs, refIDs, keyIDs, readers);
+        const std::size_t cellCount = cells.getSize();
+        const std::size_t interiorCellCount = cells.getIntSize();
+        const std::size_t exteriorCellCount = cells.getExtSize();
+        for (std::size_t i = 0; i < cellCount; ++i)
+            readRefs(*cells.at(i), i, refs, refIDs, keyIDs, readers);
         const auto lessByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum < r.mRefNum; };
         std::stable_sort(refs.begin(), refs.end(), lessByRefNum);
         const auto equalByRefNum = [](const Ref& l, const Ref& r) { return l.mRefNum == r.mRefNum; };
-        const auto incrementRefCount = [&](const Ref& value) {
-            if (value.mRefID != deletedRefID)
-            {
-                ESM::RefId& refId = refIDs[value.mRefID];
-                ++mRefCount[std::move(refId)];
-            }
+        const auto forEachEffectiveRef = [&](auto&& fn) {
+            Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, [&](const Ref& value) {
+                if (value.mRefID != deletedRefID)
+                    fn(value, refIDs[value.mRefID]);
+            });
         };
-        Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
+
+        std::vector<std::vector<RefInfo*>> refsPerCell(cellCount);
+        forEachEffectiveRef([&](const Ref& value, const ESM::RefId& refId) {
+            RefInfo& info = mRefInfo[refId];
+            ++info.mCount;
+            refsPerCell[value.mCellIndex].push_back(&info);
+        });
+        // Exteriors first, matching world lookup order.
+        for (std::size_t i = 0; i < cellCount; ++i)
+        {
+            const std::size_t cellIndex = i < exteriorCellCount ? interiorCellCount + i : i - exteriorCellCount;
+            const ESM::Cell* const cell = cells.at(cellIndex);
+            for (RefInfo* info : refsPerCell[cellIndex])
+                if (info->mCells.empty() || info->mCells.back() != cell)
+                    info->mCells.push_back(cell);
+        }
         auto& store = getWritable<ESM::Miscellaneous>().mStatic;
         for (const auto& id : keyIDs)
         {
@@ -592,10 +609,18 @@ namespace MWWorld
 
     int ESMStore::getRefCount(const ESM::RefId& id) const
     {
-        auto it = mRefCount.find(id);
-        if (it == mRefCount.end())
+        auto it = mRefInfo.find(id);
+        if (it == mRefInfo.end())
             return 0;
-        return it->second;
+        return it->second.mCount;
+    }
+
+    std::span<const ESM::Cell* const> ESMStore::getRefCells(const ESM::RefId& id) const
+    {
+        const auto it = mRefInfo.find(id);
+        if (it == mRefInfo.end())
+            return {};
+        return it->second.mCells;
     }
 
     void ESMStore::validate()

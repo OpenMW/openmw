@@ -4,7 +4,6 @@
 #include <limits>
 
 #include <osg/BlendFunc>
-#include <osg/Material>
 #include <osg/Matrix>
 #include <osg/MatrixTransform>
 #include <osg/Switch>
@@ -428,40 +427,39 @@ namespace MWRender
     class TransparencyUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        TransparencyUpdater(const float alpha)
-            : mAlpha(alpha)
+        TransparencyUpdater(float actorFade, float alpha)
+            : mActorFade(actorFade)
+            , mAlpha(alpha)
         {
         }
 
-        void setAlpha(const float alpha) { mAlpha = alpha; }
+        void setAlpha(float actorFade, float alpha)
+        {
+            mActorFade = actorFade;
+            mAlpha = alpha;
+        }
 
     protected:
         void setDefaults(osg::StateSet* stateset) override
         {
             osg::BlendFunc* blendfunc(new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON);
 
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
 
-            // FIXME: overriding diffuse/ambient/emissive colors
-            osg::Material* material = new osg::Material;
-            material->setColorMode(osg::Material::OFF);
-            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, mAlpha));
-            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1, 1, 1, 1));
-            stateset->setAttributeAndModes(material, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-            stateset->addUniform(
-                new osg::Uniform("colorMode", 0), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("alpha", mAlpha));
+            stateset->addUniform(new osg::Uniform("actorFade", mActorFade));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
         {
-            osg::Material* material
-                = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);
+            stateset->getUniform("actorFade")->set(mActorFade);
+            stateset->getUniform("alpha")->set(mAlpha);
         }
 
     private:
+        float mActorFade;
         float mAlpha;
     };
 
@@ -556,6 +554,7 @@ namespace MWRender
         , mBodyPitchRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
+        , mActorFade(1.f)
         , mPlayScriptedOnly(false)
         , mRequiresBoneMap(false)
     {
@@ -1694,7 +1693,7 @@ namespace MWRender
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
         mExtraLightSource = SceneUtil::addLight(parent, esmLight, Mask_Lighting, exterior);
-        mExtraLightSource->setActorFade(mAlpha);
+        mExtraLightSource->setActorFade(mActorFade);
     }
 
     void Animation::addEffect(std::string_view model, std::string_view effectId, bool loop, std::string_view bonename,
@@ -1767,6 +1766,8 @@ namespace MWRender
         {
             // Morrowind has a white ambient light attached to the root VFX node of the scenegraph
             SceneUtil::configureSunAmbientOverride(osg::Vec4f(1, 1, 1, 1), node->getOrCreateStateSet());
+            node->getOrCreateStateSet()->addUniform(
+                new osg::Uniform("alpha", 1.f), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 
         mResourceSystem->getSceneManager()->setUpNormalsRTForStateSet(node->getOrCreateStateSet(), false);
@@ -1864,22 +1865,23 @@ namespace MWRender
             return found->second;
     }
 
-    void Animation::setAlpha(float alpha)
+    void Animation::setAlpha(float actorFade, float alpha)
     {
-        if (alpha == mAlpha || !mObjectRoot)
+        if ((alpha == mAlpha && actorFade == mActorFade) || !mObjectRoot)
             return;
         mAlpha = alpha;
+        mActorFade = actorFade;
 
         // TODO: we use it to fade actors away too, but it would be nice to have a dithering shader instead.
-        if (alpha != 1.f)
+        if (mAlpha != 1.f || mActorFade != 1.f)
         {
             if (mTransparencyUpdater == nullptr)
             {
-                mTransparencyUpdater = new TransparencyUpdater(alpha);
+                mTransparencyUpdater = new TransparencyUpdater(actorFade, alpha);
                 mObjectRoot->addCullCallback(mTransparencyUpdater);
             }
             else
-                mTransparencyUpdater->setAlpha(alpha);
+                mTransparencyUpdater->setAlpha(actorFade, alpha);
         }
         else
         {
@@ -1887,7 +1889,7 @@ namespace MWRender
             mTransparencyUpdater = nullptr;
         }
         if (mExtraLightSource)
-            mExtraLightSource->setActorFade(alpha);
+            mExtraLightSource->setActorFade(actorFade);
     }
 
     void Animation::setLightEffect(float effect)

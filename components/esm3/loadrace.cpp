@@ -152,11 +152,7 @@ namespace ESM
 
         mPowers.mList.clear();
 
-        for (auto& bonus : mData.mBonus)
-        {
-            bonus.mSkill = {};
-            bonus.mBonus = 0;
-        }
+        mData.mBonus.fill({});
 
         mData.mAttributeValues.clear();
 

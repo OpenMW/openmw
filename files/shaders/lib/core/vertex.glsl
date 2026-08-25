@@ -4,6 +4,7 @@
 
 uniform vec2 screenRes;
 uniform mat4 projectionMatrix;
+uniform Material material;
 
 vec4 modelToClip(vec4 pos)
 {
@@ -23,4 +24,9 @@ vec4 viewToClip(vec4 pos)
 vec2 clipToScreen(vec4 pos)
 {
     return ((pos.xy / pos.w) * 0.5 + 0.5) * screenRes;
+}
+
+Material getMaterial()
+{
+    return material;
 }

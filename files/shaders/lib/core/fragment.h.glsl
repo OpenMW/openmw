@@ -6,6 +6,8 @@
 @link "lib/core/lighting_fragment.glsl" if @lightingMethodClustered
 @link "lib/core/lighting_fragment_legacy.glsl" if !@lightingMethodClustered
 
+#include "lib/material/struct.glsl"
+
 vec4 sampleReflectionMap(vec2 uv);
 vec4 samplerLastShader(vec2 uv);
 
@@ -19,5 +21,7 @@ vec4 sampleOpaqueColorTex(vec2 uv);
 void doLighting(vec2 screenCoord, vec3 viewPos, vec3 viewNormal, float shininess, float shadowing, out vec3 diffuseLight, out vec3 ambientLight, out vec3 specularLight);
 
 vec3 doSpecularLighting(vec2 screenCoord, vec3 viewPos, vec3 viewNormal);
+
+Material getMaterial();
 
 #endif  // OPENMW_FRAGMENT_H_GLSL

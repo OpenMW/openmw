@@ -42,6 +42,41 @@ return {
     end,
     print = print,
 
+    iteratePlain = function()
+        local sum = 0
+        for k, v in pairs({a = 1, b = 2, c = 3}) do sum = sum + v end
+        for i, v in ipairs({10, 20, 30}) do sum = sum + v end
+        return sum
+    end,
+    honoursCustomPairs = function()
+        local t = setmetatable({}, { __pairs = function(v) return next, {z = 9}, nil end })
+        local sum = 0
+        for k, v in pairs(t) do sum = sum + v end
+        return sum
+    end,
+    iterateHiddenMetatable = function()
+        local t = setmetatable({a = 1, b = 2}, { __metatable = false })
+        local sum = 0
+        for k, v in pairs(t) do sum = sum + v end
+        for i, v in ipairs(setmetatable({7, 8}, { __metatable = false })) do sum = sum + v end
+        return sum
+    end,
+    iterateReadOnly = function(t)
+        local keys, sum = {}, 0
+        for k, v in pairs(t) do keys[#keys + 1] = k; sum = sum + v end
+        table.sort(keys)
+        return table.concat(keys, ','), sum, #t
+    end,
+    iterateReadOnlyArray = function(t)
+        local sum = 0
+        for i, v in ipairs(t) do sum = sum + v end
+        return sum, #t
+    end,
+    readOnlyIterationStateIsGuarded = function(t)
+        local _, state = pairs(t)
+        return rawequal(state, t)
+    end,
+
     -- should throw an error
     incorrectRequire = function() require('counter') end,
     modifySystemLib = function() math.sin = 5 end,
@@ -179,6 +214,32 @@ return {
         EXPECT_ERROR(LuaUtil::call(script["modifySystemLib2"]), "a nil value");
 
         EXPECT_EQ(LuaUtil::getMutableFromReadOnly(LuaUtil::makeReadOnly(script)), script);
+    }
+
+    TEST_F(LuaStateTest, Iteration)
+    {
+        const VFS::Path::Normalized path("bbb/tests.lua");
+        sol::table script = mLua.runInNewSandbox(path);
+
+        EXPECT_EQ(LuaUtil::call(script["iteratePlain"]).get<int>(), 66);
+        EXPECT_EQ(LuaUtil::call(script["honoursCustomPairs"]).get<int>(), 9);
+        EXPECT_EQ(LuaUtil::call(script["iterateHiddenMetatable"]).get<int>(), 18);
+
+        mLua.protectedCall([&](LuaUtil::LuaView& view) {
+            sol::table hash = LuaUtil::makeReadOnly(view.sol().create_table_with("a", 1, "b", 2, "c", 3));
+            sol::table array = LuaUtil::makeReadOnly(view.sol().create_table_with(1, 10, 2, 20, 3, 30));
+
+            auto readOnly = LuaUtil::call(script["iterateReadOnly"], hash);
+            EXPECT_EQ(readOnly.get<std::string>(0), "a,b,c");
+            EXPECT_EQ(readOnly.get<int>(1), 6);
+            EXPECT_EQ(readOnly.get<int>(2), 0);
+
+            auto readOnlyArray = LuaUtil::call(script["iterateReadOnlyArray"], array);
+            EXPECT_EQ(readOnlyArray.get<int>(0), 60);
+            EXPECT_EQ(readOnlyArray.get<int>(1), 3);
+
+            EXPECT_TRUE(LuaUtil::call(script["readOnlyIterationStateIsGuarded"], hash).get<bool>());
+        });
     }
 
     TEST_F(LuaStateTest, Print)

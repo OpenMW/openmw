@@ -456,6 +456,8 @@ namespace MWGui
         int i = 0;
         for (const ESM::RefId& spellpower : race->mPowers.mList)
         {
+            if (!store.get<ESM::Spell>().search(spellpower))
+                continue;
             Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>(
                 "MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);

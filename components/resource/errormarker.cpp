@@ -25,14 +25,14 @@ osg::Group {
                 GL_BLEND ON
               }
               AttributeList 1 {
-                osg::Material {
+                SceneUtil::Material {
                   UniqueID 5
                   Name "Error"
-                  Ambient TRUE Front 1 1 1 0.5 Back 1 1 1 0.5
-                  Diffuse TRUE Front 0.8 0.704 0.32 0.5 Back 0.8 0.704 0.32 0.5
-                  Specular TRUE Front 0.5 0.5 0.5 0.5 Back 0.5 0.5 0.5 0.5
-                  Emission TRUE Front 1 0.88 0.4 0.5 Back 1 0.88 0.4 0.5
-                  Shininess TRUE Front 28.8 Back 28.8
+                  Ambient 1 1 1 0.5
+                  Diffuse 0.8 0.704 0.32 0.5
+                  Specular 0.5 0.5 0.5 0.5
+                  Emission 1 0.88 0.4 0.5
+                  Shininess 28.8
                 }
                 Value OFF
               }
@@ -493,14 +493,14 @@ osg::Group {
               UniqueID 22
               DataVariance STATIC
               AttributeList 1 {
-                osg::Material {
+                SceneUtil::Material {
                   UniqueID 23
                   Name "ErrorLabel"
-                  Ambient TRUE Front 1 1 1 1 Back 1 1 1 1
-                  Diffuse TRUE Front 0.176208 0.176208 0.176208 1 Back 0.176208 0.176208 0.176208 1
-                  Specular TRUE Front 0.5 0.5 0.5 1 Back 0.5 0.5 0.5 1
-                  Emission TRUE Front 0.22026 0.22026 0.22026 1 Back 0.22026 0.22026 0.22026 1
-                  Shininess TRUE Front 28.8 Back 28.8
+                  Ambient 1 1 1 1
+                  Diffuse 0.176208 0.176208 0.176208 1
+                  Specular 0.5 0.5 0.5 1
+                  Emission 0.22026 0.22026 0.22026 1
+                  Shininess 28.8
                 }
                 Value OFF
               }
@@ -1242,14 +1242,14 @@ osg::Group {
               UniqueID 40
               DataVariance STATIC
               AttributeList 1 {
-                osg::Material {
+                SceneUtil::Material {
                   UniqueID 41
                   Name "Material"
-                  Ambient TRUE Front 1 1 1 1 Back 1 1 1 1
-                  Diffuse TRUE Front 0.8 0.8 0.8 1 Back 0.8 0.8 0.8 1
-                  Specular TRUE Front 0.5 0.5 0.5 1 Back 0.5 0.5 0.5 1
-                  Emission TRUE Front 0 0 0 1 Back 0 0 0 1
-                  Shininess TRUE Front 41.344 Back 41.344
+                  Ambient 1 1 1 1
+                  Diffuse 0.8 0.8 0.8 1
+                  Specular 0.5 0.5 0.5 1
+                  Emission 0 0 0 1
+                  Shininess 41.344
                 }
                 Value OFF
               }

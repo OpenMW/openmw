@@ -9,7 +9,6 @@
 
 #include <osg/Geometry>
 #include <osg/GraphicsContext>
-#include <osg/TexMat>
 #include <osg/Texture2D>
 #include <osg/Version>
 #include <osgViewer/GraphicsWindow>

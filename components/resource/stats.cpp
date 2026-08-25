@@ -329,7 +329,8 @@ namespace Resource
 
         mCamera->getOrCreateStateSet()->setGlobalDefaults();
         osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
-        SceneUtil::disableFFPLightModelForRenderer(renderer);
+        SceneUtil::disableFFPStateForRenderer(renderer);
+        mCamera->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
         mCamera->setRenderer(renderer);
         mCamera->setProjectionResizePolicy(osg::Camera::FIXED);
         mCamera->addChild(mSwitch);
@@ -454,7 +455,8 @@ namespace Resource
         }
 
         osg::ref_ptr<osgViewer::Renderer> renderer = new osgViewer::Renderer(mCamera);
-        SceneUtil::disableFFPLightModelForRenderer(renderer);
+        SceneUtil::disableFFPStateForRenderer(renderer);
+        mCamera->getOrCreateStateSet()->removeAttribute(osg::StateAttribute::MATERIAL);
         mCamera->setRenderer(renderer);
 
         mCamera->setGraphicsContext(context);

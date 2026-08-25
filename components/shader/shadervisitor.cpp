@@ -9,7 +9,6 @@
 #include <osg/ColorMaski>
 #include <osg/GLExtensions>
 #include <osg/Geometry>
-#include <osg/Material>
 #include <osg/Multisample>
 #include <osg/Texture>
 #include <osg/ValueObject>
@@ -23,6 +22,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/glextensions.hpp>
+#include <components/sceneutil/material.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
@@ -144,9 +144,7 @@ namespace Shader
     };
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
-        : mColorMode(0)
-        , mMaterialOverridden(false)
-        , mAlphaTestOverridden(false)
+        : mAlphaTestOverridden(false)
         , mAlphaBlendOverridden(false)
         , mAlphaFunc(GL_ALWAYS)
         , mAlphaRef(1.0)
@@ -442,41 +440,10 @@ namespace Shader
                     continue;
                 if (it->first.first == osg::StateAttribute::MATERIAL)
                 {
-                    // This should probably be moved out of ShaderRequirements and be applied directly now it's a
-                    // uniform instead of a define
-                    if (!mRequirements.back().mMaterialOverridden || it->second.second & osg::StateAttribute::PROTECTED)
-                    {
-                        if (it->second.second & osg::StateAttribute::OVERRIDE)
-                            mRequirements.back().mMaterialOverridden = true;
-
-                        const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-
-                        int colorMode;
-                        switch (mat->getColorMode())
-                        {
-                            case osg::Material::OFF:
-                                colorMode = 0;
-                                break;
-                            case osg::Material::EMISSION:
-                                colorMode = 1;
-                                break;
-                            default:
-                            case osg::Material::AMBIENT_AND_DIFFUSE:
-                                colorMode = 2;
-                                break;
-                            case osg::Material::AMBIENT:
-                                colorMode = 3;
-                                break;
-                            case osg::Material::DIFFUSE:
-                                colorMode = 4;
-                                break;
-                            case osg::Material::SPECULAR:
-                                colorMode = 5;
-                                break;
-                        }
-
-                        mRequirements.back().mColorMode = colorMode;
-                    }
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+                    static_cast<const SceneUtil::Material*>(it->second.first.get())
+                        ->setStateSet(writableStateSet, it->second.second);
                 }
                 else if (it->first.first == osg::StateAttribute::ALPHAFUNC)
                 {
@@ -583,12 +550,7 @@ namespace Shader
         defineMap["diffuseParallax"] = reqs.mDiffuseHeight ? "1" : "0";
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
         defineMap["reconstructNormalZ"] = reqs.mReconstructNormalZ ? "1" : "0";
-
-        writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
-        addedState->addUniform("colorMode");
-
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
-
         defineMap["additiveBlending"] = reqs.mAdditiveBlending ? "1" : "0";
 
         osg::ref_ptr<osg::StateSet> removedState;
@@ -612,7 +574,7 @@ namespace Shader
             }
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc),
-                osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+                osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
             addedState->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc));
 
             // Blending won't work with A2C as we use the alpha channel for coverage. gl_SampleCoverage from
@@ -696,15 +658,13 @@ namespace Shader
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
             shaderPrefix = mDefaultShaderPrefix;
 
-        auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
+        ShaderManager::SamplerBindingMap samplers;
+        for (const auto& [unit, name] : reqs.mTextures)
+            samplers[name] = unit;
+
+        auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate, samplers);
         writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
         addedState->setAttributeAndModes(std::move(program));
-
-        for (const auto& [unit, name] : reqs.mTextures)
-        {
-            writableStateSet->addUniform(new osg::Uniform(name.c_str(), unit), osg::StateAttribute::ON);
-            addedState->addUniform(name);
-        }
 
         if (!addedState->empty())
         {

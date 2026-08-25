@@ -423,7 +423,7 @@ namespace MWGui
             addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
         // starting spells
-        std::vector<ESM::RefId> spells;
+        std::vector<const ESM::Spell*> spells;
 
         const ESM::Race* race = nullptr;
         if (!mRaceId.empty())
@@ -433,19 +433,22 @@ namespace MWGui
         for (const auto& [key, value] : mAttributeWidgets)
             attributes[key] = value->getAttributeValue();
 
+        const auto& spellStore = MWBase::Environment::get().getESMStore()->get<ESM::Spell>();
         std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(mSkillValues, attributes, race);
         for (ESM::RefId& spellId : selectedSpells)
         {
-            if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
-                spells.push_back(spellId);
+            const ESM::Spell* spell = spellStore.search(spellId);
+            if (spell && std::find(spells.begin(), spells.end(), spell) == spells.end())
+                spells.push_back(spell);
         }
 
         if (race)
         {
             for (const ESM::RefId& spellId : race->mPowers.mList)
             {
-                if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
-                    spells.push_back(spellId);
+                const ESM::Spell* spell = spellStore.search(spellId);
+                if (spell && std::find(spells.begin(), spells.end(), spell) == spells.end())
+                    spells.push_back(spell);
             }
         }
 
@@ -455,8 +458,9 @@ namespace MWGui
                 = MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>().find(mBirthSignId);
             for (const auto& spellId : sign->mPowers.mList)
             {
-                if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
-                    spells.push_back(spellId);
+                const ESM::Spell* spell = spellStore.search(spellId);
+                if (spell && std::find(spells.begin(), spells.end(), spell) == spells.end())
+                    spells.push_back(spell);
             }
         }
 
@@ -464,9 +468,8 @@ namespace MWGui
             addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"),
             coord1, coord2);
-        for (auto& spellId : spells)
+        for (const ESM::Spell* spell : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Ability)
                 addItem(spell, coord1, coord2);
         }
@@ -474,9 +477,8 @@ namespace MWGui
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1,
             coord2);
-        for (auto& spellId : spells)
+        for (const ESM::Spell* spell : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Power)
                 addItem(spell, coord1, coord2);
         }
@@ -484,9 +486,8 @@ namespace MWGui
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1,
             coord2);
-        for (auto& spellId : spells)
+        for (const ESM::Spell* spell : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Spell)
                 addItem(spell, coord1, coord2);
         }

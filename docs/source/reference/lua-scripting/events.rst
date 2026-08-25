@@ -175,7 +175,7 @@ If sent to a player, shows a message as if a call to ui.showMessage was made.
 
 .. code-block:: Lua
 
-    player:sendEvent('ShowMessage', {message = 'Lorem ipsum'})
+    player:sendEvent('ShowMessage', {message = 'Lorem ipsum', showInDialogue = false})
 
 **UiModeChanged**
 
