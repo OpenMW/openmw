@@ -95,7 +95,7 @@ namespace MWWorld
         /// @note name must be lower case
         void getExteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out);
 
-        std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id);
+        std::vector<MWWorld::Ptr> getAll(ESM::RefId id, ESM::RefId worldSpace = {}, bool searchUnloaded = false);
 
         size_t countSavedGameRecords() const;
 
@@ -120,6 +120,7 @@ namespace MWWorld
         CellStore& getOrInsertCellStore(const ESM::Cell& cell);
 
         CellStore& insertCellStore(const ESM::Cell& cell);
+        CellStore& insertCellStore(const ESM4::Cell& cell);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 

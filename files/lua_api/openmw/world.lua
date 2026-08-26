@@ -156,6 +156,18 @@
 -- @usage local obj = world.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
 
 ---
+-- Returns all objects with the given record ID.
+-- Note: Searching all world spaces or a large world space can impact performance.
+-- @function [parent=#world] getObjectsByRecordId
+-- @param #string recordId Record ID
+-- @param #string worldSpaceId (Optional) ID of the world space to search. (Note that an interior cell's world space ID is its ID and that the ESM3 exterior world space's ID is `sys::default`.)
+-- @param #bool loadedOnly (Optional) When true, only cells that have previously been loaded are searched.
+-- @return list<openmw.core#GameObject>
+-- @usage for _, object in pairs(world.getObjectsByRecordId('TempleMarker', world.players[1].cell.worldSpaceId)) do
+--   print(object.cell.name)
+-- end
+
+---
 -- Create a new instance of the given record.
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
 -- Note that dynamically created creatures, NPCs, and container inventories will not respawn.

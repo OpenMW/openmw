@@ -120,6 +120,13 @@ namespace MWWorld
                 MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
             return cellStore;
         }
+
+        ESM::RefId getWorldSpace(const ESM4::Cell& cell)
+        {
+            if (cell.mCellFlags & ESM4::CELL_Interior)
+                return cell.mId;
+            return cell.mParent;
+        }
     }
 }
 
@@ -139,6 +146,16 @@ MWWorld::CellStore& MWWorld::WorldModel::insertCellStore(const ESM::Cell& cell)
     else
         mExteriors.emplace(
             ESM::ExteriorCellLocation(cell.getGridX(), cell.getGridY(), ESM::Cell::sDefaultWorldspaceId), &cellStore);
+    return cellStore;
+}
+
+MWWorld::CellStore& MWWorld::WorldModel::insertCellStore(const ESM4::Cell& cell)
+{
+    CellStore& cellStore = emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells);
+    if (cellStore.isExterior())
+        mExteriors.emplace(cellStore.getCell()->getExteriorCellLocation(), &cellStore);
+    else
+        mInteriors.emplace(cellStore.getCell()->getNameId(), &cellStore);
     return cellStore;
 }
 
@@ -418,17 +435,18 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
     }
 }
 
-std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
+std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, ESM::RefId worldSpace, bool searchUnloaded)
 {
     std::vector<Ptr> result;
-    for (auto& [cellId, cellStore] : mCells)
-    {
+    const auto addFromStore = [&](MWWorld::CellStore& cellStore) {
+        if (!worldSpace.empty() && cellStore.getCell()->getWorldSpace() != worldSpace)
+            return;
         if (cellStore.getState() == CellStore::State_Unloaded)
             cellStore.preload();
         if (cellStore.getState() == CellStore::State_Preloaded)
         {
             if (!cellStore.hasId(id))
-                continue;
+                return;
             cellStore.load();
         }
         cellStore.forEach([&](const Ptr& ptr) {
@@ -436,6 +454,46 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
                 result.push_back(ptr);
             return true;
         });
+    };
+    for (auto& [cellId, cellStore] : mCells)
+        addFromStore(cellStore);
+
+    if (!searchUnloaded)
+        return result;
+
+    const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
+    if (worldSpace.empty() || worldSpace == ESM::Cell::sDefaultWorldspaceId)
+    {
+        for (auto iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+        {
+            if (mCells.contains(iter->mId))
+                continue;
+            addFromStore(insertCellStore(*iter));
+        }
+    }
+    if (worldSpace.empty())
+    {
+        for (auto iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+        {
+            if (mCells.contains(iter->mId))
+                continue;
+            addFromStore(insertCellStore(*iter));
+        }
+    }
+    else if (worldSpace.is<ESM::StringRefId>() && !mCells.contains(worldSpace))
+    {
+        if (const ESM::Cell* cell = cells.search(worldSpace); cell != nullptr)
+            addFromStore(insertCellStore(*cell));
+    }
+    if (worldSpace.empty() || worldSpace.is<ESM::FormId>())
+    {
+        for (const ESM4::Cell& cell : mStore.get<ESM4::Cell>())
+        {
+            if (mCells.contains(cell.mId))
+                continue;
+            if (worldSpace.empty() || getWorldSpace(cell) == worldSpace)
+                addFromStore(insertCellStore(cell));
+        }
     }
     return result;
 }
