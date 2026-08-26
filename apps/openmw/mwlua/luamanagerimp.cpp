@@ -526,7 +526,7 @@ namespace MWLua
         const MWWorld::Ptr& target, const std::vector<int>& effects, bool ignoreReflect, bool ignoreSpellAbsorption,
         bool stackable, bool isReflect)
     {
-        if (!target.isEmpty())
+        if (!target.isEmpty() && !effects.empty())
         {
             mLua.protectedCall([&](LuaUtil::LuaView& view) {
                 sol::table luaEffects = view.newTable();
