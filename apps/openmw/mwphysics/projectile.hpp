@@ -52,6 +52,7 @@ namespace MWPhysics
         bool isValidTarget(const btCollisionObject* target) const;
 
         btVector3 getHitPosition() const { return mHitPosition; }
+        btVector3 getHitNormal() const { return mHitNormal; }
 
     private:
         std::unique_ptr<btCollisionShape> mShape;

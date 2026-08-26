@@ -142,12 +142,14 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/globalcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
+    scripts/omw/mechanics/projectiles.lua
     scripts/omw/settings/menu.lua
     scripts/omw/music/actor.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua
     scripts/omw/settings/renderers.lua
+    scripts/omw/spellcasting/interface_global.lua
     scripts/omw/spellcasting/interface_local.lua
     scripts/omw/mwui/constants.lua
     scripts/omw/mwui/borders.lua

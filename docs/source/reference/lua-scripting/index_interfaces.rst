@@ -17,6 +17,7 @@ Interfaces
     GamepadControls <interface_gamepadcontrols>
     ItemUsage <interface_item_usage>
     MWUI <interface_mwui>
+    Projectiles <interface_projectiles>
     Settings <interface_settings>
     SkillProgression <interface_skill_progression>
     SpellCasting <interface_spellcasting>

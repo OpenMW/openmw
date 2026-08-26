@@ -41,6 +41,7 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -572,7 +573,7 @@ namespace MWWorld
                 projectileState.mAttackStrength, projectileState.mAttackWindUp);
             projectileState.mToDelete = true;
         }
-        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
+
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)
@@ -596,22 +597,15 @@ namespace MWWorld
 
             assert(target != caster);
 
-            MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
-            cast.mId = magicBoltState.mSpellId;
-            cast.mSourceName = magicBoltState.mSourceName;
-            cast.mItem = magicBoltState.mItem;
-            // Grab original effect list so the indices are correct
-            const ESM::EffectList* effects;
-            if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(magicBoltState.mSpellId))
-                effects = &spell->mEffects;
-            else
+            auto hitPos = !active ? Misc::Convert::makeOsgVec3f(projectile->getHitPosition()) : pos;
+            auto hitNormal = Misc::Convert::makeOsgVec3f(projectile->getHitNormal());
+            if (active)
             {
-                MWWorld::ManualRef ref(esmStore, magicBoltState.mSpellId);
-                const MWWorld::Ptr& ptr = ref.getPtr();
-                effects = &esmStore.get<ESM::Enchantment>().find(ptr.getClass().getEnchantment(ptr))->mEffects;
+                hitNormal = projectile->velocity();
+                hitNormal.normalize();
             }
-            cast.inflict(target, *effects, ESM::RT_Target);
+            MWBase::Environment::get().getLuaManager()->magicProjectileHit(
+                magicBoltState.mSpellId, caster, magicBoltState.mItem, target, hitPos, hitNormal);
 
             magicBoltState.mToDelete = true;
         }

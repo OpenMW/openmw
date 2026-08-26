@@ -215,17 +215,23 @@ namespace MWLua
 
         api["isEnabled"] = []() { return MWBase::Environment::get().getSoundManager()->isEnabled(); };
 
-        api["playSound3d"]
-            = [](std::string_view soundId, const sol::object& object, const sol::optional<sol::table>& options) {
-                  auto args = getPlaySoundArgs(options);
-                  auto playMode = getPlayMode(args, true);
+        api["playSound3d"] = [](std::string_view soundId, const sol::object& objectOrPosition,
+                                 const sol::optional<sol::table>& options) {
+            auto args = getPlaySoundArgs(options);
+            auto playMode = getPlayMode(args, true);
 
-                  ESM::RefId sound = ESM::RefId::deserializeText(soundId);
-                  MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(object));
+            ESM::RefId sound = ESM::RefId::deserializeText(soundId);
 
-                  MWBase::Environment::get().getSoundManager()->playSound3D(
-                      ptr, sound, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
-              };
+            if (objectOrPosition.is<Object>())
+            {
+                MWWorld::Ptr ptr = getMutablePtrOrThrow(ObjectVariant(objectOrPosition));
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    ptr, sound, args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+            }
+            else if (objectOrPosition.is<osg::Vec3f>())
+                MWBase::Environment::get().getSoundManager()->playSound3D(objectOrPosition.as<osg::Vec3f>(), sound,
+                    args.mVolume, args.mPitch, MWSound::Type::Sfx, playMode, args.mTimeOffset);
+        };
         api["playSoundFile3d"]
             = [](std::string_view fileName, const sol::object& object, const sol::optional<sol::table>& options) {
                   auto args = getPlaySoundArgs(options);

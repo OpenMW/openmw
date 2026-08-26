@@ -20,7 +20,7 @@ namespace MWLua
         {
             registerEngineHandlers({ &mObjectActiveHandlers, &mActorActiveHandlers, &mItemActiveHandlers,
                 &mNewGameHandlers, &mPlayerAddedHandlers, &mOnActivateHandlers, &mOnUseItemHandlers,
-                &mOnNewExteriorHandlers, &mOnDroppedHandlers, &mOnPlacedHandlers });
+                &mOnNewExteriorHandlers, &mOnDroppedHandlers, &mOnPlacedHandlers, &mOnProjectileHit });
         }
 
         void newGameStarted() { callEngineHandlers(mNewGameHandlers); }
@@ -47,6 +47,10 @@ namespace MWLua
             callEngineHandlers(mOnUseItemHandlers, obj, actor, force);
         }
         void onNewExterior(const GCell& cell) { callEngineHandlers(mOnNewExteriorHandlers, cell); }
+        void onProjectileHit(const sol::table& projectile, const sol::table& hitResult)
+        {
+            callEngineHandlers(mOnProjectileHit, projectile, hitResult);
+        }
 
     private:
         EngineHandlerList mObjectActiveHandlers{ "onObjectActive" };
@@ -59,6 +63,7 @@ namespace MWLua
         EngineHandlerList mOnPlacedHandlers{ "onPlaced" };
         EngineHandlerList mOnUseItemHandlers{ "_onUseItem" };
         EngineHandlerList mOnNewExteriorHandlers{ "onNewExterior" };
+        EngineHandlerList mOnProjectileHit{ "_onProjectileHit" };
     };
 
 }

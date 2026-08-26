@@ -6,6 +6,7 @@ local common = require('scripts.omw.spellcasting.common')
 local Actor = types.Actor
 
 local interface = auxUtil.shallowCopy(I.SpellCasting)
+interface.inflict = common.inflict
 
 I.SpellCasting.addApplyMagicEffectsHandler(function(options)
     if Actor.isDeathFinished(self) then return end

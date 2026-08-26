@@ -15,5 +15,6 @@ SkillDecreasedTo:
   pattern: "{gmst:sNotifyMessage44}"
   variables:
     - ["skill", "level"]
+MagicCannotRecast: "sMagicCannotRecast"
 MagicLockSuccess: "sMagicLockSuccess"
 MagicOpenSuccess: "sMagicOpenSuccess"

@@ -27,6 +27,8 @@ CREATURE, NPC, PLAYER: scripts/omw/mechanics/actorcontroller.lua
 NPC,CREATURE,PLAYER: scripts/omw/combat/interface_local.lua
 GLOBAL: scripts/omw/combat/interface_global.lua
 CREATURE, NPC, PLAYER: scripts/omw/spellcasting/interface_local.lua
+GLOBAL: scripts/omw/spellcasting/interface_global.lua
+GLOBAL: scripts/omw/mechanics/projectiles.lua
 
 # User interface
 PLAYER: scripts/omw/ui.lua
