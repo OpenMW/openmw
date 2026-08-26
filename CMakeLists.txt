@@ -466,6 +466,9 @@ if(OPENMW_USE_SYSTEM_OSG)
     find_package(OpenSceneGraph 3.6.5 REQUIRED ${USED_OSG_COMPONENTS})  # Bump to 3.6.6 when released
 
     if(OSG_STATIC OR OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+        if(WIN32 OR APPLE)
+            set(OSGPlugins_DONT_FIND_DEPENDENCIES 1)
+        endif()
         find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
 
         if(OSG_STATIC)
@@ -497,7 +500,12 @@ if(OPENMW_USE_SYSTEM_OSG)
             endif()
         endforeach()
         
-        install(IMPORTED_RUNTIME_ARTIFACTS ${USED_OSG_PLUGINS} DESTINATION "${CMAKE_INSTALL_LIBDIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}" RUNTIME_DEPENDENCY_SET openmw-dependencies)
+        if(WIN32)
+            set(osg_plugin_destination "${CMAKE_INSTALL_BINDIR}")
+        else()
+            set(osg_plugin_destination "${CMAKE_INSTALL_LIBDIR}")
+        endif()
+        install(IMPORTED_RUNTIME_ARTIFACTS ${USED_OSG_PLUGINS} DESTINATION "${osg_plugin_destination}/osgPlugins-${OPENSCENEGRAPH_VERSION}" RUNTIME_DEPENDENCY_SET openmw-dependencies)
     endif()
 endif()
 
@@ -843,10 +851,38 @@ endif()
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CUSTOM_CPACK_OS_NAME}-${CUSTOM_CPACK_ARCHITECTURE}")
 
 if (NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
-    install(RUNTIME_DEPENDENCY_SET openmw-dependencies
-        POST_EXCLUDE_REGEXES
+    if (UNIX)
+        set(pre_exclude_regexes)
+        set(post_exclude_regexes
             ^/lib64/
             ^/usr/lib64/
+        )
+        set(directories)
+    elseif (WIN32)
+        # CMake thinks some dummy DLL names are real so explodes unless we manually pre-exclude every possible system DLL
+        # https://discourse.cmake.org/t/get-runtime-dependencies-has-difficulties-with-windows-api-sets/1768/23
+        set(pre_exclude_regexes
+            ^msvcp.*\\.dll$
+            ^vcruntime.*\\.dll$
+            ^api-ms-win-.*
+            ^ext-ms-.*
+            ^hvsifiletrust\\.dll$
+            ^pdmutilities\\.dll$
+        )
+        set(systemroot "$ENV{SystemRoot}")
+        # documentation says to use lower-case regex, but drive letter is upper-case and I can't be bothered preserving the case of just one character right now
+        #string(TOLOWER "${systemroot}" systemroot)
+        cmake_path(NORMAL_PATH systemroot)
+        escape_regex_control_characters(systemroot "${systemroot}")
+        set(post_exclude_regexes ^${systemroot}/)
+        # CMP0207 will avoid the need for this
+        string(REPLACE "/" "(/|\\\\)" post_exclude_regexes "${post_exclude_regexes}")
+        set(directories "${RUNTIME_OUTPUT_DIRECTORY}")
+    endif ()
+    install(RUNTIME_DEPENDENCY_SET openmw-dependencies
+        PRE_EXCLUDE_REGEXES ${pre_exclude_regexes}
+        POST_EXCLUDE_REGEXES ${post_exclude_regexes}
+        DIRECTORIES ${directories}
     )
 endif ()
 
