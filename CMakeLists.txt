@@ -19,11 +19,15 @@ endif()
 
 if (APPLE OR WIN32)
     set(DEPLOY_QT_TRANSLATIONS_DEFAULT ON)
+    set(deploy_runtime_dependencies_default ON)
 else ()
     set(DEPLOY_QT_TRANSLATIONS_DEFAULT OFF)
+    set(deploy_runtime_dependencies_default OFF)
 endif ()
 
 option(DEPLOY_QT_TRANSLATIONS "Deploy standard Qt translations to resources folder. Needed when OpenMW applications are deployed with Qt libraries" ${DEPLOY_QT_TRANSLATIONS_DEFAULT})
+# this has overlap with OPENMW_LOCAL_INSTALL, so needs some tidying
+option(OPENMW_DEPLOY_RUNTIME_DEPENDENCIES "Deploy runtime dependency libraries. Needed when not relying on a system-wide insallation of these libraries existing" ${deploy_runtime_dependencies_default})
 
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
@@ -117,6 +121,7 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Macros
 include(OpenMWMacros)
 include(WholeArchive)
+include(escape_regex_control_characters)
 
 # doxygen main page
 
@@ -460,8 +465,39 @@ endif()
 if(OPENMW_USE_SYSTEM_OSG)
     find_package(OpenSceneGraph 3.6.5 REQUIRED ${USED_OSG_COMPONENTS})  # Bump to 3.6.6 when released
 
-    if(OSG_STATIC)
+    if(OSG_STATIC OR OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
         find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+
+        if(OSG_STATIC)
+            set(module_or_static STATIC)
+        else()
+            set(module_or_static MODULE)
+        endif()
+
+        foreach(osgplugin ${USED_OSG_PLUGINS})
+            if(NOT TARGET ${osgplugin})
+                add_library(${osgplugin} ${module_or_static} IMPORTED)
+                string(TOUPPER ${osgplugin} pluginnameupper)
+                if (${pluginnameupper}_LIBRARY_RELEASE)
+                    set_property(TARGET ${osgplugin} APPEND PROPERTY
+                        IMPORTED_CONFIGURATIONS RELEASE
+                    )
+                    set_target_properties(${osgplugin} PROPERTIES
+                        IMPORTED_LOCATION_RELEASE "${${pluginnameupper}_LIBRARY_RELEASE}"
+                    )
+                endif()
+                if (${pluginnameupper}_LIBRARY_DEBUG)
+                    set_property(TARGET ${osgplugin} APPEND PROPERTY
+                        IMPORTED_CONFIGURATIONS DEBUG
+                    )
+                    set_target_properties(${osgplugin} PROPERTIES
+                        IMPORTED_LOCATION_DEBUG "${${pluginnameupper}_LIBRARY_DEBUG}"
+                    )
+                endif()
+            endif()
+        endforeach()
+        
+        install(IMPORTED_RUNTIME_ARTIFACTS ${USED_OSG_PLUGINS} DESTINATION "${CMAKE_INSTALL_LIBDIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}" RUNTIME_DEPENDENCY_SET openmw-dependencies)
     endif()
 endif()
 
@@ -623,10 +659,12 @@ if (APPLE)
 endif()
 
 if (UNIX AND NOT APPLE)
-    if (OPENMW_LOCAL_INSTALL AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+    if (OPENMW_DEPLOY_RUNTIME_DEPENDENCIES AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         # file(RELATIVE_PATH ...) can't handle pure lexical relativity, but cmake_path only came with 3.20.0
         cmake_path(RELATIVE_PATH CMAKE_INSTALL_LIBDIR BASE_DIRECTORY "${CMAKE_INSTALL_BINDIR}" OUTPUT_VARIABLE origin_relative_libdir)
         set(CMAKE_INSTALL_RPATH "$ORIGIN/${origin_relative_libdir}")
+    else()
+        message(WARNING "CMake is too old to work out how to adjust RPATH, please do so manually or update to something newer than 2017.")
     endif()
 endif()
 
@@ -804,6 +842,14 @@ endif()
 
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CUSTOM_CPACK_OS_NAME}-${CUSTOM_CPACK_ARCHITECTURE}")
 
+if (NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+    install(RUNTIME_DEPENDENCY_SET openmw-dependencies
+        POST_EXCLUDE_REGEXES
+            ^/lib64/
+            ^/usr/lib64/
+    )
+endif ()
+
 # Apple bundling
 if (APPLE)
     if(CMAKE_VERSION VERSION_LESS 3.19)
@@ -936,25 +982,13 @@ if (APPLE)
     include(CPack)
 elseif(NOT APPLE)
     if(WIN32)
-        INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." FILES_MATCHING PATTERN "*.dll"
-                                                                                        PATTERN ".cmake" EXCLUDE
-                                                                                        PATTERN ".qt" EXCLUDE
-                                                                                        PATTERN "_CPack_Packages" EXCLUDE
-                                                                                        PATTERN "_deps" EXCLUDE
-                                                                                        PATTERN "apps" EXCLUDE
-                                                                                        PATTERN "bin" EXCLUDE
-                                                                                        PATTERN "CMakeFiles" EXCLUDE
-                                                                                        PATTERN "components" EXCLUDE
-                                                                                        PATTERN "deps" EXCLUDE
-                                                                                        PATTERN "docs" EXCLUDE
-                                                                                        PATTERN "extern" EXCLUDE
-                                                                                        PATTERN "files" EXCLUDE
-                                                                                        PATTERN "lib" EXCLUDE
-                                                                                        PATTERN "SymStore" EXCLUDE
-                                                                                        PATTERN "symstore-venv" EXCLUDE
-                                                                                        PATTERN "Testing" EXCLUDE
-                                                                                        PATTERN "tests_output" EXCLUDE
-                                                                                        PATTERN "try-compile" EXCLUDE)
+        # this just deals with Qt plugins now as if we get windeployqt.exe to do it, it adds things we don't need like ANGLE
+        INSTALL(DIRECTORY
+                "${RUNTIME_OUTPUT_DIRECTORY}/iconengines"
+                "${RUNTIME_OUTPUT_DIRECTORY}/imageformats"
+                "${RUNTIME_OUTPUT_DIRECTORY}/platforms"
+                "${RUNTIME_OUTPUT_DIRECTORY}/styles"
+            DESTINATION "." FILES_MATCHING PATTERN "*.dll")
         INSTALL(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/" DESTINATION "." CONFIGURATIONS Debug;RelWithDebInfo FILES_MATCHING PATTERN "*.pdb"
                                                                                                                             PATTERN ".cmake" EXCLUDE
                                                                                                                             PATTERN ".qt" EXCLUDE

@@ -272,5 +272,5 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (NOT APPLE AND BUILD_OPENMW)
-    INSTALL(TARGETS openmw)
+    install(TARGETS openmw RUNTIME_DEPENDENCY_SET openmw-dependencies)
 endif()

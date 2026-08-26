@@ -136,6 +136,31 @@ macro (openmw_add_executable target)
     endif (MSVC)
 endmacro (openmw_add_executable)
 
+macro (openmw_add_qt_executable target)
+    set(OMW_ADD_EXE_OPTIONS WIN32 MACOSX_BUNDLE EXCLUDE_FROM_ALL)
+    set(OMW_ADD_EXE_VALUES)
+    set(OMW_ADD_EXE_MULTI_VALUES)
+    cmake_parse_arguments(OMW_ADD_EXE "${OMW_ADD_EXE_OPTIONS}" "${OMW_ADD_EXE_VALUES}" "${OMW_ADD_EXE_MULTI_VALUES}" ${ARGN})
+
+    if (OMW_ADD_EXE_WIN32)
+        set(OMW_ADD_EXE_WIN32_VALUE WIN32)
+    endif (OMW_ADD_EXE_WIN32)
+
+    if (OMW_ADD_EXE_MACOSX_BUNDLE)
+        set(OMW_ADD_EXE_MACOSX_BUNDLE_VALUE MACOSX_BUNDLE)
+    endif (OMW_ADD_EXE_MACOSX_BUNDLE)
+
+    if (OMW_ADD_EXE_EXCLUDE_FROM_ALL)
+        set(OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE EXCLUDE_FROM_ALL)
+    endif (OMW_ADD_EXE_EXCLUDE_FROM_ALL)
+
+    qt_add_executable(${target} ${OMW_ADD_EXE_WIN32_VALUE} ${OMW_ADD_EXE_MACOSX_BUNDLE_VALUE} ${OMW_ADD_EXE_EXCLUDE_FROM_ALL_VALUE} ${OMW_ADD_EXE_UNPARSED_ARGUMENTS})
+
+    if (MSVC)
+        set_target_properties(${target} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${target}>")
+    endif (MSVC)
+endmacro (openmw_add_qt_executable)
+
 macro (get_generator_is_multi_config VALUE)
     # TODO: make git version getter less dumb so everywhere that calls this macro can just call the function this calls instead
     if (DEFINED generator_is_multi_config_var)

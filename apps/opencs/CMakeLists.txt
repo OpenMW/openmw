@@ -172,7 +172,7 @@ add_library(openmw-cs-lib STATIC
 )
 
 if(BUILD_OPENCS)
-    openmw_add_executable(openmw-cs
+    openmw_add_qt_executable(openmw-cs
         MACOSX_BUNDLE
         ${OPENCS_MAC_ICON}
         ${OPENCS_CFG}
@@ -182,7 +182,7 @@ if(BUILD_OPENCS)
         main.cpp
     )
 
-    target_link_libraries(openmw-cs openmw-cs-lib)
+    target_link_libraries(openmw-cs PRIVATE openmw-cs-lib)
 
     set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
     set_property(TARGET openmw-cs PROPERTY AUTOUIC_SEARCH_PATHS ui)
@@ -190,7 +190,7 @@ if(BUILD_OPENCS)
 
     if (BUILD_WITH_CODE_COVERAGE)
         target_compile_options(openmw-cs PRIVATE --coverage)
-        target_link_libraries(openmw-cs gcov)
+        target_link_libraries(openmw-cs PRIVATE gcov)
     endif()
 endif()
 
@@ -250,8 +250,29 @@ if (WIN32)
 endif()
 
 if (NOT APPLE AND BUILD_OPENCS)
-    INSTALL(TARGETS openmw-cs)
+    install(TARGETS openmw-cs RUNTIME_DEPENDENCY_SET openmw-dependencies)
     INSTALL(FILES "$<TARGET_FILE_DIR:openmw-cs>/defaults-cs.bin" DESTINATION "${CMAKE_INSTALL_SYSCONFDIR}")
+
+    if (LINUX AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
+        if (Qt6Core_VERSION VERSION_LESS 6.10)
+            message(FATAL_ERROR "Deployment of Qt on Linux requires at least 6.10 (for the INCLUDE_PLUGINS argument)")
+        endif ()
+        # don't bother with this on Windows yet as windeployqt includes a bunch of DLLs we don't use
+        cmake_path(NORMAL_PATH QT_DIR OUTPUT_VARIABLE QT_BASE_DIR)
+        string(REGEX REPLACE "(.+)/lib/cmake/Qt[0-9]+" "\\1" QT_BASE_DIR "${QT_BASE_DIR}")
+        escape_regex_control_characters(QT_BASE_REGEX "${QT_BASE_DIR}")
+        qt_generate_deploy_app_script(TARGET openmw-cs
+            OUTPUT_SCRIPT deploy_script
+            NO_TRANSLATIONS
+            NO_COMPILER_RUNTIME
+            INCLUDE_PLUGINS wayland
+            POST_INCLUDE_REGEXES
+                "${QT_BASE_REGEX}"
+            POST_EXCLUDE_REGEXES
+                ".*"
+        )
+        install(SCRIPT ${deploy_script})
+    endif()
 endif()
 
 if (MSVC)
@@ -273,7 +294,7 @@ endif(USE_QT)
 
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-cs-lib PRIVATE --coverage)
-    target_link_libraries(openmw-cs-lib gcov)
+    target_link_libraries(openmw-cs-lib PRIVATE gcov)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

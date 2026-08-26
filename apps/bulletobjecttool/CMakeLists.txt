@@ -20,7 +20,7 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (NOT APPLE)
-    install(TARGETS openmw-bulletobjecttool)
+    install(TARGETS openmw-bulletobjecttool RUNTIME_DEPENDENCY_SET openmw-dependencies)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

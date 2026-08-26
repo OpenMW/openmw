@@ -23,7 +23,7 @@ if (BUILD_WITH_CODE_COVERAGE)
 endif()
 
 if (NOT APPLE)
-    install(TARGETS bsatool)
+    install(TARGETS bsatool RUNTIME_DEPENDENCY_SET openmw-dependencies)
 endif()
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
