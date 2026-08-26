@@ -84,6 +84,18 @@ Sound Settings
 
 
 .. omw-setting::
+   :title: head cache size
+   :type: int
+   :range: 0 to 4095
+   :default: 32
+
+   This setting determines the size of the sound head cache in megabytes.
+   The cache keeps the beginning of recently played music and voice files in
+   memory so that playing them again does not wait for storage. Set to 0 to
+   disable.
+
+
+.. omw-setting::
    :title: hrtf enable
    :type: int
    :range: -1, 0, 1

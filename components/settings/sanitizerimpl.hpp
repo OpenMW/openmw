@@ -31,6 +31,8 @@ namespace Settings
 
     std::unique_ptr<Sanitizer<int>> makeClampSanitizerInt(int min, int max);
 
+    std::unique_ptr<Sanitizer<std::size_t>> makeClampSanitizerSize(std::size_t min, std::size_t max);
+
     std::unique_ptr<Sanitizer<float>> makeClampStrictMaxSanitizerFloat(float min, float max);
 
     std::unique_ptr<Sanitizer<int>> makeEnumSanitizerInt(std::initializer_list<int> values);
