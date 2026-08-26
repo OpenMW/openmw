@@ -120,6 +120,7 @@ namespace MWWorld
         CellStore& getOrInsertCellStore(const ESM::Cell& cell);
 
         CellStore& insertCellStore(const ESM::Cell& cell);
+        CellStore& insertCellStore(const ESM4::Cell& cell);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 

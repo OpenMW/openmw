@@ -149,6 +149,16 @@ MWWorld::CellStore& MWWorld::WorldModel::insertCellStore(const ESM::Cell& cell)
     return cellStore;
 }
 
+MWWorld::CellStore& MWWorld::WorldModel::insertCellStore(const ESM4::Cell& cell)
+{
+    CellStore& cellStore = emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells);
+    if (cellStore.isExterior())
+        mExteriors.emplace(cellStore.getCell()->getExteriorCellLocation(), &cellStore);
+    else
+        mInteriors.emplace(cellStore.getCell()->getNameId(), &cellStore);
+    return cellStore;
+}
+
 void MWWorld::WorldModel::clear()
 {
     mPtrRegistry.clear();
@@ -482,7 +492,7 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(ESM::RefId id, ESM::RefId 
             if (mCells.contains(cell.mId))
                 continue;
             if (worldSpace.empty() || getWorldSpace(cell) == worldSpace)
-                addFromStore(emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells));
+                addFromStore(insertCellStore(cell));
         }
     }
     return result;
