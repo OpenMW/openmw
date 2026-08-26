@@ -376,6 +376,28 @@ testing.registerGlobalTest('load script generated static', function()
     testing.expectEqual(record.model, 'meshes/generatedonload.nif')
 end)
 
+testing.registerGlobalTest('load script generated apparatuses', function()
+    local apparatus = types.Apparatus.records.OMW_Generated_Apparatus
+    testing.expectNotEqual(apparatus, nil)
+    testing.expectEqual(apparatus.name, 'Modified apparatus')
+    testing.expectEqual(apparatus.model, 'meshes/a/modified.nif')
+    testing.expectEqual(apparatus.icon, 'icons/a/modified.dds')
+    testing.expectEqual(apparatus.mwscript, nil)
+    testing.expectEqual(apparatus.type, types.Apparatus.TYPE.Calcinator)
+    testing.expectEqual(apparatus.quality, 10)
+    testing.expectEqual(apparatus.weight, 5.5)
+    testing.expectEqual(apparatus.value, 450)
+
+    local templated = types.Apparatus.records.OMW_Templated_Apparatus
+    testing.expectEqual(templated.name, 'Templated apparatus')
+    testing.expectEqual(templated.quality, apparatus.quality)
+    local copied = types.Apparatus.records.OMW_Copied_Apparatus
+    testing.expectEqual(copied.name, apparatus.name)
+    testing.expectEqual(copied.type, apparatus.type)
+    testing.expectEqual(types.Apparatus.records.OMW_Temporary_Apparatus, nil)
+    testing.expectEqual(types.Apparatus.records.OMW_Invalid_Apparatus, nil)
+end)
+
 return {
     engineHandlers = {
         onUpdate = testing.updateGlobal,

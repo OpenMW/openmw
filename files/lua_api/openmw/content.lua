@@ -19,6 +19,20 @@
 -- @usage
 -- content.activators.records.MyActivator = { mwscript = 'float', model = 'meshes/w/w_chitin_arrow.nif', name = 'Quest marker' }
 
+--- @{#ApparatusContent}: Apparatus manipulation.
+-- @field [parent=#content] #ApparatusContent apparatuses
+
+--- @{openmw.types#ApparatusTYPE}: Apparatus types
+-- @field [parent=#ApparatusContent] openmw.types#ApparatusTYPE TYPE
+
+---
+-- A mutable list of all @{openmw.types#ApparatusRecord}s. Record IDs are immutable.
+-- @field [parent=#ApparatusContent] #list<openmw.types#ApparatusRecord> records
+-- @usage
+-- content.apparatuses.records.MyAlembic = { name = 'Industrial Alembic', model = 'meshes/a/alembic.nif', icon = 'icons/a/alembic.dds', type = content.apparatuses.TYPE.Alembic, quality = 2.5, weight = 4, value = 300 }
+-- @usage
+-- content.apparatuses.records.BetterAlembic = { template = content.apparatuses.records.MyAlembic, quality = 10 }
+
 --- @{#BookContent}: Book manipulation.
 -- @field [parent=#content] #BookContent books
 

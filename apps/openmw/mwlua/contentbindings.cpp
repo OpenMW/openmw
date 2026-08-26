@@ -2,6 +2,7 @@
 
 #include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadappa.hpp>
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loaddoor.hpp>
@@ -274,6 +275,16 @@ namespace MWLua
             return LuaUtil::makeReadOnly(api);
         }
 
+        sol::table initApparatusBindings(sol::state_view& lua, MWWorld::Store<ESM::Apparatus>& store)
+        {
+            addRecordStoreBindings<ESM::Apparatus>(lua, &MWLua::tableToApparatus);
+            addMutableApparatusType(lua);
+            sol::table api(lua, sol::create);
+            api["records"] = MutableStore<ESM::Apparatus>{ store };
+            api["TYPE"] = makeApparatusTypeTable(lua);
+            return LuaUtil::makeReadOnly(api);
+        }
+
         sol::table initBookBindings(sol::state_view& lua, MWWorld::Store<ESM::Book>& store)
         {
             addRecordStoreBindings<ESM::Book>(lua, &MWLua::tableToBook);
@@ -482,6 +493,7 @@ namespace MWLua
         sol::table api(lua, sol::create);
         MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         api["activators"] = initActivatorBindings(lua, esmStore.getWritable<ESM::Activator>());
+        api["apparatuses"] = initApparatusBindings(lua, esmStore.getWritable<ESM::Apparatus>());
         api["books"] = initBookBindings(lua, esmStore.getWritable<ESM::Book>());
         api["classes"] = initClassBindings(lua, esmStore.getWritable<ESM::Class>());
         api["doors"] = initDoorBindings(lua, esmStore.getWritable<ESM::Door>());
