@@ -1015,7 +1015,6 @@ if (APPLE)
 
     set(CPACK_PRE_BUILD_SCRIPTS ${CMAKE_SOURCE_DIR}/cmake/SignMacApplications.cmake)
 
-    include(CPack)
 elseif(NOT APPLE)
     if(WIN32)
         # this just deals with Qt plugins now as if we get windeployqt.exe to do it, it adds things we don't need like ANGLE
@@ -1091,7 +1090,6 @@ elseif(NOT APPLE)
             SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
         endif()
 
-        include(CPack)
     else(WIN32)
         # Linux installation
 
@@ -1119,6 +1117,8 @@ elseif(NOT APPLE)
 
     install(DIRECTORY "${RUNTIME_OUTPUT_DIRECTORY}/resources" TYPE DATA)
 endif(APPLE)
+
+include(CPack)
 
 # what is necessary to build documentation
 if ( BUILD_DOCS )
