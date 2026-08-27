@@ -26,11 +26,13 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstddef>
+#include <exception>
 #include <mutex>
-#include <random>
 #include <string_view>
+#include <thread>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace NavMeshTool
@@ -55,6 +57,7 @@ namespace NavMeshTool
 
         // Limits pending tiles between worldspaces.
         constexpr std::size_t maxTilesInFlight = 4096;
+        constexpr std::size_t maxQueuedDbJobs = 1024;
         constexpr std::chrono::seconds transactionInterval(1);
 
         void logGeneratedTiles(std::size_t provided, std::size_t expected)
@@ -82,6 +85,47 @@ namespace NavMeshTool
             void operator()(std::size_t provided, std::size_t expected) const { logGeneratedTiles(provided, expected); }
         };
 
+        struct InsertTileJob
+        {
+            TileId mTileId;
+            ESM::RefId mWorldspace;
+            TilePosition mTilePosition;
+            TileVersion mVersion;
+            std::vector<std::byte> mInput;
+            std::vector<std::byte> mData;
+        };
+
+        struct UpdateTileJob
+        {
+            TileId mTileId;
+            ESM::RefId mWorldspace;
+            TilePosition mTilePosition;
+            TileVersion mVersion;
+            std::vector<std::byte> mData;
+        };
+
+        struct DeleteTilesAtJob
+        {
+            ESM::RefId mWorldspace;
+            TilePosition mTilePosition;
+        };
+
+        struct DeleteTilesAtExceptJob
+        {
+            ESM::RefId mWorldspace;
+            TilePosition mTilePosition;
+            TileId mTileId;
+        };
+
+        struct DeleteTilesOutsideRangeJob
+        {
+            ESM::RefId mWorldspace;
+            TilesPositionsRange mRange;
+        };
+
+        using DbJob = std::variant<InsertTileJob, UpdateTileJob, DeleteTilesAtJob, DeleteTilesAtExceptJob,
+            DeleteTilesOutsideRangeJob>;
+
         class RecastMeshProvider final : public DetourNavigator::RecastMeshProvider
         {
         public:
@@ -105,20 +149,279 @@ namespace NavMeshTool
             std::size_t mProvided = 0;
             std::shared_ptr<RecastMeshProvider> mProvider;
         };
+
+        struct DbResult
+        {
+            std::size_t mInserted;
+            std::size_t mUpdated;
+            std::size_t mDeleted;
+        };
+
+        // Lookups block; one thread writes queued jobs.
+        class NavMeshDbWriter
+        {
+        public:
+            NavMeshDbWriter(NavMeshDb& db, const GenerateAllNavMeshTilesOptions& options,
+                DetourNavigator::NavMeshTileConsumer& consumer, const std::atomic<Status>& status)
+                : mDb(db)
+                , mRemoveUnusedTiles(options.mRemoveUnusedTiles)
+                , mCollectStats(options.mCollectStats)
+                , mConsumer(consumer)
+                , mStatus(status)
+                , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
+                , mNextTileId(mDb.getMaxTileId() + 1)
+                , mNextShapeId(mDb.getMaxShapeId() + 1)
+                , mWriter([this] { runWriter(); })
+            {
+            }
+
+            ~NavMeshDbWriter()
+            {
+                {
+                    const std::lock_guard lock(mQueueMutex);
+                    mStopWriter = true;
+                    mQueueNotEmpty.notify_all();
+                }
+                mWriter.join();
+            }
+
+            std::int64_t resolveMeshSource(const MeshSource& source)
+            {
+                const std::lock_guard lock(mDbMutex);
+                return DetourNavigator::resolveMeshSource(mDb, source, mNextShapeId);
+            }
+
+            std::optional<NavMeshTileInfo> find(
+                ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input)
+            {
+                std::optional<NavMeshTileInfo> result;
+                const std::lock_guard lock(mDbMutex);
+                if (mCollectStats)
+                {
+                    if (const auto tile = mDb.getTileData(worldspace, tilePosition, input))
+                    {
+                        NavMeshTileInfo info;
+                        info.mTileId = tile->mTileId;
+                        info.mVersion = tile->mVersion;
+                        info.mData = std::make_unique<PreparedNavMeshData>();
+                        deserialize(tile->mData, *info.mData);
+                        result.emplace(std::move(info));
+                    }
+                }
+                else
+                {
+                    if (const auto tile = mDb.findTile(worldspace, tilePosition, input))
+                    {
+                        NavMeshTileInfo info;
+                        info.mTileId = tile->mTileId;
+                        info.mVersion = tile->mVersion;
+                        result.emplace(std::move(info));
+                    }
+                }
+                return result;
+            }
+
+            void ignore(ESM::RefId worldspace, const TilePosition& tilePosition)
+            {
+                if (mRemoveUnusedTiles)
+                    push(DeleteTilesAtJob{ worldspace, tilePosition });
+            }
+
+            void identity(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId)
+            {
+                if (mRemoveUnusedTiles)
+                    push(DeleteTilesAtExceptJob{ worldspace, tilePosition, TileId{ tileId } });
+            }
+
+            void insert(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t version,
+                const std::vector<std::byte>& input, PreparedNavMeshData& data)
+            {
+                TileId tileId;
+                {
+                    const std::lock_guard lock(mQueueMutex);
+                    tileId = mNextTileId;
+                    ++mNextTileId;
+                }
+                data.mUserId = static_cast<unsigned>(tileId);
+                push(InsertTileJob{
+                    .mTileId = tileId,
+                    .mWorldspace = worldspace,
+                    .mTilePosition = tilePosition,
+                    .mVersion = TileVersion{ version },
+                    .mInput = input,
+                    .mData = serialize(data),
+                });
+            }
+
+            void update(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId,
+                std::int64_t version, PreparedNavMeshData& data)
+            {
+                data.mUserId = static_cast<unsigned>(tileId);
+                push(UpdateTileJob{
+                    .mTileId = TileId{ tileId },
+                    .mWorldspace = worldspace,
+                    .mTilePosition = tilePosition,
+                    .mVersion = TileVersion{ version },
+                    .mData = serialize(data),
+                });
+            }
+
+            void cancel()
+            {
+                // Predicate lock prevents missed cancellation wake-ups.
+                {
+                    const std::lock_guard lock(mQueueMutex);
+                    mQueueNotFull.notify_all();
+                    mQueueDrained.notify_all();
+                }
+            }
+
+            void removeTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range)
+            {
+                push(DeleteTilesOutsideRangeJob{ worldspace, range });
+            }
+
+            DbResult finish()
+            {
+                {
+                    std::unique_lock lock(mQueueMutex);
+                    mQueueDrained.wait(lock, [&] { return (mQueue.empty() && !mWriterBusy) || mStatus != Status::Ok; });
+                }
+                if (mStatus == Status::Ok)
+                {
+                    const std::lock_guard lock(mDbMutex);
+                    mTransaction.commit();
+                }
+                return DbResult{
+                    .mInserted = mInserted.load(),
+                    .mUpdated = mUpdated.load(),
+                    .mDeleted = mDeleted.load(),
+                };
+            }
+
+        private:
+            std::atomic_size_t mInserted{ 0 };
+            std::atomic_size_t mUpdated{ 0 };
+            std::atomic_size_t mDeleted{ 0 };
+            NavMeshDb& mDb;
+            const bool mRemoveUnusedTiles;
+            const bool mCollectStats;
+            DetourNavigator::NavMeshTileConsumer& mConsumer;
+            const std::atomic<Status>& mStatus;
+            std::mutex mDbMutex;
+            Transaction mTransaction;
+            TileId mNextTileId;
+            ShapeId mNextShapeId;
+            std::mutex mQueueMutex;
+            std::condition_variable mQueueNotEmpty;
+            std::condition_variable mQueueNotFull;
+            std::condition_variable mQueueDrained;
+            std::vector<DbJob> mQueue;
+            bool mWriterBusy = false;
+            bool mStopWriter = false;
+            std::thread mWriter;
+
+            void push(DbJob&& job)
+            {
+                std::unique_lock lock(mQueueMutex);
+                mQueueNotFull.wait(lock, [&] { return mQueue.size() < maxQueuedDbJobs || mStatus != Status::Ok; });
+                if (mStatus != Status::Ok)
+                    return;
+                mQueue.push_back(std::move(job));
+                mQueueNotEmpty.notify_one();
+            }
+
+            void execute(InsertTileJob& job)
+            {
+                if (mRemoveUnusedTiles)
+                    mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(job.mWorldspace, job.mTilePosition));
+                mDb.insertTile(job.mTileId, job.mWorldspace, job.mTilePosition, job.mVersion, job.mInput, job.mData);
+                ++mInserted;
+            }
+
+            void execute(UpdateTileJob& job)
+            {
+                if (mRemoveUnusedTiles)
+                {
+                    mDeleted += static_cast<std::size_t>(
+                        mDb.deleteTilesAtExcept(job.mWorldspace, job.mTilePosition, job.mTileId));
+                }
+                mDb.updateTile(job.mTileId, job.mVersion, job.mData);
+                ++mUpdated;
+            }
+
+            void execute(DeleteTilesAtJob& job)
+            {
+                mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(job.mWorldspace, job.mTilePosition));
+            }
+
+            void execute(DeleteTilesAtExceptJob& job)
+            {
+                mDeleted += static_cast<std::size_t>(
+                    mDb.deleteTilesAtExcept(job.mWorldspace, job.mTilePosition, job.mTileId));
+            }
+
+            void execute(DeleteTilesOutsideRangeJob& job)
+            {
+                Log(Debug::Info) << "Removing tiles outside processed range for worldspace " << job.mWorldspace
+                                 << "...";
+                mDeleted += static_cast<std::size_t>(mDb.deleteTilesOutsideRange(job.mWorldspace, job.mRange));
+            }
+
+            void runWriter()
+            {
+                std::vector<DbJob> batch;
+                auto lastCommit = std::chrono::steady_clock::now();
+                while (true)
+                {
+                    {
+                        std::unique_lock lock(mQueueMutex);
+                        mQueueNotEmpty.wait(lock, [&] { return !mQueue.empty() || mStopWriter; });
+                        if (mQueue.empty())
+                            break;
+                        batch.swap(mQueue);
+                        mWriterBusy = mStatus == Status::Ok;
+                        if (!mWriterBusy)
+                            batch.clear();
+                        mQueueNotFull.notify_all();
+                    }
+                    if (batch.empty())
+                        continue;
+                    try
+                    {
+                        const std::lock_guard lock(mDbMutex);
+                        for (DbJob& job : batch)
+                            std::visit([this](auto& value) { execute(value); }, job);
+                        const auto now = std::chrono::steady_clock::now();
+                        if (now - lastCommit > transactionInterval)
+                        {
+                            mTransaction.commit();
+                            mTransaction = mDb.startTransaction(Sqlite3::TransactionMode::Immediate);
+                            lastCommit = now;
+                        }
+                    }
+                    catch (const std::exception& e)
+                    {
+                        Log(Debug::Warning) << "Failed to store navmesh tiles: " << e.what();
+                        mConsumer.cancel(e.what());
+                    }
+                    batch.clear();
+                    {
+                        const std::lock_guard lock(mQueueMutex);
+                        mWriterBusy = false;
+                        mQueueDrained.notify_all();
+                    }
+                }
+            }
+        };
     }
 
     class NavMeshTileConsumer final : public DetourNavigator::NavMeshTileConsumer
     {
     public:
         explicit NavMeshTileConsumer(NavMeshDb& db, const GenerateAllNavMeshTilesOptions& options)
-            : mDb(db)
-            , mRemoveUnusedTiles(options.mRemoveUnusedTiles)
-            , mWriteBinaryLog(options.mWriteBinaryLog)
-            , mCollectStats(options.mCollectStats)
-            , mTransaction(mDb.startTransaction(Sqlite3::TransactionMode::Immediate))
-            , mNextTileId(mDb.getMaxTileId() + 1)
-            , mNextShapeId(mDb.getMaxShapeId() + 1)
-            , mLastCommit(std::chrono::steady_clock::now())
+            : mWriteBinaryLog(options.mWriteBinaryLog)
+            , mWriter(db, options, *this, mStatus)
         {
         }
 
@@ -136,98 +439,37 @@ namespace NavMeshTool
                 serializeToStderr(ExpectedTiles{ static_cast<std::uint64_t>(expected) });
         }
 
-        std::int64_t resolveMeshSource(const MeshSource& source) override
-        {
-            const std::lock_guard lock(mDbMutex);
-            const std::int64_t shapeId = DetourNavigator::resolveMeshSource(mDb, source, mNextShapeId);
-            commitIfNeeded();
-            return shapeId;
-        }
+        std::int64_t resolveMeshSource(const MeshSource& source) override { return mWriter.resolveMeshSource(source); }
 
         std::optional<NavMeshTileInfo> find(
             ESM::RefId worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input) override
         {
-            std::optional<NavMeshTileInfo> result;
-            const std::lock_guard lock(mDbMutex);
-            if (mCollectStats)
-            {
-                if (const auto tile = mDb.getTileData(worldspace, tilePosition, input))
-                {
-                    NavMeshTileInfo info;
-                    info.mTileId = tile->mTileId;
-                    info.mVersion = tile->mVersion;
-                    info.mData = std::make_unique<PreparedNavMeshData>();
-                    deserialize(tile->mData, *info.mData);
-                    result.emplace(std::move(info));
-                }
-            }
-            else
-            {
-                if (const auto tile = mDb.findTile(worldspace, tilePosition, input))
-                {
-                    NavMeshTileInfo info;
-                    info.mTileId = tile->mTileId;
-                    info.mVersion = tile->mVersion;
-                    result.emplace(std::move(info));
-                }
-            }
-            return result;
+            return mWriter.find(worldspace, tilePosition, input);
         }
 
         void ignore(ESM::RefId worldspace, const TilePosition& tilePosition) override
         {
-            if (mRemoveUnusedTiles)
-            {
-                const std::lock_guard lock(mDbMutex);
-                mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(worldspace, tilePosition));
-                commitIfNeeded();
-            }
+            mWriter.ignore(worldspace, tilePosition);
             report(worldspace);
         }
 
         void identity(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId) override
         {
-            if (mRemoveUnusedTiles)
-            {
-                const std::lock_guard lock(mDbMutex);
-                mDeleted
-                    += static_cast<std::size_t>(mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId{ tileId }));
-                commitIfNeeded();
-            }
+            mWriter.identity(worldspace, tilePosition, tileId);
             report(worldspace);
         }
 
         void insert(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t version,
             const std::vector<std::byte>& input, PreparedNavMeshData& data) override
         {
-            {
-                const std::lock_guard lock(mDbMutex);
-                if (mRemoveUnusedTiles)
-                    mDeleted += static_cast<std::size_t>(mDb.deleteTilesAt(worldspace, tilePosition));
-                data.mUserId = static_cast<unsigned>(mNextTileId);
-                mDb.insertTile(mNextTileId, worldspace, tilePosition, TileVersion{ version }, input, serialize(data));
-                ++mNextTileId;
-                commitIfNeeded();
-            }
-            ++mInserted;
+            mWriter.insert(worldspace, tilePosition, version, input, data);
             report(worldspace);
         }
 
         void update(ESM::RefId worldspace, const TilePosition& tilePosition, std::int64_t tileId, std::int64_t version,
             PreparedNavMeshData& data) override
         {
-            data.mUserId = static_cast<unsigned>(tileId);
-            {
-                const std::lock_guard lock(mDbMutex);
-                if (mRemoveUnusedTiles)
-                {
-                    mDeleted += static_cast<std::size_t>(
-                        mDb.deleteTilesAtExcept(worldspace, tilePosition, TileId{ tileId }));
-                }
-                mDb.updateTile(TileId{ tileId }, TileVersion{ version }, serialize(data));
-                commitIfNeeded();
-            }
-            ++mUpdated;
+            mWriter.update(worldspace, tilePosition, tileId, version, data);
             report(worldspace);
         }
 
@@ -244,6 +486,7 @@ namespace NavMeshTool
                 const std::lock_guard lock(mProvidedMutex);
                 mProvidedChanged.notify_all();
             }
+            mWriter.cancel();
         }
 
         void updateStats(const NavMeshTileConsumerStats& value) override
@@ -254,10 +497,7 @@ namespace NavMeshTool
 
         void removeTilesOutsideRange(ESM::RefId worldspace, const TilesPositionsRange& range)
         {
-            Log(Debug::Info) << "Removing tiles outside processed range for worldspace " << worldspace << "...";
-            const std::lock_guard lock(mDbMutex);
-            mDeleted += static_cast<std::size_t>(mDb.deleteTilesOutsideRange(worldspace, range));
-            commitIfNeeded();
+            mWriter.removeTilesOutsideRange(worldspace, range);
         }
 
         void waitTilesInFlight(std::size_t limit)
@@ -272,21 +512,17 @@ namespace NavMeshTool
                 std::unique_lock lock(mProvidedMutex);
                 mProvidedChanged.wait(lock, [&] { return mProvided >= mExpected || mStatus != Status::Ok; });
             }
+            const DbResult result = mWriter.finish();
             if (mExpected > 0)
                 logGeneratedTiles(mProvided, mExpected);
             if (mWriteBinaryLog)
                 logGeneratedTilesMessage(mProvided);
-            if (mStatus == Status::Ok)
-            {
-                const std::lock_guard lock(mDbMutex);
-                mTransaction.commit();
-            }
             return GenerateTilesResult{
                 .mStatus = mStatus.load(),
                 .mProvided = mProvided.load(),
-                .mInserted = mInserted.load(),
-                .mUpdated = mUpdated.load(),
-                .mDeleted = mDeleted.load(),
+                .mInserted = result.mInserted,
+                .mUpdated = result.mUpdated,
+                .mDeleted = result.mDeleted,
                 .mStats = *mStats.lockConst(),
             };
         }
@@ -294,18 +530,7 @@ namespace NavMeshTool
     private:
         std::atomic_size_t mExpected{ 0 };
         std::atomic_size_t mProvided{ 0 };
-        std::atomic_size_t mInserted{ 0 };
-        std::atomic_size_t mUpdated{ 0 };
-        std::atomic_size_t mDeleted{ 0 };
-        NavMeshDb& mDb;
-        const bool mRemoveUnusedTiles;
         const bool mWriteBinaryLog;
-        const bool mCollectStats;
-        std::mutex mDbMutex;
-        Transaction mTransaction;
-        TileId mNextTileId;
-        ShapeId mNextShapeId;
-        std::chrono::steady_clock::time_point mLastCommit;
         std::mutex mProgressMutex;
         std::unordered_map<ESM::RefId, WorldspaceProgress> mProgress;
         Misc::ProgressReporter<LogGeneratedTiles> mReporter;
@@ -313,6 +538,8 @@ namespace NavMeshTool
         std::mutex mProvidedMutex;
         std::condition_variable mProvidedChanged;
         std::atomic<Status> mStatus{ Status::Ok };
+        // Writer stops before progress state destruction.
+        NavMeshDbWriter mWriter;
 
         void report(ESM::RefId worldspace)
         {
@@ -336,17 +563,6 @@ namespace NavMeshTool
             }
             if (mWriteBinaryLog)
                 logGeneratedTilesMessage(provided);
-        }
-
-        void commitIfNeeded()
-        {
-            const auto now = std::chrono::steady_clock::now();
-            if (now - mLastCommit > transactionInterval)
-            {
-                mTransaction.commit();
-                mTransaction = mDb.startTransaction(Sqlite3::TransactionMode::Immediate);
-                mLastCommit = now;
-            }
         }
     };
 
@@ -374,12 +590,8 @@ namespace NavMeshTool
             mConsumer->removeTilesOutsideRange(data.mWorldspace, range);
         }
 
-        std::vector<TilePosition> tiles = std::move(data.mTiles);
-
-        {
-            std::mt19937_64 random;
-            std::shuffle(tiles.begin(), tiles.end(), random);
-        }
+        // Tile order improves database locality.
+        const std::vector<TilePosition> tiles = std::move(data.mTiles);
 
         Log(Debug::Info) << "Queued " << tiles.size() << " navmesh tiles for " << data.mWorldspace << " worldspace";
 
