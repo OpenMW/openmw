@@ -6,7 +6,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable or disable shadow rendering using shadow mapping.
    More realistic but may reduce performance.
@@ -16,7 +16,6 @@ Shadows Settings
    :type: int
    :range: 1 to 8
    :default: 3
-   :location: :bdg-success:`Launcher > Settings > Visuals > Shadows`
 
    Number of shadow maps used.
    More maps improve shadow quality but may reduce performance or cause texture conflicts.
@@ -26,7 +25,7 @@ Shadows Settings
    :type: float32
    :range: full 32-bit float range
    :default: 8192
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Maximum distance shadows cover from the camera.
    Set ≤ 0 to disable distance limit.
@@ -36,7 +35,6 @@ Shadows Settings
    :type: float32
    :range: [0, 1]
    :default: 0.9
-   :location: :bdg-success:`Launcher > Settings > Visuals > Shadows`
 
    Fraction of maximum shadow distance at which shadows start fading.
    No effect if distance limit disabled.
@@ -64,7 +62,6 @@ Shadows Settings
    :type: string
    :range: primitives | bounds | none
    :default: bounds
-   :location: :bdg-success:`Launcher > Settings > Visuals > Shadows`
 
    Method to compute shadow map coverage:
    - `primitives`: better shadows, higher CPU cost
@@ -76,7 +73,7 @@ Shadows Settings
    :type: int
    :range: dependent on GPU/driver
    :default: 1024
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Size of shadow maps.
    Higher values improve quality but increase GPU load.
@@ -87,6 +84,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable shadows cast by NPCs and creatures.
    May reduce performance.
@@ -96,7 +94,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable shadows cast by the player character.
    May reduce performance.
@@ -106,7 +104,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable shadows cast by terrain.
    May reduce performance.
@@ -116,7 +114,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable shadows cast by static objects.
    May reduce performance.
@@ -126,7 +124,7 @@ Shadows Settings
    :type: boolean
    :range: true, false
    :default: false
-   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows` :bdg-success:`Launcher > Settings > Visuals > Shadows`
+   :location: :bdg-info:`In Game > Settings > Options > Video > Shadows`
 
    Enable shadows indoors.
    Only actors cast shadows indoors without full ceiling shadows.
