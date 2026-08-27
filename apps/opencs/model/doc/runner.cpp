@@ -4,12 +4,14 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QMessageBox>
 #include <QProcess>
 #include <QString>
 #include <QStringList>
 #include <QTemporaryFile>
 #include <QTextStream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include "operationholder.hpp"
@@ -65,7 +67,12 @@ void CSMDoc::Runner::start(bool delayed)
         path = dir.absoluteFilePath(path);
 
         mStartup = new QTemporaryFile(this);
-        mStartup->open();
+        if (!mStartup->open())
+        {
+            Log(Debug::Error) << "Unable to open temporary file for --script-run source";
+            QMessageBox::critical(nullptr, tr("Error launching OpenMW"), tr("Unable to open temporary file."));
+            return;
+        }
 
         {
             QTextStream stream(mStartup);
