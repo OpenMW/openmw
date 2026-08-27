@@ -853,6 +853,13 @@ namespace MWRender
         return -1.f;
     }
 
+    void Animation::getTextKeys(std::vector<std::string_view>& out) const
+    {
+        for (const auto& source : mAnimSources)
+            for (const auto& key : source->getTextKeys())
+                out.push_back(key.second);
+    }
+
     void Animation::handleTextKey(AnimState& state, std::string_view groupname,
         SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
     {

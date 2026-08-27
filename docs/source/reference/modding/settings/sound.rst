@@ -100,10 +100,14 @@ Sound Settings
    :range: true, false
    :default: true
 
-   Fill the head cache in the background for music and spontaneous voice
-   lines. Trades background disk reads for stall-free first starts; disable
-   to minimise background disk activity. Has no effect when the head cache is
-   disabled.
+   Fill the head cache in the background for sounds the game is likely to
+   start: music, spontaneous voice lines, and the current cell's ambient and
+   creature sounds. Trades background disk reads for stall-free first starts;
+   disable to minimise background disk activity. Has no effect when the head
+   cache is disabled.
+
+   Effects and voice lines enter the queue after content loading, before the
+   main menu or game starts.
 
 
 .. omw-setting::

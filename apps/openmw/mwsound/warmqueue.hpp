@@ -2,10 +2,11 @@
 #define GAME_SOUND_WARMQUEUE_H
 
 #include <condition_variable>
-#include <deque>
+#include <functional>
+#include <list>
 #include <mutex>
 #include <thread>
-#include <unordered_set>
+#include <unordered_map>
 
 #include <components/vfs/pathutil.hpp>
 
@@ -25,17 +26,27 @@ namespace MWSound
         WarmQueue(const VFS::Manager& vfs, HeadCache& cache);
         ~WarmQueue();
 
-        void enqueue(VFS::Path::Normalized path);
+        void enqueue(VFS::Path::Normalized path, bool urgent = false);
+
+        void enqueueStreamed(VFS::Path::Normalized path);
 
     private:
+        struct Item
+        {
+            VFS::Path::Normalized mPath;
+            bool mUrgent;
+            bool mWholeFile;
+        };
+
+        void push(VFS::Path::Normalized path, bool urgent, bool wholeFile);
         void run() noexcept;
 
         const VFS::Manager& mVfs;
         HeadCache& mCache;
         std::mutex mMutex;
         std::condition_variable mCV;
-        std::deque<VFS::Path::Normalized> mQueue;
-        std::unordered_set<VFS::Path::Normalized, VFS::Path::Hash> mQueued;
+        std::list<Item> mQueue;
+        std::unordered_map<VFS::Path::Normalized, std::list<Item>::iterator, VFS::Path::Hash, std::equal_to<>> mQueued;
         bool mQuit = false;
         std::thread mThread;
     };

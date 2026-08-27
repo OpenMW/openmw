@@ -25,13 +25,42 @@ namespace MWSound
         mThread.join();
     }
 
-    void WarmQueue::enqueue(VFS::Path::Normalized path)
+    void WarmQueue::enqueue(VFS::Path::Normalized path, bool urgent)
     {
+        push(std::move(path), urgent, true);
+    }
+
+    void WarmQueue::enqueueStreamed(VFS::Path::Normalized path)
+    {
+        push(std::move(path), false, false);
+    }
+
+    void WarmQueue::push(VFS::Path::Normalized path, bool urgent, bool wholeFile)
+    {
+        // Allow head-only entries to upgrade.
         {
             std::lock_guard<std::mutex> lock(mMutex);
-            if (!mQueued.emplace(path).second)
+            const auto [it, inserted] = mQueued.try_emplace(path);
+            if (!inserted)
+            {
+                it->second->mWholeFile |= wholeFile;
+                if (urgent && !it->second->mUrgent)
+                {
+                    it->second->mUrgent = true;
+                    mQueue.splice(mQueue.begin(), mQueue, it->second);
+                }
                 return;
-            mQueue.push_back(std::move(path));
+            }
+            if (urgent)
+            {
+                mQueue.push_front({ std::move(path), true, wholeFile });
+                it->second = mQueue.begin();
+            }
+            else
+            {
+                mQueue.push_back({ std::move(path), false, wholeFile });
+                it->second = std::prev(mQueue.end());
+            }
         }
         mCV.notify_one();
     }
@@ -45,22 +74,25 @@ namespace MWSound
             mCV.wait(lock, [&] { return mQuit || !mQueue.empty(); });
             if (mQuit)
                 return;
-            VFS::Path::Normalized path = std::move(mQueue.front());
+            Item item = std::move(mQueue.front());
             mQueue.pop_front();
-            mQueued.erase(path);
+            mQueued.erase(item.mPath);
             lock.unlock();
             try
             {
                 // Bulk warming never evicts.
-                if (mCache.full() || mCache.contains(path))
+                if (!item.mUrgent && mCache.full())
                     continue;
-                // Cache stream initialization ranges.
-                FFmpegDecoder decoder(&mVfs, &mCache);
-                decoder.open(path);
+                // Streamed entries cache initialization ranges.
+                if ((!item.mWholeFile || !mCache.warmWholeFile(item.mPath)) && !mCache.contains(item.mPath))
+                {
+                    FFmpegDecoder decoder(&mVfs, &mCache, /*recordHead=*/true);
+                    decoder.open(item.mPath);
+                }
             }
             catch (const std::exception& e)
             {
-                Log(Debug::Verbose) << "Failed to warm sound " << path << ": " << e.what();
+                Log(Debug::Verbose) << "Failed to warm sound " << item.mPath << ": " << e.what();
             }
         }
     }

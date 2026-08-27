@@ -5,11 +5,13 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <thread>
 
 #include <gtest/gtest.h>
 
+#include <components/files/istreamptr.hpp>
 #include <components/testing/util.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
@@ -18,7 +20,17 @@ namespace MWSound
 {
     namespace
     {
+        constexpr VFS::Path::NormalizedView sEffect("sound/fx/a.wav");
+        constexpr VFS::Path::NormalizedView sOtherEffect("sound/fx/b.wav");
         constexpr VFS::Path::NormalizedView sStreamed("sound/vo/a.wav");
+
+        std::string makeContent(std::size_t size)
+        {
+            std::string content(size, '\0');
+            for (std::size_t i = 0; i < size; ++i)
+                content[i] = static_cast<char>('a' + i % 26);
+            return content;
+        }
 
         void appendLe(std::string& out, std::uint32_t value, std::size_t bytes)
         {
@@ -46,6 +58,32 @@ namespace MWSound
             return wav;
         }
 
+        // Wait for background completion.
+        template <class Predicate>
+        bool waitFor(Predicate predicate)
+        {
+            for (int i = 0; i < 500 && !predicate(); ++i)
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            return predicate();
+        }
+
+        TEST(MWSoundWarmQueueTest, warmsWholeEffect)
+        {
+            const std::string content = makeContent(64);
+            TestingOpenMW::VFSTestFile file(content);
+            const auto vfs = TestingOpenMW::createTestVFS({ { sEffect, &file } });
+            HeadCache cache(*vfs, 4 * 1024 * 1024);
+            {
+                WarmQueue queue(*vfs, cache);
+                queue.enqueue(VFS::Path::Normalized(sEffect));
+                EXPECT_TRUE(waitFor([&] { return cache.contains(sEffect); }));
+            }
+
+            const std::shared_ptr<const HeadBuffer> buffer = cache.lookup(sEffect);
+            ASSERT_NE(buffer, nullptr);
+            EXPECT_EQ(std::string(buffer->mHead.begin(), buffer->mHead.end()), content);
+        }
+
         TEST(MWSoundWarmQueueTest, warmsStreamedSound)
         {
             TestingOpenMW::VFSTestFile file(makeWav(4000));
@@ -53,11 +91,27 @@ namespace MWSound
             HeadCache cache(*vfs, 4 * 1024 * 1024);
 
             WarmQueue queue(*vfs, cache);
-            queue.enqueue(VFS::Path::Normalized(sStreamed));
+            queue.enqueueStreamed(VFS::Path::Normalized(sStreamed));
 
-            for (int i = 0; i < 500 && !cache.contains(sStreamed); ++i)
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            EXPECT_TRUE(cache.contains(sStreamed));
+            EXPECT_TRUE(waitFor([&] { return cache.contains(sStreamed); }));
+        }
+
+        TEST(MWSoundWarmQueueTest, prioritizesUrgentWarm)
+        {
+            const std::string content = makeContent(64);
+            TestingOpenMW::VFSTestFile file(content);
+            TestingOpenMW::VFSTestFile otherFile(content);
+            const auto vfs = TestingOpenMW::createTestVFS({ { sEffect, &file }, { sOtherEffect, &otherFile } });
+            // This budget starts full.
+            HeadCache cache(*vfs, 512 * 1024);
+            ASSERT_TRUE(cache.full());
+
+            WarmQueue queue(*vfs, cache);
+            queue.enqueue(VFS::Path::Normalized(sEffect));
+            queue.enqueue(VFS::Path::Normalized(sOtherEffect), true);
+
+            EXPECT_TRUE(waitFor([&] { return cache.contains(sOtherEffect); }));
+            EXPECT_FALSE(cache.contains(sEffect));
         }
     }
 }

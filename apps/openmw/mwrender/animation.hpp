@@ -430,6 +430,8 @@ namespace MWRender
         /// Get the absolute position in the animation track of the text key
         float getTextKeyTime(std::string_view textKey) const;
 
+        void getTextKeys(std::vector<std::string_view>& out) const;
+
         /// Get the current absolute position in the animation track for the animation that is currently playing from
         /// the given group.
         float getCurrentTime(std::string_view groupname) const;

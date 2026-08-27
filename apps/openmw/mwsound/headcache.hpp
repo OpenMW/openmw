@@ -84,6 +84,8 @@ namespace MWSound
 
         bool full() const;
 
+        bool warmWholeFile(VFS::Path::NormalizedView name);
+
     private:
         using LruIt = std::list<std::shared_ptr<const HeadBuffer>>::iterator;
 

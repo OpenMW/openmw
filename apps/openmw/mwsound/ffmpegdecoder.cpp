@@ -322,17 +322,15 @@ namespace MWSound
     void FFmpegDecoder::open(VFS::Path::NormalizedView fname)
     {
         close();
-        bool cached = false;
+        std::shared_ptr<const HeadBuffer> buffer;
         if (mHeadCache != nullptr)
-        {
-            if (std::shared_ptr<const HeadBuffer> buffer = mHeadCache->lookup(fname))
-            {
-                mDataStream = makeHeadStream(std::move(buffer), *mResourceMgr);
-                cached = true;
-            }
-            else
-                mDataStream = makeRecordingStream(mResourceMgr->get(fname));
-        }
+            buffer = mHeadCache->lookup(fname);
+
+        const bool record = mHeadCache != nullptr && buffer == nullptr && mRecordHead;
+        if (buffer != nullptr)
+            mDataStream = makeHeadStream(std::move(buffer), *mResourceMgr);
+        else if (record)
+            mDataStream = makeRecordingStream(mResourceMgr->get(fname));
         else
             mDataStream = mResourceMgr->get(fname);
 
@@ -363,7 +361,7 @@ namespace MWSound
             throw std::runtime_error("Failed to open input");
 
         // Opening is done, so the bytes it read are exactly the prefix the next open of this file needs.
-        if (mHeadCache != nullptr && !cached)
+        if (record)
             mHeadCache->insert(fname, *mDataStream);
 
         const AVCodec* codec = avcodec_find_decoder((*stream)->codecpar->codec_id);
@@ -593,7 +591,7 @@ namespace MWSound
         return static_cast<std::size_t>(mNextPts * mCodecCtx->sample_rate) - delay;
     }
 
-    FFmpegDecoder::FFmpegDecoder(const VFS::Manager* vfs, HeadCache* headCache)
+    FFmpegDecoder::FFmpegDecoder(const VFS::Manager* vfs, HeadCache* headCache, bool recordHead)
         : SoundDecoder(vfs)
         , mStream(nullptr)
         , mFrameSize(0)
@@ -610,6 +608,7 @@ namespace MWSound
         , mFrameData(nullptr)
         , mDataBufLen(0)
         , mHeadCache(headCache)
+        , mRecordHead(recordHead)
     {
         memset(&mPacket, 0, sizeof(mPacket));
 
