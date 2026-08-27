@@ -2,6 +2,7 @@
 #define OPENMW_NAVMESHTOOL_NAVMESH_H
 
 #include <cstddef>
+#include <memory>
 
 namespace DetourNavigator
 {
@@ -18,6 +19,7 @@ namespace SceneUtil
 namespace NavMeshTool
 {
     struct WorldspaceData;
+    class NavMeshTileConsumer;
 
     struct GenerateAllNavMeshTilesOptions
     {
@@ -48,9 +50,24 @@ namespace NavMeshTool
         GenerateTilesStats mStats;
     };
 
-    GenerateTilesResult generateAllNavMeshTiles(const DetourNavigator::AgentBounds& agentBounds,
-        const DetourNavigator::Settings& settings, const GenerateAllNavMeshTilesOptions& options,
-        const WorldspaceData& data, DetourNavigator::NavMeshDb& db, SceneUtil::WorkQueue& workQueue);
+    class NavMeshTilesGenerator
+    {
+    public:
+        NavMeshTilesGenerator(const DetourNavigator::AgentBounds& agentBounds,
+            const DetourNavigator::Settings& settings, const GenerateAllNavMeshTilesOptions& options,
+            DetourNavigator::NavMeshDb& db, SceneUtil::WorkQueue& workQueue);
+
+        Status addWorldspace(WorldspaceData&& data);
+
+        GenerateTilesResult finish();
+
+    private:
+        const DetourNavigator::AgentBounds& mAgentBounds;
+        const DetourNavigator::Settings& mSettings;
+        const GenerateAllNavMeshTilesOptions mOptions;
+        SceneUtil::WorkQueue& mWorkQueue;
+        std::shared_ptr<NavMeshTileConsumer> mConsumer;
+    };
 }
 
 #endif
