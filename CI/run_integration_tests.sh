@@ -5,6 +5,7 @@ if [[ ! -d example-suite ]]; then
     mkdir example-suite
     cd example-suite
     git init
+    git lfs install --local
     git remote add origin https://gitlab.com/OpenMW/example-suite.git
     git fetch --depth=1 origin ${EXAMPLE_SUITE_REVISION}
     git checkout FETCH_HEAD
