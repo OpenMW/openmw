@@ -102,34 +102,95 @@ Ubuntu_GCC_preprocess:
       - build/install/
       - "**/CMakeCache.txt"
 
-.Almalinux_Vcpkg:
+Almalinux_Generic:
   tags:
     - saas-linux-medium-amd64
   image: almalinux:9
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   cache:
-    paths:
-      - ccache/
+    - key:
+        prefix: almalinux-generic
+        files:
+          - CI/linux/deps_versions.sh
+      paths:
+        - deps
+        - ccache
   stage: build
   variables:
     OPENMW_CXX_FLAGS: "-Werror -Werror=implicit-fallthrough"
     CC: gcc
     CXX: g++
     OPENMW_LOCAL_INSTALL: 1
+    CI_OPENMW_USE_VCPKG: true
+    CCACHE_SIZE: 1G
   before_script:
     - dnf install -y epel-release
     - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
     - source /opt/rh/gcc-toolset-13/enable
     - ./CI/linux/before_install_for_vcpkg.sh
   script:
-    - !reference [.Ubuntu, script]
-    - cpack -G TXZ -D CPACK_STRIP_FILES=ON -D CPACK_THREADS=0
+    - df -h
+    - export CCACHE_BASEDIR="`pwd`"
+    - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_script.linux.sh -C
+    - cd build
+    - cmake --build . -- -j $(nproc)
+    - ccache -svv
+    - cpack -G TXZ -D CPACK_STRIP_FILES=ON -D CPACK_THREADS=0 -D CPACK_INCLUDE_TOPLEVEL_DIRECTORY=0
   artifacts:
     paths:
-      - build/install/
       - "**/CMakeCache.txt"
       - build/OpenMW*.tar.xz
+
+.base_Generic_Integration_Tests:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+  needs:
+    - job: "Almalinux_Generic"
+      artifacts: true
+  script:
+    - mkdir -p install
+    - |
+      for package in build/OpenMW*.tar.xz; do
+          echo "Extracting '$package'..."
+          tar -xf "$package" -C install
+      done
+    - CI/run_integration_tests.sh
+  after_script:
+    - |
+      if [[ -f /tmp/openmw-crash.log ]]; then
+        cat /tmp/openmw-crash.log
+        cp /tmp/openmw-crash.log openmw-crash.log
+      fi
+  variables:
+    EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
+    OPENMW_BINARY: install/openmw
+  artifacts:
+    paths:
+      - openmw-crash.log
+
+
+Almalinux_Generic_Integration_Tests:
+  extends: .base_Generic_Integration_Tests
+  image: almalinux:9
+  before_script:
+    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils git-lfs openal-soft
+    - pip3 install --user numpy matplotlib termtables click
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+Arch_Linux_Generic_Integration_Tests:
+  extends: .base_Generic_Integration_Tests
+  image: archlinux
+  before_script:
+    - pacman --noconfirm -Sy python python-pip python-numpy python-matplotlib python-click xorg-server-xvfb alsa-utils git-lfs openal
+    - python -m venv --system-site-packages testvenv
+    - export PATH="$(pwd)/testvenv/bin:$PATH"
+    - hash -r
+    - pip install termtables
 
 PushToCoverityBranch:
   tags:
@@ -537,32 +598,6 @@ Ubuntu_Clang_tests_Debug:
     when: always
     reports:
       junit: build/*-tests.xml
-
-Almalinux_Vcpkg_Deps_Integration_Tests:
-  extends: .Almalinux_Vcpkg
-  stage: test
-  cache:
-    key: Almalinux_Vcpkg_Deps_Integration.v1
-    paths:
-      - ccache/
-      - build/extern/fetched/
-  script:
-    - !reference [.Almalinux_Vcpkg, script]
-    - dnf install -y python3-pip xorg-x11-server-Xvfb alsa-utils git-lfs
-    - pip3 install --user numpy matplotlib termtables click
-    - CI/run_integration_tests.sh
-  after_script:
-    - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
-  variables:
-    CI_OPENMW_USE_VCPKG: true
-    CCACHE_SIZE: 1G
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    EXAMPLE_SUITE_REVISION: a1ba6fc9d7315c2158ef4c60349fc4e71b7ca343
-    OPENMW_LOCAL_INSTALL: 1
-    OPENMW_BINARY: build/install/openmw
-  artifacts:
-    paths:
-      - "**/CMakeCache.txt"
 
 .Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
