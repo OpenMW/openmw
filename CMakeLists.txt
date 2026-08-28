@@ -666,8 +666,8 @@ if (APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 endif()
 
-if (UNIX AND NOT APPLE)
-    if (OPENMW_DEPLOY_RUNTIME_DEPENDENCIES AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+if (OPENMW_DEPLOY_RUNTIME_DEPENDENCIES AND UNIX AND NOT APPLE)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         # file(RELATIVE_PATH ...) can't handle pure lexical relativity, but cmake_path only came with 3.20.0
         cmake_path(RELATIVE_PATH CMAKE_INSTALL_LIBDIR BASE_DIRECTORY "${CMAKE_INSTALL_BINDIR}" OUTPUT_VARIABLE origin_relative_libdir)
         set(CMAKE_INSTALL_RPATH "$ORIGIN/${origin_relative_libdir}")
@@ -872,7 +872,12 @@ if (NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
         set(systemroot "$ENV{SystemRoot}")
         # documentation says to use lower-case regex, but drive letter is upper-case and I can't be bothered preserving the case of just one character right now
         #string(TOLOWER "${systemroot}" systemroot)
-        cmake_path(NORMAL_PATH systemroot)
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+            cmake_path(NORMAL_PATH systemroot)
+        else ()
+            file(TO_CMAKE_PATH "${systemroot}" systemroot)
+            # and just hope there's no mess with double slashes or dots
+        endif ()
         escape_regex_control_characters(systemroot "${systemroot}")
         set(post_exclude_regexes ^${systemroot}/)
         # CMP0207 will avoid the need for this
