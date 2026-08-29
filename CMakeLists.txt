@@ -871,7 +871,9 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${_custom_cpack_label}-${CUST
 
 if (NOT APPLE AND OPENMW_DEPLOY_RUNTIME_DEPENDENCIES)
     if (UNIX)
-        set(pre_exclude_regexes)
+        set(pre_exclude_regexes
+            ^libopenal.so.*
+        )
         set(post_exclude_regexes
             ^/lib64/
             ^/usr/lib64/
