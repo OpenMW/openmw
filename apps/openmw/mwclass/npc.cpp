@@ -301,7 +301,6 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
-            bool recalculate = false;
             auto tempData = std::make_unique<NpcCustomData>();
             NpcCustomData* data = tempData.get();
             MWMechanics::CreatureCustomDataResetter resetter{ ptr };
@@ -309,16 +308,16 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
-            const bool spellsInitialised
-                = data->mNpcStats.getSpells().setSpells(ref->mBase->mId, ref->mBase->mFlags & ESM::NPC::Autocalc);
+            const bool autoCalc = ref->mBase->mFlags & ESM::NPC::Autocalc;
+            const bool spellsInitialised = data->mNpcStats.getSpells().setSpells(ref->mBase->mId, autoCalc);
 
             const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
             // creature stats
-            int gold = 0;
-            if (ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+            data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
+            data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
+            data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
+            if (!autoCalc)
             {
-                gold = ref->mBase->mNpdt.mGold;
-
                 for (const auto& [skill, value] : ref->mBase->mNpdt.mSkills)
                     data->mNpcStats.getSkill(skill).setBase(value);
 
@@ -328,26 +327,14 @@ namespace MWClass
                 data->mNpcStats.setHealth(ref->mBase->mNpdt.mHealth);
                 data->mNpcStats.setMagicka(ref->mBase->mNpdt.mMana);
                 data->mNpcStats.setFatigue(ref->mBase->mNpdt.mFatigue);
-
-                data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
-                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
-                data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
             }
             else
             {
-                gold = ref->mBase->mNpdt.mGold;
-
                 for (int i = 0; i < 3; ++i)
                     data->mNpcStats.setDynamic(i, 10);
 
-                data->mNpcStats.setLevel(ref->mBase->mNpdt.mLevel);
-                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt.mDisposition);
-                data->mNpcStats.setReputation(ref->mBase->mNpdt.mReputation);
-
                 autoCalculateAttributes(ref->mBase, race, data->mNpcStats);
                 autoCalculateSkills(ref->mBase, race, data->mNpcStats, spellsInitialised);
-
-                recalculate = true;
             }
 
             // Persistent actors with 0 health do not play death animation
@@ -386,11 +373,11 @@ namespace MWClass
             if (!spellsInitialised)
                 data->mNpcStats.getSpells().addAllToInstance(ref->mBase->mSpells.mList);
 
-            data->mNpcStats.setGoldPool(gold);
+            data->mNpcStats.setGoldPool(ref->mBase->mNpdt.mGold);
 
             // store
             resetter.mPtr = {};
-            if (recalculate)
+            if (autoCalc)
                 data->mNpcStats.recalculateMagicka();
 
             // inventory
