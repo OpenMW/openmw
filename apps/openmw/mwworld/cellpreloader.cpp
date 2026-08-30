@@ -394,7 +394,7 @@ namespace MWWorld
             mTerrainPreloadPositions.clear();
             mLoadedTerrainPositions.clear();
         }
-        else if (contains(mTerrainPreloadPositions, positions, 128.f))
+        else if (contains(mTerrainPreloadPositions, positions, terrainPreloadMergeDistance))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {

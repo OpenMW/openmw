@@ -32,6 +32,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwrender/camera.hpp"
 #include "../mwrender/landmanager.hpp"
 #include "../mwrender/postprocessor.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -1145,8 +1146,12 @@ namespace MWWorld
         osg::Vec3f predictedPos = playerPos + moved / dt * mPredictionTime;
 
         if (mCurrentCell->isExterior())
-            exteriorPositions.push_back(
-                PositionCellGrid{ predictedPos, gridCenterToBounds(getNewGridCenter(predictedPos, nullptr)) });
+        {
+            const MWRender::Camera& camera = *mRendering.getCamera();
+            exteriorPositions = terrainPreloadPositions(predictedPos, playerPos, camera.getPosition(),
+                camera.getMode() == MWRender::Camera::Mode::Static,
+                gridCenterToBounds(getNewGridCenter(predictedPos, nullptr)), mCurrentCell->getCell()->getWorldSpace());
+        }
 
         mLastPlayerPos = playerPos;
 
@@ -1286,9 +1291,11 @@ namespace MWWorld
             throw std::runtime_error("preloadTerrain can only work with the current exterior worldspace");
 
         ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace);
-        const PositionCellGrid position{ pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }) };
-        mPreloader->abortTerrainPreloadExcept(&position);
-        mPreloader->setTerrainPreloadPositions(std::span(&position, 1));
+        // Teleports preload their destination alone.
+        const std::vector<PositionCellGrid> positions = terrainPreloadPositions(
+            pos, pos, osg::Vec3f(), false, gridCenterToBounds({ cellPos.mX, cellPos.mY }), worldspace);
+        mPreloader->abortTerrainPreloadExcept(&positions.front());
+        mPreloader->setTerrainPreloadPositions(positions);
         if (!sync)
             return;
 
