@@ -324,6 +324,20 @@ testing.registerGlobalTest('player with equipped weapon on attack should damage 
     testing.runLocalTest(player, 'player with equipped weapon on attack should damage health of other actors')
 end)
 
+testing.registerGlobalTest('camera.getFocusRay should report the object under the crosshair', function()
+    local player = initPlayer()
+    local target = world.createObject(types.NPC.record(player).id)
+    target:teleport(player.cell, player.position + util.vector3(0, 150, 0), util.transform.rotateZ(math.rad(180)))
+    coroutine.yield()
+    coroutine.yield()
+    -- The spawned NPC dies with the test.
+    local ok, err = pcall(testing.runLocalTest, player, 'camera.getFocusRay should report the object under the crosshair')
+    target:remove()
+    if not ok then
+        error(err, 0)
+    end
+end)
+
 testing.registerGlobalTestStep('load while teleporting - init player', function()
     local player = world.players[1]
     player:teleport('Museum of Wonders', util.vector3(0, -1500, 111), util.transform.rotateZ(math.rad(180)))

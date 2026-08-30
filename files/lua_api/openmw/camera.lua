@@ -241,4 +241,12 @@
 -- @param openmw.util#Vector3 worldPos
 -- @return openmw.util#Vector3
 
+--- Returns the result of the last internal focus query.
+-- Updated by the crosshair, telekinesis checks and GUI mode.
+-- Out-of-reach targets keep the hit but lose hitObject.
+-- Cleared when a game is loaded.
+-- @function [parent=#camera] getFocusRay
+-- @return openmw.nearby#RayCastingResult
+-- @usage local target = camera.getFocusRay().hitObject
+
 return nil

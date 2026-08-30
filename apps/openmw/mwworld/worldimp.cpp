@@ -370,6 +370,7 @@ namespace MWWorld
         }
 
         mDoorStates.clear();
+        mFocusRay = MWPhysics::RayCastingResult();
 
         mGoToJail = false;
         mTeleportEnabled = true;
@@ -922,7 +923,10 @@ namespace MWWorld
 
         if (!focusObject.isEmpty() && mDistanceToFocusObject > maxDistance
             && !focusObject.getClass().allowTelekinesis(focusObject) && !inGui)
+        {
+            mFocusRay.mHitObject = MWWorld::Ptr();
             return {};
+        }
         return focusObject;
     }
 
@@ -1731,6 +1735,7 @@ namespace MWWorld
             mDistanceToFocusObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
             mDistanceToFocusObject = -1;
+        mFocusRay = { rayToObject.mHit, rayToObject.mHitPointWorld, rayToObject.mHitNormalWorld, focusObject };
         return focusObject;
     }
 

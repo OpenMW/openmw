@@ -254,6 +254,26 @@ testing.registerLocalTest('findNearestNavMeshPosition',
             'Navigation mesh position ' .. testing.formatActualExpected(result, expected))
     end)
 
+testing.registerLocalTestStep('camera.getFocusRay should report the object under the crosshair',
+    function()
+        local target = nil
+        for _, actor in ipairs(nearby.actors) do
+            if actor.id ~= self.id and (actor.position - self.position):length() < 200 then
+                target = actor
+            end
+        end
+        testing.expect(target, 'An NPC should stand ahead of the player')
+
+        local ray = camera.getFocusRay()
+        testing.expect(ray.hit, 'Focus ray should hit the NPC ahead')
+        testing.expect(ray.hitObject, 'Focus ray should report the NPC it hits')
+        testing.expectEqual(ray.hitObject.id, target.id, 'Focus ray should hit the NPC ahead')
+        testing.expectLessOrEqual((ray.hitPos - target.position):length(), 200,
+            'Focus ray hit position ' .. testing.formatActualExpected(ray.hitPos, target.position))
+        testing.expectGreaterThan((ray.hitPos - self.position):length(), 50,
+            'Focus ray hit position ' .. testing.formatActualExpected(ray.hitPos, self.position))
+    end)
+
 testing.registerLocalTest('player memory limit',
     function()
         local ok, err = pcall(function()
