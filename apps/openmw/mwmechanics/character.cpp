@@ -896,7 +896,7 @@ namespace MWMechanics
     {
         std::string result;
         bool isSwimming = MWBase::Environment::get().getWorld()->isSwimming(mPtr);
-        const bool isSpell = mWeaponType == ESM::Weapon::Spell;
+        const bool isSpell = mWeaponTypeId == ESM::WeaponType::Spell;
 
         if (isSwimming)
             result = isSpell ? "swimattack1" : chooseRandomGroup("swimattack");
